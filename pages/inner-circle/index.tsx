@@ -2,20 +2,17 @@
 import * as React from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShieldCheck, 
   Key, 
   Mail, 
-  User, 
   RefreshCw, 
   CheckCircle,
-  Lock,
   Unlock,
   ArrowRight,
-  BookOpen,
-  Users,
-  Send
+  Send,
+  Lock
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -59,7 +56,6 @@ const InnerCirclePage: NextPage = () => {
     
     if (unlocked && router.isReady) {
       const redirectTimer = setTimeout(() => {
-        // Only redirect if we aren't already where we want to be
         if (returnTo && !window.location.pathname.includes(returnTo)) {
           router.push(returnTo);
         }
@@ -156,9 +152,15 @@ const InnerCirclePage: NextPage = () => {
     e.preventDefault();
     setNewsletterStatus("submitting");
     
-    // Implementation for newsletter API
     try {
-      // Logic for newsletter signup
+      // Integration with Mailchimp/Resend logic
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error();
+
       setNewsletterStatus("success");
       setFeedback({ type: "newsletter", msg: "Subscription confirmed. Welcome to the mailing list." });
     } catch (err) {
@@ -172,136 +174,183 @@ const InnerCirclePage: NextPage = () => {
       title="Inner Circle" 
       description="Private access to exclusive strategic volumes and architectural notes."
     >
-      <main className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-gray-300 pt-24 pb-20">
-        <section className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 mb-6 text-amber-500">
-              <ShieldCheck size={16} />
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">Institutional Access</span>
-            </div>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">The Inner Circle</h1>
-            <p className="mx-auto max-w-3xl text-lg text-gray-400">Entry is reserved for those who carry the weight of real responsibility.</p>
-          </div>
+      <main className="min-h-screen bg-[#050505] text-zinc-400 pt-32 pb-24">
+        {/* Decorative background element */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-amber-500/5 blur-[120px] pointer-events-none" />
 
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            {/* REQUEST ENTRY */}
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-8 backdrop-blur-xl">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 bg-amber-500 rounded-xl flex items-center justify-center text-black">
-                  <Mail className="h-6 w-6" />
+        <section className="relative mx-auto max-w-6xl px-6">
+          <header className="text-center mb-20">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-1.5 mb-8 text-amber-500/80"
+            >
+              <ShieldCheck size={14} className="text-amber-500" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.3em]">Identity Protocol 2.0</span>
+            </motion.div>
+            <h1 className="font-serif text-5xl md:text-6xl font-medium text-white mb-6 italic tracking-tight">
+              The Inner Circle
+            </h1>
+            <p className="mx-auto max-w-2xl text-sm md:text-base text-zinc-500 font-light leading-relaxed">
+              Entry is strictly reserved for stakeholders and collaborators. 
+              Authenticating your identity unlocks the complete <span className="text-amber-500/80">Intelligence Portfolio</span>.
+            </p>
+          </header>
+
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+            {/* REQUEST ACCESS */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="group rounded-2xl border border-white/5 bg-white/[0.02] p-8 md:p-10 transition-colors hover:bg-white/[0.03]"
+            >
+              <div className="flex items-center gap-4 mb-10">
+                <div className="h-10 w-10 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 border border-white/10">
+                  <Mail size={20} strokeWidth={1.5} />
                 </div>
-                <h2 className="text-2xl font-serif font-bold text-white">Request Access</h2>
+                <div>
+                  <h2 className="text-xl font-serif text-white italic">Request Entry</h2>
+                  <p className="text-[10px] uppercase tracking-widest text-zinc-600">Verification Required</p>
+                </div>
               </div>
               
               <form onSubmit={handleRegister} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Name</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">Full Name</label>
                   <input 
                     type="text" required value={name} 
                     onChange={e => setName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:border-amber-500/50 outline-none transition-all"
-                    placeholder="Full Name"
+                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3.5 text-sm text-white focus:border-amber-500/40 outline-none transition-all placeholder:text-zinc-700"
+                    placeholder="Institutional Identity"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Email</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">Professional Email</label>
                   <input 
                     type="email" required value={email} 
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:border-amber-500/50 outline-none transition-all"
-                    placeholder="advisory@firm.com"
+                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3.5 text-sm text-white focus:border-amber-500/40 outline-none transition-all placeholder:text-zinc-700"
+                    placeholder="name@organization.com"
                   />
                 </div>
                 <button 
                   type="submit" 
                   disabled={registerStatus === "submitting" || registerStatus === "success"}
-                  className="w-full bg-amber-500 text-black py-4 rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full bg-white text-black py-4 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 transition-all flex items-center justify-center gap-3 disabled:opacity-30"
                 >
-                  {registerStatus === "submitting" ? <RefreshCw className="animate-spin" /> : <ShieldCheck />}
-                  Request Access Key
+                  {registerStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
+                  Issue Access Key
                 </button>
-                {feedback?.type === "register" && (
-                  <div className={`p-4 rounded-xl text-sm ${registerStatus === "error" ? 'text-red-400 bg-red-500/10' : 'text-emerald-400 bg-emerald-500/10'}`}>
-                    {feedback.msg}
-                  </div>
-                )}
+                
+                <AnimatePresence>
+                  {feedback?.type === "register" && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className={`p-4 rounded-lg text-xs font-light leading-relaxed border ${registerStatus === "error" ? 'text-red-400 bg-red-500/5 border-red-500/10' : 'text-amber-500 bg-amber-500/5 border-amber-500/10'}`}
+                    >
+                      {feedback.msg}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </form>
-            </div>
+            </motion.div>
 
             {/* UNLOCK VAULT */}
-            <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 backdrop-blur-xl">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 bg-amber-900/50 border border-amber-500/30 rounded-xl flex items-center justify-center text-amber-500">
-                  <Key className="h-6 w-6" />
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.02] p-8 md:p-10 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Lock size={120} strokeWidth={0.5} className="text-amber-500" />
+              </div>
+
+              <div className="flex items-center gap-4 mb-10 relative z-10">
+                <div className="h-10 w-10 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-500 border border-amber-500/20">
+                  <Key size={20} strokeWidth={1.5} />
                 </div>
-                <h2 className="text-2xl font-serif font-bold text-white">Unlock Vault</h2>
+                <div>
+                  <h2 className="text-xl font-serif text-white italic">Unlock Vault</h2>
+                  <p className="text-[10px] uppercase tracking-widest text-amber-500/50">Deployment Mode</p>
+                </div>
               </div>
 
               {alreadyUnlocked ? (
-                <div className="text-center py-10">
-                  <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-6" />
-                  <h3 className="text-xl font-bold text-white mb-6">Vault Unlocked</h3>
-                  <button onClick={() => router.push(returnTo)} className="w-full bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2">
-                    Enter Dashboard <ArrowRight />
+                <div className="text-center py-8 relative z-10">
+                  <div className="mb-6 inline-block p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                    <CheckCircle className="h-10 w-10 text-emerald-500" />
+                  </div>
+                  <h3 className="text-lg font-serif text-white italic mb-8">Access Granted</h3>
+                  <button 
+                    onClick={() => router.push(returnTo)} 
+                    className="w-full bg-emerald-600 text-white py-4 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-emerald-500 transition-all"
+                  >
+                    Enter Dashboard <ArrowRight size={16} />
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleUnlock} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-widest text-amber-500/60 ml-1">Security Key</label>
+                <form onSubmit={handleUnlock} className="space-y-6 relative z-10">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono uppercase tracking-widest text-amber-500/60 ml-1">Cryptographic Key</label>
                     <input 
                       type="password" required value={accessKey} 
                       onChange={e => setAccessKey(e.target.value)}
-                      className="w-full bg-black/40 border border-amber-500/30 rounded-xl px-4 py-3.5 font-mono text-amber-400 focus:border-amber-500 outline-none transition-all"
+                      className="w-full bg-black/60 border border-amber-500/20 rounded-lg px-4 py-3.5 font-mono text-sm text-amber-500 focus:border-amber-500/60 outline-none transition-all placeholder:text-amber-900/30"
                       placeholder="ic_••••••••••••"
                     />
                   </div>
                   <button 
                     type="submit" 
                     disabled={unlockStatus === "submitting"}
-                    className="w-full border-2 border-amber-500 text-amber-500 py-4 rounded-xl font-bold hover:bg-amber-500 hover:text-black transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full border border-amber-500/40 text-amber-500 py-4 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all flex items-center justify-center gap-3 disabled:opacity-30"
                   >
-                    {unlockStatus === "submitting" ? <RefreshCw className="animate-spin" /> : <Unlock />}
-                    Unlock Vault
+                    {unlockStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <Unlock size={16} />}
+                    Authenticate
                   </button>
-                  {feedback?.type === "unlock" && (
-                    <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-sm border border-red-500/20">
-                      {feedback.msg}
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {feedback?.type === "unlock" && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 rounded-lg bg-red-500/5 text-red-400 text-[11px] border border-red-500/10 font-light"
+                      >
+                        {feedback.msg}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </form>
               )}
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* NEWSLETTER SECTION */}
-        <section id="newsletter" className="mt-24 border-t border-white/5 pt-24">
-          <div className="mx-auto max-w-4xl px-4 text-center">
-            <h2 className="font-serif text-3xl font-bold text-white mb-4">The Strategic Brief</h2>
-            <p className="text-gray-400 mb-10 max-w-2xl mx-auto">
-              Not ready for the vault? Join the broader circle for occasional notes on institutional design, 
-              frontier market strategy, and operational frameworks.
+        {/* NEWSLETTER / THE BRIEF */}
+        <section className="mt-40 border-t border-white/5 pt-32">
+          <div className="mx-auto max-w-2xl px-6 text-center">
+            <h2 className="font-serif text-3xl text-white mb-6 italic">The Strategic Brief</h2>
+            <p className="text-zinc-500 text-sm font-light leading-relaxed mb-12">
+              For those not requiring vault-level access, the Brief offers periodic analysis 
+              on institutional design and frontier market strategy.
             </p>
             
-            <form onSubmit={handleNewsletterSignup} className="relative max-w-md mx-auto">
+            <form onSubmit={handleNewsletterSignup} className="relative group">
               <input 
                 type="email" 
                 required
-                placeholder="Receive the Brief"
-                className="w-full bg-white/5 border border-white/10 rounded-full px-8 py-4 text-white focus:border-amber-500/50 outline-none transition-all pr-16"
+                placeholder="Institutional Email"
+                className="w-full bg-white/[0.02] border border-white/10 rounded-full px-8 py-5 text-sm text-white focus:border-amber-500/30 outline-none transition-all pr-16"
               />
               <button 
                 type="submit"
-                className="absolute right-2 top-2 bottom-2 bg-amber-500 text-black px-4 rounded-full hover:bg-amber-400 transition-colors"
+                className="absolute right-2 top-2 bottom-2 bg-amber-500 text-black px-6 rounded-full hover:bg-white transition-colors flex items-center justify-center"
               >
                 <Send size={18} />
               </button>
             </form>
-            {feedback?.type === "newsletter" && (
-              <p className="mt-4 text-sm text-amber-500/80">{feedback.msg}</p>
-            )}
-            <p className="mt-6 text-[10px] uppercase tracking-widest text-gray-600">Strictly no spam. High signal only.</p>
+            <p className="mt-8 text-[9px] uppercase tracking-[0.4em] text-zinc-700">Signal Only • No Proliferation</p>
           </div>
         </section>
       </main>

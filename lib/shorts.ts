@@ -1,10 +1,10 @@
 // lib/shorts.ts
 import {
   type ContentDoc,
-  getPublishedShorts, // FIX: Use specific getter instead of generic
+  getAllShorts,
   normalizeSlug,
   coerceShortTheme,
-} from "./contentlayer-helper";
+} from "@/lib/content/server"
 
 /**
  * Unified type for Shorts Indexing.
@@ -57,11 +57,11 @@ function getReadTime(doc: any): string | null {
  * - Draft filtering handled centrally
  */
 export function getPublicShorts(): ShortIndexItem[] {
-  // FIX: Use the specific getter available in the helper
-  const docs = getPublishedShorts();
+  // Use getAllShorts which returns all shorts (including drafts)
+  const docs = getAllShorts();
 
   const items: ShortIndexItem[] = docs.map((d: ContentDoc) => {
-    const slug = normalizeSlug(d);
+    const slug = normalizeSlug(d.slug || d._raw?.flattenedPath || "");
 
     // Title/excerpt are optional in ContentDoc, normalize hard
     const title = String(d?.title ?? "").trim() || "Untitled";
@@ -79,13 +79,13 @@ export function getPublicShorts(): ShortIndexItem[] {
     // Tags: safe string array
     const tags = toTags(d?.tags);
 
-    // Theme: FIX usage to pass the specific property, not the whole doc
+    // Theme: coerce the theme property
     const theme = coerceShortTheme((d as any).theme);
 
     // These are primarily informational; helper already filtered drafts out.
     const draft = Boolean((d as any)?.draft);
     const published =
-      typeof (d as any)?.published === "boolean" ? (d as any).published : true;
+      typeof (d as any)?.published === 'boolean' ? (d as any).published : true;
 
     return {
       _id: String((d as any)?._id ?? slug ?? ""),
@@ -111,3 +111,12 @@ export function getPublicShorts(): ShortIndexItem[] {
     });
 }
 
+/**
+ * Export a simple published shorts getter (matches the suggested fixed version pattern)
+ */
+export function getPublishedShorts() {
+  return getAllShorts().map((short: ContentDoc) => ({
+    ...short,
+    slug: normalizeSlug(short.slug || short._raw?.flattenedPath || ""),
+  }));
+}

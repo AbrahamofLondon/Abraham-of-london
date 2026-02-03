@@ -9,7 +9,7 @@ import {
   toUiDoc,
   resolveDocDownloadUrl,
   getAccessLevel
-} from '@/lib/contentlayer-helper';
+} from "@/lib/content/server";
 
 type Tier = "public" | "inner-circle" | "private";
 

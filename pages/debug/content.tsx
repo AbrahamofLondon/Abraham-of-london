@@ -13,7 +13,7 @@ import {
   getDocKind,
   normalizeSlug,
   getDocHref
-} from '@/lib/contentlayer-helper';
+} from "@/lib/content/server";
 import { isDraftContent as isDraft } from "@/lib/content/client-utils";
 import { safeSlice } from "@/lib/utils/safe";
 

@@ -917,8 +917,8 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const featuredShorts: FeaturedShort[] = [];
 
   try {
-    // Server-only import inside getStaticProps
-    const mod: any = await import("@/lib/contentlayer-helper");
+    // ✅ Server façade only (never import helper directly in pages/)
+    const mod: any = await import("@/lib/content/server");
     const getAll = mod?.getAllContentlayerDocs;
 
     if (typeof getAll !== "function") {
@@ -926,14 +926,16 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       return { props: { featuredShorts }, revalidate: 3600 };
     }
 
-    const docs = getAll();
+    const docs = getAll() || [];
+
     const shorts = (Array.isArray(docs) ? docs : [])
-      .filter((d: any) => isShortDoc(d) && !isDraftContent(d))
-      .sort((a: any, b: any) => {
-        const aT = new Date(safeText(a?.date, "0")).getTime() || 0;
-        const bT = new Date(safeText(b?.date, "0")).getTime() || 0;
-        return bT - aT;
+      .filter((d: any) => {
+        const kind = String(d?.kind || d?.type || "").toLowerCase();
+        const fp = String(d?._raw?.flattenedPath || "").toLowerCase();
+        return kind === "short" || fp.startsWith("shorts/");
       })
+      .filter((d: any) => !isDraftContent(d))
+      .sort((a: any, b: any) => (new Date(b?.date).getTime() || 0) - (new Date(a?.date).getTime() || 0))
       .slice(0, 8);
 
     for (const s of shorts) {
@@ -943,7 +945,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       featuredShorts.push({
         title: safeText(s?.title, "Untitled Briefing"),
         slug: bareSlug,
-        excerpt: s?.excerpt || s?.description || null,
+        excerpt: safeText(s?.excerpt ?? s?.description ?? "", "").trim() || null,
         href: joinHref("shorts", bareSlug),
         dateISO: safeISODate(s?.date),
         theme: safeText(s?.theme, "Intel"),
@@ -954,9 +956,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   }
 
   return {
-    props: {
-      featuredShorts: JSON.parse(JSON.stringify(featuredShorts)),
-    },
+    props: { featuredShorts: JSON.parse(JSON.stringify(featuredShorts)) },
     revalidate: 3600,
   };
 };

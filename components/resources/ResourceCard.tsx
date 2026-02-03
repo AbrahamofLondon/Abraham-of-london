@@ -1,8 +1,9 @@
+// components/resources/ResourceCard.tsx — HARDENED (Asset Archive Variant)
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Download, ArrowRight, Bookmark } from 'lucide-react';
 import { safeSlice } from "@/lib/utils/safe";
-
 
 interface ResourceCardProps {
   title: string;
@@ -25,89 +26,88 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
   isFeatured = false,
   tags = [],
 }) => {
+  // Institutional Type Mapping
   const typeLabels = {
-    ebook: 'eBook',
-    whitepaper: 'Whitepaper',
-    template: 'Template',
-    guide: 'Guide',
-    toolkit: 'Toolkit',
-  };
-
-  const typeColors = {
-    ebook: 'bg-purple-100 text-purple-800',
-    whitepaper: 'bg-blue-100 text-blue-800',
-    template: 'bg-green-100 text-green-800',
-    guide: 'bg-yellow-100 text-yellow-800',
-    toolkit: 'bg-red-100 text-red-800',
+    ebook: 'VOLUME',
+    whitepaper: 'WHITE PAPER',
+    template: 'FRAMEWORK',
+    guide: 'PROCEDURAL',
+    toolkit: 'TOOLKIT',
   };
 
   return (
-    <Link href={`/resources/${slug}`}>
-      <div className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+    <Link href={`/resources/${slug}`} className="group block">
+      <div className="relative flex h-full flex-col overflow-hidden border border-white/5 bg-zinc-950 transition-all duration-500 hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/5">
+        
+        {/* Featured Badge — Tactical Aesthetic */}
         {isFeatured && (
-          <div className="absolute top-4 right-4 z-10">
-            <span className="px-3 py-1 bg-yellow-500 text-yellow-900 text-xs font-bold rounded-full">
-              Featured
-            </span>
+          <div className="absolute top-0 right-0 z-20">
+            <div className="bg-amber-500 px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-black">
+              Featured Asset
+            </div>
           </div>
         )}
         
-        <div className="relative h-48 bg-gradient-to-br from-gray-900 to-blue-900">
+        {/* Visual Header */}
+        <div className="relative h-44 w-full overflow-hidden border-b border-white/5 bg-zinc-900">
           {image ? (
             <Image
               src={image}
               alt={title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover opacity-50 transition-all duration-700 grayscale group-hover:scale-110 group-hover:opacity-80 group-hover:grayscale-0"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600" />
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
           
           <div className="absolute bottom-4 left-4">
-            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${typeColors[type]}`}>
+            <span className="border border-amber-500/30 bg-black/80 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-tighter text-amber-500 backdrop-blur-md">
               {typeLabels[type]}
             </span>
           </div>
         </div>
         
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+        {/* Content Body */}
+        <div className="flex flex-1 flex-col p-6">
+          <h3 className="mb-3 font-serif text-xl italic text-white transition-colors group-hover:text-amber-500">
             {title}
           </h3>
           
-          <p className="text-gray-600 mb-4 line-clamp-3">
+          <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-zinc-400">
             {description}
           </p>
           
+          {/* Tags — Institutional Style */}
           {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {safeSlice(tags, 0, 3).map((tag, index) => (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {safeSlice(tags, 0, 2).map((tag, index) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                  className="bg-white/[0.03] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-zinc-500 border border-white/5"
                 >
                   {tag}
                 </span>
               ))}
-              {tags.length > 3 && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                  +{tags.length - 3} more
+              {tags.length > 2 && (
+                <span className="px-2 py-0.5 font-mono text-[9px] text-zinc-600">
+                  +{tags.length - 2}
                 </span>
               )}
             </div>
           )}
           
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="flex items-center text-sm text-gray-500">
-              <DownloadIcon className="w-4 h-4 mr-1" />
-              <span>{downloadCount.toLocaleString()} downloads</span>
+          {/* Footer Metrics */}
+          <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-4">
+            <div className="flex items-center font-mono text-[10px] text-zinc-500">
+              <Download className="mr-2 h-3 w-3 text-amber-500/50" />
+              <span>{downloadCount.toLocaleString()} DISTRIBUTIONS</span>
             </div>
             
-            <div className="flex items-center text-blue-600 font-semibold">
-              <span>Download</span>
-              <ArrowIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <div className="flex items-center font-mono text-[10px] font-bold tracking-widest text-amber-500 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1">
+              RETRIEVE <ArrowRight className="ml-2 h-3 w-3" />
             </div>
           </div>
         </div>
@@ -115,17 +115,5 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
     </Link>
   );
 };
-
-const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-  </svg>
-);
 
 export default ResourceCard;

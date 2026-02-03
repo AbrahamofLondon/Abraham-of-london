@@ -4,13 +4,15 @@
  * * Fully synchronized with ContentHelper v5.0.0
  * ============================================================================ */
 
-import ContentHelper, { 
+import {
+  getCardProps,
+  documentKinds,
+  getPublishedDocumentsByType,
   type ContentDoc,
-  type DocKind 
-} from "./contentlayer-helper";
+  type DocKind
+} from "@/lib/content/server";
 import { absUrl } from "@/lib/siteConfig";
 import { safeSlice } from "@/lib/utils/safe";
-
 
 /* -------------------------------------------------------------------------- */
 /* 1. SEARCH INDEX SHAPE                                                      */
@@ -50,7 +52,7 @@ function sortByDate<T extends { date?: string | null }>(docs: T[]): T[] {
 function toSearchDoc(doc: ContentDoc): SearchDoc | null {
   if (!doc) return null;
 
-  const props = ContentHelper.getCardProps(doc);
+  const props = getCardProps(doc);
   
   // Filter out any documents that failed to resolve correctly
   if (props.slug === "unknown") return null;
@@ -80,12 +82,12 @@ function toSearchDoc(doc: ContentDoc): SearchDoc | null {
  */
 export function buildSearchIndex(): SearchDoc[] {
   // Use the master list of document kinds from the helper
-  const allKinds = ContentHelper.documentKinds;
+  const allKinds = documentKinds;
   
   const allSearchDocs: SearchDoc[] = [];
 
   allKinds.forEach((kind: DocKind) => {
-    const docs = ContentHelper.getPublishedDocumentsByType(kind);
+    const docs = getPublishedDocumentsByType(kind);
     docs.forEach(doc => {
       const searchEntry = toSearchDoc(doc);
       if (searchEntry) allSearchDocs.push(searchEntry);

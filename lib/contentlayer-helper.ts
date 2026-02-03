@@ -1,62 +1,60 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/**
- * SOVEREIGN CONTENTLAYER HELPER
- * Strictly aligned to satisfy Turbopack/Next.js production build requirements.
- */
-
-import { 
-  allDocuments, 
-  allBooks, 
-  allCanons, 
-  allPosts, 
+import {
+  allDocuments,
+  allBooks,
+  allCanons,
+  allPosts,
   allShorts,
   allDownloads,
   allEvents,
   allPrints,
   allResources,
-  allStrategies
+  allStrategies,
 } from "contentlayer/generated";
 
-// --- CORE UTILITIES ---
+if (typeof window === "undefined" && process.env.NODE_ENV === "production") {
+  // This file must NEVER be imported directly by Pages / API / build code
+}
 
-export const normalizeSlug = (slug: string | string[]): string => {
-  if (Array.isArray(slug)) return slug.join('/');
-  return slug;
-};
+// ---------------- CORE ----------------
 
-export const sanitizeData = (data: any) => {
-  if (!data) return null;
-  return JSON.parse(JSON.stringify(data));
-};
+export const normalizeSlug = (slug: string | string[]): string =>
+  Array.isArray(slug) ? slug.join("/") : slug;
 
-// --- DOCUMENT SELECTORS ---
+export const sanitizeData = <T>(data: T): T | null =>
+  data ? JSON.parse(JSON.stringify(data)) : null;
+
+// ---------------- COLLECTIONS ----------------
 
 export const getAllContentlayerDocs = () => allDocuments;
 export const getAllBooks = () => allBooks;
 export const getAllCanons = () => allCanons;
 export const getAllShorts = () => allShorts;
 export const getAllPosts = () => allPosts;
+export const getAllDownloads = () => allDownloads;
+export const getAllEvents = () => allEvents;
+export const getAllPrints = () => allPrints;
+export const getAllResources = () => allResources;
+export const getAllStrategies = () => allStrategies;
 
-// --- SINGLETON FETCHERS ---
+// ---------------- LOOKUPS ----------------
 
 export const getDocBySlug = (slug: string | string[]) => {
   const normalized = normalizeSlug(slug);
-  return allDocuments.find((doc) => doc.slug === normalized || doc._id.includes(normalized));
+  return allDocuments.find(
+    (doc) => doc.slug === normalized || doc._id.includes(normalized)
+  );
 };
 
 export const getServerBookBySlug = (slug: string) => {
   const normalized = normalizeSlug(slug);
-  return allBooks.find((b) => b.slug === normalized || b._id.includes(normalized));
+  return allBooks.find(
+    (b) => b.slug === normalized || b._id.includes(normalized)
+  );
 };
 
-// --- LEGACY & METADATA ---
+// ---------------- LEGACY ----------------
 
 export const allDocs = allDocuments;
 export { allDocuments };
-
-export const getDocKind = (doc: any): string => doc.type || doc._type || "Unknown";
-
-// --- RE-EXPORTING SERVER LOGIC ---
-// This ensures that when we import this helper, we get the full server-side suite
-export * from "@/lib/content/server";

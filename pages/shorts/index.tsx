@@ -8,7 +8,7 @@ import {
   Target, Command, ShieldCheck, Fingerprint 
 } from "lucide-react";
 import Layout from "@/components/Layout";
-import { getAllCombinedDocs, normalizeSlug, sanitizeData } from "@/lib/contentlayer-helper";
+import { getAllCombinedDocs, normalizeSlug, sanitizeData } from "@/lib/content/server";
 
 const GridBackground = () => (
   <div className="absolute inset-0 z-0 pointer-events-none">

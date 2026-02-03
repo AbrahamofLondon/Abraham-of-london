@@ -25,7 +25,7 @@ import { safeSlice } from "@/lib/utils/safe";
 import {
   getAllContentlayerDocs,
   getDocBySlug,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/content/server";
 
 import { 
   normalizeSlug, 

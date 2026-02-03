@@ -1,7 +1,8 @@
-// components/Cards/CanonResourceCard.tsx
+// components/Cards/CanonResourceCard.tsx — HARDENED (Archival Resource)
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Lock, BookOpen, ChevronRight, ShieldCheck } from "lucide-react";
 
 import {
   getCardImage,
@@ -37,146 +38,115 @@ const CanonResourceCard: React.FC<CanonCardProps> = ({
   className = "",
 }) => {
   const isLocked = isContentLocked(canon.accessLevel ?? null);
-  const displayText =
-    canon.excerpt || canon.description || canon.subtitle || "";
-  const displayTags = truncateTags(canon.tags || [], 3);
+  const displayText = canon.excerpt || canon.description || canon.subtitle || "";
+  const displayTags = truncateTags(canon.tags || [], 2); // Tighter for tactical grid
 
   const linkHref = `/canon/${canon.slug}`;
   const imageSrc = getCardImage(canon.coverImage);
-  const altText = getCardImageAlt(canon.title, "Canon volume");
+  const altText = getCardImageAlt(canon.title, "Canon Resource");
   const dateLabel = formatCardDate(canon.date ?? null);
   const accessBadge = getAccessLevelBadge(canon.accessLevel ?? undefined);
 
   return (
     <Link
       href={linkHref}
-      className={`group block rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm transition-all duration-300 hover:border-softGold/30 hover:shadow-[0_8px_30px_rgba(226,197,120,0.15)] ${className}`}
-      aria-label={getCardAriaLabel(canon.title, "Canon volume")}
+      className={`group relative block border border-white/5 bg-zinc-950 transition-all duration-500 hover:border-amber-500/40 ${className}`}
+      aria-label={getCardAriaLabel(canon.title, "Archival Resource")}
     >
       <article className="flex h-full flex-col overflow-hidden">
-        {/* Cover Image - always present with fallback */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden">
+        {/* 1. VISUAL SECTOR */}
+        <div className="relative aspect-video w-full overflow-hidden border-b border-white/5 bg-zinc-900">
           <Image
             src={imageSrc}
             alt={altText}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover opacity-40 grayscale transition-all duration-700 group-hover:scale-105 group-hover:opacity-80 group-hover:grayscale-0"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
+          
+          {/* Tactical Overlay Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
 
-          {/* Featured badge */}
-          {canon.featured && (
-            <div className="absolute left-3 top-3 rounded-full bg-softGold/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-black backdrop-blur-sm">
-              Featured
-            </div>
-          )}
+          {/* Badges: Top Row */}
+          <div className="absolute inset-x-3 top-3 flex justify-between">
+            {canon.featured ? (
+              <span className="bg-amber-500 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-black">
+                Featured
+              </span>
+            ) : <div />}
+            
+            {canon.volumeNumber && (
+              <span className="border border-amber-500/20 bg-black/60 px-2 py-0.5 font-mono text-[9px] font-bold text-amber-500 backdrop-blur-md">
+                VOL // {String(canon.volumeNumber).padStart(2, '0')}
+              </span>
+            )}
+          </div>
 
-          {/* Volume badge */}
-          {canon.volumeNumber && (
-            <div className="absolute right-3 top-3 rounded-full border border-softGold/30 bg-black/60 px-3 py-1 text-xs font-bold text-softGold backdrop-blur-sm">
-              Vol. {canon.volumeNumber}
-            </div>
-          )}
-
-          {/* Access badge */}
+          {/* Access Security Status: Bottom Right */}
           {canon.accessLevel && (
-            <div
-              className={`absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold backdrop-blur-sm ${accessBadge.bgColor} ${accessBadge.borderColor} ${accessBadge.color}`}
-            >
-              <svg
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+            <div className="absolute bottom-3 right-3 flex items-center gap-1.5 border border-white/10 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-zinc-300 backdrop-blur-md transition-colors group-hover:border-amber-500/30">
+              {isLocked ? <Lock size={10} className="text-amber-600" /> : <ShieldCheck size={10} className="text-emerald-500" />}
               {accessBadge.text}
             </div>
           )}
         </div>
 
-        {/* Body */}
-        <div className="flex flex-1 flex-col gap-3 p-5">
-          {/* Tags */}
-          {displayTags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {displayTags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="rounded-full border border-softGold/20 bg-softGold/10 px-3 py-1 text-xs font-medium text-softGold/90"
-                >
-                  {formatTagText(tag)}
-                </span>
-              ))}
-            </div>
-          )}
+        {/* 2. BODY SECTOR */}
+        <div className="flex flex-1 flex-col p-5">
+          {/* Registry Header */}
+          <div className="mb-4 flex flex-wrap gap-2 border-b border-white/5 pb-3">
+            {displayTags.map((tag, idx) => (
+              <span key={idx} className="font-mono text-[9px] uppercase tracking-tighter text-zinc-500">
+                // {formatTagText(tag)}
+              </span>
+            ))}
+          </div>
 
-          {/* Title / Subtitle / Volume (when no cover emphasis) */}
-          <div className="space-y-2">
-            {canon.volumeNumber && (
-              <p className="text-xs font-bold uppercase tracking-wider text-softGold/80">
-                Volume {canon.volumeNumber}
-              </p>
-            )}
-
-            <h3 className="font-serif text-xl font-semibold text-cream transition-colors group-hover:text-softGold">
+          {/* Identification */}
+          <div className="mb-4">
+            <h3 className="font-serif text-xl italic leading-tight text-white transition-colors group-hover:text-amber-500">
               {canon.title}
             </h3>
-
             {canon.subtitle && (
-              <p className="text-sm font-medium text-gray-400">
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
                 {canon.subtitle}
               </p>
             )}
           </div>
 
-          {/* Excerpt / Description */}
+          {/* Abstract */}
           {displayText && (
-            <p className="line-clamp-3 text-sm leading-relaxed text-gray-300">
-              {displayText}
+            <p className="mb-6 line-clamp-3 font-sans text-sm font-light leading-relaxed text-zinc-400 italic">
+              "{displayText}"
             </p>
           )}
 
-          {/* Footer */}
-          <div className="mt-auto flex items-center gap-3 border-t border-white/5 pt-3">
-            {dateLabel && (
-              <time className="text-xs text-gray-400">{dateLabel}</time>
-            )}
+          {/* 3. ARCHIVE FOOTER */}
+          <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-4">
+            <div className="flex flex-col">
+              {dateLabel && (
+                <time className="font-mono text-[9px] uppercase tracking-tighter text-zinc-600">
+                  Ref Date: {dateLabel}
+                </time>
+              )}
+              {isLocked && canon.lockMessage && (
+                <span className="font-mono text-[8px] uppercase text-amber-600/80">
+                  {canon.lockMessage}
+                </span>
+              )}
+            </div>
 
-            {isLocked && canon.lockMessage && (
-              <span className="ml-auto text-xs italic text-amber-400/80">
-                {canon.lockMessage}
-              </span>
-            )}
-
-            <div className="ml-auto flex items-center gap-1 text-xs font-medium text-softGold/70 transition-colors group-hover:text-softGold">
-              Read
-              <svg
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+            <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500 transition-colors group-hover:text-amber-500">
+              Access <ChevronRight size={14} className="transition-transform group-hover:translate-x-1" />
             </div>
           </div>
         </div>
       </article>
+
+      {/* Bottom Identity Line */}
+      <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500 transition-all duration-700 group-hover:w-full" />
     </Link>
   );
 };
 
 export default CanonResourceCard;
-

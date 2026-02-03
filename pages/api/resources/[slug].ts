@@ -10,7 +10,7 @@ import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 import { prepareMDX } from "@/lib/server/md-utils";
 
 // FIXED: Import BOTH functions from contentlayer-helper (server-side)
-import { normalizeSlug, getDocumentBySlug } from '@/lib/contentlayer-helper';
+import { normalizeSlug, getDocumentBySlug } from "@/lib/content/server";
 
 type Tier = "public" | "inner-circle" | "private";
 

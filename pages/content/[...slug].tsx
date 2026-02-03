@@ -1,4 +1,4 @@
-// pages/content/[...slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
+// pages/content/[...slug].tsx — HARDENED (Netlify-Resilient Vault Proxy)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
@@ -7,16 +7,17 @@ import { useRouter } from "next/router";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import { Loader2 } from "lucide-react";
 
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 
-// ✅ Server-side helpers
+// ✅ Institutional Server-side helpers
 import {
   getContentlayerData,
   getAllContentlayerDocs,
   getDocBySlug,
   isDraftContent,
-} from '@/lib/contentlayer-helper';
+} from "@/lib/content/server";
 
 import {
   getDocHref,
@@ -32,7 +33,7 @@ interface Props {
   doc: UiDoc;
   source: MDXRemoteSerializeResult;
   canonicalPath: string;
-  mdxRaw: string; // ✅ Required for seeding
+  mdxRaw: string; 
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
@@ -46,38 +47,41 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath, mdxRaw }
 
   if (router.isFallback) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 font-serif tracking-widest uppercase text-xs">Accessing Vault...</p>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <div className="flex items-center gap-3 text-amber-500 animate-pulse">
+          <Loader2 className="animate-spin" size={20} />
+          <span className="font-mono text-[10px] uppercase tracking-[0.4em] italic">
+            Synchronising Registry Vault...
+          </span>
         </div>
       </div>
     );
   }
 
-  if (!doc) return null; // getStaticProps handles 404
+  if (!doc) return null;
 
   const canonicalUrl = `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
-  const desc = doc.description || doc.excerpt || "Intelligence asset from the Abraham of London vault.";
+  const desc = doc.description || doc.excerpt || "Institutional intelligence asset // Abraham of London.";
 
   return (
     <>
       <Head>
-        <title>{`${doc.title} | Abraham of London`}</title>
+        <title>{`${doc.title.toUpperCase()} // REGISTRY`}</title>
         <meta name="description" content={desc} />
         <link rel="canonical" href={canonicalUrl} />
         
-        <meta property="og:title" content={doc.title} />
+        {/* Institutional OpenGraph */}
+        <meta property="og:title" content={`${doc.title} | Abraham of London`} />
         <meta property="og:description" content={desc} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={canonicalUrl} />
         {doc.coverImage && <meta property="og:image" content={doc.coverImage} />}
 
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
         {doc.date && <meta property="article:published_time" content={doc.date} />}
       </Head>
 
-      {/* ✅ ContentlayerDocPage receives mdxRaw to initialize createSeededSafeMdxComponents */}
       <ContentlayerDocPage
         doc={doc}
         source={source}
@@ -90,18 +94,19 @@ const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath, mdxRaw }
   );
 };
 
-// ==================== PATH GENERATION ====================
-
+/* -----------------------------------------------------------------------------
+  PATH GENERATION: EXHAUSTIVE CATCH-ALL
+----------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    getContentlayerData(); // Ensure data is primed
+    getContentlayerData(); 
     const docs = getAllContentlayerDocs();
 
     const paths = docs
       .filter((d) => {
         if (!d || isDraftContent(d)) return false;
         const href = getDocHref(d);
-        // This catch-all handles anything routed through /content/
+        // Only route docs that belong to the /content/ hierarchy
         return Boolean(href) && href.startsWith("/content/");
       })
       .map((doc) => {
@@ -112,16 +117,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
       })
       .filter(Boolean) as { params: { slug: string[] } }[];
 
-    console.log(`📄 Catch-all Vault: Generated ${paths.length} nested paths`);
     return { paths, fallback: "blocking" };
   } catch (error) {
-    console.error("Static Path Error:", error);
+    console.error("[VAULT_PATH_ERROR]", error);
     return { paths: [], fallback: "blocking" };
   }
 };
 
-// ==================== DATA FETCHING ====================
-
+/* -----------------------------------------------------------------------------
+  DATA FETCHING: SERIALIZED RESOLUTION
+----------------------------------------------------------------------------- */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const slugParts = params?.slug;
@@ -130,11 +135,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const joinedSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts;
     const normalized = normalizeSlug(joinedSlug);
     
-    // Attempt to find the doc across all sub-directories (canon, strategy, etc)
+    // Attempt multi-directory resolution
     const rawDoc = getDocBySlug(`content/${normalized}`);
     
     if (!rawDoc || isDraftContent(rawDoc)) {
-      console.warn(`[Vault] Missing or Draft: content/${normalized}`);
       return { notFound: true };
     }
 
@@ -142,7 +146,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const doc = toUiDoc(rawDoc);
     const mdxRaw = getRawBody(rawDoc);
     
-    // Direct build-time serialization
+    // Server-side serialization (Hardened with GFM for tables/lists)
     const source = await serialize(mdxRaw || " ", {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
@@ -157,10 +161,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         canonicalPath: href || `/content/${normalized}`,
         mdxRaw,
       },
-      revalidate: 1800,
+      revalidate: 1800, // 30-minute archival sync
     };
   } catch (error) {
-    console.error("Static Props Error:", error);
+    console.error("[VAULT_PROPS_ERROR]", error);
     return { notFound: true };
   }
 };

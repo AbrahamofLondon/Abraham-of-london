@@ -1,8 +1,9 @@
+// components/downloads/DownloadCard.tsx — HARDENED (Tactical Asset Variant)
 import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import * as React from "react";
-import { Download, FileText, Lock, ArrowRight, Layers } from "lucide-react";
+import { Download, FileText, Lock, ArrowRight, Layers, ShieldCheck, Loader2 } from "lucide-react";
 
 type DownloadCardProps = {
   slug: string;
@@ -14,14 +15,12 @@ type DownloadCardProps = {
   size?: string;
   featured?: boolean;
   className?: string;
-  
-  // New props for component integration
   useDownloadCTA?: boolean;
-  ctaDetails?: Array<{label: string, value: string, icon?: React.ReactNode}>;
+  ctaDetails?: Array<{ label: string; value: string; icon?: React.ReactNode }>;
   ctaFeatures?: string[];
   ctaRequiresAuth?: boolean;
   pdfFormats?: string[];
-  pageCount?: number; // Resolved: Invariant matched to contentlayer
+  pageCount?: number;
 };
 
 const DEFAULT_COVER = "/assets/images/downloads/default-download-cover.jpg";
@@ -30,7 +29,6 @@ function isGatedHref(href: string): boolean {
   return href.startsWith("/api/downloads/");
 }
 
-// Reusable DownloadCTA-like component
 const FeaturedDownloadSection = ({
   title,
   description,
@@ -42,321 +40,176 @@ const FeaturedDownloadSection = ({
   fileSize,
   fileFormat,
   buttonText,
-  pdfFormats = ["A4", "Letter", "A3"],
-  pageCount
-}: {
-  title: string;
-  description: string;
-  badge: string;
-  details: Array<{label: string, value: string, icon?: React.ReactNode}>;
-  features: string[];
-  downloadUrl: string | null;
-  requiresAuth: boolean;
-  fileSize: string;
-  fileFormat: string;
-  buttonText: string;
-  pdfFormats?: string[];
-  pageCount?: number;
-}) => {
+  pageCount,
+}: any) => {
   const [isLoading, setIsLoading] = React.useState(false);
 
   const handleDownload = async () => {
     if (!downloadUrl) return;
     setIsLoading(true);
+    // Mimicking secure decryption/preparation
     setTimeout(() => {
-      window.open(downloadUrl, '_blank');
+      window.open(downloadUrl, "_blank");
       setIsLoading(false);
-    }, 1000);
+    }, 1200);
   };
 
-  // Merge pageCount into details if present and not already there
   const finalDetails = [...details];
-  if (pageCount && !finalDetails.some(d => d.label.toLowerCase().includes('page'))) {
+  if (pageCount && !finalDetails.some((d) => d.label.toLowerCase().includes("page"))) {
     finalDetails.push({
       label: "Length",
       value: `${pageCount} Pages`,
-      icon: <Layers className="w-4 h-4" />
+      icon: <Layers className="w-4 h-4" />,
     });
   }
 
   return (
-    <div className="relative my-6 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/5 via-black/50 to-gold/5 p-8 overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(245, 158, 11, 0.2) 1px, transparent 0)`,
-          backgroundSize: '24px 24px'
-        }}></div>
-      </div>
+    <div className="relative my-8 overflow-hidden rounded-sm border border-amber-500/20 bg-zinc-950 p-8 shadow-2xl">
+      {/* Tactical Grid Background */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: `radial-gradient(circle at 2px 2px, #f59e0b 1px, transparent 0)`, backgroundSize: '24px 24px' }} 
+      />
 
       <div className="relative z-10">
-        {/* Header */}
         <div className="mb-8">
-          <span className="inline-block px-4 py-2 rounded-full bg-gold/20 text-gold text-sm font-semibold uppercase tracking-wider mb-4">
+          <span className="inline-block border border-amber-500/30 bg-amber-500/5 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500 mb-4">
             {badge}
           </span>
-          
-          <h2 className="font-serif text-2xl font-bold text-cream mb-3">{title}</h2>
-          <p className="text-lg text-gray-300 leading-relaxed">{description}</p>
+          <h2 className="font-serif text-3xl italic text-white mb-4">{title}</h2>
+          <p className="max-w-2xl text-zinc-400 leading-relaxed italic">{description}</p>
         </div>
 
-        {/* Details Grid */}
-        {finalDetails.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-            {finalDetails.map((detail, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
-                    {detail.icon || <FileText className="w-4 h-4" />}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-                    {detail.label}
-                  </div>
-                  <div className="text-sm font-semibold text-cream">
-                    {detail.value}
-                  </div>
-                </div>
+        {/* Technical Specs Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 border border-white/5 mb-8 overflow-hidden rounded-sm">
+          {finalDetails.map((detail, index) => (
+            <div key={index} className="bg-zinc-950 p-4 transition-colors hover:bg-zinc-900">
+              <div className="flex items-center gap-2 mb-2 text-amber-500/60">
+                {detail.icon || <FileText size={14} />}
+                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">{detail.label}</span>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="font-mono text-xs font-bold text-zinc-200">{detail.value}</div>
+            </div>
+          ))}
+        </div>
 
-        {/* Features List */}
+        {/* Asset Manifest */}
         {features.length > 0 && (
-          <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
-            <h3 className="text-lg font-semibold text-cream mb-4 flex items-center gap-2">
-              <span className="text-gold">✨</span>
-              <span>What's Included</span>
+          <div className="mb-10 rounded-sm border border-white/5 bg-white/[0.02] p-6">
+            <h3 className="mb-4 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+              <ShieldCheck size={14} className="text-amber-500" /> Included Metadata
             </h3>
-            <ul className="space-y-3">
-              {features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="text-green-400 text-base mt-0.5 flex-shrink-0">✓</span>
-                  <span className="text-gray-300 text-sm leading-relaxed">{feature}</span>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-8">
+              {features.map((feature : string, index : number) => (
+                <li key={index} className="flex items-center gap-3 text-sm text-zinc-400 font-light">
+                  <span className="h-1 w-1 bg-amber-500" /> {feature}
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Download Button */}
-        <div className="text-center">
+        {/* Action Zone */}
+        <div className="flex flex-col items-center gap-4">
           <button
             onClick={handleDownload}
             disabled={isLoading || requiresAuth}
-            className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-gold to-amber-600 text-black font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-gold/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative flex w-full max-w-md items-center justify-center gap-4 border border-amber-500 bg-amber-500 py-4 font-mono text-xs font-bold uppercase tracking-[0.3em] text-black transition-all hover:bg-transparent hover:text-amber-500 disabled:opacity-20"
           >
             {isLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Preparing Download...</span>
-              </>
+              <Loader2 className="animate-spin" size={18} />
             ) : (
               <>
-                <Download className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" />
+                <Download size={18} />
                 <span>{buttonText}</span>
-                <span className="text-xs opacity-80">({fileSize}, {fileFormat})</span>
               </>
             )}
           </button>
-
-          {/* Auth notice */}
-          {requiresAuth && (
-            <div className="mt-6 p-3 rounded-lg bg-black/40 border border-white/10">
-              <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
-                <Lock className="w-4 h-4 text-gold" />
-                <span>Requires <strong className="text-gold">authenticated access</strong></span>
-              </p>
-            </div>
-          )}
+          
+          <div className="flex items-center gap-4 font-mono text-[9px] uppercase tracking-widest text-zinc-600">
+             <span>Format: {fileFormat}</span>
+             <span>•</span>
+             <span>Size: {fileSize}</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default function DownloadCard({
-  slug,
-  title,
-  excerpt,
-  coverImage,
-  fileHref,
-  category,
-  size,
-  featured = false,
-  className,
-  useDownloadCTA = true,
-  ctaDetails = [],
-  ctaFeatures = [],
-  ctaRequiresAuth = false,
-  pdfFormats = ["A4", "Letter", "A3"],
-  pageCount,
-}: DownloadCardProps) {
+export default function DownloadCard(props: DownloadCardProps) {
+  const { slug, title, excerpt, coverImage, fileHref, category, size, featured, className, useDownloadCTA, pageCount } = props;
   const detailHref = `/downloads/${slug}`;
-  const finalImageSrc = (typeof coverImage === "string" && coverImage) || DEFAULT_COVER;
-  const gated = typeof fileHref === "string" && fileHref ? isGatedHref(fileHref) : false;
+  const gated = fileHref ? isGatedHref(fileHref) : false;
 
   if (featured && useDownloadCTA) {
     return (
-      <div className={className}>
-        <FeaturedDownloadSection
-          title={title}
-          description={excerpt || ""}
-          badge={category ? `${category} • Featured` : "Featured Download"}
-          details={ctaDetails}
-          features={ctaFeatures}
-          downloadUrl={fileHref}
-          requiresAuth={ctaRequiresAuth || gated}
-          fileSize={size || "2.5 MB"}
-          fileFormat="PDF"
-          buttonText={gated ? "Unlock Access" : "Download Now"}
-          pdfFormats={pdfFormats}
-          pageCount={pageCount}
-        />
-      </div>
+      <FeaturedDownloadSection
+        {...props}
+        badge={category ? `${category} // PRIORITY` : "FEATURED ASSET"}
+        downloadUrl={fileHref}
+        requiresAuth={props.ctaRequiresAuth || gated}
+        fileSize={size || "---"}
+        fileFormat="PDF"
+        buttonText={gated ? "AUTHENTICATE TO UNLOCK" : "INITIALIZE DOWNLOAD"}
+        details={props.ctaDetails || []}
+        features={props.ctaFeatures || []}
+      />
     );
   }
 
   return (
-    <article
-      className={clsx(
-        "group relative flex overflow-hidden rounded-2xl bg-white transition-all duration-300",
-        featured ? "flex-col md:flex-row border border-amber-200 shadow-xl" : "flex-col border border-slate-200 shadow-card hover:shadow-cardHover hover:border-amber-200/50",
-        className
-      )}
-    >
-      <div
-        className={clsx(
-          "relative overflow-hidden bg-slate-100",
-          featured ? "w-full md:w-2/5 min-h-[260px]" : "w-full aspect-[16/9]"
+    <article className={clsx(
+      "group relative flex flex-col overflow-hidden rounded-sm border border-white/5 bg-zinc-950 transition-all duration-500 hover:border-amber-500/30",
+      className
+    )}>
+      {/* Tactical Header Image */}
+      <div className="relative aspect-video w-full overflow-hidden border-b border-white/5">
+        <Image
+          src={coverImage || DEFAULT_COVER}
+          alt={title}
+          fill
+          className="object-cover opacity-40 grayscale transition-all duration-700 group-hover:scale-110 group-hover:opacity-70 group-hover:grayscale-0"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+        
+        {category && (
+          <div className="absolute top-4 left-4 border border-amber-500/30 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-tighter text-amber-500 backdrop-blur-md">
+            {category}
+          </div>
         )}
-      >
-        <Link href={detailHref} prefetch={false} className="block w-full h-full" tabIndex={-1}>
-           {featured && (
-             <div className="absolute top-4 left-4 z-10">
-               <span className="inline-flex items-center rounded-full bg-slate-900/90 px-3 py-1 text-xs font-medium text-amber-50 shadow-sm backdrop-blur-sm border border-white/10">
-                 Featured Asset
-               </span>
-             </div>
-           )}
-
-           {category && !featured && (
-             <div className="absolute top-3 left-3 z-10">
-               <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700 shadow-sm backdrop-blur-md">
-                 {category}
-               </span>
-             </div>
-           )}
-
-          <Image
-            src={finalImageSrc}
-            alt={`Cover image for ${title}`}
-            fill
-            sizes={featured ? "(max-width: 768px) 100vw, 40vw" : "(max-width: 768px) 100vw, 30vw"}
-            className={clsx(
-              "object-cover transition-transform duration-700",
-              featured ? "group-hover:scale-105" : "group-hover:scale-110"
-            )}
-            priority={featured}
-          />
-          <div className="absolute inset-0 bg-slate-900/0 transition-colors duration-300 group-hover:bg-slate-900/5" />
-        </Link>
       </div>
 
-      <div className={clsx("flex flex-1 flex-col", featured ? "p-6 md:p-8" : "p-5")}>
-        <div className="flex-1">
-          <div className="mb-3 flex items-center gap-3 text-xs font-medium text-slate-500 uppercase tracking-wide">
-             {featured && category && (
-               <span className="text-amber-600 font-bold">{category}</span>
-             )}
-             {size && (
-               <>
-                 {featured && category && <span>•</span>}
-                 <span>{size}</span>
-               </>
-             )}
-             {pageCount && (
-               <>
-                 <span>•</span>
-                 <span>{pageCount} Pages</span>
-               </>
-             )}
-             <span>PDF</span>
-          </div>
-
-          <h3
-            className={clsx(
-              "font-serif text-slate-900 transition-colors group-hover:text-amber-700",
-              featured ? "text-2xl font-bold mb-3" : "text-lg font-semibold mb-2"
-            )}
-          >
-            <Link href={detailHref} prefetch={false} className="outline-none focus:underline">
-              {title}
-            </Link>
-          </h3>
-
-          {excerpt && (
-            <p
-              className={clsx(
-                "text-slate-600 leading-relaxed",
-                featured ? "text-base line-clamp-3" : "text-sm line-clamp-2"
-              )}
-            >
-              {excerpt}
-            </p>
-          )}
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-4 flex items-center gap-3 font-mono text-[9px] text-zinc-500 uppercase tracking-widest">
+           {size && <span>{size}</span>}
+           {pageCount && <span>• {pageCount} PGS</span>}
+           {gated && <Lock size={10} className="text-amber-500" />}
         </div>
 
-        <div className={clsx("flex items-center justify-between pt-6 border-t border-slate-100", featured ? "mt-6" : "mt-4")}>
-          <Link
-            href={detailHref}
-            className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-slate-400 transition-colors hover:text-amber-600"
-            prefetch={false}
-          >
-            Details <ArrowRight className="h-3 w-3" />
+        <h3 className="mb-4 font-serif text-xl italic text-white group-hover:text-amber-500 transition-colors">
+          <Link href={detailHref}>{title}</Link>
+        </h3>
+
+        <p className="mb-8 line-clamp-2 text-sm leading-relaxed text-zinc-500 italic">
+          {excerpt}
+        </p>
+
+        <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-4">
+          <Link href={detailHref} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500 hover:text-amber-500">
+            METADATA <ArrowRight size={12} />
           </Link>
 
-          <div className="flex items-center gap-3">
-             {gated && (
-               <div className="flex items-center gap-1 text-xs font-medium text-amber-600/80 bg-amber-50 px-2 py-1 rounded-md">
-                 <Lock className="h-3 w-3" />
-                 <span>Inner Circle</span>
-               </div>
-             )}
-
-             {fileHref && (
-               gated ? (
-                 <a
-                   href={fileHref}
-                   className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all bg-slate-900 hover:bg-slate-800 hover:shadow-md"
-                 >
-                   Unlock
-                 </a>
-               ) : (
-                 <a
-                   href={fileHref}
-                   download
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   className={clsx(
-                     "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all shadow-sm",
-                     featured 
-                       ? "bg-amber-500 text-white hover:bg-amber-600 hover:shadow-amber-200"
-                       : "bg-white border border-slate-200 text-slate-700 hover:border-amber-300 hover:text-amber-700"
-                   )}
-                   onClick={(e) => e.stopPropagation()}
-                 >
-                   <Download className="h-4 w-4" />
-                   {featured && "Download"}
-                 </a>
-               )
-             )}
-          </div>
+          {fileHref && (
+            <a 
+              href={fileHref} 
+              className={clsx(
+                "flex h-8 w-8 items-center justify-center rounded-sm transition-all",
+                gated ? "bg-zinc-800 text-amber-500" : "bg-amber-500 text-black hover:bg-amber-400"
+              )}
+            >
+              {gated ? <Lock size={14} /> : <Download size={14} />}
+            </a>
+          )}
         </div>
       </div>
     </article>

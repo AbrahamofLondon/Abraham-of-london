@@ -1,7 +1,8 @@
-// components/Cards/BlogPostCard.tsx
+// components/Cards/BlogPostCard.tsx — HARDENED (Tactical Journal)
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Clock, User, Calendar, ArrowUpRight } from "lucide-react";
 
 import {
   getCardImage,
@@ -52,114 +53,125 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   const linkHref = href || `/blog/${slug}`;
 
   const displayTextRaw = getDisplayText(excerpt, description, subtitle);
-  const displayText = truncateText(displayTextRaw, 200);
-  const displayTags = truncateTags(tags, 3);
+  const displayText = truncateText(displayTextRaw, 180); // Tighter truncation for tactical UI
+  const displayTags = truncateTags(tags, 2); // Less is more in a hardened UI
 
   const authorName = getAuthorName(author ?? null);
   const authorPicture = getAuthorPicture(author ?? null);
   const dateLabel = formatShortDate(date ?? null);
 
   const readTimeText =
-    typeof readTime === "number" ? `${readTime} min read` : readTime || null;
+    typeof readTime === "number" ? `${readTime} MIN READ` : readTime?.toString().toUpperCase() || null;
 
   const imageSrc = getCardImage(coverImage);
-  const altText = getCardImageAlt(title, "Blog post");
+  const altText = getCardImageAlt(title, "Intel Dispatch");
 
   return (
     <Link
       href={linkHref}
-      className={`group block rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm transition-all duration-300 hover:border-softGold/30 hover:shadow-[0_8px_30px_rgba(226,197,120,0.15)] ${className}`}
-      aria-label={getCardAriaLabel(title, "Blog post")}
+      className={`group relative block overflow-hidden border border-white/5 bg-zinc-950 transition-all duration-500 hover:border-amber-500/30 ${className}`}
+      aria-label={getCardAriaLabel(title, "Intelligence Dispatch")}
     >
-      <article className="flex h-full flex-col overflow-hidden">
-        {/* IMAGE (with fallback) */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden">
+      <article className="flex h-full flex-col">
+        {/* IMAGE SECTOR (Institutional Grayscale) */}
+        <div className="relative aspect-video w-full overflow-hidden border-b border-white/5 bg-zinc-900">
           <Image
             src={imageSrc}
             alt={altText}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover opacity-50 grayscale transition-all duration-700 group-hover:scale-105 group-hover:opacity-80 group-hover:grayscale-0"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
-          {featured && (
-            <div className="absolute left-3 top-3 rounded-full bg-softGold/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-black backdrop-blur-sm">
-              Featured
-            </div>
-          )}
-          {category && (
-            <div className="absolute right-3 top-3 rounded-full border border-softGold/40 bg-black/60 px-3 py-1 text-xs font-semibold text-softGold backdrop-blur-sm">
-              {category}
-            </div>
-          )}
+          
+          {/* Tactical Badge Overlays */}
+          <div className="absolute inset-x-4 top-4 flex justify-between">
+            {featured ? (
+              <span className="bg-amber-500 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-black">
+                Featured Dispatch
+              </span>
+            ) : <div />}
+            
+            {category && (
+              <span className="border border-white/10 bg-black/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-zinc-400 backdrop-blur-md">
+                {category}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* BODY */}
-        <div className="flex flex-1 flex-col gap-3 p-5">
-          {/* TAGS */}
-          {displayTags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+        {/* BODY SECTOR */}
+        <div className="flex flex-1 flex-col p-6">
+          {/* META HEADER */}
+          <div className="mb-4 flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex gap-2">
               {displayTags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="rounded-full border border-softGold/20 bg-softGold/10 px-3 py-1 text-xs font-medium text-softGold/90"
-                >
-                  {formatTagText(tag)}
+                <span key={idx} className="font-mono text-[9px] uppercase tracking-tighter text-amber-500/70">
+                  #{formatTagText(tag)}
                 </span>
               ))}
             </div>
-          )}
-
-          {/* TITLE / SUBTITLE */}
-          <div className="space-y-1">
-            <h3 className="font-serif text-xl font-semibold text-cream transition-colors group-hover:text-softGold">
-              {title}
-            </h3>
-            {subtitle && (
-              <p className="text-sm font-medium text-gray-400">{subtitle}</p>
+            {readTimeText && (
+              <div className="flex items-center gap-1 font-mono text-[9px] text-zinc-600">
+                <Clock size={10} /> {readTimeText}
+              </div>
             )}
           </div>
 
-          {/* EXCERPT */}
-          {displayText && (
-            <p className="line-clamp-3 text-sm leading-relaxed text-gray-300">
-              {displayText}
-            </p>
-          )}
+          {/* CONTENT */}
+          <div className="mb-6 flex-1">
+            <h3 className="mb-2 font-serif text-xl italic leading-tight text-white transition-colors group-hover:text-amber-500">
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500 italic">
+                // {subtitle}
+              </p>
+            )}
+            {displayText && (
+              <p className="line-clamp-3 font-sans text-sm font-light leading-relaxed text-zinc-400 italic">
+                "{displayText}"
+              </p>
+            )}
+          </div>
 
-          {/* META ROW */}
-          <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/5 pt-3">
-            <div className="flex items-center gap-2">
-              {authorPicture && (
-                <div className="relative h-6 w-6 overflow-hidden rounded-full">
+          {/* AUTHOR/DATE FOOTER */}
+          <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-4">
+            <div className="flex items-center gap-3">
+              {authorPicture ? (
+                <div className="relative h-7 w-7 border border-white/10 p-0.5 grayscale group-hover:grayscale-0 transition-all">
                   <Image
                     src={authorPicture}
-                    alt={authorName || "Author"}
+                    alt={authorName || "Correspondent"}
                     fill
                     className="object-cover"
                   />
                 </div>
+              ) : (
+                <div className="flex h-7 w-7 items-center justify-center border border-white/10 bg-zinc-900 text-zinc-600">
+                  <User size={12} />
+                </div>
               )}
-              <div className="flex flex-col">
-                {authorName && (
-                  <span className="text-xs font-medium text-gray-300">
-                    {authorName}
-                  </span>
-                )}
-                {dateLabel && (
-                  <time className="text-xs text-gray-400">{dateLabel}</time>
-                )}
+              <div className="flex flex-col leading-none">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+                  {authorName || "Staff Correspondent"}
+                </span>
+                <time className="font-mono text-[9px] text-zinc-600">
+                  {dateLabel || "UNDATED"}
+                </time>
               </div>
             </div>
 
-            {readTimeText && (
-              <span className="text-xs text-gray-400">{readTimeText}</span>
-            )}
+            <div className="text-zinc-700 transition-colors group-hover:text-amber-500">
+              <ArrowUpRight size={16} />
+            </div>
           </div>
         </div>
       </article>
+
+      {/* Bottom Accent Line */}
+      <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500 transition-all duration-500 group-hover:w-full" />
     </Link>
   );
 };
 
 export default BlogPostCard;
-

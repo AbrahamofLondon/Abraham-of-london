@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { getAllCombinedDocs } from "@/lib/contentlayer-helper";
+import { getAllCombinedDocs } from "@/lib/content/server";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 

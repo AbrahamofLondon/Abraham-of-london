@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GetServerSideProps } from 'next';
-import { getAllCombinedDocs } from "@/lib/contentlayer-helper";
+import { getAllCombinedDocs } from "@/lib/content/server";
 import { normalizeSlug } from "@/lib/content/shared";
 
 const DOMAIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.abrahamoflondon.org').replace(/\/+$/, '');

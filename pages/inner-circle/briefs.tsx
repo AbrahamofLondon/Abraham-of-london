@@ -1,67 +1,47 @@
-/* pages/inner-circle/briefs.tsx — SECURE ACCESS PORTAL FOR INTELLIGENCE ASSETS */
+/* pages/inner-circle/briefs.tsx — INTEGRATED INTELLIGENCE PORTAL (75 ASSETS) */
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Layout from "@/components/Layout";
 import { useSession } from "next-auth/react";
+import { 
+  Search, 
+  Filter, 
+  ShieldAlert, 
+  Download, 
+  Lock, 
+  FileText,
+  Activity
+} from "lucide-react";
+
+import Layout from "@/components/Layout";
 import { useToast } from "@/hooks/useToast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
-// Types for the intelligence assets
-interface Brief {
-  id: string;
-  codeName: string;
-  title: string;
-  category: "Geopolitical" | "Economic" | "Technological" | "Special Ops";
-  classification: "Level 1" | "Level 2" | "Level 3";
-  summary: string;
-  fileSize: string;
-  publishedAt: string;
-}
+// Leveraging the central registry for production consistency
+import { BRIEF_REGISTRY, BriefEntry } from "@/lib/briefs/registry";
 
 const IntelligenceBriefsPage: NextPage = () => {
   const { data: session, status } = useSession();
   const { toast } = useToast();
-  const [briefs, setBriefs] = React.useState<Brief[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
+  
+  // State Management
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [activeCategory, setActiveCategory] = React.useState<string>("All");
+  const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
 
-  // Simulated internal database of the 75 briefs 
-  // (In production, this would be fetched from /api/briefs)
-  React.useEffect(() => {
-    const fetchBriefs = async () => {
-      setLoading(true);
-      try {
-        // Mock data representing the growing portfolio
-        const mockBriefs: Brief[] = Array.from({ length: 75 }).map((_, i) => ({
-          id: `brief-${i + 1}`,
-          codeName: `PROJECT_${100 + i}`,
-          title: `Intelligence Report ${i + 1}: Global Market Analysis`,
-          category: i % 4 === 0 ? "Geopolitical" : "Economic",
-          classification: i % 10 === 0 ? "Level 3" : "Level 1",
-          summary: "Comprehensive strategic analysis regarding emerging trends and systematic risks.",
-          fileSize: "4.2 MB",
-          publishedAt: new Date(2025, 10, i + 1).toISOString(),
-        }));
-        setBriefs(mockBriefs);
-      } catch (error) {
-        toast.error("Retrieval Error", "Failed to sync with intelligence database.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Categories derived from the 75 entries for dynamic filtering
+  const categories = ["All", ...Array.from(new Set(BRIEF_REGISTRY.map(b => b.series)))];
 
-    if (status === "authenticated") fetchBriefs();
-  }, [status, toast]);
-
-  const handleDownload = async (briefId: string, codeName: string) => {
+  /**
+   * PRODUCTION SECURE RETRIEVAL
+   * Authorizes the user via API and triggers a signed-URL download
+   */
+  const handleDownload = async (briefId: string, title: string) => {
     setDownloadingId(briefId);
-    toast.info("Authorizing", `Generating secure download token for ${codeName}...`);
+    toast.info("Authorizing Access", `Generating encrypted token for Vol. ${briefId}`);
 
     try {
-      // Secure API call to generate a signed, one-time URL
       const response = await fetch("/api/inner-circle/generate-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,123 +53,148 @@ const IntelligenceBriefsPage: NextPage = () => {
       if (data.downloadUrl) {
         const link = document.createElement("a");
         link.href = data.downloadUrl;
-        link.setAttribute("download", `${codeName}.pdf`);
+        link.setAttribute("download", `${title.replace(/\s+/g, '_')}.pdf`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        toast.success("Transfer Started", "Asset is being transmitted to your local device.");
+        toast.success("Transmission Started", "Asset retrieved successfully.");
       } else {
-        throw new Error("Access Denied");
+        throw new Error("Unauthorized");
       }
     } catch (error) {
-      toast.error("Encryption Error", "Unauthorized access attempt or link expired.");
+      toast.error("Encryption Error", "Verification failed. Check clearance levels.");
     } finally {
       setDownloadingId(null);
     }
   };
 
-  const filteredBriefs = briefs.filter(b => 
-    b.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    b.codeName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Systematic Filtering Logic
+  const filteredBriefs = BRIEF_REGISTRY.filter((brief) => {
+    const matchesSearch = brief.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          brief.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = activeCategory === "All" || brief.series === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   if (status === "loading") return <LoadingSpinner size="lg" message="Decrypting Portal..." />;
-
-  if (status === "unauthenticated") {
-    return (
-      <Layout title="Restricted Access">
-        <div className="flex h-screen items-center justify-center bg-black px-4">
-          <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-black text-white mb-4 tracking-tighter">RESTRICTED AREA</h1>
-            <p className="text-zinc-500 mb-8">Access to the Intelligence Portfolio requires active Inner Circle membership and Tier 2 clearance.</p>
-            <button className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-zinc-200 transition-all">
-              Initialize Membership
-            </button>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <ErrorBoundary>
       <Layout title="Briefing Room">
         <Head>
-          <title>Intelligence Briefs | Inner Circle</title>
+          <title>Intelligence Portfolio | 75 Assets</title>
         </Head>
 
-        <main className="min-h-screen bg-[#050505] text-zinc-300 pb-20">
-          {/* Header Section */}
-          <div className="relative border-b border-white/5 bg-zinc-950/80 backdrop-blur-md px-8 py-12">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Secure Uplink Active</span>
+        <main className="min-h-screen bg-[#050505] text-zinc-400 pb-32">
+          {/* 1. Dashboard Header */}
+          <div className="relative border-b border-white/5 bg-zinc-950/50 backdrop-blur-xl px-8 py-16">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                  <Activity size={12} className="text-emerald-500" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-500">
+                    Connection: Secured // {session?.user?.email}
+                  </span>
                 </div>
-                <h1 className="text-5xl font-black text-white tracking-tighter">Portfolio: 75 Briefs</h1>
-                <p className="text-zinc-500 max-w-md mt-4">Verified assets available for local retrieval. All downloads are watermarked with your unique identifier: <span className="text-white font-mono">{session?.user?.email}</span></p>
               </div>
-              <div className="w-full md:w-96">
-                <input 
-                  type="text" 
-                  placeholder="Filter by Project Name or Keyword..." 
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-blue-500/50 outline-none transition-all"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+                <div>
+                  <h1 className="text-5xl md:text-6xl font-serif text-white italic tracking-tight mb-4">
+                    Intelligence Portfolio
+                  </h1>
+                  <p className="text-zinc-500 max-w-xl text-lg font-light leading-relaxed">
+                    Accessing <span className="text-white font-medium">{BRIEF_REGISTRY.length} verified dispatches</span>. 
+                    Strategically watermarked for institutional integrity.
+                  </p>
+                </div>
+
+                <div className="w-full lg:w-auto space-y-4">
+                  <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-amber-500 transition-colors" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="Filter 75 assets..." 
+                      className="w-full lg:w-96 bg-black border border-white/10 rounded-xl pl-12 pr-6 py-4 text-sm text-white focus:border-amber-500/50 outline-none transition-all"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Briefs Grid */}
-          <div className="max-w-7xl mx-auto px-8 mt-12">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => <div key={i} className="h-64 rounded-3xl bg-white/5 animate-pulse" />)}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBriefs.map((brief) => (
-                  <div 
-                    key={brief.id} 
-                    className="group relative bg-zinc-900/40 border border-white/5 rounded-3xl p-8 hover:bg-zinc-900/60 hover:border-white/20 transition-all duration-500"
-                  >
-                    <div className="flex justify-between items-start mb-6">
-                      <span className="text-[10px] font-mono font-bold bg-white/10 text-zinc-400 px-3 py-1 rounded-full uppercase tracking-widest">
-                        {brief.codeName}
-                      </span>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${brief.classification === 'Level 3' ? 'text-rose-500' : 'text-blue-400'}`}>
-                        {brief.classification}
-                      </span>
-                    </div>
-                    
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
-                      {brief.title}
-                    </h3>
-                    
-                    <p className="text-sm text-zinc-500 leading-relaxed mb-8 line-clamp-2">
-                      {brief.summary}
-                    </p>
+          {/* 2. Dynamic Filtering Tabs */}
+          <div className="max-w-7xl mx-auto px-8 py-8">
+            <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar border-b border-white/5">
+              <Filter size={14} className="text-zinc-600 flex-shrink-0" />
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
+                    activeCategory === cat 
+                    ? "bg-white text-black" 
+                    : "bg-white/5 text-zinc-500 hover:bg-white/10"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                    <div className="flex items-center justify-between mt-auto pt-6 border-t border-white/5">
-                      <div className="text-[10px] font-mono text-zinc-600">
-                        SIZE: {brief.fileSize}
-                      </div>
-                      <button 
-                        onClick={() => handleDownload(brief.id, brief.codeName)}
-                        disabled={!!downloadingId}
-                        className="flex items-center gap-2 text-xs font-black uppercase tracking-tighter text-white hover:text-blue-400 transition-all disabled:opacity-50"
-                      >
-                        {downloadingId === brief.id ? 'Authorizing...' : 'Retrieve Asset'}
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </button>
-                    </div>
+          {/* 3. The Briefing Grid */}
+          <div className="max-w-7xl mx-auto px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredBriefs.map((brief) => (
+                <div 
+                  key={brief.id} 
+                  className="group relative flex flex-col bg-zinc-900/20 border border-white/5 rounded-2xl p-8 hover:bg-zinc-900/40 hover:border-amber-500/20 transition-all duration-500"
+                >
+                  <div className="flex justify-between items-start mb-8">
+                    <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest border-b border-zinc-800 pb-1">
+                      VOL. {brief.volume.toString().padStart(2, '0')}
+                    </span>
+                    {brief.classification === "Restricted" ? (
+                      <ShieldAlert size={16} className="text-rose-500" />
+                    ) : (
+                      <Lock size={16} className="text-amber-500/50" />
+                    )}
                   </div>
-                ))}
+
+                  <h3 className="text-xl font-serif text-white italic mb-4 group-hover:text-amber-500 transition-colors leading-snug">
+                    {brief.title}
+                  </h3>
+                  
+                  <p className="text-sm text-zinc-500 font-light leading-relaxed mb-10 line-clamp-3">
+                    {brief.abstract}
+                  </p>
+
+                  <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] uppercase tracking-widest text-zinc-700 font-bold">Latency</span>
+                      <span className="text-[11px] font-mono text-zinc-400">{brief.readingTime}</span>
+                    </div>
+                    
+                    <button 
+                      onClick={() => handleDownload(brief.id, brief.title)}
+                      disabled={!!downloadingId}
+                      className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:text-amber-500 transition-all disabled:opacity-30"
+                    >
+                      {downloadingId === brief.id ? "Authorizing..." : "Retrieve"}
+                      <Download size={14} strokeWidth={3} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredBriefs.length === 0 && (
+              <div className="py-40 text-center">
+                <p className="text-zinc-600 font-serif italic text-lg">No intelligence assets found matching these parameters.</p>
               </div>
             )}
           </div>

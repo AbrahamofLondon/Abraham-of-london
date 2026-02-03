@@ -1,12 +1,12 @@
 /* lib/contentlayer/index.ts - COMPLETE FIX */
 // Re-export everything from contentlayer-helper
-export * from "../contentlayer-helper";
+export type * from "contentlayer/generated";
 
 // Export from data.ts
 export { getContentlayerData } from "./data";
 
-// Import and re-export types from contentlayer-helper
-import type { ContentDoc, DocKind } from "../contentlayer-helper";
+// Import and re-export types from "@/lib/content/server";
+import type { ContentDoc, DocKind } from "@/lib/content/server";
 export type { ContentDoc, DocKind };
 
 // Re-export document types from ContentLayer

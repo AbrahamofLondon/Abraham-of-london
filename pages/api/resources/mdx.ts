@@ -4,7 +4,7 @@ import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
 import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 
 // FIXED: Remove duplicate import
-import { normalizeSlug, getDocumentBySlug } from '@/lib/contentlayer-helper';
+import { normalizeSlug, getDocumentBySlug } from "@/lib/content/server";
 
 type Tier = "public" | "inner-circle" | "private";
 

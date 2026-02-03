@@ -1,94 +1,190 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * SERVER-ONLY CONTENT ACCESS (HARDENED)
- * Consolidated to prevent circular dependencies and resolve Netlify TypeErrors.
- * Directly maps to the Sovereign Contentlayer Helper.
+ * lib/content/server.ts — SERVER-ONLY CONTENT ACCESS (BACKWARD-INTEGRATED)
+ * Hard rules:
+ * - NO circular imports (contentlayer-helper must NOT re-export this file).
+ * - This file can safely depend on contentlayer-helper + shared utils.
  */
 
 import * as Helper from "@/lib/contentlayer-helper";
-
-// --- RE-EXPORT GOVERNANCE & UTILS ---
-export {
-  normalizeSlug,
+import {
   isDraftContent,
   isPublished,
   getAccessLevel,
   getDocHref,
   getDocKind,
-  sanitizeData,
   toUiDoc,
   resolveDocCoverImage,
-  resolveDocDownloadUrl
+  resolveDocDownloadUrl,
+} from "@/lib/content/shared";
+
+export {
+  isDraftContent,
+  isPublished,
+  getAccessLevel,
+  getDocHref,
+  getDocKind,
+  toUiDoc,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl,
+};
+
+// ------------------------------
+// Direct static imports from contentlayer-helper
+// ------------------------------
+import {
+  normalizeSlug as helperNormalizeSlug,
+  sanitizeData as helperSanitizeData,
+  getAllContentlayerDocs as helperGetAllContentlayerDocs,
+  getAllBooks as helperGetAllBooks,
+  getAllCanons as helperGetAllCanons,
+  getAllDownloads as helperGetAllDownloads,
+  getAllPosts as helperGetAllPosts,
+  getAllEvents as helperGetAllEvents,
+  getAllPrints as helperGetAllPrints,
+  getAllResources as helperGetAllResources,
+  getAllStrategies as helperGetAllStrategies,
+  getAllShorts as helperGetAllShorts,
+  getDocBySlug as helperGetDocBySlug,
+  getServerBookBySlug as helperGetServerBookBySlug,
+  getServerCanonBySlug as helperGetServerCanonBySlug,
 } from "@/lib/contentlayer-helper";
 
-// --- CORE DATA ACCESS ---
+// Re-export with consistent naming
+export const normalizeSlug = helperNormalizeSlug;
+export const sanitizeData = helperSanitizeData;
+
+// ------------------------------
+// Core data access (static imports)
+// ------------------------------
+export function getAllContentlayerDocs() {
+  return helperGetAllContentlayerDocs();
+}
+
+export function getAllBooks() {
+  return helperGetAllBooks();
+}
+
+export function getAllCanons() {
+  return helperGetAllCanons();
+}
+
+export function getAllDownloads() {
+  return helperGetAllDownloads();
+}
+
+export function getAllPosts() {
+  return helperGetAllPosts();
+}
+
+export function getAllEvents() {
+  return helperGetAllEvents();
+}
+
+export function getAllPrints() {
+  return helperGetAllPrints();
+}
+
+export function getAllResources() {
+  return helperGetAllResources();
+}
+
+export function getAllStrategies() {
+  return helperGetAllStrategies();
+}
+
+export function getAllShorts() {
+  return helperGetAllShorts();
+}
 
 export function isContentlayerLoaded(): boolean {
-  const docs = Helper.getAllContentlayerDocs();
+  const docs = getAllContentlayerDocs();
   return Array.isArray(docs) && docs.length > 0;
 }
 
 export function assertContentlayerHasDocs(): void {
-  if (!isContentlayerLoaded()) throw new Error("Build aborted: Contentlayer data is empty.");
+  if (!isContentlayerLoaded()) {
+    throw new Error("Build aborted: Contentlayer data is empty.");
+  }
 }
 
 export function getContentlayerData() {
   return {
-    allDocuments: Helper.getAllContentlayerDocs(),
-    allBooks: Helper.getAllBooks(),
-    allCanons: Helper.getAllCanons(),
-    allDownloads: Helper.getAllDownloads(),
-    allPosts: Helper.getAllPosts(),
-    allEvents: Helper.getAllEvents(),
-    allPrints: Helper.getAllPrints(),
-    allResources: Helper.getAllResources(),
-    allStrategies: Helper.getAllStrategies(),
-    allShorts: Helper.getAllShorts(),
+    allDocuments: getAllContentlayerDocs(),
+    allBooks: getAllBooks(),
+    allCanons: getAllCanons(),
+    allDownloads: getAllDownloads(),
+    allPosts: getAllPosts(),
+    allEvents: getAllEvents(),
+    allPrints: getAllPrints(),
+    allResources: getAllResources(),
+    allStrategies: getAllStrategies(),
+    allShorts: getAllShorts(),
   };
 }
 
-// --- RESILIENT LOOKUPS ---
+// ------------------------------
+// Legacy + resilient lookups
+// ------------------------------
+export const getDocBySlug = helperGetDocBySlug;
+export const getDocumentBySlug = getDocBySlug;
 
-export const getDocBySlug = (slug: string) => Helper.getDocBySlug(slug);
-export const getDocumentBySlug = (slug: string) => Helper.getDocBySlug(slug);
-export const getAllContentlayerDocs = () => Helper.getAllContentlayerDocs();
-
-// --- COLLECTION MAPPING ---
-
-export const getShorts = () => Helper.getAllShorts().filter(Helper.isPublished);
-export const getAllShorts = () => getShorts();
+// ------------------------------
+// Published collections
+// ------------------------------
+export const getShorts = () => getAllShorts().filter(isPublished);
 export const getServerAllShorts = () => getShorts();
 
-export const getCanons = () => Helper.getAllCanons().filter(Helper.isPublished);
-export const getAllCanons = () => getCanons();
+export const getCanons = () => getAllCanons().filter(isPublished);
 export const getServerAllCanons = () => getCanons();
 
-export const getBooks = () => Helper.getAllBooks().filter(Helper.isPublished);
-export const getAllBooks = () => getBooks();
+export const getBooks = () => getAllBooks().filter(isPublished);
 export const getServerAllBooks = () => getBooks();
 
-export const getPublishedPosts = () => Helper.getAllPosts().filter(Helper.isPublished);
-export const getAllPosts = () => getPublishedPosts();
+export const getPublishedPosts = () => getAllPosts().filter(isPublished);
 export const getPosts = () => getPublishedPosts();
 
-// --- TYPED SLUG LOOKUPS ---
+// ------------------------------
+// Typed slug lookups
+// ------------------------------
+export const getServerShortBySlug = (slug: string) => {
+  const target = normalizeSlug(slug);
+  return (
+    getShorts().find((s: any) => {
+      const sSlug = normalizeSlug(s.slug || s._raw?.flattenedPath || "");
+      return sSlug === target || sSlug.endsWith(`/${target}`) || sSlug.includes(`/shorts/${target}`);
+    }) || null
+  );
+};
 
-export const getServerShortBySlug = (slug: string) => 
-  getShorts().find(s => Helper.normalizeSlug(s.slug || s._raw.flattenedPath).includes(Helper.normalizeSlug(slug)));
+export const getServerBookBySlug = helperGetServerBookBySlug;
 
-export const getServerBookBySlug = (slug: string) => Helper.getServerBookBySlug(slug);
-export const getServerCanonBySlug = (slug: string) => Helper.getServerCanonBySlug(slug);
+export const getServerCanonBySlug = (slug: string) => {
+  // First try the imported function
+  if (helperGetServerCanonBySlug) {
+    return helperGetServerCanonBySlug(slug);
+  }
+  
+  // Fallback logic
+  const target = normalizeSlug(slug);
+  return (
+    getCanons().find((c: any) => {
+      const cSlug = normalizeSlug(c.slug || c._raw?.flattenedPath || "");
+      return cSlug === target || cSlug.endsWith(`/${target}`);
+    }) || null
+  );
+};
 
 export function getPostBySlug(slug: string): any | null {
-  const target = Helper.normalizeSlug(slug);
-  return getPublishedPosts().find((p) => {
-    const pSlug = Helper.normalizeSlug(p.slug || p._raw?.flattenedPath || "");
-    return pSlug === target || pSlug.endsWith(`/${target}`);
-  }) || null;
+  const target = normalizeSlug(slug);
+  return (
+    getPublishedPosts().find((p: any) => {
+      const pSlug = normalizeSlug(p.slug || p._raw?.flattenedPath || "");
+      return pSlug === target || pSlug.endsWith(`/${target}`);
+    }) || null
+  );
 }
-
-// --- AGGREGATORS ---
 
 export function getAllCombinedDocs(): any[] {
   const d = getContentlayerData();
@@ -103,7 +199,15 @@ export function getAllCombinedDocs(): any[] {
     ...d.allResources,
     ...d.allStrategies,
     ...d.allShorts,
-  ].filter(Helper.isPublished);
-  
-  return Helper.sanitizeData(combined);
+  ].filter(isPublished);
+
+  return (sanitizeData(combined) || []) as any[];
 }
+
+// Export all the static functions that other files expect
+export const documentKinds = Helper.documentKinds || [];
+export const getCardProps = Helper.getCardProps;
+export const getPublishedDocuments = () => getAllCombinedDocs();
+export const getPublishedDocumentsByType = (kind: string) => 
+  getAllCombinedDocs().filter((doc: any) => getDocKind(doc) === kind);
+export const coerceShortTheme = Helper.coerceShortTheme || ((theme: any) => theme || null);

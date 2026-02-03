@@ -1,4 +1,4 @@
-// pages/security.tsx
+// pages/security.tsx — INSTITUTIONAL SECURITY & GOVERNANCE PROTOCOL
 import * as React from "react";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
@@ -6,393 +6,169 @@ import PolicyFooter from "@/components/PolicyFooter";
 
 const SecurityPage: NextPage = () => {
   const lastUpdated = React.useMemo(
-    () => new Date().toLocaleDateString("en-GB"),
+    () => new Date().toLocaleDateString("en-GB", { 
+      day: '2-digit', 
+      month: 'long', 
+      year: 'numeric' 
+    }),
     []
   );
 
   return (
-    <Layout title="Security Policy">
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16 lg:py-20">
-        <section className="space-y-8">
-          <header className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold/70">
-              Governance · Security
+    <Layout title="Security Policy | Abraham of London">
+      <main className="mx-auto max-w-4xl px-6 py-16 sm:py-24 lg:py-32">
+        {/* HEADER SECTION */}
+        <header className="border-b border-white/10 pb-12 mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px w-8 bg-amber-500/50" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-500">
+              Protocol // Governance
+            </span>
+          </div>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium text-white mb-6 italic">
+            Security Policy
+          </h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+            <p className="text-zinc-400 text-sm leading-relaxed max-w-md font-light">
+              Security at Abraham of London is managed as a core governance pillar rather than a technical feature. 
+              We operate a defense-in-depth model designed to protect the integrity of our 163-dispatch registry 
+              and the privacy of our Inner Circle members.
             </p>
-            <h1 className="font-serif text-3xl font-semibold text-cream sm:text-4xl">
-              Security Policy
-            </h1>
-            <p className="text-sm text-gold/70">Last updated: {lastUpdated}</p>
-            <p className="mt-2 text-sm text-gray-200">
-              This Security Policy sets out how we protect the Abraham of London
-              platform and the data you choose to share with us. Security is
-              treated as a governance issue, not a cosmetic feature.
-            </p>
-          </header>
+            <div className="text-right">
+              <span className="block font-mono text-[9px] text-zinc-600 uppercase tracking-widest">
+                Revision Date: {lastUpdated}
+              </span>
+              <span className="block font-mono text-[9px] text-zinc-800 uppercase tracking-widest mt-1">
+                Ref: AOL-SEC-2026-V1
+              </span>
+            </div>
+          </div>
+        </header>
 
-          {/* 1. Security by Design */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              1. Security by Design
-            </h2>
-            <p className="text-sm text-gray-200">
-              The platform is engineered with defence-in-depth. We combine
-              secure infrastructure, hardened application code, and conservative
-              data practices to reduce the attack surface and limit blast
-              radius.
-            </p>
-            <p className="text-sm text-gray-200">
-              Controls are implemented at multiple layers: browser, edge,
-              application, and service integrations. New features are assessed
-              for security impact before they ship.
-            </p>
-          </section>
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          {/* NAVIGATION (DESKTOP) */}
+          <aside className="hidden lg:block lg:col-span-3 sticky top-32 h-fit">
+            <nav className="space-y-4">
+              {['Security by Design', 'Bot Protection', 'Rate Limiting', 'Data Minimisation', 'Incident Response'].map((item, i) => (
+                <div key={item} className="flex items-center gap-3 group cursor-pointer">
+                  <span className="font-mono text-[8px] text-amber-500/40">0{i+1}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </nav>
+          </aside>
 
-          {/* 2. Bot Protection & reCAPTCHA */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              2. Bot Protection & reCAPTCHA v3
-            </h2>
-            <p className="text-sm text-gray-200">
-              Public forms are a primary attack vector. We apply a combination
-              of behavioural and structural controls to protect them:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Google reCAPTCHA v3 on key flows (contact, newsletter, teaser
-                requests), evaluated on the server.
-              </li>
-              <li>
-                Action-specific scoring and thresholds to distinguish human use
-                from scripted abuse.
-              </li>
-              <li>
-                Multiple honeypot fields designed to attract and silently
-                neutralise automated submissions.
-              </li>
-              <li>
-                Normal users see no intrusive challenges; suspicious traffic is
-                quietly throttled or rejected.
-              </li>
-            </ul>
-          </section>
+          {/* MAIN CONTENT AREA */}
+          <div className="lg:col-span-9 space-y-16">
+            
+            {/* 1. Security by Design */}
+            <section className="space-y-4">
+              <h2 className="font-serif text-2xl text-white italic">1. Security by Design</h2>
+              <div className="prose prose-invert prose-sm max-w-none text-zinc-300 font-light leading-relaxed">
+                <p>
+                  The Abraham of London platform is engineered with a focus on <strong>attack surface reduction</strong>. 
+                  By utilizing a decoupled, static-first architecture, we eliminate the vast majority of server-side 
+                  vulnerabilities inherent in traditional database-driven websites.
+                </p>
+                <p>
+                  Every component is assessed for security impact before deployment. Our infrastructure is 
+                  managed via secure CI/CD pipelines with encrypted environmental variables and strictly limited 
+                  administrative access.
+                </p>
+              </div>
+            </section>
 
-          {/* 3. Rate Limiting */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              3. Rate Limiting & Abuse Controls
-            </h2>
-            <p className="text-sm text-gray-200">
-              To protect availability and prevent brute-force style abuse, the
-              platform applies explicit rate limits:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                IP-based and email-based rate limiting across sensitive
-                endpoints.
-              </li>
-              <li>
-                Tight limits on contact, newsletter, and subscription flows
-                (typically 3-5 attempts per 15 minutes).
-              </li>
-              <li>
-                <strong>Inner Circle registration protection</strong> - dual
-                IP-based (20 attempts per 15 minutes) and email-based (3
-                attempts per hour) rate limiting to prevent abuse.
-              </li>
-              <li>
-                Proper HTTP <code>429</code> responses with{" "}
-                <code>Retry-After</code> guidance when limits are exceeded.
-              </li>
-              <li>
-                In-memory protection as standard, with a design that can extend
-                to Redis-backed distributed limits when required.
-              </li>
-            </ul>
-          </section>
+            {/* 2. Automated Defenses */}
+            <section className="space-y-4">
+              <h2 className="font-serif text-2xl text-white italic">2. Bot Protection & reCAPTCHA v3</h2>
+              <div className="prose prose-invert prose-sm max-w-none text-zinc-300 font-light leading-relaxed">
+                <p>
+                  Public interface points are protected via <strong>Google reCAPTCHA v3</strong> and proprietary 
+                  behavioral analysis. Unlike traditional systems, we do not disrupt the user experience with 
+                  interruptive challenges. Instead:
+                </p>
+                <ul className="list-none p-0 space-y-3">
+                  <li className="flex gap-4 items-start border-l border-amber-500/20 pl-4 py-1">
+                    <span className="text-amber-500 font-mono text-[10px] mt-1">A</span>
+                    <span>Action-specific scoring differentiates human intent from scripted abuse in real-time.</span>
+                  </li>
+                  <li className="flex gap-4 items-start border-l border-amber-500/20 pl-4 py-1">
+                    <span className="text-amber-500 font-mono text-[10px] mt-1">B</span>
+                    <span>Hidden honeypot fields act as silent neutralizers for automated form submissions.</span>
+                  </li>
+                </ul>
+              </div>
+            </section>
 
-          {/* 4. Input Validation */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              4. Input Validation & Sanitisation
-            </h2>
-            <p className="text-sm text-gray-200">
-              Untrusted input is treated as hostile by default. All user data
-              passing into the system is validated, constrained, and sanitised:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Rigorous email validation plus rejection of known disposable
-                domains on key flows.
-              </li>
-              <li>
-                Length limits and character checks for names, subjects, and free
-                text messages.
-              </li>
-              <li>
-                Systematic escaping of content used in emails and logs to reduce
-                XSS and injection risk.
-              </li>
-              <li>
-                Strong typing across the codebase (TypeScript) to reduce
-                malformed data and logic errors.
-              </li>
-              <li>
-                <strong>Cryptographic validation</strong> for Inner Circle
-                access keys to prevent tampering and ensure integrity.
-              </li>
-            </ul>
-          </section>
+            {/* 3. Cryptographic Integrity */}
+            <section className="space-y-4 bg-white/[0.02] border border-white/5 p-8 rounded-sm">
+              <h2 className="font-serif text-2xl text-white italic">3. Inner Circle Protection</h2>
+              <div className="prose prose-invert prose-sm max-w-none text-zinc-300 font-light leading-relaxed">
+                <p>
+                  Membership within the Inner Circle is protected by modern cryptographic standards. 
+                  We do not store your raw personal data in a way that is retrievable by our staff:
+                </p>
+                <ul className="space-y-2 mt-4">
+                  <li className="flex items-center gap-3">
+                    <div className="w-1 h-1 bg-amber-500" />
+                    <span><strong>Email Hashing:</strong> Addresses are stored as unique SHA-256 hashes.</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-1 h-1 bg-amber-500" />
+                    <span><strong>Key Security:</strong> Access keys are cryptographically hashed and validated at the edge.</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-1 h-1 bg-amber-500" />
+                    <span><strong>Minimal Retension:</strong> We retain only the metadata required for resource delivery.</span>
+                  </li>
+                </ul>
+              </div>
+            </section>
 
-          {/* 5. Technical Measures */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              5. Technical Security Controls
-            </h2>
-            <p className="text-sm text-gray-200">
-              The platform is deployed on modern, reputable infrastructure with
-              hardened defaults and secure transport:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>HTTPS enforcement with modern TLS configurations.</li>
-              <li>
-                Strict security headers, including HSTS, X-Frame-Options,
-                X-Content-Type-Options, basic XSS protections, and referrer
-                controls.
-              </li>
-              <li>
-                Cross-origin isolation and restrictive cross-origin resource
-                loading where supported.
-              </li>
-              <li>
-                Controlled access to deployment, environment variables, and
-                administration consoles.
-              </li>
-              <li>
-                Hosting and email services provided by established vendors
-                (Netlify, Vercel, Resend, Mailchimp and similar) with their own
-                security baselines and certifications.
-              </li>
-            </ul>
-          </section>
+            {/* 4. Incident Response */}
+            <section className="space-y-4">
+              <h2 className="font-serif text-2xl text-white italic">4. Incident Response Protocol</h2>
+              <p className="text-sm text-zinc-400 font-light leading-relaxed">
+                In the event of a suspected security breach, our internal protocol dictates immediate triage, 
+                containment, and remediation. We commit to transparency where an incident has a material impact 
+                on user data.
+              </p>
+              <div className="p-4 border border-zinc-800 bg-zinc-900/50 rounded-sm">
+                <p className="font-mono text-[10px] text-zinc-500 uppercase mb-2">Security Reporting</p>
+                <p className="text-sm text-white">
+                  To report vulnerabilities or suspicious activity, please contact: <br className="md:hidden" />
+                  <span className="text-amber-500 underline underline-offset-4">Security@AbrahamOfLondon.com</span>
+                </p>
+              </div>
+            </section>
 
-          {/* 6. Data Minimisation */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              6. Data Minimisation & Privacy
-            </h2>
-            <p className="text-sm text-gray-200">
-              The most robust way to protect data is not to collect it in the
-              first place. The platform is intentionally lean:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Only information strictly necessary to respond to your request
-                or deliver a resource is requested.
-              </li>
-              <li>
-                No public user accounts, passwords, or payment card data are
-                stored on this site.
-              </li>
-              <li>
-                <strong>Inner Circle privacy protection</strong> - email
-                addresses are stored as SHA-256 hashes, access keys are stored
-                as cryptographic hashes, and no raw personal data is retained in
-                accessible formats.
-              </li>
-              <li>
-                Security logs use anonymised IPs wherever possible, balancing
-                monitoring with privacy.
-              </li>
-              <li>
-                Data is retained only for as long as needed for the purpose for
-                which it was collected.
-              </li>
-            </ul>
-          </section>
-
-          {/* 7. Email & Comms */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              7. Email & Communications Security
-            </h2>
-            <p className="text-sm text-gray-200">
-              Email is handled via specialist providers with encryption in
-              transit and established compliance frameworks:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                <span className="font-semibold text-cream">Resend</span> for
-                transactional emails (contact acknowledgements, teaser delivery,
-                internal notifications).
-              </li>
-              <li>
-                <span className="font-semibold text-cream">Mailchimp</span> for
-                newsletter and campaign delivery, with unsubscribe support and
-                GDPR-aware processing.
-              </li>
-              <li>
-                <strong>Inner Circle cryptographic key delivery</strong> -
-                secure email transmission of access keys with minimal data
-                exposure.
-              </li>
-              <li>
-                Subscription flows are designed to prevent silent enrolment and
-                to respect user choice.
-              </li>
-              <li>
-                Email APIs are called over HTTPS with appropriate authentication
-                and minimal payloads.
-              </li>
-            </ul>
-          </section>
-
-          {/* 8. Monitoring & Audit */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              8. Security Monitoring & Audit Logging
-            </h2>
-            <p className="text-sm text-gray-200">
-              Security events are logged with enough context to investigate
-              issues while avoiding unnecessary personal data:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Logging of key API activity (newsletter, subscriptions, contact,
-                teaser requests) with anonymised identifiers.
-              </li>
-              <li>
-                reCAPTCHA scores and reasons captured for security tuning and
-                anomaly detection.
-              </li>
-              <li>
-                Rate limit breaches and honeypot triggers recorded as potential
-                abuse indicators.
-              </li>
-              <li>
-                <strong>Inner Circle access monitoring</strong> - cryptographic
-                key usage tracking without storing raw keys or personal data.
-              </li>
-              <li>
-                Logs are used for operational security and troubleshooting, not
-                for profiling ordinary users.
-              </li>
-            </ul>
-          </section>
-
-          {/* 9. Incident Response */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              9. Incident Response
-            </h2>
-            <p className="text-sm text-gray-200">
-              If a security incident is suspected or confirmed, the response is
-              structured and proportionate:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Rapid triage to confirm scope and impact.</li>
-              <li>
-                Containment and remediation of the underlying cause (for
-                example, configuration fixes or dependency updates).
-              </li>
-              <li>
-                Direct communication with affected parties where the impact
-                warrants it.
-              </li>
-              <li>
-                Regulatory notifications where required by applicable law,
-                depending on jurisdiction and severity.
-              </li>
-              <li>
-                Post-incident review to harden controls and prevent recurrence.
-              </li>
-            </ul>
-          </section>
-
-          {/* 10. User Responsibilities */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              10. Your Security Responsibilities
-            </h2>
-            <p className="text-sm text-gray-200">
-              Some risks sit outside any website&apos;s control. You can help
-              protect yourself and your information by:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>
-                Not sending highly sensitive information (for example, full
-                financial or medical details) through standard contact forms.
-              </li>
-              <li>
-                Treating unexpected requests for money, credentials, or
-                confidential data with scepticism, even if they appear to come
-                from this brand.
-              </li>
-              <li>
-                <strong>Protecting Inner Circle access keys</strong> - treating
-                cryptographic keys as sensitive credentials and not sharing them
-                publicly.
-              </li>
-              <li>
-                Using up-to-date browsers and operating systems with security
-                features enabled.
-              </li>
-              <li>
-                Reporting suspicious emails or activity to{" "}
-                <span className="font-semibold text-cream">
-                  Abraham@AbrahamofLondon.com
-                </span>
-                .
-              </li>
-              <li>
-                Protecting your email account with strong passwords and, where
-                possible, multi-factor authentication.
-              </li>
-            </ul>
-          </section>
-
-          {/* 11. Continuous Improvement */}
-          <section className="space-y-3">
-            <h2 className="font-serif text-xl font-semibold text-cream">
-              11. Continuous Security Improvement
-            </h2>
-            <p className="text-sm text-gray-200">
-              Security is an ongoing discipline, not a single project. The
-              platform&apos;s controls are refined over time as threats and
-              standards evolve:
-            </p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-gray-200">
-              <li>Regular dependency and platform upgrades.</li>
-              <li>
-                Monitoring of relevant security advisories and industry
-                guidance.
-              </li>
-              <li>
-                Progressive hardening of headers, rate limits, logging, and bot
-                detection based on observed behaviour.
-              </li>
-              <li>
-                <strong>Cryptographic algorithm review</strong> - periodic
-                assessment of hashing and key generation methods.
-              </li>
-              <li>
-                Periodic review of this Security Policy to ensure it accurately
-                reflects what is implemented.
-              </li>
-            </ul>
-            <p className="mt-3 text-sm text-gray-200">
-              Where this policy is updated, the revised version will be
-              published on this page with an updated date. Material changes that
-              affect how your data is handled will be highlighted in plain
-              language.
-            </p>
-          </section>
+            {/* 5. User Responsibilities */}
+            <section className="space-y-4">
+              <h2 className="font-serif text-2xl text-white italic">5. Your Security Responsibilities</h2>
+              <p className="text-sm text-zinc-400 font-light leading-relaxed">
+                Platform security is a shared responsibility. We advise all stakeholders to:
+              </p>
+              <ul className="list-disc ml-4 text-xs text-zinc-500 space-y-2">
+                <li>Treat Inner Circle access keys as sensitive credentials.</li>
+                <li>Avoid transmitting financial or medical data via standard contact forms.</li>
+                <li>Verify the authenticity of any communication claiming to be from "Abraham of London."</li>
+              </ul>
+            </section>
+          </div>
         </section>
 
-        <PolicyFooter isDark />
+        <div className="mt-32 pt-12 border-t border-white/5">
+          <PolicyFooter isDark />
+        </div>
       </main>
+
+      <style jsx global>{`
+        body { background-color: #000; }
+      `}</style>
     </Layout>
   );
 };
 
 export default SecurityPage;
-

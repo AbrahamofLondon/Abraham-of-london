@@ -1,9 +1,10 @@
-// components/AccessGate.tsx — REFINED
+// components/AccessGate.tsx — HARDENED (Security Sentinel)
 'use client';
 
 import React, { useMemo, useState } from "react";
-import { Shield, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Shield, Lock, ArrowRight, Loader2, Key } from "lucide-react";
 import { safeString } from "@/lib/utils/string";
+import clsx from "clsx";
 
 type Tier = "public" | "inner-circle" | "private";
 
@@ -28,9 +29,9 @@ export default function AccessGate({
 
   const requiredLabel = useMemo(() => {
     const tierStr = safeString(requiredTier).toLowerCase();
-    if (tierStr.includes("private")) return "Private";
+    if (tierStr.includes("private")) return "Classified";
     if (tierStr.includes("inner-circle")) return "Inner Circle";
-    return "Public";
+    return "Standard";
   }, [requiredTier]);
 
   const submit = async (e: React.FormEvent) => {
@@ -38,7 +39,7 @@ export default function AccessGate({
     setError(null);
 
     const t = token.trim();
-    if (!t) return setError("Credential required.");
+    if (!t) return setError("AUTHENTICATION_TOKEN_REQUIRED");
 
     setBusy(true);
     try {
@@ -50,59 +51,85 @@ export default function AccessGate({
 
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j?.ok) {
-        setError(j?.reason || "Verification failed. Check your key.");
+        setError(j?.reason || "INVALID_CREDENTIAL_MATCH");
         return;
       }
 
       onUnlocked?.(j.tier as Tier);
     } catch (err) {
-      setError("Encryption error. Check connection.");
+      setError("ENCRYPTION_LAYER_FAILURE");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl animate-in fade-in zoom-in duration-500">
-        <div className="bg-gradient-to-b from-white/[0.03] to-transparent p-8 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10 ring-1 ring-gold/20">
-            <Shield className="h-8 w-8 text-gold" />
+    <div className="flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md border border-white/10 bg-zinc-950 shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-bottom-4 duration-700">
+        
+        {/* TOP STATUS BAR */}
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.02] px-4 py-2">
+          <div className="flex items-center gap-2">
+            <Shield size={10} className="text-amber-500" />
+            <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+              Security Protocol // Active
+            </span>
           </div>
-          <h2 className="text-2xl font-serif italic text-white">{title}</h2>
-          <p className="mt-3 text-sm text-zinc-500 leading-relaxed">{message}</p>
+          <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+        </div>
+
+        {/* HEADER SECTION */}
+        <div className="p-8 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border border-amber-500/20 bg-amber-500/5 transition-all group-hover:bg-amber-500/10">
+            <Key className="h-6 w-6 text-amber-500" />
+          </div>
+          <h2 className="font-serif text-2xl italic text-zinc-100">{title}</h2>
+          <p className="mt-4 font-sans text-sm font-light leading-relaxed text-zinc-500 italic">
+            "{message}"
+          </p>
           
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 text-[10px] font-mono uppercase tracking-[0.2em] text-gold">
+          <div className="mt-8 inline-flex items-center gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.3em] text-amber-500">
             <Lock size={10} /> {requiredLabel} Clearance Required
           </div>
         </div>
 
+        {/* FORM SECTION */}
         <div className="p-8 pt-0">
           <form onSubmit={submit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 ml-1">
-                Security Key
+            <div className="space-y-3">
+              <label className="flex justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-600">
+                <span>Enter Security Key</span>
+                <span>[AES-256]</span>
               </label>
-              <input
-                type="password"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full rounded-xl border border-white/5 bg-black/40 px-5 py-4 text-white placeholder:text-zinc-800 outline-none transition-all focus:border-gold/30 focus:ring-1 focus:ring-gold/20"
-              />
-              {error && <p className="text-xs text-rose-500 mt-2 font-medium">{error}</p>}
+              <div className="relative">
+                <input
+                  type="password"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder="PROTOCOL_KEY_REQUIRED"
+                  className={clsx(
+                    "w-full border border-white/5 bg-zinc-900/50 px-5 py-4 font-mono text-xs text-white transition-all focus:border-amber-500/40 focus:outline-none focus:ring-0 placeholder:text-zinc-800",
+                    error && "border-red-500/50"
+                  )}
+                />
+              </div>
+              {error && (
+                <p className="font-mono text-[9px] uppercase tracking-widest text-red-500 mt-2 flex items-center gap-2">
+                  <span className="h-1 w-1 bg-red-500" /> {error}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={busy}
-              className="group relative w-full overflow-hidden rounded-xl bg-gold px-6 py-4 text-sm font-bold text-black transition-all hover:bg-white active:scale-[0.98] disabled:opacity-50"
+              className="group relative w-full overflow-hidden border border-amber-500/20 bg-amber-500 px-6 py-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-black transition-all hover:bg-white disabled:opacity-50"
             >
               <span className="flex items-center justify-center gap-2">
                 {busy ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <>Unlock Brief <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></>
+                  <>Initialise Decryption <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></>
                 )}
               </span>
             </button>
@@ -110,11 +137,21 @@ export default function AccessGate({
             <button
               type="button"
               onClick={onGoToJoin}
-              className="w-full text-center text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600 hover:text-gold transition-colors"
+              className="w-full text-center font-mono text-[9px] uppercase tracking-[0.4em] text-zinc-600 hover:text-amber-500 transition-colors"
             >
-              Request Access // Inner Circle
+              Request Credentials // Inner Circle
             </button>
           </form>
+        </div>
+
+        {/* FOOTER BAR */}
+        <div className="border-t border-white/5 bg-white/[0.01] px-4 py-2 flex justify-between items-center">
+            <span className="font-mono text-[8px] uppercase text-zinc-700 tracking-tighter">Encrypted Connection Established</span>
+            <div className="flex gap-1">
+                <div className="h-1 w-3 bg-amber-500/20" />
+                <div className="h-1 w-3 bg-amber-500/40" />
+                <div className="h-1 w-3 bg-amber-500/60" />
+            </div>
         </div>
       </div>
     </div>

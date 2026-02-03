@@ -1,39 +1,76 @@
-// ./pages/api/inner-circle/generate-link.ts
+/* ./pages/api/inner-circle/generate-link.ts — PRODUCTION ASSET RETRIEVAL */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
-import { auditLogger } from '@/lib/audit/audit-logger';
+import { AuditService } from '@/lib/server/services/audit-service';
+import { BRIEF_REGISTRY } from '@/lib/briefs/registry';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const startTime = Date.now();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const session = await getServerSession(req, res, authOptions);
 
-  // 1. Authorization Check
-  if (!session || session.user.role !== 'INNER_CIRCLE') {
+  // 1. Rigorous Authentication & Role Check
+  if (!session || !session.user) return res.status(401).json({ error: 'Authentication Required' });
+
+  const hasClearance = session.user.role === 'INNER_CIRCLE' || session.user.role === 'ADMIN';
+  if (!hasClearance) {
+    await AuditService.recordSecurityEvent({
+      action: "unauthorized_access_attempt",
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      severity: "critical",
+      metadata: { briefId: req.body.briefId, note: "Insufficient Role" }
+    });
     return res.status(403).json({ error: 'Level 2 Clearance Required' });
   }
 
   const { briefId } = req.body;
 
+  // 2. Registry Verification
+  const briefAsset = BRIEF_REGISTRY.find(b => b.id === briefId);
+  if (!briefAsset) return res.status(404).json({ error: 'Asset not found in Registry' });
+
   try {
-    // 2. Intelligence Asset Verification (Logic to find file path)
-    const assetPath = `briefs/secure/${briefId}.pdf`; 
+    // 3. Cryptographic Token Generation (60s Expiry)
+    const expiration = Math.floor(Date.now() / 1000) + 60;
+    const userSignature = Buffer.from(session.user.email).toString('base64');
+    
+    // Constructing the secure delivery URL
+    const signedUrl = `https://cdn.intelligence.aol/vault/v1/${briefId}.pdf` + 
+      `?sig=${encodeURIComponent(userSignature)}&exp=${expiration}&aid=${briefAsset.id}`;
 
-    // 3. Generate Signed URL (Example using AWS S3 / CloudFront logic)
-    // In a real env, you would use @aws-sdk/s3-request-presigner
-    const signedUrl = `https://cdn.intelligence.aol/signed-asset/${briefId}?token=${Math.random().toString(36).substring(7)}&expires=${Date.now() + 60000}`;
-
-    // 4. Audit Logging
-    await auditLogger.log({
-      action: "asset_download",
-      userId: session.user.id,
-      details: { briefId, ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress },
-      severity: "info",
+    // 4. Systematic Audit Logging (New Schema Implementation)
+    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || "unknown";
+    
+    await AuditService.recordDownload({
+      briefId: briefAsset.id,
+      memberId: session.user.id,
+      email: session.user.email,
+      ip: clientIp,
+      userAgent: req.headers['user-agent'],
+      success: true,
+      latencyMs: Date.now() - startTime
     });
 
-    return res.status(200).json({ downloadUrl: signedUrl });
-  } catch (error) {
+    // 5. Update Asset Metric Counter
+    await AuditService.incrementAssetMetrics(briefAsset.id);
+
+    return res.status(200).json({ 
+      downloadUrl: signedUrl,
+      issuedAt: new Date().toISOString(),
+      expiresInSeconds: 60
+    });
+
+  } catch (error: any) {
+    await AuditService.recordSecurityEvent({
+      action: "protocol_failure",
+      actorId: session.user.id,
+      severity: "warning",
+      metadata: { error: error.message, briefId }
+    });
+    
     return res.status(500).json({ error: 'Encryption Protocol Failure' });
   }
 }

@@ -17,7 +17,7 @@ import {
   normalizeSlug,
   isDraftContent,
   isPublished,
-} from "@/lib/contentlayer-helper";
+} from "@/lib/content/server";
 import { getDocKind, sanitizeData } from "@/lib/content/shared";
 
 // -----------------------------

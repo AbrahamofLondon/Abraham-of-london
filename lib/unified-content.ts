@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/unified-content.ts
-// ✅ Contentlayer-native implementation
+// ✅ Server-safe unified content facade
 // ✅ Supports all Vault types (Canon, Books, Strategy, etc.)
 
 import { safeSlice } from "@/lib/utils/safe";
-
 import {
-  getPublishedDocuments,
+  getAllCombinedDocs,
   getDocKind,
   normalizeSlug,
   getDocHref,
   resolveDocCoverImage,
-} from "./contentlayer-helper";
+} from "@/lib/content/server";
 
 /**
  * Predictable, serialisable unified content shape for UI components.
@@ -36,7 +35,7 @@ export interface UnifiedContentSummary {
  */
 function normalizeToSummary(doc: any): UnifiedContentSummary {
   const kind = getDocKind(doc);
-  const slug = normalizeSlug(doc);
+  const slug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
   
   return {
     id: doc._id ?? `${kind}-${slug}`,
@@ -55,11 +54,25 @@ function normalizeToSummary(doc: any): UnifiedContentSummary {
 }
 
 // -----------------------------------------------------------------------------
-// DATA ACCESS HELPERS (Async for architecture compatibility)
+// SYNCHRONOUS VERSION (for server components where async isn't needed)
+// -----------------------------------------------------------------------------
+
+/**
+ * Synchronous unified content access for server components.
+ * @param limit - Maximum number of items to return
+ */
+export function getUnifiedContent(limit = 50): UnifiedContentSummary[] {
+  const docs = getAllCombinedDocs();
+  const normalized = docs.map(normalizeToSummary);
+  return safeSlice(normalized, 0, limit);
+}
+
+// -----------------------------------------------------------------------------
+// ASYNC VERSION (for compatibility with async architecture patterns)
 // -----------------------------------------------------------------------------
 
 export async function getAllUnifiedContentSafe(): Promise<UnifiedContentSummary[]> {
-  const docs = getPublishedDocuments();
+  const docs = getAllCombinedDocs();
   return docs.map(normalizeToSummary);
 }
 
@@ -103,6 +116,10 @@ export async function getAllCategoriesSafe(): Promise<string[]> {
 // DEFAULT EXPORT
 // -----------------------------------------------------------------------------
 const UnifiedContentFacade = {
+  // Synchronous
+  getUnifiedContent,
+  
+  // Async
   getAllUnifiedContentSafe,
   getRecentUnifiedContentSafe,
   getUnifiedContentByTypeSafe,

@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { 
   getDownloadBySlug,
   resolveDocDownloadUrl,
-} from "@/lib/contentlayer-helper"; 
+} from "@/lib/content/server"; 
 import { sanitizeData } from "@/lib/content/shared";
 import {
   verifyDownloadToken,

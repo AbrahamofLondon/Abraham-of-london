@@ -1,28 +1,20 @@
-// lib/server/prisma.ts - UPDATED
-/// Safe Prisma wrapper.
-/// NOTE: This avoids hard dependency on PrismaClient types so TS can compile
-/// even when tooling is broken. Still exports a named `prisma` for legacy imports.
+// lib/server/prisma.ts — HARDENED SINGLETON
+import { PrismaClient } from "@prisma/client";
 
-let prismaInstance: any = null;
+/**
+ * INSTITUTIONAL PRISMA WRAPPER
+ * * Prevents multiple instances of Prisma Client in development (Hot Reload) 
+ * and optimizes connection pooling in Serverless (Netlify/Neon).
+ */
 
-export function getPrisma() {
-  if (prismaInstance) return prismaInstance;
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-  try {
-    // dynamic require avoids TS static type dependency
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require(".prisma/client"); // CHANGED: Added dot
-    const Client = mod?.PrismaClient;
-    prismaInstance = Client ? new Client() : null;
-  } catch {
-    prismaInstance = null;
-  }
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+  });
 
-  return prismaInstance;
-}
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-// ✅ legacy named export expected by older routes
-export const prisma = getPrisma();
-
-// ✅ default export for existing default-import usage
 export default prisma;

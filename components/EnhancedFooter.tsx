@@ -14,38 +14,27 @@ import {
   Phone,
   ArrowUp,
   Globe,
-  FileText,
   Users,
   MessageCircle,
-  BookOpen,
-  Shield,
   Briefcase,
   ArrowRight,
   Vault,
-  Compass,
   Layers,
   Sparkles,
+  ShieldCheck,
+  Fingerprint,
 } from "lucide-react";
 
 import { siteConfig } from "@/config/site";
 
+/* -----------------------------------------------------------------------------
+  TYPES & CONFIG
+----------------------------------------------------------------------------- */
 type SocialPlatform =
-  | "twitter"
-  | "x"
-  | "linkedin"
-  | "instagram"
-  | "youtube"
-  | "tiktok"
-  | "facebook"
-  | "email"
-  | "phone"
-  | "website"
-  | "whatsapp";
+  | "twitter" | "x" | "linkedin" | "instagram" | "youtube"
+  | "tiktok" | "facebook" | "email" | "phone" | "website" | "whatsapp";
 
-const iconMap: Record<
-  SocialPlatform,
-  React.ComponentType<React.SVGProps<SVGSVGElement>>
-> = {
+const iconMap: Record<SocialPlatform, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   twitter: Twitter,
   x: Twitter,
   linkedin: Linkedin,
@@ -59,49 +48,43 @@ const iconMap: Record<
   website: Globe,
 };
 
-const fallbackSiteConfig = {
-  brand: {
-    name: "Abraham of London",
-    tagline: "Faith · Strategy · Fatherhood",
+const footerSections = [
+  {
+    title: "Intelligence Registry",
+    icon: Globe,
+    links: [
+      { label: "Full Canon", href: "/canon" },
+      { label: "Strategic Shorts", href: "/shorts" },
+      { label: "Intelligence Briefs", href: "/registry/dispatches" },
+      { label: "The Vault", href: "/downloads/vault" },
+    ],
   },
-  author: { email: "info@abrahamoflondon.org" },
-  seo: {
-    description:
-      "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.",
+  {
+    title: "Systems & Advisory",
+    icon: Layers,
+    links: [
+      { label: "Strategic Frameworks", href: "/resources/strategic-frameworks" },
+      { label: "Advisory Services", href: "/consulting" },
+      { label: "Founder Tools", href: "/resources#founder-tools" },
+      { label: "Venture Partners", href: "/ventures" },
+    ],
   },
-  socials: [
-    {
-      kind: "twitter" as const,
-      label: "Twitter / X",
-      href: "https://twitter.com/abrahamoflondon",
-    },
-    {
-      kind: "linkedin" as const,
-      label: "LinkedIn",
-      href: "https://linkedin.com/company/abrahamoflondon",
-    },
-    {
-      kind: "instagram" as const,
-      label: "Instagram",
-      href: "https://instagram.com/abrahamoflondon",
-    },
-  ],
-};
+  {
+    title: "The Institution",
+    icon: Users,
+    links: [
+      { label: "Inner Circle Access", href: "/inner-circle" },
+      { label: "Institutional Security", href: "/security" },
+      { label: "Contact Terminal", href: "/contact" },
+      { label: "Global Presence", href: "/strategy" },
+    ],
+  },
+];
 
-const config = siteConfig || fallbackSiteConfig;
-
-function cleanTel(phone: string): string {
-  return phone.replace(/\s+/g, "");
-}
-
-function isExternal(href: string): boolean {
-  return /^https?:\/\//i.test(href);
-}
-
-const FadeIn: React.FC<{ children: React.ReactNode; delay?: number }> = ({
-  children,
-  delay = 0,
-}) => (
+/* -----------------------------------------------------------------------------
+  SUB-COMPONENTS
+----------------------------------------------------------------------------- */
+const FadeIn: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -112,390 +95,173 @@ const FadeIn: React.FC<{ children: React.ReactNode; delay?: number }> = ({
   </motion.div>
 );
 
-function FooterLink({ href, label }: { href: string; label: string }): JSX.Element {
-  const external = isExternal(href);
+function FooterLink({ href, label }: { href: string; label: string }) {
+  const isExternal = /^https?:\/\//i.test(href);
+  const cls = "group flex items-center gap-2.5 py-1.5 text-sm text-zinc-400 hover:text-white transition-colors duration-200";
 
-  const cls =
-    "group flex items-center gap-2.5 py-2 text-sm text-gray-300 hover:text-white transition-colors duration-200";
-
-  const dot =
-    "w-1.5 h-1.5 rounded-full bg-amber-400/40 group-hover:bg-amber-400 transition-colors duration-200";
-
-  const underline =
-    "absolute bottom-0 left-0 w-0 h-[1px] bg-amber-400 group-hover:w-full transition-all duration-300";
-
-  if (external) {
+  if (isExternal) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cls}
-      >
-        <span className={dot} />
-        <span className="relative">
-          {label}
-          <span className={underline} />
-        </span>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        <span className="w-1 h-1 rounded-full bg-amber-500/20 group-hover:bg-amber-500 transition-colors" />
+        <span className="relative">{label}</span>
       </a>
     );
   }
 
   return (
-    <Link href={href} className={cls} prefetch={false}>
-      <span className={dot} />
-      <span className="relative">
-        {label}
-        <span className={underline} />
-      </span>
+    <Link href={href} className={cls}>
+      <span className="w-1 h-1 rounded-full bg-amber-500/20 group-hover:bg-amber-500 transition-colors" />
+      <span className="relative">{label}</span>
     </Link>
   );
 }
 
-/**
- * HARD-WIRED, ALWAYS-LIVE FOOTER ROUTING
- */
-const footerSections: Array<{
-  title: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  links: Array<{ label: string; href: string }>;
-}> = [
-  {
-    title: "Explore",
-    icon: Globe,
-    links: [
-      { label: "Home", href: "/" },
-      { label: "Canon", href: "/canon" },
-      { label: "Books", href: "/books" },
-      { label: "Strategy", href: "/strategy" },
-      { label: "Ventures", href: "/ventures" },
-      { label: "Shorts", href: "/shorts" },
-      { label: "Essays", href: "/blog" },
-      { label: "Downloads", href: "/downloads" },
-      { label: "Resources", href: "/resources" },
-    ],
-  },
-  {
-    title: "Systems",
-    icon: Layers,
-    links: [
-      { label: "Strategic Frameworks", href: "/resources/strategic-frameworks" },
-      { label: "Ultimate Purpose of Man", href: "/books/the-architecture-of-human-purpose" },
-      { label: "The Vault", href: "/downloads/vault" },
-      { label: "Canon Campaign", href: "/canon#campaign" },
-      { label: "Founder Tools", href: "/resources#founder-tools" },
-      { label: "Leadership Resources", href: "/resources#leadership" },
-    ],
-  },
-  {
-    title: "Engage",
-    icon: Users,
-    links: [
-      { label: "Consulting", href: "/consulting" },
-      { label: "Speaking", href: "/consulting#speaking" },
-      { label: "Inner Circle", href: "/inner-circle" },
-      { label: "Newsletter", href: "/inner-circle#newsletter" },
-      { label: "Contact", href: "/contact" },
-    ],
-  },
-];
-
+/* -----------------------------------------------------------------------------
+  MAIN COMPONENT
+----------------------------------------------------------------------------- */
 export default function Footer(): JSX.Element {
   const year = new Date().getFullYear();
-
-  const email = config.author?.email || "info@abrahamoflondon.org";
-  const phone = "+44 20 8622 5909";
-  const location = "Based in London, working globally";
-
-  const description =
-    config.seo?.description ||
-    "Faith-rooted strategy and leadership for founders, leadership teams, and institutions that refuse to outsource responsibility.";
-
-  const socials = Array.isArray((config as any).socials)
-    ? (config as any).socials
-    : [];
-
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="relative bg-black border-t border-white/10">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(245,158,11,0.08),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_80%,rgba(59,130,246,0.06),transparent_55%)]" />
-        <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:84px_84px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
+    <footer className="relative bg-black border-t border-white/5 overflow-hidden">
+      {/* INSTITUTIONAL BACKGROUND LAYER */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-white/5 via-transparent to-transparent" />
+        <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-white/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(245,158,11,0.03),transparent_50%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        {/* Top CTA Rail */}
-        <FadeIn delay={0.02}>
-          <div className="mb-10 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl md:grid-cols-3">
-            <CTA
-              href="/consulting"
-              title="Engage Advisory"
-              subtitle="Governance-grade strategy delivery"
-              icon={<Briefcase className="h-5 w-5" />}
-              tone="amber"
+      <div className="relative mx-auto max-w-7xl px-6 py-20">
+        
+        {/* ACCESS RAIL */}
+        <FadeIn>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-20">
+            <CTACard 
+              href="/consulting" 
+              title="Engage Advisory" 
+              label="GOVERNANCE"
+              icon={<Briefcase className="w-5 h-5 text-amber-500" />} 
             />
-            <CTA
-              href="/books/the-architecture-of-human-purpose"
-              title="Canon Prelude"
-              subtitle="The main access to the Canon"
-              icon={<Sparkles className="h-5 w-5" />}
-              tone="neutral"
+            <CTACard 
+              href="/inner-circle" 
+              title="Secure Clearance" 
+              label="MEMBERSHIP"
+              icon={<Fingerprint className="w-5 h-5 text-amber-500" />} 
             />
-            <CTA
-              href="/downloads/vault"
-              title="Open the Vault"
-              subtitle="Assets, templates, operator packs"
-              icon={<Vault className="h-5 w-5" />}
-              tone="amberSoft"
+            <CTACard 
+              href="/downloads/vault" 
+              title="Open the Vault" 
+              label="RESOURCES"
+              icon={<Vault className="w-5 h-5 text-amber-500" />} 
             />
           </div>
         </FadeIn>
 
-        {/* Main grid */}
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="md:col-span-2 lg:col-span-1">
-            <FadeIn delay={0.05}>
-              <Link href="/" className="inline-block mb-5" aria-label="Go to homepage">
-                <div className="flex flex-col gap-2">
-                  <h2 className="font-serif text-2xl lg:text-3xl font-semibold text-white tracking-tight">
-                    {config.brand?.name || "Abraham of London"}
-                  </h2>
-                  <p className="text-[10px] font-extrabold tracking-[0.35em] text-amber-300 uppercase">
-                    {config.brand?.tagline || "Faith · Strategy · Fatherhood"}
-                  </p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
+          {/* BRAND BLOCK */}
+          <div className="lg:col-span-4">
+            <FadeIn delay={0.1}>
+              <Link href="/" className="group block mb-8">
+                <h2 className="font-serif text-3xl italic text-white mb-2 tracking-tight group-hover:text-amber-500 transition-colors">
+                  Abraham of London
+                </h2>
+                <div className="font-mono text-[9px] uppercase tracking-[0.5em] text-amber-500/60">
+                  Faith · Strategy · Fatherhood
                 </div>
               </Link>
-
-              <p className="mb-6 text-sm text-gray-300/90 leading-relaxed font-light">
-                {description}
+              <p className="text-zinc-500 text-sm leading-relaxed max-w-sm mb-8 font-light">
+                Faith-rooted strategy for institutions that refuse to outsource responsibility. 
+                Architecting legacy through sovereign leadership and biblical governance.
               </p>
-
-              {/* Contact */}
-              <div className="space-y-3 mb-7">
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-amber-300 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-300/90 font-light">{location}</span>
+              
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3 text-zinc-400">
+                  <ShieldCheck size={14} className="text-amber-500/50" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest">Registry ID: AOL-75-163</span>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-amber-300 flex-shrink-0" />
-                  <a
-                    href={`mailto:${email}`}
-                    className="text-sm text-gray-300/90 hover:text-amber-300 transition-colors duration-200 font-light"
-                  >
-                    {email}
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-amber-300 flex-shrink-0" />
-                  <a
-                    href={`tel:${cleanTel(phone)}`}
-                    className="text-sm text-gray-300/90 hover:text-amber-300 transition-colors duration-200 font-light"
-                  >
-                    {phone}
-                  </a>
+                <div className="flex gap-3">
+                  {siteConfig.socials.map((s: any) => {
+                    const Icon = iconMap[s.kind as SocialPlatform] || Globe;
+                    return (
+                      <a key={s.label} href={s.href} className="p-2 border border-white/5 bg-white/[0.02] hover:bg-amber-500 hover:text-black transition-all rounded-sm">
+                        <Icon size={14} />
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
-
-              {/* Socials */}
-              {socials.length > 0 && (
-                <div>
-                  <p className="mb-3 text-sm font-semibold text-white tracking-wide">
-                    Follow
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {socials.map((social: any, index: number) => {
-                      const kind = (social.kind || "website") as SocialPlatform;
-                      const Icon = iconMap[kind] ?? Globe;
-                      const external = isExternal(social.href);
-
-                      return (
-                        <motion.a
-                          key={`${social.label}-${social.href}-${index}`}
-                          href={social.href}
-                          target={external ? "_blank" : "_self"}
-                          rel={external ? "noopener noreferrer" : undefined}
-                          className="group flex items-center gap-2 rounded-xl px-3 py-2 text-xs border border-white/10 bg-white/5 transition-all duration-200 hover:border-amber-400/25 hover:bg-white/10"
-                          whileHover={{ x: 2, scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          aria-label={`Follow on ${social.label}`}
-                        >
-                          <Icon className="h-3.5 w-3.5 text-amber-300" />
-                          <span className="text-gray-300/90 group-hover:text-white transition-colors duration-200 font-medium">
-                            {social.label}
-                          </span>
-                        </motion.a>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </FadeIn>
           </div>
 
-          {/* Sections */}
-          {footerSections.map((section, idx) => {
-            const Icon = section.icon;
-            return (
+          {/* LINK SECTIONS */}
+          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
+            {footerSections.map((section, idx) => (
               <div key={section.title}>
-                <FadeIn delay={0.1 + idx * 0.07}>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10">
-                      <Icon className="h-4 w-4 text-amber-300" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white tracking-tight">
-                      {section.title}
-                    </h3>
-                  </div>
-
+                <FadeIn delay={0.2 + idx * 0.05}>
+                  <h4 className="font-mono text-[10px] uppercase tracking-[0.3em] text-white mb-6">
+                    {section.title}
+                  </h4>
                   <ul className="space-y-1">
-                    {section.links.map((l) => (
-                      <li key={`${section.title}-${l.href}`}>
-                        <FooterLink href={l.href} label={l.label} />
+                    {section.links.map(link => (
+                      <li key={link.label}>
+                        <FooterLink href={link.href} label={link.label} />
                       </li>
                     ))}
                   </ul>
                 </FadeIn>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
-        {/* Bottom bar */}
-        <FadeIn delay={0.30}>
-          <div className="mt-12 pt-7 border-t border-white/10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="text-center lg:text-left">
-                <p className="text-sm text-gray-400/90 font-light">
-                  © {year} {config.brand?.name || "Abraham of London"}. All rights reserved.
-                </p>
-                <p className="mt-2 text-xs text-gray-500/80 font-light">
-                  Built for builders — not browsers.
-                </p>
-              </div>
-
-              <div className="flex-1">
-                <div className="flex flex-wrap justify-center gap-5 lg:gap-6 text-xs">
-                  <Link href="/privacy" className="text-gray-400/90 hover:text-amber-300 transition-colors duration-200 whitespace-nowrap font-light">
-                    Privacy
-                  </Link>
-                  <Link href="/terms" className="text-gray-400/90 hover:text-amber-300 transition-colors duration-200 whitespace-nowrap font-light">
-                    Terms
-                  </Link>
-                  <Link href="/cookies" className="text-gray-400/90 hover:text-amber-300 transition-colors duration-200 whitespace-nowrap font-light">
-                    Cookies
-                  </Link>
-                  <Link href="/accessibility" className="text-gray-400/90 hover:text-amber-300 transition-colors duration-200 whitespace-nowrap font-light">
-                    Accessibility
-                  </Link>
-                  <Link href="/security" className="text-gray-400/90 hover:text-amber-300 transition-colors duration-200 whitespace-nowrap font-light">
-                    Security
-                  </Link>
-                </div>
-              </div>
-
-              <motion.button
-                onClick={scrollToTop}
-                className="group flex items-center justify-center gap-2.5 rounded-2xl px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-sm hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 shadow-xl shadow-amber-900/20"
-                whileHover={{ y: -2, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                aria-label="Scroll back to top"
-              >
-                Back to Top
-                <ArrowUp className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-1" />
-              </motion.button>
+        {/* BOTTOM LEGAL TERMINAL */}
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="text-center md:text-left">
+            <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-1">
+              © {year} Abraham of London — All Rights Reserved
             </div>
-
-            <div className="mt-6 text-center">
-              <p className="text-[10px] text-gray-500/70 font-light tracking-[0.35em] uppercase">
-                Designed in London · built to deploy
-              </p>
+            <div className="text-[9px] font-mono text-zinc-800 uppercase tracking-tighter">
+              Classified Intelligence Portfolio // Node: London_Central
             </div>
           </div>
-        </FadeIn>
-      </div>
 
-      {/* Motion safety */}
-      <style jsx global>{`
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
-      `}</style>
+          <div className="flex gap-6">
+            {['Privacy', 'Security', 'Terms'].map(item => (
+              <Link key={item} href={`/${item.toLowerCase()}`} className="font-mono text-[9px] uppercase tracking-widest text-zinc-500 hover:text-amber-500 transition-colors">
+                {item}
+              </Link>
+            ))}
+          </div>
+
+          <motion.button
+            onClick={scrollToTop}
+            whileHover={{ y: -2 }}
+            className="flex items-center gap-3 px-6 py-3 border border-white/10 font-mono text-[9px] uppercase tracking-[0.3em] text-white hover:bg-white/5 transition-all"
+          >
+            Ascend <ArrowUp size={12} />
+          </motion.button>
+        </div>
+      </div>
     </footer>
   );
 }
 
-function CTA({
-  href,
-  title,
-  subtitle,
-  icon,
-  tone,
-}: {
-  href: string;
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  tone: "amber" | "amberSoft" | "neutral";
-}) {
-  const toneCls =
-    tone === "amber"
-      ? "border-amber-400/20 hover:border-amber-400/35 hover:bg-white/[0.06]"
-      : tone === "amberSoft"
-      ? "border-amber-400/15 hover:border-amber-400/30 hover:bg-white/[0.06]"
-      : "border-white/10 hover:border-white/20 hover:bg-white/[0.06]";
-
-  const iconCls =
-    tone === "amber"
-      ? "bg-amber-500/10 text-amber-300"
-      : tone === "amberSoft"
-      ? "bg-amber-500/10 text-amber-300"
-      : "bg-white/5 text-gray-200";
-
+function CTACard({ href, title, label, icon }: { href: string; title: string; label: string; icon: React.ReactNode }) {
   return (
-    <Link
-      href={href}
-      className={`group relative overflow-hidden rounded-2xl border bg-white/[0.02] p-5 backdrop-blur-xl transition-all ${toneCls}`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
-            access
-          </p>
-          <h3 className="mt-2 font-serif text-xl font-semibold text-amber-100">
-            {title}
-          </h3>
-          <p className="mt-2 text-sm font-light text-gray-300">{subtitle}</p>
+    <Link href={href} className="group relative p-6 bg-white/[0.02] border border-white/5 hover:border-amber-500/30 transition-all overflow-hidden">
+      <div className="relative z-10">
+        <div className="font-mono text-[8px] uppercase tracking-[0.5em] text-zinc-600 group-hover:text-amber-500 transition-colors mb-4">
+          {label}
         </div>
-
-        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconCls}`}>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-serif italic text-white group-hover:translate-x-1 transition-transform">{title}</h3>
           {icon}
         </div>
       </div>
-
-      <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-        <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
-          open
-        </span>
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
-          View
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </span>
+      <div className="absolute bottom-0 right-0 p-1 opacity-0 group-hover:opacity-10 transition-opacity">
+        <Sparkles size={40} className="text-amber-500" />
       </div>
-
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.06),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
     </Link>
   );
 }

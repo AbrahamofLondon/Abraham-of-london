@@ -1,60 +1,79 @@
-// pages/terms.tsx
+// pages/terms.tsx — SERVICE ENGAGEMENT & TERMS
 import * as React from "react";
 import Head from "next/head";
-import Link from "next/link";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { brand, contact, getPageTitle } from "@/lib/siteConfig";
+import { contact, getPageTitle } from "@/lib/siteConfig";
 
 const TermsPage: NextPage = () => {
-  const pageTitle = "Terms";
   const lastUpdated = React.useMemo(
-    () => new Date().toLocaleDateString("en-GB"),
+    () => new Date().toLocaleDateString("en-GB", { day: '2-digit', month: 'long', year: 'numeric' }),
     []
   );
 
   return (
-    <Layout title={pageTitle}>
+    <Layout title="Terms of Use">
       <Head>
-        <title>{getPageTitle(pageTitle)}</title>
-        <meta
-          name="description"
-          content="Terms of use for Abraham of London's website, content, and related services."
-        />
+        <title>{getPageTitle("Terms")}</title>
       </Head>
 
-      <main className="mx-auto max-w-4xl px-4 py-12 text-sm leading-relaxed text-gray-200 sm:py-16 lg:py-20">
-        {/* Header and sections 1-9 remain exactly the same */}
-        
-        {/* 10. Contact */}
-        <section className="mb-12 space-y-2">
-          <h2 className="font-serif text-xl font-semibold text-cream">
-            10. Contact about these Terms
-          </h2>
-          <p>
-            If you have questions about these Terms or believe they need to be
-            clarified in light of a specific situation, contact:
+      <main className="mx-auto max-w-4xl px-6 py-16 sm:py-24 lg:py-32">
+        <header className="border-b border-white/10 pb-12 mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px w-8 bg-amber-500/50" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-500">
+              Governance // Terms
+            </span>
+          </div>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium text-white mb-6 italic">
+            Terms of Use
+          </h1>
+          <p className="text-zinc-400 text-sm leading-relaxed max-w-md font-light">
+            These terms govern the use of the Abraham of London platform and its intellectual content. 
+            Engagement implies acceptance of these protocols.
           </p>
-          <ul className="ml-5 list-disc space-y-1">
-            <li>
-              Email:{" "}
-              <a
-                href={`mailto:${contact.email}`}
-                className="text-softGold underline underline-offset-2 hover:text-amber-200"
-              >
-                {contact.email}
-              </a>
-            </li>
-          </ul>
-          <p className="mt-2 text-xs text-gray-400">
-            These Terms are intended to be firm but reasonable. If you genuinely
-            believe a provision is unclear or unfair in practice, the first step
-            is a measured conversation rather than escalation.
-          </p>
-        </section>
+        </header>
 
-        <PolicyFooter isDark />
+        <div className="space-y-16 lg:ml-[25%] max-w-2xl">
+          <section className="space-y-4">
+            <h2 className="font-serif text-2xl text-white italic">1. Intellectual Property</h2>
+            <p className="text-sm text-zinc-300 font-light leading-relaxed">
+              All content, including the 75 intelligence briefs, editorial dispatches, and 
+              governance frameworks, are the exclusive property of Abraham of London. 
+              Unauthorised distribution or reproduction is strictly prohibited.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="font-serif text-2xl text-white italic">2. Inner Circle Conduct</h2>
+            <p className="text-sm text-zinc-300 font-light leading-relaxed">
+              Membership to the Inner Circle is a privilege, not a right. We reserve the 
+              unilateral right to revoke access keys in instances of platform abuse, 
+              violation of confidentiality, or actions that compromise the community.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="font-serif text-2xl text-white italic">3. Liability & Advisory</h2>
+            <p className="text-sm text-zinc-400 font-light leading-relaxed italic">
+              The content provided on this platform is for informational and strategic 
+              discourse. It does not constitute formal legal, financial, or professional 
+              advice unless specifically engaged under a separate, signed contract.
+            </p>
+          </section>
+
+          <div className="p-8 border-l border-amber-500/20 bg-white/[0.01]">
+            <h3 className="text-xs uppercase tracking-widest text-amber-500 mb-4">Protocol Conflict</h3>
+            <p className="text-xs text-zinc-500 leading-relaxed">
+              If you believe a provision is unclear, we invite a measured dialogue. 
+              Contact: <span className="text-zinc-300">{contact.email}</span>
+            </p>
+          </div>
+        </div>
+        <div className="mt-32 pt-12 border-t border-white/5">
+          <PolicyFooter isDark />
+        </div>
       </main>
     </Layout>
   );
