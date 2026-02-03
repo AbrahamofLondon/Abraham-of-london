@@ -1,0 +1,695 @@
+{
+  "generatedAt": "2026-02-03T14:50:05.932Z",
+  "totalAssets": 76,
+  "breakdown": {
+    "public": 76,
+    "inner-circle": 0,
+    "private": 0
+  },
+  "inventory": [
+    {
+      "id": "institutional-sovereignty",
+      "type": "SHORT",
+      "title": "On Institutional Sovereignty",
+      "tier": "public",
+      "date": "2026-01-31",
+      "words": 120,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-a-single-yes-changes-everything",
+      "type": "SHORT",
+      "title": "When A Single Yes Changes Everything",
+      "tier": "public",
+      "date": "2025-03-21",
+      "words": 114,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-all-you-can-do-is-breathe",
+      "type": "SHORT",
+      "title": "When All You Can Do Is Breathe",
+      "tier": "public",
+      "date": "2025-02-21",
+      "words": 92,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-avoidance-becomes-your-personality",
+      "type": "SHORT",
+      "title": "When Avoidance Becomes Your Personality",
+      "tier": "public",
+      "date": "2025-01-28",
+      "words": 151,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-busyness-becomes-your-brand",
+      "type": "SHORT",
+      "title": "When Busyness Becomes Your Brand",
+      "tier": "public",
+      "date": "2025-03-30",
+      "words": 121,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-comfort-becomes-your-cage",
+      "type": "SHORT",
+      "title": "When Comfort Becomes Your Cage",
+      "tier": "public",
+      "date": "2025-01-13",
+      "words": 149,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-conflict-feels-like-betrayal",
+      "type": "SHORT",
+      "title": "When Conflict Feels Like Betrayal",
+      "tier": "public",
+      "date": "2025-03-31",
+      "words": 136,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-doctrine-feels-safer-than-god",
+      "type": "SHORT",
+      "title": "When Doctrine Feels Safer Than God",
+      "tier": "public",
+      "date": "2025-03-25",
+      "words": 148,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-every-promotion-feels-hollow",
+      "type": "SHORT",
+      "title": "When Every Promotion Feels Hollow",
+      "tier": "public",
+      "date": "2025-03-09",
+      "words": 93,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-grace-finds-you-in-the-mess",
+      "type": "SHORT",
+      "title": "When Grace Finds You In The Mess",
+      "tier": "public",
+      "date": "2025-03-07",
+      "words": 104,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-hope-feels-reckless",
+      "type": "SHORT",
+      "title": "When Hope Feels Reckless",
+      "tier": "public",
+      "date": "2025-02-25",
+      "words": 135,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-kindness-feels-like-rebellion",
+      "type": "SHORT",
+      "title": "When Kindness Feels Like Rebellion",
+      "tier": "public",
+      "date": "2025-03-28",
+      "words": 106,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-later-became-never",
+      "type": "SHORT",
+      "title": "When Later Became Never",
+      "tier": "public",
+      "date": "2025-03-20",
+      "words": 142,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-numbness-feels-safer-than-joy",
+      "type": "SHORT",
+      "title": "When Numbness Feels Safer Than Joy",
+      "tier": "public",
+      "date": "2025-03-15",
+      "words": 133,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-productivity-becomes-punishment",
+      "type": "SHORT",
+      "title": "When Productivity Becomes Punishment",
+      "tier": "public",
+      "date": "2025-01-16",
+      "words": 146,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-rest-starts-to-feel-dangerous",
+      "type": "SHORT",
+      "title": "When Rest Starts To Feel Dangerous",
+      "tier": "public",
+      "date": "2025-02-28",
+      "words": 107,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-argue-with-god-in-your-head",
+      "type": "SHORT",
+      "title": "When You Argue With God In Your Head",
+      "tier": "public",
+      "date": "2025-03-18",
+      "words": 140,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-cant-stop-overthinking",
+      "type": "SHORT",
+      "title": "When You Cant Stop Overthinking",
+      "tier": "public",
+      "date": "2025-04-08",
+      "words": 99,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "type": "SHORT",
+      "title": "When You Cant Tell If Youre Growing Or Drifting",
+      "tier": "public",
+      "date": "2025-02-18",
+      "words": 132,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-dont-know-what-you-want-anymore",
+      "type": "SHORT",
+      "title": "When You Dont Know What You Want Anymore",
+      "tier": "public",
+      "date": "2025-02-22",
+      "words": 124,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-dont-trust-your-own-decisions",
+      "type": "SHORT",
+      "title": "When You Dont Trust Your Own Decisions",
+      "tier": "public",
+      "date": "2025-04-14",
+      "words": 113,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-fear-being-wrong-about-god",
+      "type": "SHORT",
+      "title": "When You Fear Being Wrong About God",
+      "tier": "public",
+      "date": "2025-04-01",
+      "words": 123,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-fear-success-more-than-failure",
+      "type": "SHORT",
+      "title": "When You Fear Success More Than Failure",
+      "tier": "public",
+      "date": "2025-02-27",
+      "words": 137,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-feel-like-god-is-delaying-you",
+      "type": "SHORT",
+      "title": "When You Feel Like God Is Delaying You",
+      "tier": "public",
+      "date": "2025-04-06",
+      "words": 124,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-feel-too-busy-to-care",
+      "type": "SHORT",
+      "title": "When You Feel Too Busy To Care",
+      "tier": "public",
+      "date": "2025-01-06",
+      "words": 155,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-finally-let-yourself-cry",
+      "type": "SHORT",
+      "title": "When You Finally Let Yourself Cry",
+      "tier": "public",
+      "date": "2025-03-14",
+      "words": 110,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-give-more-than-you-get",
+      "type": "SHORT",
+      "title": "When You Give More Than You Get",
+      "tier": "public",
+      "date": "2025-01-13",
+      "words": 182,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-keep-blaming-your-childhood",
+      "type": "SHORT",
+      "title": "When You Keep Blaming Your Childhood",
+      "tier": "public",
+      "date": "2025-04-03",
+      "words": 128,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-keep-choosing-people-who-cant-choose-you",
+      "type": "SHORT",
+      "title": "When You Keep Choosing People Who Cant Choose You",
+      "tier": "public",
+      "date": "2025-03-24",
+      "words": 135,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-keep-confusing-niceness-with-goodness",
+      "type": "SHORT",
+      "title": "When You Keep Confusing Niceness With Goodness",
+      "tier": "public",
+      "date": "2025-04-13",
+      "words": 95,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-miss-who-you-used-to-be",
+      "type": "SHORT",
+      "title": "When You Miss Who You Used To Be",
+      "tier": "public",
+      "date": "2025-01-14",
+      "words": 168,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-mistake-familiarity-for-loyalty",
+      "type": "SHORT",
+      "title": "When You Mistake Familiarity For Loyalty",
+      "tier": "public",
+      "date": "2025-02-17",
+      "words": 137,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-need-god-to-interrupt-you",
+      "type": "SHORT",
+      "title": "When You Need God To Interrupt You",
+      "tier": "public",
+      "date": "2025-03-11",
+      "words": 144,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-no-longer-recognise-your-own-voice",
+      "type": "SHORT",
+      "title": "When You No Longer Recognise Your Own Voice",
+      "tier": "public",
+      "date": "2025-03-22",
+      "words": 132,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-outgrow-your-circle",
+      "type": "SHORT",
+      "title": "When You Outgrow Your Circle",
+      "tier": "public",
+      "date": "2025-03-17",
+      "words": 128,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-realise-prayer-is-war",
+      "type": "SHORT",
+      "title": "When You Realise Prayer Is War",
+      "tier": "public",
+      "date": "2025-04-16",
+      "words": 143,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-realise-you-were-the-problem",
+      "type": "SHORT",
+      "title": "When You Realise You Were The Problem",
+      "tier": "public",
+      "date": "2025-03-13",
+      "words": 158,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-realise-youre-not-behind",
+      "type": "SHORT",
+      "title": "When You Realise Youre Not Behind",
+      "tier": "public",
+      "date": "2025-04-04",
+      "words": 91,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-stop-waiting-for-permission",
+      "type": "SHORT",
+      "title": "When You Stop Waiting For Permission",
+      "tier": "public",
+      "date": "2025-03-19",
+      "words": 126,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-you-want-to-quit-but-cant",
+      "type": "SHORT",
+      "title": "When You Want To Quit But Cant",
+      "tier": "public",
+      "date": "2025-02-19",
+      "words": 139,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-calendar-is-full-but-your-life-is-empty",
+      "type": "SHORT",
+      "title": "When Your Calendar Is Full But Your Life Is Empty",
+      "tier": "public",
+      "date": "2025-01-27",
+      "words": 152,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-calling-stops-being-cute",
+      "type": "SHORT",
+      "title": "When Your Calling Stops Being Cute",
+      "tier": "public",
+      "date": "2025-03-26",
+      "words": 112,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-character-is-leaking",
+      "type": "SHORT",
+      "title": "When Your Character Is Leaking",
+      "tier": "public",
+      "date": "2025-03-06",
+      "words": 132,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-confidence-feels-manufactured",
+      "type": "SHORT",
+      "title": "When Your Confidence Feels Manufactured",
+      "tier": "public",
+      "date": "2025-01-08",
+      "words": 166,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-convictions-feel-like-costumes",
+      "type": "SHORT",
+      "title": "When Your Convictions Feel Like Costumes",
+      "tier": "public",
+      "date": "2025-01-20",
+      "words": 149,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-dreams-feel-too-heavy",
+      "type": "SHORT",
+      "title": "When Your Dreams Feel Too Heavy",
+      "tier": "public",
+      "date": "2025-01-12",
+      "words": 186,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-excuses-become-your-identity",
+      "type": "SHORT",
+      "title": "When Your Excuses Become Your Identity",
+      "tier": "public",
+      "date": "2025-02-20",
+      "words": 166,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-faith-feels-numb",
+      "type": "SHORT",
+      "title": "When Your Faith Feels Numb",
+      "tier": "public",
+      "date": "2025-01-05",
+      "words": 175,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-hustle-has-no-soul",
+      "type": "SHORT",
+      "title": "When Your Hustle Has No Soul",
+      "tier": "public",
+      "date": "2025-03-02",
+      "words": 135,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-legacy-terrifies-you",
+      "type": "SHORT",
+      "title": "When Your Legacy Terrifies You",
+      "tier": "public",
+      "date": "2025-03-12",
+      "words": 140,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-silence-says-too-much",
+      "type": "SHORT",
+      "title": "When Your Silence Says Too Much",
+      "tier": "public",
+      "date": "2025-03-03",
+      "words": 144,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-standards-keep-you-lonely",
+      "type": "SHORT",
+      "title": "When Your Standards Keep You Lonely",
+      "tier": "public",
+      "date": "2025-03-08",
+      "words": 156,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-vision-outgrows-your-environment",
+      "type": "SHORT",
+      "title": "When Your Vision Outgrows Your Environment",
+      "tier": "public",
+      "date": "2025-02-26",
+      "words": 125,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-your-work-becomes-your-hiding-place",
+      "type": "SHORT",
+      "title": "When Your Work Becomes Your Hiding Place",
+      "tier": "public",
+      "date": "2025-03-16",
+      "words": 132,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-addicted-to-distraction",
+      "type": "SHORT",
+      "title": "When Youre Addicted To Distraction",
+      "tier": "public",
+      "date": "2025-03-29",
+      "words": 117,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-afraid-of-your-own-potential",
+      "type": "SHORT",
+      "title": "When Youre Afraid Of Your Own Potential",
+      "tier": "public",
+      "date": "2025-01-15",
+      "words": 183,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-afraid-to-be-radical",
+      "type": "SHORT",
+      "title": "When Youre Afraid To Be Radical",
+      "tier": "public",
+      "date": "2025-04-11",
+      "words": 112,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-always-the-strong-one",
+      "type": "SHORT",
+      "title": "When Youre Always The Strong One",
+      "tier": "public",
+      "date": "2025-03-10",
+      "words": 136,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-attracted-to-potential-not-reality",
+      "type": "SHORT",
+      "title": "When Youre Attracted To Potential Not Reality",
+      "tier": "public",
+      "date": "2025-04-05",
+      "words": 126,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-building-someone-elses-legacy",
+      "type": "SHORT",
+      "title": "When Youre Building Someone Elses Legacy",
+      "tier": "public",
+      "date": "2025-02-03",
+      "words": 127,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-done-fixing-adults",
+      "type": "SHORT",
+      "title": "When Youre Done Fixing Adults",
+      "tier": "public",
+      "date": "2025-02-24",
+      "words": 117,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-exhausted-but-still-available",
+      "type": "SHORT",
+      "title": "When Youre Exhausted But Still Available",
+      "tier": "public",
+      "date": "2025-01-07",
+      "words": 171,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-keeping-faith-out-of-habit",
+      "type": "SHORT",
+      "title": "When Youre Keeping Faith Out Of Habit",
+      "tier": "public",
+      "date": "2025-03-04",
+      "words": 133,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-living-for-weekends",
+      "type": "SHORT",
+      "title": "When Youre Living For Weekends",
+      "tier": "public",
+      "date": "2025-04-15",
+      "words": 84,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-loved-without-earning-it",
+      "type": "SHORT",
+      "title": "When Youre Loved Without Earning It",
+      "tier": "public",
+      "date": "2025-04-12",
+      "words": 104,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-measuring-everything-but-meaning",
+      "type": "SHORT",
+      "title": "When Youre Measuring Everything But Meaning",
+      "tier": "public",
+      "date": "2025-01-13",
+      "words": 134,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-not-lazy-youre-undisciplined",
+      "type": "SHORT",
+      "title": "When Youre Not Lazy Youre Undisciplined",
+      "tier": "public",
+      "date": "2025-04-07",
+      "words": 115,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-preparing-for-rooms-you-havent-entered",
+      "type": "SHORT",
+      "title": "When Youre Preparing For Rooms You Havent Entered",
+      "tier": "public",
+      "date": "2025-03-05",
+      "words": 126,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-productive-but-not-present",
+      "type": "SHORT",
+      "title": "When Youre Productive But Not Present",
+      "tier": "public",
+      "date": "2025-03-23",
+      "words": 130,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-scared-to-start-over",
+      "type": "SHORT",
+      "title": "When Youre Scared To Start Over",
+      "tier": "public",
+      "date": "2025-03-01",
+      "words": 107,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-the-only-one-doing-the-work",
+      "type": "SHORT",
+      "title": "When Youre The Only One Doing The Work",
+      "tier": "public",
+      "date": "2025-04-09",
+      "words": 109,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-tired-of-being-the-bigger-person",
+      "type": "SHORT",
+      "title": "When Youre Tired Of Being The Bigger Person",
+      "tier": "public",
+      "date": "2025-01-10",
+      "words": 177,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-tired-of-starting-over",
+      "type": "SHORT",
+      "title": "When Youre Tired Of Starting Over",
+      "tier": "public",
+      "date": "2025-04-02",
+      "words": 125,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youre-winning-at-work-but-losing-yourself",
+      "type": "SHORT",
+      "title": "When Youre Winning At Work But Losing Yourself",
+      "tier": "public",
+      "date": "2025-02-23",
+      "words": 114,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youve-become-chronically-online",
+      "type": "SHORT",
+      "title": "When Youve Become Chronically Online",
+      "tier": "public",
+      "date": "2025-04-10",
+      "words": 108,
+      "path": "content/shorts"
+    },
+    {
+      "id": "when-youve-worshipped-the-wrong-metrics",
+      "type": "SHORT",
+      "title": "When Youve Worshipped The Wrong Metrics",
+      "tier": "public",
+      "date": "2025-03-27",
+      "words": 134,
+      "path": "content/shorts"
+    }
+  ]
+}

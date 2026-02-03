@@ -1,1902 +1,882 @@
-{
-  "version": "2026.1",
-  "timestamp": "2026-02-03T10:19:07.922Z",
-  "count": 163,
-  "entries": [
-    {
-      "title": "Christianity Is Not Extremism - It Is the Light That Built the World",
-      "slug": "/blog/christianity-not-extremism",
-      "date": "2025-08-28T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "christianity",
-        "faith",
-        "fathers",
-        "apologetics",
-        "culture"
-      ]
-    },
-    {
-      "title": "Fathering Principles: A Blueprint for Men",
-      "slug": "/blog/fathering-principles",
-      "date": "2025-05-15T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "principles",
-        "legacy",
-        "masculinity",
-        "formation"
-      ]
-    },
-    {
-      "title": "Fathering Without Fear - Teaser",
-      "slug": "/blog/fathering-without-fear-teaser",
-      "date": "2025-06-15T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "memoir",
-        "faith",
-        "fatherhood",
-        "purpose",
-        "legacy"
-      ]
-    },
-    {
-      "title": "Fathering Without Fear - A Memoir",
-      "slug": "/blog/fathering-without-fear",
-      "date": "2025-06-01T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "memoir",
-        "faith",
-        "fatherhood",
-        "legacy",
-        "courage"
-      ]
-    },
-    {
-      "title": "In My Father's House: Not Mansions-Home",
-      "slug": "/blog/in-my-fathers-house",
-      "date": "2025-09-30T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "faith",
-        "gospel",
-        "theology",
-        "john14",
-        "philippians2",
-        "hope",
-        "kingdom"
-      ]
-    },
-    {
-      "title": "Kingdom Strategies for a Loving Legacy: Fathering O.J.A-Y",
-      "slug": "/blog/kingdom-strategies-for-a-loving-legacy",
-      "date": "2025-10-12T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "faith",
-        "legacy",
-        "kingdom",
-        "family"
-      ]
-    },
-    {
-      "title": "Leadership Begins at Home",
-      "slug": "/blog/leadership-begins-at-home",
-      "date": "2025-08-15T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "self-leadership",
-        "family",
-        "culture",
-        "legacy"
-      ]
-    },
-    {
-      "title": "Lessons from Noah - Fathers Who Listen, Hear, and Build",
-      "slug": "/blog/lessons-from-noah",
-      "date": "2025-10-19T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "leadership",
-        "faith",
-        "purpose",
-        "practical-notes"
-      ]
-    },
-    {
-      "title": "Out of Context Truth",
-      "slug": "/blog/out-of-context-truth",
-      "date": "2025-10-13T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "When the System Breaks You",
-      "slug": "/blog/when-the-system-breaks-you",
-      "date": "2025-02-15T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "family court",
-        "legacy"
-      ]
-    },
-    {
-      "title": "Principles for My Son: Building a Foundation of Character",
-      "slug": "/blog/principles-for-my-son",
-      "date": "2025-08-01T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "principles",
-        "character",
-        "legacy",
-        "guidance"
-      ]
-    },
-    {
-      "title": "Purpose Is the Anchor: Why Meaning Beats Pleasure Every Time",
-      "slug": "/blog/purpose-is-the-anchor",
-      "date": "2026-01-14T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "purpose",
-        "meaning",
-        "leadership",
-        "resilience",
-        "psychology",
-        "faith-and-culture"
-      ]
-    },
-    {
-      "title": "Reclaiming The Narrative",
-      "slug": "/blog/reclaiming-the-narrative",
-      "date": "2025-04-01T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "family court",
-        "legacy",
-        "resilience",
-        "faith"
-      ]
-    },
-    {
-      "title": "Surrender, Not Submission: The Path to Having It All",
-      "slug": "/blog/surrender-not-submission",
-      "date": "2024-01-04T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "surrender",
-        "leadership",
-        "formation",
-        "faith-and-culture",
-        "civilisation"
-      ]
-    },
-    {
-      "title": "Surrender Applied: The Operational Framework",
-      "slug": "/blog/surrender-operational-framework",
-      "date": "2024-01-05T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "Practical Application",
-        "Personal Development",
-        "Leadership Tools"
-      ]
-    },
-    {
-      "title": "The Brotherhood Code: Breaking the Cycle of Father Absence",
-      "slug": "/blog/the-brotherhood-code",
-      "date": "2025-07-14T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "discipleship",
-        "formation",
-        "leadership",
-        "brotherhood"
-      ]
-    },
-    {
-      "title": "The Ultimate Purpose of Man",
-      "slug": "/blog/ultimate-purpose-of-man",
-      "date": "2025-11-23T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "Purpose",
-        "Leadership",
-        "Theology",
-        "Strategy",
-        "Ancient Wisdom",
-        "Frameworks"
-      ]
-    },
-    {
-      "title": "When God's Sovereignty Collides With Our Pain",
-      "slug": "/blog/when-gods-sovereignty-collides-with-our-pain",
-      "date": "2025-09-11T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "faith",
-        "fatherhood",
-        "truth",
-        "culture",
-        "sovereignty-of-god"
-      ]
-    },
-    {
-      "title": "When the Foundation Is Destroyed",
-      "slug": "/blog/when-the-foundation-is-destroyed",
-      "date": "2025-01-01T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "leadership",
-        "faith",
-        "foundations"
-      ]
-    },
-    {
-      "title": "When the Storm Finds You: Lessons from Jonah, Jesus, and the Men Who Build Legacies",
-      "slug": "/blog/when-the-storm-finds-you",
-      "date": "2025-11-10T00:00:00.000Z",
-      "folder": "blog",
-      "readingTime": "Unknown",
-      "tags": [
-        "leadership",
-        "fatherhood",
-        "legacy",
-        "faith",
-        "principles"
-      ]
-    },
-    {
-      "title": "On Institutional Sovereignty",
-      "slug": "/shorts/institutional-sovereignty",
-      "date": "2026-01-31T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "When A Single Yes Changes Everything",
-      "slug": "/shorts/when-a-single-yes-changes-everything",
-      "date": "2025-03-21T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "breakthrough"
-      ]
-    },
-    {
-      "title": "When All You Can Do Is Breathe",
-      "slug": "/shorts/when-all-you-can-do-is-breathe",
-      "date": "2025-02-21T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "hope"
-      ]
-    },
-    {
-      "title": "When Avoidance Becomes Your Personality",
-      "slug": "/shorts/when-avoidance-becomes-your-personality",
-      "date": "2025-01-28T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "conflict"
-      ]
-    },
-    {
-      "title": "When Busyness Becomes Your Brand",
-      "slug": "/shorts/when-busyness-becomes-your-brand",
-      "date": "2025-03-30T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "burnout"
-      ]
-    },
-    {
-      "title": "When Comfort Becomes Your Cage",
-      "slug": "/shorts/when-comfort-becomes-your-cage",
-      "date": "2025-01-13T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "complacency"
-      ]
-    },
-    {
-      "title": "When Conflict Feels Like Betrayal",
-      "slug": "/shorts/when-conflict-feels-like-betrayal",
-      "date": "2025-03-31T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing"
-      ]
-    },
-    {
-      "title": "When Doctrine Feels Safer Than God",
-      "slug": "/shorts/when-doctrine-feels-safer-than-god",
-      "date": "2025-03-25T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "religion"
-      ]
-    },
-    {
-      "title": "When Every Promotion Feels Hollow",
-      "slug": "/shorts/when-every-promotion-feels-hollow",
-      "date": "2025-03-09T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "meaning"
-      ]
-    },
-    {
-      "title": "When Grace Finds You In The Mess",
-      "slug": "/shorts/when-grace-finds-you-in-the-mess",
-      "date": "2025-03-07T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing"
-      ]
-    },
-    {
-      "title": "When Hope Feels Reckless",
-      "slug": "/shorts/when-hope-feels-reckless",
-      "date": "2025-02-25T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "endurance"
-      ]
-    },
-    {
-      "title": "When Kindness Feels Like Rebellion",
-      "slug": "/shorts/when-kindness-feels-like-rebellion",
-      "date": "2025-03-28T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "courage"
-      ]
-    },
-    {
-      "title": "When Later Became Never",
-      "slug": "/shorts/when-later-became-never",
-      "date": "2025-03-20T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "accountability"
-      ]
-    },
-    {
-      "title": "When Numbness Feels Safer Than Joy",
-      "slug": "/shorts/when-numbness-feels-safer-than-joy",
-      "date": "2025-03-15T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "trauma"
-      ]
-    },
-    {
-      "title": "When Productivity Becomes Punishment",
-      "slug": "/shorts/when-productivity-becomes-punishment",
-      "date": "2025-01-16T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "avoidance"
-      ]
-    },
-    {
-      "title": "When Rest Starts To Feel Dangerous",
-      "slug": "/shorts/when-rest-starts-to-feel-dangerous",
-      "date": "2025-02-28T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing"
-      ]
-    },
-    {
-      "title": "When You Argue With God In Your Head",
-      "slug": "/shorts/when-you-argue-with-god-in-your-head",
-      "date": "2025-03-18T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "honesty"
-      ]
-    },
-    {
-      "title": "When You Cant Stop Overthinking",
-      "slug": "/shorts/when-you-cant-stop-overthinking",
-      "date": "2025-04-08T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "clarity",
-        "decisions"
-      ]
-    },
-    {
-      "title": "When You Cant Tell If Youre Growing Or Drifting",
-      "slug": "/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
-      "date": "2025-02-18T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "direction"
-      ]
-    },
-    {
-      "title": "When You Dont Know What You Want Anymore",
-      "slug": "/shorts/when-you-dont-know-what-you-want-anymore",
-      "date": "2025-02-22T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "direction"
-      ]
-    },
-    {
-      "title": "When You Dont Trust Your Own Decisions",
-      "slug": "/shorts/when-you-dont-trust-your-own-decisions",
-      "date": "2025-04-14T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "confidence",
-        "growth"
-      ]
-    },
-    {
-      "title": "When You Fear Being Wrong About God",
-      "slug": "/shorts/when-you-fear-being-wrong-about-god",
-      "date": "2025-04-01T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "truth"
-      ]
-    },
-    {
-      "title": "When You Fear Success More Than Failure",
-      "slug": "/shorts/when-you-fear-success-more-than-failure",
-      "date": "2025-02-27T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "responsibility"
-      ]
-    },
-    {
-      "title": "When You Feel Like God Is Delaying You",
-      "slug": "/shorts/when-you-feel-like-god-is-delaying-you",
-      "date": "2025-04-06T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "waiting",
-        "trust"
-      ]
-    },
-    {
-      "title": "When You Feel Too Busy To Care",
-      "slug": "/shorts/when-you-feel-too-busy-to-care",
-      "date": "2025-01-06T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "honesty"
-      ]
-    },
-    {
-      "title": "When You Finally Let Yourself Cry",
-      "slug": "/shorts/when-you-finally-let-yourself-cry",
-      "date": "2025-03-14T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "emotions"
-      ]
-    },
-    {
-      "title": "When You Give More Than You Get",
-      "slug": "/shorts/when-you-give-more-than-you-get",
-      "date": "2025-01-13T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "self-respect"
-      ]
-    },
-    {
-      "title": "When You Keep Blaming Your Childhood",
-      "slug": "/shorts/when-you-keep-blaming-your-childhood",
-      "date": "2025-04-03T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing",
-        "growth"
-      ]
-    },
-    {
-      "title": "When You Keep Choosing People Who Cant Choose You",
-      "slug": "/shorts/when-you-keep-choosing-people-who-cant-choose-you",
-      "date": "2025-03-24T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "attachment"
-      ]
-    },
-    {
-      "title": "When You Keep Confusing Niceness With Goodness",
-      "slug": "/shorts/when-you-keep-confusing-niceness-with-goodness",
-      "date": "2025-04-13T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "boundaries",
-        "truth"
-      ]
-    },
-    {
-      "title": "When You Miss Who You Used To Be",
-      "slug": "/shorts/when-you-miss-who-you-used-to-be",
-      "date": "2025-01-14T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "tenderness"
-      ]
-    },
-    {
-      "title": "When You Mistake Familiarity For Loyalty",
-      "slug": "/shorts/when-you-mistake-familiarity-for-loyalty",
-      "date": "2025-02-17T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "discernment"
-      ]
-    },
-    {
-      "title": "When You Need God To Interrupt You",
-      "slug": "/shorts/when-you-need-god-to-interrupt-you",
-      "date": "2025-03-11T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "stillness"
-      ]
-    },
-    {
-      "title": "When You No Longer Recognise Your Own Voice",
-      "slug": "/shorts/when-you-no-longer-recognise-your-own-voice",
-      "date": "2025-03-22T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing"
-      ]
-    },
-    {
-      "title": "When You Outgrow Your Circle",
-      "slug": "/shorts/when-you-outgrow-your-circle",
-      "date": "2025-03-17T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "transition"
-      ]
-    },
-    {
-      "title": "When You Realise Prayer Is War",
-      "slug": "/shorts/when-you-realise-prayer-is-war",
-      "date": "2025-04-16T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "faith",
-        "endurance"
-      ]
-    },
-    {
-      "title": "When You Realise You Were The Problem",
-      "slug": "/shorts/when-you-realise-you-were-the-problem",
-      "date": "2025-03-13T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "humility"
-      ]
-    },
-    {
-      "title": "When You Realise Youre Not Behind",
-      "slug": "/shorts/when-you-realise-youre-not-behind",
-      "date": "2025-04-04T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "comparison",
-        "hope"
-      ]
-    },
-    {
-      "title": "When You Stop Waiting For Permission",
-      "slug": "/shorts/when-you-stop-waiting-for-permission",
-      "date": "2025-03-19T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "execution"
-      ]
-    },
-    {
-      "title": "When You Want To Quit But Cant",
-      "slug": "/shorts/when-you-want-to-quit-but-cant",
-      "date": "2025-02-19T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "calling"
-      ]
-    },
-    {
-      "title": "When Your Calendar Is Full But Your Life Is Empty",
-      "slug": "/shorts/when-your-calendar-is-full-but-your-life-is-empty",
-      "date": "2025-01-27T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "engagement"
-      ]
-    },
-    {
-      "title": "When Your Calling Stops Being Cute",
-      "slug": "/shorts/when-your-calling-stops-being-cute",
-      "date": "2025-03-26T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "discipline"
-      ]
-    },
-    {
-      "title": "When Your Character Is Leaking",
-      "slug": "/shorts/when-your-character-is-leaking",
-      "date": "2025-03-06T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "accountability"
-      ]
-    },
-    {
-      "title": "When Your Confidence Feels Manufactured",
-      "slug": "/shorts/when-your-confidence-feels-manufactured",
-      "date": "2025-01-08T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "imposter-syndrome"
-      ]
-    },
-    {
-      "title": "When Your Convictions Feel Like Costumes",
-      "slug": "/shorts/when-your-convictions-feel-like-costumes",
-      "date": "2025-01-20T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "integrity"
-      ]
-    },
-    {
-      "title": "When Your Dreams Feel Too Heavy",
-      "slug": "/shorts/when-your-dreams-feel-too-heavy",
-      "date": "2025-01-12T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "pressure"
-      ]
-    },
-    {
-      "title": "When Your Excuses Become Your Identity",
-      "slug": "/shorts/when-your-excuses-become-your-identity",
-      "date": "2025-02-20T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "self-sabotage"
-      ]
-    },
-    {
-      "title": "When Your Faith Feels Numb",
-      "slug": "/shorts/when-your-faith-feels-numb",
-      "date": "2025-01-05T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "honesty"
-      ]
-    },
-    {
-      "title": "When Your Hustle Has No Soul",
-      "slug": "/shorts/when-your-hustle-has-no-soul",
-      "date": "2025-03-02T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "ambition"
-      ]
-    },
-    {
-      "title": "When Your Legacy Terrifies You",
-      "slug": "/shorts/when-your-legacy-terrifies-you",
-      "date": "2025-03-12T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "responsibility"
-      ]
-    },
-    {
-      "title": "When Your Silence Says Too Much",
-      "slug": "/shorts/when-your-silence-says-too-much",
-      "date": "2025-03-03T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "boundaries"
-      ]
-    },
-    {
-      "title": "When Your Standards Keep You Lonely",
-      "slug": "/shorts/when-your-standards-keep-you-lonely",
-      "date": "2025-03-08T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "discernment"
-      ]
-    },
-    {
-      "title": "When Your Vision Outgrows Your Environment",
-      "slug": "/shorts/when-your-vision-outgrows-your-environment",
-      "date": "2025-02-26T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "environment"
-      ]
-    },
-    {
-      "title": "When Your Work Becomes Your Hiding Place",
-      "slug": "/shorts/when-your-work-becomes-your-hiding-place",
-      "date": "2025-03-16T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "burnout"
-      ]
-    },
-    {
-      "title": "When Youre Addicted To Distraction",
-      "slug": "/shorts/when-youre-addicted-to-distraction",
-      "date": "2025-03-29T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing"
-      ]
-    },
-    {
-      "title": "When Youre Afraid Of Your Own Potential",
-      "slug": "/shorts/when-youre-afraid-of-your-own-potential",
-      "date": "2025-01-15T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "responsibility"
-      ]
-    },
-    {
-      "title": "When Youre Afraid To Be Radical",
-      "slug": "/shorts/when-youre-afraid-to-be-radical",
-      "date": "2025-04-11T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "obedience",
-        "courage"
-      ]
-    },
-    {
-      "title": "When Youre Always The Strong One",
-      "slug": "/shorts/when-youre-always-the-strong-one",
-      "date": "2025-03-10T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "strength"
-      ]
-    },
-    {
-      "title": "When Youre Attracted To Potential Not Reality",
-      "slug": "/shorts/when-youre-attracted-to-potential-not-reality",
-      "date": "2025-04-05T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "discernment",
-        "patterns"
-      ]
-    },
-    {
-      "title": "When Youre Building Someone Elses Legacy",
-      "slug": "/shorts/when-youre-building-someone-elses-legacy",
-      "date": "2025-02-03T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "ownership"
-      ]
-    },
-    {
-      "title": "When Youre Done Fixing Adults",
-      "slug": "/shorts/when-youre-done-fixing-adults",
-      "date": "2025-02-24T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "emotional-labour"
-      ]
-    },
-    {
-      "title": "When Youre Exhausted But Still Available",
-      "slug": "/shorts/when-youre-exhausted-but-still-available",
-      "date": "2025-01-07T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "self-care"
-      ]
-    },
-    {
-      "title": "When Youre Keeping Faith Out Of Habit",
-      "slug": "/shorts/when-youre-keeping-faith-out-of-habit",
-      "date": "2025-03-04T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "doubt"
-      ]
-    },
-    {
-      "title": "When Youre Living For Weekends",
-      "slug": "/shorts/when-youre-living-for-weekends",
-      "date": "2025-04-15T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "alignment",
-        "life-design"
-      ]
-    },
-    {
-      "title": "When Youre Loved Without Earning It",
-      "slug": "/shorts/when-youre-loved-without-earning-it",
-      "date": "2025-04-12T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "healing",
-        "grace"
-      ]
-    },
-    {
-      "title": "When Youre Measuring Everything But Meaning",
-      "slug": "/shorts/when-youre-measuring-everything-but-meaning",
-      "date": "2025-01-13T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "reflection"
-      ]
-    },
-    {
-      "title": "When Youre Not Lazy Youre Undisciplined",
-      "slug": "/shorts/when-youre-not-lazy-youre-undisciplined",
-      "date": "2025-04-07T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "execution",
-        "growth"
-      ]
-    },
-    {
-      "title": "When Youre Preparing For Rooms You Havent Entered",
-      "slug": "/shorts/when-youre-preparing-for-rooms-you-havent-entered",
-      "date": "2025-03-05T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "patience"
-      ]
-    },
-    {
-      "title": "When Youre Productive But Not Present",
-      "slug": "/shorts/when-youre-productive-but-not-present",
-      "date": "2025-03-23T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "burnout"
-      ]
-    },
-    {
-      "title": "When Youre Scared To Start Over",
-      "slug": "/shorts/when-youre-scared-to-start-over",
-      "date": "2025-03-01T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "identity"
-      ]
-    },
-    {
-      "title": "When Youre The Only One Doing The Work",
-      "slug": "/shorts/when-youre-the-only-one-doing-the-work",
-      "date": "2025-04-09T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "reciprocity",
-        "boundaries"
-      ]
-    },
-    {
-      "title": "When Youre Tired Of Being The Bigger Person",
-      "slug": "/shorts/when-youre-tired-of-being-the-bigger-person",
-      "date": "2025-01-10T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "resentment"
-      ]
-    },
-    {
-      "title": "When Youre Tired Of Starting Over",
-      "slug": "/shorts/when-youre-tired-of-starting-over",
-      "date": "2025-04-02T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "purpose",
-        "endurance"
-      ]
-    },
-    {
-      "title": "When Youre Winning At Work But Losing Yourself",
-      "slug": "/shorts/when-youre-winning-at-work-but-losing-yourself",
-      "date": "2025-02-23T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "identity"
-      ]
-    },
-    {
-      "title": "When Youve Become Chronically Online",
-      "slug": "/shorts/when-youve-become-chronically-online",
-      "date": "2025-04-10T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "social-media",
-        "life"
-      ]
-    },
-    {
-      "title": "When Youve Worshipped The Wrong Metrics",
-      "slug": "/shorts/when-youve-worshipped-the-wrong-metrics",
-      "date": "2025-03-27T00:00:00.000Z",
-      "folder": "shorts",
-      "readingTime": "Unknown",
-      "tags": [
-        "priorities"
-      ]
-    },
-    {
-      "title": "Fathering Without Fear",
-      "slug": "/books/fathering-without-fear",
-      "date": "2025-05-25T00:00:00.000Z",
-      "folder": "books",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "memoir",
-        "legacy",
-        "faith",
-        "justice",
-        "personal-transformation"
-      ]
-    },
-    {
-      "title": "The Architecture of Human Purpose",
-      "slug": "/books/the-architecture-of-human-purpose",
-      "date": "2025-11-25T00:00:00.000Z",
-      "folder": "books",
-      "readingTime": "Unknown",
-      "tags": [
-        "purpose",
-        "civilisation",
-        "governance",
-        "leadership",
-        "theology",
-        "strategic-frameworks",
-        "institutional-design",
-        "human-destiny",
-        "philosophy"
-      ]
-    },
-    {
-      "title": "The Builder's Catechism",
-      "slug": "/books/the-builders-catechism",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "books",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "catechism",
-        "formation",
-        "civilisation",
-        "leadership",
-        "doctrine",
-        "theology",
-        "spiritual-growth"
-      ]
-    },
-    {
-      "title": "The Fiction Adaptation",
-      "slug": "/books/the-fiction-adaptation",
-      "date": "2025-06-10T00:00:00.000Z",
-      "folder": "books",
-      "readingTime": "Unknown",
-      "tags": [
-        "fiction",
-        "drama",
-        "spiritual",
-        "romance",
-        "psychological",
-        "mystery",
-        "allegory"
-      ]
-    },
-    {
-      "title": "The Builder’s Catechism",
-      "slug": "/canon/builders-catechism",
-      "date": "2025-06-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "builders",
-        "purpose",
-        "civilisation",
-        "governance",
-        "formation",
-        "doctrine"
-      ]
-    },
-    {
-      "title": "THE CANON - A New Era of Builders",
-      "slug": "/canon/canon-campaign",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "purpose",
-        "civilisation",
-        "marketing",
-        "leadership",
-        "governance"
-      ]
-    },
-    {
-      "title": "THE CANON: A LETTER FROM THE AUTHOR",
-      "slug": "/canon/canon-introduction-letter",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "purpose",
-        "civilisation",
-        "leadership",
-        "theology",
-        "governance"
-      ]
-    },
-    {
-      "title": "Canon Master Index & Glossary (Preview)",
-      "slug": "/canon/canon-master-index-preview",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "glossary",
-        "index",
-        "civilisation",
-        "governance",
-        "theology",
-        "reference"
-      ]
-    },
-    {
-      "title": "Volume I - Foundations of Purpose",
-      "slug": "/canon/volume-i-foundations-of-purpose",
-      "date": "2024-01-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "purpose",
-        "formation",
-        "builders",
-        "canon"
-      ]
-    },
-    {
-      "title": "Canon Volume I - Teaching Edition",
-      "slug": "/canon/volume-i-teaching-edition",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "teaching-edition",
-        "leadership",
-        "discipleship",
-        "formation"
-      ]
-    },
-    {
-      "title": "Canon Volume II - Governance & Formation",
-      "slug": "/canon/volume-ii-governance-and-formation",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "governance",
-        "formation",
-        "leadership",
-        "discipline"
-      ]
-    },
-    {
-      "title": "Canon Volume II - Teaching Edition",
-      "slug": "/canon/volume-ii-teaching-edition",
-      "date": "2025-12-10T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "teaching-edition",
-        "governance",
-        "formation",
-        "leadership",
-        "systems",
-        "responsibility"
-      ]
-    },
-    {
-      "title": "Canon Volume III - Teaching Edition",
-      "slug": "/canon/volume-iii-teaching-edition",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "teaching-edition",
-        "family",
-        "fatherhood",
-        "governance",
-        "generational-order",
-        "civilisation"
-      ]
-    },
-    {
-      "title": "Canon Volume IV - Teaching Edition",
-      "slug": "/canon/volume-iv-teaching-edition",
-      "date": "2025-12-15T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "culture",
-        "civilisation",
-        "renewal",
-        "governance",
-        "anthropology",
-        "pattern-theory"
-      ]
-    },
-    {
-      "title": "VOLUME TITLE GOES HERE",
-      "slug": "/canon/volume-x-filename",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "civilisation",
-        "governance",
-        "purpose"
-      ]
-    },
-    {
-      "title": "VOLUME X – THE ARC OF FUTURE CIVILISATION",
-      "slug": "/canon/volume-x-the-arc-of-future-civilisation",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "canon",
-      "readingTime": "Unknown",
-      "tags": [
-        "civilisation-design",
-        "governance-frameworks",
-        "strategic-theology",
-        "institutional-architecture",
-        "future-studies",
-        "purpose-systems"
-      ]
-    },
-    {
-      "title": "Abraham Vault — Strategic Artifacts Pack",
-      "slug": "/downloads/abraham-vault-pack",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "Strategy",
-        "Governance",
-        "Decision-Making",
-        "Leadership",
-        "Frameworks"
-      ]
-    },
-    {
-      "title": "Board Decision Log Template",
-      "slug": "/downloads/board-decision-log-template",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "board",
-        "governance",
-        "decisions",
-        "accountability"
-      ]
-    },
-    {
-      "title": "Board & Investor One-Pager Template",
-      "slug": "/downloads/board-investor-onepager",
-      "date": "2024-02-01T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "download",
-        "template",
-        "board",
-        "investor",
-        "strategy"
-      ]
-    },
-    {
-      "title": "Brotherhood Covenant",
-      "slug": "/downloads/brotherhood-covenant",
-      "date": "2024-03-10T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "covenant",
-        "brotherhood",
-        "accountability"
-      ]
-    },
-    {
-      "title": "Canon Volume IV - Culture-Decadence Diagnostic Toolkit",
-      "slug": "/downloads/canon-volume-iv-diagnostic-toolkit",
-      "date": "2025-12-18T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "culture",
-        "civilisation",
-        "governance",
-        "diagnostics",
-        "renewal"
-      ]
-    },
-    {
-      "title": "Canon Volume V - Governance Diagnostic Toolkit",
-      "slug": "/downloads/canon-volume-v-governance-diagnostic-toolkit",
-      "date": "2025-12-20T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "governance",
-        "leadership",
-        "institutions",
-        "diagnostics",
-        "stewardship"
-      ]
-    },
-    {
-      "title": "Brotherhood Communication Script",
-      "slug": "/downloads/communication-script-bpf",
-      "date": "2024-03-01T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "brotherhood",
-        "communication",
-        "accountability"
-      ]
-    },
-    {
-      "title": "Decision Log Template (PDF)",
-      "slug": "/downloads/decision-log-template",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "decisions",
-        "governance",
-        "template"
-      ]
-    },
-    {
-      "title": "Decision Matrix Scorecard",
-      "slug": "/downloads/decision-matrix-scorecard",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "decision-making",
-        "governance",
-        "strategy",
-        "scorecard"
-      ]
-    },
-    {
-      "title": "The Legacy Architecture Canvas",
-      "slug": "/downloads/download-legacy-architecture-canvas",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "legacy-architecture",
-        "intergenerational-governance",
-        "family-sovereignty",
-        "strategic-formation",
-        "heirloom-tools"
-      ]
-    },
-    {
-      "title": "Entrepreneur Operating Pack",
-      "slug": "/downloads/entrepreneur-operating-pack",
-      "date": "2025-09-22T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Entrepreneurial Survival Checklist",
-      "slug": "/downloads/entrepreneur-survival-checklist",
-      "date": "2024-03-15T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "entrepreneurship",
-        "survival",
-        "strategy",
-        "cashflow"
-      ]
-    },
-    {
-      "title": "Family Altar Liturgy",
-      "slug": "/downloads/family-altar-liturgy",
-      "date": "2024-03-05T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "family",
-        "worship",
-        "liturgy",
-        "habits"
-      ]
-    },
-    {
-      "title": "Leader's Cue Card (Two Up)",
-      "slug": "/downloads/leaders-cue-card-two-up",
-      "date": "2025-10-21T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "The Leadership Playbook",
-      "slug": "/downloads/leadership-playbook",
-      "date": "2025-10-21T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "The Legacy Architecture Canvas",
-      "slug": "/downloads/legacy-canvas",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "legacy-architecture",
-        "intergenerational-governance",
-        "family-sovereignty",
-        "strategic-formation",
-        "heirloom-tools"
-      ]
-    },
-    {
-      "title": "THE PRINCIPLES of SURRENDER FRAMEWORK",
-      "slug": "/downloads/life-alignment-assessment",
-      "date": "2026-01-19T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "the-canon",
-        "surrender",
-        "alignment",
-        "leadership",
-        "institutional-formation",
-        "civilisation"
-      ]
-    },
-    {
-      "title": "Mentorship Starter Kit",
-      "slug": "/downloads/mentorship-starter-kit",
-      "date": "2025-01-01T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "leadership",
-        "mentoring"
-      ]
-    },
-    {
-      "title": "Operating Cadence Pack",
-      "slug": "/downloads/operating-cadence-pack",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "operations",
-        "execution",
-        "cadence",
-        "governance"
-      ]
-    },
-    {
-      "title": "Principles for My Son - Cue Card",
-      "slug": "/downloads/principles-for-my-son-cue-card",
-      "date": "2025-10-21T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Principles for My Son",
-      "slug": "/downloads/principles-for-my-son",
-      "date": "2025-01-01T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "legacy"
-      ]
-    },
-    {
-      "title": "Purpose Pyramid Worksheet",
-      "slug": "/downloads/purpose-pyramid-worksheet",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "purpose",
-        "strategy",
-        "execution",
-        "vault"
-      ]
-    },
-    {
-      "title": "Scripture Track - John 14",
-      "slug": "/downloads/scripture-track-john14",
-      "date": "2025-01-21T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Standards Brief",
-      "slug": "/downloads/standards-brief",
-      "date": "2025-10-21T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "The Ultimate Purpose of Man — Strategic Editorial (PDF)",
-      "slug": "/downloads/ultimate-purpose-of-man-editorial",
-      "date": "2025-11-23T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": [
-        "Purpose",
-        "Leadership",
-        "Theology",
-        "Strategy",
-        "Ancient Wisdom",
-        "Frameworks",
-        "Governance",
-        "Civilisation"
-      ]
-    },
-    {
-      "title": "Weekly Operating Rhythm & Daily Blocks",
-      "slug": "/downloads/weekly-operating-rhythm",
-      "date": "2025-10-21T00:00:00.000Z",
-      "folder": "downloads",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Founders Salon",
-      "slug": "/events/founders-salon",
-      "date": "2025-06-01T00:00:00.000Z",
-      "folder": "events",
-      "readingTime": "Unknown",
-      "tags": [
-        "event",
-        "founders",
-        "leadership",
-        "salon"
-      ]
-    },
-    {
-      "title": "Leadership Workshop",
-      "slug": "/events/leadership-workshop",
-      "date": "2026-09-12T00:00:00.000Z",
-      "folder": "events",
-      "readingTime": "Unknown",
-      "tags": [
-        "event",
-        "leadership",
-        "workshop",
-        "strategy"
-      ]
-    },
-    {
-      "title": "Entrepreneur Operating Pack",
-      "slug": "/prints/entrepreneur-operating-pack",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "prints",
-      "readingTime": "Unknown",
-      "tags": [
-        "entrepreneurship",
-        "operating",
-        "finance"
-      ]
-    },
-    {
-      "title": "Fatherhood Standards Card",
-      "slug": "/prints/fatherhood-standards-card",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "prints",
-      "readingTime": "Unknown",
-      "tags": [
-        "fatherhood",
-        "standards",
-        "home"
-      ]
-    },
-    {
-      "title": "Leadership Playbook (30•60•90)",
-      "slug": "/prints/leadership-playbook",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "prints",
-      "readingTime": "Unknown",
-      "tags": [
-        "leadership",
-        "cadence",
-        "governance"
-      ]
-    },
-    {
-      "title": "Mentorship Starter Kit",
-      "slug": "/prints/mentorship-starter-kit",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "prints",
-      "readingTime": "Unknown",
-      "tags": [
-        "mentorship",
-        "people",
-        "development"
-      ]
-    },
-    {
-      "title": "Standards Brief",
-      "slug": "/prints/standards-brief",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "prints",
-      "readingTime": "Unknown",
-      "tags": [
-        "standards",
-        "governance",
-        "culture"
-      ]
-    },
-    {
-      "title": "Weekly Operating Rhythm",
-      "slug": "/prints/weekly-operating-rhythm",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "prints",
-      "readingTime": "Unknown",
-      "tags": [
-        "cadence",
-        "execution",
-        "teams"
-      ]
-    },
-    {
-      "title": "Brotherhood Starter Kit",
-      "slug": "/resources/brotherhood-starter-kit",
-      "date": "2025-01-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "brotherhood",
-        "leadership",
-        "community"
-      ]
-    },
-    {
-      "title": "Canon Builder's Rule of Life",
-      "slug": "/resources/canon-builders-rule-of-life",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "rule-of-life",
-        "discipline",
-        "leadership",
-        "formation"
-      ]
-    },
-    {
-      "title": "THE CANON - A New Era of Builders",
-      "slug": "/resources/canon-campaign",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "purpose",
-        "civilisation",
-        "marketing",
-        "leadership"
-      ]
-    },
-    {
-      "title": "Council Table Agenda - Canon Leadership Session",
-      "slug": "/resources/canon-council-table-agenda",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "leadership",
-        "governance",
-        "institutions",
-        "councils"
-      ]
-    },
-    {
-      "title": "Canon Household Charter",
-      "slug": "/resources/canon-household-charter",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "household",
-        "governance",
-        "family",
-        "fatherhood"
-      ]
-    },
-    {
-      "title": "Canon Reading Plan - Year One",
-      "slug": "/resources/canon-reading-plan-year-one",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "reading-plan",
-        "discipline",
-        "formation",
-        "leadership"
-      ]
-    },
-    {
-      "title": "Destiny Mapping Worksheet",
-      "slug": "/resources/destiny-mapping-worksheet",
-      "date": "2025-03-09T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Fatherhood Impact Framework",
-      "slug": "/resources/fatherhood-impact-framework",
-      "date": "2025-01-15T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Getting Started",
-      "slug": "/resources/getting-started",
-      "date": "2024-01-15T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "guide",
-        "resources",
-        "getting-started"
-      ]
-    },
-    {
-      "title": "Institutional Health Scorecard",
-      "slug": "/resources/institutional-health-scorecard",
-      "date": "2025-03-02T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Leadership Standards Blueprint",
-      "slug": "/resources/leadership-standards-blueprint",
-      "date": "2025-01-05T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Multi-Generational Legacy Ledger",
-      "slug": "/resources/multi-generational-legacy-ledger",
-      "date": "2025-12-01T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "canon",
-        "legacy",
-        "stewardship",
-        "wealth",
-        "fatherhood"
-      ]
-    },
-    {
-      "title": "Purpose Alignment Checklist",
-      "slug": "/resources/purpose-alignment-checklist",
-      "date": "2025-01-07T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": []
-    },
-    {
-      "title": "Strategic Frameworks",
-      "slug": "/resources/strategic-frameworks",
-      "date": "2024-01-10T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "strategic",
-        "frameworks",
-        "tools",
-        "decision-making"
-      ]
-    },
-    {
-      "title": "Strategy Room Intake",
-      "slug": "/resources/strategy-room-intake",
-      "date": "2025-12-26T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "consulting",
-        "strategy",
-        "governance",
-        "decision-making",
-        "board"
-      ]
-    },
-    {
-      "title": "The Vault",
-      "slug": "/resources/vault",
-      "date": "2025-12-28T00:00:00.000Z",
-      "folder": "resources",
-      "readingTime": "Unknown",
-      "tags": [
-        "vault",
-        "downloads",
-        "governance",
-        "strategy",
-        "leadership"
-      ]
-    },
-    {
-      "title": "Strategy Sample",
-      "slug": "/strategy/sample-strategy",
-      "date": "2025-12-12T00:00:00.000Z",
-      "folder": "strategy",
-      "readingTime": "Unknown",
-      "tags": []
-    }
-  ]
-}
+[
+  {
+    "title": "Christianity Is Not Extremism - It Is the Light That Built the World",
+    "slug": "/blog/christianity-not-extremism",
+    "file": "content/blog/christianity-not-extremism.mdx"
+  },
+  {
+    "title": "Fathering Principles: A Blueprint for Men",
+    "slug": "/blog/fathering-principles",
+    "file": "content/blog/fathering-principles.mdx"
+  },
+  {
+    "title": "Fathering Without Fear - Teaser",
+    "slug": "/blog/fathering-without-fear-teaser",
+    "file": "content/blog/fathering-without-fear-teaser.mdx"
+  },
+  {
+    "title": "Fathering Without Fear - A Memoir",
+    "slug": "/blog/fathering-without-fear",
+    "file": "content/blog/fathering-without-fear.mdx"
+  },
+  {
+    "title": "In My Father's House: Not Mansions-Home",
+    "slug": "/blog/in-my-fathers-house",
+    "file": "content/blog/in-my-fathers-house.mdx"
+  },
+  {
+    "title": "Kingdom Strategies for a Loving Legacy: Fathering O.J.A-Y",
+    "slug": "/blog/kingdom-strategies-for-a-loving-legacy",
+    "file": "content/blog/kingdom-strategies-for-a-loving-legacy.mdx"
+  },
+  {
+    "title": "Leadership Begins at Home",
+    "slug": "/blog/leadership-begins-at-home",
+    "file": "content/blog/leadership-begins-at-home.mdx"
+  },
+  {
+    "title": "Lessons from Noah - Fathers Who Listen, Hear, and Build",
+    "slug": "/blog/lessons-from-noah",
+    "file": "content/blog/lessons-from-noah.mdx"
+  },
+  {
+    "title": "Out of Context Truth",
+    "slug": "/blog/out-of-context-truth",
+    "file": "content/blog/out-of-context-truth.mdx"
+  },
+  {
+    "title": "When the System Breaks You",
+    "slug": "/blog/when-the-system-breaks-you",
+    "file": "content/blog/post-when-the-system-breaks-you.mdx"
+  },
+  {
+    "title": "Principles for My Son: Building a Foundation of Character",
+    "slug": "/blog/principles-for-my-son",
+    "file": "content/blog/principles-for-my-son.mdx"
+  },
+  {
+    "title": "Purpose Is the Anchor: Why Meaning Beats Pleasure Every Time",
+    "slug": "/blog/purpose-is-the-anchor",
+    "file": "content/blog/purpose-is-the-anchor.mdx"
+  },
+  {
+    "title": "Reclaiming The Narrative",
+    "slug": "/blog/reclaiming-the-narrative",
+    "file": "content/blog/reclaiming-the-narrative.mdx"
+  },
+  {
+    "title": "Surrender, Not Submission: The Path to Having It All",
+    "slug": "/blog/surrender-not-submission",
+    "file": "content/blog/surrender-not-submission.mdx"
+  },
+  {
+    "title": "Surrender Applied: The Operational Framework",
+    "slug": "/blog/surrender-operational-framework",
+    "file": "content/blog/surrender-operational-framework.mdx"
+  },
+  {
+    "title": "The Brotherhood Code: Breaking the Cycle of Father Absence",
+    "slug": "/blog/the-brotherhood-code",
+    "file": "content/blog/the-brotherhood-code.mdx"
+  },
+  {
+    "title": "The Ultimate Purpose of Man",
+    "slug": "/blog/ultimate-purpose-of-man",
+    "file": "content/blog/ultimate-purpose-of-man.mdx"
+  },
+  {
+    "title": "When God's Sovereignty Collides With Our Pain",
+    "slug": "/blog/when-gods-sovereignty-collides-with-our-pain",
+    "file": "content/blog/when-gods-sovereignty-collides-with-our-pain.mdx"
+  },
+  {
+    "title": "When the Foundation Is Destroyed",
+    "slug": "/blog/when-the-foundation-is-destroyed",
+    "file": "content/blog/when-the-foundation-is-destroyed.mdx"
+  },
+  {
+    "title": "When the Storm Finds You: Lessons from Jonah, Jesus, and the Men Who Build Legacies",
+    "slug": "/blog/when-the-storm-finds-you",
+    "file": "content/blog/when-the-storm-finds-you.mdx"
+  },
+  {
+    "title": "Fathering Without Fear",
+    "slug": "/books/fathering-without-fear",
+    "file": "content/books/book-fathering-without-fear.mdx"
+  },
+  {
+    "title": "The Architecture of Human Purpose",
+    "slug": "/books/the-architecture-of-human-purpose",
+    "file": "content/books/the-architecture-of-human-purpose.mdx"
+  },
+  {
+    "title": "The Builder's Catechism",
+    "slug": "/books/the-builders-catechism",
+    "file": "content/books/the-builders-catechism.mdx"
+  },
+  {
+    "title": "The Fiction Adaptation",
+    "slug": "/books/the-fiction-adaptation",
+    "file": "content/books/the-fiction-adaptation.mdx"
+  },
+  {
+    "title": "The Builder’s Catechism",
+    "slug": "/canon/builders-catechism",
+    "file": "content/canon/builders-catechism.mdx"
+  },
+  {
+    "title": "THE CANON - A New Era of Builders",
+    "slug": "/canon/canon-campaign",
+    "file": "content/canon/canon-campaign.mdx"
+  },
+  {
+    "title": "THE CANON: A LETTER FROM THE AUTHOR",
+    "slug": "/canon/canon-introduction-letter",
+    "file": "content/canon/canon-introduction-letter.mdx"
+  },
+  {
+    "title": "Canon Master Index & Glossary (Preview)",
+    "slug": "/canon/canon-master-index-preview",
+    "file": "content/canon/canon-master-index-preview.mdx"
+  },
+  {
+    "title": "Volume I - Foundations of Purpose",
+    "slug": "/canon/volume-i-foundations-of-purpose",
+    "file": "content/canon/volume-i-foundations-of-purpose.mdx"
+  },
+  {
+    "title": "Canon Volume I - Teaching Edition",
+    "slug": "/canon/volume-i-teaching-edition",
+    "file": "content/canon/volume-i-teaching-edition.mdx"
+  },
+  {
+    "title": "Canon Volume II - Governance & Formation",
+    "slug": "/canon/volume-ii-governance-and-formation",
+    "file": "content/canon/volume-ii-governance-and-formation.mdx"
+  },
+  {
+    "title": "Canon Volume II - Teaching Edition",
+    "slug": "/canon/volume-ii-teaching-edition",
+    "file": "content/canon/volume-ii-teaching-edition.mdx"
+  },
+  {
+    "title": "Canon Volume III - Teaching Edition",
+    "slug": "/canon/volume-iii-teaching-edition",
+    "file": "content/canon/volume-iii-teaching-edition.mdx"
+  },
+  {
+    "title": "Canon Volume IV - Teaching Edition",
+    "slug": "/canon/volume-iv-teaching-edition",
+    "file": "content/canon/volume-iv-teaching-edition.mdx"
+  },
+  {
+    "title": "VOLUME TITLE GOES HERE",
+    "slug": "/canon/volume-x-filename",
+    "file": "content/canon/volume-x-filename.mdx"
+  },
+  {
+    "title": "VOLUME X – THE ARC OF FUTURE CIVILISATION",
+    "slug": "/canon/volume-x-the-arc-of-future-civilisation",
+    "file": "content/canon/volume-x-the-arc-of-future-civilisation.mdx"
+  },
+  {
+    "title": "Abraham Vault — Strategic Artifacts Pack",
+    "slug": "/downloads/abraham-vault-pack",
+    "file": "content/downloads/abraham-vault-pack.mdx"
+  },
+  {
+    "title": "Board Decision Log Template",
+    "slug": "/downloads/board-decision-log-template",
+    "file": "content/downloads/board-decision-log-template.mdx"
+  },
+  {
+    "title": "Board & Investor One-Pager Template",
+    "slug": "/downloads/board-investor-onepager",
+    "file": "content/downloads/board-investor-onepager.mdx"
+  },
+  {
+    "title": "Brotherhood Covenant",
+    "slug": "/downloads/brotherhood-covenant",
+    "file": "content/downloads/brotherhood-covenant.mdx"
+  },
+  {
+    "title": "Canon Volume IV - Culture-Decadence Diagnostic Toolkit",
+    "slug": "/downloads/canon-volume-iv-diagnostic-toolkit",
+    "file": "content/downloads/canon-volume-iv-diagnostic-toolkit.mdx"
+  },
+  {
+    "title": "Canon Volume V - Governance Diagnostic Toolkit",
+    "slug": "/downloads/canon-volume-v-governance-diagnostic-toolkit",
+    "file": "content/downloads/canon-volume-v-governance-diagnostic-toolkit.mdx"
+  },
+  {
+    "title": "Brotherhood Communication Script",
+    "slug": "/downloads/communication-script-bpf",
+    "file": "content/downloads/communication-script-bpf.mdx"
+  },
+  {
+    "title": "Decision Log Template (PDF)",
+    "slug": "/downloads/decision-log-template",
+    "file": "content/downloads/decision-log-template.mdx"
+  },
+  {
+    "title": "Decision Matrix Scorecard",
+    "slug": "/downloads/decision-matrix-scorecard",
+    "file": "content/downloads/decision-matrix-scorecard.mdx"
+  },
+  {
+    "title": "The Legacy Architecture Canvas",
+    "slug": "/downloads/download-legacy-architecture-canvas",
+    "file": "content/downloads/download-legacy-architecture-canvas.mdx"
+  },
+  {
+    "title": "Entrepreneur Operating Pack",
+    "slug": "/downloads/entrepreneur-operating-pack",
+    "file": "content/downloads/entrepreneur-operating-pack.mdx"
+  },
+  {
+    "title": "Entrepreneurial Survival Checklist",
+    "slug": "/downloads/entrepreneur-survival-checklist",
+    "file": "content/downloads/entrepreneur-survival-checklist.mdx"
+  },
+  {
+    "title": "Family Altar Liturgy",
+    "slug": "/downloads/family-altar-liturgy",
+    "file": "content/downloads/family-altar-liturgy.mdx"
+  },
+  {
+    "title": "Leader's Cue Card (Two Up)",
+    "slug": "/downloads/leaders-cue-card-two-up",
+    "file": "content/downloads/leaders-cue-card-two-up.mdx"
+  },
+  {
+    "title": "The Leadership Playbook",
+    "slug": "/downloads/leadership-playbook",
+    "file": "content/downloads/leadership-playbook.mdx"
+  },
+  {
+    "title": "The Legacy Architecture Canvas",
+    "slug": "/downloads/legacy-canvas",
+    "file": "content/downloads/legacy-canvas.mdx"
+  },
+  {
+    "title": "THE PRINCIPLES of SURRENDER FRAMEWORK",
+    "slug": "/downloads/life-alignment-assessment",
+    "file": "content/downloads/life-alignment-assessment.mdx"
+  },
+  {
+    "title": "Mentorship Starter Kit",
+    "slug": "/downloads/mentorship-starter-kit",
+    "file": "content/downloads/mentorship-starter-kit.mdx"
+  },
+  {
+    "title": "Operating Cadence Pack",
+    "slug": "/downloads/operating-cadence-pack",
+    "file": "content/downloads/operating-cadence-pack.mdx"
+  },
+  {
+    "title": "Principles for My Son - Cue Card",
+    "slug": "/downloads/principles-for-my-son-cue-card",
+    "file": "content/downloads/principles-for-my-son-cue-card.mdx"
+  },
+  {
+    "title": "Principles for My Son",
+    "slug": "/downloads/principles-for-my-son",
+    "file": "content/downloads/principles-for-my-son.mdx"
+  },
+  {
+    "title": "Purpose Pyramid Worksheet",
+    "slug": "/downloads/purpose-pyramid-worksheet",
+    "file": "content/downloads/purpose-pyramid-worksheet.mdx"
+  },
+  {
+    "title": "Scripture Track - John 14",
+    "slug": "/downloads/scripture-track-john14",
+    "file": "content/downloads/scripture-track-john14.mdx"
+  },
+  {
+    "title": "Standards Brief",
+    "slug": "/downloads/standards-brief",
+    "file": "content/downloads/standards-brief.mdx"
+  },
+  {
+    "title": "The Ultimate Purpose of Man — Strategic Editorial (PDF)",
+    "slug": "/downloads/ultimate-purpose-of-man-editorial",
+    "file": "content/downloads/ultimate-purpose-of-man-editorial.mdx"
+  },
+  {
+    "title": "Weekly Operating Rhythm & Daily Blocks",
+    "slug": "/downloads/weekly-operating-rhythm",
+    "file": "content/downloads/weekly-operating-rhythm.mdx"
+  },
+  {
+    "title": "Founders Salon",
+    "slug": "/events/founders-salon",
+    "file": "content/events/founders-salon.mdx"
+  },
+  {
+    "title": "Leadership Workshop",
+    "slug": "/events/leadership-workshop",
+    "file": "content/events/leadership-workshop.mdx"
+  },
+  {
+    "title": "Clarity",
+    "slug": "/vault/lexicon/clarity",
+    "file": "content/lexicon/clarity.mdx"
+  },
+  {
+    "title": "Family",
+    "slug": "/vault/lexicon/family",
+    "file": "content/lexicon/family.mdx"
+  },
+  {
+    "title": "Father",
+    "slug": "/vault/lexicon/father",
+    "file": "content/lexicon/father.mdx"
+  },
+  {
+    "title": "Governance",
+    "slug": "/vault/lexicon/governance",
+    "file": "content/lexicon/governance.mdx"
+  },
+  {
+    "title": "Identity",
+    "slug": "/vault/lexicon/identity",
+    "file": "content/lexicon/identity.mdx"
+  },
+  {
+    "title": "Integrity",
+    "slug": "/vault/lexicon/integrity",
+    "file": "content/lexicon/integrity.mdx"
+  },
+  {
+    "title": "Leadership",
+    "slug": "/vault/lexicon/leadership",
+    "file": "content/lexicon/leadership.mdx"
+  },
+  {
+    "title": "Legacy",
+    "slug": "/vault/lexicon/legacy",
+    "file": "content/lexicon/legacy.mdx"
+  },
+  {
+    "title": "Purpose",
+    "slug": "/vault/lexicon/purpose",
+    "file": "content/lexicon/purpose.mdx"
+  },
+  {
+    "title": "Responsibility",
+    "slug": "/vault/lexicon/responsibility",
+    "file": "content/lexicon/responsibility.mdx"
+  },
+  {
+    "title": "Sovereignty",
+    "slug": "/vault/lexicon/sovereignty",
+    "file": "content/lexicon/sovereignty.mdx"
+  },
+  {
+    "title": "Strategic Autonomy",
+    "slug": "/vault/lexicon/strategic-autonomy",
+    "file": "content/lexicon/strategic-autonomy.mdx"
+  },
+  {
+    "title": "Surrender",
+    "slug": "/vault/lexicon/surrender",
+    "file": "content/lexicon/surrender.mdx"
+  },
+  {
+    "title": "Entrepreneur Operating Pack",
+    "slug": "/prints/entrepreneur-operating-pack",
+    "file": "content/prints/entrepreneur-operating-pack.mdx"
+  },
+  {
+    "title": "Fatherhood Standards Card",
+    "slug": "/prints/fatherhood-standards-card",
+    "file": "content/prints/fatherhood-standards-card.mdx"
+  },
+  {
+    "title": "Leadership Playbook (30•60•90)",
+    "slug": "/prints/leadership-playbook",
+    "file": "content/prints/leadership-playbook.mdx"
+  },
+  {
+    "title": "Mentorship Starter Kit",
+    "slug": "/prints/mentorship-starter-kit",
+    "file": "content/prints/mentorship-starter-kit.mdx"
+  },
+  {
+    "title": "Standards Brief",
+    "slug": "/prints/standards-brief",
+    "file": "content/prints/standards-brief.mdx"
+  },
+  {
+    "title": "Weekly Operating Rhythm",
+    "slug": "/prints/weekly-operating-rhythm",
+    "file": "content/prints/weekly-operating-rhythm.mdx"
+  },
+  {
+    "title": "Brotherhood Starter Kit",
+    "slug": "/resources/brotherhood-starter-kit",
+    "file": "content/resources/brotherhood-starter-kit.md"
+  },
+  {
+    "title": "Canon Builder's Rule of Life",
+    "slug": "/resources/canon-builders-rule-of-life",
+    "file": "content/resources/canon-builders-rule-of-life.mdx"
+  },
+  {
+    "title": "THE CANON - A New Era of Builders",
+    "slug": "/resources/canon-campaign",
+    "file": "content/resources/canon-campaign.mdx"
+  },
+  {
+    "title": "Council Table Agenda - Canon Leadership Session",
+    "slug": "/resources/canon-council-table-agenda",
+    "file": "content/resources/canon-council-table-agenda.mdx"
+  },
+  {
+    "title": "Canon Household Charter",
+    "slug": "/resources/canon-household-charter",
+    "file": "content/resources/canon-household-charter.mdx"
+  },
+  {
+    "title": "Canon Reading Plan - Year One",
+    "slug": "/resources/canon-reading-plan-year-one",
+    "file": "content/resources/canon-reading-plan-year-one.mdx"
+  },
+  {
+    "title": "Destiny Mapping Worksheet",
+    "slug": "/resources/destiny-mapping-worksheet",
+    "file": "content/resources/destiny-mapping-worksheet.mdx"
+  },
+  {
+    "title": "Fatherhood Impact Framework",
+    "slug": "/resources/fatherhood-impact-framework",
+    "file": "content/resources/fatherhood-impact-framework.md"
+  },
+  {
+    "title": "Getting Started",
+    "slug": "/resources/getting-started",
+    "file": "content/resources/getting-started.mdx"
+  },
+  {
+    "title": "Institutional Health Scorecard",
+    "slug": "/resources/institutional-health-scorecard",
+    "file": "content/resources/institutional-health-scorecard.mdx"
+  },
+  {
+    "title": "Leadership Standards Blueprint",
+    "slug": "/resources/leadership-standards-blueprint",
+    "file": "content/resources/leadership-standards-blueprint.md"
+  },
+  {
+    "title": "Multi-Generational Legacy Ledger",
+    "slug": "/resources/multi-generational-legacy-ledger",
+    "file": "content/resources/multi-generational-legacy-ledger.mdx"
+  },
+  {
+    "title": "Purpose Alignment Checklist",
+    "slug": "/resources/purpose-alignment-checklist",
+    "file": "content/resources/purpose-alignment-checklist.mdx"
+  },
+  {
+    "title": "Strategic Frameworks",
+    "slug": "/resources/strategic-frameworks",
+    "file": "content/resources/strategic-frameworks.md"
+  },
+  {
+    "title": "Strategy Room Intake",
+    "slug": "/resources/strategy-room-intake",
+    "file": "content/resources/strategy-room-intake.mdx"
+  },
+  {
+    "title": "The Vault",
+    "slug": "/resources/vault",
+    "file": "content/resources/vault.mdx"
+  },
+  {
+    "title": "On Institutional Sovereignty",
+    "slug": "/shorts/institutional-sovereignty",
+    "file": "content/shorts/institutional-sovereignty.mdx"
+  },
+  {
+    "title": "When A Single Yes Changes Everything",
+    "slug": "/shorts/when-a-single-yes-changes-everything",
+    "file": "content/shorts/when-a-single-yes-changes-everything.mdx"
+  },
+  {
+    "title": "When All You Can Do Is Breathe",
+    "slug": "/shorts/when-all-you-can-do-is-breathe",
+    "file": "content/shorts/when-all-you-can-do-is-breathe.mdx"
+  },
+  {
+    "title": "When Avoidance Becomes Your Personality",
+    "slug": "/shorts/when-avoidance-becomes-your-personality",
+    "file": "content/shorts/when-avoidance-becomes-your-personality.mdx"
+  },
+  {
+    "title": "When Busyness Becomes Your Brand",
+    "slug": "/shorts/when-busyness-becomes-your-brand",
+    "file": "content/shorts/when-busyness-becomes-your-brand.mdx"
+  },
+  {
+    "title": "When Comfort Becomes Your Cage",
+    "slug": "/shorts/when-comfort-becomes-your-cage",
+    "file": "content/shorts/when-comfort-becomes-your-cage.mdx"
+  },
+  {
+    "title": "When Conflict Feels Like Betrayal",
+    "slug": "/shorts/when-conflict-feels-like-betrayal",
+    "file": "content/shorts/when-conflict-feels-like-betrayal.mdx"
+  },
+  {
+    "title": "When Doctrine Feels Safer Than God",
+    "slug": "/shorts/when-doctrine-feels-safer-than-god",
+    "file": "content/shorts/when-doctrine-feels-safer-than-god.mdx"
+  },
+  {
+    "title": "When Every Promotion Feels Hollow",
+    "slug": "/shorts/when-every-promotion-feels-hollow",
+    "file": "content/shorts/when-every-promotion-feels-hollow.mdx"
+  },
+  {
+    "title": "When Grace Finds You In The Mess",
+    "slug": "/shorts/when-grace-finds-you-in-the-mess",
+    "file": "content/shorts/when-grace-finds-you-in-the-mess.mdx"
+  },
+  {
+    "title": "When Hope Feels Reckless",
+    "slug": "/shorts/when-hope-feels-reckless",
+    "file": "content/shorts/when-hope-feels-reckless.mdx"
+  },
+  {
+    "title": "When Kindness Feels Like Rebellion",
+    "slug": "/shorts/when-kindness-feels-like-rebellion",
+    "file": "content/shorts/when-kindness-feels-like-rebellion.mdx"
+  },
+  {
+    "title": "When Later Became Never",
+    "slug": "/shorts/when-later-became-never",
+    "file": "content/shorts/when-later-became-never.mdx"
+  },
+  {
+    "title": "When Numbness Feels Safer Than Joy",
+    "slug": "/shorts/when-numbness-feels-safer-than-joy",
+    "file": "content/shorts/when-numbness-feels-safer-than-joy.mdx"
+  },
+  {
+    "title": "When Productivity Becomes Punishment",
+    "slug": "/shorts/when-productivity-becomes-punishment",
+    "file": "content/shorts/when-productivity-becomes-punishment.mdx"
+  },
+  {
+    "title": "When Rest Starts To Feel Dangerous",
+    "slug": "/shorts/when-rest-starts-to-feel-dangerous",
+    "file": "content/shorts/when-rest-starts-to-feel-dangerous.mdx"
+  },
+  {
+    "title": "When You Argue With God In Your Head",
+    "slug": "/shorts/when-you-argue-with-god-in-your-head",
+    "file": "content/shorts/when-you-argue-with-god-in-your-head.mdx"
+  },
+  {
+    "title": "When You Cant Stop Overthinking",
+    "slug": "/shorts/when-you-cant-stop-overthinking",
+    "file": "content/shorts/when-you-cant-stop-overthinking.mdx"
+  },
+  {
+    "title": "When You Cant Tell If Youre Growing Or Drifting",
+    "slug": "/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
+    "file": "content/shorts/when-you-cant-tell-if-youre-growing-or-drifting.mdx"
+  },
+  {
+    "title": "When You Dont Know What You Want Anymore",
+    "slug": "/shorts/when-you-dont-know-what-you-want-anymore",
+    "file": "content/shorts/when-you-dont-know-what-you-want-anymore.mdx"
+  },
+  {
+    "title": "When You Dont Trust Your Own Decisions",
+    "slug": "/shorts/when-you-dont-trust-your-own-decisions",
+    "file": "content/shorts/when-you-dont-trust-your-own-decisions.mdx"
+  },
+  {
+    "title": "When You Fear Being Wrong About God",
+    "slug": "/shorts/when-you-fear-being-wrong-about-god",
+    "file": "content/shorts/when-you-fear-being-wrong-about-god.mdx"
+  },
+  {
+    "title": "When You Fear Success More Than Failure",
+    "slug": "/shorts/when-you-fear-success-more-than-failure",
+    "file": "content/shorts/when-you-fear-success-more-than-failure.mdx"
+  },
+  {
+    "title": "When You Feel Like God Is Delaying You",
+    "slug": "/shorts/when-you-feel-like-god-is-delaying-you",
+    "file": "content/shorts/when-you-feel-like-god-is-delaying-you.mdx"
+  },
+  {
+    "title": "When You Feel Too Busy To Care",
+    "slug": "/shorts/when-you-feel-too-busy-to-care",
+    "file": "content/shorts/when-you-feel-too-busy-to-care.mdx"
+  },
+  {
+    "title": "When You Finally Let Yourself Cry",
+    "slug": "/shorts/when-you-finally-let-yourself-cry",
+    "file": "content/shorts/when-you-finally-let-yourself-cry.mdx"
+  },
+  {
+    "title": "When You Give More Than You Get",
+    "slug": "/shorts/when-you-give-more-than-you-get",
+    "file": "content/shorts/when-you-give-more-than-you-get.mdx"
+  },
+  {
+    "title": "When You Keep Blaming Your Childhood",
+    "slug": "/shorts/when-you-keep-blaming-your-childhood",
+    "file": "content/shorts/when-you-keep-blaming-your-childhood.mdx"
+  },
+  {
+    "title": "When You Keep Choosing People Who Cant Choose You",
+    "slug": "/shorts/when-you-keep-choosing-people-who-cant-choose-you",
+    "file": "content/shorts/when-you-keep-choosing-people-who-cant-choose-you.mdx"
+  },
+  {
+    "title": "When You Keep Confusing Niceness With Goodness",
+    "slug": "/shorts/when-you-keep-confusing-niceness-with-goodness",
+    "file": "content/shorts/when-you-keep-confusing-niceness-with-goodness.mdx"
+  },
+  {
+    "title": "When You Miss Who You Used To Be",
+    "slug": "/shorts/when-you-miss-who-you-used-to-be",
+    "file": "content/shorts/when-you-miss-who-you-used-to-be.mdx"
+  },
+  {
+    "title": "When You Mistake Familiarity For Loyalty",
+    "slug": "/shorts/when-you-mistake-familiarity-for-loyalty",
+    "file": "content/shorts/when-you-mistake-familiarity-for-loyalty.mdx"
+  },
+  {
+    "title": "When You Need God To Interrupt You",
+    "slug": "/shorts/when-you-need-god-to-interrupt-you",
+    "file": "content/shorts/when-you-need-god-to-interrupt-you.mdx"
+  },
+  {
+    "title": "When You No Longer Recognise Your Own Voice",
+    "slug": "/shorts/when-you-no-longer-recognise-your-own-voice",
+    "file": "content/shorts/when-you-no-longer-recognise-your-own-voice.mdx"
+  },
+  {
+    "title": "When You Outgrow Your Circle",
+    "slug": "/shorts/when-you-outgrow-your-circle",
+    "file": "content/shorts/when-you-outgrow-your-circle.mdx"
+  },
+  {
+    "title": "When You Realise Prayer Is War",
+    "slug": "/shorts/when-you-realise-prayer-is-war",
+    "file": "content/shorts/when-you-realise-prayer-is-war.mdx"
+  },
+  {
+    "title": "When You Realise You Were The Problem",
+    "slug": "/shorts/when-you-realise-you-were-the-problem",
+    "file": "content/shorts/when-you-realise-you-were-the-problem.mdx"
+  },
+  {
+    "title": "When You Realise Youre Not Behind",
+    "slug": "/shorts/when-you-realise-youre-not-behind",
+    "file": "content/shorts/when-you-realise-youre-not-behind.mdx"
+  },
+  {
+    "title": "When You Stop Waiting For Permission",
+    "slug": "/shorts/when-you-stop-waiting-for-permission",
+    "file": "content/shorts/when-you-stop-waiting-for-permission.mdx"
+  },
+  {
+    "title": "When You Want To Quit But Cant",
+    "slug": "/shorts/when-you-want-to-quit-but-cant",
+    "file": "content/shorts/when-you-want-to-quit-but-cant.mdx"
+  },
+  {
+    "title": "When Your Calendar Is Full But Your Life Is Empty",
+    "slug": "/shorts/when-your-calendar-is-full-but-your-life-is-empty",
+    "file": "content/shorts/when-your-calendar-is-full-but-your-life-is-empty.mdx"
+  },
+  {
+    "title": "When Your Calling Stops Being Cute",
+    "slug": "/shorts/when-your-calling-stops-being-cute",
+    "file": "content/shorts/when-your-calling-stops-being-cute.mdx"
+  },
+  {
+    "title": "When Your Character Is Leaking",
+    "slug": "/shorts/when-your-character-is-leaking",
+    "file": "content/shorts/when-your-character-is-leaking.mdx"
+  },
+  {
+    "title": "When Your Confidence Feels Manufactured",
+    "slug": "/shorts/when-your-confidence-feels-manufactured",
+    "file": "content/shorts/when-your-confidence-feels-manufactured.mdx"
+  },
+  {
+    "title": "When Your Convictions Feel Like Costumes",
+    "slug": "/shorts/when-your-convictions-feel-like-costumes",
+    "file": "content/shorts/when-your-convictions-feel-like-costumes.mdx"
+  },
+  {
+    "title": "When Your Dreams Feel Too Heavy",
+    "slug": "/shorts/when-your-dreams-feel-too-heavy",
+    "file": "content/shorts/when-your-dreams-feel-too-heavy.mdx"
+  },
+  {
+    "title": "When Your Excuses Become Your Identity",
+    "slug": "/shorts/when-your-excuses-become-your-identity",
+    "file": "content/shorts/when-your-excuses-become-your-identity.mdx"
+  },
+  {
+    "title": "When Your Faith Feels Numb",
+    "slug": "/shorts/when-your-faith-feels-numb",
+    "file": "content/shorts/when-your-faith-feels-numb.mdx"
+  },
+  {
+    "title": "When Your Hustle Has No Soul",
+    "slug": "/shorts/when-your-hustle-has-no-soul",
+    "file": "content/shorts/when-your-hustle-has-no-soul.mdx"
+  },
+  {
+    "title": "When Your Legacy Terrifies You",
+    "slug": "/shorts/when-your-legacy-terrifies-you",
+    "file": "content/shorts/when-your-legacy-terrifies-you.mdx"
+  },
+  {
+    "title": "When Your Silence Says Too Much",
+    "slug": "/shorts/when-your-silence-says-too-much",
+    "file": "content/shorts/when-your-silence-says-too-much.mdx"
+  },
+  {
+    "title": "When Your Standards Keep You Lonely",
+    "slug": "/shorts/when-your-standards-keep-you-lonely",
+    "file": "content/shorts/when-your-standards-keep-you-lonely.mdx"
+  },
+  {
+    "title": "When Your Vision Outgrows Your Environment",
+    "slug": "/shorts/when-your-vision-outgrows-your-environment",
+    "file": "content/shorts/when-your-vision-outgrows-your-environment.mdx"
+  },
+  {
+    "title": "When Your Work Becomes Your Hiding Place",
+    "slug": "/shorts/when-your-work-becomes-your-hiding-place",
+    "file": "content/shorts/when-your-work-becomes-your-hiding-place.mdx"
+  },
+  {
+    "title": "When Youre Addicted To Distraction",
+    "slug": "/shorts/when-youre-addicted-to-distraction",
+    "file": "content/shorts/when-youre-addicted-to-distraction.mdx"
+  },
+  {
+    "title": "When Youre Afraid Of Your Own Potential",
+    "slug": "/shorts/when-youre-afraid-of-your-own-potential",
+    "file": "content/shorts/when-youre-afraid-of-your-own-potential.mdx"
+  },
+  {
+    "title": "When Youre Afraid To Be Radical",
+    "slug": "/shorts/when-youre-afraid-to-be-radical",
+    "file": "content/shorts/when-youre-afraid-to-be-radical.mdx"
+  },
+  {
+    "title": "When Youre Always The Strong One",
+    "slug": "/shorts/when-youre-always-the-strong-one",
+    "file": "content/shorts/when-youre-always-the-strong-one.mdx"
+  },
+  {
+    "title": "When Youre Attracted To Potential Not Reality",
+    "slug": "/shorts/when-youre-attracted-to-potential-not-reality",
+    "file": "content/shorts/when-youre-attracted-to-potential-not-reality.mdx"
+  },
+  {
+    "title": "When Youre Building Someone Elses Legacy",
+    "slug": "/shorts/when-youre-building-someone-elses-legacy",
+    "file": "content/shorts/when-youre-building-someone-elses-legacy.mdx"
+  },
+  {
+    "title": "When Youre Done Fixing Adults",
+    "slug": "/shorts/when-youre-done-fixing-adults",
+    "file": "content/shorts/when-youre-done-fixing-adults.mdx"
+  },
+  {
+    "title": "When Youre Exhausted But Still Available",
+    "slug": "/shorts/when-youre-exhausted-but-still-available",
+    "file": "content/shorts/when-youre-exhausted-but-still-available.mdx"
+  },
+  {
+    "title": "When Youre Keeping Faith Out Of Habit",
+    "slug": "/shorts/when-youre-keeping-faith-out-of-habit",
+    "file": "content/shorts/when-youre-keeping-faith-out-of-habit.mdx"
+  },
+  {
+    "title": "When Youre Living For Weekends",
+    "slug": "/shorts/when-youre-living-for-weekends",
+    "file": "content/shorts/when-youre-living-for-weekends.mdx"
+  },
+  {
+    "title": "When Youre Loved Without Earning It",
+    "slug": "/shorts/when-youre-loved-without-earning-it",
+    "file": "content/shorts/when-youre-loved-without-earning-it.mdx"
+  },
+  {
+    "title": "When Youre Measuring Everything But Meaning",
+    "slug": "/shorts/when-youre-measuring-everything-but-meaning",
+    "file": "content/shorts/when-youre-measuring-everything-but-meaning.mdx"
+  },
+  {
+    "title": "When Youre Not Lazy Youre Undisciplined",
+    "slug": "/shorts/when-youre-not-lazy-youre-undisciplined",
+    "file": "content/shorts/when-youre-not-lazy-youre-undisciplined.mdx"
+  },
+  {
+    "title": "When Youre Preparing For Rooms You Havent Entered",
+    "slug": "/shorts/when-youre-preparing-for-rooms-you-havent-entered",
+    "file": "content/shorts/when-youre-preparing-for-rooms-you-havent-entered.mdx"
+  },
+  {
+    "title": "When Youre Productive But Not Present",
+    "slug": "/shorts/when-youre-productive-but-not-present",
+    "file": "content/shorts/when-youre-productive-but-not-present.mdx"
+  },
+  {
+    "title": "When Youre Scared To Start Over",
+    "slug": "/shorts/when-youre-scared-to-start-over",
+    "file": "content/shorts/when-youre-scared-to-start-over.mdx"
+  },
+  {
+    "title": "When Youre The Only One Doing The Work",
+    "slug": "/shorts/when-youre-the-only-one-doing-the-work",
+    "file": "content/shorts/when-youre-the-only-one-doing-the-work.mdx"
+  },
+  {
+    "title": "When Youre Tired Of Being The Bigger Person",
+    "slug": "/shorts/when-youre-tired-of-being-the-bigger-person",
+    "file": "content/shorts/when-youre-tired-of-being-the-bigger-person.mdx"
+  },
+  {
+    "title": "When Youre Tired Of Starting Over",
+    "slug": "/shorts/when-youre-tired-of-starting-over",
+    "file": "content/shorts/when-youre-tired-of-starting-over.mdx"
+  },
+  {
+    "title": "When Youre Winning At Work But Losing Yourself",
+    "slug": "/shorts/when-youre-winning-at-work-but-losing-yourself",
+    "file": "content/shorts/when-youre-winning-at-work-but-losing-yourself.mdx"
+  },
+  {
+    "title": "When Youve Become Chronically Online",
+    "slug": "/shorts/when-youve-become-chronically-online",
+    "file": "content/shorts/when-youve-become-chronically-online.mdx"
+  },
+  {
+    "title": "When Youve Worshipped The Wrong Metrics",
+    "slug": "/shorts/when-youve-worshipped-the-wrong-metrics",
+    "file": "content/shorts/when-youve-worshipped-the-wrong-metrics.mdx"
+  },
+  {
+    "title": "Strategy Sample",
+    "slug": "/strategy/sample-strategy",
+    "file": "content/strategy/sample-strategy.mdx"
+  }
+]
