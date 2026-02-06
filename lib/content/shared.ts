@@ -1,8 +1,6 @@
-/**
- * lib/content/shared.ts — CLIENT-SAFE SHARED CONTENT UTILITIES
- * Shared utilities used across Pages Router + App Router.
- * MUST remain client-safe (no fs, no server-only imports).
- */
+// lib/content/shared.ts — CLIENT-SAFE SHARED CONTENT UTILITIES
+// Shared utilities used across Pages Router + App Router.
+// MUST remain client-safe (no fs, no server-only imports).
 
 export type DocKind =
   | "blog"
@@ -15,6 +13,8 @@ export type DocKind =
   | "short"
   | "strategy"
   | "unknown";
+
+export type AccessLevel = "free" | "member" | "architect" | "inner-circle" | "inner-circle-elite";
 
 type AnyDoc = Record<string, any>;
 
@@ -43,6 +43,47 @@ export function joinHref(...args: (string | undefined | null)[]): string {
 
 export function isDraftContent(doc: AnyDoc): boolean {
   return Boolean(doc?.draft || doc?.isDraft || doc?.published === false);
+}
+
+/**
+ * Check if a document is published (not a draft and has publish date)
+ */
+export function isPublished(doc: AnyDoc): boolean {
+  if (isDraftContent(doc)) return false;
+  
+  const publishDate = doc?.publishedAt || doc?.date;
+  if (publishDate) {
+    const pubDate = new Date(publishDate);
+    const now = new Date();
+    return pubDate <= now;
+  }
+  
+  // If no publish date, assume published unless marked as draft
+  return !isDraftContent(doc);
+}
+
+/**
+ * Get the access level (tier) for a document
+ */
+export function getAccessLevel(doc: AnyDoc): AccessLevel {
+  const tier = doc?.tier || doc?.access || doc?.accessLevel || 'free';
+  
+  switch (String(tier).toLowerCase()) {
+    case 'member':
+    case 'premium':
+      return 'member';
+    case 'architect':
+    case 'enterprise':
+      return 'architect';
+    case 'inner-circle':
+    case 'innercircle':
+      return 'inner-circle';
+    case 'inner-circle-elite':
+    case 'elite':
+      return 'inner-circle-elite';
+    default:
+      return 'free';
+  }
 }
 
 export function getDocKind(doc: AnyDoc): DocKind {

@@ -1,12 +1,5 @@
-// pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-// IMPORTANT:
-// - Keep this file tiny.
-// - No Prisma imports here.
-// - No heavy runtime decisions.
-// This prevents “collect page data” and bundling landmines.
-
+// Institutional Note: Keep logic in @/lib/auth to avoid build-time bundling loops.
 export default NextAuth(authOptions);
-export { authOptions };

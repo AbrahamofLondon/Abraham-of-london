@@ -1,882 +1,1675 @@
 [
   {
-    "title": "Christianity Is Not Extremism - It Is the Light That Built the World",
-    "slug": "/blog/christianity-not-extremism",
-    "file": "content\\blog\\christianity-not-extremism.mdx"
+    "title": "Christianity Is Not Extremism",
+    "slug": "/vault/blog/christianity-not-extremism",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Fathering Principles: A Blueprint for Men",
-    "slug": "/blog/fathering-principles",
-    "file": "content\\blog\\fathering-principles.mdx"
+    "slug": "/vault/blog/fathering-principles",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Fathering Without Fear - Teaser",
-    "slug": "/blog/fathering-without-fear-teaser",
-    "file": "content\\blog\\fathering-without-fear-teaser.mdx"
+    "slug": "/vault/blog/fathering-without-fear-teaser",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Fathering Without Fear - A Memoir",
-    "slug": "/blog/fathering-without-fear",
-    "file": "content\\blog\\fathering-without-fear.mdx"
+    "slug": "/vault/blog/fathering-without-fear",
+    "category": "blog",
+    "type": "brief"
   },
   {
-    "title": "In My Father's House: Not Mansions-Home",
-    "slug": "/blog/in-my-fathers-house",
-    "file": "content\\blog\\in-my-fathers-house.mdx"
+    "title": "In My Father's House",
+    "slug": "/vault/blog/in-my-fathers-house",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Kingdom Strategies for a Loving Legacy: Fathering O.J.A-Y",
-    "slug": "/blog/kingdom-strategies-for-a-loving-legacy",
-    "file": "content\\blog\\kingdom-strategies-for-a-loving-legacy.mdx"
+    "slug": "/vault/blog/kingdom-strategies-for-a-loving-legacy",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Leadership Begins at Home",
-    "slug": "/blog/leadership-begins-at-home",
-    "file": "content\\blog\\leadership-begins-at-home.mdx"
+    "slug": "/vault/blog/leadership-begins-at-home",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Lessons from Noah - Fathers Who Listen, Hear, and Build",
-    "slug": "/blog/lessons-from-noah",
-    "file": "content\\blog\\lessons-from-noah.mdx"
+    "slug": "/vault/blog/lessons-from-noah",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Out of Context Truth",
-    "slug": "/blog/out-of-context-truth",
-    "file": "content\\blog\\out-of-context-truth.mdx"
+    "slug": "/vault/blog/out-of-context-truth",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "When the System Breaks You",
-    "slug": "/blog/when-the-system-breaks-you",
-    "file": "content\\blog\\post-when-the-system-breaks-you.mdx"
+    "slug": "/vault/blog/post-when-the-system-breaks-you",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Principles for My Son: Building a Foundation of Character",
-    "slug": "/blog/principles-for-my-son",
-    "file": "content\\blog\\principles-for-my-son.mdx"
+    "slug": "/vault/blog/principles-for-my-son",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Purpose Is the Anchor: Why Meaning Beats Pleasure Every Time",
-    "slug": "/blog/purpose-is-the-anchor",
-    "file": "content\\blog\\purpose-is-the-anchor.mdx"
+    "slug": "/vault/blog/purpose-is-the-anchor",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Reclaiming The Narrative",
-    "slug": "/blog/reclaiming-the-narrative",
-    "file": "content\\blog\\reclaiming-the-narrative.mdx"
+    "slug": "/vault/blog/reclaiming-the-narrative",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Surrender, Not Submission: The Path to Having It All",
-    "slug": "/blog/surrender-not-submission",
-    "file": "content\\blog\\surrender-not-submission.mdx"
+    "slug": "/vault/blog/surrender-not-submission",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Surrender Applied: The Operational Framework",
-    "slug": "/blog/surrender-operational-framework",
-    "file": "content\\blog\\surrender-operational-framework.mdx"
+    "slug": "/vault/blog/surrender-operational-framework",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "The Brotherhood Code: Breaking the Cycle of Father Absence",
-    "slug": "/blog/the-brotherhood-code",
-    "file": "content\\blog\\the-brotherhood-code.mdx"
+    "slug": "/vault/blog/the-brotherhood-code",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "The Ultimate Purpose of Man",
-    "slug": "/blog/ultimate-purpose-of-man",
-    "file": "content\\blog\\ultimate-purpose-of-man.mdx"
+    "slug": "/vault/blog/ultimate-purpose-of-man",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "When God's Sovereignty Collides With Our Pain",
-    "slug": "/blog/when-gods-sovereignty-collides-with-our-pain",
-    "file": "content\\blog\\when-gods-sovereignty-collides-with-our-pain.mdx"
+    "slug": "/vault/blog/when-gods-sovereignty-collides-with-our-pain",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "When the Foundation Is Destroyed",
-    "slug": "/blog/when-the-foundation-is-destroyed",
-    "file": "content\\blog\\when-the-foundation-is-destroyed.mdx"
+    "slug": "/vault/blog/when-the-foundation-is-destroyed",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "When the Storm Finds You: Lessons from Jonah, Jesus, and the Men Who Build Legacies",
-    "slug": "/blog/when-the-storm-finds-you",
-    "file": "content\\blog\\when-the-storm-finds-you.mdx"
+    "slug": "/vault/blog/when-the-storm-finds-you",
+    "category": "blog",
+    "type": "brief"
   },
   {
     "title": "Fathering Without Fear",
-    "slug": "/books/fathering-without-fear",
-    "file": "content\\books\\book-fathering-without-fear.mdx"
+    "slug": "/vault/books/book-fathering-without-fear",
+    "category": "books",
+    "type": "brief"
   },
   {
     "title": "The Architecture of Human Purpose",
-    "slug": "/books/the-architecture-of-human-purpose",
-    "file": "content\\books\\the-architecture-of-human-purpose.mdx"
+    "slug": "/vault/books/the-architecture-of-human-purpose",
+    "category": "books",
+    "type": "brief"
   },
   {
     "title": "The Builder's Catechism",
-    "slug": "/books/the-builders-catechism",
-    "file": "content\\books\\the-builders-catechism.mdx"
+    "slug": "/vault/books/the-builders-catechism",
+    "category": "books",
+    "type": "brief"
   },
   {
     "title": "The Fiction Adaptation",
-    "slug": "/books/the-fiction-adaptation",
-    "file": "content\\books\\the-fiction-adaptation.mdx"
+    "slug": "/vault/books/the-fiction-adaptation",
+    "category": "books",
+    "type": "brief"
   },
   {
-    "title": "The Builder’s Catechism",
-    "slug": "/canon/builders-catechism",
-    "file": "content\\canon\\builders-catechism.mdx"
+    "title": "The Canon Builder's Rule of Life",
+    "slug": "/vault/briefs/canon-builders-rule-of-life",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 001",
+    "slug": "/vault/briefs/fr-001",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 004",
+    "slug": "/vault/briefs/fr-004",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 007",
+    "slug": "/vault/briefs/fr-007",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 010",
+    "slug": "/vault/briefs/fr-010",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 013",
+    "slug": "/vault/briefs/fr-013",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 016",
+    "slug": "/vault/briefs/fr-016",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 019",
+    "slug": "/vault/briefs/fr-019",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 022",
+    "slug": "/vault/briefs/fr-022",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 025",
+    "slug": "/vault/briefs/fr-025",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 028",
+    "slug": "/vault/briefs/fr-028",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 031",
+    "slug": "/vault/briefs/fr-031",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 034",
+    "slug": "/vault/briefs/fr-034",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 037",
+    "slug": "/vault/briefs/fr-037",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 040",
+    "slug": "/vault/briefs/fr-040",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 043",
+    "slug": "/vault/briefs/fr-043",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 046",
+    "slug": "/vault/briefs/fr-046",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 049",
+    "slug": "/vault/briefs/fr-049",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 052",
+    "slug": "/vault/briefs/fr-052",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 055",
+    "slug": "/vault/briefs/fr-055",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 058",
+    "slug": "/vault/briefs/fr-058",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 061",
+    "slug": "/vault/briefs/fr-061",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 064",
+    "slug": "/vault/briefs/fr-064",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 067",
+    "slug": "/vault/briefs/fr-067",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 070",
+    "slug": "/vault/briefs/fr-070",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Frontier Resilience // Briefing 073",
+    "slug": "/vault/briefs/fr-073",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Resilience in Frontier Markets",
+    "slug": "/vault/briefs/frontier-resilience-01",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 003",
+    "slug": "/vault/briefs/ia-003",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 006",
+    "slug": "/vault/briefs/ia-006",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 009",
+    "slug": "/vault/briefs/ia-009",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 012",
+    "slug": "/vault/briefs/ia-012",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 015",
+    "slug": "/vault/briefs/ia-015",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 018",
+    "slug": "/vault/briefs/ia-018",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 021",
+    "slug": "/vault/briefs/ia-021",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 024",
+    "slug": "/vault/briefs/ia-024",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 027",
+    "slug": "/vault/briefs/ia-027",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 030",
+    "slug": "/vault/briefs/ia-030",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 033",
+    "slug": "/vault/briefs/ia-033",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 036",
+    "slug": "/vault/briefs/ia-036",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 039",
+    "slug": "/vault/briefs/ia-039",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 042",
+    "slug": "/vault/briefs/ia-042",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 045",
+    "slug": "/vault/briefs/ia-045",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 048",
+    "slug": "/vault/briefs/ia-048",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 051",
+    "slug": "/vault/briefs/ia-051",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 054",
+    "slug": "/vault/briefs/ia-054",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 057",
+    "slug": "/vault/briefs/ia-057",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 060",
+    "slug": "/vault/briefs/ia-060",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 063",
+    "slug": "/vault/briefs/ia-063",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 066",
+    "slug": "/vault/briefs/ia-066",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 069",
+    "slug": "/vault/briefs/ia-069",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 072",
+    "slug": "/vault/briefs/ia-072",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Alpha // Briefing 075",
+    "slug": "/vault/briefs/ia-075",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 002",
+    "slug": "/vault/briefs/si-002",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 005",
+    "slug": "/vault/briefs/si-005",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 008",
+    "slug": "/vault/briefs/si-008",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 011",
+    "slug": "/vault/briefs/si-011",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 014",
+    "slug": "/vault/briefs/si-014",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 017",
+    "slug": "/vault/briefs/si-017",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 020",
+    "slug": "/vault/briefs/si-020",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 023",
+    "slug": "/vault/briefs/si-023",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 026",
+    "slug": "/vault/briefs/si-026",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 029",
+    "slug": "/vault/briefs/si-029",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 032",
+    "slug": "/vault/briefs/si-032",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 035",
+    "slug": "/vault/briefs/si-035",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 038",
+    "slug": "/vault/briefs/si-038",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 041",
+    "slug": "/vault/briefs/si-041",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 044",
+    "slug": "/vault/briefs/si-044",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 047",
+    "slug": "/vault/briefs/si-047",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 050",
+    "slug": "/vault/briefs/si-050",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 053",
+    "slug": "/vault/briefs/si-053",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 056",
+    "slug": "/vault/briefs/si-056",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 059",
+    "slug": "/vault/briefs/si-059",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 062",
+    "slug": "/vault/briefs/si-062",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 065",
+    "slug": "/vault/briefs/si-065",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 068",
+    "slug": "/vault/briefs/si-068",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 071",
+    "slug": "/vault/briefs/si-071",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereign Intelligence // Briefing 074",
+    "slug": "/vault/briefs/si-074",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "The Builder's Catechism",
+    "slug": "/vault/canon/builders-catechism",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "THE CANON - A New Era of Builders",
-    "slug": "/canon/canon-campaign",
-    "file": "content\\canon\\canon-campaign.mdx"
+    "slug": "/vault/canon/canon-campaign",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "THE CANON: A LETTER FROM THE AUTHOR",
-    "slug": "/canon/canon-introduction-letter",
-    "file": "content\\canon\\canon-introduction-letter.mdx"
+    "slug": "/vault/canon/canon-introduction-letter",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Canon Master Index & Glossary (Preview)",
-    "slug": "/canon/canon-master-index-preview",
-    "file": "content\\canon\\canon-master-index-preview.mdx"
+    "slug": "/vault/canon/canon-master-index-preview",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Volume I - Foundations of Purpose",
-    "slug": "/canon/volume-i-foundations-of-purpose",
-    "file": "content\\canon\\volume-i-foundations-of-purpose.mdx"
+    "slug": "/vault/canon/volume-i-foundations-of-purpose",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Canon Volume I - Teaching Edition",
-    "slug": "/canon/volume-i-teaching-edition",
-    "file": "content\\canon\\volume-i-teaching-edition.mdx"
+    "slug": "/vault/canon/volume-i-teaching-edition",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Canon Volume II - Governance & Formation",
-    "slug": "/canon/volume-ii-governance-and-formation",
-    "file": "content\\canon\\volume-ii-governance-and-formation.mdx"
+    "slug": "/vault/canon/volume-ii-governance-and-formation",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Canon Volume II - Teaching Edition",
-    "slug": "/canon/volume-ii-teaching-edition",
-    "file": "content\\canon\\volume-ii-teaching-edition.mdx"
+    "slug": "/vault/canon/volume-ii-teaching-edition",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Canon Volume III - Teaching Edition",
-    "slug": "/canon/volume-iii-teaching-edition",
-    "file": "content\\canon\\volume-iii-teaching-edition.mdx"
+    "slug": "/vault/canon/volume-iii-teaching-edition",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "Canon Volume IV - Teaching Edition",
-    "slug": "/canon/volume-iv-teaching-edition",
-    "file": "content\\canon\\volume-iv-teaching-edition.mdx"
+    "slug": "/vault/canon/volume-iv-teaching-edition",
+    "category": "canon",
+    "type": "brief"
   },
   {
     "title": "VOLUME TITLE GOES HERE",
-    "slug": "/canon/volume-x-filename",
-    "file": "content\\canon\\volume-x-filename.mdx"
+    "slug": "/vault/canon/volume-x-filename",
+    "category": "canon",
+    "type": "brief"
   },
   {
-    "title": "VOLUME X – THE ARC OF FUTURE CIVILISATION",
-    "slug": "/canon/volume-x-the-arc-of-future-civilisation",
-    "file": "content\\canon\\volume-x-the-arc-of-future-civilisation.mdx"
+    "title": "VOLUME X - THE ARC OF FUTURE CIVILISATION",
+    "slug": "/vault/canon/volume-x-the-arc-of-future-civilisation",
+    "category": "canon",
+    "type": "brief"
   },
   {
-    "title": "Abraham Vault — Strategic Artifacts Pack",
-    "slug": "/downloads/abraham-vault-pack",
-    "file": "content\\downloads\\abraham-vault-pack.mdx"
+    "title": "Abraham Vault -- Strategic Artifacts Pack",
+    "slug": "/vault/downloads/abraham-vault-pack",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Board Decision Log Template",
-    "slug": "/downloads/board-decision-log-template",
-    "file": "content\\downloads\\board-decision-log-template.mdx"
+    "slug": "/vault/downloads/board-decision-log-template",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Board & Investor One-Pager Template",
-    "slug": "/downloads/board-investor-onepager",
-    "file": "content\\downloads\\board-investor-onepager.mdx"
+    "slug": "/vault/downloads/board-investor-onepager",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Brotherhood Covenant",
-    "slug": "/downloads/brotherhood-covenant",
-    "file": "content\\downloads\\brotherhood-covenant.mdx"
+    "slug": "/vault/downloads/brotherhood-covenant",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Canon Volume IV - Culture-Decadence Diagnostic Toolkit",
-    "slug": "/downloads/canon-volume-iv-diagnostic-toolkit",
-    "file": "content\\downloads\\canon-volume-iv-diagnostic-toolkit.mdx"
+    "slug": "/vault/downloads/canon-volume-iv-diagnostic-toolkit",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Canon Volume V - Governance Diagnostic Toolkit",
-    "slug": "/downloads/canon-volume-v-governance-diagnostic-toolkit",
-    "file": "content\\downloads\\canon-volume-v-governance-diagnostic-toolkit.mdx"
+    "slug": "/vault/downloads/canon-volume-v-governance-diagnostic-toolkit",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Brotherhood Communication Script",
-    "slug": "/downloads/communication-script-bpf",
-    "file": "content\\downloads\\communication-script-bpf.mdx"
+    "slug": "/vault/downloads/communication-script-bpf",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Decision Log Template (PDF)",
-    "slug": "/downloads/decision-log-template",
-    "file": "content\\downloads\\decision-log-template.mdx"
+    "slug": "/vault/downloads/decision-log-template",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Decision Matrix Scorecard",
-    "slug": "/downloads/decision-matrix-scorecard",
-    "file": "content\\downloads\\decision-matrix-scorecard.mdx"
+    "slug": "/vault/downloads/decision-matrix-scorecard",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "The Legacy Architecture Canvas",
-    "slug": "/downloads/download-legacy-architecture-canvas",
-    "file": "content\\downloads\\download-legacy-architecture-canvas.mdx"
+    "slug": "/vault/downloads/download-legacy-architecture-canvas",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Entrepreneur Operating Pack",
-    "slug": "/downloads/entrepreneur-operating-pack",
-    "file": "content\\downloads\\entrepreneur-operating-pack.mdx"
+    "slug": "/vault/downloads/entrepreneur-operating-pack",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Entrepreneurial Survival Checklist",
-    "slug": "/downloads/entrepreneur-survival-checklist",
-    "file": "content\\downloads\\entrepreneur-survival-checklist.mdx"
+    "slug": "/vault/downloads/entrepreneur-survival-checklist",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Family Altar Liturgy",
-    "slug": "/downloads/family-altar-liturgy",
-    "file": "content\\downloads\\family-altar-liturgy.mdx"
+    "slug": "/vault/downloads/family-altar-liturgy",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Leader's Cue Card (Two Up)",
-    "slug": "/downloads/leaders-cue-card-two-up",
-    "file": "content\\downloads\\leaders-cue-card-two-up.mdx"
+    "slug": "/vault/downloads/leaders-cue-card-two-up",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "The Leadership Playbook",
-    "slug": "/downloads/leadership-playbook",
-    "file": "content\\downloads\\leadership-playbook.mdx"
+    "slug": "/vault/downloads/leadership-playbook",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "The Legacy Architecture Canvas",
-    "slug": "/downloads/legacy-canvas",
-    "file": "content\\downloads\\legacy-canvas.mdx"
+    "slug": "/vault/downloads/legacy-canvas",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "THE PRINCIPLES of SURRENDER FRAMEWORK",
-    "slug": "/downloads/life-alignment-assessment",
-    "file": "content\\downloads\\life-alignment-assessment.mdx"
+    "slug": "/vault/downloads/life-alignment-assessment",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Mentorship Starter Kit",
-    "slug": "/downloads/mentorship-starter-kit",
-    "file": "content\\downloads\\mentorship-starter-kit.mdx"
+    "slug": "/vault/downloads/mentorship-starter-kit",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Operating Cadence Pack",
-    "slug": "/downloads/operating-cadence-pack",
-    "file": "content\\downloads\\operating-cadence-pack.mdx"
+    "slug": "/vault/downloads/operating-cadence-pack",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Principles for My Son - Cue Card",
-    "slug": "/downloads/principles-for-my-son-cue-card",
-    "file": "content\\downloads\\principles-for-my-son-cue-card.mdx"
+    "slug": "/vault/downloads/principles-for-my-son-cue-card",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Principles for My Son",
-    "slug": "/downloads/principles-for-my-son",
-    "file": "content\\downloads\\principles-for-my-son.mdx"
+    "slug": "/vault/downloads/principles-for-my-son",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Purpose Pyramid Worksheet",
-    "slug": "/downloads/purpose-pyramid-worksheet",
-    "file": "content\\downloads\\purpose-pyramid-worksheet.mdx"
+    "slug": "/vault/downloads/purpose-pyramid-worksheet",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Scripture Track - John 14",
-    "slug": "/downloads/scripture-track-john14",
-    "file": "content\\downloads\\scripture-track-john14.mdx"
+    "slug": "/vault/downloads/scripture-track-john14",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Standards Brief",
-    "slug": "/downloads/standards-brief",
-    "file": "content\\downloads\\standards-brief.mdx"
+    "slug": "/vault/downloads/standards-brief",
+    "category": "downloads",
+    "type": "brief"
   },
   {
-    "title": "The Ultimate Purpose of Man — Strategic Editorial (PDF)",
-    "slug": "/downloads/ultimate-purpose-of-man-editorial",
-    "file": "content\\downloads\\ultimate-purpose-of-man-editorial.mdx"
+    "title": "The Ultimate Purpose of Man -- Strategic Editorial (PDF)",
+    "slug": "/vault/downloads/ultimate-purpose-of-man-editorial",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Weekly Operating Rhythm & Daily Blocks",
-    "slug": "/downloads/weekly-operating-rhythm",
-    "file": "content\\downloads\\weekly-operating-rhythm.mdx"
+    "slug": "/vault/downloads/weekly-operating-rhythm",
+    "category": "downloads",
+    "type": "brief"
   },
   {
     "title": "Founders Salon",
-    "slug": "/events/founders-salon",
-    "file": "content\\events\\founders-salon.mdx"
+    "slug": "/vault/events/founders-salon",
+    "category": "events",
+    "type": "brief"
   },
   {
     "title": "Leadership Workshop",
-    "slug": "/events/leadership-workshop",
-    "file": "content\\events\\leadership-workshop.mdx"
+    "slug": "/vault/events/leadership-workshop",
+    "category": "events",
+    "type": "brief"
+  },
+  {
+    "title": "Sovereignty: The First Pillar",
+    "slug": "/vault/intelligence/sovereignty-001",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "Strategic Autonomy",
+    "slug": "/vault/intelligence/strategic-autonomy-002",
+    "category": "intelligence",
+    "type": "brief"
   },
   {
     "title": "Clarity",
     "slug": "/vault/lexicon/clarity",
-    "file": "content\\lexicon\\clarity.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Family",
     "slug": "/vault/lexicon/family",
-    "file": "content\\lexicon\\family.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Father",
     "slug": "/vault/lexicon/father",
-    "file": "content\\lexicon\\father.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Governance",
     "slug": "/vault/lexicon/governance",
-    "file": "content\\lexicon\\governance.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Identity",
     "slug": "/vault/lexicon/identity",
-    "file": "content\\lexicon\\identity.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Integrity",
     "slug": "/vault/lexicon/integrity",
-    "file": "content\\lexicon\\integrity.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Leadership",
     "slug": "/vault/lexicon/leadership",
-    "file": "content\\lexicon\\leadership.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Legacy",
     "slug": "/vault/lexicon/legacy",
-    "file": "content\\lexicon\\legacy.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Purpose",
     "slug": "/vault/lexicon/purpose",
-    "file": "content\\lexicon\\purpose.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Responsibility",
     "slug": "/vault/lexicon/responsibility",
-    "file": "content\\lexicon\\responsibility.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Sovereignty",
     "slug": "/vault/lexicon/sovereignty",
-    "file": "content\\lexicon\\sovereignty.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Strategic Autonomy",
     "slug": "/vault/lexicon/strategic-autonomy",
-    "file": "content\\lexicon\\strategic-autonomy.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Surrender",
     "slug": "/vault/lexicon/surrender",
-    "file": "content\\lexicon\\surrender.mdx"
+    "category": "lexicon",
+    "type": "brief"
   },
   {
     "title": "Entrepreneur Operating Pack",
-    "slug": "/prints/entrepreneur-operating-pack",
-    "file": "content\\prints\\entrepreneur-operating-pack.mdx"
+    "slug": "/vault/prints/entrepreneur-operating-pack",
+    "category": "prints",
+    "type": "brief"
   },
   {
     "title": "Fatherhood Standards Card",
-    "slug": "/prints/fatherhood-standards-card",
-    "file": "content\\prints\\fatherhood-standards-card.mdx"
+    "slug": "/vault/prints/fatherhood-standards-card",
+    "category": "prints",
+    "type": "brief"
   },
   {
     "title": "Leadership Playbook (30•60•90)",
-    "slug": "/prints/leadership-playbook",
-    "file": "content\\prints\\leadership-playbook.mdx"
+    "slug": "/vault/prints/leadership-playbook",
+    "category": "prints",
+    "type": "brief"
   },
   {
     "title": "Mentorship Starter Kit",
-    "slug": "/prints/mentorship-starter-kit",
-    "file": "content\\prints\\mentorship-starter-kit.mdx"
+    "slug": "/vault/prints/mentorship-starter-kit",
+    "category": "prints",
+    "type": "brief"
   },
   {
     "title": "Standards Brief",
-    "slug": "/prints/standards-brief",
-    "file": "content\\prints\\standards-brief.mdx"
+    "slug": "/vault/prints/standards-brief",
+    "category": "prints",
+    "type": "brief"
   },
   {
     "title": "Weekly Operating Rhythm",
-    "slug": "/prints/weekly-operating-rhythm",
-    "file": "content\\prints\\weekly-operating-rhythm.mdx"
+    "slug": "/vault/prints/weekly-operating-rhythm",
+    "category": "prints",
+    "type": "brief"
   },
   {
-    "title": "Brotherhood Starter Kit",
-    "slug": "/resources/brotherhood-starter-kit",
-    "file": "content\\resources\\brotherhood-starter-kit.md"
+    "title": "The Brotherhood Leader Guide",
+    "slug": "/vault/resources/brotherhood-leader-guide",
+    "category": "resources",
+    "type": "brief"
+  },
+  {
+    "title": "The Brotherhood Starter Kit",
+    "slug": "/vault/resources/brotherhood-starter-kit",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Canon Builder's Rule of Life",
-    "slug": "/resources/canon-builders-rule-of-life",
-    "file": "content\\resources\\canon-builders-rule-of-life.mdx"
+    "slug": "/vault/resources/canon-builders-rule-of-life",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "THE CANON - A New Era of Builders",
-    "slug": "/resources/canon-campaign",
-    "file": "content\\resources\\canon-campaign.mdx"
+    "slug": "/vault/resources/canon-campaign",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Council Table Agenda - Canon Leadership Session",
-    "slug": "/resources/canon-council-table-agenda",
-    "file": "content\\resources\\canon-council-table-agenda.mdx"
+    "slug": "/vault/resources/canon-council-table-agenda",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Canon Household Charter",
-    "slug": "/resources/canon-household-charter",
-    "file": "content\\resources\\canon-household-charter.mdx"
+    "slug": "/vault/resources/canon-household-charter",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Canon Reading Plan - Year One",
-    "slug": "/resources/canon-reading-plan-year-one",
-    "file": "content\\resources\\canon-reading-plan-year-one.mdx"
+    "slug": "/vault/resources/canon-reading-plan-year-one",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Destiny Mapping Worksheet",
-    "slug": "/resources/destiny-mapping-worksheet",
-    "file": "content\\resources\\destiny-mapping-worksheet.mdx"
+    "slug": "/vault/resources/destiny-mapping-worksheet",
+    "category": "resources",
+    "type": "brief"
+  },
+  {
+    "title": "Family Court Practical Pack",
+    "slug": "/vault/resources/family-court-practical-pack",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Fatherhood Impact Framework",
-    "slug": "/resources/fatherhood-impact-framework",
-    "file": "content\\resources\\fatherhood-impact-framework.md"
+    "slug": "/vault/resources/fatherhood-impact-framework",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Getting Started",
-    "slug": "/resources/getting-started",
-    "file": "content\\resources\\getting-started.mdx"
+    "slug": "/vault/resources/getting-started",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Institutional Health Scorecard",
-    "slug": "/resources/institutional-health-scorecard",
-    "file": "content\\resources\\institutional-health-scorecard.mdx"
+    "slug": "/vault/resources/institutional-health-scorecard",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Leadership Standards Blueprint",
-    "slug": "/resources/leadership-standards-blueprint",
-    "file": "content\\resources\\leadership-standards-blueprint.md"
+    "slug": "/vault/resources/leadership-standards-blueprint",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Multi-Generational Legacy Ledger",
-    "slug": "/resources/multi-generational-legacy-ledger",
-    "file": "content\\resources\\multi-generational-legacy-ledger.mdx"
+    "slug": "/vault/resources/multi-generational-legacy-ledger",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Purpose Alignment Checklist",
-    "slug": "/resources/purpose-alignment-checklist",
-    "file": "content\\resources\\purpose-alignment-checklist.mdx"
+    "slug": "/vault/resources/purpose-alignment-checklist",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Strategic Frameworks",
-    "slug": "/resources/strategic-frameworks",
-    "file": "content\\resources\\strategic-frameworks.md"
+    "slug": "/vault/resources/strategic-frameworks",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "Strategy Room Intake",
-    "slug": "/resources/strategy-room-intake",
-    "file": "content\\resources\\strategy-room-intake.mdx"
+    "slug": "/vault/resources/strategy-room-intake",
+    "category": "resources",
+    "type": "brief"
+  },
+  {
+    "title": "Vault Index",
+    "slug": "/vault/resources/vault-index",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "The Vault",
-    "slug": "/resources/vault",
-    "file": "content\\resources\\vault.mdx"
+    "slug": "/vault/resources/vault",
+    "category": "resources",
+    "type": "brief"
   },
   {
     "title": "On Institutional Sovereignty",
-    "slug": "/shorts/institutional-sovereignty",
-    "file": "content\\shorts\\institutional-sovereignty.mdx"
+    "slug": "/vault/shorts/institutional-sovereignty",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When A Single Yes Changes Everything",
-    "slug": "/shorts/when-a-single-yes-changes-everything",
-    "file": "content\\shorts\\when-a-single-yes-changes-everything.mdx"
+    "slug": "/vault/shorts/when-a-single-yes-changes-everything",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When All You Can Do Is Breathe",
-    "slug": "/shorts/when-all-you-can-do-is-breathe",
-    "file": "content\\shorts\\when-all-you-can-do-is-breathe.mdx"
+    "slug": "/vault/shorts/when-all-you-can-do-is-breathe",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Avoidance Becomes Your Personality",
-    "slug": "/shorts/when-avoidance-becomes-your-personality",
-    "file": "content\\shorts\\when-avoidance-becomes-your-personality.mdx"
+    "slug": "/vault/shorts/when-avoidance-becomes-your-personality",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Busyness Becomes Your Brand",
-    "slug": "/shorts/when-busyness-becomes-your-brand",
-    "file": "content\\shorts\\when-busyness-becomes-your-brand.mdx"
+    "slug": "/vault/shorts/when-busyness-becomes-your-brand",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Comfort Becomes Your Cage",
-    "slug": "/shorts/when-comfort-becomes-your-cage",
-    "file": "content\\shorts\\when-comfort-becomes-your-cage.mdx"
+    "slug": "/vault/shorts/when-comfort-becomes-your-cage",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Conflict Feels Like Betrayal",
-    "slug": "/shorts/when-conflict-feels-like-betrayal",
-    "file": "content\\shorts\\when-conflict-feels-like-betrayal.mdx"
+    "slug": "/vault/shorts/when-conflict-feels-like-betrayal",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Doctrine Feels Safer Than God",
-    "slug": "/shorts/when-doctrine-feels-safer-than-god",
-    "file": "content\\shorts\\when-doctrine-feels-safer-than-god.mdx"
+    "slug": "/vault/shorts/when-doctrine-feels-safer-than-god",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Every Promotion Feels Hollow",
-    "slug": "/shorts/when-every-promotion-feels-hollow",
-    "file": "content\\shorts\\when-every-promotion-feels-hollow.mdx"
+    "slug": "/vault/shorts/when-every-promotion-feels-hollow",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Grace Finds You In The Mess",
-    "slug": "/shorts/when-grace-finds-you-in-the-mess",
-    "file": "content\\shorts\\when-grace-finds-you-in-the-mess.mdx"
+    "slug": "/vault/shorts/when-grace-finds-you-in-the-mess",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Hope Feels Reckless",
-    "slug": "/shorts/when-hope-feels-reckless",
-    "file": "content\\shorts\\when-hope-feels-reckless.mdx"
+    "slug": "/vault/shorts/when-hope-feels-reckless",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Kindness Feels Like Rebellion",
-    "slug": "/shorts/when-kindness-feels-like-rebellion",
-    "file": "content\\shorts\\when-kindness-feels-like-rebellion.mdx"
+    "slug": "/vault/shorts/when-kindness-feels-like-rebellion",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Later Became Never",
-    "slug": "/shorts/when-later-became-never",
-    "file": "content\\shorts\\when-later-became-never.mdx"
+    "slug": "/vault/shorts/when-later-became-never",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Numbness Feels Safer Than Joy",
-    "slug": "/shorts/when-numbness-feels-safer-than-joy",
-    "file": "content\\shorts\\when-numbness-feels-safer-than-joy.mdx"
+    "slug": "/vault/shorts/when-numbness-feels-safer-than-joy",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Productivity Becomes Punishment",
-    "slug": "/shorts/when-productivity-becomes-punishment",
-    "file": "content\\shorts\\when-productivity-becomes-punishment.mdx"
+    "slug": "/vault/shorts/when-productivity-becomes-punishment",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Rest Starts To Feel Dangerous",
-    "slug": "/shorts/when-rest-starts-to-feel-dangerous",
-    "file": "content\\shorts\\when-rest-starts-to-feel-dangerous.mdx"
+    "slug": "/vault/shorts/when-rest-starts-to-feel-dangerous",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Argue With God In Your Head",
-    "slug": "/shorts/when-you-argue-with-god-in-your-head",
-    "file": "content\\shorts\\when-you-argue-with-god-in-your-head.mdx"
+    "slug": "/vault/shorts/when-you-argue-with-god-in-your-head",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Cant Stop Overthinking",
-    "slug": "/shorts/when-you-cant-stop-overthinking",
-    "file": "content\\shorts\\when-you-cant-stop-overthinking.mdx"
+    "slug": "/vault/shorts/when-you-cant-stop-overthinking",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Cant Tell If Youre Growing Or Drifting",
-    "slug": "/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
-    "file": "content\\shorts\\when-you-cant-tell-if-youre-growing-or-drifting.mdx"
+    "slug": "/vault/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Dont Know What You Want Anymore",
-    "slug": "/shorts/when-you-dont-know-what-you-want-anymore",
-    "file": "content\\shorts\\when-you-dont-know-what-you-want-anymore.mdx"
+    "slug": "/vault/shorts/when-you-dont-know-what-you-want-anymore",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Dont Trust Your Own Decisions",
-    "slug": "/shorts/when-you-dont-trust-your-own-decisions",
-    "file": "content\\shorts\\when-you-dont-trust-your-own-decisions.mdx"
+    "slug": "/vault/shorts/when-you-dont-trust-your-own-decisions",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Fear Being Wrong About God",
-    "slug": "/shorts/when-you-fear-being-wrong-about-god",
-    "file": "content\\shorts\\when-you-fear-being-wrong-about-god.mdx"
+    "slug": "/vault/shorts/when-you-fear-being-wrong-about-god",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Fear Success More Than Failure",
-    "slug": "/shorts/when-you-fear-success-more-than-failure",
-    "file": "content\\shorts\\when-you-fear-success-more-than-failure.mdx"
+    "slug": "/vault/shorts/when-you-fear-success-more-than-failure",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Feel Like God Is Delaying You",
-    "slug": "/shorts/when-you-feel-like-god-is-delaying-you",
-    "file": "content\\shorts\\when-you-feel-like-god-is-delaying-you.mdx"
+    "slug": "/vault/shorts/when-you-feel-like-god-is-delaying-you",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Feel Too Busy To Care",
-    "slug": "/shorts/when-you-feel-too-busy-to-care",
-    "file": "content\\shorts\\when-you-feel-too-busy-to-care.mdx"
+    "slug": "/vault/shorts/when-you-feel-too-busy-to-care",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Finally Let Yourself Cry",
-    "slug": "/shorts/when-you-finally-let-yourself-cry",
-    "file": "content\\shorts\\when-you-finally-let-yourself-cry.mdx"
+    "slug": "/vault/shorts/when-you-finally-let-yourself-cry",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Give More Than You Get",
-    "slug": "/shorts/when-you-give-more-than-you-get",
-    "file": "content\\shorts\\when-you-give-more-than-you-get.mdx"
+    "slug": "/vault/shorts/when-you-give-more-than-you-get",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Keep Blaming Your Childhood",
-    "slug": "/shorts/when-you-keep-blaming-your-childhood",
-    "file": "content\\shorts\\when-you-keep-blaming-your-childhood.mdx"
+    "slug": "/vault/shorts/when-you-keep-blaming-your-childhood",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Keep Choosing People Who Cant Choose You",
-    "slug": "/shorts/when-you-keep-choosing-people-who-cant-choose-you",
-    "file": "content\\shorts\\when-you-keep-choosing-people-who-cant-choose-you.mdx"
+    "slug": "/vault/shorts/when-you-keep-choosing-people-who-cant-choose-you",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Keep Confusing Niceness With Goodness",
-    "slug": "/shorts/when-you-keep-confusing-niceness-with-goodness",
-    "file": "content\\shorts\\when-you-keep-confusing-niceness-with-goodness.mdx"
+    "slug": "/vault/shorts/when-you-keep-confusing-niceness-with-goodness",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Miss Who You Used To Be",
-    "slug": "/shorts/when-you-miss-who-you-used-to-be",
-    "file": "content\\shorts\\when-you-miss-who-you-used-to-be.mdx"
+    "slug": "/vault/shorts/when-you-miss-who-you-used-to-be",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Mistake Familiarity For Loyalty",
-    "slug": "/shorts/when-you-mistake-familiarity-for-loyalty",
-    "file": "content\\shorts\\when-you-mistake-familiarity-for-loyalty.mdx"
+    "slug": "/vault/shorts/when-you-mistake-familiarity-for-loyalty",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Need God To Interrupt You",
-    "slug": "/shorts/when-you-need-god-to-interrupt-you",
-    "file": "content\\shorts\\when-you-need-god-to-interrupt-you.mdx"
+    "slug": "/vault/shorts/when-you-need-god-to-interrupt-you",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You No Longer Recognise Your Own Voice",
-    "slug": "/shorts/when-you-no-longer-recognise-your-own-voice",
-    "file": "content\\shorts\\when-you-no-longer-recognise-your-own-voice.mdx"
+    "slug": "/vault/shorts/when-you-no-longer-recognise-your-own-voice",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Outgrow Your Circle",
-    "slug": "/shorts/when-you-outgrow-your-circle",
-    "file": "content\\shorts\\when-you-outgrow-your-circle.mdx"
+    "slug": "/vault/shorts/when-you-outgrow-your-circle",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Realise Prayer Is War",
-    "slug": "/shorts/when-you-realise-prayer-is-war",
-    "file": "content\\shorts\\when-you-realise-prayer-is-war.mdx"
+    "slug": "/vault/shorts/when-you-realise-prayer-is-war",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Realise You Were The Problem",
-    "slug": "/shorts/when-you-realise-you-were-the-problem",
-    "file": "content\\shorts\\when-you-realise-you-were-the-problem.mdx"
+    "slug": "/vault/shorts/when-you-realise-you-were-the-problem",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Realise Youre Not Behind",
-    "slug": "/shorts/when-you-realise-youre-not-behind",
-    "file": "content\\shorts\\when-you-realise-youre-not-behind.mdx"
+    "slug": "/vault/shorts/when-you-realise-youre-not-behind",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Stop Waiting For Permission",
-    "slug": "/shorts/when-you-stop-waiting-for-permission",
-    "file": "content\\shorts\\when-you-stop-waiting-for-permission.mdx"
+    "slug": "/vault/shorts/when-you-stop-waiting-for-permission",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When You Want To Quit But Cant",
-    "slug": "/shorts/when-you-want-to-quit-but-cant",
-    "file": "content\\shorts\\when-you-want-to-quit-but-cant.mdx"
+    "slug": "/vault/shorts/when-you-want-to-quit-but-cant",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Calendar Is Full But Your Life Is Empty",
-    "slug": "/shorts/when-your-calendar-is-full-but-your-life-is-empty",
-    "file": "content\\shorts\\when-your-calendar-is-full-but-your-life-is-empty.mdx"
+    "slug": "/vault/shorts/when-your-calendar-is-full-but-your-life-is-empty",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Calling Stops Being Cute",
-    "slug": "/shorts/when-your-calling-stops-being-cute",
-    "file": "content\\shorts\\when-your-calling-stops-being-cute.mdx"
+    "slug": "/vault/shorts/when-your-calling-stops-being-cute",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Character Is Leaking",
-    "slug": "/shorts/when-your-character-is-leaking",
-    "file": "content\\shorts\\when-your-character-is-leaking.mdx"
+    "slug": "/vault/shorts/when-your-character-is-leaking",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Confidence Feels Manufactured",
-    "slug": "/shorts/when-your-confidence-feels-manufactured",
-    "file": "content\\shorts\\when-your-confidence-feels-manufactured.mdx"
+    "slug": "/vault/shorts/when-your-confidence-feels-manufactured",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Convictions Feel Like Costumes",
-    "slug": "/shorts/when-your-convictions-feel-like-costumes",
-    "file": "content\\shorts\\when-your-convictions-feel-like-costumes.mdx"
+    "slug": "/vault/shorts/when-your-convictions-feel-like-costumes",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Dreams Feel Too Heavy",
-    "slug": "/shorts/when-your-dreams-feel-too-heavy",
-    "file": "content\\shorts\\when-your-dreams-feel-too-heavy.mdx"
+    "slug": "/vault/shorts/when-your-dreams-feel-too-heavy",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Excuses Become Your Identity",
-    "slug": "/shorts/when-your-excuses-become-your-identity",
-    "file": "content\\shorts\\when-your-excuses-become-your-identity.mdx"
+    "slug": "/vault/shorts/when-your-excuses-become-your-identity",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Faith Feels Numb",
-    "slug": "/shorts/when-your-faith-feels-numb",
-    "file": "content\\shorts\\when-your-faith-feels-numb.mdx"
+    "slug": "/vault/shorts/when-your-faith-feels-numb",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Hustle Has No Soul",
-    "slug": "/shorts/when-your-hustle-has-no-soul",
-    "file": "content\\shorts\\when-your-hustle-has-no-soul.mdx"
+    "slug": "/vault/shorts/when-your-hustle-has-no-soul",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Legacy Terrifies You",
-    "slug": "/shorts/when-your-legacy-terrifies-you",
-    "file": "content\\shorts\\when-your-legacy-terrifies-you.mdx"
+    "slug": "/vault/shorts/when-your-legacy-terrifies-you",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Silence Says Too Much",
-    "slug": "/shorts/when-your-silence-says-too-much",
-    "file": "content\\shorts\\when-your-silence-says-too-much.mdx"
+    "slug": "/vault/shorts/when-your-silence-says-too-much",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Standards Keep You Lonely",
-    "slug": "/shorts/when-your-standards-keep-you-lonely",
-    "file": "content\\shorts\\when-your-standards-keep-you-lonely.mdx"
+    "slug": "/vault/shorts/when-your-standards-keep-you-lonely",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Vision Outgrows Your Environment",
-    "slug": "/shorts/when-your-vision-outgrows-your-environment",
-    "file": "content\\shorts\\when-your-vision-outgrows-your-environment.mdx"
+    "slug": "/vault/shorts/when-your-vision-outgrows-your-environment",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Your Work Becomes Your Hiding Place",
-    "slug": "/shorts/when-your-work-becomes-your-hiding-place",
-    "file": "content\\shorts\\when-your-work-becomes-your-hiding-place.mdx"
+    "slug": "/vault/shorts/when-your-work-becomes-your-hiding-place",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Addicted To Distraction",
-    "slug": "/shorts/when-youre-addicted-to-distraction",
-    "file": "content\\shorts\\when-youre-addicted-to-distraction.mdx"
+    "slug": "/vault/shorts/when-youre-addicted-to-distraction",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Afraid Of Your Own Potential",
-    "slug": "/shorts/when-youre-afraid-of-your-own-potential",
-    "file": "content\\shorts\\when-youre-afraid-of-your-own-potential.mdx"
+    "slug": "/vault/shorts/when-youre-afraid-of-your-own-potential",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Afraid To Be Radical",
-    "slug": "/shorts/when-youre-afraid-to-be-radical",
-    "file": "content\\shorts\\when-youre-afraid-to-be-radical.mdx"
+    "slug": "/vault/shorts/when-youre-afraid-to-be-radical",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Always The Strong One",
-    "slug": "/shorts/when-youre-always-the-strong-one",
-    "file": "content\\shorts\\when-youre-always-the-strong-one.mdx"
+    "slug": "/vault/shorts/when-youre-always-the-strong-one",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Attracted To Potential Not Reality",
-    "slug": "/shorts/when-youre-attracted-to-potential-not-reality",
-    "file": "content\\shorts\\when-youre-attracted-to-potential-not-reality.mdx"
+    "slug": "/vault/shorts/when-youre-attracted-to-potential-not-reality",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Building Someone Elses Legacy",
-    "slug": "/shorts/when-youre-building-someone-elses-legacy",
-    "file": "content\\shorts\\when-youre-building-someone-elses-legacy.mdx"
+    "slug": "/vault/shorts/when-youre-building-someone-elses-legacy",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Done Fixing Adults",
-    "slug": "/shorts/when-youre-done-fixing-adults",
-    "file": "content\\shorts\\when-youre-done-fixing-adults.mdx"
+    "slug": "/vault/shorts/when-youre-done-fixing-adults",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Exhausted But Still Available",
-    "slug": "/shorts/when-youre-exhausted-but-still-available",
-    "file": "content\\shorts\\when-youre-exhausted-but-still-available.mdx"
+    "slug": "/vault/shorts/when-youre-exhausted-but-still-available",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Keeping Faith Out Of Habit",
-    "slug": "/shorts/when-youre-keeping-faith-out-of-habit",
-    "file": "content\\shorts\\when-youre-keeping-faith-out-of-habit.mdx"
+    "slug": "/vault/shorts/when-youre-keeping-faith-out-of-habit",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Living For Weekends",
-    "slug": "/shorts/when-youre-living-for-weekends",
-    "file": "content\\shorts\\when-youre-living-for-weekends.mdx"
+    "slug": "/vault/shorts/when-youre-living-for-weekends",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Loved Without Earning It",
-    "slug": "/shorts/when-youre-loved-without-earning-it",
-    "file": "content\\shorts\\when-youre-loved-without-earning-it.mdx"
+    "slug": "/vault/shorts/when-youre-loved-without-earning-it",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Measuring Everything But Meaning",
-    "slug": "/shorts/when-youre-measuring-everything-but-meaning",
-    "file": "content\\shorts\\when-youre-measuring-everything-but-meaning.mdx"
+    "slug": "/vault/shorts/when-youre-measuring-everything-but-meaning",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Not Lazy Youre Undisciplined",
-    "slug": "/shorts/when-youre-not-lazy-youre-undisciplined",
-    "file": "content\\shorts\\when-youre-not-lazy-youre-undisciplined.mdx"
+    "slug": "/vault/shorts/when-youre-not-lazy-youre-undisciplined",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Preparing For Rooms You Havent Entered",
-    "slug": "/shorts/when-youre-preparing-for-rooms-you-havent-entered",
-    "file": "content\\shorts\\when-youre-preparing-for-rooms-you-havent-entered.mdx"
+    "slug": "/vault/shorts/when-youre-preparing-for-rooms-you-havent-entered",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Productive But Not Present",
-    "slug": "/shorts/when-youre-productive-but-not-present",
-    "file": "content\\shorts\\when-youre-productive-but-not-present.mdx"
+    "slug": "/vault/shorts/when-youre-productive-but-not-present",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Scared To Start Over",
-    "slug": "/shorts/when-youre-scared-to-start-over",
-    "file": "content\\shorts\\when-youre-scared-to-start-over.mdx"
+    "slug": "/vault/shorts/when-youre-scared-to-start-over",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre The Only One Doing The Work",
-    "slug": "/shorts/when-youre-the-only-one-doing-the-work",
-    "file": "content\\shorts\\when-youre-the-only-one-doing-the-work.mdx"
+    "slug": "/vault/shorts/when-youre-the-only-one-doing-the-work",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Tired Of Being The Bigger Person",
-    "slug": "/shorts/when-youre-tired-of-being-the-bigger-person",
-    "file": "content\\shorts\\when-youre-tired-of-being-the-bigger-person.mdx"
+    "slug": "/vault/shorts/when-youre-tired-of-being-the-bigger-person",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Tired Of Starting Over",
-    "slug": "/shorts/when-youre-tired-of-starting-over",
-    "file": "content\\shorts\\when-youre-tired-of-starting-over.mdx"
+    "slug": "/vault/shorts/when-youre-tired-of-starting-over",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youre Winning At Work But Losing Yourself",
-    "slug": "/shorts/when-youre-winning-at-work-but-losing-yourself",
-    "file": "content\\shorts\\when-youre-winning-at-work-but-losing-yourself.mdx"
+    "slug": "/vault/shorts/when-youre-winning-at-work-but-losing-yourself",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youve Become Chronically Online",
-    "slug": "/shorts/when-youve-become-chronically-online",
-    "file": "content\\shorts\\when-youve-become-chronically-online.mdx"
+    "slug": "/vault/shorts/when-youve-become-chronically-online",
+    "category": "shorts",
+    "type": "brief"
   },
   {
     "title": "When Youve Worshipped The Wrong Metrics",
-    "slug": "/shorts/when-youve-worshipped-the-wrong-metrics",
-    "file": "content\\shorts\\when-youve-worshipped-the-wrong-metrics.mdx"
+    "slug": "/vault/shorts/when-youve-worshipped-the-wrong-metrics",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Governance",
+    "slug": "/vault/strategy/institutional-governance",
+    "category": "strategy",
+    "type": "brief"
   },
   {
     "title": "Strategy Sample",
-    "slug": "/strategy/sample-strategy",
-    "file": "content\\strategy\\sample-strategy.mdx"
+    "slug": "/vault/strategy/sample-strategy",
+    "category": "strategy",
+    "type": "brief"
+  },
+  {
+    "title": "Download: decision-matrix-scorecard-fillable.pdf",
+    "slug": "/vault/downloads/decision-matrix-scorecard-fillable.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: decision-matrix.pdf",
+    "slug": "/vault/downloads/decision-matrix.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: decision-matrix.pdf",
+    "slug": "/vault/downloads/decision-matrix.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: legacy-canvas.pdf",
+    "slug": "/vault/downloads/legacy-canvas.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: purpose-pyramid.pdf",
+    "slug": "/vault/downloads/purpose-pyramid.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: legacy-canvas-fillable.pdf",
+    "slug": "/vault/downloads/legacy-canvas-fillable.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: legacy-canvas.pdf",
+    "slug": "/vault/downloads/legacy-canvas.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: purpose-pyramid-worksheet-fillable.pdf",
+    "slug": "/vault/downloads/purpose-pyramid-worksheet-fillable.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: life-alignment-worksheet.pdf",
+    "slug": "/vault/downloads/life-alignment-worksheet.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: personal-alignment-assessment-fillable.pdf",
+    "slug": "/vault/downloads/personal-alignment-assessment-fillable.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: purpose-pyramid-worksheet-fillable.pdf",
+    "slug": "/vault/downloads/purpose-pyramid-worksheet-fillable.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: purpose-pyramid.pdf",
+    "slug": "/vault/downloads/purpose-pyramid.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: surrender-framework.pdf",
+    "slug": "/vault/downloads/surrender-framework.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: surrender-principles.pdf",
+    "slug": "/vault/downloads/surrender-principles.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Contact",
+    "slug": "/vault/contact",
+    "category": "system"
+  },
+  {
+    "title": "Subscribe",
+    "slug": "/vault/subscribe",
+    "category": "system"
+  },
+  {
+    "title": "Inner Circle",
+    "slug": "/vault/inner-circle",
+    "category": "system"
+  },
+  {
+    "title": "Practical Pack",
+    "slug": "/vault/downloads/Fathers_in_Family_Court_Practical_Pack.pdf",
+    "category": "downloads"
+  },
+  {
+    "title": "Starter Kit",
+    "slug": "/vault/downloads/Brotherhood_Starter_Kit.pdf",
+    "category": "downloads"
+  },
+  {
+    "title": "Leader Guide",
+    "slug": "/vault/downloads/Brotherhood_Leader_Guide_4_Weeks.pdf",
+    "category": "downloads"
+  },
+  {
+    "title": "Practical Pack Lower",
+    "slug": "/vault/downloads/Fathers_in_the_family_court_practical_pack.pdf",
+    "category": "downloads"
   }
 ]

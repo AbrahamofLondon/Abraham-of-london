@@ -14,6 +14,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getSessionContext, tierAtLeast, mapMemberTier, type Tier } from "@/lib/server/auth/tokenStore.postgres";
+
 import Layout from "@/components/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 
@@ -227,31 +230,48 @@ const RhythmItem = ({ label, val }: any) => (
 ----------------------------------------------------------------------------- */
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const [{ prisma }, accessMod, { getServerSession }, { authOptions }] = await Promise.all([
-      import("@/lib/server/prisma"),
-      import("@/lib/inner-circle/access.server"),
-      import("next-auth/next"),
-      import("@/lib/auth"),
-    ]);
+    const sessionId = readAccessCookie(context.req as any);
 
-    const session = await getServerSession(context.req, context.res, authOptions);
-
-    if (!session?.user?.email) {
-      return { redirect: { destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`, permanent: false } };
+    if (!sessionId) {
+      return {
+        redirect: {
+          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          permanent: false,
+        },
+      };
     }
 
-    const member = await prisma.member.findUnique({
-      where: { email: session.user.email },
-    });
+    const ctx = await getSessionContext(sessionId);
 
-    const userTier = (member?.tier || "public") as any;
-    const access = accessMod.getInnerCircleAccess({ userTier, requiresTier: "basic" });
-
-    if (!access.ok) {
-      return { redirect: { destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`, permanent: false } };
+    if (!ctx.session || !ctx.member || !ctx.tier) {
+      return {
+        redirect: {
+          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          permanent: false,
+        },
+      };
     }
 
-    // Replace with real Contentlayer or Prisma query for the 75 briefs
+    // REQUIRED TIER (choose your actual minimum)
+    const required: Tier = "inner-circle";
+    if (!tierAtLeast(ctx.tier, required)) {
+      return {
+        redirect: {
+          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          permanent: false,
+        },
+      };
+    }
+
+    // Use the authoritative tier mapping for display
+    const userTier = mapMemberTier(ctx.member.tier); // returns Tier
+    const uiTier =
+      userTier === "inner-circle-elite" ? "elite" :
+      userTier === "inner-circle-plus" ? "plus" :
+      userTier === "inner-circle" ? "basic" :
+      userTier; // fallback
+
+    // TODO: replace stub content with real query
     const content = [
       { title: "The Builder's Catechism", kind: "Canon", excerpt: "Foundational questions for institutional architects.", href: "/canon/builders-catechism", date: "Jan 2026", readTime: "12m" },
       { title: "Strategic Frameworks v4.2", kind: "Brief", excerpt: "Board-ready decision matrices and prioritization logic.", href: "/canon/strategic-frameworks", date: "Dec 2025", readTime: "8m" },
@@ -260,25 +280,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     return {
       props: {
-        access: { hasAccess: true, userId: member?.id || null, tier: userTier },
+        access: { hasAccess: true, userId: ctx.member.id || null, tier: uiTier },
         initialData: {
           content,
-          stats: { total: 75, totalViews: member?.viewCount || 0 },
+          stats: { total: 75, totalViews: ctx.member.viewCount || 0 },
           user: {
-            name: member?.name || session.user.name || "Member",
-            tier: userTier,
-            lastLogin: member?.updatedAt?.toISOString() || new Date().toISOString(),
+            name: ctx.member.name || "Member",
+            tier: uiTier,
+            lastLogin: ctx.session.lastActivity?.toISOString?.() || new Date().toISOString(),
           },
         },
       },
     };
-  } catch (err) {
+  } catch (err: any) {
+    console.error("[inner-circle/dashboard] gSSP error:", err);
     return {
       props: {
         access: { hasAccess: false, tier: "public" },
         initialData: { content: [], stats: { total: 0, totalViews: 0 }, user: { name: "Member", tier: "public", lastLogin: "" } },
-        error: "Critical Failure: Institutional Vault is currently locked for maintenance."
-      }
+        error: "Critical Failure: Institutional Vault is currently locked for maintenance.",
+      },
     };
   }
 };

@@ -1,7 +1,9 @@
-/* next.config.mjs — UNIFIED SOVEREIGN CONFIGURATION (Hardened for 2026) */
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
+/** 
+ * Safe module resolution with fallbacks for browser-compatible polyfills
+ */
 function tryResolve(id) {
   try {
     return require.resolve(id);
@@ -10,17 +12,38 @@ function tryResolve(id) {
   }
 }
 
+/** 
+ * Maps Node.js modules to browser polyfills or false to ignore
+ */
 function buildBrowserFallbacks() {
-  const fallbacks = ["crypto-browserify", "stream-browserify", "url", "util", "path-browserify", "os-browserify/browser"];
+  const polyfillMap = {
+    "crypto": "crypto-browserify",
+    "stream": "stream-browserify",
+    "url": "url",
+    "util": "util",
+    "path": "path-browserify",
+    "os": "os-browserify/browser"
+  };
+  
   const resolved = {};
-  fallbacks.forEach(id => {
-    const path = tryResolve(id);
-    if (path) {
-      const key = id.replace('-browserify', '').replace('/browser', '');
-      resolved[key] = path;
+  
+  // Explicitly disable server-only modules in the browser
+  const disabled = {
+    fs: false,
+    net: false,
+    tls: false,
+    dns: false,
+    child_process: false,
+  };
+  
+  Object.entries(polyfillMap).forEach(([nodeModule, polyfillId]) => {
+    const resolvedPath = tryResolve(polyfillId);
+    if (resolvedPath) {
+      resolved[nodeModule] = resolvedPath;
     }
   });
-  return { fs: false, net: false, tls: false, dns: false, child_process: false, ...resolved };
+  
+  return { ...disabled, ...resolved };
 }
 
 /** @type {import("next").NextConfig} */
@@ -29,54 +52,111 @@ const nextConfig = {
   trailingSlash: false,
   compress: true,
   poweredByHeader: false,
-  staticPageGenerationTimeout: 1200,
-
-  // Combined hardening for Typescript and ESLint
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
-
+  staticPageGenerationTimeout: 300,
+  
+  typescript: { 
+    ignoreBuildErrors: false,
+  },
+  
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge", "framer-motion"],
+    optimizePackageImports: [
+      "lucide-react", 
+      "date-fns", 
+      "clsx", 
+      "tailwind-merge", 
+      "framer-motion",
+      "@/components",
+      "@/lib"
+    ],
+    optimizeCss: true,
+    // REMOVED: optimizeFonts is not valid in Next.js 16
+    // Font optimization is automatic in Next.js 16 via next/font
   },
-
+  
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "**", pathname: "**" }
+    ],
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-
+  
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-DNS-Prefetch-Control", value: "on" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "origin-when-cross-origin" }
+        ],
+      },
+    ];
+  },
+  
+  async redirects() {
+    return [
+      { source: '/app/strategy/:slug', destination: '/strategy/:slug', permanent: true },
+      { source: '/:path+/', destination: '/:path+', permanent: true },
+    ];
+  },
+  
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // 1. Sever the link to Node.js internals for Client Components
       config.resolve.fallback = {
         ...config.resolve.fallback,
         ...buildBrowserFallbacks(),
       };
+      
+      // 2. Performance optimization for the 259 asset portfolio
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 250000,
+          cacheGroups: {
+            defaultVendors: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
     }
     return config;
   },
+  
+  output: 'standalone',
+  
+  env: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_APP_VERSION: '1.0.0',
+  },
 };
 
-// Sovereign Wrapper Logic
-export default async function() {
-  let finalConfig = nextConfig;
+// --- CONTENTLAYER WRAPPER ---
+let finalConfig = nextConfig;
+
+try {
+  const { withContentlayer } = require("next-contentlayer2");
+  finalConfig = withContentlayer(nextConfig);
+  console.log("✅ Contentlayer 2 Integrated");
+} catch (e1) {
   try {
-    const { withContentlayer } = await import("next-contentlayer2");
+    const { withContentlayer } = require("next-contentlayer");
     finalConfig = withContentlayer(nextConfig);
-  } catch (e) {
-    try {
-      const { withContentlayer } = await import("next-contentlayer");
-      finalConfig = withContentlayer(nextConfig);
-    } catch (e2) {
-      console.warn("⚠️ Contentlayer wrapper failed. Running naked.");
-    }
+    console.log("✅ Contentlayer (Legacy) Integrated");
+  } catch (e2) {
+    console.warn("⚠️ Contentlayer not found. Building without content processing.");
   }
-
-  // Final check: Remove top-level 'eslint' if the wrapper accidentally injected it 
-  // as a root-level key which Next.js 16 now rejects.
-  if (finalConfig.eslint && typeof finalConfig.eslint !== 'object') {
-     delete finalConfig.eslint;
-  }
-
-  return finalConfig;
 }
+
+export default finalConfig;

@@ -1,74 +1,92 @@
-// types/next-auth.d.ts
-import type { DefaultSession, DefaultUser } from "next-auth";
-import type { JWT as DefaultJWT } from "next-auth/jwt";
+/* lib/auth/auth-options.ts */
+import { NextAuthOptions } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt"; // For key verification
 
-// -----------------------------------------------------------------------------
-// AoL Access Claims (canonical)
-// -----------------------------------------------------------------------------
-export type AoLTier =
-  | "public"
-  | "inner-circle"
-  | "inner-circle-plus"
-  | "inner-circle-elite"
-  | "private";
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+    maxAge: 4 * 60 * 60, // 4-hour high-security window
+  },
+  providers: [
+    CredentialsProvider({
+      name: "AoL Institutional Access",
+      credentials: {
+        email: { label: "Principal Email", type: "email" },
+        accessKey: { label: "Institutional Key", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.accessKey) return null;
 
-export interface AoLAccessClaims {
-  aol: {
-    tier: AoLTier;
-    innerCircleAccess: boolean;
-    isInternal: boolean;
-    allowPrivate: boolean;
+        const member = await prisma.innerCircleMember.findUnique({
+          where: { email: credentials.email.toLowerCase() },
+          include: { keys: true },
+        });
 
-    // Correlation keys (safe for audit, avoid raw identifiers if you can)
-    memberId?: string | null;
-    emailHash?: string | null;
+        if (!member || member.status !== "active") {
+          throw new Error("Access Denied: Account non-existent or suspended.");
+        }
 
-    // Optional meta
-    flags?: string[];
-  };
-}
+        // Find the active institutional key
+        const activeKey = member.keys.find(k => k.status === "active");
+        if (!activeKey) throw new Error("No active institutional key found.");
 
-declare module "next-auth" {
-  /**
-   * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider`.
-   */
-  interface Session extends DefaultSession, AoLAccessClaims {
-    user: {
-      /** The user's unique identifier. */
-      id: string;
-      /** The user's email address. */
-      email: string;
-      /** The user's full name. */
-      name?: string | null;
-      /** The user's profile image URL. */
-      image?: string | null;
-      /** User role */
-      role?: string;
-    } & DefaultSession["user"];
-  }
+        // Verify the 256-bit hashed key
+        const isValid = await bcrypt.compare(credentials.accessKey, activeKey.keyHash);
+        
+        if (!isValid) {
+          await prisma.systemAuditLog.create({
+            data: {
+              action: "AUTH_FAILURE",
+              severity: "HIGH",
+              actorEmail: credentials.email,
+              metadata: JSON.stringify({ reason: "Invalid Access Key" })
+            }
+          });
+          return null;
+        }
 
-  /**
-   * The shape of the user object returned in the OAuth providers' `profile` callback,
-   * or the second parameter of the `credentials` authorization callback.
-   */
-  interface User extends DefaultUser {
-    id: string;
-    email: string;
-    name?: string | null;
-    image?: string | null;
-    role?: string;
-  }
-}
+        return {
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          role: member.role,
+          tier: member.tier,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        const member = await prisma.innerCircleMember.findUnique({
+          where: { id: user.id },
+        });
 
-declare module "next-auth/jwt" {
-  /**
-   * JWT payload returned by the `jwt` callback and `getToken`, when using JWT sessions.
-   */
-  interface JWT extends DefaultJWT, Partial<AoLAccessClaims> {
-    id: string;
-    email: string;
-    name?: string;
-    image?: string;
-    role?: string;
-  }
-}
+        token.id = user.id;
+        token.role = user.role;
+        token.aol = {
+          tier: (member?.tier as any) || "public",
+          innerCircleAccess: ["inner-circle", "inner-circle-plus", "inner-circle-elite", "private"].includes(member?.tier || ""),
+          isInternal: member?.role === "ADMIN" || member?.role === "PRINCIPAL",
+          allowPrivate: member?.tier === "private",
+          memberId: member?.id || null,
+          emailHash: member?.emailHash || null,
+          flags: member?.flags ? JSON.parse(member.flags) : [],
+        };
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.aol = token.aol;
+      }
+      return session;
+    },
+  },
+};

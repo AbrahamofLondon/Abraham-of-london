@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 // Fix hashbang in .tsx files that are imported as modules
 const filesToFix = [
   'scripts/generate-pdfs.tsx',
-  'scripts/pdf-registry.ts',
+  '@/lib/pdf/registry";
   'scripts/generate-legacy-canvas.tsx'
 ];
 

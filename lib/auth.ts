@@ -1,15 +1,20 @@
-// lib/auth.ts
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import crypto from "crypto";
 
 import type { AoLTier } from "@/types/next-auth";
-import { safePrismaQuery } from "@/lib/prisma"; // <- from the lazy Prisma module I gave you earlier
+import { safePrismaQuery } from "@/lib/prisma"; 
 
+/**
+ * UTILITY: Deterministic Identity Hashing
+ */
 function sha256Hex(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+/**
+ * UTILITY: Flag Sanitization
+ */
 function safeParseFlags(flagsJson?: string | null): string[] {
   if (!flagsJson) return [];
   try {
@@ -21,48 +26,54 @@ function safeParseFlags(flagsJson?: string | null): string[] {
 }
 
 function hasInternalFlag(flags: string[]): boolean {
-  return (
-    flags.includes("internal") ||
-    flags.includes("staff") ||
-    flags.includes("private_access") ||
-    flags.includes("admin")
-  );
+  const internalMarkers = ["internal", "staff", "private_access", "admin"];
+  return flags.some(flag => internalMarkers.includes(flag));
 }
 
-// Map your InnerCircleMember.tier -> AoL tier ladder
+/**
+ * TIER MAPPING: Translates Neon PostgreSQL tiers to AoL Logic
+ */
 function mapMemberTierToAoLTier(dbTier: string, flags: string[]): AoLTier {
   if (hasInternalFlag(flags)) return "private";
 
   const t = (dbTier || "").toLowerCase();
   if (t.includes("elite") || t.includes("enterprise")) return "inner-circle-elite";
   if (t.includes("plus") || t.includes("premium")) return "inner-circle-plus";
-  if (t.includes("standard") || t.includes("basic")) return "inner-circle";
-
-  // default: if a member exists + active, treat as inner-circle
+  
+  // Default active member status
   return "inner-circle";
 }
 
+/**
+ * CLAIMS RESOLVER: The "Handshake" between DB and JWT
+ */
 async function resolveAoLClaimsByEmail(email?: string | null) {
-  if (!email) {
-    return {
-      tier: "public" as AoLTier,
-      innerCircleAccess: false,
-      isInternal: false,
-      allowPrivate: false,
-      memberId: null as string | null,
-      emailHash: null as string | null,
-      flags: [] as string[],
-    };
-  }
+  const baseClaims = {
+    tier: "public" as AoLTier,
+    innerCircleAccess: false,
+    isInternal: false,
+    allowPrivate: false,
+    memberId: null as string | null,
+    emailHash: null as string | null,
+    flags: [] as string[],
+  };
 
-  const emailHash = sha256Hex(email.trim().toLowerCase());
+  if (!email) return baseClaims;
 
-  // IMPORTANT:
-  // - This MUST be build-safe.
-  // - If Prisma is unavailable (build/edge/misconfig), safePrismaQuery returns null.
+  const normalizedEmail = email.trim().toLowerCase();
+  // We check both the SHA256 version and the plain text version 
+  // to support the Directorate Master Keys we just generated.
+  const hashedEmail = sha256Hex(normalizedEmail);
+
   const member = await safePrismaQuery((prisma) =>
-    prisma.innerCircleMember.findUnique({
-      where: { emailHash },
+    prisma.innerCircleMember.findFirst({
+      where: { 
+        OR: [
+          { email: normalizedEmail },
+          { emailHash: hashedEmail },
+          { emailHash: normalizedEmail } // Alignment with our Key-Gen script
+        ]
+      },
       select: {
         id: true,
         status: true,
@@ -74,54 +85,37 @@ async function resolveAoLClaimsByEmail(email?: string | null) {
   );
 
   if (!member || member.status !== "active") {
-    const flags = member?.flags ? safeParseFlags(member.flags) : [];
-    return {
-      tier: "public" as AoLTier,
-      innerCircleAccess: false,
-      isInternal: false,
-      allowPrivate: false,
-      memberId: member?.id ?? null,
-      emailHash,
-      flags,
-    };
+    return { ...baseClaims, emailHash: hashedEmail, memberId: member?.id ?? null };
   }
 
   const flags = safeParseFlags(member.flags);
-  const isInternal = hasInternalFlag(flags);
-  const tier = mapMemberTierToAoLTier(member.tier, flags);
+  
+  // LOGIC UPGRADE: If tier is "Director" (from our script), treat as Internal/Private
+  const isInternal = hasInternalFlag(flags) || member.tier === "Director";
+  const tier = isInternal ? "private" : mapMemberTierToAoLTier(member.tier, flags);
 
   return {
     tier,
     innerCircleAccess: true,
     isInternal,
-    allowPrivate: isInternal, // hard gate: private requires internal/staff
+    allowPrivate: isInternal, 
     memberId: member.id,
     emailHash: member.emailHash,
     flags,
   };
 }
 
-/**
- * THE SECURITY AUTHORITY — NextAuth Configuration
- * Hardened for: administrative access, tiered membership gating, and session integrity.
- */
 export const authOptions: NextAuthOptions = {
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-  },
-
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   secret: process.env.NEXTAUTH_SECRET,
-
   providers: [
     CredentialsProvider({
       id: "credentials",
       name: "Vault Credentials",
       credentials: {
-        email: { label: "Identity", type: "email", placeholder: "advisory@firm.com" },
+        email: { label: "Identity", type: "email" },
         password: { label: "Passkey", type: "password" },
       },
-
       async authorize(credentials) {
         const email = credentials?.email?.trim().toLowerCase();
         const password = credentials?.password ?? "";
@@ -130,53 +124,35 @@ export const authOptions: NextAuthOptions = {
         const ADMIN_EMAIL = process.env.ADMIN_USER_EMAIL?.trim().toLowerCase();
         const ADMIN_PASS = process.env.ADMIN_USER_PASSWORD ?? "";
 
-        const adminEnvReady = Boolean(ADMIN_EMAIL && ADMIN_PASS && process.env.NEXTAUTH_SECRET);
-
-        if (adminEnvReady && email === ADMIN_EMAIL && password === ADMIN_PASS) {
+        // Admin environment check
+        if (ADMIN_EMAIL && email === ADMIN_EMAIL && password === ADMIN_PASS) {
           return {
             id: "system-admin",
-            email: ADMIN_EMAIL!,
+            email: ADMIN_EMAIL,
             name: "Vault Administrator",
             role: "admin",
           };
         }
-
-        // Tight posture: deny member password login
-        return null;
+        return null; // Strict posture: members login via keys/other routes
       },
     }),
   ],
-
-  theme: {
-    colorScheme: "dark",
-    brandColor: "#d4af37",
-    logo: "/assets/images/logo.png",
-  },
-
+  theme: { colorScheme: "dark", brandColor: "#d4af37" },
   pages: {
     signIn: "/inner-circle/admin/login",
     error: "/inner-circle/error",
   },
-
   callbacks: {
-    async jwt({ token, user, session }) {
-      // 1) identity core
+    async jwt({ token, user }) {
       if (user) {
         token.id = (user as any).id;
-        token.email = (user as any).email;
-        token.name = (user as any).name;
-        token.picture = (user as any).image;
         token.role = (user as any).role || "user";
       }
 
-      // 2) claims
-      const email =
-        (token?.email as string | undefined) ||
-        ((session as any)?.user?.email as string | undefined) ||
-        ((user as any)?.email as string | undefined);
-
+      const email = token?.email as string | undefined;
       const aol = await resolveAoLClaimsByEmail(email ?? null);
 
+      // Admin escalation
       if ((token as any).role === "admin") {
         (token as any).aol = {
           tier: "private",
@@ -190,31 +166,16 @@ export const authOptions: NextAuthOptions = {
       } else {
         (token as any).aol = aol;
       }
-
       return token;
     },
-
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id as string;
-        (session.user as any).email = token.email as string;
         (session.user as any).role = (token as any).role as string;
       }
-
-      (session as any).aol =
-        (token as any).aol ?? {
-          tier: "public",
-          innerCircleAccess: false,
-          isInternal: false,
-          allowPrivate: false,
-          memberId: null,
-          emailHash: null,
-          flags: [],
-        };
-
+      (session as any).aol = (token as any).aol;
       return session;
     },
   },
-
   debug: process.env.NODE_ENV === "development",
 };

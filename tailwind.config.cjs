@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "class",
+  darkMode: ["class"], // Ensure class-based dark mode for the Vault UI
 
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,6 +9,8 @@ module.exports = {
     "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
+    // Added .contentlayer to ensure generated files trigger the right utility classes
+    "./.contentlayer/**/*.json", 
   ],
 
   theme: {
@@ -30,7 +32,6 @@ module.exports = {
 
     extend: {
       colors: {
-        // Institutional core palette
         background: "var(--brand-obsidian, #000000)",
         foreground: "var(--brand-cream, #fdfaf3)",
 
@@ -105,5 +106,8 @@ module.exports = {
     },
   },
 
-  plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
+  plugins: [
+    require("@tailwindcss/typography"), 
+    require("@tailwindcss/forms")
+  ],
 };

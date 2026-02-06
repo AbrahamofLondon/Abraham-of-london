@@ -1,6 +1,4 @@
-/* Abraham of London — Strategic Frameworks Library (Foundations Track)
- * Rewrite: Build-safe, server-code isolated, no framer-motion dependency.
- */
+/* pages/resources/strategic-frameworks/index.tsx */
 
 import * as React from "react";
 import type { NextPage, GetStaticProps } from "next";
@@ -13,12 +11,16 @@ import {
   Layers,
   Sparkles,
   Shield,
+  Activity
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 
+// Tier Directives for Institutional Guidance
+import { TIER_DIRECTIVES } from "@/lib/resources/tier-metadata";
+
 // IMPORTANT: only import TYPES at module level (safe)
-import type { Framework } from "@/lib/resources/strategic-frameworks";
+import type { Framework } from "@/lib/resources/strategic-frameworks.static";
 
 interface PageProps {
   frameworks: Framework[];
@@ -79,11 +81,9 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({
       const title = (f.title || "").toLowerCase();
       const one = (f.oneLiner || "").toLowerCase();
 
-      const matchesSearch =
-        !q || title.includes(q) || one.includes(q);
+      const matchesSearch = !q || title.includes(q) || one.includes(q);
 
-      // tier is typically string[]; keep it resilient
-      const tierList = Array.isArray((f as any).tier) ? (f as any).tier : [];
+      const tierList = Array.isArray(f.tier) ? f.tier : [];
       const matchesCategory =
         selectedCategory === "all" ||
         tierList.map((x: any) => String(x)).includes(selectedCategory);
@@ -92,23 +92,24 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({
     });
   }, [frameworks, searchQuery, selectedCategory]);
 
+  const activeDirective = React.useMemo(() => {
+    return TIER_DIRECTIVES[selectedCategory] || null;
+  }, [selectedCategory]);
+
   return (
-    <Layout title="Strategic Frameworks" className="bg-black min-h-screen">
-      {/* Fallback badge */}
+    <Layout title="Strategic Library | Abraham of London" className="bg-black min-h-screen">
       {isFallbackData && (
         <div className="fixed top-4 right-4 z-50 rounded-lg border border-amber-500/30 bg-amber-500/15 px-4 py-2 text-amber-200 text-xs font-semibold backdrop-blur-sm">
           Data mode: static (build-safe)
         </div>
       )}
 
-      {/* HERO */}
+      {/* HERO SECTION */}
       <section className="relative isolate overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[#06060b]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_15%,rgba(245,158,11,0.10),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_80%,rgba(59,130,246,0.08),transparent_55%)]" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-22">
-          {/* Eyebrow */}
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-4 py-2">
               <ScrollText className="h-4 w-4 text-amber-200" />
@@ -116,51 +117,41 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({
                 Canon Offshoot · Foundations Track
               </span>
             </span>
-
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
               <Sparkles className="h-4 w-4 text-white/70" />
               <span className="text-[10px] font-black uppercase tracking-[0.28em] text-white/70">
-                Preview positioning (not final form)
+                Preview positioning
               </span>
             </span>
           </div>
 
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight">
             Strategic Frameworks
           </h1>
 
-          <p className="mt-6 max-w-3xl text-lg text-white/80 leading-relaxed">
+          <p className="mt-6 max-w-3xl text-lg text-white/80 leading-relaxed font-sans">
             A disciplined library of deployable frameworks—built from Canon methodology,
             packaged as operator-ready tools for founders, institutions, and households.
           </p>
 
-          {/* Stats + CTAs */}
           <div className="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4 text-sm text-white/60">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span>{frameworks.length} frameworks available</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{frameworks.length} frameworks active</span>
               </div>
               <div className="hidden md:block h-4 w-px bg-white/10" />
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-white/60" />
-                <span>Structured for rapid deployment</span>
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase">
+                <Activity size={12} /> Live Intelligence Sync
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/books/the-architecture-of-human-purpose"
-                className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-xs font-extrabold uppercase tracking-widest text-black hover:from-amber-400 hover:to-amber-500 transition-all"
-              >
-                Start at the Canon Prelude <ArrowRight className="h-4 w-4" />
-              </Link>
-
-              <Link
                 href="/canon"
-                className="inline-flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.03] px-6 py-3 text-xs font-extrabold uppercase tracking-widest text-gray-200 hover:bg-white/[0.06] hover:border-white/25 transition-all"
+                className="inline-flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.03] px-6 py-3 text-xs font-extrabold uppercase tracking-widest text-gray-200 hover:bg-white/[0.06] transition-all"
               >
-                Enter the Canon <ChevronRight className="h-4 w-4 text-gray-400" />
+                Enter the Canon <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -175,161 +166,114 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search frameworks..."
+                placeholder="Search dossiers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/35 outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/35 outline-none focus:ring-2 focus:ring-amber-500 transition-all font-mono"
               />
             </div>
 
-            <div className="w-full md:w-auto">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full md:w-auto rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-sm text-white outline-none focus:ring-2 focus:ring-amber-500"
-              >
-                <option value="all">All Categories</option>
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-sm text-white outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+            >
+              <option value="all">All Tiers</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
+        </div>
+      </section>
 
-          {/* “Positioning without overcommit” note */}
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/55">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Shield className="h-3.5 w-3.5" />
-              This is the first Canon offshoot in operational format.
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              Not final taxonomy · Iterating deliberately
-            </span>
-          </div>
+      {/* DYNAMIC INSTITUTIONAL DIRECTIVE */}
+      <section className="pt-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {activeDirective && (
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all duration-700 animate-in fade-in slide-in-from-top-4">
+              <div className="space-y-2">
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-amber-500">
+                  <Shield size={12} /> Institutional_Directive: {activeDirective.tier}
+                </span>
+                <h2 className="text-2xl font-serif font-bold text-white uppercase tracking-tight">
+                  {activeDirective.mandate}
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {activeDirective.focusNodes.map((node) => (
+                  <span key={node} className="text-[9px] border border-zinc-800 px-3 py-1.5 rounded-md text-zinc-400 bg-black font-mono uppercase">
+                    {node}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* GRID */}
       <section className="py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {filteredFrameworks.length === 0 ? (
-            <div className="py-20 text-center">
-              <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-                <Search className="h-8 w-8 text-white/40" />
-              </div>
-              <h3 className="text-xl font-semibold text-white">No frameworks found</h3>
-              <p className="mx-auto mt-2 max-w-md text-white/60">
-                Try adjusting your search term or category filter.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredFrameworks.map((framework) => {
-                const accentKey = (framework as any).accent || "gold";
-                const A = ACCENTS[accentKey] || ACCENTS.gold;
-
-                return (
-                  <Link
-                    key={(framework as any).key || framework.slug}
-                    href={`${LIBRARY_HREF}/${framework.slug}`}
-                    className="group block"
-                  >
-                    <div
-                      className={[
-                        "rounded-2xl border bg-gradient-to-br from-white/5 to-white/0 p-6",
-                        "transition-all duration-300",
-                        "hover:bg-white/10 hover:-translate-y-0.5 hover:scale-[1.01]",
-                        A.border,
-                        A.glow,
-                      ].join(" ")}
-                    >
-                      <div className="mb-4">
-                        <span
-                          className={[
-                            "inline-flex items-center rounded-full border px-3 py-1",
-                            "text-[10px] font-black uppercase tracking-[0.22em]",
-                            A.chip,
-                          ].join(" ")}
-                        >
-                          {(framework as any).tag || "Framework"}
-                        </span>
-                      </div>
-
-                      <h3 className="font-serif text-xl font-semibold text-white">
-                        {framework.title}
-                      </h3>
-
-                      <p className="mt-2 text-sm leading-relaxed text-white/70">
-                        {framework.oneLiner}
-                      </p>
-
-                      <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-                        <span className={`inline-flex items-center gap-2 text-sm font-semibold ${A.link}`}>
-                          Explore <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </span>
-                        <ChevronRight className="h-4 w-4 text-white/40" />
-                      </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredFrameworks.map((framework) => {
+              const A = ACCENTS[framework.accent] || ACCENTS.gold;
+              return (
+                <Link key={framework.key} href={`${LIBRARY_HREF}/${framework.slug}`} className="group block">
+                  <div className={`rounded-2xl border bg-gradient-to-br from-white/5 to-white/0 p-6 transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5 ${A.border} ${A.glow}`}>
+                    <div className="mb-4">
+                      <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${A.chip}`}>
+                        {framework.tag}
+                      </span>
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+                    <h3 className="font-serif text-xl font-semibold text-white">{framework.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-white/70 font-sans">{framework.oneLiner}</p>
+                    <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                      <span className={`inline-flex items-center gap-2 text-sm font-semibold ${A.link}`}>
+                        Access Brief <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
     </Layout>
   );
 };
 
-// BUILD-SAFE getStaticProps
 export const getStaticProps: GetStaticProps<PageProps> = async () => {
-  console.log("[Framework Index] Building static page...");
-
-  // 1) Always get static frameworks (guaranteed)
-  let getAllFrameworks: null | (() => any[]) = null;
-
-  // 2) Optionally attempt server fetch (kept INSIDE getStaticProps to avoid client bundling)
-  let getServerAllFrameworks: null | (() => Promise<any[]>) = null;
+  let getAllFrameworks: any = null;
+  let getServerAllFrameworks: any = null;
 
   try {
-    const mod = await import("@/lib/resources/strategic-frameworks");
-    getAllFrameworks = (mod as any).getAllFrameworks || null;
-    getServerAllFrameworks = (mod as any).getServerAllFrameworks || null;
+    const mod = await import("@/lib/resources/strategic-frameworks.server");
+    const staticMod = await import("@/lib/resources/strategic-frameworks.static");
+    getAllFrameworks = staticMod.getAllFrameworks;
+    getServerAllFrameworks = mod.getServerAllFrameworks;
   } catch (e) {
-    console.warn("[Framework Index] Could not import strategic-frameworks module:", e);
+    console.warn("[Framework Index] Import error:", e);
   }
 
-  const staticFrameworks = (getAllFrameworks ? getAllFrameworks() : []) as Framework[];
-
-  let frameworks: Framework[] = staticFrameworks;
+  const staticFrameworks = getAllFrameworks ? getAllFrameworks() : [];
+  let frameworks = staticFrameworks;
   let isFallbackData = true;
 
-  // If server fetch exists, try it — but never fail the build
   if (getServerAllFrameworks) {
     try {
-      const serverFrameworks = (await getServerAllFrameworks()) as Framework[];
-      if (Array.isArray(serverFrameworks) && serverFrameworks.length > 0) {
+      const serverFrameworks = await getServerAllFrameworks();
+      if (serverFrameworks?.length > 0) {
         frameworks = serverFrameworks;
-        // If server returned something different from static length, we assume "not fallback"
         isFallbackData = serverFrameworks.length === staticFrameworks.length;
       }
     } catch (e) {
-      console.warn("[Framework Index] Server fetch failed; using static data:", e);
-      frameworks = staticFrameworks;
       isFallbackData = true;
     }
   }
 
-  // Categories from tiers
-  const categories = Array.from(
-    new Set(
-      frameworks.flatMap((f: any) => (Array.isArray(f?.tier) ? f.tier : []))
-        .map((x: any) => String(x))
-        .filter(Boolean)
-    )
-  );
+  const categories = Array.from(new Set(frameworks.flatMap((f: any) => f.tier))).filter(Boolean) as string[];
 
   return {
     props: {

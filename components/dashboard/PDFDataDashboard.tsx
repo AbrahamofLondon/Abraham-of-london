@@ -11,7 +11,7 @@ import LiveDataDashboard from "./LiveDataDashboard";
 import PDFDashboard from "@/components/PDFDashboard";
 import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 
-import { getDashboardPDFById, getAllDashboardPDFs } from "@/utils/pdf-types";
+import { getAllPDFItems } from "@/lib/pdf/registry";
 
 interface PDFDataDashboardProps {
   view?: "dashboard" | "analytics" | "live";

@@ -1,4 +1,3 @@
-// components/resources/ResourceGrid.tsx
 import Link from "next/link";
 import Image from "next/image";
 
@@ -8,7 +7,7 @@ interface ResourceItem {
   excerpt?: string | null;
   coverImage?: string | null;
   pdfPath?: string | null;
-  // Allow any other fields without caring about their exact type
+  category?: string | null; // Added for category/tag support
   [key: string]: unknown;
 }
 
@@ -29,7 +28,11 @@ export default function ResourceGrid({
     }[columns] ?? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
 
   if (!Array.isArray(items) || items.length === 0) {
-    return null;
+    return (
+      <div className="py-12 text-center border-2 border-dashed border-lightGrey rounded-2xl">
+        <p className="text-gray-500">No intelligence briefs found in manifest.</p>
+      </div>
+    );
   }
 
   return (
@@ -43,13 +46,12 @@ export default function ResourceGrid({
 
 function ResourceCard({ resource }: { resource: ResourceItem }) {
   const safeSlug = String(resource.slug);
-  const safeCoverImage = resource.coverImage
-    ? String(resource.coverImage)
-    : null;
-  const safeTitle = resource.title
-    ? String(resource.title)
-    : "Untitled Resource";
+  const safeCoverImage = resource.coverImage ? String(resource.coverImage) : null;
+  const safeTitle = resource.title ? String(resource.title) : "Untitled Resource";
   const safeExcerpt = resource.excerpt ? String(resource.excerpt) : null;
+  const safeCategory = resource.category ? String(resource.category) : null;
+  
+  // Ensure we are pointing to the validated public path
   const pdfPath =
     typeof resource.pdfPath === "string" && resource.pdfPath.trim().length
       ? resource.pdfPath
@@ -69,10 +71,16 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
         </div>
       )}
 
-      <div className="p-4">
+      <div className="p-5">
+        {safeCategory && (
+          <span className="mb-2 inline-block text-[10px] font-bold uppercase tracking-widest text-softGold">
+            {safeCategory}
+          </span>
+        )}
+        
         <h3 className="mb-2 line-clamp-2 text-lg font-semibold text-deepCharcoal">
           <Link
-            href={`/downloads/${safeSlug}`}
+            href={`/resources/${safeSlug}`}
             className="transition-colors hover:text-softGold"
             prefetch={false}
           >
@@ -88,11 +96,11 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
 
         <div className="flex gap-2">
           <Link
-            href={`/downloads/${safeSlug}`}
-            className="flex-1 rounded-lg bg-deepCharcoal px-3 py-2 text-center text-sm font-medium text-cream transition-colors hover:bg-[color:var(--color-on-secondary)/0.9]"
+            href={`/resources/${safeSlug}`}
+            className="flex-1 rounded-lg bg-deepCharcoal px-3 py-2 text-center text-sm font-medium text-cream transition-colors hover:bg-deepCharcoal/90"
             prefetch={false}
           >
-            View Details
+            Read Brief
           </Link>
 
           {pdfPath && (
@@ -102,7 +110,7 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
               className="flex-1 rounded-lg border border-lightGrey bg-white px-3 py-2 text-center text-sm font-medium text-deepCharcoal transition-colors hover:bg-warmWhite"
               rel="noopener noreferrer"
             >
-              Download
+              PDF
             </a>
           )}
         </div>
@@ -110,4 +118,3 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
     </div>
   );
 }
-

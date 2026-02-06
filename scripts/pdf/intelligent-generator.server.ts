@@ -8,7 +8,7 @@ import path from "path";
 import crypto from "crypto";
 
 // Registry & Config Imports
-import { getAllPDFs, getPDFById } from "@/scripts/pdf-registry";
+import { getPDFRegistry } from "@/scripts/pdf";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES & DEFAULTS                                                           */

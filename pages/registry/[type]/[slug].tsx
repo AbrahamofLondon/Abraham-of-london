@@ -1,18 +1,61 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/registry/[type]/[slug].tsx — HARDENED (The Universal Terminal)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { serialize } from "next-mdx-remote/serialize";
-import { getDocBySlug, UnifiedDoc } from "@/lib/content/unified-router";
+import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { getDocBySlug } from "@/lib/content/unified-router";
 import { allPosts, allShorts } from "contentlayer/generated";
 
-// Use the same robust logic from the previous Tantalizer build...
-// (Component implementation remains the same, but the data fetching is now type-aware)
+// CORRECTED PATH: Removed the 's' from 'layouts' to match your 'find' result
+import RegistryLayout from "@/components/layout/RegistryLayout";
+
+interface UniversalPageProps {
+  source: MDXRemoteSerializeResult;
+  metadata: {
+    title: string;
+    subtitle?: string;
+    date: string;
+    description?: string;
+    [key: string]: any;
+  };
+}
+
+const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ source, metadata }) => {
+  return (
+    <RegistryLayout>
+      <article className="prose prose-invert max-w-none">
+        <header className="mb-12 border-b border-white/10 pb-8">
+          <h1 className="font-serif text-4xl italic text-white md:text-5xl">
+            {metadata.title}
+          </h1>
+          {metadata.subtitle && (
+            <p className="mt-4 font-mono text-lg uppercase tracking-widest text-amber-500/80">
+              {metadata.subtitle}
+            </p>
+          )}
+          <div className="mt-6 flex items-center gap-4 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+            <span>Date: {new Date(metadata.date).toLocaleDateString('en-GB')}</span>
+            <span className="h-1 w-1 rounded-full bg-zinc-800" />
+            <span>Status: Verified</span>
+          </div>
+        </header>
+        
+        <div className="text-zinc-300">
+          <MDXRemote {...source} />
+        </div>
+      </article>
+    </RegistryLayout>
+  );
+};
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Generate paths for Dispatches and Shorts combined
-  const dispatches = allPosts.map(p => ({ params: { type: 'dispatches', slug: p.slug || p._raw.flattenedPath } }));
-  const shorts = allShorts.map(s => ({ params: { type: 'shorts', slug: s.slug || s._raw.flattenedPath } }));
+  const dispatches = allPosts
+    .filter(p => !p.draft)
+    .map(p => ({ params: { type: 'dispatches', slug: p.slugAsParams || p._raw.flattenedPath.split('/').pop() } }));
+    
+  const shorts = allShorts
+    .filter(s => !s.draft)
+    .map(s => ({ params: { type: 'shorts', slug: s.slugAsParams || s._raw.flattenedPath.split('/').pop() } }));
 
   return {
     paths: [...dispatches, ...shorts],
@@ -21,20 +64,24 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const type = params?.type as string;
   const slug = params?.slug as string;
-
-  // Unified lookup
   const docRaw = getDocBySlug(slug);
 
   if (!docRaw || (docRaw as any).draft) return { notFound: true };
 
-  // ... (Rest of the Tantalizer and serialization logic from previous step)
-  // Ensure you pass the resolved 'docRaw' to the TantalizerResolver
-  
+  const mdxSource = await serialize((docRaw as any).body.raw, {
+    parseFrontmatter: true,
+  });
+
   return {
     props: {
-      /* serialized data */
+      source: mdxSource,
+      metadata: {
+        title: (docRaw as any).title || "Untitled Intelligence",
+        subtitle: (docRaw as any).subtitle || null,
+        date: (docRaw as any).date || new Date().toISOString(),
+        description: (docRaw as any).description || null,
+      },
     },
     revalidate: 1800
   };

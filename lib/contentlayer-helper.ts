@@ -1,3 +1,4 @@
+// lib/contentlayer-helper.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
@@ -12,6 +13,14 @@ import {
   allResources,
   allStrategies,
 } from "contentlayer/generated";
+
+// Import from shared utilities
+import { 
+  getDocKind, 
+  isPublished as sharedIsPublished, 
+  getAccessLevel as sharedGetAccessLevel,
+  toUiDoc as sharedToUiDoc 
+} from '@/lib/content/shared';
 
 if (typeof window === "undefined" && process.env.NODE_ENV === "production") {
   // This file must NEVER be imported directly by Pages / API / build code
@@ -53,6 +62,51 @@ export const getServerBookBySlug = (slug: string) => {
     (b) => b.slug === normalized || b._id.includes(normalized)
   );
 };
+
+export const getServerCanonBySlug = (slug: string) => {
+  const normalized = normalizeSlug(slug);
+  return allCanons.find(
+    (c) => c.slug === normalized || c._id.includes(normalized)
+  );
+};
+
+// ---------------- SHARED UTILITIES RE-EXPORTS ----------------
+
+// Re-export shared utilities
+export { getDocKind };
+export const isPublished = sharedIsPublished;
+export const getAccessLevel = sharedGetAccessLevel;
+export const toUiDoc = sharedToUiDoc;
+
+// Document kinds constant
+export const documentKinds = [
+  "blog",
+  "book", 
+  "canon",
+  "download",
+  "event",
+  "print",
+  "resource",
+  "short",
+  "strategy"
+] as const;
+
+/**
+ * Get card properties for a document
+ */
+export function getCardProps(doc: any) {
+  return {
+    title: doc?.title || 'Untitled',
+    description: doc?.description || doc?.excerpt || '',
+    href: doc?.href || `/${doc?.slug || ''}`,
+    image: doc?.coverImage || doc?.image || null,
+    kind: getDocKind(doc),
+    tier: getAccessLevel(doc),
+    published: isPublished(doc),
+    date: doc?.publishedAt || doc?.date || null,
+    tags: doc?.tags || []
+  };
+}
 
 // ---------------- LEGACY ----------------
 

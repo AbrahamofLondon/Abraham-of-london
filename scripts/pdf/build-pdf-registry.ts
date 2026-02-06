@@ -104,7 +104,7 @@ function failFast(results: StepResult[]): never {
 async function main() {
   const results: StepResult[] = [];
 
-  const generatedFile = path.join(ROOT, "scripts", "pdf", "pdf-registry.generated.ts");
+  const generatedFile = path.join(ROOT, "lib", "pdf", "pdf-registry.generated.ts");
   ensureDir(path.dirname(generatedFile));
 
   // 1) Build generated registry

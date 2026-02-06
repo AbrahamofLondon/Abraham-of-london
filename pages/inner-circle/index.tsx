@@ -1,4 +1,4 @@
-/* pages/inner-circle/index.tsx — HARDENED ACCESS CONTROL (INTEGRITY MODE) */
+/* pages/inner-circle/index.tsx — INSTITUTIONAL ALIGNMENT */
 import * as React from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -19,13 +19,8 @@ import Layout from "@/components/Layout";
 import useAnalytics from "@/hooks/useAnalytics";
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
-// Institutional Standard: matches lib/server/auth/cookies.ts
 const INNER_CIRCLE_COOKIE_NAME = "aol_access";
 
-/**
- * CLIENT-SIDE ACCESS VERIFICATION
- * Note: Presence != validity. Server must verify on protected routes.
- */
 function hasInnerCircleCookie(): boolean {
   if (typeof document === "undefined") return false;
   return document.cookie
@@ -34,27 +29,11 @@ function hasInnerCircleCookie(): boolean {
     .some((c) => c.startsWith(`${INNER_CIRCLE_COOKIE_NAME}=`));
 }
 
-/**
- * Prevent open redirects. Only allow internal, absolute paths.
- */
-function safeReturnTo(input: unknown, fallback = "/inner-circle/dashboard"): string {
+function safeReturnTo(input: unknown, fallback = "/dashboard"): string {
   try {
     const raw = typeof input === "string" ? input.trim() : "";
-    if (!raw) return fallback;
-
-    // Disallow protocol/host, double-slash, or javascript:
-    if (/^(https?:)?\/\//i.test(raw)) return fallback;
-    if (/^javascript:/i.test(raw)) return fallback;
-
-    // Must be an internal path
+    if (!raw || /^(https?:)?\/\//i.test(raw) || /^javascript:/i.test(raw)) return fallback;
     if (!raw.startsWith("/")) return fallback;
-
-    // Optional: avoid redirecting back to the same page endlessly
-    if (raw.startsWith("/inner-circle") && raw !== "/inner-circle/dashboard") {
-      // allow inner-circle dashboard & subroutes; block the entry page itself to reduce loops
-      if (raw === "/inner-circle") return fallback;
-    }
-
     return raw;
   } catch {
     return fallback;
@@ -65,394 +44,226 @@ const InnerCirclePage: NextPage = () => {
   const router = useRouter();
   const { trackEvent } = useAnalytics();
 
-  // FORM STATE
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [accessKey, setAccessKey] = React.useState("");
-
-  // Newsletter uses its own state (prevents accidental overwrite by other flows)
   const [newsletterEmail, setNewsletterEmail] = React.useState("");
 
   const [registerStatus, setRegisterStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
   const [unlockStatus, setUnlockStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
   const [newsletterStatus, setNewsletterStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  const [feedback, setFeedback] = React.useState<{ type: "register" | "unlock" | "newsletter"; msg: string } | null>(
-    null
-  );
+  const [feedback, setFeedback] = React.useState<{ type: "register" | "unlock" | "newsletter"; msg: string } | null>(null);
   const [alreadyUnlocked, setAlreadyUnlocked] = React.useState(false);
 
-  // REDIRECTION LOGIC (sanitised)
   const returnTo = React.useMemo(
-    () => safeReturnTo(router.query.returnTo, "/inner-circle/dashboard"),
-    [router.query.returnTo]
+    () => safeReturnTo(router.query.callbackUrl || router.query.returnTo, "/dashboard"),
+    [router.query]
   );
 
   React.useEffect(() => {
     if (!router.isReady) return;
-
     const unlocked = hasInnerCircleCookie();
     setAlreadyUnlocked(unlocked);
-
-    // If already unlocked, redirect gently
-    if (unlocked) {
-      const timer = window.setTimeout(() => {
-        // Avoid pointless redirect if you're already there
-        if (window.location.pathname !== returnTo) {
-          router.replace(returnTo);
-        }
-      }, 900);
-
+    if (unlocked && window.location.pathname !== returnTo) {
+      const timer = window.setTimeout(() => router.replace(returnTo), 900);
       return () => window.clearTimeout(timer);
     }
   }, [router.isReady, returnTo, router]);
 
-  /**
-   * MEMBERSHIP REQUEST HANDLER (POSTGRES-SYNCED)
-   */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (registerStatus === "submitting") return;
-
     setRegisterStatus("submitting");
     setFeedback(null);
 
     const token = await getRecaptchaTokenSafe("inner_circle_register");
-    if (!token) {
-      setRegisterStatus("error");
-      setFeedback({ type: "register", msg: "Security verification failed. Please refresh." });
-      return;
-    }
-
     try {
-      const cleanEmail = email.trim().toLowerCase();
-      const cleanName = name.trim();
-
       const res = await fetch("/api/inner-circle/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: cleanEmail,
-          name: cleanName,
-          recaptchaToken: token,
-        }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), name: name.trim(), recaptchaToken: token }),
       });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.ok) throw new Error(data?.error || "Registration failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Registration failed");
 
       setRegisterStatus("success");
-      setFeedback({ type: "register", msg: "Request received. Check your inbox for your access key." });
-
-      trackEvent("inner_circle_register_success", { domain: cleanEmail.split("@")[1] || "unknown" });
-
-      setEmail("");
-      setName("");
+      setFeedback({ type: "register", msg: "Request dispatched. Verification key will be issued via encrypted mail." });
+      setEmail(""); setName("");
     } catch (err: any) {
       setRegisterStatus("error");
-      setFeedback({ type: "register", msg: err?.message || "Request failed. Please try again." });
+      setFeedback({ type: "register", msg: err?.message || "Protocol failure." });
     }
   };
 
-  /**
-   * VAULT DEPLOYMENT HANDLER (POSTGRES-SYNCED)
-   * Adds optional Recaptcha token — server can ignore if not implemented.
-   */
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (unlockStatus === "submitting") return;
-
     setUnlockStatus("submitting");
     setFeedback(null);
-
-    // Optional: if your API expects this, great. If not, it can ignore it safely.
-    const token = await getRecaptchaTokenSafe("inner_circle_unlock");
 
     try {
       const res = await fetch("/api/inner-circle/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          key: accessKey.trim(),
-          ...(token ? { recaptchaToken: token } : {}),
-        }),
+        body: JSON.stringify({ key: accessKey.trim() }),
       });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.ok) throw new Error(data?.error || "Invalid security key");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Invalid Security Key");
 
       setUnlockStatus("success");
       setAlreadyUnlocked(true);
-
-      trackEvent("inner_circle_vault_unlocked");
-
-      window.setTimeout(() => {
-        router.replace(returnTo);
-      }, 650);
+      window.setTimeout(() => router.replace(returnTo), 650);
     } catch (err: any) {
       setUnlockStatus("error");
-      setFeedback({ type: "unlock", msg: err?.message || "Invalid key. Please check and try again." });
-    }
-  };
-
-  /**
-   * NEWSLETTER OPT-IN HANDLER
-   */
-  const handleNewsletterSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newsletterStatus === "submitting") return;
-
-    setNewsletterStatus("submitting");
-    setFeedback(null);
-
-    try {
-      const cleanEmail = newsletterEmail.trim().toLowerCase();
-      const res = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.ok === false) throw new Error(data?.error || "Signup failed");
-
-      setNewsletterStatus("success");
-      setFeedback({ type: "newsletter", msg: "Subscription confirmed. Welcome to the mailing list." });
-
-      trackEvent("newsletter_subscribe_success", { source: "inner_circle", domain: cleanEmail.split("@")[1] || "unknown" });
-
-      setNewsletterEmail("");
-    } catch (err: any) {
-      setNewsletterStatus("error");
-      setFeedback({ type: "newsletter", msg: err?.message || "Signup failed. Please try again." });
+      setFeedback({ type: "unlock", msg: err?.message || "Access Denied." });
     }
   };
 
   return (
-    <Layout title="Inner Circle" description="Private access to exclusive strategic volumes and architectural notes.">
-      <main className="min-h-screen bg-[#050505] text-zinc-400 pt-32 pb-24">
-        {/* Decorative background element */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-amber-500/5 blur-[120px] pointer-events-none" />
+    <Layout pageTitle="Inner Circle">
+      <main className="min-h-screen bg-background pt-40 pb-24 relative overflow-hidden">
+        {/* Institutional Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[600px] bg-primary/5 blur-[140px] pointer-events-none" />
 
         <section className="relative mx-auto max-w-6xl px-6">
-          <header className="text-center mb-20">
+          <header className="text-center mb-24">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-1.5 mb-8 text-amber-500/80"
+              className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2 mb-10"
             >
-              <ShieldCheck size={14} className="text-amber-500" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.3em]">Identity Protocol 2.0</span>
+              <ShieldCheck size={14} className="text-primary" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-primary">Registry Access Protocol</span>
             </motion.div>
 
-            <h1 className="font-serif text-5xl md:text-6xl font-medium text-white mb-6 italic tracking-tight">
+            <h1 className="font-editorial text-6xl md:text-8xl text-white mb-8 italic tracking-tighter leading-none">
               The Inner Circle
             </h1>
 
-            <p className="mx-auto max-w-2xl text-sm md:text-base text-zinc-500 font-light leading-relaxed">
-              Entry is strictly reserved for stakeholders and collaborators. Authenticating your identity unlocks the complete{" "}
-              <span className="text-amber-500/80">Intelligence Portfolio</span>.
+            <p className="mx-auto max-w-2xl text-zinc-500 font-light text-lg italic leading-relaxed">
+              Access is restricted to authorized stakeholders. Verification of identity grants entry to the 
+              <span className="text-primary/80 ml-2">Sovereign Intelligence Portfolio</span>.
             </p>
           </header>
 
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-            {/* REQUEST ACCESS */}
-            <motion.div
+          <div className="grid gap-16 lg:grid-cols-2">
+            {/* REGISTER SECTION */}
+            <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="group rounded-2xl border border-white/5 bg-white/[0.02] p-8 md:p-10 transition-colors hover:bg-white/[0.03]"
+              className="vault-card p-10 md:p-12 rounded-none border-white/5"
             >
-              <div className="flex items-center gap-4 mb-10">
-                <div className="h-10 w-10 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 border border-white/10">
-                  <Mail size={20} strokeWidth={1.5} />
+              <div className="flex items-center gap-6 mb-12">
+                <div className="h-12 w-12 bg-white/5 flex items-center justify-center text-primary border border-white/10">
+                  <Mail size={22} strokeWidth={1} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-serif text-white italic">Request Entry</h2>
-                  <p className="text-[10px] uppercase tracking-widest text-zinc-600">Verification Required</p>
+                  <h2 className="text-2xl font-editorial text-white italic">Request Clearance</h2>
+                  <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-600 font-mono">Formal Registration</p>
                 </div>
               </div>
 
-              <form onSubmit={handleRegister} className="space-y-6">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">Full Name</label>
+              <form onSubmit={handleRegister} className="space-y-8">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-mono uppercase tracking-[0.4em] text-zinc-700 ml-1">Identity Name</label>
                   <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3.5 text-sm text-white focus:border-amber-500/40 outline-none transition-all placeholder:text-zinc-700"
-                    placeholder="Institutional Identity"
-                    autoComplete="name"
+                    type="text" required value={name} onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 px-5 py-4 text-white focus:border-primary/40 outline-none transition-all placeholder:text-zinc-800"
+                    placeholder="Full Legal or Institutional Name"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 ml-1">
-                    Professional Email
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-mono uppercase tracking-[0.4em] text-zinc-700 ml-1">Professional Email</label>
                   <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3.5 text-sm text-white focus:border-amber-500/40 outline-none transition-all placeholder:text-zinc-700"
-                    placeholder="name@organization.com"
-                    autoComplete="email"
+                    type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 px-5 py-4 text-white focus:border-primary/40 outline-none transition-all placeholder:text-zinc-800"
+                    placeholder="name@institution.com"
                   />
                 </div>
 
                 <button
-                  type="submit"
-                  disabled={registerStatus === "submitting" || registerStatus === "success"}
-                  className="w-full bg-white text-black py-4 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 transition-all flex items-center justify-center gap-3 disabled:opacity-30"
+                  type="submit" disabled={registerStatus === "submitting"}
+                  className="w-full bg-white text-black py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-primary transition-all flex items-center justify-center gap-4 disabled:opacity-20"
                 >
                   {registerStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
-                  Issue Access Key
+                  Issue Access Request
                 </button>
-
-                <AnimatePresence>
-                  {feedback?.type === "register" && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className={`p-4 rounded-lg text-xs font-light leading-relaxed border ${
-                        registerStatus === "error"
-                          ? "text-red-400 bg-red-500/5 border-red-500/10"
-                          : "text-amber-500 bg-amber-500/5 border-amber-500/10"
-                      }`}
-                    >
-                      {feedback.msg}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </form>
             </motion.div>
 
-            {/* UNLOCK VAULT */}
-            <motion.div
+            {/* UNLOCK SECTION */}
+            <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.02] p-8 md:p-10 relative overflow-hidden"
+              className="vault-card p-10 md:p-12 border-primary/20 bg-primary/[0.01]"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Lock size={120} strokeWidth={0.5} className="text-amber-500" />
-              </div>
-
-              <div className="flex items-center gap-4 mb-10 relative z-10">
-                <div className="h-10 w-10 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-500 border border-amber-500/20">
-                  <Key size={20} strokeWidth={1.5} />
+              <div className="flex items-center gap-6 mb-12">
+                <div className="h-12 w-12 bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-gold-glow">
+                  <Key size={22} strokeWidth={1} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-serif text-white italic">Unlock Vault</h2>
-                  <p className="text-[10px] uppercase tracking-widest text-amber-500/50">Deployment Mode</p>
+                  <h2 className="text-2xl font-editorial text-white italic">Secure Entry</h2>
+                  <p className="text-[9px] uppercase tracking-[0.3em] text-primary/50 font-mono">Key Authentication</p>
                 </div>
               </div>
 
               {alreadyUnlocked ? (
-                <div className="text-center py-8 relative z-10">
-                  <div className="mb-6 inline-block p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                    <CheckCircle className="h-10 w-10 text-emerald-500" />
+                <div className="text-center py-10">
+                  <div className="mb-8 inline-block p-6 bg-primary/10 rounded-full border border-primary/20 animate-pulse">
+                    <CheckCircle className="h-10 w-10 text-primary" />
                   </div>
-                  <h3 className="text-lg font-serif text-white italic mb-8">Access Granted</h3>
+                  <h3 className="text-xl font-editorial text-white italic mb-10">Clearance Verified</h3>
                   <button
-                    type="button"
                     onClick={() => router.replace(returnTo)}
-                    className="w-full bg-emerald-600 text-white py-4 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-emerald-500 transition-all"
+                    className="w-full bg-primary text-black py-5 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-4"
                   >
-                    Enter Dashboard <ArrowRight size={16} />
+                    Enter Registry <ArrowRight size={16} />
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleUnlock} className="space-y-6 relative z-10">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-mono uppercase tracking-widest text-amber-500/60 ml-1">
-                      Cryptographic Key
-                    </label>
+                <form onSubmit={handleUnlock} className="space-y-8">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-mono uppercase tracking-[0.4em] text-primary/40 ml-1">Cryptographic Key</label>
                     <input
-                      type="password"
-                      required
-                      value={accessKey}
-                      onChange={(e) => setAccessKey(e.target.value)}
-                      className="w-full bg-black/60 border border-amber-500/20 rounded-lg px-4 py-3.5 font-mono text-sm text-amber-500 focus:border-amber-500/60 outline-none transition-all placeholder:text-amber-900/30"
+                      type="password" required value={accessKey} onChange={(e) => setAccessKey(e.target.value)}
+                      className="w-full bg-black/60 border border-primary/20 px-5 py-4 font-mono text-primary focus:border-primary/60 outline-none transition-all placeholder:text-primary/10"
                       placeholder="ic_••••••••••••"
-                      autoComplete="one-time-code"
                     />
                   </div>
 
                   <button
-                    type="submit"
-                    disabled={unlockStatus === "submitting"}
-                    className="w-full border border-amber-500/40 text-amber-500 py-4 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all flex items-center justify-center gap-3 disabled:opacity-30"
+                    type="submit" disabled={unlockStatus === "submitting"}
+                    className="w-full border border-primary/40 text-primary py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-4"
                   >
                     {unlockStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <Unlock size={16} />}
-                    Authenticate
+                    Authenticate Key
                   </button>
-
-                  <AnimatePresence>
-                    {feedback?.type === "unlock" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-4 rounded-lg bg-red-500/5 text-red-400 text-[11px] border border-red-500/10 font-light"
-                      >
-                        {feedback.msg}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </form>
               )}
             </motion.div>
           </div>
         </section>
 
-        {/* NEWSLETTER / THE BRIEF */}
-        <section className="mt-40 border-t border-white/5 pt-32">
+        {/* BOTTOM SECTION: THE BRIEF */}
+        <section className="mt-48 border-t border-white/5 pt-32 pb-20">
           <div className="mx-auto max-w-2xl px-6 text-center">
-            <h2 className="font-serif text-3xl text-white mb-6 italic">The Strategic Brief</h2>
-            <p className="text-zinc-500 text-sm font-light leading-relaxed mb-12">
-              For those not requiring vault-level access, the Brief offers periodic analysis on institutional design and
-              frontier market strategy.
+            <h2 className="font-editorial text-4xl text-white mb-8 italic">The Strategic Brief</h2>
+            <p className="text-zinc-500 text-lg font-light leading-relaxed mb-12 italic">
+              Public dispatches on institutional design and frontier market strategy.
             </p>
 
-            <form onSubmit={handleNewsletterSignup} className="relative group">
+            <form className="relative group max-w-md mx-auto">
               <input
-                type="email"
-                required
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                placeholder="Institutional Email"
-                className="w-full bg-white/[0.02] border border-white/10 rounded-full px-8 py-5 text-sm text-white focus:border-amber-500/30 outline-none transition-all pr-16 placeholder:text-zinc-700"
-                autoComplete="email"
+                type="email" required placeholder="Institutional Email"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-none px-8 py-5 text-sm text-white focus:border-primary/30 outline-none transition-all"
               />
-              <button
-                type="submit"
-                disabled={newsletterStatus === "submitting" || newsletterStatus === "success"}
-                className="absolute right-2 top-2 bottom-2 bg-amber-500 text-black px-6 rounded-full hover:bg-white transition-colors flex items-center justify-center disabled:opacity-40"
-                aria-label="Subscribe"
-              >
-                {newsletterStatus === "submitting" ? <RefreshCw className="animate-spin" size={18} /> : <Send size={18} />}
+              <button className="absolute right-0 top-0 bottom-0 px-8 text-primary hover:text-white transition-colors">
+                <Send size={18} />
               </button>
             </form>
-
-            <AnimatePresence>
-              {feedback?.type === "newsletter" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`mt-6 p-4 rounded-lg text-[11px] border font-light ${
-                    newsletterStatus === "error"
-                      ? "text-red-400 bg-red-500/5 border-red-500/10"
-                      : "text-amber-500 bg-amber-500/5 border-amber-500/10"
-                  }`}
-                >
-                  {feedback.msg}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <p className="mt-8 text-[9px] uppercase tracking-[0.4em] text-zinc-700">Signal Only • No Proliferation</p>
+            <p className="mt-12 text-[8px] font-mono uppercase tracking-[0.5em] text-zinc-800">Direct Signal • No Proliferation</p>
           </div>
         </section>
       </main>

@@ -1,90 +1,44 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { edgeRateLimit } from "@/lib/server/rate-limit-edge";
 import { ROLE_HIERARCHY } from "@/types/auth";
 
 export const config = {
-  matcher: [
-    "/admin/:path*", 
-    "/inner-circle/:path*", 
-    "/api/restricted/:path*", // Protect your new encrypted API routes
-  ],
+  matcher: ["/admin/:path*", "/inner-circle/:path*", "/api/vault/:path*", "/strategy/:path*"],
 };
-
-/**
- * Helper to extract IP for rate limiting
- */
-function getClientIp(req: NextRequest): string {
-  const xff = req.headers.get("x-forwarded-for");
-  return xff ? xff.split(",")[0]?.trim() : "unknown";
-}
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  const ip = getClientIp(req);
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // --- 1. RATE LIMITING ---
-  // Ensuring the system isn't brute-forced at the edge
-  if (process.env.NODE_ENV === "production" && process.env.DISABLE_EDGE_RATE_LIMIT !== "true") {
-    const rl = await edgeRateLimit({
-      key: `edge:${ip}:${path}`,
-      windowSeconds: 60,
-      limit: 60,
-    });
-
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { error: "Too many requests", retryAfterSeconds: rl.retryAfterSeconds ?? 60 },
-        { status: 429 }
-      );
-    }
-  }
-
-  // --- 2. AUTHENTICATION (NEXT-AUTH) ---
-  // Using getToken is the clean, official way to decode the session at the Edge
-  const token = await getToken({ 
-    req, 
-    secret: process.env.NEXTAUTH_SECRET 
-  });
-
-  // If no token exists, redirect to the specific login page defined in authOptions
+  // 1. Unauthenticated Redirects
   if (!token) {
-    const loginUrl = new URL("/admin/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", path);
-    return NextResponse.redirect(loginUrl);
+    // Determine the most appropriate login gate based on path intent
+    const redirectPath = path.startsWith("/admin") ? "/admin/login" : "/inner-circle";
+    const url = new URL(redirectPath, req.url);
+    url.searchParams.set("callbackUrl", path);
+    return NextResponse.redirect(url);
   }
 
-  // --- 3. AUTHORIZATION (THE 403 GATE) ---
-  const userRole = (token.role as string) || "guest";
+  // 2. Resolve Clearance Levels
+  const userRole = (token.role as any) || "guest";
+  const userRank = ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0;
 
-  // ENFORCE: Directorate Access (Admin/Founder)
-  if (path.startsWith("/admin") || path.startsWith("/api/restricted")) {
-    const hasDirectorateClearance = 
-      ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] >= ROLE_HIERARCHY["admin"];
-
-    if (!hasDirectorateClearance) {
-      console.warn(`🛑 CLEARANCE VIOLATION: ${ip} attempted to access ${path} with role: ${userRole}`);
-      return new NextResponse(
-        "Forbidden: Directorate Clearance (Admin/Founder) Required.", 
-        { status: 403 }
-      );
+  // 3. Admin & Vault API Gate (Directorate Clearance)
+  if (path.startsWith("/admin") || path.startsWith("/api/vault")) {
+    if (userRank < ROLE_HIERARCHY["admin"]) {
+      console.warn(`🛑 CLEARANCE VIOLATION: ${path} attempted by role=${userRole}`);
+      return new NextResponse("Forbidden: Directorate Clearance Required.", { status: 403 });
     }
   }
 
-  // ENFORCE: Inner Circle Access (Member+)
-  if (path.startsWith("/inner-circle")) {
-    const hasMemberClearance = 
-      ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] >= ROLE_HIERARCHY["member"];
-
-    if (!hasMemberClearance) {
-      return new NextResponse(
-        "Forbidden: Inner Circle Membership Required.", 
-        { status: 403 }
-      );
+  // 4. Inner Circle & Strategy Gate (Membership Clearance)
+  // Ensures the 180 intelligence briefs are protected
+  if (path.startsWith("/inner-circle") || path.startsWith("/strategy")) {
+    if (userRank < ROLE_HIERARCHY["member"]) {
+      return new NextResponse("Forbidden: Membership Required.", { status: 403 });
     }
   }
 
-  // Allow the request to proceed if all gates are passed
   return NextResponse.next();
 }

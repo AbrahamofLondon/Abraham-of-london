@@ -1,47 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { decryptDocument } from '@/lib/security';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string[] } }
+  { params }: { params: Promise<{ slug: string[] }> } // Awaiting params is best practice in Next 15+
 ) {
-  // params.slug comes in as an array: ['blog', 'christianity-not-extremism']
-  const slugPath = params.slug.join('/');
+  // Ensure params are resolved
+  const resolvedParams = await params;
+  const slugPath = resolvedParams.slug.join('/');
   
   try {
-    const asset = await prisma.contentMetadata.findUnique({
-      where: { slug: slugPath }
-    });
-
-    if (!asset || !asset.metadata) {
-      return NextResponse.json(
-        { error: `Asset [${slugPath}] not found.` },
-        { status: 404 }
-      );
-    }
-
-    const security = JSON.parse(asset.metadata);
-    const decrypted = decryptDocument(
-      security.content,
-      security.iv,
-      security.authTag
-    );
-
-    return NextResponse.json({
-      ok: true,
-      asset: {
-        title: asset.title,
-        content: decrypted,
-        classification: asset.classification,
-        updatedAt: asset.updatedAt
+    // 1. ATOMIC UPDATE & FETCH
+    const asset = await prisma.contentMetadata.update({
+      where: { slug: slugPath },
+      data: { 
+        viewCount: { increment: 1 },
+        lastAccessedAt: new Date()
       }
     });
 
-  } catch (error) {
-    console.error(`[VAULT_FAILURE]:`, error);
-    return NextResponse.json({ error: 'Decryption failed.' }, { status: 500 });
+    if (!asset) {
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
+    // 2. CLASSIFICATION GATE
+    const classification = asset.classification.toLowerCase();
+    const isGated = ['private', 'restricted'].includes(classification);
+
+    // 3. AUDIT LOGGING (Non-blocking)
+    // FIX: Added explicit type (Error) to the catch parameter
+    prisma.systemAuditLog.create({
+      data: {
+        action: 'ACCESS_ASSET',
+        resourceId: asset.id,
+        resourceType: asset.contentType,
+        metadata: JSON.stringify({ slug: slugPath, classification }),
+        status: 'success'
+      }
+    }).catch((err: Error) => console.error("Audit failed:", err.message));
+
+    // 4. SECURITY & PREVIEW LOGIC
+    if (isGated) {
+      if (asset.metadata) {
+        try {
+          // If authorized (Authorization header logic would go here)
+          return NextResponse.json({
+            ok: true,
+            gated: true,
+            classification: asset.classification,
+            asset: {
+              title: asset.title,
+              preview: asset.summary || "Institutional preview restricted.",
+              content: null 
+            }
+          });
+        } catch (e) {
+          console.error("Decryption trigger failed", e);
+        }
+      }
+    }
+
+    // 5. PUBLIC ACCESS RETURN
+    return NextResponse.json({
+      ok: true,
+      gated: false,
+      asset: {
+        title: asset.title,
+        content: asset.content,
+        classification: asset.classification,
+        metrics: {
+          views: asset.viewCount,
+          downloads: asset.totalDownloads
+        }
+      }
+    });
+
+  } catch (error: any) {
+    console.error("Vault API Error:", error.message);
+    return NextResponse.json({ error: "Institutional Access Error" }, { status: 500 });
   }
 }

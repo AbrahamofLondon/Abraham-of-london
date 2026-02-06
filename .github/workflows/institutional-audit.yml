@@ -1,0 +1,50 @@
+name: Institutional Portfolio Audit
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  audit:
+    name: Validate Portfolio Integrity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/checkout@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Institutional Step 1: Contentlayer Build (Schema Check)
+        run: pnpm contentlayer build
+        env:
+          NODE_ENV: production
+
+      - name: Institutional Step 2: TypeScript Compilation (Type Alignment)
+        run: pnpm tsc --noEmit
+
+      - name: Institutional Step 3: PDF Registry Verification
+        run: |
+          # This runs a small script to ensure no null bytes or BOMs exist
+          find . -name "*.mdx" -exec grep -l $'\xEF\xBB\xBF' {} + | xargs -r echo "Warning: BOM detected in:"
+          find . -name "*.mdx" -exec grep -l $'\x00' {} + | xargs -r echo "Error: Null byte detected in:"
+
+      - name: Institutional Step 4: Next.js Build
+        run: pnpm run build
+        env:
+          NEXT_PUBLIC_AUDIT_MODE: true

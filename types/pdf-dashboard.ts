@@ -1,4 +1,3 @@
-// types/pdf-dashboard.ts 
 import type React from "react";
 import type { PDFItem as CanonPDFItem } from "@/lib/pdf/types";
 
@@ -10,22 +9,18 @@ export type ViewMode = "list" | "grid" | "detail";
 // ✅ SINGLE SOURCE OF TRUTH
 export type PDFItem = CanonPDFItem;
 
-
 // ------------------------------------------------------------
 // Responses / status
 // ------------------------------------------------------------
 export interface GenerationResponse {
   success: boolean;
   pdfId?: string;
-
   filename?: string;
   fileUrl?: string;
   fileSize?: number;
   generatedAt?: string;
-
   count?: number;
   message?: string;
-
   error?: string;
   details?: any;
 }
@@ -64,9 +59,11 @@ export interface DashboardStats {
 
   byTier?: Record<string, number>;
   byType?: Record<string, number>;
+  byCategory?: Record<string, number>; // Added to match converter
   averageFileSize?: string;
-  newest?: PDFItem | null;
-  oldest?: PDFItem | null;
+  /** Adjusted to allow ISO strings from registry stats */
+  newest?: string | PDFItem | null; 
+  oldest?: string | PDFItem | null;
 }
 
 // ------------------------------------------------------------
@@ -75,32 +72,13 @@ export interface DashboardStats {
 export interface UsePDFDashboardOptions {
   initialViewMode?: ViewMode;
   defaultCategory?: string;
-
-  /**
-   * Milliseconds. Set to 0 or undefined to disable auto-refresh.
-   * @default 30000
-   */
   autoRefreshInterval?: number;
-  
-  /**
-   * Whether to enable auto-refresh
-   * @default true
-   */
   enableAutoRefresh?: boolean;
-  
-  /**
-   * Initial filter state
-   */
   initialFilter?: Partial<FilterState>;
-  
-  /**
-   * Maximum number of items to display
-   */
   maxItems?: number;
 }
 
 export interface UsePDFDashboardReturn {
-  // State
   pdfs: PDFItem[];
   filteredPDFs: PDFItem[];
   selectedPDF: PDFItem | null;
@@ -118,13 +96,11 @@ export interface UsePDFDashboardReturn {
   generationStatus: GenerationStatus | null;
   error: Error | null;
 
-  // Actions — use proper React setters to match the hook implementation
   setSelectedPDFId: React.Dispatch<React.SetStateAction<string | null>>;
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
   setGenerationStatus: React.Dispatch<React.SetStateAction<GenerationStatus | null>>;
 
   refreshPDFList: () => Promise<void>;
-
   generatePDF: (pdfId?: string, options?: any) => Promise<GenerationResponse>;
   generateAllPDFs: () => Promise<GenerationResponse>;
 
@@ -140,7 +116,7 @@ export interface UsePDFDashboardReturn {
 }
 
 // ------------------------------------------------------------
-// Other supporting types (kept, but trimmed of duplicates)
+// Supporting Types
 // ------------------------------------------------------------
 export interface AnalyticsEvent {
   name: string;
@@ -258,7 +234,7 @@ export interface IPDFService {
   getCategories(): Promise<string[]>;
 }
 
-// Convenience re-exports (kept)
+// Re-exports
 export type {
   PDFItem as PDFDocument,
   FilterState as PDFFilterState,
@@ -267,22 +243,11 @@ export type {
   UsePDFDashboardReturn as PDFDashboardHookReturn,
 };
 
-// Utility types
-export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-export type RequiredKeys<T, K extends keyof T> = Required<Pick<T, K>> & Partial<Omit<T>, K>;
-
 // Events
 export type PDFEventType =
-  | "pdf_open"
-  | "pdf_generated"
-  | "pdf_deleted"
-  | "pdf_shared"
-  | "pdf_exported"
-  | "pdf_view_changed"
-  | "pdf_filter_changed"
-  | "pdf_search_performed"
-  | "batch_operation"
-  | "error_occurred";
+  | "pdf_open" | "pdf_generated" | "pdf_deleted" | "pdf_shared" | "pdf_exported"
+  | "pdf_view_changed" | "pdf_filter_changed" | "pdf_search_performed"
+  | "batch_operation" | "error_occurred";
 
 export interface PDFEvent {
   type: PDFEventType;
@@ -290,19 +255,6 @@ export interface PDFEvent {
   timestamp: string;
   userId?: string;
   sessionId?: string;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  errors: string[];
-  warnings?: string[];
-}
-
-export interface CacheState<T> {
-  data: T | null;
-  timestamp: number;
-  expiresAt: number;
-  isValid: () => boolean;
 }
 
 export interface ThemeSettings {

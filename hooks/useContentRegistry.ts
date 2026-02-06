@@ -1,4 +1,6 @@
 // hooks/useContentRegistry.ts — HARDENED (Performance & Cache)
+"use client"; 
+
 import { useState, useEffect, useMemo } from 'react';
 
 export interface RegistryItem {

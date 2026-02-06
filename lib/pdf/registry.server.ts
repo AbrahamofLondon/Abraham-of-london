@@ -1,24 +1,31 @@
-// lib/pdfs/registry.server.ts — SERVER ONLY
+// lib/pdf/registry.server.ts
+import "server-only";
 import fs from "fs";
 import path from "path";
-import type { PDFConfig } from "./registry";
-import { getAllPDFs } from "./registry";
+import { GENERATED_PDF_CONFIGS } from "./pdf-registry.generated";
 
-function toFsPathFromWebPath(webPath: string): string {
-  const clean = (webPath || "").trim().replace(/^\/+/, "");
-  return path.join(process.cwd(), "public", clean);
-}
+export type PDFItem = (typeof GENERATED_PDF_CONFIGS)[number];
 
-export function fileExistsForPdf(pdf: PDFConfig): boolean {
+function fileExistsOnDisk(publicPath: string): boolean {
+  // publicPath like "/assets/downloads/foo.pdf"
+  const abs = path.join(process.cwd(), "public", publicPath.replace(/^\//, ""));
   try {
-    const abs = toFsPathFromWebPath(pdf.outputPath);
-    const st = fs.statSync(abs);
-    return st.isFile();
+    return fs.existsSync(abs);
   } catch {
     return false;
   }
 }
 
-export function getMissingPdfsServer(): PDFConfig[] {
-  return getAllPDFs({ includeMissing: true }).filter((p) => !fileExistsForPdf(p));
+export function getAllPDFItemsServer(opts?: { includeMissing?: boolean }) {
+  const includeMissing = Boolean(opts?.includeMissing);
+  const items = Array.isArray(GENERATED_PDF_CONFIGS) ? [...GENERATED_PDF_CONFIGS] : [];
+
+  // If exists field is already accurate, keep it; otherwise verify here.
+  const normalized = items.map((x) => {
+    const url = (x.outputPath || "").toString();
+    const exists = typeof x.exists === "boolean" ? x.exists : fileExistsOnDisk(url);
+    return { ...x, exists };
+  });
+
+  return includeMissing ? normalized : normalized.filter((x) => x.exists);
 }

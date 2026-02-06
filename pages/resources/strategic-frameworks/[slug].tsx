@@ -1,14 +1,16 @@
-/* pages/resources/strategic-frameworks/[slug].tsx — INSTITUTIONAL REWRITE (NO MOCK, NO DOUBLE RENDER) */
+/* pages/resources/strategic-frameworks/[slug].tsx */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { ArrowLeft, Lock, Key, Eye, Shield } from "lucide-react";
+import { ArrowLeft, Lock, Key, Eye, Shield, Activity, Download, Printer } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { withUnifiedAuth } from "@/lib/auth/withUnifiedAuth";
+import { DecisionMemo } from "@/components/Frameworks/DecisionMemo";
+import { AuditLog } from "@/components/Frameworks/AuditLog";
 
 import {
   LIBRARY_HREF,
@@ -21,22 +23,7 @@ import type { User } from "@/types/auth";
 import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
 
 /* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
-
-type PublicPageProps = {
-  framework: Framework;
-};
-
-type PrivatePageProps = PublicPageProps & {
-  user?: User;
-  innerCircleAccess?: InnerCircleAccess;
-  requiredRole?: string;
-  onPrivateReady?: () => void; // used to hide public shell when private mounts
-};
-
-/* -------------------------------------------------------------------------- */
-/* UTIL                                                                       */
+/* UTIL & DESIGN SYSTEM                                                       */
 /* -------------------------------------------------------------------------- */
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
@@ -46,157 +33,49 @@ function canonicalFor(slug: string) {
 }
 
 function accentClass(accent: Framework["accent"]) {
-  switch (accent) {
-    case "gold":
-      return "border-amber-500/25 bg-amber-500/10 text-amber-200";
-    case "emerald":
-      return "border-emerald-500/25 bg-emerald-500/10 text-emerald-200";
-    case "blue":
-      return "border-sky-500/25 bg-sky-500/10 text-sky-200";
-    case "rose":
-      return "border-rose-500/25 bg-rose-500/10 text-rose-200";
-    case "indigo":
-      return "border-indigo-500/25 bg-indigo-500/10 text-indigo-200";
-    default:
-      return "border-amber-500/25 bg-amber-500/10 text-amber-200";
-  }
-}
-
-function tierChipIcon(tier: string) {
-  if (tier === "Board") return <Shield className="h-3 w-3 mr-2" />;
-  return null;
+  const map = {
+    gold: "border-amber-500/25 bg-amber-500/10 text-amber-200",
+    emerald: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200",
+    blue: "border-sky-500/25 bg-sky-500/10 text-sky-200",
+    rose: "border-rose-500/25 bg-rose-500/10 text-rose-200",
+    indigo: "border-indigo-500/25 bg-indigo-500/10 text-indigo-200",
+  };
+  return map[accent] || map.gold;
 }
 
 /* -------------------------------------------------------------------------- */
-/* PUBLIC VIEW (SSR/SEO SAFE)                                                 */
+/* PUBLIC VIEW (SEO LAYER)                                                    */
 /* -------------------------------------------------------------------------- */
 
-const PublicFrameworkView: React.FC<{ framework: Framework; hidden?: boolean }> = ({
-  framework,
-  hidden,
-}) => {
+const PublicFrameworkView: React.FC<{ framework: Framework; hidden?: boolean }> = ({ framework, hidden }) => {
   return (
     <div className={hidden ? "hidden" : "block"}>
-      <Layout
-        title={`${framework.title} | Strategic Framework`}
-        description={framework.oneLiner}
-        className="bg-black min-h-screen"
-      >
-        <Head>
-          <meta property="og:type" content="article" />
-          <link rel="canonical" href={canonicalFor(framework.slug)} />
-        </Head>
-
-        <div className="border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-4 py-4">
-            <Link
-              href={LIBRARY_HREF}
-              className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Library
+      <Layout title={`${framework.title} | Strategic Framework`} description={framework.oneLiner} className="bg-black min-h-screen">
+        <Head><link rel="canonical" href={canonicalFor(framework.slug)} /></Head>
+        
+        <div className="border-b border-white/10 py-4">
+          <div className="mx-auto max-w-7xl px-4">
+            <Link href={LIBRARY_HREF} className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors">
+              <ArrowLeft size={16} /> Back to Library
             </Link>
           </div>
         </div>
 
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-black to-rose-900/20" />
-          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-amber-200 text-xs font-black uppercase tracking-widest">
-                <Eye className="h-4 w-4" />
-                Preview Mode — Full Access Requires Inner Circle
-              </div>
-
-              <div className="mb-6">
-                <span
-                  className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-bold ${accentClass(
-                    framework.accent
-                  )}`}
-                >
-                  {framework.tag || "Framework"}
-                </span>
-              </div>
-
-              <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">
-                {framework.title}
-              </h1>
-
-              <p className="text-xl text-white/80 mb-8 leading-relaxed">
-                {framework.oneLiner}
-              </p>
-
-              <div className="flex flex-wrap gap-2 mb-8">
-                {(framework.tier || []).map((tier) => (
-                  <span
-                    key={tier}
-                    className="inline-flex items-center rounded-full border border-white/12 bg-white/7 px-3 py-1 text-sm text-white/80"
-                  >
-                    {tierChipIcon(tier)}
-                    {tier}
-                  </span>
-                ))}
-              </div>
-
-              {framework.canonRoot && (
-                <div className="rounded-xl border border-white/10 bg-white/5 p-6 mb-8">
-                  <h3 className="text-lg font-semibold text-white mb-2">Canon Foundation</h3>
-                  <p className="text-white/60 italic">“{framework.canonRoot}”</p>
-                </div>
-              )}
-
-              <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent p-6">
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-amber-400" />
-                  What you’re seeing
-                </h3>
-                <p className="text-white/70">
-                  This is a public preview. The complete framework includes operating logic, playbook steps, metrics,
-                  board questions, failure modes, and downloadable artifacts where available.
-                </p>
-              </div>
+        <section className="relative py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.05),transparent_50%)]" />
+          <div className="relative mx-auto max-w-7xl px-4 flex flex-col items-center text-center">
+            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-6 py-2 text-amber-200 text-[10px] font-black uppercase tracking-[0.3em]">
+              <Lock size={14} /> Dossier Protected
             </div>
-          </div>
-        </section>
-
-        <section className="py-16 border-t border-white/10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-amber-600/5 p-8 text-center">
-              <Lock className="mx-auto h-12 w-12 text-amber-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Inner Circle Access Required</h3>
-
-              <p className="text-white/70 mb-6">
-                Tiered for:{" "}
-                <span className="font-semibold text-amber-300">
-                  {(framework.tier || []).join(", ")}
-                </span>
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href={`/inner-circle/join?framework=${encodeURIComponent(framework.slug)}&tier=${encodeURIComponent(
-                    (framework.tier && framework.tier[0]) || "Founder"
-                  )}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-bold text-black hover:shadow-lg hover:shadow-amber-500/25 transition-all hover:scale-[1.02]"
-                >
-                  <Key className="h-4 w-4" />
-                  Join Inner Circle
-                </Link>
-
-                <Link
-                  href={`/login?redirect=${encodeURIComponent(
-                    `/resources/strategic-frameworks/${framework.slug}`
-                  )}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-500/30 px-8 py-3 text-sm font-bold text-amber-300 hover:bg-amber-500/10 transition-all"
-                >
-                  Sign In
-                </Link>
-              </div>
-
-              <p className="text-white/40 text-sm mt-6">
-                Already have access? Sign in to view the complete framework.
-              </p>
-            </div>
+            <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-6 uppercase tracking-tighter">
+              {framework.title}
+            </h1>
+            <p className="max-w-2xl text-xl text-white/70 leading-relaxed mb-12">
+              {framework.oneLiner}
+            </p>
+            <Link href="/login" className="bg-white text-black px-10 py-4 rounded-full font-black uppercase tracking-widest hover:bg-amber-500 transition-all">
+              Unlock Full Intelligence
+            </Link>
           </div>
         </section>
       </Layout>
@@ -205,19 +84,11 @@ const PublicFrameworkView: React.FC<{ framework: Framework; hidden?: boolean }> 
 };
 
 /* -------------------------------------------------------------------------- */
-/* PRIVATE VIEW (client-only, replaces public when available)                 */
+/* PRIVATE VIEW (INTELLIGENCE LAYER)                                          */
 /* -------------------------------------------------------------------------- */
 
-const PrivateFrameworkView: React.FC<PrivatePageProps> = ({
-  framework,
-  user,
-  innerCircleAccess,
-  onPrivateReady,
-}) => {
-  const hasAccess =
-    Boolean(innerCircleAccess?.hasAccess) ||
-    user?.role === "admin" ||
-    user?.role === "editor";
+const PrivateFrameworkView: React.FC<PrivatePageProps> = ({ framework, user, innerCircleAccess, onPrivateReady }) => {
+  const hasAccess = Boolean(innerCircleAccess?.hasAccess) || user?.role === "admin" || user?.role === "editor";
 
   React.useEffect(() => {
     if (hasAccess) onPrivateReady?.();
@@ -226,205 +97,99 @@ const PrivateFrameworkView: React.FC<PrivatePageProps> = ({
   if (!hasAccess) return null;
 
   return (
-    <Layout
-      title={`${framework.title} | Strategic Framework`}
-      description={framework.oneLiner}
-      className="bg-black min-h-screen"
-    >
-      <Head>
-        <meta property="og:type" content="article" />
-        <meta name="robots" content="noindex,nofollow" />
-        <link rel="canonical" href={canonicalFor(framework.slug)} />
-      </Head>
+    <Layout title={`${framework.title} | Strategic Briefing`} className="bg-black min-h-screen print:bg-white">
+      <Head><meta name="robots" content="noindex,nofollow" /></Head>
 
-      <div className="border-b border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent">
-        <div className="mx-auto max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">
-                <Key className="h-3 w-3 text-amber-300" />
-                <span className="text-xs font-bold text-amber-300">
-                  {user?.role === "admin" ? "ADMIN ACCESS" : "INNER CIRCLE ACCESS"}
-                </span>
-              </div>
-              <span className="text-sm text-white/60">{user?.name || "Authenticated"}</span>
-            </div>
-
-            <Link href={LIBRARY_HREF} className="text-white/60 hover:text-white text-sm">
-              ← Back to Library
-            </Link>
-          </div>
-        </div>
+      {/* 1. Decision Memo Engine (Print Secret Layer) */}
+      <div className="print:block hidden">
+        <DecisionMemo framework={framework} />
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="mb-6">
-              <span
-                className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-bold ${accentClass(
-                  framework.accent
-                )}`}
-              >
-                {framework.tag || "Framework"}
+      <div className="print:hidden">
+        {/* Navigation / Header */}
+        <div className="border-b border-white/5 bg-zinc-900/20 backdrop-blur-md sticky top-0 z-50">
+          <div className="mx-auto max-w-7xl px-4 py-3 flex justify-between items-center">
+             <div className="flex items-center gap-4">
+               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+               <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Live_Dossier_Active</span>
+             </div>
+             <div className="flex items-center gap-6">
+               <span className="text-xs font-bold text-amber-500 uppercase tracking-tighter">{user?.name} // {user?.role}</span>
+               <Link href={LIBRARY_HREF} className="text-white/60 hover:text-white text-xs uppercase font-bold tracking-widest">Close Brief</Link>
+             </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-16 grid lg:grid-cols-4 gap-12">
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-20">
+            <header>
+              <span className={`inline-flex items-center rounded-full border px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${accentClass(framework.accent)}`}>
+                {framework.tag}
               </span>
-            </div>
+              <h1 className="font-serif text-6xl font-bold text-white mb-6 uppercase leading-none">{framework.title}</h1>
+              <p className="text-2xl text-white/60 font-serif italic border-l-2 border-amber-500/40 pl-8 py-2">"{framework.oneLiner}"</p>
+            </header>
 
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-4">
-              {framework.title}
-            </h1>
-            <p className="text-xl text-white/80 mb-10">{framework.oneLiner}</p>
+            {/* Decision Memo Component (Screen View) */}
+            <DecisionMemo framework={framework} />
 
-            {!!framework.executiveSummary?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Executive Summary
-                </h2>
-                <div className="space-y-4">
-                  {framework.executiveSummary.map((p, idx) => (
-                    <p key={idx} className="text-white/80 leading-relaxed">
-                      {p}
-                    </p>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* Structured Content Sections */}
+            <section>
+              <h2 className="text-sm font-black text-amber-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
+                <span className="h-px bg-amber-500/20 flex-1" /> Operating Logic <Activity size={14} />
+              </h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                {framework.operatingLogic?.map((logic, i) => (
+                  <div key={i} className="bg-zinc-900/50 border border-white/5 p-8 rounded-2xl hover:border-amber-500/30 transition-colors group">
+                    <h3 className="text-white font-bold text-lg mb-4 uppercase tracking-tight group-hover:text-amber-200 transition-colors">{logic.title}</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed">{logic.body}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
 
-            {!!framework.operatingLogic?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Operating Logic
-                </h2>
-                <div className="space-y-8">
-                  {framework.operatingLogic.map((logic, idx) => (
-                    <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-6">
-                      <h3 className="text-lg font-semibold text-white mb-3">{logic.title}</h3>
-                      <p className="text-white/70">{logic.body}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {!!framework.applicationPlaybook?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Application Playbook
-                </h2>
-                <div className="space-y-4">
-                  {framework.applicationPlaybook.map((s, idx) => (
-                    <div key={idx} className="rounded-xl border border-white/10 bg-white/5 p-6">
-                      <div className="text-xs font-black uppercase tracking-[0.22em] text-amber-300 mb-2">
-                        Step {s.step}
-                      </div>
-                      <div className="text-white/90 font-semibold mb-2">{s.detail}</div>
-                      <div className="text-white/60 text-sm">Deliverable: {s.deliverable}</div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {!!framework.metrics?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Metrics & Cadence
-                </h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {framework.metrics.map((m, idx) => (
-                    <div key={idx} className="rounded-xl border border-white/10 bg-white/5 p-6">
-                      <div className="text-white font-semibold mb-2">{m.metric}</div>
-                      <div className="text-white/70 text-sm mb-3">{m.whyItMatters}</div>
-                      <div className="text-white/50 text-xs">Review cadence: {m.reviewCadence}</div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {!!framework.boardQuestions?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Board Questions
-                </h2>
-                <ul className="space-y-3">
-                  {framework.boardQuestions.map((q, idx) => (
-                    <li key={idx} className="rounded-xl border border-white/10 bg-white/5 p-5 text-white/80">
-                      {q}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {!!framework.failureModes?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Failure Modes
-                </h2>
-                <ul className="space-y-3">
-                  {framework.failureModes.map((x, idx) => (
-                    <li key={idx} className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-5 text-white/80">
-                      {x}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {!!framework.whatToDoNext?.length && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  What to Do Next
-                </h2>
-                <ul className="space-y-3">
-                  {framework.whatToDoNext.map((x, idx) => (
-                    <li key={idx} className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-white/80">
-                      {x}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {framework.artifactHref ? (
-              <section className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/10">
-                  Artifacts & Templates
-                </h2>
-                <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30 rounded-xl p-6">
-                  <a
-                    href={framework.artifactHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-3 w-full sm:w-auto bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold py-3 px-8 rounded-lg hover:shadow-lg hover:shadow-amber-500/25 transition-all"
-                  >
-                    <Key className="h-5 w-5" />
-                    Download Complete Package
-                  </a>
-                  <p className="text-white/60 text-sm mt-3">
-                    Includes templates, worksheets, and implementation guides.
-                  </p>
-                </div>
-              </section>
-            ) : null}
+            {/* Board Questions */}
+            <section className="bg-amber-500/5 border border-amber-500/10 rounded-3xl p-10">
+              <h2 className="text-white font-bold text-2xl mb-8 flex items-center gap-3">
+                <Shield className="text-amber-500" /> Fiduciary Inquiries
+              </h2>
+              <div className="space-y-4">
+                {framework.boardQuestions?.map((q, i) => (
+                  <div key={i} className="flex gap-4 text-zinc-300 text-lg font-serif italic border-b border-white/5 pb-4 last:border-0">
+                    <span className="text-amber-500 font-mono text-sm tracking-tighter">Q_{i+1}</span>
+                    <p>{q}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
 
-          <aside className="space-y-6">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Framework Details</h3>
-              <div className="space-y-3">
-                {framework.canonRoot && (
-                  <div>
-                    <p className="text-sm text-white/60">Canon Foundation</p>
-                    <p className="text-white font-medium">“{framework.canonRoot}”</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm text-white/60">Tier</p>
-                  <p className="text-amber-300 font-medium">{(framework.tier || []).join(" + ")}</p>
+          {/* Sidebar Intelligence */}
+          <aside className="space-y-8">
+            <div className="sticky top-24 space-y-6">
+              <AuditLog slug={framework.slug} userName={user?.name || "Anonymous"} />
+              
+              <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-6">
+                <h4 className="text-white text-xs font-black uppercase tracking-widest mb-4">Metadata</h4>
+                <div className="space-y-4">
+                   <div>
+                     <span className="block text-[10px] text-zinc-500 uppercase">Institutional Tier</span>
+                     <span className="text-amber-200 text-sm font-bold uppercase">{framework.tier.join(" + ")}</span>
+                   </div>
+                   <div>
+                     <span className="block text-[10px] text-zinc-500 uppercase">Canon Root</span>
+                     <span className="text-zinc-300 text-sm italic">"{framework.canonRoot}"</span>
+                   </div>
                 </div>
               </div>
+
+              {framework.artifactHref && (
+                <a href={framework.artifactHref} className="flex items-center justify-between w-full bg-white text-black p-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 transition-all">
+                  <span>Download Package</span>
+                  <Download size={16} />
+                </a>
+              )}
             </div>
           </aside>
         </div>
@@ -434,84 +199,48 @@ const PrivateFrameworkView: React.FC<PrivatePageProps> = ({
 };
 
 /* -------------------------------------------------------------------------- */
-/* CLIENT AUTH SHELL (renders Private if authorized; otherwise renders null)  */
+/* PROTECTED SHELL & PAGE EXPORTS                                             */
 /* -------------------------------------------------------------------------- */
 
-const ProtectedShell = dynamic(
-  async () => {
-    const Protected: React.FC<PrivatePageProps> = (props) => {
-      const ProtectedComponent = withUnifiedAuth(PrivateFrameworkView, {
-        requiredRole: "inner-circle",
-        // IMPORTANT: do NOT replace public SSR with an “access denied page”.
-        // If not authorized, we render null so the public SSR stays visible.
-        fallbackComponent: () => null,
-        publicFallback: true,
-      });
-
-      return <ProtectedComponent {...props} />;
-    };
-    return Protected;
-  },
-  { ssr: false }
-);
-
-/* -------------------------------------------------------------------------- */
-/* PAGE                                                                       */
-/* -------------------------------------------------------------------------- */
+const ProtectedShell = dynamic(async () => {
+  return (props: PrivatePageProps) => {
+    const ProtectedComponent = withUnifiedAuth(PrivateFrameworkView, {
+      requiredRole: "inner-circle",
+      fallbackComponent: () => null,
+      publicFallback: true,
+    });
+    return <ProtectedComponent {...props} />;
+  };
+}, { ssr: false });
 
 const FrameworkDetailPage: NextPage<PublicPageProps> = (props) => {
-  const router = useRouter();
   const [privateReady, setPrivateReady] = React.useState(false);
+  const router = useRouter();
 
-  if (router.isFallback) {
-    return (
-      <Layout title="Loading…" className="bg-black min-h-screen">
-        <div className="mx-auto max-w-4xl px-4 py-24 text-white/70">Loading framework…</div>
-      </Layout>
-    );
-  }
+  if (router.isFallback) return <div className="bg-black min-h-screen p-20 text-white font-mono uppercase tracking-[0.5em] animate-pulse">Loading_Dossier...</div>;
 
   return (
     <>
-      {/* SSR-first public page for SEO; hidden once private mounts successfully */}
       <PublicFrameworkView framework={props.framework} hidden={privateReady} />
-
-      {/* Client-only private shell. If authorized, it renders and signals the swap. */}
-      <ProtectedShell
-        {...(props as PrivatePageProps)}
-        onPrivateReady={() => setPrivateReady(true)}
-      />
+      <ProtectedShell {...(props as PrivatePageProps)} onPrivateReady={() => setPrivateReady(true)} />
     </>
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* SSG                                                                        */
-/* -------------------------------------------------------------------------- */
-
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getAllFrameworkSlugs();
-
   return {
-    paths: slugs
-      .map((slug) => String(slug || "").trim())
-      .filter(Boolean)
-      .map((slug) => ({ params: { slug } })),
+    paths: slugs.map((slug) => ({ params: { slug: String(slug).trim() } })),
     fallback: "blocking",
   };
 };
 
 export const getStaticProps: GetStaticProps<PublicPageProps> = async ({ params }) => {
   const slug = String(params?.slug || "").trim();
-  if (!slug) return { notFound: true };
-
   const framework = getFrameworkBySlug(slug);
   if (!framework) return { notFound: true };
-
   return {
-    props: {
-      framework: JSON.parse(JSON.stringify(framework)),
-    },
+    props: { framework: JSON.parse(JSON.stringify(framework)) },
     revalidate: 3600,
   };
 };

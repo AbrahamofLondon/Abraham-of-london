@@ -3,8 +3,14 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-// NOTE: This is the browser-safe registry; safe to import server-side too.
-import { getAllPDFs, getPDFById, PDFConfig, PDFTier, PDFType } from "@/scripts/pdf-registry";
+// Import from legacy barrel file (client-safe)
+import { 
+  getAllPDFItems as getAllPDFs, 
+  getPDFById, 
+  PDFItem as PDFConfig, 
+  PDFTier, 
+  PDFType 
+} from "@/scripts/pdf-registry";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */

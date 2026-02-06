@@ -1,0 +1,19 @@
+{
+  "project": {
+    "id": "AbrahamofLondon",
+    "owner": "seunadaramola",
+    "email": "seunadaramola@gmail.com",
+    "default_branch": "main",
+    "region_id": "aws-eu-central-1"
+  },
+  "development": {
+    "local_proxy_port": 5432,
+    "driver": "@neondatabase/serverless",
+    "pooling": true
+  },
+  "agents": {
+    "allow_schema_read": true,
+    "allow_branch_creation": true,
+    "context_path": ".agents/skills/neon-postgres"
+  }
+}

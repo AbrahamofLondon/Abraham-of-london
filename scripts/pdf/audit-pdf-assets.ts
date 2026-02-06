@@ -1,6 +1,7 @@
 // scripts/pdf/audit-pdf-assets.ts
 import fs from "fs";
 import path from "path";
+// Import the actual function instead of aliasing the array
 import { getPDFRegistrySource } from "./pdf-registry.source";
 
 function walk(dir: string): string[] {
@@ -21,7 +22,6 @@ function toPosix(p: string) {
 // Define ignore patterns for internal operational files
 const IGNORE_PATTERNS = [
   /^\/assets\/downloads\/_core-.*\.pdf$/i,
-  // Add more patterns here as needed
 ];
 
 function shouldIgnore(p: string): boolean {
@@ -30,13 +30,22 @@ function shouldIgnore(p: string): boolean {
 
 function main() {
   const root = process.cwd();
+  // Scanning both core download locations
   const publicDownloads = path.join(root, "public", "assets", "downloads");
+  const vaultDownloads = path.join(root, "public", "vault", "downloads");
 
-  const diskFiles = walk(publicDownloads)
+  const diskFiles = [
+    ...walk(publicDownloads),
+    ...walk(vaultDownloads)
+  ]
     .filter((f) => f.toLowerCase().endsWith(".pdf"))
-    .map((abs) => toPosix(abs.slice(path.join(root, "public").length)).replace(/^\/+/, "/"))
+    .map((abs) => {
+      const relative = toPosix(abs.slice(path.join(root, "public").length));
+      return relative.startsWith("/") ? relative : `/${relative}`;
+    })
     .sort();
 
+  // CALLING the function properly now
   const source = getPDFRegistrySource();
 
   const registryPaths = source
@@ -51,9 +60,8 @@ function main() {
 
   const missingOnDisk = registryPaths.filter((p) => !diskSet.has(p));
   
-  // Apply ignore rule for unregistered files
   const unregisteredOnDisk = diskFiles.filter((p) => {
-    if (shouldIgnore(p)) return false; // Skip ignored files
+    if (shouldIgnore(p)) return false; 
     return !regSet.has(p);
   });
 
@@ -71,7 +79,6 @@ function main() {
   if (!unregisteredOnDisk.length) console.log("✅ OK: none");
   else unregisteredOnDisk.forEach((p) => console.log(`⚠️  UNLISTED: ${p}`));
 
-  // Show ignored files for transparency
   const ignoredFiles = diskFiles.filter(shouldIgnore);
   if (ignoredFiles.length > 0) {
     console.log("\n--- Internal PDFs (ignored in audit) ---");
@@ -79,16 +86,18 @@ function main() {
   }
 
   console.log("\n--- Quick diagnosis ---");
-  if (registryPaths.length < diskFiles.length - ignoredFiles.length) {
+  const activeDiskCount = diskFiles.length - ignoredFiles.length;
+  
+  if (registryPaths.length < activeDiskCount) {
     console.log(
-      "⚠️  Your registry source is missing entries for existing PDFs. Add those PDFs into scripts/pdf/pdf-registry.source.ts."
+      `⚠️  Registry is missing ${activeDiskCount - registryPaths.length} entries found on disk.`
     );
-  } else if (registryPaths.length > diskFiles.length - ignoredFiles.length) {
+  } else if (registryPaths.length > activeDiskCount) {
     console.log(
-      "⚠️  Your registry references PDFs that aren't present on disk. Either generate them or remove/fix outputPath."
+      `⚠️  Registry references ${registryPaths.length - activeDiskCount} files missing from disk.`
     );
   } else {
-    console.log("✅ Registry and disk counts match (excluding internal files).");
+    console.log("✅ Registry and disk counts match.");
   }
 
   if (missingOnDisk.length === 0 && unregisteredOnDisk.length === 0) {

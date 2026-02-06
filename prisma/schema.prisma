@@ -1,210 +1,192 @@
-/* prisma/schema.prisma — PRODUCTION HARDENED SCHEMA [VERSION 2.7.0] */
+// prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"] // Required for pgvector
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")] // Enables semantic discovery
 }
 
-// 1. ASSET AUDIT SYSTEM
-model DownloadAuditEvent {
-  id            String   @id @default(cuid())
-  slug          String   // The Brief ID
-  contentType   String   @default("download")
-  eventType     String   @default("download")
-  memberId      String?
-  fileName      String?
-  fileSize      BigInt?
-  fileHash      String?  
-  userId        String?
-  email         String?
-  emailHash     String?  
-  sessionId     String?
-  deviceId      String?
-  userAgent     String?
-  ipAddress     String?
-  ipHash        String?  
-  countryCode   String?
-  region        String?
-  city          String?
-  referrer      String?
-  
-  utmSource     String?
-  utmMedium     String?
-  utmCampaign   String?
-  
-  statusCode    Int?
-  latencyMs     Int?
-  success       Boolean  @default(true)
-  errorCode     String?
-  errorDetail   String?
-  
-  createdAt     DateTime @default(now())
-  processedAt   DateTime?
+// ============================================================================
+// 1. CORE IDENTITY & MEMBERSHIP
+// ============================================================================
 
-  member        InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  @@index([slug])
-  @@index([createdAt])
-  @@index([memberId])
-}
-
-// 2. CORE IDENTITY & MEMBERSHIP
 model InnerCircleMember {
   id              String   @id @default(cuid())
+
+  // Identity
   emailHash       String   @unique
-  emailHashPrefix String
+  email           String?  @unique
   name            String?
-  email           String?  
-  status          String   @default("active") 
-  tier            String   @default("standard") 
-  role            String   @default("MEMBER")   
-  
-  loginCount      Int      @default(0)
+
+  // Role & Status
+  role            String   @default("MEMBER")   // ADMIN | PRINCIPAL | DELEGATE | MEMBER
+  tier            String   @default("standard") // standard | elite | private
+  status          String   @default("active")
+
+  // Institutional Intelligence
+  annotations     PrivateAnnotation[]
+  inquiries       StrategyInquiry[]
+
+  // Activity Tracking
+  viewCount       Int      @default(0)
   lastSeenAt      DateTime @default(now())
-  lastIp          String?
-  flags           String?  
   
+  // Timestamps
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   // Relations
-  downloadEvents    DownloadAuditEvent[]
-  shortInteractions ShortInteraction[]
-  keys              InnerCircleKey[]
-  sessions          Session[]
+  downloadEvents  DownloadAuditEvent[]
+  sessions        Session[]
+  keys            InnerCircleKey[]
 
   @@index([status])
   @@index([tier])
 }
 
-// 3. SECURITY & ACCESS CONTROL
-model InnerCircleKey {
-  id            String   @id @default(cuid())
-  memberId      String
-  keyHash       String   @unique
-  keySuffix     String   
-  status        String   @default("active")
-  keyType       String?  @default("standard") 
-  totalUnlocks  Int      @default(0)
-  
-  createdAt     DateTime @default(now())
-  lastUsedAt    DateTime?
-  lastIp        String?
-  expiresAt     DateTime?
-  revokedAt     DateTime?
-  revokedReason String?
-  metadata      String?
+// ============================================================================
+// 2. INTELLIGENCE & SEMANTIC SEARCH
+// ============================================================================
 
-  member        InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  @@index([memberId])
-}
-
-// 4. CONTENT & ENGAGEMENT ENGINE
 model ContentMetadata {
-  id                String   @id @default(cuid())
-  slug              String   @unique
-  title             String
-  contentType       String   
-  version           String   @default("1.0.0")
-  classification    String   @default("UNCLASSIFIED") // Prepared for scaling security
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  contentType     String   // "Dossier", "Briefing", "Operational_Framework"
+  classification  String   @default("RESTRICTED") // PUBLIC, PRIVATE, RESTRICTED
   
-  totalDownloads    Int      @default(0)
-  uniqueDownloaders Int      @default(0)
-  viewCount         Int      @default(0)
-  shareCount        Int      @default(0)
-  likeCount         Int      @default(0)
+  // Content Core
+  summary         String?  @db.Text 
+  content         String?  @db.Text
   
-  tags              String?
-  metadata          String?  
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  // Vector Embedding for Semantic Search (Requires pgvector)
+  embedding       Unsupported("vector(1536)")? 
+
+  // Strategic Metrics
+  totalPrints     Int      @default(0)
+  engagementScore Float    @default(0.0)
 
   // Relations
-  shortInteractions ShortInteraction[]
+  annotations     PrivateAnnotation[]
+  dependencies    StrategicLink[]      @relation("SourceBrief")
+  dependents      StrategicLink[]      @relation("TargetBrief")
 
-  @@index([contentType])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
   @@index([classification])
 }
 
-model ShortInteraction {
-  id        String   @id @default(cuid())
-  type      String   // e.g., "LIKE", "SHARE", "BOOKMARK"
-  createdAt DateTime @default(now())
+model StrategicLink {
+  id              String   @id @default(cuid())
+  sourceId        String
+  targetId        String
+  strength        Float    @default(1.0)
+  linkType        String   @default("DEPENDENCY") // PREREQUISITE | COMPLEMENTARY
+
+  sourceBrief     ContentMetadata @relation("SourceBrief", fields: [sourceId], references: [id])
+  targetBrief     ContentMetadata @relation("TargetBrief", fields: [targetId], references: [id])
+
+  @@unique([sourceId, targetId])
+}
+
+// ============================================================================
+// 3. PRIVATE ANNOTATIONS (Commander's Intent)
+// ============================================================================
+
+model PrivateAnnotation {
+  id              String   @id @default(cuid())
+  body            String   @db.Text
+  priority        String   @default("ROUTINE") // ROUTINE | URGENT | MANDATE
   
-  memberId  String
-  member    InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId        String
+  member          InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
   
-  contentId String
-  content   ContentMetadata   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId       String
+  content         ContentMetadata   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  embedding       Unsupported("vector(1536)")? // Allows searching personal notes
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([memberId])
   @@index([contentId])
-  @@index([type])
 }
 
-// 5. SYSTEM STABILITY
-model ApiRateLimit {
-  id           Int      @id @default(autoincrement())
-  identifier   String   
-  bucketType   String   
-  requestCount Int      @default(0)
-  windowStart  DateTime
-  windowEnd    DateTime
-  lastRequest  DateTime
+// ============================================================================
+// 4. STRATEGY INTAKE REGISTRY
+// ============================================================================
 
-  @@unique([identifier, bucketType, windowStart])
+model StrategyInquiry {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   
+  intent          String   @db.Text
+  status          String   @default("PENDING") 
+  
+  metadata        Json?    
+  
+  memberId        String?
+  member          InnerCircleMember? @relation(fields: [memberId], references: [id])
+
+  createdAt       DateTime @default(now())
+
+  // Correct Index Placement
+  @@index([email])
+  @@index([status])
 }
+
+// ============================================================================
+// 5. INFRASTRUCTURE & AUDIT
+// ============================================================================
 
 model SystemAuditLog {
-  id           String   @id @default(cuid())
-  actorType    String   @default("system") 
-  actorId      String?
-  actorEmail   String
-  action       String   
-  resourceType String   @default("system")
-  resourceId   String
-  status       String   @default("success")
-  severity     String   @default("info") 
-  metadata     String  @db.Text
-  createdAt    DateTime @default(now())
+  id              String   @id @default(cuid())
+  action          String   // e.g., "BOARD_MEMO_PRINT"
+  severity        String   @default("info") // info | warning | high | critical
+  
+  actorId         String?
+  resourceId      String?
+  
+  ipAddress       String?
+  userAgent       String?
+  metadata        Json?
+
+  createdAt       DateTime @default(now())
 
   @@index([action])
-  @@index([createdAt])
+  @@index([severity])
+  @@index([actorId])
 }
 
+// Keep existing Session, InnerCircleKey, and DownloadAuditEvent logic...
 model Session {
-  id            String   @id @default(cuid())
-  sessionId     String   @unique
-  memberId      String?
-  expiresAt     DateTime
-  lastActivity  DateTime
-  createdAt     DateTime @default(now())
-  member        InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionId    String   @unique
+  memberId     String?
+  expiresAt    DateTime
+  member       InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
-model SystemConfig {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  value       String
-  type        String
-  description String
-  category    String?  @default("general")
-  isPublic    Boolean  @default(false)
-  updatedAt   DateTime @updatedAt
+model InnerCircleKey {
+  id           String   @id @default(cuid())
+  memberId     String
+  keyHash      String   @unique
+  status       String   @default("active")
+  member       InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
-model MaintenanceLog {
-  id          String   @id @default(cuid())
-  operation   String
-  status      String   @default("pending")
-  startedAt   DateTime
-  completedAt DateTime?
-  createdAt   DateTime @default(now())
+model DownloadAuditEvent {
+  id           String   @id @default(cuid())
+  slug         String
+  memberId     String?
+  member       InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
 }

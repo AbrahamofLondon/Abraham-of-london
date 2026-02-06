@@ -1,13 +1,25 @@
 {
-  "generatedAt": "2026-02-03T17:48:45.573Z",
-  "totalAssets": 252,
+  "generatedAt": "2026-02-06T12:38:03.940Z",
+  "totalAssets": 257,
   "tierDistribution": {
-    "public": 237,
-    "inner-circle": 12,
+    "inner-circle": 15,
+    "public": 235,
+    "member": 4,
     "inner-circle-elite": 2,
     "private": 1
   },
   "entries": [
+    {
+      "id": "canon-builders-rule-of-life",
+      "type": "INTEL_BRIEF",
+      "title": "The Canon Builder's Rule of Life",
+      "tier": "inner-circle",
+      "date": "2026-02-04",
+      "words": 707,
+      "relative": "content\\briefs\\canon-builders-rule-of-life.mdx",
+      "isValid": true,
+      "violations": []
+    },
     {
       "id": "fr-001",
       "type": "INTEL_BRIEF",
@@ -845,6 +857,17 @@
       "violations": []
     },
     {
+      "id": "institutional-governance",
+      "type": "STRATEGY",
+      "title": "Institutional Governance",
+      "tier": "inner-circle",
+      "date": "2026-02-05",
+      "words": 150,
+      "relative": "content\\strategy\\institutional-governance.mdx",
+      "isValid": true,
+      "violations": []
+    },
+    {
       "id": "sample-strategy",
       "type": "STRATEGY",
       "title": "Strategy Sample",
@@ -858,10 +881,10 @@
     {
       "id": "christianity-not-extremism",
       "type": "DISPATCH",
-      "title": "Christianity Is Not Extremism - It Is the Light That Built the World",
+      "title": "Christianity Is Not Extremism",
       "tier": "public",
       "date": "2025-08-28",
-      "words": 520,
+      "words": 46,
       "relative": "content\\blog\\christianity-not-extremism.mdx",
       "isValid": true,
       "violations": []
@@ -872,7 +895,7 @@
       "title": "Fathering Principles: A Blueprint for Men",
       "tier": "public",
       "date": "2025-05-15",
-      "words": 492,
+      "words": 499,
       "relative": "content\\blog\\fathering-principles.mdx",
       "isValid": true,
       "violations": []
@@ -883,7 +906,7 @@
       "title": "Fathering Without Fear - Teaser",
       "tier": "public",
       "date": "2025-06-15",
-      "words": 360,
+      "words": 362,
       "relative": "content\\blog\\fathering-without-fear-teaser.mdx",
       "isValid": true,
       "violations": []
@@ -902,10 +925,10 @@
     {
       "id": "in-my-fathers-house",
       "type": "DISPATCH",
-      "title": "In My Father's House: Not Mansions-Home",
+      "title": "In My Father's House",
       "tier": "public",
       "date": "2025-09-30",
-      "words": 559,
+      "words": 32,
       "relative": "content\\blog\\in-my-fathers-house.mdx",
       "isValid": true,
       "violations": []
@@ -1917,7 +1940,7 @@
       "title": "Clarity",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 28,
+      "words": 33,
       "relative": "content\\lexicon\\clarity.mdx",
       "isValid": true,
       "violations": []
@@ -1928,7 +1951,7 @@
       "title": "Family",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 26,
+      "words": 31,
       "relative": "content\\lexicon\\family.mdx",
       "isValid": true,
       "violations": []
@@ -1939,7 +1962,7 @@
       "title": "Father",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 36,
+      "words": 40,
       "relative": "content\\lexicon\\father.mdx",
       "isValid": true,
       "violations": []
@@ -1948,9 +1971,9 @@
       "id": "governance",
       "type": "LEXICON",
       "title": "Governance",
-      "tier": "public",
-      "date": "2026-02-01",
-      "words": 31,
+      "tier": "inner-circle",
+      "date": "2026-02-05",
+      "words": 72,
       "relative": "content\\lexicon\\governance.mdx",
       "isValid": true,
       "violations": []
@@ -1961,7 +1984,7 @@
       "title": "Identity",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 22,
+      "words": 27,
       "relative": "content\\lexicon\\identity.mdx",
       "isValid": true,
       "violations": []
@@ -1972,7 +1995,7 @@
       "title": "Integrity",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 138,
+      "words": 147,
       "relative": "content\\lexicon\\integrity.mdx",
       "isValid": true,
       "violations": []
@@ -1983,7 +2006,7 @@
       "title": "Leadership",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 21,
+      "words": 26,
       "relative": "content\\lexicon\\leadership.mdx",
       "isValid": true,
       "violations": []
@@ -1994,7 +2017,7 @@
       "title": "Legacy",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 27,
+      "words": 32,
       "relative": "content\\lexicon\\legacy.mdx",
       "isValid": true,
       "violations": []
@@ -2005,7 +2028,7 @@
       "title": "Purpose",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 36,
+      "words": 40,
       "relative": "content\\lexicon\\purpose.mdx",
       "isValid": true,
       "violations": []
@@ -2016,7 +2039,7 @@
       "title": "Responsibility",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 24,
+      "words": 29,
       "relative": "content\\lexicon\\responsibility.mdx",
       "isValid": true,
       "violations": []
@@ -2027,7 +2050,7 @@
       "title": "Sovereignty",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 73,
+      "words": 77,
       "relative": "content\\lexicon\\sovereignty.mdx",
       "isValid": true,
       "violations": []
@@ -2038,7 +2061,7 @@
       "title": "Strategic Autonomy",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 161,
+      "words": 165,
       "relative": "content\\lexicon\\strategic-autonomy.mdx",
       "isValid": true,
       "violations": []
@@ -2049,7 +2072,7 @@
       "title": "Surrender",
       "tier": "public",
       "date": "2026-02-01",
-      "words": 29,
+      "words": 34,
       "relative": "content\\lexicon\\surrender.mdx",
       "isValid": true,
       "violations": []
@@ -2057,7 +2080,7 @@
     {
       "id": "builders-catechism",
       "type": "CANON",
-      "title": "The Builder’s Catechism",
+      "title": "The Builder's Catechism",
       "tier": "public",
       "date": "2025-06-01",
       "words": 369,
@@ -2178,7 +2201,7 @@
     {
       "id": "volume-x-the-arc-of-future-civilisation",
       "type": "CANON",
-      "title": "VOLUME X – THE ARC OF FUTURE CIVILISATION",
+      "title": "VOLUME X - THE ARC OF FUTURE CIVILISATION",
       "tier": "inner-circle",
       "date": "2025-12-01",
       "words": 256,
@@ -2231,13 +2254,24 @@
       "violations": []
     },
     {
+      "id": "brotherhood-leader-guide",
+      "type": "RESOURCE",
+      "title": "The Brotherhood Leader Guide",
+      "tier": "member",
+      "date": "2026-02-04",
+      "words": 722,
+      "relative": "content\\resources\\brotherhood-leader-guide.mdx",
+      "isValid": true,
+      "violations": []
+    },
+    {
       "id": "brotherhood-starter-kit",
       "type": "RESOURCE",
-      "title": "Brotherhood Starter Kit",
-      "tier": "public",
-      "date": "2025-01-01",
-      "words": 153,
-      "relative": "content\\resources\\brotherhood-starter-kit.md",
+      "title": "The Brotherhood Starter Kit",
+      "tier": "member",
+      "date": "2026-02-04",
+      "words": 818,
+      "relative": "content\\resources\\brotherhood-starter-kit.mdx",
       "isValid": true,
       "violations": []
     },
@@ -2304,6 +2338,17 @@
       "date": "2025-03-09",
       "words": 140,
       "relative": "content\\resources\\destiny-mapping-worksheet.mdx",
+      "isValid": true,
+      "violations": []
+    },
+    {
+      "id": "family-court-practical-pack",
+      "type": "RESOURCE",
+      "title": "Family Court Practical Pack",
+      "tier": "member",
+      "date": "2025-07-04",
+      "words": 1267,
+      "relative": "content\\resources\\family-court-practical-pack.mdx",
       "isValid": true,
       "violations": []
     },
@@ -2396,6 +2441,17 @@
       "violations": []
     },
     {
+      "id": "vault-index",
+      "type": "RESOURCE",
+      "title": "Vault Index",
+      "tier": "member",
+      "date": "2026-02-04",
+      "words": 129,
+      "relative": "content\\resources\\vault-index.mdx",
+      "isValid": true,
+      "violations": []
+    },
+    {
       "id": "vault",
       "type": "RESOURCE",
       "title": "The Vault",
@@ -2409,7 +2465,7 @@
     {
       "id": "abraham-vault-pack",
       "type": "DOWNLOAD",
-      "title": "Abraham Vault — Strategic Artifacts Pack",
+      "title": "Abraham Vault -- Strategic Artifacts Pack",
       "tier": "public",
       "date": "2025-12-28",
       "words": 96,
@@ -2673,7 +2729,7 @@
     {
       "id": "ultimate-purpose-of-man-editorial",
       "type": "DOWNLOAD",
-      "title": "The Ultimate Purpose of Man — Strategic Editorial (PDF)",
+      "title": "The Ultimate Purpose of Man -- Strategic Editorial (PDF)",
       "tier": "public",
       "date": "2025-11-23",
       "words": 861,

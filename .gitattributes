@@ -320,3 +320,6 @@ fix-*.bat export-ignore
 *.config.ts text eol=lf
 *.config.mjs text eol=lf
 *.config.cjs text eol=lf
+
+*.mdx text working-tree-encoding=UTF-8
+*.md  text working-tree-encoding=UTF-8

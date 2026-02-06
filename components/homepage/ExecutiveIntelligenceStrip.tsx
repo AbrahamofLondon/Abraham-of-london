@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect } from "react"; // Added hooks
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -14,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+// ... (LooseShort type and helper functions remain the same)
 type LooseShort = {
   title?: string;
   excerpt?: string | null;
@@ -54,7 +56,14 @@ export default function ExecutiveIntelligenceStrip({
   shorts: LooseShort[];
   viewAllHref?: string;
 }): JSX.Element | null {
+  const [sessionId, setSessionId] = useState<string>(""); // State for ID
   const items = Array.isArray(shorts) ? shorts.slice(0, 6) : [];
+  
+  // Initialize Session ID only on Client
+  useEffect(() => {
+    setSessionId(Math.random().toString(36).substring(7).toUpperCase());
+  }, []);
+
   if (!items.length) return null;
 
   const [lead, ...rest] = items;
@@ -198,7 +207,7 @@ export default function ExecutiveIntelligenceStrip({
         {/* --- System Footer --- */}
         <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em]">
-            End of Current Feed // Session ID: {Math.random().toString(36).substring(7).toUpperCase()}
+            End of Current Feed // Session ID: {sessionId || "SYNCHRONIZING..."}
           </p>
           <div className="flex items-center gap-6">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500/50" />

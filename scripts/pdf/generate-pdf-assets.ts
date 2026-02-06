@@ -1,105 +1,151 @@
-// scripts/pdf/generate-pdf-assets.ts - Production Build Optimizer
-console.log('🚀 PDF Assets Generator - Registry Edition');
+import fs from "fs";
+import path from "path";
+import puppeteer from "puppeteer";
+import { getPDFRegistrySource } from "./pdf-registry.source";
 
-// Try to import the registry
-let getPDFRegistrySource;
-try {
-    const module = await import('./pdf-registry.source.js');
-    getPDFRegistrySource = module.getPDFRegistrySource;
-    console.log('✅ PDF registry module loaded');
-} catch (error) {
-    console.error('❌ Failed to load PDF registry:', error.message);
-    console.log('⚠️ Running in fallback mode');
-    getPDFRegistrySource = () => [];
+/**
+ * CONFIGURATION
+ * Threshold: 20KB. Anything smaller is a failed render or a placeholder.
+ */
+const PLACEHOLDER_THRESHOLD = 20 * 1024; 
+const BASE_URL = "http://localhost:3000/render/pdf"; 
+
+console.log('🚀 PDF Assets Generator - High Fidelity Production');
+
+/**
+ * PRODUCTION GENERATOR ENGINE
+ */
+async function runGenerationEngine(browser: puppeteer.Browser, pdfId: string, fullPath: string) {
+    console.log(`🛠️  GENERATING HIGH-FIDELITY ASSET: ${pdfId}...`);
+    
+    const page = await browser.newPage();
+    const url = `${BASE_URL}/${pdfId}`;
+
+    try {
+        // 1. Set High-Density Viewport for crisp typography
+        await page.setViewport({ 
+            width: 1240, 
+            height: 1754, 
+            deviceScaleFactor: 2 
+        });
+
+        // 2. Navigate with Extended Timeout
+        // 'networkidle0' ensures all fonts and CSS are fully loaded
+        await page.goto(url, { 
+            waitUntil: 'networkidle0', 
+            timeout: 60000 
+        });
+
+        // 3. Strategic Sync: Wait for the CSS-injected container
+        // This prevents the "0.9KB" empty file issue
+        await page.waitForSelector('.pdf-canvas', { timeout: 10000 });
+
+        // 4. Print to PDF
+        await page.pdf({
+            path: fullPath,
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: false,
+            margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' },
+            preferCSSPageSize: true
+        });
+
+        const finalStats = fs.statSync(fullPath);
+
+        // 5. Post-Generation Integrity Check
+        if (finalStats.size < 5000) {
+            throw new Error(`Integrity Failure: Asset ${pdfId} is too small (${finalStats.size} bytes).`);
+        }
+
+        console.log(`✅ SUCCESS: ${pdfId} (${(finalStats.size / 1024).toFixed(1)} KB)`);
+    } catch (error) {
+        console.error(`❌ FAILED ${pdfId}:`, error instanceof Error ? error.message : error);
+        
+        // Cleanup: Don't leave corrupted 0KB files in the repository
+        if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+        }
+        throw error; // Re-throw to count the error in the summary
+    } finally {
+        await page.close();
+    }
 }
 
 async function buildPDFAssets() {
     console.log('📊 PDF Assets Build Process');
     console.log('='.repeat(60));
     
+    const root = process.cwd();
+    const allPDFs = getPDFRegistrySource();
+    let purged = 0;
+    let created = 0;
+    let errors = 0;
+
+    const browser = await puppeteer.launch({ 
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--font-render-hinting=none'] 
+    });
+
     try {
-        // Get all PDFs from registry
-        const allPDFs = getPDFRegistrySource();
-        console.log(`📄 Total PDFs in registry: ${allPDFs.length}`);
-        
-        if (allPDFs.length > 0) {
-            console.log('\n📋 Sample PDFs from registry:');
-            allPDFs.slice(0, 3).forEach((pdf, i) => {
-                console.log(`  ${i+1}. ${pdf.title} (${pdf.id})`);
-            });
-            if (allPDFs.length > 3) {
-                console.log(`  ... and ${allPDFs.length - 3} more`);
-            }
-        }
-        
-        // Simulate checking which need generation
-        const missingPDFs = allPDFs.filter(pdf => 
-            pdf.id.includes('personal-alignment') || 
-            pdf.id.includes('surrender') ||
-            pdf.tier === 'free'
-        ).slice(0, 5); // Just check first 5
-        
-        console.log(`\n🔍 PDFs potentially needing generation: ${missingPDFs.length}`);
-        
-        if (missingPDFs.length === 0) {
-            console.log('✅ All PDF assets appear to be available');
-        } else {
-            console.log('\n📝 PDFs to check:');
-            missingPDFs.forEach(pdf => {
-                console.log(`  • ${pdf.title} → ${pdf.outputPath}`);
-            });
-            console.log('\n💡 Note: Actual file existence check not implemented');
-        }
-        
-        console.log('\n' + '='.repeat(60));
-        console.log('📈 GENERATION SUMMARY');
-        console.log('='.repeat(60));
-        console.log(`✅ Would generate: ${missingPDFs.length}`);
-        console.log(`⏭️  Already exist: ${allPDFs.length - missingPDFs.length}`);
-        console.log(`🎯 Total in registry: ${allPDFs.length}`);
-        
-        return {
-            success: true,
-            generated: 0, // Not actually generating yet
-            failed: 0,
-            skipped: allPDFs.length,
-            results: []
-        };
-        
-    } catch (error) {
-        console.error('❌ Error in buildPDFAssets:', error);
-        return {
-            success: false,
-            generated: 0,
-            failed: 1,
-            skipped: 0,
-            results: [{ error: error.message }]
-        };
-    }
-}
+        for (const pdf of allPDFs) {
+            const relativePath = pdf.outputPath.startsWith('/') ? pdf.outputPath.slice(1) : pdf.outputPath;
+            const fullPath = path.join(root, 'public', relativePath);
+            const dir = path.dirname(fullPath);
 
-// Execution
-const isMain = import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
-console.log(`Mode: ${isMain ? 'Standalone execution' : 'Module import'}`);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-if (isMain) {
-    buildPDFAssets()
-        .then(result => {
-            console.log('\n' + '='.repeat(50));
-            if (result.success) {
-                console.log('🎉 PDF GENERATION SIMULATION COMPLETE');
-                console.log('💡 Note: This is a simulation only');
-                console.log('💡 To actually generate PDFs, implement the generation logic');
+            let shouldGenerate = false;
+
+            if (!fs.existsSync(fullPath)) {
+                console.log(`❌ MISSING: ${pdf.id}`);
+                shouldGenerate = true;
+                created++;
             } else {
-                console.log('⚠️ SIMULATION COMPLETED WITH ERRORS');
+                const stats = fs.statSync(fullPath);
+                if (stats.size < PLACEHOLDER_THRESHOLD) {
+                    console.log(`⚠️  RECALIBRATING (${stats.size} bytes): ${pdf.id}`);
+                    shouldGenerate = true;
+                    purged++;
+                }
             }
-            console.log('='.repeat(50));
-            process.exit(result.success ? 0 : 1);
-        })
-        .catch(error => {
-            console.error('💥 Fatal error:', error);
-            process.exit(1);
-        });
+
+            if (shouldGenerate) {
+                try {
+                    await runGenerationEngine(browser, pdf.id, fullPath);
+                } catch (e) {
+                    errors++;
+                }
+            }
+        }
+    } finally {
+        await browser.close();
+    }
+
+    const healthyCount = allPDFs.filter(p => {
+        const pPath = path.join(root, 'public', p.outputPath.startsWith('/') ? p.outputPath.slice(1) : p.outputPath);
+        return fs.existsSync(pPath) && fs.statSync(pPath).size >= PLACEHOLDER_THRESHOLD;
+    }).length;
+
+    console.log('\n' + '='.repeat(60));
+    console.log('📈 GENERATION SUMMARY');
+    console.log('='.repeat(60));
+    console.log(`✅ Recalibrated/Purged: ${purged}`);
+    console.log(`🆕 New Assets Created:  ${created}`);
+    console.log(`❌ Current Errors:      ${errors}`);
+    console.log(`🎯 Validated Assets:    ${healthyCount} / ${allPDFs.length}`);
+    
+    return { success: errors === 0 && healthyCount === allPDFs.length };
 }
 
-export { buildPDFAssets };
+buildPDFAssets().then(result => {
+    if (result.success) {
+        console.log('🎉 BUILD COMPLETE: Institutional Portfolio Secure.');
+        process.exit(0);
+    } else {
+        console.log('⚠️ BUILD COMPLETED WITH ERRORS: Check server logs.');
+        process.exit(1);
+    }
+}).catch(err => {
+    console.error("💥 Fatal Engine Failure:", err);
+    process.exit(1);
+});

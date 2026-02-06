@@ -1,4 +1,4 @@
-// lib/mdx/safe-components.ts — BUILD-PROOF MDX COMPONENT RESOLVER (TS, NO JSX)
+// lib/mdx/safe-components.ts — BUILD-PROOF MDX COMPONENT RESOLVER
 import * as React from "react";
 
 export type MDXComponentMap = Record<string, React.ComponentType<any>>;
@@ -16,8 +16,32 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+// List of JavaScript reserved words that can't be used as component names
+const RESERVED_WORDS = new Set([
+  'Object', 'Array', 'Function', 'String', 'Number', 'Boolean', 'Symbol',
+  'Promise', 'Error', 'Date', 'Math', 'JSON', 'console', 'window', 'document',
+  'undefined', 'null', 'NaN', 'Infinity', 'global', 'process', 'module',
+  'exports', 'require', 'arguments', 'eval', 'this', 'super', 'new', 'typeof',
+  'instanceof', 'delete', 'in', 'with', 'void', 'await', 'async', 'yield',
+  'let', 'const', 'var', 'class', 'extends', 'import', 'export', 'default',
+  'return', 'throw', 'try', 'catch', 'finally', 'if', 'else', 'switch',
+  'case', 'break', 'continue', 'for', 'while', 'do', 'true', 'false'
+]);
+
 function createMissingComponent(name: string, warnOnFallback: boolean): React.ComponentType<any> {
   const isDev = process.env.NODE_ENV !== "production";
+
+  // If it's a reserved word, return a safe component that doesn't break
+  if (RESERVED_WORDS.has(name)) {
+    const SafeReserved: React.ComponentType<any> = (props: any) => {
+      if (warnOnFallback && isDev) {
+        console.warn(`[MDX Safe] Reserved word "${name}" used as component - using fallback.`);
+      }
+      return React.createElement(React.Fragment, null, props?.children || null);
+    };
+    SafeReserved.displayName = `SafeReserved(${name})`;
+    return SafeReserved;
+  }
 
   const Missing: React.ComponentType<any> = (props: any) => {
     const p = props || {};
@@ -75,9 +99,19 @@ export function createProxySafeMdxComponents(base: unknown, options: SafeMdxOpti
     get(target, prop: string | symbol) {
       const key = String(prop);
       if (key === "then" || key === "__esModule") return (target as any)[key];
+      
+      // Check if it's a reserved word
+      if (RESERVED_WORDS.has(key)) {
+        if (!cache.has(key)) {
+          cache.set(key, createMissingComponent(key, warnOnFallback));
+        }
+        return cache.get(key);
+      }
+      
       const existing = (target as any)[key];
       if (isComponent(existing)) return existing;
       if (cache.has(key)) return cache.get(key);
+      
       const missing = createMissingComponent(key, warnOnFallback);
       cache.set(key, missing);
       return missing;
@@ -88,9 +122,19 @@ export function createProxySafeMdxComponents(base: unknown, options: SafeMdxOpti
 export function detectMdxComponentNames(mdxRaw: string): string[] {
   const mdx = String(mdxRaw || "");
   const names = new Set<string>();
-  const tagRe = /<\/?([A-Z][A-Za-z0-9_]*)\b/g;
+  
+  // Match component tags like <Component> or </Component>
+  const tagRe = /<\/?\s*([A-Z][A-Za-z0-9_]*)\b/g;
   let m: RegExpExecArray | null;
-  while ((m = tagRe.exec(mdx))) names.add(m[1]);
+  
+  while ((m = tagRe.exec(mdx))) {
+    const name = m[1];
+    // Only add non-reserved words
+    if (!RESERVED_WORDS.has(name)) {
+      names.add(name);
+    }
+  }
+  
   return Array.from(names);
 }
 
@@ -101,7 +145,7 @@ export function seedMissingMdxComponents(base: unknown, mdxRaw: string, options:
   const names = detectMdxComponentNames(mdxRaw);
 
   for (const name of names) {
-    if (!seeded[name]) {
+    if (!seeded[name] && !RESERVED_WORDS.has(name)) {
       seeded[name] = createMissingComponent(name, warnOnFallback);
     }
   }

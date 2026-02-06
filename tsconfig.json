@@ -46,20 +46,19 @@
       "@/*": [
         "./*"
       ],
-      "@/styles/*": [
-        "./styles/*"
+      // Contentlayer broad mapping for 180 documents
+      "contentlayer/generated": [
+        "./.contentlayer/generated"
       ],
-      "@/components/*": [
-        "./components/*"
+      "contentlayer/generated/*": [
+        "./.contentlayer/generated/*"
       ],
-      "@/lib/*": [
-        "./lib/*"
+      // Database & Redis
+      "@prisma/client": [
+        "./node_modules/.prisma/client"
       ],
-      "@/fonts/*": [
-        "./fonts/*"
-      ],
-      "@/hooks/*": [
-        "./hooks/*"
+      "@/lib/db": [
+        "./lib/db.ts"
       ],
       "@/lib/redis": [
         "./lib/redis.ts"
@@ -67,53 +66,15 @@
       "@/lib/redis/*": [
         "./lib/redis/*"
       ],
-      "@/lib/redis-enhanced": [
-        "./lib/redis-enhanced.ts"
+      // Core UI/Logic
+      "@/components/*": [
+        "./components/*"
       ],
-      "@/lib/db": [
-        "./lib/db.ts"
+      "@/lib/*": [
+        "./lib/*"
       ],
-      "@/lib/contentlayer-compat": [
-        "./lib/contentlayer-compat.ts"
-      ],
-      "@/lib/contentlayer/status": [
-        "./lib/contentlayer/status.ts"
-      ],
-      "contentlayer/generated": [
-        "./.contentlayer/generated"
-      ],
-      "@/lib/server/rate-limit-unified": [
-        "./lib/server/rate-limit-unified.ts"
-      ],
-      "@/lib/server/inner-circle-access": [
-        "./lib/server/inner-circle-access.ts"
-      ],
-      "@/lib/server/inner-circle-store": [
-        "./lib/server/inner-circle-store.ts"
-      ],
-      "@/lib/server/with-inner-circle-access": [
-        "./lib/server/with-inner-circle-access.ts"
-      ],
-      "@/lib/rate-limit": [
-        "./lib/rate-limit.ts"
-      ],
-      "@/lib/inner-circle/access": [
-        "./lib/inner-circle/access.ts"
-      ],
-      "@/lib/premium/download-token": [
-        "./lib/premium/download-token.ts"
-      ],
-      "@/lib/next-fonts": [
-        "./lib/next-fonts.ts"
-      ],
-      "@prisma/client": [
-        "./.prisma/client"
-      ],
-      "react": [
-        "./node_modules/@types/react"
-      ],
-      "react-dom": [
-        "./node_modules/@types/react-dom"
+      "@/styles/*": [
+        "./styles/*"
       ]
     },
     "plugins": [
@@ -123,9 +84,12 @@
     ]
   },
   "ts-node": {
+    "esm": true,
+    "experimentalSpecifiers": true,
     "transpileOnly": true,
     "compilerOptions": {
-      "module": "commonjs"
+      "module": "ESNext",
+      "moduleResolution": "Node"
     }
   },
   "include": [
@@ -133,13 +97,16 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    ".contentlayer/generated"
+    ".contentlayer/generated",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".next",
     "out",
-    "dist"
+    "dist",
+    // ⚠️ CRITICAL: Exclude legacy/archive to prevent build-time type errors
+    "_api_archive",
+    "**/_api_archive/*"
   ]
 }

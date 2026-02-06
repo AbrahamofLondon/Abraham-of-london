@@ -5,36 +5,20 @@
  * Integrated with AES-256-GCM Decryption and NextAuth Session Verification.
  */
 
-import * as Helper from "@/lib/contentlayer-helper";
-import { decryptDocument } from "@/lib/security";
-import { getAuthSession } from "@/lib/auth/options";
-import { canAccessDoc } from "@/lib/content/index"; // Using the synchronized role logic
 import {
   isDraftContent,
-  isPublished,
-  getAccessLevel,
   getDocHref,
-  getDocKind,
-  toUiDoc,
+  getDocKind as sharedGetDocKind,
+  toUiDoc as sharedToUiDoc,
   resolveDocCoverImage,
   resolveDocDownloadUrl,
 } from "@/lib/content/shared";
 
-// Re-exports
-export {
-  isDraftContent,
-  isPublished,
-  getAccessLevel,
-  getDocHref,
-  getDocKind,
-  toUiDoc,
-  resolveDocCoverImage,
-  resolveDocDownloadUrl,
-};
+import { decryptDocument } from "@/lib/security";
+import { getAuthSession } from "@/lib/auth/options";
+import { canAccessDoc } from "@/lib/content/index"; // Using the synchronized role logic
 
-// ------------------------------
-// Direct static imports from contentlayer-helper
-// ------------------------------
+// Import all helpers from contentlayer-helper
 import {
   normalizeSlug as helperNormalizeSlug,
   sanitizeData as helperSanitizeData,
@@ -51,10 +35,36 @@ import {
   getDocBySlug as helperGetDocBySlug,
   getServerBookBySlug as helperGetServerBookBySlug,
   getServerCanonBySlug as helperGetServerCanonBySlug,
+  isPublished as helperIsPublished,
+  getAccessLevel as helperGetAccessLevel,
+  toUiDoc as helperToUiDoc,
+  documentKinds,
+  getCardProps,
 } from "@/lib/contentlayer-helper";
 
+// Re-exports - EXPORT EVERYTHING THAT PAGES ARE TRYING TO IMPORT
+export {
+  isDraftContent,
+  getDocHref,
+  resolveDocCoverImage,
+  resolveDocDownloadUrl,
+};
+
+// Export normalizeSlug and sanitizeData explicitly
 export const normalizeSlug = helperNormalizeSlug;
 export const sanitizeData = helperSanitizeData;
+
+// Export other utilities
+export const isPublished = helperIsPublished;
+export const getAccessLevel = helperGetAccessLevel;
+export const toUiDoc = helperToUiDoc;
+export const getDocKind = sharedGetDocKind;
+
+export { documentKinds, getCardProps };
+
+// Export getDocBySlug and getContentlayerData
+export const getDocBySlug = helperGetDocBySlug;
+export const getContentlayerData = helperGetAllContentlayerDocs;
 
 // ------------------------------
 // 🔐 SOVEREIGN DECRYPTION ENGINES
@@ -108,7 +118,7 @@ async function secureProcessDocument(doc: any): Promise<any | null> {
 }
 
 // ------------------------------
-// Core data access
+// Core data access - REMOVED DUPLICATE getAllStrategies
 // ------------------------------
 export function getAllContentlayerDocs() { return helperGetAllContentlayerDocs(); }
 export function getAllBooks() { return helperGetAllBooks(); }
@@ -118,8 +128,12 @@ export function getAllPosts() { return helperGetAllPosts(); }
 export function getAllEvents() { return helperGetAllEvents(); }
 export function getAllPrints() { return helperGetAllPrints(); }
 export function getAllResources() { return helperGetAllResources(); }
-export function getAllStrategies() { return helperGetAllStrategies(); }
 export function getAllShorts() { return helperGetAllShorts(); }
+
+// FIXED: Only one getAllStrategies function
+export function getAllStrategies() { 
+  return helperGetAllStrategies().filter(helperIsPublished); 
+}
 
 export function isContentlayerLoaded(): boolean {
   const docs = getAllContentlayerDocs();
@@ -133,13 +147,13 @@ export function assertContentlayerHasDocs(): void {
 }
 
 // ------------------------------
-// 🚀 SECURE LOOKUPS (The fix for your 3-month bug)
+// 🚀 SECURE LOOKUPS
 // ------------------------------
 
 export async function getServerShortBySlug(slug: string) {
-  const target = normalizeSlug(slug);
+  const target = helperNormalizeSlug(slug);
   const doc = getShorts().find((s: any) => {
-    const sSlug = normalizeSlug(s.slug || s._raw?.flattenedPath || "");
+    const sSlug = helperNormalizeSlug(s.slug || s._raw?.flattenedPath || "");
     return sSlug === target || sSlug.endsWith(`/${target}`) || sSlug.includes(`/shorts/${target}`);
   }) || null;
   
@@ -152,19 +166,14 @@ export async function getServerBookBySlug(slug: string) {
 }
 
 export async function getServerCanonBySlug(slug: string) {
-  const target = normalizeSlug(slug);
-  const doc = getCanons().find((c: any) => {
-    const cSlug = normalizeSlug(c.slug || c._raw?.flattenedPath || "");
-    return cSlug === target || cSlug.endsWith(`/${target}`);
-  }) || null;
-  
+  const doc = helperGetServerCanonBySlug(slug);
   return await secureProcessDocument(doc);
 }
 
 export async function getPostBySlug(slug: string): Promise<any | null> {
-  const target = normalizeSlug(slug);
+  const target = helperNormalizeSlug(slug);
   const doc = getPublishedPosts().find((p: any) => {
-    const pSlug = normalizeSlug(p.slug || p._raw?.flattenedPath || "");
+    const pSlug = helperNormalizeSlug(p.slug || p._raw?.flattenedPath || "");
     return pSlug === target || pSlug.endsWith(`/${target}`);
   }) || null;
 
@@ -174,17 +183,77 @@ export async function getPostBySlug(slug: string): Promise<any | null> {
 // ------------------------------
 // Collection Helpers
 // ------------------------------
-export const getShorts = () => getAllShorts().filter(isPublished);
-export const getCanons = () => getAllCanons().filter(isPublished);
-export const getBooks = () => getAllBooks().filter(isPublished);
-export const getPublishedPosts = () => getAllPosts().filter(isPublished);
+export const getShorts = () => getAllShorts().filter(helperIsPublished);
+export const getCanons = () => getAllCanons().filter(helperIsPublished);
+export const getBooks = () => getAllBooks().filter(helperIsPublished);
+export const getPublishedPosts = () => getAllPosts().filter(helperIsPublished);
 
+/**
+ * Unified combined document access with built-in Link-Integrity Audit
+ */
 export function getAllCombinedDocs(): any[] {
   const d = helperGetAllContentlayerDocs();
-  const combined = [...d].filter(isPublished);
-  return (sanitizeData(combined) || []) as any[];
+  const combined = [...d].filter(helperIsPublished);
+  const sanitized = (helperSanitizeData(combined) || []) as any[];
+
+  // SYSTEMATIC AUDIT: Ensure critical files are resolving
+  if (process.env.NODE_ENV === 'development') {
+    const requiredBriefs = ["institutional-governance"];
+    requiredBriefs.forEach(slug => {
+      const found = sanitized.find(doc => 
+        (doc.slug === slug) || 
+        (doc._raw?.flattenedPath?.includes(slug))
+      );
+      if (!found) {
+        console.error(`🚨 [Link-Integrity Alert]: Critical asset '${slug}' is missing from the build.`);
+      } else {
+        console.log(`✅ [Vault Verified]: Asset '${slug}' is live.`);
+      }
+    });
+  }
+
+  return sanitized;
 }
 
-export const documentKinds = Helper.documentKinds || [];
-export const getCardProps = Helper.getCardProps;
+// Fixed duplicate declaration: Pointing to audited combined docs
 export const getPublishedDocuments = () => getAllCombinedDocs();
+
+// ------------------------------
+// Intelligence Portfolio Extensions
+// ------------------------------
+
+export function getAllLexicons() {
+  const docs = getAllCombinedDocs();
+  return docs.filter(d => d.kind === 'lexicon' || d._raw?.sourceFilePath.includes('lexicon/'));
+}
+
+// REMOVED DUPLICATE: getAllStrategies is already defined above
+
+export function getAllBlogs() {
+  return getAllPosts();
+}
+
+export function getDocumentBySlug(slug: string) {
+  return helperGetDocBySlug(slug);
+}
+
+export function getServerAllEvents() {
+  return getAllEvents().filter(helperIsPublished);
+}
+
+export function getServerEventBySlug(slug: string) {
+  const target = helperNormalizeSlug(slug);
+  return getAllEvents().find((e: any) => {
+    const eSlug = helperNormalizeSlug(e.slug || e._raw?.flattenedPath || "");
+    return eSlug === target || eSlug.endsWith(`/${target}`);
+  }) || null;
+}
+
+export function getSecureDocument(id: string) {
+  console.warn(`getSecureDocument lookup for id: ${id}`);
+  return null;
+}
+
+export function getDownloads() {
+  return getAllDownloads().filter(helperIsPublished);
+}

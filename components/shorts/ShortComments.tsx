@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { safeFirstChar } from "@/lib/utils/safe";
-
 
 interface Comment {
   id: string;
@@ -19,11 +17,15 @@ interface Comment {
 }
 
 interface ShortCommentsProps {
-  comments: Comment[];
   shortId: string;
+  comments?: Comment[]; // Made optional with default value
 }
 
-const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
+const ShortComments: React.FC<ShortCommentsProps> = ({ 
+  shortId, 
+  comments: initialComments = [] // Default to empty array
+}) => {
+  const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
@@ -33,7 +35,21 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
     e.preventDefault();
     if (!newComment.trim()) return;
     
-    // Submit comment
+    // Create new comment
+    const newCommentObj: Comment = {
+      id: Date.now().toString(),
+      author: {
+        name: "You",
+        avatar: "",
+        role: "Reader"
+      },
+      content: newComment,
+      timestamp: "Just now",
+      likes: 0,
+      isLiked: false
+    };
+    
+    setComments(prev => [newCommentObj, ...prev]);
     console.log('Submitting comment:', newComment);
     setNewComment('');
   };
@@ -41,7 +57,31 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
   const handleReply = (commentId: string) => {
     if (!replyContent.trim()) return;
     
-    // Submit reply
+    // Create new reply
+    const newReply: Comment = {
+      id: `${commentId}-${Date.now()}`,
+      author: {
+        name: "You",
+        avatar: "",
+        role: "Reader"
+      },
+      content: replyContent,
+      timestamp: "Just now",
+      likes: 0,
+      isLiked: false
+    };
+    
+    // Find parent comment and add reply
+    setComments(prev => prev.map(comment => {
+      if (comment.id === commentId) {
+        return {
+          ...comment,
+          replies: [...(comment.replies || []), newReply]
+        };
+      }
+      return comment;
+    }));
+    
     console.log('Submitting reply to', commentId, ':', replyContent);
     setReplyContent('');
     setReplyTo(null);
@@ -57,7 +97,35 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
     setExpandedReplies(newExpanded);
   };
 
-  const CommentComponent: React.FC<{ comment: Comment; depth?: number }> = ({ 
+  const handleLike = (commentId: string) => {
+    // Function to recursively update likes
+    const updateLikes = (comment: Comment): Comment => {
+      if (comment.id === commentId) {
+        const newLikes = comment.isLiked ? comment.likes - 1 : comment.likes + 1;
+        return {
+          ...comment,
+          likes: newLikes,
+          isLiked: !comment.isLiked
+        };
+      }
+      
+      if (comment.replies) {
+        return {
+          ...comment,
+          replies: comment.replies.map(reply => updateLikes(reply))
+        };
+      }
+      
+      return comment;
+    };
+    
+    setComments(prev => prev.map(comment => updateLikes(comment)));
+  };
+
+  const CommentComponent: React.FC<{ 
+    comment: Comment; 
+    depth?: number 
+  }> = ({ 
     comment, 
     depth = 0 
   }) => {
@@ -77,7 +145,7 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
                 />
               ) : (
                 <span className="font-semibold text-gray-600">
-                  {comment.author.safeFirstChar(name)}
+                  {comment.author.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
               )}
             </div>
@@ -97,7 +165,10 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
             <p className="text-gray-700 mb-3">{comment.content}</p>
             
             <div className="flex items-center space-x-4">
-              <button className="flex items-center space-x-1 text-gray-500 hover:text-red-600">
+              <button 
+                onClick={() => handleLike(comment.id)}
+                className={`flex items-center space-x-1 ${comment.isLiked ? 'text-red-600' : 'text-gray-500 hover:text-red-600'}`}
+              >
                 <HeartIcon className="w-4 h-4" />
                 <span className="text-sm">{comment.likes}</span>
               </button>
@@ -162,6 +233,9 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
     );
   };
 
+  // Use comments.length safely
+  const commentCount = comments?.length || 0;
+
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
       <div className="flex justify-between items-center mb-8">
@@ -170,7 +244,7 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
           <p className="text-gray-600">Join the discussion</p>
         </div>
         <div className="text-lg font-semibold text-gray-900">
-          {comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}
+          {commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}
         </div>
       </div>
 
@@ -205,22 +279,23 @@ const ShortComments: React.FC<ShortCommentsProps> = ({ comments, shortId }) => {
 
       {/* Comments List */}
       <div className="space-y-8">
-        {comments.map((comment) => (
-          <CommentComponent key={comment.id} comment={comment} />
-        ))}
+        {commentCount > 0 ? (
+          comments.map((comment) => (
+            <CommentComponent key={comment.id} comment={comment} />
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <ChatIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No comments yet</h3>
+            <p className="text-gray-600">Be the first to share your thoughts!</p>
+          </div>
+        )}
       </div>
-
-      {comments.length === 0 && (
-        <div className="text-center py-12">
-          <ChatIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No comments yet</h3>
-          <p className="text-gray-600">Be the first to share your thoughts!</p>
-        </div>
-      )}
     </div>
   );
 };
 
+// Icon Components
 const UserIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

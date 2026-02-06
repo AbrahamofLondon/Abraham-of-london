@@ -31,9 +31,9 @@ This collection brings together time-tested strategic frameworks used by leaders
 
 ## Included Frameworks
 
-### 1. The [Purpose](/lexicon/purpose) Pyramid
+### 1. The [Purpose](/vault/lexicon/purpose) Pyramid
 - **Use**: Defining organizational or personal purpose
-- **Levels**: Survival, Success, Significance, [Legacy](/lexicon/legacy)
+- **Levels**: Survival, Success, Significance, [Legacy](/vault/lexicon/legacy)
 - **Application**: Annual planning, team alignment
 
 ### 2. The Decision Matrix
@@ -41,12 +41,12 @@ This collection brings together time-tested strategic frameworks used by leaders
 - **Axes**: Impact vs. Effort, Certainty vs. Risk
 - **Application**: Prioritization, resource allocation
 
-### 3. The [Legacy](/lexicon/legacy) Canvas---
+### 3. The [Legacy](/vault/lexicon/legacy) Canvas---
 title: "Strategic Frameworks"
 docKind: "Resource"
 date: "2024-01-10"
 description: "A curated operating library of strategic frameworks derived from ancient principles and built for modern board-level decision-making."
-excerpt: "Not theory. Deployable frameworks — engineered from the Canon’s philosophical spine to solve modern problems with ancient precision."
+excerpt: "Not theory. Deployable frameworks -- engineered from the Canon's philosophical spine to solve modern problems with ancient precision."
 author: "Abraham of London"
 coverImage: "/assets/images/canon/canon-resources.jpg"
 tags:
@@ -62,18 +62,18 @@ draft: false
 
 Most strategy fails for one of three reasons:
 
-1. **No spine** — a lack of worldview clarity means decisions are inconsistent.
-2. **No translation layer** — lofty ideals never become operational choices.
-3. **No discipline of execution** — strategy becomes theatre, not outcomes.
+1. **No spine** -- a lack of worldview clarity means decisions are inconsistent.
+2. **No translation layer** -- lofty ideals never become operational choices.
+3. **No discipline of execution** -- strategy becomes theatre, not outcomes.
 
-The Canon is the philosophical spine of this house: a system of meaning, purpose, morality, and destiny — not as religion-as-aesthetic, but **as load-bearing architecture**.
+The Canon is the philosophical spine of this house: a system of meaning, purpose, morality, and destiny -- not as religion-as-aesthetic, but **as load-bearing architecture**.
 
 This resource collection is the **translation layer**:
 - **Ancient principles → modern instruments**
 - **Conviction → governance**
 - **Theology → execution**
 
-These frameworks are designed to be used in boardrooms, founding teams, households, and institutions — because *the same human problems repeat; only the costumes change.*
+These frameworks are designed to be used in boardrooms, founding teams, households, and institutions -- because *the same human problems repeat; only the costumes change.*
 
 
 
@@ -82,38 +82,38 @@ These frameworks are designed to be used in boardrooms, founding teams, househol
 
 ## The Core Library
 
-### 1) The [Purpose](/lexicon/purpose) Pyramid
+### 1) The [Purpose](/vault/lexicon/purpose) Pyramid
 **Use:** Defining organizational or personal purpose (and preventing drift)
 **Best for:** Boards, founders, leaders re-architecting a mandate
 
 **The Problem It Solves**
-Most organizations can describe “what we do,” but cannot articulate **why we exist** in a way that governs decisions under pressure.
+Most organizations can describe "what we do," but cannot articulate **why we exist** in a way that governs decisions under pressure.
 
-[Purpose](/lexicon/purpose) becomes a slogan; strategy becomes improvisation.
+[Purpose](/vault/lexicon/purpose) becomes a slogan; strategy becomes improvisation.
 
 **Model**
 A four-level progression:
 
-1. **Survival** — stay alive (cashflow, viability, legitimacy)
-2. **Success** — outperform peers (market fit, scale, excellence)
-3. **Significance** — build value beyond profit (impact, contribution)
-4. **[Legacy](/lexicon/legacy)** — build what outlives you (institutions, culture, succession)
+1. **Survival** -- stay alive (cashflow, viability, legitimacy)
+2. **Success** -- outperform peers (market fit, scale, excellence)
+3. **Significance** -- build value beyond profit (impact, contribution)
+4. **[Legacy](/vault/lexicon/legacy)** -- build what outlives you (institutions, culture, succession)
 
 **When to use**
 - New strategy cycle / annual planning
 - Post-crisis reset
 - Merger / pivot / leadership change
-- Culture fracture (“we’ve lost ourselves” moments)
+- Culture fracture ("we've lost ourselves" moments)
 
 **Inputs**
 - Current operating constraints (cash, talent, compliance)
 - Market truth (demand, competition, regulation)
-- [Leadership](/lexicon/leadership) values (non-negotiables)
+- [Leadership](/vault/lexicon/leadership) values (non-negotiables)
 - Stakeholder reality (customers, staff, dependents)
 
 **Process**
-1. **Diagnose the current level** (don’t pretend you’re at [Legacy](/lexicon/legacy) if you’re fighting payroll)
-2. **Name the next level** you must enter within 12–24 months
+1. **Diagnose the current level** (don't pretend you're at [Legacy](/vault/lexicon/legacy) if you're fighting payroll)
+2. **Name the next level** you must enter within 12-24 months
 3. Define the **proof markers** (what would be true if we achieved it?)
 4. Translate into:
    - **Strategic narrative** (public meaning)
@@ -121,43 +121,43 @@ A four-level progression:
    - **Kill list** (what must stop)
 
 **Outputs**
-- [Purpose](/lexicon/purpose) statement that governs choices
-- 3–5 strategic priorities
-- A clear “Not us” boundary list
+- [Purpose](/vault/lexicon/purpose) statement that governs choices
+- 3-5 strategic priorities
+- A clear "Not us" boundary list
 - Decision criteria used by leadership
 
 **Failure modes**
-- Confusing “Significance” with PR
-- Skipping levels ([Legacy](/lexicon/legacy) talk with Survival performance)
-- [Purpose](/lexicon/purpose) without sacrifice (no cost = no conviction)
+- Confusing "Significance" with PR
+- Skipping levels ([Legacy](/vault/lexicon/legacy) talk with Survival performance)
+- [Purpose](/vault/lexicon/purpose) without sacrifice (no cost = no conviction)
 
 **Canon root**
 **The Garden Mandate:** identity precedes assignment; assignment precedes stewardship.
-[Purpose](/lexicon/purpose) is not emotion — it’s *placement + responsibility + order*.
+[Purpose](/vault/lexicon/purpose) is not emotion -- it's *placement + responsibility + order*.
 
 
 
 {/* stripped: duplicate frontmatter block */}
 
 
-### 3) The [Legacy](/lexicon/legacy) Canvas
-**Use:** Long-term legacy planning that doesn’t collapse into money-talk
+### 3) The [Legacy](/vault/lexicon/legacy) Canvas
+**Use:** Long-term legacy planning that doesn't collapse into money-talk
 **Best for:** founders, executives, family wealth planning, succession
 
-[Legacy](/lexicon/legacy) is not “what people say at your funeral.”
-[Legacy](/lexicon/legacy) is what your life *builds into others and systems* while you’re still alive.
+[Legacy](/vault/lexicon/legacy) is not "what people say at your funeral."
+[Legacy](/vault/lexicon/legacy) is what your life *builds into others and systems* while you're still alive.
 
 **Dimensions**
-1. **Financial** — stewardship, sustainability, transfer
-2. **Intellectual** — ideas, frameworks, IP, doctrine
-3. **Relational** — family systems, mentorship, trust structures
-4. **Spiritual** — conscience, alignment, destiny trajectory
+1. **Financial** -- stewardship, sustainability, transfer
+2. **Intellectual** -- ideas, frameworks, IP, doctrine
+3. **Relational** -- family systems, mentorship, trust structures
+4. **Spiritual** -- conscience, alignment, destiny trajectory
 
 **When to use**
 - Succession planning
 - Founder transition
 - Midlife reorientation
-- Post-trauma rebuild (“what am I building now?”)
+- Post-trauma rebuild ("what am I building now?")
 
 **Inputs**
 - Your current capacity (energy, time, finances)
@@ -184,22 +184,22 @@ For each dimension:
 - No succession mechanism (legacy dies with you)
 
 **Canon root**
-**Generational stewardship**: the biblical pattern is not “success” but inheritance — wisdom transmitted, culture built, altars restored.
+**Generational stewardship**: the biblical pattern is not "success" but inheritance -- wisdom transmitted, culture built, altars restored.
 
 
 
 {/* stripped: duplicate frontmatter block */}
 
 
-## What’s coming next in this library
-This makes the page feel “alive” and signals your seriousness.
+## What's coming next in this library
+This makes the page feel "alive" and signals your seriousness.
 
-- **The [Governance](/lexicon/governance) Ladder** (role clarity, authority, escalation)
+- **The [Governance](/vault/lexicon/governance) Ladder** (role clarity, authority, escalation)
 - **The Household Operating System** (rhythms, rules, roles, restoration)
 - **The Pressure Protocol** (how leaders decide under stress without breaking)
 - **The Narrative & Mandate Compass** (brand, message, internal alignment)
-- **The [Integrity](/lexicon/integrity) Moat Model** (trust as a competitive advantage)
-- **The Institutional Design Kit** (how you build structures that don’t rot)
+- **The [Integrity](/vault/lexicon/integrity) Moat Model** (trust as a competitive advantage)
+- **The Institutional Design Kit** (how you build structures that don't rot)
 
 
 
@@ -209,9 +209,9 @@ This makes the page feel “alive” and signals your seriousness.
 ## Downloadable artifacts (recommended structure)
 You can attach real assets here over time. Start with placeholders, then iterate.
 
-- [Purpose](/lexicon/purpose) Pyramid Worksheet (PDF)
+- [Purpose](/vault/lexicon/purpose) Pyramid Worksheet (PDF)
 - Decision Matrix Scorecard (PDF)
-- [Legacy](/lexicon/legacy) Canvas (PDF)
+- [Legacy](/vault/lexicon/legacy) Canvas (PDF)
 - Board Decision Log Template (Google Sheet / Excel)
 - Operating Cadence Pack (Deck)
 
@@ -221,7 +221,7 @@ You can attach real assets here over time. Start with placeholders, then iterate
 Good strategy is not novelty. It is **timeless truth applied with precision**.
 
 The modern world is loud, but not deep.
-This library is built to be deep — and therefore durable.
+This library is built to be deep -- and therefore durable.
 
 - **Use**: Long-term legacy planning
 - **Dimensions**: Financial, Intellectual, Relational, Spiritual

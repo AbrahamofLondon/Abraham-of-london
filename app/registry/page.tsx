@@ -1,27 +1,28 @@
+/* app/registry/page.tsx */
 import React from 'react';
-import Layout from '@/components/Layout';
 import { getAllContentlayerDocs, toUiDoc } from '@/lib/contentlayer-helper';
 import RegistryView from './RegistryView';
+import RegistryLayout from '@/components/layout/RegistryLayout'; // Fixed path
 
-// Next.js 16 Metadata
 export const metadata = {
   title: 'Institutional Registry | Abraham of London',
   description: 'Sovereign Archive of Intelligence Briefs and Institutional Assets.',
 };
 
 export default async function RegistryPage() {
-  // Institutional Data Fetching (Server-Side)
-  const allDocs = getAllContentlayerDocs().filter(d => !d.draft);
+  const allDocs = getAllContentlayerDocs()
+    .filter(d => !d.draft)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   const initialDocs = allDocs.map(toUiDoc);
   
-  // Extract unique categories for the filter bar
   const categories = Array.from(
-    new Set(initialDocs.map(d => d.category).filter(Boolean))
+    new Set(initialDocs.map(d => d.category || 'General Lexicon'))
   ) as string[];
 
   return (
-    <Layout title="Institutional Registry">
+    <RegistryLayout>
       <RegistryView initialDocs={initialDocs} categories={categories} />
-    </Layout>
+    </RegistryLayout>
   );
 }

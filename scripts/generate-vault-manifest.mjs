@@ -2,22 +2,24 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * VAULT MANIFEST GENERATOR
- * Compiles a high-performance index of the 75+ intelligence briefs.
+ * VAULT MANIFEST GENERATOR (Direct-Read Mode)
+ * Bypasses ESM import hangs by reading the raw JSON cache.
  */
 async function runGenerator() {
-  const SDK_PATH = path.resolve('./.contentlayer/generated/index.mjs');
+  // Use the raw JSON instead of the .mjs SDK to avoid the hang
+  const JSON_PATH = path.resolve('./.contentlayer/generated/Document/_index.json');
   const OUTPUT = path.join(process.cwd(), 'vault-manifest.json');
 
-  if (!fs.existsSync(SDK_PATH)) {
-    console.error('\n❌ MANIFEST FAILURE: Source data not found.');
+  if (!fs.existsSync(JSON_PATH)) {
+    console.error('\n❌ MANIFEST FAILURE: Contentlayer JSON cache not found. Run "npx contentlayer build" first.');
     process.exit(1);
   }
 
   try {
-    const { allDocuments } = await import('../.contentlayer/generated/index.mjs');
+    const rawData = fs.readFileSync(JSON_PATH, 'utf8');
+    const allDocuments = JSON.parse(rawData);
 
-    console.log(`\n--- 🏗️  Compiling Manifest for ${allDocuments.length} Intelligence Briefs ---`);
+    console.log(`\n--- 🏗️  Compiling Manifest for ${allDocuments.length} Verified Briefs ---`);
 
     const manifestData = {
       version: "2026.1",
@@ -27,17 +29,18 @@ async function runGenerator() {
         title: doc.title,
         slug: doc.slug.startsWith('/') ? doc.slug : `/${doc.slug}`,
         date: doc.date,
-        folder: doc._raw.sourceFileDir,
+        folder: doc._raw?.sourceFileDir || "root",
         readingTime: doc.readingTime?.text || "Unknown",
-        tags: doc.tags || []
+        tags: doc.tags || [],
+        accessLevel: doc.accessLevel // Critical for the identity bridge
       }))
     };
 
     fs.writeFileSync(OUTPUT, JSON.stringify(manifestData, null, 2), 'utf8');
-    console.log(`✅ Manifest successfully updated at: ${OUTPUT}`);
+    console.log(`✅ Manifest updated: ${OUTPUT}`);
     process.exit(0);
   } catch (err) {
-    console.error('❌ Manifest Generation Error:', err.message);
+    console.error('❌ Manifest Error:', err.message);
     process.exit(1);
   }
 }

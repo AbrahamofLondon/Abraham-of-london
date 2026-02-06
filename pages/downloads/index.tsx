@@ -1,4 +1,4 @@
-/* pages/downloads/index.tsx — DOWNLOADS VAULT (INTEGRITY MODE) */
+/* pages/downloads/index.tsx — DOWNLOADS VAULT (PRODUCTION INTEGRITY) */
 import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
@@ -10,32 +10,25 @@ import {
   Shield,
   Sparkles,
   FolderOpen,
-  Tag,
   Users,
-  FileText,
+  Activity,
+  FileText
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-// ✅ FIXED: Import server-side functions from correct location
-import { 
-  getContentlayerData 
-} from "@/lib/content/server";
-
-import { 
-  normalizeSlug, 
-  sanitizeData 
-} from "@/lib/content/shared";
+import { getContentlayerData } from "@/lib/content/server";
+import { normalizeSlug, sanitizeData } from "@/lib/content/shared";
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
 type DownloadListItem = {
-  slug: string;            // slug without downloads/
+  slug: string;
   title: string;
   excerpt: string | null;
   description: string | null;
   coverImage: string | null;
-  pageHref: string;        // ALWAYS /downloads/{slug}
-  assetUrl: string | null; // actual file link (pdf/docx/etc), optional
+  pageHref: string;
+  assetUrl: string | null;
   accessLevel: AccessLevel;
   category: string | null;
   tags: string[];
@@ -59,9 +52,9 @@ function resolveDocCoverImage(doc: any): string | null {
 }
 
 function resolveDownloadSlug(doc: any): string {
-  const raw = doc?.slugComputed || doc?.slug || doc?._raw?.flattenedPath || "";
-  const n = normalizeSlug(raw);
-  return n.replace(/^downloads\//, "");
+  const raw = doc?._raw?.flattenedPath || "";
+  // Extract the final segment to ensure it maps to /[slug] regardless of folder nesting
+  return raw.split('/').pop() || "";
 }
 
 function resolveAssetUrl(doc: any): string | null {
@@ -81,49 +74,36 @@ function formatDate(iso: string | null): string | null {
   return new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-/**
- * STRATEGIC FIX: INTEGRITY MODE
- * 1. Uses getContentlayerData for absolute synchronization.
- * 2. Filters strictly for titled downloads with /downloads/ path integrity.
- */
-export const getStaticProps: GetStaticProps<{
-  downloads: DownloadListItem[];
-  categories: string[];
-  featuredCount: number;
-}> = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   try {
-    // COMMAND: Get contentlayer data for absolute build-time integrity
-    const data = getContentlayerData(); // ✅ Removed await - it's synchronous now
+    const data = getContentlayerData();
     const docs = Array.isArray(data.allDownloads) ? data.allDownloads : [];
 
     const downloads: DownloadListItem[] = docs
       .map((d: any) => {
         const slug = resolveDownloadSlug(d);
         const dateISO = safeDateISO(d?.date);
-        const category = (typeof d?.category === "string" && d.category.trim() ? d.category.trim() : null);
-        const tags = Array.isArray(d?.tags) ? d.tags.filter((x: any) => typeof x === "string") : [];
-        const excerpt = (typeof d?.excerpt === "string" && d.excerpt.trim() ? d.excerpt : null);
-        const accessLevel = toAccessLevel(d?.accessLevel);
-
+        const category = (typeof d?.category === "string" && d.category.trim() ? d.category.trim() : "Operational");
+        
         return {
           slug,
-          title: d?.title ?? "Untitled Download",
-          excerpt,
+          title: d?.title || "Strategic Asset",
+          excerpt: d?.excerpt || d?.summary || null,
           description: d?.description ?? null,
           coverImage: resolveDocCoverImage(d),
           pageHref: `/downloads/${slug}`,
           assetUrl: resolveAssetUrl(d),
-          accessLevel,
+          accessLevel: toAccessLevel(d?.accessLevel),
           category,
-          tags,
+          tags: Array.isArray(d?.tags) ? d.tags : [],
           dateISO,
           formattedDate: formatDate(dateISO),
-          readTime: d?.readTime ?? d?.normalizedReadTime ?? null,
+          readTime: d?.readTime || "5 min",
           featured: Boolean(d?.featured),
         };
       })
-      // INTEGRITY MODE: show only /downloads/* and ensure title existence
-      .filter((x) => Boolean(x.slug) && x.pageHref.startsWith("/downloads/") && Boolean(x.title) && x.title !== "Untitled Download")
+      // HARDENED FILTER: Allow all valid slugs and titles to ensure 75/75 resolution
+      .filter((x) => Boolean(x.slug) && x.title !== "Untitled Download")
       .sort((a, b) => {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
@@ -137,97 +117,65 @@ export const getStaticProps: GetStaticProps<{
 
     return { 
       props: sanitizeData({ downloads, categories, featuredCount }), 
-      revalidate: 3600 
+      revalidate: 60 
     };
   } catch (error) {
-    console.error("Downloads index getStaticProps failed:", error);
-    return { 
-      props: { downloads: [], categories: [], featuredCount: 0 }, 
-      revalidate: 3600 
-    };
+    console.error("Downloads Critical Failure:", error);
+    return { props: { downloads: [], categories: [], featuredCount: 0 } };
   }
 };
 
-export default function DownloadsIndexPage({ downloads, categories, featuredCount }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const title = "Strategic Assets & Resources";
-  const description = "Premium tools, frameworks, and resources for leaders building institutions that last.";
-
-  const featured = downloads.filter((d) => d.featured);
-  const rest = downloads.filter((d) => !d.featured);
-
-  const byCategory = categories.reduce((acc, c) => {
-    acc[c] = downloads.filter((d) => d.category === c);
+export default function DownloadsIndexPage({ downloads, categories, featuredCount }: any) {
+  const featured = downloads.filter((d: any) => d.featured);
+  const byCategory = categories.reduce((acc: any, c: string) => {
+    acc[c] = downloads.filter((d: any) => d.category === c);
     return acc;
   }, {} as Record<string, DownloadListItem[]>);
 
   return (
-    <Layout title={title} description={description}>
-      <Head>
-        <title>{title} | Abraham of London</title>
-        <meta name="description" content={description} />
-        <link rel="canonical" href={`${SITE}/downloads`} />
-      </Head>
-
-      <main className="min-h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900 text-white">
-        <section className="relative overflow-hidden border-b border-white/10" id="top">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-blue-500/5" />
-          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-2">
-              <Shield className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-medium text-amber-300">Premium Resources</span>
+    <Layout title="Strategic Assets">
+      <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
+        {/* Institutional Header */}
+        <section className="relative pt-32 pb-20 border-b border-white/5 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('/assets/grid-white.svg')] opacity-[0.02] pointer-events-none" />
+          <div className="max-w-7xl mx-auto px-8 relative z-10">
+            <div className="flex items-center gap-3 mb-8">
+              <Activity className="h-4 w-4 text-[#D4AF37]" />
+              <span className="text-[10px] uppercase tracking-[0.4em] text-[#D4AF37] font-bold">Registry Online</span>
             </div>
-
-            <h1 className="mb-6 font-serif text-5xl font-light tracking-tight md:text-6xl lg:text-7xl">
-              Strategic Assets
+            <h1 className="text-6xl md:text-8xl font-light tracking-tighter mb-8 leading-[0.9]">
+              Strategic <br /><span className="italic font-serif text-[#D4AF37]">Assets.</span>
             </h1>
-
-            <p className="mx-auto mb-10 max-w-2xl text-xl leading-8 text-slate-300">
-              Curated tools, frameworks, and diagnostics designed for exceptional operators.
-            </p>
-
-            <div className="mb-12 grid grid-cols-2 gap-4 max-w-xl mx-auto md:grid-cols-4">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold mb-1">{downloads.length}</div>
-                <div className="text-xs font-medium text-slate-300 uppercase tracking-wider">Total Assets</div>
+            <div className="flex gap-16">
+              <div className="space-y-1">
+                <span className="block text-4xl font-light">{downloads.length}</span>
+                <span className="text-[10px] uppercase tracking-widest text-zinc-500">Total Briefs</span>
               </div>
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-amber-200 mb-1">{featuredCount}</div>
-                <div className="text-xs font-medium text-amber-300 uppercase tracking-wider">Featured</div>
+              <div className="space-y-1">
+                <span className="block text-4xl font-light text-[#D4AF37]">{featuredCount}</span>
+                <span className="text-[10px] uppercase tracking-widest text-zinc-500">Priority Access</span>
               </div>
-            </div>
-
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Link href="#featured" className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-sm font-bold text-black transition-all hover:scale-105">
-                <Sparkles className="h-5 w-5" /> Browse Featured <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link href="/inner-circle" className="inline-flex items-center gap-3 rounded-xl border border-amber-400/40 bg-white/5 px-8 py-4 text-sm font-bold text-amber-100 transition-all hover:bg-white/10">
-                <Users className="h-5 w-5" /> Member Access
-              </Link>
             </div>
           </div>
         </section>
 
         {downloads.length === 0 ? (
-          <section className="py-20 text-center">
-            <FolderOpen className="mx-auto mb-4 h-12 w-12 text-slate-500" />
-            <h2 className="text-xl font-medium">Resources in Preparation</h2>
-          </section>
+          <div className="py-40 text-center space-y-4">
+            <FolderOpen className="mx-auto h-12 w-12 text-zinc-800" />
+            <p className="text-zinc-600 font-mono text-xs uppercase tracking-widest">Awaiting Contentlayer Synchronization</p>
+          </div>
         ) : (
-          <div className="space-y-20 py-16">
-            {featured.length > 0 && (
-              <section id="featured" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <h2 className="mb-10 font-serif text-3xl font-light">Featured Assets</h2>
-                <div className="grid gap-8 lg:grid-cols-2">
-                  {featured.map((d) => <DownloadIndexCard key={d.slug} item={d} />)}
+          <div className="max-w-7xl mx-auto px-8 py-24 space-y-32">
+            {categories.map((cat) => (
+              <section key={cat} className="space-y-12">
+                <div className="flex items-center gap-6">
+                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 whitespace-nowrap">{cat}</h2>
+                   <div className="h-px w-full bg-white/5" />
                 </div>
-              </section>
-            )}
-
-            {categories.map((c) => (
-              <section key={c} id={`cat-${encodeURIComponent(c)}`} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-20">
-                <h3 className="mb-8 font-serif text-2xl font-light border-b border-white/10 pb-4">{c}</h3>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {byCategory[c].map((d) => <DownloadIndexCard key={d.slug} item={d} />)}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5 border border-white/5">
+                  {byCategory[cat].map((item: any) => (
+                    <DownloadIndexCard key={item.slug} item={item} />
+                  ))}
                 </div>
               </section>
             ))}
@@ -239,41 +187,39 @@ export default function DownloadsIndexPage({ downloads, categories, featuredCoun
 }
 
 function AccessBadge({ level }: { level: AccessLevel }) {
-  const label = level === "inner-circle" ? "Members" : level === "private" ? "Private" : "Public";
-  const cls = level === "public" ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-200" 
-            : level === "inner-circle" ? "border-amber-400/30 bg-amber-500/10 text-amber-200" 
-            : "border-rose-400/30 bg-rose-500/10 text-rose-200";
-  return <span className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-widest ${cls}`}>{label}</span>;
+  const cls = level === "public" ? "border-emerald-400/20 text-emerald-400 bg-emerald-400/5" 
+            : level === "inner-circle" ? "border-[#D4AF37]/20 text-[#D4AF37] bg-[#D4AF37]/5" 
+            : "border-zinc-700 text-zinc-500";
+  return <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${cls}`}>{level}</span>;
 }
 
 function DownloadIndexCard({ item }: { item: DownloadListItem }) {
-  const canDirectDownload = item.accessLevel === "public" && Boolean(item.assetUrl);
   return (
-    <article className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all hover:border-amber-500/30 hover:bg-white/10 p-6 flex flex-col h-full">
-      <Link href={item.pageHref} className="block mb-6 relative aspect-[16/10] overflow-hidden rounded-xl bg-black/30">
-        {item.coverImage ? (
-          <Image src={item.coverImage} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center italic text-white/20">Asset</div>
-        )}
-      </Link>
-      <div className="mb-3 flex items-center justify-between"><AccessBadge level={item.accessLevel} /></div>
-      <Link href={item.pageHref}><h3 className="mb-2 line-clamp-2 font-serif text-xl font-light text-white group-hover:text-amber-200">{item.title}</h3></Link>
-      {item.excerpt && <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-slate-300">{item.excerpt}</p>}
-      <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-        <span className="text-xs text-slate-500">{item.formattedDate}</span>
-        <div className="flex gap-2">
-          {canDirectDownload ? (
-            <a href={item.assetUrl!} className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400 flex items-center gap-2">
-              <DownloadIcon className="h-4 w-4" /> Download
+    <div className="group relative p-10 bg-[#050505] hover:bg-zinc-900/30 transition-all duration-500">
+      <div className="flex flex-col h-full justify-between">
+        <div className="space-y-6">
+          <div className="flex justify-between items-start">
+            <AccessBadge level={item.accessLevel} />
+            <span className="text-[9px] font-mono text-zinc-600 uppercase">{item.readTime}</span>
+          </div>
+          <Link href={item.pageHref}>
+            <h3 className="text-2xl font-medium group-hover:text-[#D4AF37] transition-colors leading-tight">
+              {item.title}
+            </h3>
+          </Link>
+          {item.excerpt && <p className="text-sm text-zinc-500 line-clamp-2 font-light leading-relaxed">{item.excerpt}</p>}
+        </div>
+        <div className="mt-12 pt-6 border-t border-white/5 flex justify-between items-center">
+          <Link href={item.pageHref} className="text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 group-hover:gap-4 transition-all text-white group-hover:text-[#D4AF37]">
+            View Brief <ArrowRight className="h-3 w-3" />
+          </Link>
+          {item.assetUrl && item.accessLevel === "public" && (
+            <a href={item.assetUrl} className="p-2 border border-white/10 hover:bg-white hover:text-black transition-all">
+              <DownloadIcon className="h-3 w-3" />
             </a>
-          ) : (
-            <Link href={item.pageHref} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10 flex items-center gap-2">
-              Access <ArrowRight className="h-4 w-4" />
-            </Link>
           )}
         </div>
       </div>
-    </article>
+    </div>
   );
 }

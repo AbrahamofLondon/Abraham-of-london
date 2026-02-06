@@ -2,7 +2,7 @@ import type { NextAuthOptions, User, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
-import { hashEmail } from "@/lib/security"; // Our unified security lib
+import { hashEmail } from "@/lib/security"; 
 import { getServerSession } from "next-auth/next";
 
 const prisma = new PrismaClient();
@@ -39,13 +39,10 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // 1. Verify against the Directorate/Member Database
+        // 1. Verify against hashed registry
         const emailHash = hashEmail(credentials.email);
-        const member = await prisma.innerCircleMember.findUnique({
-          where: { emailHash },
-        });
-
-        // 2. Initial Admin Fallback (Only for first-time setup or emergency)
+        
+        // 2. Master Admin Logic
         const isMasterAdmin = 
           credentials.email === process.env.ADMIN_EMAIL && 
           credentials.password === process.env.ADMIN_PASSWORD;
@@ -56,18 +53,21 @@ export const authOptions: NextAuthOptions = {
             email: credentials.email,
             name: "Director",
             role: "admin",
-          };
+          } as AppUser;
         }
 
-        // 3. Database Check (Logic: if member exists and status is active)
-        // Note: For now, we check password. In production, consider Magic Links.
+        // 3. Database Validation
+        const member = await prisma.innerCircleMember.findUnique({
+          where: { emailHash },
+        });
+
         if (member && member.status === 'active' && credentials.password === process.env.INTERNAL_ACCESS_CODE) {
            return {
             id: member.id,
             email: member.email || credentials.email,
             name: member.name || "Member",
-            role: member.role, // This pulls 'admin', 'founder', etc.
-          };
+            role: member.role || "member",
+          } as AppUser;
         }
 
         return null;
@@ -78,15 +78,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }): Promise<JWT> {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.role = (user as AppUser).role;
+        const u = user as AppUser;
+        token.id = u.id;
+        token.email = u.email;
+        token.role = u.role;
         
-        // Sovereign Claims
         token.aol = {
-          tier: token.role === 'admin' || token.role === 'founder' ? 'internal' : 'private',
+          tier: u.role === 'admin' || u.role === 'founder' ? 'internal' : 'private',
           innerCircleAccess: true,
-          isInternal: token.role === 'admin' || token.role === 'founder',
+          isInternal: u.role === 'admin' || u.role === 'founder',
           allowPrivate: true,
         };
       }

@@ -7,29 +7,55 @@ export interface Tantalizer {
   wordCount: number;
 }
 
+/**
+ * RESOLVE TANTALIZER
+ * A bulletproof extraction engine for strategic teasers.
+ * Handles missing body properties and malformed content gracefully.
+ */
 export function resolveTantalizer(post: Post): Tantalizer {
-  // 1. Check for explicit preview field in MDX frontmatter
-  if (post.summary || (post as any).preview) {
+  // 1. Check for explicit preview/summary fields in MDX frontmatter
+  // Use optional chaining to prevent property access on undefined
+  const explicitSummary = post?.summary || (post as any)?.preview;
+
+  if (explicitSummary) {
     return {
-      content: post.summary || (post as any).preview,
+      content: explicitSummary.trim(),
       isTruncated: true,
-      wordCount: (post.summary || "").split(/\s+/).length,
+      wordCount: explicitSummary.split(/\s+/).filter(Boolean).length,
     };
   }
 
-  // 2. Fallback: Extract first 300 characters of raw body
-  const rawBody = post.body.raw || "";
+  // 2. Defensive Extraction: Extract raw body safely
+  // post.body?.raw ensures that if 'body' is missing, it returns undefined instead of crashing
+  const rawBody = post?.body?.raw || (post as any)?.content || "";
+  
+  // 3. Sanitization Pipeline
   const cleanBody = rawBody
-    .replace(/[#*`_]/g, "") // Strip basic markdown symbols
-    .replace(/\[.*\]\(.*\)/g, "") // Strip links
+    .replace(/^---[\s\S]*?---/, "") // Remove frontmatter if leaked into body
+    .replace(/[#*`_~]/g, "")        // Strip Markdown symbols
+    .replace(/\[.*\]\(.*\)/g, "")   // Strip Markdown links
+    .replace(/\s+/g, " ")           // Normalize whitespace
     .trim();
 
-  const teaser = cleanBody.slice(0, 300);
-  const isTruncated = cleanBody.length > 300;
+  // If the body is effectively empty
+  if (!cleanBody) {
+    return {
+      content: "Strategic briefing content pending initialization.",
+      isTruncated: false,
+      wordCount: 5,
+    };
+  }
+
+  // 4. Intelligence Truncation (300 character limit)
+  const limit = 300;
+  const isTruncated = cleanBody.length > limit;
+  const teaser = isTruncated 
+    ? cleanBody.slice(0, limit).split(" ").slice(0, -1).join(" ").trim() + "..." 
+    : cleanBody;
 
   return {
-    content: isTruncated ? `${teaser.trim()}...` : teaser,
+    content: teaser,
     isTruncated,
-    wordCount: teaser.split(/\s+/).length,
+    wordCount: teaser.split(/\s+/).filter(Boolean).length,
   };
 }

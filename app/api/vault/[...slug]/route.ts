@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma'; // Use the singleton
 import { decryptDocument } from '@/lib/security';
 
-const prisma = new PrismaClient();
-
+/**
+ * GET /api/vault/[...slug]
+ * Secure retrieval and decryption of institutional assets.
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string[] }> }
 ) {
-  // 1. Precise Parameter Resolution
   const resolvedParams = await params;
+  
   if (!resolvedParams.slug || resolvedParams.slug.length === 0) {
     return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
   }
@@ -18,7 +20,7 @@ export async function GET(
   console.log(`[VAULT_LOOKUP]: Requesting Asset >> ${slugPath}`);
 
   try {
-    // 2. Database Interrogation
+    // 1. Interrogate Registry via Singleton
     const asset = await prisma.contentMetadata.findUnique({
       where: { slug: slugPath }
     });
@@ -28,7 +30,7 @@ export async function GET(
       return NextResponse.json({ error: 'Asset not found in Registry' }, { status: 404 });
     }
 
-    // 3. Metadata Validation
+    // 2. Security Envelope Validation
     let security;
     try {
       security = typeof asset.metadata === 'string' 
@@ -42,7 +44,7 @@ export async function GET(
       throw new Error("Incomplete security envelope (missing IV or AuthTag).");
     }
 
-    // 4. Decryption Engine with localized error handling
+    // 3. Decryption Engine Execution
     let decrypted: string;
     try {
       decrypted = decryptDocument(
@@ -58,7 +60,7 @@ export async function GET(
       }, { status: 403 });
     }
 
-    // 5. Verified Response
+    // 4. Return Verified Payload
     return NextResponse.json({
       ok: true,
       asset: {
@@ -76,8 +78,6 @@ export async function GET(
       error: 'Internal System Failure', 
       details: error.message 
     }, { status: 500 });
-  } finally {
-    // Prevent connection pool exhaustion
-    await prisma.$disconnect();
   }
-}  
+  // Note: No need for $disconnect() here when using a singleton pool
+}

@@ -1,36 +1,32 @@
-// scripts/build-manifest-check.mjs — ADAPTIVE (Metadata Integrity & Auto-Correction)
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
 /**
- * INSTITUTIONAL POLICY:
- * 1. Title is MANDATORY. Without a title, the asset is invisible/broken.
- * 2. Date is RECOMMENDED. Defaults to 'undated' if missing.
- * 3. AccessLevel is ADAPTIVE. Defaults to 'public' if missing.
+ * INSTITUTIONAL POLICY ENFORCEMENT
+ * Standardizes metadata and prevents path regression.
  */
 
 const CONTENT_DIRS = [
-  { path: 'content/dispatches', defaultLevel: 'public' },
-  { path: 'content/shorts', defaultLevel: 'public' },
-  { path: 'content/vault', defaultLevel: 'inner-circle' }
+  { path: 'content/blog', defaultLevel: 'public' },
+  { path: 'content/lexicon', defaultLevel: 'public' },
+  { path: 'content/insights', defaultLevel: 'public' },
+  { path: 'content/resources', defaultLevel: 'inner-circle' },
+  { path: 'content/canon', defaultLevel: 'inner-circle' },
+  { path: 'content/books', defaultLevel: 'public' }
 ];
 
 const VALID_LEVELS = ['public', 'inner-circle', 'private'];
 
 function auditRegistry() {
-  console.log('🛡️  [REGISTRY_AUDIT] Initiating adaptive integrity check...');
+  console.log('🛡️  [REGISTRY_AUDIT] Verifying Institutional Integrity...');
   let criticalErrors = 0;
   let totalFiles = 0;
-  let correctedFields = 0;
+  let regressionLinks = 0;
 
   CONTENT_DIRS.forEach(dirConfig => {
     const fullPath = path.join(process.cwd(), dirConfig.path);
-    
-    if (!existsSync(fullPath)) {
-      console.warn(`⚠️  [SKIP_DIR] Optional registry path not found: ${dirConfig.path}`);
-      return;
-    }
+    if (!existsSync(fullPath)) return;
 
     const files = readdirSync(fullPath).filter(f => f.endsWith('.mdx') || f.endsWith('.md'));
     
@@ -40,38 +36,41 @@ function auditRegistry() {
       const content = readFileSync(filePath, 'utf8');
       const { data } = matter(content);
 
-      // 1. CRITICAL CHECK: Title (The build cannot identify the asset without this)
+      // 1. Title Policy
       if (!data.title) {
-        console.error(`❌ [CRITICAL_MISSING] ${dirConfig.path}/${file} has no title. Build unsafe.`);
+        console.error(`❌ [MISSING_TITLE] ${dirConfig.path}/${file}`);
         criticalErrors++;
       }
 
-      // 2. ADAPTIVE CHECK: Access Level
-      if (!data.accessLevel) {
-        // Log as info, not error. We apply the default here for validation purposes.
-        console.log(`ℹ️  [AUTO_RESOLVE] ${file} -> defaulting to "${dirConfig.defaultLevel}"`);
-        correctedFields++;
-      } else if (!VALID_LEVELS.includes(data.accessLevel)) {
-        console.error(`❌ [INVALID_ACCESS] ${file} has unauthorized level: "${data.accessLevel}"`);
-        criticalErrors++;
+      // 2. Link Regression Policy (Catches /blog/ instead of /vault/blog/)
+      const linkRegex = /\[([^\]]+)\]\((?!http|#|\/vault\/)([^)]+)\)/g;
+      let match;
+      while ((match = linkRegex.exec(content)) !== null) {
+        const url = match[2];
+        // If it's an internal absolute path missing /vault/
+        if (url.startsWith('/') && !url.startsWith('/vault/')) {
+          console.error(`⚠️  [PATH_REGRESSION] ${file}: Link "${url}" must start with "/vault/"`);
+          regressionLinks++;
+        }
       }
 
-      // 3. ADAPTIVE CHECK: Date
-      if (!data.date) {
-        console.warn(`⚠️  [METADATA_WARNING] ${file} is undated.`);
+      // 3. Access Level Policy
+      if (data.accessLevel && !VALID_LEVELS.includes(data.accessLevel)) {
+        console.error(`❌ [INVALID_ACCESS] ${file}: Unauthorized level "${data.accessLevel}"`);
+        criticalErrors++;
       }
     });
   });
 
-  if (criticalErrors > 0) {
-    console.error(`\n🚨 AUDIT REJECTED: ${criticalErrors} critical structural errors found.`);
+  console.log('\n--- 📊 AUDIT REPORT ---');
+  console.log(`Assets Verified: ${totalFiles}`);
+  
+  if (criticalErrors > 0 || regressionLinks > 0) {
+    console.error(`🚨 REJECTED: ${criticalErrors} metadata errors, ${regressionLinks} link regressions.`);
     process.exit(1); 
   }
 
-  console.log(`\n✅ AUDIT AUTHORIZED: ${totalFiles} assets processed.`);
-  if (correctedFields > 0) {
-    console.log(`✨ Note: ${correctedFields} access levels were auto-resolved to defaults.`);
-  }
+  console.log(`✅ AUTHORIZED: Vault integrity confirmed.`);
 }
 
 auditRegistry();

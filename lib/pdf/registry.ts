@@ -1,17 +1,14 @@
-// lib/pdfs/registry.ts — RUNTIME SAFE (client + server)
-// NO fs, NO path, NO node:*, NO require.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * lib/pdf/registry.ts — SINGLE SOURCE OF TRUTH (Next-safe)
+ * Reads from: lib/pdf/pdf-registry.generated.ts (committed file)
+ */
 
-import {
-  GENERATED_PDF_CONFIGS,
-  GENERATED_AT,
-  GENERATED_COUNT,
-} from "@/scripts/pdf/pdf-registry.generated";
+import fs from 'fs'
+import path from 'path'
+import { GENERATED_PDF_CONFIGS } from "./pdf-registry.generated";
 
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
-
-// Canonical runtime types (what your app should depend on)
+/** --- TYPES --- */
 export type PDFType =
   | "editorial"
   | "framework"
@@ -24,6 +21,13 @@ export type PDFType =
   | "journal"
   | "tracker"
   | "bundle"
+  | "pack"
+  | "playbook"
+  | "brief"
+  | "liturgy"
+  | "study"
+  | "checklist"
+  | "toolkit"
   | "other";
 
 export type PDFFormat = "PDF" | "EXCEL" | "POWERPOINT" | "ZIP" | "BINARY";
@@ -33,257 +37,186 @@ export type PaperFormat = "A4" | "Letter" | "A3" | "bundle";
 export interface PDFConfig {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   excerpt?: string;
 
   outputPath: string;
-  type: PDFType;
-  format: PDFFormat;
+  type?: PDFType;
+  format?: PDFFormat;
+  formats?: PaperFormat[];
 
-  isInteractive: boolean;
-  isFillable: boolean;
+  category?: string;
+  tier?: PDFTier;
 
-  category: string;
-  tier: PDFTier;
-  formats: PaperFormat[];
+  isInteractive?: boolean;
+  isFillable?: boolean;
+  requiresAuth?: boolean;
 
-  fileSize: string;
-  lastModified: string; // ISO string for serialization
-  exists: boolean;
+  version?: string;
+  author?: string;
+  tags?: string[];
 
-  tags: string[];
-  requiresAuth: boolean;
-  version: string;
-
-  priority?: number;
-  preload?: boolean;
-  placeholder?: string;
-  md5?: string;
+  exists?: boolean;
+  lastModified?: string; // ISO
+  fileSizeBytes?: number;
+  fileSize?: string; // computed human-readable (optional)
 }
 
 export interface PDFItem extends PDFConfig {
   fileUrl: string;
+  lastModifiedISO: string;
+  fileSizeHuman: string;
+  existsOnDisk: boolean;
 }
 
-/* -------------------------------------------------------------------------- */
-/* NORMALIZATION                                                              */
-/* -------------------------------------------------------------------------- */
-
-function canonicalizeOutputPath(p: string): string {
-  let v = (p || "").trim();
+/** --- HELPERS --- */
+function canonicalizeWebPath(p: string): string {
+  let v = String(p || "").trim();
   if (!v.startsWith("/")) v = `/${v}`;
-  v = v.replace(/^\/public\//, "/");
-  v = v.replace(/^\/assets\/downloads\/downloads\//, "/assets/downloads/");
+  v = v.replace(/\/{2,}/g, "/");
   return v;
 }
 
-function normalizeTier(t: unknown): PDFTier {
-  const v = String(t || "").toLowerCase().trim();
-
-  // Your generator produced an illegal tier "public" in one record.
-  // Policy: treat "public" as "free" (or map it to member if you want).
-  if (v === "public") return "free";
-
-  if (v === "free" || v === "member" || v === "architect" || v === "inner-circle") return v;
-  return "free";
+function toFsPathFromWebPath(webPath: string): string {
+  // Assumes webPath is under /public
+  // Example: /assets/downloads/foo.pdf -> <cwd>/public/assets/downloads/foo.pdf
+  return path.join(process.cwd(), "public", webPath.replace(/^\/+/, ""));
 }
 
-function normalizeType(x: unknown): PDFType {
-  const v = String(x || "").toLowerCase().trim();
-
-  // Your generator produced "Download" as a type for many.
-  // Policy: treat Download(s) as "tool" (generic download artifact).
-  if (v === "download" || v === "downloads") return "tool";
-
-  // Accept canonical types
-  if (
-    v === "editorial" ||
-    v === "framework" ||
-    v === "academic" ||
-    v === "strategic" ||
-    v === "tool" ||
-    v === "canvas" ||
-    v === "worksheet" ||
-    v === "assessment" ||
-    v === "journal" ||
-    v === "tracker" ||
-    v === "bundle" ||
-    v === "other"
-  ) return v;
-
-  return "other";
-}
-
-function normalizeFormat(x: unknown): PDFFormat {
-  const v = String(x || "").toUpperCase().trim();
-  if (v === "PDF" || v === "EXCEL" || v === "POWERPOINT" || v === "ZIP" || v === "BINARY") return v;
-  return "BINARY";
-}
-
-function normalizePaperFormats(x: unknown): PaperFormat[] {
-  const arr = Array.isArray(x) ? x : ["A4"];
-  const out: PaperFormat[] = [];
-  for (const item of arr) {
-    const v = String(item || "").trim();
-    if (v === "A4" || v === "Letter" || v === "A3" || v === "bundle") out.push(v);
+function statSafe(fsPath: string): fs.Stats | null {
+  try {
+    return fs.statSync(fsPath);
+  } catch {
+    return null;
   }
-  return out.length ? out : ["A4"];
 }
 
-function toRuntimeConfig(g: any): PDFConfig {
-  const lastModified =
-    typeof g.lastModified === "string" && g.lastModified.trim()
-      ? g.lastModified
-      : new Date().toISOString();
+function bytesToHuman(bytes?: number): string {
+  const n = Number(bytes || 0);
+  if (!Number.isFinite(n) || n <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let v = n;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function normalizeEntry(raw: any): PDFConfig {
+  const outputPath = canonicalizeWebPath(raw.outputPath);
+  const tags = Array.isArray(raw.tags) ? raw.tags.map(String) : [];
 
   return {
-    id: String(g.id),
-    title: String(g.title),
-    description: String(g.description || ""),
-    excerpt: g.excerpt ? String(g.excerpt) : undefined,
+    id: String(raw.id),
+    title: String(raw.title || raw.id),
+    description: raw.description ? String(raw.description) : undefined,
+    excerpt: raw.excerpt ? String(raw.excerpt) : undefined,
 
-    outputPath: canonicalizeOutputPath(String(g.outputPath || "")),
-    type: normalizeType(g.type),
-    format: normalizeFormat(g.format),
+    outputPath,
+    type: (raw.type || "other") as PDFType,
+    format: (raw.format || "PDF") as PDFFormat,
+    formats: (Array.isArray(raw.formats) && raw.formats.length ? raw.formats : ["A4"]) as PaperFormat[],
 
-    isInteractive: Boolean(g.isInteractive),
-    isFillable: Boolean(g.isFillable),
+    category: raw.category ? String(raw.category) : "Vault",
+    tier: (raw.tier || "free") as PDFTier,
 
-    category: String(g.category || "downloads"),
-    tier: normalizeTier(g.tier),
-    formats: normalizePaperFormats(g.formats),
+    isInteractive: Boolean(raw.isInteractive),
+    isFillable: Boolean(raw.isFillable),
+    requiresAuth: Boolean(raw.requiresAuth),
 
-    fileSize: String(g.fileSize || "0 KB"),
-    lastModified,
-    exists: Boolean(g.exists),
+    version: raw.version ? String(raw.version) : "1.0.0",
+    author: raw.author ? String(raw.author) : undefined,
+    tags,
 
-    tags: Array.isArray(g.tags) ? g.tags.map(String) : [],
-    requiresAuth: Boolean(g.requiresAuth),
-    version: String(g.version || "1.0.0"),
-
-    priority: typeof g.priority === "number" ? g.priority : undefined,
-    preload: Boolean(g.preload),
-    placeholder: g.placeholder ? String(g.placeholder) : undefined,
-    md5: g.md5 ? String(g.md5) : undefined,
+    exists: typeof raw.exists === "boolean" ? raw.exists : undefined,
+    lastModified: raw.lastModified ? String(raw.lastModified) : undefined,
+    fileSizeBytes: typeof raw.fileSizeBytes === "number" ? raw.fileSizeBytes : undefined,
   };
 }
 
-export function configToItem(config: PDFConfig): PDFItem {
-  return { ...config, fileUrl: config.outputPath };
+function toItem(cfg: PDFConfig): PDFItem {
+  const webPath = canonicalizeWebPath(cfg.outputPath);
+  const fsPath = toFsPathFromWebPath(webPath);
+  const st = statSafe(fsPath);
+
+  const existsOnDisk = Boolean(st && st.isFile());
+  const lastModifiedISO =
+    cfg.lastModified ||
+    (st?.mtime ? new Date(st.mtime).toISOString() : new Date(0).toISOString());
+
+  const bytes =
+    typeof cfg.fileSizeBytes === "number"
+      ? cfg.fileSizeBytes
+      : (st?.size ? Number(st.size) : 0);
+
+  return {
+    ...cfg,
+    outputPath: webPath,
+    fileUrl: webPath,
+    lastModifiedISO,
+    fileSizeHuman: bytesToHuman(bytes),
+    existsOnDisk,
+    fileSize: cfg.fileSize || bytesToHuman(bytes),
+    exists: typeof cfg.exists === "boolean" ? cfg.exists : existsOnDisk,
+  };
 }
 
-/* -------------------------------------------------------------------------- */
-/* REGISTRY                                                                    */
-/* -------------------------------------------------------------------------- */
-
-const PDF_REGISTRY_MAP: Map<string, PDFConfig> = new Map(
-  (GENERATED_PDF_CONFIGS || []).map((g: any) => {
-    const cfg = toRuntimeConfig(g);
-    return [cfg.id, cfg] as const;
-  })
-);
-
-export const STATIC_PDF_REGISTRY: Record<string, PDFConfig> = Object.fromEntries(PDF_REGISTRY_MAP);
-
-// Back-compat alias expected by older imports
-export const PDF_REGISTRY = STATIC_PDF_REGISTRY;
-
-// Cached collections
-let cachedAllExisting: PDFConfig[] | null = null;
-let cachedAllExistingItems: PDFItem[] | null = null;
-
-/* -------------------------------------------------------------------------- */
-/* PUBLIC API                                                                  */
-/* -------------------------------------------------------------------------- */
-
+/** --- PUBLIC API --- */
 export function getPDFRegistry(): Record<string, PDFConfig> {
-  return STATIC_PDF_REGISTRY;
-}
-
-export function getAllPDFs(opts?: { includeMissing?: boolean }): PDFConfig[] {
-  if (opts?.includeMissing) {
-    return Array.from(PDF_REGISTRY_MAP.values()).sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
+  const arr = Array.isArray(GENERATED_PDF_CONFIGS) ? GENERATED_PDF_CONFIGS : [];
+  const out: Record<string, PDFConfig> = {};
+  for (const raw of arr as any[]) {
+    const cfg = normalizeEntry(raw);
+    if (cfg.id) out[cfg.id] = cfg;
   }
-
-  if (!cachedAllExisting) {
-    cachedAllExisting = Array.from(PDF_REGISTRY_MAP.values())
-      .filter((p) => p.exists)
-      .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
-  }
-  return cachedAllExisting;
-}
-
-export function getAllPDFItems(opts?: { includeMissing?: boolean }): PDFItem[] {
-  if (opts?.includeMissing) return getAllPDFs({ includeMissing: true }).map(configToItem);
-
-  if (!cachedAllExistingItems) cachedAllExistingItems = getAllPDFs().map(configToItem);
-  return cachedAllExistingItems;
+  return out;
 }
 
 export function getPDFById(id: string): PDFConfig | null {
-  return PDF_REGISTRY_MAP.get(id) || null;
+  const reg = getPDFRegistry();
+  return reg[id] || null;
 }
 
-export function getPDFItemById(id: string): PDFItem | null {
-  const cfg = getPDFById(id);
-  return cfg ? configToItem(cfg) : null;
+export function getAllPDFs(opts?: { includeMissing?: boolean }): PDFConfig[] {
+  const includeMissing = Boolean(opts?.includeMissing);
+  const reg = getPDFRegistry();
+  const arr = Object.values(reg);
+  if (includeMissing) return arr;
+  return arr.filter((x) => Boolean(x.exists));
 }
 
-export function getPDFsByTier(tier: PDFTier, opts?: { includeMissing?: boolean }): PDFConfig[] {
-  return getAllPDFs(opts).filter((p) => p.tier === tier);
+export function getAllPDFItems(opts?: { includeMissing?: boolean }): PDFItem[] {
+  const includeMissing = Boolean(opts?.includeMissing);
+  const arr = getAllPDFs({ includeMissing }).map(toItem);
+  // Stable sort: category then title
+  return arr.sort((a, b) => {
+    const ca = String(a.category || "");
+    const cb = String(b.category || "");
+    if (ca !== cb) return ca.localeCompare(cb);
+    return String(a.title || "").localeCompare(String(b.title || ""));
+  });
 }
 
-export function getPDFsByType(type: PDFType, opts?: { includeMissing?: boolean }): PDFConfig[] {
-  return getAllPDFs(opts).filter((p) => p.type === type);
-}
+/** * --- INSTITUTIONAL STATS API --- 
+ * Provides aggregate data for the vault-audit and stats routes.
+ */
+export async function getRegistryStats() {
+  const allItems = getAllPDFItems({ includeMissing: true });
+  
+  // Calculate category distribution
+  const categories: Record<string, number> = {};
+  allItems.forEach(item => {
+    const cat = item.category || 'Uncategorized';
+    categories[cat] = (categories[cat] || 0) + 1;
+  });
 
-export function getInteractivePDFs(opts?: { includeMissing?: boolean }): PDFConfig[] {
-  return getAllPDFs(opts).filter((p) => p.isInteractive);
-}
-
-export function getFillablePDFs(opts?: { includeMissing?: boolean }): PDFConfig[] {
-  return getAllPDFs(opts).filter((p) => p.isFillable);
-}
-
-export function searchPDFs(query: string, opts?: { includeMissing?: boolean }): PDFConfig[] {
-  const q = (query || "").toLowerCase().trim();
-  if (!q) return getAllPDFs(opts);
-  return getAllPDFs(opts).filter(
-    (p) =>
-      p.title.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      (p.tags || []).some((t) => t.toLowerCase().includes(q))
-  );
-}
-
-export function getPDFStats() {
-  const all = Array.from(PDF_REGISTRY_MAP.values());
   return {
-    generatedAt: GENERATED_AT,
-    generatedCount: GENERATED_COUNT,
-    total: all.length,
-    available: all.filter((p) => p.exists).length,
-    interactive: all.filter((p) => p.isInteractive).length,
-    fillable: all.filter((p) => p.isFillable).length,
-    byTier: {
-      free: all.filter((p) => p.tier === "free").length,
-      member: all.filter((p) => p.tier === "member").length,
-      architect: all.filter((p) => p.tier === "architect").length,
-      "inner-circle": all.filter((p) => p.tier === "inner-circle").length,
-    },
+    totalAssets: allItems.length,
+    existsOnDisk: allItems.filter(i => i.existsOnDisk).length,
+    missingAssets: allItems.filter(i => !i.existsOnDisk).length,
+    categories,
+    lastUpdated: new Date().toISOString()
   };
-}
-
-// Runtime-safe stubs (keep only if something imports them)
-export function scanForDynamicAssets() {
-  return { ok: true, found: [], message: "runtime-safe stub" };
-}
-export function needsRegeneration(_pdf: PDFConfig): boolean {
-  return false;
-}
-export function getPDFsRequiringGeneration(): PDFConfig[] {
-  return [];
-}
-export async function generateMissingPDFs() {
-  return { ok: true, generated: 0, missing: [], message: "runtime no-op" };
 }

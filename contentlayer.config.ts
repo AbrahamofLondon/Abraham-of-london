@@ -1,4 +1,3 @@
-// contentlayer.config.ts — STRICT INVARIANTS, REAL-WORLD FIELDS, NO DRIFT
 import {
   defineDocumentType,
   defineNestedType,
@@ -180,75 +179,51 @@ const seoFields = {
   twitterCard: { type: "string", required: false },
   canonicalUrl: { type: "string", required: false },
   robots: { type: "string", required: false },
+  status: { type: 'string', required: false },
+  kind: { type: 'string', required: false },
 } as const;
 
 const baseFields = {
-  // core identity
   title: { type: "string", required: true },
   subtitle: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
-
-  // dates
   date: { type: "date", required: false },
   updated: { type: "date", required: false },
-
-  // publishing flags
   published: { type: "boolean", required: false },
   draft: { type: "boolean", required: false },
   featured: { type: "boolean", required: false },
-
-  // routing
   slug: { type: "string", required: false },
   href: { type: "string", required: false },
   aliases: { type: "list", of: { type: "string" }, required: false },
-
-  // presentation
   docKind: { type: "string", required: false },
   layout: { type: "string", required: false },
   density: { type: "string", required: false },
-
-  // authoring / taxonomy
   author: { type: "string", required: false },
   authorTitle: { type: "string", required: false },
   tags: { type: "list", of: { type: "string" }, required: false },
   category: { type: "string", required: false },
-
-  // visuals
   coverImage: { type: "string", required: false },
   featuredImage: { type: "string", required: false },
   coverAspect: { type: "string", required: false },
   coverFit: { type: "string", required: false },
   coverPosition: { type: "string", required: false },
-
-  // sharing
   socialCaption: { type: "string", required: false },
   readTime: { type: "string", required: false },
-
-  // access control
   accessLevel: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false },
   tier: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
-
-  // structured blobs / attachments (kept permissive)
   resources: { type: "json", required: false },
   downloads: { type: "json", required: false },
   relatedDownloads: { type: "list", of: { type: "string" }, required: false },
-
-  // editorial extras
   keyInsights: { type: "list", of: { type: "string" }, required: false },
   authorNote: { type: "string", required: false },
-
-  // canon ordering (used in your content)
   order: { type: "number", required: false },
   volumeNumber: { type: "string", required: false },
   volume: { type: "string", required: false },
   part: { type: "string", required: false },
-
-  // ... other fields
   contentOnly: { type: "boolean", required: false },
-
   ...seoFields,
 } as const;
 
@@ -264,25 +239,18 @@ const downloadFields = {
   isFillable: { type: "boolean", required: false },
   version: { type: "string", required: false },
   language: { type: "string", required: false },
-  pageCount: { type: "number", required: false }, // Resolved: Added to capture legacy data
-
+  pageCount: { type: "number", required: false },
   useLegacyDiagram: { type: "boolean", required: false },
   useProTip: { type: "boolean", required: false },
   useFeatureGrid: { type: "boolean", required: false },
   useDownloadCTA: { type: "boolean", required: false },
-
   proTipType: { type: "string", required: false },
   proTipContent: { type: "string", required: false },
-
   featureGridColumns: { type: "number", required: false },
   featureGridItems: { type: "list", of: FeatureGridItem, required: false },
-
   ctaPrimary: { type: "nested", of: CTAButton, required: false },
   ctaSecondary: { type: "nested", of: CTAButton, required: false },
-
   related: { type: "list", of: { type: "string" }, required: false },
-
-  // these were explicitly in your warnings
   ctaConfig: { type: "json", required: false },
   downloadProcess: { type: "json", required: false },
 } as const;
@@ -299,7 +267,7 @@ const strategyFields = {
   region: { type: "string", required: false },
   timeline: { type: "string", required: false },
   status: { type: "string", required: false },
-  resourceType: { type: "string", required: false }, // your sample-strategy
+  resourceType: { type: "string", required: false },
 } as const;
 
 // ------------------------------------------------------------
@@ -362,8 +330,9 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
 }
 
 // ------------------------------------------------------------
-// DOCUMENT TYPES
+// DOCUMENT TYPES - UNIFIED & INSTITUTIONAL GRADE
 // ------------------------------------------------------------
+
 export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
@@ -372,6 +341,9 @@ export const Post = defineDocumentType(() => ({
     ...baseFields,
     series: { type: "string", required: false },
     seriesOrder: { type: "number", required: false },
+    // Institutional Metadata for 2026 reporting
+    version: { type: "string", required: false },
+    institutionalId: { type: "string", required: false },
   },
   computedFields: createComputedFields("blog/", "blog"),
 }));
@@ -412,6 +384,7 @@ export const Canon = defineDocumentType(() => ({
     ...baseFields,
     canonType: { type: "string", required: false },
     edition: { type: "string", required: false },
+    institutionalId: { type: "string", required: false },
   },
   computedFields: createComputedFields("canon/", "canon"),
 }));
@@ -423,6 +396,8 @@ export const Download = defineDocumentType(() => ({
   fields: {
     ...baseFields,
     ...downloadFields,
+    version: { type: "string", required: false },
+    institutionalId: { type: "string", required: false },
   },
   computedFields: createComputedFields("downloads/", "downloads"),
 }));
@@ -485,14 +460,44 @@ export const Print = defineDocumentType(() => ({
 
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
-  filePathPattern: "resources/**/*.{md,mdx}",
+  filePathPattern: `resources/**/*.{md,mdx}`, // Updated to include .md
   contentType: "mdx",
   fields: {
-    ...baseFields,
-    ...resourceFields,
-    fileType: { type: "string", required: false },
-    difficulty: { type: "string", required: false },
-    prerequisites: { type: "list", of: { type: "string" }, required: false },
+    title: { type: "string", required: true },
+    date: { type: "date", required: false },
+    description: { type: "string", required: false },
+    excerpt: { type: "string", required: false },
+    category: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    status: { type: "string", required: false },
+    tier: { type: "string", required: false },
+    
+    // UI & System Fields (From Build Log)
+    author: { type: "string", required: false },
+    slug: { type: "string", required: false },
+    draft: { type: "boolean", required: false },
+    featured: { type: "boolean", required: false },
+    coverImage: { type: "string", required: false },
+    accessLevel: { type: "string", required: false },
+    resourceType: { type: "string", required: false },
+    docKind: { type: "string", required: false },
+    downloadUrl: { type: "string", required: false },
+    readTime: { type: "string", required: false },
+    ogTitle: { type: "string", required: false },
+    ogDescription: { type: "string", required: false },
+    socialCaption: { type: "string", required: false },
+    coverAspect: { type: "string", required: false },
+    coverFit: { type: "string", required: false },
+    coverPosition: { type: "string", required: false },
+    lockMessage: { type: "string", required: false },
+
+    // Institutional Metadata
+    format: { type: "string", required: false },
+    version: { type: "string", required: false },
+    institutionalId: { type: "string", required: false },
+    jurisdiction: { type: "string", required: false },
+    classification: { type: "string", required: false },
+    subtitle: { type: "string", required: false },
   },
   computedFields: createComputedFields("resources/", "resources"),
 }));
@@ -504,16 +509,41 @@ export const Strategy = defineDocumentType(() => ({
   fields: {
     ...baseFields,
     ...strategyFields,
+    version: { type: "string", required: false },
+    institutionalId: { type: "string", required: false },
+    // Ensuring strategy can handle standard UI fields if present
+    accessLevel: { type: "string", required: false },
+    docKind: { type: "string", required: false },
   },
   computedFields: createComputedFields("strategy/", "strategy"),
 }));
 
+export const Lexicon = defineDocumentType(() => ({
+  name: "Lexicon",
+  filePathPattern: "lexicon/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    term: { type: "string", required: false },
+    phonetic: { type: "string", required: false },
+    status: { type: "string", required: false },
+    kind: { type: "string", required: false },
+    // Metadata discovered in Lexicon frontmatter
+    accessLevel: { type: "string", required: false },
+    slug: { type: "string", required: false },
+    docKind: { type: "string", required: false },
+    ogTitle: { type: "string", required: false },
+    ogDescription: { type: "string", required: false },
+    draft: { type: "boolean", required: false },
+  },
+  computedFields: createComputedFields("lexicon/", "lexicon"),
+}));
+
 // ------------------------------------------------------------
-// INSTITUTIONAL EXCLUSIONS (Hardened for Binary Safety)
+// INSTITUTIONAL EXCLUSIONS
 // ------------------------------------------------------------
 function getExclusions(): string[] {
   const exclusions = [
-    // Core Infrastructure
     "node_modules",
     ".git",
     ".next",
@@ -522,13 +552,9 @@ function getExclusions(): string[] {
     "_templates",
     "tmp",
     "temp",
-
-    // The "Vault" - Explicitly barring the public folder from being scanned
-    "public/**/*",           // 🛡️ CRITICAL: Do not let Contentlayer scan public assets
-    "**/public/assets/**",   
+    "public/**/*",
+    "**/public/assets/**",
     "public/assets/images/**",
-
-    // Binary File Extensions (Expanded to prevent EPERM on images)
     "**/*.jpg",
     "**/*.jpeg",
     "**/*.png",
@@ -545,8 +571,6 @@ function getExclusions(): string[] {
     "**/*.7z",
     "**/*.mp4",
     "**/*.mp3",
-
-    // System Artifacts & Temporary Files
     "**/.DS_Store",
     "**/Thumbs.db",
     "**/*.lnk",
@@ -554,17 +578,15 @@ function getExclusions(): string[] {
     "**/*.tmp",
     "**/*.swp",
     "**/*.backup*",
-
-    // Typo Neutralization
     "donwloads",
     "donwloads/**",
   ];
 
   if (IS_WINDOWS) {
     exclusions.push(
-      "**/~$*.docx", 
-      "**/~$*.xlsx", 
-      "**/~$*.pptx", 
+      "**/~$*.docx",
+      "**/~$*.xlsx",
+      "**/~$*.pptx",
       "**/desktop.ini",
       "**/Thumbs.db"
     );
@@ -578,9 +600,20 @@ function getExclusions(): string[] {
 // ------------------------------------------------------------
 export default makeSource({
   contentDirPath: "content",
-  contentDirInclude: ["blog", "shorts", "books", "canon", "downloads", "events", "prints", "resources", "strategy"],
+  contentDirInclude: [
+    "blog", 
+    "shorts", 
+    "books", 
+    "canon", 
+    "downloads", 
+    "events", 
+    "prints", 
+    "resources", 
+    "strategy",
+    "lexicon"
+  ],
   contentDirExclude: getExclusions(),
-  documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy],
+  documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy, Lexicon],
   disableImportAliasWarning: true,
   mdx: { remarkPlugins: [], rehypePlugins: [] },
 

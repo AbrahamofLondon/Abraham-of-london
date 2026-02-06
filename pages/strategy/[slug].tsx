@@ -1,201 +1,135 @@
-// pages/strategy/[slug].tsx — FINAL BUILD-PROOF (Seeded + URL Normalized)
+/* pages/strategy/[slug].tsx — REFINED WITH DUAL-MODE RENDERING */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Head from "next/head";
+import { ChevronLeft, Download, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { 
-  BookOpen, FileSpreadsheet, Presentation, ClipboardCheck, 
-  Target, ShieldCheck, Workflow, Landmark, ArrowRight, 
-  Lock, Download, Calendar, MessageSquare 
-} from "lucide-react";
-
-import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
-
+import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import Layout from "@/components/Layout";
+import BriefViewer from "@/components/strategy/BriefViewer";
+import { getDocBySlug, getAllContentlayerDocs } from "@/lib/content/server";
+import { prisma } from "@/lib/prisma";
 
-import { safeSlice } from "@/lib/utils/safe";
-
-// ✅ Server Helpers
-import {
-  getAllContentlayerDocs,
-  getDocBySlug,
-} from "@/lib/content/server";
-
-import { 
-  normalizeSlug, 
-  sanitizeData, 
-  isDraftContent 
-} from "@/lib/content/shared";
-
-// ==================== TYPES ====================
-type Props = {
-  strategy: any;
-  source: MDXRemoteSerializeResult;
-  mdxRaw: string;
-};
-
-// ==================== HELPERS ====================
-function isStrategyDoc(d: any): boolean {
-  const kind = String(d?.kind || d?.type || "").toLowerCase();
-  if (kind === "strategy") return true;
-  const flat = String(d?._raw?.flattenedPath || "").toLowerCase();
-  return flat.startsWith("strategy/");
-}
-
-function strategySlugFromDoc(d: any): string {
-  const raw = normalizeSlug(String(d.slug || d._raw?.flattenedPath || ""));
-  return raw.replace(/^strategy\//, "").replace(/\.(md|mdx)$/i, "");
-}
-
-function getRawBody(d: any): string {
-  return d?.body?.raw || d?.bodyRaw || d?.content || d?.mdx || "";
-}
-
-// ==================== STATIC PATHS ====================
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const docs = getAllContentlayerDocs();
-    const paths = docs
-      .filter((d: any) => isStrategyDoc(d) && !isDraftContent(d))
-      .map((d: any) => ({ params: { slug: strategySlugFromDoc(d) } }));
-
-    return { paths, fallback: "blocking" };
-  } catch (e) {
-    console.error("[strategy/getStaticPaths] error:", e);
-    return { paths: [], fallback: "blocking" };
-  }
-};
-
-// ==================== STATIC PROPS ====================
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  try {
-    const slug = String(params?.slug || "");
-    const s = normalizeSlug(slug);
-    
-    // Resolve strategy document (checking with/without prefix)
-    const strategy = (getDocBySlug(`strategy/${s}`) as any) || (getDocBySlug(s) as any);
-
-    if (!strategy || !isStrategyDoc(strategy) || isDraftContent(strategy)) {
-      return { notFound: true };
-    }
-
-    const mdxRaw = getRawBody(strategy);
-    const source = await serialize(mdxRaw || " ", {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]],
-      },
-    });
-
-    return {
-      props: {
-        strategy: sanitizeData(strategy),
-        source,
-        mdxRaw,
-      },
-      revalidate: 1800,
-    };
-  } catch (e) {
-    console.error("[strategy/getStaticProps] error:", e);
-    return { notFound: true };
-  }
-};
-
-// ==================== PAGE COMPONENT ====================
-const StrategyDetailPage: NextPage<Props> = ({ strategy, source, mdxRaw }) => {
-  const [activeSection, setActiveSection] = React.useState<string>("");
+const StrategyDetailPage: NextPage<any> = ({ strategy, source, isPdf, dbMeta }) => {
   const [progress, setProgress] = React.useState(0);
 
-  // ✅ SEED + PROXY logic
-  const safeComponents = React.useMemo(
-    () => createSeededSafeMdxComponents(mdxComponents, mdxRaw),
-    [mdxRaw]
-  );
-
   React.useEffect(() => {
-    const onScroll = () => {
-      // Scrollspy logic
-      const sections = document.querySelectorAll("h2[id], h3[id]");
-      const scrollPos = window.scrollY + 120;
-      sections.forEach((section: any) => {
-        if (scrollPos >= section.offsetTop && scrollPos < section.offsetTop + (section.offsetHeight || 1)) {
-          setActiveSection(section.id);
-        }
-      });
-
-      // Progress bar
+    if (isPdf) return; // Progress bar only for long-form MDX
+    const handleScroll = () => {
       const doc = document.documentElement;
       const pct = (window.scrollY / (doc.scrollHeight - window.innerHeight)) * 100;
       setProgress(Math.max(0, Math.min(100, pct)));
     };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isPdf]);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // MODE A: SECURE PDF DOSSIER
+  if (isPdf) {
+    const meta = dbMeta ? JSON.parse(dbMeta) : {};
+    return (
+      <Layout pageTitle={strategy.title}>
+        <BriefViewer 
+          assetUrl={`/api/assets/serve-pdf?id=${strategy.slug || strategy._id}`}
+          title={strategy.title}
+          classification={meta.classification || "LEVEL 3"}
+          serialNumber={meta.institutional_code || `AOL-B-${strategy._id?.slice(-5)}`}
+        />
+      </Layout>
+    );
+  }
 
-  const canonical = `https://www.abrahamoflondon.org/strategy/${strategySlugFromDoc(strategy)}`;
-
+  // MODE B: MDX INTEL DISPATCH
   return (
-    <Layout title={strategy.title} description={strategy.excerpt || strategy.description}>
-      <Head>
-        <link rel="canonical" href={canonical} />
-        <meta name="robots" content={strategy.accessLevel === "inner-circle" ? "noindex" : "index"} />
-      </Head>
+    <Layout pageTitle={strategy.title}>
+      <div className="fixed top-0 left-0 h-[1px] bg-primary z-[100] transition-all duration-300" style={{ width: `${progress}%` }} />
+      
+      <article className="relative pt-32 pb-40">
+        <div className="max-w-6xl mx-auto px-6 mb-24">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-[9px] font-mono uppercase tracking-widest text-zinc-600 hover:text-primary transition-colors mb-12">
+            <ChevronLeft size={10} /> Return_to_Registry
+          </Link>
 
-      <div className="relative overflow-hidden border-b border-gold/10 bg-black pt-24 pb-16">
-        <div className="container relative mx-auto px-4">
-          <div className="mb-6 flex items-center gap-3">
-            <span className="text-xs font-bold uppercase tracking-widest text-gold">{strategy.category || "Framework"}</span>
-            {strategy.accessLevel === "inner-circle" && (
-              <span className="rounded-full bg-gold/10 border border-gold/30 px-3 py-1 text-[10px] font-bold text-gold">INNER CIRCLE</span>
-            )}
-          </div>
-          <h1 className="max-w-4xl font-serif text-4xl font-bold text-white sm:text-6xl">{strategy.title}</h1>
-          <p className="mt-6 max-w-3xl text-lg text-zinc-400">{strategy.excerpt || strategy.description}</p>
-          
-          <div className="mt-8 flex gap-4">
-            <Link href="#download" className="rounded-xl bg-gold px-6 py-3 text-sm font-bold text-black uppercase tracking-widest">
-              Download Framework
-            </Link>
-            <Link href="/consulting/strategy-room" className="rounded-xl bg-white/5 border border-white/10 px-6 py-3 text-sm font-bold text-white uppercase tracking-widest">
-              Strategy Room
-            </Link>
+          <div className="grid lg:grid-cols-12 gap-12 items-end">
+            <div className="lg:col-span-8 space-y-8">
+              <div className="flex items-center gap-4">
+                <span className="text-[9px] font-mono uppercase tracking-[0.5em] text-primary">Strategic Dispatch</span>
+                <div className="h-px w-12 bg-primary/20" />
+                <span className="text-[9px] font-mono text-zinc-700">AOL-B-{strategy._id?.slice(-5)}</span>
+              </div>
+              <h1 className="font-editorial text-5xl md:text-8xl font-light text-white tracking-tighter leading-[0.85] italic">
+                {strategy.title}
+              </h1>
+            </div>
+            <div className="lg:col-span-4 flex justify-end">
+              <div className="text-right font-mono text-[9px] text-zinc-600 uppercase tracking-widest space-y-1">
+                <p>Classification: <span className="text-zinc-300">Level 3 Private</span></p>
+                <p>Origin: <span className="text-zinc-300">London Terminal</span></p>
+                <p>Date: <span className="text-zinc-300">{new Date(strategy.date).toLocaleDateString()}</span></p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-16 grid lg:grid-cols-4 gap-12">
-        <aside className="lg:col-span-1">
-          <div className="sticky top-24 space-y-8">
-            <nav className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-              <h3 className="mb-4 text-xs font-bold uppercase text-white">Contents</h3>
-              <div className="space-y-2">
-                {["overview", "principles", "implementation", "tools"].map(id => (
-                   <a key={id} href={`#${id}`} className={`block text-sm transition-colors ${activeSection === id ? "text-gold" : "text-zinc-500 hover:text-white"}`}>
-                     {id.charAt(0).toUpperCase() + id.slice(1)}
-                   </a>
-                ))}
+        <div className="max-w-6xl mx-auto px-6 grid lg:grid-cols-12 gap-20">
+          <aside className="lg:col-span-3 border-r border-white/5">
+            <div className="sticky top-40 space-y-12 pr-8">
+              <div className="space-y-6">
+                <h4 className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-800">Briefing_Index</h4>
+                <nav className="flex flex-col gap-4 font-editorial italic text-xl text-zinc-500">
+                  <a href="#overview" className="hover:text-primary transition-colors">Strategic_Overview</a>
+                  <a href="#analysis" className="hover:text-primary transition-colors">Core_Analysis</a>
+                  <a href="#implementation" className="hover:text-primary transition-colors">Execution_Logic</a>
+                </nav>
               </div>
-            </nav>
-          </div>
-        </aside>
+            </div>
+          </aside>
 
-        <main className="lg:col-span-3">
-          <article className="prose prose-invert prose-gold max-w-none">
-            <MDXRemote {...source} components={safeComponents as any} />
-          </article>
-        </main>
-      </div>
-
-      <div className="fixed bottom-0 left-0 h-1 bg-gold transition-all duration-300" style={{ width: `${progress}%` }} />
+          <main className="lg:col-span-9">
+            <div className="prose prose-invert prose-zinc max-w-none 
+              prose-headings:font-editorial prose-headings:font-light prose-headings:tracking-tighter
+              prose-h2:text-4xl prose-h2:italic prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-6
+              prose-p:text-zinc-400 prose-p:text-xl prose-p:leading-relaxed prose-p:font-light
+              prose-strong:text-primary prose-strong:font-mono prose-strong:text-sm
+              prose-blockquote:border-primary/40 prose-blockquote:bg-surface prose-blockquote:py-2 prose-blockquote:px-8">
+              <MDXRemote {...source} />
+            </div>
+          </main>
+        </div>
+      </article>
     </Layout>
   );
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const docs = getAllContentlayerDocs();
+  const paths = docs.map((d: any) => ({ params: { slug: d.slug.split('/').pop() } }));
+  return { paths, fallback: "blocking" };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slug = params?.slug as string;
+  
+  // 1. Attempt to find the document in the DB first (for PDF assets)
+  const dbEntry = await prisma.contentMetadata.findUnique({ where: { slug } });
+  
+  // 2. Fetch the Contentlayer doc (for MDX content)
+  const strategy = getDocBySlug(`strategy/${slug}`);
+
+  if (!strategy && !dbEntry) return { notFound: true };
+
+  const isPdf = dbEntry?.contentType === "PDF_BRIEF";
+  const source = !isPdf && strategy ? await serialize(strategy.body.raw) : null;
+
+  return { 
+    props: { 
+      strategy: strategy || { title: dbEntry?.title, _id: dbEntry?.slug }, 
+      source, 
+      isPdf,
+      dbMeta: dbEntry?.metadata || null
+    }, 
+    revalidate: 3600 
+  };
 };
 
 export default StrategyDetailPage;
