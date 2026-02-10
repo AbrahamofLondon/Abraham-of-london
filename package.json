@@ -270,7 +270,7 @@
     "pdf-lib": "^1.17.1",
     "pg": "^8.18.0",
     "puppeteer": "^24.37.1",
-    "puppeteer-core": "^24.37.1",
+    "puppeteer-core": "^24.37.2",
     "tsx": "^4.21.0",
     "webpack-bundle-analyzer": "^5.2.0"
   },
