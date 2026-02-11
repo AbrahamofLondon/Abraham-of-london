@@ -7,7 +7,7 @@ export const config = {
   matcher: ["/admin/:path*", "/inner-circle/:path*", "/api/vault/:path*", "/strategy/:path*"],
 };
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
