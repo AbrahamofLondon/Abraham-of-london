@@ -21,8 +21,7 @@ function createRealPrismaClient(): PrismaClient {
 }
 
 /**
- * Safe Build Proxy: Ensures Contentlayer doesn't hang on Netlify
- * if the database is unreachable during the build phase.
+ * Safe Build Proxy: Ensures Contentlayer doesn't hang
  */
 function createBuildStub(): any {
   return new Proxy({} as any, {
@@ -33,10 +32,10 @@ function createBuildStub(): any {
   });
 }
 
+// 1. Primary Named Export
 export const prisma: PrismaClient = (() => {
   if (isBrowser || isEdge) return createBuildStub();
   
-  // Allow Prisma during build ONLY if explicitly flagged, else use stub to prevent hangs
   if (isBuild && process.env.PRISMA_ALLOW_DURING_BUILD !== "1") {
     return createBuildStub();
   }
@@ -50,4 +49,18 @@ export const prisma: PrismaClient = (() => {
   return global.__prisma;
 })();
 
-export const prisma = new PrismaClient();
+// 2. Default Export (Resolves: '@/lib/prisma' does not contain a default export)
+export default prisma;
+
+// 3. Named Wrapper (Resolves: 'getPrisma' is not exported)
+export const getPrisma = () => prisma;
+
+// 4. Integrity Wrapper (Resolves: 'safePrismaQuery' is not exported)
+export async function safePrismaQuery<T>(query: () => Promise<T>): Promise<T | null> {
+  try {
+    return await query();
+  } catch (error) {
+    console.error("[VAULT_PRISMA_ERROR]:", error);
+    return null;
+  }
+}

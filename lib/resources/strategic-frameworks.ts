@@ -127,3 +127,5 @@ export async function getInstitutionalFramework(slug: string): Promise<Framework
     return null;
   }
 }
+
+export const FRAMEWORKS

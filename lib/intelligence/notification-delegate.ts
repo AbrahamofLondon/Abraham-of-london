@@ -78,3 +78,28 @@ export async function sendOnboardingWelcome(member: any, rawKey: string) {
 
   return await transporter.sendMail(mailOptions);
 }
+
+export async function notifyPrincipalOfSecurityAction(member: any, action: string) {
+  const isSuspension = action === "SUSPENSION_DORMANCY";
+  
+  const mailOptions = {
+    from: `"AoL Security" <security@abraham-of-london.com>`,
+    to: member.email,
+    subject: isSuspension ? "ACCESS PAUSED: Security Protocol" : "Security Update",
+    html: `
+      <div style="font-family: serif; padding: 50px; background: #0a0a0a; color: #fff; border: 2px solid #991b1b;">
+        <h2 style="text-transform: uppercase; letter-spacing: 2px; color: #ef4444;">Security Alert</h2>
+        <p>Principal ${member.name},</p>
+        <p>In accordance with <strong>Institutional Dormancy Policy</strong>, your active session has been paused due to 30+ days of inactivity.</p>
+        <div style="margin: 30px 0; padding: 20px; background: #1a1a1a; border-left: 4px solid #ef4444;">
+          <p style="margin: 0; font-size: 13px; color: #ddd;">STATUS: <strong>SUSPENDED</strong></p>
+          <p style="margin: 0; font-size: 13px; color: #ddd;">KEYS: <strong>REVOKED</strong></p>
+        </div>
+        <p>To restore access, please contact a Senior Admin or initiate a re-authentication sequence.</p>
+        <p style="font-size: 10px; color: #444; margin-top: 40px;">REF: ${action} // ${new Date().toISOString()}</p>
+      </div>
+    `,
+  };
+
+  return await transporter.sendMail(mailOptions);
+}

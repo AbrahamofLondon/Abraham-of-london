@@ -1,51 +1,18 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import crypto from "crypto";
 
 import type { AoLTier } from "@/types/next-auth";
-import { safePrismaQuery } from "@/lib/prisma"; 
-
-/**
- * UTILITY: Deterministic Identity Hashing
- */
-function sha256Hex(input: string): string {
-  return crypto.createHash("sha256").update(input).digest("hex");
-}
-
-/**
- * UTILITY: Flag Sanitization
- */
-function safeParseFlags(flagsJson?: string | null): string[] {
-  if (!flagsJson) return [];
-  try {
-    const v = JSON.parse(flagsJson);
-    return Array.isArray(v) ? v.map(String) : [];
-  } catch {
-    return [];
-  }
-}
-
-function hasInternalFlag(flags: string[]): boolean {
-  const internalMarkers = ["internal", "staff", "private_access", "admin"];
-  return flags.some(flag => internalMarkers.includes(flag));
-}
-
-/**
- * TIER MAPPING: Translates Neon PostgreSQL tiers to AoL Logic
- */
-function mapMemberTierToAoLTier(dbTier: string, flags: string[]): AoLTier {
-  if (hasInternalFlag(flags)) return "private";
-
-  const t = (dbTier || "").toLowerCase();
-  if (t.includes("elite") || t.includes("enterprise")) return "inner-circle-elite";
-  if (t.includes("plus") || t.includes("premium")) return "inner-circle-plus";
-  
-  // Default active member status
-  return "inner-circle";
-}
+import { safePrismaQuery, prisma } from "@/lib/prisma";
+import { 
+  sha256Hex, 
+  safeParseFlags, 
+  mapMemberTierToAoLTier, 
+  hasInternalFlag 
+} from "@/lib/auth-utils";
 
 /**
  * CLAIMS RESOLVER: The "Handshake" between DB and JWT
+ * Synchronizes the identity against the Neon PostgreSQL registry.
  */
 async function resolveAoLClaimsByEmail(email?: string | null) {
   const baseClaims = {
@@ -61,18 +28,17 @@ async function resolveAoLClaimsByEmail(email?: string | null) {
   if (!email) return baseClaims;
 
   const normalizedEmail = email.trim().toLowerCase();
-  // We check both the SHA256 version and the plain text version 
-  // to support the Directorate Master Keys we just generated.
   const hashedEmail = sha256Hex(normalizedEmail);
 
-  const member = await safePrismaQuery((prisma) =>
+  // High-integrity query using the proxy-safe prisma instance
+  const member = await safePrismaQuery(() =>
     prisma.innerCircleMember.findFirst({
-      where: { 
+      where: {
         OR: [
           { email: normalizedEmail },
           { emailHash: hashedEmail },
-          { emailHash: normalizedEmail } // Alignment with our Key-Gen script
-        ]
+          { emailHash: normalizedEmail } // Support for Directorate Master Keys
+        ],
       },
       select: {
         id: true,
@@ -90,7 +56,7 @@ async function resolveAoLClaimsByEmail(email?: string | null) {
 
   const flags = safeParseFlags(member.flags);
   
-  // LOGIC UPGRADE: If tier is "Director" (from our script), treat as Internal/Private
+  // Escalation Logic: Directors or specific flags grant Private Clearance
   const isInternal = hasInternalFlag(flags) || member.tier === "Director";
   const tier = isInternal ? "private" : mapMemberTierToAoLTier(member.tier, flags);
 
@@ -98,7 +64,7 @@ async function resolveAoLClaimsByEmail(email?: string | null) {
     tier,
     innerCircleAccess: true,
     isInternal,
-    allowPrivate: isInternal, 
+    allowPrivate: isInternal,
     memberId: member.id,
     emailHash: member.emailHash,
     flags,
@@ -124,7 +90,7 @@ export const authOptions: NextAuthOptions = {
         const ADMIN_EMAIL = process.env.ADMIN_USER_EMAIL?.trim().toLowerCase();
         const ADMIN_PASS = process.env.ADMIN_USER_PASSWORD ?? "";
 
-        // Admin environment check
+        // Admin environment check (Vault Administrator)
         if (ADMIN_EMAIL && email === ADMIN_EMAIL && password === ADMIN_PASS) {
           return {
             id: "system-admin",
@@ -133,7 +99,8 @@ export const authOptions: NextAuthOptions = {
             role: "admin",
           };
         }
-        return null; // Strict posture: members login via keys/other routes
+        // Members typically enter via the AccessGate/Proxy route
+        return null;
       },
     }),
   ],
@@ -152,15 +119,15 @@ export const authOptions: NextAuthOptions = {
       const email = token?.email as string | undefined;
       const aol = await resolveAoLClaimsByEmail(email ?? null);
 
-      // Admin escalation
+      // System Admin Escalation (Hard-coded for the root environment user)
       if ((token as any).role === "admin") {
         (token as any).aol = {
           tier: "private",
           innerCircleAccess: true,
           isInternal: true,
           allowPrivate: true,
-          memberId: aol.memberId ?? null,
-          emailHash: aol.emailHash ?? (email ? sha256Hex(email.trim().toLowerCase()) : null),
+          memberId: aol.memberId ?? "admin-root",
+          emailHash: aol.emailHash ?? (email ? sha256Hex(email) : null),
           flags: Array.from(new Set([...(aol.flags ?? []), "admin", "internal"])),
         };
       } else {

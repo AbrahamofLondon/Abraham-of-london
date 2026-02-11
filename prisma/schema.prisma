@@ -250,6 +250,20 @@ model StrategyInquiry {
 // 5. INFRASTRUCTURE & AUDIT
 // ============================================================================
 
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g., "app.version", "security.encryption_mode"
+  value       String
+  type        String   @default("string") // e.g., "string", "boolean", "number"
+  description String?
+  isPublic    Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+}
+
 model SystemAuditLog {
   id       String @id @default(cuid())
   action   String // e.g., "BOARD_MEMO_PRINT", "ADMIN_LOGIN_FAILED"

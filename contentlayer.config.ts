@@ -391,13 +391,26 @@ export const Canon = defineDocumentType(() => ({
 
 export const Download = defineDocumentType(() => ({
   name: "Download",
-  filePathPattern: "downloads/**/*.{md,mdx}",
+  filePathPattern: "downloads/**/*.{md,mdx}", 
   contentType: "mdx",
   fields: {
     ...baseFields,
     ...downloadFields,
+    // Existing extended fields
+    volume: { type: "number", required: false },
+    lastUpdated: { type: "string", required: false },
+    audience: { type: "string", required: false },
     version: { type: "string", required: false },
     institutionalId: { type: "string", required: false },
+    
+    // --- MISSION CRITICAL: Resolving the 76 document errors ---
+    classification: { 
+      type: "enum", 
+      options: ["Unclassified", "Restricted", "Confidential", "Secret", "Top Secret"],
+      default: "Unclassified",
+      required: false 
+    },
+    series: { type: "string", required: false },
   },
   computedFields: createComputedFields("downloads/", "downloads"),
 }));
