@@ -824,33 +824,32 @@ class UnifiedPDFGenerator {
     return { generated, skipped, failed, results };
   }
 
-  private async processPDFFile(entry: ContentRegistryEntry) {
-    const startTime = Date.now();
-    const outputAbsPath = path.join(process.cwd(), 'public', entry.outputPath);
-    
-    try {
-      if (!entry.sourcePath) {
-        throw new Error('No source path');
-      }
+  private async processEntry(entry: ContentRegistryEntry) {
+  const start = Date.now();
+  const dest = path.join(process.cwd(), 'public', entry.outputPath);
+  
+  // NEW: Validate Source Existence and Content
+  if (!fs.existsSync(entry.sourcePath) || fs.statSync(entry.sourcePath).size < 10) {
+    throw new Error(`Source file missing or empty: ${entry.sourcePath}`);
+  }
 
-      fs.mkdirSync(path.dirname(outputAbsPath), { recursive: true });
-      
-      if (!this.options.overwrite && fs.existsSync(outputAbsPath)) {
-        const stats = fs.statSync(outputAbsPath);
-        const valid = IntegratedUniversalConverter.pdfLooksValid(outputAbsPath, this.options.minBytes);
-        
-        if (valid.ok) {
-          const hash = IntegratedUniversalConverter.checksum16(outputAbsPath);
-          return {
-            id: entry.id,
-            success: true,
-            method: 'skip_existing',
-            duration: Date.now() - startTime,
-            size: stats.size,
-            hash: hash || undefined,
-          };
-        }
-      }
-      
-      fs.copyFileSync(entry.sourcePath, outputAbsPath);
-      const stats = fs
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+
+  // Conversion Logic...
+  if (entry.sourceKind === 'pdf') {
+    fs.copyFileSync(entry.sourcePath, dest);
+  } else if (['xlsx', 'xls', 'pptx', 'ppt'].includes(entry.sourceKind)) {
+    await this.convertOffice(entry.sourcePath, dest);
+  } else {
+    await this.convertWeb(entry, dest);
+  }
+
+  // POST-CHECK: Ensure the output is actually a valid PDF (> 8KB)
+  const outStats = fs.statSync(dest);
+  if (outStats.size < 8000) {
+    throw new Error(`Generated PDF is corrupt or too small (${outStats.size} bytes)`);
+  }
+  
+  await this.injectIntegrityHash(dest);
+  console.log(`  \x1b[32m✅ [${entry.sourceKind.toUpperCase()}] ${entry.id} (${Date.now() - start}ms)\x1b[0m`);
+}

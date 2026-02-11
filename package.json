@@ -10,7 +10,6 @@
     "start": "next start",
     "preview": "next start --port 3001",
     "prebuild": "pnpm vault:audit",
-    "build": "contentlayer build && next build",
     "build": "pnpm build:downloads && node scripts/build-manifest-check.mjs && node scripts/build-manifest.mjs && cross-env NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "build:ci": "pnpm prebuild:ci && pnpm build",
     "build:netlify": "pnpm build:ci",
@@ -303,7 +302,8 @@
       "@prisma/client": "6.6.0",
       "prisma": "6.6.0",
       "cookie@<0.7.0": ">=0.7.0",
-      "undici@<6.23.0": ">=6.23.0"
+      "undici@<6.23.0": ">=6.23.0",
+      "axios@<=1.13.4": ">=1.13.5"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
