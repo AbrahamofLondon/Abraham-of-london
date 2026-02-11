@@ -1,12 +1,36 @@
+version: "3.8"
+
 services:
+  # The PDF Engine: Consumes Briefs -> Produces PDFs -> Syncs to Postgres
+  pdf-generator:
+    build: .
+    environment:
+      - DATABASE_URL=postgresql://AbrahamofLondon:du9EDnkurJci7DVfxEhTaYuJZatj8/qLK8dozUFNAzM=@postgres:5432/abraham_of_london
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Mount the output directory to your host so you can access the PDFs
+      - ./public/assets/downloads:/app/public/assets/downloads
+      # Mount your briefs so the generator can find them
+      - ./content/downloads:/app/content/downloads
+      - ./lib/pdf:/app/lib/pdf
+
   postgres:
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: abraham_of_london
       POSTGRES_USER: AbrahamofLondon
-      POSTGRES_PASSWORD: DB_PASSWORD=du9EDnkurJci7DVfxEhTaYuJZatj8/qLK8dozUFNAzM=
+      POSTGRES_PASSWORD: du9EDnkurJci7DVfxEhTaYuJZatj8/qLK8dozUFNAzM=
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U AbrahamofLondon -d abraham_of_london"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./lib/server/inner-circle-schema.sql:/docker-entrypoint-initdb.d/init.sql

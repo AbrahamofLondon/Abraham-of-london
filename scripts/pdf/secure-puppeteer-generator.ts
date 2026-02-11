@@ -1,586 +1,258 @@
-// scripts/pdf/secure-puppeteer-generator.ts - UPDATED WITH BETTER ERROR HANDLING
-import puppeteer from 'puppeteer';
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
+// scripts/pdf/secure-puppeteer-generator.ts
+// – PRODUCTION GRADE, ESM‑SAFE, CI‑SAFE, HARD TIMEOUTS ADDED
+import fs from "fs";
+import path from "path";
+import os from "os";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
+import { marked } from "marked";
+import matter from "gray-matter";
 
-export interface PuppeteerPDFOptions {
-  format?: 'A4' | 'Letter' | 'A3' | 'Legal';
-  margin?: { top: string; right: string; bottom: string; left: string };
-  printBackground?: boolean;
-  displayHeaderFooter?: boolean;
-  headerTemplate?: string;
-  footerTemplate?: string;
+type BrowserStatus = "connected" | "disconnected" | "unknown";
+
+export type PuppeteerPDFOptions = {
+  format?: "A4" | "Letter" | "A3";
   landscape?: boolean;
-  scale?: number;
-  preferCSSPageSize?: boolean;
-  timeout?: number;
-  waitForNetworkIdle?: boolean;
-  emulateMedia?: 'screen' | 'print';
-}
+  printBackground?: boolean;
+  margin?: { top?: string; right?: string; bottom?: string; left?: string };
+  timeoutMs?: number;
+  blockExternalRequests?: boolean;
+  allowFileUrls?: boolean;
+  userAgent?: string;
+  title?: string;
+  headerHTML?: string;
+  footerHTML?: string;
+};
 
-export interface GenerationResult {
-  success: boolean;
+export type SecurePDFResult = {
   filePath: string;
   size: number;
   duration: number;
-  hash?: string;
-}
+  sha256: string;
+  md5: string;
+};
 
-export interface HealthCheckResult {
-  browserStatus: 'connected' | 'disconnected' | 'unknown';
+export type HealthCheckResult = {
+  browserStatus: BrowserStatus;
   puppeteerVersion: string;
   chromeVersion?: string;
   isHealthy: boolean;
+  details?: string;
+};
+
+type CtorOptions = {
+  timeout?: number;      // per‑navigation timeout
+  maxRetries?: number;
+  headless?: boolean;
+  executablePath?: string;
+  args?: string[];
+};
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function yel(s: string) { return `\x1b[33m${s}\x1b[0m`; }
+function grn(s: string) { return `\x1b[32m${s}\x1b[0m`; }
+function red(s: string) { return `\x1b[31m${s}\x1b[0m`; }
+
+function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)); }
+
+function isPdfHeader(buf: Buffer) {
+  return buf?.length >= 4 && buf.subarray(0, 4).toString("utf8") === "%PDF";
+}
+
+function hashFile(absPath: string) {
+  const buf = fs.readFileSync(absPath);
+  return {
+    sha256: crypto.createHash("sha256").update(buf).digest("hex"),
+    md5: crypto.createHash("md5").update(buf).digest("hex"),
+  };
+}
+
+function ensureDir(absFilePath: string) { fs.mkdirSync(path.dirname(absFilePath), { recursive: true }); }
+
+function safeWriteFile(absPath: string, data: Buffer) {
+  ensureDir(absPath);
+  const tmp = `${absPath}.tmp-${Date.now()}`;
+  fs.writeFileSync(tmp, data);
+  fs.renameSync(tmp, absPath);
+}
+
+async function loadPuppeteer(): Promise<any> {
+  try { return await import("puppeteer-core"); }
+  catch { return await import("puppeteer"); }
 }
 
 export class SecurePuppeteerPDFGenerator {
-  private browser: puppeteer.Browser | null = null;
-  private timeout: number;
-  private maxRetries: number;
-  private userAgent: string;
-  private isInitializing: boolean = false;
-  private launchAttempts: number = 0;
-  private maxLaunchAttempts: number = 3;
+  private browser: any | null = null;
+  private launchAttempts = 0;
+  private readonly timeout: number;
+  private readonly maxRetries: number;
+  private readonly headless: boolean;
+  private readonly executablePath?: string;
+  private readonly args: string[];
 
-  constructor(options: {
-    timeout?: number;
-    maxRetries?: number;
-    userAgent?: string;
-  } = {}) {
-    this.timeout = options.timeout || 30000;
-    this.maxRetries = options.maxRetries || 3;
-    this.userAgent = options.userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  constructor(opts: CtorOptions = {}) {
+    this.timeout = opts.timeout ?? 60_000;
+    this.maxRetries = Math.max(0, opts.maxRetries ?? 2);
+    this.headless = opts.headless ?? true;
+    this.executablePath = opts.executablePath;
+    this.args = opts.args ?? [
+      "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage",
+      "--disable-gpu", "--no-zygote", "--font-render-hinting=none",
+    ];
   }
 
   async initialize(): Promise<void> {
-    if (this.browser) {
-      return;
-    }
-
-    if (this.isInitializing) {
-      // Wait for initialization to complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return this.initialize();
-    }
-
-    this.isInitializing = true;
-    this.launchAttempts++;
-
-    try {
-      // Try different launch strategies for Windows
-      const launchOptions: puppeteer.LaunchOptions = {
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=IsolateOrigins,site-per-process',
-          '--window-size=1920,1080',
-          '--single-process',
-          '--no-zygote',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding',
-        ],
-        defaultViewport: {
-          width: 1920,
-          height: 1080,
-        },
-        timeout: this.timeout,
-        protocolTimeout: this.timeout * 2,
-      };
-
-      // Try with executable path if default fails
-      if (this.launchAttempts > 1) {
-        try {
-          // Try to find Chrome/Chromium
-          const possiblePaths = [
-            process.env.PUPPETEER_EXECUTABLE_PATH,
-            'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-            'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-            process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe',
-            process.env.PROGRAMFILES + '\\Google\\Chrome\\Application\\chrome.exe',
-            process.env['PROGRAMFILES(X86)'] + '\\Google\\Chrome\\Application\\chrome.exe',
-          ].filter(Boolean) as string[];
-
-          for (const exePath of possiblePaths) {
-            if (fs.existsSync(exePath)) {
-              launchOptions.executablePath = exePath;
-              console.log(`\x1b[36m🔧 Using Chrome at: ${exePath}\x1b[0m`);
-              break;
-            }
-          }
-        } catch (error) {
-          // Ignore path errors
-        }
-      }
-
-      // Additional args for Windows stability
-      if (process.platform === 'win32') {
-        launchOptions.args.push(
-          '--disable-component-update',
-          '--disable-blink-features=AutomationControlled'
-        );
-      }
-
-      this.browser = await puppeteer.launch(launchOptions);
-      
-      // Set up browser error handling
-      this.browser.on('disconnected', () => {
-        console.warn('\x1b[33m⚠️ Puppeteer browser disconnected\x1b[0m');
-        this.browser = null;
-        this.launchAttempts = 0;
-      });
-
-      console.log(`\x1b[32m✅ Puppeteer initialized successfully (attempt ${this.launchAttempts})\x1b[0m`);
-      this.launchAttempts = 0; // Reset on success
-
-    } catch (error: any) {
-      console.error(`\x1b[31m❌ Failed to initialize Puppeteer (attempt ${this.launchAttempts}):\x1b[0m`, error.message);
-      
-      if (this.launchAttempts < this.maxLaunchAttempts) {
-        console.log(`\x1b[33m🔄 Retrying Puppeteer initialization in 2 seconds...\x1b[0m`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        this.isInitializing = false;
-        return this.initialize();
-      } else {
-        throw new Error(`Failed to initialize Puppeteer after ${this.maxLaunchAttempts} attempts: ${error.message}`);
-      }
-    } finally {
-      this.isInitializing = false;
-    }
-  }
-
-  async generateSecurePDF(
-    htmlContent: string,
-    outputPath: string,
-    options: PuppeteerPDFOptions = {},
-    retryCount: number = 0
-  ): Promise<GenerationResult> {
-    const startTime = Date.now();
-    let page: puppeteer.Page | null = null;
-
-    try {
-      await this.initialize();
-      if (!this.browser) {
-        throw new Error('Browser not initialized');
-      }
-
-      // Create output directory if it doesn't exist
-      const outputDir = path.dirname(outputPath);
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-
-      // Remove existing file if it exists and we're retrying
-      if (retryCount > 0 && fs.existsSync(outputPath)) {
-        fs.unlinkSync(outputPath);
-      }
-
-      page = await this.browser.newPage();
-      
-      // Set secure headers and user agent
-      await page.setUserAgent(this.userAgent);
-      await page.setExtraHTTPHeaders({
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-      });
-
-      // Set page error handling
-      page.on('error', (error) => {
-        console.warn(`\x1b[33m⚠️ Page error: ${error.message}\x1b[0m`);
-      });
-
-      page.on('pageerror', (error) => {
-        console.warn(`\x1b[33m⚠️ Page JS error: ${error.message}\x1b[0m`);
-      });
-
-      // Set content with enhanced HTML structure
-      const enhancedHTML = this.enhanceHTML(htmlContent, options);
-      
-      await page.setContent(enhancedHTML, {
-        waitUntil: options.waitForNetworkIdle ? 'networkidle0' : 'domcontentloaded',
-        timeout: options.timeout || this.timeout,
-      });
-
-      // Wait for any dynamic content
-      if (options.waitForNetworkIdle) {
-        try {
-          await page.waitForNetworkIdle({ timeout: 5000 });
-        } catch {
-          console.warn('\x1b[33m⚠️ Network idle timeout, continuing...\x1b[0m');
-        }
-      }
-
-      // Ensure fonts are loaded
+    if (this.browser) return;
+    const puppeteer = await loadPuppeteer();
+    for (;;) {
       try {
-        await page.evaluate(() => document.fonts.ready);
-      } catch {
-        // Font loading failed, continue anyway
-      }
-
-      // Generate PDF with options
-      const pdfOptions: puppeteer.PDFOptions = {
-        path: outputPath,
-        format: options.format || 'A4',
-        margin: options.margin || { 
-          top: '40px', 
-          right: '30px', 
-          bottom: '40px', 
-          left: '30px' 
-        },
-        printBackground: options.printBackground !== false,
-        displayHeaderFooter: options.displayHeaderFooter || false,
-        landscape: options.landscape || false,
-        scale: options.scale || 1.0,
-        preferCSSPageSize: options.preferCSSPageSize !== false,
-      };
-
-      if (options.headerTemplate) {
-        pdfOptions.headerTemplate = options.headerTemplate;
-      }
-      if (options.footerTemplate) {
-        pdfOptions.footerTemplate = options.footerTemplate;
-      }
-
-      await page.pdf(pdfOptions);
-
-      // Verify PDF was created
-      await new Promise(resolve => setTimeout(resolve, 500)); // Wait for file write
-      
-      if (!fs.existsSync(outputPath)) {
-        throw new Error(`PDF file was not created at ${outputPath}`);
-      }
-
-      const stats = fs.statSync(outputPath);
-      const fileSize = stats.size;
-
-      if (fileSize < 1024) {
-        throw new Error(`PDF file is too small (${fileSize} bytes), likely corrupted`);
-      }
-
-      // Calculate file hash for integrity checking
-      const fileBuffer = fs.readFileSync(outputPath);
-      const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
-
-      const duration = Date.now() - startTime;
-
-      if (retryCount > 0) {
-        console.log(`\x1b[32m✅ PDF generated successfully after ${retryCount} retry(s)\x1b[0m`);
-      }
-
-      return {
-        success: true,
-        filePath: outputPath,
-        size: fileSize,
-        duration,
-        hash,
-      };
-
-    } catch (error: any) {
-      // Clean up corrupted file if it exists
-      if (fs.existsSync(outputPath)) {
-        try {
-          fs.unlinkSync(outputPath);
-        } catch (e) {
-          // Ignore cleanup errors
+        this.launchAttempts++;
+        if (this.launchAttempts > this.maxRetries + 1) {
+          throw new Error(`Launch retries exhausted`);
         }
-      }
-
-      // Clean up page if it exists
-      if (page) {
-        try {
-          await page.close();
-        } catch (e) {
-          // Ignore page close errors during retry
-        }
-      }
-
-      // Retry logic
-      if (retryCount < this.maxRetries) {
-        const delay = 1000 * (retryCount + 1);
-        console.warn(`\x1b[33m⚠️ Retrying PDF generation in ${delay}ms (${retryCount + 1}/${this.maxRetries}): ${error.message}\x1b[0m`);
-        
-        // Reset browser if it's in a bad state
-        if (error.message.includes('Protocol error') || error.message.includes('Session closed')) {
-          console.warn('\x1b[33m⚠️ Browser in bad state, closing and retrying...\x1b[0m');
-          await this.close();
-        }
-        
-        // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, delay));
-        
-        return this.generateSecurePDF(htmlContent, outputPath, options, retryCount + 1);
-      }
-
-      throw new Error(`Failed to generate PDF after ${this.maxRetries} attempts: ${error.message}`);
-
-    } finally {
-      if (page) {
-        try {
-          await page.close();
-        } catch (error) {
-          console.warn('\x1b[33m⚠️ Failed to close page:\x1b[0m', error.message);
-        }
+        const launchOpts: any = { headless: this.headless, args: this.args };
+        if (this.executablePath) launchOpts.executablePath = this.executablePath;
+        this.browser = await puppeteer.launch(launchOpts);
+        return;
+      } catch (e: any) {
+        const backoff = Math.min(2500, 250 * this.launchAttempts);
+        await sleep(backoff);
       }
     }
   }
 
   async healthCheck(): Promise<HealthCheckResult> {
-  try {
-    // Try to initialize but don't throw if it fails
     try {
       await this.initialize();
-    } catch {
-      // Initialization failed, continue with health check
+      const page = await this.browser.newPage();
+      await page.goto("about:blank");
+      const v = await this.browser.version();
+      await page.close();
+      return { browserStatus: "connected", puppeteerVersion: "loaded", chromeVersion: v, isHealthy: true };
+    } catch (e: any) {
+      return { browserStatus: "disconnected", puppeteerVersion: "unknown", isHealthy: false, details: e.message };
     }
-    
-    if (!this.browser) {
-      return {
-        browserStatus: 'disconnected',
-        puppeteerVersion: 'unknown',
-        isHealthy: false,
-      };
-    }
-
-    // Try to create a page to verify browser is working
-    const page = await this.browser.newPage();
-    await page.goto('about:blank', { waitUntil: 'domcontentloaded', timeout: 5000 });
-    const version = await this.browser.version();
-    await page.close();
-
-    return {
-      browserStatus: 'connected',
-      puppeteerVersion: 'unknown', // We'll get this differently
-      chromeVersion: version,
-      isHealthy: true,
-    };
-
-  } catch (error: any) {
-    console.warn(`\x1b[33m⚠️ Health check failed: ${error.message}\x1b[0m`);
-    return {
-      browserStatus: 'unknown',
-      puppeteerVersion: 'unknown',
-      isHealthy: false,
-    };
   }
-}
 
   async close(): Promise<void> {
-    if (this.browser) {
-      try {
-        await this.browser.close();
-      } catch (error: any) {
-        console.warn(`\x1b[33m⚠️ Failed to close browser gracefully: ${error.message}\x1b[0m`);
-      } finally {
-        this.browser = null;
-        this.launchAttempts = 0;
+    if (!this.browser) return;
+    try { await this.browser.close(); } finally { this.browser = null; }
+  }
+
+  async generateSecurePDF(
+    htmlContent: string,
+    outputFilePath: string,
+    options: PuppeteerPDFOptions = {}
+  ): Promise<SecurePDFResult> {
+    const t0 = Date.now();
+    await this.initialize();
+    const absOut = path.isAbsolute(outputFilePath) ? outputFilePath : path.join(process.cwd(), outputFilePath);
+    ensureDir(absOut);
+    const page = await this.browser.newPage();
+
+    // 🔒 HARD TIMEOUTS – prevents hanging
+    page.setDefaultTimeout(options.timeoutMs ?? this.timeout);
+    page.setDefaultNavigationTimeout(options.timeoutMs ?? this.timeout);
+
+    try {
+      if (options.blockExternalRequests !== false) {
+        await page.setRequestInterception(true);
+        page.on("request", (req: any) => {
+          if (req.url().startsWith("http")) return req.abort();
+          req.continue();
+        });
       }
+      const enhanced = this.enhanceHTML(htmlContent, options);
+      await page.setContent(enhanced, {
+        waitUntil: ["domcontentloaded", "networkidle0"],
+        timeout: options.timeoutMs ?? this.timeout,
+      });
+      const pdfBuffer: Buffer = await page.pdf({
+        format: options.format ?? "A4",
+        printBackground: true,
+        margin: options.margin ?? { top: "40px", right: "30px", bottom: "40px", left: "30px" },
+        displayHeaderFooter: Boolean(options.headerHTML || options.footerHTML),
+        headerTemplate: options.headerHTML ?? "<div></div>",
+        footerTemplate: options.footerHTML ?? "<div></div>",
+      });
+      if (!isPdfHeader(pdfBuffer)) throw new Error("Invalid PDF header");
+      safeWriteFile(absOut, pdfBuffer);
+      const { sha256, md5 } = hashFile(absOut);
+      return { filePath: absOut, size: pdfBuffer.length, duration: Date.now() - t0, sha256, md5 };
+    } finally {
+      await page.close();
     }
+  }
+
+  /**
+   * 🎯 ENHANCED: accepts explicit timeoutMs (passed to generateSecurePDF)
+   */
+  async generateFromSource(args: {
+    sourceAbsPath: string;
+    sourceKind: "mdx" | "md" | "html";
+    outputAbsPath: string;
+    quality: "premium" | "enterprise" | "draft";
+    format: "A4" | "Letter" | "A3";
+    title?: string;
+    timeoutMs?: number;   // 👈 ADDED – per‑entry timeout override
+  }): Promise<void> {
+    const { sourceAbsPath, sourceKind, outputAbsPath, format, title, quality, timeoutMs } = args;
+    if (!fs.existsSync(sourceAbsPath)) throw new Error(`Source missing: ${sourceAbsPath}`);
+
+    const docId = path.parse(outputAbsPath).name.toUpperCase();
+    const lastMod = fs.statSync(sourceAbsPath).mtime.toISOString().split('T')[0];
+
+    let htmlBody = "";
+    if (sourceKind === "html") {
+      htmlBody = fs.readFileSync(sourceAbsPath, "utf8");
+    } else {
+      const raw = fs.readFileSync(sourceAbsPath, "utf8");
+      const { content } = matter(raw);
+      const markdownHtml = await marked.parse(content);
+      htmlBody = `
+        <div class="inst-header">
+          <small>Abraham of London — Intelligence Brief</small>
+          <div class="doc-meta">ID: ${docId} | Modified: ${lastMod}</div>
+        </div>
+        ${markdownHtml}
+      `;
+    }
+
+    await this.generateSecurePDF(htmlBody, outputAbsPath, {
+      format,
+      title,
+      blockExternalRequests: true,
+      userAgent: `AOL-Generator/${quality}`,
+      timeoutMs: timeoutMs ?? (quality === "premium" ? 120_000 : 60_000), // quality‑sensitive
+      footerHTML: `
+        <div style="font-family:sans-serif; font-size:8pt; width:100%; text-align:center; color:#999; border-top:1px solid #eee; padding-top:5px;">
+          Abraham of London — Restricted Property — Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+        </div>`,
+    });
   }
 
   private enhanceHTML(htmlContent: string, options: PuppeteerPDFOptions): string {
-    const format = options.format || 'A4';
-    const margin = options.margin || { top: '40px', right: '30px', bottom: '40px', left: '30px' };
-    
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta http-equiv="X-UA-Compatible" content="ie=edge">
-          <title>Generated PDF Document</title>
-          <style>
-            @page {
-              size: ${format};
-              margin: ${margin.top} ${margin.right} ${margin.bottom} ${margin.left};
-            }
-            
-            /* CSS Reset */
-            *, *::before, *::after {
-              box-sizing: border-box;
-              margin: 0;
-              padding: 0;
-            }
-            
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-              line-height: 1.6;
-              color: #333;
-              margin: 0;
-              padding: 0;
-              font-size: 12pt;
-            }
-            
-            /* Typography */
-            h1, h2, h3, h4, h5, h6 {
-              color: #1a1a1a;
-              font-weight: 600;
-              line-height: 1.2;
-              margin-bottom: 0.5em;
-            }
-            
-            h1 { font-size: 24pt; margin-top: 0; }
-            h2 { font-size: 20pt; margin-top: 1.5em; }
-            h3 { font-size: 16pt; margin-top: 1.2em; }
-            h4 { font-size: 14pt; }
-            h5 { font-size: 12pt; }
-            h6 { font-size: 11pt; }
-            
-            p {
-              margin-bottom: 1em;
-              text-align: justify;
-            }
-            
-            /* Lists */
-            ul, ol {
-              margin-left: 2em;
-              margin-bottom: 1em;
-            }
-            
-            li {
-              margin-bottom: 0.5em;
-            }
-            
-            /* Code */
-            code {
-              font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-              font-size: 11pt;
-              background-color: #f5f5f5;
-              padding: 2px 6px;
-              border-radius: 3px;
-            }
-            
-            pre {
-              font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-              font-size: 11pt;
-              background-color: #f5f5f5;
-              padding: 1em;
-              border-radius: 5px;
-              overflow-x: auto;
-              margin: 1em 0;
-            }
-            
-            pre code {
-              background-color: transparent;
-              padding: 0;
-            }
-            
-            /* Blockquotes */
-            blockquote {
-              border-left: 4px solid #0070f3;
-              padding-left: 1em;
-              margin: 1.5em 0;
-              color: #666;
-              font-style: italic;
-            }
-            
-            /* Tables */
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 1.5em 0;
-            }
-            
-            th, td {
-              border: 1px solid #ddd;
-              padding: 10px;
-              text-align: left;
-              vertical-align: top;
-            }
-            
-            th {
-              background-color: #f8f9fa;
-              font-weight: 600;
-            }
-            
-            /* Images */
-            img {
-              max-width: 100%;
-              height: auto;
-              display: block;
-              margin: 1em auto;
-            }
-            
-            /* Print specific styles */
-            @media print {
-              body {
-                font-size: 11pt;
-              }
-              
-              a {
-                color: #333;
-              }
-            }
-            
-            /* Document container */
-            .document-container {
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="document-container">
-            ${htmlContent}
-          </div>
-        </body>
-      </html>
-    `;
-  }
-}
-
-// Export singleton instance
-export const pdfGenerator = new SecurePuppeteerPDFGenerator();
-
-// Example usage
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {
-  async function example() {
-    const generator = new SecurePuppeteerPDFGenerator();
-    
-    try {
-      // Check health
-      const health = await generator.healthCheck();
-      console.log('🏥 Health check:', health);
-      
-      if (health.isHealthy) {
-        // Generate a test PDF
-        const result = await generator.generateSecurePDF(
-          `
-            <h1>Test Document</h1>
-            <p>This is a test PDF generated with enhanced security and formatting.</p>
-          `,
-          './test-output.pdf',
-          {
-            format: 'A4',
-            printBackground: true,
-            margin: { top: '40px', right: '30px', bottom: '40px', left: '30px' },
-          }
-        );
-        
-        console.log('\n\x1b[32m✅ PDF generated successfully!\x1b[0m');
-        console.log(`📄 File: ${result.filePath}`);
-        console.log(`💾 Size: ${(result.size / 1024).toFixed(1)} KB`);
-        console.log(`⏱️  Duration: ${result.duration}ms`);
-      } else {
-        console.log('\x1b[31m❌ Puppeteer is not healthy\x1b[0m');
-      }
-      
-    } catch (error: any) {
-      console.error('\x1b[31m❌ Error:\x1b[0m', error.message);
-    } finally {
-      await generator.close();
+    const quality = options.userAgent?.split('/')[1] || 'premium';
+    let watermarkCss = "";
+    if (quality === "draft" || quality === "enterprise") {
+      watermarkCss = `body::before { content: "${quality.toUpperCase()}"; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 100pt; color: rgba(200, 200, 200, 0.1); z-index: -1; pointer-events: none; font-weight: bold; }`;
     }
+
+    return `<!DOCTYPE html><html><head><style>
+      body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; line-height: 1.7; color: #1a1a1a; font-size: 11pt; padding: 40px; position: relative; }
+      ${watermarkCss}
+      .inst-header { border-bottom: 2px solid #111; margin-bottom: 30px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-end; }
+      .inst-header small { text-transform: uppercase; color: #666; letter-spacing: 1.5px; font-weight: 600; }
+      .doc-meta { font-size: 8pt; color: #999; font-family: monospace; }
+      h1 { font-size: 26pt; margin-top: 0; color: #000; } 
+      h2 { font-size: 18pt; margin-top: 2em; border-left: 4px solid #111; padding-left: 15px; }
+      p { margin-bottom: 1.2em; text-align: justify; hyphens: auto; }
+      table { width: 100%; border-collapse: collapse; margin: 2em 0; font-size: 10pt; }
+      th { background: #111; color: #fff; padding: 12px; text-align: left; text-transform: uppercase; font-size: 9pt; }
+      td { border: 1px solid #eee; padding: 10px; }
+      @page { margin: 60px 40px; }
+    </style></head><body>${htmlContent}</body></html>`;
   }
-  
-  example().catch(console.error);
 }

@@ -1,855 +1,819 @@
-// scripts/pdf/unified-pdf-generator.ts - COMPLETE AND PROPERLY STRUCTURED
-import { Command } from 'commander';
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import crypto from 'crypto';
-import matter from 'gray-matter';
-import os from 'os';
-import { fileURLToPath } from 'url';
-import { SecurePuppeteerPDFGenerator } from './secure-puppeteer-generator';
+// scripts/pdf/unified-pdf-generator.ts
+// ABRAHAM OF LONDON — Unified PDF Generator (Production Grade)
+// - Deterministic scanning + conversion
+// - Hard PDF validation gate
+// - Integrity hashing (sha256 + md5)
+// - Optional Prisma upsert (metadata only)
+// - PER‑FILE LOGGING with index/total and timers (🧾 [1/N] id :: kind → outputPath)
+// - TIMEOUT‑SAFE LibreOffice via spawn + kill (120s per file)
+// - Puppeteer hard navigation timeouts (premium: 120s, draft/enterprise: 60s)
 
-const program = new Command();
+import { Command } from "commander";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import crypto from "crypto";
+import matter from "gray-matter";
+import { spawn } from "child_process";          // 👈 Replaces execFileSync for timeout safety
+import { SecurePuppeteerPDFGenerator } from "./secure-puppeteer-generator";
 
-program
-  .name('unified-pdf-generator')
-  .description('Premium PDF generator with content scanning & enhanced output')
-  .version('3.2.0');
+// =============================================================================
+// TYPES
+// =============================================================================
 
-program
-  .option('-t, --tier <tier>', 'Tier to generate (architect, member, free, all)', 'all')
-  .option('-q, --quality <quality>', 'PDF quality (premium, enterprise, draft)', 'premium')
-  .option('-f, --formats <formats>', 'Formats (A4,Letter,A3,bundle)', 'A4,Letter,A3')
-  .option('-o, --output <output>', 'Output directory', './public/assets/downloads')
-  .option('-c, --clean', 'Clean output before generation', false)
-  .option('-v, --verbose', 'Verbose output', false)
-  .option('--scan-content', 'Scan content/downloads for source files', false)
-  .option('--scan-only', 'Only scan content, don\'t generate', false)
-  .option('--skip-canvas', 'Skip legacy canvas generation', false)
-  .option('--use-puppeteer', 'Use Puppeteer for MDX/HTML generation', true)
-  .option('--use-universal', 'Use Universal Converter for Office/PDF files', true)
-  .option('--strict', 'Fail on conversion errors', false)
-  .option('--overwrite', 'Overwrite existing files', false)
-  .option('--min-bytes <bytes>', 'Minimum PDF size to consider valid', '8000')
-  .option('--no-clean', 'Skip cleaning (safer)', false);
+type Tier = "architect" | "member" | "free" | "all";
+type Quality = "premium" | "enterprise" | "draft";
+type Format = "A4" | "Letter" | "A3" | "bundle";
+type SourceKind = "mdx" | "md" | "xlsx" | "xls" | "pptx" | "ppt" | "pdf" | "html";
+type SourceFrom = "content/downloads" | "lib/pdf";
 
-type Tier = 'architect' | 'member' | 'free' | 'all';
-type Quality = 'premium' | 'enterprise' | 'draft';
-type Format = 'A4' | 'Letter' | 'A3' | 'bundle';
-type SourceKind = 'mdx' | 'md' | 'xlsx' | 'xls' | 'pptx' | 'ppt' | 'pdf' | 'html';
-
-interface GenerationOptions {
-  tier: string;
+type GenerationOptions = {
+  tier: Tier;
   quality: Quality;
   formats: Format[];
-  output: string;
+  outputDirAbs: string;
   clean: boolean;
   verbose: boolean;
   scanContent: boolean;
   scanOnly: boolean;
-  skipCanvas: boolean;
   usePuppeteer: boolean;
   useUniversal: boolean;
   strict: boolean;
   overwrite: boolean;
   minBytes: number;
-}
+  generate: boolean;
+  writeRegistry: boolean;
+  registryOutAbs: string;
+  db: boolean;
+};
 
-interface SourceFile {
+type SourceFile = {
   absPath: string;
   relPath: string;
   kind: SourceKind;
   baseName: string;
   mtimeMs: number;
   size: number;
-  from: 'content/downloads' | 'lib/pdf';
-}
+  from: SourceFrom;
+};
 
-interface ContentRegistryEntry {
+type ContentRegistryEntry = {
   id: string;
   title: string;
   description: string;
   excerpt?: string;
-  outputPath: string;
+  outputPathWeb: string;
+  outputAbsPath: string;
+  sourcePathAbs: string;
+  sourceKind: SourceKind;
+  from: SourceFrom;
   type: string;
   format: string;
   isInteractive: boolean;
   isFillable: boolean;
   category: string;
-  tier: Tier;
+  tier: Exclude<Tier, "all">;
   formats: Format[];
-  fileSize: string;
-  lastModified: string;
   exists: boolean;
+  needsGeneration: boolean;
+  fileSizeBytes: number;
+  fileSizeLabel: string;
+  lastModifiedIso: string;
   tags: string[];
   requiresAuth: boolean;
   version: string;
-  priority?: number;
-  preload?: boolean;
-  placeholder?: string;
+  sha256?: string;
   md5?: string;
-  sourcePath?: string;
-  sourceKind?: SourceKind;
-  needsGeneration: boolean;
+};
+
+type ProcessResult = {
+  id: string;
+  ok: boolean;
+  method: "copy" | "libreoffice" | "puppeteer" | "fallback";
+  durationMs: number;
+  outputBytes?: number;
+  error?: string;
+  sha256?: string;
+  md5?: string;
+};
+
+// =============================================================================
+// PROGRAM CONFIG
+// =============================================================================
+
+const program = new Command();
+
+program
+  .name("unified-pdf-generator")
+  .description("Institutional PDF generator (scan + convert + validate + register + optional DB sync)")
+  .version("4.1.0") // bump version for logging & timeouts
+  .option("-t, --tier <tier>", "Tier filter (architect|member|free|all)", "all")
+  .option("-q, --quality <quality>", "PDF quality (premium|enterprise|draft)", "premium")
+  .option("-f, --formats <formats>", "Formats (A4,Letter,A3)", "A4")
+  .option("-o, --output <output>", "Output directory (relative or abs)", "./public/assets/downloads")
+  .option("--clean", "Clean selected generator artifacts before generation", false)
+  .option("-v, --verbose", "Verbose logging", false)
+  .option("--scan-content", "Scan content/downloads and lib/pdf for sources", false)
+  .option("--scan-only", "Scan only (no generation)", false)
+  .option("--generate", "Generate outputs", true)
+  .option("--use-puppeteer", "Use Puppeteer for MDX/HTML -> PDF", true)
+  .option("--use-universal", "Use Universal Converter (LibreOffice) for Office files", true)
+  .option("--strict", "Fail process if any conversion fails", false)
+  .option("--overwrite", "Overwrite existing PDFs", false)
+  .option("--min-bytes <bytes>", "Minimum bytes for a PDF to be considered valid", "8000")
+  .option("--write-registry", "Write registry JSON to disk", true)
+  .option("--registry-out <file>", "Registry JSON output file", "./public/assets/downloads/_generated.registry.json")
+  .option("--db", "Upsert ContentMetadata in DB (stores file pointer JSON in content field)", false);
+
+// =============================================================================
+// LOGGING UTILITIES
+// =============================================================================
+
+class Log {
+  static dim(s: string) { return `\x1b[90m${s}\x1b[0m`; }
+  static red(s: string) { return `\x1b[31m${s}\x1b[0m`; }
+  static yel(s: string) { return `\x1b[33m${s}\x1b[0m`; }
+  static grn(s: string) { return `\x1b[32m${s}\x1b[0m`; }
+  static cya(s: string) { return `\x1b[36m${s}\x1b[0m`; }
+  static mag(s: string) { return `\x1b[35m${s}\x1b[0m`; }
 }
+
+// =============================================================================
+// COMMON HELPERS
+// =============================================================================
+
+function toAbs(p: string) {
+  return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+}
+
+function normalizeId(baseName: string): string {
+  return String(baseName || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\.mdx?$/i, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function parseFormats(input: string): Format[] {
+  const parts = String(input || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const allowed: Format[] = ["A4", "Letter", "A3", "bundle"];
+  const out: Format[] = [];
+  for (const p of parts) { if (allowed.includes(p as Format)) out.push(p as Format); }
+  return out.length ? out : ["A4"];
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let v = bytes;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+  return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function isPdfHeader(buf: Buffer): boolean {
+  if (!buf || buf.length < 4) return false;
+  return buf.subarray(0, 4).toString("utf8") === "%PDF";
+}
+
+function validatePdf(absPath: string, minBytes: number): { ok: boolean; reason: string; size?: number } {
+  try {
+    const st = fs.statSync(absPath);
+    if (!st.isFile()) return { ok: false, reason: "not a file" };
+    if (st.size < minBytes) return { ok: false, reason: `too small (${st.size} bytes)`, size: st.size };
+    const head = fs.readFileSync(absPath);
+    if (!isPdfHeader(head)) return { ok: false, reason: "missing %PDF header", size: st.size };
+    return { ok: true, reason: "ok", size: st.size };
+  } catch (e: any) {
+    return { ok: false, reason: `cannot read (${e?.message || "unknown"})` };
+  }
+}
+
+function hashFile(absPath: string): { sha256: string; md5: string } {
+  const buf = fs.readFileSync(absPath);
+  return {
+    sha256: crypto.createHash("sha256").update(buf).digest("hex"),
+    md5: crypto.createHash("md5").update(buf).digest("hex"),
+  };
+}
+
+/**
+ * 🕒 TIMEOUT‑SAFE COMMAND EXECUTION
+ * Replaces execFileSync to prevent indefinite hangs.
+ */
+async function runCmdWithTimeout(
+  cmd: string,
+  args: string[],
+  timeoutMs: number
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: "pipe", shell: true });
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new Error(`Command timed out after ${timeoutMs}ms: ${cmd} ${args.join(" ")}`));
+    }, timeoutMs);
+
+    child.on("exit", (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolve();
+      else reject(new Error(`Command failed (code ${code}): ${cmd} ${args.join(" ")}`));
+    });
+
+    child.on("error", (err) => {
+      clearTimeout(timer);
+      reject(new Error(`Spawn error: ${err.message}`));
+    });
+  });
+}
+
+function hasSoffice(): boolean {
+  try {
+    // quick check, not using timeout here because it's fast and synchronous
+    require("child_process").execFileSync("soffice", ["--version"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// =============================================================================
+// CONTENT SCANNER (unchanged)
+// =============================================================================
 
 class ContentScanner {
-  static async discoverFiles(root: string, from: SourceFile["from"], recursive: boolean = true): Promise<SourceFile[]> {
-    if (!fs.existsSync(root)) {
-      console.warn(`\x1b[33m⚠️ Source directory does not exist: ${root}\x1b[0m`);
-      return [];
-    }
-
-    const files: SourceFile[] = [];
-
-    function walk(dir: string) {
-      try {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        
-        for (const entry of entries) {
-          const absPath = path.join(dir, entry.name);
-          
-          if (entry.isDirectory()) {
-            if (recursive) walk(absPath);
-            continue;
-          }
-
-          const ext = path.extname(entry.name).toLowerCase().replace('.', '');
-          let kind = ext as SourceKind;
-          
-          if (ext === 'html' || ext === 'htm') kind = 'html';
-          if (!['mdx', 'md', 'xlsx', 'xls', 'pptx', 'ppt', 'pdf', 'html'].includes(kind)) {
-            continue;
-          }
-
-          const stats = fs.statSync(absPath);
-          const relPath = path.relative(root, absPath);
-          const baseName = path.basename(entry.name, path.extname(entry.name));
-
-          files.push({
-            absPath,
-            relPath,
-            kind,
-            baseName,
-            mtimeMs: stats.mtimeMs,
-            size: stats.size,
-            from,
-          });
-        }
-      } catch (error: any) {
-        console.error(`\x1b[31m❌ Error scanning directory ${dir}: ${error.message}\x1b[0m`);
+  static discover(rootAbs: string, from: SourceFrom, recursive = true): SourceFile[] {
+    if (!fs.existsSync(rootAbs)) return [];
+    const out: SourceFile[] = [];
+    const allowed = new Set(["mdx", "md", "xlsx", "xls", "pptx", "ppt", "pdf", "html", "htm"]);
+    const walk = (dir: string) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const ent of entries) {
+        const abs = path.join(dir, ent.name);
+        if (ent.isDirectory()) { if (recursive) walk(abs); continue; }
+        const ext = path.extname(ent.name).toLowerCase().replace(".", "");
+        if (!allowed.has(ext)) continue;
+        const kind: SourceKind = ext === "htm" ? "html" : (ext as SourceKind);
+        const st = fs.statSync(abs);
+        out.push({
+          absPath: abs,
+          relPath: path.relative(rootAbs, abs),
+          kind,
+          baseName: path.basename(ent.name, path.extname(ent.name)),
+          mtimeMs: st.mtimeMs,
+          size: st.size,
+          from,
+        });
       }
-    }
-
-    walk(root);
-    return files;
+    };
+    walk(rootAbs);
+    return out;
   }
 
-  static extractMetadata(filePath: string, kind: SourceKind): Record<string, any> {
+  static extractMeta(absPath: string, kind: SourceKind): Record<string, any> {
     try {
-      if (kind === 'mdx' || kind === 'md') {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const { data } = matter(content);
-        return data || {};
+      if (kind === "mdx" || kind === "md") {
+        const raw = fs.readFileSync(absPath, "utf8");
+        return (matter(raw).data || {}) as Record<string, any>;
       }
-      if (kind === 'html') {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const metaTags: Record<string, string> = {};
-        const titleMatch = content.match(/<title>(.*?)<\/title>/i);
-        if (titleMatch) metaTags.title = titleMatch[1];
-        
-        const descriptionMatch = content.match(/<meta name="description" content="(.*?)"/i);
-        if (descriptionMatch) metaTags.description = descriptionMatch[1];
-        
-        return metaTags;
+      if (kind === "html") {
+        const raw = fs.readFileSync(absPath, "utf8");
+        const title = raw.match(/<title>(.*?)<\/title>/i)?.[1];
+        const description = raw.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i)?.[1];
+        return { title, description };
       }
-      const stats = fs.statSync(filePath);
-      return {
-        _fileSize: stats.size,
-        _modified: new Date(stats.mtimeMs).toISOString(),
-        _source: path.basename(filePath),
-      };
-    } catch (error: any) {
-      console.warn(`\x1b[33m⚠️ Could not extract metadata from ${filePath}: ${error.message}\x1b[0m`);
       return {};
-    }
+    } catch { return {}; }
   }
 
-  static detectCategory(id: string, tags: string[] = [], metadata?: Record<string, any>): string {
-    if (metadata?.category) return metadata.category;
-    
-    const tagCategories = ['legacy', 'leadership', 'theology', 'surrender-framework', 'personal-growth', 'organizational', 'tools', 'templates'];
-    for (const tag of tags) {
-      if (tagCategories.includes(tag.toLowerCase())) return tag;
-    }
-    
-    const idLower = id.toLowerCase();
-    if (idLower.includes('legacy') || idLower.includes('architecture')) return 'legacy';
-    if (idLower.includes('leadership') || idLower.includes('management')) return 'leadership';
-    if (idLower.includes('theology') || idLower.includes('scripture')) return 'theology';
-    if (idLower.includes('personal') || idLower.includes('alignment')) return 'personal-growth';
-    if (idLower.includes('board') || idLower.includes('organizational')) return 'organizational';
-    if (idLower.includes('surrender') || idLower.includes('framework')) return 'surrender-framework';
-    if (idLower.includes('template') || idLower.includes('worksheet')) return 'templates';
-    if (idLower.includes('tool') || idLower.includes('calculator')) return 'tools';
-    
-    return 'downloads';
+  static tagsFrom(meta: Record<string, any>): string[] {
+    const raw = meta?.tags;
+    if (Array.isArray(raw)) return raw.map(String).map((s) => s.trim()).filter(Boolean);
+    if (typeof raw === "string") return raw.split(",").map((s) => s.trim()).filter(Boolean);
+    return [];
   }
 
-  static detectTier(id: string, metadata?: Record<string, any>): Tier {
-    if (metadata?.tier && ['architect', 'member', 'free'].includes(metadata.tier)) {
-      return metadata.tier as Tier;
-    }
-    
-    const idLower = id.toLowerCase();
-    if (idLower.includes('premium') || idLower.includes('architect') || idLower.includes('inner-circle')) {
-      return 'architect';
-    }
-    if (idLower.includes('member') || idLower.includes('pro') || idLower.includes('premium')) {
-      return 'member';
-    }
-    if (idLower.includes('free') || idLower.includes('public') || idLower.includes('basic')) {
-      return 'free';
-    }
-    
-    if (idLower.includes('legacy-architecture')) return 'architect';
-    if (idLower.includes('canvas') || idLower.includes('framework')) return 'member';
-    
-    return 'free';
+  static detectCategory(id: string, tags: string[], meta: Record<string, any>): string {
+    if (meta?.category) return String(meta.category);
+    const tagFirst = tags.map((t) => t.toLowerCase());
+    const known = new Set(["legacy","leadership","theology","surrender-framework","personal-growth","organizational","tools","templates"]);
+    for (const t of tagFirst) if (known.has(t)) return t;
+    const s = id.toLowerCase();
+    if (s.includes("legacy") || s.includes("architecture")) return "legacy";
+    if (s.includes("leadership") || s.includes("management")) return "leadership";
+    if (s.includes("theology") || s.includes("scripture")) return "theology";
+    if (s.includes("personal") || s.includes("alignment")) return "personal-growth";
+    if (s.includes("board") || s.includes("organizational")) return "organizational";
+    if (s.includes("surrender") || s.includes("framework")) return "surrender-framework";
+    if (s.includes("template") || s.includes("worksheet")) return "templates";
+    if (s.includes("tool") || s.includes("calculator")) return "tools";
+    return "downloads";
   }
 
-  static generateId(baseName: string): string {
-    return baseName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
+  static detectTier(id: string, meta: Record<string, any>): Exclude<Tier, "all"> {
+    const m = String(meta?.tier || meta?.accessLevel || "").toLowerCase();
+    if (m === "architect" || m === "member" || m === "free") return m;
+    const s = id.toLowerCase();
+    if (s.includes("architect") || s.includes("inner-circle-plus") || s.includes("elite")) return "architect";
+    if (s.includes("member") || s.includes("inner-circle")) return "member";
+    return "free";
   }
 
-  static sourceFileToRegistryEntry(sourceFile: SourceFile): ContentRegistryEntry {
-    const id = ContentScanner.generateId(sourceFile.baseName);
-    const metadata = ContentScanner.extractMetadata(sourceFile.absPath, sourceFile.kind);
-    
-    const tags = Array.isArray(metadata.tags) 
-      ? metadata.tags 
-      : (typeof metadata.tags === 'string' ? metadata.tags.split(',').map(t => t.trim()) : []);
-    
-    const category = ContentScanner.detectCategory(id, tags, metadata);
-    const tier = ContentScanner.detectTier(id, metadata);
-    
-    const title = metadata.title || 
-      sourceFile.baseName.split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    
-    const description = metadata.description || 
-      metadata.excerpt || 
-      `${title} - A resource from Abraham of London`;
-    
-    const outputPath = sourceFile.from === 'content/downloads'
+  static titleFrom(baseName: string, meta: Record<string, any>): string {
+    if (meta?.title) return String(meta.title);
+    return baseName.split("-").map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w)).join(" ");
+  }
+
+  static descriptionFrom(title: string, meta: Record<string, any>): string {
+    return String(meta?.description || meta?.excerpt || `${title} — A resource from Abraham of London`);
+  }
+
+  static outputPathWebFor(from: SourceFrom, id: string): string {
+    return from === "content/downloads"
       ? `/assets/downloads/content-downloads/${id}.pdf`
       : `/assets/downloads/lib-pdf/${id}.pdf`;
-    
-    const outputAbsPath = path.join(process.cwd(), 'public', outputPath);
-    const pdfExists = fs.existsSync(outputAbsPath);
-    
-    let fileSize = '0 KB';
-    if (pdfExists) {
-      const stats = fs.statSync(outputAbsPath);
-      fileSize = this.formatFileSize(stats.size);
-    }
-    
-    let needsGeneration = !pdfExists;
-    if (pdfExists && sourceFile.mtimeMs) {
+  }
+
+  static toRegistryEntry(sf: SourceFile): ContentRegistryEntry {
+    const id = normalizeId(sf.baseName);
+    const meta = this.extractMeta(sf.absPath, sf.kind);
+    const tags = this.tagsFrom(meta);
+    const title = this.titleFrom(sf.baseName, meta);
+    const description = this.descriptionFrom(title, meta);
+    const excerpt = String(meta?.excerpt || "").trim() || (description.length > 140 ? `${description.slice(0, 140)}…` : description);
+    const category = this.detectCategory(id, tags, meta);
+    const tier = this.detectTier(id, meta);
+    const outputPathWeb = this.outputPathWebFor(sf.from, id);
+    const outputAbsPath = path.join(process.cwd(), "public", outputPathWeb);
+    const exists = fs.existsSync(outputAbsPath);
+    const needsGeneration = (() => {
+      if (!exists) return true;
       try {
-        const pdfStats = fs.statSync(outputAbsPath);
-        needsGeneration = sourceFile.mtimeMs > pdfStats.mtimeMs + 1000;
-      } catch {
-        needsGeneration = true;
-      }
-    }
-    
+        const outSt = fs.statSync(outputAbsPath);
+        return sf.mtimeMs > outSt.mtimeMs + 1000;
+      } catch { return true; }
+    })();
+    const outBytes = exists ? fs.statSync(outputAbsPath).size : 0;
+    const format = sf.kind === "pdf" ? "PDF"
+      : (sf.kind === "xlsx" || sf.kind === "xls") ? "EXCEL"
+      : (sf.kind === "pptx" || sf.kind === "ppt") ? "POWERPOINT"
+      : (sf.kind === "html") ? "HTML"
+      : "PDF";
+    const isFillable = id.includes("fillable") || sf.kind === "xlsx" || sf.kind === "xls";
+    const isInteractive = id.includes("interactive") || isFillable;
     return {
-      id,
-      title,
-      description,
-      excerpt: metadata.excerpt || description.substring(0, 120) + '...',
-      outputPath,
-      type: metadata.type || 'tool',
-      format: sourceFile.kind === 'pdf' ? 'PDF' : 
-              (sourceFile.kind === 'xlsx' || sourceFile.kind === 'xls') ? 'EXCEL' :
-              (sourceFile.kind === 'pptx' || sourceFile.kind === 'ppt') ? 'POWERPOINT' :
-              sourceFile.kind === 'html' ? 'HTML' : 'PDF',
-      isInteractive: id.toLowerCase().includes('interactive') || id.toLowerCase().includes('fillable'),
-      isFillable: id.toLowerCase().includes('fillable') || sourceFile.kind === 'xlsx' || sourceFile.kind === 'xls',
-      category,
-      tier,
-      formats: ['A4'],
-      fileSize,
-      lastModified: new Date(sourceFile.mtimeMs).toISOString(),
-      exists: pdfExists,
-      tags,
-      requiresAuth: tier !== 'free',
-      version: metadata.version || '1.0.0',
-      priority: metadata.priority || (tier === 'architect' ? 5 : 10),
-      preload: metadata.preload || false,
-      placeholder: metadata.placeholder,
-      md5: undefined,
-      sourcePath: sourceFile.absPath,
-      sourceKind: sourceFile.kind,
-      needsGeneration,
+      id, title, description, excerpt, outputPathWeb, outputAbsPath,
+      sourcePathAbs: sf.absPath, sourceKind: sf.kind, from: sf.from,
+      type: String(meta?.type || "tool"), format, isInteractive, isFillable,
+      category, tier, formats: ["A4"], exists, needsGeneration,
+      fileSizeBytes: outBytes, fileSizeLabel: formatBytes(outBytes),
+      lastModifiedIso: new Date(sf.mtimeMs).toISOString(),
+      tags, requiresAuth: tier !== "free", version: String(meta?.version || "1.0.0"),
     };
-  }
-
-  static formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-    
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  }
-
-  static async scanAllContent(options: GenerationOptions): Promise<{
-    entries: ContentRegistryEntry[];
-    summary: {
-      total: number;
-      contentFiles: number;
-      libFiles: number;
-      needGeneration: number;
-    };
-  }> {
-    console.log('\n\x1b[1;36m🔍 CONTENT SCANNER\x1b[0m');
-    console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-    
-    const contentDir = path.join(process.cwd(), 'content/downloads');
-    const libDir = path.join(process.cwd(), 'lib/pdf');
-    
-    console.log(`\x1b[36m📂 Scanning: ${contentDir}\x1b[0m`);
-    const contentFiles = await ContentScanner.discoverFiles(contentDir, 'content/downloads', true);
-    
-    console.log(`\x1b[36m📂 Scanning: ${libDir}\x1b[0m`);
-    const libFiles = await ContentScanner.discoverFiles(libDir, 'lib/pdf', true);
-    
-    console.log(`\x1b[32m✅ Found ${contentFiles.length} content files\x1b[0m`);
-    console.log(`\x1b[32m✅ Found ${libFiles.length} library PDF files\x1b[0m`);
-    
-    const allEntries: ContentRegistryEntry[] = [];
-    const existingIds = new Set<string>();
-    
-    for (const file of contentFiles) {
-      try {
-        const entry = ContentScanner.sourceFileToRegistryEntry(file);
-        allEntries.push(entry);
-        existingIds.add(entry.id);
-        if (options.verbose) {
-          console.log(`  \x1b[90m📄 ${file.kind}: ${file.baseName} -> ${entry.id}\x1b[0m`);
-        }
-      } catch (error: any) {
-        console.error(`  \x1b[31m❌ Error processing ${file.absPath}: ${error.message}\x1b[0m`);
-      }
-    }
-    
-    for (const file of libFiles) {
-      const entryId = ContentScanner.generateId(file.baseName);
-      if (existingIds.has(entryId)) {
-        if (options.verbose) {
-          console.log(`  \x1b[33m⚠️  Skipping duplicate: ${file.baseName}\x1b[0m`);
-        }
-        continue;
-      }
-      
-      try {
-        const entry = ContentScanner.sourceFileToRegistryEntry(file);
-        allEntries.push(entry);
-        if (options.verbose) {
-          console.log(`  \x1b[90m📄 ${file.kind}: ${file.baseName} -> ${entry.id}\x1b[0m`);
-        }
-      } catch (error: any) {
-        console.error(`  \x1b[31m❌ Error processing ${file.absPath}: ${error.message}\x1b[0m`);
-      }
-    }
-    
-    const needGeneration = allEntries.filter(e => e.needsGeneration).length;
-    
-    const summary = {
-      total: allEntries.length,
-      contentFiles: contentFiles.length,
-      libFiles: libFiles.length,
-      needGeneration,
-    };
-    
-    console.log(`\n\x1b[32m📊 Scan complete: ${allEntries.length} entries, ${needGeneration} need generation\x1b[0m`);
-    console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-    
-    return { entries: allEntries, summary };
   }
 }
 
-class IntegratedUniversalConverter {
-  static isPdfHeader(buf: Buffer): boolean {
-    if (!buf || buf.length < 4) return false;
-    const head = buf.subarray(0, 4).toString('utf8');
-    return head === '%PDF';
-  }
+// =============================================================================
+// UNIVERSAL CONVERTER (updated with spawn+timeout)
+// =============================================================================
 
-  static pdfLooksValid(absPath: string, minBytes: number): { ok: boolean; reason: string } {
+class UniversalConverter {
+  /**
+   * Convert Office file to PDF with a hard timeout (120s).
+   */
+  static async convertOfficeToPdf(srcAbs: string, destAbs: string): Promise<void> {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "aol-pdf-"));
     try {
-      const st = fs.statSync(absPath);
-      if (st.size < minBytes) return { ok: false, reason: "too small or missing" };
+      fs.mkdirSync(path.dirname(destAbs), { recursive: true });
 
-      const head = fs.readFileSync(absPath, { encoding: null, flag: "r" });
-      if (!this.isPdfHeader(head)) return { ok: false, reason: "missing %PDF header" };
+      // Use timeout‑safe spawn instead of execFileSync
+      await runCmdWithTimeout(
+        "soffice",
+        [
+          "--headless",
+          "--nologo",
+          "--nofirststartwizard",
+          "--convert-to",
+          "pdf",
+          "--outdir",
+          tmpDir,
+          srcAbs,
+        ],
+        120_000 // 2 minutes per file – adjust if needed
+      );
 
-      return { ok: true, reason: "ok" };
-    } catch {
-      return { ok: false, reason: "cannot read file" };
-    }
-  }
-
-  static hasLibreOffice(): boolean {
-    try {
-      execSync('libreoffice --version', { stdio: 'ignore', shell: true });
-      return true;
-    } catch {
-      try {
-        execSync('soffice --version', { stdio: 'ignore', shell: true });
-        return true;
-      } catch {
-        return false;
-      }
-    }
-  }
-
-  static checksum16(filePath: string): string | null {
-    try {
-      const buf = fs.readFileSync(filePath);
-      return crypto.createHash('sha256').update(buf).digest('hex').slice(0, 16);
-    } catch {
-      return null;
-    }
-  }
-
-  static async convertOfficeWithLibreOffice(srcAbsPath: string, outAbsPath: string): Promise<boolean> {
-    try {
-      const tempDir = path.join(os.tmpdir(), 'pdf-conversion');
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
-      if (!fs.existsSync(path.dirname(outAbsPath))) {
-        fs.mkdirSync(path.dirname(outAbsPath), { recursive: true });
-      }
-
-      const cmd = `soffice --headless --convert-to pdf --outdir "${tempDir}" "${srcAbsPath}"`;
-      execSync(cmd, { stdio: 'pipe', shell: true });
-
-      const base = path.basename(srcAbsPath, path.extname(srcAbsPath));
-      const produced = path.join(tempDir, `${base}.pdf`);
+      const base = path.basename(srcAbs, path.extname(srcAbs));
+      const produced = path.join(tmpDir, `${base}.pdf`);
 
       if (!fs.existsSync(produced)) {
-        const pdfs = fs.readdirSync(tempDir).filter((f) => f.toLowerCase().endsWith(".pdf"));
-        if (pdfs.length === 0) throw new Error("LibreOffice produced no PDF output");
-        fs.copyFileSync(path.join(tempDir, pdfs[0]), outAbsPath);
-      } else {
-        fs.copyFileSync(produced, outAbsPath);
+        const pdfs = fs.readdirSync(tmpDir).filter((f) => f.toLowerCase().endsWith(".pdf"));
+        if (!pdfs.length) throw new Error("LibreOffice produced no PDF output");
+        fs.copyFileSync(path.join(tmpDir, pdfs[0]), destAbs);
+        return;
       }
-
-      try {
-        if (fs.existsSync(produced)) fs.unlinkSync(produced);
-      } catch {}
-
-      return true;
-    } catch (error: any) {
-      console.error(`\x1b[31m❌ LibreOffice conversion failed: ${error.message}\x1b[0m`);
-      return false;
+      fs.copyFileSync(produced, destAbs);
+    } finally {
+      try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
     }
   }
 
-  static async convertWithFallback(entry: ContentRegistryEntry, outputPath: string, options: GenerationOptions): Promise<{
-    success: boolean;
-    method: string;
-    error?: string;
-    size?: number;
-  }> {
-    const startTime = Date.now();
-    
-    try {
-      if (!entry.sourcePath) {
-        throw new Error('No source path');
-      }
+  static async createFallbackPdf(entry: ContentRegistryEntry, destAbs: string, note: string): Promise<void> {
+    const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+    fs.mkdirSync(path.dirname(destAbs), { recursive: true });
+    const doc = await PDFDocument.create();
+    const page = doc.addPage([595.28, 841.89]); // A4
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+    page.drawText("Abraham of London — Fallback PDF", { x: 50, y: 780, size: 18, font: bold, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText(entry.title, { x: 50, y: 745, size: 14, font: bold, color: rgb(0.2, 0.2, 0.2), maxWidth: 500 });
+    page.drawText(entry.description.slice(0, 250), { x: 50, y: 715, size: 10, font, color: rgb(0.35, 0.35, 0.35), maxWidth: 500 });
+    const lines = [
+      `ID: ${entry.id}`,
+      `Source: ${path.basename(entry.sourcePathAbs)} (${entry.sourceKind})`,
+      `Tier: ${entry.tier} | Category: ${entry.category}`,
+      `Note: ${note}`,
+      `Generated: ${new Date().toISOString()}`,
+    ];
+    let y = 675;
+    for (const l of lines) { page.drawText(l, { x: 50, y, size: 10, font, color: rgb(0.4, 0.4, 0.4) }); y -= 18; }
+    const bytes = await doc.save();
+    fs.writeFileSync(destAbs, bytes);
+  }
+}
 
-      if (entry.sourceKind === 'pdf') {
-        fs.copyFileSync(entry.sourcePath, outputPath);
-        const stats = fs.statSync(outputPath);
-        const valid = this.pdfLooksValid(outputPath, options.minBytes);
-        
-        if (!valid.ok) {
-          fs.unlinkSync(outputPath);
-          throw new Error(`Invalid PDF: ${valid.reason}`);
+// =============================================================================
+// GENERATOR ENGINE – with logging + per‑entry timeouts
+// =============================================================================
+
+class GeneratorEngine {
+  private opts: GenerationOptions;
+  private puppeteer: SecurePuppeteerPDFGenerator;
+
+  constructor(opts: GenerationOptions) {
+    this.opts = opts;
+    this.puppeteer = new SecurePuppeteerPDFGenerator({ timeout: 90_000, maxRetries: 2 });
+  }
+
+  async run(): Promise<void> {
+    this.banner();
+    const entries = this.opts.scanContent ? this.scanSources() : [];
+    if (this.opts.scanOnly) {
+      this.printScanSummary(entries);
+      if (this.opts.writeRegistry) this.writeRegistry(entries);
+      return;
+    }
+    if (!this.opts.generate) { this.printScanSummary(entries); return; }
+
+    const results = await this.generateAll(entries);
+
+    if (this.opts.writeRegistry) {
+      const byId = new Map(results.map((r) => [r.id, r]));
+      for (const e of entries) {
+        const rr = byId.get(e.id);
+        if (rr?.ok) {
+          e.sha256 = rr.sha256;
+          e.md5 = rr.md5;
+          e.fileSizeBytes = rr.outputBytes || e.fileSizeBytes;
+          e.fileSizeLabel = formatBytes(e.fileSizeBytes);
+          e.exists = true;
+          e.needsGeneration = false;
         }
-        
+      }
+      this.writeRegistry(entries);
+    }
+
+    if (this.opts.db) { await this.syncToDb(entries, results); }
+
+    const failed = results.filter((r) => !r.ok);
+    if (failed.length && this.opts.strict) {
+      console.error(Log.red(`\n❌ STRICT MODE: ${failed.length} failures. Aborting with code 1.\n`));
+      process.exit(1);
+    }
+    console.log(Log.grn(`\n✅ Completed: ${results.filter((r) => r.ok).length} ok, ${failed.length} failed.\n`));
+  }
+
+  private banner() {
+    console.log(Log.mag("\n✨ UNIFIED PDF GENERATOR (Institutional) ✨"));
+    console.log(Log.dim("────────────────────────────────────────────────────────────"));
+    console.log(`${Log.cya("Tier:")} ${this.opts.tier}`);
+    console.log(`${Log.cya("Quality:")} ${this.opts.quality}`);
+    console.log(`${Log.cya("Formats:")} ${this.opts.formats.join(", ")}`);
+    console.log(`${Log.cya("Scan:")} ${this.opts.scanContent ? "ON" : "OFF"}  ${Log.cya("Generate:")} ${this.opts.generate ? "ON" : "OFF"}`);
+    console.log(`${Log.cya("Puppeteer:")} ${this.opts.usePuppeteer ? "ON" : "OFF"}  ${Log.cya("LibreOffice:")} ${this.opts.useUniversal ? "ON" : "OFF"}`);
+    console.log(`${Log.cya("Overwrite:")} ${this.opts.overwrite ? "YES" : "NO"}  ${Log.cya("Strict:")} ${this.opts.strict ? "YES" : "NO"}`);
+    console.log(`${Log.cya("Min bytes:")} ${this.opts.minBytes}`);
+    console.log(`${Log.cya("Output:")} ${this.opts.outputDirAbs}`);
+    console.log(Log.dim("────────────────────────────────────────────────────────────\n"));
+    fs.mkdirSync(this.opts.outputDirAbs, { recursive: true });
+  }
+
+  private scanSources(): ContentRegistryEntry[] {
+    const contentDir = path.join(process.cwd(), "content", "downloads");
+    const libDir = path.join(process.cwd(), "lib", "pdf");
+    console.log(Log.cya(`🔍 Scanning ${contentDir}`));
+    const a = ContentScanner.discover(contentDir, "content/downloads", true);
+    console.log(Log.cya(`🔍 Scanning ${libDir}`));
+    const b = ContentScanner.discover(libDir, "lib/pdf", true);
+    const all = [...a, ...b];
+    const map = new Map<string, SourceFile>();
+    for (const sf of all) {
+      const id = normalizeId(sf.baseName);
+      if (!map.has(id)) map.set(id, sf);
+      else {
+        const existing = map.get(id)!;
+        if (existing.from === "lib/pdf" && sf.from === "content/downloads") { map.set(id, sf); }
+      }
+    }
+    const entries = Array.from(map.values()).map((sf) => ContentScanner.toRegistryEntry(sf));
+    entries.sort((x, y) => x.title.localeCompare(y.title));
+    this.printScanSummary(entries);
+    return entries;
+  }
+
+  private printScanSummary(entries: ContentRegistryEntry[]) {
+    const need = entries.filter((e) => e.needsGeneration).length;
+    console.log(Log.grn(`📊 Found ${entries.length} sources. ${need} need generation.`));
+    if (this.opts.verbose) {
+      for (const e of entries.slice(0, 30)) { console.log(Log.dim(` - ${e.id} [${e.sourceKind}] tier=${e.tier} needs=${e.needsGeneration}`)); }
+      if (entries.length > 30) console.log(Log.dim(` ... (${entries.length - 30} more)`));
+    }
+  }
+
+  private writeRegistry(entries: ContentRegistryEntry[]) {
+    fs.mkdirSync(path.dirname(this.opts.registryOutAbs), { recursive: true });
+    fs.writeFileSync(this.opts.registryOutAbs, JSON.stringify({ generatedAt: new Date().toISOString(), entries }, null, 2), "utf8");
+    console.log(Log.grn(`🧾 Registry written: ${this.opts.registryOutAbs}`));
+  }
+
+  private tierAllowed(entryTier: Exclude<Tier, "all">): boolean {
+    if (this.opts.tier === "all") return true;
+    return this.opts.tier === entryTier;
+  }
+
+  /**
+   * 🎯 PER‑ENTRY PROCESSING with full logging and timeouts.
+   */
+  private async processEntry(
+    entry: ContentRegistryEntry,
+    index: number,
+    total: number
+  ): Promise<ProcessResult> {
+    const start = Date.now();
+    const dest = entry.outputAbsPath;
+
+    // 📣 REQUIRED LOG LINE – shows exactly which file is being processed
+    console.log(`\n🧾 [${index + 1}/${total}] ${entry.id} :: ${entry.sourceKind} → ${entry.outputPathWeb}`);
+
+    if (!fs.existsSync(entry.sourcePathAbs) || fs.statSync(entry.sourcePathAbs).size < 10) {
+      throw new Error(`Source missing/empty: ${entry.sourcePathAbs}`);
+    }
+
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+
+    try {
+      // --- PDF copy ---
+      if (entry.sourceKind === "pdf") {
+        fs.copyFileSync(entry.sourcePathAbs, dest);
+        this.postValidateOrThrow(dest);
+        const { sha256, md5 } = hashFile(dest);
+        console.log(`   ✅ copy   ⏱️ ${Date.now() - start}ms`);
         return {
-          success: true,
-          method: 'copy',
-          size: stats.size,
+          id: entry.id,
+          ok: true,
+          method: "copy",
+          durationMs: Date.now() - start,
+          outputBytes: fs.statSync(dest).size,
+          sha256,
+          md5,
         };
       }
 
-      if (['xlsx', 'xls', 'pptx', 'ppt'].includes(entry.sourceKind || '')) {
-        const hasLibreOffice = this.hasLibreOffice();
-        
-        if (hasLibreOffice) {
-          const success = await this.convertOfficeWithLibreOffice(entry.sourcePath, outputPath);
-          if (success) {
-            const stats = fs.statSync(outputPath);
-            const valid = this.pdfLooksValid(outputPath, options.minBytes);
-            
-            if (!valid.ok) {
-              fs.unlinkSync(outputPath);
-              throw new Error(`Converted PDF invalid: ${valid.reason}`);
-            }
-            
-            return {
-              success: true,
-              method: 'libreoffice',
-              size: stats.size,
-            };
-          }
+      // --- Office conversion (with hard timeout) ---
+      if (["xlsx", "xls", "pptx", "ppt"].includes(entry.sourceKind)) {
+        if (this.opts.useUniversal && hasSoffice()) {
+          await UniversalConverter.convertOfficeToPdf(entry.sourcePathAbs, dest);
+          this.postValidateOrThrow(dest);
+          const { sha256, md5 } = hashFile(dest);
+          console.log(`   ✅ libreoffice   ⏱️ ${Date.now() - start}ms`);
+          return {
+            id: entry.id,
+            ok: true,
+            method: "libreoffice",
+            durationMs: Date.now() - start,
+            outputBytes: fs.statSync(dest).size,
+            sha256,
+            md5,
+          };
         }
-        
-        console.log(`  \x1b[33m⚠️  LibreOffice not available, using fallback for ${entry.sourceKind}\x1b[0m`);
-        return this.createFallbackPDF(entry, outputPath, `${entry.sourceKind?.toUpperCase()} Document`);
+        // Fallback if soffice not available
+        await UniversalConverter.createFallbackPdf(entry, dest, "LibreOffice not available.");
+        this.postValidateOrThrow(dest);
+        const { sha256, md5 } = hashFile(dest);
+        console.log(`   ⚠️ fallback (office)   ⏱️ ${Date.now() - start}ms`);
+        return {
+          id: entry.id,
+          ok: true,
+          method: "fallback",
+          durationMs: Date.now() - start,
+          outputBytes: fs.statSync(dest).size,
+          sha256,
+          md5,
+        };
       }
 
-      throw new Error(`Unsupported file type: ${entry.sourceKind}`);
-
-    } catch (error: any) {
-      return {
-        success: false,
-        method: 'universal-converter',
-        error: error.message,
-      };
-    }
-  }
-
-  static async createFallbackPDF(entry: ContentRegistryEntry, outputPath: string, docType: string): Promise<{
-    success: boolean;
-    method: string;
-    error?: string;
-    size?: number;
-  }> {
-    try {
-      const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
-      
-      const doc = await PDFDocument.create();
-      const page = doc.addPage([595.28, 841.89]);
-      
-      const font = await doc.embedFont(StandardFonts.Helvetica);
-      const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-      
-      const fileName = entry.sourcePath ? path.basename(entry.sourcePath) : entry.id;
-      
-      page.drawText(`${docType} - Fallback PDF`, {
-        x: 50,
-        y: 750,
-        size: 24,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-      
-      page.drawText(`File: ${fileName}`, {
-        x: 50,
-        y: 700,
-        size: 14,
-        font: font,
-        color: rgb(0.3, 0.3, 0.3),
-      });
-      
-      page.drawText(entry.title, {
-        x: 50,
-        y: 670,
-        size: 16,
-        font: fontBold,
-        color: rgb(0.2, 0.2, 0.2),
-        maxWidth: 500,
-      });
-      
-      page.drawText(entry.description.substring(0, 200) + '...', {
-        x: 50,
-        y: 640,
-        size: 10,
-        font: font,
-        color: rgb(0.4, 0.4, 0.4),
-        maxWidth: 500,
-      });
-      
-      const metadata = [
-        `ID: ${entry.id}`,
-        `Type: ${entry.type}`,
-        `Tier: ${entry.tier}`,
-        `Category: ${entry.category}`,
-        `Source: ${entry.sourceKind || 'unknown'}`,
-        `Generated: ${new Date().toLocaleDateString()}`,
-      ];
-      
-      metadata.forEach((line, i) => {
-        page.drawText(line, {
-          x: 50,
-          y: 600 - (i * 20),
-          size: 10,
-          font: font,
-          color: rgb(0.4, 0.4, 0.4),
+      // --- MDX / HTML -> PDF via Puppeteer (with quality‑sensitive timeout) ---
+      if ((entry.sourceKind === "mdx" || entry.sourceKind === "md" || entry.sourceKind === "html") && this.opts.usePuppeteer) {
+        // premium = 120s, others = 60s (enterprise/draft)
+        const timeoutMs = this.opts.quality === "premium" ? 120_000 : 60_000;
+        await this.puppeteer.generateFromSource({
+          sourceAbsPath: entry.sourcePathAbs,
+          sourceKind: entry.sourceKind,
+          outputAbsPath: dest,
+          quality: this.opts.quality,
+          format: "A4",
+          title: entry.title,
+          timeoutMs,   // 👈 pass per‑entry timeout
         });
-      });
-      
-      const pdfBytes = await doc.save();
-      fs.writeFileSync(outputPath, pdfBytes);
-      const stats = fs.statSync(outputPath);
-      
+        this.postValidateOrThrow(dest);
+        const { sha256, md5 } = hashFile(dest);
+        console.log(`   ✅ puppeteer   ⏱️ ${Date.now() - start}ms`);
+        return {
+          id: entry.id,
+          ok: true,
+          method: "puppeteer",
+          durationMs: Date.now() - start,
+          outputBytes: fs.statSync(dest).size,
+          sha256,
+          md5,
+        };
+      }
+
+      // --- Fallback for any other case ---
+      await UniversalConverter.createFallbackPdf(entry, dest, "No renderer configured.");
+      this.postValidateOrThrow(dest);
+      const { sha256, md5 } = hashFile(dest);
+      console.log(`   ⚠️ fallback   ⏱️ ${Date.now() - start}ms`);
       return {
-        success: true,
-        method: 'fallback',
-        size: stats.size,
+        id: entry.id,
+        ok: true,
+        method: "fallback",
+        durationMs: Date.now() - start,
+        outputBytes: fs.statSync(dest).size,
+        sha256,
+        md5,
       };
     } catch (error: any) {
-      return {
-        success: false,
-        method: 'fallback',
-        error: `Fallback creation failed: ${error.message}`,
-      };
+      // Clean up corrupted output
+      if (fs.existsSync(dest)) { try { fs.unlinkSync(dest); } catch {} }
+      console.log(`   ❌ failed after ${Date.now() - start}ms: ${error.message}`);
+      throw error;
     }
   }
-}
 
-class UnifiedPDFGenerator {
-  private options: GenerationOptions;
-  private puppeteerGenerator: SecurePuppeteerPDFGenerator;
-  private tierMapping: Record<Tier, string> = {
-    architect: 'inner-circle-plus',
-    member: 'inner-circle',
-    free: 'public',
-    all: 'all'
-  };
+  private async generateAll(entries: ContentRegistryEntry[]): Promise<ProcessResult[]> {
+    const candidates = entries
+      .filter((e) => this.tierAllowed(e.tier))
+      .filter((e) => this.opts.overwrite || e.needsGeneration);
 
-  constructor(options: GenerationOptions) {
-    this.options = options;
-    this.puppeteerGenerator = new SecurePuppeteerPDFGenerator({
-      timeout: 60000,
-      maxRetries: 3,
+    console.log(Log.cya(`⚙️ Generating ${candidates.length} assets...`));
+    const results: ProcessResult[] = [];
+
+    for (let i = 0; i < candidates.length; i++) {
+      const entry = candidates[i];
+      try {
+        const result = await this.processEntry(entry, i, candidates.length);
+        results.push(result);
+      } catch (e: any) {
+        results.push({
+          id: entry.id,
+          ok: false,
+          method: "fallback",
+          durationMs: 0,
+          error: e?.message || "unknown error",
+        });
+      }
+    }
+
+    const ok = results.filter((r) => r.ok).length;
+    const fail = results.length - ok;
+    console.log(Log.dim("────────────────────────────────────────────────────────────"));
+    console.log(Log.grn(`✅ Generated OK: ${ok}`));
+    if (fail) console.log(Log.red(`❌ Failed: ${fail}`));
+    console.log(Log.dim("────────────────────────────────────────────────────────────"));
+    return results;
+  }
+
+  private postValidateOrThrow(outAbs: string) {
+    const v = validatePdf(outAbs, this.opts.minBytes);
+    if (!v.ok) {
+      try { fs.unlinkSync(outAbs); } catch {}
+      throw new Error(`Invalid PDF (${v.reason})`);
+    }
+  }
+
+  private async puppeteerRender(entry: ContentRegistryEntry, outAbs: string): Promise<void> {
+    // This is a compatibility wrapper; actual call now in processEntry with timeout
+    await this.puppeteer.generateFromSource({
+      sourceAbsPath: entry.sourcePathAbs,
+      sourceKind: entry.sourceKind,
+      outputAbsPath: outAbs,
+      quality: this.opts.quality,
+      format: "A4",
+      title: entry.title,
+      timeoutMs: this.opts.quality === "premium" ? 120_000 : 60_000,
     });
   }
 
-  async initialize() {
-    console.log('\n\x1b[1;35m✨ UNIFIED PDF GENERATOR v3.2 ✨\x1b[0m');
-    console.log('\x1b[1;37m════════════════════════════════════════════════════════════════════\x1b[0m');
-    
-    console.log(`🎯 \x1b[1;36mTier:\x1b[0m \x1b[1;33m${this.options.tier}\x1b[0m`);
-    console.log(`🏆 \x1b[1;36mQuality:\x1b[0m \x1b[1;33m${this.options.quality}\x1b[0m`);
-    console.log(`📄 \x1b[1;36mFormats:\x1b[0m \x1b[1;33m${this.options.formats.join(', ')}\x1b[0m`);
-    console.log(`🔍 \x1b[1;36mContent Scan:\x1b[0m \x1b[1;33m${this.options.scanContent ? 'ENABLED' : 'DISABLED'}\x1b[0m`);
-    console.log(`🎨 \x1b[1;36mPuppeteer:\x1b[0m \x1b[1;33m${this.options.usePuppeteer ? 'ENABLED' : 'DISABLED'}\x1b[0m`);
-    console.log(`🔄 \x1b[1;36mUniversal Converter:\x1b[0m \x1b[1;33m${this.options.useUniversal ? 'ENABLED' : 'DISABLED'}\x1b[0m`);
-    console.log(`🏗️ \x1b[1;36mCanvas Gen:\x1b[0m \x1b[1;33m${this.options.skipCanvas ? 'SKIP' : 'ENABLED'}\x1b[0m`);
-    console.log(`📁 \x1b[1;36mOutput:\x1b[0m \x1b[1;33m${this.options.output}\x1b[0m`);
-    console.log(`🧹 \x1b[1;36mClean:\x1b[0m \x1b[1;33m${this.options.clean ? 'YES' : 'NO'}\x1b[0m`);
-    console.log(`⚡ \x1b[1;36mOverwrite:\x1b[0m \x1b[1;33m${this.options.overwrite ? 'YES' : 'NO'}\x1b[0m`);
-    console.log(`🔒 \x1b[1;36mStrict:\x1b[0m \x1b[1;33m${this.options.strict ? 'YES' : 'NO'}\x1b[0m`);
-    
-    if (!fs.existsSync(this.options.output)) {
-      fs.mkdirSync(this.options.output, { recursive: true });
-      console.log('\n\x1b[32m📁 Created output directory\x1b[0m');
-    }
-    
-    if (this.options.clean) {
-      await this.cleanOutputSafely();
-    }
-    
-    console.log('\x1b[1;37m════════════════════════════════════════════════════════════════════\x1b[0m');
-  }
-
-  async cleanOutputSafely() {
-    console.log('\n\x1b[33m🧹 Safe cleaning of output directory...\x1b[0m');
-    
-    if (!fs.existsSync(this.options.output)) {
-      console.log('  \x1b[90m📁 Output directory does not exist, skipping clean\x1b[0m');
-      return;
-    }
-    
-    const files = fs.readdirSync(this.options.output);
-    const pdfFiles = files.filter(f => f.toLowerCase().endsWith('.pdf'));
-    
-    if (pdfFiles.length === 0) {
-      console.log('  \x1b[90m✅ No PDF files found to clean\x1b[0m');
-      return;
-    }
-    
-    const tiers = this.options.tier === 'all' 
-      ? ['architect', 'member', 'free'] 
-      : [this.options.tier as Tier];
-    
-    let filesToDelete: string[] = [];
-    
-    for (const tier of tiers) {
-      for (const format of this.options.formats) {
-        const filename = `legacy-architecture-canvas-${format.toLowerCase()}-${this.options.quality}-${tier}.pdf`;
-        if (pdfFiles.includes(filename)) {
-          filesToDelete.push(filename);
-        }
+  private async syncToDb(entries: ContentRegistryEntry[], results: ProcessResult[]) {
+    console.log(Log.cya("\n🧠 Syncing metadata to DB (ContentMetadata)…"));
+    const { PrismaClient } = await import("@prisma/client");
+    const prisma = new PrismaClient();
+    const byId = new Map(results.map((r) => [r.id, r]));
+    const toUpsert = entries.filter((e) => e.exists || byId.get(e.id)?.ok);
+    let upserted = 0;
+    try {
+      for (const e of toUpsert) {
+        const r = byId.get(e.id);
+        const classification = e.requiresAuth ? "RESTRICTED" : "PUBLIC";
+        const payload = {
+          slug: e.id,
+          title: e.title,
+          contentType: "Briefing",
+          classification,
+          summary: e.description,
+          content: JSON.stringify({
+            outputPathWeb: e.outputPathWeb,
+            fileSizeBytes: r?.outputBytes ?? e.fileSizeBytes,
+            fileSizeLabel: formatBytes(r?.outputBytes ?? e.fileSizeBytes),
+            sha256: r?.sha256,
+            md5: r?.md5,
+            tags: e.tags,
+            category: e.category,
+            tier: e.tier,
+            sourceKind: e.sourceKind,
+            sourceFrom: e.from,
+            version: e.version,
+            generatedAt: new Date().toISOString(),
+          }),
+        };
+        await prisma.contentMetadata.upsert({
+          where: { slug: payload.slug },
+          create: payload as any,
+          update: payload as any,
+        });
+        upserted++;
       }
-    }
-    
-    let cleaned = 0;
-    let skipped = 0;
-    
-    for (const filename of filesToDelete) {
-      try {
-        const filePath = path.join(this.options.output, filename);
-        const stats = fs.statSync(filePath);
-        const fileAgeMinutes = (Date.now() - stats.mtimeMs) / (1000 * 60);
-        
-        if (fileAgeMinutes > 5) {
-          const tempBackup = path.join(os.tmpdir(), 'pdf-backup', filename);
-          fs.mkdirSync(path.dirname(tempBackup), { recursive: true });
-          fs.copyFileSync(filePath, tempBackup);
-          
-          fs.unlinkSync(filePath);
-          if (this.options.verbose) {
-            console.log(`  \x1b[32m✅ Removed: ${filename} (${Math.round(fileAgeMinutes)}min old)\x1b[0m`);
-          }
-          cleaned++;
-        } else {
-          if (this.options.verbose) {
-            console.log(`  \x1b[33m⏭️  Skipped: ${filename} (too recent, ${Math.round(fileAgeMinutes)}min)\x1b[0m`);
-          }
-          skipped++;
-        }
-      } catch (error: any) {
-        console.log(`  \x1b[31m❌ Failed to remove: ${filename} (${error.message})\x1b[0m`);
-      }
-    }
-    
-    if (cleaned > 0 || skipped > 0) {
-      console.log(`  \x1b[90mCleaned ${cleaned} outdated files, skipped ${skipped} recent ones\x1b[0m`);
+      console.log(Log.grn(`✅ DB sync complete. Upserted: ${upserted}`));
+    } finally {
+      await prisma.$disconnect();
     }
   }
-
-  async generateFromContent(entries: ContentRegistryEntry[]): Promise<{
-    generated: number;
-    skipped: number;
-    failed: number;
-    results: Array<{
-      id: string;
-      success: boolean;
-      method: string;
-      duration: number;
-      error?: string;
-      size?: number;
-      hash?: string;
-    }>;
-  }> {
-    console.log('\n\x1b[1;36m🔄 GENERATING FROM CONTENT\x1b[0m');
-    console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-    
-    const toGenerate = this.options.overwrite 
-      ? entries 
-      : entries.filter(entry => entry.needsGeneration);
-    
-    const skipped = entries.length - toGenerate.length;
-    
-    console.log(`\x1b[36m📊 Found ${toGenerate.length} files to generate (${skipped} already exist)\x1b[0m`);
-    
-    const results = [];
-    let generated = 0;
-    let failed = 0;
-    
-    const pdfFiles = toGenerate.filter(e => e.sourceKind === 'pdf');
-    const mdxFiles = toGenerate.filter(e => e.sourceKind === 'mdx' || e.sourceKind === 'md');
-    const htmlFiles = toGenerate.filter(e => e.sourceKind === 'html');
-    const officeFiles = toGenerate.filter(e => 
-      ['xlsx', 'xls', 'pptx', 'ppt'].includes(e.sourceKind || '')
-    );
-    
-    for (const entry of pdfFiles) {
-      const result = await this.processPDFFile(entry);
-      results.push(result);
-      if (result.success) generated++;
-      else failed++;
-    }
-    
-    if (this.options.usePuppeteer && mdxFiles.length > 0) {
-      const puppeteerResults = await this.processWithPuppeteerFallback(mdxFiles, 'mdx');
-      results.push(...puppeteerResults);
-      generated += puppeteerResults.filter(r => r.success).length;
-      failed += puppeteerResults.filter(r => !r.success).length;
-    } else if (mdxFiles.length > 0) {
-      const fallbackResults = await this.processWithUniversalConverter(mdxFiles);
-      results.push(...fallbackResults);
-      generated += fallbackResults.filter(r => r.success).length;
-      failed += fallbackResults.filter(r => !r.success).length;
-    }
-
-    if (this.options.usePuppeteer && htmlFiles.length > 0) {
-      const puppeteerResults = await this.processWithPuppeteerFallback(htmlFiles, 'html');
-      results.push(...puppeteerResults);
-      generated += puppeteerResults.filter(r => r.success).length;
-      failed += puppeteerResults.filter(r => !r.success).length;
-    } else if (htmlFiles.length > 0) {
-      const fallbackResults = await this.processWithUniversalConverter(htmlFiles);
-      results.push(...fallbackResults);
-      generated += fallbackResults.filter(r => r.success).length;
-      failed += fallbackResults.filter(r => !r.success).length;
-    }
-    
-    if (this.options.useUniversal && officeFiles.length > 0) {
-      const converterResults = await this.processWithUniversalConverter(officeFiles);
-      results.push(...converterResults);
-      generated += converterResults.filter(r => r.success).length;
-      failed += converterResults.filter(r => !r.success).length;
-    } else if (officeFiles.length > 0) {
-      const fallbackResults = await this.processWithUniversalConverter(officeFiles);
-      results.push(...fallbackResults);
-      generated += fallbackResults.filter(r => r.success).length;
-      failed += fallbackResults.filter(r => !r.success).length;
-    }
-    
-    console.log(`\n\x1b[32m📊 Content generation: ${generated} generated, ${skipped} skipped, ${failed} failed\x1b[0m`);
-    console.log('\x1b[90m────────────────────────────────────────────────────────────\x1b[0m');
-    
-    return { generated, skipped, failed, results };
-  }
-
-  private async processEntry(entry: ContentRegistryEntry) {
-  const start = Date.now();
-  const dest = path.join(process.cwd(), 'public', entry.outputPath);
-  
-  // NEW: Validate Source Existence and Content
-  if (!fs.existsSync(entry.sourcePath) || fs.statSync(entry.sourcePath).size < 10) {
-    throw new Error(`Source file missing or empty: ${entry.sourcePath}`);
-  }
-
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-
-  // Conversion Logic...
-  if (entry.sourceKind === 'pdf') {
-    fs.copyFileSync(entry.sourcePath, dest);
-  } else if (['xlsx', 'xls', 'pptx', 'ppt'].includes(entry.sourceKind)) {
-    await this.convertOffice(entry.sourcePath, dest);
-  } else {
-    await this.convertWeb(entry, dest);
-  }
-
-  // POST-CHECK: Ensure the output is actually a valid PDF (> 8KB)
-  const outStats = fs.statSync(dest);
-  if (outStats.size < 8000) {
-    throw new Error(`Generated PDF is corrupt or too small (${outStats.size} bytes)`);
-  }
-  
-  await this.injectIntegrityHash(dest);
-  console.log(`  \x1b[32m✅ [${entry.sourceKind.toUpperCase()}] ${entry.id} (${Date.now() - start}ms)\x1b[0m`);
 }
+
+// =============================================================================
+// CLI OPTIONS BUILDER
+// =============================================================================
+
+function buildOptions(): GenerationOptions {
+  const raw = program.parse(process.argv).opts();
+  const tier = String(raw.tier || "all") as Tier;
+  const quality = String(raw.quality || "premium") as Quality;
+  const formats = parseFormats(String(raw.formats || "A4"));
+  const outputDirAbs = toAbs(String(raw.output || "./public/assets/downloads"));
+  const registryOutAbs = toAbs(String(raw.registryOut || "./public/assets/downloads/_generated.registry.json"));
+
+  return {
+    tier: (["architect", "member", "free", "all"].includes(tier) ? tier : "all") as Tier,
+    quality: (["premium", "enterprise", "draft"].includes(quality) ? quality : "premium") as Quality,
+    formats,
+    outputDirAbs,
+    clean: Boolean(raw.clean),
+    verbose: Boolean(raw.verbose),
+    scanContent: Boolean(raw.scanContent),
+    scanOnly: Boolean(raw.scanOnly),
+    usePuppeteer: Boolean(raw.usePuppeteer),
+    useUniversal: Boolean(raw.useUniversal),
+    strict: Boolean(raw.strict),
+    overwrite: Boolean(raw.overwrite),
+    minBytes: Math.max(1000, parseInt(String(raw.minBytes || "8000"), 10) || 8000),
+    generate: Boolean(raw.generate),
+    writeRegistry: Boolean(raw.writeRegistry),
+    registryOutAbs,
+    db: Boolean(raw.db),
+  };
+}
+
+// =============================================================================
+// MAIN ENTRY
+// =============================================================================
+
+(async () => {
+  try {
+    const opts = buildOptions();
+    const engine = new GeneratorEngine(opts);
+    await engine.run();
+  } catch (e: any) {
+    console.error(Log.red(`\nCRITICAL ENGINE FAILURE: ${e?.message || "unknown"}\n`));
+    process.exit(1);
+  }
+})();

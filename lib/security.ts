@@ -1,6 +1,13 @@
+// lib/security.ts — INSTITUTIONAL CRYPTOGRAPHY CORE [V4.1.0]
 import crypto from 'crypto';
 
+/** * Institutional Design Specifications
+ * - Algorithm: AES-256-GCM
+ * - Key Management: Fixed 32-byte Buffer allocation
+ * - IV Length: 16 bytes
+ */
 const ALGORITHM = 'aes-256-gcm';
+
 /** * Institutional Requirement: Ensure the key is exactly 32 bytes.
  * We use Buffer.alloc to guarantee length regardless of the env string.
  */
@@ -19,7 +26,8 @@ export function hashEmail(email: string): string {
 }
 
 /**
- * Encrypts institutional data for private storage
+ * Encrypts institutional data for private storage.
+ * Returns the hex-encoded content, IV, and GCM Authentication Tag.
  */
 export function encryptDocument(text: string) {
   const iv = crypto.randomBytes(IV_LENGTH);
@@ -38,7 +46,8 @@ export function encryptDocument(text: string) {
 }
 
 /**
- * Decrypts data for authorized onboarding sessions
+ * Decrypts data for authorized onboarding sessions.
+ * Reconstructs the cipher state using the stored IV and Auth Tag.
  */
 export function decryptDocument(encryptedText: string, iv: string, authTag: string) {
   const decipher = crypto.createDecipheriv(

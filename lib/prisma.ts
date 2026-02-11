@@ -50,4 +50,4 @@ export const prisma: PrismaClient = (() => {
   return global.__prisma;
 })();
 
-export default prisma;
+export const prisma = new PrismaClient();
