@@ -43,7 +43,8 @@ const whitelist = [
   '/about', 
   '/', 
   '/newsletter',
-  '/canon'
+  '/canon' ,
+  '/resources' 
 ];
 
 /**
