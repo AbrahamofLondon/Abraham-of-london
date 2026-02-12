@@ -291,15 +291,18 @@ export default function BlogPostCard({
   const currentSize = sizeClasses[size];
 
   // Filter and slice tags safely
-  const displayTags = useMemo(() => {
-    if (!showTags || !Array.isArray(post.tags)) return [];
-    
-    return safeSlice(
-      post.tags.filter((t): t is string => isString(t) && t.trim().length > 0),
-      0,
-      3
-    );
-  }, [post.tags, showTags]);
+  // Filter and slice tags safely – now properly typed as string[]
+const displayTags = useMemo(() => {
+  if (!showTags || !Array.isArray(post.tags)) return [];
+  
+  // ✅ Type predicate: filters out non‑strings and narrows type to string[]
+  const validTags = post.tags.filter((t): t is string => 
+    typeof t === 'string' && t.trim().length > 0
+  );
+  
+  // ✅ Explicit generic ensures safeSlice returns string[], not unknown[]
+  return safeSlice<string>(validTags, 0, 3);
+}, [post.tags, showTags]);
 
   // ────────────────────────────────────────────────────────────────────────────
   // HANDLERS

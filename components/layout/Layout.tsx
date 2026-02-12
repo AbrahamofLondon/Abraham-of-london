@@ -8,6 +8,9 @@ import { useRouter } from 'next/router';
 import { Header as PDFHeader } from '@/components/PDFDashboard/Header';
 import { Sidebar as PDFSidebar } from '@/components/PDFDashboard/Sidebar';
 
+// -------------------- Environment‑aware base URL --------------------
+const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+
 // Create a simple Footer component inline
 const Footer = () => (
   <footer className="bg-gray-50 border-t border-gray-200 py-8 mt-12">
@@ -117,6 +120,7 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   const router = useRouter();
   const isInnerCirclePage = router.pathname.startsWith('/inner-circle');
+  const currentUrl = `${BASE_URL}${router.asPath}`;
 
   // Check authentication (simplified - in production use context/state)
   React.useEffect(() => {
@@ -141,7 +145,7 @@ const Layout: React.FC<LayoutProps> = ({
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImage} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://abrahamoflondon.org${router.asPath}`} />
+        <meta property="og:url" content={currentUrl} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -156,7 +160,7 @@ const Layout: React.FC<LayoutProps> = ({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         
         {/* Canonical URL */}
-        <link rel="canonical" href={`https://abrahamoflondon.org${router.asPath}`} />
+        <link rel="canonical" href={currentUrl} />
         
         {/* Structured Data */}
         <script
@@ -166,14 +170,14 @@ const Layout: React.FC<LayoutProps> = ({
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "Abraham of London - Inner Circle",
-              "url": "https://abrahamoflondon.org",
+              "url": BASE_URL,
               "description": description,
               "publisher": {
                 "@type": "Organization",
                 "name": "Abraham of London",
                 "logo": {
                   "@type": "ImageObject",
-                  "url": "https://abrahamoflondon.org/logo.png"
+                  "url": `${BASE_URL}/logo.png`
                 }
               }
             })

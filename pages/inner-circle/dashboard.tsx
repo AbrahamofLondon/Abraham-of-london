@@ -3,16 +3,7 @@ import * as React from "react";
 import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import {
-  BookOpen,
-  Users,
-  ShieldCheck,
-  Lock,
-  RefreshCw,
-  Search,
-  ArrowRight,
-  TrendingUp,
-} from "lucide-react";
+import { BookOpen, ShieldCheck, Lock, RefreshCw, Search, ArrowRight, TrendingUp } from "lucide-react";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast, mapMemberTier, type Tier } from "@/lib/server/auth/tokenStore.postgres";
@@ -23,7 +14,7 @@ import ErrorBoundary from "@/components/error/ErrorBoundary";
 interface DashboardProps {
   access: {
     hasAccess: boolean;
-    userId?: string;
+    userId?: string | null;
     tier: string;
   };
   initialData: {
@@ -50,9 +41,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
     if (!searchTerm) return initialData.content;
     const term = searchTerm.toLowerCase();
     return initialData.content.filter(
-      (item) => 
-        item.title?.toLowerCase().includes(term) || 
-        item.excerpt?.toLowerCase().includes(term)
+      (item) => item.title?.toLowerCase().includes(term) || item.excerpt?.toLowerCase().includes(term)
     );
   }, [searchTerm, initialData.content]);
 
@@ -63,7 +52,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 
   if (error) {
     return (
-      <Layout title="System Error">
+      <Layout title="System Error | Abraham of London">
         <div className="min-h-screen bg-black flex items-center justify-center p-6 text-center">
           <div className="max-w-md">
             <h1 className="text-2xl font-serif font-bold text-red-500 mb-4">Vault Sync Error</h1>
@@ -82,7 +71,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 
   return (
     <ErrorBoundary>
-      <Layout title="Member Dashboard" className="bg-black text-cream">
+      <Layout title="Member Dashboard | Abraham of London" className="bg-black text-cream">
         <main className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             {/* WELCOME HEADER */}
@@ -93,18 +82,25 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
                     {access.tier} Clearance
                   </span>
                   <span className="text-zinc-600 text-xs font-mono italic">
-                    Sync: {new Date(initialData.user.lastLogin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    Sync:{" "}
+                    {initialData.user.lastLogin
+                      ? new Date(initialData.user.lastLogin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                      : "—"}
                   </span>
                 </div>
+
                 <h1 className="font-serif text-4xl md:text-5xl font-bold text-white tracking-tight">The Kingdom Vault</h1>
                 <p className="mt-4 text-zinc-400 max-w-xl text-lg leading-relaxed">
-                  Welcome back, <span className="text-white italic">{initialData.user.name}</span>. Accessing institutional-grade strategic manuscripts.
+                  Welcome back, <span className="text-white italic">{initialData.user.name}</span>. Accessing institutional-grade
+                  strategic manuscripts.
                 </p>
               </div>
+
               <button
                 onClick={handleRefresh}
                 disabled={loading}
                 className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-zinc-400 hover:text-gold"
+                aria-label="Refresh"
               >
                 <RefreshCw size={20} className={loading ? "animate-spin text-gold" : ""} />
               </button>
@@ -144,19 +140,21 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
                         className="group p-8 rounded-[2rem] border border-white/5 bg-zinc-950/40 hover:bg-zinc-900/60 hover:border-gold/20 transition-all flex flex-col h-full relative overflow-hidden"
                       >
                         <div className="absolute top-0 right-0 p-6">
-                           <ArrowRight className="h-5 w-5 text-zinc-800 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+                          <ArrowRight className="h-5 w-5 text-zinc-800 group-hover:text-gold group-hover:translate-x-1 transition-all" />
                         </div>
+
                         <div className="mb-6">
                           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 py-1 px-2 bg-gold/5 rounded border border-gold/10">
                             {item.kind}
                           </span>
                         </div>
+
                         <h3 className="font-serif text-2xl font-bold text-white mb-3 group-hover:text-gold transition-colors leading-tight">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-zinc-500 line-clamp-2 mb-8 flex-grow leading-relaxed">
-                          {item.excerpt}
-                        </p>
+
+                        <p className="text-sm text-zinc-500 line-clamp-2 mb-8 flex-grow leading-relaxed">{item.excerpt}</p>
+
                         <div className="pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
                           <span>{item.date || "Institutional"}</span>
                           <span>{item.readTime || "Classified"}</span>
@@ -166,9 +164,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
                   ) : (
                     <div className="sm:col-span-2 py-32 text-center border border-dashed border-white/10 rounded-[2rem] bg-white/[0.01]">
                       <Lock size={32} className="mx-auto text-zinc-800 mb-4" />
-                      <p className="text-zinc-600 italic font-serif text-lg">
-                        No manuscripts found in the current clearance level.
-                      </p>
+                      <p className="text-zinc-600 italic font-serif text-lg">No manuscripts found in the current clearance level.</p>
                     </div>
                   )}
                 </div>
@@ -235,7 +231,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (!sessionId) {
       return {
         redirect: {
-          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl || "/inner-circle/dashboard")}`,
           permanent: false,
         },
       };
@@ -246,36 +242,55 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (!ctx.session || !ctx.member || !ctx.tier) {
       return {
         redirect: {
-          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl || "/inner-circle/dashboard")}`,
           permanent: false,
         },
       };
     }
 
-    // REQUIRED TIER (choose your actual minimum)
+    // REQUIRED TIER
     const required: Tier = "inner-circle";
     if (!tierAtLeast(ctx.tier, required)) {
       return {
         redirect: {
-          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl || "/inner-circle/dashboard")}`,
           permanent: false,
         },
       };
     }
 
-    // Use the authoritative tier mapping for display
-    const userTier = mapMemberTier(ctx.member.tier); // returns Tier
+    const userTier = mapMemberTier(ctx.member.tier);
     const uiTier =
       userTier === "inner-circle-elite" ? "elite" :
       userTier === "inner-circle-plus" ? "plus" :
       userTier === "inner-circle" ? "basic" :
-      userTier; // fallback
+      String(userTier);
 
-    // TODO: replace stub content with real query
     const content = [
-      { title: "The Builder's Catechism", kind: "Canon", excerpt: "Foundational questions for institutional architects.", href: "/canon/builders-catechism", date: "Jan 2026", readTime: "12m" },
-      { title: "Strategic Frameworks v4.2", kind: "Brief", excerpt: "Board-ready decision matrices and prioritization logic.", href: "/canon/strategic-frameworks", date: "Dec 2025", readTime: "8m" },
-      { title: "Sovereign Governance", kind: "Manuscript", excerpt: "Mechanisms for autonomous household management.", href: "/canon/sovereign-governance", date: "Nov 2025", readTime: "15m" }
+      {
+        title: "The Builder's Catechism",
+        kind: "Canon",
+        excerpt: "Foundational questions for institutional architects.",
+        href: "/canon/builders-catechism",
+        date: "Jan 2026",
+        readTime: "12m",
+      },
+      {
+        title: "Strategic Frameworks v4.2",
+        kind: "Brief",
+        excerpt: "Board-ready decision matrices and prioritization logic.",
+        href: "/canon/strategic-frameworks",
+        date: "Dec 2025",
+        readTime: "8m",
+      },
+      {
+        title: "Sovereign Governance",
+        kind: "Manuscript",
+        excerpt: "Mechanisms for autonomous household management.",
+        href: "/canon/sovereign-governance",
+        date: "Nov 2025",
+        readTime: "15m",
+      },
     ];
 
     return {
@@ -297,7 +312,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
       props: {
         access: { hasAccess: false, tier: "public" },
-        initialData: { content: [], stats: { total: 0, totalViews: 0 }, user: { name: "Member", tier: "public", lastLogin: "" } },
+        initialData: {
+          content: [],
+          stats: { total: 0, totalViews: 0 },
+          user: { name: "Member", tier: "public", lastLogin: "" },
+        },
         error: "Critical Failure: Institutional Vault is currently locked for maintenance.",
       },
     };

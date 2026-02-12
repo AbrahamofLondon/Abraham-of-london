@@ -147,7 +147,7 @@ type Props = {
 // Helpers
 // -------------------------------------------------------------------
 function safeSiteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 }
 
 function cleanSlug(raw: unknown): string {

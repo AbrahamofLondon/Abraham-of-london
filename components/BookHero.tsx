@@ -63,7 +63,7 @@ const getBookFallbackConfig = (props: BookHeroProps): FallbackConfig => {
   return { type, theme, category };
 };
 
-export default function BookHero(props: BookHeroProps): JSX.Element {
+export default function BookHero(props: BookHeroProps): React.ReactElement {
   const {
     title = "",
     subtitle,
@@ -91,8 +91,8 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
 
   const metaBits = [dateLabel, readLabel].filter(Boolean).join(" • ");
 
-  // Ensure title is always a string for the alt attribute
-  const safeTitle = safeString(title, "Untitled Book");
+  // ✅ Safe title: no second argument to safeString, use || for fallback
+  const safeTitle = safeString(title) || "Untitled Book";
   
   // Get fallback configuration
   const fallbackConfig = getBookFallbackConfig(props);
@@ -103,6 +103,16 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
     fallbackConfig,
     loading: "eager",
   });
+
+  // ✅ Filter and slice tags – now properly typed as string[]
+  const validTags = React.useMemo(() => {
+    if (!Array.isArray(tags)) return [];
+    return tags.filter((tag): tag is string => 
+      typeof tag === "string" && tag.trim().length > 0
+    );
+  }, [tags]);
+
+  const displayTags = validTags.slice(0, 5); // No need for safeSlice – already filtered
 
   return (
     <section
@@ -181,14 +191,10 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
             )}
           </div>
 
-          {/* Tags */}
-          {tags && tags.length > 0 && (
+          {/* ✅ Tags – now properly typed, no unknown error */}
+          {displayTags.length > 0 && (
             <div className="mb-6 flex flex-wrap gap-2">
-              {safeSlice(
-                tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0),
-                0,
-                5
-              ).map((tag, index) => (
+              {displayTags.map((tag, index) => (
                 <span
                   key={`${tag}-${index}`}
                   className="rounded-full border border-gray-200/50 bg-gray-100/80 px-3 py-1 text-xs font-light text-gray-600 backdrop-blur-sm dark:border-white/20 dark:bg-white/10 dark:text-gray-300"
@@ -213,28 +219,14 @@ export default function BookHero(props: BookHeroProps): JSX.Element {
               {/* Decorative background */}
               <div className="absolute -right-2 -top-2 h-full w-full rounded-lg bg-softGold/20 transform rotate-2 transition-transform group-hover:rotate-1" />
               
-              {/* Check if CoverFrame exists and use it, otherwise use Image directly */}
-              {CoverFrame ? (
-                <CoverFrame
-                  src={imageProps.src}
-                  alt={imageProps.alt}
-                  aspect={coverAspect}
-                  priority={imageProps.priority}
-                  className="relative z-10 transform transition-transform group-hover:scale-105 shadow-2xl"
-                />
-              ) : (
-                // Fallback to direct Image component if CoverFrame doesn't exist
-                <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-2xl">
-                  <Image
-                    src={imageProps.src}
-                    alt={imageProps.alt}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                    priority={imageProps.priority}
-                    sizes="(min-width: 768px) 224px, 192px"
-                  />
-                </div>
-              )}
+              {/* CoverFrame is always imported – use it directly */}
+              <CoverFrame
+                src={imageProps.src}
+                alt={imageProps.alt}
+                aspect={coverAspect}
+                priority={imageProps.priority}
+                className="relative z-10 transform transition-transform group-hover:scale-105 shadow-2xl"
+              />
               
               {/* Optional blur placeholder */}
               {imageProps.blurDataURL && (

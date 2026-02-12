@@ -104,8 +104,8 @@ const VenturesPage: NextPage = () => {
       description="Applied frameworks across institutional, performance, and development domains."
     >
       <Head>
-        <meta property="og:image" content="https://abrahamoflondon.org/ventures-og.png" />
-        <link rel="canonical" href="https://abrahamoflondon.org/ventures" />
+        <meta property="og:image" content="https://www.abrahamoflondon.org/ventures-og.png" />
+        <link rel="canonical" href="https://www.abrahamoflondon.org/ventures" />
       </Head>
       
       <main className="min-h-screen bg-black text-white">

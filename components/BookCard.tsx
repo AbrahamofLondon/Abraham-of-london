@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 
-import { safeFirstChar, safeSlice, safeCapitalize, safeArraySlice } from "@/lib/utils/safe";
+import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe"; // ✅ removed unused safeArraySlice
 import { getSafeImageProps, getFallbackImage } from "@/lib/image-utils";
 import type { FallbackConfig } from "@/lib/image-utils";
 
@@ -39,7 +39,8 @@ function resolveBookCover(book: BookCardProps): string {
   return BOOK_FALLBACK_COVER;
 }
 
-export default function BookCard(props: BookCardProps): JSX.Element {
+// ✅ Removed explicit : JSX.Element – TypeScript infers it
+export default function BookCard(props: BookCardProps) {
   const { slug, title, subtitle, status, blurb, progress } = props;
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [coverIndex, setCoverIndex] = React.useState(0);

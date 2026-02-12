@@ -148,7 +148,7 @@ export function InnerCircleEmail({
             <Row>
               <Column style={logoColumn}>
                 <Img
-                  src="https://abrahamoflondon.org/logo.png"
+                  src="https://www.abrahamoflondon.org/logo.png"
                   width="40"
                   height="40"
                   alt="Abraham of London"
@@ -321,7 +321,7 @@ export function InnerCircleEmail({
                   LinkedIn
                 </Link>
                 <span style={socialDivider}>•</span>
-                <Link href="https://abrahamoflondon.org" style={socialLink}>
+                <Link href="https://www.abrahamoflondon.org" style={socialLink}>
                   Website
                 </Link>
               </Section>

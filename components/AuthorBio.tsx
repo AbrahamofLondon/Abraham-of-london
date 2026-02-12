@@ -39,12 +39,12 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
     safeString(props.bio) ||
     'Content creator and thought leader sharing insights on business, technology, and innovation.';
 
-  const website = safeUrl(props.website, 'https://abrahamoflondon.org'); // safeUrl supports fallback (2 args)
-  const avatar = safeImageSrc(props.avatar); // safeImageSrc: 1 arg (returns safe string)
+  const website = safeUrl(props.website, 'https://www.abrahamoflondon.org');
+  const avatar = safeImageSrc(props.avatar);
   const social = props.social || {};
 
-  // ✅ safeArray: exactly one argument; then check length for fallback
-  const safeWorks = safeArray(props.works);
+  // 🚀 IMMEDIATE FIX: Cast safeArray result to string[]
+  const safeWorks = safeArray(props.works) as string[];
   const works = safeWorks.length > 0 ? safeWorks : DEFAULT_WORKS;
 
   // ✅ safeFirstChar: exactly one argument; fallback via ||

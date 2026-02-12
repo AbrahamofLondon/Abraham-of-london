@@ -1,27 +1,28 @@
-/* components/blog/BlogSidebar.tsx - INSTITUTIONAL EDITION */
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { 
-  User, 
-  Mail, 
-  Hash, 
-  ListTree, 
-  ShieldCheck, 
+import {
+  User,
+  Mail,
+  Hash,
+  ListTree,
+  ShieldCheck,
   ArrowRight,
   Clock
 } from 'lucide-react';
 
 interface BlogSidebarProps {
-  author: string | null;
-  publishedDate: string;
-  tags: string[];
-  tier?: 'free' | 'member' | 'architect'; // Institutional Tiering
+  author?: string | null;
+  publishedDate?: string;
+  tags?: string[];
+  tier?: 'free' | 'member' | 'architect';
 }
 
 const BlogSidebar: React.FC<BlogSidebarProps> = ({
-  author,
-  publishedDate,
-  tags,
+  author = 'Abraham of London',
+  publishedDate = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }),
+  tags = [],
   tier = 'free'
 }) => {
   return (

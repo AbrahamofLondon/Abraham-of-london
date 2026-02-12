@@ -18,7 +18,7 @@ interface ImageMetadata {
 
 interface FallbackConfig {
   type: "book" | "post" | "avatar" | "project";
-  theme?: "light" | "dark" | "gradient";
+  theme?: "light" | "dark" | "gradient" | "luxury" | "business" | "philosophy" | "deep" | "premium" |"strategy";
   category?: string;
 }
 

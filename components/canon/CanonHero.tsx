@@ -1,4 +1,3 @@
-// components/canon/CanonHero.tsx — GROWN-UP, DISCIPLINED (BLACK + AMBER + ZINC)
 import React from "react";
 import Image from "next/image";
 import {
@@ -8,8 +7,7 @@ import {
   safeArray,
   classNames,
   safeFirstChar,
-  safeSlice,
-} from "@/lib/utils/safe";
+} from "@/lib/utils/safe"; // ✅ removed safeSlice – use native slice
 import { BookOpen, Clock, Download, Calendar, ArrowRight, Sparkles } from "lucide-react";
 
 interface CanonHeroProps {
@@ -24,8 +22,6 @@ interface CanonHeroProps {
   tags?: (string | null | undefined)[];
   author?: string | null;
   publishedDate?: string | Date | null;
-
-  // Optional: allow caller to wire buttons without rewriting hero
   primaryHref?: string;
   secondaryHref?: string;
 }
@@ -37,18 +33,19 @@ const difficultyConfig = {
 } as const;
 
 const CanonHero: React.FC<CanonHeroProps> = (props) => {
-  const title = safeString(props.title, "Manuscript");
+  // ✅ safeString: no fallback argument, use || after
+  const title = safeString(props.title) || "Manuscript";
   const subtitle = safeString(props.subtitle);
-  const description = safeString(
-    props.description,
-    "A disciplined text for builders—strategy, governance, and operational clarity."
-  );
-  const category = safeString(props.category, "Canon");
-  const difficultyKey = safeString(props.difficulty, "beginner").toLowerCase() as keyof typeof difficultyConfig;
+  const description = safeString(props.description) ||
+    "A disciplined text for builders—strategy, governance, and operational clarity.";
+  const category = safeString(props.category) || "Canon";
+  const difficultyKey = (safeString(props.difficulty) || "beginner").toLowerCase() as keyof typeof difficultyConfig;
   const estimatedHours = safeNumber(props.estimatedHours, 0);
-  const version = safeString(props.version, "1.0.0");
-  const author = safeString(props.author, "Abraham of London");
-  const tags = safeArray<string>(props.tags);
+  const version = safeString(props.version) || "1.0.0";
+  const author = safeString(props.author) || "Abraham of London";
+
+  // ✅ safeArray<string> – returns string[]
+  const tags = safeArray<string>(props.tags).filter(Boolean);
 
   const diff = difficultyConfig[difficultyKey] || difficultyConfig.beginner;
 
@@ -124,7 +121,7 @@ const CanonHero: React.FC<CanonHeroProps> = (props) => {
               <div className="flex items-center gap-3 text-zinc-300/90">
                 <div className="h-9 w-9 rounded-full bg-amber-300/10 border border-amber-300/15 flex items-center justify-center">
                   <span className="text-xs font-bold text-amber-200">
-                    {safeFirstChar(author, "A")}
+                    {safeFirstChar(author) || "A"} {/* ✅ fixed */}
                   </span>
                 </div>
                 <span className="font-light">{author}</span>
@@ -136,10 +133,10 @@ const CanonHero: React.FC<CanonHeroProps> = (props) => {
               </div>
             </div>
 
-            {/* Tags */}
-            {tags.length > 0 ? (
+            {/* Tags – ✅ native slice, no safeSlice */}
+            {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
-                {safeSlice(tags, 0, 6).map((tag, index) => (
+                {tags.slice(0, 6).map((tag, index) => (
                   <span
                     key={`${tag}-${index}`}
                     className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
@@ -148,7 +145,7 @@ const CanonHero: React.FC<CanonHeroProps> = (props) => {
                   </span>
                 ))}
               </div>
-            ) : null}
+            )}
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-4 pt-2">
@@ -190,7 +187,6 @@ const CanonHero: React.FC<CanonHeroProps> = (props) => {
                 <div className="h-[440px] md:h-[520px] bg-[radial-gradient(900px_480px_at_25%_0%,rgba(245,158,11,0.14),transparent_55%)]" />
               )}
 
-              {/* Corner accents (subtle) */}
               <div className="pointer-events-none absolute top-0 left-0 h-12 w-12 border-t border-l border-amber-300/35 rounded-tl-2xl" />
               <div className="pointer-events-none absolute bottom-0 right-0 h-12 w-12 border-b border-r border-amber-300/35 rounded-br-2xl" />
             </div>

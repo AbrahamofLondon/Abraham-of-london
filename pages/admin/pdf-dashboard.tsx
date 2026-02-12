@@ -1,27 +1,26 @@
 /* pages/admin/pdf-dashboard.tsx — PDF INTELLIGENCE ENGINE (INTEGRITY MODE) */
-'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { withAdminAuth } from '@/lib/auth/withAdminAuth';
-import { usePDFDashboard } from '@/hooks/usePDFDashboard';
-import { useToast } from '@/hooks/useToast';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { withAdminAuth } from "@/lib/auth/withAdminAuth";
+import { usePDFDashboard } from "@/hooks/usePDFDashboard";
+import { useToast } from "@/hooks/useToast";
 
 // Core Dashboard Components
-import DashboardHeader from '@/components/DashboardHeader';
-import PDFListPanel from '@/components/PDFListPanel';
-import PDFViewerPanel from '@/components/PDFViewerPanel';
-import StatusMessage from '@/components/StatusMessage';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import PDFFilters from '@/components/PDFFilters';
-import DashboardStats from '@/components/DashboardStats';
+import DashboardHeader from "@/components/DashboardHeader";
+import PDFListPanel from "@/components/PDFListPanel";
+import PDFViewerPanel from "@/components/PDFViewerPanel";
+import StatusMessage from "@/components/StatusMessage";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import PDFFilters from "@/components/PDFFilters";
+import DashboardStats from "@/components/DashboardStats";
 import PDFQuickActions from "@/components/PDFQuickActions";
 import PDFActionsBar from "@/components/PDFActionsBar";
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Specialized Data Visualization Modules
-import PDFDataDashboard from '@/components/dashboard/PDFDataDashboard';
-import LiveDataDashboard from '@/components/dashboard/LiveDataDashboard';
+import PDFDataDashboard from "@/components/dashboard/PDFDataDashboard";
+import LiveDataDashboard from "@/components/dashboard/LiveDataDashboard";
 
 interface PDFDashboardProps {
   user?: {
@@ -36,20 +35,16 @@ interface PDFDashboardProps {
 const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
   const router = useRouter();
   const { toast } = useToast();
-  
-  // viewMode controls the high-level UI state (Classic vs Live)
-  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'detail' | 'live'>('grid');
+
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "detail" | "live">("grid");
   const [selectedPDFs, setSelectedPDFs] = useState<Set<string>>(new Set());
 
-  // URL Parameter Synchronization
-  const searchQuery = router.query.search as string || '';
-  const category = router.query.category as string || 'all';
-  const sortBy = router.query.sort as string || 'updatedAt';
-  const sortOrder = router.query.order as 'asc' | 'desc' || 'desc';
+  const searchQuery = (router.query.search as string) || "";
+  const category = (router.query.category as string) || "all";
+  const sortBy = (router.query.sort as string) || "updatedAt";
+  const sortOrder = ((router.query.order as string) === "asc" ? "asc" : "desc") as "asc" | "desc";
 
-  // Primary Hook for Data Orchestration
   const {
-    pdfs,
     filteredPDFs,
     selectedPDF,
     isGenerating,
@@ -73,36 +68,40 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     clearFilters,
     batchDelete,
   } = usePDFDashboard({
-    userId: user?.id || 'anonymous',
+    userId: user?.id || "anonymous",
     initialFilters: {
       search: searchQuery,
       category,
       sortBy,
       sortOrder,
-      status: 'all',
+      status: "all",
     },
   });
 
-  // Persist Filter State to URL
+  // Persist Filter State to URL (clean query — no undefined)
   useEffect(() => {
     const query: Record<string, string> = {};
-    if (filters.search) query.search = filters.search;
-    if (filters.category !== 'all') query.category = filters.category;
-    if (filters.sortBy !== 'updatedAt') query.sort = filters.sortBy;
-    if (filters.sortOrder !== 'desc') query.order = filters.sortOrder;
-    
-    router.push({ pathname: router.pathname, query }, undefined, { shallow: true });
-  }, [filters, router]);
 
-  // Error Feedback
+    if (filters.search) query.search = filters.search;
+    if (filters.category && filters.category !== "all") query.category = filters.category;
+    if (filters.sortBy && filters.sortBy !== "updatedAt") query.sort = filters.sortBy;
+    if (filters.sortOrder && filters.sortOrder !== "desc") query.order = filters.sortOrder;
+
+    // keep existing "live" param if present
+    if (router.query.live === "true") query.live = "true";
+
+    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.search, filters.category, filters.sortBy, filters.sortOrder]);
+
   useEffect(() => {
-    if (error) toast.error('Dashboard Error', error.message);
+    if (error) toast.error("Dashboard Error", error.message);
   }, [error, toast]);
 
   const handleSelectPDF = (pdfId: string) => setSelectedPDFId(pdfId);
 
   const togglePDFSelection = (pdfId: string) => {
-    setSelectedPDFs(prev => {
+    setSelectedPDFs((prev) => {
       const next = new Set(prev);
       next.has(pdfId) ? next.delete(pdfId) : next.add(pdfId);
       return next;
@@ -113,24 +112,31 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
 
   const handleBatchDelete = async () => {
     if (selectedPDFs.size === 0) return;
+
     if (confirm(`Authorize destruction of ${selectedPDFs.size} restricted volumes?`)) {
       try {
         await batchDelete(Array.from(selectedPDFs));
         clearSelection();
-        toast.success('Sequence Complete', `${selectedPDFs.size} records purged.`);
-      } catch (err) {
-        toast.error('Authority Rejected', 'Batch deletion failed.');
+        toast.success("Sequence Complete", `${selectedPDFs.size} records purged.`);
+      } catch {
+        toast.error("Authority Rejected", "Batch deletion failed.");
       }
     }
   };
 
   const toggleLiveView = () => {
-    const newMode = viewMode === 'live' ? 'grid' : 'live';
+    const newMode = viewMode === "live" ? "grid" : "live";
     setViewMode(newMode);
-    router.push({
-      pathname: router.pathname,
-      query: { ...router.query, live: newMode === 'live' ? 'true' : undefined },
-    }, undefined, { shallow: true });
+
+    const query: Record<string, string> = {};
+    if (filters.search) query.search = filters.search;
+    if (filters.category && filters.category !== "all") query.category = filters.category;
+    if (filters.sortBy && filters.sortBy !== "updatedAt") query.sort = filters.sortBy;
+    if (filters.sortOrder && filters.sortOrder !== "desc") query.order = filters.sortOrder;
+
+    if (newMode === "live") query.live = "true";
+
+    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
   };
 
   if (isLoading) {
@@ -145,7 +151,6 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     <ErrorBoundary fallback={<DashboardError onRetry={refreshPDFList} />}>
       <div className="min-h-screen bg-zinc-950 text-white selection:bg-gold/30">
         <div className="max-w-[1600px] mx-auto p-6 md:p-10">
-          
           <DashboardHeader
             title="Intelligence Pipeline"
             subtitle="Abraham of London • Restricted Portfolio Management"
@@ -158,24 +163,19 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
               <button
                 onClick={toggleLiveView}
                 className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
-                  viewMode === 'live' 
-                    ? 'bg-gold border-gold text-black shadow-lg shadow-gold/20' 
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
+                  viewMode === "live"
+                    ? "bg-gold border-gold text-black shadow-lg shadow-gold/20"
+                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
                 }`}
               >
-                {viewMode === 'live' ? 'Exit Live Pulse' : 'Initiate Live Pulse'}
+                {viewMode === "live" ? "Exit Live Pulse" : "Initiate Live Pulse"}
               </button>
             }
           />
 
-          {generationStatus && (
-            <StatusMessage
-              status={generationStatus}
-              onDismiss={() => setGenerationStatus(null)}
-            />
-          )}
+          {generationStatus && <StatusMessage status={generationStatus} onDismiss={() => setGenerationStatus(null)} />}
 
-          {viewMode === 'live' ? (
+          {viewMode === "live" ? (
             <div className="space-y-8 animate-in fade-in duration-700">
               <LiveDataDashboard theme="dark" onPDFSelect={handleSelectPDF} />
               <div className="flex justify-center">
@@ -196,9 +196,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                 onBatchDelete={handleBatchDelete}
                 onClearSelection={clearSelection}
                 isGenerating={isGenerating}
-                additionalButtons={
-                  <div className="h-4 w-px bg-zinc-800 mx-2 hidden sm:block" />
-                }
+                additionalButtons={<div className="h-4 w-px bg-zinc-800 mx-2 hidden sm:block" />}
               />
 
               <div className="mb-10">
@@ -255,11 +253,11 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                         onDeletePDF={() => deletePDF(selectedPDF.id)}
                         onDuplicatePDF={() => duplicatePDF(selectedPDF.id)}
                         onRenamePDF={() => {
-                          const newName = prompt('Enter Institutional Designation:', selectedPDF.title);
+                          const newName = prompt("Enter Institutional Designation:", selectedPDF.title);
                           if (newName) renamePDF(selectedPDF.id, newName);
                         }}
-                        canEdit={user?.permissions.includes('pdf:edit')}
-                        canDelete={user?.permissions.includes('pdf:delete')}
+                        canEdit={!!user?.permissions?.includes("pdf:edit")}
+                        canDelete={!!user?.permissions?.includes("pdf:delete")}
                       />
                     )}
 
@@ -296,7 +294,10 @@ const DashboardError: React.FC<{ onRetry: () => void }> = ({ onRetry }) => (
         The PDF Intelligence System encountered a structural error. Re-authentication may be required.
       </p>
       <div className="flex gap-4 justify-center">
-        <button onClick={onRetry} className="px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all">
+        <button
+          onClick={onRetry}
+          className="px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all"
+        >
           Re-Sync Registry
         </button>
       </div>

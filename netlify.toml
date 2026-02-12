@@ -1,44 +1,38 @@
 # netlify.toml — FINALISED STRATEGIC VERSION (HARDENED FOR ABRAHAM OF LONDON)
 
 [build]
-  # Deterministic installs + Netlify-safe Next build
   command = "pnpm install --frozen-lockfile && pnpm build:netlify"
-  # For Netlify Next runtime, publish root; plugin handles Next output + routing
   publish = "."
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
-  # Increased memory for Contentlayer-heavy builds
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "true"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
 
-  # Lock install behavior
   NETLIFY_USE_PNPM = "true"
-  PNPM_VERSION = "9.15.4"
   PNPM_FLAGS = "--frozen-lockfile"
   NPM_FLAGS = "--version"
 
-# --- Plugins (ordered): Next first, then Emails ---
+  # MUST match package.json packageManager
+  PNPM_VERSION = "10.28.2"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# Netlify Emails: include source templates
 [functions.emails]
   included_files = ["./emails/**"]
 
-# --- Environment Contexts ---
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
   NEXT_OPTIMIZE_FONTS = "true"
-  # Custom optimization preferred over Netlify generic processing
   NEXT_OPTIMIZE_IMAGES = "false"
 
 [context.deploy-preview.environment]
@@ -52,19 +46,13 @@
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
 
-# --- Redirect Strategy: Canonical & Semantic Migration ---
-
 [[redirects]]
-  from = "http://abrahamoflondon.org/*"
+  from = "https://www.abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
-  status = 301
+  status = 200
   force = true
-
-[[redirects]]
-  from = "https://abrahamoflondon.org/*"
-  to = "https://www.abrahamoflondon.org/:splat"
-  status = 301
-  force = true
+  [redirects.conditions]
+    Host = ["abrahamoflondon.org"]
 
 [[redirects]]
   from = "/index.html"
@@ -85,8 +73,6 @@
   from = "/news/:slug"
   to = "/insights/:slug"
   status = 301
-
-# --- Security & Caching Headers ---
 
 [[headers]]
   for = "/*"
@@ -114,7 +100,6 @@
     Content-Type = "application/pdf"
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
-    # Open in-browser instead of forcing download
     Content-Disposition = "inline"
 
 [[headers]]

@@ -5,7 +5,7 @@ import type { ContactInfo, SEOConfig, SiteConfig, SocialLink } from "@/types/con
  * Canonical public site URL.
  * Keep without trailing slash for consistent canonical/og URLs.
  */
-export const PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(
+export const PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_UR_ || "https://www.abrahamoflondon.org").replace(
   /\/+$/,
   "",
 );

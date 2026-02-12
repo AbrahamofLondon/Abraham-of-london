@@ -5,35 +5,27 @@ import Image from "next/image";
 import { useState, useMemo } from "react";
 
 import { safeString } from "@/lib/utils";
-import { safeSlice, safeCapitalize, safeArraySlice } from "@/lib/utils/safe";
+import { safeCapitalize } from "@/lib/utils/safe"; // ✅ removed safeSlice, safeArraySlice
 
 import {
   getSafeImageProps,
   type FallbackConfig,
 } from "@/lib/image-utils";
 
-// FIXED: Made _id optional with a fallback
 interface BookCardBook {
-  // Required fields from Book interface
-  _id?: string; // CHANGED: Made optional
+  _id?: string;
   slug: string;
   title: string;
-  
-  // Optional fields with explicit null/undefined handling
   excerpt?: string | null;
   description?: string | null;
   date?: string | null;
   coverImage?: string | null;
-  
-  // Extended properties
   status?: "published" | "draft" | "archived";
   format?: string | null;
   featured?: boolean;
   tags?: (string | null)[];
   readTime?: string | number | null;
   author?: string | null;
-  
-  // Allow any additional properties that might exist on Book
   [key: string]: unknown;
 }
 
@@ -46,11 +38,9 @@ interface BookCardProps {
 
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
-
   try {
     const date = new Date(dateString);
     if (Number.isNaN(date.getTime())) return "";
-
     return date.toLocaleDateString("en-GB", {
       year: "numeric",
       month: "short",
@@ -63,20 +53,13 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
 
 const getReadTimeText = (readTime: string | number | null | undefined): string => {
   if (!readTime) return "";
-  
-  if (typeof readTime === "number") {
-    return `${readTime} min read`;
-  }
-  
+  if (typeof readTime === "number") return `${readTime} min read`;
   if (typeof readTime === "string") {
-    // Check if it's already formatted
     if (readTime.includes("min")) return readTime;
-    // Try to parse as number
     const num = parseInt(readTime);
     if (!isNaN(num)) return `${num} min read`;
     return readTime;
   }
-  
   return "";
 };
 
@@ -90,31 +73,34 @@ export default function BookCard({
   const [imageError, setImageError] = useState(false);
   const [fallbackIndex, setFallbackIndex] = useState(0);
 
-  // FIXED: Generate a fallback ID if _id is missing
+  // Generate a fallback ID if _id is missing
   const bookWithId = useMemo(() => {
     return {
       ...book,
-      _id: book._id || `book-${book.slug || Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      _id:
+        book._id ||
+        `book-${book.slug || Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     };
   }, [book]);
 
-  // Safely extract all values with defaults
-  const safeTitle = safeString(bookWithId.title, "Untitled Book");
-  const safeExcerpt = safeString(bookWithId.excerpt, "");
+  // ✅ Safe strings with fallback using `||` (second arg is maxLength, not fallback)
+  const safeTitle = safeString(bookWithId.title) || "Untitled Book";
+  const safeExcerpt = safeString(bookWithId.excerpt) || "";
   const safeDate = formatDateSafe(bookWithId.date);
   const safeSlug = safeString(bookWithId.slug);
   const safeAuthor = safeString(bookWithId.author);
   const safeFormat = safeString(bookWithId.format);
   const readTimeText = getReadTimeText(bookWithId.readTime);
-  
+
   // Determine category for fallback images
   const category = useMemo(() => {
-    if (bookWithId.tags && bookWithId.tags.length > 0) {
+    if (Array.isArray(bookWithId.tags) && bookWithId.tags.length > 0) {
       const firstTag = safeString(bookWithId.tags[0]);
       if (firstTag.includes("philosophy")) return "philosophy";
       if (firstTag.includes("business")) return "business";
       if (firstTag.includes("fiction")) return "fiction";
-      if (firstTag.includes("non-fiction") || firstTag.includes("nonfiction")) return "nonFiction";
+      if (firstTag.includes("non-fiction") || firstTag.includes("nonfiction"))
+        return "nonFiction";
     }
     return "default";
   }, [bookWithId.tags]);
@@ -142,8 +128,27 @@ export default function BookCard({
   const handleImageError = () => {
     setImageError(true);
     setImageLoaded(false);
-    setFallbackIndex(prev => prev + 1);
+    setFallbackIndex((prev) => prev + 1);
   };
+
+  // ===== FIXED TAGS SECTION =====
+  // ✅ Filter and slice – returns string[], no safeArraySlice
+  const validTags = useMemo(() => {
+    if (!Array.isArray(bookWithId.tags)) return [];
+    return bookWithId.tags
+      .filter((tag): tag is string => 
+        typeof tag === "string" && tag.trim().length > 0
+      )
+      .slice(0, 3);
+  }, [bookWithId.tags]);
+
+  const remainingTagCount = useMemo(() => {
+    if (!Array.isArray(bookWithId.tags)) return 0;
+    const total = bookWithId.tags.filter(
+      (t): t is string => typeof t === "string" && t.trim().length > 0
+    ).length;
+    return Math.max(0, total - 3);
+  }, [bookWithId.tags]);
 
   // Size-based styling
   const sizeClasses = {
@@ -181,9 +186,7 @@ export default function BookCard({
       <Link href={href} className="block relative z-10 h-full" prefetch={false}>
         <div className="flex h-full flex-col">
           {/* Image container with premium overlay */}
-          <div
-            className={`relative w-full overflow-hidden ${currentSize.image}`}
-          >
+          <div className={`relative w-full overflow-hidden ${currentSize.image}`}>
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
             {/* Loading shimmer */}
@@ -244,9 +247,7 @@ export default function BookCard({
           </div>
 
           {/* Content container */}
-          <div
-            className={`relative flex flex-col flex-1 ${currentSize.content}`}
-          >
+          <div className={`relative flex flex-col flex-1 ${currentSize.content}`}>
             {/* Title with gradient hover effect */}
             <h3
               className={`mb-3 line-clamp-2 font-serif font-light leading-tight text-deepCharcoal transition-colors duration-300 group-hover:text-forest ${currentSize.title}`}
@@ -332,16 +333,10 @@ export default function BookCard({
                 </div>
               </div>
 
-              {/* Tags */}
-              {bookWithId.tags && bookWithId.tags.length > 0 && (
+              {/* ✅ Tags – now properly typed, no 'unknown' error */}
+              {validTags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {safeArraySlice(
-                    bookWithId.tags.filter(
-                      (tag): tag is string => typeof tag === "string" && tag.trim().length > 0
-                    ),
-                    0,
-                    3
-                  ).map((tag, index) => (
+                  {validTags.map((tag, index) => (
                     <span
                       key={`${tag}-${index}`}
                       className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/20 hover:bg-softGold/10 hover:text-softGold"
@@ -350,9 +345,9 @@ export default function BookCard({
                     </span>
                   ))}
 
-                  {bookWithId.tags.filter((t): t is string => typeof t === "string" && t.trim()).length > 3 && (
+                  {remainingTagCount > 0 && (
                     <span className="rounded-full border border-gray-200/50 bg-gray-100/80 px-2 py-1 text-xs font-light text-gray-500 backdrop-blur-sm">
-                      +{bookWithId.tags.filter((t): t is string => typeof t === "string" && t.trim()).length - 3}
+                      +{remainingTagCount}
                     </span>
                   )}
                 </div>

@@ -1,10 +1,7 @@
-// components/canon/CanonResourceCard.tsx
-
 import Link from "next/link";
 import LockClosedIcon from "@/components/icons/LockClosedIcon";
 import InnerCircleBadge from "@/components/InnerCircleBadge";
-import { safeSlice } from "@/lib/utils/safe";
-
+import { safeArray } from "@/lib/utils/safe"; // ✅ removed safeSlice – use native slice
 
 export interface CanonSummary {
   slug: string;
@@ -15,17 +12,14 @@ export interface CanonSummary {
   tags?: string[];
   readTime?: string | null;
   volumeNumber?: string | null;
-  accessLevel?: string | null; // "public" | "inner-circle" | undefined
-  label?: string | null; // e.g. "Volume X", "Campaign", "Featured"
+  accessLevel?: string | null;
+  label?: string | null;
 }
 
 interface CanonResourceCardProps {
   doc: CanonSummary;
-  /** Route to open. If omitted, defaults to `/canon/${slug}`. */
   href?: string;
-  /** Optional override label shown above title. */
   label?: string;
-  /** If true, visually emphasise the card (for hero/featured blocks). */
   highlight?: boolean;
 }
 
@@ -49,12 +43,16 @@ export default function CanonResourceCard({
 
   const targetHref = href || `/canon/${slug}`;
   const isInnerCircle = accessLevel === "inner-circle";
-  const locked = isInnerCircle; // UI lock - real gate is via middleware
+  const locked = isInnerCircle;
 
   const displayLabel =
     label || doc.label || (volumeNumber ? `Volume ${volumeNumber}` : undefined);
 
   const blurb = description || subtitle || "";
+
+  // ✅ safe tags: ensure string[], use native slice
+  const safeTags = safeArray<string>(tags).filter(Boolean);
+  const displayTags = safeTags.slice(0, 3);
 
   return (
     <Link
@@ -100,9 +98,8 @@ export default function CanonResourceCard({
             </h3>
           </div>
 
-          {/* INNER CIRCLE BADGE (if gated) */}
           <InnerCircleBadge
-            accessLevel={accessLevel ?? null} // Convert undefined to null
+            accessLevel={accessLevel ?? null}
             className="shrink-0"
             size="sm"
           />
@@ -123,9 +120,10 @@ export default function CanonResourceCard({
             </span>
           )}
 
-          {tags && tags.length > 0 && (
+          {/* ✅ displayTags is string[], .map works without unknown */}
+          {displayTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {safeSlice(tags, 0, 3).map((tag) => (
+              {displayTags.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-gray-200 px-2 py-0.5 text-[0.65rem] uppercase tracking-[0.12em] dark:border-gray-700"

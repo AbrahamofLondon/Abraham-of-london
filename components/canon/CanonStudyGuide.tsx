@@ -1,4 +1,20 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import {
+  ChevronDown,
+  ChevronRight,
+  Download,
+  FileText,
+  Video,
+  Headphones,
+  Link as LinkIcon,
+  Pencil,
+  Clock,
+  CheckCircle,
+  Circle,
+  Sparkles,
+} from 'lucide-react';
 
 interface StudyMaterial {
   id: string;
@@ -21,167 +37,303 @@ interface CanonStudyGuideProps {
   sections: StudyGuideSection[];
 }
 
-const CanonStudyGuide: React.FC<CanonStudyGuideProps> = ({ sections }) => {
-  const getTypeIcon = (type: StudyMaterial['type']) => {
-    switch (type) {
-      case 'pdf':
-        return <DocumentIcon className="w-5 h-5" />;
-      case 'video':
-        return <VideoIcon className="w-5 h-5" />;
-      case 'audio':
-        return <MusicIcon className="w-5 h-5" />;
-      case 'link':
-        return <LinkIcon className="w-5 h-5" />;
-      case 'exercise':
-        return <PencilIcon className="w-5 h-5" />;
-    }
+// ------------------------------------------------------------------
+// Helper – maps material type to icon & color scheme
+// ------------------------------------------------------------------
+const materialConfig = {
+  pdf: {
+    icon: FileText,
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-300',
+    border: 'border-amber-500/20',
+    hoverBg: 'hover:bg-amber-500/15',
+  },
+  video: {
+    icon: Video,
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-300',
+    border: 'border-blue-500/20',
+    hoverBg: 'hover:bg-blue-500/15',
+  },
+  audio: {
+    icon: Headphones,
+    bg: 'bg-emerald-500/10',
+    text: 'text-emerald-300',
+    border: 'border-emerald-500/20',
+    hoverBg: 'hover:bg-emerald-500/15',
+  },
+  link: {
+    icon: LinkIcon,
+    bg: 'bg-purple-500/10',
+    text: 'text-purple-300',
+    border: 'border-purple-500/20',
+    hoverBg: 'hover:bg-purple-500/15',
+  },
+  exercise: {
+    icon: Pencil,
+    bg: 'bg-rose-500/10',
+    text: 'text-rose-300',
+    border: 'border-rose-500/20',
+    hoverBg: 'hover:bg-rose-500/15',
+  },
+} as const;
+
+export default function CanonStudyGuide({ sections }: CanonStudyGuideProps) {
+  // ------------------------------------------------------------------
+  // State – collapsible sections + completion tracking
+  // ------------------------------------------------------------------
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() =>
+    sections.reduce((acc, s) => ({ ...acc, [s.id]: true }), {})
+  );
+
+  const [completedMaterials, setCompletedMaterials] = useState<Set<string>>(new Set());
+
+  const toggleSection = (sectionId: string) => {
+    setOpenSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
 
-  const getTypeColor = (type: StudyMaterial['type']) => {
-    switch (type) {
-      case 'pdf':
-        return 'bg-red-100 text-red-800';
-      case 'video':
-        return 'bg-blue-100 text-blue-800';
-      case 'audio':
-        return 'bg-green-100 text-green-800';
-      case 'link':
-        return 'bg-purple-100 text-purple-800';
-      case 'exercise':
-        return 'bg-yellow-100 text-yellow-800';
-    }
+  const toggleMaterial = (materialId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCompletedMaterials((prev) => {
+      const next = new Set(prev);
+      if (next.has(materialId)) {
+        next.delete(materialId);
+      } else {
+        next.add(materialId);
+      }
+      return next;
+    });
   };
 
+  const isAllCompleted = (materialIds: string[]) =>
+    materialIds.every((id) => completedMaterials.has(id));
+
+  const sectionProgress = (section: StudyGuideSection) => {
+    const total = section.materials.length;
+    const completed = section.materials.filter((m) => completedMaterials.has(m.id)).length;
+    return { total, completed, percentage: total ? (completed / total) * 100 : 0 };
+  };
+
+  const totalMaterials = sections.reduce((acc, s) => acc + s.materials.length, 0);
+  const totalCompleted = [...completedMaterials].filter((id) =>
+    sections.some((s) => s.materials.some((m) => m.id === id))
+  ).length;
+  const overallProgress = totalMaterials ? (totalCompleted / totalMaterials) * 100 : 0;
+
+  // ------------------------------------------------------------------
+  // Render
+  // ------------------------------------------------------------------
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-8">
+      {/* Header – overall progress */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-6 backdrop-blur-sm">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Study Materials</h2>
-          <p className="text-gray-600">Additional resources to enhance your learning</p>
+          <h2 className="font-serif text-2xl font-semibold text-white flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-amber-400" />
+            Study Intelligence
+          </h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Curated materials to deepen your command
+          </p>
         </div>
-        <button className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
-          Download All
-        </button>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <span className="text-2xl font-bold text-amber-400">
+              {totalCompleted}
+            </span>
+            <span className="text-sm text-zinc-500"> / {totalMaterials}</span>
+          </div>
+          <div className="h-2 w-32 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-700"
+              style={{ width: `${overallProgress}%` }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-8">
-        {sections.map((section) => (
-          <div key={section.id} className="border border-gray-200 rounded-lg overflow-hidden">
-            <div className="bg-gray-50 p-4">
-              <h3 className="font-semibold text-gray-900">{section.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">{section.description}</p>
-            </div>
-            
-            <div className="divide-y divide-gray-200">
-              {section.materials.map((material) => (
-                <a
-                  key={material.id}
-                  href={material.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4">
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${getTypeColor(material.type)}`}>
-                        {getTypeIcon(material.type)}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">{material.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{material.description}</p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className={`px-2 py-1 text-xs font-medium rounded ${getTypeColor(material.type)}`}>
-                            {material.type.toUpperCase()}
-                          </span>
-                          {material.duration && (
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <ClockIcon className="w-3 h-3 mr-1" />
-                              {material.duration}
-                            </span>
+      {/* Sections */}
+      <div className="space-y-4">
+        {sections.map((section) => {
+          const progress = sectionProgress(section);
+          const isOpen = openSections[section.id] ?? true;
+          const allDone = isAllCompleted(section.materials.map((m) => m.id));
+
+          return (
+            <div
+              key={section.id}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-black/20 backdrop-blur-sm transition-all duration-300"
+            >
+              {/* Section header – click to collapse/expand */}
+              <button
+                onClick={() => toggleSection(section.id)}
+                className="flex w-full items-center justify-between gap-4 bg-zinc-900/80 p-5 text-left hover:bg-zinc-900/90 transition-colors"
+                aria-expanded={isOpen}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl font-serif font-semibold text-white">
+                      {section.title}
+                    </span>
+                    {allDone && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 text-[0.65rem] font-medium uppercase tracking-wider text-emerald-300">
+                        <CheckCircle className="h-3 w-3" />
+                        Complete
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-zinc-400">{section.description}</p>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  {/* Mini progress ring */}
+                  <div className="hidden sm:block">
+                    <div className="relative h-12 w-12">
+                      <svg className="h-12 w-12 -rotate-90">
+                        <circle
+                          className="text-white/10"
+                          strokeWidth="3"
+                          stroke="currentColor"
+                          fill="transparent"
+                          r="20"
+                          cx="24"
+                          cy="24"
+                        />
+                        <circle
+                          className="text-amber-400 transition-all duration-700"
+                          strokeWidth="3"
+                          strokeDasharray={2 * Math.PI * 20}
+                          strokeDashoffset={2 * Math.PI * 20 * (1 - progress.percentage / 100)}
+                          strokeLinecap="round"
+                          stroke="currentColor"
+                          fill="transparent"
+                          r="20"
+                          cx="24"
+                          cy="24"
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                        {progress.completed}/{progress.total}
+                      </span>
+                    </div>
+                  </div>
+
+                  {isOpen ? (
+                    <ChevronDown className="h-5 w-5 text-zinc-400" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5 text-zinc-400" />
+                  )}
+                </div>
+              </button>
+
+              {/* Collapsible materials */}
+              {isOpen && (
+                <div className="divide-y divide-white/5">
+                  {section.materials.map((material) => {
+                    const isCompleted = completedMaterials.has(material.id);
+                    const config = materialConfig[material.type];
+                    const Icon = config.icon;
+
+                    return (
+                      <div
+                        key={material.id}
+                        className={`group relative flex items-start gap-4 p-5 transition-colors ${
+                          isCompleted ? 'bg-amber-500/5' : 'hover:bg-white/5'
+                        }`}
+                      >
+                        {/* Completion toggle */}
+                        <button
+                          onClick={(e) => toggleMaterial(material.id, e)}
+                          className="mt-1 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-full"
+                          aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+                        >
+                          {isCompleted ? (
+                            <CheckCircle className="h-5 w-5 text-amber-400" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
                           )}
-                          {material.size && (
-                            <span className="text-xs text-gray-500">{material.size}</span>
-                          )}
+                        </button>
+
+                        {/* Icon + content */}
+                        <div className="flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <div
+                                className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border ${config.border} ${config.bg}`}
+                              >
+                                <Icon className={`h-5 w-5 ${config.text}`} />
+                              </div>
+
+                              <div>
+                                <h4 className="font-medium text-white">{material.title}</h4>
+                                <p className="mt-1 text-sm text-zinc-400">
+                                  {material.description}
+                                </p>
+                                <div className="mt-2 flex flex-wrap items-center gap-3">
+                                  <span
+                                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider ${config.border} ${config.bg} ${config.text}`}
+                                  >
+                                    {material.type}
+                                  </span>
+                                  {material.duration && (
+                                    <span className="flex items-center gap-1 text-xs text-zinc-500">
+                                      <Clock className="h-3 w-3" />
+                                      {material.duration}
+                                    </span>
+                                  )}
+                                  {material.size && (
+                                    <span className="text-xs text-zinc-500">
+                                      {material.size}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Download / View button */}
+                            <a
+                              href={material.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium transition-colors ${config.bg} ${config.text} ${config.hoverBg} border ${config.border}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Download className="h-4 w-4" />
+                              <span className="hidden sm:inline">
+                                {material.type === 'link' ? 'Open' : 'Download'}
+                              </span>
+                            </a>
+                          </div>
                         </div>
                       </div>
+                    );
+                  })}
+
+                  {/* “All complete” celebration banner */}
+                  {allDone && (
+                    <div className="bg-gradient-to-r from-amber-500/10 to-transparent p-4 text-sm text-amber-300 flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      <span>You’ve mastered this section. Exceptional.</span>
                     </div>
-                    <DownloadIcon className="w-5 h-5 text-gray-400" />
-                  </div>
-                </a>
-              ))}
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Study Tips */}
-      <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Study Tips</h3>
-        <ul className="space-y-2">
-          <li className="flex items-start space-x-2">
-            <LightBulbIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">Review materials within 24 hours for better retention</span>
-          </li>
-          <li className="flex items-start space-x-2">
-            <LightBulbIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">Complete exercises to reinforce learning</span>
-          </li>
-          <li className="flex items-start space-x-2">
-            <LightBulbIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-700">Take notes and summarize key concepts</span>
-          </li>
-        </ul>
-      </div>
+      {/* Global “Download All” – only if at least one material exists */}
+      {totalMaterials > 0 && (
+        <div className="flex justify-end pt-4">
+          <button className="group inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25">
+            <Download className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
+            Download All Materials
+          </button>
+        </div>
+      )}
     </div>
   );
-};
-
-const DocumentIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-  </svg>
-);
-
-const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-  </svg>
-);
-
-const MusicIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-  </svg>
-);
-
-const LinkIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-  </svg>
-);
-
-const PencilIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-);
-
-const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const LightBulbIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-  </svg>
-);
-
-export default CanonStudyGuide;
+}

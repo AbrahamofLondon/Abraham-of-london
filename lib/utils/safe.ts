@@ -12,7 +12,6 @@ export function safeString(str: any, maxLength: number = 1000): string {
       return '';
     }
   }
-  // Safe slice for strings
   if (str.length > maxLength) {
     return str.substring(0, maxLength);
   }
@@ -46,24 +45,22 @@ export function capitalize(str: any): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// Alias for compatibility
 export const safeCapitalize = capitalize;
 
 export function isNonEmptyString(str: any): boolean {
   return safeString(str).length > 0;
 }
 
-// Array utilities
-export function safeArray<T>(arr: any): T[] {
-  return Array.isArray(arr) ? arr : [];
+// ✅ FIXED: Array utilities with proper generics
+export function safeArray<T = unknown>(arr: any): T[] {
+  return Array.isArray(arr) ? (arr as T[]) : [];
 }
 
 // ✅ CRITICAL FIX: This is what audit.ts needs
 export function safeSlice<T>(arr: any, start: number, end?: number): T[] {
   if (!Array.isArray(arr)) return [];
   try {
-    // For arrays, use Array.prototype.slice
-    return Array.prototype.slice.call(arr, start, end);
+    return Array.prototype.slice.call(arr, start, end) as T[];
   } catch {
     return [];
   }
@@ -216,7 +213,6 @@ export function toSlug(str: any): string {
 
 // Default export for easy imports
 const safe = {
-  // Core
   safeString,
   safeNumber,
   safeArray,
@@ -225,8 +221,6 @@ const safe = {
   safeImageSrc,
   safeDate,
   safeInteger,
-  
-  // String
   safeTrim,
   safeSubstring,
   safeFirstChar,
@@ -240,25 +234,15 @@ const safe = {
   safeJoin,
   safeReplace,
   toSlug,
-  
-  // Array
   safeSlice,
   safeSliceAlt,
   safeArraySlice,
   safeTrimSlice,
-  
-  // Date
   safeDateSlice,
   formatSafeDate,
-  
-  // Type conversion
   safeParseInt,
   safeParseFloat,
-  
-  // Object
   safeGet,
-  
-  // CSS
   classNames,
 };
 

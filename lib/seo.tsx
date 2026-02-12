@@ -35,7 +35,8 @@ const TWITTER_HANDLE = "@AbrahamOfLondon";
 /* -------------------------------------------------------------------------- */
 
 function getBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org").replace(/\/+$/, "");
+  // ✅ Always default to canonical www
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 }
 
 export function toAbsoluteUrl(input?: string): string | undefined {

@@ -1,63 +1,67 @@
 /* pages/admin/index.tsx — ADMINISTRATIVE CONTROL CENTER */
-import React from 'react';
-import Link from 'next/link';
-import AdminLayout from '@/components/AdminLayout';
-import { 
-  TrendingUp, 
-  FileText, 
-  Users, 
+import React from "react";
+import Link from "next/link";
+import AdminLayout from "@/components/AdminLayout";
+import {
+  TrendingUp,
+  FileText,
+  Users,
   Database,
   AlertCircle,
   CheckCircle2,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+} from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
   const stats = [
     {
-      title: 'Total PDFs',
-      value: '148',
-      change: '+12%',
+      title: "Total PDFs",
+      value: "148",
+      change: "+12%",
       icon: <FileText className="text-blue-500" size={24} />,
-      color: 'bg-blue-50 border-blue-100'
+      color: "bg-blue-50 border-blue-100",
     },
     {
-      title: 'Active Users',
-      value: '42',
-      change: '+5%',
+      title: "Active Users",
+      value: "42",
+      change: "+5%",
       icon: <Users className="text-green-500" size={24} />,
-      color: 'bg-green-50 border-green-100'
+      color: "bg-green-50 border-green-100",
     },
     {
-      title: 'Storage Used',
-      value: '3.2 GB',
-      change: '+8%',
+      title: "Storage Used",
+      value: "3.2 GB",
+      change: "+8%",
       icon: <Database className="text-purple-500" size={24} />,
-      color: 'bg-purple-50 border-purple-100'
+      color: "bg-purple-50 border-purple-100",
     },
     {
-      title: 'System Health',
-      value: '98%',
-      change: '+2%',
+      title: "System Health",
+      value: "98%",
+      change: "+2%",
       icon: <TrendingUp className="text-amber-500" size={24} />,
-      color: 'bg-amber-50 border-amber-100'
-    }
+      color: "bg-amber-50 border-amber-100",
+    },
   ];
 
   const recentActivity = [
-    { id: 1, action: 'Generated Q4 Report.pdf', user: 'Admin', time: '2 min ago', status: 'success' },
-    { id: 2, action: 'Updated user permissions', user: 'System', time: '15 min ago', status: 'info' },
-    { id: 3, action: 'Failed to generate Invoice_001.pdf', user: 'Auto', time: '1 hour ago', status: 'error' },
-    { id: 4, action: 'Scheduled weekly report generation', user: 'Admin', time: '3 hours ago', status: 'success' },
+    { id: 1, action: "Generated Q4 Report.pdf", user: "Admin", time: "2 min ago", status: "success" as const },
+    { id: 2, action: "Updated user permissions", user: "System", time: "15 min ago", status: "info" as const },
+    { id: 3, action: "Failed to generate Invoice_001.pdf", user: "Auto", time: "1 hour ago", status: "error" as const },
+    { id: 4, action: "Scheduled weekly report generation", user: "Admin", time: "3 hours ago", status: "success" as const },
   ];
 
   const quickActions = [
-    { title: 'PDF Management', href: '/admin/pdf-dashboard', color: 'bg-gradient-to-r from-amber-500 to-orange-500' },
-    { title: 'PDF File Status', href: '/admin/pdf-status', color: 'bg-gradient-to-r from-blue-500 to-cyan-500' },
-    { title: 'View System Logs', href: '/admin/settings/logs', color: 'bg-gradient-to-r from-indigo-500 to-purple-500' },
-    { title: 'Manage Users', href: '/admin/users', color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
-    { title: 'API Documentation', href: '/admin/settings/api', color: 'bg-gradient-to-r from-green-500 to-emerald-500' },
+    { title: "PDF Management", href: "/admin/pdf-dashboard", color: "bg-gradient-to-r from-amber-500 to-orange-500" },
+    { title: "PDF File Status", href: "/admin/pdf-status", color: "bg-gradient-to-r from-blue-500 to-cyan-500" },
+    { title: "View System Logs", href: "/admin/settings/logs", color: "bg-gradient-to-r from-indigo-500 to-purple-500" },
+    { title: "Manage Users", href: "/admin/users", color: "bg-gradient-to-r from-purple-500 to-pink-500" },
+    { title: "API Documentation", href: "/admin/settings/api", color: "bg-gradient-to-r from-green-500 to-emerald-500" },
   ];
+
+  // If you later want the heartbeat dynamic, compute it on the client.
+  // Keeping it static avoids hydration noise during deploy.
+  const lastHeartbeat = "02:14:59";
 
   return (
     <AdminLayout>
@@ -67,7 +71,9 @@ const AdminDashboard: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-3">
               <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">System Operational</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
+                System Operational
+              </span>
             </div>
             <h1 className="text-3xl font-serif font-bold mb-2">Institutional Administrator</h1>
             <p className="text-zinc-400 text-sm max-w-xl">
@@ -77,7 +83,7 @@ const AdminDashboard: React.FC = () => {
           <div className="hidden lg:block">
             <div className="text-right p-4 border-l border-white/10">
               <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Last Heartbeat</p>
-              <p className="text-2xl font-mono font-bold text-gold">02:14:59</p>
+              <p className="text-2xl font-mono font-bold text-gold">{lastHeartbeat}</p>
             </div>
           </div>
         </div>
@@ -86,19 +92,19 @@ const AdminDashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {stats.map((stat) => (
-          <div 
-            key={stat.title} 
+          <div
+            key={stat.title}
             className={`${stat.color} border rounded-2xl p-6 transition-all hover:shadow-xl hover:-translate-y-1 group`}
           >
             <div className="flex items-center justify-between mb-6">
               <div className="p-3 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
                 {stat.icon}
               </div>
-              <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-                stat.change.startsWith('+') 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-red-100 text-red-700'
-              }`}>
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
+                  stat.change.startsWith("+") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                }`}
+              >
                 {stat.change}
               </span>
             </div>
@@ -124,7 +130,10 @@ const AdminDashboard: React.FC = () => {
                     <h3 className="text-xl font-bold mb-2">{action.title}</h3>
                     <p className="text-white/70 text-xs font-mono">Initialize Module →</p>
                   </div>
-                  <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all" size={48} />
+                  <ChevronRight
+                    className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all"
+                    size={48}
+                  />
                 </Link>
               ))}
             </div>
@@ -138,9 +147,7 @@ const AdminDashboard: React.FC = () => {
                   <TrendingUp size={12} />
                   Intelligence Layer
                 </div>
-                <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">
-                  Vault Analytics Engine
-                </h3>
+                <h3 className="text-2xl font-serif font-bold text-gray-900 mb-3">Vault Analytics Engine</h3>
                 <p className="text-gray-600 text-sm mb-8 leading-relaxed">
                   Monitor the decryption rates and dissemination of the 75 core briefs. Verify the integrity of PDF generation for institutional distribution.
                 </p>
@@ -172,30 +179,37 @@ const AdminDashboard: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">Audit Trail</h2>
-              <Link href="/admin/settings/logs" className="text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest">
+              <Link
+                href="/admin/settings/logs"
+                className="text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest"
+              >
                 Full Logs →
               </Link>
             </div>
-            
+
             <div className="space-y-3">
               {recentActivity.map((activity) => (
-                <div 
-                  key={activity.id} 
+                <div
+                  key={activity.id}
                   className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="max-w-[80%]">
                       <p className="text-sm font-bold text-gray-900 truncate">{activity.action}</p>
-                      <p className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-tighter">Auth: {activity.user}</p>
+                      <p className="text-[10px] font-mono text-gray-400 mt-1 uppercase tracking-tighter">
+                        Auth: {activity.user}
+                      </p>
                     </div>
-                    {activity.status === 'success' ? (
+
+                    {activity.status === "success" ? (
                       <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-                    ) : activity.status === 'error' ? (
+                    ) : activity.status === "error" ? (
                       <AlertCircle size={18} className="text-rose-500 shrink-0" />
                     ) : (
                       <div className="w-4 h-4 rounded-full bg-blue-500 shrink-0" />
                     )}
                   </div>
+
                   <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest">{activity.time}</p>
                 </div>
               ))}
@@ -218,11 +232,11 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-const StatusRow = ({ label, status, warning }: { label: string, status: string, warning?: boolean }) => (
+const StatusRow = ({ label, status, warning }: { label: string; status: string; warning?: boolean }) => (
   <div className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
     <span className="text-xs font-medium text-zinc-400">{label}</span>
     <span className="flex items-center text-[10px] font-mono uppercase font-bold">
-      <div className={`w-2 h-2 rounded-full mr-2 ${warning ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+      <span className={`w-2 h-2 rounded-full mr-2 ${warning ? "bg-amber-500" : "bg-emerald-500"}`} />
       {status}
     </span>
   </div>
