@@ -13,11 +13,14 @@ const AUTHORIZED_PREFIXES = [
   '/blog', 
   '/resources', 
   '/downloads', 
-  '/assets', // Crucial for your image/pdf links
+  '/assets',
   '/inner-circle',
   '/canon',
   '/strategy-room',
-  '/books'
+  '/books',
+  '/insights',    // Added: For the 75 Intelligence Briefs
+  '/contact',     // Added: New canonical contact path
+  '/newsletter'   // Added: For the Founding Readers Circle
 ];
 
 const getFiles = (dir) => {

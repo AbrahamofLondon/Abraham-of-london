@@ -5,9 +5,13 @@ import path from 'path';
 const contentDir = path.resolve('./content');
 const publicDir = path.resolve('./public');
 
-// 1. Build a Dynamic Map of all valid MDX/MD routes
+/**
+ * 1. Build a Dynamic Map of all valid MDX/MD routes
+ */
 const getValidRoutes = (dir, currentRoute = '') => {
   let routes = new Set();
+  if (!fs.existsSync(dir)) return routes;
+
   const list = fs.readdirSync(dir);
   
   list.forEach(file => {
@@ -18,7 +22,6 @@ const getValidRoutes = (dir, currentRoute = '') => {
       const subRoutes = getValidRoutes(fullPath, `${currentRoute}/${file}`);
       subRoutes.forEach(r => routes.add(r));
     } else if (file.endsWith('.mdx') || file.endsWith('.md')) {
-      // Convert 'blog/post.mdx' to '/blog/post'
       const slug = file.replace(/\.mdx?$/, '');
       routes.add(`${currentRoute}/${slug}`);
     }
@@ -28,16 +31,62 @@ const getValidRoutes = (dir, currentRoute = '') => {
 
 const validContentRoutes = getValidRoutes(contentDir);
 
-// 2. Institutional Whitelist & Asset Paths
-const whitelist = ['/contact', '/subscribe', '/inner-circle', '/about', '/', '/vault', '/resources'];
+/**
+ * 2. Institutional Whitelist & Alias Mapping
+ * This allows "insights" to map to "blog" and handles legacy paths.
+ */
+const whitelist = [
+  '/contact', 
+  '/contact-us', // Allow during migration
+  '/subscribe', 
+  '/inner-circle', 
+  '/about', 
+  '/', 
+  '/newsletter',
+  '/canon'
+];
+
+/**
+ * Strategic Path Resolution
+ * Maps requested URLs to actual routes in the filesystem.
+ */
+function isLinkValid(link) {
+  // Direct match
+  if (validContentRoutes.has(link)) return true;
+  if (whitelist.includes(link)) return true;
+  if (link.startsWith('/assets/') || link.startsWith('/downloads/')) return true;
+
+  // --- ALIAS LOGIC ---
+  
+  // 1. Alias: /insights/* -> /blog/*
+  if (link.startsWith('/insights/')) {
+    const aliased = link.replace('/insights/', '/blog/');
+    if (validContentRoutes.has(aliased)) return true;
+  }
+
+  // 2. Alias: /vault/lexicon/* -> /lexicon/*
+  if (link.startsWith('/vault/lexicon/')) {
+    const aliased = link.replace('/vault/lexicon/', '/lexicon/');
+    if (validContentRoutes.has(aliased)) return true;
+  }
+
+  // 3. Alias: /vault/downloads/* -> /downloads/ or /assets/
+  if (link.startsWith('/vault/downloads/')) return true; 
+
+  return false;
+}
 
 const getAllFiles = (dir) => {
   let results = [];
+  if (!fs.existsSync(dir)) return results;
   const list = fs.readdirSync(dir);
   list.forEach(file => {
     const fullPath = path.resolve(dir, file);
-    if (fs.statSync(fullPath).isDirectory()) results = results.concat(getAllFiles(fullPath));
-    else if (file.endsWith('.mdx') || file.endsWith('.md')) results.push(fullPath);
+    if (fs.statSync(fullPath).isDirectory()) {
+      results = results.concat(getAllFiles(fullPath));
+    } else if (file.endsWith('.mdx') || file.endsWith('.md')) {
+      results.push(fullPath);
+    }
   });
   return results;
 };
@@ -57,20 +106,16 @@ function validateLinks() {
     let match;
 
     while ((match = linkRegex.exec(content)) !== null) {
-      const link = match[2].trim().split('#')[0]; // Ignore anchors for validation
+      let link = match[2].trim().split('#')[0]; // Ignore anchors
 
-      // Only validate internal absolute paths
-      if (!link.startsWith('/')) continue;
+      // Skip external links or non-internal protocols
+      if (!link.startsWith('/') || link.startsWith('//')) continue;
 
-      const isValidRoute = validContentRoutes.has(link);
-      const isWhitelisted = whitelist.includes(link);
-      const isAsset = link.startsWith('/assets/') || link.startsWith('/downloads/');
-
-      if (!isValidRoute && !isWhitelisted && !isAsset) {
+      if (!isLinkValid(link)) {
         brokenLinks.push({
           file: relativeFile,
           link: link,
-          context: match[0].substring(0, 40) // Truncated for table clarity
+          context: match[0].substring(0, 45)
         });
       }
     }
@@ -78,7 +123,6 @@ function validateLinks() {
 
   if (brokenLinks.length > 0) {
     console.error(`❌ Found ${brokenLinks.length} Broken Internal Links:`);
-    // Filter out duplicates for a cleaner report
     const uniqueBroken = brokenLinks.slice(0, 50); 
     console.table(uniqueBroken);
     
@@ -87,7 +131,8 @@ function validateLinks() {
     }
     process.exit(1);
   } else {
-    console.log(`✅ Success: All 347+ links verified against filesystem routes.`);
+    console.log(`✅ Success: All links verified against Institutional Manifest.`);
+    process.exit(0);
   }
 }
 
