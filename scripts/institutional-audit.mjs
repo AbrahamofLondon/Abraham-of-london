@@ -11,20 +11,63 @@ const CONTENT_PATH = path.join(process.cwd(), 'content');
  * Defines the strategic boundaries of the Abraham-of-London ecosystem.
  * Any link not starting with these prefixes will trigger a REJECTION.
  */
+/* scripts/institutional-audit.mjs */
+
+/**
+ * AUTHORIZED_PATHS
+ * Defines the strategic boundaries of the Abraham-of-London ecosystem.
+ * Organized by Sector to mirror the physical 'pages/' directory.
+ */
 const AUTHORIZED_PREFIXES = [
-  '/vault', 
-  '/lexicon', 
-  '/blog', 
-  '/resources', 
-  '/downloads', 
-  '/assets', 
-  '/contact',    // Matches /contact and /contact-us
-  '/subscribe', 
-  '/newsletter', // Added to support your new mapping
-  '/books', 
+  // --- CORE SECTORS ---
+  '/admin',
+  '/api',
+  '/auth',
+  '/dashboard',
   '/inner-circle',
+  '/vault',
+  '/registry',
+  '/private',
+
+  // --- INTELLIGENCE & CONTENT ---
+  '/blog',
+  '/canon',
+  '/canon-campaign',
+  '/insights',      // 75 Intelligence Briefs
+  '/shorts',
+  '/lexicon',
+  '/content',
+
+  // --- KNOWLEDGE & FRAMEWORKS ---
+  '/strategy',
+  '/strategy-room',
+  '/leadership',
+  '/fatherhood',
+  '/consulting',
+  '/resources',
+
+  // --- INSTITUTIONAL ENTITIES ---
+  '/board',
+  '/directorate',
+  '/founders',
+  '/membership',
+  '/ventures',
+
+  // --- ENGAGEMENT & COMMERCE ---
   '/events',
-  '/about'
+  '/speaking',
+  '/chatham-rooms',
+  '/books',
+  '/brands',
+  '/prints',
+  '/downloads',
+
+  // --- PUBLIC INTERFACE ---
+  '/about',
+  '/contact',
+  '/subscribe',
+  '/newsletter',
+  '/assets'
 ];
 
 const getFiles = (dir) => {
@@ -66,13 +109,12 @@ async function runAudit() {
       ) continue;
 
       // 2. Validate internal paths against Authorized Prefixes
-      // We normalize the path to ensure leading slashes for comparison
       const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
       const isValid = AUTHORIZED_PREFIXES.some(prefix => normalizedUrl.startsWith(prefix));
       
       if (!isValid) {
         console.log(chalk.red(`🚨 [PATH_REGRESSION] ${relativeFile}`));
-        console.log(chalk.yellow(`   Link "${url}" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.\n`));
+        console.log(chalk.yellow(`    Link "${url}" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.\n`));
         linkRegressions++;
       }
     }
