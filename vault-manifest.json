@@ -6,7 +6,7 @@
     "type": "brief"
   },
   {
-    "title": "Fathering Principles: A Blueprint for Men",
+    "title": "fathering-principles",
     "slug": "/vault/blog/fathering-principles",
     "category": "blog",
     "type": "brief"
@@ -30,7 +30,7 @@
     "type": "brief"
   },
   {
-    "title": "Kingdom Strategies for a Loving Legacy: Fathering O.J.A-Y",
+    "title": "kingdom-strategies-for-a-loving-legacy",
     "slug": "/vault/blog/kingdom-strategies-for-a-loving-legacy",
     "category": "blog",
     "type": "brief"
@@ -42,7 +42,7 @@
     "type": "brief"
   },
   {
-    "title": "Lessons from Noah - Fathers Who Listen, Hear, and Build",
+    "title": "lessons-from-noah",
     "slug": "/vault/blog/lessons-from-noah",
     "category": "blog",
     "type": "brief"
@@ -60,13 +60,13 @@
     "type": "brief"
   },
   {
-    "title": "Principles for My Son: Building a Foundation of Character",
+    "title": "principles-for-my-son",
     "slug": "/vault/blog/principles-for-my-son",
     "category": "blog",
     "type": "brief"
   },
   {
-    "title": "Purpose Is the Anchor: Why Meaning Beats Pleasure Every Time",
+    "title": "purpose-is-the-anchor",
     "slug": "/vault/blog/purpose-is-the-anchor",
     "category": "blog",
     "type": "brief"
@@ -78,19 +78,19 @@
     "type": "brief"
   },
   {
-    "title": "Surrender, Not Submission: The Path to Having It All",
+    "title": "surrender-not-submission",
     "slug": "/vault/blog/surrender-not-submission",
     "category": "blog",
     "type": "brief"
   },
   {
-    "title": "Surrender Applied: The Operational Framework",
+    "title": "surrender-operational-framework",
     "slug": "/vault/blog/surrender-operational-framework",
     "category": "blog",
     "type": "brief"
   },
   {
-    "title": "The Brotherhood Code: Breaking the Cycle of Father Absence",
+    "title": "the-brotherhood-code",
     "slug": "/vault/blog/the-brotherhood-code",
     "category": "blog",
     "type": "brief"
@@ -618,7 +618,7 @@
     "type": "brief"
   },
   {
-    "title": "THE CANON: A LETTER FROM THE AUTHOR",
+    "title": "canon-introduction-letter",
     "slug": "/vault/canon/canon-introduction-letter",
     "category": "canon",
     "type": "brief"
@@ -1242,7 +1242,7 @@
     "type": "brief"
   },
   {
-    "title": "Sovereignty: The First Pillar",
+    "title": "sovereignty-001",
     "slug": "/vault/downloads/linked-intel/sovereignty-001",
     "category": "downloads",
     "type": "brief"
@@ -1254,8 +1254,38 @@
     "type": "brief"
   },
   {
+    "title": "Busy Is Not the Same as Anchored",
+    "slug": "/vault/downloads/linked-shorts/busy-is-not-the-same-as-anchored",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
+    "title": "Freedom Begins Where Ego Ends",
+    "slug": "/vault/downloads/linked-shorts/freedom-begins-where-ego-ends",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
     "title": "On Institutional Sovereignty",
     "slug": "/vault/downloads/linked-shorts/institutional-sovereignty",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
+    "title": "Pleasure Is Loud. Purpose Is Quiet.",
+    "slug": "/vault/downloads/linked-shorts/pleasure-is-loud-purpose-is-quiet",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
+    "title": "The Cost of Refusing Formation",
+    "slug": "/vault/downloads/linked-shorts/the-cost-of-refusing-formation",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
+    "title": "This Is Not a Comfort Platform",
+    "slug": "/vault/downloads/linked-shorts/this-is-not-a-comfort-platform",
     "category": "downloads",
     "type": "brief"
   },
@@ -1710,6 +1740,12 @@
     "type": "brief"
   },
   {
+    "title": "You Were Built to Carry Weight",
+    "slug": "/vault/downloads/linked-shorts/you-were-built-to-carry-weight",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
     "title": "Mentorship Starter Kit",
     "slug": "/vault/downloads/mentorship-starter-kit",
     "category": "downloads",
@@ -1776,7 +1812,7 @@
     "type": "brief"
   },
   {
-    "title": "Sovereignty: The First Pillar",
+    "title": "sovereignty-001",
     "slug": "/vault/intelligence/sovereignty-001",
     "category": "intelligence",
     "type": "brief"
@@ -2016,8 +2052,38 @@
     "type": "brief"
   },
   {
+    "title": "Busy Is Not the Same as Anchored",
+    "slug": "/vault/shorts/busy-is-not-the-same-as-anchored",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
+    "title": "Freedom Begins Where Ego Ends",
+    "slug": "/vault/shorts/freedom-begins-where-ego-ends",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
     "title": "On Institutional Sovereignty",
     "slug": "/vault/shorts/institutional-sovereignty",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
+    "title": "Pleasure Is Loud. Purpose Is Quiet.",
+    "slug": "/vault/shorts/pleasure-is-loud-purpose-is-quiet",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
+    "title": "The Cost of Refusing Formation",
+    "slug": "/vault/shorts/the-cost-of-refusing-formation",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
+    "title": "This Is Not a Comfort Platform",
+    "slug": "/vault/shorts/this-is-not-a-comfort-platform",
     "category": "shorts",
     "type": "brief"
   },
@@ -2468,6 +2534,12 @@
   {
     "title": "When Youve Worshipped The Wrong Metrics",
     "slug": "/vault/shorts/when-youve-worshipped-the-wrong-metrics",
+    "category": "shorts",
+    "type": "brief"
+  },
+  {
+    "title": "You Were Built to Carry Weight",
+    "slug": "/vault/shorts/you-were-built-to-carry-weight",
     "category": "shorts",
     "type": "brief"
   },

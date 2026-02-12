@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth/next";
 import { pipeline } from "stream/promises";
 import { z } from "zod";
 
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { authOptions } from "@/lib/auth";
 import type { AccessContext, AccessControlledDocument } from "@/lib/access/logic";
 import { checkDocumentAccess } from "@/lib/access/logic";
 import { FRAMEWORKS } from "@/lib/resources/strategic-frameworks";

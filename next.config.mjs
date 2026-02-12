@@ -107,31 +107,35 @@ const nextConfig = {
   },
   
   webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // 1. Sever the link to Node.js internals for Client Components
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        ...buildBrowserFallbacks(),
-      };
-      
-      // 2. Performance optimization for the 259 asset portfolio
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          minSize: 20000,
-          maxSize: 250000,
-          cacheGroups: {
-            defaultVendors: {
-              test: /[\\/]node_modules[\\/]/,
-              priority: -10,
-              reuseExistingChunk: true,
-            },
+  if (!isServer) {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      ...buildBrowserFallbacks(),
+    };
+    
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 250000,
+        cacheGroups: {
+          defaultVendors: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+            reuseExistingChunk: true,
           },
         },
-      };
-    }
-    return config;
+      },
+    };
+  }
+  
+  // ✅ Silence verbose cache serialization warnings
+  config.infrastructureLogging = {
+    level: 'error',
+  };
+  
+  return config;
   },
   
   output: 'standalone',

@@ -1,35 +1,45 @@
 # netlify.toml — FINALISED STRATEGIC VERSION (HARDENED FOR ABRAHAM OF LONDON)
+
 [build]
-  # Combined command: ensures pnpm frozen-lockfile and custom netlify build script
+  # Deterministic installs + Netlify-safe Next build
   command = "pnpm install --frozen-lockfile && pnpm build:netlify"
-  publish = ".next"
+  # For Netlify Next runtime, publish root; plugin handles Next output + routing
+  publish = "."
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
-  # Increased memory for processing 75+ intelligence briefs through Contentlayer
+  # Increased memory for Contentlayer-heavy builds
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "true"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
-  PNPM_FLAGS = "--frozen-lockfile"
 
+  # Lock install behavior
+  NETLIFY_USE_PNPM = "true"
+  PNPM_VERSION = "9.15.4"
+  PNPM_FLAGS = "--frozen-lockfile"
+  NPM_FLAGS = "--version"
+
+# --- Plugins (ordered): Next first, then Emails ---
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [[plugins]]
   package = "@netlify/plugin-emails"
 
+# Netlify Emails: include source templates
 [functions.emails]
   included_files = ["./emails/**"]
 
+# --- Environment Contexts ---
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
   NEXT_OPTIMIZE_FONTS = "true"
-  # Custom optimization preferred over Netlify's generic processing
-  NEXT_OPTIMIZE_IMAGES = "false" 
+  # Custom optimization preferred over Netlify generic processing
+  NEXT_OPTIMIZE_IMAGES = "false"
 
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
@@ -104,7 +114,7 @@
     Content-Type = "application/pdf"
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
-    # 'inline' ensures the intelligence brief opens in the browser rather than forcing a download
+    # Open in-browser instead of forcing download
     Content-Disposition = "inline"
 
 [[headers]]

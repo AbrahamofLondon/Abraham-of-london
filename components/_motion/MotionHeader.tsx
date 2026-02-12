@@ -1,5 +1,7 @@
+// components/_motion/MotionHeader.tsx
 import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
+import { Calendar, Clock, Eye, Users } from 'lucide-react'; // ✅ ADD THIS LINE
 
 interface MotionHeaderProps {
   children?: ReactNode;

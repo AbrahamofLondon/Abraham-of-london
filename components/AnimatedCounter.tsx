@@ -17,8 +17,10 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   onComplete,
 }) => {
   const [count, setCount] = React.useState(0);
-  const frameRef = React.useRef<number>();
-  const startTimeRef = React.useRef<number>();
+  
+  // ✅ Provide initial values to refs
+  const frameRef = React.useRef<number | null>(null);
+  const startTimeRef = React.useRef<number | null>(null);
   const completedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -62,4 +64,3 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 };
 
 export default AnimatedCounter;
-

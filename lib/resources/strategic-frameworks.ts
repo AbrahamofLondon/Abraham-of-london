@@ -1,5 +1,5 @@
 /* lib/resources/strategic-frameworks.ts */
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export const LIBRARY_HREF = "/resources/strategic-frameworks";
 
@@ -79,34 +79,25 @@ const FOUNDATION_TRACK: Framework[] = [
   }
 ];
 
+// Exported constant for the UI components
+export const FRAMEWORKS = FOUNDATION_TRACK;
+
 /* -------------------------------------------------------------------------- */
 /* RESOLUTION LOGIC                                                           */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Returns all available slugs for SSG (getStaticPaths)
- */
 export function getAllFrameworkSlugs(): string[] {
-  // Combine static foundation and potentially dynamic database slugs
   return FOUNDATION_TRACK.map(f => f.slug);
 }
 
-/**
- * Primary resolver for [slug].tsx (getStaticProps)
- */
 export function getFrameworkBySlug(slug: string): Framework | undefined {
   return FOUNDATION_TRACK.find(f => f.slug === slug);
 }
 
-/**
- * Extended Resolver: Checks Static Registry first, then Database Metadata
- */
 export async function getInstitutionalFramework(slug: string): Promise<Framework | null> {
-  // 1. Check static briefs
   const staticMatch = getFrameworkBySlug(slug);
   if (staticMatch) return staticMatch;
 
-  // 2. Check Database for dynamically added Briefs (from your 75+ portfolio)
   try {
     const meta = await prisma.contentMetadata.findUnique({
       where: { slug: `framework/${slug}` }
@@ -114,12 +105,11 @@ export async function getInstitutionalFramework(slug: string): Promise<Framework
 
     if (!meta) return null;
 
-    // Typecast stored JSON to Framework interface
     return {
       slug,
       title: meta.title,
       oneLiner: meta.description || "",
-      tier: (meta.requiredRoles as string[]) || ["Inner Circle"],
+      tier: (meta.requiredRoles as any) || ["Inner Circle"],
       ...((meta.payload as any) || {})
     };
   } catch (e) {
@@ -127,5 +117,3 @@ export async function getInstitutionalFramework(slug: string): Promise<Framework
     return null;
   }
 }
-
-export const FRAMEWORKS

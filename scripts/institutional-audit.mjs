@@ -1,57 +1,99 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
+/* scripts/institutional-audit.mjs */
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
+import matter from 'gray-matter';
 
-const CONTENT_PATH = path.join(process.cwd(), "content");
+const CONTENT_PATH = path.join(process.cwd(), 'content');
 
-// ALIGNED WITH types/next-auth.d.ts
-const VALID_LEVELS = [
-  "public", 
-  "inner-circle", 
-  "inner-circle-plus", 
-  "inner-circle-elite", 
-  "private",
-  "restricted", // Legacy support
-  "admin"       // Legacy support
+/**
+ * AUTHORIZED_PATHS
+ * Defines the strategic boundaries of the Abraham-of-London ecosystem.
+ * Any link not starting with these prefixes will trigger a REJECTION.
+ */
+const AUTHORIZED_PREFIXES = [
+  '/vault', 
+  '/lexicon', 
+  '/blog', 
+  '/resources', 
+  '/downloads', 
+  '/assets', 
+  '/contact',    // Matches /contact and /contact-us
+  '/subscribe', 
+  '/newsletter', // Added to support your new mapping
+  '/books', 
+  '/inner-circle',
+  '/events',
+  '/about'
 ];
 
+const getFiles = (dir) => {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  return entries.flatMap((entry) => {
+    const res = path.resolve(dir, entry.name);
+    return entry.isDirectory() ? getFiles(res) : res;
+  });
+};
+
 async function runAudit() {
-  console.log("🔍 [INSTITUTIONAL AUDIT]: Validating 256 Assets...");
-  
-  if (!fs.existsSync(CONTENT_PATH)) {
-    console.error("❌ Error: Content directory not found.");
+  console.log(chalk.blue.bold("\n🛡️  [INSTITUTIONAL_AUDIT]: Verifying Intelligence Architecture...\n"));
+
+  const mdxFiles = getFiles(CONTENT_PATH).filter(f => f.endsWith('.mdx') || f.endsWith('.md'));
+  let linkRegressions = 0;
+  let assetsVerified = 0;
+  let totalLinksChecked = 0;
+
+  mdxFiles.forEach(file => {
+    const rawContent = fs.readFileSync(file, 'utf8');
+    const { data, content } = matter(rawContent);
+    const relativeFile = path.relative(CONTENT_PATH, file);
+
+    // Regex to find Markdown links: [text](url)
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    let match;
+    
+    while ((match = linkRegex.exec(content)) !== null) {
+      const url = match[2];
+      totalLinksChecked++;
+      
+      // 1. Skip valid non-internal protocols
+      if (
+        url.startsWith('http') || 
+        url.startsWith('#') || 
+        url.startsWith('mailto:') || 
+        url.startsWith('tel:')
+      ) continue;
+
+      // 2. Validate internal paths against Authorized Prefixes
+      // We normalize the path to ensure leading slashes for comparison
+      const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
+      const isValid = AUTHORIZED_PREFIXES.some(prefix => normalizedUrl.startsWith(prefix));
+      
+      if (!isValid) {
+        console.log(chalk.red(`🚨 [PATH_REGRESSION] ${relativeFile}`));
+        console.log(chalk.yellow(`   Link "${url}" is unauthorized. Update AUTHORIZED_PREFIXES if this is a new route.\n`));
+        linkRegressions++;
+      }
+    }
+
+    // Asset tracking for Intelligence Briefs
+    if (data.assetPath || data.downloadUrl || data.pdf) assetsVerified++;
+  });
+
+  console.log(chalk.blue.bold('--- 📊 AUDIT REPORT ---'));
+  console.log(chalk.cyan(`Files Scanned:       ${mdxFiles.length}`));
+  console.log(chalk.cyan(`Links Validated:     ${totalLinksChecked}`));
+  console.log(chalk.cyan(`Briefs Verified:    ${assetsVerified}`));
+
+  if (linkRegressions > 0) {
+    console.log(chalk.red.bold(`\n❌ REJECTED: ${linkRegressions} link regressions found.`));
+    console.log(chalk.red(`System alignment failed. Fix the links above or authorize the paths in the audit script.`));
     process.exit(1);
   }
 
-  const getFiles = (dir) => {
-    const subdirs = fs.readdirSync(dir);
-    const files = subdirs.map((subdir) => {
-      const res = path.resolve(dir, subdir);
-      return fs.statSync(res).isDirectory() ? getFiles(res) : res;
-    });
-    return files.reduce((a, b) => a.concat(b), []);
-  };
-
-  const mdxFiles = getFiles(CONTENT_PATH).filter(f => f.endsWith(".mdx"));
-  let errorCount = 0;
-
-  mdxFiles.forEach(file => {
-    const content = fs.readFileSync(file, "utf8");
-    const { data } = matter(content);
-    const fileName = path.basename(file);
-
-    // Validate accessLevel
-    if (!data.accessLevel || !VALID_LEVELS.includes(data.accessLevel)) {
-      console.warn(`⚠️  [MISMATCH]: ${fileName} -> Level: ${data.accessLevel || "MISSING"}`);
-      errorCount++;
-    }
-  });
-
-  if (errorCount > 0) {
-    console.log(`\n❌ Audit complete: ${errorCount} items require frontmatter correction.`);
-  } else {
-    console.log("\n✅ Audit Complete: All 256 items are schema-valid.");
-  }
+  console.log(chalk.green.bold('\n✅ SUCCESS: All links aligned to Institutional Portfolio standards.'));
+  process.exit(0);
 }
 
 runAudit();

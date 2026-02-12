@@ -1,65 +1,57 @@
-/* scripts/pdf-refresh.ts - FINAL RECONCILED VERSION */
-import { scanForPDFContent } from './pdf/scanner.ts';
-import { generateMissingPdfs } from './pdf/intelligent-generator.ts';
+/* scripts/pdf-refresh.ts */
 import fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
+
+const SOURCE_DIR = path.join(process.cwd(), 'content/downloads');
+const TARGET_DIR = path.join(process.cwd(), 'public/assets/downloads');
 
 async function refresh() {
-  console.log("🔄 STARTING INSTITUTIONAL ASSET REFRESH");
+  console.log(chalk.blue.bold("🔄 STARTING INSTITUTIONAL ASSET REFRESH"));
   console.log("============================================================");
 
+  if (!fs.existsSync(TARGET_DIR)) fs.mkdirSync(TARGET_DIR, { recursive: true });
+
   try {
-    // 1. Full Scan
-    await scanForPDFContent();
-    
-    // 2. Sync
-    console.log("\n🚀 SYNCHRONIZING ASSETS...");
-    await generateMissingPdfs({
-      createPlaceholders: true,
-      enableContentScan: true
+    const files = fs.readdirSync(SOURCE_DIR);
+
+    files.forEach(file => {
+      const srcPath = path.join(SOURCE_DIR, file);
+      
+      // 1. CLEANUP: Remove backup files
+      if (file.includes('.backup-')) {
+        fs.unlinkSync(srcPath);
+        console.log(chalk.gray(`  🗑️  Cleaned Backup: ${file}`));
+        return;
+      }
+
+      // 2. PRODUCTION SYNC: Move actual assets to Public
+      // We target non-MDX files that are intended for download
+      if (file.endsWith('.pdf') || file.endsWith('.xlsx') || file.endsWith('.pptx') || file.endsWith('.zip')) {
+        const destPath = path.join(TARGET_DIR, file);
+        fs.copyFileSync(srcPath, destPath);
+        console.log(chalk.green(`  ✅ Synced to Public: ${file}`));
+      }
     });
 
-    // 3. Robust Alias Reconciliation
-    console.log("\n🧷 RECONCILING CANONICAL ALIASES...");
-    const coreAssets = [
+    // 3. CANONICAL ALIASES (Institutional Requirements)
+    const aliases = [
       { src: 'life-alignment-assessment.pdf', alias: 'core-alignment.pdf' },
-      { src: 'legacy-canvas-fillable.pdf', alias: 'core-legacy.pdf' }
+      { src: 'legacy-canvas.pdf', alias: 'core-legacy.pdf' }
     ];
 
-    const searchDirs = [
-      'public/assets/downloads/content-downloads',
-      'public/assets/downloads/lib-pdf',
-      'public/assets/downloads'
-    ];
-
-    const targetDir = path.join(process.cwd(), 'public/assets/downloads/content-downloads');
-    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-
-    coreAssets.forEach(asset => {
-      let foundPath: string | null = null;
-
-      // Search all possible locations for the source file
-      for (const dir of searchDirs) {
-        const fullPath = path.join(process.cwd(), dir, asset.src);
-        if (fs.existsSync(fullPath)) {
-          foundPath = fullPath;
-          break;
-        }
-      }
-
-      if (foundPath) {
-        const aliasPath = path.join(targetDir, asset.alias);
-        fs.copyFileSync(foundPath, aliasPath);
-        console.log(`   ✅ Created Alias: ${asset.alias} (from ${path.basename(path.dirname(foundPath))})`);
-      } else {
-        console.warn(`   ⚠️  CANONICAL SOURCE MISSING: ${asset.src} not found in any directory.`);
+    aliases.forEach(a => {
+      const src = path.join(TARGET_DIR, a.src);
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, path.join(TARGET_DIR, a.alias));
+        console.log(chalk.cyan(`  🧷 Created Alias: ${a.alias}`));
       }
     });
 
-    console.log("\n============================================================");
-    console.log("✨ REFRESH COMPLETE: Institutional Integrity Verified");
+    console.log(chalk.blue.bold("\n============================================================"));
+    console.log(chalk.green("✨ REFRESH COMPLETE: Assets Physically Reconciled"));
   } catch (error) {
-    console.error("❌ REFRESH FAILED:", error);
+    console.error(chalk.red("❌ REFRESH FAILED:"), error);
     process.exit(1);
   }
 }

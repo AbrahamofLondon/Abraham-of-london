@@ -1,13 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  safeString, 
-  safeFirstChar, 
+import {
+  safeString,
+  safeFirstChar,
   safeUrl,
   safeImageSrc,
   safeArray,
-  classNames 
 } from '@/lib/utils/safe';
 import { ArrowRight, Twitter, Linkedin, Github, Globe } from 'lucide-react';
 
@@ -26,26 +25,36 @@ interface AuthorBioProps {
   works?: string[];
 }
 
+const DEFAULT_WORKS = [
+  'Latest Articles',
+  'Free Resources',
+  'Recommended Reading',
+];
+
 const AuthorBio: React.FC<AuthorBioProps> = (props) => {
-  // Extract and sanitize
-  const author = safeString(props.author, 'Anonymous');
-  const bio = safeString(props.bio, 'Content creator and thought leader sharing insights on business, technology, and innovation.');
-  const website = safeUrl(props.website, 'https://abrahamoflondon.org');
-  const avatar = safeImageSrc(props.avatar);
+  // ✅ safeString: no fallback argument, use || after
+  const author = safeString(props.author) || 'Anonymous';
+
+  const bio =
+    safeString(props.bio) ||
+    'Content creator and thought leader sharing insights on business, technology, and innovation.';
+
+  const website = safeUrl(props.website, 'https://abrahamoflondon.org'); // safeUrl supports fallback (2 args)
+  const avatar = safeImageSrc(props.avatar); // safeImageSrc: 1 arg (returns safe string)
   const social = props.social || {};
-  const works = safeArray<string>(props.works, [
-    'Latest Articles',
-    'Free Resources', 
-    'Recommended Reading'
-  ]);
-  
-  const authorInitial = safeFirstChar(author, 'A');
+
+  // ✅ safeArray: exactly one argument; then check length for fallback
+  const safeWorks = safeArray(props.works);
+  const works = safeWorks.length > 0 ? safeWorks : DEFAULT_WORKS;
+
+  // ✅ safeFirstChar: exactly one argument; fallback via ||
+  const authorInitial = safeFirstChar(author) || 'A';
 
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-50 to-white p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200">
       {/* Animated background effect */}
       <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/50 via-transparent to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-      
+
       <div className="relative flex flex-col md:flex-row items-start md:items-center gap-8">
         {/* Avatar */}
         <div className="flex-shrink-0">
@@ -70,12 +79,12 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
                 </span>
               </div>
             )}
-            
+
             {/* Online indicator */}
             <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full border-2 border-white bg-green-500" />
           </div>
         </div>
-        
+
         {/* Content */}
         <div className="flex-1 space-y-6">
           <div>
@@ -87,12 +96,10 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
                 Author
               </span>
             </div>
-            
-            <p className="text-gray-700 leading-relaxed">
-              {bio}
-            </p>
+
+            <p className="text-gray-700 leading-relaxed">{bio}</p>
           </div>
-          
+
           {/* Links */}
           <div className="flex flex-wrap items-center gap-4">
             <Link
@@ -103,7 +110,7 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
               <span>Visit Website</span>
               <ArrowRight className="h-3 w-3 transition-transform group-hover/link:translate-x-1" />
             </Link>
-            
+
             {(social.twitter || social.linkedin || social.github) && (
               <div className="flex items-center gap-3">
                 {social.twitter && (
@@ -144,14 +151,14 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
           </div>
         </div>
       </div>
-      
+
       {/* Works Section */}
       <div className="relative mt-12 pt-8 border-t border-gray-200">
         <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <div className="h-1.5 w-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
           More from {author}
         </h4>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {works.map((work, index) => (
             <div
@@ -159,7 +166,7 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
               className="group/work relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-white p-4 hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue-200"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover/work:opacity-100 transition-opacity duration-300" />
-              
+
               <div className="relative">
                 <div className="font-medium text-gray-900 group-hover/work:text-blue-600 transition-colors">
                   {work}
@@ -168,16 +175,14 @@ const AuthorBio: React.FC<AuthorBioProps> = (props) => {
                   <span className="text-sm text-gray-600 group-hover/work:text-blue-500 transition-colors">
                     Explore →
                   </span>
-                  <span className="text-xs text-gray-400">
-                    {index + 1}
-                  </span>
+                  <span className="text-xs text-gray-400">{index + 1}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-      
+
       {/* Decorative element */}
       <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-bl from-blue-500/5 to-purple-500/5 rounded-full -translate-y-16 translate-x-16" />
     </div>

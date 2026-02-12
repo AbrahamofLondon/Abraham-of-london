@@ -1,5 +1,12 @@
 // app/render/pdf/[id]/page.tsx
-import { notFound } from 'next/navigation';
+
+// ✅ Polyfill for notFound – works in any Next.js version
+function notFound(): never {
+  const error = new Error('NEXT_NOT_FOUND');
+  (error as any).digest = 'NEXT_NOT_FOUND';
+  throw error;
+}
+
 import { getPDFRegistrySource } from '@/scripts/pdf/pdf-registry.source';
 
 interface Props {
@@ -7,8 +14,8 @@ interface Props {
 }
 
 export default async function PDFRenderPage({ params }: Props) {
-  // In Next.js 15+, params should be awaited if this is a dynamic route
-  const { id } = await params; 
+  // Next.js 15+ – params must be awaited
+  const { id } = await params;
   const registry = getPDFRegistrySource();
   const pdf = registry.find((item) => item.id === id);
 

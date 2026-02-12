@@ -185,6 +185,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     };
   }, [pdfs]);
 
+  // ✅ RECENT PDFS – sorted by date, typed as PDFAnalyticsItem[]
+  const recentPdfs = useMemo(() => {
+    return [...pdfs]
+      .sort((a, b) => 
+        new Date(b.lastModified || b.updatedAt || 0).getTime() - 
+        new Date(a.lastModified || a.updatedAt || 0).getTime()
+      )
+      .slice(0, 5);
+  }, [pdfs]);
+
   const handleExport = () => {
     if (!analyticsData || !onExport) return;
 
@@ -329,8 +339,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`rounded-2xl border p-6 lg:col-span-2 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
           <h3 className="text-lg font-semibold mb-4">📈 Recent Activity</h3>
+          {/* ✅ Use recentPdfs – fully typed, no unknown error */}
           <div className="space-y-3">
-            {safeSlice([...pdfs].sort((a, b) => new Date(b.lastModified || b.updatedAt || 0).getTime() - new Date(a.lastModified || a.updatedAt || 0).getTime()), 0, 5).map((pdf) => (
+            {recentPdfs.map((pdf) => (
               <div key={pdf.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-800/10 hover:bg-gray-800/20 transition-all group">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl ${pdf.exists ? "bg-green-500/20" : pdf.error ? "bg-red-500/20" : "bg-yellow-500/20"}`}>

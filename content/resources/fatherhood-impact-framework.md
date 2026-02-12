@@ -24,6 +24,7 @@ readTime: 4 mins
 tags:
   - intel
   - institutional-brief
+category: Institutional Alpha
 ---
 # Fatherhood Impact Framework
 

@@ -4,7 +4,7 @@ title: Strategic Frameworks
 description: Collection of strategic frameworks for decision-making.
 excerpt: Tools and models for thinking strategically about complex challenges.
 author: Abraham of London
-date: "2024-01-10"
+date: '2024-01-10'
 slug: /resources/strategic-frameworks
 tags:
   - strategic
@@ -16,13 +16,14 @@ coverImage: /assets/images/canon/canon-resources.jpg
 accessLevel: public
 resourceType: guide
 docKind: Resource
-ogTitle: ""
-ogDescription: ""
-socialCaption: ""
+ogTitle: ''
+ogDescription: ''
+socialCaption: ''
 coverAspect: wide
 coverFit: cover
 coverPosition: center
-lockMessage: ""
+lockMessage: ''
+category: Institutional Alpha
 ---
 # Strategic Frameworks Collection
 
@@ -48,7 +49,7 @@ date: "2024-01-10"
 description: "A curated operating library of strategic frameworks derived from ancient principles and built for modern board-level decision-making."
 excerpt: "Not theory. Deployable frameworks -- engineered from the Canon's philosophical spine to solve modern problems with ancient precision."
 author: "Abraham of London"
-coverImage: "/assets/images/canon/canon-resources.jpg"
+coverImage: "/vault/assets/images/canon/canon-resources.jpg"
 tags:
   ["strategic", "frameworks", "tools", "decision-making", "governance", "leadership", "execution"]
 href: "/resources/strategic-frameworks"

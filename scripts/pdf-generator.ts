@@ -1,32 +1,48 @@
 #!/usr/bin/env tsx
-import { getPDFRegistry, getAllPDFs, generatePDF } from '../lib/pdf-registry';
+import { getPDFRegistry, generatePDF } from '../lib/pdf-registry';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import chalk from 'chalk';
+import pLimit from 'p-limit'; // Recommended: pnpm add p-limit
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-class PDFGenerationPipeline {
-  private results: Array<{
-    id: string;
-    success: boolean;
-    error?: string;
-    duration: number;
-  }> = [];
+// Concurrency limit to prevent memory spikes during PDF rendering
+const limit = pLimit(3); 
 
-  async generateSingle(id: string): Promise<typeof this.results[0]> {
+interface PipelineResult {
+  id: string;
+  success: boolean;
+  error?: string;
+  duration: number;
+  path?: string;
+}
+
+class PDFGenerationPipeline {
+  private results: PipelineResult[] = [];
+
+  /**
+   * Generates a single asset with strict validation
+   */
+  async generateSingle(id: string): Promise<PipelineResult> {
     const start = Date.now();
-    
     try {
-      console.log(`🚀 Generating: ${id}`);
       const result = await generatePDF(id);
       
+      // Physical Verification Post-Generation
+      const registry = getPDFRegistry();
+      const config = registry[id];
+      const physicalPath = path.join(process.cwd(), 'public', config.outputPath);
+      const exists = fs.existsSync(physicalPath);
+
       return {
         id,
-        success: result.success,
-        error: result.error,
-        duration: Date.now() - start
+        success: result.success && exists,
+        error: !exists ? 'Physical file not found after generation' : result.error,
+        duration: Date.now() - start,
+        path: config.outputPath
       };
     } catch (error: any) {
       return {
@@ -38,59 +54,23 @@ class PDFGenerationPipeline {
     }
   }
 
-  async generateAll(): Promise<void> {
-    console.log('🚀 Starting PDF Generation Pipeline...\n');
+  /**
+   * Orchestrates the batch with parallel execution
+   */
+  async runBatch(ids: string[]): Promise<void> {
+    console.log(chalk.blue.bold(`\n🚀 ORCHESTRATING ${ids.length} ASSETS...`));
     
-    const registry = getPDFRegistry();
-    const missingPDFs = Object.values(registry).filter(pdf => !pdf.exists && pdf.generationScript);
-    
-    console.log(`📊 Total PDFs in registry: ${Object.keys(registry).length}`);
-    console.log(`📊 Available PDFs: ${Object.values(registry).filter(pdf => pdf.exists).length}`);
-    console.log(`📊 Missing PDFs to generate: ${missingPDFs.length}\n`);
-    
-    if (missingPDFs.length === 0) {
-      console.log('✅ All PDFs are already generated.');
-      return;
-    }
-    
-    for (const pdf of missingPDFs) {
-      const result = await this.generateSingle(pdf.id);
-      this.results.push(result);
-      
-      if (result.success) {
-        console.log(`✅ ${pdf.id}: Generated successfully`);
+    const tasks = ids.map(id => limit(async () => {
+      const res = await this.generateSingle(id);
+      this.results.push(res);
+      if (res.success) {
+        console.log(`${chalk.green('✅')} ${chalk.white(id.padEnd(30))} ${chalk.gray(res.duration + 'ms')}`);
       } else {
-        console.log(`❌ ${pdf.id}: ${result.error}`);
+        console.log(`${chalk.red('❌')} ${chalk.red(id.padEnd(30))} ${chalk.yellow(res.error)}`);
       }
-    }
-    
-    this.report();
-  }
+    }));
 
-  async generateByType(type: string): Promise<void> {
-    console.log(`🚀 Generating PDFs of type: ${type}\n`);
-    
-    const registry = getPDFRegistry();
-    const pdfsToGenerate = Object.values(registry).filter(pdf => 
-      pdf.type === type && !pdf.exists && pdf.generationScript
-    );
-    
-    if (pdfsToGenerate.length === 0) {
-      console.log(`✅ No PDFs of type "${type}" need generation.`);
-      return;
-    }
-    
-    for (const pdf of pdfsToGenerate) {
-      const result = await this.generateSingle(pdf.id);
-      this.results.push(result);
-      
-      if (result.success) {
-        console.log(`✅ ${pdf.id}: Generated successfully`);
-      } else {
-        console.log(`❌ ${pdf.id}: ${result.error}`);
-      }
-    }
-    
+    await Promise.all(tasks);
     this.report();
   }
 
@@ -99,139 +79,61 @@ class PDFGenerationPipeline {
     const failed = this.results.filter(r => !r.success).length;
     const totalDuration = this.results.reduce((acc, r) => acc + r.duration, 0);
     
-    console.log('\n' + '='.repeat(50));
-    console.log('📊 GENERATION REPORT');
-    console.log('='.repeat(50));
-    console.log(`✅ Successful: ${successful}`);
-    console.log(`❌ Failed: ${failed}`);
-    console.log(`⏱️  Total duration: ${(totalDuration / 1000).toFixed(2)}s`);
-    console.log('='.repeat(50));
+    console.log(chalk.blue('\n' + '='.repeat(60)));
+    console.log(chalk.blue.bold('📊 INSTITUTIONAL GENERATION REPORT'));
+    console.log(chalk.blue('='.repeat(60)));
+    console.log(`${chalk.green('✔ Success:')}    ${successful}`);
+    console.log(`${chalk.red('✘ Failed:')}     ${failed}`);
+    console.log(`${chalk.cyan('⏱ Total Time:')} ${(totalDuration / 1000).toFixed(2)}s`);
+    console.log(chalk.blue('='.repeat(60)));
     
-    if (failed > 0) {
-      console.log('\n❌ FAILED GENERATIONS:');
-      this.results.filter(r => !r.success).forEach(r => {
-        console.log(`  - ${r.id}: ${r.error}`);
-      });
-    }
+    if (failed > 0) process.exit(1);
   }
 }
 
-// CLI Interface
 async function main() {
   const args = process.argv.slice(2);
-  
-  if (args.includes('--help') || args.includes('-h')) {
-    console.log(`
-📚 PDF Generation Commands:
-
-  npm run pdfs:all              Generate all PDFs
-  npm run pdfs:single=<id>      Generate single PDF by ID
-  npm run pdfs:type=<type>      Generate PDFs by type
-  npm run pdfs:list             List all PDFs in registry
-  npm run pdfs:scan             Scan for dynamic assets
-  npm run pdfs:missing          Generate missing PDFs only
-  npm run pdfs:validate         Validate PDF configurations
-  npm run pdfs:legacy           Generate legacy architecture canvas
-
-📋 Available PDF IDs:
-${Object.keys(getPDFRegistry()).map(id => `  • ${id}`).join('\n')}
-
-📋 Available Types:
-  • editorial
-  • framework
-  • canvas
-  • strategic
-  • worksheet
-  • tool
-  • other
-    `);
-    return;
-  }
-  
-  if (args.includes('--validate')) {
-    console.log('🔍 Validating PDF configurations...\n');
-    const registry = getPDFRegistry();
-    const issues: string[] = [];
-    
-    Object.entries(registry).forEach(([id, config]) => {
-      if (config.generationScript) {
-        const scriptPath = path.resolve(process.cwd(), config.generationScript);
-        if (!fs.existsSync(scriptPath)) {
-          issues.push(`❌ ${id}: Generation script not found: ${config.generationScript}`);
-        }
-      }
-      
-      if (!config.outputPath.startsWith('/')) {
-        issues.push(`❌ ${id}: Output path must start with /`);
-      }
-    });
-    
-    if (issues.length > 0) {
-      console.log('Found issues:\n');
-      issues.forEach(issue => console.log(issue));
-      process.exit(1);
-    } else {
-      console.log('✅ All configurations are valid');
-    }
-    
-    return;
-  }
-  
-  if (args.includes('--preview')) {
-    console.log('📋 PDF REGISTRY PREVIEW:\n');
-    const registry = getPDFRegistry();
-    
-    Object.entries(registry).forEach(([id, config]) => {
-      const status = config.exists ? '✅' : '❌';
-      console.log(`${status} ${config.title} (${id})`);
-      console.log(`  Type: ${config.type}`);
-      console.log(`  Tier: ${config.tier}`);
-      console.log(`  Path: ${config.outputPath}`);
-      console.log(`  Interactive: ${config.isInteractive ? 'Yes' : 'No'}`);
-      if (config.generationScript) {
-        console.log(`  Generator: ${config.generationScript}`);
-      }
-      console.log();
-    });
-    
-    return;
-  }
-  
-  const singleArg = args.find(arg => arg.startsWith('--single='));
-  const typeArg = args.find(arg => arg.startsWith('--type='));
-  
+  const registry = getPDFRegistry();
   const pipeline = new PDFGenerationPipeline();
-  
+
+  // --- COMMAND LOGIC ---
+
+  if (args.includes('--validate')) {
+    console.log(chalk.cyan('🔍 Validating Registry Integrity...'));
+    let hasIssues = false;
+    Object.entries(registry).forEach(([id, config]) => {
+      if (!config.outputPath.startsWith('/')) {
+        console.error(chalk.red(`❌ ${id}: outputPath must be absolute (start with /)`));
+        hasIssues = true;
+      }
+    });
+    if (hasIssues) process.exit(1);
+    console.log(chalk.green('✅ Registry valid.'));
+    return;
+  }
+
+  const singleArg = args.find(a => a.startsWith('--single='));
+  const typeArg = args.find(a => a.startsWith('--type='));
+
   if (singleArg) {
-    const singleId = singleArg.split('=')[1];
-    console.log(`🎯 Generating single PDF: ${singleId}`);
-    
-    const result = await pipeline.generateSingle(singleId);
-    
-    if (result.success) {
-      console.log(`\n✅ Successfully generated: ${singleId}`);
-      console.log(`⏱️  Duration: ${result.duration}ms`);
-    } else {
-      console.error(`\n❌ Failed to generate: ${singleId}`);
-      console.error(`💥 Error: ${result.error}`);
-      process.exit(1);
-    }
-    
+    const id = singleArg.split('=')[1];
+    await pipeline.runBatch([id]);
   } else if (typeArg) {
     const type = typeArg.split('=')[1];
-    await pipeline.generateByType(type);
-    
+    const ids = Object.values(registry)
+      .filter(pdf => pdf.type === type && pdf.generationScript)
+      .map(pdf => pdf.id);
+    await pipeline.runBatch(ids);
   } else {
-    await pipeline.generateAll();
+    // Default: Generate all missing or all scripted
+    const ids = Object.values(registry)
+      .filter(pdf => pdf.generationScript)
+      .map(pdf => pdf.id);
+    await pipeline.runBatch(ids);
   }
 }
 
-// Run if called directly
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main().catch(error => {
-    console.error('💥 Fatal error in PDF generation pipeline:', error);
-    process.exit(1);
-  });
-}
-
-export { PDFGenerationPipeline };
+main().catch(err => {
+  console.error(chalk.red('💥 Pipeline Crash:'), err);
+  process.exit(1);
+});

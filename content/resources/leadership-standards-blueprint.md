@@ -26,6 +26,7 @@ readTime: 3 mins
 tags:
   - intel
   - institutional-brief
+category: Institutional Alpha
 ---
 
 # [Leadership](/vault/lexicon/leadership) Standards Blueprint

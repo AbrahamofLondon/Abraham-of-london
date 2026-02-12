@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { Shield, Lock, ArrowRight, Loader2, Key, CheckCircle2 } from "lucide-react";
 import { safeString } from "@/lib/utils/string";
 import { getClearanceLabel } from "@/lib/auth-utils";
-import type { AoLTier } from "@/types/next-auth";
+import type { AoLTier } from "@/types/next-auth";  // ✅ FIXED
 import clsx from "clsx";
 
 interface AccessGateProps {

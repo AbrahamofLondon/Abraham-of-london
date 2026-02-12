@@ -1,11 +1,33 @@
 import React from 'react';
 import auditData from '../../public/system/intel-audit-log.json';
 
-const IntelDashboard = () => {
-  const { totalAssets, breakdown, generatedAt, inventory } = auditData;
+interface AuditEntry {
+  id: string;
+  title: string;
+  tier: string;
+  type: string;
+  words?: number;
+  [key: string]: unknown;
+}
 
-  // Filter for Lexicon items specifically to track institutional language
-  const lexiconCount = inventory.filter(i => i.type === 'LEXICON').length;
+interface AuditData {
+  generatedAt: string;
+  totalAssets: number;
+  tierDistribution: {
+    "inner-circle": number;
+    public: number;
+    member: number;
+    "inner-circle-elite": number;
+    private: number;
+  };
+  entries: AuditEntry[];
+}
+
+const IntelDashboard = () => {
+  // ✅ Destructure the actual JSON properties
+  const { totalAssets, tierDistribution, generatedAt, entries } = auditData as AuditData;
+
+  const lexiconCount = entries.filter(i => i.type === 'LEXICON').length;
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen font-sans text-slate-900">
@@ -17,8 +39,8 @@ const IntelDashboard = () => {
           </p>
         </div>
         <div className="text-right">
-            <span className="text-xs font-bold text-slate-400 block uppercase">Portfolio Health</span>
-            <span className="text-green-600 font-mono font-bold">STABLE</span>
+          <span className="text-xs font-bold text-slate-400 block uppercase">Portfolio Health</span>
+          <span className="text-green-600 font-mono font-bold">STABLE</span>
         </div>
       </header>
 
@@ -30,11 +52,11 @@ const IntelDashboard = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
           <span className="text-slate-500 text-sm uppercase font-semibold">Inner Circle</span>
-          <div className="text-4xl font-light mt-2">{breakdown['inner-circle'] || 0}</div>
+          <div className="text-4xl font-light mt-2">{tierDistribution['inner-circle'] || 0}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
           <span className="text-slate-500 text-sm uppercase font-semibold">Public Access</span>
-          <div className="text-4xl font-light mt-2">{breakdown.public || 0}</div>
+          <div className="text-4xl font-light mt-2">{tierDistribution.public || 0}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
           <span className="text-slate-500 text-sm uppercase font-semibold">Lexicon Terms</span>
@@ -57,7 +79,7 @@ const IntelDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {inventory.map((item, idx) => (
+            {entries.map((item, idx) => (
               <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                 <td className="p-4">
                   <div className="font-medium text-slate-800">{item.title}</div>
@@ -71,7 +93,9 @@ const IntelDashboard = () => {
                   </span>
                 </td>
                 <td className="p-4 text-xs font-semibold text-slate-500">{item.type}</td>
-                <td className="p-4 text-xs tabular-nums text-slate-600">{item.words.toLocaleString()}</td>
+                <td className="p-4 text-xs tabular-nums text-slate-600">
+                  {item.words?.toLocaleString() || '0'}
+                </td>
               </tr>
             ))}
           </tbody>

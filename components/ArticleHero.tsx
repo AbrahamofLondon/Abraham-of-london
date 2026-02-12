@@ -98,7 +98,8 @@ function getCoverImage(image?: string | null | { src?: string }): string | null 
   return null;
 }
 
-export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
+// ✅ Remove explicit return type – TypeScript infers JSX.Element
+export default function ArticleHero(props: ArticleHeroProps) {
   const {
     title = "",
     subtitle,
@@ -229,4 +230,3 @@ export default function ArticleHero(props: ArticleHeroProps): JSX.Element {
 
 // Optional: Export helper functions for reuse
 export { formatDate, formatReadTime, getCoverImage };
-

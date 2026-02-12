@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"], // Ensure class-based dark mode for the Vault UI
+  darkMode: ["class"],
 
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,8 +9,7 @@ module.exports = {
     "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
-    // Added .contentlayer to ensure generated files trigger the right utility classes
-    "./.contentlayer/**/*.json", 
+    "./.contentlayer/**/*.{json,js,ts}",
   ],
 
   theme: {
@@ -32,8 +31,18 @@ module.exports = {
 
     extend: {
       colors: {
+        // Brand-first defaults (safe if CSS vars are missing)
         background: "var(--brand-obsidian, #000000)",
         foreground: "var(--brand-cream, #fdfaf3)",
+        surface: "var(--brand-charcoal, #050505)",
+
+        // Optional CSS-var pipeline (lets you do rgb(var(--x)/<alpha-value>))
+        ui: {
+          background: "rgb(var(--color-background, 0 0 0) / <alpha-value>)",
+          foreground: "rgb(var(--color-on-background, 253 250 243) / <alpha-value>)",
+          surface: "rgb(var(--color-surface, 5 5 5) / <alpha-value>)",
+          border: "rgb(var(--ui-alpha-border, 255 255 255) / <alpha-value>)",
+        },
 
         primary: {
           DEFAULT: "#f59e0b",
@@ -55,11 +64,11 @@ module.exports = {
           glow: "rgba(212, 175, 55, 0.4)",
         },
 
-        surface: "var(--brand-charcoal, #050505)",
         border: "rgba(255, 255, 255, 0.08)",
       },
 
       fontFamily: {
+        // Uses your CSS font vars if present; falls back safely
         sans: ["var(--font-family-sans)", "Inter", "system-ui", "sans-serif"],
         mono: ["var(--font-family-mono)", "JetBrains Mono", "monospace"],
         serif: ["var(--font-family-serif)", "Cormorant Garamond", "serif"],
@@ -73,7 +82,6 @@ module.exports = {
       },
 
       spacing: { 18: "4.5rem", 88: "22rem", 128: "32rem", 144: "36rem" },
-
       borderRadius: { "4xl": "2rem", "5xl": "2.5rem", "6xl": "3.5rem" },
 
       boxShadow: {
@@ -88,6 +96,8 @@ module.exports = {
         float: "float 8s ease-in-out infinite",
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "shimmer-protocol": "protocol-shimmer 2s linear infinite",
+        "slide-in": "slide-in 0.3s ease-out",
+        "slide-out": "slide-out 0.3s ease-in",
       },
 
       keyframes: {
@@ -99,6 +109,14 @@ module.exports = {
           from: { backgroundPosition: "200% 0" },
           to: { backgroundPosition: "-200% 0" },
         },
+        "slide-in": {
+          "0%": { transform: "translateX(-100%)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
+        "slide-out": {
+          "0%": { transform: "translateX(0)", opacity: "1" },
+          "100%": { transform: "translateX(100%)", opacity: "0" },
+        },
       },
 
       backdropBlur: { xs: "2px", "2xl": "40px" },
@@ -106,8 +124,5 @@ module.exports = {
     },
   },
 
-  plugins: [
-    require("@tailwindcss/typography"), 
-    require("@tailwindcss/forms")
-  ],
+  plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
 };

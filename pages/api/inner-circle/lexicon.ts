@@ -1,7 +1,7 @@
 // pages/api/inner-circle/lexicon.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
+import { authOptions } from "@/lib/auth";
 import fs from 'fs';
 import path from 'path';
 

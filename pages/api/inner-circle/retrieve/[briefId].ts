@@ -1,7 +1,7 @@
 /* ./pages/api/inner-circle/retrieve/[briefId].ts — STREAMING WATERMARKED ASSET */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../auth/[...nextauth]";
+import { authOptions } from "@/lib/auth";
 import { PdfService } from '@/lib/server/services/pdf-service';
 import { AuditService } from '@/lib/server/services/audit-service';
 import { BRIEF_REGISTRY } from '@/lib/briefs/registry';

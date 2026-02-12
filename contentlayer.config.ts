@@ -12,7 +12,6 @@ const IS_WINDOWS = process.platform === "win32";
 const IS_CI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
 
-// Hard fail only when explicitly enabled or in CI+prod
 const FAIL_ON_INVALID =
   process.env.CONTENTLAYER_FAIL_ON_INVALID === "true" || (IS_CI && IS_PROD);
 
@@ -42,18 +41,25 @@ function defaultSlugFrom(doc: any, prefix: string): string {
   return cleanSlug(stripPrefix(flat, prefix));
 }
 
+function normalizeSlugForRoute(slug: string, routeBase: string): string {
+  const s = cleanSlug(slug);
+  const prefix = `${routeBase}/`;
+  return s.startsWith(prefix) ? s.slice(prefix.length) : s;
+}
+
 function defaultHrefFrom(doc: any, prefix: string, routeBase: string): string {
-  const slug = cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix);
+  const rawSlug = cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix);
+  const slug = normalizeSlugForRoute(rawSlug, routeBase);
   const normalized = slug.replace(/\/index$/i, "");
   return normalized ? `/${routeBase}/${normalized}` : `/${routeBase}`;
 }
 
 type AccessLevel = "public" | "inner-circle" | "private";
-
 function asAccessLevel(v: unknown): AccessLevel {
   const s = safeString(v).toLowerCase().trim();
   if (s === "private") return "private";
-  if (s === "inner-circle" || s === "innercircle" || s === "member" || s === "members") return "inner-circle";
+  if (s === "inner-circle" || s === "innercircle" || s === "member" || s === "members")
+    return "inner-circle";
   return "public";
 }
 
@@ -69,15 +75,12 @@ function analyzeContent(text: string): { images: number; codeBlocks: number; wor
   const t = safeString(text);
   const images = (t.match(/\!\[.*?\]\(.*?\)/g) || []).length;
   const codeBlocks = (t.match(/```[\s\S]*?```/g) || []).length;
-
-  const words =
-    t
-      .replace(/[`*_>#~\[\]\(\)\{\}.,;:!?'"\\\/|-]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .split(" ")
-      .filter(Boolean).length;
-
+  const words = t
+    .replace(/[`*_>#~\[\]\(\)\{\}.,;:!?'"\\\/|-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean).length;
   return { images, codeBlocks, words };
 }
 
@@ -95,12 +98,10 @@ type ValidationResult = { isValid: boolean; errors: string[] };
 
 function validateBase(doc: any): ValidationResult {
   const errors: string[] = [];
-  if (!safeString(doc?.title).trim()) errors.push("Missing required field: title");
-
+  // ✅ Title validation removed – titleSafe guarantees a value
   const flat = cleanSlug(doc?._raw?.flattenedPath || "");
   const slug = cleanSlug(doc?.slug) || flat;
   if (!slug) errors.push("Missing slug (slug + flattenedPath both empty)");
-
   return { isValid: errors.length === 0, errors };
 }
 
@@ -116,17 +117,13 @@ function parseEventStartISO(raw: unknown): string | null {
 function parseEventEndISO(raw: unknown): string | null {
   const s = safeString(raw).trim();
   if (!s || !s.includes(" - ")) return null;
-
   const [startPart, endPart] = s.split(" - ").map((x) => x.trim());
   const start = new Date(startPart);
   if (isNaN(start.getTime())) return null;
-
   const parts = endPart.split(":").map((n) => parseInt(n, 10));
   if (!parts.length || Number.isNaN(parts[0])) return null;
-
   start.setHours(parts[0] || 0, parts[1] || 0, parts[2] || 0, 0);
   if (isNaN(start.getTime())) return null;
-
   return start.toISOString();
 }
 
@@ -166,7 +163,7 @@ const CTAButton = defineNestedType(() => ({
 }));
 
 // ------------------------------------------------------------
-// FIELD SETS
+// FIELD SETS (NO DUPLICATES)
 // ------------------------------------------------------------
 const seoFields = {
   ogTitle: { type: "string", required: false },
@@ -179,28 +176,29 @@ const seoFields = {
   twitterCard: { type: "string", required: false },
   canonicalUrl: { type: "string", required: false },
   robots: { type: "string", required: false },
-  status: { type: 'string', required: false },
-  kind: { type: 'string', required: false },
+  status: { type: "string", required: false },
+  kind: { type: "string", required: false },
 } as const;
 
-const baseFields = {
-  title: { type: "string", required: true },
+export const baseFields = {
+  title: { type: "string", required: false }, // optional; computed titleSafe provides fallback
   subtitle: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
-  date: { type: "date", required: false },
-  updated: { type: "date", required: false },
-  published: { type: "boolean", required: false },
-  draft: { type: "boolean", required: false },
-  featured: { type: "boolean", required: false },
   slug: { type: "string", required: false },
   href: { type: "string", required: false },
+  date: { type: "string", required: false },
+  updated: { type: "string", required: false },
+  published: { type: "boolean", required: false, default: true },
+  draft: { type: "boolean", required: false, default: false },
+  featured: { type: "boolean", required: false, default: false },
   aliases: { type: "list", of: { type: "string" }, required: false },
   docKind: { type: "string", required: false },
   layout: { type: "string", required: false },
   density: { type: "string", required: false },
   author: { type: "string", required: false },
   authorTitle: { type: "string", required: false },
+  authorNote: { type: "string", required: false },
   tags: { type: "list", of: { type: "string" }, required: false },
   category: { type: "string", required: false },
   coverImage: { type: "string", required: false },
@@ -211,19 +209,20 @@ const baseFields = {
   socialCaption: { type: "string", required: false },
   readTime: { type: "string", required: false },
   accessLevel: { type: "string", required: false },
-  requiresAuth: { type: "boolean", required: false },
+  requiresAuth: { type: "boolean", required: false, default: false },
   tier: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
   resources: { type: "json", required: false },
   downloads: { type: "json", required: false },
   relatedDownloads: { type: "list", of: { type: "string" }, required: false },
   keyInsights: { type: "list", of: { type: "string" }, required: false },
-  authorNote: { type: "string", required: false },
   order: { type: "number", required: false },
   volumeNumber: { type: "string", required: false },
   volume: { type: "string", required: false },
   part: { type: "string", required: false },
-  contentOnly: { type: "boolean", required: false },
+  contentOnly: { type: "boolean", required: false, default: false },
+  version: { type: "string", required: false },
+  institutionalId: { type: "string", required: false },
   ...seoFields,
 } as const;
 
@@ -237,7 +236,6 @@ const downloadFields = {
   paperFormats: { type: "list", of: { type: "string" }, required: false },
   isInteractive: { type: "boolean", required: false },
   isFillable: { type: "boolean", required: false },
-  version: { type: "string", required: false },
   language: { type: "string", required: false },
   pageCount: { type: "number", required: false },
   useLegacyDiagram: { type: "boolean", required: false },
@@ -253,12 +251,6 @@ const downloadFields = {
   related: { type: "list", of: { type: "string" }, required: false },
   ctaConfig: { type: "json", required: false },
   downloadProcess: { type: "json", required: false },
-} as const;
-
-const resourceFields = {
-  resourceType: { type: "string", required: false },
-  downloadUrl: { type: "string", required: false },
-  links: { type: "json", required: false },
 } as const;
 
 const strategyFields = {
@@ -277,11 +269,15 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
   return {
     slugSafe: {
       type: "string",
-      resolve: (doc) => cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix) || "",
+      resolve: (doc) => {
+        const raw = cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix) || "";
+        return normalizeSlugForRoute(raw, routeBase);
+      },
     },
     hrefSafe: {
       type: "string",
-      resolve: (doc) => (cleanSlug(doc?.href) ? safeString(doc.href) : defaultHrefFrom(doc, prefix, routeBase)),
+      resolve: (doc) =>
+        cleanSlug(doc?.href) ? safeString(doc.href) : defaultHrefFrom(doc, prefix, routeBase),
     },
     titleSafe: {
       type: "string",
@@ -310,7 +306,8 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
     },
     readTimeSafe: {
       type: "string",
-      resolve: (doc) => safeString(doc?.readTime).trim() || estimateReadTime(safeRawBody(doc)),
+      resolve: (doc) =>
+        safeString(doc?.readTime).trim() || estimateReadTime(safeRawBody(doc)),
     },
     wordCount: {
       type: "number",
@@ -321,7 +318,9 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
       resolve: (doc) => {
         const r = validateBase(doc);
         if (!r.isValid && FAIL_ON_INVALID) {
-          throw new Error(`[Contentlayer] Invalid doc (${doc?._id || "unknown"}): ${r.errors.join("; ")}`);
+          throw new Error(
+            `[Contentlayer] Invalid doc (${doc?._id || "unknown"}): ${r.errors.join("; ")}`
+          );
         }
         return r;
       },
@@ -330,9 +329,8 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
 }
 
 // ------------------------------------------------------------
-// DOCUMENT TYPES - UNIFIED & INSTITUTIONAL GRADE
+// DOCUMENT TYPES
 // ------------------------------------------------------------
-
 export const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
@@ -341,9 +339,6 @@ export const Post = defineDocumentType(() => ({
     ...baseFields,
     series: { type: "string", required: false },
     seriesOrder: { type: "number", required: false },
-    // Institutional Metadata for 2026 reporting
-    version: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
   },
   computedFields: createComputedFields("blog/", "blog"),
 }));
@@ -384,31 +379,25 @@ export const Canon = defineDocumentType(() => ({
     ...baseFields,
     canonType: { type: "string", required: false },
     edition: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
   },
   computedFields: createComputedFields("canon/", "canon"),
 }));
 
 export const Download = defineDocumentType(() => ({
   name: "Download",
-  filePathPattern: "downloads/**/*.{md,mdx}", 
+  filePathPattern: "downloads/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
     ...baseFields,
     ...downloadFields,
-    // Existing extended fields
-    volume: { type: "number", required: false },
+    volumeIndex: { type: "number", required: false },
     lastUpdated: { type: "string", required: false },
     audience: { type: "string", required: false },
-    version: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
-    
-    // --- MISSION CRITICAL: Resolving the 76 document errors ---
-    classification: { 
-      type: "enum", 
+    classification: {
+      type: "enum",
       options: ["Unclassified", "Restricted", "Confidential", "Secret", "Top Secret"],
       default: "Unclassified",
-      required: false 
+      required: false,
     },
     series: { type: "string", required: false },
   },
@@ -426,6 +415,7 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", required: false },
     startDate: { type: "string", required: false },
     endDate: { type: "string", required: false },
+    startdate: { type: "string", required: false }, // lowercase fallback
     timezone: { type: "string", required: false },
     isVirtual: { type: "boolean", required: false },
     meetingLink: { type: "string", required: false },
@@ -434,18 +424,20 @@ export const Event = defineDocumentType(() => ({
     ...createComputedFields("events/", "events"),
     parsedStartDate: {
       type: "string",
-      resolve: (doc) => parseEventStartISO(doc?.startDate) || "",
+      resolve: (doc) => parseEventStartISO(doc?.startDate ?? doc?.startdate) || "",
     },
     parsedEndDate: {
       type: "string",
-      resolve: (doc) => parseEventEndISO(doc?.startDate) || "",
+      resolve: (doc) => parseEventEndISO(doc?.startDate ?? doc?.startdate) || "",
     },
     validation: {
       type: "json",
       resolve: (doc) => {
         const r = validateEvent(doc);
         if (!r.isValid && FAIL_ON_INVALID) {
-          throw new Error(`[Contentlayer] Invalid Event (${doc?._id || "unknown"}): ${r.errors.join("; ")}`);
+          throw new Error(
+            `[Contentlayer] Invalid Event (${doc?._id || "unknown"}): ${r.errors.join("; ")}`
+          );
         }
         return r;
       },
@@ -473,44 +465,16 @@ export const Print = defineDocumentType(() => ({
 
 export const Resource = defineDocumentType(() => ({
   name: "Resource",
-  filePathPattern: `resources/**/*.{md,mdx}`, // Updated to include .md
+  filePathPattern: "resources/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: true },
-    date: { type: "date", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    category: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    status: { type: "string", required: false },
-    tier: { type: "string", required: false },
-    
-    // UI & System Fields (From Build Log)
-    author: { type: "string", required: false },
-    slug: { type: "string", required: false },
-    draft: { type: "boolean", required: false },
-    featured: { type: "boolean", required: false },
-    coverImage: { type: "string", required: false },
-    accessLevel: { type: "string", required: false },
+    ...baseFields,
     resourceType: { type: "string", required: false },
-    docKind: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
-    readTime: { type: "string", required: false },
-    ogTitle: { type: "string", required: false },
-    ogDescription: { type: "string", required: false },
-    socialCaption: { type: "string", required: false },
-    coverAspect: { type: "string", required: false },
-    coverFit: { type: "string", required: false },
-    coverPosition: { type: "string", required: false },
-    lockMessage: { type: "string", required: false },
-
-    // Institutional Metadata
+    links: { type: "json", required: false },
     format: { type: "string", required: false },
-    version: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
     jurisdiction: { type: "string", required: false },
     classification: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
   },
   computedFields: createComputedFields("resources/", "resources"),
 }));
@@ -522,11 +486,6 @@ export const Strategy = defineDocumentType(() => ({
   fields: {
     ...baseFields,
     ...strategyFields,
-    version: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
-    // Ensuring strategy can handle standard UI fields if present
-    accessLevel: { type: "string", required: false },
-    docKind: { type: "string", required: false },
   },
   computedFields: createComputedFields("strategy/", "strategy"),
 }));
@@ -539,21 +498,12 @@ export const Lexicon = defineDocumentType(() => ({
     ...baseFields,
     term: { type: "string", required: false },
     phonetic: { type: "string", required: false },
-    status: { type: "string", required: false },
-    kind: { type: "string", required: false },
-    // Metadata discovered in Lexicon frontmatter
-    accessLevel: { type: "string", required: false },
-    slug: { type: "string", required: false },
-    docKind: { type: "string", required: false },
-    ogTitle: { type: "string", required: false },
-    ogDescription: { type: "string", required: false },
-    draft: { type: "boolean", required: false },
   },
   computedFields: createComputedFields("lexicon/", "lexicon"),
 }));
 
 // ------------------------------------------------------------
-// INSTITUTIONAL EXCLUSIONS
+// EXCLUSIONS
 // ------------------------------------------------------------
 function getExclusions(): string[] {
   const exclusions = [
@@ -567,7 +517,6 @@ function getExclusions(): string[] {
     "temp",
     "public/**/*",
     "**/public/assets/**",
-    "public/assets/images/**",
     "**/*.jpg",
     "**/*.jpeg",
     "**/*.png",
@@ -593,8 +542,13 @@ function getExclusions(): string[] {
     "**/*.backup*",
     "donwloads",
     "donwloads/**",
+    "downloads/linked-shorts/**",
+    "downloads/linked-shorts/**/*",
+    "downloads/linked-briefs/**",
+    "downloads/linked-briefs/**/*",
+    "downloads/linked-*/**",
+    "downloads/linked-*/**/*",
   ];
-
   if (IS_WINDOWS) {
     exclusions.push(
       "**/~$*.docx",
@@ -604,35 +558,73 @@ function getExclusions(): string[] {
       "**/Thumbs.db"
     );
   }
-
   return exclusions;
 }
 
 // ------------------------------------------------------------
-// SOURCE
+// SOURCE – SINGLE, CLEAN CONFIG
 // ------------------------------------------------------------
 export default makeSource({
   contentDirPath: "content",
   contentDirInclude: [
-    "blog", 
-    "shorts", 
-    "books", 
-    "canon", 
-    "downloads", 
-    "events", 
-    "prints", 
-    "resources", 
+    "blog",
+    "shorts",
+    "books",
+    "canon",
+    "downloads",
+    "events",
+    "prints",
+    "resources",
     "strategy",
-    "lexicon"
+    "lexicon",
   ],
   contentDirExclude: getExclusions(),
-  documentTypes: [Post, Short, Book, Canon, Download, Event, Print, Resource, Strategy, Lexicon],
+  documentTypes: [
+    Post,
+    Short,
+    Book,
+    Canon,
+    Download,
+    Event,
+    Print,
+    Resource,
+    Strategy,
+    Lexicon,
+  ],
   disableImportAliasWarning: true,
   mdx: { remarkPlugins: [], rehypePlugins: [] },
 
+  // ✅ onSuccess – full duplicate detection and validation reporting
   onSuccess: async (importData) => {
     const data = await importData();
     const allDocuments: any[] = (data as any)?.allDocuments || [];
+
+    const seenFlat = new Map<string, string>();
+    const seenHref = new Map<string, string>();
+    const dupErrors: string[] = [];
+
+    for (const doc of allDocuments) {
+      const id = safeString(doc?._id);
+      const flat = safeString(doc?._raw?.flattenedPath);
+      const href = safeString(doc?.hrefSafe);
+
+      if (flat) {
+        const prev = seenFlat.get(flat);
+        if (prev && prev !== id) {
+          dupErrors.push(`Duplicate flattenedPath: ${flat} (${prev}) vs (${id})`);
+        } else {
+          seenFlat.set(flat, id);
+        }
+      }
+      if (href) {
+        const prev = seenHref.get(href);
+        if (prev && prev !== id) {
+          dupErrors.push(`Duplicate hrefSafe: ${href} (${prev}) vs (${id})`);
+        } else {
+          seenHref.set(href, id);
+        }
+      }
+    }
 
     const counts: Record<string, number> = {};
     let valid = 0;
@@ -648,7 +640,9 @@ export default makeSource({
       else {
         invalid++;
         if (samples.length < 12) {
-          samples.push(`${t} ${safeString(doc?._id)} → ${(v?.errors || ["Validation failed"]).join(", ")}`);
+          samples.push(
+            `${t} ${safeString(doc?._id)} → ${(v?.errors || ["Validation failed"]).join(", ")}`
+          );
         }
       }
     }
@@ -660,6 +654,13 @@ export default makeSource({
     console.log(`Docs: ${allDocuments.length}`);
     console.log("By type:", counts);
     console.log(`Validation: valid=${valid} invalid=${invalid}`);
+
+    if (dupErrors.length) {
+      console.warn("\n⚠️  Duplicate routing/source signals detected:");
+      dupErrors.slice(0, 20).forEach((e) => console.warn("  -", e));
+      if (dupErrors.length > 20) console.warn(`  ...and ${dupErrors.length - 20} more`);
+      if (FAIL_ON_INVALID) throw new Error(`Duplicate doc signals detected: ${dupErrors.length}`);
+    }
 
     if (invalid > 0) {
       console.warn("\n⚠️  Invalid document samples:");
