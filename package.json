@@ -198,7 +198,7 @@
     "remark-reading-time": "^2.0.2",
     "remark-toc": "^9.0.0",
     "resend": "^6.9.2",
-    "rimraf": "^6.1.2",
+    "rimraf": "^6.1.3",
     "rxjs": "^7.8.2",
     "sass": "^1.97.3",
     "sharp": "^0.34.5",
