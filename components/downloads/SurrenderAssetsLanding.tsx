@@ -1,24 +1,22 @@
-// components/downloads/SurrenderAssetsLanding.tsx - ROBUST IMPORT
+// components/downloads/SurrenderAssetsLanding.tsx - FINAL FIX
 import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
-import * as PDFRegistry from "@/lib/pdf/registry";
+import { getAllPDFItems } from "@/lib/pdf/registry";
+import type { PDFItem } from "@/lib/pdf/registry";
 import { Shield, Download, FileText, Users, Zap, Award } from 'lucide-react';
-// Use the imported functions
-const { getAllPDFItems, getPDFsByType, configToItem } = PDFRegistry;
-type PDFItem = PDFRegistry.PDFItem;
-type PDFConfig = PDFRegistry.PDFConfig;
+
 interface AssetCardProps {
   asset: PDFItem;
   index: number;
 }
+
 const SurrenderAssetsLanding: React.FC = () => {
-  // Convert PDFConfig[] to PDFItem[] for component usage
-  const surrenderAssets = [
-    ...getPDFsByType('worksheet'),
-    ...getPDFsByType('assessment'),
-    ...getPDFsByType('tool'),
-    ...getPDFsByType('framework')
-  ].map(configToItem);
+  // Get all PDF items and filter by relevant types, ensuring type is defined
+  const allItems = getAllPDFItems({ includeMissing: false });
+  const surrenderAssets = allItems.filter(asset => 
+    asset.type && ['worksheet', 'assessment', 'tool', 'framework'].includes(asset.type)
+  );
+
   const categories = [
     {
       title: 'Worksheets & Templates',
@@ -39,6 +37,7 @@ const SurrenderAssetsLanding: React.FC = () => {
       assets: surrenderAssets.filter(a => a.type === 'tool' || a.type === 'framework')
     }
   ];
+
   const AssetCard: React.FC<AssetCardProps> = ({ asset, index }) => (
     <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-xl p-6 hover:border-amber-500/30 transition-all group hover:scale-[1.02]">
       <div className="flex justify-between items-start mb-4">
@@ -54,7 +53,7 @@ const SurrenderAssetsLanding: React.FC = () => {
           </span>
         </div>
         <div className="text-xs font-mono text-gray-500">
-          {asset.fileSize || 'PDF'}
+          {asset.fileSizeHuman || 'PDF'}
         </div>
       </div>
       <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition">
@@ -65,7 +64,8 @@ const SurrenderAssetsLanding: React.FC = () => {
       </p>
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          {asset.safeArraySlice(tags, 0, 2)?.map((tag: string) => (
+          {/* Cast the result to string[] since asset.tags is string[] | undefined */}
+          {(safeArraySlice(asset.tags || [], 0, 2) as string[]).map((tag) => (
             <span key={tag} className="text-xs px-2 py-1 rounded bg-white/5 text-gray-400">
               {tag}
             </span>
@@ -82,6 +82,7 @@ const SurrenderAssetsLanding: React.FC = () => {
       </div>
     </div>
   );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
       {/* Hero Section */}
@@ -112,7 +113,7 @@ const SurrenderAssetsLanding: React.FC = () => {
             </a>
           </div>
         </div>
-        {/* Stats - Use the actual surrenderAssets array */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
             <div className="text-2xl font-bold text-white mb-1">{surrenderAssets.length}</div>
@@ -138,6 +139,7 @@ const SurrenderAssetsLanding: React.FC = () => {
           </div>
         </div>
       </div>
+
       {/* Categories */}
       <div id="downloads" className="max-w-6xl mx-auto">
         {categories.map((category, catIndex) => (
@@ -153,16 +155,13 @@ const SurrenderAssetsLanding: React.FC = () => {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {category.assets.map((asset, assetIndex) => (
-                <AssetCard 
-                  key={asset.id} 
-                  asset={asset} 
-                  index={assetIndex} 
-                />
+                <AssetCard key={asset.id} asset={asset} index={assetIndex} />
               ))}
             </div>
           </div>
         ))}
       </div>
+
       {/* CTA Section */}
       <div className="max-w-4xl mx-auto mt-16 p-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20">
         <div className="text-center">
@@ -187,4 +186,5 @@ const SurrenderAssetsLanding: React.FC = () => {
     </div>
   );
 };
+
 export default SurrenderAssetsLanding;

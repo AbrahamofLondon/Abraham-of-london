@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Quote } from "lucide-react";
 
-export default function CredibilityQuotes(): JSX.Element {
+export default function CredibilityQuotes(): React.ReactElement {
   const quotes = [
     {
       q: "This reads like an operator’s briefing — not internet content.",

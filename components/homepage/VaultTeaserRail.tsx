@@ -13,7 +13,7 @@ import {
   Zap 
 } from "lucide-react";
 
-export default function VaultTeaserRail() {
+export default function VaultTeaserRail(): React.ReactElement {
   const items = [
     { 
       icon: <Workflow className="h-5 w-5" />, 
@@ -37,7 +37,6 @@ export default function VaultTeaserRail() {
 
   return (
     <section className="relative bg-black py-24 overflow-hidden">
-      {/* 1. Ambient Background (The Vault Atmosphere) */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-amber-500/[0.03] blur-[150px] rounded-full" />
         <div className="absolute inset-0 bg-[url('/assets/images/dots.svg')] opacity-5" />
@@ -46,7 +45,6 @@ export default function VaultTeaserRail() {
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
           
-          {/* Left: The "Access Point" */}
           <div className="lg:col-span-5">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-[1px] w-8 bg-amber-500/50" />
@@ -83,9 +81,7 @@ export default function VaultTeaserRail() {
             </div>
           </div>
 
-          {/* Right: The Grid of Artefacts */}
           <div className="lg:col-span-7 relative">
-            {/* The "Blueprint" Grid lines */}
             <div className="absolute -inset-6 border border-white/[0.03] pointer-events-none rounded-[40px]" />
             
             <div className="grid gap-4 sm:grid-cols-2">
@@ -113,12 +109,10 @@ export default function VaultTeaserRail() {
                     {x.body}
                   </p>
 
-                  {/* Decorative Scanline */}
                   <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500/40 transition-all duration-500 group-hover:w-full" />
                 </motion.div>
               ))}
 
-              {/* Secure Footer Bar */}
               <div className="sm:col-span-2 mt-4 p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20">
                 <div className="flex items-center gap-4">
                   <div className="hidden sm:flex h-8 w-8 rounded-full bg-amber-500/20 items-center justify-center">

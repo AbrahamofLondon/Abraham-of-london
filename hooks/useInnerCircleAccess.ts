@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import type { InnerCircleAccess } from '@/lib/inner-circle';
+import type { InnerCircleAccess } from '@/lib/inner-circle/access.client';
 
 export function useInnerCircleAccess(): {
   access: InnerCircleAccess | null;
@@ -25,33 +25,36 @@ export function useInnerCircleAccess(): {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache',
         },
-        credentials: 'include', // Include cookies
+        credentials: 'include',
       });
 
       if (!response.ok) {
         throw new Error(`Access check failed: ${response.status} ${response.statusText}`);
       }
 
-      const data: InnerCircleAccess = await response.json();
+      const data = await response.json();
       
-      // Validate the response matches the expected type
-      if (typeof data.hasAccess !== 'boolean') {
+      // Validate the response matches InnerCircleAccess type
+      if (typeof data !== 'object' || data === null) {
         throw new Error('Invalid access response format');
       }
-      
-      setAccess(data);
+
+      // Check for hasAccess property (as defined in the type)
+      if (typeof data.hasAccess !== 'boolean') {
+        throw new Error('Response missing required field: hasAccess must be boolean');
+      }
+
+      // The response matches our type, so we can set it directly
+      setAccess(data as InnerCircleAccess);
     } catch (err) {
       console.error('Failed to check inner circle access:', err);
       setError(err instanceof Error ? err : new Error('Unknown error'));
       
-      // Fallback with type-safe reason
+      // Create fallback that matches InnerCircleAccess exactly
       const fallbackAccess: InnerCircleAccess = {
         hasAccess: false,
-        reason: 'no_cookie', // Use a valid reason from the union type
-        // Add optional fields if needed by your type
-        ...(typeof window !== 'undefined' && localStorage.getItem('innerCircleAccess') === 'true' 
-          ? { tier: 'inner-circle' as const }
-          : {}),
+        reason: 'error',
+        // tier is optional, so we can omit it
       };
       
       setAccess(fallbackAccess);
@@ -65,18 +68,18 @@ export function useInnerCircleAccess(): {
     checkAccess();
   }, [checkAccess]);
 
-  // Optional: Poll for access changes (every 5 minutes)
+  // Poll for access changes (every 5 minutes)
   useEffect(() => {
     if (!access?.hasAccess) return;
     
     const interval = setInterval(() => {
       checkAccess();
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, [access?.hasAccess, checkAccess]);
 
-  // Optional: Listen for storage/cookie changes
+  // Listen for storage/cookie changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
     

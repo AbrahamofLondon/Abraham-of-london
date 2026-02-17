@@ -1,182 +1,334 @@
-/* pages/purpose.tsx — PURPOSE LANDING PAGE (INTEGRITY MODE) */
+// pages/books/the-architecture-of-human-purpose-landing.tsx
 import * as React from "react";
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { 
-  BookOpen, 
-  ChevronRight, 
-  Sparkles, 
-  Target, 
-  Compass, 
-  Layers, 
-  Globe, 
-  Users, 
-  ArrowRight, 
-  Clock, 
-  Calendar, 
-  Tag 
-} from "lucide-react";
-
 import Layout from "@/components/Layout";
+import { ArrowRight, BookOpen, Layers, Lock, ShieldCheck } from "lucide-react";
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.com").replace(/\/+$/, "");
-const CANONICAL_PATH = "/purpose";
+type PreludeBook = {
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  slug?: string | null;
+};
 
-const PurposeLandingPage: NextPage = () => {
-  const canonicalUrl = `${SITE_URL}${CANONICAL_PATH}`;
+type PurposeLandingProps = {
+  book: PreludeBook;
+};
 
-  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
-  const [activeSection, setActiveSection] = React.useState('introduction');
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+const canonicalPath = "/books/the-architecture-of-human-purpose-landing";
+const canonicalUrl = `${SITE_URL}${canonicalPath}`;
 
-  React.useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => setMousePosition({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", handleMouseMove);
-
-    const handleScroll = () => {
-      const sections = ['introduction', 'architecture', 'principles', 'access'];
-      const scrollPosition = window.scrollY + 120;
-
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el && scrollPosition >= el.offsetTop && scrollPosition < el.offsetTop + el.offsetHeight) {
-          setActiveSection(section);
-          break;
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
+  const title = book?.title || "The Architecture of Human Purpose";
+  const subtitle = book?.subtitle || "Prelude MiniBook - Limited Release Edition";
+  const description =
+    book?.description ||
+    "A limited-release Prelude Minibook introducing the Canon on purpose, civilisation, governance, spiritual alignment, and human destiny.";
+  const excerpt =
+    book?.excerpt ||
+    "Human flourishing is not accidental. It is architectural. This Prelude introduces the foundational patterns that govern purpose, identity, civilisation and destiny.";
+  const cover = book?.coverImage || "/assets/images/books/the-architecture-of-human-purpose.jpg";
 
   return (
     <Layout
-      title="The Architecture of Human Purpose"
-      description="Volume Zero: The foundational scaffolding for purpose, civilisation, and human destiny."
-      canonicalUrl={canonicalUrl}
-      className="bg-[#0a0a0a]"
+      title={`${title} — Prelude MiniBook`}
+      description={description}
+      canonicalUrl={canonicalPath}
+      ogType="book"
+      ogImage={cover}
+      fullWidth
+      className="bg-black"
+      headerTransparent
     >
-      {/* BACKGROUND INTEGRITY */}
-      <div className="fixed inset-0 -z-10 bg-[#0a0a0a]">
-        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        <div className="absolute inset-0" style={{ background: `radial-gradient(800px at ${mousePosition.x}px ${mousePosition.y}px, rgba(212, 175, 55, 0.04) 0%, transparent 80%)` }} />
-      </div>
+      <Head>
+        <meta property="og:url" content={canonicalUrl} />
+      </Head>
 
-      {/* STRATEGIC NAVIGATION */}
-      <nav className="sticky top-6 z-50 mx-auto max-w-4xl px-4">
-        <div className="bg-black/80 backdrop-blur-2xl border border-gold/10 rounded-2xl px-6 py-3 flex items-center justify-between shadow-2xl">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">Home</Link>
-            <div className="h-4 w-px bg-white/10" />
-            <div className="hidden sm:flex gap-4">
-              {['introduction', 'architecture', 'principles'].map((id) => (
-                <a key={id} href={`#${id}`} className={`text-[10px] font-bold uppercase tracking-widest transition-all ${activeSection === id ? 'text-gold' : 'text-white/40 hover:text-white'}`}>
-                  {id}
-                </a>
-              ))}
-            </div>
+      <div className="min-h-screen bg-black text-white">
+        {/* HERO */}
+        <section className="relative overflow-hidden border-b border-white/10">
+          <div className="pointer-events-none absolute inset-0 opacity-[0.05]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(245,158,11,0.35),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_65%,rgba(245,158,11,0.18),transparent_60%)]" />
           </div>
-          <Link href="/books/the-architecture-of-human-purpose" className="bg-gold text-black px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gold/80 transition-all">Read Volume Zero</Link>
-        </div>
-      </nav>
 
-      <main className="relative pt-20">
-        {/* HERO SECTION */}
-        <section id="introduction" className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center pb-32">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-gold border border-gold/20">
-              <BookOpen size={12} /> Volume Zero • Prelude Edition
-            </div>
-            <h1 className="font-serif text-5xl md:text-7xl font-bold text-white leading-tight">
-              The Architecture of <span className="italic text-gold/90">Human Purpose</span>
-            </h1>
-            <p className="text-xl text-white/60 leading-relaxed max-w-xl">
-              Human flourishing is not accidental. It is architectural. This prelude sketches the load-bearing walls of destiny.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <Link href="/books/the-architecture-of-human-purpose" className="bg-gold text-black px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gold/80 transition-all flex items-center justify-center gap-3">
-                Begin Reading <ArrowRight size={16} />
-              </Link>
-              <Link href="/inner-circle" className="border border-gold/30 text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gold/5 transition-all flex items-center justify-center gap-2">
-                Inner Circle Access <ChevronRight size={14} />
-              </Link>
-            </div>
-          </div>
-          
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gold/20 rounded-3xl blur-2xl group-hover:bg-gold/30 transition-all" />
-            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-zinc-900">
-              <Image 
-                src="/assets/images/books/the-architecture-of-human-purpose.jpg" 
-                alt="Volume Zero Cover" 
-                fill 
-                className="object-cover group-hover:scale-105 transition-transform duration-700" 
-                priority
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ARCHITECTURE SECTION */}
-        <section id="architecture" className="bg-zinc-950/50 py-32 border-y border-white/5">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <Layers className="mx-auto text-gold mb-6" size={40} />
-            <h2 className="font-serif text-4xl md:text-5xl text-white mb-8">Architectural Foundations</h2>
-            <p className="text-gray-400 text-lg leading-relaxed mb-16">
-              Just as buildings require blueprints, human purpose requires architectural rigor. This volume establishes the scaffolding for meaningful institutional build.
-            </p>
-            <div className="grid sm:grid-cols-2 gap-8 text-left">
-              {[
-                { icon: Compass, title: "Intentionality", desc: "Flourishing begins with design, not accident." },
-                { icon: Globe, title: "Civilisation", desc: "Individual purpose must integrate with the collective." },
-                { icon: Target, title: "Precision", desc: "Clear blueprints precede meaningful construction." },
-                { icon: Sparkles, title: "Elegance", desc: "Profound truths are simple when properly architectural." }
-              ].map((p, i) => (
-                <div key={i} className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-gold/20 transition-all">
-                  <p.icon className="text-gold mb-4" size={24} />
-                  <h3 className="text-white font-bold mb-2 uppercase tracking-widest text-sm">{p.title}</h3>
-                  <p className="text-gray-500 text-sm">{p.desc}</p>
+          <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-20 sm:px-6 lg:px-8 lg:pb-20 lg:pt-24">
+            <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+              {/* Copy */}
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-2">
+                  <ShieldCheck className="h-4 w-4 text-amber-300" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200">
+                    Canon Prelude · Limited Release
+                  </span>
                 </div>
-              ))}
+
+                <h1 className="font-serif text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+                  {title.split(" ").slice(0, 3).join(" ")}{" "}
+                  <span className="block text-amber-200">{title.split(" ").slice(3).join(" ")}</span>
+                </h1>
+
+                <p className="text-sm font-mono uppercase tracking-[0.28em] text-white/55">
+                  {subtitle}
+                </p>
+
+                <p className="max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+                  {description}
+                </p>
+
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                  <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-amber-200/70">
+                    Excerpt
+                  </p>
+                  <p className="mt-3 text-base font-serif leading-relaxed text-white/85">
+                    {excerpt}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-4 pt-2">
+                  <Link
+                    href="/books/the-architecture-of-human-purpose"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-7 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-amber-400 transition-all"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Read the Prelude
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+
+                  <Link
+                    href="/canon"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-7 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/85 hover:bg-white/10 hover:border-white/20 transition-all"
+                  >
+                    <Layers className="h-4 w-4" />
+                    Enter the Canon
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+
+                  <Link
+                    href="/inner-circle"
+                    className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/5 px-7 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-amber-200 hover:bg-amber-500/10 hover:border-amber-500/55 transition-all"
+                  >
+                    <Lock className="h-4 w-4" />
+                    Founding Readers Circle
+                  </Link>
+                </div>
+
+                <p className="pt-2 text-xs text-white/45">
+                  Volume 0 thinking: a frame strong enough to hold decisions, covenants, markets, and legacy without collapsing into “purpose vibes”.
+                </p>
+              </div>
+
+              {/* Cover */}
+              <div className="flex justify-center lg:justify-end">
+                <div className="relative">
+                  <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-amber-500/20 via-amber-500/5 to-transparent blur-2xl opacity-70" />
+                  <div className="relative rounded-[2rem] border border-amber-500/25 bg-black/60 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.9)]">
+                    <Image
+                      src={cover}
+                      alt={`${title} cover`}
+                      width={420}
+                      height={620}
+                      className="h-auto w-[240px] rounded-2xl border border-amber-500/35 shadow-2xl sm:w-[280px]"
+                      priority
+                    />
+                    <div className="mt-4 text-center text-[10px] font-mono uppercase tracking-[0.28em] text-white/50">
+                      Canon Shelf · Prelude MiniBook
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hairline */}
+            <div className="mt-14 h-px w-full bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />
+          </div>
+        </section>
+
+        {/* CANON INTRO — real, not a “mini pill” */}
+        <section className="relative overflow-hidden">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+            <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/18 bg-amber-500/10 px-4 py-2">
+                  <Layers className="h-4 w-4 text-amber-300" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200">
+                    The Canon
+                  </span>
+                </div>
+
+                <h2 className="font-serif text-3xl sm:text-4xl text-white/95">
+                  Not content. An operating library.
+                </h2>
+
+                <p className="text-base leading-relaxed text-white/70">
+                  Most platforms publish ideas. This platform publishes <span className="text-amber-200">systems</span>.
+                  The Canon is the doctrinal spine — the place where the frameworks live: diagnostics, matrices, models,
+                  institutional blueprints, and operating procedures.
+                </p>
+
+                <p className="text-base leading-relaxed text-white/60">
+                  The Prelude is the key. The Canon is the architecture.
+                  If you want a worldview that can hold pressure — family, leadership, governance, markets, culture —
+                  you don’t need more inspiration. You need structure.
+                </p>
+
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Link
+                    href="/canon"
+                    className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-slate-100 transition-all"
+                  >
+                    Browse Canon <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/downloads"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/80 hover:bg-white/10 hover:border-white/20 transition-all"
+                  >
+                    Vault & Tools <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-sm">
+                <p className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/70">
+                  What the Canon contains
+                </p>
+
+                <div className="mt-6 grid gap-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+                    <div className="text-sm font-semibold text-white">Diagnostics & Indices</div>
+                    <div className="mt-2 text-sm text-white/60 leading-relaxed">
+                      Alignment Index™, coherence scoring, and decision-quality frameworks across person, family, organisation, and nation.
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+                    <div className="text-sm font-semibold text-white">Models & Matrices</div>
+                    <div className="mt-2 text-sm text-white/60 leading-relaxed">
+                      Input → logic → output systems that can be audited, taught, deployed, and improved.
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+                    <div className="text-sm font-semibold text-white">Institutional Blueprints</div>
+                    <div className="mt-2 text-sm text-white/60 leading-relaxed">
+                      Governance, continuity, stewardship, and legacy design — church, business, household, and state.
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-5">
+                    <div className="text-sm font-semibold text-amber-100">The Prelude’s role</div>
+                    <div className="mt-2 text-sm text-white/65 leading-relaxed">
+                      A doorway: it gives you the load-bearing logic without opening the entire vault of tools.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-7 h-px w-full bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/books/the-architecture-of-human-purpose"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-amber-400 transition-all"
+                  >
+                    Open the Prelude <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/inner-circle"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-white/5 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/85 hover:bg-white/10 hover:border-white/20 transition-all"
+                  >
+                    Join Inner Circle <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ACCESS SECTION */}
-        <section id="access" className="py-32">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-10 rounded-3xl bg-white/5 border border-white/10">
-                <h3 className="text-2xl font-serif font-bold text-white mb-4">Public Reading</h3>
-                <p className="text-gray-500 mb-8">Access the Prelude edition in its entirety. Open to all builders.</p>
-                <Link href="/books/the-architecture-of-human-purpose" className="block w-full py-4 bg-white/10 text-white rounded-xl text-center font-bold text-xs uppercase tracking-widest hover:bg-white/20 transition-all">Start Now</Link>
-              </div>
-              <div className="p-10 rounded-3xl bg-gold/5 border border-gold/20 relative overflow-hidden">
-                <Sparkles className="absolute top-6 right-6 text-gold/20" size={40} />
-                <h3 className="text-2xl font-serif font-bold text-white mb-4">Inner Circle</h3>
-                <p className="text-gray-500 mb-8">Receive all future volumes and participate in strategic community dialogue.</p>
-                <Link href="/inner-circle" className="block w-full py-4 bg-gold text-black rounded-xl text-center font-bold text-xs uppercase tracking-widest hover:bg-gold/80 transition-all">Join Circle</Link>
-              </div>
+        {/* CTA */}
+        <section className="border-t border-white/10 bg-gradient-to-r from-black via-slate-950 to-black py-14">
+          <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <h3 className="font-serif text-2xl sm:text-3xl text-white/95">
+              Ready to read the Prelude?
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-white/60 leading-relaxed">
+              Start with the doorway. Then track the Canon as new volumes, tools, and operating frameworks are released.
+            </p>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Link
+                href="/books/the-architecture-of-human-purpose"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-slate-100 transition-all"
+              >
+                Read the Prelude <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/downloads"
+                className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-8 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/85 hover:bg-white/10 hover:border-white/20 transition-all"
+              >
+                Explore the Vault <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </section>
-
-        {/* FINAL CTA */}
-        <section className="pb-32 text-center px-6">
-          <div className="max-w-2xl mx-auto">
-             <h2 className="font-serif text-4xl text-white mb-6">The Build Begins Here</h2>
-             <p className="text-gray-400 mb-10">Purpose is not found; it is constructed. Begin your journey with the foundations of Volume Zero.</p>
-             <Link href="/books/the-architecture-of-human-purpose" className="inline-flex items-center gap-3 bg-gold text-black px-10 py-5 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gold/80 transition-all">Begin The Architecture <ArrowRight size={18} /></Link>
-          </div>
-        </section>
-      </main>
+      </div>
     </Layout>
   );
+};
+
+const PRELUDE_SOURCE_FILE = "content/books/the-architecture-of-human-purpose.mdx";
+
+export const getStaticProps: GetStaticProps<PurposeLandingProps> = async () => {
+  // fallback if content pipeline fails (never breaks deploy)
+  let book: PreludeBook = {
+    title: "The Architecture of Human Purpose",
+    subtitle: "Prelude MiniBook - Limited Release Edition",
+    description:
+      "A distilled, high-level preview of the forthcoming multi-volume Canon on purpose, civilisation, governance, spiritual alignment, and human destiny.",
+    excerpt:
+      "Human flourishing is not accidental. It is architectural. This Prelude introduces the foundational patterns that govern purpose, identity, civilisation and destiny.",
+    coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
+    slug: "/books/the-architecture-of-human-purpose",
+  };
+
+  try {
+    const mod: any = await import("@/lib/content/server");
+    const getAll = mod?.getAllContentlayerDocs;
+
+    if (typeof getAll === "function") {
+      const docs = (getAll() || []).filter((d: any) => !isDraftContent(d));
+
+      const prelude = docs.find((d: any) => {
+        const fp = String(d?._raw?.sourceFilePath || "").replace(/\\/g, "/");
+        const kind = String(d?.docKind || d?.type || d?.kind || "").toLowerCase();
+        return (kind === "book" || fp.includes("/content/books/")) && fp.endsWith(PRELUDE_SOURCE_FILE);
+      });
+
+      if (prelude) {
+        book = {
+          title: String(prelude?.title || book.title),
+          subtitle: (prelude?.subtitle ?? book.subtitle) as any,
+          description: (prelude?.description ?? book.description) as any,
+          excerpt: (prelude?.excerpt ?? prelude?.description ?? book.excerpt) as any,
+          coverImage: (prelude?.coverImage ?? book.coverImage) as any,
+          slug: (prelude?.slug ?? book.slug) as any,
+        };
+      }
+    }
+  } catch (err) {
+    console.error("[PurposeLanding/getStaticProps] non-fatal:", err);
+  }
+
+  return {
+    props: sanitizeData({ book }),
+    revalidate: 3600,
+  };
 };
 
 export default PurposeLandingPage;

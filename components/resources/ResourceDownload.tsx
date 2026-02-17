@@ -1,3 +1,4 @@
+// components/resources/ResourceDownload.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -25,9 +26,11 @@ const ResourceDownload: React.FC<ResourceDownloadProps> = ({
   requiresAccess = false,
   isSubscriber = false,
 }) => {
-  const [selectedOption, setSelectedOption] = useState(
-    downloadOptions.find(opt => opt.isPrimary)?.id || downloadOptions[0]?.id
-  );
+  // Safely find primary option or first option
+  const [selectedOption, setSelectedOption] = useState<string>(() => {
+    const primary = downloadOptions.find(opt => opt.isPrimary);
+    return primary?.id || downloadOptions[0]?.id || '';
+  });
 
   const handleDownload = () => {
     const option = downloadOptions.find(opt => opt.id === selectedOption);
@@ -45,9 +48,25 @@ const ResourceDownload: React.FC<ResourceDownloadProps> = ({
           This resource is available exclusively to our subscribers. 
           Join our community to access premium content.
         </p>
-        <button className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+        <button 
+          className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+          onClick={() => window.location.href = '/subscribe'}
+        >
           Become a Subscriber
         </button>
+      </div>
+    );
+  }
+
+  // If no download options available
+  if (!downloadOptions.length) {
+    return (
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200 text-center">
+        <FileIcon className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Download Unavailable</h3>
+        <p className="text-gray-600">
+          This resource is currently being prepared. Please check back later.
+        </p>
       </div>
     );
   }
@@ -106,7 +125,8 @@ const ResourceDownload: React.FC<ResourceDownloadProps> = ({
 
       <button
         onClick={handleDownload}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-3"
+        disabled={!selectedOption}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <DownloadIcon className="w-5 h-5" />
         <span>Download Now</span>
@@ -122,6 +142,7 @@ const ResourceDownload: React.FC<ResourceDownloadProps> = ({
   );
 };
 
+// Icon Components with proper typing
 const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -140,9 +161,17 @@ const ShieldIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const FileIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  </svg>
+);
+
 const FileFormatIcon: React.FC<{ format: string; className?: string }> = ({ format, className }) => {
-  const getIcon = () => {
-    switch (format.toLowerCase()) {
+  const getIconPath = (): React.ReactNode => {
+    const formatLower = format.toLowerCase();
+    
+    switch (formatLower) {
       case 'pdf':
         return (
           <path d="M10 18l-4-4 1.41-1.41L10 15.17l6.59-6.59L18 10l-8 8z" />
@@ -165,8 +194,8 @@ const FileFormatIcon: React.FC<{ format: string; className?: string }> = ({ form
   };
 
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      {getIcon()}
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      {getIconPath()}
     </svg>
   );
 };

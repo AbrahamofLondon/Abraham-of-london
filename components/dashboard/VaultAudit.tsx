@@ -5,8 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Server, Activity, Database, Layers } from "lucide-react";
-import type { DashboardStats } from "@/types/pdf-dashboard";
 import { syncVaultRegistry } from "@/app/actions/sync-vault";
+
+// DashboardStats is not exported from @/types/pdf-dashboard, so define it locally.
+interface DashboardStats {
+  totalPDFs: number;
+  availablePDFs: number;
+  missingPDFs: number;
+  categories: string[];
+  generated: number;
+  errors: number;
+  generating: number;
+  lastUpdated: string;
+}
 
 export function VaultAudit() {
   const [stats, setStats] = useState<DashboardStats | null>(null);

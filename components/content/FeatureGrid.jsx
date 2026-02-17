@@ -1,12 +1,30 @@
+// components/content/FeatureGrid.jsx
 import React from 'react';
+import PropTypes from 'prop-types';
 
+/**
+ * @typedef {Object} FeatureGridItem
+ * @property {string} title - The title of the feature
+ * @property {string} content - HTML content
+ * @property {string} [icon] - Optional icon emoji/character
+ * @property {string} [color] - Optional accent color
+ */
+
+/**
+ * @param {Object} props
+ * @param {number} [props.columns=2]
+ * @param {FeatureGridItem[]} props.items
+ */
 const FeatureGrid = ({ columns = 2, items = [] }) => {
+  // Guard against empty items
+  if (!items.length) return null;
+
   return (
     <div className="my-12">
       <div 
         className="grid gap-6"
         style={{ 
-          gridTemplateColumns: `repeat(${Math.min(columns, items.length)}, 1fr)`
+          gridTemplateColumns: `repeat(${Math.min(columns, items.length || 1)}, minmax(0, 1fr))`
         }}
       >
         {items.map((item, index) => (
@@ -22,7 +40,7 @@ const FeatureGrid = ({ columns = 2, items = [] }) => {
             <div 
               className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
               style={{ backgroundColor: item.color || '#3B82F6' }}
-            ></div>
+            />
             
             <div className="mb-6">
               {item.icon && (
@@ -59,6 +77,18 @@ const FeatureGrid = ({ columns = 2, items = [] }) => {
       </div>
     </div>
   );
+};
+
+FeatureGrid.propTypes = {
+  columns: PropTypes.number,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      content: PropTypes.string.isRequired,
+      icon: PropTypes.string,
+      color: PropTypes.string,
+    })
+  ).isRequired,
 };
 
 export default FeatureGrid;

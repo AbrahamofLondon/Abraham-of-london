@@ -239,27 +239,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
           </div>
         </div>
       </nav>
-      
-      <style jsx>{`
-        .scrollbar-thin {
-          scrollbar-width: thin;
-          scrollbar-color: #CBD5E0 #F7FAFC;
-        }
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: #F7FAFC;
-          border-radius: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: #CBD5E0;
-          border-radius: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background: #A0AEC0;
-        }
-      `}</style>
     </aside>
   );
 };

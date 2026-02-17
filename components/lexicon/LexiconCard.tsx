@@ -1,7 +1,6 @@
-// components/lexicon/LexiconCard.tsx — HARDENED (Terminology Variant)
 import * as React from "react";
 import Link from "next/link";
-import { BookOpen, Hash, ExternalLink, ChevronRight } from "lucide-react";
+import { BookOpen, Hash, ChevronRight } from "lucide-react";
 import clsx from "clsx";
 
 type LexiconCardProps = {
@@ -22,8 +21,7 @@ export default function LexiconCard({
   tags,
   className,
   isFeatured = false,
-}: LexiconCardProps): JSX.Element {
-  // Path normalization for the Lexicon sector
+}: LexiconCardProps): React.ReactElement {
   const href = `/lexicon/${slug.replace(/^lexicon\//, "")}`;
 
   return (
@@ -35,7 +33,7 @@ export default function LexiconCard({
         className
       )}
     >
-      {/* Institutional Metadata Header */}
+      {/* Rest of your component remains the same */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-amber-500/10 text-amber-500">
@@ -54,7 +52,6 @@ export default function LexiconCard({
         )}
       </div>
 
-      {/* Term & Definition */}
       <div className="flex-1">
         <h3 className="mb-3 font-serif text-2xl font-bold italic tracking-tight text-white transition-colors group-hover:text-amber-500">
           <Link href={href} className="focus:outline-none">
@@ -67,7 +64,6 @@ export default function LexiconCard({
         </p>
       </div>
 
-      {/* Tags & Taxonomy */}
       {tags && tags.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
           {tags.slice(0, 3).map((tag) => (
@@ -81,7 +77,6 @@ export default function LexiconCard({
         </div>
       )}
 
-      {/* Footer Access */}
       <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-4">
         <Link
           href={href}

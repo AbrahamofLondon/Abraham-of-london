@@ -1,4 +1,3 @@
-// components/lexicon/LexiconGrid.tsx
 import * as React from "react";
 import LexiconCard from "./LexiconCard";
 
@@ -15,7 +14,7 @@ type LexiconGridProps = {
   items: LexiconItem[];
 };
 
-export default function LexiconGrid({ items }: LexiconGridProps): JSX.Element {
+export default function LexiconGrid({ items }: LexiconGridProps): React.ReactElement {
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">
       <div className="mb-10 flex flex-col items-start justify-between gap-4 border-l-2 border-amber-500 pl-6 md:flex-row md:items-end">

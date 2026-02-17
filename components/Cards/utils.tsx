@@ -253,10 +253,12 @@ export function getAuthorInitials(name: string): string {
   if (parts.length === 0) return '??';
   
   if (parts.length === 1) {
-    // Single word - take first two characters
     const firstPart = parts[0];
     if (!firstPart || firstPart.length === 0) return '??';
-    return safeSlice(firstPart, 0, 2).toUpperCase();
+    
+    // ✅ FIXED: Use native string slice – returns string, not unknown[]
+    const slice = firstPart.slice(0, 2);
+    return slice.toUpperCase();
   }
   
   // Multiple words - take first letter of first two words

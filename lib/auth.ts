@@ -10,22 +10,37 @@ import {
   hasInternalFlag 
 } from "@/lib/auth-utils";
 
+// Define the claims structure for better type safety
+interface AoLCliams {
+  tier: AoLTier;
+  innerCircleAccess: boolean;
+  isInternal: boolean;
+  allowPrivate: boolean;
+  memberId: string | null;
+  emailHash: string | null;
+  flags: string[];
+}
+
+// DO NOT redeclare the module here - it's already in types/next-auth.ts
+// Remove the module declaration block entirely
+
+// Base claims with defaults
+const BASE_CLAIMS: AoLCliams = {
+  tier: "public",
+  innerCircleAccess: false,
+  isInternal: false,
+  allowPrivate: false,
+  memberId: null,
+  emailHash: null,
+  flags: [],
+};
+
 /**
  * CLAIMS RESOLVER: The "Handshake" between DB and JWT
  * Synchronizes the identity against the Neon PostgreSQL registry.
  */
-async function resolveAoLClaimsByEmail(email?: string | null) {
-  const baseClaims = {
-    tier: "public" as AoLTier,
-    innerCircleAccess: false,
-    isInternal: false,
-    allowPrivate: false,
-    memberId: null as string | null,
-    emailHash: null as string | null,
-    flags: [] as string[],
-  };
-
-  if (!email) return baseClaims;
+async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLCliams> {
+  if (!email) return BASE_CLAIMS;
 
   const normalizedEmail = email.trim().toLowerCase();
   const hashedEmail = sha256Hex(normalizedEmail);
@@ -50,8 +65,21 @@ async function resolveAoLClaimsByEmail(email?: string | null) {
     })
   );
 
-  if (!member || member.status !== "active") {
-    return { ...baseClaims, emailHash: hashedEmail, memberId: member?.id ?? null };
+  // If no member found or inactive, return base claims with email hash
+  if (!member) {
+    return {
+      ...BASE_CLAIMS,
+      emailHash: hashedEmail,
+    };
+  }
+
+  // Check member status
+  if (member.status !== "active") {
+    return {
+      ...BASE_CLAIMS,
+      emailHash: hashedEmail,
+      memberId: member.id,
+    };
   }
 
   const flags = safeParseFlags(member.flags);
@@ -62,11 +90,11 @@ async function resolveAoLClaimsByEmail(email?: string | null) {
 
   return {
     tier,
-    innerCircleAccess: true,
+    innerCircleAccess: tier !== "public" && tier !== "free",
     isInternal,
-    allowPrivate: isInternal,
+    allowPrivate: isInternal || tier === "private" || tier === "architect",
     memberId: member.id,
-    emailHash: member.emailHash,
+    emailHash: member.emailHash || hashedEmail,
     flags,
   };
 }
@@ -99,6 +127,7 @@ export const authOptions: NextAuthOptions = {
             role: "admin",
           };
         }
+        
         // Members typically enter via the AccessGate/Proxy route
         return null;
       },
@@ -111,17 +140,18 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      // Add user data to token
       if (user) {
-        token.id = (user as any).id;
+        token.id = user.id;
         token.role = (user as any).role || "user";
       }
 
-      const email = token?.email as string | undefined;
-      const aol = await resolveAoLClaimsByEmail(email ?? null);
+      const email = token.email as string | undefined;
+      const aol = await resolveAoLClaimsByEmail(email);
 
       // System Admin Escalation (Hard-coded for the root environment user)
-      if ((token as any).role === "admin") {
-        (token as any).aol = {
+      if (token.role === "admin") {
+        token.aol = {
           tier: "private",
           innerCircleAccess: true,
           isInternal: true,
@@ -131,16 +161,21 @@ export const authOptions: NextAuthOptions = {
           flags: Array.from(new Set([...(aol.flags ?? []), "admin", "internal"])),
         };
       } else {
-        (token as any).aol = aol;
+        token.aol = aol;
       }
+      
       return token;
     },
     async session({ session, token }) {
+      // Add token data to session
       if (session.user) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).role = (token as any).role as string;
+        session.user.id = token.id as string;
+        (session.user as any).role = token.role as string;
       }
-      (session as any).aol = (token as any).aol;
+      
+      // Add AOL claims to session - now using the type from central definitions
+      session.aol = token.aol;
+      
       return session;
     },
   },

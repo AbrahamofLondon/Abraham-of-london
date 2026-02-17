@@ -35,6 +35,7 @@ const AUTHORIZED_PREFIXES = [
   '/canon-campaign',
   '/insights',      // 75 Intelligence Briefs
   '/shorts',
+  '/briefs',
   '/lexicon',
   '/content',
 

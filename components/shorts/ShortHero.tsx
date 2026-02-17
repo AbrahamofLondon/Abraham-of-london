@@ -7,9 +7,12 @@ import {
   safeArray,
   safeDate,
   formatSafeDate,
-  classNames 
+  classNames,
+  safeCapitalize,
+  safeSlice,
+  isNonEmptyString
 } from '@/lib/utils/safe';
-import { Clock, Calendar, User, Sparkles } from 'lucide-react';
+import { Clock, Calendar, Sparkles } from 'lucide-react';
 
 interface ShortHeroProps {
   title?: string | null;
@@ -21,104 +24,180 @@ interface ShortHeroProps {
   theme?: string | null;
 }
 
+// Theme configuration for consistency
+const THEMES = {
+  insight: {
+    gradient: 'from-amber-500 to-orange-500',
+    light: 'amber-50',
+    dark: 'amber-950',
+    text: 'text-amber-500',
+    border: 'border-amber-500/20',
+    bg: 'bg-amber-500/10',
+  },
+  reflection: {
+    gradient: 'from-blue-500 to-purple-500',
+    light: 'blue-50',
+    dark: 'blue-950',
+    text: 'text-blue-500',
+    border: 'border-blue-500/20',
+    bg: 'bg-blue-500/10',
+  },
+  wisdom: {
+    gradient: 'from-emerald-500 to-teal-500',
+    light: 'emerald-50',
+    dark: 'emerald-950',
+    text: 'text-emerald-500',
+    border: 'border-emerald-500/20',
+    bg: 'bg-emerald-500/10',
+  },
+  challenge: {
+    gradient: 'from-rose-500 to-pink-500',
+    light: 'rose-50',
+    dark: 'rose-950',
+    text: 'text-rose-500',
+    border: 'border-rose-500/20',
+    bg: 'bg-rose-500/10',
+  },
+} as const;
+
+type ThemeKey = keyof typeof THEMES;
+
+// Helper to get string with fallback (since safeString uses maxLength)
+function getString(value: unknown, fallback: string): string {
+  const str = safeString(value, 1000);
+  return isNonEmptyString(str) ? str : fallback;
+}
+
+// Helper to safely get string from category
+function getCategoryString(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value == null) return '';
+  return String(value);
+}
+
 const ShortHero: React.FC<ShortHeroProps> = (props) => {
-  // Extract and sanitize
-  const title = safeString(props.title, 'Field Note');
-  const excerpt = safeString(props.excerpt, 'A brief insight for builders and thinkers.');
-  const author = safeString(props.author, 'Abraham of London');
-  const date = props.date;
-  const readTime = safeString(props.readTime, '2 min read');
-  const categories = safeArray<string>(props.category);
-  const theme = safeString(props.theme, 'insight').toLowerCase();
+  // Use helper for string fallbacks
+  const title = getString(props.title, 'Field Note');
+  const excerpt = getString(props.excerpt, 'A brief insight for builders and thinkers.');
+  const author = getString(props.author, 'Abraham of London');
+  const readTime = getString(props.readTime?.toString(), '2 min read');
+  const rawCategories = safeArray<string>(props.category);
+  const themeInput = getString(props.theme, 'insight').toLowerCase() as ThemeKey;
   
-  // Format date
-  const formattedDate = date 
-    ? formatSafeDate(date, { month: 'long', day: 'numeric', year: 'numeric' })
-    : formatSafeDate(new Date());
+  // Validate theme against available options
+  const themeKey = (themeInput in THEMES ? themeInput : 'insight') as ThemeKey;
+  const theme = THEMES[themeKey];
   
-  // Get theme colors
-  const themeColors = {
-    insight: 'from-amber-500 to-orange-500',
-    reflection: 'from-blue-500 to-purple-500',
-    wisdom: 'from-emerald-500 to-teal-500',
-    challenge: 'from-rose-500 to-pink-500',
-  };
+  // ✅ FIXED: Properly type and filter categories
+  const categories = React.useMemo(() => {
+    return rawCategories
+      .filter((cat): cat is string => typeof cat === 'string' && cat.trim().length > 0)
+      .slice(0, 3);
+  }, [rawCategories]);
   
-  const themeGradient = themeColors[theme as keyof typeof themeColors] || themeColors.insight;
+  // Safely format date with fallback
+  const formattedDate = React.useMemo(() => {
+    if (!props.date) {
+      return formatSafeDate(new Date());
+    }
+    
+    try {
+      return formatSafeDate(props.date);
+    } catch {
+      return formatSafeDate(new Date());
+    }
+  }, [props.date]);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-950 to-black py-20 md:py-28">
-      {/* Animated background */}
-      <div className="absolute inset-0">
+    <section 
+      className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-950 to-black py-20 md:py-28"
+      aria-labelledby="short-hero-title"
+    >
+      {/* Animated background with reduced motion preference */}
+      <div className="absolute inset-0" aria-hidden="true">
         <div className={classNames(
-          "absolute inset-0 bg-gradient-to-br opacity-10",
-          themeGradient
+          "absolute inset-0 bg-gradient-to-br opacity-10 transition-opacity duration-700",
+          theme.gradient
         )} />
         
-        {/* Geometric pattern */}
+        {/* Subtle geometric pattern */}
         <div className="absolute inset-0 bg-[size:100px_100px] bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]" />
         
-        {/* Floating particles */}
-        <div className="absolute top-1/4 left-1/4 h-2 w-2 rounded-full bg-amber-500/20 animate-pulse" />
-        <div className="absolute top-1/3 right-1/4 h-1 w-1 rounded-full bg-blue-500/20 animate-pulse" />
-        <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 rounded-full bg-purple-500/20 animate-pulse" />
+        {/* Floating particles - reduced motion respects user preference */}
+        <div className="absolute top-1/4 left-1/4 h-2 w-2 rounded-full bg-amber-500/20 motion-safe:animate-pulse" />
+        <div className="absolute top-1/3 right-1/4 h-1 w-1 rounded-full bg-blue-500/20 motion-safe:animate-pulse" />
+        <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 rounded-full bg-purple-500/20 motion-safe:animate-pulse" />
       </div>
       
-      <div className="relative container mx-auto px-4">
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          {/* Category Tags */}
+          {/* Category Tags with improved semantics */}
           {categories.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-8">
-              {safeSlice(categories, 0, 3).map((cat, index) => (
+            <nav className="flex flex-wrap gap-2 mb-8" aria-label="Content categories">
+              {categories.map((category, index) => (
                 <span
-                  key={index}
-                  className="group relative overflow-hidden rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase backdrop-blur-sm border"
+                  key={`${category}-${index}`}
+                  className={classNames(
+                    "group relative overflow-hidden rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase backdrop-blur-sm border transition-all duration-300",
+                    theme.border,
+                    "hover:border-opacity-40"
+                  )}
                 >
                   <div className={classNames(
-                    "absolute inset-0 bg-gradient-to-r opacity-10 group-hover:opacity-20 transition-opacity",
-                    themeGradient
+                    "absolute inset-0 bg-gradient-to-r opacity-10 transition-opacity duration-300 group-hover:opacity-20",
+                    theme.gradient
                   )} />
                   <span className={classNames(
                     "relative bg-gradient-to-r bg-clip-text text-transparent",
-                    themeGradient
+                    theme.gradient
                   )}>
-                    {cat}
+                    {category}
                   </span>
                 </span>
               ))}
-            </div>
+            </nav>
           )}
           
-          {/* Title with gradient */}
-          <h1 className="mb-8 text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+          {/* Title with gradient - main heading */}
+          <h1 
+            id="short-hero-title"
+            className="mb-8 text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight"
+          >
             <span className={classNames(
               "bg-gradient-to-r bg-clip-text text-transparent",
-              themeGradient
+              theme.gradient
             )}>
               {title}
             </span>
           </h1>
           
-          {/* Excerpt */}
-          <p className="mb-12 text-xl md:text-2xl text-gray-300 leading-relaxed max-w-2xl">
-            {excerpt}
-          </p>
+          {/* Excerpt with refined typography */}
+          {excerpt && (
+            <p className="mb-12 text-xl md:text-2xl text-gray-300 leading-relaxed max-w-2xl font-light">
+              {excerpt}
+            </p>
+          )}
           
-          {/* Meta Information */}
+          {/* Meta Information with improved layout */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8 pt-8 border-t border-zinc-800/50">
-            {/* Author */}
+            {/* Author with visual identifier */}
             <div className="group flex items-center gap-4">
               <div className="relative">
                 <div className={classNames(
-                  "h-12 w-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg",
+                  "h-12 w-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg transition-transform duration-300 group-hover:scale-105",
                   "bg-gradient-to-r",
-                  themeGradient
+                  theme.gradient
                 )}>
-                  {safeFirstChar(author, 'A')}
+                  {safeFirstChar(author) || 'A'}
                 </div>
                 
-                {/* Active indicator */}
-                <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-black bg-green-500" />
+                {/* Active indicator with tooltip */}
+                <div 
+                  className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-black bg-green-500"
+                  title="Active contributor"
+                  role="status"
+                  aria-label="Active contributor"
+                />
               </div>
               
               <div>
@@ -129,21 +208,26 @@ const ShortHero: React.FC<ShortHeroProps> = (props) => {
               </div>
             </div>
             
-            {/* Date & Read Time */}
-            <div className="flex flex-wrap gap-6">
+            {/* Metadata grid with improved spacing */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full sm:w-auto">
+              {/* Date */}
               <div className="group">
                 <div className="flex items-center gap-2 text-gray-400 group-hover:text-gray-300 transition-colors mb-1">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-4 w-4" aria-hidden="true" />
                   <span className="text-sm">Published</span>
                 </div>
-                <p className="font-medium text-white group-hover:text-gray-200 transition-colors">
+                <time 
+                  dateTime={safeDate(props.date)?.toISOString()}
+                  className="font-medium text-white group-hover:text-gray-200 transition-colors"
+                >
                   {formattedDate}
-                </p>
+                </time>
               </div>
               
+              {/* Reading Time */}
               <div className="group">
                 <div className="flex items-center gap-2 text-gray-400 group-hover:text-gray-300 transition-colors mb-1">
-                  <Clock className="h-4 w-4" />
+                  <Clock className="h-4 w-4" aria-hidden="true" />
                   <span className="text-sm">Reading Time</span>
                 </div>
                 <p className="font-medium text-white group-hover:text-gray-200 transition-colors">
@@ -151,13 +235,14 @@ const ShortHero: React.FC<ShortHeroProps> = (props) => {
                 </p>
               </div>
               
+              {/* Theme */}
               <div className="group">
                 <div className="flex items-center gap-2 text-gray-400 group-hover:text-gray-300 transition-colors mb-1">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
                   <span className="text-sm">Theme</span>
                 </div>
                 <p className="font-medium text-white group-hover:text-gray-200 transition-colors">
-                  {safeCapitalize(theme, 'Insight')}
+                  {safeCapitalize(themeKey)}
                 </p>
               </div>
             </div>
@@ -165,15 +250,15 @@ const ShortHero: React.FC<ShortHeroProps> = (props) => {
         </div>
       </div>
       
-      {/* Decorative corner accents */}
-      <div className="absolute top-0 right-0 h-64 w-64 bg-gradient-to-bl from-amber-500/5 via-transparent to-purple-500/5 rounded-full -translate-y-32 translate-x-32" />
-      <div className="absolute bottom-0 left-0 h-96 w-96 bg-gradient-to-tr from-amber-500/3 via-transparent to-purple-500/10 rounded-full translate-y-48 -translate-x-48" />
+      {/* Decorative corner accents - subtle depth */}
+      <div className="absolute top-0 right-0 h-64 w-64 bg-gradient-to-bl from-amber-500/5 via-transparent to-purple-500/5 rounded-full -translate-y-32 translate-x-32 pointer-events-none" aria-hidden="true" />
+      <div className="absolute bottom-0 left-0 h-96 w-96 bg-gradient-to-tr from-amber-500/3 via-transparent to-purple-500/10 rounded-full translate-y-48 -translate-x-48 pointer-events-none" aria-hidden="true" />
       
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      {/* Scroll indicator - refined */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 motion-safe:animate-bounce" aria-hidden="true">
         <div className="h-8 w-px bg-gradient-to-b from-amber-500 via-transparent to-transparent" />
       </div>
-    </div>
+    </section>
   );
 };
 

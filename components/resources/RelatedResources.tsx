@@ -1,3 +1,4 @@
+// components/resources/RelatedResources.tsx
 import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import ResourceCard from './ResourceCard';
@@ -12,6 +13,7 @@ interface RelatedResource {
   image: string;
   slug: string;
   tags?: string[];
+  isFeatured?: boolean;
 }
 
 interface RelatedResourcesProps {
@@ -23,11 +25,9 @@ const RelatedResources: React.FC<RelatedResourcesProps> = ({
   resources, 
   currentResourceId 
 }) => {
-  const filteredResources = safeArraySlice(
-  resources.filter((r) => r.id !== currentResourceId),
-  0,
-  3
-);
+  // First filter the resources, then explicitly type the slice
+  const filtered = resources.filter((r) => r.id !== currentResourceId);
+  const filteredResources: RelatedResource[] = safeArraySlice(filtered, 0, 3);
 
   if (filteredResources.length === 0) {
     return null;
@@ -50,8 +50,18 @@ const RelatedResources: React.FC<RelatedResourcesProps> = ({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredResources.map((resource) => (
-          <ResourceCard key={resource.id} {...resource} />
+        {filteredResources.map((resource: RelatedResource) => (
+          <ResourceCard
+            key={resource.id}
+            title={resource.title}
+            description={resource.description}
+            type={resource.type}
+            downloadCount={resource.downloadCount}
+            image={resource.image}
+            slug={resource.slug}
+            tags={resource.tags}
+            isFeatured={resource.isFeatured}
+          />
         ))}
       </div>
     </div>

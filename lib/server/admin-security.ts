@@ -1,82 +1,103 @@
-/* lib/server/admin-security.ts — DEPLOY SAFE, FULLY FEATURED */
+/* lib/server/admin-security.ts — PRODUCTION SAFE, DEV FRIENDLY */
 import type { NextRequest } from "next/server";
-import { getClientIp, withEdgeRateLimit } from "@/lib/server/rate-limit-unified";
 
-// ------------------------------------------------------------------
-// IP ALLOWLIST – Deploy‑safe default: if env var not set, allow all.
-// ------------------------------------------------------------------
-const NODE_ENV = process.env.NODE_ENV;
-const rawAllowlist = (process.env.ADMIN_IP_ALLOWLIST || "").trim();
+const IS_PROD = process.env.NODE_ENV === "production";
 
 /**
- * Allowlist can be:
- *   - empty string → null → allow all (deploy‑safe)
- *   - comma‑separated values, each an exact IP or prefix
- *     e.g. "203.0.113.10,198.51.100.,127.0.0.1"
+ * Normalize IP values coming from:
+ * - req.ip (middleware)
+ * - x-forwarded-for (first hop)
+ * - custom getClientIp helpers
  */
-const allowlist = rawAllowlist
-  ? rawAllowlist.split(",").map(s => s.trim()).filter(Boolean)
-  : null;
+function normalizeIp(ip?: string | null): string {
+  if (!ip) return "";
+  let v = String(ip).trim();
+
+  // If it's "x-forwarded-for" style: "a, b, c"
+  if (v.includes(",")) v = v.split(",")[0].trim();
+
+  // Strip port if present (rare)
+  v = v.replace(/:\d+$/, "");
+
+  return v;
+}
 
 /**
- * Check if an IP is allowed to access admin routes.
- * 
- * - If allowlist is null (env var not set) → allow all (safety first).
- * - In development, always allow localhost.
- * - Otherwise, match against exact IP or prefix (CIDR supported via split).
+ * In dev, allow localhost variants.
  */
-export function isAllowedIp(ip: string): boolean {
-  // 1) Deploy‑safe: no allowlist configured → allow everything
-  if (!allowlist) return true;
+const LOCALHOST_IPS = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
 
-  // 2) Always allow localhost in development
-  if (NODE_ENV !== 'production') {
-    if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') return true;
+/**
+ * Parse allowlist:
+ * ADMIN_IP_ALLOWLIST="1.2.3.4, 5.6.7.8, 192.168.0., 2a00:abcd:"
+ * Supports exact matches and prefix matches.
+ */
+function parseAllowlist(raw?: string | null): string[] {
+  return String(raw || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * IP allow gate:
+ * - Production: requires ADMIN_IP_ALLOWLIST to be set and match.
+ * - Dev: always allow localhost; if allowlist is set, also allow matches.
+ */
+export function isAllowedIp(ipRaw?: string | null): boolean {
+  const ip = normalizeIp(ipRaw);
+
+  // Dev convenience: never lock yourself out locally
+  if (!IS_PROD && LOCALHOST_IPS.has(ip)) return true;
+
+  const allowlist = parseAllowlist(process.env.ADMIN_IP_ALLOWLIST);
+
+  // Production: strict. No allowlist = deny by default.
+  if (IS_PROD) {
+    if (allowlist.length === 0) return false;
+  } else {
+    // Non-prod: no allowlist => allow everything (optional convenience)
+    if (allowlist.length === 0) return true;
   }
 
-  // 3) Check against allowlist rules
-  return allowlist.some(rule => {
-    // Strip CIDR suffix (e.g., "192.168.1.0/24" → "192.168.1.")
-    const base = rule.includes('/') ? rule.split('/')[0] : rule;
+  // Match exact or prefix
+  return allowlist.some((rule) => {
+    const base = rule.includes("/") ? rule.split("/")[0] : rule; // tolerate CIDR-like inputs
     return ip === base || ip.startsWith(base);
   });
 }
 
-// ------------------------------------------------------------------
-// SENSITIVE OPERATIONS – only protect destructive admin actions.
-// ------------------------------------------------------------------
+/**
+ * Sensitive operations requiring secondary confirmation.
+ * Keep explicit and conservative.
+ */
 export function isSensitiveOperation(pathname: string, method: string): boolean {
   const m = method.toUpperCase();
-  const isWrite = m === 'POST' || m === 'PUT' || m === 'PATCH' || m === 'DELETE';
+  const isWrite = m === "POST" || m === "PUT" || m === "PATCH" || m === "DELETE";
   if (!isWrite) return false;
 
-  const sensitiveRoutes = [
-    '/api/admin/system',
-    '/api/admin/backup',
-    '/api/vault',
-    '/admin',              // catches all /admin/* pages
+  // Only admin/vault/pdf mutation surfaces
+  const sensitivePrefixes = [
+    "/api/admin",
+    "/api/vault",
+    "/api/pdfs", // if you have delete/rename/generate endpoints under here
+    "/admin",
   ];
 
-  return sensitiveRoutes.some(route => pathname.startsWith(route));
+  return sensitivePrefixes.some((p) => pathname.startsWith(p));
 }
 
-// ------------------------------------------------------------------
-// ADMIN RATE LIMITING – tuned per endpoint.
-// ------------------------------------------------------------------
-export async function checkAdminRateLimit(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  let config = { limit: 100, windowMs: 60_000, keyPrefix: 'admin_ops' };
+/**
+ * OPTIONAL: if you want a single source of IP extraction for middleware.
+ * Use this in proxy.ts if desired.
+ */
+export function getRequestIp(req: NextRequest): string {
+  // Trust the platform header first (Netlify/CDN)
+  const xf = req.headers.get("x-forwarded-for");
+  if (xf) return normalizeIp(xf);
 
-  // Stricter limits for authentication endpoints
-  if (pathname.includes('/login')) {
-    config = { limit: 5, windowMs: 900_000, keyPrefix: 'admin_login' };
-  }
-
-  // Special case: vault operations – medium limit
-  if (pathname.startsWith('/api/vault')) {
-    config = { limit: 30, windowMs: 60_000, keyPrefix: 'vault' };
-  }
-
-  // Returns { allowed: boolean, headers: Headers, result: RateLimitResult }
-  return withEdgeRateLimit(request, config);
+  // Next middleware often provides req.ip
+  // @ts-ignore
+  const direct = req.ip as string | undefined;
+  return normalizeIp(direct);
 }

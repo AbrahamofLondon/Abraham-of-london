@@ -1,3 +1,4 @@
+// types/pdf-dashboard.ts
 import type React from "react";
 import type { PDFItem as CanonPDFItem } from "@/lib/pdf/types";
 
@@ -8,6 +9,21 @@ export type ViewMode = "list" | "grid" | "detail";
 
 // ✅ SINGLE SOURCE OF TRUTH
 export type PDFItem = CanonPDFItem;
+
+// Analytics specific types
+export type MetricType = "generations" | "views" | "downloads" | "errors" | "size" | "categories";
+
+export interface PDFAnalyticsItem {
+  id: string;
+  title: string;
+  exists: boolean;
+  error?: string;
+  category: string;
+  tier?: string;
+  fileSize?: string;
+  lastModified?: string;
+  updatedAt?: string;
+}
 
 // ------------------------------------------------------------
 // Responses / status
@@ -59,7 +75,7 @@ export interface DashboardStats {
 
   byTier?: Record<string, number>;
   byType?: Record<string, number>;
-  byCategory?: Record<string, number>; // Added to match converter
+  byCategory?: Record<string, number>;
   averageFileSize?: string;
   /** Adjusted to allow ISO strings from registry stats */
   newest?: string | PDFItem | null; 

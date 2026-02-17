@@ -4,30 +4,34 @@
 // ✅ Strict guards around frontmatter shapes
 // ✅ Stable memo deps (no optional-chaining-in-deps pitfalls)
 // ✅ Safe download handler (client-only)
+// ✅ Fixed FeatureGrid type mismatch
+// ✅ Fixed DownloadCTA prop types
 
 import * as React from "react";
 import dynamic from "next/dynamic";
 
 import LegacyDiagram from "@/components/diagrams/LegacyDiagram";
 import ProTip from "@/components/content/ProTip";
-import FeatureGrid from "@/components/content/FeatureGrid";
+import FeatureGrid, { type FeatureGridItem as GridItem } from "@/components/content/FeatureGrid";
 
-// IMPORTANT:
-// If DownloadCTA.client exports a named export instead of default, this was your crash:
-// "Cannot read properties of undefined (reading 'default')"
-// We force a default export mapping here, regardless of how the module exports it.
-const DownloadCTA = dynamic(
+// Import types from the shared types file
+import type { DownloadCTAProps, CTADetail } from "@/types/download-cta";
+
+// Properly typed dynamic import
+const DownloadCTA = dynamic<DownloadCTAProps>(
   () =>
-    import("@/components/content/DownloadCTA.client").then((m: any) => ({
-      default: m?.default ?? m?.DownloadCTA ?? m,
-    })),
+    import("@/components/content/DownloadCTA.client").then((m: any) => {
+      // Handle both default and named exports
+      const Component = m?.default ?? m?.DownloadCTA ?? m;
+      return Component;
+    }),
   {
     ssr: false,
     loading: () => (
       <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6">
-        <div className="h-4 w-40 rounded bg-white/10" />
-        <div className="mt-3 h-3 w-72 rounded bg-white/5" />
-        <div className="mt-6 h-10 w-full rounded-xl bg-white/10" />
+        <div className="h-4 w-40 rounded bg-white/10 animate-pulse" />
+        <div className="mt-3 h-3 w-72 rounded bg-white/5 animate-pulse" />
+        <div className="mt-6 h-10 w-full rounded-xl bg-white/10 animate-pulse" />
       </div>
     ),
   }
@@ -36,11 +40,7 @@ const DownloadCTA = dynamic(
 // -------------------------
 // Types
 // -------------------------
-interface CTADetail {
-  label: string;
-  value: string;
-  icon: string;
-}
+// Remove CTADetail from here since it's now imported
 
 interface CTAConfig {
   badge?: string;
@@ -52,10 +52,12 @@ interface DownloadProcess {
   steps?: string[];
 }
 
-interface FeatureGridItem {
+// FeatureGridItem type matching the component's expected shape
+export interface FeatureGridItem {
   title: string;
-  description: string;
+  content: string; // HTML content
   icon?: string;
+  color?: string;
 }
 
 export interface MDXContentWrapperProps {
@@ -67,7 +69,7 @@ export interface MDXContentWrapperProps {
     proTipContent?: string;
     proTipType?: "info" | "warning" | "success" | "danger";
     useFeatureGrid?: boolean;
-    featureGridItems?: FeatureGridItem[];
+    featureGridItems?: any[]; // Raw items from frontmatter
     featureGridColumns?: number;
     useDownloadCTA?: boolean;
     ctaConfig?: CTAConfig;
@@ -80,6 +82,9 @@ export interface MDXContentWrapperProps {
   };
 }
 
+// -------------------------
+// Utility Functions
+// -------------------------
 function asArray<T>(v: unknown): T[] {
   return Array.isArray(v) ? (v as T[]) : [];
 }
@@ -98,6 +103,16 @@ function safeUrl(v: unknown): string {
   return s;
 }
 
+// Transform raw frontmatter items to properly typed FeatureGrid items
+function transformFeatureGridItems(rawItems: any[]): FeatureGridItem[] {
+  return rawItems.map(item => ({
+    title: item.title || '',
+    content: item.content || item.description || '', // Handle both content and description fields
+    icon: item.icon,
+    color: item.color
+  }));
+}
+
 // -------------------------
 // Component
 // -------------------------
@@ -113,13 +128,21 @@ export function MDXContentWrapper({ content, frontmatter }: MDXContentWrapperPro
   const proTipContent = safeStr(frontmatter?.proTipContent);
   const proTipType = (frontmatter?.proTipType ?? "info") as "info" | "warning" | "success" | "danger";
 
+  // Feature Grid with proper typing
   const useFeatureGrid = !!frontmatter?.useFeatureGrid;
-  const featureGridItems = asArray<FeatureGridItem>(frontmatter?.featureGridItems);
+  const rawFeatureGridItems = asArray<any>(frontmatter?.featureGridItems || []);
+  
+  // Memoize transformed items to prevent unnecessary recalculations
+  const featureGridItems = React.useMemo<FeatureGridItem[]>(() => {
+    return transformFeatureGridItems(rawFeatureGridItems);
+  }, [rawFeatureGridItems]);
+  
   const featureGridColumns =
     typeof frontmatter?.featureGridColumns === "number" && frontmatter.featureGridColumns > 0
       ? frontmatter.featureGridColumns
       : 2;
 
+  // Download CTA
   const useDownloadCTA = !!frontmatter?.useDownloadCTA;
   const ctaConfig: CTAConfig | undefined = frontmatter?.ctaConfig;
   const ctaBadge = safeStr(ctaConfig?.badge) || "Download";
@@ -175,10 +198,12 @@ export function MDXContentWrapper({ content, frontmatter }: MDXContentWrapperPro
       {useLegacyDiagram ? <LegacyDiagram /> : null}
 
       {/* Pro Tip */}
-      {useProTip && proTipContent ? <ProTip type={proTipType}>{proTipContent}</ProTip> : null}
+      {useProTip && proTipContent ? (
+        <ProTip type={proTipType}>{proTipContent}</ProTip>
+      ) : null}
 
       {/* Feature Grid */}
-      {useFeatureGrid && featureGridItems.length ? (
+      {useFeatureGrid && featureGridItems.length > 0 ? (
         <FeatureGrid columns={featureGridColumns} items={featureGridItems} />
       ) : null}
 

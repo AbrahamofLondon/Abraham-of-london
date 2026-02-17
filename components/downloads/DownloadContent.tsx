@@ -120,7 +120,7 @@ const components = {
   // No duplicate custom components here - they're already defined above
 }
 
-const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter }) => {
+const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter = {} }) => {
   if (!content) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -263,10 +263,6 @@ const DownloadContent: React.FC<DownloadContentProps> = ({ content, frontmatter 
       </div>
     </div>
   )
-}
-
-DownloadContent.defaultProps = {
-  frontmatter: {},
 }
 
 export default DownloadContent

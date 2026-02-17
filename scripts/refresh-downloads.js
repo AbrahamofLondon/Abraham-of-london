@@ -10,7 +10,6 @@ const PUBLIC_PATH = path.join(process.cwd(), 'public');
 /**
  * AUTHORIZED_ROUTES
  * Strategic mapping of the Abraham-of-London digital ecosystem.
- * Includes new endpoints: /newsletter and /contact-us
  */
 const AUTHORIZED_ROUTES = [
   '/vault', 
@@ -21,12 +20,13 @@ const AUTHORIZED_ROUTES = [
   '/assets', 
   '/books', 
   '/inner-circle', 
-  '/contact',    // Matches /contact and /contact-us
+  '/contact',
   '/subscribe',
-  '/newsletter', // ADDED: New authorized endpoint
-  '/events',     // ADDED: Portfolio expansion
-  '/about'       // ADDED: Base consistency
-];
+  '/newsletter',
+  '/events',
+  '/about',
+  '/insights' // Authorizes the 75 Intelligence Briefs
+].map(route => route.toLowerCase());
 
 const getFiles = (dir) => {
   if (!fs.existsSync(dir)) return [];
@@ -58,11 +58,13 @@ async function executeAudit() {
       // Skip protocols and anchors
       if (url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto:') || url.startsWith('tel:')) continue;
       
-      // Normalize leading slash for comparison
-      const normalizedUrl = url.startsWith('/') ? url : `/${url}`;
+      // Normalize leading slash and casing for comparison
+      const normalizedUrl = (url.startsWith('/') ? url : `/${url}`).toLowerCase();
       
       if (!AUTHORIZED_ROUTES.some(route => normalizedUrl.startsWith(route))) {
         console.log(chalk.red(`❌ [LINK_REGRESSION] ${relativeFile}: "${url}" is unauthorized.`));
+        // Strategic Debug: Shows exactly what the normalization saw
+        console.log(chalk.gray(`   Normalized as: ${normalizedUrl}`)); 
         linkErrors++;
       }
     }
@@ -70,7 +72,6 @@ async function executeAudit() {
     // 2. ASSET PHYSICAL VERIFICATION
     const downloadUrl = data.downloadUrl || data.assetPath;
     if (downloadUrl && downloadUrl.startsWith('/')) {
-      // Improved Windows cross-compatibility for physical path resolution
       const cleanPath = downloadUrl.split('/').filter(p => p !== '');
       const physicalPath = path.join(PUBLIC_PATH, ...cleanPath);
       

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Command, X, Shield, FileText, ArrowRight, Terminal } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router'; // ✅ FIXED: Use next/router for Pages Router
 import clsx from 'clsx';
 
 export default function RegistrySearch() {
@@ -11,7 +11,7 @@ export default function RegistrySearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); // ✅ Now correctly imported
 
   // Command-K Shortcut Listener
   useEffect(() => {
@@ -20,10 +20,14 @@ export default function RegistrySearch() {
         e.preventDefault();
         setIsOpen((open) => !open);
       }
+      // ESC to close
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [isOpen]);
 
   const handleSearch = useCallback(async (val: string) => {
     setQuery(val);
@@ -123,7 +127,7 @@ export default function RegistrySearch() {
             <div className="p-12 text-center space-y-4">
               <Command size={24} className="mx-auto text-zinc-800" />
               <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-600">
-                Begin typing to filter the 163-dispatch registry
+                Begin typing to filter the registry
               </p>
             </div>
           )}

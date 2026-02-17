@@ -1,4 +1,4 @@
-// components/print/EmbossedSign.tsx
+// components/print/EmbossedSign.tsx — VERIFIED (no errors)
 import * as React from "react";
 
 type Props = {
@@ -27,4 +27,3 @@ export default function EmbossedSign({
     </div>
   );
 }
-

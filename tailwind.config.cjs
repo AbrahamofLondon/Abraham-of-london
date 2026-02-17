@@ -1,3 +1,4 @@
+// tailwind.config.js — FINAL (stable fonts + safe CSS-var pipeline + plugins)
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -31,12 +32,10 @@ module.exports = {
 
     extend: {
       colors: {
-        // Brand-first defaults (safe if CSS vars are missing)
         background: "var(--brand-obsidian, #000000)",
         foreground: "var(--brand-cream, #fdfaf3)",
         surface: "var(--brand-charcoal, #050505)",
 
-        // Optional CSS-var pipeline (lets you do rgb(var(--x)/<alpha-value>))
         ui: {
           background: "rgb(var(--color-background, 0 0 0) / <alpha-value>)",
           foreground: "rgb(var(--color-on-background, 253 250 243) / <alpha-value>)",
@@ -68,15 +67,39 @@ module.exports = {
       },
 
       fontFamily: {
-        // Uses your CSS font vars if present; falls back safely
-        sans: ["var(--font-family-sans)", "Inter", "system-ui", "sans-serif"],
-        mono: ["var(--font-family-mono)", "JetBrains Mono", "monospace"],
-        serif: ["var(--font-family-serif)", "Cormorant Garamond", "serif"],
-        editorial: ["var(--font-editorial)", "var(--font-family-serif)", "serif"],
+        sans: [
+          "var(--font-family-sans)",
+          "Inter",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif",
+        ],
+        mono: [
+          "var(--font-family-mono)",
+          "JetBrains Mono",
+          "Fira Code",
+          "ui-monospace",
+          "SFMono-Regular",
+          "monospace",
+        ],
+        serif: [
+          "var(--font-family-serif)",
+          "Cormorant Garamond",
+          "Georgia",
+          "Times New Roman",
+          "serif",
+        ],
+        editorial: [
+          "var(--font-editorial)",
+          "var(--font-family-serif)",
+          "Cormorant Garamond",
+          "serif",
+        ],
       },
 
       fontSize: {
-        "4xs": ["0.5rem", { lineHeight: "0.6rem", letterSpacing: "0.1em" }],
+        "4xs": ["0.5rem", { lineHeight: "0.6rem", letterSpacing: "0.12em" }],
         "3xs": ["0.625rem", { lineHeight: "0.8rem", letterSpacing: "0.2em" }],
         "2xs": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.05em" }],
       },
@@ -121,6 +144,11 @@ module.exports = {
 
       backdropBlur: { xs: "2px", "2xl": "40px" },
       zIndex: { 60: "60", 70: "70", 80: "80", 90: "90", 100: "100" },
+
+      // Optional utility: if you ever need hard anti-bleed wrappers
+      maxWidth: {
+        "screen-safe": "100vw",
+      },
     },
   },
 

@@ -1,7 +1,12 @@
+// components/PDFDashboard/Header.tsx
 import React from "react";
-import type { DashboardStats, FilterState } from "@/types/pdf-dashboard";
 
-export type ViewMode = "list" | "grid" | "detail";
+// Import types from central types file
+import type { 
+  DashboardStats, 
+  FilterState, 
+  ViewMode 
+} from "@/types/pdf-dashboard";
 
 export interface HeaderProps {
   stats: DashboardStats;

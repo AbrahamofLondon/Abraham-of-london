@@ -1,9 +1,8 @@
+// next.config.mjs
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
-/** 
- * Safe module resolution with fallbacks for browser-compatible polyfills
- */
+/** Safe module resolution with fallbacks for browser-compatible polyfills */
 function tryResolve(id) {
   try {
     return require.resolve(id);
@@ -12,22 +11,18 @@ function tryResolve(id) {
   }
 }
 
-/** 
- * Maps Node.js modules to browser polyfills or false to ignore
- */
+/** Maps Node.js modules to browser polyfills or false to ignore */
 function buildBrowserFallbacks() {
   const polyfillMap = {
-    "crypto": "crypto-browserify",
-    "stream": "stream-browserify",
-    "url": "url",
-    "util": "util",
-    "path": "path-browserify",
-    "os": "os-browserify/browser"
+    crypto: "crypto-browserify",
+    stream: "stream-browserify",
+    url: "url",
+    util: "util",
+    path: "path-browserify",
+    os: "os-browserify/browser",
   };
-  
+
   const resolved = {};
-  
-  // Explicitly disable server-only modules in the browser
   const disabled = {
     fs: false,
     net: false,
@@ -35,14 +30,12 @@ function buildBrowserFallbacks() {
     dns: false,
     child_process: false,
   };
-  
-  Object.entries(polyfillMap).forEach(([nodeModule, polyfillId]) => {
+
+  for (const [nodeModule, polyfillId] of Object.entries(polyfillMap)) {
     const resolvedPath = tryResolve(polyfillId);
-    if (resolvedPath) {
-      resolved[nodeModule] = resolvedPath;
-    }
-  });
-  
+    if (resolvedPath) resolved[nodeModule] = resolvedPath;
+  }
+
   return { ...disabled, ...resolved };
 }
 
@@ -53,36 +46,36 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   staticPageGenerationTimeout: 300,
-  
-  typescript: { 
+
+  typescript: {
     ignoreBuildErrors: false,
   },
-  
+
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: [
-      "lucide-react", 
-      "date-fns", 
-      "clsx", 
-      "tailwind-merge", 
+      "lucide-react",
+      "date-fns",
+      "clsx",
+      "tailwind-merge",
       "framer-motion",
-      "@/components",
-      "@/lib"
     ],
     optimizeCss: true,
-    // REMOVED: optimizeFonts is not valid in Next.js 16
-    // Font optimization is automatic in Next.js 16 via next/font
   },
-  
+
   images: {
+    // ✅ Local public/ images are always allowed.
+    // Remote patterns: keep explicit hosts only (avoid wildcard instability)
     remotePatterns: [
-      { protocol: "https", hostname: "**", pathname: "**" }
+      { protocol: "https", hostname: "www.abrahamoflondon.org", pathname: "/**" },
+      { protocol: "https", hostname: "abrahamoflondon.org", pathname: "/**" },
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
+
   async headers() {
     return [
       {
@@ -93,56 +86,52 @@ const nextConfig = {
           { key: "X-XSS-Protection", value: "1; mode=block" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "origin-when-cross-origin" }
+          { key: "Referrer-Policy", value: "origin-when-cross-origin" },
         ],
       },
     ];
   },
-  
+
   async redirects() {
     return [
-      { source: '/app/strategy/:slug', destination: '/strategy/:slug', permanent: true },
-      { source: '/:path+/', destination: '/:path+', permanent: true },
+      { source: "/app/strategy/:slug", destination: "/strategy/:slug", permanent: true },
+      { source: "/:path+/", destination: "/:path+", permanent: true },
     ];
   },
-  
+
   webpack: (config, { isServer }) => {
-  if (!isServer) {
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      ...buildBrowserFallbacks(),
-    };
-    
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        chunks: 'all',
-        minSize: 20000,
-        maxSize: 250000,
-        cacheGroups: {
-          defaultVendors: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: -10,
-            reuseExistingChunk: true,
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        ...buildBrowserFallbacks(),
+      };
+
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: "all",
+          minSize: 20000,
+          maxSize: 250000,
+          cacheGroups: {
+            defaultVendors: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
+            },
           },
         },
-      },
-    };
-  }
-  
-  // ✅ Silence verbose cache serialization warnings
-  config.infrastructureLogging = {
-    level: 'error',
-  };
-  
-  return config;
+      };
+    }
+
+    config.infrastructureLogging = { level: "error" };
+    return config;
   },
-  
-  output: 'standalone',
-  
+
+  output: "standalone",
+
   env: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_APP_VERSION: '1.0.0',
+    NEXT_PUBLIC_APP_VERSION: "1.0.0",
   },
 };
 

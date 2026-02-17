@@ -17,9 +17,6 @@ const CANONICAL_HOST = "www.abrahamoflondon.org";
 
 /**
  * Public prefixes that must NEVER be blocked by auth
- * - Keep /api/auth public (NextAuth)
- * - Keep health/contact public
- * - Keep Next static assets public
  */
 const PUBLIC_PREFIXES = [
   "/api/auth",
@@ -33,15 +30,10 @@ const PUBLIC_PREFIXES = [
   "/assets",
   "/fonts",
   "/images",
-  "/public",
   "/inner-circle/login",
   "/admin/login",
 ];
 
-/**
- * Apply proxy only where it matters.
- * IMPORTANT: Next proxy/middleware matcher is honored only if the runner picks it up.
- */
 export const config = {
   matcher: ["/admin/:path*", "/inner-circle/:path*", "/api/:path*"],
 };
@@ -50,12 +42,6 @@ function isPublicPath(pathname: string) {
   return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
-/**
- * Build a safe returnTo:
- * - strips callbackUrl/returnTo to prevent nesting loops
- * - keeps other query params
- * - guarantees a leading slash
- */
 function safeReturnTo(req: NextRequest) {
   const u = req.nextUrl.clone();
   u.searchParams.delete("callbackUrl");
@@ -77,12 +63,6 @@ function isApiPath(pathname: string) {
   return pathname.startsWith("/api/");
 }
 
-/**
- * Canonical host redirect guard:
- * - only redirect apex -> www
- * - never redirect if already www
- * - preserve path + query
- */
 function canonicalizeHost(req: NextRequest) {
   const host = req.nextUrl.hostname;
   if (host === "abrahamoflondon.org") {
@@ -93,24 +73,15 @@ function canonicalizeHost(req: NextRequest) {
   return null;
 }
 
-/**
- * Main proxy runner
- * Next 16 expects either:
- * - export async function proxy(req)
- * - OR default export function
- * We'll provide both + middleware alias at bottom.
- */
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // 0) Canonical host redirect (apex -> www)
+  // 0) Canonical host redirect
   const canonical = canonicalizeHost(req);
   if (canonical) return canonical;
 
-  // 1) Bypass truly public paths immediately
-  if (isPublicPath(pathname)) {
-    return NextResponse.next();
-  }
+  // 1) Public bypass
+  if (isPublicPath(pathname)) return NextResponse.next();
 
   const ip = getClientIp(req);
 
@@ -118,16 +89,12 @@ export async function proxy(req: NextRequest) {
   const api = isApiPath(pathname);
   const inner = isInnerCirclePath(pathname);
 
-  // 2) IP GATE – Admin only
+  // 2) IP gate — Admin only
   if (admin) {
-    // If allowlist isn’t configured properly, isAllowedIp should still return false safely
-    if (!isAllowedIp(ip)) {
-      return new NextResponse("Access Denied", { status: 403 });
-    }
+    if (!isAllowedIp(ip)) return new NextResponse("Access Denied", { status: 403 });
   }
 
-  // 3) RATE LIMIT – APIs + Admin perimeter
-  // NOTE: Rate limiting runs before auth so abuse is throttled early.
+  // 3) Rate limit — Admin + API
   if (admin || api) {
     const opts = admin ? RATE_LIMIT_CONFIGS.ADMIN : RATE_LIMIT_CONFIGS.API_GENERAL;
     const rl = await rateLimit(ip, opts);
@@ -153,13 +120,12 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // 4) AUTH GATE – ONLY for /admin + /inner-circle (NOT all /api)
+  // 4) Auth gate — ONLY admin + inner-circle (NOT all /api)
   const needsAuth = admin || inner;
 
   if (needsAuth) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-    // Let login pages through without token (avoid lockout loops)
     if (!token) {
       const onAdminLogin = pathname.startsWith("/admin/login");
       const onInnerLogin = pathname.startsWith("/inner-circle/login");
@@ -167,30 +133,25 @@ export async function proxy(req: NextRequest) {
 
       const loginPath = admin ? "/admin/login" : "/inner-circle/login";
       const url = new URL(loginPath, req.url);
-
-      // ✅ Use returnTo — never callbackUrl (prevents recursion hell)
       url.searchParams.set("returnTo", safeReturnTo(req));
 
       return NextResponse.redirect(url, 307);
     }
 
-    // 5) ROLE GATE – Admin only
+    // 5) Role gate — Admin only
     if (admin) {
       const role = String((token as any)?.role ?? "guest").toLowerCase();
       const rank = ROLE_HIERARCHY[role] ?? 0;
       const required = ROLE_HIERARCHY.admin ?? 100;
 
       if (rank < required) {
-        if (api) {
-          return NextResponse.json({ error: "Clearance Required" }, { status: 403 });
-        }
+        if (api) return NextResponse.json({ error: "Clearance Required" }, { status: 403 });
         return NextResponse.redirect(new URL("/auth/access-denied", req.url));
       }
     }
   }
 
-  // 6) Sensitive operation MFA (optional)
-  // Guard against admin-security being present but not exporting properly
+  // 6) Sensitive operations precondition (optional)
   try {
     if (typeof isSensitiveOperation === "function" && isSensitiveOperation(pathname, req.method)) {
       if (!req.headers.get("x-confirmation-token")) {
@@ -201,27 +162,18 @@ export async function proxy(req: NextRequest) {
       }
     }
   } catch {
-    // Do nothing — never let MFA helper crash the perimeter
+    // never crash perimeter
   }
 
-  // 7) SUCCESS – Security headers
+  // 7) Success — perimeter headers
   const res = NextResponse.next();
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
-  if (admin || inner) {
-    res.headers.set("Cache-Control", "no-store, private, must-revalidate");
-  }
-
+  if (admin || inner) res.headers.set("Cache-Control", "no-store, private, must-revalidate");
   return res;
 }
 
-/**
- * Belt-and-braces exports for Next 16 runner expectations
- * - proxy: named
- * - middleware: compatibility alias
- * - default: compatibility
- */
 export const middleware = proxy;
 export default proxy;

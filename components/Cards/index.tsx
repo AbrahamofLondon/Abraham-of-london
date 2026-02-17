@@ -18,7 +18,9 @@ export { default as BlogPostCard } from "./BlogPostCard";
 export { default as CanonResourceCard } from "./CanonResourceCard";
 export { default as ArticleHero } from "./ArticleHero";
 export { default as CanonPrimaryCard } from "./CanonPrimaryCard";
-export { DocumentCard } from "./BaseCard";
+
+// ✅ FIXED: Re-exporting the default export as a named member
+export { default as DocumentCard } from "./BaseCard";
 
 // Component prop types
 export type { BookCardProps } from "./BookCard";
@@ -31,4 +33,3 @@ export * from "./utils";
 
 // Mapping
 export { getCardPropsForDocument } from "./getCardPropsForDocument";
-

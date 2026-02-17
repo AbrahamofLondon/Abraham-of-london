@@ -5,24 +5,45 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 
+function cleanAttemptedPath(asPath?: string) {
+  const raw = (asPath || "/").trim();
+  // Remove hash
+  const noHash = raw.split("#")[0] || "/";
+  // Keep query (useful), but decode safely for readability
+  try {
+    return decodeURI(noHash);
+  } catch {
+    return noHash;
+  }
+}
+
 const NotFoundPage: React.FC = () => {
   const router = useRouter();
-  const attemptedPath = router?.asPath || "/";
+  const attemptedPath = cleanAttemptedPath(router?.asPath);
 
   const title = "Page Not Found | Abraham of London";
   const description =
     "This page could not be found. Use the links below to return to a live, curated part of the Abraham of London experience.";
 
   return (
-    <Layout title="404 - Not Found">
+    <Layout
+      title="404 - Not Found"
+      description={description}
+      canonicalUrl="/404"
+      ogType="website"
+      fullWidth
+      className="bg-black"
+    >
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <main className="flex min-h-[80vh] items-center justify-center bg-gradient-to-b from-black via-deepCharcoal to-black px-4">
+      {/* NOTE: Layout already provides <main>. Do NOT nest another <main>. */}
+      <div className="min-h-[80vh] px-4 py-16 sm:py-20">
         <section className="mx-auto w-full max-w-3xl rounded-3xl border border-softGold/30 bg-white/5 p-8 text-center shadow-2xl shadow-black/60 backdrop-blur">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-softGold">
             Abraham of London
@@ -36,8 +57,8 @@ const NotFoundPage: React.FC = () => {
           </h1>
 
           <p className="mx-auto mb-4 max-w-xl text-sm text-gray-200 md:text-base">
-            Either the URL is wrong, the content has been retired, or this route
-            simply hasn&apos;t been brought into the live experience yet.
+            Either the URL is wrong, the content has been retired, or this route simply hasn&apos;t been brought into the
+            live experience yet.
           </p>
 
           <div className="mx-auto mb-6 max-w-xl rounded-2xl bg-black/50 px-4 py-3 text-xs text-left text-gray-300">
@@ -46,8 +67,7 @@ const NotFoundPage: React.FC = () => {
               {attemptedPath}
             </code>
             <p className="mt-2 text-[11px] text-gray-400">
-              If this URL should exist, note it down - it helps when we&apos;re
-              tightening routes or migrating content.
+              If this URL should exist, note it down — it helps when we&apos;re tightening routes or migrating content.
             </p>
           </div>
 
@@ -59,18 +79,21 @@ const NotFoundPage: React.FC = () => {
             >
               Go to Home
             </Link>
+
             <Link
               href="/downloads"
               className="inline-flex items-center rounded-full border border-softGold/50 px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-softGold hover:bg-softGold/10"
             >
               View Downloads
             </Link>
+
             <Link
               href="/strategy/sample-strategy"
               className="inline-flex items-center rounded-full border border-white/30 px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-white/5"
             >
               Strategy Sample
             </Link>
+
             <Link
               href="/contact"
               className="inline-flex items-center rounded-full border border-white/20 px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-white/5"
@@ -83,10 +106,9 @@ const NotFoundPage: React.FC = () => {
             Something always happens | Fathering Without Fear
           </p>
         </section>
-      </main>
+      </div>
     </Layout>
   );
 };
 
 export default NotFoundPage;
-

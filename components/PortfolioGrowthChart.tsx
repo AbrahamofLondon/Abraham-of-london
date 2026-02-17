@@ -40,6 +40,29 @@ export default function PortfolioGrowthChart({ auditData }: PortfolioGrowthChart
 
   const maxValue = auditData.totalAssets;
 
+  // ✅ SAFE CALCULATION: Calculate quarterly growth with comprehensive null checks
+  const calculateQuarterlyGrowth = (): number => {
+    // Need at least 4 data points for a quarterly comparison
+    if (!chartData || chartData.length < 4) return 0;
+    
+    const lastIndex = chartData.length - 1;
+    const previousIndex = chartData.length - 4;
+    
+    // Ensure indices are valid
+    if (lastIndex < 0 || previousIndex < 0) return 0;
+    
+    const lastItem = chartData[lastIndex];
+    const previousItem = chartData[previousIndex];
+    
+    // Check if both items exist and have values
+    if (!lastItem || !previousItem) return 0;
+    if (typeof lastItem.value !== 'number' || typeof previousItem.value !== 'number') return 0;
+    
+    return lastItem.value - previousItem.value;
+  };
+
+  const quarterlyGrowth = calculateQuarterlyGrowth();
+
   return (
     <div className="w-full bg-zinc-950 border border-white/5 p-8 rounded-sm overflow-hidden relative group">
       {/* BACKGROUND TEXTURE */}
@@ -92,9 +115,20 @@ export default function PortfolioGrowthChart({ auditData }: PortfolioGrowthChart
             <span className="text-zinc-500 font-mono text-[9px] uppercase tracking-widest">Integrity: Verified</span>
           </div>
           <div className="flex items-center gap-3 justify-end text-emerald-500">
-             <span className="font-mono text-[9px] uppercase tracking-widest">+{(chartData[chartData.length-1]?.value - chartData[chartData.length-4]?.value) || 0} QTR</span>
+            <span className="font-mono text-[9px] uppercase tracking-widest">
+              +{quarterlyGrowth} QTR
+            </span>
           </div>
         </div>
+
+        {/* Show message when insufficient data */}
+        {chartData.length < 4 && (
+          <div className="mt-4 text-center">
+            <p className="text-zinc-600 font-mono text-[8px] uppercase tracking-widest">
+              Insufficient historical data for quarterly comparison
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

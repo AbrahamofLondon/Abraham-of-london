@@ -13,10 +13,28 @@ declare module "next-auth" {
     tier?: AoLTier;
     /** Optional: whether the user is an administrator */
     isAdmin?: boolean;
+    /** User's role */
+    role?: string;
   }
 
   interface Session {
     user?: User;
+    /** AOL claims - institutional access metadata */
+    aol?: {
+      tier: AoLTier;
+      innerCircleAccess: boolean;
+      isInternal: boolean;
+      allowPrivate: boolean;
+      memberId?: string | null;
+      emailHash?: string | null;
+      flags?: string[];
+    };
+  }
+  
+  interface JWT {
+    id?: string;
+    role?: string;
+    aol?: Session['aol'];
   }
 }
 

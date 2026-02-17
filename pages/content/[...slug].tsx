@@ -1,172 +1,278 @@
-// pages/content/[...slug].tsx — HARDENED (Netlify-Resilient Vault Proxy)
+// pages/library/[slug].tsx
+// — LIBRARY DETAIL (PDF Asset Page) — Pages Router
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-import { Loader2 } from "lucide-react";
+import Layout from "@/components/Layout";
+import { ArrowLeft, ExternalLink, Download, FileText } from "lucide-react";
 
-import ContentlayerDocPage from "@/components/ContentlayerDocPage";
+type PdfAsset = {
+  slug: string;
+  title: string;
+  description?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  href?: string | null;
+  url?: string | null;
+  path?: string | null;
+  public?: boolean | null;
+  updated?: string | null;
+  date?: string | null;
+};
 
-// ✅ Institutional Server-side helpers
-import {
-  getContentlayerData,
-  getAllContentlayerDocs,
-  getDocBySlug,
-  isDraftContent,
-} from "@/lib/content/server";
+type Props = { asset: PdfAsset };
 
-import {
-  getDocHref,
-  normalizeSlug,
-  toUiDoc,
-} from "@/lib/content/shared";
-
-import { sanitizeData } from "@/lib/server/md-utils";
-
-type UiDoc = ReturnType<typeof toUiDoc>;
-
-interface Props {
-  doc: UiDoc;
-  source: MDXRemoteSerializeResult;
-  canonicalPath: string;
-  mdxRaw: string; 
+function safeStr(v: any): string {
+  return typeof v === "string" ? v : v == null ? "" : String(v);
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-
-function getRawBody(d: any): string {
-  return d?.body?.raw || d?.bodyRaw || d?.content || d?.body || d?.mdx || "";
+function normalizeSlug(input: string) {
+  return (input || "")
+    .trim()
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
 }
 
-const ContentSlugPage: NextPage<Props> = ({ doc, source, canonicalPath, mdxRaw }) => {
+function jsonSafe<T>(v: T): T {
+  return JSON.parse(JSON.stringify(v, (_k, val) => (val === undefined ? null : val)));
+}
+
+function coerceAsset(x: any): PdfAsset | null {
+  if (!x) return null;
+
+  const slug =
+    normalizeSlug(
+      safeStr(x.slug || x.id || x.key || x.name || x.file || x.pdf || "")
+    ) || "";
+
+  const title = safeStr(x.title || x.name || x.label || slug || "Untitled");
+  if (!slug) return null;
+
+  const tags = Array.isArray(x.tags) ? x.tags.map((t: any) => safeStr(t)).filter(Boolean) : null;
+
+  const updated =
+    safeStr(x.updated || x.updatedAt || x.modified || x.lastModified || x.date || "") || null;
+
+  const isPublic =
+    x.public === true ||
+    x.isPublic === true ||
+    x.accessLevel === "public" ||
+    x.tier === "public" ||
+    x.visibility === "public" ||
+    x.visibility === "Public" ||
+    x.access === "public" ||
+    x.access === "Public" ||
+    x.locked === false;
+
+  return {
+    slug,
+    title,
+    description: safeStr(x.description || x.excerpt || x.summary || "") || null,
+    category: safeStr(x.category || x.collection || x.kind || "") || null,
+    tags,
+    href: safeStr(x.href || "") || null,
+    url: safeStr(x.url || x.publicUrl || "") || null,
+    path: safeStr(x.path || x.filePath || x.file || "") || null,
+    public: Boolean(isPublic),
+    updated,
+    date: safeStr(x.date || x.publishedAt || "") || null,
+  };
+}
+
+function resolveAssetUrl(asset: PdfAsset): string | null {
+  const url = safeStr(asset.url || "");
+  if (url) return url;
+
+  const href = safeStr(asset.href || "");
+  if (href.startsWith("/")) return href;
+
+  const path = safeStr(asset.path || "");
+  if (path) {
+    const p = normalizeSlug(path);
+    if (p.startsWith("pdfs/")) return `/${p}`;
+    if (p.startsWith("assets/")) return `/${p}`;
+    if (p.startsWith("public/")) return `/${p.replace(/^public\//, "")}`;
+  }
+
+  return null;
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  let assets: PdfAsset[] = [];
+  try {
+    const mod: any = await import("@/scripts/pdf/pdf-registry.source");
+    const list = mod?.ALL_SOURCE_PDFS || mod?.PDF_REGISTRY || mod?.ALL_PDFS || mod?.default;
+    const arr: any[] = Array.isArray(list) ? list : Array.isArray(list?.items) ? list.items : [];
+    assets = arr.map(coerceAsset).filter(Boolean) as PdfAsset[];
+  } catch {
+    assets = [];
+  }
+
+  const paths = assets.map((a) => ({ params: { slug: normalizeSlug(a.slug) } }));
+
+  return { paths, fallback: "blocking" };
+};
+
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const slug = normalizeSlug(String(params?.slug || ""));
+
+  let assets: PdfAsset[] = [];
+  try {
+    const mod: any = await import("@/scripts/pdf/pdf-registry.source");
+    const list = mod?.ALL_SOURCE_PDFS || mod?.PDF_REGISTRY || mod?.ALL_PDFS || mod?.default;
+    const arr: any[] = Array.isArray(list) ? list : Array.isArray(list?.items) ? list.items : [];
+    assets = arr.map(coerceAsset).filter(Boolean) as PdfAsset[];
+  } catch {
+    assets = [];
+  }
+
+  const asset =
+    assets.find((a) => a.slug.toLowerCase() === slug.toLowerCase()) ||
+    assets.find((a) => normalizeSlug(a.slug).toLowerCase().endsWith(slug.toLowerCase())) ||
+    null;
+
+  if (!asset) return { notFound: true };
+
+  return {
+    props: jsonSafe({ asset }),
+    revalidate: 900,
+  };
+};
+
+const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
   const router = useRouter();
 
   if (router.isFallback) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
-        <div className="flex items-center gap-3 text-amber-500 animate-pulse">
-          <Loader2 className="animate-spin" size={20} />
-          <span className="font-mono text-[10px] uppercase tracking-[0.4em] italic">
-            Synchronising Registry Vault...
-          </span>
-        </div>
-      </div>
+      <Layout title="Resolving Asset…">
+        <main className="min-h-screen bg-black text-white flex items-center justify-center">
+          <div className="text-[11px] font-mono uppercase tracking-[0.35em] text-white/50">
+            Resolving Library Asset…
+          </div>
+        </main>
+      </Layout>
     );
   }
 
-  if (!doc) return null;
-
-  const canonicalUrl = `${SITE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
-  const desc = doc.description || doc.excerpt || "Institutional intelligence asset // Abraham of London.";
+  const url = resolveAssetUrl(asset);
+  const canonical = `/library/${encodeURIComponent(asset.slug)}`;
+  const desc =
+    asset.description ||
+    "Verified Library asset // Abraham of London.";
 
   return (
-    <>
+    <Layout title={asset.title} description={desc} canonicalUrl={canonical} fullWidth>
       <Head>
-        <title>{`${doc.title.toUpperCase()} // REGISTRY`}</title>
-        <meta name="description" content={desc} />
-        <link rel="canonical" href={canonicalUrl} />
-        
-        {/* Institutional OpenGraph */}
-        <meta property="og:title" content={`${doc.title} | Abraham of London`} />
-        <meta property="og:description" content={desc} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        {doc.coverImage && <meta property="og:image" content={doc.coverImage} />}
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="robots" content="index, follow, max-image-preview:large" />
-        {doc.date && <meta property="article:published_time" content={doc.date} />}
+        <meta name="robots" content="index, follow" />
       </Head>
 
-      <ContentlayerDocPage
-        doc={doc}
-        source={source}
-        canonicalPath={canonicalPath}
-        backHref="/content"
-        label="Strategic Archive"
-        mdxRaw={mdxRaw} 
-      />
-    </>
+      <main className="min-h-screen bg-black text-white">
+        <header className="border-b border-white/5 bg-zinc-950/40">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-10">
+            <Link
+              href="/library"
+              className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-white/45 hover:text-amber-300 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back to Library
+            </Link>
+
+            <div className="mt-6 flex items-start justify-between gap-6">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+                  <FileText className="h-4 w-4 text-amber-400" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/55">
+                    {asset.category || "Library Asset"}
+                  </span>
+                </div>
+
+                <h1 className="mt-6 font-serif text-3xl md:text-5xl text-white/95 leading-tight">
+                  {asset.title}
+                </h1>
+
+                {asset.description && (
+                  <p className="mt-4 max-w-3xl text-sm md:text-base text-white/45 leading-relaxed">
+                    {asset.description}
+                  </p>
+                )}
+
+                <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+                  Slug: <span className="text-white/60">{asset.slug}</span>
+                </div>
+
+                {Array.isArray(asset.tags) && asset.tags.length > 0 && (
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {asset.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[9px] font-mono uppercase tracking-[0.28em] text-white/40"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="shrink-0 flex flex-col gap-3">
+                {url ? (
+                  <>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/70 hover:border-amber-500/25 hover:text-amber-300 transition-all"
+                    >
+                      <ExternalLink className="h-4 w-4" /> Open
+                    </a>
+
+                    <a
+                      href={url}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white hover:bg-amber-700 transition-all shadow-lg shadow-amber-900/20"
+                    >
+                      <Download className="h-4 w-4" /> Download
+                    </a>
+                  </>
+                ) : (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white/45 w-[260px]">
+                    No direct URL in registry for this asset.
+                    <div className="mt-2 text-[10px] font-mono text-white/35">
+                      Add one of: <span className="text-white/55">url</span>, <span className="text-white/55">href</span>, or <span className="text-white/55">path</span>.
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Inline preview (best-effort) */}
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+          {url ? (
+            <div className="rounded-3xl border border-white/10 bg-black overflow-hidden">
+              <div className="px-5 py-3 border-b border-white/10 bg-white/[0.02] text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">
+                Preview
+              </div>
+              <div className="aspect-[16/10] w-full">
+                <iframe
+                  src={url}
+                  className="h-full w-full"
+                  title={asset.title}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center text-white/45">
+              Preview unavailable without a resolvable URL.
+            </div>
+          )}
+        </section>
+      </main>
+    </Layout>
   );
 };
 
-/* -----------------------------------------------------------------------------
-  PATH GENERATION: EXHAUSTIVE CATCH-ALL
------------------------------------------------------------------------------ */
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    getContentlayerData(); 
-    const docs = getAllContentlayerDocs();
-
-    const paths = docs
-      .filter((d) => {
-        if (!d || isDraftContent(d)) return false;
-        const href = getDocHref(d);
-        // Only route docs that belong to the /content/ hierarchy
-        return Boolean(href) && href.startsWith("/content/");
-      })
-      .map((doc) => {
-        const href = getDocHref(doc);
-        const rest = normalizeSlug(href!.replace(/^\/content\//, ""));
-        const parts = rest.split("/").filter(Boolean);
-        return parts.length > 0 ? { params: { slug: parts } } : null;
-      })
-      .filter(Boolean) as { params: { slug: string[] } }[];
-
-    return { paths, fallback: "blocking" };
-  } catch (error) {
-    console.error("[VAULT_PATH_ERROR]", error);
-    return { paths: [], fallback: "blocking" };
-  }
-};
-
-/* -----------------------------------------------------------------------------
-  DATA FETCHING: SERIALIZED RESOLUTION
------------------------------------------------------------------------------ */
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  try {
-    const slugParts = params?.slug;
-    if (!slugParts) return { notFound: true };
-
-    const joinedSlug = Array.isArray(slugParts) ? slugParts.join("/") : slugParts;
-    const normalized = normalizeSlug(joinedSlug);
-    
-    // Attempt multi-directory resolution
-    const rawDoc = getDocBySlug(`content/${normalized}`);
-    
-    if (!rawDoc || isDraftContent(rawDoc)) {
-      return { notFound: true };
-    }
-
-    const href = getDocHref(rawDoc);
-    const doc = toUiDoc(rawDoc);
-    const mdxRaw = getRawBody(rawDoc);
-    
-    // Server-side serialization (Hardened with GFM for tables/lists)
-    const source = await serialize(mdxRaw || " ", {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug],
-      },
-    });
-
-    return {
-      props: {
-        doc: sanitizeData(doc),
-        source,
-        canonicalPath: href || `/content/${normalized}`,
-        mdxRaw,
-      },
-      revalidate: 1800, // 30-minute archival sync
-    };
-  } catch (error) {
-    console.error("[VAULT_PROPS_ERROR]", error);
-    return { notFound: true };
-  }
-};
-
-export default ContentSlugPage;
+export default LibrarySlugPage;

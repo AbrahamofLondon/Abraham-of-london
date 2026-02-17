@@ -15,7 +15,7 @@ export default function CanonReference({
   chapter,
   title,
   children,
-}: CanonReferenceProps): JSX.Element {
+}: CanonReferenceProps): React.ReactElement {
   return (
     <div className="mt-6 rounded-xl border border-gold/20 bg-gold/5 p-4 transition-all hover:bg-gold/10">
       <div className="flex flex-wrap items-center gap-3 mb-2">
@@ -45,4 +45,3 @@ export default function CanonReference({
     </div>
   );
 }
-

@@ -2,7 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, Vault, Layers } from "lucide-react";
 
-export default function InstitutionalClose(): JSX.Element {
+export default function InstitutionalClose(): React.ReactElement {
   return (
     <section className="bg-black">
       <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">

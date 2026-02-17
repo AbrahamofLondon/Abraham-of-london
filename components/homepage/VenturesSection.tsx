@@ -1,289 +1,279 @@
-"use client";
+/* components/homepage/VenturesSection.tsx */
 
 import * as React from "react";
 import Link from "next/link";
-import { 
-  ArrowRight, 
-  Building2, 
-  PackageCheck, 
+import {
+  ArrowRight,
+  Building2,
+  PackageCheck,
   Lightbulb,
-  Target,
   Globe,
-  Rocket,
-  Shield,
+  ShieldCheck,
   Users,
-  Zap,
-  Sparkles
+  ChevronRight,
+  Layers,
 } from "lucide-react";
 
+type Accent = "emerald" | "blue" | "amber";
+
 interface Venture {
-  name: string;
+  name: "Alomarada" | "Endureluxe" | "InnovateHub";
   description: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   href: string;
   status: "Active" | "In development" | "Scaling";
   focus: string;
-  accentColor: "emerald" | "blue" | "amber" | "purple" | "rose" | "cyan";
-  metrics?: {
-    label: string;
-    value: string;
-  }[];
+  accentColor: Accent;
   launched?: string;
+  ref?: string;
 }
 
-const ALOMARADA_URL =
-  process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com/";
+const ALOMARADA_URL = process.env.NEXT_PUBLIC_ALOMARADA_URL || "https://alomarada.com/";
 const ENDURELUXE_URL =
-  process.env.NEXT_PUBLIC_ENDURELUXE_URL ||
-  "https://alomarada.com/endureluxe";
+  process.env.NEXT_PUBLIC_ENDURELUXE_URL || "https://alomarada.com/endureluxe";
 const INNOVATEHUB_URL =
-  process.env.NEXT_PUBLIC_INNOVATEHUB_URL ||
-  "https://innovatehub.abrahamoflondon.org";
+  process.env.NEXT_PUBLIC_INNOVATEHUB_URL || "https://innovatehub.abrahamoflondon.org";
 
-const ventures: Omit<Venture, "icon">[] = [
+const ventures: readonly Venture[] = [
   {
     name: "Alomarada",
     description:
-      "Board-level advisory, operating systems, and market-entry strategy for founders, boards, and institutions building sustainable ventures across Africa and emerging markets.",
+      "Advisory, operating systems, and market-entry architecture—built for founders and institutions across Africa and growth markets.",
     href: ALOMARADA_URL,
     status: "Active",
-    focus: "Strategic advisory · Market systems · Deal architecture",
+    focus: "Strategy · Governance · Deal Architecture",
     accentColor: "emerald",
-    metrics: [
-      { label: "Advisory sessions", value: "48+" },
-      { label: "Markets covered", value: "12+" },
-      { label: "Deals structured", value: "£5M+" }
-    ],
-    launched: "2023"
+    launched: "2018",
+    ref: "AOL-HLD-ALM",
   },
   {
     name: "Endureluxe",
     description:
-      "Community-driven fitness and performance gear engineered for durability. Built for people who train, build, and endure - designed to survive real life, not just product shoots.",
+      "Performance essentials designed for real life—where training, work, and responsibility share the same calendar.",
     href: ENDURELUXE_URL,
     status: "Scaling",
-    focus: "Fitness community · Performance gear · Everyday durability",
+    focus: "Community · Performance Gear · Durability",
     accentColor: "blue",
-    metrics: [
-      { label: "Products shipped", value: "2,500+" },
-      { label: "Community members", value: "1,200+" },
-      { label: "Countries served", value: "28+" }
-    ],
-    launched: "2024"
+    launched: "2024",
+    ref: "AOL-HLD-END",
   },
   {
     name: "InnovateHub",
     description:
-      "Strategy, playbooks, and hands-on support to help founders test ideas, ship durable products, and build operating rhythms that actually hold under pressure.",
+      "A builder’s workshop: playbooks, sprints, and support for founders turning ideas into products that hold under pressure.",
     href: INNOVATEHUB_URL,
     status: "In development",
-    focus: "Innovation engine · Capability building · Venture design",
+    focus: "Venture Design · Capability · Execution Cadence",
     accentColor: "amber",
-    metrics: [
-      { label: "Founders supported", value: "36+" },
-      { label: "Products launched", value: "12+" },
-      { label: "Playbooks shipped", value: "8+" }
-    ],
-    launched: "2025"
+    launched: "2025",
+    ref: "AOL-HLD-INH",
   },
-];
+] as const;
 
-// Map icons to ventures
 const ventureIcons = {
   Alomarada: Building2,
   Endureluxe: PackageCheck,
-  InnovateHub: Lightbulb
-};
+  InnovateHub: Lightbulb,
+} as const;
 
-const colorClasses = {
+const accent: Record<
+  Accent,
+  {
+    pill: string;
+    ring: string;
+    icon: string;
+    edge: string;
+    link: string;
+    glow: string;
+  }
+> = {
   emerald: {
-    pill: "bg-emerald-500/15 text-emerald-300 border-emerald-400/30",
-    iconBg: "bg-gradient-to-br from-emerald-500/20 to-emerald-600/10",
-    iconText: "text-emerald-400",
-    border: "border-emerald-400/20 group-hover:border-emerald-400/40",
-    linkText: "text-emerald-300",
-    gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent",
+    pill: "border-emerald-400/25 bg-emerald-500/10 text-emerald-200",
+    ring: "group-hover:border-emerald-400/25",
+    icon: "text-emerald-300",
+    edge: "bg-emerald-500/20",
+    link: "text-emerald-200",
     glow: "bg-emerald-500/10",
-    metric: "text-emerald-300"
   },
   blue: {
-    pill: "bg-blue-500/15 text-blue-300 border-blue-400/30",
-    iconBg: "bg-gradient-to-br from-blue-500/20 to-blue-600/10",
-    iconText: "text-blue-400",
-    border: "border-blue-400/20 group-hover:border-blue-400/40",
-    linkText: "text-blue-300",
-    gradient: "from-blue-500/10 via-blue-500/5 to-transparent",
+    pill: "border-blue-400/25 bg-blue-500/10 text-blue-200",
+    ring: "group-hover:border-blue-400/25",
+    icon: "text-blue-300",
+    edge: "bg-blue-500/20",
+    link: "text-blue-200",
     glow: "bg-blue-500/10",
-    metric: "text-blue-300"
   },
   amber: {
-    pill: "bg-amber-500/15 text-amber-300 border-amber-400/30",
-    iconBg: "bg-gradient-to-br from-amber-500/20 to-amber-600/10",
-    iconText: "text-amber-400",
-    border: "border-amber-400/20 group-hover:border-amber-400/40",
-    linkText: "text-amber-300",
-    gradient: "from-amber-500/10 via-amber-500/5 to-transparent",
+    pill: "border-amber-400/25 bg-amber-500/10 text-amber-200",
+    ring: "group-hover:border-amber-400/25",
+    icon: "text-amber-300",
+    edge: "bg-amber-500/20",
+    link: "text-amber-200",
     glow: "bg-amber-500/10",
-    metric: "text-amber-300"
-  },
-  purple: {
-    pill: "bg-purple-500/15 text-purple-300 border-purple-400/30",
-    iconBg: "bg-gradient-to-br from-purple-500/20 to-purple-600/10",
-    iconText: "text-purple-400",
-    border: "border-purple-400/20 group-hover:border-purple-400/40",
-    linkText: "text-purple-300",
-    gradient: "from-purple-500/10 via-purple-500/5 to-transparent",
-    glow: "bg-purple-500/10",
-    metric: "text-purple-300"
-  },
-  rose: {
-    pill: "bg-rose-500/15 text-rose-300 border-rose-400/30",
-    iconBg: "bg-gradient-to-br from-rose-500/20 to-rose-600/10",
-    iconText: "text-rose-400",
-    border: "border-rose-400/20 group-hover:border-rose-400/40",
-    linkText: "text-rose-300",
-    gradient: "from-rose-500/10 via-rose-500/5 to-transparent",
-    glow: "bg-rose-500/10",
-    metric: "text-rose-300"
-  },
-  cyan: {
-    pill: "bg-cyan-500/15 text-cyan-300 border-cyan-400/30",
-    iconBg: "bg-gradient-to-br from-cyan-500/20 to-cyan-600/10",
-    iconText: "text-cyan-400",
-    border: "border-cyan-400/20 group-hover:border-cyan-400/40",
-    linkText: "text-cyan-300",
-    gradient: "from-cyan-500/10 via-cyan-500/5 to-transparent",
-    glow: "bg-cyan-500/10",
-    metric: "text-cyan-300"
   },
 };
 
-const VenturesSection: React.FC = () => {
+function StatusPill({ status, tone }: { status: Venture["status"]; tone: Accent }) {
+  const c = accent[tone];
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900">
-      <div className="mx-auto max-w-7xl">
-        {/* Section Header */}
-        <div className="mb-16 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-4 py-2">
-            <Sparkles className="h-4 w-4 text-amber-300" />
-            <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
-              Execution Arms
-            </span>
+    <span
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${c.pill}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${c.edge}`} />
+      {status}
+    </span>
+  );
+}
+
+function MicroStat({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4">
+      <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.02]">
+        <Icon className="h-5 w-5 text-amber-200/80" />
+      </div>
+      <div className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/35">{label}</div>
+      <div className="mt-1 text-[12px] font-semibold text-white/70">{value}</div>
+    </div>
+  );
+}
+
+export default function VenturesSection(): React.ReactElement {
+  return (
+    <section className="relative overflow-hidden bg-black py-24 lg:py-32">
+      {/* AOL Background Architecture */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-grid-technical mask-radial-fade opacity-[0.10]" />
+        <div className="absolute left-1/2 top-[-280px] h-[760px] w-[1040px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[190px]" />
+        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.03] mix-blend-overlay" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header (Institutional Portfolio tone) */}
+        <div className="mb-14 md:mb-16">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1">
+              <Layers className="h-3.5 w-3.5 text-amber-500/70" />
+              <span className="text-[10px] font-black uppercase tracking-[0.35em] text-amber-500/70">
+                Portfolio Registry
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-white/15" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/35">
+                ventures-core
+              </span>
+            </div>
+
+            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/25">
+              holdings // practice // execution
+            </div>
           </div>
-          
-          <h2 className="mb-6 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Where philosophy becomes <span className="bg-gradient-to-r from-amber-200 to-amber-300 bg-clip-text text-transparent">operating system</span>
+
+          <h2 className="mt-7 font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-white tracking-tight leading-[1.05]">
+            A portfolio built to{" "}
+            <span className="text-amber-200/90">carry weight</span>.
           </h2>
-          
-          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-gray-300">
-            Alomarada, Endureluxe, and InnovateHub are not side projects. They are execution arms 
-            of the Canon — real-world laboratories for strategy, governance, and multi-generational design.
+
+          <p className="mt-6 max-w-3xl text-white/40 text-base md:text-lg font-light leading-relaxed">
+            These ventures are not side-projects. They are execution theatres — different audiences, same doctrine:
+            governance, cadence, clarity. If it doesn’t survive real responsibility, it doesn’t ship.
           </p>
 
-          {/* Quick stats */}
-          <div className="mt-8 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-            {[
-              { label: "Active Ventures", value: "3", icon: Rocket },
-              { label: "Markets", value: "40+", icon: Globe },
-              { label: "Impact", value: "£5M+", icon: Target },
-            ].map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className="text-center">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white/5 to-white/10 mb-3">
-                    <Icon className="h-6 w-6 text-amber-400" />
-                  </div>
-                  <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                  <div className="text-xs uppercase tracking-wider text-gray-400">{stat.label}</div>
-                </div>
-              );
-            })}
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 max-w-3xl">
+            <MicroStat icon={Globe} label="Markets" value="Africa & growth corridors" />
+            <MicroStat icon={Users} label="Communities" value="Builders, teams, households" />
+            <MicroStat icon={ShieldCheck} label="Protocol" value="Governance, controls, cadence" />
           </div>
         </div>
 
-        {/* Ventures Grid */}
-        <div className="grid gap-8 md:grid-cols-3">
-          {ventures.map((venture) => {
-            const colors = colorClasses[venture.accentColor];
-            const IconComponent = ventureIcons[venture.name as keyof typeof ventureIcons];
+        {/* Ventures Grid (AOL cards + controlled accents) */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {ventures.map((v, idx) => {
+            const Icon = ventureIcons[v.name];
+            const c = accent[v.accentColor];
 
             return (
               <article
-                key={venture.name}
-                className={`group relative flex h-full flex-col rounded-3xl border ${colors.border} bg-gradient-to-br from-white/5 to-transparent p-6 backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50`}
+                key={v.name}
+                className={`group relative flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.02] p-8 transition-all duration-500 hover:bg-white/[0.04] hover:-translate-y-1 ${c.ring}`}
               >
-                {/* Gradient background */}
-                <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 bg-gradient-to-br ${colors.gradient} transition-opacity duration-500`} />
-                
-                {/* Status glow */}
-                <div className={`absolute -top-2 -right-2 h-4 w-4 rounded-full ${colors.glow} blur-sm`} />
-
-                {/* Icon and Status */}
-                <div className="relative mb-6 flex items-start justify-between gap-4">
-                  <div className={`rounded-2xl p-4 ${colors.iconBg}`}>
-                    <IconComponent className={`h-7 w-7 ${colors.iconText}`} />
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <span
-                      className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider ${colors.pill}`}
-                    >
-                      {venture.status}
-                    </span>
-                    {venture.launched && (
-                      <span className="text-xs text-gray-500">
-                        Launched {venture.launched}
-                      </span>
-                    )}
-                  </div>
+                {/* Controlled edge accent: thin bar + corner tick */}
+                <div aria-hidden className="pointer-events-none absolute left-0 top-10 h-24 w-[2px] rounded-full opacity-60">
+                  <div className={`h-full w-full ${c.edge}`} />
                 </div>
 
-                {/* Content */}
-                <div className="relative mb-6 flex-1">
-                  <h3 className="mb-3 font-serif text-2xl font-semibold text-white">
-                    {venture.name}
+                <div aria-hidden className="pointer-events-none absolute right-0 top-0 p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className={`w-8 h-[1px] ${c.edge}`} />
+                  <div className={`absolute right-4 top-4 h-8 w-[1px] ${c.edge}`} />
+                </div>
+
+                <div aria-hidden className="pointer-events-none absolute -top-2 -right-2 h-4 w-4 rounded-full blur-sm opacity-70">
+                  <div className={`h-full w-full rounded-full ${c.glow}`} />
+                </div>
+
+                {/* Top row: phase + status */}
+                <div className="mb-10 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-amber-500/60 transition-colors">
+                      Phase 0{idx + 1} // Holding
+                    </span>
+                  </div>
+                  <StatusPill status={v.status} tone={v.accentColor} />
+                </div>
+
+                {/* Icon + identity */}
+                <div className="mb-6">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02]">
+                    <Icon className={`h-6 w-6 ${c.icon} transition-colors`} />
+                  </div>
+
+                  <h3 className="mt-5 font-serif text-2xl font-medium text-white transition-colors group-hover:text-amber-50">
+                    {v.name}
                   </h3>
 
-                  <p className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-amber-300/90">
-                    {venture.focus}
-                  </p>
-
-                  <p className="mb-6 text-sm leading-relaxed text-gray-300">
-                    {venture.description}
-                  </p>
-
-                  {/* Metrics */}
-                  {venture.metrics && (
-                    <div className="mt-6 pt-6 border-t border-white/10">
-                      <div className="grid grid-cols-3 gap-3">
-                        {venture.metrics.map((metric, idx) => (
-                          <div key={idx} className="text-center">
-                            <div className={`text-lg font-bold ${colors.metric} mb-1`}>
-                              {metric.value}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {metric.label}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/30">
+                      Ref: {v.ref ?? "AOL-HLD-CORE"}
+                    </span>
+                    {v.launched ? (
+                      <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/25">
+                        Since {v.launched}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
 
-                {/* CTA */}
-                <div className="relative mt-auto flex items-center justify-between border-t border-white/10 pt-6">
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs text-gray-500">Strategic arm</span>
-                  </div>
+                {/* Focus + body */}
+                <div className="flex-1">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-amber-500/60">
+                    {v.focus}
+                  </p>
+
+                  <p className="mt-4 text-sm leading-relaxed text-white/45 group-hover:text-white/65 transition-colors">
+                    {v.description}
+                  </p>
+                </div>
+
+                {/* Footer action */}
+                <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-white/35">
+                    External Link
+                  </span>
+
                   <Link
-                    href={venture.href}
+                    href={v.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group/link inline-flex items-center gap-1.5 rounded-full border ${colors.border} ${colors.iconBg} px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:gap-2 ${colors.linkText}`}
+                    className={`group/link inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-5 py-2.5 text-xs font-black uppercase tracking-widest ${c.link} hover:border-amber-500/25 hover:bg-white/[0.04] transition-all`}
                   >
-                    Visit site
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
+                    Visit
+                    <ArrowRight className="h-4 w-4 text-white/20 transition-all group-hover/link:text-amber-400 group-hover/link:translate-x-0.5" />
                   </Link>
                 </div>
               </article>
@@ -291,40 +281,44 @@ const VenturesSection: React.FC = () => {
           })}
         </div>
 
-        {/* Footer CTA */}
+        {/* Footer CTA (still on-brand, no “salesy sparkle”) */}
         <div className="mt-16 text-center">
-          <div className="mb-8">
-            <h3 className="mb-4 font-serif text-2xl font-semibold text-white">
-              Ready to build something durable?
+          <div className="mx-auto max-w-2xl">
+            <h3 className="font-serif text-2xl md:text-3xl font-medium text-white">
+              Partnerships, programmes, practical work.
             </h3>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Each venture represents a different execution channel of the Canon philosophy — 
-              from strategic advisory to physical products and founder support.
+            <p className="mt-4 text-sm md:text-base leading-relaxed text-white/45">
+              Where alignment matters, the next step should be obvious: venture partnership, programme engagement, or
+              advisory for leadership teams under pressure.
             </p>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-4">
+
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
               href="/ventures"
-              className="group inline-flex items-center gap-2 rounded-full border border-amber-400/60 bg-gradient-to-r from-amber-500/10 to-amber-600/5 px-8 py-4 text-sm font-semibold text-amber-200 transition-all hover:from-amber-500/20 hover:to-amber-600/10"
+              className="group inline-flex items-center gap-3 rounded-xl border border-amber-500/25 bg-amber-500/5 px-8 py-4 text-sm font-black uppercase tracking-widest text-amber-200 hover:bg-amber-500/10 hover:border-amber-500/40 transition-all"
             >
-              <Users className="h-4 w-4" />
-              Venture partnerships
+              Portfolio overview
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
+
             <Link
-              href="/consulting"
-              className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-semibold text-white transition-all hover:bg-white/10"
+              href="/consulting/strategy-room"
+              className="group inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-sm font-black uppercase tracking-widest text-white/80 hover:bg-white/10 hover:text-white transition-all"
             >
-              <Zap className="h-4 w-4" />
-              Strategic advisory
+              Strategy room
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
+          </div>
+
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+            <p className="text-[9px] font-black uppercase tracking-[0.5em] text-white/20">
+              System Verification: Portfolio Indexed
+            </p>
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default VenturesSection;
+}

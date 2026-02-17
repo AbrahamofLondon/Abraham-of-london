@@ -13,15 +13,12 @@ import { PDFService } from "@/services/pdf-service";
 
 function parseFileSize(size: string | number | undefined): number {
   if (size === undefined || size === null) return 0;
-  
-  if (typeof size === "number") {
-    return size;
-  }
+
+  if (typeof size === "number") return size;
 
   const trimmed = String(size).trim();
   if (!trimmed) return 0;
 
-  // Support raw numbers-as-string (bytes)
   const raw = Number(trimmed);
   if (Number.isFinite(raw)) return raw;
 
@@ -51,9 +48,16 @@ function safeIsoNow(): string {
   return new Date().toISOString();
 }
 
-export function usePDFDashboard(
-  options: UsePDFDashboardOptions = {}
-): UsePDFDashboardReturn {
+// Defensive coercion: tolerate array, tolerate { pdfs: [...] }, tolerate nonsense.
+function coercePDFArray(input: unknown): PDFItem[] {
+  if (Array.isArray(input)) return input as PDFItem[];
+  if (input && typeof input === "object" && Array.isArray((input as any).pdfs)) {
+    return (input as any).pdfs as PDFItem[];
+  }
+  return [];
+}
+
+export function usePDFDashboard(options: UsePDFDashboardOptions = {}): UsePDFDashboardReturn {
   const {
     initialViewMode = "list",
     defaultCategory = "all",
@@ -84,19 +88,19 @@ export function usePDFDashboard(
       setIsLoading(true);
       setError(null);
 
-      const data = await PDFService.getPDFs();
-      const sliced = typeof maxItems === "number" && maxItems > 0 ? data.slice(0, maxItems) : data;
+      // ✅ Contract: getPDFs() MUST return PDFItem[]
+      const raw = await PDFService.getPDFs(1, 1000);
+      const list = coercePDFArray(raw);
+
+      const sliced =
+        typeof maxItems === "number" && maxItems > 0 ? list.slice(0, maxItems) : list;
 
       setPdfs(sliced);
 
-      // Auto select first item if nothing selected
       setSelectedPDFId((prev) => {
         if (prev) return prev;
-        
         if (sliced.length === 0) return null;
-        
-        const firstItem = sliced[0];
-        return firstItem?.id || null;
+        return (sliced[0] as any)?.id || null;
       });
     } catch (err) {
       const e = err instanceof Error ? err : new Error("Failed to load PDFs");
@@ -116,90 +120,104 @@ export function usePDFDashboard(
     if (!autoRefreshInterval || autoRefreshInterval <= 0) return;
 
     const interval = setInterval(() => {
-      if (!isLoading && !isGenerating) {
-        void loadPDFs();
-      }
+      if (!isLoading && !isGenerating) void loadPDFs();
     }, autoRefreshInterval);
 
     return () => clearInterval(interval);
   }, [enableAutoRefresh, autoRefreshInterval, isLoading, isGenerating, loadPDFs]);
 
   const categories = useMemo(() => {
+    const safe = Array.isArray(pdfs) ? pdfs : [];
     const uniques = Array.from(
-      new Set(pdfs.map((p) => p.category).filter((c): c is string => !!c))
+      new Set(
+        safe
+          .map((p: any) => (p?.category ? String(p.category) : ""))
+          .filter((c) => !!c)
+      )
     );
     return ["all", ...uniques];
   }, [pdfs]);
 
   const filteredPDFs = useMemo(() => {
+    const safe = Array.isArray(pdfs) ? pdfs : [];
     const q = filterState.searchQuery.trim().toLowerCase();
 
-    const matchSearch = (p: PDFItem) => {
+    const matchSearch = (p: any) => {
       if (!q) return true;
+      const id = String(p?.id || "").toLowerCase();
+      const title = String(p?.title || "").toLowerCase();
+      const desc = String(p?.description || "").toLowerCase();
+      const cat = String(p?.category || "").toLowerCase();
+      const type = String(p?.type || "").toLowerCase();
+
       return (
-        p.id.toLowerCase().includes(q) ||
-        p.title.toLowerCase().includes(q) ||
-        (p.description?.toLowerCase().includes(q) ?? false) ||
-        (p.category?.toLowerCase().includes(q) ?? false) ||
-        (p.type?.toLowerCase().includes(q) ?? false)
+        id.includes(q) ||
+        title.includes(q) ||
+        (desc ? desc.includes(q) : false) ||
+        (cat ? cat.includes(q) : false) ||
+        (type ? type.includes(q) : false)
       );
     };
 
-    const matchCategory = (p: PDFItem) =>
-      filterState.selectedCategory === "all" || p.category === filterState.selectedCategory;
+    const matchCategory = (p: any) =>
+      filterState.selectedCategory === "all" ||
+      String(p?.category || "") === filterState.selectedCategory;
 
-    const matchStatus = (p: PDFItem) => {
+    const matchStatus = (p: any) => {
       const f = filterState.statusFilter;
+      const exists = Boolean(p?.exists);
+      const isGen = Boolean(p?.isGenerating);
+      const hasErr = Boolean(p?.error);
+
       if (f === "all") return true;
-      if (f === "generated") return p.exists === true;
-      if (f === "missing") return !p.exists && !p.error && !p.isGenerating;
-      if (f === "error") return !!p.error;
-      if (f === "generating") return !!p.isGenerating;
+      if (f === "generated") return exists === true;
+      if (f === "missing") return !exists && !hasErr && !isGen;
+      if (f === "error") return hasErr;
+      if (f === "generating") return isGen;
       return true;
     };
 
-    const sorted = pdfs
+    return safe
       .filter((p) => matchSearch(p) && matchCategory(p) && matchStatus(p))
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         const order = filterState.sortOrder === "asc" ? 1 : -1;
 
         switch (filterState.sortBy) {
           case "title":
-            return order * a.title.localeCompare(b.title);
+            return order * String(a?.title || "").localeCompare(String(b?.title || ""));
           case "category":
-            return order * (a.category || "").localeCompare(b.category || "");
+            return order * String(a?.category || "").localeCompare(String(b?.category || ""));
           case "date": {
-            const da = new Date(a.lastGenerated || a.updatedAt || a.createdAt || 0).getTime();
-            const db = new Date(b.lastGenerated || b.updatedAt || b.createdAt || 0).getTime();
+            const da = new Date(a?.lastGenerated || a?.updatedAt || a?.createdAt || 0).getTime();
+            const db = new Date(b?.lastGenerated || b?.updatedAt || b?.createdAt || 0).getTime();
             return order * (da - db);
           }
           case "size": {
-            const sa = parseFileSize(a.fileSize);
-            const sb = parseFileSize(b.fileSize);
+            const sa = parseFileSize(a?.fileSize);
+            const sb = parseFileSize(b?.fileSize);
             return order * (sa - sb);
           }
           default:
             return 0;
         }
       });
-
-    return sorted;
   }, [pdfs, filterState]);
 
   const selectedPDF = useMemo(() => {
     if (!selectedPDFId) return null;
-    return pdfs.find((p) => p.id === selectedPDFId) || null;
+    const safe = Array.isArray(pdfs) ? pdfs : [];
+    return safe.find((p: any) => String(p?.id || "") === selectedPDFId) || null;
   }, [pdfs, selectedPDFId]);
 
   const stats = useMemo<DashboardStats>(() => {
-    const totalPDFs = pdfs.length;
-    const generated = pdfs.filter((p) => p.exists).length;
-    const errors = pdfs.filter((p) => !!p.error).length;
-    const generating = pdfs.filter((p) => !!p.isGenerating).length;
-    const missingPDFs = pdfs.filter((p) => !p.exists && !p.error).length;
+    const safe = Array.isArray(pdfs) ? pdfs : [];
+    const generated = safe.filter((p: any) => Boolean(p?.exists)).length;
+    const errors = safe.filter((p: any) => Boolean(p?.error)).length;
+    const generating = safe.filter((p: any) => Boolean(p?.isGenerating)).length;
+    const missingPDFs = safe.filter((p: any) => !p?.exists && !p?.error).length;
 
     return {
-      totalPDFs,
+      totalPDFs: safe.length,
       availablePDFs: generated,
       missingPDFs,
       categories: categories.filter((c) => c !== "all"),
@@ -214,21 +232,13 @@ export function usePDFDashboard(
     setFilterState((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  const searchPDFs = useCallback(
-    (query: string) => updateFilter({ searchQuery: query }),
-    [updateFilter]
-  );
+  const searchPDFs = useCallback((query: string) => updateFilter({ searchQuery: query }), [updateFilter]);
 
   const sortPDFs = useCallback((sortBy: string) => {
     setFilterState((prev) => {
       const same = prev.sortBy === (sortBy as FilterState["sortBy"]);
       const nextOrder: FilterState["sortOrder"] = same && prev.sortOrder === "asc" ? "desc" : "asc";
-
-      return {
-        ...prev,
-        sortBy: sortBy as FilterState["sortBy"],
-        sortOrder: nextOrder,
-      };
+      return { ...prev, sortBy: sortBy as FilterState["sortBy"], sortOrder: nextOrder };
     });
   }, []);
 
@@ -246,78 +256,63 @@ export function usePDFDashboard(
     async (pdfId?: string, options?: any): Promise<GenerationResponse> => {
       const idToGenerate = pdfId || selectedPDFId;
 
-      if (!idToGenerate) {
-        return { success: false, error: "No PDF selected for generation" };
-      }
+      if (!idToGenerate) return { success: false, error: "No PDF selected for generation" };
 
-      const pdf = pdfs.find((p) => p.id === idToGenerate);
-      if (!pdf) {
-        return { success: false, error: `PDF with ID ${idToGenerate} not found` };
-      }
+      const safe = Array.isArray(pdfs) ? pdfs : [];
+      const pdf = safe.find((p: any) => String(p?.id || "") === idToGenerate);
+      if (!pdf) return { success: false, error: `PDF with ID ${idToGenerate} not found` };
 
       try {
         setIsGenerating(true);
         setGenerationStatus({ type: "info", message: "Generating PDF…", progress: 0 });
 
-        // mark generating locally
         setPdfs((prev) =>
-          prev.map((p) =>
-            p.id === idToGenerate ? { ...p, isGenerating: true, error: undefined } : p
+          (Array.isArray(prev) ? prev : []).map((p: any) =>
+            String(p?.id || "") === idToGenerate ? { ...p, isGenerating: true, error: undefined } : p
           )
         );
 
         const result = await PDFService.generatePDF(idToGenerate, options);
 
         setPdfs((prev) =>
-          prev.map((p) => {
-            if (p.id !== idToGenerate) return p;
+          (Array.isArray(prev) ? prev : []).map((p: any) => {
+            if (String(p?.id || "") !== idToGenerate) return p;
 
-            const next: PDFItem = {
+            const next: any = {
               ...p,
               isGenerating: false,
               exists: true,
               lastGenerated: result.generatedAt || safeIsoNow(),
             };
 
-            // Only set optional fields if defined
             if (result.fileUrl) next.fileUrl = result.fileUrl;
-            if (result.fileSize !== undefined) {
-              // Ensure fileSize is a number for PDFItem type
-              next.fileSize = typeof result.fileSize === 'number' 
-                ? result.fileSize 
-                : parseFileSize(result.fileSize);
-            }
+            if (result.fileSize !== undefined) next.fileSize = result.fileSize;
 
-            // Remove error key if it existed
-            if (next.error) delete (next as any).error;
-
+            if (next.error) delete next.error;
             return next;
           })
         );
 
         setGenerationStatus({
           type: "success",
-          message: `Successfully generated "${pdf.title}"`,
+          message: `Successfully generated "${(pdf as any).title || idToGenerate}"`,
           progress: 100,
         });
 
         return {
           success: true,
           pdfId: idToGenerate,
-          filename: pdf.title,
+          filename: (pdf as any).title || idToGenerate,
           fileUrl: result.fileUrl,
-          // Convert fileSize to number for GenerationResponse
-          fileSize: typeof result.fileSize === 'number' 
-            ? result.fileSize 
-            : parseFileSize(result.fileSize),
+          fileSize: result.fileSize,
           generatedAt: result.generatedAt,
         };
       } catch (err) {
         const e = err instanceof Error ? err : new Error("Failed to generate PDF");
 
         setPdfs((prev) =>
-          prev.map((p) =>
-            p.id === idToGenerate ? { ...p, isGenerating: false, error: e.message } : p
+          (Array.isArray(prev) ? prev : []).map((p: any) =>
+            String(p?.id || "") === idToGenerate ? { ...p, isGenerating: false, error: e.message } : p
           )
         );
 
@@ -326,9 +321,7 @@ export function usePDFDashboard(
           message: `Failed to generate PDF: ${e.message}`,
           details: e.stack,
           actionLabel: "Retry",
-          onAction: () => {
-            void generatePDF(idToGenerate, options);
-          },
+          onAction: () => void generatePDF(idToGenerate, options),
         });
 
         return { success: false, error: e.message };
@@ -343,82 +336,28 @@ export function usePDFDashboard(
     try {
       setIsGenerating(true);
 
-      const missing = pdfs.filter((p) => !p.exists && !p.error);
+      const safe = Array.isArray(pdfs) ? pdfs : [];
+      const missing = safe.filter((p: any) => !p?.exists && !p?.error);
+
       if (missing.length === 0) {
         return { success: true, message: "All PDFs are already generated", count: 0, generatedAt: safeIsoNow() };
       }
 
-      setGenerationStatus({
-        type: "info",
-        message: `Generating ${missing.length} PDFs…`,
-        progress: 0,
-      });
+      setGenerationStatus({ type: "info", message: `Generating ${missing.length} PDFs…`, progress: 0 });
 
-      let successCount = 0;
-      let errorCount = 0;
+      const result = await PDFService.generateAllPDFs();
 
-      for (let i = 0; i < missing.length; i++) {
-        const item = missing[i];
-        if (!item) continue;
+      // Refresh list after batch (source of truth)
+      await loadPDFs();
 
-        setGenerationStatus({
-          type: "info",
-          message: `Generating ${i + 1}/${missing.length}: ${item.title}`,
-          progress: Math.round((i / missing.length) * 100),
-        });
-
-        try {
-          const result = await PDFService.generatePDF(item.id);
-
-          setPdfs((prev) =>
-            prev.map((p) => {
-              if (p.id !== item.id) return p;
-
-              const next: PDFItem = {
-                ...p,
-                exists: true,
-                isGenerating: false,
-                lastGenerated: result.generatedAt || safeIsoNow(),
-              };
-
-              if (result.fileUrl) next.fileUrl = result.fileUrl;
-              if (result.fileSize !== undefined) {
-                next.fileSize = typeof result.fileSize === 'number'
-                  ? result.fileSize
-                  : parseFileSize(result.fileSize);
-              }
-              if (next.error) delete (next as any).error;
-
-              return next;
-            })
-          );
-
-          successCount++;
-        } catch (err) {
-          const e = err instanceof Error ? err : new Error("Generation failed");
-          setPdfs((prev) =>
-            prev.map((p) => (p.id === item.id ? { ...p, isGenerating: false, error: e.message } : p))
-          );
-          errorCount++;
-        }
-      }
-
-      const message =
-        errorCount === 0
-          ? `Generated ${successCount} PDFs successfully`
-          : `Generated ${successCount} PDFs; ${errorCount} failed`;
-
-      setGenerationStatus({
-        type: errorCount === 0 ? "success" : "warning",
-        message,
-        progress: 100,
-      });
+      setGenerationStatus({ type: "success", message: result.message || "Batch generation completed", progress: 100 });
 
       return {
-        success: errorCount === 0,
-        count: successCount,
-        generatedAt: safeIsoNow(),
-        error: errorCount > 0 ? `${errorCount} PDFs failed to generate` : undefined,
+        success: Boolean(result.success),
+        count: result.count ?? missing.length,
+        message: result.message,
+        generatedAt: result.generatedAt || safeIsoNow(),
+        error: result.error,
       };
     } catch (err) {
       const e = err instanceof Error ? err : new Error("Failed to generate PDFs");
@@ -427,52 +366,39 @@ export function usePDFDashboard(
     } finally {
       setIsGenerating(false);
     }
-  }, [pdfs]);
+  }, [pdfs, loadPDFs]);
 
-  const deletePDF = useCallback(
-    async (pdfId: string): Promise<void> => {
-      await PDFService.deletePDF(pdfId);
-      setPdfs((prev) => prev.filter((p) => p.id !== pdfId));
-      setSelectedPDFId((prev) => (prev === pdfId ? null : prev));
-    },
-    []
-  );
+  const deletePDF = useCallback(async (pdfId: string): Promise<void> => {
+    await PDFService.deletePDF(pdfId);
+    setPdfs((prev) => (Array.isArray(prev) ? prev : []).filter((p: any) => String(p?.id || "") !== pdfId));
+    setSelectedPDFId((prev) => (prev === pdfId ? null : prev));
+  }, []);
 
-  const duplicatePDF = useCallback(
-    async (pdfId: string): Promise<PDFItem> => {
-      const dup = await PDFService.duplicatePDF(pdfId);
-      setPdfs((prev) => [...prev, dup]);
-      return dup;
-    },
-    []
-  );
+  const duplicatePDF = useCallback(async (pdfId: string): Promise<PDFItem> => {
+    const dup = await PDFService.duplicatePDF(pdfId);
+    setPdfs((prev) => [...(Array.isArray(prev) ? prev : []), dup]);
+    return dup;
+  }, []);
 
-  const renamePDF = useCallback(
-    async (pdfId: string, newTitle: string): Promise<void> => {
-      await PDFService.renamePDF(pdfId, newTitle);
-      setPdfs((prev) =>
-        prev.map((p) =>
-          p.id === pdfId ? { ...p, title: newTitle, updatedAt: safeIsoNow() } : p
-        )
-      );
-    },
-    []
-  );
+  const renamePDF = useCallback(async (pdfId: string, newTitle: string): Promise<void> => {
+    await PDFService.renamePDF(pdfId, newTitle);
+    setPdfs((prev) =>
+      (Array.isArray(prev) ? prev : []).map((p: any) =>
+        String(p?.id || "") === pdfId ? { ...p, title: newTitle, updatedAt: safeIsoNow() } : p
+      )
+    );
+  }, []);
 
-  const updatePDFMetadata = useCallback(
-    async (pdfId: string, metadata: Partial<PDFItem>): Promise<void> => {
-      await PDFService.updateMetadata(pdfId, metadata);
-      setPdfs((prev) =>
-        prev.map((p) =>
-          p.id === pdfId ? { ...p, ...metadata, updatedAt: safeIsoNow() } : p
-        )
-      );
-    },
-    []
-  );
+  const updatePDFMetadata = useCallback(async (pdfId: string, metadata: Partial<PDFItem>): Promise<void> => {
+    await PDFService.updateMetadata(pdfId, metadata);
+    setPdfs((prev) =>
+      (Array.isArray(prev) ? prev : []).map((p: any) =>
+        String(p?.id || "") === pdfId ? { ...p, ...metadata, updatedAt: safeIsoNow() } : p
+      )
+    );
+  }, []);
 
   return {
-    // State
     pdfs,
     filteredPDFs,
     selectedPDF,
@@ -486,17 +412,19 @@ export function usePDFDashboard(
     generationStatus,
     error,
 
-    // Actions
     setSelectedPDFId,
     setViewMode,
     setGenerationStatus,
+
     refreshPDFList: loadPDFs,
     generatePDF,
     generateAllPDFs,
+
     updateFilter,
     searchPDFs,
     sortPDFs,
     clearFilters,
+
     deletePDF,
     duplicatePDF,
     renamePDF,

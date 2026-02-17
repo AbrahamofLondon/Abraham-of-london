@@ -1,4 +1,4 @@
-// pages/resources/[...slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
+// pages/resources/[...slug].tsx — BUILD-PROOF (Pages Router)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -11,8 +11,6 @@ import rehypeSlug from "rehype-slug";
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import AccessGate from "@/components/AccessGate";
-
-// ✅ STANDARDIZED: Use createSeededSafeMdxComponents for seed + proxy
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 
 import {
@@ -41,7 +39,7 @@ type Props = {
   resource: ResourceMeta;
   locked: boolean;
   initialSource: MDXRemoteSerializeResult | null;
-  mdxRaw: string; // ✅ ADDED: Required for seeding
+  mdxRaw: string;
 };
 
 type ApiOk = {
@@ -49,7 +47,7 @@ type ApiOk = {
   tier: AccessLevel;
   requiredTier: AccessLevel;
   source: MDXRemoteSerializeResult;
-  mdxRaw: string; // ✅ ADDED: For re-seeding on client if needed
+  mdxRaw: string;
 };
 
 type ApiFail = {
@@ -60,7 +58,15 @@ type ApiFail = {
 function toAccessLevel(v: unknown): AccessLevel {
   const n = String(v || "").toLowerCase().trim();
   if (n === "private" || n === "restricted") return "private";
-  if (n === "inner-circle" || n === "inner circle" || n === "member" || n === "members" || n === "basic" || n === "premium" || n === "enterprise") {
+  if (
+    n === "inner-circle" ||
+    n === "inner circle" ||
+    n === "member" ||
+    n === "members" ||
+    n === "basic" ||
+    n === "premium" ||
+    n === "enterprise"
+  ) {
     return "inner-circle";
   }
   return "public";
@@ -93,7 +99,6 @@ function resourceSlugFromDoc(d: any): string {
   return stripResourcesPrefix(noExt);
 }
 
-// Paranoid MDX extraction
 function getRawBody(d: any): string {
   return (
     d?.body?.raw ||
@@ -105,9 +110,9 @@ function getRawBody(d: any): string {
   );
 }
 
-// 🔒 Prevent conflicts with real, concrete routes under /resources
+// Prevent conflicts with real routes under /resources
 const RESERVED_RESOURCE_ROUTES = new Set<string>([
-  "strategic-frameworks", // pages/resources/strategic-frameworks(.tsx) or /index.tsx
+  "strategic-frameworks",
 ]);
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -120,19 +125,18 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .filter(Boolean)
       .map((p) => normalizeSlug(p));
 
-    // ✅ De-dupe + exclude reserved to avoid Next "conflicting paths"
     const unique = Array.from(new Set(slugPaths)).filter((p) => {
       const head = p.split("/")[0] || "";
       return head && !RESERVED_RESOURCE_ROUTES.has(head);
     });
 
-    const paths = unique.map((slugPath) => ({
-      params: { slug: slugPath.split("/").filter(Boolean) },
-    }));
-
-    return { paths, fallback: "blocking" };
+    return {
+      paths: unique.map((slugPath) => ({
+        params: { slug: slugPath.split("/").filter(Boolean) },
+      })),
+      fallback: "blocking",
+    };
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("Error generating static paths:", e);
     return { paths: [], fallback: "blocking" };
   }
@@ -145,12 +149,11 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
     typeof slugParam === "string"
       ? stripResourcesPrefix(slugParam)
       : Array.isArray(slugParam)
-        ? stripResourcesPrefix(slugParam.join("/"))
-        : "";
+      ? stripResourcesPrefix(slugParam.join("/"))
+      : "";
 
   if (!slugPath) return { notFound: true };
 
-  // ✅ safety: never allow this catch-all to resolve reserved routes
   const head = normalizeSlug(slugPath).split("/")[0] || "";
   if (RESERVED_RESOURCE_ROUTES.has(head)) return { notFound: true };
 
@@ -163,12 +166,10 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   const accessLevel = toAccessLevel((doc as any).accessLevel ?? (doc as any).tier);
   const locked = accessLevel !== "public";
 
-  // ✅ EXTRACT MDX RAW CONTENT FOR SEEDING
   const mdxRaw = getRawBody(doc);
-  
+
   let initialSource: MDXRemoteSerializeResult | null = null;
   if (!locked) {
-    // ✅ USE DIRECT SERIALIZE WITH PLUGINS
     initialSource = await serialize(mdxRaw || " ", {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
@@ -190,11 +191,11 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   };
 
   return {
-    props: { 
-      resource: sanitizeData(resource), 
-      locked, 
+    props: {
+      resource: sanitizeData(resource),
+      locked,
       initialSource,
-      mdxRaw, // ✅ PASS MDX RAW FOR SEEDING
+      mdxRaw,
     },
     revalidate: 3600,
   };
@@ -202,8 +203,7 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
 
 const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, mdxRaw }) => {
   const router = useRouter();
-  
-  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
+
   const safeComponents = React.useMemo(
     () =>
       createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
@@ -211,7 +211,7 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
       }),
     [mdxRaw]
   );
-  
+
   const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
   const [loading, setLoading] = React.useState(false);
   const [errMsg, setErrMsg] = React.useState<string | null>(null);
@@ -219,6 +219,7 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
   async function loadLockedContent(): Promise<boolean> {
     setErrMsg(null);
     setLoading(true);
+
     try {
       const slug = stripResourcesPrefix(resource.slugPath);
 
@@ -229,7 +230,7 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
 
       const json = (await res.json()) as ApiOk | ApiFail;
 
-      if (!res.ok || !json || (json as ApiFail).ok === false) {
+      if (!res.ok || !json || (json as any).ok === false) {
         setErrMsg((json as ApiFail)?.reason || "Access denied");
         return false;
       }
@@ -259,7 +260,6 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
         <meta property="og:description" content={resource.description || resource.excerpt || ""} />
         {resource.coverImage ? <meta property="og:image" content={resource.coverImage} /> : null}
         <meta name="robots" content={locked ? "noindex, nofollow" : "index, follow"} />
-        <link rel="canonical" href={`https://www.abrahamoflondon.org/resources/${resource.slugPath}`} />
       </Head>
 
       <div className="mx-auto max-w-4xl px-4 py-16">
@@ -273,7 +273,7 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
 
         <h1 className="mt-6 text-4xl font-bold text-white">{resource.title}</h1>
 
-        {(resource.description || resource.excerpt) ? (
+        {resource.description || resource.excerpt ? (
           <p className="mt-4 text-gray-300">{resource.description || resource.excerpt}</p>
         ) : null}
 
@@ -283,7 +283,7 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
               title={resource.title}
               message={resource.accessLevel === "private" ? "This resource is restricted." : "This resource is for Inner Circle members."}
               requiredTier={requiredTier}
-              onUnlocked={() => { void loadLockedContent(); }}
+              onUnlocked={() => void loadLockedContent()}
               onGoToJoin={() => router.push("/inner-circle")}
             />
           </div>
@@ -299,7 +299,6 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
 
         {source ? (
           <div className="prose prose-invert mt-10 max-w-none">
-            {/* ✅ SEED + PROXY: Guaranteed no missing component errors */}
             <MDXRemote {...source} components={safeComponents as any} />
           </div>
         ) : null}

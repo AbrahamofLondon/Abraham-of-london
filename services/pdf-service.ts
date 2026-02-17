@@ -1,7 +1,6 @@
 // services/pdf-service.ts
-import {
+import type {
   PDFItem,
-  PDFConfig,
   GenerationResponse,
   ServiceResponse,
   SearchResult,
@@ -9,215 +8,345 @@ import {
   BatchOperation,
   PDFListResponse,
   DashboardStats,
+  Pagination,
 } from "@/types/pdf-dashboard";
 
-export class PDFService {
-  // ------------------------------------------------------------------
-  // READ OPERATIONS
-  // ------------------------------------------------------------------
-  static async getPDFs(page: number = 1, limit: number = 50): Promise<PDFListResponse> {
-    const response = await fetch(`/api/pdfs/list?page=${page}&limit=${limit}`, {
-      credentials: "include",
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    return response.json();
+/** ---------------------------
+ * Internal helpers
+ * -------------------------- */
+type AnyRecord = Record<string, any>;
+
+function isObject(v: unknown): v is AnyRecord {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+function asString(v: unknown, fallback = ""): string {
+  return typeof v === "string" ? v : fallback;
+}
+
+function asNumber(v: unknown, fallback = 0): number {
+  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function asBool(v: unknown, fallback = false): boolean {
+  return typeof v === "boolean" ? v : fallback;
+}
+
+function asArray<T>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
+}
+
+function isoNow(): string {
+  return new Date().toISOString();
+}
+
+async function readJsonSafe(res: Response): Promise<any> {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+function errorMessageFrom(res: Response, body: any): string {
+  const generic = `HTTP ${res.status}`;
+  if (!body) return generic;
+  if (typeof body === "string" && body.trim()) return body;
+  if (isObject(body)) {
+    if (typeof body.error === "string" && body.error.trim()) return body.error;
+    if (typeof body.message === "string" && body.message.trim()) return body.message;
+  }
+  return generic;
+}
+
+async function fetchJsonOrThrow(url: string, init?: RequestInit): Promise<any> {
+  const res = await fetch(url, {
+    credentials: "include",
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(init?.headers || {}),
+    },
+  });
+
+  const body = await readJsonSafe(res);
+
+  if (!res.ok) {
+    const msg = errorMessageFrom(res, body);
+    if (res.status === 401 || res.status === 403) throw new Error(`AUTH ${res.status}: ${msg}`);
+    throw new Error(msg);
   }
 
+  return body;
+}
+
+/** ---------------------------
+ * Normalizers aligned to /api/pdfs/list.ts output
+ * -------------------------- */
+
+/**
+ * /api/pdfs/list.ts maps:
+ *  - id, title, description, category, type (string), exists (boolean)
+ *  - isGenerating, error, fileUrl, fileSize, lastGenerated
+ *  - createdAt, updatedAt, tags, status, metadata, outputPath, downloadCount
+ */
+function normalizeDashboardPDFItem(raw: any): PDFItem {
+  const id = asString(raw?.id, "");
+  const title = asString(raw?.title, id || "Untitled");
+
+  const description =
+    typeof raw?.description === "string"
+      ? raw.description
+      : typeof raw?.excerpt === "string"
+      ? raw.excerpt
+      : undefined;
+
+  const category = typeof raw?.category === "string" ? raw.category : undefined;
+
+  // IMPORTANT: API currently sends type as string (often "pdf").
+  // Dashboard PDFItem allows this (do NOT force Canon union here).
+  const type = asString(raw?.type, "pdf");
+
+  const exists = asBool(raw?.exists, false);
+
+  const isGenerating = typeof raw?.isGenerating === "boolean" ? raw.isGenerating : undefined;
+  const error = typeof raw?.error === "string" ? raw.error : undefined;
+
+  const fileUrl = typeof raw?.fileUrl === "string" ? raw.fileUrl : undefined;
+  const fileSize = typeof raw?.fileSize === "string" ? raw.fileSize : undefined;
+
+  const lastGenerated = typeof raw?.lastGenerated === "string" ? raw.lastGenerated : undefined;
+
+  const createdAt = typeof raw?.createdAt === "string" ? raw.createdAt : undefined;
+  const updatedAt = typeof raw?.updatedAt === "string" ? raw.updatedAt : undefined;
+
+  const tags = Array.isArray(raw?.tags) ? raw.tags.map(String) : [];
+
+  const status = typeof raw?.status === "string" ? raw.status : undefined;
+
+  const metadata = isObject(raw?.metadata) ? (raw.metadata as AnyRecord) : {};
+
+  const outputPath = typeof raw?.outputPath === "string" ? raw.outputPath : "";
+
+  const downloadCount = Number.isFinite(Number(raw?.downloadCount)) ? Number(raw.downloadCount) : 0;
+
+  // Return as Dashboard PDFItem (not Canon)
+  return {
+    id,
+    title,
+    description,
+    category,
+    type: type as any, // keep flexible; aligns to API
+    exists,
+
+    isGenerating,
+    error,
+
+    fileUrl,
+    fileSize,
+    lastGenerated,
+
+    createdAt,
+    updatedAt,
+
+    tags,
+
+    status,
+    metadata,
+    outputPath,
+
+    downloadCount,
+  } as PDFItem;
+}
+
+function normalizePagination(raw: any, fallbackPage: number, fallbackLimit: number, fallbackTotal: number): Pagination {
+  const page = asNumber(raw?.page, fallbackPage);
+  const limit = asNumber(raw?.limit, fallbackLimit);
+  const total = asNumber(raw?.total, fallbackTotal);
+  const totalPages = asNumber(raw?.totalPages, Math.max(1, Math.ceil(total / Math.max(1, limit))));
+  return { page, limit, total, totalPages };
+}
+
+function buildStatsFrom(pdfs: PDFItem[]): DashboardStats {
+  const categories = Array.from(new Set(pdfs.map((p) => p.category).filter((c): c is string => !!c)));
+
+  const generated = pdfs.filter((p) => p.exists && !p.error).length;
+  const errors = pdfs.filter((p) => !!p.error).length;
+  const generating = pdfs.filter((p) => !!p.isGenerating).length;
+  const missingPDFs = pdfs.filter((p) => !p.exists && !p.error && !p.isGenerating).length;
+
+  return {
+    totalPDFs: pdfs.length,
+    availablePDFs: generated,
+    missingPDFs,
+    categories,
+    generated,
+    errors,
+    generating,
+    lastUpdated: isoNow(),
+  };
+}
+
+/** /api/pdfs/list always returns { pdfs, pagination, stats } (even when unauth: emptyResponse) */
+function normalizePDFListResponse(raw: any, page: number, limit: number): PDFListResponse {
+  const root = isObject(raw) ? raw : {};
+
+  const pdfs = asArray<any>(root.pdfs).map(normalizeDashboardPDFItem).filter((p) => p.id);
+
+  const pagination = normalizePagination(root.pagination, page, limit, pdfs.length);
+
+  const stats: DashboardStats = isObject(root.stats)
+    ? (root.stats as DashboardStats)
+    : buildStatsFrom(pdfs);
+
+  return {
+    pdfs,
+    pagination,
+    stats,
+  };
+}
+
+/** ---------------------------
+ * Service (aligned to list.ts)
+ * -------------------------- */
+export class PDFService {
+  // READ -------------------------------------------------------
+
+  /** ✅ Hook expects array (prevents “pdfs.map is not a function”) */
+  static async getPDFs(page: number = 1, limit: number = 50): Promise<PDFItem[]> {
+    const list = await this.getPDFList(page, limit);
+    return Array.isArray(list.pdfs) ? list.pdfs : [];
+  }
+
+  /** Full response (stats + pagination) */
+  static async getPDFList(page: number = 1, limit: number = 50): Promise<PDFListResponse> {
+    const data = await fetchJsonOrThrow(`/api/pdfs/list?page=${page}&limit=${limit}`);
+    return normalizePDFListResponse(data, page, limit);
+  }
+
+  static async getStats(page: number = 1, limit: number = 50): Promise<DashboardStats> {
+    const list = await this.getPDFList(page, limit);
+    return list.stats;
+  }
+
+  static async getCategories(page: number = 1, limit: number = 50): Promise<string[]> {
+    const list = await this.getPDFList(page, limit);
+    const cats = Array.isArray(list.stats?.categories) ? list.stats.categories : [];
+    return ["all", ...cats.filter(Boolean)];
+  }
+
+  // OPTIONAL: if you have these endpoints ----------------------
+
   static async getPDFById(id: string): Promise<PDFItem | null> {
-    const response = await fetch(`/api/pdfs/${id}`, {
+    const res = await fetch(`/api/pdfs/${encodeURIComponent(id)}`, {
       credentials: "include",
+      headers: { Accept: "application/json" },
     });
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    const data = await response.json();
-    return data.pdf ?? null;
+
+    if (res.status === 404) return null;
+
+    const body = await readJsonSafe(res);
+    if (!res.ok) throw new Error(errorMessageFrom(res, body));
+
+    const raw = isObject(body) ? (body.pdf ?? body) : body;
+    const pdf = normalizeDashboardPDFItem(raw);
+    return pdf.id ? pdf : null;
   }
 
   static async searchPDFs(query: string): Promise<SearchResult[]> {
-    const response = await fetch(`/api/pdfs/search?q=${encodeURIComponent(query)}`, {
-      credentials: "include",
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    const data = await response.json();
-    return data.results ?? [];
+    const data = await fetchJsonOrThrow(`/api/pdfs/search?q=${encodeURIComponent(query)}`);
+    const results = isObject(data) ? data.results : null;
+    return Array.isArray(results) ? (results as SearchResult[]) : [];
   }
 
-  // ------------------------------------------------------------------
-  // GENERATION
-  // ------------------------------------------------------------------
+  // GENERATION --------------------------------------------------
+
   static async generatePDF(id: string, options?: any): Promise<GenerationResponse> {
-    const response = await fetch(`/api/pdfs/${id}/generate`, {
+    const data = await fetchJsonOrThrow(`/api/pdfs/${encodeURIComponent(id)}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ options }),
     });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    return response.json();
+
+    return (isObject(data) ? data : { success: true, pdfId: id, generatedAt: isoNow() }) as GenerationResponse;
   }
 
   static async generateAllPDFs(): Promise<GenerationResponse> {
-    const response = await fetch("/api/pdfs/generate-all", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    return response.json();
+    const data = await fetchJsonOrThrow("/api/pdfs/generate-all", { method: "POST" });
+    return (isObject(data) ? data : { success: true, generatedAt: isoNow() }) as GenerationResponse;
   }
 
-  // ------------------------------------------------------------------
-  // MUTATIONS
-  // ------------------------------------------------------------------
+  // MUTATIONS ---------------------------------------------------
+
   static async deletePDF(id: string): Promise<void> {
-    const response = await fetch(`/api/pdfs/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
+    await fetchJsonOrThrow(`/api/pdfs/${encodeURIComponent(id)}`, { method: "DELETE" });
   }
 
   static async duplicatePDF(id: string): Promise<PDFItem> {
-    const response = await fetch(`/api/pdfs/${id}/duplicate`, {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    const data = await response.json();
-    return data.pdf;
+    const data = await fetchJsonOrThrow(`/api/pdfs/${encodeURIComponent(id)}/duplicate`, { method: "POST" });
+    const raw = isObject(data) ? (data.pdf ?? data) : data;
+    const pdf = normalizeDashboardPDFItem(raw);
+    if (!pdf.id) throw new Error("Duplicate failed: invalid payload");
+    return pdf;
   }
 
   static async renamePDF(id: string, newTitle: string): Promise<void> {
-    const response = await fetch(`/api/pdfs/${id}/rename`, {
+    await fetchJsonOrThrow(`/api/pdfs/${encodeURIComponent(id)}/rename`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ title: newTitle }),
     });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
   }
 
   static async updateMetadata(id: string, metadata: Partial<PDFItem>): Promise<void> {
-    const response = await fetch(`/api/pdfs/${id}/metadata`, {
+    await fetchJsonOrThrow(`/api/pdfs/${encodeURIComponent(id)}/metadata`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify(metadata),
     });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
   }
 
-  // ------------------------------------------------------------------
-  // BATCH OPERATIONS
-  // ------------------------------------------------------------------
-  static async batchDelete(ids: string[]): Promise<void> {
-    const response = await fetch("/api/pdfs/batch/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ ids }),
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-  }
-
-  static async batchExport(ids: string[], format: string): Promise<Blob> {
-    const response = await fetch("/api/pdfs/batch/export", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ ids, format }),
-    });
-    if (!response.ok) {
-      throw new Error(`Export failed: ${response.statusText}`);
-    }
-    return response.blob();
-  }
+  // BATCH -------------------------------------------------------
 
   static async batchOperation(operation: BatchOperation): Promise<ServiceResponse> {
-    const response = await fetch("/api/pdfs/batch", {
+    const res = await fetch("/api/pdfs/batch", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       credentials: "include",
       body: JSON.stringify(operation),
     });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
+
+    const body = await readJsonSafe(res);
+
+    if (!res.ok) {
       return {
         success: false,
-        error: error.error || `HTTP ${response.status}`,
-        timestamp: new Date().toISOString(),
+        error: errorMessageFrom(res, body),
+        timestamp: isoNow(),
+        statusCode: res.status,
       };
     }
-    return response.json();
+
+    return (isObject(body) ? body : { success: true, timestamp: isoNow() }) as ServiceResponse;
   }
 
-  // ------------------------------------------------------------------
-  // EXPORT SINGLE PDF
-  // ------------------------------------------------------------------
   static async exportPDF(id: string, options: ExportOptions): Promise<Blob> {
-    const response = await fetch(`/api/pdfs/${id}/export`, {
+    const res = await fetch(`/api/pdfs/${encodeURIComponent(id)}/export`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(options),
     });
-    if (!response.ok) {
-      throw new Error(`Export failed: ${response.statusText}`);
-    }
-    return response.blob();
-  }
 
-  // ------------------------------------------------------------------
-  // LEGACY COMPATIBILITY (if needed)
-  // ------------------------------------------------------------------
-  static async getAllPDFs(): Promise<PDFConfig[]> {
-    const { pdfs } = await this.getPDFs(1, 1000);
-    return pdfs.map((pdf) => ({
-      id: pdf.id,
-      title: pdf.title,
-      description: pdf.description || "",
-      category: pdf.category,
-      type: pdf.type,
-      exists: pdf.exists,
-      fileSize: pdf.fileSize ? parseFloat(pdf.fileSize) : undefined,
-      outputPath: pdf.fileUrl || "",
-      createdAt: pdf.createdAt ? new Date(pdf.createdAt) : undefined,
-      updatedAt: pdf.updatedAt ? new Date(pdf.updatedAt) : undefined,
-    }));
+    if (!res.ok) throw new Error(`Export failed: ${res.status} ${res.statusText}`);
+    return res.blob();
   }
 }
 
-// Legacy named exports
-export const getAllPDFs = PDFService.getAllPDFs;
+// Convenience named exports (optional)
+export const getPDFs = PDFService.getPDFs;
+export const getPDFList = PDFService.getPDFList;
 export const getPDFById = PDFService.getPDFById;
 export const generatePDF = PDFService.generatePDF;
 export const generateAllPDFs = PDFService.generateAllPDFs;

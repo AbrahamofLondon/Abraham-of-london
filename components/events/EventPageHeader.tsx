@@ -12,7 +12,7 @@ export default function EventPageHeader({
   date,
   location,
   summary,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   return (
     <header className="mb-8 border-b border-gray-200 pb-6">
       <h1 className="font-serif text-3xl text-deepCharcoal">{title}</h1>
@@ -35,4 +35,3 @@ export default function EventPageHeader({
     </header>
   );
 }
-

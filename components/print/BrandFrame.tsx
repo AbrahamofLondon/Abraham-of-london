@@ -51,46 +51,8 @@ const BrandFrame: React.FC<BrandFrameProps> = ({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-8 print:bg-white print:p-0">
-      {/* Print container */}
-      <div
-        className={`${sizeClass} bg-white shadow-2xl print:shadow-none`}
-        style={{ padding: `${marginsMm}mm` }}
-      >
-        {/* Optional subtle brand header (NOT the main content header) */}
-        <header className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3 print:mb-3 print:pb-2">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
-              Abraham of London
-            </div>
-            {title && (
-              <div className="mt-1 text-sm font-medium text-deepCharcoal">
-                {title}
-              </div>
-            )}
-            {subtitle && (
-              <div className="mt-0.5 text-xs text-gray-500">{subtitle}</div>
-            )}
-          </div>
-          <div className="text-right text-[10px] text-gray-500">
-            {author && <div>Author: {author}</div>}
-            {date && <div>Date: {formatDate(date)}</div>}
-          </div>
-        </header>
-
-        {/* Main content - the page is responsible for its own article header */}
-        <main className="flex-1">{children}</main>
-
-        {/* Footer */}
-        <footer className="mt-6 border-t border-gray-200 pt-3 text-center text-[10px] text-gray-500 print:mt-4 print:pt-2">
-          <div className="flex items-center justify-between">
-            <span>Abraham of London</span>
-            <span>{printedOn}</span>
-          </div>
-        </footer>
-      </div>
-
-      {/* Global print styles for page size & margins */}
-      <style jsx global>{`
+      {/* Regular style tag instead of styled-jsx */}
+      <style>{`
         @media print {
           @page {
             size: ${pageSize};
@@ -115,9 +77,46 @@ const BrandFrame: React.FC<BrandFrameProps> = ({
           }
         }
       `}</style>
+
+      {/* Print container */}
+      <div
+        className={`${sizeClass} bg-white shadow-2xl print:shadow-none`}
+        style={{ padding: `${marginsMm}mm` }}
+      >
+        {/* Optional subtle brand header */}
+        <header className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3 print:mb-3 print:pb-2">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+              Abraham of London
+            </div>
+            {title && (
+              <div className="mt-1 text-sm font-medium text-deepCharcoal">
+                {title}
+              </div>
+            )}
+            {subtitle && (
+              <div className="mt-0.5 text-xs text-gray-500">{subtitle}</div>
+            )}
+          </div>
+          <div className="text-right text-[10px] text-gray-500">
+            {author && <div>Author: {author}</div>}
+            {date && <div>Date: {formatDate(date)}</div>}
+          </div>
+        </header>
+
+        {/* Main content */}
+        <main className="flex-1">{children}</main>
+
+        {/* Footer */}
+        <footer className="mt-6 border-t border-gray-200 pt-3 text-center text-[10px] text-gray-500 print:mt-4 print:pt-2">
+          <div className="flex items-center justify-between">
+            <span>Abraham of London</span>
+            <span>{printedOn}</span>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 };
 
 export default BrandFrame;
-

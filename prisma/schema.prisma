@@ -8,7 +8,10 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"] // Required for datasource.extensions
+  // Explicitly defining the output resolves the Prisma 7.0 deprecation warning
+  // and mitigates Windows EPERM locking issues by forcing a clean target.
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {

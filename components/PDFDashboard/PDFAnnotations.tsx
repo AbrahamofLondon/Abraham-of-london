@@ -6,11 +6,9 @@ import {
   Trash2, 
   Edit2, 
   Save, 
-  X, 
   MessageSquare, 
   Highlighter,
   Type,
-  Circle,
   Square,
   ArrowRight,
   Undo,
@@ -43,7 +41,6 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
   const [annotations, setAnnotations] = useState<Annotation[]>(initialAnnotations);
   const [selectedTool, setSelectedTool] = useState<'text' | 'highlight' | 'comment' | 'shape' | 'arrow'>('comment');
   const [selectedColor, setSelectedColor] = useState('#3B82F6'); // blue-500
-  const [isDrawing, setIsDrawing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [history, setHistory] = useState<Annotation[][]>([initialAnnotations]);
   const [historyIndex, setHistoryIndex] = useState(0);
@@ -74,8 +71,8 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
       position,
       color: selectedColor,
       createdAt: new Date().toISOString(),
-      createdBy: 'user', // In real app, get from auth
-      page: 1, // In real app, track current page
+      createdBy: 'user',
+      page: 1,
       metadata: { tool: selectedTool }
     };
 
@@ -102,8 +99,15 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
     saveToHistory(newAnnotations);
   };
 
+  // ✅ FIXED: Properly typed history management without relying on safeSlice return type
   const saveToHistory = (newAnnotations: Annotation[]) => {
-    const newHistory = [...safeSlice(history, 0, historyIndex + 1), newAnnotations];
+    // Manual slice implementation to avoid type issues
+    const slicedHistory: Annotation[][] = [];
+    for (let i = 0; i <= historyIndex && i < history.length; i++) {
+      slicedHistory.push(history[i] as Annotation[]);
+    }
+    
+    const newHistory: Annotation[][] = [...slicedHistory, newAnnotations];
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };
@@ -113,7 +117,7 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
       const prevAnnotations = history[historyIndex - 1];
       if (prevAnnotations) {
         setHistoryIndex(historyIndex - 1);
-        setAnnotations(prevAnnotations);
+        setAnnotations([...prevAnnotations]); // Create new array to ensure re-render
       }
     }
   };
@@ -123,7 +127,7 @@ const PDFAnnotations: React.FC<PDFAnnotationsProps> = ({
       const nextAnnotations = history[historyIndex + 1];
       if (nextAnnotations) {
         setHistoryIndex(historyIndex + 1);
-        setAnnotations(nextAnnotations);
+        setAnnotations([...nextAnnotations]); // Create new array to ensure re-render
       }
     }
   };

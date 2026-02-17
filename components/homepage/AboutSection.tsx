@@ -6,8 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { BookOpen, Award, Calendar, Mail, Users, FileText, Clock } from "lucide-react";
-import { safeSlice } from "@/lib/utils/safe";
-
+// safeSlice is not needed here, so we remove the import
+// import { safeSlice } from "@/lib/utils/safe";
 
 // --- Types ---
 
@@ -26,7 +26,7 @@ type AboutSectionProps = {
   portraitSrc?: string;
   portraitAlt?: string;
   priority?: boolean;
-  _className?: string; // Changed from className to _className to fix unused warning
+  _className?: string;
 };
 
 // --- Animation Variants ---
@@ -87,7 +87,7 @@ export default function AboutSection({
   portraitSrc = "/assets/images/profile-portrait.webp",
   portraitAlt = "Portrait of Abraham of London",
   priority = false,
-  _className, // Changed from className to _className
+  _className,
 }: AboutSectionProps) {
   const containerRef = React.useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -97,8 +97,9 @@ export default function AboutSection({
 
   const parallaxY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
 
+  // Sort achievements by year descending (newest first)
   const sortedAchievements = React.useMemo(() => {
-    return safeSlice(achievements, ).sort((a, b) => b.year - a.year);
+    return [...achievements].sort((a, b) => b.year - a.year);
   }, [achievements]);
 
   // Stats data
@@ -354,4 +355,3 @@ export default function AboutSection({
     </section>
   );
 }
-

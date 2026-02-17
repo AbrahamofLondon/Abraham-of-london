@@ -20,7 +20,7 @@ type EventCardProps = {
 
 const EVENT_FALLBACK_COVER = "/assets/images/abraham-of-london-banner.webp";
 
-export default function EventCard(props: EventCardProps): JSX.Element {
+export default function EventCard(props: EventCardProps): React.ReactElement {
   const { slug, title, date, time, location, description, status, tags } = props;
 
   const [imageLoaded, setImageLoaded] = React.useState(false);
@@ -38,12 +38,14 @@ export default function EventCard(props: EventCardProps): JSX.Element {
     addCandidate(props.coverImage);
     addCandidate(props.heroImage);
     addCandidate(props.image);
+    // Always include fallback as last resort
     candidates.push(EVENT_FALLBACK_COVER);
 
     return candidates;
   }, [props.coverImage, props.heroImage, props.image]);
 
-  const cover = coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)];
+  // Ensure we always have a valid string for Image src
+  const cover = coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)] ?? EVENT_FALLBACK_COVER;
 
   return (
     <article className="group overflow-hidden rounded-sm border border-white/5 bg-zinc-950/40 backdrop-blur-md transition-all duration-500 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/5">

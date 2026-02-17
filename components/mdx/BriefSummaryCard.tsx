@@ -1,7 +1,7 @@
 // components/mdx/BriefSummaryCard.tsx — INTEL SPEC
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Shield, Clock, FileText, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +22,31 @@ export const BriefSummaryCard: React.FC<BriefSummaryCardProps> = ({
   readingTime,
   className,
 }) => {
+  // Deterministic reference code based on props – same on server and client
+  const refCode = useMemo(() => {
+    const input = `${category}-${author}-${date || ''}-${classification}`;
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      hash = ((hash << 5) - hash) + input.charCodeAt(i);
+      hash |= 0; // convert to 32‑bit integer
+    }
+    // Convert to positive hex‑like string, pad to 6 characters
+    return Math.abs(hash).toString(36).substring(0, 6).toUpperCase().padStart(6, '0');
+  }, [category, author, date, classification]);
+
+  // Stable date display – avoids client‑side `new Date()` mismatches
+  const displayDate = useMemo(() => {
+    if (!date) return "Unknown date";
+    try {
+      return new Date(date).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'long',
+      });
+    } catch {
+      return "Invalid date";
+    }
+  }, [date]);
+
   return (
     <div className={cn(
       "my-12 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/50 backdrop-blur-sm",
@@ -36,7 +61,7 @@ export const BriefSummaryCard: React.FC<BriefSummaryCardProps> = ({
           </span>
         </div>
         <div className="font-mono text-[9px] text-white/20 uppercase tracking-widest">
-          Ref: {Math.random().toString(36).substring(2, 8).toUpperCase()}
+          Ref: {refCode}
         </div>
       </div>
 
@@ -63,9 +88,7 @@ export const BriefSummaryCard: React.FC<BriefSummaryCardProps> = ({
             <Clock size={14} className="text-gold/50" />
             <span className="font-mono text-[9px] uppercase tracking-widest">Temporal</span>
           </div>
-          <p className="text-sm font-medium text-white tracking-wide">
-            {date || new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })}
-          </p>
+          <p className="text-sm font-medium text-white tracking-wide">{displayDate}</p>
         </div>
       </div>
     </div>

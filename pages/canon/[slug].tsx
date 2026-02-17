@@ -1,4 +1,6 @@
 // pages/canon/[slug].tsx — HARDENED (Netlify-Resilient / Institutional Gate)
+// (GitHub fix version + slug hygiene to prevent canon/canon and other path pollution)
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -14,12 +16,7 @@ import { MDXLayoutRenderer } from "@/components/mdx/MDXLayoutRenderer";
 
 // Logic & Hooks
 import { useAccess } from "@/hooks/useAccess";
-import { 
-  getDocBySlug, 
-  getAllCanons, 
-  normalizeSlug, 
-  sanitizeData 
-} from "@/lib/content/server"; 
+import { getDocBySlug, getAllCanons, normalizeSlug, sanitizeData } from "@/lib/content/server";
 import { joinHref } from "@/lib/content/shared";
 import { resolveDocCoverImage } from "@/lib/content/client-utils";
 import { prepareMDX } from "@/lib/server/md-utils";
@@ -35,8 +32,8 @@ type CanonDoc = {
   title: string;
   excerpt?: string | null;
   description?: string | null;
-  slug: string;
-  href: string;
+  slug: string; // ALWAYS bare: "volume-x-the-arc-of-future-civilisation"
+  href: string; // ALWAYS "/canon/<bare>"
   accessLevel: Tier;
   date?: string | null;
   coverImage?: string | null;
@@ -55,12 +52,26 @@ interface Props {
 }
 
 /* -----------------------------------------------------------------------------
+  SLUG HYGIENE (prevents /canon/canon/... or mixed slugs)
+----------------------------------------------------------------------------- */
+function stripCanonPrefix(slug: string): string {
+  let s = normalizeSlug(String(slug || ""));
+  const prefix = "canon/";
+  while (s.toLowerCase().startsWith(prefix)) s = s.slice(prefix.length);
+  return normalizeSlug(s);
+}
+
+function getRawBody(doc: any): string {
+  return doc?.body?.raw || doc?.bodyRaw || doc?.content || doc?.body || "";
+}
+
+/* -----------------------------------------------------------------------------
   PAGE COMPONENT
 ----------------------------------------------------------------------------- */
-const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdxRaw }) => {
+const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) => {
   const router = useRouter();
   const { hasClearance, verify, isValidating } = useAccess();
-  
+
   const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
   const [loadingContent, setLoadingContent] = React.useState(false);
 
@@ -72,14 +83,12 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
   const fetchDecryptedContent = React.useCallback(async () => {
     if (loadingContent || source) return;
     setLoadingContent(true);
-    
+
     try {
       const res = await fetch(`/api/canon/${encodeURIComponent(doc.slug)}`);
       const json = await res.json();
-      if (res.ok && json.source) {
-        setSource(json.source);
-      }
-    } catch (e) {
+      if (res.ok && json?.source) setSource(json.source);
+    } catch {
       console.error("[CANON_DECRYPT_ERROR] Failed to fetch secure payload.");
     } finally {
       setLoadingContent(false);
@@ -87,10 +96,10 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
   }, [doc.slug, loadingContent, source]);
 
   React.useEffect(() => {
-    if (isAuthorized && !source) {
-      fetchDecryptedContent();
-    }
-  }, [isAuthorized, source, fetchDecryptedContent]);
+    // Only fetch when user has clearance and we don't already have source.
+    // Also, only necessary when the page is initially locked.
+    if (isAuthorized && !source && initialLocked) fetchDecryptedContent();
+  }, [isAuthorized, source, initialLocked, fetchDecryptedContent]);
 
   if (router.isFallback) {
     return (
@@ -121,11 +130,11 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
         />
 
         <div className="mx-auto max-w-7xl px-6 py-12">
-          <BriefSummaryCard 
-             category="CANON"
-             classification={doc.accessLevel}
-             date={doc.date || undefined}
-             author={doc.author || undefined}
+          <BriefSummaryCard
+            category="CANON"
+            classification={doc.accessLevel}
+            date={doc.date || undefined}
+            author={doc.author || undefined}
           />
 
           <div className="grid lg:grid-cols-4 gap-16 mt-16">
@@ -148,9 +157,9 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
                       </span>
                     </div>
                   )}
-                  
+
                   <div className={loadingContent ? "opacity-20 transition-opacity" : "opacity-100 transition-opacity"}>
-                    <MDXLayoutRenderer code={source as any} />
+                    {source ? <MDXLayoutRenderer code={source as any} /> : null}
                   </div>
                 </div>
               )}
@@ -158,7 +167,10 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
               {/* Intelligence Chain Navigation — Hardened Version */}
               <nav className="mt-24 border-t border-white/5 pt-12 grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/5 overflow-hidden">
                 {doc.prevDoc ? (
-                  <a href={doc.prevDoc.href} className="group bg-black p-8 hover:bg-zinc-900 transition-all border-r border-white/5">
+                  <a
+                    href={doc.prevDoc.href}
+                    className="group bg-black p-8 hover:bg-zinc-900 transition-all border-r border-white/5"
+                  >
                     <div className="flex items-center gap-3 text-zinc-600 mb-4 font-mono text-[9px] uppercase tracking-[0.4em]">
                       <ArrowLeft size={12} /> Previous Dispatch
                     </div>
@@ -173,7 +185,10 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
                 )}
 
                 {doc.nextDoc ? (
-                  <a href={doc.nextDoc.href} className="group bg-black p-8 text-right hover:bg-zinc-900 transition-all">
+                  <a
+                    href={doc.nextDoc.href}
+                    className="group bg-black p-8 text-right hover:bg-zinc-900 transition-all"
+                  >
                     <div className="flex items-center justify-end gap-3 text-zinc-600 mb-4 font-mono text-[9px] uppercase tracking-[0.4em]">
                       Next Dispatch <ArrowRight size={12} />
                     </div>
@@ -196,17 +211,25 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
                 </h4>
                 <div className="space-y-8">
                   <div>
-                    <span className="block text-[10px] text-amber-500/60 uppercase tracking-widest mb-2 font-mono">Tier</span>
+                    <span className="block text-[10px] text-amber-500/60 uppercase tracking-widest mb-2 font-mono">
+                      Tier
+                    </span>
                     <span className="text-xl font-serif italic text-white/90 capitalize">
                       {doc.accessLevel.replace("-", " ")}
                     </span>
                   </div>
+
                   {doc.tags && doc.tags.length > 0 && (
                     <div>
-                      <span className="block text-[10px] text-amber-500/60 uppercase tracking-widest mb-4 font-mono">Registry Tags</span>
+                      <span className="block text-[10px] text-amber-500/60 uppercase tracking-widest mb-4 font-mono">
+                        Registry Tags
+                      </span>
                       <div className="flex flex-wrap gap-2">
-                        {doc.tags.map(t => (
-                          <span key={t} className="px-2 py-1 bg-white/[0.03] text-[9px] text-white/40 border border-white/5 uppercase font-mono">
+                        {doc.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="px-2 py-1 bg-white/[0.03] text-[9px] text-white/40 border border-white/5 uppercase font-mono"
+                          >
                             {t}
                           </span>
                         ))}
@@ -228,63 +251,79 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource, mdx
 ----------------------------------------------------------------------------- */
 export const getStaticPaths: GetStaticPaths = async () => {
   const canons = getAllCanons() || [];
+
   const paths = canons
-    .filter((d: any) => !d.draft)
+    .filter((d: any) => !d?.draft)
     .map((d: any) => {
-      const raw = d.slug || d._raw?.flattenedPath || "";
-      const bare = normalizeSlug(raw).replace(/^canon\//, "");
-      return { params: { slug: bare } };
-    });
-    
+      const raw = d?.slug || d?._raw?.flattenedPath || "";
+      const bare = stripCanonPrefix(raw);
+      return bare ? { params: { slug: bare } } : null;
+    })
+    .filter(Boolean) as { params: { slug: string } }[];
+
   return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = String(params?.slug || "");
-  const rawDoc = getDocBySlug(`canon/${slug}`) || getDocBySlug(slug);
+  const incoming = String(params?.slug || "");
+  const slug = stripCanonPrefix(incoming);
+  if (!slug) return { notFound: true };
 
-  if (!rawDoc || rawDoc.draft) return { notFound: true };
+  // Try both canonical and sloppy inputs (robust under migration)
+  const rawDoc = getDocBySlug(`canon/${slug}`) || getDocBySlug(slug) || getDocBySlug(`canon/canon/${slug}`);
+  if (!rawDoc || rawDoc?.draft) return { notFound: true };
 
   const accessLevel = (rawDoc.accessLevel || "inner-circle") as Tier;
   const initialLocked = accessLevel !== "public";
-  const mdxRaw = (rawDoc.body?.raw || rawDoc.bodyRaw || rawDoc.content || "");
 
-  let initialSource = null;
+  const mdxRaw = getRawBody(rawDoc);
+
+  let initialSource: MDXRemoteSerializeResult | null = null;
   if (!initialLocked) {
-    initialSource = await prepareMDX(mdxRaw);
+    initialSource = await prepareMDX(mdxRaw || " ");
   }
 
-  const all = getAllCanons();
-  const idx = all.findIndex((d: any) => normalizeSlug(d.slug || "").includes(slug));
-  const prevDocRaw = idx > 0 ? all[idx - 1] : null;
-  const nextDocRaw = idx < all.length - 1 ? all[idx + 1] : null;
+  // Navigation list (ensure stable ordering)
+  const all = (getAllCanons() || []).filter((d: any) => !d?.draft);
+  const normalizedAll = all.map((d: any) => ({
+    ...d,
+    __bare: stripCanonPrefix(d?.slug || d?._raw?.flattenedPath || ""),
+  }));
+
+  const idx = normalizedAll.findIndex((d: any) => d.__bare === slug);
+  const prevDocRaw = idx > 0 ? normalizedAll[idx - 1] : null;
+  const nextDocRaw = idx >= 0 && idx < normalizedAll.length - 1 ? normalizedAll[idx + 1] : null;
 
   const doc: CanonDoc = {
     title: rawDoc.title || "Institutional Brief",
-    slug,
-    href: joinHref("canon", slug),
+    slug, // ✅ bare
+    href: joinHref("canon", slug), // ✅ /canon/<bare>
     accessLevel,
     date: rawDoc.date ? String(rawDoc.date) : null,
     coverImage: resolveDocCoverImage(rawDoc),
     category: rawDoc.category || null,
-    tags: rawDoc.tags || [],
+    tags: Array.isArray(rawDoc.tags) ? rawDoc.tags : [],
     author: rawDoc.author || "Abraham of London",
-    nextDoc: nextDocRaw ? { 
-      title: nextDocRaw.title, 
-      href: joinHref("canon", normalizeSlug(nextDocRaw.slug).replace(/^canon\//, "")) 
-    } : null,
-    prevDoc: prevDocRaw ? { 
-      title: prevDocRaw.title, 
-      href: joinHref("canon", normalizeSlug(prevDocRaw.slug).replace(/^canon\//, "")) 
-    } : null,
+    nextDoc: nextDocRaw
+      ? {
+          title: nextDocRaw.title || "Next",
+          href: joinHref("canon", String(nextDocRaw.__bare)),
+        }
+      : null,
+    prevDoc: prevDocRaw
+      ? {
+          title: prevDocRaw.title || "Previous",
+          href: joinHref("canon", String(prevDocRaw.__bare)),
+        }
+      : null,
   };
 
   return {
-    props: sanitizeData({ 
-      doc, 
-      initialLocked, 
-      initialSource: initialLocked ? null : initialSource, 
-      mdxRaw 
+    props: sanitizeData({
+      doc,
+      initialLocked,
+      initialSource: initialLocked ? null : initialSource,
+      mdxRaw,
     }),
     revalidate: 1800,
   };

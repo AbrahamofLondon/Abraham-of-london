@@ -19,7 +19,7 @@ type EventCardProps = {
 
 const EVENT_FALLBACK_COVER = "/assets/images/abraham-of-london-banner.webp";
 
-export default function EventCard(props: EventCardProps): JSX.Element {
+export default function EventCard(props: EventCardProps): React.ReactElement {
   const { slug, title, date, time, location, description, status, tags } =
     props;
 
@@ -142,4 +142,3 @@ export default function EventCard(props: EventCardProps): JSX.Element {
     </article>
   );
 }
-

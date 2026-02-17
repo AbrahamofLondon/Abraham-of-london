@@ -12,6 +12,25 @@ interface ThemeToggleProps {
   size?: "sm" | "md" | "lg";
 }
 
+// Move constants outside component to prevent recreation
+const SIZE_CLASSES = {
+  sm: "w-12 h-6",
+  md: "w-16 h-8",
+  lg: "w-20 h-10",
+} as const;
+
+const ICON_SIZES = {
+  sm: 12,
+  md: 16,
+  lg: 20,
+} as const;
+
+const THUMB_POSITIONS = {
+  sm: { light: 26, dark: 2 },
+  md: { light: 34, dark: 4 },
+  lg: { light: 42, dark: 6 },
+} as const;
+
 export default function ThemeToggle({
   className = "",
   size = "md",
@@ -27,26 +46,24 @@ export default function ThemeToggle({
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
-  const sizeClasses: Record<NonNullable<ThemeToggleProps["size"]>, string> = {
-    sm: "w-12 h-6",
-    md: "w-16 h-8",
-    lg: "w-20 h-10",
-  };
-
-  const iconSizes: Record<NonNullable<ThemeToggleProps["size"]>, number> = {
-    sm: 12,
-    md: 16,
-    lg: 20,
-  };
-
   const toggleTheme = React.useCallback(() => {
     setTheme(isDark ? "light" : "dark");
   }, [isDark, setTheme]);
 
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div 
+        className={`${SIZE_CLASSES[size]} rounded-full border-2 border-softGold/30 bg-charcoal/80 ${className}`}
+        aria-hidden="true"
+      />
+    );
+  }
+
   return (
     <motion.button
       className={`
-        relative ${sizeClasses[size]} rounded-full border-2 border-softGold/30 
+        relative ${SIZE_CLASSES[size]} rounded-full border-2 border-softGold/30 
         bg-gradient-to-br from-charcoal/80 to-charcoal shadow-lg 
         backdrop-blur-sm transition-all duration-500 
         hover:border-softGold/60 hover:shadow-xl
@@ -68,7 +85,7 @@ export default function ThemeToggle({
         {/* Animated background particles */}
         <AnimatePresence>
           {isHovered && (
-            <>
+            <React.Fragment>
               <motion.div
                 className="absolute top-1 left-2 h-1 w-1 rounded-full bg-softGold"
                 initial={{ scale: 0, opacity: 0 }}
@@ -83,7 +100,7 @@ export default function ThemeToggle({
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ delay: 0.2 }}
               />
-            </>
+            </React.Fragment>
           )}
         </AnimatePresence>
 
@@ -98,17 +115,7 @@ export default function ThemeToggle({
           `}
           initial={false}
           animate={{
-            x: isDark
-              ? size === "sm"
-                ? 2
-                : size === "md"
-                  ? 4
-                  : 6
-              : size === "sm"
-                ? 26
-                : size === "md"
-                  ? 34
-                  : 42,
+            x: isDark ? THUMB_POSITIONS[size].dark : THUMB_POSITIONS[size].light,
           }}
           transition={{
             type: "spring",
@@ -126,7 +133,7 @@ export default function ThemeToggle({
                 transition={{ duration: 0.3 }}
               >
                 <Sparkles
-                  size={iconSizes[size] - 8}
+                  size={ICON_SIZES[size] - 8}
                   className="text-charcoal/80"
                 />
               </motion.div>
@@ -145,12 +152,12 @@ export default function ThemeToggle({
             >
               {isDark ? (
                 <Moon
-                  size={iconSizes[size] - 4}
+                  size={ICON_SIZES[size] - 4}
                   className="text-charcoal"
                   fill="currentColor"
                 />
               ) : (
-                <Sun size={iconSizes[size] - 4} className="text-charcoal" />
+                <Sun size={ICON_SIZES[size] - 4} className="text-charcoal" />
               )}
             </motion.div>
           </AnimatePresence>
@@ -183,4 +190,3 @@ export default function ThemeToggle({
     </motion.button>
   );
 }
-

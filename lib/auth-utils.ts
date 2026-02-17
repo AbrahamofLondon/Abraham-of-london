@@ -47,21 +47,27 @@ export function mapMemberTierToAoLTier(dbTier: string | null, flags: string[]): 
 
   const t = (dbTier || "").toLowerCase();
   
-  // 2. High-tier "Inner Circle" mappings
+  // 2. High-tier mappings - map to architect as the highest available tier
   if (t.includes("elite") || t.includes("enterprise") || t.includes("l4")) {
-    return "inner-circle-elite";
+    return "architect"; // Highest tier available
   }
   
+  // 3. Premium/Mid-tier mappings
   if (t.includes("plus") || t.includes("premium") || t.includes("l3")) {
-    return "inner-circle-plus";
+    return "premium"; // Mid-high tier
   }
   
-  // 3. Standard active membership
+  // 4. Standard active membership
   if (t.includes("member") || t.includes("inner") || t.includes("l2")) {
     return "inner-circle";
   }
 
-  // 4. Fallback for unverified or public status
+  // 5. Free tier
+  if (t.includes("free") || t.includes("trial") || t.includes("l1")) {
+    return "free";
+  }
+
+  // 6. Fallback for unverified or public status
   return "public";
 }
 
@@ -72,9 +78,12 @@ export function mapMemberTierToAoLTier(dbTier: string | null, flags: string[]): 
 export function getClearanceLabel(tier: AoLTier): string {
   switch (tier) {
     case "private": return "Classified // Level 5";
-    case "inner-circle-elite": return "Elite // Level 4";
-    case "inner-circle-plus": return "Premium // Level 3";
+    case "architect": return "Architect // Level 4";
+    case "premium": return "Premium // Level 3";
     case "inner-circle": return "Inner Circle // Level 2";
+    case "member": return "Member // Level 2";
+    case "free": return "Free // Level 1";
+    case "public":
     default: return "Standard // Level 1";
   }
 }

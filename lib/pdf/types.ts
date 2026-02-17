@@ -31,6 +31,7 @@ export interface PDFItem {
   title: string;
   type: PDFType;
   tier: PDFTier;
+  error?: string;
 
   outputPath: string;
 

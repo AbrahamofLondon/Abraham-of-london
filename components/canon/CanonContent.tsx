@@ -1,14 +1,14 @@
 import React from 'react';
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import type { MDXRemoteProps } from 'next-mdx-remote/rsc';
 
 interface CanonContentProps {
   content: string;
-  components?: Record<string, React.ComponentType>;
+  components?: MDXRemoteProps['components']; // Extract the type from MDXRemote
 }
 
 const CanonContent: React.FC<CanonContentProps> = ({ content, components = {} }) => {
-  const defaultComponents = {
-    // Custom components for canon content
+  const defaultComponents: MDXRemoteProps['components'] = {
     ...components,
   };
 

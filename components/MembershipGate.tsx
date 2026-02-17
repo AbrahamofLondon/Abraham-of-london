@@ -3,7 +3,8 @@
 
 import React from 'react';
 import { Lock, ShieldAlert, Key, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router'; // ✅ FIXED: Use next/router for Pages Router
+import Link from 'next/link';
 import { useRegistry } from '@/contexts/RegistryProvider';
 
 interface MembershipGateProps {
@@ -84,6 +85,3 @@ export default function MembershipGate({ requiredTier, assetTitle }: MembershipG
     </div>
   );
 }
-
-// Helper for linking
-import Link from 'next/link';

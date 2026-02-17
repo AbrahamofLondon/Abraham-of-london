@@ -1,8 +1,8 @@
+// components/PDFDashboard/Sidebar.tsx
 import React, { useCallback, useMemo } from "react";
 import type { PDFItem, DashboardStats, ViewMode } from "@/types/pdf-dashboard";
 import { FileText, RefreshCw, CheckCircle, Clock, AlertCircle, Trash2, Copy, Pencil } from "lucide-react";
 import { safeSlice } from "@/lib/utils/safe";
-
 
 type SidebarProps = {
   pdfs: PDFItem[];
@@ -21,12 +21,21 @@ type SidebarProps = {
   onUpdateMetadata: (id: string, metadata: Partial<PDFItem>) => Promise<void> | void;
   canEdit: boolean;
   canDelete: boolean;
+  // Add these if needed for per-PDF error tracking
+  generatingIds?: Set<string>;
+  errorMap?: Map<string, string>;
 };
 
-function statusFor(pdf: PDFItem): "generating" | "generated" | "error" | "pending" {
-  if (pdf.isGenerating) return "generating";
+function statusFor(
+  pdf: PDFItem, 
+  isGenerating: boolean, 
+  generatingIds?: Set<string>,
+  errorMap?: Map<string, string>
+): "generating" | "generated" | "error" | "pending" {
+  // Check if this specific PDF is being generated
+  if (generatingIds?.has(pdf.id) || isGenerating) return "generating";
   if (pdf.exists) return "generated";
-  if (pdf.error) return "error";
+  if (errorMap?.has(pdf.id)) return "error";
   return "pending";
 }
 
@@ -80,6 +89,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onUpdateMetadata,
   canEdit,
   canDelete,
+  generatingIds,
+  errorMap,
 }) => {
   const selectedCount = selectedPDFs.size;
   const selectedIds = useMemo(() => Array.from(selectedPDFs), [selectedPDFs]);
@@ -119,6 +130,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     [onToggleSelection]
   );
+
+  const getErrorMessage = (pdfId: string): string | undefined => {
+    return errorMap?.get(pdfId);
+  };
 
   return (
     <div className="space-y-6">
@@ -170,9 +185,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
           {pdfs.map((pdf) => {
-            const s = statusFor(pdf);
+            const s = statusFor(pdf, isGenerating, generatingIds, errorMap);
             const selected = selectedPDFId === pdf.id;
             const multiSelected = selectedPDFs.has(pdf.id);
+            const errorMsg = getErrorMessage(pdf.id);
 
             return (
               <button
@@ -198,6 +214,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <p className="text-xs text-gray-400 truncate">
                         {pdf.type}
                       </p>
+                      {errorMsg && s === "error" && (
+                        <p className="text-xs text-red-400 mt-1 truncate">
+                          {errorMsg}
+                        </p>
+                      )}
                     </div>
                   </div>
 

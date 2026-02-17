@@ -1,187 +1,230 @@
+// components/SearchPalette.tsx — BUILD-SAFE (no Fuse generics, pages-router safe)
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/router";
+import { Search, FileText, Loader2, X } from "lucide-react";
 import Fuse from "fuse.js";
-import Link from "next/link";
-import { safeArraySlice } from "@/lib/utils/safe";
 
-/* --- 1. DATA SHAPE --- */
-interface RegistryAsset {
-  id: string;   
-  t: string;    
-  type: string; 
-  tier: string; 
-  d: string;    
-  w: number;    
+type RegistryAsset = {
+  t: string; // title
+  s: string; // slug
+  k: string; // kind
+  d?: string; // date
+};
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
 
-interface SearchPaletteProps {
-  open: boolean;
-  onClose: () => void;
+function safeArraySlice<T>(arr: T[], start: number, end?: number): T[] {
+  return Array.isArray(arr) ? arr.slice(start, end) : [];
 }
 
-export default function SearchPalette({
-  open,
-  onClose,
-}: SearchPaletteProps): JSX.Element | null {
+function resolveBase(kind: string): string {
+  const k = String(kind || "").toLowerCase();
+  if (k === "short") return "/shorts";
+  if (k === "brief") return "/briefs";
+  if (k === "canon") return "/canon";
+  if (k === "download") return "/downloads";
+  if (k === "resource") return "/resources";
+  if (k === "event") return "/events";
+  if (k === "strategy") return "/strategy";
+  if (k === "lexicon") return "/lexicon";
+  return "/blog";
+}
+
+export default function SearchPalette(): React.ReactElement {
+  const router = useRouter();
+
+  const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [items, setItems] = React.useState<RegistryAsset[]>([]);
-  const [fuse, setFuse] = React.useState<Fuse<RegistryAsset> | null>(null);
+  const [fuse, setFuse] = React.useState<any>(null); // ✅ DO NOT type Fuse in this codebase
   const [active, setActive] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(false);
+
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Focus and Scroll Lock logic
+  // Keyboard shortcut: ⌘K / Ctrl+K
   React.useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [open]);
+    const down = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((v) => !v);
+      }
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
-  // Load the Registry
+  // Load registry when opened
   React.useEffect(() => {
-    if (!open || items.length > 0) return;
+    if (!open) return;
 
-    const loadRegistry = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch("/system/content-registry.json");
-        const data = await res.json();
-        const list: RegistryAsset[] = data.index;
+    setIsLoading(true);
 
-        const fuseInstance = new Fuse(list, {
-          includeScore: true,
-          threshold: 0.4,
-          keys: ["t", "id", "type"],
+    fetch("/system/content-registry.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const assets: RegistryAsset[] = Array.isArray(data?.index) ? data.index : [];
+        setItems(assets);
+
+        // ✅ Create Fuse without generics/types — runtime is fine.
+        const instance = new (Fuse as any)(assets, {
+          keys: ["t", "k"],
+          threshold: 0.3,
+          ignoreLocation: true,
         });
 
-        setItems(list);
-        setFuse(fuseInstance);
-      } catch (error) {
-        console.error("❌ Registry Sync Error:", error);
-      } finally {
-        setIsLoading(false);
-      }
+        setFuse(instance);
+      })
+      .catch((err) => console.error("Registry load failed:", err))
+      .finally(() => setIsLoading(false));
+  }, [open]);
+
+  // Reset on close
+  React.useEffect(() => {
+    if (!open) return;
+    return () => {
+      setQuery("");
+      setActive(0);
     };
-    loadRegistry();
-  }, [open, items]);
+  }, [open]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") onClose();
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActive((prev) => (prev + 1) % Math.min(results.length, 12));
-    }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActive((prev) => (prev - 1 + Math.min(results.length, 12)) % Math.min(results.length, 12));
-    }
-    if (e.key === "Enter" && results[active]) {
-      // In a real scenario, you could push to router here
-      onClose();
-    }
-  };
+  // Focus input when opened
+  React.useEffect(() => {
+    if (!open) return;
+    const id = window.setTimeout(() => inputRef.current?.focus(), 30);
+    return () => window.clearTimeout(id);
+  }, [open]);
 
-  if (!open) return null;
-
-  const results = query.trim() && fuse
-    ? fuse.search(query).map((r) => r.item)
-    : items;
+  // Results
+  const results: RegistryAsset[] =
+    query.trim() && fuse
+      ? (fuse.search(query) || []).map((r: any) => r?.item).filter(Boolean)
+      : items;
 
   const top = safeArraySlice(results, 0, 12);
 
+  const handleSelect = (slug: string, kind: string) => {
+    const base = resolveBase(kind);
+    router.push(`${base}/${slug}`);
+    setOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((prev) => Math.min(prev + 1, Math.max(top.length - 1, 0)));
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((prev) => Math.max(prev - 1, 0));
+      return;
+    }
+    if (e.key === "Enter" && top[active]) {
+      e.preventDefault();
+      handleSelect(top[active].s, top[active].k);
+      return;
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+      return;
+    }
+  };
+
+  // Reset active when query changes
+  React.useEffect(() => {
+    setActive(0);
+  }, [query]);
+
+  // Closed state button (header can mount this anywhere)
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 rounded-md border border-white/10 px-3 py-1.5 text-sm text-white/60 transition-colors hover:text-white"
+        aria-label="Search content"
+      >
+        <Search className="h-4 w-4" />
+        <span className="hidden sm:inline">Search</span>
+        <kbd className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono text-white/40">
+          <span>⌘K</span>
+        </kbd>
+      </button>
+    );
+  }
+
+  // Open palette modal
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-[#0a0a0a]/80 backdrop-blur-md p-4 pt-24 transition-opacity duration-300"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="w-full max-w-2xl overflow-hidden rounded-sm bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] ring-1 ring-black/5 dark:bg-[#111] dark:ring-white/5">
-        
-        {/* Minimal Search Input */}
-        <div className="flex items-center border-b border-neutral-100 p-5 dark:border-neutral-800">
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setActive(0); }}
-            onKeyDown={handleKeyDown}
-            placeholder="Search Intelligence Archive..."
-            className="w-full bg-transparent text-xl font-light tracking-tight outline-none dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
-          />
-          {isLoading && <div className="animate-spin rounded-full h-4 w-4 border border-emerald-800 border-t-transparent" />}
-        </div>
-
-        {/* Conservative Results List */}
-        <ul className="max-h-[65vh] overflow-y-auto">
-          {top.length === 0 ? (
-            <li className="py-20 text-center text-xs uppercase tracking-widest text-neutral-400">
-              {query ? "No relevant records found." : "Awaiting selection..."}
-            </li>
-          ) : (
-            top.map((asset, index) => (
-              <li key={asset.id}>
-                <Link
-                  href={`/vault/${asset.id}`}
-                  onClick={onClose}
-                  className={`group flex flex-col border-l-2 px-8 py-5 transition-all duration-300 ${
-                    index === active
-                      ? "border-emerald-800 bg-neutral-50/50 dark:bg-white/[0.02] dark:border-emerald-500"
-                      : "border-transparent hover:bg-neutral-50/30 dark:hover:bg-white/[0.01]"
-                  }`}
-                  onMouseEnter={() => setActive(index)}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={getTierStyles(asset.tier)}>
-                      {asset.tier.replace('-', ' ')}
-                    </span>
-                    <span className="text-[9px] text-neutral-400 font-mono tracking-tighter opacity-60">
-                      {asset.type} // {asset.w} WORDS
-                    </span>
-                  </div>
-                  
-                  <div className="text-base font-medium tracking-tight text-neutral-800 dark:text-neutral-200 group-hover:text-black dark:group-hover:text-white">
-                    {asset.t}
-                  </div>
-                  
-                  <div className="mt-2 text-[10px] text-neutral-400 font-light tracking-wide uppercase">
-                    Ref: {asset.id} — {new Date(asset.d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </div>
-                </Link>
-              </li>
-            ))
-          )}
-        </ul>
-
-        {/* Formal Footer */}
-        <div className="flex items-center justify-between border-t border-neutral-100 bg-[#fafafa] px-6 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-400 dark:border-neutral-800 dark:bg-[#0d0d0d]">
-          <div className="flex gap-6">
-            <span className="flex items-center gap-2"><span className="opacity-50">↓↑</span> Navigate</span>
-            <span className="flex items-center gap-2"><span className="opacity-50">↵</span> Access Record</span>
+    <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm" onClick={() => setOpen(false)}>
+      <div
+        className="fixed left-1/2 top-[18%] w-full max-w-2xl -translate-x-1/2 px-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="overflow-hidden rounded-lg border border-white/10 bg-zinc-900 shadow-2xl">
+          {/* Search Input */}
+          <div className="flex items-center border-b border-white/10 px-4">
+            <Search className="mr-3 h-4 w-4 shrink-0 text-white/40" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Search content..."
+              className="flex-1 bg-transparent py-4 text-sm text-white outline-none placeholder:text-white/40"
+            />
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin text-white/40" />}
+            <button
+              onClick={() => setOpen(false)}
+              className="rounded p-1 transition-colors hover:bg-white/10"
+              aria-label="Close search"
+            >
+              <X className="h-4 w-4 text-white/40" />
+            </button>
           </div>
-          <span className="font-medium text-neutral-300 dark:text-neutral-700">Established 2026</span>
+
+          {/* Results */}
+          <div className="max-h-[420px] overflow-y-auto p-2">
+            {!isLoading && top.length === 0 && (
+              <div className="py-12 text-center text-sm text-white/40">
+                {query ? "No results found" : "Start typing to search..."}
+              </div>
+            )}
+
+            {top.map((item, index) => (
+              <button
+                key={`${item.k}:${item.s}`}
+                onClick={() => handleSelect(item.s, item.k)}
+                className={cx(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors",
+                  index === active ? "bg-white/10 text-white" : "text-white/60 hover:bg-white/5"
+                )}
+              >
+                <FileText className="h-4 w-4 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{item.t}</div>
+                  <div className="mt-0.5 text-xs uppercase tracking-wider text-white/40">{item.k}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-white/10 px-4 py-2 font-mono text-[10px] text-white/30">
+            <span>↑↓ Navigate</span>
+            <span className="mx-2">•</span>
+            <span>↵ Select</span>
+            <span className="mx-2">•</span>
+            <span>ESC Close</span>
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-/* --- TIER STYLING: INSTITUTIONAL MINIMALISM --- */
-function getTierStyles(tier: string) {
-  const base = "text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-none border transition-all duration-300";
-  
-  switch (tier.toLowerCase()) {
-    case 'inner-circle-elite':
-      return `${base} bg-amber-50/30 text-amber-700 border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-300/80 dark:border-amber-900/40`;
-    case 'inner-circle':
-      return `${base} bg-emerald-50/30 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400/80 dark:border-emerald-900/40`;
-    case 'private':
-      return `${base} bg-rose-50/30 text-rose-900 border-rose-200/50 dark:bg-rose-950/20 dark:text-rose-400/80 dark:border-rose-900/40`;
-    case 'member':
-      return `${base} bg-slate-50/30 text-slate-700 border-slate-200/50 dark:bg-slate-900/30 dark:text-slate-400/80 dark:border-slate-800/40`;
-    default:
-      return `${base} bg-neutral-50/50 text-neutral-500 border-neutral-200 dark:bg-neutral-900/30 dark:text-neutral-500 dark:border-neutral-800/50`;
-  }
 }

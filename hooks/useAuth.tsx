@@ -1,11 +1,14 @@
 // hooks/useAuth.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
+import type { AoLTier } from '@/types/next-auth';
 
-// Types based on your aol-claims.ts
-type AoLTier = "public" | "inner-circle" | "inner-circle-plus" | "inner-circle-elite" | "private";
+// No need to redeclare module here - it's already in types/next-auth.ts
 
-interface AoLClaims {
+interface AuthContextType {
+  user: any | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
   aol?: {
     tier: AoLTier;
     innerCircleAccess: boolean;
@@ -15,13 +18,6 @@ interface AoLClaims {
     emailHash?: string | null;
     flags?: string[];
   };
-}
-
-interface AuthContextType {
-  user: any | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  aol?: AoLClaims['aol'];
   tier: AoLTier;
   innerCircleAccess: boolean;
   isInternal: boolean;
@@ -48,7 +44,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [status]);
 
-  const aolClaims = session?.aol as AoLClaims['aol'] | undefined;
+  // Session type now includes aol from the central type definition
+  const aolClaims = session?.aol;
 
   const contextValue: AuthContextType = {
     user: session?.user || null,
@@ -62,11 +59,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     memberId: aolClaims?.memberId || null,
     emailHash: aolClaims?.emailHash || null,
     login: () => {
-      // Implement login logic
       window.location.href = '/api/auth/signin';
     },
     logout: () => {
-      // Implement logout logic
       window.location.href = '/api/auth/signout';
     },
   };

@@ -42,16 +42,18 @@ async function getUpstashLimiter(windowMs: number, limit: number) {
   if (!url || !token) return null;
 
   try {
-    const { Ratelimit } = await import("@upstash/ratelimit");
-    // ✅ Always import @upstash/redis – conditional exports handle Edge/Node automatically
+    // Dynamic imports – safe for both Node.js and Edge runtimes
     const { Redis } = await import("@upstash/redis");
+    const { Ratelimit } = await import("@upstash/ratelimit");
 
+    const redis = new Redis({ url, token });
     return new Ratelimit({
-      redis: new Redis({ url, token }),
+      redis,
       limiter: Ratelimit.slidingWindow(limit, `${Math.ceil(windowMs / 1000)} s`),
       analytics: false,
     });
-  } catch {
+  } catch (error) {
+    console.warn("Upstash rate limit unavailable, using memory fallback", error);
     return null;
   }
 }

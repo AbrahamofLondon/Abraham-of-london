@@ -1,29 +1,50 @@
-// lib/siteConfig.ts - COMPLETE FIXED VERSION
-import { safeSlice } from "@/lib/utils/safe";
-import type { ContactInfo, SEOConfig, SiteConfig, SocialLink } from "@/types/config";
+/* lib/siteConfig.ts — HARD-LOCKED SINGLE SOURCE OF TRUTH
+   Canonical config lives in: config/site.ts
+   This file exists ONLY to provide legacy exports + stable helpers.
+*/
+
+import {
+  siteConfig as canonical,
+  canonicalUrl as canonicalUrlFromConfig,
+  getSocialLinks as getSocialLinksFromConfig,
+  getSocialUrl as getSocialUrlFromConfig,
+  getMainNavigation,
+  getFooterNavigation,
+  getSocialNavigation,
+  getPageTitle as getPageTitleFromConfig,
+  getMetaDescription,
+  getKeywords,
+} from "@/config/site";
+
+import type { SiteConfig as CanonicalSiteConfig, SocialLink as CanonicalSocialLink } from "@/config/site";
+
 /**
- * Canonical public site URL.
- * Keep without trailing slash for consistent canonical/og URLs.
+ * Types used by older parts of the codebase.
+ * If your "@/types/config" differs, keep this as "type-only" best-effort.
  */
-export const PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_UR_ || "https://www.abrahamoflondon.org").replace(
-  /\/+$/,
-  "",
-);
+import type { ContactInfo, SEOConfig, SiteConfig as LegacySiteConfig, SocialLink as LegacySocialLink } from "@/types/config";
+
 /* -------------------------------------------------------------------------- */
-/* Brand                                                                       */
+/* Canonical public site URL                                                   */
+/* -------------------------------------------------------------------------- */
+export const PUBLIC_SITE_URL = (canonical.url || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+
+/* -------------------------------------------------------------------------- */
+/* Brand (legacy shape)                                                        */
 /* -------------------------------------------------------------------------- */
 export const brand = {
-  name: "Abraham of London",
-  tagline: "Faith · Strategy · Fatherhood",
-  logo: "/images/logo.svg",
-  logoDark: "/images/logo-dark.svg",
-  logoAlt: "Abraham of London Logo",
-  favicon: "/favicon.ico",
-  themeColor: "#1a1a1a",
-  accentColor: "#D4AF37",
+  name: canonical.brand?.name ?? "Abraham of London",
+  tagline: canonical.brand?.tagline ?? "Faith · Strategy · Fatherhood",
+  logo: canonical.brand?.logoSvg ?? canonical.brand?.logo ?? "/assets/images/logo/abraham-of-london.svg",
+  logoDark: canonical.brand?.logoSvg ?? canonical.brand?.logo ?? "/assets/images/logo/abraham-of-london.svg",
+  logoAlt: `${canonical.brand?.name ?? "Abraham of London"} Logo`,
+  favicon: canonical.brand?.favicon ?? "/assets/icons/favicon.ico",
+  themeColor: canonical.brand?.accentColor ?? "#1a1a1a",
+  accentColor: canonical.brand?.primaryColor ?? "#d4af37",
 } as const;
+
 /* -------------------------------------------------------------------------- */
-/* Routes                                                                      */
+/* Routes (legacy shape)                                                       */
 /* -------------------------------------------------------------------------- */
 export type RouteId =
   | "home"
@@ -36,16 +57,22 @@ export type RouteId =
   | "downloadsIndex"
   | "strategyLanding"
   | "contact";
+
 export interface RouteConfig {
   path: string;
   label: string;
   description?: string;
 }
+
+/**
+ * Hard-lock routes to canonical navigation where possible,
+ * but preserve your known route IDs.
+ */
 export const routes: Record<RouteId, RouteConfig> = {
   home: { path: "/", label: "Home" },
   about: { path: "/about", label: "About" },
   blogIndex: { path: "/blog", label: "Insights" },
-  contentIndex: { path: "/content", label: "The Kingdom Vault" },
+  contentIndex: { path: "/content", label: "Content" },
   booksIndex: { path: "/books", label: "Books" },
   canonIndex: { path: "/canon", label: "The Canon" },
   ventures: { path: "/ventures", label: "Ventures" },
@@ -53,60 +80,84 @@ export const routes: Record<RouteId, RouteConfig> = {
   strategyLanding: { path: "/strategy", label: "Strategy" },
   contact: { path: "/contact", label: "Contact" },
 } as const;
+
 /* -------------------------------------------------------------------------- */
-/* Contact                                                                     */
+/* Contact (legacy shape)                                                      */
 /* -------------------------------------------------------------------------- */
 export const contact: ContactInfo = {
-  email: "info@abrahamoflondon.org",
-  phone: "+44 20 8622 5909",
-  address: "London, United Kingdom",
+  email: canonical.contact?.email ?? "info@abrahamoflondon.org",
+  phone: canonical.contact?.phone ?? "+44 20 8622 5909",
+  address: canonical.contact?.address ?? canonical.contact?.location ?? "London, United Kingdom",
 };
+
 /* -------------------------------------------------------------------------- */
-/* SEO                                                                         */
+/* SEO (legacy shape)                                                          */
 /* -------------------------------------------------------------------------- */
 export const seo: SEOConfig = {
-  title: brand.name,
-  description: "Faith-rooted strategy and leadership for fathers, founders, and board-level leaders.",
-  author: brand.name,
-  ogImage: "/images/og-default.jpg",
-  keywords: ["strategy", "leadership", "fatherhood", "legacy", "faith"],
+  title: canonical.seo?.title ?? brand.name,
+  description: canonical.seo?.description ?? "",
+  author: canonical.author?.name ?? brand.name,
+  ogImage: canonical.seo?.openGraphImage ?? "/assets/images/social/og-image.jpg",
+  keywords: canonical.seo?.keywords ?? [],
   canonicalUrl: PUBLIC_SITE_URL,
-  twitterHandle: "@AbrahamofLondon",
+  twitterHandle: canonical.seo?.twitterHandle ?? "",
   siteName: brand.name,
   type: "website",
   locale: "en_GB",
 };
+
 /* -------------------------------------------------------------------------- */
-/* Social                                                                      */
+/* Social (legacy shape)                                                       */
 /* -------------------------------------------------------------------------- */
+
 /**
- * Verified Social Links - All Live
- * Keep 'external' accurate. mailto is not "external" in the browser sense.
+ * Convert canonical socials → legacy SocialLink if needed.
+ * (Same fields: kind/label/href; we also compute external.)
  */
-export const socialLinks: SocialLink[] = [
-  { href: "https://x.com/AbrahamAda48634", label: "X", kind: "twitter", external: true },
-  { href: "https://www.tiktok.com/@abrahamoflondon", label: "TikTok", kind: "tiktok", external: true },
-  { href: "https://www.facebook.com/share/1Gvu4ZunTq/", label: "Facebook", kind: "facebook", external: true },
-  { href: "https://www.instagram.com/abraham_of_london_/", label: "Instagram", kind: "instagram", external: true },
-  { href: "https://www.linkedin.com/in/abraham-adaramola-06630321", label: "LinkedIn", kind: "linkedin", external: true },
-  { href: "https://www.youtube.com/@abrahamoflondon", label: "YouTube", kind: "youtube", external: true },
-  { href: "https://wa.me/447496334022", label: "WhatsApp", kind: "whatsapp", external: true },
-  { href: "mailto:info@abrahamoflondon.org", label: "Email", kind: "email", external: false },
-];
+export const socialLinks: LegacySocialLink[] = (canonical.socials || []).map((s: CanonicalSocialLink) => ({
+  kind: (s.kind as any),
+  label: s.label,
+  href: s.href,
+  external:
+    /^https?:\/\//i.test(s.href) &&
+    !s.href.startsWith("mailto:") &&
+    !s.href.startsWith("tel:") &&
+    !s.href.startsWith("sms:"),
+})) as any;
+
 /**
- * Compatibility layer for legacy components expecting:
- * social: { twitter: string; linkedin: string; }
+ * Legacy compatibility:
+ * social: { twitter: string; linkedin: string }
+ * Your canonical uses "x" not "twitter" — we map it.
  */
 export const social = {
-  twitter: socialLinks.find((s) => s.kind === "twitter")?.href ?? "https://x.com/AbrahamAda48634",
+  twitter:
+    getSocialUrlCompat("x") ||
+    getSocialUrlCompat("twitter") ||
+    "https://x.com/AbrahamAda48634",
   linkedin:
-    socialLinks.find((s) => s.kind === "linkedin")?.href ?? "https://www.linkedin.com/in/abraham-adaramola-06630321",
+    getSocialUrlCompat("linkedin") ||
+    "https://www.linkedin.com/in/abraham-adaramola-06630321/",
 } as const;
+
+function getSocialUrlCompat(kind: any): string | null {
+  try {
+    // use canonical helper if available
+    const url = getSocialUrlFromConfig(kind);
+    if (url) return url;
+  } catch {
+    // ignore
+  }
+  const found = (canonical.socials || []).find((s) => s.kind === kind);
+  return found?.href ?? null;
+}
+
 /* -------------------------------------------------------------------------- */
-/* Ventures                                                                    */
+/* Ventures (legacy shape)                                                     */
 /* -------------------------------------------------------------------------- */
 export type VentureStatus = "active" | "planned" | "paused" | "archived";
 export type VentureCategory = "consulting" | "publication" | "technology" | "community" | "education" | "other";
+
 export interface Venture {
   id: string;
   name: string;
@@ -115,6 +166,11 @@ export interface Venture {
   status: VentureStatus;
   category: VentureCategory;
 }
+
+/**
+ * Your canonical config doesn’t model ventures.
+ * Keep this stable list here OR migrate ventures into config/site.ts later.
+ */
 export const ventures: Venture[] = [
   {
     id: "chatham-rooms",
@@ -133,104 +189,124 @@ export const ventures: Venture[] = [
     category: "publication",
   },
 ];
+
 /* -------------------------------------------------------------------------- */
-/* Helpers                                                                     */
+/* Helpers (legacy + robust)                                                   */
 /* -------------------------------------------------------------------------- */
-export const getPageTitle = (pageTitle?: string): string =>
-  pageTitle ? `${pageTitle} | ${brand.name}` : brand.name;
-/**
- * Generate absolute URL from a relative path
- */
-export const absUrl = (path: string): string => {
-  if (!path) return PUBLIC_SITE_URL;
-  // Remove leading slash if present
-  const normalizedPath = path.startsWith('/') ? safeSlice(path, 1) : path;
-  // Join base URL with path
-  return `${PUBLIC_SITE_URL}/${normalizedPath}`;
+export const getPageTitle = (pageTitle?: string): string => getPageTitleFromConfig(pageTitle);
+
+export const absUrl = (pathOrUrl: string): string => {
+  if (!pathOrUrl) return PUBLIC_SITE_URL;
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  const clean = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+  return `${PUBLIC_SITE_URL}${clean}`;
 };
-/**
- * Check if URL is external (not same domain)
- */
+
 export const isExternalUrl = (url: string): boolean => {
   if (!url) return false;
+  if (url.startsWith("mailto:") || url.startsWith("tel:") || url.startsWith("sms:")) return false;
   try {
-    const urlObj = new URL(url);
-    const siteUrlObj = new URL(PUBLIC_SITE_URL);
-    return urlObj.hostname !== siteUrlObj.hostname;
+    const u = new URL(url, PUBLIC_SITE_URL);
+    const s = new URL(PUBLIC_SITE_URL);
+    return u.hostname !== s.hostname;
   } catch {
-    // If URL parsing fails, assume it's relative (internal)
     return false;
   }
 };
-/**
- * Format phone number for display
- */
+
 export const formatPhoneNumber = (phone: string): string => {
-  if (!phone) return '';
-  // Remove all non-digits
-  const digits = phone.replace(/\D/g, '');
-  // Format UK numbers
-  if (digits.startsWith('44')) {
-    const ukNumber = safeSlice(digits, 2);
-    if (ukNumber.length === 10) {
-      return `+44 (0)${safeSlice(ukNumber, 0, 4)} ${safeSlice(ukNumber, 4)}`;
-    }
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("44")) {
+    const uk = digits.slice(2);
+    if (uk.length === 10) return `+44 (0)${uk.slice(0, 4)} ${uk.slice(4)}`;
   }
-  // Default formatting
   return phone;
 };
-/* -------------------------------------------------------------------------- */
-/* Central config                                                              */
-/* -------------------------------------------------------------------------- */
+
 /**
- * IMPORTANT:
- * - `SiteConfig` in types/site-config.ts defines `contact.email` (canonical)
- * - Some legacy components read `siteConfig.email` directly → keep it.
- * - Some legacy components read `siteConfig.siteName` and `siteConfig.social` → keep them.
+ * Hard-lock these to canonical navigation helpers:
+ */
+export const mainNavigation = getMainNavigation();
+export const footerNavigation = getFooterNavigation();
+export const socialNavigation = getSocialNavigation();
+
+/**
+ * Hard-lock canonicalUrl as well
+ */
+export const canonicalUrl = (path = "/") => canonicalUrlFromConfig(path);
+
+/**
+ * Social helpers: hard-lock to canonical helpers
+ */
+export const getSocialLinks = (priority?: number) => getSocialLinksFromConfig(priority);
+export const getSocialUrl = (platform: any) => getSocialUrlFromConfig(platform);
+
+/* -------------------------------------------------------------------------- */
+/* Central config export (legacy shape)                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * This is what older code expects: siteConfig.title, siteConfig.email, siteConfig.socialLinks, etc.
+ * We populate it FROM canonical every time.
  */
 export const siteConfig = {
+  // legacy top-level
   title: brand.name,
-  siteName: brand.name, // legacy
+  siteName: brand.name,
   description: seo.description,
   siteUrl: PUBLIC_SITE_URL,
-  author: brand.name,
-  email: contact.email, // legacy convenience
+  author: canonical.author?.name ?? brand.name,
+  email: contact.email,
+
+  // structured
   contact,
-  socialLinks,
-  social,
   seo,
   brand,
   routes,
   ventures,
-  copyright: `© ${new Date().getFullYear()} Abraham of London.`,
+
+  // social
+  socialLinks,
+  social,
+
+  // helpers
   getPageTitle,
-  absUrl, // Add absUrl to siteConfig
-  isExternalUrl, // Add helper function
-  formatPhoneNumber, // Add helper function
-} satisfies SiteConfig & {
+  absUrl,
+  isExternalUrl,
+  formatPhoneNumber,
+
+  // navigation mirrors (optional)
+  navigation: canonical.navigation,
+
+  // canonical raw config for power-users
+  canonical,
+} satisfies LegacySiteConfig & {
   siteName: string;
   email: string;
   social: typeof social;
+  socialLinks: LegacySocialLink[];
   brand: typeof brand;
   routes: typeof routes;
   ventures: Venture[];
-  socialLinks: SocialLink[];
-  copyright: string;
-  getPageTitle: (pageTitle?: string) => string;
-  absUrl: (path: string) => string;
-  isExternalUrl: (url: string) => boolean;
-  formatPhoneNumber: (phone: string) => string;
+  canonical: CanonicalSiteConfig;
 };
+
 /* -------------------------------------------------------------------------- */
 /* Named exports (convenience)                                                 */
 /* -------------------------------------------------------------------------- */
-export const title = siteConfig.title; // new
-export const siteName = siteConfig.siteName; // legacy
+export const title = siteConfig.title;
+export const siteName = siteConfig.siteName;
 export const description = siteConfig.description;
 export const author = siteConfig.author;
 export const siteUrl = siteConfig.siteUrl;
+
 export const brandConfig = siteConfig.brand;
 export const siteRoutes = siteConfig.routes;
 export const siteVentures = siteConfig.ventures;
-export const socialConfig = siteConfig.social; // legacy convenience
-export const socialLinksConfig = siteConfig.socialLinks; // new convenience
+
+export const socialConfig = siteConfig.social;
+export const socialLinksConfig = siteConfig.socialLinks;
+
+// Extra SEO helpers (hard-locked)
+export { getMetaDescription, getKeywords };

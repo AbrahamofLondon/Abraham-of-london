@@ -720,6 +720,23 @@ export const EXISTING_PDFS: SourcePDFItem[] = [
 
 export const ALL_SOURCE_PDFS: SourcePDFItem[] = [...EXISTING_PDFS];
 
+/**
+ * Deduplicated version of ALL_SOURCE_PDFS that removes duplicates by id or outputPath.
+ * Use this in library pages to prevent duplicate entries.
+ */
+export const ALL_SOURCE_PDFS_DEDUPED: SourcePDFItem[] = (() => {
+  const seen = new Set<string>();
+  const out: SourcePDFItem[] = [];
+  for (const x of ALL_SOURCE_PDFS) {
+    const key = String(x.id || x.outputPath || "").toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(x);
+  }
+  console.log(`[pdf-registry.source] Deduplicated: ${ALL_SOURCE_PDFS.length} → ${out.length} unique items`);
+  return out;
+})();
+
 export const getPDFRegistrySource = (): SourcePDFItem[] => {
   return ALL_SOURCE_PDFS;
 };

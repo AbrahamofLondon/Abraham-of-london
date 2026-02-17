@@ -26,7 +26,7 @@ function resolveEmail(config: any): string {
 export default function LegalStrip({
   variant = "subtle",
   className = "",
-}: LegalStripProps): JSX.Element {
+}: LegalStripProps): React.ReactElement {
   const email = resolveEmail(siteConfig);
 
   const shell =
@@ -115,4 +115,3 @@ export default function LegalStrip({
     </section>
   );
 }
-

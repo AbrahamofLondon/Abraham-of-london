@@ -1,254 +1,199 @@
+// components/homepage/EventsSection.tsx — BULLETPROOF (status derived from date, no phantom “missing”)
 import * as React from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import clsx from "clsx";
-import { safeSlice, safeDateSlice } from "@/lib/utils/safe";
-
-
-// --- Types ---
+import { ArrowRight, Calendar, MapPin, Video, Users, Clock, Shield } from "lucide-react";
 
 export type EventItem = {
-  id?: string;
-  /** ISO date string (YYYY-MM-DD) or Date */
-  date: string | Date;
+  slug: string;
   title: string;
-  location?: string;
-  href?: string;
+  date: string;
+  location: string;
+  mode: "online" | "in-person" | "hybrid";
+  excerpt: string | null;
+  capacity: number | null;
+  duration: string | null;
+  status?: "open" | "limited" | "full" | "past" | null;
 };
 
-type Props = {
-  events?: EventItem[];
-  variant?: "light" | "dark";
-  title?: string;
-  emptyMessage?: string;
-  /** Hide past events (default: true) */
-  hidePast?: boolean;
-  /** Limit number shown */
-  max?: number;
-  /** Locale for date formatting (default: en-GB) */
-  locale?: string;
-  className?: string;
-};
-
-// --- Constants & Utilities ---
-
-const DEFAULT_EVENTS: EventItem[] = [
-  {
-    date: "2026-09-12",
-    title: "Strategic Leadership Workshop",
-    location: "London, UK",
-    href: "/events/leadership-workshop",
-  },
-  {
-    date: "2026-11-11",
-    title: "Fathers & Futures Panel: Online Session",
-    location: "Online",
-    href: "/events/fathers-and-futures",
-  },
-];
-
-/**
- * Safely parses a date string/object into a Date object.
- * @returns Date object or null if parsing fails.
- */
-function parseDate(d: string | Date): Date | null {
-  try {
-    const date = d instanceof Date ? d : new Date(d);
-    return isNaN(date.getTime()) ? null : date;
-  } catch {
-    return null;
-  }
+function isValidDate(value: string): boolean {
+  const t = Date.parse(value);
+  return Number.isFinite(t);
 }
 
-/**
- * Safely converts a Date object to YYYY-MM-DD string.
- */
-const isoDate = (d: Date) => safeDateSlice(d, 0, 10);
+function deriveStatus(event: EventItem): "open" | "limited" | "full" | "past" {
+  const explicit = String(event.status || "").toLowerCase();
+  if (explicit === "open" || explicit === "limited" || explicit === "full" || explicit === "past") return explicit as any;
 
-// --- Component ---
+  if (!isValidDate(event.date)) return "open";
 
-export default function EventsSection({
-  events = DEFAULT_EVENTS,
-  variant = "light",
-  title = "Upcoming Events",
-  emptyMessage = "No upcoming events scheduled at this time. Please check back later!",
-  hidePast = true,
-  max,
-  locale = "en-GB",
-  className,
-}: Props) {
-  // ✅ UPGRADE: Centralized reference date for safety
-  const today = React.useMemo(() => {
-    const t = new Date();
-    // Normalize to start of day for accurate comparison
-    t.setHours(0, 0, 0, 0);
-    return t;
-  }, []);
+  const t = Date.parse(event.date);
+  const d = new Date(t);
+  const endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
-  // ✅ UPGRADE: Robust Data Filtering and Sorting
-  const list = React.useMemo(() => {
-    const normalized = (Array.isArray(events) ? events : [])
-      .map((e) => {
-        const date = parseDate(e.date);
-        // Only return objects with valid Date
-        return date ? { ...e, date } : null;
-      })
-      .filter(Boolean) as (Omit<EventItem, "date"> & { date: Date })[];
+  return endOfDay.getTime() < Date.now() ? "past" : "open";
+}
 
-    const filtered = hidePast
-      ? normalized.filter((e) => e.date >= today)
-      : normalized;
+function formatDateGB(value: string): string {
+  if (!isValidDate(value)) return "Date TBC";
+  return new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
 
-    // Sort chronologically (earliest first)
-    filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
+export default function EventsSection({ events }: { events?: EventItem[] }) {
+  const safeEvents = Array.isArray(events) ? events : [];
 
-    // Apply max limit
-    return typeof max === "number" ? safeSlice(filtered, 0, max) : filtered;
-  }, [events, hidePast, max, today]);
+  // Normalize status consistently (so upstream can be imperfect)
+  const normalized = safeEvents
+    .filter(Boolean)
+    .map((e) => ({ ...e, status: deriveStatus(e) }));
 
-  const hasEvents = list.length > 0;
-  const headingId = React.useId();
-
-  // ✅ UPGRADE: Cleaned up variant styling definition
-  const isDark = variant === "dark";
-
-  const styles = React.useMemo(
-    () => ({
-      heading: clsx(
-        "text-3xl md:text-4xl font-serif font-semibold text-center mb-10", // Added font-serif
-        isDark ? "text-cream" : "text-deepCharcoal"
-      ),
-      card: clsx(
-        "rounded-2xl p-6 shadow-xl transition-transform duration-300 hover:scale-[1.01]", // Added hover effect
-        isDark
-          ? "border border-white/10 bg-white/10 backdrop-blur-sm text-cream"
-          : "border border-black/5 bg-white text-gray-900"
-      ),
-      subText: clsx(
-        "text-sm",
-        isDark ? "text-[color:var(--color-on-primary)/0.7]" : "text-gray-600"
-      ),
-      locationText: clsx(
-        "mt-1 text-base",
-        isDark ? "text-[color:var(--color-on-primary)/0.85]" : "text-gray-700"
-      ),
-      button: clsx(
-        "inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full font-medium transition duration-200",
-        isDark
-          ? "bg-forest text-cream hover:bg-emerald-700 focus-visible:ring-emerald-400"
-          : "bg-forest text-cream hover:bg-deepCharcoal focus-visible:ring-[color:var(--color-on-secondary)/0.5]"
-      ),
-    }),
-    [isDark]
-  );
-
-  const fmt = React.useMemo(
-    () =>
-      new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    [locale]
-  );
+  // Show next 3 upcoming only
+  const upcomingEvents = normalized
+    .filter((e) => e.status !== "past")
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+    .slice(0, 3);
 
   return (
-    <section
-      className={clsx("max-w-7xl mx-auto px-4 py-16", className)}
-      role="region"
-      aria-labelledby={headingId}
-    >
-      <motion.h2
-        id={headingId}
-        className={styles.heading}
-        initial={{ opacity: 0, y: 12 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-      >
-        {title}
-      </motion.h2>
+    <section className="relative bg-black py-24 sm:py-28 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,black_100%)]" />
+      </div>
 
-      {!hasEvents ? (
-        <p className={clsx("text-center italic", styles.subText)}>
-          {emptyMessage}
-        </p>
-      ) : (
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {list.map((ev, i) => {
-            const dateLabel = fmt.format(ev.date);
-            const linkHref = ev.href ?? "#"; // Ensure a fallback href for Link
+      <div className="pointer-events-none absolute right-[-300px] top-[-300px] h-[800px] w-[800px] rounded-full bg-amber-500/8 blur-[200px]" />
+      <div className="pointer-events-none absolute left-[-200px] bottom-[-200px] h-[600px] w-[600px] rounded-full bg-blue-500/5 blur-[180px]" />
 
-            return (
-              <motion.article
-                key={ev.id ?? `${ev.title}-${isoDate(ev.date)}`}
-                className={styles.card}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.45, delay: i * 0.08 }}
-              >
-                <div className={styles.subText}>
-                  {/* ✅ UPGRADE: Time component and strong semantic structure */}
-                  <time
-                    dateTime={isoDate(ev.date)}
-                    className="font-semibold tracking-wide"
-                  >
-                    {dateLabel}
-                  </time>
-                </div>
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between mb-14">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.35em] text-amber-500/70">
+                Live Engagement Protocol
+              </span>
+            </div>
 
-                <h3 className="text-xl font-semibold mt-2">
-                  {/* ✅ UPGRADE: Wrap title in link if href exists for a larger click target */}
-                  {ev.href ? (
-                    <Link
-                      href={linkHref}
-                      className="hover:underline decoration-softGold/60 underline-offset-4"
-                    >
-                      {ev.title}
-                    </Link>
-                  ) : (
-                    ev.title
-                  )}
-                </h3>
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white font-medium leading-[1.05] tracking-tight">
+              Upcoming <span className="italic text-amber-200/80">Gatherings</span>
+            </h2>
 
-                {ev.location && (
-                  <p className={styles.locationText}>
-                    <span aria-hidden="true">📍 </span>
-                    {ev.location}
-                  </p>
-                )}
+            <p className="mt-6 text-base sm:text-lg text-white/45 leading-relaxed">
+              Structured sessions and strategic briefings. No theatrics—only operational intelligence for leaders who execute.
+            </p>
+          </div>
 
-                {ev.href && (
-                  <Link
-                    href={linkHref}
-                    className={styles.button}
-                    aria-label={`View details for the event: ${ev.title} on ${dateLabel}`} // ✅ UPGRADE: Rich ARIA label
-                  >
-                    Details
-                    {/* SVG Arrow for visual cue */}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
-                      />
-                    </svg>
-                  </Link>
-                )}
-              </motion.article>
-            );
-          })}
+          <Link
+            href="/events"
+            className="group inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-8 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-white hover:border-amber-500/30 hover:bg-amber-500/5 transition-all duration-300"
+          >
+            Full Calendar
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
-      )}
+
+        {upcomingEvents.length ? (
+          <div className="grid gap-8 lg:grid-cols-3">
+            {upcomingEvents.map((event) => (
+              <EventCard key={event.slug} event={event} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-amber-300/80">
+              Calendar standby
+            </p>
+            <h3 className="mt-4 font-serif text-2xl text-white/90">No public sessions published yet.</h3>
+            <p className="mt-3 text-sm text-white/55 max-w-xl mx-auto">
+              When events are announced, this section will update automatically from the events registry.
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-500 px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.22em] text-black hover:bg-amber-400 transition"
+              >
+                Request a private briefing <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-14 flex items-center justify-center gap-3 text-white/30">
+          <Shield className="h-4 w-4" />
+          <p className="text-xs uppercase tracking-wider">Events registry updated from institutional index</p>
+        </div>
+      </div>
     </section>
   );
 }
 
+function EventCard({ event }: { event: EventItem }) {
+  const Icon = event.mode === "online" ? Video : event.mode === "hybrid" ? Users : MapPin;
+
+  const statusConfig = {
+    open: { label: "Open", dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+    limited: { label: "Limited", dot: "bg-amber-400", text: "text-amber-300", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+    full: { label: "Full", dot: "bg-red-400", text: "text-red-300", bg: "bg-red-500/10", border: "border-red-500/20" },
+    past: { label: "Past", dot: "bg-zinc-500", text: "text-zinc-400", bg: "bg-zinc-500/10", border: "border-zinc-500/20" },
+  } as const;
+
+  const status = statusConfig[(event.status || "open") as keyof typeof statusConfig];
+
+  return (
+    <Link
+      href={`/events/${event.slug}`}
+      className="group relative block h-full overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent p-1 transition-all duration-500 hover:border-amber-500/30"
+    >
+      <div className="relative h-full bg-black/90 backdrop-blur-sm rounded-[22px] p-8 flex flex-col">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+            <Calendar className="h-3.5 w-3.5 text-amber-500/70" />
+            <span className="text-[10px] font-semibold text-white/60 uppercase tracking-wider">
+              {formatDateGB(event.date)}
+            </span>
+          </div>
+
+          <div className={`flex items-center gap-2 rounded-full border ${status.border} ${status.bg} px-3 py-1.5`}>
+            <div className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+            <span className={`text-[10px] font-bold ${status.text} uppercase tracking-wider`}>{status.label}</span>
+          </div>
+        </div>
+
+        <h3 className="font-serif text-2xl text-white/90 group-hover:text-white leading-tight transition-colors mb-4">
+          {event.title}
+        </h3>
+
+        {event.excerpt ? (
+          <p className="text-sm text-white/45 leading-relaxed mb-6 line-clamp-2">{event.excerpt}</p>
+        ) : null}
+
+        <div className="flex-grow" />
+
+        <div className="space-y-3 pt-6 border-t border-white/5">
+          <div className="flex items-center gap-3 text-white/45">
+            <Icon className="h-4 w-4 text-amber-500/50" />
+            <span className="text-xs uppercase tracking-wider">
+              {event.mode === "online" ? "Virtual Session" : event.mode === "hybrid" ? "Hybrid Event" : event.location}
+            </span>
+          </div>
+
+          {event.duration ? (
+            <div className="flex items-center gap-3 text-white/45">
+              <Clock className="h-4 w-4 text-amber-500/50" />
+              <span className="text-xs uppercase tracking-wider">{event.duration}</span>
+            </div>
+          ) : null}
+
+          {typeof event.capacity === "number" ? (
+            <div className="flex items-center gap-3 text-white/45">
+              <Users className="h-4 w-4 text-amber-500/50" />
+              <span className="text-xs uppercase tracking-wider">Limited to {event.capacity} participants</span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-8 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-white/55 group-hover:text-amber-400 transition-colors">
+          View Details
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+        </div>
+      </div>
+    </Link>
+  );
+}

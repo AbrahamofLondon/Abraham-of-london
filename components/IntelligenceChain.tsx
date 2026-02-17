@@ -29,6 +29,10 @@ export default function IntelligenceChain({
   
   const progressPercentage = (currentStep / totalSteps) * 100;
 
+  // Safe access to previous and next links
+  const prevLink = currentStep - 2 >= 0 ? links[currentStep - 2] : undefined;
+  const nextLink = currentStep < links.length ? links[currentStep] : undefined;
+
   return (
     <nav className="w-full border-b border-white/5 bg-zinc-950/30 backdrop-blur-md sticky top-[72px] z-40">
       <div className="max-w-7xl mx-auto px-6 py-4">
@@ -71,9 +75,9 @@ export default function IntelligenceChain({
 
           {/* 3. TACTICAL NAVIGATION */}
           <div className="flex items-center gap-2">
-            {links[currentStep - 2] ? (
+            {prevLink ? (
               <Link 
-                href={links[currentStep - 2].href}
+                href={prevLink.href}
                 className="flex items-center gap-2 px-3 py-2 border border-white/5 hover:border-white/20 transition-all group"
               >
                 <ChevronLeft size={14} className="text-zinc-600 group-hover:text-amber-500" />
@@ -81,13 +85,13 @@ export default function IntelligenceChain({
               </Link>
             ) : (
               <div className="px-3 py-2 border border-white/5 opacity-20 cursor-not-allowed">
-                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-800 text-zinc-500">Origin</span>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">Origin</span>
               </div>
             )}
 
-            {links[currentStep] ? (
+            {nextLink ? (
               <Link 
-                href={links[currentStep].href}
+                href={nextLink.href}
                 className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-black hover:bg-white transition-all group"
               >
                 <span className="font-mono text-[9px] font-bold uppercase tracking-widest">Next Dispatch</span>

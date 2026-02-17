@@ -12,7 +12,7 @@ export default function SectionDivider({
   className = "", 
   id,
   label = "SYS-CHECK-OK"
-}: Props) {
+}: Props): React.ReactElement {
   return (
     <div id={id} className={`bg-black overflow-hidden ${className}`}>
       <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${tight ? "py-10" : "py-20"}`}>
@@ -42,7 +42,8 @@ export default function SectionDivider({
         </div>
       </div>
 
-      <style jsx>{`
+      {/* ✅ Fixed: Removed 'jsx' prop – now using a standard style tag */}
+      <style>{`
         @keyframes pulse-horizontal {
           0% { transform: translateX(-150%); opacity: 0; }
           50% { opacity: 1; }

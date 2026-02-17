@@ -1,14 +1,13 @@
-// components/lexicon/LexiconEntry.tsx
 import React from 'react';
 
 interface LexiconProps {
   title: string;
   definition: string;
-  briefReference?: string; // Links to your 75 intelligence briefs
+  briefReference?: string;
   children: React.ReactNode;
 }
 
-export const LexiconEntry: React.FC<LexiconProps> = ({ title, definition, children }) => {
+export const LexiconEntry: React.FC<LexiconProps> = ({ title, definition, children }): React.ReactElement => {
   return (
     <article className="lexicon-container p-6 border-l-4 border-gold">
       <header>

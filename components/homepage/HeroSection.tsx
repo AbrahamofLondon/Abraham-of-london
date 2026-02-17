@@ -1,342 +1,181 @@
-// components/HeroSection.tsx — EDELMAN HERO (premium, civilised, build-safe)
+// components/homepage/HeroSection.tsx — FINAL (no fake counts + primer + cleaner grid + no “bleed” feel)
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx";
-import { ArrowRight, Sparkles, ShieldCheck, BookOpen, Vault, LineChart } from "lucide-react";
+import Image from "next/image";
+import {
+  ArrowRight,
+  BookOpen,
+  Library as LibraryIcon,
+  LineChart,
+  Award,
+  ShieldCheck,
+  Globe,
+  Users,
+} from "lucide-react";
 
-// --- Utility Components ------------------------------------------------------
+export type Counts = {
+  shorts: number;
+  canon: number;
+  briefs: number;
+  library: number; // PDF registry count (NOT contentlayer docs)
+};
 
-function Eyebrow({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
+type Props = {
+  counts: Counts; // required: no silent fallback
+};
+
+function formatCount(n: number): string {
+  return new Intl.NumberFormat("en-GB").format(Math.max(0, Math.floor(Number(n || 0))));
+}
+
+export default function HeroSection({ counts }: Props): React.ReactElement {
   return (
-    <span
-      className={clsx(
-        "inline-flex items-center gap-2 rounded-full",
-        "border border-white/10 bg-white/[0.04] px-3 py-1",
-        "text-[11px] uppercase tracking-[0.28em] font-bold",
-        "text-white/70",
-        className
-      )}
-    >
-      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/15 text-amber-300">
-        <Sparkles className="h-3.5 w-3.5" />
-      </span>
-      {children}
+    <section className="relative overflow-hidden bg-black">
+      {/* Backdrop */}
+      <div aria-hidden className="absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_50%_0%,rgba(245,158,11,0.14),transparent_72%)]" />
+        {/* Grid kept subtle (avoid “harsh lines” impression) */}
+        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:96px_96px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/92 to-black" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-14">
+          {/* Copy */}
+          <div className="z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-amber-200/70">
+              <Award className="h-3.5 w-3.5 text-amber-400/80" />
+              Abraham of London — Institutional Platform
+            </div>
+
+            {/* Primer */}
+            <p className="mt-6 max-w-prose text-[13px] sm:text-[14px] leading-relaxed text-white/55">
+              A home for disciplined thinking: doctrine, tools, and field-tested execution across ventures, leaders,
+              founders, and families—built with a serious bias for stewardship, durability, and Africa-forward ambition.
+            </p>
+
+            <h1 className="mt-6 font-serif text-[clamp(2.15rem,4vw,3.6rem)] font-medium leading-[1.08] text-white [text-wrap:balance]">
+              Governance discipline, market clarity, and execution logic—built to hold under pressure.
+            </h1>
+
+            <p className="mt-6 max-w-prose text-[16px] sm:text-[18px] leading-relaxed text-zinc-400 font-light">
+              Clear positioning, clean operating models, and decision systems that translate from principle into repeatable
+              action—without noise.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-2">
+              <Pill icon={<LineChart className="h-3.5 w-3.5" />} label="Market Positioning" />
+              <Pill icon={<ShieldCheck className="h-3.5 w-3.5" />} label="Governance & Controls" />
+              <Pill icon={<Globe className="h-3.5 w-3.5" />} label="Institutional Design" />
+              <Pill icon={<Users className="h-3.5 w-3.5" />} label="Mentoring & Cohorts" />
+              <Pill icon={<BookOpen className="h-3.5 w-3.5" />} label="Research-Led Doctrine" />
+            </div>
+
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:max-w-[640px] sm:grid-cols-4">
+              <MiniStat label="Canon" value={formatCount(counts.canon)} hint="Framework library" />
+              <MiniStat label="Briefs" value={formatCount(counts.briefs)} hint="Operator memos" />
+              <MiniStat label="Shorts" value={formatCount(counts.shorts)} hint="Micro-doctrine" />
+              <MiniStat label="Library" value={formatCount(counts.library)} hint="PDF assets" />
+            </div>
+
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Link
+                href="/canon"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-500 px-7 py-3 text-[11px] font-bold uppercase tracking-[0.25em] text-black hover:bg-amber-400 transition-all duration-300 shadow-lg shadow-amber-500/10"
+              >
+                Explore the Canon <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/consulting/strategy-room"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent px-7 py-3 text-[11px] font-bold uppercase tracking-[0.25em] text-white hover:bg-white/5 transition-all duration-300"
+              >
+                Book a Strategy Room
+              </Link>
+
+              <Link
+                href="/library"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-7 py-3 text-[11px] font-bold uppercase tracking-[0.25em] text-white/80 hover:text-white hover:border-amber-500/25 transition-all duration-300"
+              >
+                Open Library <LibraryIcon className="h-4 w-4 text-amber-400/80" />
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3 text-[11px] text-zinc-500">
+              <span className="font-mono uppercase tracking-[0.28em]">Principled Strategy</span>
+              <span className="text-amber-500/50">/</span>
+              <span className="font-mono uppercase tracking-[0.28em]">Measurable Execution</span>
+              <span className="text-amber-500/50">/</span>
+              <span className="font-mono uppercase tracking-[0.28em]">Institutional Longevity</span>
+            </div>
+          </div>
+
+          {/* Image */}
+          <div className="relative">
+            <div aria-hidden className="pointer-events-none absolute -inset-10 rounded-full bg-amber-500/5 blur-[90px] opacity-45" />
+
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900 shadow-2xl">
+              <div className="absolute left-6 top-6 z-[2] inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-[10px] font-semibold tracking-widest text-white/80">
+                ABRAHAM OF LONDON <span className="h-1 w-1 rounded-full bg-amber-400" /> SELECTED WORKS
+              </div>
+
+              <Image
+                src="/assets/images/abraham-of-london-banner.webp"
+                alt="Abraham of London — Institutional Platform"
+                width={1200}
+                height={900}
+                priority
+                className="h-[340px] w-full object-cover grayscale-[0.25] hover:grayscale-0 transition-all duration-700 sm:h-[400px] md:h-[520px]"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              <MicroKpi label="Clarity" value="Decision-grade" />
+              <MicroKpi label="Method" value="Operator-first" />
+              <MicroKpi label="Output" value="Runbooks & assets" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Pill({ icon, label }: { icon: React.ReactNode; label: string }): React.ReactElement {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/[0.02] px-3 py-1 text-[11px] font-medium text-zinc-400">
+      <span className="text-amber-500/70">{icon}</span>
+      {label}
     </span>
   );
 }
 
-function Pill({
-  children,
-  className,
-  icon,
-}: React.PropsWithChildren<{ className?: string; icon?: React.ReactNode }>) {
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center gap-2 rounded-full",
-        "border border-white/10 bg-white/[0.03] px-3 py-1",
-        "text-[11px] font-semibold text-white/70",
-        className
-      )}
-    >
-      {icon ? <span className="text-amber-300/80">{icon}</span> : null}
-      {children}
-    </span>
-  );
-}
-
-function Stat({
+function MiniStat({
   label,
   value,
+  hint,
 }: {
   label: string;
   value: string;
-}) {
+  hint?: string;
+}): React.ReactElement {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-      <div className="text-[10px] uppercase tracking-[0.26em] text-white/45">{label}</div>
-      <div className="mt-1 font-serif text-lg text-white/90">{value}</div>
+    <div className="rounded-2xl border border-white/5 bg-white/[0.01] px-5 py-4 transition-colors hover:border-white/10">
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-zinc-500">{label}</div>
+        <div className="text-[9px] font-mono uppercase tracking-[0.25em] text-white/25">{hint || ""}</div>
+      </div>
+      <div className="mt-1 font-serif text-xl text-zinc-200">{value}</div>
     </div>
   );
 }
 
-// --- Type Definitions --------------------------------------------------------
-
-type Cta = { href: string; label: string; ariaLabel?: string };
-type VideoSource = { src: string; type: string };
-type AspectRatio = "book" | "wide" | "square" | "cover-wide";
-
-type HeroProps = {
-  title?: string;
-  subtitle?: string;
-  eyebrow?: string;
-
-  primaryCta?: Cta;
-  secondaryCta?: Cta;
-
-  coverImage?: string | null;
-  coverAspect?: AspectRatio;
-  coverFit?: "contain" | "cover";
-  coverPosition?: "left" | "center" | "right" | "top";
-
-  videoSources?: VideoSource[] | null;
-  poster?: string | null;
-};
-
-// --- Utilities ---------------------------------------------------------------
-
-function normalizeLocal(src?: string | null): string | undefined {
-  if (!src) return undefined;
-  if (/^https?:\/\//i.test(src)) return src;
-  const cleanSrc = src.replace(/^\/+/, "");
-  return `/${cleanSrc}`;
-}
-
-function getAspectClass(aspect: AspectRatio): string {
-  switch (aspect) {
-    case "square":
-      return "h-[220px] sm:h-[260px] md:h-[300px] lg:h-[340px]";
-    case "wide":
-      return "h-[200px] sm:h-[230px] md:h-[260px] lg:h-[300px]";
-    case "cover-wide":
-      return "h-[180px] sm:h-[210px] md:h-[240px] lg:h-[280px]";
-    case "book":
-    default:
-      return "h-[260px] sm:h-[320px] md:h-[380px] lg:h-[440px]";
-  }
-}
-
-// --- Main Component ----------------------------------------------------------
-
-export default function HeroSection({
-  title = "When the System Breaks You: Finding Purpose in Pain",
-  subtitle = "Win the only battle you fully control — the one inside your chest.",
-  eyebrow = "Operational Briefing",
-
-  primaryCta = {
-    href: "/downloads/Fathering_Without_Fear_Teaser-Mobile.pdf",
-    label: "Get the free teaser",
-    ariaLabel: "Download the Fathering Without Fear Teaser PDF",
-  },
-  secondaryCta = { href: "/blog", label: "Read the latest insights" },
-
-  coverImage,
-  coverAspect = "book",
-  coverFit = "contain",
-  coverPosition = "center",
-
-  videoSources = [],
-  poster = null,
-}: HeroProps) {
-  const defaultImage = "/assets/images/abraham-of-london-banner.webp";
-  const imgSrc = normalizeLocal(coverImage) || normalizeLocal(defaultImage)!;
-  const hasVideo = Array.isArray(videoSources) && videoSources.length > 0;
-  const posterSrc = normalizeLocal(poster) || imgSrc;
-
-  const frameClasses = clsx(
-    "relative overflow-hidden rounded-3xl",
-    "border border-white/10 bg-white/[0.02]",
-    "shadow-[0_30px_120px_rgba(0,0,0,0.55)]",
-    "max-w-[560px] w-full mx-auto",
-    getAspectClass(coverAspect),
-    coverFit === "contain" ? "p-3 sm:p-4" : "p-0"
-  );
-
-  const mediaClasses = clsx(
-    "block h-full w-full",
-    coverFit === "contain" ? "object-contain" : "object-cover",
-    {
-      "object-left": coverPosition === "left",
-      "object-right": coverPosition === "right",
-      "object-top": coverPosition === "top",
-      "object-center": coverPosition === "center",
-    }
-  );
-
+function MicroKpi({ label, value }: { label: string; value: string }): React.ReactElement {
   return (
-    <section
-      className={clsx(
-        "relative overflow-hidden bg-black",
-        // premium light bloom
-        "before:pointer-events-none before:absolute before:inset-0",
-        "before:bg-[radial-gradient(70%_55%_at_50%_0%,rgba(245,158,11,.18),transparent_60%)]",
-        // subtle technical grid (low contrast)
-        "after:pointer-events-none after:absolute after:inset-0 after:opacity-20",
-        "after:bg-[radial-gradient(rgba(255,255,255,0.10)_1px,transparent_1px)] after:[background-size:18px_18px]"
-      )}
-      role="region"
-      aria-label="Homepage hero"
-    >
-      {/* top edge line */}
-      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
-
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-14 md:grid-cols-2 md:gap-14 md:py-20">
-        {/* LEFT: copy */}
-        <div className="relative z-[1]">
-          {eyebrow && <Eyebrow className="mb-5">{eyebrow}</Eyebrow>}
-
-          <h1
-            id="hero-title"
-            className={clsx(
-              "font-serif font-semibold leading-[1.06] text-white [text-wrap:balance]",
-              "text-[clamp(2.1rem,3.6vw,3.55rem)]"
-            )}
-          >
-            <span className="text-white/90">{title}</span>
-          </h1>
-
-          {subtitle && (
-            <p className="mt-5 max-w-prose text-white/55 leading-relaxed text-[15px] sm:text-[16px]">
-              {subtitle}
-            </p>
-          )}
-
-          {/* credibility signals */}
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Pill icon={<ShieldCheck className="h-4 w-4" />}>Canon-rooted doctrine</Pill>
-            <Pill icon={<LineChart className="h-4 w-4" />}>High-stakes execution</Pill>
-            <Pill icon={<Vault className="h-4 w-4" />}>Artifacts in the Vault</Pill>
-          </div>
-
-          {/* mini stats (subtle social proof without “brag”) */}
-          <div className="mt-7 grid grid-cols-2 gap-3 sm:max-w-[520px] sm:grid-cols-3">
-            <Stat label="Canon" value="12 Volumes" />
-            <Stat label="Shorts" value="76 Briefings" />
-            <Stat label="Assets" value="Vault-ready" />
-          </div>
-
-          {/* CTAs */}
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            {primaryCta && (
-              <Link
-                href={primaryCta.href}
-                aria-label={primaryCta.ariaLabel || `Go to ${primaryCta.label}`}
-                className={clsx(
-                  "inline-flex items-center justify-center gap-2 rounded-full",
-                  "bg-amber-500 px-5 py-2.5",
-                  "text-[11px] font-black uppercase tracking-[0.22em] text-black",
-                  "hover:bg-amber-400 transition",
-                  "shadow-[0_0_38px_rgba(245,158,11,0.22)]"
-                )}
-              >
-                {primaryCta.label}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            )}
-
-            {secondaryCta && (
-              <Link
-                href={secondaryCta.href}
-                aria-label={secondaryCta.ariaLabel || `Go to ${secondaryCta.label}`}
-                className={clsx(
-                  "inline-flex items-center justify-center gap-2 rounded-full",
-                  "border border-white/12 bg-white/[0.04] px-5 py-2.5",
-                  "text-[11px] font-black uppercase tracking-[0.22em] text-white/85",
-                  "hover:border-white/25 hover:bg-white/[0.06] transition"
-                )}
-              >
-                {secondaryCta.label}
-              </Link>
-            )}
-
-            {/* tertiary link: Canon (quietly forces serious positioning) */}
-            <Link
-              href="/canon/the-architecture-of-human-purpose"
-              className="ml-1 inline-flex items-center gap-2 text-xs font-semibold text-white/55 hover:text-white/80 transition"
-            >
-              <BookOpen className="h-4 w-4 text-amber-300/70" />
-              Start with the Mini-Book
-            </Link>
-          </div>
-
-          {/* micro disclaimer line (tone: serious, not salesy) */}
-          <p className="mt-6 text-xs text-white/35">
-            Not motivation. Not noise. <span className="text-white/55">Architecture → Logic → Deployment.</span>
-          </p>
-        </div>
-
-        {/* RIGHT: media */}
-        <div className="relative">
-          {/* back glow */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-6 rounded-[2.25rem] bg-amber-500/10 blur-[55px] opacity-60"
-          />
-
-          <div className={frameClasses}>
-            {/* inner bevel */}
-            <div
-              aria-hidden
-              className={clsx(
-                "pointer-events-none absolute inset-0 rounded-3xl",
-                "shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]"
-              )}
-            />
-
-            {/* gradient veil when cover-fit */}
-            {coverFit === "cover" && (
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 z-[1]
-                           bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),transparent_35%,transparent_65%,rgba(0,0,0,0.32))]"
-              />
-            )}
-
-            {/* subtle “brand stamp” */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute left-5 top-5 z-[2] inline-flex items-center gap-2 rounded-full
-                         border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/70"
-            >
-              A•O•L
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-300/70" />
-              Featured
-            </div>
-
-            {/* Media: Video or Image */}
-            {hasVideo ? (
-              <video
-                className={mediaClasses}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                poster={posterSrc}
-                aria-describedby="hero-title"
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                {videoSources!.map((s) => (
-                  <source key={s.src} src={normalizeLocal(s.src)} type={s.type} />
-                ))}
-              </video>
-            ) : (
-              <Image
-                src={imgSrc}
-                alt={title || "Hero image illustrating the page content"}
-                width={900}
-                height={1200}
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className={mediaClasses}
-              />
-            )}
-
-            {/* bottom edge line */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* bottom fade */}
-      <div aria-hidden className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black to-transparent" />
-    </section>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+      <div className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/35">{label}</div>
+      <div className="mt-1 text-[11px] font-semibold text-white/70">{value}</div>
+    </div>
   );
 }

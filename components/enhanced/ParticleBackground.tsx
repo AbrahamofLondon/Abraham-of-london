@@ -15,7 +15,8 @@ interface Particle {
 export const ParticleBackground: React.FC = () => {
   const [particles, setParticles] = React.useState<Particle[]>([]);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const animationRef = React.useRef<number>();
+  // ✅ Provide initial value undefined to satisfy useRef signature
+  const animationRef = React.useRef<number | undefined>(undefined);
 
   const initParticles = useCallback(() => {
     const particlesArray: Particle[] = [];

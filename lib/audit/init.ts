@@ -1,8 +1,8 @@
 // lib/audit/init.ts - CORRECTED
-import { PrismaClient } from '.prisma/client';
-import { initializeAuditLogger } from './audit-logger';
+import { auditLogger, initializeAuditLogger } from './audit-logger';
 
-let prisma: PrismaClient;
+// Use any for the prisma client to avoid type issues
+let prisma: any;
 
 // Initialize the audit logger on demand
 export async function initAuditLogger() {
@@ -20,4 +20,4 @@ export async function initAuditLogger() {
 }
 
 // Export the auditLogger instance
-export { auditLogger } from './audit-logger';
+export { auditLogger };

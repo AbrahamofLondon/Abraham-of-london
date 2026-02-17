@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronDown } from 'lucide-react'; // ✅ replaced heroicons with lucide-react
 import { BaseCard } from '@/components/Cards';
 
 // Define Category type locally (no Contentlayer dependency yet)
@@ -262,7 +262,7 @@ export function ContentPortal() {
 
                 <div className="flex items-center text-sm text-stone-500">
                   <span className="mr-2">Access →</span>
-                  <ChevronDownIcon className="w-4 h-4 transform group-hover:translate-y-1 transition-transform" />
+                  <ChevronDown className="w-4 h-4 transform group-hover:translate-y-1 transition-transform" />
                 </div>
               </div>
             </button>
@@ -343,7 +343,7 @@ export function ContentPortal() {
               className="px-6 py-3 rounded-full bg-amber-900 text-white font-medium hover:bg-amber-800 transition-colors flex items-center gap-2 group"
             >
               Explore All Content
-              <ChevronDownIcon className="w-4 h-4 transform rotate-90 group-hover:translate-x-1 transition-transform" />
+              <ChevronDown className="w-4 h-4 transform rotate-90 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
@@ -382,4 +382,3 @@ export function ContentPortal() {
     </div>
   );
 }
-

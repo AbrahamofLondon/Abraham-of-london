@@ -132,7 +132,8 @@ export default function ProtocolInitiation() {
         </motion.div>
       </div>
 
-      <style jsx>{`
+      {/* ✅ Fixed: Removed 'jsx' prop – now using a standard style tag */}
+      <style>{`
         @keyframes shimmer {
           100% { transform: translateX(100%); }
         }

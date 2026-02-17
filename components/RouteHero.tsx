@@ -13,11 +13,41 @@ export interface RouteHeroProps {
   routePath?: string;
 }
 
+// Function to get counts based on route
+function getCountsForRoute(route?: string) {
+  // Default counts
+  const defaultCounts = {
+    shorts: 82,
+    canon: 13,
+    briefs: 75,
+    library: 0,
+  };
+
+  if (!route) return defaultCounts;
+
+  // You can customize counts per route if needed
+  if (route.includes('/canon')) {
+    return {
+      ...defaultCounts,
+      canon: 13, // Maybe fetch actual canon count
+    };
+  }
+
+  if (route.includes('/library')) {
+    return {
+      ...defaultCounts,
+      library: 67, // Actual library count
+    };
+  }
+
+  return defaultCounts;
+}
+
 /**
- * Adapter that takes a hero-banner config and feeds it into the
+ * Adapter that takes a hero-banner config and passes counts to the
  * globally-constrained HeroSection.
  */
-export default function RouteHero(props: RouteHeroProps): JSX.Element {
+export default function RouteHero(props: RouteHeroProps): React.ReactElement {
   let config: HeroBannerConfig;
 
   if (props.bannerKey) {
@@ -28,30 +58,8 @@ export default function RouteHero(props: RouteHeroProps): JSX.Element {
     config = heroBannersApi.defaultHero;
   }
 
-  const {
-    title,
-    subtitle,
-    description,
-    backgroundImage,
-    primaryCta,
-    secondaryCta,
-  } = config;
+  // Get counts based on the route
+  const counts = getCountsForRoute(props.routePath);
 
-  const eyebrow = subtitle;
-  const subtitleBody = description ?? subtitle ?? "";
-
-  return (
-    <HeroSection
-      title={title}
-      subtitle={subtitleBody}
-      eyebrow={eyebrow}
-      primaryCta={primaryCta}
-      secondaryCta={secondaryCta}
-      coverImage={backgroundImage}
-      coverAspect="cover-wide"
-      coverFit="cover"
-      coverPosition="center"
-    />
-  );
+  return <HeroSection counts={counts} />;
 }
-

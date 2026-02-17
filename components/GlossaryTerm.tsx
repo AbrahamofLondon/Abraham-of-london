@@ -11,7 +11,7 @@ export default function GlossaryTerm({
   term,
   code,
   children,
-}: GlossaryTermProps): JSX.Element {
+}: GlossaryTermProps): React.ReactElement {
   return (
     <section
       className="
@@ -43,4 +43,3 @@ export default function GlossaryTerm({
     </section>
   );
 }
-

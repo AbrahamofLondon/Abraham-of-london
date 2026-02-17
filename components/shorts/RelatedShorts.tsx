@@ -20,11 +20,9 @@ interface RelatedShortsProps {
 }
 
 const RelatedShorts: React.FC<RelatedShortsProps> = ({ shorts, currentShortId }) => {
-  const filteredShorts = safeArraySlice(
-  shorts.filter((s) => s.id !== currentShortId),
-  0,
-  4
-);
+  // First filter, then explicitly type the slice
+  const filtered = shorts.filter((s) => s.id !== currentShortId);
+  const filteredShorts: RelatedShort[] = safeArraySlice(filtered, 0, 4);
 
   if (filteredShorts.length === 0) {
     return null;
@@ -47,7 +45,7 @@ const RelatedShorts: React.FC<RelatedShortsProps> = ({ shorts, currentShortId })
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredShorts.map((short) => (
+        {filteredShorts.map((short: RelatedShort) => (
           <Link key={short.id} href={`/shorts/${short.slug}`}>
             <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer">
               <div className="relative aspect-video">

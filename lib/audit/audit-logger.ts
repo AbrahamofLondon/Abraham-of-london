@@ -1,6 +1,35 @@
 /* lib/audit/audit-logger.ts */
 import { safeSlice } from "@/lib/utils/safe";
-import { PrismaClient, Prisma, type SystemAuditLog } from "@prisma/client"; // Corrected path
+
+// Use require for Prisma client - this works reliably
+const { PrismaClient } = require('@prisma/client');
+// Import Prisma namespace for types
+import type * as Prisma from '@prisma/client';
+
+// Define the SystemAuditLog type locally since we can't import it
+export interface SystemAuditLog {
+  id: string;
+  actorType: string;
+  actorId?: string | null;
+  actorEmail?: string | null;
+  ipAddress?: string | null;
+  action: string;
+  resourceType: string;
+  resourceId?: string | null;
+  resourceName?: string | null;
+  userAgent?: string | null;
+  requestId?: string | null;
+  sessionId?: string | null;
+  status: string;
+  severity: string;
+  errorMessage?: string | null;
+  durationMs?: number | null;
+  metadata?: any;
+  category?: string | null;
+  subCategory?: string | null;
+  tags?: any;
+  createdAt: Date;
+}
 
 export type AuditSeverity = "info" | "warning" | "error" | "critical";
 export type AuditCategory =
@@ -39,7 +68,7 @@ export interface AuditEvent {
 }
 
 type LoggerConfig = {
-  prisma: PrismaClient;
+  prisma: any; // Use any for the Prisma client
   service: string;
   environment: string;
   version?: string;
@@ -47,13 +76,13 @@ type LoggerConfig = {
 };
 
 export class AuditLogger {
-  private prisma: PrismaClient;
+  private prisma: any;
   private service: string;
   private environment: string;
   private version: string;
   private enabled: boolean;
 
-  private batchQueue: Prisma.SystemAuditLogCreateManyInput[] = [];
+  private batchQueue: any[] = [];
   private batchSize = 50;
   private batchTimer: NodeJS.Timeout | null = null;
   private batchIntervalMs = 5000;
@@ -121,7 +150,6 @@ export class AuditLogger {
     console.groupCollapsed(`${emoji} [AUDIT:${event.severity.toUpperCase()}] ${event.action}`);
     console.log("Actor:", event.actorEmail || event.actorId || "Anonymous");
     
-    // FIX: Corrected userAgent reference and usage of safeSlice
     if (event.ipAddress || event.userAgent) {
       console.log("Context:", {
         ip: event.ipAddress,
@@ -141,7 +169,7 @@ export class AuditLogger {
     return emojis[severity] || "📝";
   }
 
-  private toCreateManyInput(event: AuditEvent): Prisma.SystemAuditLogCreateManyInput {
+  private toCreateManyInput(event: AuditEvent): any {
     return {
       actorType: event.actorType || "system",
       actorId: event.actorId,
@@ -210,7 +238,10 @@ let auditLoggerInstance: AuditLogger | null = null;
 export const auditLogger = {
   async ensureInitialized(): Promise<AuditLogger> {
     if (!auditLoggerInstance) {
-      const { prisma } = await import("@/lib/db"); // Verified path
+      // Use dynamic import with require pattern for db
+      const dbModule = await import("@/lib/db");
+      const prisma = dbModule.prisma;
+      
       auditLoggerInstance = new AuditLogger({
         prisma,
         service: "sovereign-core",
@@ -230,6 +261,13 @@ export const auditLogger = {
     return await logger.logAuthEvent(userId, action, details);
   }
 };
+
+export function initializeAuditLogger(config: LoggerConfig): AuditLogger {
+  if (!auditLoggerInstance) {
+    auditLoggerInstance = new AuditLogger(config);
+  }
+  return auditLoggerInstance;
+}
 
 export function getAuditLogger() {
   return auditLogger;

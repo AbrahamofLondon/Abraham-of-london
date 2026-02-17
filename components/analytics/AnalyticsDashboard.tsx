@@ -1,12 +1,16 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from "react";
-import type { DashboardStats } from "@/types/pdf-dashboard";
 import { getInstitutionalAnalytics } from "@/app/actions/analytics";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { safeSlice, safeCapitalize } from "@/lib/utils/safe";
+import { safeCapitalize } from "@/lib/utils/safe";
 
-type MetricType = "generations" | "views" | "downloads" | "errors" | "size" | "categories";
+// Import types from central types file
+import type { 
+  DashboardStats, 
+  PDFAnalyticsItem, 
+  MetricType 
+} from "@/types/pdf-dashboard";
 
 interface AnalyticsDashboardProps {
   theme?: "light" | "dark";
@@ -19,21 +23,8 @@ interface AnalyticsDashboardProps {
 }
 
 /**
- * Local analytics view-model.
  * Normalizes data coming from the server action.
  */
-type PDFAnalyticsItem = {
-  id: string;
-  title: string;
-  exists: boolean;
-  error?: string;
-  category: string;
-  tier?: string;
-  fileSize?: string;
-  lastModified?: string;
-  updatedAt?: string;
-};
-
 function normalizePDF(input: any): PDFAnalyticsItem {
   const id = String(input?.id ?? "");
   const title = String(input?.title ?? "Untitled PDF");
@@ -185,7 +176,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     };
   }, [pdfs]);
 
-  // ✅ RECENT PDFS – sorted by date, typed as PDFAnalyticsItem[]
+  // ✅ RECENT PDFS – sorted by date
   const recentPdfs = useMemo(() => {
     return [...pdfs]
       .sort((a, b) => 
@@ -234,7 +225,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className={`p-8 text-center ${theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"} rounded-xl`}>
         <div className="text-4xl mb-4">📊</div>
         <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
-        <p>No PDFs found to generate analytics. Please check your PDF registry.</p>
+        <p className="text-sm opacity-70">No PDFs found to generate analytics. Please check your PDF registry.</p>
       </div>
     );
   }
@@ -339,7 +330,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className={`rounded-2xl border p-6 lg:col-span-2 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
           <h3 className="text-lg font-semibold mb-4">📈 Recent Activity</h3>
-          {/* ✅ Use recentPdfs – fully typed, no unknown error */}
           <div className="space-y-3">
             {recentPdfs.map((pdf) => (
               <div key={pdf.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-800/10 hover:bg-gray-800/20 transition-all group">
@@ -363,9 +353,24 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div className={`rounded-2xl border p-6 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
           <h3 className="text-lg font-semibold mb-4">📋 Quick Stats</h3>
           <div className="space-y-4">
-            <StatItem label="Largest PDF" value={analyticsData?.largestPDF?.title || "None"} subvalue={analyticsData?.largestPDF?.fileSize || "0KB"} theme={theme} />
-            <StatItem label="Generation Rate" value={`${Math.round(((analyticsData?.generated || 0) / pdfs.length) * 100)}%`} subvalue={`${analyticsData?.generated || 0} of ${pdfs.length}`} theme={theme} />
-            <StatItem label="Error Rate" value={`${Math.round(((analyticsData?.errors || 0) / pdfs.length) * 100)}%`} subvalue={`${analyticsData?.errors || 0} errors`} theme={theme} />
+            <StatItem 
+              label="Largest PDF" 
+              value={analyticsData?.largestPDF?.title || "None"} 
+              subvalue={analyticsData?.largestPDF?.fileSize || "0KB"} 
+              theme={theme} 
+            />
+            <StatItem 
+              label="Generation Rate" 
+              value={`${Math.round(((analyticsData?.generated || 0) / pdfs.length) * 100)}%`} 
+              subvalue={`${analyticsData?.generated || 0} of ${pdfs.length}`} 
+              theme={theme} 
+            />
+            <StatItem 
+              label="Error Rate" 
+              value={`${Math.round(((analyticsData?.errors || 0) / pdfs.length) * 100)}%`} 
+              subvalue={`${analyticsData?.errors || 0} errors`} 
+              theme={theme} 
+            />
           </div>
         </div>
       </div>
@@ -385,7 +390,7 @@ const MetricCard: React.FC<{
   <div className={`rounded-2xl border p-6 transition-all hover:scale-[1.02] backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
     <div className="flex items-start justify-between mb-4">
       <div className="text-3xl">{icon}</div>
-      {change && (
+      {change && change !== "" && (
         <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 font-medium">{change}</span>
       )}
     </div>
@@ -399,7 +404,7 @@ const StatItem: React.FC<{
   value: string;
   subvalue: string;
   theme: "light" | "dark";
-}> = ({ label, value, subvalue, theme }) => (
+}> = ({ label, value, subvalue }) => (
   <div className="p-3 rounded-xl bg-gray-800/10 hover:bg-gray-800/20 transition-all">
     <p className="text-xs opacity-50 mb-1">{label}</p>
     <p className="text-md font-semibold mb-1 truncate">{value}</p>

@@ -133,8 +133,8 @@ export default function TestimonialsSection({
 
   const data = React.useMemo(() => {
     const base = items?.length ? items : DEFAULT_ITEMS;
-    const arr = safeArraySlice(base, 0);
-    return typeof limit === "number" ? safeSlice(arr, 0, Math.max(0, limit)) : arr;
+    const arr = safeArraySlice(base, 0) as Testimonial[];
+    return typeof limit === "number" ? safeSlice(arr, 0, Math.max(0, limit)) as Testimonial[] : arr;
   }, [items, limit]);
 
   const surface =
@@ -154,7 +154,7 @@ export default function TestimonialsSection({
 
   // JSON-LD (Review list)
   const ldJson = React.useMemo<SchemaItemList>(() => {
-    const reviews: SchemaReview[] = data.map((t) => {
+    const reviews: SchemaReview[] = data.map((t: Testimonial) => {
       const review: SchemaReview = {
         "@type": "Review",
         reviewBody: t.quote,
@@ -266,7 +266,7 @@ export default function TestimonialsSection({
             <p className={clsx("text-center", subText)}>No testimonials yet.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-3">
-              {data.map((t, i) => {
+              {data.map((t: Testimonial, i: number) => {
                 // Get motion props for each testimonial card
                 const cardMotionProps = buildMotionProps(!!reduceMotion, i);
                 

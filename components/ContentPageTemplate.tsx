@@ -31,7 +31,7 @@ export default function ContentPageTemplate({
   frontmatter,
   children,
   contentType = "content",
-}: ContentPageTemplateProps): JSX.Element {
+}: ContentPageTemplateProps): React.ReactElement {  // ✅ changed from JSX.Element
   // ✅ FIXED: Use safe capitalize function
   const title = frontmatter.title || capitalize(contentType);
   const description = frontmatter.excerpt || frontmatter.description || title;

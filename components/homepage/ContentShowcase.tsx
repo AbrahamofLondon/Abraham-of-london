@@ -1,181 +1,181 @@
 import * as React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Vault, PenTool } from "lucide-react";
+import { ArrowRight, FileText, Calendar, Clock, ChevronRight } from "lucide-react";
 
-import BlogPostCard from "@/components/BlogPostCard";
-import BookCard from "@/components/books/BookCard";
-import { safeSlice } from "@/lib/utils/safe";
-
-interface ContentItem {
+type ContentItem = {
   slug: string;
   title: string;
-  _type?: string;
-  type?: string;
-  _id?: string;
-  id?: string;
-  excerpt?: string;
-  description?: string;
-  coverImage?: string;
-  date?: string;
-  author?: any;
-  tags?: string[];
-  featured?: boolean;
-  [key: string]: any;
-}
-
-const asBlogPost = (item: ContentItem): any => {
-  const { slug, title, excerpt, description, ...rest } = item;
-  return {
-    slug: slug || "",
-    title: title || "Untitled",
-    excerpt: excerpt || description || "",
-    coverImage: rest.coverImage ?? null,
-    date: rest.date ?? null,
-    author: rest.author ?? null,
-    tags: Array.isArray(rest.tags) ? rest.tags : [],
-    featured: Boolean(rest.featured),
-    ...rest,
-  };
+  excerpt?: string | null;
+  dateISO?: string | null;
+  theme?: string | null;
+  kind?: string | null;
 };
 
-const asBook = (item: ContentItem): any => {
-  const { slug, title, excerpt, description, _id, id, ...rest } = item;
-  return {
-    slug: slug || "",
-    title: title || "Untitled",
-    excerpt: excerpt || description || "",
-    coverImage: rest.coverImage ?? null,
-    date: rest.date ?? null,
-    author: rest.author ?? null,
-    tags: Array.isArray(rest.tags) ? rest.tags : [],
-    featured: Boolean(rest.featured),
-    _id: _id || id || `book-${slug || Date.now()}`,
-    ...rest,
-  };
-};
-
-interface ContentShowcaseProps {
+type ContentShowcaseProps = {
   items: ContentItem[];
   title?: string;
   description?: string;
-  viewAllHref?: string;
-  viewAllLabel?: string;
   maxItems?: number;
   className?: string;
+};
+
+function safeFormatDate(dateISO?: string | null): string | null {
+  if (!dateISO) return null;
+  try {
+    const d = new Date(dateISO);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
+  } catch {
+    return null;
+  }
 }
 
 export default function ContentShowcase({
   items,
-  title = "Signal Feed",
-  description = "High-signal writing and assets engineered for deployment — not entertainment.",
-  viewAllHref = "/resources",
-  viewAllLabel = "Browse resources",
+  title = "Recent Dispatches",
+  description = "Strategic insights and architectural briefings",
   maxItems = 6,
   className = "",
-}: ContentShowcaseProps): JSX.Element {
-  const validItems = (items || []).filter(
-    (item) => item && typeof item === "object" && item.slug && item.title
-  );
+}: ContentShowcaseProps): React.ReactElement | null {
+  // ✅ FIXED: Safely filter items
+  const validItems = (items || [])
+    .filter((item): item is ContentItem => 
+      item !== null && 
+      typeof item === "object" && 
+      typeof item.slug === "string" && 
+      typeof item.title === "string"
+    )
+    .slice(0, maxItems);
 
-  const displayedItems = safeSlice(validItems, 0, maxItems);
+  if (validItems.length === 0) return null;
 
   return (
-    <section className={`relative bg-black py-24 ${className}`}>
-      {/* Technical Grid Overlay */}
-      <div className="bg-grid-technical mask-radial-fade absolute inset-0 opacity-20 pointer-events-none" />
-      
+    <section className={`relative overflow-hidden bg-black py-20 md:py-24 ${className}`}>
+      {/* Background (matches other sections) */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-grid-technical mask-radial-fade opacity-[0.10]" />
+        <div className="absolute left-1/2 top-[-260px] h-[720px] w-[980px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[180px]" />
+        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.03] mix-blend-overlay" />
+      </div>
+
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.5 }}
-          className="mb-14"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="signal-dot" />
-            <span className="text-kicker">Intelligence Feed</span>
-          </div>
-          
-          <h2 className="heading-statement">
-            {title}
-          </h2>
-          
-          {description && (
-            <p className="mt-6 max-w-3xl text-xl font-light text-white/40 leading-relaxed">
+        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1">
+              <FileText className="h-3.5 w-3.5 text-amber-500/70" />
+              <span className="text-[10px] font-black uppercase tracking-[0.35em] text-amber-500/70">
+                Intelligence Dispatch
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-white/15" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/35">
+                recent
+              </span>
+            </div>
+
+            <h2 className="mt-6 font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-white tracking-tight">
+              {title}
+            </h2>
+            <p className="mt-3 text-sm md:text-base text-white/45 max-w-xl leading-relaxed">
               {description}
             </p>
-          )}
-
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link href="/canon" className="city-gate-card px-6 py-3 flex items-center gap-3 group">
-              <BookOpen className="h-4 w-4 text-amber-500" />
-              <span className="text-metadata text-white/70 group-hover:text-amber-500 transition-colors">Canon</span>
-            </Link>
-            <Link href="/downloads/vault" className="city-gate-card px-6 py-3 flex items-center gap-3 group">
-              <Vault className="h-4 w-4 text-amber-500" />
-              <span className="text-metadata text-white/70 group-hover:text-amber-500 transition-colors">Vault</span>
-            </Link>
-            <Link href="/shorts" className="city-gate-card px-6 py-3 flex items-center gap-3 group">
-              <PenTool className="h-4 w-4 text-amber-500" />
-              <span className="text-metadata text-white/70 group-hover:text-amber-500 transition-colors">Shorts</span>
-            </Link>
           </div>
-        </motion.div>
 
-        {/* Content Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {displayedItems.map((item, index) => {
-            const type = String(item._type || item.type || "").toLowerCase();
-            const key = item.slug || item._id || item.id || `item-${index}`;
+          <Link
+            href="/content"
+            className="group inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-amber-500/70 hover:text-amber-300 transition-colors"
+          >
+            View All
+            <ArrowRight className="h-4 w-4 text-white/20 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
+          </Link>
+        </div>
+
+        {/* Grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {validItems.map((item, idx) => {
+            // ✅ FIXED: Safely format date with validation
+            const dateLabel = (() => {
+              if (!item.dateISO) return null;
+              try {
+                const date = new Date(item.dateISO);
+                return !Number.isNaN(date.getTime())
+                  ? date.toLocaleDateString("en-GB", { month: "short", day: "numeric" })
+                  : null;
+              } catch {
+                return null;
+              }
+            })();
 
             return (
-              <motion.div
-                key={key}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.45, delay: index * 0.05 }}
+              <Link
+                key={item.slug}
+                href={`/content/${item.slug}`}
+                className="group block h-full"
               >
-                {type === "post" || type === "short" ? (
-                  <BlogPostCard post={asBlogPost(item)} />
-                ) : type === "book" ? (
-                  <BookCard book={asBook(item)} />
-                ) : (
-                  <div className="city-gate-card p-8 h-full flex flex-col group">
-                    <span className="text-metadata mb-6 italic opacity-50">Artefact // {index + 1}</span>
-                    <h3 className="font-serif text-2xl font-light text-white group-hover:text-amber-500 transition-colors">
-                      {item.title || "Untitled"}
-                    </h3>
-                    <p className="mt-4 text-sm font-light leading-relaxed text-white/40 flex-grow">
-                      {item.excerpt || item.description || "High-signal object designed for deployment."}
+                <article className="relative h-full rounded-3xl border border-white/10 bg-white/[0.02] p-8 transition-all duration-500 hover:bg-white/[0.04] hover:border-amber-500/20 hover:-translate-y-1">
+                  {/* Phase tag */}
+                  <div className="mb-8 flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-amber-500/60 transition-colors">
+                      Phase 0{(idx % 3) + 1} // {item.kind || "Brief"}
+                    </span>
+                  </div>
+
+                  {/* Meta */}
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/35">
+                    <FileText className="h-3 w-3 text-amber-500/60" />
+                    <span>{item.kind || "Brief"}</span>
+
+                    {dateLabel && (
+                      <>
+                        <span className="text-white/20">•</span>
+                        <Calendar className="h-3 w-3 text-white/25" />
+                        <span>{dateLabel}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <h3 className="mt-4 font-serif text-xl text-white transition-colors group-hover:text-amber-100 line-clamp-2">
+                    {item.title}
+                  </h3>
+
+                  {item.excerpt ? (
+                    <p className="mt-3 text-sm text-white/45 leading-relaxed line-clamp-3 group-hover:text-white/65 transition-colors">
+                      {item.excerpt}
                     </p>
-                    <div className="mt-8 pt-6 border-t border-white/5">
-                        <Link href={`/resources/${item.slug}`} className="text-kicker flex items-center gap-2 group/btn">
-                            Access Module <ArrowRight className="h-3 w-3 group-hover/btn:translate-x-1 transition-transform" />
-                        </Link>
+                  ) : (
+                    <p className="mt-3 text-sm text-white/35 leading-relaxed line-clamp-3">
+                      Strategic note indexed for retrieval and reuse.
+                    </p>
+                  )}
+
+                  <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-amber-500/75">
+                      Read
+                    </span>
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/25 group-hover:text-amber-500/60 transition-colors">
+                      <Clock className="h-3.5 w-3.5" />
+                      Indexed
                     </div>
                   </div>
-                )}
-              </motion.div>
+
+                  {/* Corner accent */}
+                  <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="w-8 h-[1px] bg-amber-500/30" />
+                    <div className="absolute right-4 top-4 h-8 w-[1px] bg-amber-500/30" />
+                  </div>
+                </article>
+              </Link>
             );
           })}
         </div>
 
-        {/* View All CTA */}
-        {validItems.length > maxItems && (
-          <div className="mt-16 flex justify-center">
-            <Link
-              href={viewAllHref}
-              className="group city-gate-card px-10 py-5 flex items-center gap-4 hover:border-amber-500/50"
-            >
-              <span className="text-metadata group-hover:text-white transition-colors">{viewAllLabel}</span>
-              <ArrowRight className="h-4 w-4 text-amber-500 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-        )}
+        <div className="mt-14 flex flex-col items-center gap-4">
+          <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+          <p className="text-[9px] font-black uppercase tracking-[0.5em] text-white/20">
+            System Verification: Dispatch Indexed
+          </p>
+        </div>
       </div>
     </section>
   );

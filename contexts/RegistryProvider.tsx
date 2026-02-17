@@ -4,6 +4,9 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { useAccess } from '@/hooks/useAccess';
 
+// Import the Tier type from useAccess to ensure consistency
+import type { Tier } from '@/hooks/useAccess';
+
 /**
  * REGISTRY CONTEXT SCHEMA
  * Centralized state management for the Abraham of London institutional interface.
@@ -12,9 +15,9 @@ interface RegistryContextType {
   isSearchOpen: boolean;
   setSearchOpen: (open: boolean) => void;
   toggleSearch: () => void;
-  userTier: string;
+  userTier: Tier; // Now using the imported Tier type
   isValidating: boolean;
-  hasClearance: (required: string) => boolean;
+  hasClearance: (required: Tier) => boolean; // Using imported Tier type
   refreshClearance: () => Promise<void>;
 }
 
@@ -57,3 +60,6 @@ export function useRegistry() {
   }
   return context;
 }
+
+// Re-export Tier type for convenience
+export type { Tier };

@@ -5,7 +5,7 @@ import TeaserRequest from "@/components/TeaserRequest";
 
 const LS_KEY = "fwt_teaser_dismissed_until";
 
-export default function FloatingTeaserCTA(): JSX.Element | null {
+export default function FloatingTeaserCTA(): React.ReactElement | null {
   const [open, setOpen] = React.useState(false);
   const [visible, setVisible] = React.useState(false);
 
@@ -131,4 +131,3 @@ export default function FloatingTeaserCTA(): JSX.Element | null {
     </>
   );
 }
-

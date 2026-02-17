@@ -14,12 +14,19 @@ export type DocKind =
   | "strategy"
   | "unknown";
 
-export type AccessLevel = "free" | "member" | "architect" | "inner-circle" | "inner-circle-elite";
+export type AccessLevel =
+  | "free"
+  | "member"
+  | "architect"
+  | "inner-circle"
+  | "inner-circle-elite";
 
 type AnyDoc = Record<string, any>;
 
 /**
  * Institutional Slug Normalizer
+ * - strips leading/trailing slashes
+ * - collapses multiple slashes
  */
 export function normalizeSlug(input: string): string {
   return (input || "")
@@ -30,14 +37,42 @@ export function normalizeSlug(input: string): string {
 }
 
 /**
- * ✅ REQUIRED BY BUILD: joinHref
- * Combines multiple segments into a clean, normalized URL path.
+ * joinHref — HARD-LOCKED (idempotent)
+ * Combines segments into a clean URL, avoiding double-prefixes like:
+ *   joinHref("books", "books/the-x")  -> "/books/the-x"
+ *   joinHref("canon", "/canon/vol-i") -> "/canon/vol-i"
  */
 export function joinHref(...args: (string | undefined | null)[]): string {
-  const parts = args
-    .filter((arg): arg is string => typeof arg === 'string' && arg.length > 0)
-    .map(part => normalizeSlug(part));
-  
+  const raw = args
+    .filter((a): a is string => typeof a === "string" && a.trim().length > 0)
+    .map((a) => normalizeSlug(a));
+
+  if (raw.length === 0) return "/";
+
+  const parts: string[] = [];
+
+  for (let i = 0; i < raw.length; i++) {
+    const curr = raw[i];
+    const prev = parts[parts.length - 1];
+
+    // Skip exact duplicates: ["books","books"] => ["books"]
+    if (prev && curr === prev) continue;
+
+    // If current already contains prev as prefix: ["books","books/the-x"] => keep only "books/the-x"
+    if (prev && (curr === prev || curr.startsWith(`${prev}/`))) {
+      parts.pop();
+      parts.push(curr);
+      continue;
+    }
+
+    // If prev already contains current as prefix, keep prev (rare)
+    if (prev && (prev === curr || prev.startsWith(`${curr}/`))) {
+      continue;
+    }
+
+    parts.push(curr);
+  }
+
   return "/" + parts.join("/");
 }
 
@@ -50,39 +85,39 @@ export function isDraftContent(doc: AnyDoc): boolean {
  */
 export function isPublished(doc: AnyDoc): boolean {
   if (isDraftContent(doc)) return false;
-  
+
   const publishDate = doc?.publishedAt || doc?.date;
   if (publishDate) {
     const pubDate = new Date(publishDate);
     const now = new Date();
     return pubDate <= now;
   }
-  
+
   // If no publish date, assume published unless marked as draft
-  return !isDraftContent(doc);
+  return true;
 }
 
 /**
  * Get the access level (tier) for a document
  */
 export function getAccessLevel(doc: AnyDoc): AccessLevel {
-  const tier = doc?.tier || doc?.access || doc?.accessLevel || 'free';
-  
+  const tier = doc?.tier || doc?.access || doc?.accessLevel || "free";
+
   switch (String(tier).toLowerCase()) {
-    case 'member':
-    case 'premium':
-      return 'member';
-    case 'architect':
-    case 'enterprise':
-      return 'architect';
-    case 'inner-circle':
-    case 'innercircle':
-      return 'inner-circle';
-    case 'inner-circle-elite':
-    case 'elite':
-      return 'inner-circle-elite';
+    case "member":
+    case "premium":
+      return "member";
+    case "architect":
+    case "enterprise":
+      return "architect";
+    case "inner-circle":
+    case "innercircle":
+      return "inner-circle";
+    case "inner-circle-elite":
+    case "elite":
+      return "inner-circle-elite";
     default:
-      return 'free';
+      return "free";
   }
 }
 
@@ -113,40 +148,60 @@ export function getDocKind(doc: AnyDoc): DocKind {
   return "unknown";
 }
 
+/**
+ * getDocHref — HARDENED
+ * - honors explicit href/url/permalink
+ * - otherwise builds a canonical route without double-prefixing
+ */
 export function getDocHref(doc: AnyDoc): string {
   const explicit = doc?.href || doc?.url || doc?.permalink;
-  if (typeof explicit === "string" && explicit.trim()) return explicit.trim();
+  if (typeof explicit === "string" && explicit.trim()) {
+    const e = explicit.trim();
+    return e.startsWith("/") ? e : `/${e}`;
+  }
 
   const kind = getDocKind(doc);
+
+  // Prefer slug; fallback to flattenedPath; then id
   const rawSlug = normalizeSlug(
     String(doc?.slug || doc?._raw?.flattenedPath || doc?._id || "")
   );
 
-  const buildSafePath = (prefix: string, slug: string) => {
-    const cleanPrefix = prefix.replace(/^\/+/, "").replace(/\/+$/, "");
-    if (slug.startsWith(cleanPrefix + "/")) return `/${slug}`;
-    return `/${cleanPrefix}/${slug}`;
+  // For Contentlayer docs, flattenedPath often already includes collection prefix.
+  // We do NOT want /books/books/x or /canon/canon/x etc.
+  const stripPrefix = (prefix: string, slug: string) => {
+    const p = normalizeSlug(prefix);
+    const s = normalizeSlug(slug);
+    return s === p ? "" : s.startsWith(`${p}/`) ? s.slice(p.length + 1) : s;
   };
 
   switch (kind) {
-    case "blog": return buildSafePath("blog", rawSlug);
-    case "book": return buildSafePath("books", rawSlug);
-    case "canon": return buildSafePath("canon", rawSlug);
-    case "download": return buildSafePath("downloads", rawSlug);
-    case "event": return buildSafePath("events", rawSlug);
-    case "print": return buildSafePath("prints", rawSlug);
-    case "resource": return buildSafePath("resources", rawSlug);
-    case "short": return buildSafePath("shorts", rawSlug);
-    case "strategy": return buildSafePath("strategy", rawSlug);
+    case "blog":
+      return joinHref("blog", stripPrefix("blog", rawSlug));
+    case "book":
+      return joinHref("books", stripPrefix("books", rawSlug));
+    case "canon":
+      return joinHref("canon", stripPrefix("canon", rawSlug));
+    case "download":
+      return joinHref("downloads", stripPrefix("downloads", rawSlug));
+    case "event":
+      return joinHref("events", stripPrefix("events", rawSlug));
+    case "print":
+      return joinHref("prints", stripPrefix("prints", rawSlug));
+    case "resource":
+      return joinHref("resources", stripPrefix("resources", rawSlug));
+    case "short":
+      return joinHref("shorts", stripPrefix("shorts", rawSlug));
+    case "strategy":
+      return joinHref("strategy", stripPrefix("strategy", rawSlug));
     default:
-      return rawSlug.includes("/") ? `/${rawSlug}` : `/content/${rawSlug}`;
+      // If already nested, use it as-is; otherwise put in /content
+      return rawSlug.includes("/") ? `/${rawSlug}` : joinHref("content", rawSlug);
   }
 }
 
 export function sanitizeData<T>(input: T): T {
-  return JSON.parse(
-    JSON.stringify(input, (_k, v) => (v === undefined ? null : v))
-  );
+  return JSON.parse(JSON.stringify(input, (_k, v) => (v === undefined ? null : v)));
 }
 
 export function toUiDoc<T extends Record<string, any>>(doc: T): T {
@@ -159,6 +214,6 @@ export function resolveDocCoverImage(doc: any): string | null {
 
 export function resolveDocDownloadUrl(doc: any): string | null {
   if (doc?.downloadUrl) return doc.downloadUrl;
-  if (doc?.slug) return `/downloads/${normalizeSlug(String(doc.slug))}`;
+  if (doc?.slug) return joinHref("downloads", normalizeSlug(String(doc.slug)));
   return null;
 }

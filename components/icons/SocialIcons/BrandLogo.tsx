@@ -3,7 +3,7 @@ import * as React from "react";
 
 export type BrandLogoProps = React.SVGProps<SVGSVGElement>;
 
-export function BrandLogo(props: BrandLogoProps): JSX.Element {
+export function BrandLogo(props: BrandLogoProps): React.ReactElement {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -28,4 +28,3 @@ export function BrandLogo(props: BrandLogoProps): JSX.Element {
 }
 
 export default BrandLogo;
-

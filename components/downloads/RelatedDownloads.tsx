@@ -3,6 +3,25 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Define helper components first to avoid reference errors
+const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+);
+
+const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+  </svg>
+);
+
+const ArrowSmallRightIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+  </svg>
+);
+
 interface RelatedDownload {
   id: string;
   title: string;
@@ -21,11 +40,12 @@ interface RelatedDownloadsProps {
 }
 
 const RelatedDownloads: React.FC<RelatedDownloadsProps> = ({ downloads, currentDownloadId }) => {
+  // Filter and slice with explicit type casting to preserve type safety
   const filteredDownloads = safeArraySlice(
-  downloads.filter((d) => d.id !== currentDownloadId),
-  0,
-  4
-);
+    downloads.filter((d) => d.id !== currentDownloadId),
+    0,
+    4
+  ) as RelatedDownload[]; // 👈 cast to ensure correct type
 
   const typeColors = {
     pdf: 'bg-red-100 text-red-800',
@@ -58,7 +78,7 @@ const RelatedDownloads: React.FC<RelatedDownloadsProps> = ({ downloads, currentD
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredDownloads.map((download) => (
+        {filteredDownloads.map((download: RelatedDownload) => (
           <Link key={download.id} href={`/downloads/${download.slug}`}>
             <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer">
               <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
@@ -113,23 +133,5 @@ const RelatedDownloads: React.FC<RelatedDownloadsProps> = ({ downloads, currentD
     </div>
   );
 };
-
-const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-  </svg>
-);
-
-const ArrowSmallRightIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-  </svg>
-);
 
 export default RelatedDownloads;

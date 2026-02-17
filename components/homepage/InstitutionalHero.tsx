@@ -1,4 +1,5 @@
-/* @/components/homepage/InstitutionalHero.tsx */
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -6,7 +7,7 @@ import { ArrowRight, Shield, Layers, Vault, BookOpen, Fingerprint } from "lucide
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-export default function InstitutionalHero(): JSX.Element {
+export default function InstitutionalHero(): React.ReactElement {
   const reduce = useReducedMotion();
 
   return (
@@ -142,7 +143,7 @@ function ProofTile({
   icon: React.ReactNode;
   title: string;
   body: string;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur hover:border-white/15 hover:bg-white/[0.05] transition-all">
       <div className="flex items-start gap-3">

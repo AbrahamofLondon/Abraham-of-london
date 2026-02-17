@@ -1,10 +1,10 @@
-// components/content/CardDisplay.tsx - COMPLETE SELF-CONTAINED FIX
 import * as React from "react";
 import Link from "next/link";
-import { safeSlice } from "@/lib/utils/safe";
+import { Calendar, Tag, ChevronRight, BookOpen, Sparkles } from "lucide-react";
 
-
-// Define everything locally - NO imports from problematic modules
+// =============================================================================
+// TYPES – fully self-contained
+// =============================================================================
 type ContentDoc = {
   _id: string;
   slug: string;
@@ -26,7 +26,9 @@ type Props = {
   className?: string;
 };
 
-// Local type guard functions
+// =============================================================================
+// TYPE GUARDS
+// =============================================================================
 const isPost = (doc: ContentDoc): boolean => doc.type === "Post";
 const isBook = (doc: ContentDoc): boolean => doc.type === "Book";
 const isCanon = (doc: ContentDoc): boolean => doc.type === "Canon";
@@ -36,8 +38,10 @@ const isPrint = (doc: ContentDoc): boolean => doc.type === "Print";
 const isResource = (doc: ContentDoc): boolean => doc.type === "Resource";
 const isStrategy = (doc: ContentDoc): boolean => doc.type === "Strategy";
 
-// Local helper functions
-const getCardPropsForDocument = (doc: ContentDoc) => ({
+// =============================================================================
+// HELPERS
+// =============================================================================
+const getCardProps = (doc: ContentDoc) => ({
   title: doc.title || "Untitled",
   subtitle: doc.subtitle,
   excerpt: doc.excerpt,
@@ -48,7 +52,7 @@ const getCardPropsForDocument = (doc: ContentDoc) => ({
   slug: doc.slug || "",
 });
 
-const formatCardDate = (dateString: string | null | undefined): string => {
+const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
   try {
     return new Date(dateString).toLocaleDateString("en-GB", {
@@ -61,12 +65,11 @@ const formatCardDate = (dateString: string | null | undefined): string => {
   }
 };
 
-const getCardImage = (coverImage: string | null | undefined, fallback: string): string => {
-  return coverImage || fallback;
+const getImage = (coverImage: string | null | undefined): string => {
+  return coverImage || "/assets/images/og-image.jpg";
 };
 
-// Simple href builder
-function getHref(doc: ContentDoc): string {
+const getHref = (doc: ContentDoc): string => {
   const slug = doc.slug || "";
   if (!slug) return "/";
 
@@ -80,24 +83,45 @@ function getHref(doc: ContentDoc): string {
   if (isStrategy(doc)) return `/strategy/${slug}`;
 
   return `/content/${slug}`;
-}
+};
 
+const getTypeLabel = (type: string): string => {
+  const map: Record<string, string> = {
+    Post: "Briefing",
+    Book: "Volume",
+    Canon: "Canon",
+    Download: "Asset",
+    Event: "Summit",
+    Print: "Artifact",
+    Resource: "Tool",
+    Strategy: "Directive",
+  };
+  return map[type] || type;
+};
+
+// =============================================================================
+// MAIN COMPONENT
+// =============================================================================
 export default function CardDisplay({
   items,
   title,
-  emptyMessage = "No items found.",
+  emptyMessage = "No intelligence matches your current query.",
   className = "",
 }: Props) {
   if (!Array.isArray(items) || items.length === 0) {
     return (
       <section className={className}>
         {title && (
-          <h2 className="mb-4 font-serif text-xl font-semibold text-cream">
+          <h2 className="mb-6 font-serif text-2xl font-semibold text-cream border-b border-white/10 pb-4">
             {title}
           </h2>
         )}
-        <div className="rounded-2xl border border-white/10 bg-black/30 p-6 text-sm text-gray-300">
-          {emptyMessage}
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-black/60 to-zinc-950/80 p-12 text-center backdrop-blur-sm">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.08),transparent_50%)]" />
+          <div className="relative">
+            <BookOpen className="mx-auto h-12 w-12 text-amber-500/40" />
+            <p className="mt-4 text-sm text-zinc-400">{emptyMessage}</p>
+          </div>
         </div>
       </section>
     );
@@ -106,75 +130,106 @@ export default function CardDisplay({
   return (
     <section className={className}>
       {title && (
-        <h2 className="mb-4 font-serif text-xl font-semibold text-cream">
+        <h2 className="mb-6 font-serif text-2xl font-semibold text-cream border-b border-white/10 pb-4 flex items-center gap-3">
+          <Sparkles className="h-5 w-5 text-amber-400" />
           {title}
         </h2>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((doc) => {
-          const card = getCardPropsForDocument(doc);
+          const card = getCardProps(doc);
           const href = getHref(doc);
-          const image = getCardImage(card.coverImage, "/assets/images/og-image.jpg");
-          const date = formatCardDate(card.date);
-
-          const docKey = doc._id || `${doc.type}-${card.slug}`;
+          const image = getImage(card.coverImage);
+          const date = formatDate(card.date);
+          const typeLabel = getTypeLabel(doc.type);
+          const key = doc._id || `${doc.type}-${card.slug}`;
 
           return (
             <Link
-              key={docKey}
+              key={key}
               href={href}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-black/30 transition hover:border-white/20 hover:bg-black/40"
+              className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-black/60 to-zinc-950/80 transition-all duration-300 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-900/20"
             >
+              {/* Glow overlay */}
+              <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent" />
+              </div>
+
+              {/* Image container */}
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image}
-                  alt={card.title || "Cover"}
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                  alt={card.title}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+                {/* Type badge – absolute positioned */}
+                <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-400 backdrop-blur-sm">
+                  {typeLabel}
+                </span>
               </div>
 
-              <div className="space-y-2 p-4">
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold/90">
-                    {doc.type || "Content"}
-                  </span>
-                  {date && (
-                    <span className="text-xs text-gray-400">{date}</span>
-                  )}
-                </div>
-
-                <h3 className="line-clamp-2 font-serif text-lg font-semibold text-cream">
-                  {card.title || "Untitled"}
+              {/* Content */}
+              <div className="flex flex-1 flex-col p-5">
+                {/* Title */}
+                <h3 className="mb-2 font-serif text-lg font-semibold leading-tight text-cream transition-colors group-hover:text-amber-400">
+                  {card.title}
                 </h3>
 
+                {/* Subtitle / excerpt */}
                 {card.subtitle && (
-                  <p className="line-clamp-2 text-sm text-gold/80">
+                  <p className="mb-2 text-sm text-amber-400/80 line-clamp-2">
                     {card.subtitle}
                   </p>
                 )}
-
                 {(card.excerpt || card.description) && (
-                  <p className="line-clamp-3 text-sm text-gray-300">
+                  <p className="mb-4 text-sm leading-relaxed text-zinc-400 line-clamp-3">
                     {card.excerpt || card.description}
                   </p>
                 )}
 
+                {/* Metadata row */}
+                <div className="mt-auto flex items-center justify-between">
+                  {date && (
+                    <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>{date}</span>
+                    </div>
+                  )}
+
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-400 transition-all group-hover:gap-2">
+                    Read <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+
+                {/* Tags */}
                 {Array.isArray(card.tags) && card.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {card.safeSlice(tags, 0, 3).map((t: string) => (
+                  <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-white/5 pt-4">
+                    <Tag className="h-3.5 w-3.5 text-zinc-600" />
+                    {card.tags.slice(0, 3).map((tag) => (
                       <span
-                        key={t}
-                        className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-gray-300"
+                        key={tag}
+                        className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-medium text-zinc-400 transition-colors hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-300"
                       >
-                        {t}
+                        {tag}
                       </span>
                     ))}
+                    {card.tags.length > 3 && (
+                      <span className="text-[10px] text-zinc-600">
+                        +{card.tags.length - 3}
+                      </span>
+                    )}
                   </div>
                 )}
+              </div>
+
+              {/* Subtle corner accent */}
+              <div className="pointer-events-none absolute bottom-0 right-0 h-12 w-12 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-amber-500/30 rounded-br-2xl" />
               </div>
             </Link>
           );

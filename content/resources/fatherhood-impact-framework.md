@@ -34,7 +34,7 @@ This resource defines the five domains every father must architect intentionally
 
 ## The 5 Domains
 
-### 1. **[Identity](/vault/lexicon/identity) Formation**
+### 1. **[Identity](/lexicon/identity) Formation**
 
 - Who am I?
 - What does it mean to carry this name?
@@ -61,7 +61,7 @@ This resource defines the five domains every father must architect intentionally
 
 - Vision
 - Calling
-- [Purpose](/vault/lexicon/purpose)
+- [Purpose](/lexicon/purpose)
 
 > "A father's presence becomes a child's first definition of safety."
 

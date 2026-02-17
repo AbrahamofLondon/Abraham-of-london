@@ -3,7 +3,6 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Download, ArrowRight, Bookmark } from 'lucide-react';
-import { safeSlice } from "@/lib/utils/safe";
 
 interface ResourceCardProps {
   title: string;
@@ -34,6 +33,16 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
     guide: 'PROCEDURAL',
     toolkit: 'TOOLKIT',
   };
+
+  // Ensure tags are strings and filter out any invalid ones
+  const validTags: string[] = React.useMemo(() => {
+    return (tags || [])
+      .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0);
+  }, [tags]);
+
+  // Manual slice instead of using safeSlice to maintain type safety
+  const displayTags: string[] = validTags.slice(0, 2);
+  const remainingCount: number = validTags.length - 2;
 
   return (
     <Link href={`/resources/${slug}`} className="group block">
@@ -80,10 +89,10 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
             {description}
           </p>
           
-          {/* Tags — Institutional Style */}
-          {tags.length > 0 && (
+          {/* Tags — Institutional Style with proper typing */}
+          {validTags.length > 0 && (
             <div className="mb-6 flex flex-wrap gap-2">
-              {safeSlice(tags, 0, 2).map((tag, index) => (
+              {displayTags.map((tag: string, index: number) => (
                 <span
                   key={index}
                   className="bg-white/[0.03] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-zinc-500 border border-white/5"
@@ -91,9 +100,9 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
                   {tag}
                 </span>
               ))}
-              {tags.length > 2 && (
+              {remainingCount > 0 && (
                 <span className="px-2 py-0.5 font-mono text-[9px] text-zinc-600">
-                  +{tags.length - 2}
+                  +{remainingCount}
                 </span>
               )}
             </div>

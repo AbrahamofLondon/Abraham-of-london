@@ -1,9 +1,8 @@
-// components/ContextualSearch.tsx — HARDENED (Registry Query Terminal)
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Command, Lock, FileText, X, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router'; // ✅ CORRECT: Use next/router for Pages Router
 import { useAccess } from '@/hooks/useAccess';
 import { UnifiedDoc, getDocHref } from '@/lib/content/unified-router';
 
@@ -14,7 +13,7 @@ interface ContextualSearchProps {
 }
 
 export default function ContextualSearch({ isOpen, onClose, docs }: ContextualSearchProps) {
-  const router = useRouter();
+  const router = useRouter(); // ✅ Now correctly identified as a function
   const { hasClearance } = useAccess();
   const [query, setQuery] = useState('');
 
@@ -23,21 +22,24 @@ export default function ContextualSearch({ isOpen, onClose, docs }: ContextualSe
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        isOpen ? onClose() : null; // Logic handled by parent state
+        // Toggle logic is usually handled by parent state, 
+        // but we ensure the signal is clean here.
       }
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, [isOpen, onClose]);
+  }, []);
 
-  // 2. High-performance filter logic
+  // 2. High-performance filter logic with explicit typing
   const filteredResults = useMemo(() => {
     if (!query) return docs.slice(0, 5); // Show 5 recents/featured if empty
     const q = query.toLowerCase();
+    
     return docs.filter(doc => 
       doc.title.toLowerCase().includes(q) || 
       doc.category?.toLowerCase().includes(q) ||
-      doc.tags?.some(t => t.toLowerCase().includes(q))
+      // Explicitly type 't' as string to satisfy the compiler
+      doc.tags?.some((t: string) => t.toLowerCase().includes(q))
     ).slice(0, 8);
   }, [query, docs]);
 

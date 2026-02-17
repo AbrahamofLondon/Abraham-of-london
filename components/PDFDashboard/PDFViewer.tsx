@@ -1,5 +1,5 @@
 // components/PDFDashboard/PDFViewer.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PDFItem } from '@/lib/pdf/types';
 import { 
   Download, 
@@ -28,6 +28,7 @@ interface PDFViewerProps {
   refreshKey?: number;
   viewMode?: 'list' | 'grid' | 'detail';
   enableAnnotations?: boolean;
+  error?: string | null; // Add error prop
 }
 
 export const PDFViewer: React.FC<PDFViewerProps> = ({
@@ -36,7 +37,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
   onGeneratePDF,
   refreshKey,
   viewMode = 'detail',
-  enableAnnotations = false
+  enableAnnotations = false,
+  error: pdfError = null, // ← FIXED: Added missing comma on the line above
 }) => {
   // ALL HOOKS AT TOP LEVEL
   const [zoom, setZoom] = useState(100);
@@ -45,7 +47,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
   const [copied, setCopied] = useState(false);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [loadingPdf, setLoadingPdf] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   
   // Handle mounting (only needed for client-side rendering)
@@ -65,7 +67,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       }
 
       setLoadingPdf(true);
-      setError(null);
+      setLoadError(null);
 
       try {
         // Handle both absolute URLs and relative paths
@@ -84,7 +86,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         setPdfBlobUrl(blobUrl);
       } catch (err) {
         console.error('Error loading PDF:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load PDF');
+        setLoadError(err instanceof Error ? err.message : 'Failed to load PDF');
         setPdfBlobUrl(null);
       } finally {
         setLoadingPdf(false);
@@ -99,7 +101,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         URL.revokeObjectURL(pdfBlobUrl);
       }
     };
-  }, [pdf?.fileUrl, refreshKey, pdfBlobUrl]); // Added pdfBlobUrl to dependencies
+  }, [pdf?.fileUrl, refreshKey]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -158,7 +160,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         setTimeout(() => setCopied(false), 2000);
       })
       .catch(() => {
-        setError('Failed to copy link');
+        setLoadError('Failed to copy link');
       });
   };
 
@@ -175,8 +177,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
 
   const getPDFStatus = () => {
     if (!pdf) return { text: 'No PDF selected', color: 'text-gray-400' };
-    if (pdf.isGenerating) return { text: 'Generating...', color: 'text-amber-500' };
-    if (pdf.error) return { text: 'Error: ' + pdf.error, color: 'text-red-500' };
+    if (isGenerating) return { text: 'Generating...', color: 'text-amber-500' };
+    if (pdfError) return { text: 'Error: ' + pdfError, color: 'text-red-500' };
     if (pdf.exists) return { text: 'Ready to view', color: 'text-green-500' };
     return { text: 'PDF not generated', color: 'text-gray-400' };
   };
@@ -238,7 +240,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
       <div className="border-b border-gray-800 p-6 bg-gradient-to-r from-gray-900 to-black">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
               <FileText className="h-6 w-6 text-blue-400 flex-shrink-0" />
               <h2 className="text-xl font-bold truncate">{pdf.title}</h2>
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${status.color}`}>
@@ -253,9 +255,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
             <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-gray-500">
               <span>Type: {pdf.type}</span>
               {pdf.fileSize && <span>Size: {pdf.fileSize}</span>}
-              {/* FIX: Use generatedAt instead of lastGenerated */}
-              {pdf.generatedAt && (
-                <span>Last Generated: {new Date(pdf.generatedAt).toLocaleDateString()}</span>
+              {(pdf.lastModified || pdf.updatedAt) && (
+                <span>Last Modified: {new Date(pdf.lastModified || pdf.updatedAt || '').toLocaleDateString()}</span>
               )}
               {enableAnnotations && (
                 <span className="text-blue-400">Annotations Enabled</span>
@@ -264,7 +265,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {!pdf.exists && !pdf.isGenerating && (
+            {!pdf.exists && !isGenerating && !pdfError && (
               <button
                 onClick={() => onGeneratePDF(pdf.id)}
                 disabled={isGenerating}
@@ -384,16 +385,35 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         viewMode === 'grid' ? 'h-[300px]' : 
         'h-[calc(100%-200px)]'
       }`}>
-        {error && (
+        {loadError && (
           <div className="mb-4 p-4 bg-red-900/20 border border-red-800 rounded-lg">
             <div className="flex items-center gap-2 text-red-400">
               <AlertCircle className="h-5 w-5" />
-              <p className="font-medium">Error: {error}</p>
+              <p className="font-medium">Error: {loadError}</p>
             </div>
           </div>
         )}
 
-        {!pdf.exists && !pdf.isGenerating ? (
+        {pdfError && !isGenerating ? (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="mb-6 p-6 bg-gradient-to-br from-red-900/20 to-black rounded-full">
+              <AlertCircle className="h-20 w-20 text-red-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-red-400 mb-3">PDF Generation Failed</h3>
+            <p className="text-gray-400 max-w-md mb-2">Error: {pdfError}</p>
+            <p className="text-gray-500 max-w-md mb-6">
+              There was an issue generating this PDF. Please try again.
+            </p>
+            <button
+              onClick={() => onGeneratePDF(pdf.id)}
+              disabled={isGenerating}
+              className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 rounded-lg font-medium flex items-center gap-3 transition-all disabled:opacity-50"
+            >
+              <RefreshCw className="h-5 w-5" />
+              Retry Generation
+            </button>
+          </div>
+        ) : !pdf.exists && !isGenerating ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="mb-6 p-6 bg-gradient-to-br from-gray-900 to-black rounded-full">
               <FileText className="h-20 w-20 text-gray-600" />
@@ -420,7 +440,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
               )}
             </button>
           </div>
-        ) : pdf.isGenerating ? (
+        ) : isGenerating ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="relative mb-8">
               <div className="h-32 w-32 rounded-full border-4 border-gray-800 border-t-amber-500 animate-spin" />
@@ -436,25 +456,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
               <Clock className="h-4 w-4 inline mr-2 animate-pulse" />
               Processing {pdf.title}
             </div>
-          </div>
-        ) : pdf.error ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="mb-6 p-6 bg-gradient-to-br from-red-900/20 to-black rounded-full">
-              <AlertCircle className="h-20 w-20 text-red-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-red-400 mb-3">PDF Generation Failed</h3>
-            <p className="text-gray-400 max-w-md mb-2">Error: {pdf.error}</p>
-            <p className="text-gray-500 max-w-md mb-6">
-              There was an issue generating this PDF. Please try again.
-            </p>
-            <button
-              onClick={() => onGeneratePDF(pdf.id)}
-              disabled={isGenerating}
-              className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 rounded-lg font-medium flex items-center gap-3 transition-all disabled:opacity-50"
-            >
-              <RefreshCw className="h-5 w-5" />
-              Retry Generation
-            </button>
           </div>
         ) : loadingPdf ? (
           <div className="flex flex-col items-center justify-center h-full">
@@ -536,9 +537,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <div className="flex items-center gap-4 text-gray-400">
             <span>PDF ID: {pdf.id}</span>
-            {/* FIX: Use generatedAt instead of lastGenerated */}
-            {pdf.generatedAt && (
-              <span>Last updated: {new Date(pdf.generatedAt).toLocaleString()}</span>
+            {(pdf.lastModified || pdf.updatedAt) && (
+              <span>Last updated: {new Date(pdf.lastModified || pdf.updatedAt || '').toLocaleString()}</span>
             )}
             <div className="flex items-center gap-1">
               {getViewModeIcon()}

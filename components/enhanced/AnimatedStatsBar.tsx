@@ -81,10 +81,11 @@ export default function AnimatedStatsBar() {
       const e = easeOutCubic(t);
 
       setCounts({
-        frameworks: Math.floor(e * stats[0].value),
-        clients: Math.floor(e * stats[1].value),
-        volumes: Math.floor(e * stats[2].value),
-        years: Math.floor(e * stats[3].value),
+        // Use non‑null assertion because we know stats[0..3] exist
+        frameworks: Math.floor(e * stats[0]!.value),
+        clients: Math.floor(e * stats[1]!.value),
+        volumes: Math.floor(e * stats[2]!.value),
+        years: Math.floor(e * stats[3]!.value),
       });
 
       if (t < 1) requestAnimationFrame(tick);

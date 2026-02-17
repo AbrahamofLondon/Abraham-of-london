@@ -98,7 +98,6 @@ type ValidationResult = { isValid: boolean; errors: string[] };
 
 function validateBase(doc: any): ValidationResult {
   const errors: string[] = [];
-  // ✅ Title validation removed – titleSafe guarantees a value
   const flat = cleanSlug(doc?._raw?.flattenedPath || "");
   const slug = cleanSlug(doc?.slug) || flat;
   if (!slug) errors.push("Missing slug (slug + flattenedPath both empty)");
@@ -108,25 +107,45 @@ function validateBase(doc: any): ValidationResult {
 function parseEventStartISO(raw: unknown): string | null {
   const s = safeString(raw).trim();
   if (!s) return null;
-  const left = s.includes(" - ") ? s.split(" - ")[0].trim() : s;
-  const d = new Date(left);
-  if (isNaN(d.getTime())) return null;
-  return d.toISOString();
+  
+  try {
+    const parts = s.split(" - ");
+    const dateStr = parts[0]?.trim() ?? s;
+    
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString();
+  } catch {
+    return null;
+  }
 }
 
 function parseEventEndISO(raw: unknown): string | null {
   const s = safeString(raw).trim();
   if (!s || !s.includes(" - ")) return null;
-  const [startPart, endPart] = s.split(" - ").map((x) => x.trim());
-  const start = new Date(startPart);
-  if (isNaN(start.getTime())) return null;
-  const parts = endPart.split(":").map((n) => parseInt(n, 10));
-  if (!parts.length || Number.isNaN(parts[0])) return null;
-  start.setHours(parts[0] || 0, parts[1] || 0, parts[2] || 0, 0);
-  if (isNaN(start.getTime())) return null;
-  return start.toISOString();
+  
+  try {
+    const parts = s.split(" - ");
+    const startPart = parts[0]?.trim();
+    const endPart = parts[1]?.trim();
+    
+    if (!startPart || !endPart) return null;
+    
+    const start = new Date(startPart);
+    if (isNaN(start.getTime())) return null;
+    
+    const timeParts = endPart.split(":").map((n) => parseInt(n, 10));
+    const [hours = 0, minutes = 0, seconds = 0] = timeParts;
+    
+    start.setHours(hours, minutes, seconds, 0);
+    if (isNaN(start.getTime())) return null;
+    return start.toISOString();
+  } catch {
+    return null;
+  }
 }
 
+// ✅ Moved validateEvent BEFORE it's used in Event document type
 function validateEvent(doc: any): ValidationResult {
   const base = validateBase(doc);
   const errors = [...base.errors];
@@ -163,7 +182,7 @@ const CTAButton = defineNestedType(() => ({
 }));
 
 // ------------------------------------------------------------
-// FIELD SETS (NO DUPLICATES)
+// FIELD SETS
 // ------------------------------------------------------------
 const seoFields = {
   ogTitle: { type: "string", required: false },
@@ -181,7 +200,7 @@ const seoFields = {
 } as const;
 
 export const baseFields = {
-  title: { type: "string", required: false }, // optional; computed titleSafe provides fallback
+  title: { type: "string", required: false },
   subtitle: { type: "string", required: false },
   description: { type: "string", required: false },
   excerpt: { type: "string", required: false },
@@ -218,7 +237,7 @@ export const baseFields = {
   keyInsights: { type: "list", of: { type: "string" }, required: false },
   order: { type: "number", required: false },
   volumeNumber: { type: "string", required: false },
-  volume: { type: "string", required: false },
+  volume: { type: "number", required: false },
   part: { type: "string", required: false },
   contentOnly: { type: "boolean", required: false, default: false },
   version: { type: "string", required: false },
@@ -251,15 +270,6 @@ const downloadFields = {
   related: { type: "list", of: { type: "string" }, required: false },
   ctaConfig: { type: "json", required: false },
   downloadProcess: { type: "json", required: false },
-} as const;
-
-const strategyFields = {
-  strategyType: { type: "string", required: false },
-  industry: { type: "string", required: false },
-  region: { type: "string", required: false },
-  timeline: { type: "string", required: false },
-  status: { type: "string", required: false },
-  resourceType: { type: "string", required: false },
 } as const;
 
 // ------------------------------------------------------------
@@ -383,6 +393,49 @@ export const Canon = defineDocumentType(() => ({
   computedFields: createComputedFields("canon/", "canon"),
 }));
 
+export const Brief = defineDocumentType(() => ({
+  name: "Brief",
+  filePathPattern: "briefs/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    briefId: { type: "string", required: false },
+    series: { type: "string", required: false },
+    lastUpdated: { type: "string", required: false },
+    format: { type: "string", required: false },
+    audience: { type: "string", required: false },
+    classification: {
+      type: "enum",
+      options: ["Unclassified", "Restricted", "Confidential", "Secret", "Top Secret"],
+      default: "Unclassified",
+      required: false,
+    },
+  },
+  computedFields: createComputedFields("briefs/", "briefs"),
+}));
+
+export const Intelligence = defineDocumentType(() => ({
+  name: "Intelligence",
+  filePathPattern: "intelligence/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    classification: { type: "string", required: false },
+  },
+  computedFields: createComputedFields("intelligence/", "intelligence"),
+}));
+
+export const Dispatch = defineDocumentType(() => ({
+  name: "Dispatch",
+  filePathPattern: "dispatches/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    dispatchId: { type: "string", required: false },
+  },
+  computedFields: createComputedFields("dispatches/", "dispatches"),
+}));
+
 export const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.{md,mdx}",
@@ -415,7 +468,7 @@ export const Event = defineDocumentType(() => ({
     registrationUrl: { type: "string", required: false },
     startDate: { type: "string", required: false },
     endDate: { type: "string", required: false },
-    startdate: { type: "string", required: false }, // lowercase fallback
+    startdate: { type: "string", required: false },
     timezone: { type: "string", required: false },
     isVirtual: { type: "boolean", required: false },
     meetingLink: { type: "string", required: false },
@@ -485,7 +538,11 @@ export const Strategy = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
-    ...strategyFields,
+    strategyType: { type: "string", required: false },
+    industry: { type: "string", required: false },
+    region: { type: "string", required: false },
+    timeline: { type: "string", required: false },
+    resourceType: { type: "string", required: false },
   },
   computedFields: createComputedFields("strategy/", "strategy"),
 }));
@@ -496,10 +553,22 @@ export const Lexicon = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
+    // Claim 'type' as data to prevent Contentlayer from
+    // trying to move these files into the 'Resource' bucket.
+    type: { type: "string", required: false },
+    docKind: { type: "string", required: false },
     term: { type: "string", required: false },
     phonetic: { type: "string", required: false },
+    category: { type: "string", required: false },
   },
-  computedFields: createComputedFields("lexicon/", "lexicon"),
+  computedFields: {
+    ...createComputedFields("lexicon/", "lexicon"),
+    // Force the internal identity for the manifest
+    actualType: {
+      type: "string",
+      resolve: () => "Lexicon",
+    },
+  },
 }));
 
 // ------------------------------------------------------------
@@ -562,7 +631,7 @@ function getExclusions(): string[] {
 }
 
 // ------------------------------------------------------------
-// SOURCE – SINGLE, CLEAN CONFIG
+// SOURCE
 // ------------------------------------------------------------
 export default makeSource({
   contentDirPath: "content",
@@ -571,12 +640,15 @@ export default makeSource({
     "shorts",
     "books",
     "canon",
+    "briefs", // Intelligence Portfolio
+    "dispatches", // Communication Logs
+    "intelligence", // Classified Intelligence
     "downloads",
     "events",
     "prints",
     "resources",
     "strategy",
-    "lexicon",
+    "lexicon", // Institutional Glossary
   ],
   contentDirExclude: getExclusions(),
   documentTypes: [
@@ -584,17 +656,20 @@ export default makeSource({
     Short,
     Book,
     Canon,
+    Brief, // Integrated
+    Dispatch, // Integrated
+    Intelligence, // Integrated
     Download,
     Event,
     Print,
     Resource,
     Strategy,
-    Lexicon,
+    Lexicon, // Integrated
   ],
   disableImportAliasWarning: true,
   mdx: { remarkPlugins: [], rehypePlugins: [] },
 
-  // ✅ onSuccess – full duplicate detection and validation reporting
+  // ✅ onSuccess – Full duplicate detection and validation reporting
   onSuccess: async (importData) => {
     const data = await importData();
     const allDocuments: any[] = (data as any)?.allDocuments || [];

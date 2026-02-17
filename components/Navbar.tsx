@@ -1,137 +1,174 @@
+// components/Navbar.tsx — SINGLE SOURCE OF TRUTH (Pages Router safe, no overlap)
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu,
-  X,
-  BookOpen,
-  User,
-  Mail,
-  Shield,
-  LayoutGrid,
-  Lock,
-} from "lucide-react";
+import { useRouter } from "next/router";
+import { Menu, X, ArrowRight, Briefcase } from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Home", icon: BookOpen },
+const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
 
-  // ✅ Vault is NOT /content. Vault is its own destination.
-  { href: "/vault", label: "Vault", icon: LayoutGrid },
-
-  { href: "/canon", label: "The Canon", icon: Shield },
-
-  // ✅ Optional but recommended: direct Inner Circle entry
-  { href: "/inner-circle", label: "Inner Circle", icon: Lock },
-
-  { href: "/about", label: "About", icon: User },
-  { href: "/contact", label: "Contact", icon: Mail },
+const NAV = [
+  { href: "/canon", label: "Canon" },
+  { href: "/briefs", label: "Briefs" },
+  { href: "/library", label: "Library" },
+  { href: "/ventures", label: "Ventures" },
+  { href: "/shorts", label: "Shorts" },
+  { href: "/about", label: "About" },
+  { href: "/downloads/vault", label: "Vault" },
 ];
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = React.useState(false);
+export default function Navbar(): React.ReactElement {
+  const router = useRouter();
   const [scrolled, setScrolled] = React.useState(false);
-  const pathname = usePathname();
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close menu on navigation
-  React.useEffect(() => setIsOpen(false), [pathname]);
+  React.useEffect(() => {
+    setOpen(false);
+  }, [router.asPath]);
+
+  React.useEffect(() => {
+    document.documentElement.style.overflow = open ? "hidden" : "";
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const currentPath = (router.asPath || "/").split("#")[0] || "/";
+  const isActive = (href: string) => (href === "/" ? currentPath === "/" : currentPath.startsWith(href));
 
   return (
-    <nav
-      className={`fixed top-0 z-[100] w-full transition-all duration-500 ${
-        scrolled
-          ? "bg-black/80 backdrop-blur-xl border-b border-gold/10 py-3"
-          : "bg-transparent py-6"
-      }`}
-    >
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="group flex flex-col">
-            <span className="font-serif text-xl font-bold tracking-tight text-white sm:text-2xl">
-              Abraham<span className="text-gold"> of London</span>
+    <header className="fixed inset-x-0 top-0 z-[100]">
+      {/* Backplate */}
+      <div
+        className={cx(
+          "h-20 border-b transition-all duration-300",
+          scrolled ? "border-white/10 bg-black/90 backdrop-blur-xl" : "border-transparent bg-transparent"
+        )}
+      />
+
+      {/* Content */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="pointer-events-auto mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+          {/* Brand: fixed footprint so nav never overlays it */}
+          <Link href="/" className="shrink-0">
+            <span className="block font-serif text-xl font-semibold tracking-tight text-amber-100 sm:text-2xl whitespace-nowrap">
+              Abraham<span className="text-amber-300"> of London</span>
             </span>
-            <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-gold/50 group-hover:text-gold/80 transition-colors">
-              Without Fear
+            <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.45em] text-gray-500">
+              Institutional Platform
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden items-center gap-8 lg:flex">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-xs font-bold uppercase tracking-widest transition-colors ${
-                  pathname === item.href
-                    ? "text-gold"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          {/* Desktop Nav: clamps width, prevents wrapping/overlap */}
+          <nav className="ml-auto hidden min-w-0 items-center gap-6 lg:flex">
+            <div className="min-w-0 max-w-[52vw] xl:max-w-[58vw] overflow-hidden">
+              <ul className="flex items-center justify-end gap-6 whitespace-nowrap">
+                {NAV.map((x) => (
+                  <li key={x.href} className="shrink-0">
+                    <Link
+                      href={x.href}
+                      className={cx(
+                        "text-[11px] font-extrabold uppercase tracking-[0.25em] transition-colors",
+                        isActive(x.href) ? "text-amber-300" : "text-gray-300 hover:text-white"
+                      )}
+                    >
+                      {x.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
+            {/* CTA: always visible, never pushes nav into brand */}
             <Link
-              href="/canon/the-architecture-of-human-purpose"
-              className="rounded-full border border-gold bg-gold/10 px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold hover:text-black transition-all"
+              href="/consulting"
+              className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-black shadow-xl shadow-amber-900/25 transition-all hover:scale-[1.02]"
             >
-              Read Canon Prelude
+              <Briefcase className="h-4 w-4" />
+              Inquiries
+              <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
+          </nav>
 
-          {/* Mobile Toggle */}
+          {/* Mobile toggle */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/20 text-gold lg:hidden"
+            onClick={() => setOpen((v) => !v)}
+            className="ml-auto lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-amber-200 transition-all hover:border-white/20 hover:bg-white/10"
+            aria-label={open ? "Close menu" : "Open menu"}
           >
-            {isOpen ? <X size={20} /> : <Menu size={20} />}
+            {open ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-b border-gold/10 bg-black lg:hidden"
-          >
-            <div className="space-y-1 px-6 py-8">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-4 py-4 text-sm font-bold uppercase tracking-widest text-gray-400 active:text-gold"
-                >
-                  <item.icon size={18} className="text-gold/40" />
-                  {item.label}
-                </Link>
-              ))}
-
-              <div className="pt-6">
-                <Link
-                  href="/inner-circle"
-                  className="block w-full rounded-xl bg-gold py-4 text-center text-xs font-bold uppercase tracking-widest text-black"
-                >
-                  Join Inner Circle
-                </Link>
-              </div>
+      {/* Mobile drawer */}
+      {open && (
+        <div className="fixed inset-0 z-[110] lg:hidden">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-0 h-full w-[88vw] max-w-sm border-l border-white/10 bg-black/95 backdrop-blur-xl">
+            <div className="flex items-center justify-between border-b border-white/10 p-6 pt-7">
+              <span className="font-serif text-lg font-semibold text-amber-100">Menu</span>
+              <button
+                onClick={() => setOpen(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-200 hover:border-white/20 hover:bg-white/10"
+              >
+                <X size={18} />
+              </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+
+            <div className="p-6">
+              <div className="grid gap-2">
+                <Link
+                  href="/"
+                  className={cx(
+                    "rounded-2xl border px-5 py-4 text-sm font-semibold transition-all",
+                    isActive("/") ? "border-amber-400/25 bg-amber-500/10 text-amber-200" : "border-white/10 bg-white/5 text-gray-200 hover:border-white/20 hover:bg-white/10"
+                  )}
+                >
+                  Home
+                </Link>
+
+                {NAV.map((x) => (
+                  <Link
+                    key={x.href}
+                    href={x.href}
+                    className={cx(
+                      "rounded-2xl border px-5 py-4 text-sm font-semibold transition-all",
+                      isActive(x.href)
+                        ? "border-amber-400/25 bg-amber-500/10 text-amber-200"
+                        : "border-white/10 bg-white/5 text-gray-200 hover:border-white/20 hover:bg-white/10"
+                    )}
+                  >
+                    {x.label}
+                  </Link>
+                ))}
+              </div>
+
+              <Link
+                href="/consulting"
+                className="mt-6 inline-flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-5 py-4 text-sm font-extrabold text-black"
+              >
+                Inquiries
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <p className="mt-6 text-[10px] font-extrabold uppercase tracking-[0.45em] text-gray-500">
+                London • Africa-forward • durable systems
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
-
