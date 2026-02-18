@@ -21,6 +21,15 @@ function normalizeSlug(slug: string): string {
 
 const norm = (v: unknown) => normalizeSlug(String(v || ""));
 
+// Helper to filter documents by type
+function filterDocumentsByType(docs: any[], type: string): any[] {
+  return docs.filter(doc => {
+    const kind = String(doc?.kind || doc?.type || doc?.docKind || "").toLowerCase();
+    const fp = String(doc?._raw?.flattenedPath || "").toLowerCase();
+    return kind === type || fp.startsWith(`${type}s/`) || fp.startsWith(`${type}/`);
+  });
+}
+
 export function isPublicCanon(canon: Canon): boolean {
   if (!canon) return false;
   if (isDraftContent(canon)) return false;
@@ -59,7 +68,24 @@ export function resolveCanonSlug(canon: Canon): string {
 
 async function loadCanons(): Promise<Canon[]> {
   const d = await getContentlayerData();
-  const canons = (d.allCanons ?? []) as any[];
+  
+  // Handle different possible return shapes
+  let allDocs: any[] = [];
+  
+  if (Array.isArray(d)) {
+    // d is an array of documents
+    allDocs = d;
+  } else if (d && typeof d === 'object') {
+    // d is an object, look for document collections
+    allDocs = (d as any).allDocuments || 
+              (d as any).documents || 
+              (d as any).docs || 
+              [];
+  }
+  
+  // Filter for canons specifically
+  const canons = filterDocumentsByType(allDocs, 'canon');
+  
   return canons.filter((c) => c && !isDraftContent(c));
 }
 

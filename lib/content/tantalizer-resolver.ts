@@ -1,5 +1,4 @@
 // lib/content/tantalizer-resolver.ts — HARDENED (Intelligence Teaser Logic)
-import { Post } from "contentlayer/generated";
 
 export interface Tantalizer {
   content: string;
@@ -7,12 +6,22 @@ export interface Tantalizer {
   wordCount: number;
 }
 
+// Define a local type for Post-like objects
+type AnyPost = {
+  summary?: string;
+  body?: {
+    raw?: string;
+  };
+  content?: string;
+  [key: string]: any;
+};
+
 /**
  * RESOLVE TANTALIZER
  * A bulletproof extraction engine for strategic teasers.
  * Handles missing body properties and malformed content gracefully.
  */
-export function resolveTantalizer(post: Post): Tantalizer {
+export function resolveTantalizer(post: AnyPost): Tantalizer {
   // 1. Check for explicit preview/summary fields in MDX frontmatter
   // Use optional chaining to prevent property access on undefined
   const explicitSummary = post?.summary || (post as any)?.preview;
@@ -27,7 +36,7 @@ export function resolveTantalizer(post: Post): Tantalizer {
 
   // 2. Defensive Extraction: Extract raw body safely
   // post.body?.raw ensures that if 'body' is missing, it returns undefined instead of crashing
-  const rawBody = post?.body?.raw || (post as any)?.content || "";
+  const rawBody = post?.body?.raw || post?.content || "";
   
   // 3. Sanitization Pipeline
   const cleanBody = rawBody

@@ -3,13 +3,38 @@ import React, { ComponentType, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
-import type { User, UserRole } from '@/types/auth';
+import type { UserRole } from '@/types/auth';
 import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
+
+// Define User interface locally since it's not exported from @/types/auth
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  permissions?: string[];
+  membershipDate?: string;
+  lastAccess?: string;
+}
 
 interface WithUnifiedAuthProps {
   user?: User;
   innerCircleAccess?: InnerCircleAccess;
   requiredRole?: UserRole | 'inner-circle';
+}
+
+// Helper function to get inner circle access client-side
+async function getClientInnerCircleAccess(): Promise<InnerCircleAccess | null> {
+  try {
+    const response = await fetch('/api/inner-circle/access');
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to fetch inner circle access:', error);
+    return null;
+  }
 }
 
 export function withUnifiedAuth<P extends object>(
@@ -37,10 +62,10 @@ export function withUnifiedAuth<P extends object>(
     useEffect(() => {
       const checkAuth = async () => {
         try {
-          // Check both systems in parallel
-          const [sessionResponse, innerCircleCheck] = await Promise.allSettled([
+          // Check both systems in parallel - use client-safe methods
+          const [sessionResponse, innerCircleResponse] = await Promise.allSettled([
             fetch('/api/auth/session'),
-            getInnerCircleAccess()
+            getClientInnerCircleAccess() // Client-safe version
           ]);
 
           let currentUser: User | undefined;
@@ -60,9 +85,9 @@ export function withUnifiedAuth<P extends object>(
             }
           }
 
-          // Check inner circle access
-          if (innerCircleCheck.status === 'fulfilled') {
-            currentInnerCircleAccess = innerCircleCheck.value;
+          // Check inner circle access from client response
+          if (innerCircleResponse.status === 'fulfilled' && innerCircleResponse.value) {
+            currentInnerCircleAccess = innerCircleResponse.value;
           }
 
           setUser(currentUser);
@@ -112,7 +137,7 @@ export function withUnifiedAuth<P extends object>(
       };
 
       checkAuth();
-    }, [router, requiredRole, redirectTo]);
+    }, [router, requiredRole, redirectTo, options?.publicFallback, options?.fallbackComponent]);
 
     if (isLoading) {
       return (
@@ -140,3 +165,6 @@ export function withUnifiedAuth<P extends object>(
   ComponentWithAuth.displayName = `withUnifiedAuth(${WrappedComponent.displayName || WrappedComponent.name})`;
   return ComponentWithAuth;
 }
+
+// Export types for convenience
+export type { UserRole, InnerCircleAccess };

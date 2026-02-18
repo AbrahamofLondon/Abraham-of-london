@@ -1,80 +1,78 @@
-/* lib/contentlayer/index.ts - COMPLETE FIX */
-// Re-export everything from contentlayer-helper
-export type * from "contentlayer/generated";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-// Export from data.ts
-export { getContentlayerData } from "./data";
+/**
+ * lib/contentlayer/index.ts — COMPAT LAYER (SSOT)
+ *
+ * Purpose:
+ * - Provide a stable import surface for the app.
+ * - Do NOT depend on non-existent "@/contentlayer/generated/types".
+ * - Do NOT depend on contentlayer exporting Post/Book/etc as named TS types.
+ */
 
-// Import and re-export types from "@/lib/content/server";
-import type { ContentDoc, DocKind } from "@/lib/content/server";
+import { allDocuments } from "contentlayer/generated";
+
+// ✅ The only types we guarantee in this codebase:
+import type { ContentDoc, DocKind } from "@/lib/content/index";
 export type { ContentDoc, DocKind };
 
-// Re-export document types from ContentLayer
-export type { Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short } from '@/contentlayer/generated/types';
+// -----------------------------
+// Data (stable)
+// -----------------------------
+export const getAllDocuments = (): ContentDoc[] => (allDocuments as any[]) as ContentDoc[];
 
-// Define and export the missing functions that CardDisplay needs
-export const isPost = (doc: any): boolean => doc.type === "Post";
-export const isBook = (doc: any): boolean => doc.type === "Book";
-export const isCanon = (doc: any): boolean => doc.type === "Canon";
-export const isDownload = (doc: any): boolean => doc.type === "Download";
-export const isEvent = (doc: any): boolean => doc.type === "Event";
-export const isPrint = (doc: any): boolean => doc.type === "Print";
-export const isResource = (doc: any): boolean => doc.type === "Resource";
-export const isStrategy = (doc: any): boolean => doc.type === "Strategy";
+// -----------------------------
+// Kind helpers (stable)
+// -----------------------------
+export const isPost = (doc: any): boolean => String(doc?.type) === "Post";
+export const isShort = (doc: any): boolean => String(doc?.type) === "Short";
+export const isBook = (doc: any): boolean => String(doc?.type) === "Book";
+export const isCanon = (doc: any): boolean => String(doc?.type) === "Canon";
+export const isBrief = (doc: any): boolean => String(doc?.type) === "Brief";
+export const isDownload = (doc: any): boolean => String(doc?.type) === "Download";
+export const isEvent = (doc: any): boolean => String(doc?.type) === "Event";
+export const isPrint = (doc: any): boolean => String(doc?.type) === "Print";
+export const isResource = (doc: any): boolean => String(doc?.type) === "Resource";
+export const isStrategy = (doc: any): boolean => String(doc?.type) === "Strategy";
+export const isIntelligence = (doc: any): boolean => String(doc?.type) === "Intelligence";
+export const isLexicon = (doc: any): boolean => String(doc?.type) === "Lexicon";
 
-// For backward compatibility
-export type DocumentTypes = ContentDoc;
-
-// Card display helpers
-export const getCardPropsForDocument = (doc: ContentDoc) => ({
-  title: doc.title || "Untitled",
-  subtitle: doc.subtitle,
-  excerpt: doc.excerpt,
-  description: doc.description,
-  coverImage: doc.coverImage,
-  date: doc.date,
-  tags: doc.tags || [],
-  slug: doc.slug || "",
-});
-
-export const formatCardDate = (dateString: string | null | undefined): string => {
-  if (!dateString) return "";
-  try {
-    return new Date(dateString).toLocaleDateString("en-GB", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "";
-  }
+// -----------------------------
+// Optional: docKind mapping
+// (useful if CardDisplay expects it)
+// -----------------------------
+export const toDocKind = (doc: any): DocKind => {
+  const t = String(doc?.type || "").toLowerCase();
+  if (t === "post") return "post";
+  if (t === "short") return "short";
+  if (t === "book") return "book";
+  if (t === "canon") return "canon";
+  if (t === "brief") return "brief";
+  if (t === "download") return "download";
+  if (t === "event") return "event";
+  if (t === "print") return "print";
+  if (t === "resource") return "resource";
+  if (t === "strategy") return "strategy";
+  if (t === "intelligence") return "intelligence";
+  if (t === "lexicon") return "lexicon";
+  return "unknown";
 };
 
-export const getCardImage = (coverImage: string | null | undefined, fallback: string): string => {
-  return coverImage || fallback;
-};
-
-// Import the actual ContentHelper
-import ContentHelper from "../contentlayer-helper";
-import { getContentlayerData } from "./data";
-
-const DefaultExport = {
-  ...ContentHelper,
-  getContentlayerData,
-  // Add all the functions we defined above
+// Default export (if anything imports default)
+const contentlayerApi = {
+  getAllDocuments,
   isPost,
+  isShort,
   isBook,
   isCanon,
+  isBrief,
   isDownload,
   isEvent,
   isPrint,
   isResource,
   isStrategy,
-  getCardPropsForDocument,
-  formatCardDate,
-  getCardImage,
-  ContentDoc: {} as ContentDoc, // For type-only, this won't be used at runtime
-  DocumentTypes: {} as DocumentTypes, // For type-only
+  isIntelligence,
+  isLexicon,
+  toDocKind,
 };
 
-export default DefaultExport;
+export default contentlayerApi;

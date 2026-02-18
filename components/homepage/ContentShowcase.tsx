@@ -21,51 +21,34 @@ type ContentShowcaseProps = {
 
 function safeFormatDate(dateISO?: string | null): string | null {
   if (!dateISO) return null;
-  try {
-    const d = new Date(dateISO);
-    if (Number.isNaN(d.getTime())) return null;
-    return d.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
-  } catch {
-    return null;
-  }
+  const d = new Date(dateISO);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
 }
 
 export default function ContentShowcase({
   items,
-  title = "Recent Dispatches",
-  description = "Strategic insights and architectural briefings",
+  title = "Dispatches",
+  description = "Strategic intelligence notes engineered for retrieval and reuse.",
   maxItems = 6,
   className = "",
 }: ContentShowcaseProps): React.ReactElement | null {
-  // ✅ FIXED: Safely filter items
   const validItems = (items || [])
-    .filter((item): item is ContentItem => 
-      item !== null && 
-      typeof item === "object" && 
-      typeof item.slug === "string" && 
-      typeof item.title === "string"
-    )
+    .filter((item) => item && typeof item === "object" && item.slug && item.title)
     .slice(0, maxItems);
 
   if (validItems.length === 0) return null;
 
   return (
-    <section className={`relative overflow-hidden bg-black py-20 md:py-24 ${className}`}>
-      {/* Background (matches other sections) */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-grid-technical mask-radial-fade opacity-[0.10]" />
-        <div className="absolute left-1/2 top-[-260px] h-[720px] w-[980px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[180px]" />
-        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.03] mix-blend-overlay" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className={`relative overflow-hidden bg-black ${className}`}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 md:py-24">
         {/* Header */}
         <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1">
               <FileText className="h-3.5 w-3.5 text-amber-500/70" />
               <span className="text-[10px] font-black uppercase tracking-[0.35em] text-amber-500/70">
-                Intelligence Dispatch
+                Dispatch Index
               </span>
               <ChevronRight className="h-3.5 w-3.5 text-white/15" />
               <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/35">
@@ -93,27 +76,10 @@ export default function ContentShowcase({
         {/* Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {validItems.map((item, idx) => {
-            // ✅ FIXED: Safely format date with validation
-            const dateLabel = (() => {
-              if (!item.dateISO) return null;
-              try {
-                const date = new Date(item.dateISO);
-                return !Number.isNaN(date.getTime())
-                  ? date.toLocaleDateString("en-GB", { month: "short", day: "numeric" })
-                  : null;
-              } catch {
-                return null;
-              }
-            })();
-
+            const dateLabel = safeFormatDate(item.dateISO);
             return (
-              <Link
-                key={item.slug}
-                href={`/content/${item.slug}`}
-                className="group block h-full"
-              >
+              <Link key={item.slug} href={`/content/${item.slug}`} className="group block h-full">
                 <article className="relative h-full rounded-3xl border border-white/10 bg-white/[0.02] p-8 transition-all duration-500 hover:bg-white/[0.04] hover:border-amber-500/20 hover:-translate-y-1">
-                  {/* Phase tag */}
                   <div className="mb-8 flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-amber-500/60 transition-colors">
@@ -121,18 +87,17 @@ export default function ContentShowcase({
                     </span>
                   </div>
 
-                  {/* Meta */}
                   <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/35">
                     <FileText className="h-3 w-3 text-amber-500/60" />
                     <span>{item.kind || "Brief"}</span>
 
-                    {dateLabel && (
+                    {dateLabel ? (
                       <>
                         <span className="text-white/20">•</span>
                         <Calendar className="h-3 w-3 text-white/25" />
                         <span>{dateLabel}</span>
                       </>
-                    )}
+                    ) : null}
                   </div>
 
                   <h3 className="mt-4 font-serif text-xl text-white transition-colors group-hover:text-amber-100 line-clamp-2">
@@ -159,7 +124,6 @@ export default function ContentShowcase({
                     </div>
                   </div>
 
-                  {/* Corner accent */}
                   <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-0 transition-opacity group-hover:opacity-100">
                     <div className="w-8 h-[1px] bg-amber-500/30" />
                     <div className="absolute right-4 top-4 h-8 w-[1px] bg-amber-500/30" />

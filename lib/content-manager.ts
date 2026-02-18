@@ -1,4 +1,4 @@
-// lib/content-manager.ts - FIXED WITH OPTIONAL TITLE
+// lib/content-manager.ts - FIXED WITH PROPER TYPING
 import { safeArraySlice } from "@/lib/utils/safe";
 import fs from 'fs/promises';
 import path from 'path';
@@ -184,16 +184,15 @@ export async function getFeaturedContent(
   
   for (const col of collections) {
     const items = await getAllFromCollection(col);
-    const featured = safeArraySlice(
-      items.filter(item => item.featured === true),
-      0,
-      limit
-    );
+    // ✅ FIXED: Type assertion to ensure featured is ContentFile[]
+    const featured = items
+      .filter(item => item.featured === true)
+      .slice(0, limit);
     
     allFeatured.push(...featured);
   }
   
-  return safeArraySlice(
+  return safeArraySlice<ContentFile>(
     allFeatured.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;

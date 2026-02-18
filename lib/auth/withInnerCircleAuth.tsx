@@ -2,8 +2,19 @@
 import React, { ComponentType, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import LoadingSpinner from "@/components/LoadingSpinner";
-import type { User, UserRole } from '@/types/auth';
-import { ROLE_HIERARCHY } from '@/types/auth'; // ✅ Added import
+import type { UserRole } from '@/types/auth';
+import { ROLE_HIERARCHY, CONTENT_ACCESS, hasContentAccess } from '@/types/auth';
+
+// Define User interface locally since it's not exported from @/types/auth
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  permissions?: string[];
+  membershipDate?: string;
+  lastAccess?: string;
+}
 
 interface WithInnerCircleAuthProps {
   user?: User;
@@ -184,7 +195,7 @@ function getPermissionsForRole(role: UserRole): string[] {
 // Utility function for checking permissions
 export function checkPermission(user: User | undefined, permission: string): boolean {
   if (!user) return false;
-  return user.permissions.includes(permission) || user.permissions.includes('*');
+  return (user.permissions?.includes(permission) || user.permissions?.includes('*')) ?? false;
 }
 
 // Hook version for functional components
@@ -256,7 +267,7 @@ export function useInnerCircleAuth(requiredRole?: UserRole) {
     };
 
     checkAccess();
-  }, [requiredRole]);
+  }, [requiredRole, router.asPath]);
 
   return {
     user,

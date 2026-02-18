@@ -1,17 +1,21 @@
+// lib/auth.ts — SINGLE SOURCE OF TRUTH (JWT + Session) — HARD GUARANTEES
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { getServerSession } from "next-auth/next";
 
 import type { AoLTier } from "@/types/next-auth";
 import { safePrismaQuery, prisma } from "@/lib/prisma";
-import { 
-  sha256Hex, 
-  safeParseFlags, 
-  mapMemberTierToAoLTier, 
-  hasInternalFlag 
+import {
+  sha256Hex,
+  safeParseFlags,
+  mapMemberTierToAoLTier,
+  hasInternalFlag,
 } from "@/lib/auth-utils";
 
-// Define the claims structure for better type safety
-interface AoLCliams {
+/* ============================================================================
+   Types
+============================================================================ */
+type AoLClaims = {
   tier: AoLTier;
   innerCircleAccess: boolean;
   isInternal: boolean;
@@ -19,14 +23,21 @@ interface AoLCliams {
   memberId: string | null;
   emailHash: string | null;
   flags: string[];
-}
+};
 
-// DO NOT redeclare the module here - it's already in types/next-auth.ts
-// Remove the module declaration block entirely
+type MemberResult = {
+  id: string;
+  status: string | null;
+  tier: string | null;
+  flags: string | null;
+  emailHash: string | null;
+};
 
-// Base claims with defaults
-const BASE_CLAIMS: AoLCliams = {
-  tier: "public",
+/* ============================================================================
+   Base Claims (NEVER undefined)
+============================================================================ */
+const BASE_CLAIMS: AoLClaims = {
+  tier: "public" as AoLTier,
   innerCircleAccess: false,
   isInternal: false,
   allowPrivate: false,
@@ -35,24 +46,35 @@ const BASE_CLAIMS: AoLCliams = {
   flags: [],
 };
 
-/**
- * CLAIMS RESOLVER: The "Handshake" between DB and JWT
- * Synchronizes the identity against the Neon PostgreSQL registry.
- */
-async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLCliams> {
+function computeAccess(tier: AoLTier, isInternal: boolean) {
+  // Treat anything not public/free as having inner-circle access
+  const innerCircleAccess =
+    tier !== ("public" as AoLTier) && tier !== ("free" as AoLTier);
+
+  const allowPrivate =
+    isInternal ||
+    tier === ("private" as AoLTier) ||
+    tier === ("architect" as AoLTier);
+
+  return { innerCircleAccess, allowPrivate };
+}
+
+/* ============================================================================
+   Claims Resolver
+============================================================================ */
+async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims> {
   if (!email) return BASE_CLAIMS;
 
   const normalizedEmail = email.trim().toLowerCase();
   const hashedEmail = sha256Hex(normalizedEmail);
 
-  // High-integrity query using the proxy-safe prisma instance
-  const member = await safePrismaQuery(() =>
+  const member = await safePrismaQuery<MemberResult | null>(() =>
     prisma.innerCircleMember.findFirst({
       where: {
         OR: [
           { email: normalizedEmail },
           { emailHash: hashedEmail },
-          { emailHash: normalizedEmail } // Support for Directorate Master Keys
+          { emailHash: normalizedEmail }, // Directorate Master Keys support
         ],
       },
       select: {
@@ -65,43 +87,43 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLCliams
     })
   );
 
-  // If no member found or inactive, return base claims with email hash
   if (!member) {
-    return {
-      ...BASE_CLAIMS,
-      emailHash: hashedEmail,
-    };
+    return { ...BASE_CLAIMS, emailHash: hashedEmail };
   }
 
-  // Check member status
-  if (member.status !== "active") {
-    return {
-      ...BASE_CLAIMS,
-      emailHash: hashedEmail,
-      memberId: member.id,
-    };
+  const isActive = member.status === "active";
+  if (!isActive) {
+    return { ...BASE_CLAIMS, emailHash: hashedEmail, memberId: member.id };
   }
 
   const flags = safeParseFlags(member.flags);
-  
-  // Escalation Logic: Directors or specific flags grant Private Clearance
+
   const isInternal = hasInternalFlag(flags) || member.tier === "Director";
-  const tier = isInternal ? "private" : mapMemberTierToAoLTier(member.tier, flags);
+
+  const tier: AoLTier = isInternal
+    ? ("private" as AoLTier)
+    : (mapMemberTierToAoLTier(member.tier, flags) as AoLTier);
+
+  const { innerCircleAccess, allowPrivate } = computeAccess(tier, isInternal);
 
   return {
     tier,
-    innerCircleAccess: tier !== "public" && tier !== "free",
+    innerCircleAccess,
     isInternal,
-    allowPrivate: isInternal || tier === "private" || tier === "architect",
+    allowPrivate,
     memberId: member.id,
     emailHash: member.emailHash || hashedEmail,
     flags,
   };
 }
 
+/* ============================================================================
+   NextAuth Options
+============================================================================ */
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   secret: process.env.NEXTAUTH_SECRET,
+
   providers: [
     CredentialsProvider({
       id: "credentials",
@@ -118,7 +140,6 @@ export const authOptions: NextAuthOptions = {
         const ADMIN_EMAIL = process.env.ADMIN_USER_EMAIL?.trim().toLowerCase();
         const ADMIN_PASS = process.env.ADMIN_USER_PASSWORD ?? "";
 
-        // Admin environment check (Vault Administrator)
         if (ADMIN_EMAIL && email === ADMIN_EMAIL && password === ADMIN_PASS) {
           return {
             id: "system-admin",
@@ -127,57 +148,86 @@ export const authOptions: NextAuthOptions = {
             role: "admin",
           };
         }
-        
-        // Members typically enter via the AccessGate/Proxy route
+
         return null;
       },
     }),
   ],
+
   theme: { colorScheme: "dark", brandColor: "#d4af37" },
+
   pages: {
     signIn: "/inner-circle/admin/login",
     error: "/inner-circle/error",
   },
+
   callbacks: {
     async jwt({ token, user }) {
-      // Add user data to token
+      // Ensure these exist deterministically
       if (user) {
-        token.id = user.id;
-        token.role = (user as any).role || "user";
+        (token as any).id = (user as any).id;
+        (token as any).role = (user as any).role || "user";
+        token.email = (user as any).email || token.email;
       }
 
-      const email = token.email as string | undefined;
-      const aol = await resolveAoLClaimsByEmail(email);
+      const role = String((token as any).role || "user");
+      const email = typeof token.email === "string" ? token.email : undefined;
 
-      // System Admin Escalation (Hard-coded for the root environment user)
-      if (token.role === "admin") {
-        token.aol = {
-          tier: "private",
-          innerCircleAccess: true,
-          isInternal: true,
-          allowPrivate: true,
-          memberId: aol.memberId ?? "admin-root",
-          emailHash: aol.emailHash ?? (email ? sha256Hex(email) : null),
-          flags: Array.from(new Set([...(aol.flags ?? []), "admin", "internal"])),
-        };
-      } else {
-        token.aol = aol;
-      }
-      
+      const resolved = await resolveAoLClaimsByEmail(email);
+
+      // Admin escalation
+      const aol: AoLClaims =
+        role === "admin"
+          ? {
+              tier: "private" as AoLTier,
+              innerCircleAccess: true,
+              isInternal: true,
+              allowPrivate: true,
+              memberId: resolved.memberId ?? "admin-root",
+              emailHash: resolved.emailHash ?? (email ? sha256Hex(email) : null),
+              flags: Array.from(
+                new Set([...(resolved.flags ?? []), "admin", "internal"])
+              ),
+            }
+          : resolved;
+
+      // ✅ HARD GUARANTEE: token.aol is NEVER undefined
+      (token as any).aol = aol;
+
+      // Also keep id/role stable
+      (token as any).id = String((token as any).id || token.sub || "");
+      (token as any).role = role;
+
       return token;
     },
+
     async session({ session, token }) {
-      // Add token data to session
+      // Ensure required session.user fields (per your Session augmentation)
       if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as any).role = token.role as string;
+        (session.user as any).id = String((token as any).id || "");
+        (session.user as any).role = String((token as any).role || "user");
       }
-      
-      // Add AOL claims to session - now using the type from central definitions
-      session.aol = token.aol;
-      
+
+      // ✅ HARD GUARANTEE: session.aol is NEVER undefined
+      const aol = ((token as any).aol as AoLClaims | undefined) ?? BASE_CLAIMS;
+      (session as any).aol = aol;
+
       return session;
     },
   },
+
   debug: process.env.NODE_ENV === "development",
 };
+
+/* ============================================================================
+   Server Session Helper
+============================================================================ */
+/**
+ * Get the current auth session on the server
+ * @returns The session or null if not authenticated
+ */
+export async function getAuthSession() {
+  return getServerSession(authOptions);
+}
+
+export default authOptions;

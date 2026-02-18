@@ -106,10 +106,6 @@ body {
    3) Utilities: subtle helpers for institutional polish
 ============================================================================= */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
   /* Prevents backdrop blur flicker in some browsers */
   .backdrop-fix {
     transform: translateZ(0);
@@ -126,5 +122,36 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================================
+   5) TYPOGRAPHY + MOTION-SAFE UTILITIES
+   World-class typography polish and institutional motion
+============================================================================= */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  @keyframes aolFadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+      filter: blur(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .animate-aolFadeUp {
+    animation: aolFadeUp 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 }

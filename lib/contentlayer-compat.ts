@@ -19,6 +19,40 @@ import {
   allStrategies,
 } from "contentlayer/generated";
 
+// Export DocBase type for use in other files
+export type DocBase = {
+  _id: string;
+  _raw: {
+    sourceFilePath: string;
+    sourceFileName: string;
+    sourceFileDir: string;
+    contentType: string;
+    flattenedPath: string;
+  };
+  type: string;
+  title: string;
+  description?: string;
+  excerpt?: string;
+  date?: string;
+  tags?: string[];
+  draft?: boolean;
+  published?: boolean;
+  featured?: boolean;
+  slug?: string;
+  slugComputed?: string;
+  coverImage?: string;
+  image?: string;
+  author?: string;
+  readTime?: string;
+  category?: string;
+  body?: {
+    raw: string;
+    html?: string;
+    code?: string;
+  };
+  [key: string]: any;
+};
+
 /**
  * Core Governance: Filters out drafts and future-dated content.
  */

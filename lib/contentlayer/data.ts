@@ -1,13 +1,13 @@
-import { safeSlice } from "@/lib/utils/safe";
-
 // lib/contentlayer/data.ts
 /**
  * ContentLayer data export for build-time usage
  * This file provides the getContentlayerData function that pages need during build
  */
 
-// Import REAL data from your contentlayer-generated files
-import { 
+import { safeSlice } from "@/lib/utils/safe";
+
+// Import REAL data from your SSOT wrapper (which itself re-exports contentlayer/generated)
+import {
   allDocuments,
   allPosts,
   allBooks,
@@ -17,15 +17,30 @@ import {
   allResources,
   allStrategies,
   allCanons,
-  allShorts
-} from '@/lib/contentlayer-generated';
+  allShorts,
+} from "@/lib/contentlayer-generated";
 
-// Import document types from your contentlayer config
-import type { 
-  Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short 
-} from '@/contentlayer/generated/types';
+// Define local types since they're not exported from contentlayer/generated
+export type Post = any;
+export type Book = any;
+export type Download = any;
+export type Event = any;
+export type Print = any;
+export type Resource = any;
+export type Strategy = any;
+export type Canon = any;
+export type Short = any;
 
-export type ContentLayerDocument = Post | Book | Download | Event | Print | Resource | Strategy | Canon | Short;
+export type ContentLayerDocument =
+  | Post
+  | Book
+  | Download
+  | Event
+  | Print
+  | Resource
+  | Strategy
+  | Canon
+  | Short;
 
 export function getContentlayerData(): {
   available: boolean;
@@ -37,39 +52,35 @@ export function getContentlayerData(): {
 } {
   try {
     const documents = allDocuments as unknown as ContentLayerDocument[];
-    
+
     if (!documents || documents.length === 0) {
       return {
         available: false,
         documentCount: 0,
         documents: [],
         types: [],
-        warning: 'No ContentLayer documents found. Run "pnpm contentlayer build" to generate content.'
+        warning:
+          'No Contentlayer documents found. Run "pnpm contentlayer build" to generate content.',
       };
     }
-    
-    // Extract unique document types
-    const types = Array.from(
-      new Set(
-        documents.map(doc => doc.type || 'unknown')
-      )
-    );
-    
+
+    const types = Array.from(new Set(documents.map((doc: any) => doc.type || "unknown")));
+
     return {
       available: true,
       documentCount: documents.length,
-      documents: safeSlice(documents, 0, 50), // Limit for performance
-      types
+      documents: safeSlice(documents, 0, 50), // Limit for safety/perf
+      types,
     };
   } catch (error) {
-    console.error('[ContentLayer] getContentlayerData failed:', error);
-    
+    console.error("[ContentLayer] getContentlayerData failed:", error);
+
     return {
       available: false,
       documentCount: 0,
       documents: [],
       types: [],
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -79,24 +90,29 @@ export function getAllDocuments(): ContentLayerDocument[] {
 }
 
 export function getDocumentsByType(type: string): ContentLayerDocument[] {
-  const documents = getAllDocuments();
-  return documents.filter(doc => doc.type === type);
+  return getAllDocuments().filter((doc: any) => doc.type === type);
 }
 
 export function getDocumentBySlug(slug: string): ContentLayerDocument | null {
-  const documents = getAllDocuments();
-  return documents.find(doc => doc.slug === slug) || null;
+  const s = String(slug || "").replace(/^\/+|\/+$/g, "");
+  const docs = getAllDocuments();
+
+  return (
+    docs.find((doc: any) => {
+      const docSlug = String(doc.slug || "").replace(/^\/+|\/+$/g, "");
+      const flat = String(doc._raw?.flattenedPath || "").replace(/^\/+|\/+$/g, "");
+      return docSlug === s || flat === s;
+    }) || null
+  );
 }
 
 export function getPublishedDocuments(): ContentLayerDocument[] {
-  const documents = getAllDocuments();
-  return documents.filter(doc => !doc.draft && doc.published !== false);
+  return getAllDocuments().filter((doc: any) => !doc.draft && doc.published !== false);
 }
 
-// Document type specific getters
+// ---------- Type-specific getters ----------
 export function getPostBySlug(slug: string): Post | null {
-  const post = allPosts.find(post => post.slug === slug);
-  return post || null;
+  return (allPosts as any[]).find((p: any) => p.slug === slug) || null;
 }
 
 export function getPostBySlugWithContent(slug: string): Post | null {
@@ -104,90 +120,82 @@ export function getPostBySlugWithContent(slug: string): Post | null {
 }
 
 export function getPublishedPosts(): Post[] {
-  return allPosts.filter(post => !post.draft && post.published !== false);
+  return (allPosts as any[]).filter((p: any) => !p.draft && p.published !== false);
 }
 
 export function getBookBySlug(slug: string): Book | null {
-  const book = allBooks.find(book => book.slug === slug);
-  return book || null;
+  return (allBooks as any[]).find((b: any) => b.slug === slug) || null;
 }
 
 export function getPublishedBooks(): Book[] {
-  return allBooks.filter(book => !book.draft && book.published !== false);
+  return (allBooks as any[]).filter((b: any) => !b.draft && b.published !== false);
 }
 
 export function getDownloadBySlug(slug: string): Download | null {
-  const download = allDownloads.find(download => download.slug === slug);
-  return download || null;
+  return (allDownloads as any[]).find((d: any) => d.slug === slug) || null;
 }
 
 export function getPublishedDownloads(): Download[] {
-  return allDownloads.filter(download => !download.draft && download.published !== false);
+  return (allDownloads as any[]).filter((d: any) => !d.draft && d.published !== false);
 }
 
 export function getEventBySlug(slug: string): Event | null {
-  const event = allEvents.find(event => event.slug === slug);
-  return event || null;
+  return (allEvents as any[]).find((e: any) => e.slug === slug) || null;
 }
 
 export function getPublishedEvents(): Event[] {
-  return allEvents.filter(event => !event.draft && event.published !== false);
+  return (allEvents as any[]).filter((e: any) => !e.draft && e.published !== false);
 }
 
 export function getPrintBySlug(slug: string): Print | null {
-  const print = allPrints.find(print => print.slug === slug);
-  return print || null;
+  return (allPrints as any[]).find((p: any) => p.slug === slug) || null;
 }
 
 export function getPublishedPrints(): Print[] {
-  return allPrints.filter(print => !print.draft && print.published !== false);
+  return (allPrints as any[]).filter((p: any) => !p.draft && p.published !== false);
 }
 
 export function getResourceBySlug(slug: string): Resource | null {
-  const resource = allResources.find(resource => resource.slug === slug);
-  return resource || null;
+  return (allResources as any[]).find((r: any) => r.slug === slug) || null;
 }
 
 export function getPublishedResources(): Resource[] {
-  return allResources.filter(resource => !resource.draft && resource.published !== false);
+  return (allResources as any[]).filter((r: any) => !r.draft && r.published !== false);
 }
 
 export function getStrategyBySlug(slug: string): Strategy | null {
-  const strategy = allStrategies.find(strategy => strategy.slug === slug);
-  return strategy || null;
+  return (allStrategies as any[]).find((s: any) => s.slug === slug) || null;
 }
 
 export function getPublishedStrategies(): Strategy[] {
-  return allStrategies.filter(strategy => !strategy.draft && strategy.published !== false);
+  return (allStrategies as any[]).filter((s: any) => !s.draft && s.published !== false);
 }
 
 export function getCanonBySlug(slug: string): Canon | null {
-  const canon = allCanons.find(canon => canon.slug === slug);
-  return canon || null;
+  return (allCanons as any[]).find((c: any) => c.slug === slug) || null;
 }
 
 export function getPublishedCanons(): Canon[] {
-  return allCanons.filter(canon => !canon.draft && canon.published !== false);
+  return (allCanons as any[]).filter((c: any) => !c.draft && c.published !== false);
 }
 
 export function getShortBySlug(slug: string): Short | null {
-  const short = allShorts.find(short => short.slug === slug);
-  return short || null;
+  return (allShorts as any[]).find((s: any) => s.slug === slug) || null;
 }
 
 export function getPublishedShorts(): Short[] {
-  return allShorts.filter(short => !short.draft && short.published !== false);
+  return (allShorts as any[]).filter((s: any) => !s.draft && s.published !== false);
 }
 
 export function coerceShortTheme(theme: any): string {
-  if (typeof theme === 'string') return theme;
-  return theme?.toString() || 'default';
+  if (typeof theme === "string") return theme;
+  return theme?.toString() || "default";
 }
 
-// Alias functions for compatibility
+// Aliases for compatibility
 export const getDocBySlug = getDocumentBySlug;
 
-// Default export for backward compatibility
+// Default export (backward compatibility)
 const dataApi = {
   getContentlayerData,
   getAllDocuments,
@@ -195,44 +203,35 @@ const dataApi = {
   getDocumentBySlug,
   getPublishedDocuments,
   getDocBySlug,
-  
-  // Post functions
+
   getPostBySlug,
   getPostBySlugWithContent,
   getPublishedPosts,
-  
-  // Book functions
+
   getBookBySlug,
   getPublishedBooks,
-  
-  // Download functions
+
   getDownloadBySlug,
   getPublishedDownloads,
-  
-  // Event functions
+
   getEventBySlug,
   getPublishedEvents,
-  
-  // Print functions
+
   getPrintBySlug,
   getPublishedPrints,
-  
-  // Resource functions
+
   getResourceBySlug,
   getPublishedResources,
-  
-  // Strategy functions
+
   getStrategyBySlug,
   getPublishedStrategies,
-  
-  // Canon functions
+
   getCanonBySlug,
   getPublishedCanons,
-  
-  // Short functions
+
   getShortBySlug,
   getPublishedShorts,
-  coerceShortTheme
+  coerceShortTheme,
 };
 
 export default dataApi;

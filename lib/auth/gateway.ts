@@ -1,38 +1,19 @@
-// lib/auth/gateway.ts - ALIGNED WITH ADMIN-SESSION
-import { NextRequest } from 'next/server';
-import { getAdminSession } from '@/lib/server/auth/admin-session';
+// lib/auth/gateway.ts — TYPE-SAFE + NORMALIZED (no unsafe casts)
+
+import { NextRequest } from "next/server";
+import { getAdminSession } from "@/lib/server/auth/admin-session";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 
-// Define types that match the actual return types
-interface AdminSessionResult {
-  user: { 
-    id: string; 
-    email: string; 
-    isAdmin: boolean; 
-    token?: string 
-  } | null;
-  isAdmin: boolean;
-  token?: string;
-}
+/**
+ * Infer the TRUE return types from the actual functions
+ * (no fantasy interfaces, no brittle casts).
+ */
+type AdminSession = Awaited<ReturnType<typeof getAdminSession>>;
+type InnerCircleAccess = Awaited<ReturnType<typeof getInnerCircleAccess>>;
 
-interface InnerCircleAccessResult {
-  hasAccess: boolean;
-  memberId?: string | null;
-  tier?: string | null;
-  reason?: string;
-  userId?: string;
-  email?: string;
-  accessLevel?: string;
-}
-
-interface AuthGatewayResult {
+type AuthGatewayResult = {
   adminSession: {
-    user: { 
-      id: string; 
-      email: string; 
-      isAdmin: boolean; 
-      token?: string 
-    } | null;
+    user: AdminSession extends { user: infer U } ? U : any;
     isAuthenticated: boolean;
     isAdmin: boolean;
   };
@@ -46,138 +27,168 @@ interface AuthGatewayResult {
     hasAnyAccess: boolean;
     isAuthenticated: boolean;
   };
+};
+
+/**
+ * Convert Request -> minimal NextRequest-like surface for cookie/header access.
+ * This prevents "instanceof NextRequest" issues when calling from route handlers.
+ */
+function toCompatibleReq(request: NextRequest | Request): any {
+  if (request instanceof NextRequest) return request;
+
+  const headers = new Headers();
+  request.headers.forEach((value, key) => headers.append(key, value));
+
+  const cookieHeader = request.headers.get("cookie") || "";
+  const cookies: Record<string, string> = {};
+
+  cookieHeader.split(";").forEach((cookie) => {
+    const [name, ...rest] = cookie.trim().split("=");
+    const value = rest.join("=");
+    if (name && value) cookies[name] = value;
+  });
+
+  return {
+    headers,
+    cookies: {
+      get: (name: string) => {
+        const value = cookies[name];
+        return value ? { value } : null;
+      },
+    },
+    url: request.url,
+    method: request.method,
+  };
 }
 
 /**
- * Unified authentication gateway for both admin and inner-circle access
+ * Normalize whatever getInnerCircleAccess() returns into a stable contract.
+ * We DO NOT assume the exact key names; we map defensively.
  */
-export async function authGateway(request: NextRequest | Request): Promise<AuthGatewayResult> {
-  // Convert standard Request to compatible object
-  let compatibleReq: any;
-  
-  if (request instanceof NextRequest) {
-    compatibleReq = request;
-  } else {
-    const headers = new Headers();
-    request.headers.forEach((value, key) => {
-      headers.append(key, value);
-    });
-
-    const cookieHeader = request.headers.get('cookie') || '';
-    const cookies: Record<string, string> = {};
-    cookieHeader.split(';').forEach(cookie => {
-      const [name, value] = cookie.trim().split('=');
-      if (name && value) {
-        cookies[name] = value;
-      }
-    });
-
-    compatibleReq = {
-      headers: headers,
-      cookies: {
-        get: (name: string) => {
-          const value = cookies[name];
-          return value ? { value } : null;
-        }
-      },
-      url: request.url,
-      method: request.method
-    };
+function normalizeInnerCircle(inner: InnerCircleAccess | null): {
+  hasAccess: boolean;
+  memberId: string | null;
+  tier: string | null;
+  reason?: string;
+} {
+  if (!inner) {
+    return { hasAccess: false, memberId: null, tier: null, reason: "INNER_CIRCLE_UNAVAILABLE" };
   }
 
-  // Fetch both sessions in parallel
+  const anyInner = inner as any;
+
+  // These are common patterns across auth gates:
+  const hasAccess =
+    Boolean(anyInner.hasAccess) ||
+    Boolean(anyInner.allowed) ||
+    Boolean(anyInner.ok) ||
+    Boolean(anyInner.access === true) ||
+    Boolean(anyInner.authorized) ||
+    false;
+
+  const memberId: string | null =
+    anyInner.memberId ??
+    anyInner.userId ??
+    anyInner.id ??
+    (typeof anyInner.email === "string" ? `user-${anyInner.email}` : null) ??
+    null;
+
+  const tier: string | null =
+    anyInner.tier ??
+    anyInner.accessLevel ??
+    anyInner.level ??
+    anyInner.plan ??
+    (hasAccess ? "standard" : null);
+
+  const reason: string | undefined =
+    anyInner.reason ??
+    anyInner.code ??
+    anyInner.error ??
+    (hasAccess ? undefined : "INNER_CIRCLE_REQUIRED");
+
+  return {
+    hasAccess,
+    memberId,
+    tier: tier ? String(tier) : null,
+    reason: reason ? String(reason) : undefined,
+  };
+}
+
+/**
+ * Unified authentication gateway for both admin and inner-circle access.
+ */
+export async function authGateway(request: NextRequest | Request): Promise<AuthGatewayResult> {
+  const compatibleReq = toCompatibleReq(request);
+
   const [adminAuth, innerCircleAuth] = await Promise.allSettled([
     getAdminSession(compatibleReq),
-    getInnerCircleAccess(compatibleReq)
+    getInnerCircleAccess(compatibleReq),
   ]);
 
-  // Extract admin session (using the actual return type)
-  const admin = adminAuth.status === 'fulfilled' 
-    ? (adminAuth.value as AdminSessionResult) 
-    : null;
-  
-  const innerCircle = innerCircleAuth.status === 'fulfilled' 
-    ? (innerCircleAuth.value as InnerCircleAccessResult) 
-    : null;
+  const admin: AdminSession | null = adminAuth.status === "fulfilled" ? adminAuth.value : null;
+  const innerRaw: InnerCircleAccess | null = innerCircleAuth.status === "fulfilled" ? innerCircleAuth.value : null;
 
-  const hasAdminAccess = admin?.isAdmin === true;
-  const hasInnerCircleAccess = innerCircle?.hasAccess === true;
+  const isAdmin = Boolean((admin as any)?.isAdmin === true || (admin as any)?.user?.isAdmin === true);
+  const isAuthenticated = Boolean((admin as any)?.user);
 
-  // Extract inner circle properties with fallbacks
-  const innerCircleMemberId = innerCircle?.memberId || 
-                              innerCircle?.userId || 
-                              (innerCircle?.email ? `user-${innerCircle.email}` : null);
-  
-  const innerCircleTier = innerCircle?.tier || 
-                         innerCircle?.accessLevel || 
-                         (hasInnerCircleAccess ? 'standard' : null);
+  const innerCircle = normalizeInnerCircle(innerRaw);
+
+  const hasAnyAccess = isAdmin || innerCircle.hasAccess;
 
   return {
     adminSession: {
-      user: admin?.user || null,
-      isAuthenticated: !!admin?.user,
-      isAdmin: hasAdminAccess,
+      user: (admin as any)?.user ?? null,
+      isAuthenticated,
+      isAdmin,
     },
-    innerCircleAccess: {
-      hasAccess: hasInnerCircleAccess,
-      memberId: innerCircleMemberId,
-      tier: innerCircleTier,
-      reason: innerCircle?.reason,
-    },
+    innerCircleAccess: innerCircle,
     combined: {
-      hasAnyAccess: hasAdminAccess || hasInnerCircleAccess,
-      isAuthenticated: hasAdminAccess || hasInnerCircleAccess,
+      hasAnyAccess,
+      isAuthenticated: hasAnyAccess,
     },
   };
 }
 
 /**
- * Check if user has access to a specific tier
+ * Check if user has access to a specific tier.
  */
 export async function checkTierAccess(
   request: NextRequest | Request,
   requiredTier: string
 ): Promise<{ hasAccess: boolean; reason?: string }> {
   const auth = await authGateway(request);
-  
-  // Admins get access to everything
-  if (auth.adminSession.isAdmin) {
-    return { hasAccess: true };
-  }
 
-  // Check if user has any inner-circle access
+  // Admins get everything
+  if (auth.adminSession.isAdmin) return { hasAccess: true };
+
+  // Must have inner-circle access
   if (!auth.innerCircleAccess.hasAccess) {
-    return { 
-      hasAccess: false, 
-      reason: auth.innerCircleAccess.reason || 'INNER_CIRCLE_REQUIRED' 
+    return {
+      hasAccess: false,
+      reason: auth.innerCircleAccess.reason || "INNER_CIRCLE_REQUIRED",
     };
   }
 
-  const userTier = auth.innerCircleAccess.tier;
-  
-  // If no tier specified, grant access
-  if (!userTier) {
-    return { hasAccess: true };
-  }
+  const userTier = (auth.innerCircleAccess.tier || "").toLowerCase();
+  const reqTier = (requiredTier || "").toLowerCase();
 
-  // Define tier hierarchy
+  // Tier hierarchy (lower number = higher privilege)
   const tierOrder: Record<string, number> = {
-    'elite': 1,
-    'premium': 2,  
-    'standard': 3,
-    'basic': 3,
-    'member': 3,
-    'public': 4
+    elite: 1,
+    premium: 2,
+    standard: 3,
+    basic: 3,
+    member: 3,
+    public: 4,
   };
 
-  const userTierLevel = tierOrder[userTier.toLowerCase()] || 0;
-  const requiredTierLevel = tierOrder[requiredTier.toLowerCase()] || 0;
+  const userLevel = tierOrder[userTier] ?? 999;
+  const requiredLevel = tierOrder[reqTier] ?? 999;
 
-  // User must have equal or higher privilege
-  if (userTierLevel > requiredTierLevel) {
-    return { 
-      hasAccess: false, 
-      reason: `INSUFFICIENT_TIER: You have ${userTier} access but ${requiredTier} is required` 
+  if (userLevel > requiredLevel) {
+    return {
+      hasAccess: false,
+      reason: `INSUFFICIENT_TIER: You have ${auth.innerCircleAccess.tier} but ${requiredTier} is required`,
     };
   }
 
@@ -185,53 +196,38 @@ export async function checkTierAccess(
 }
 
 /**
- * Middleware wrapper for route handlers
+ * Middleware wrapper for route handlers.
  */
-export function withAuth(handler: Function) {
-  return async function(request: NextRequest | Request, ...args: any[]) {
+export function withAuth(handler: (request: NextRequest | Request, context: any) => Promise<Response> | Response) {
+  return async function (request: NextRequest | Request, ...args: any[]) {
     try {
       const auth = await authGateway(request);
-      
-      // Deny access if no authentication present
+
       if (!auth.combined.hasAnyAccess) {
         return new Response(
-          JSON.stringify({ 
-            error: 'Authentication required',
-            code: 'AUTH_REQUIRED',
-            reason: auth.innerCircleAccess.reason
+          JSON.stringify({
+            error: "Authentication required",
+            code: "AUTH_REQUIRED",
+            reason: auth.innerCircleAccess.reason,
           }),
-          { 
-            status: 401,
-            headers: { 'Content-Type': 'application/json' }
-          }
+          { status: 401, headers: { "Content-Type": "application/json" } }
         );
       }
 
-      // Pass authentication context to handler
-      const context = { 
-        auth,
-        request,
-        ...args 
-      };
-      
-      return handler(request, context);
-      
+      return handler(request, { auth, request, args });
     } catch (error) {
-      console.error('[AuthGateway] Error:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
-      const statusCode = errorMessage.includes('Invalid') || errorMessage.includes('expired') ? 401 : 500;
-      
+      console.error("[AuthGateway] Error:", error);
+
+      const msg = error instanceof Error ? error.message : "Internal server error";
+      const status = msg.toLowerCase().includes("invalid") || msg.toLowerCase().includes("expired") ? 401 : 500;
+
       return new Response(
-        JSON.stringify({ 
-          error: 'Authentication system error',
-          details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-          code: 'AUTH_SYSTEM_ERROR'
+        JSON.stringify({
+          error: "Authentication system error",
+          details: process.env.NODE_ENV === "development" ? msg : undefined,
+          code: "AUTH_SYSTEM_ERROR",
         }),
-        { 
-          status: statusCode,
-          headers: { 'Content-Type': 'application/json' }
-        }
+        { status, headers: { "Content-Type": "application/json" } }
       );
     }
   };

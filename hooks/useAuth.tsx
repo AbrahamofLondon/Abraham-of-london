@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useSession } from 'next-auth/react';
 import type { AoLTier } from '@/types/next-auth';
 
-// No need to redeclare module here - it's already in types/next-auth.ts
+// No need to redeclare module here - it's already in types/next-auth.d.ts
 
 interface AuthContextType {
   user: any | null;

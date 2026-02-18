@@ -53,6 +53,8 @@ export function joinHref(...args: (string | undefined | null)[]): string {
 
   for (let i = 0; i < raw.length; i++) {
     const curr = raw[i];
+    if (!curr) continue;
+    
     const prev = parts[parts.length - 1];
 
     // Skip exact duplicates: ["books","books"] => ["books"]

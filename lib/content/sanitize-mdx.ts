@@ -179,18 +179,21 @@ export function extractHeadingsFromMdx(content: string): Heading[] {
   
   let match: RegExpExecArray | null;
   while ((match = headingRegex.exec(content)) !== null) {
-    const level = match[1].length;
-    const text = match[2].trim();
+    // Add null check for match[1] and match[2]
+    if (match[1] && match[2]) {
+      const level = match[1].length;
+      const text = match[2].trim();
 
-    // Generate a safe ID
-    const id = text
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
+      // Generate a safe ID
+      const id = text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
 
-    headings.push({ level, text, id });
+      headings.push({ level, text, id });
+    }
   }
 
   return headings;
@@ -209,18 +212,24 @@ export function extractImagesFromMdx(content: string): string[] {
   let match: RegExpExecArray | null;
 
   while ((match = mdImageRegex.exec(content)) !== null) {
-    const url = match[1].trim();
-    if (url && !url.startsWith("http") && !url.startsWith("//") && !url.startsWith("mailto:")) {
-      images.add(url);
+    // ✅ FIXED: Add null check for match[1]
+    if (match && match[1]) {
+      const url = match[1].trim();
+      if (url && !url.startsWith("http") && !url.startsWith("//") && !url.startsWith("mailto:")) {
+        images.add(url);
+      }
     }
   }
 
   // HTML/JSX images: <img src="..." />
   const htmlImageRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
   while ((match = htmlImageRegex.exec(content)) !== null) {
-    const url = match[1].trim();
-    if (url && !url.startsWith("http") && !url.startsWith("//") && !url.startsWith("mailto:")) {
-      images.add(url);
+    // ✅ FIXED: Add null check for match[1]
+    if (match && match[1]) {
+      const url = match[1].trim();
+      if (url && !url.startsWith("http") && !url.startsWith("//") && !url.startsWith("mailto:")) {
+        images.add(url);
+      }
     }
   }
 

@@ -1,7 +1,39 @@
 /* lib/content-loader.ts — SYSTEMATIC MDX LOADER FOR INTELLIGENCE ASSETS */
-import { allPosts, Post as ContentlayerPost } from 'contentlayer/generated';
+import { allPosts } from 'contentlayer/generated';
 import { Post } from '@/types/post';
 import { compareDesc, parseISO } from 'date-fns';
+
+// Define the type for Contentlayer documents
+interface ContentlayerDocument {
+  _id?: string;
+  _raw?: {
+    sourceFilePath?: string;
+    sourceFileName?: string;
+    sourceFileDir?: string;
+    contentType?: string;
+    flattenedPath?: string;
+  };
+  type?: string;
+  slug?: string;
+  title?: string;
+  subtitle?: string;
+  date?: string;
+  description?: string;
+  excerpt?: string;
+  coverImage?: string;
+  published?: boolean;
+  featured?: boolean;
+  category?: string;
+  tags?: string[];
+  author?: string;
+  readTime?: string;
+  body?: {
+    raw: string;
+    html?: string;
+    code?: string;
+  };
+  [key: string]: any; // Allow additional properties
+}
 
 /**
  * PRODUCTION-GRADE CONTENT LOADER
@@ -12,7 +44,7 @@ export async function loadPostsFromSource(): Promise<Post[]> {
   try {
     // 1. Fetch documents from the auto-generated Contentlayer cache
     // This is the most efficient method for 75+ documents
-    const documents = allPosts;
+    const documents = allPosts as ContentlayerDocument[];
 
     if (!documents || documents.length === 0) {
       console.warn('[content-loader] No documents found in Contentlayer cache.');
@@ -24,20 +56,20 @@ export async function loadPostsFromSource(): Promise<Post[]> {
       .map((doc) => {
         // Calculate dynamic reading time if not provided in frontmatter
         const wordsPerMinute = 200;
-        const noOfWords = doc.body.raw.split(/\s/g).length;
+        const noOfWords = doc.body?.raw?.split(/\s/g).length || 0;
         const minutes = Math.ceil(noOfWords / wordsPerMinute);
         const autoReadTime = `${minutes} min read`;
 
         return {
-          slug: doc.slug || doc._raw.flattenedPath,
+          slug: doc.slug || doc._raw?.flattenedPath || '',
           title: doc.title || 'Untitled Brief',
           subtitle: doc.subtitle || '',
-          date: doc.date,
+          date: doc.date || '',
           
           // Content Handling: Providing both raw and compiled MDX
-          content: doc.body.raw,
-          html: doc.body.html || '',
-          compiledSource: doc.body.code, // This is required for <MDXRemote /> hydration
+          content: doc.body?.raw || '',
+          html: doc.body?.html || '',
+          compiledSource: doc.body?.code || '', // This is required for <MDXRemote /> hydration
 
           excerpt: doc.excerpt || doc.description || '',
           description: doc.description || '',

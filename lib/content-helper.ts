@@ -62,12 +62,24 @@ export {
   getDocumentKind
 };
 
-// Export types from ContentLayer
-export type { Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short } from '@/contentlayer/generated/types';
-
 // Define generic types for flexibility
 export type ContentDoc = any;
 export type DocKind = string;
+
+// Import types from ContentLayer (if they exist, otherwise use fallback)
+// Try to import from the main contentlayer module
+type Post = any;
+type Book = any;
+type Download = any;
+type Event = any;
+type Print = any;
+type Resource = any;
+type Strategy = any;
+type Canon = any;
+type Short = any;
+
+// Export the types
+export type { Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short };
 
 // Client-side only utilities (these are safe for both client and server)
 export function formatDocumentDate(dateString?: string): string {
@@ -180,11 +192,11 @@ export const getServerAllBooks = getPublishedBooks;
 export const getServerAllCanons = getPublishedCanons;
 
 export function getServerBookBySlug(slug: string) {
-  return getPublishedBooks().find(b => b.slug === slug || b.slugAsParams === slug);
+  return getPublishedBooks().find((b: any) => b.slug === slug || b.slugAsParams === slug);
 }
 
 export function getServerCanonBySlug(slug: string) {
-  return getPublishedCanons().find(c => c.slug === slug || c.slugAsParams === slug);
+  return getPublishedCanons().find((c: any) => c.slug === slug || c.slugAsParams === slug);
 }
 // -------------------------------------------------------------
 

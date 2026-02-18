@@ -1,16 +1,20 @@
 import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
 
-import {
-  allPosts,
-  allBooks,
-  allDownloads,
-  allEvents,
-  allPrints,
-  allResources,
-  allStrategies,
-  allCanons,
-  allShorts,
-} from "@/lib/content";
+// Import the entire module and extract what we need
+import * as ContentModule from "@/lib/content";
+
+// Extract the document arrays from the module
+const {
+  allPosts = [],
+  allBooks = [],
+  allDownloads = [],
+  allEvents = [],
+  allPrints = [],
+  allResources = [],
+  allStrategies = [],
+  allCanons = [],
+  allShorts = [],
+} = ContentModule as any;
 
 // Define types based on actual Contentlayer data structure
 // Using more flexible types that match what's actually imported

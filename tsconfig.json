@@ -36,10 +36,12 @@
       "./types"
     ],
     "types": [
-      "node",
-      "react",
-      "react-dom",
-      "next"
+  "node",
+  "react",
+  "react-dom",
+  "next",
+  "next-auth",
+  "next-auth/jwt"
     ],
     "baseUrl": ".",
     "paths": {

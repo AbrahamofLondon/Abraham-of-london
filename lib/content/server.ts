@@ -16,7 +16,7 @@ import {
 
 import { decryptDocument } from "@/lib/security";
 import { getAuthSession } from "@/lib/auth/options";
-import { canAccessDoc } from "@/lib/content/index"; // Using the synchronized role logic
+import { canAccessDoc } from "@/lib/content/access-engine"; // ✅ FIXED: SSOT role logic (no barrel dependency)
 
 // Import all helpers from contentlayer-helper
 import {
@@ -41,6 +41,59 @@ import {
   documentKinds,
   getCardProps,
 } from "@/lib/contentlayer-helper";
+
+// ------------------------------
+// TYPES — exported for downstream type re-exports (SSOT)
+// ------------------------------
+
+export type DocKind =
+  | "post"
+  | "short"
+  | "book"
+  | "canon"
+  | "brief"
+  | "dispatch"
+  | "intelligence"
+  | "download"
+  | "event"
+  | "print"
+  | "resource"
+  | "strategy"
+  | "lexicon"
+  | "unknown";
+
+export type ContentDoc = {
+  _id?: string;
+  type?: string;
+  kind?: string;
+
+  title?: string;
+  slug?: string;
+  href?: string;
+
+  draft?: boolean;
+  published?: boolean;
+
+  accessLevel?: string;
+  tier?: string;
+  classification?: string;
+  requiresAuth?: boolean;
+
+  body?: { raw?: string; code?: string };
+  content?: string;
+
+  metadata?: any;
+
+  _raw?: {
+    flattenedPath?: string;
+    sourceFilePath?: string;
+    sourceFileName?: string;
+    sourceFileDir?: string;
+    contentType?: string;
+  };
+
+  [key: string]: any;
+};
 
 // Re-exports - EXPORT EVERYTHING THAT PAGES ARE TRYING TO IMPORT
 export {
@@ -226,8 +279,6 @@ export function getAllLexicons() {
   const docs = getAllCombinedDocs();
   return docs.filter(d => d.kind === 'lexicon' || d._raw?.sourceFilePath.includes('lexicon/'));
 }
-
-// REMOVED DUPLICATE: getAllStrategies is already defined above
 
 export function getAllBlogs() {
   return getAllPosts();

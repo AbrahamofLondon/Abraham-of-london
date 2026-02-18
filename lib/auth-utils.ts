@@ -1,9 +1,9 @@
+// lib/auth-utils.ts
 import crypto from "crypto";
 import type { AoLTier } from "@/types/next-auth";
 
 /**
  * UTILITY: Deterministic Identity Hashing (SHA-256)
- * Used for anonymizing member emails and validating Master Keys.
  */
 export function sha256Hex(input: string): string {
   if (!input) return "";
@@ -12,78 +12,80 @@ export function sha256Hex(input: string): string {
 
 /**
  * UTILITY: Flag Sanitization
- * Safely parses the JSON string storage from Neon/Prisma into a string array.
  */
 export function safeParseFlags(flagsJson?: string | null): string[] {
   if (!flagsJson) return [];
   try {
-    // Handle cases where data might already be an array or a JSON string
-    const parsed = typeof flagsJson === 'string' ? JSON.parse(flagsJson) : flagsJson;
+    const parsed = JSON.parse(flagsJson);
     return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch (e) {
-    console.warn("[AUTH_UTILS]: Failed to parse flags", e);
+  } catch {
+    // tolerate legacy CSV style
+    if (typeof flagsJson === "string" && flagsJson.includes(",")) {
+      return flagsJson.split(",").map((s) => s.trim()).filter(Boolean);
+    }
     return [];
   }
 }
 
 /**
  * SECURITY: Internal Marker Check
- * Determines if a user carries administrative or staff-level clearance.
  */
 export function hasInternalFlag(flags: string[]): boolean {
   const internalMarkers = ["internal", "staff", "private_access", "admin", "director"];
-  return flags.some(flag => internalMarkers.includes(flag.toLowerCase()));
+  return flags.some((flag) => internalMarkers.includes(String(flag).toLowerCase()));
 }
 
 /**
- * TIER MAPPING: Logic Engine
- * Translates database-level subscription tiers into Directorate OS access levels.
+ * TIER MAPPING: DB tier -> AoLTier
+ * IMPORTANT: Do NOT use "inner-circle" if AoLTier doesn't define it.
  */
 export function mapMemberTierToAoLTier(dbTier: string | null, flags: string[]): AoLTier {
-  // 1. Internal/Director flags take absolute precedence
-  if (hasInternalFlag(flags) || dbTier?.toLowerCase() === "director") {
-    return "private";
+  if (hasInternalFlag(flags) || String(dbTier || "").toLowerCase() === "director") {
+    return "private" as AoLTier;
   }
 
-  const t = (dbTier || "").toLowerCase();
-  
-  // 2. High-tier mappings - map to architect as the highest available tier
-  if (t.includes("elite") || t.includes("enterprise") || t.includes("l4")) {
-    return "architect"; // Highest tier available
+  const t = String(dbTier || "").toLowerCase();
+
+  // Highest tiers
+  if (t.includes("elite") || t.includes("enterprise") || t.includes("l4") || t.includes("architect")) {
+    return "architect" as AoLTier;
   }
-  
-  // 3. Premium/Mid-tier mappings
+
+  // Premium tiers
   if (t.includes("plus") || t.includes("premium") || t.includes("l3")) {
-    return "premium"; // Mid-high tier
-  }
-  
-  // 4. Standard active membership
-  if (t.includes("member") || t.includes("inner") || t.includes("l2")) {
-    return "inner-circle";
+    return "premium" as AoLTier;
   }
 
-  // 5. Free tier
+  // Standard member tiers (map "inner-circle" concept to "member")
+  if (t.includes("member") || t.includes("inner") || t.includes("l2") || t.includes("standard")) {
+    return "member" as AoLTier;
+  }
+
+  // Free tier
   if (t.includes("free") || t.includes("trial") || t.includes("l1")) {
-    return "free";
+    return "free" as AoLTier;
   }
 
-  // 6. Fallback for unverified or public status
-  return "public";
+  return "public" as AoLTier;
 }
 
 /**
  * UX UTILITY: Tier Labeling
- * Returns the human-readable clearance label used in the AccessGate.
  */
 export function getClearanceLabel(tier: AoLTier): string {
   switch (tier) {
-    case "private": return "Classified // Level 5";
-    case "architect": return "Architect // Level 4";
-    case "premium": return "Premium // Level 3";
-    case "inner-circle": return "Inner Circle // Level 2";
-    case "member": return "Member // Level 2";
-    case "free": return "Free // Level 1";
+    case "private":
+      return "Classified // Level 5";
+    case "architect":
+      return "Architect // Level 4";
+    case "premium":
+      return "Premium // Level 3";
+    case "member":
+      return "Member // Level 2";
+    case "free":
+      return "Free // Level 1";
     case "public":
-    default: return "Standard // Level 1";
+    default:
+      return "Standard // Level 1";
   }
 }

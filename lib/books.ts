@@ -3,7 +3,6 @@
 import { getContentlayerData, isDraftContent, normalizeSlug } from "@/lib/content/server";
 import { safeSlice } from "@/lib/utils/safe";
 
-
 export type Book = any;
 export type BookWithContent = Book;
 
@@ -41,9 +40,35 @@ function getBookSlug(book: Book): string {
   return "";
 }
 
+// Helper to extract documents by type
+function filterDocumentsByType(docs: any[], type: string): any[] {
+  return docs.filter(doc => {
+    const kind = String(doc?.kind || doc?.type || doc?.docKind || "").toLowerCase();
+    const fp = String(doc?._raw?.flattenedPath || "").toLowerCase();
+    return kind === type || fp.startsWith(`${type}s/`) || fp.startsWith(`${type}/`);
+  });
+}
+
 async function loadBooks(): Promise<Book[]> {
   const d = await getContentlayerData();
-  const books = (d.allBooks ?? []) as any[];
+  
+  // Handle different possible return shapes
+  let allDocs: any[] = [];
+  
+  if (Array.isArray(d)) {
+    // d is an array of documents
+    allDocs = d;
+  } else if (d && typeof d === 'object') {
+    // d is an object, look for document collections
+    allDocs = (d as any).allDocuments || 
+              (d as any).documents || 
+              (d as any).docs || 
+              [];
+  }
+  
+  // Filter for books specifically
+  const books = filterDocumentsByType(allDocs, 'book');
+  
   return books.filter((b) => b && !isDraft(b));
 }
 
@@ -94,4 +119,3 @@ export async function getRecentBooks(limit?: number): Promise<Book[]> {
 
   return typeof limit === "number" ? safeSlice(sorted, 0, limit) : sorted;
 }
-

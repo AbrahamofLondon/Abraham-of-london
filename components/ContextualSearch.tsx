@@ -35,12 +35,20 @@ export default function ContextualSearch({ isOpen, onClose, docs }: ContextualSe
     if (!query) return docs.slice(0, 5); // Show 5 recents/featured if empty
     const q = query.toLowerCase();
     
-    return docs.filter(doc => 
-      doc.title.toLowerCase().includes(q) || 
-      doc.category?.toLowerCase().includes(q) ||
-      // Explicitly type 't' as string to satisfy the compiler
-      doc.tags?.some((t: string) => t.toLowerCase().includes(q))
-    ).slice(0, 8);
+    return docs
+      .filter((doc) => {
+        // Safely access properties with optional chaining and fallbacks
+        const title = (doc as any).title || '';
+        const category = (doc as any).category || '';
+        const tags = Array.isArray((doc as any).tags) ? (doc as any).tags : [];
+        
+        return (
+          title.toLowerCase().includes(q) ||
+          category.toLowerCase().includes(q) ||
+          tags.some((t: string) => t && t.toLowerCase().includes(q))
+        );
+      })
+      .slice(0, 8);
   }, [query, docs]);
 
   if (!isOpen) return null;
@@ -74,10 +82,15 @@ export default function ContextualSearch({ isOpen, onClose, docs }: ContextualSe
           {filteredResults.length > 0 ? (
             <div className="divide-y divide-white/5">
               {filteredResults.map((doc) => {
-                const isLocked = !hasClearance(doc.accessLevel);
+                const isLocked = !hasClearance((doc as any).accessLevel);
+                const title = (doc as any).title || 'Untitled';
+                const category = (doc as any).category || 'Document';
+                const date = (doc as any).date || '';
+                const flattenedPath = (doc as any)._raw?.flattenedPath || (doc as any).slug || '';
+                
                 return (
                   <button
-                    key={doc._raw.flattenedPath}
+                    key={flattenedPath}
                     onClick={() => {
                       router.push(getDocHref(doc));
                       onClose();
@@ -89,11 +102,11 @@ export default function ContextualSearch({ isOpen, onClose, docs }: ContextualSe
                         {isLocked ? <Lock size={14} className="text-amber-500" /> : <FileText size={14} className="text-zinc-500" />}
                       </div>
                       <div>
-                        <h4 className="text-sm font-serif italic text-zinc-200 group-hover:text-white">{doc.title}</h4>
+                        <h4 className="text-sm font-serif italic text-zinc-200 group-hover:text-white">{title}</h4>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-600">{doc.category}</span>
+                          <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-600">{category}</span>
                           <span className="h-[1px] w-4 bg-zinc-800" />
-                          <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-500">{doc.date}</span>
+                          <span className="font-mono text-[8px] uppercase tracking-widest text-zinc-500">{date}</span>
                         </div>
                       </div>
                     </div>

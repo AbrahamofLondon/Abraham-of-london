@@ -53,6 +53,8 @@ class ContentLayerStatusManager {
   };
   private retryCount = 0;
   private maxRetries = 3;
+  // ✅ ADDED: Store type examples for use in getDocumentStats
+  private typeExamples: Record<string, string[]> = {};
 
   private constructor() {
     // Initialize with environment checks
@@ -176,6 +178,8 @@ class ContentLayerStatusManager {
     }
     
     this.buildStatus.documentTypes = typeCounts;
+    // ✅ STORE: Save examples for later use in getDocumentStats
+    this.typeExamples = typeExamples;
     
     // Update health stats
     this.healthStatus.stats = {
@@ -201,17 +205,20 @@ class ContentLayerStatusManager {
     return { ...this.healthStatus };
   }
 
+  // ✅ FIXED: Now includes examples property
   async getDocumentStats(): Promise<ContentLayerDocumentStats[]> {
     const stats: ContentLayerDocumentStats[] = [];
-    
+    const exampleMap = this.typeExamples || {};
+
     for (const [type, count] of Object.entries(this.buildStatus.documentTypes)) {
       stats.push({
         type,
         count,
-        lastModified: this.buildStatus.lastBuildTime
+        lastModified: this.buildStatus.lastBuildTime,
+        examples: Array.isArray(exampleMap[type]) ? exampleMap[type] : [],
       });
     }
-    
+
     return stats;
   }
 

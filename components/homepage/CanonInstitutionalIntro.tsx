@@ -1,4 +1,5 @@
-// components/homepage/CanonInstitutionalIntro.tsx
+// components/homepage/CanonInstitutionalIntro.tsx — 10/10 (A11y + image optimization)
+
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,8 +11,8 @@ export type CanonPrelude = {
   description?: string | null;
   excerpt?: string | null;
   coverImage?: string | null;
-  href: string;      // landing or book page
-  canonHref: string; // /canon
+  href: string;
+  canonHref: string;
   ctaLabel?: string | null;
 };
 
@@ -32,6 +33,9 @@ export default function CanonInstitutionalIntro({
   const canonHref = prelude?.canonHref || "/canon";
   const ctaLabel = prelude?.ctaLabel || "Open the Prelude MiniBook";
 
+  const focusRing =
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+
   return (
     <section className="bg-black">
       <div className="rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-950/18 to-black p-7 sm:p-8 md:p-10">
@@ -46,7 +50,6 @@ export default function CanonInstitutionalIntro({
           <div className="h-px flex-1 bg-gradient-to-r from-amber-500/30 via-amber-500/10 to-transparent" />
         </div>
 
-        {/* Main row */}
         <div className="mt-7 grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-center">
           {/* Cover */}
           <div className="flex items-center gap-5">
@@ -56,21 +59,24 @@ export default function CanonInstitutionalIntro({
                 <Image
                   src={cover}
                   alt={`${title} cover`}
-                  width={160}
-                  height={220}
-                  className="h-auto w-[120px] rounded-xl border border-amber-500/30 shadow-xl sm:w-[135px]"
+                  width={220}
+                  height={320}
+                  loading="lazy"
+                  quality={85}
+                  sizes="(max-width: 640px) 120px, (max-width: 1024px) 140px, 160px"
+                  className="h-auto w-[120px] rounded-xl border border-amber-500/30 shadow-xl sm:w-[140px] md:w-[160px]"
                 />
               </div>
             </div>
 
             <div className="min-w-0">
-              <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-white/45">
+              <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-white/55">
                 Limited release
               </div>
-              <h2 className="mt-2 font-serif text-2xl sm:text-3xl font-bold text-white/95 leading-tight">
+              <h2 className="mt-2 font-serif text-2xl sm:text-3xl font-bold text-white/95 leading-tight text-balance">
                 {title}
               </h2>
-              <p className="mt-2 text-xs sm:text-sm text-amber-200/70 font-mono uppercase tracking-[0.22em]">
+              <p className="mt-2 text-xs sm:text-sm text-amber-200/80 font-mono uppercase tracking-[0.22em]">
                 {subtitle}
               </p>
             </div>
@@ -78,16 +84,16 @@ export default function CanonInstitutionalIntro({
 
           {/* Copy + CTAs */}
           <div className="space-y-5">
-            <p className="text-sm sm:text-base text-white/70 leading-relaxed">
-              <span className="text-white/85">Not random content.</span> One doctrinal spine powering the library.
+            <p className="text-sm sm:text-base text-white/75 leading-relaxed">
+              <span className="text-white/90">Not random content.</span> One doctrinal spine powering the library.
               Start with the Prelude—then enter the Canon properly.
             </p>
 
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/70">
+              <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/80">
                 Worldview frame
               </div>
-              <p className="mt-2 text-sm sm:text-base font-serif text-white/85 leading-relaxed line-clamp-3">
+              <p className="mt-2 text-sm sm:text-base font-serif text-white/90 leading-relaxed line-clamp-3">
                 {excerpt}
               </p>
             </div>
@@ -95,16 +101,30 @@ export default function CanonInstitutionalIntro({
             <div className="flex flex-wrap gap-3">
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:from-amber-400 hover:to-amber-500 transition-all"
+                aria-label={ctaLabel}
+                className={[
+                  "relative overflow-hidden inline-flex items-center gap-2 rounded-2xl",
+                  "bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3",
+                  "text-[11px] font-mono uppercase tracking-[0.28em] text-black",
+                  "transition-all duration-300 transform hover:-translate-y-0.5 hover:from-amber-400 hover:to-amber-500",
+                  "after:absolute after:inset-0 after:bg-white/20 after:opacity-0 after:transition-opacity hover:after:opacity-100 after:rounded-[inherit]",
+                  focusRing,
+                ].join(" ")}
               >
-                <BookOpen className="h-4 w-4" />
-                {ctaLabel}
-                <ChevronRight className="h-4 w-4" />
+                <BookOpen className="h-4 w-4 relative z-[1]" />
+                <span className="relative z-[1]">{ctaLabel}</span>
+                <ChevronRight className="h-4 w-4 relative z-[1]" />
               </Link>
 
               <Link
                 href={canonHref}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/80 hover:border-white/18 hover:bg-white/10 transition-all"
+                aria-label="Browse Canon"
+                className={[
+                  "inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-6 py-3",
+                  "text-[11px] font-mono uppercase tracking-[0.28em] text-white/85",
+                  "transition-all duration-300 transform hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/10",
+                  focusRing,
+                ].join(" ")}
               >
                 Browse Canon
                 <ChevronRight className="h-4 w-4" />
@@ -113,7 +133,7 @@ export default function CanonInstitutionalIntro({
           </div>
         </div>
 
-        {/* Bottom micro-structure (short) */}
+        {/* Bottom micro-structure */}
         <div className="mt-8 grid gap-3 md:grid-cols-3">
           <MiniPill title="Purpose architecture" body="Meaning, formation, direction." />
           <MiniPill title="Canon discipline" body="Frameworks, not vibes." />
@@ -128,7 +148,7 @@ function MiniPill({ title, body }: { title: string; body: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <div className="text-sm font-semibold text-white">{title}</div>
-      <div className="mt-1.5 text-sm text-white/60 leading-relaxed">{body}</div>
+      <div className="mt-1.5 text-sm text-white/65 leading-relaxed">{body}</div>
     </div>
   );
 }

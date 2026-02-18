@@ -2,7 +2,17 @@
 import type { GetServerSidePropsContext } from 'next';
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
-import type { User, UserRole } from '@/types/auth';
+import type { AoLTier } from "@/types/next-auth";
+
+export type UserRole = 'guest' | 'viewer' | 'editor' | 'admin' | 'member' | 'patron' | 'inner-circle' | 'founder';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  permissions?: string[];
+}
 
 export type UnifiedAuthResult = {
   isAuthenticated: boolean;
@@ -111,27 +121,19 @@ async function checkServerSideInnerCircleAccess(
       const result = await response.json();
       return {
         hasAccess: result.hasAccess || false,
-        ok: result.ok || false,
         reason: result.reason || undefined,
-        token: result.token || token,
-        checkedAt: new Date()
+        tier: result.tier || undefined,
       };
     }
     
     return {
       hasAccess: false,
-      ok: false,
-      reason: 'api_error' as const,
-      token,
-      checkedAt: new Date()
+      reason: 'api_error',
     };
   } catch (error) {
     return {
       hasAccess: false,
-      ok: false,
-      reason: 'api_error' as const,
-      token,
-      checkedAt: new Date()
+      reason: 'api_error',
     };
   }
 }
@@ -187,4 +189,4 @@ export function isInnerCircleMember(
 }
 
 // Re-export types for convenience
-export type { User, UserRole, InnerCircleAccess };
+export type { InnerCircleAccess };

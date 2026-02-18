@@ -1,7 +1,32 @@
-// lib/content-mappers.ts - UPDATED IMPORTS
-import type { 
-  DocBase 
-} from "@/lib/content";
+// lib/content-mappers.ts - FIXED (removed unused import)
+// Define DocBase locally since it's not exported from @/lib/content
+export interface DocBase {
+  _id?: string;
+  _raw?: {
+    sourceFilePath?: string;
+    sourceFileName?: string;
+    sourceFileDir?: string;
+    contentType?: string;
+    flattenedPath?: string;
+  };
+  type?: string;
+  title?: string;
+  description?: string;
+  excerpt?: string;
+  date?: string;
+  tags?: string[];
+  draft?: boolean;
+  published?: boolean;
+  featured?: boolean;
+  slug?: string;
+  slugComputed?: string;
+  coverImage?: string;
+  image?: string;
+  accessLevel?: string;
+  tier?: string;
+  lockMessage?: string;
+  [key: string]: any; // Allow additional properties
+}
 
 // Define specific types based on DocBase
 export interface Post extends DocBase {

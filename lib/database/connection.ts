@@ -16,13 +16,15 @@ if (!MONGODB_URI) {
   }
 }
 
-interface GlobalWithMongo extends Global {
+// ✅ FIXED: Define the global type properly
+interface GlobalWithMongo {
   mongoose: {
     conn: typeof mongoose | null;
     promise: Promise<typeof mongoose> | null;
   };
 }
 
+// Use type assertion without referencing non-existent Global type
 const globalWithMongo = global as unknown as GlobalWithMongo;
 
 let cached = globalWithMongo.mongoose;

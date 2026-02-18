@@ -202,10 +202,10 @@ export default function EnhancedFooter(): React.ReactElement {
           <PolicyFooter isDark />
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom bar with ALL RIGHTS RESERVED */}
         <div className="mt-12 border-t border-white/10 pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-            © {year} ABRAHAM OF LONDON
+            © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
           </div>
           <div className="flex items-center gap-6">
             <Link

@@ -63,6 +63,21 @@ export function getAllContentlayerDocs(): AnyContentDoc[] {
   ];
 }
 
+export function getContentlayerData() {
+  return {
+    allDocuments: getAllContentlayerDocs(),
+    allBooks,
+    allCanons,
+    allDownloads,
+    allEvents,
+    allPosts,
+    allPrints,
+    allResources,
+    allShorts,
+    allStrategies,
+  };
+}
+
 export function getDocBySlug(slug: string): AnyContentDoc | null {
   const s = normalizeSlug(slug);
   const all = getAllContentlayerDocs();
