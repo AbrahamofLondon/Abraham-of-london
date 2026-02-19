@@ -117,3 +117,7 @@ temp/
 # Sensitive data
 *.db-journal
 # Temporary files
+*.bak-node-scheme
+*.bak-node-scheme
+*.surgical-backup
+
