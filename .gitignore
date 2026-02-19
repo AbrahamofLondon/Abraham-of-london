@@ -1,24 +1,21 @@
 # =====================================================
-# ABRAHAM OF LONDON — CONSOLIDATED .GITIGNORE
+# ABRAHAM OF LONDON — CONSOLIDATED .GITIGNORE (PRODUCTION)
 # =====================================================
 
-# DATABASE FILES & CREDENTIALS
-*.db
-*.sqlite
-*.sqlite3
-dev.db
-local.db
-.abraham.db
-database-credentials.json
-backup/
-backups/
-*.backup
-*.dump
-*.sql
-!/sql/*.sql
-
-# CORE DEPENDENCIES & BUILDS
+# ------------------------------
+# Dependencies & package managers
+# ------------------------------
 node_modules/
+.pnp.*
+.pnpm-store/
+.npm/
+.yarn/
+.yarn-cache/
+.yarn-integrity
+
+# ------------------------------
+# Build outputs & framework caches
+# ------------------------------
 .next/
 out/
 dist/
@@ -31,76 +28,155 @@ build/
 .netlify-edge-functions/
 .contentlayer/
 .contentlayer-cache/
+*.tsbuildinfo
 tsconfig.tsbuildinfo
+tsconfig.next.tsbuildinfo
 
-# WINDOWS PATH-FIX SPECIFIC (Shortened Cache Paths)
-.wfix/
-_sc/
-
-# ENVIRONMENT FILES (SENSITIVE)
+# ------------------------------
+# Environment (sensitive)
+# ------------------------------
 .env
-.env.local
 .env.*
 !.env.example
 
-# PDF CACHE & EXPORTS
+# ------------------------------
+# Logs & diagnostics
+# ------------------------------
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
+.fixlogs/
+
+# ------------------------------
+# Database & local state (sensitive)
+# ------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.mdb
+*.accdb
+dev.db
+local.db
+.abraham.db
+backup/
+backups/
+_backups/
+*.dump
+*.sql.dump
+*.backup
+*.bak
+*.swp
+*.swo
+*.swn
+
+# Keep tracked SQL migrations/scripts (if you use them)
+!/sql/**/*.sql
+!/prisma/**/*.sql
+!/db/**/*.sql
+
+# ------------------------------
+# Temp files / OS junk
+# ------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+*.tmp
+*.temp
+.temp/
+tmp/
+temp/
+
+# ------------------------------
+# IDE / editor
+# ------------------------------
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ------------------------------
+# Coverage / test artifacts
+# ------------------------------
+coverage/
+.playwright/
+playwright-report/
+test-results/
+*.lcov
+
+# ------------------------------
+# Asset pipeline (generated)
+# ------------------------------
+public/optimized-images/
+public/user-uploads/
+.image-cache/
 .pdfcache/
 exports/
 downloads/cache/
 scripts/output/
 
-# ASSET PIPELINE (GENERATED)
-public/optimized-images/
-public/user-uploads/
-.image-cache/
-
-# OFFICE DOCUMENTS & LOCK FILES (Public/Downloads)
-# Prevents Windows file-lock errors during build/sync
-public/downloads/*.pptx
-public/downloads/*.docx
-public/downloads/*.xlsx
-public/downloads/*.ppt
-public/downloads/*.doc
-public/downloads/*.xls
-public/downloads/*.odt
-public/downloads/*.ods
-public/downloads/*.odp
-public/downloads/*.numbers
-public/downloads/*.pages
-public/downloads/*.key
+# ------------------------------
+# Public downloads (prevent Windows lock issues)
+# ------------------------------
 public/downloads/temp/
 public/downloads/generated/
 public/downloads/~$*
 public/downloads/._*
+public/downloads/**/*.doc
+public/downloads/**/*.docx
+public/downloads/**/*.xls
+public/downloads/**/*.xlsx
+public/downloads/**/*.ppt
+public/downloads/**/*.pptx
+public/downloads/**/*.odt
+public/downloads/**/*.ods
+public/downloads/**/*.odp
+public/downloads/**/*.numbers
+public/downloads/**/*.pages
+public/downloads/**/*.key
 
-# LARGE FILES, BACKUPS & INSTALLERS
-*.tar
-*.zip
-*.tar.gz
-*.tgz
-_backups/
-_emergency-backup.*
-*.bak
-nvm-setup.exe
+# ------------------------------
+# Windows-specific helper caches
+# ------------------------------
+.wfix/
+_sc/
 
-# SYSTEM & SENSITIVE DATA
-.DS_Store
-Thumbs.db
-desktop.ini
+# ------------------------------
+# Backup artifacts created by hotfix tooling
+# ------------------------------
+*.bak-node-scheme
+*.surgical-backup
+*.simple-backup
+_fixbak/
+lib/content - Copy/
+
+# ------------------------------
+# Secrets & key material
+# ------------------------------
 *.pem
 *.key
 *.cert
 *.crt
 id_rsa
 id_dsa
-*.tmp
-*.temp
-.temp/
-tmp/
-temp/
-.fixlogs/
+*.p12
+*.pfx
 
-# INSTITUTIONAL ASSETS (NEVER IGNORE)
+# ------------------------------
+# Keep institutional assets tracked
+# ------------------------------
 !public/assets/
 !public/assets/**/*
 !public/favicon.ico
@@ -110,14 +186,3 @@ temp/
 !public/android-chrome-512x512.png
 !public/site.webmanifest
 !public/robots.txt
-# Environment files
-.env.*.local
-.env.production
-.env.development
-# Sensitive data
-*.db-journal
-# Temporary files
-*.bak-node-scheme
-*.bak-node-scheme
-*.surgical-backup
-
