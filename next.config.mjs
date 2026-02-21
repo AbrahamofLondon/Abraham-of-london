@@ -1,4 +1,3 @@
-// next.config.mjs
 import { createRequire } from "module";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -14,20 +13,21 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   staticPageGenerationTimeout: 300,
-
-  turbopack: {},
+  output: 'standalone', // Essential for minimizing bundle size
 
   typescript: {
     ignoreBuildErrors: true,
   },
 
-  // ✅ Moved from experimental to top level
-  outputFileTracingRoot: path.join(__dirname, '../../'),
+  // ✅ Optimized File Tracing (Moves heavy lifting outside the bundle)
+  outputFileTracingRoot: path.join(__dirname, './'),
   outputFileTracingExcludes: {
-    '/*': [
+    '*': [
+      'node_modules/@swc/core-linux-x64-gnu',
+      'node_modules/@swc/core-linux-x64-musl',
       './public/**/*',
+      './.next/cache/**/*',
       './node_modules/sharp/**/*',
-      './node_modules/@img/**/*',
       './node_modules/playwright/**/*',
       './node_modules/puppeteer/**/*',
       './node_modules/chrome-aws-lambda/**/*',
@@ -35,12 +35,9 @@ const nextConfig = {
     ],
   },
 
-  output: 'standalone',
-
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
-    // ✅ Removed outputFileTracingRoot and outputFileTracingExcludes from here
   },
 
   transpilePackages: ["framer-motion"],
@@ -104,13 +101,6 @@ try {
   finalConfig = withContentlayer(nextConfig);
 } catch (e) {
   console.log("⚠️ Contentlayer setup fallback initiated");
-}
-
-if (process.platform === "win32") {
-  process.on("unhandledRejection", (err) => {
-    if (err?.message?.includes("tap")) return;
-    console.error(err);
-  });
 }
 
 export default finalConfig;

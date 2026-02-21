@@ -1,7 +1,7 @@
-# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — CLEAN, SINGLE-SOURCE)
+# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — INSTITUTIONAL BUILD)
 
 [build]
-  command = "pnpm install --frozen-lockfile && pnpm build:netlify"
+  command = "pnpm build:netlify"
   publish = ".next"
 
 [build.environment]
@@ -11,11 +11,8 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
-
   NETLIFY_USE_PNPM = "true"
   PNPM_FLAGS = "--frozen-lockfile"
-
-  # Must match package.json `packageManager`
   PNPM_VERSION = "10.29.3"
 
 [[plugins]]
@@ -24,14 +21,23 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-[functions.emails]
-  included_files = ["emails/**"]
-
 [functions]
+  node_bundler = "esbuild"
+  # 🛡️ STRATEGIC EXCLUSION:
+  # We exclude .next/static because it is served via CDN, not the function.
+  # We exclude sourcemaps and caches to stay under the 250MB limit.
   included_files = [
     ".next/standalone/**",
-    ".next/static/**"
+    "content/**",
+    "!**/*.map",
+    "!**/*.cache",
+    "!.next/static/**",
+    "!**/node_modules/playwright/**",
+    "!**/node_modules/puppeteer/**"
   ]
+
+[functions.emails]
+  included_files = ["emails/**"]
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -43,14 +49,8 @@
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
-  NEXT_OPTIMIZE_IMAGES = "false"
 
-[context.branch-deploy.environment]
-  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-  NEXT_PUBLIC_APP_ENV = "staging"
-  NEXT_DISABLE_SOURCEMAPS = "false"
-
-# Canonical host enforcement (no loops, no nonsense)
+# Canonical host enforcement
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -64,16 +64,6 @@
 
 [[redirects]]
   from = "/blog/:slug"
-  to = "/insights/:slug"
-  status = 301
-
-[[redirects]]
-  from = "/articles/:slug"
-  to = "/insights/:slug"
-  status = 301
-
-[[redirects]]
-  from = "/news/:slug"
   to = "/insights/:slug"
   status = 301
 
@@ -96,17 +86,3 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
-
-[[headers]]
-  for = "/downloads/*.pdf"
-  [headers.values]
-    Content-Type = "application/pdf"
-    Cache-Control = "public, max-age=31536000, immutable"
-    X-Content-Type-Options = "nosniff"
-    Content-Disposition = "inline"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
-    X-Content-Type-Options = "nosniff"

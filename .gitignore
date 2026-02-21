@@ -78,10 +78,15 @@ _backups/
 *.swo
 *.swn
 
-# Keep tracked SQL migrations/scripts (if you use them)
-!/sql/**/*.sql
-!/prisma/**/*.sql
-!/db/**/*.sql
+# ------------------------------
+# 🚨 CRITICAL: PROJECT BLOAT PREVENTION (744MB FIX)
+# ------------------------------
+Abraham-of-london-backup/
+* - Copy/
+*-backup/
+*-copy/
+node_modules_old/
+_old/
 
 # ------------------------------
 # Temp files / OS junk
@@ -108,15 +113,6 @@ temp/
 *.sln
 
 # ------------------------------
-# Coverage / test artifacts
-# ------------------------------
-coverage/
-.playwright/
-playwright-report/
-test-results/
-*.lcov
-
-# ------------------------------
 # Asset pipeline (generated)
 # ------------------------------
 public/optimized-images/
@@ -140,12 +136,6 @@ public/downloads/**/*.xls
 public/downloads/**/*.xlsx
 public/downloads/**/*.ppt
 public/downloads/**/*.pptx
-public/downloads/**/*.odt
-public/downloads/**/*.ods
-public/downloads/**/*.odp
-public/downloads/**/*.numbers
-public/downloads/**/*.pages
-public/downloads/**/*.key
 
 # ------------------------------
 # Windows-specific helper caches
@@ -170,9 +160,17 @@ lib/content - Copy/
 *.cert
 *.crt
 id_rsa
-id_dsa
 *.p12
 *.pfx
+
+# ------------------------------
+# Archive files (Prevents large binary commits)
+# ------------------------------
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
 
 # ------------------------------
 # Keep institutional assets tracked
@@ -185,5 +183,7 @@ id_dsa
 !public/android-chrome-192x192.png
 !public/android-chrome-512x512.png
 !public/site.webmanifest
-!public/robots.txt_emergency-backup.tar
-*.tar
+!public/robots.txt
+!/sql/**/*.sql
+!/prisma/**/*.sql
+!/db/**/*.sql
