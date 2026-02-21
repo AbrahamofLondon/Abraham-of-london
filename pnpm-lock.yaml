@@ -433,7 +433,7 @@ importers:
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       sst:
         specifier: ^3.9.28
-        version: 3.19.0(zod@3.25.76)
+        version: 3.19.0(zod@4.3.6)
       stream-browserify:
         specifier: ^3.0.0
         version: 3.0.0
@@ -486,8 +486,8 @@ importers:
         specifier: ^0.6.2
         version: 0.6.2
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@netlify/plugin-nextjs':
         specifier: ^5.15.8
@@ -12514,7 +12514,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@modelcontextprotocol/sdk@1.26.0(zod@3.25.76)':
+  '@modelcontextprotocol/sdk@1.26.0(zod@4.3.6)':
     dependencies:
       '@hono/node-server': 1.19.9(hono@4.12.0)
       ajv: 8.18.0
@@ -12531,8 +12531,8 @@ snapshots:
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
       raw-body: 3.0.2
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.1(zod@3.25.76)
+      zod: 4.3.6
+      zod-to-json-schema: 3.25.1(zod@4.3.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -16809,8 +16809,8 @@ snapshots:
       '@babel/parser': 7.29.0
       eslint: 9.39.2(jiti@2.6.1)
       hermes-parser: 0.25.1
-      zod: 3.25.76
-      zod-validation-error: 4.0.2(zod@3.25.76)
+      zod: 4.3.6
+      zod-validation-error: 4.0.2(zod@4.3.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -22026,9 +22026,9 @@ snapshots:
   sst-win32-x86@3.19.0:
     optional: true
 
-  sst@3.19.0(zod@3.25.76):
+  sst@3.19.0(zod@4.3.6):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.26.0(zod@3.25.76)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
       aws-sdk: 2.1692.0
       aws4fetch: 1.0.18
       hono: 4.12.0
@@ -23199,13 +23199,13 @@ snapshots:
     dependencies:
       zod: 3.24.2
 
-  zod-to-json-schema@3.25.1(zod@3.25.76):
+  zod-to-json-schema@3.25.1(zod@4.3.6):
     dependencies:
-      zod: 3.25.76
+      zod: 4.3.6
 
-  zod-validation-error@4.0.2(zod@3.25.76):
+  zod-validation-error@4.0.2(zod@4.3.6):
     dependencies:
-      zod: 3.25.76
+      zod: 4.3.6
 
   zod@3.24.2: {}
 
