@@ -8,19 +8,13 @@ import Link from "next/link";
 import {
   BookOpen,
   Lock,
-  Users,
-  Calendar,
   ChevronRight,
-  Sparkles,
-  Award,
-  Layers,
   Target,
   Building2,
   Castle,
   ScrollText,
-  Library,
   Activity,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -36,8 +30,8 @@ type CanonItem = {
   title: string;
   subtitle: string | null;
   excerpt: string | null;
-  slug: string;
-  href: string;
+  slug: string; // BARE slug (no leading slash, no canon/ prefix)
+  href: string; // /canon/<bare>
   accessLevel: AccessLevel;
   coverImage: string | null;
   dateISO: string | null;
@@ -73,6 +67,31 @@ type CanonIndexProps = {
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
+function collapseSlashes(s: string): string {
+  return String(s || "")
+    .replace(/\\/g, "/")
+    .replace(/\/{2,}/g, "/");
+}
+
+function normalizeBareSlug(input: unknown): string {
+  // normalizeSlug from server is good, but we harden against:
+  // - leading "/" -> "/canon/x"
+  // - repeated slashes -> "canon//x"
+  // - repeated prefixes -> "canon/canon/x"
+  let s = collapseSlashes(String(input || "").trim());
+  s = normalizeSlug(s); // your SSOT normalizer
+  s = collapseSlashes(s).replace(/^\/+/, "").replace(/\/+$/, "");
+
+  // strip leading "canon/" repeatedly
+  const prefix = "canon/";
+  while (s.toLowerCase().startsWith(prefix)) s = s.slice(prefix.length);
+
+  // strip any accidental leading "/" again
+  s = s.replace(/^\/+/, "");
+
+  return s;
+}
+
 function toAccessLevel(v: unknown): AccessLevel {
   const s = String(v || "").trim().toLowerCase();
   if (s === "inner-circle" || s === "innercircle" || s === "members") return "inner-circle";
@@ -85,7 +104,8 @@ function extractVolumeNumber(title: string): number | null {
   if (romanMatch) {
     const roman = romanMatch[1].toUpperCase();
     const values: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
-    let total = 0, prev = 0;
+    let total = 0,
+      prev = 0;
     for (let i = roman.length - 1; i >= 0; i--) {
       const cur = values[roman[i]];
       total += cur < prev ? -cur : cur;
@@ -104,6 +124,12 @@ function extractSeries(title: string): string {
   return "General";
 }
 
+function safeHref(path: string): string {
+  // final hardening: never allow // in href
+  const p = collapseSlashes(String(path || "/")).replace(/\/{2,}/g, "/");
+  return p.startsWith("/") ? p : `/${p}`;
+}
+
 // ============================================================================
 // DATA FETCHING
 // ============================================================================
@@ -116,46 +142,48 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       console.warn("[CANON] No documents found in getAllCanons()");
     }
 
-    const seenSlugs = new Set();
+    const seenSlugs = new Set<string>();
+
     const items: CanonItem[] = rawDocs
-      .filter((doc: any) => !doc.draft)
+      .filter((doc: any) => !doc?.draft)
       .map((doc: any) => {
-        // ✅ FIX: Clean slug properly to prevent double slashes
-        const rawSlug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
-        const slug = rawSlug.replace(/^canon\//, ""); // Remove 'canon/' prefix
-        const title = doc.title || "Untitled Volume";
-        const date = doc.date ? new Date(doc.date).toISOString() : null;
-        const series = doc.series || extractSeries(title);
-        
+        const raw = doc?.slug || doc?._raw?.flattenedPath || "";
+        const bare = normalizeBareSlug(raw);
+
+        // If bare is empty, skip later
+        const title = String(doc?.title || "Untitled Volume");
+        const dateISO = doc?.date ? new Date(doc.date).toISOString() : null;
+        const series = String(doc?.series || extractSeries(title));
+
         return {
           title,
-          subtitle: doc.subtitle || null,
-          excerpt: doc.excerpt || doc.description || null,
-          slug,
-          href: `/canon/${slug}`, // ✅ Clean URL: /canon/volume-name
-          accessLevel: toAccessLevel(doc.accessLevel || doc.access),
-          coverImage: doc.coverImage || null,
-          dateISO: date,
-          readTime: doc.readTime || "10 min",
-          tags: Array.isArray(doc.tags) ? doc.tags : [],
-          category: doc.category || "General",
-          featured: Boolean(doc.featured),
+          subtitle: doc?.subtitle ? String(doc.subtitle) : null,
+          excerpt: (doc?.excerpt || doc?.description) ? String(doc.excerpt || doc.description) : null,
+          slug: bare,
+          href: safeHref(`/canon/${bare}`), // ✅ never /canon//canon/...
+          accessLevel: toAccessLevel(doc?.accessLevel || doc?.access),
+          coverImage: doc?.coverImage ? String(doc.coverImage) : null,
+          dateISO,
+          readTime: doc?.readTime ? String(doc.readTime) : "10 min",
+          tags: Array.isArray(doc?.tags) ? doc.tags.filter(Boolean).map(String) : [],
+          category: doc?.category ? String(doc.category) : "General",
+          featured: Boolean(doc?.featured),
           isTeachingEdition: title.toLowerCase().includes("teaching edition"),
           volumeNumber: extractVolumeNumber(title),
           series,
         };
       })
-      .filter(item => {
-        if (!item.slug || seenSlugs.has(item.slug)) return false;
+      .filter((item) => {
+        if (!item.slug) return false;
+        if (seenSlugs.has(item.slug)) return false;
         seenSlugs.add(item.slug);
         return true;
       })
       .sort((a, b) => (a.volumeNumber || 99) - (b.volumeNumber || 99));
 
-    // Group into Architectural Series
     const seriesMap = new Map<string, CanonSeries>();
-    
-    items.forEach(item => {
+
+    items.forEach((item) => {
       if (!seriesMap.has(item.series)) {
         const seriesConfig: Record<string, { title: string; description: string; icon: any; color: string }> = {
           "Volume I": {
@@ -177,14 +205,14 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
             color: "from-purple-500/20 to-transparent",
           },
         };
-        
+
         const config = seriesConfig[item.series] || {
           title: item.series,
           description: "Canonical volumes",
           icon: BookOpen,
           color: "from-gray-500/20 to-transparent",
         };
-        
+
         seriesMap.set(item.series, {
           volume: item.series,
           title: config.title,
@@ -194,39 +222,43 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           color: config.color,
         });
       }
-      
+
       seriesMap.get(item.series)!.items.push(item);
     });
 
-    const series = Array.from(seriesMap.values()).filter(s => s.items.length > 0);
+    const series = Array.from(seriesMap.values()).filter((s) => s.items.length > 0);
 
-    const counts = items.reduce((acc, it) => {
-      acc.total++;
-      if (it.accessLevel === "public") acc.public++;
-      else if (it.accessLevel === "inner-circle") acc.inner++;
-      else acc.private++;
-      return acc;
-    }, { total: 0, public: 0, inner: 0, private: 0 });
+    const counts = items.reduce(
+      (acc, it) => {
+        acc.total++;
+        if (it.accessLevel === "public") acc.public++;
+        else if (it.accessLevel === "inner-circle") acc.inner++;
+        else acc.private++;
+        return acc;
+      },
+      { total: 0, public: 0, inner: 0, private: 0 }
+    );
 
     return {
-      props: sanitizeData({ 
-        items, 
-        counts, 
-        series, 
-        featuredItems: items.filter(i => i.featured).slice(0, 6) 
+      props: sanitizeData({
+        items,
+        counts,
+        series,
+        featuredItems: items.filter((i) => i.featured).slice(0, 6),
       }),
-      revalidate: 60
+      revalidate: 60,
     };
   } catch (error) {
     console.error("Canon Index Failure:", error);
-    return { 
-      props: { 
-        items: [], 
-        counts: { total: 0, public: 0, inner: 0, private: 0 }, 
-        series: [], 
+    return {
+      props: {
+        items: [],
+        counts: { total: 0, public: 0, inner: 0, private: 0 },
+        series: [],
         featuredItems: [],
-        error: "Failed to load Canon documents"
-      } 
+        error: "Failed to load Canon documents",
+      },
+      revalidate: 60,
     };
   }
 };
@@ -235,20 +267,28 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
 // UI COMPONENTS
 // ============================================================================
 
-const Stat = ({ label, value, color }: { label: string, value: any, color: string }) => (
+const Stat = ({ label, value, color }: { label: string; value: any; color: string }) => (
   <div className="border-l border-white/10 pl-6">
     <div className={`text-2xl font-light ${color}`}>{value}</div>
     <div className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1">{label}</div>
   </div>
 );
 
-const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, featuredItems, error }) => {
-  const latestUpdate = items.length > 0 
-    ? new Date(Math.max(...items.map(i => new Date(i.dateISO || 0).getTime()))).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
-    : "Feb 2026";
+const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, error }) => {
+  const latestUpdate =
+    items.length > 0
+      ? new Date(Math.max(...items.map((i) => new Date(i.dateISO || 0).getTime()))).toLocaleDateString("en-GB", {
+          month: "short",
+          year: "numeric",
+        })
+      : "Feb 2026";
 
   return (
     <Layout title="The Canon">
+      <Head>
+        <link rel="canonical" href={`${SITE}/canon`} />
+      </Head>
+
       <main className="min-h-screen bg-[#050505] text-white selection:bg-amber-500/30">
         {/* Institutional Hero */}
         <section className="relative pt-32 pb-20 border-b border-white/5">
@@ -257,7 +297,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, feat
               <Activity className="h-4 w-4 text-amber-500" />
               <span className="text-[10px] uppercase tracking-[0.4em] text-amber-500 font-bold">Canonical Archive</span>
             </div>
-            
+
             <h1 className="text-7xl md:text-9xl font-light tracking-tighter mb-12">
               The <span className="italic font-serif text-amber-500">Canon.</span>
             </h1>
@@ -284,10 +324,8 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, feat
             <div className="py-20 text-center border border-dashed border-white/10 rounded-3xl">
               <ScrollText className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
               <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">No volumes resolved in registry</p>
-              {process.env.NODE_ENV === 'development' && (
-                <p className="mt-4 text-amber-500/50 text-xs font-mono">
-                  Check that canon documents exist in content/canon/
-                </p>
+              {process.env.NODE_ENV === "development" && (
+                <p className="mt-4 text-amber-500/50 text-xs font-mono">Check that canon documents exist in content/canon/</p>
               )}
             </div>
           ) : (
@@ -301,13 +339,17 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, feat
                     <h2 className="text-4xl font-light tracking-tight">{s.title}</h2>
                     <p className="text-zinc-500 leading-relaxed font-light">{s.description}</p>
                   </div>
-                  
+
                   <div className="lg:col-span-2 grid gap-px bg-white/5 border border-white/5">
                     {s.items.map((item) => (
-                      <Link key={item.slug} href={item.href} className="group relative p-10 bg-[#050505] hover:bg-zinc-900/40 transition-all duration-500">
+                      <Link
+                        key={item.slug}
+                        href={item.href}
+                        className="group relative p-10 bg-[#050505] hover:bg-zinc-900/40 transition-all duration-500"
+                      >
                         <div className="flex justify-between items-start mb-6">
                           <span className="text-[10px] font-mono text-zinc-600 uppercase">{item.readTime}</span>
-                          {item.accessLevel !== 'public' && <Lock className="h-3 w-3 text-amber-600" />}
+                          {item.accessLevel !== "public" && <Lock className="h-3 w-3 text-amber-600" />}
                         </div>
                         <h3 className="text-2xl font-medium mb-4 group-hover:text-amber-500 transition-colors">{item.title}</h3>
                         <p className="text-zinc-500 text-sm line-clamp-2 font-light leading-relaxed">{item.excerpt}</p>

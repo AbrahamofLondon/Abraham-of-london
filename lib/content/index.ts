@@ -10,6 +10,7 @@
  */
 
 import { allDocuments } from "contentlayer/generated";
+import { normalizeSlug as normalizeSlugShared, joinHref, getDocHref as getDocHrefShared } from "@/lib/content/shared";
 
 // -----------------------------
 // Tier definitions
@@ -17,11 +18,11 @@ import { allDocuments } from "contentlayer/generated";
 export type Tier = "free" | "basic" | "premium" | "enterprise" | "restricted";
 
 export const TIER_HIERARCHY: Record<Tier, number> = {
-  "free": 0,
-  "basic": 1,
-  "premium": 2,
-  "enterprise": 3,
-  "restricted": 4,
+  free: 0,
+  basic: 1,
+  premium: 2,
+  enterprise: 3,
+  restricted: 4,
 };
 
 // -----------------------------
@@ -70,19 +71,17 @@ export type DocKind =
 // -----------------------------
 export function normalizeTier(tier: string | Tier): Tier {
   if (!tier) return "free";
-  
+
   const normalized = tier.toString().toLowerCase().trim();
-  
-  // Handle legacy/public names
+
   if (normalized === "public" || normalized === "free") return "free";
   if (normalized === "inner-circle" || normalized === "basic") return "basic";
   if (normalized === "inner-circle-plus" || normalized === "premium") return "premium";
   if (normalized === "inner-circle-elite" || normalized === "enterprise") return "enterprise";
   if (normalized === "private" || normalized === "restricted") return "restricted";
-  
-  // Try direct match
+
   if (isTier(normalized)) return normalized as Tier;
-  
+
   return "free";
 }
 
@@ -92,22 +91,11 @@ export function isTier(value: string): value is Tier {
 
 export function getRequiredTier(doc: any): Tier {
   if (!doc) return "free";
-  
-  // Check explicit tier field
-  if (doc.tier) {
-    return normalizeTier(doc.tier);
-  }
-  
-  // Check accessLevel as fallback
-  if (doc.accessLevel) {
-    return normalizeTier(doc.accessLevel);
-  }
-  
-  // Check classification
-  if (doc.classification) {
-    return normalizeTier(doc.classification);
-  }
-  
+
+  if (doc.tier) return normalizeTier(doc.tier);
+  if (doc.accessLevel) return normalizeTier(doc.accessLevel);
+  if (doc.classification) return normalizeTier(doc.classification);
+
   return "free";
 }
 
@@ -121,7 +109,12 @@ export function canAccessDoc(doc: any, userTier: string | Tier = "free"): boolea
   return isTierAllowed(required, user);
 }
 
-export function getAccessLevel(doc: any): { tier: Tier; requiresAuth: boolean; requiresInnerCircle: boolean; requiresAdmin: boolean } {
+export function getAccessLevel(doc: any): {
+  tier: Tier;
+  requiresAuth: boolean;
+  requiresInnerCircle: boolean;
+  requiresAdmin: boolean;
+} {
   const tier = getRequiredTier(doc);
   return {
     tier,
@@ -132,13 +125,11 @@ export function getAccessLevel(doc: any): { tier: Tier; requiresAuth: boolean; r
 }
 
 // -----------------------------
-// Normalizers
+// Normalizers (SSOT, consistent)
 // -----------------------------
 export function normalizeSlug(input: string): string {
-  return String(input || "")
-    .trim()
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/\.(md|mdx)$/i, "");
+  // Use shared normalizer + strip file extensions
+  return normalizeSlugShared(String(input || "")).replace(/\.(md|mdx)$/i, "");
 }
 
 export function getFlattenedPath(doc: any): string {
@@ -146,14 +137,15 @@ export function getFlattenedPath(doc: any): string {
 }
 
 export function getDocSlug(doc: any): string {
-  return normalizeSlug(String(doc?.slug || "").trim()) || normalizeSlug(getFlattenedPath(doc));
+  const fromSlug = normalizeSlug(String(doc?.slug || "").trim());
+  if (fromSlug) return fromSlug;
+  return normalizeSlug(getFlattenedPath(doc));
 }
 
 // -----------------------------
 // Publication status
 // -----------------------------
 export function isPublished(doc: any): boolean {
-  // published defaults to true; draft defaults to false
   const draft = Boolean(doc?.draft);
   const published = doc?.published === undefined ? true : Boolean(doc?.published);
   return published && !draft;
@@ -194,7 +186,6 @@ export function getDocKind(doc: any): DocKind {
   if (t === "intelligence") return "intelligence";
   if (t === "lexicon") return "lexicon";
 
-  // Fallback based on path (covers weird manifests)
   const fp = getFlattenedPath(doc).toLowerCase();
   if (fp.startsWith("blog/")) return "post";
   if (fp.startsWith("shorts/")) return "short";
@@ -229,6 +220,8 @@ export function getDocumentsByKind(kind: DocKind): ContentDoc[] {
 
 export function getDocBySlug(slug: string): ContentDoc | null {
   const target = normalizeSlug(slug);
+  if (!target) return null;
+
   const docs = getAllContentlayerDocs();
 
   for (const d of docs) {
@@ -236,6 +229,47 @@ export function getDocBySlug(slug: string): ContentDoc | null {
     if (s === target || s.endsWith(`/${target}`)) return d;
   }
   return null;
+}
+
+// -----------------------------
+// Href helpers (optional, but stops duplication if used project-wide)
+// -----------------------------
+export function getDocHref(doc: any): string {
+  // Prefer the shared, already-hardened href builder
+  return getDocHrefShared(doc);
+}
+
+export function getCanonicalHref(kind: DocKind, slug: string): string {
+  const s = normalizeSlug(slug);
+  if (!s) return "/";
+  switch (kind) {
+    case "post":
+      return joinHref("blog", s);
+    case "short":
+      return joinHref("shorts", s);
+    case "book":
+      return joinHref("books", s);
+    case "canon":
+      return joinHref("canon", s);
+    case "brief":
+      return joinHref("briefs", s);
+    case "download":
+      return joinHref("downloads", s);
+    case "event":
+      return joinHref("events", s);
+    case "print":
+      return joinHref("prints", s);
+    case "resource":
+      return joinHref("resources", s);
+    case "strategy":
+      return joinHref("strategy", s);
+    case "intelligence":
+      return joinHref("intelligence", s);
+    case "lexicon":
+      return joinHref("vault/lexicon", s);
+    default:
+      return s.includes("/") ? "/" + s : joinHref("content", s);
+  }
 }
 
 // -----------------------------

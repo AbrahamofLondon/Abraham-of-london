@@ -16,24 +16,25 @@ const nextConfig = {
   staticPageGenerationTimeout: 300,
 
   // ✅ Explicitly silence Turbopack warnings while using Webpack
-  turbopack: {}, 
+  turbopack: {},
 
   typescript: {
-    ignoreBuildErrors: true, 
+    ignoreBuildErrors: true,
   },
 
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: [
-      "lucide-react",
-      "date-fns",
-      "clsx",
-      "tailwind-merge",
-      "framer-motion",
-    ],
+
+    // ✅ Keep optimizePackageImports — but DO NOT include framer-motion
+    // (it triggers __barrel_optimize__ and can break on Windows+pnpm)
+    optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
+
     // 🛡️ DISABLED: Causes document leakage in mixed routers on Windows
     // optimizeCss: true,
   },
+
+  // ✅ Stabilize framer-motion resolution under Webpack (Windows+pnpm)
+  transpilePackages: ["framer-motion"],
 
   images: {
     remotePatterns: [
@@ -49,15 +50,6 @@ const nextConfig = {
   },
 
   webpack: (config, { isServer }) => {
-    // 🛡️ REMOVED: Dangerous plugin filtering that corrupts the module graph
-    // if (process.platform === "win32") {
-    //   config.plugins = config.plugins?.filter(plugin => {
-    //     const pluginName = plugin?.constructor?.name;
-    //     return pluginName !== "ContextReplacementPlugin" && 
-    //            pluginName !== "NormalModuleReplacementPlugin";
-    //   }) || [];
-    // }
-
     if (!isServer) {
       config.resolve.fallback = {
         ...(config.resolve.fallback || {}),
@@ -74,13 +66,13 @@ const nextConfig = {
     }
 
     config.infrastructureLogging = { level: "error" };
-    
+
     // Explicit Alias Preservation
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": path.resolve(__dirname),
     };
-    
+
     return config;
   },
 

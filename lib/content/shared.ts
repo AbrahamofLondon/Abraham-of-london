@@ -24,58 +24,117 @@ export type AccessLevel =
 type AnyDoc = Record<string, any>;
 
 /**
- * Institutional Slug Normalizer
+ * normalizeSlug
+ * Institutional Slug Normalizer (idempotent)
+ * - trims whitespace
+ * - converts backslashes to slashes
  * - strips leading/trailing slashes
  * - collapses multiple slashes
  */
 export function normalizeSlug(input: string): string {
-  return (input || "")
+  return String(input ?? "")
     .trim()
+    .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
 }
 
 /**
- * joinHref — HARD-LOCKED (idempotent)
- * Combines segments into a clean URL, avoiding double-prefixes like:
- *   joinHref("books", "books/the-x")  -> "/books/the-x"
- *   joinHref("canon", "/canon/vol-i") -> "/canon/vol-i"
+ * normalizeHref
+ * - ensures leading slash
+ * - collapses multiple slashes
+ * - preserves "/" root
+ */
+export function normalizeHref(input: string): string {
+  const s = normalizeSlug(input);
+  if (!s) return "/";
+  return "/" + s;
+}
+
+/**
+ * stripCollectionPrefix (generic)
+ * Safely strips a known collection prefix from a slug/path.
+ * Examples:
+ * - stripCollectionPrefix("canon", "canon/vol-i") -> "vol-i"
+ * - stripCollectionPrefix("canon", "/canon/vol-i") -> "vol-i"
+ * - stripCollectionPrefix("canon", "vol-i") -> "vol-i"
+ * - stripCollectionPrefix("canon", "canon") -> ""
+ */
+export function stripCollectionPrefix(prefix: string, slug: string): string {
+  const p = normalizeSlug(prefix);
+  let s = normalizeSlug(slug);
+
+  if (!p) return s;
+
+  // Remove repeated prefixes: canon/canon/x => x
+  while (s.toLowerCase() === p.toLowerCase() || s.toLowerCase().startsWith(`${p.toLowerCase()}/`)) {
+    if (s.toLowerCase() === p.toLowerCase()) return "";
+    s = s.slice(p.length + 1);
+    s = normalizeSlug(s);
+  }
+
+  return s;
+}
+
+/**
+ * joinHref — HARD-LOCKED (idempotent, prefix-safe)
+ *
+ * Goals:
+ *  - Never produce // or backslashes
+ *  - Never duplicate collection prefixes when given mixed inputs:
+ *      joinHref("canon", "canon/vol-i") -> "/canon/vol-i"
+ *      joinHref("canon", "/canon/vol-i") -> "/canon/vol-i"
+ *      joinHref("/canon", "vol-i") -> "/canon/vol-i"
+ *  - If a later segment already contains earlier segments, keep the later, normalized:
+ *      joinHref("books", "books/the-x") -> "/books/the-x"
  */
 export function joinHref(...args: (string | undefined | null)[]): string {
   const raw = args
     .filter((a): a is string => typeof a === "string" && a.trim().length > 0)
-    .map((a) => normalizeSlug(a));
+    .map((a) => normalizeSlug(a))
+    .filter(Boolean);
 
   if (raw.length === 0) return "/";
 
   const parts: string[] = [];
 
-  for (let i = 0; i < raw.length; i++) {
-    const curr = raw[i];
+  for (const curr of raw) {
     if (!curr) continue;
-    
+
+    // If curr is absolute-ish already like "canon/vol-i" and we already have "canon",
+    // we want to drop the earlier "canon" and keep curr.
     const prev = parts[parts.length - 1];
 
-    // Skip exact duplicates: ["books","books"] => ["books"]
-    if (prev && curr === prev) continue;
+    if (!prev) {
+      parts.push(curr);
+      continue;
+    }
 
-    // If current already contains prev as prefix: ["books","books/the-x"] => keep only "books/the-x"
-    if (prev && (curr === prev || curr.startsWith(`${prev}/`))) {
+    const prevLower = prev.toLowerCase();
+    const currLower = curr.toLowerCase();
+
+    // Exact duplicate
+    if (currLower === prevLower) continue;
+
+    // curr already contains prev prefix: ["canon", "canon/vol-i"]
+    if (currLower.startsWith(prevLower + "/")) {
       parts.pop();
       parts.push(curr);
       continue;
     }
 
-    // If prev already contains current as prefix, keep prev (rare)
-    if (prev && (prev === curr || prev.startsWith(`${curr}/`))) {
+    // prev already contains curr prefix (rare): ["canon/vol-i","canon"]
+    if (prevLower.startsWith(currLower + "/") || prevLower === currLower) {
       continue;
     }
 
     parts.push(curr);
   }
 
-  return "/" + parts.join("/");
+  // Join, collapse any accidental doubles, and force leading slash
+  const joined = parts.join("/").replace(/\/{2,}/g, "/");
+  return joined ? "/" + joined : "/";
 }
 
 export function isDraftContent(doc: AnyDoc): boolean {
@@ -151,54 +210,45 @@ export function getDocKind(doc: AnyDoc): DocKind {
 }
 
 /**
- * getDocHref — HARDENED
+ * getDocHref — HARDENED (project-wide)
  * - honors explicit href/url/permalink
  * - otherwise builds a canonical route without double-prefixing
+ * - always returns a normalized href with a single leading slash
  */
 export function getDocHref(doc: AnyDoc): string {
   const explicit = doc?.href || doc?.url || doc?.permalink;
   if (typeof explicit === "string" && explicit.trim()) {
-    const e = explicit.trim();
-    return e.startsWith("/") ? e : `/${e}`;
+    // IMPORTANT: normalize explicit paths too (prevents //canon//canon)
+    return normalizeHref(explicit.trim());
   }
 
   const kind = getDocKind(doc);
 
   // Prefer slug; fallback to flattenedPath; then id
-  const rawSlug = normalizeSlug(
-    String(doc?.slug || doc?._raw?.flattenedPath || doc?._id || "")
-  );
-
-  // For Contentlayer docs, flattenedPath often already includes collection prefix.
-  // We do NOT want /books/books/x or /canon/canon/x etc.
-  const stripPrefix = (prefix: string, slug: string) => {
-    const p = normalizeSlug(prefix);
-    const s = normalizeSlug(slug);
-    return s === p ? "" : s.startsWith(`${p}/`) ? s.slice(p.length + 1) : s;
-  };
+  const rawSlug = normalizeSlug(String(doc?.slug || doc?._raw?.flattenedPath || doc?._id || ""));
 
   switch (kind) {
     case "blog":
-      return joinHref("blog", stripPrefix("blog", rawSlug));
+      return joinHref("blog", stripCollectionPrefix("blog", rawSlug));
     case "book":
-      return joinHref("books", stripPrefix("books", rawSlug));
+      return joinHref("books", stripCollectionPrefix("books", rawSlug));
     case "canon":
-      return joinHref("canon", stripPrefix("canon", rawSlug));
+      return joinHref("canon", stripCollectionPrefix("canon", rawSlug));
     case "download":
-      return joinHref("downloads", stripPrefix("downloads", rawSlug));
+      return joinHref("downloads", stripCollectionPrefix("downloads", rawSlug));
     case "event":
-      return joinHref("events", stripPrefix("events", rawSlug));
+      return joinHref("events", stripCollectionPrefix("events", rawSlug));
     case "print":
-      return joinHref("prints", stripPrefix("prints", rawSlug));
+      return joinHref("prints", stripCollectionPrefix("prints", rawSlug));
     case "resource":
-      return joinHref("resources", stripPrefix("resources", rawSlug));
+      return joinHref("resources", stripCollectionPrefix("resources", rawSlug));
     case "short":
-      return joinHref("shorts", stripPrefix("shorts", rawSlug));
+      return joinHref("shorts", stripCollectionPrefix("shorts", rawSlug));
     case "strategy":
-      return joinHref("strategy", stripPrefix("strategy", rawSlug));
+      return joinHref("strategy", stripCollectionPrefix("strategy", rawSlug));
     default:
       // If already nested, use it as-is; otherwise put in /content
-      return rawSlug.includes("/") ? `/${rawSlug}` : joinHref("content", rawSlug);
+      return rawSlug.includes("/") ? normalizeHref(rawSlug) : joinHref("content", rawSlug);
   }
 }
 
@@ -215,7 +265,7 @@ export function resolveDocCoverImage(doc: any): string | null {
 }
 
 export function resolveDocDownloadUrl(doc: any): string | null {
-  if (doc?.downloadUrl) return doc.downloadUrl;
+  if (doc?.downloadUrl) return String(doc.downloadUrl);
   if (doc?.slug) return joinHref("downloads", normalizeSlug(String(doc.slug)));
   return null;
 }

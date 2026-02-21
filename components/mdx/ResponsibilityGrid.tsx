@@ -6,9 +6,18 @@ interface ResponsibilityGridProps {
   className?: string;
 }
 
-export default function ResponsibilityGrid({ children, className = "" }: ResponsibilityGridProps) {
+export default function ResponsibilityGrid({
+  children,
+  className = "",
+}: ResponsibilityGridProps) {
   return (
-    <div className={`my-12 grid grid-cols-1 md:grid-cols-3 gap-6 ${className}`}>
+    <div
+      className={[
+        "my-10 grid grid-cols-1 gap-6",
+        "md:grid-cols-3",
+        className,
+      ].join(" ")}
+    >
       {children}
     </div>
   );
