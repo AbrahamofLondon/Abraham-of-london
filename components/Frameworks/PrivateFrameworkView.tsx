@@ -15,15 +15,23 @@ import type { Framework } from "@/lib/resources/strategic-frameworks";
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 const LIBRARY_HREF = "/resources/strategic-frameworks";
 
-function accentClass(accent: Framework["accent"]) {
-  const map = {
-    gold: "border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent text-amber-200 shadow-[0_0_30px_-8px_rgba(245,158,11,0.3)]",
-    emerald: "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-transparent text-emerald-200 shadow-[0_0_30px_-8px_rgba(16,185,129,0.3)]",
-    blue: "border-sky-500/30 bg-gradient-to-br from-sky-500/10 to-transparent text-sky-200 shadow-[0_0_30px_-8px_rgba(14,165,233,0.3)]",
-    rose: "border-rose-500/30 bg-gradient-to-br from-rose-500/10 to-transparent text-rose-200 shadow-[0_0_30px_-8px_rgba(244,63,94,0.3)]",
-    indigo: "border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-transparent text-indigo-200 shadow-[0_0_30px_-8px_rgba(99,102,241,0.3)]",
-  };
-  return map[accent] || map.gold;
+// ✅ FIX: Type-safe accent class generator
+type AccentType = "gold" | "emerald" | "blue" | "rose" | "indigo";
+
+const accentMap: Record<AccentType, string> = {
+  gold: "border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent text-amber-200 shadow-[0_0_30px_-8px_rgba(245,158,11,0.3)]",
+  emerald: "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-transparent text-emerald-200 shadow-[0_0_30px_-8px_rgba(16,185,129,0.3)]",
+  blue: "border-sky-500/30 bg-gradient-to-br from-sky-500/10 to-transparent text-sky-200 shadow-[0_0_30px_-8px_rgba(14,165,233,0.3)]",
+  rose: "border-rose-500/30 bg-gradient-to-br from-rose-500/10 to-transparent text-rose-200 shadow-[0_0_30px_-8px_rgba(244,63,94,0.3)]",
+  indigo: "border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-transparent text-indigo-200 shadow-[0_0_30px_-8px_rgba(99,102,241,0.3)]",
+};
+
+function accentClass(accent?: string): string {
+  // ✅ Guard against undefined/null and ensure it's a valid key
+  if (!accent || !(accent in accentMap)) {
+    return accentMap.gold; // Default fallback
+  }
+  return accentMap[accent as AccentType];
 }
 
 interface PrivateFrameworkViewProps {
