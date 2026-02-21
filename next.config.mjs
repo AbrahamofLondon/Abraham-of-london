@@ -14,14 +14,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   staticPageGenerationTimeout: 300,
-
-  // ✅ Explicitly silence Turbopack warnings while using Webpack
-  turbopack: {},
-
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
+  
   // ✅ CRITICAL: Enable standalone output for Netlify functions
   output: 'standalone',
 
