@@ -22,6 +22,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // ✅ CRITICAL: Enable standalone output for Netlify functions
+  output: 'standalone',
+
   experimental: {
     scrollRestoration: true,
 
@@ -31,10 +34,36 @@ const nextConfig = {
 
     // 🛡️ DISABLED: Causes document leakage in mixed routers on Windows
     // optimizeCss: true,
+
+    // ✅ Reduce serverless function size for Netlify
+    outputFileTracingRoot: path.join(__dirname, '../../'),
+    outputFileTracingExcludes: {
+      '/*': [
+        './public/**/*',
+        './node_modules/sharp/**/*',
+        './node_modules/@img/**/*',
+        './node_modules/playwright/**/*',
+        './node_modules/puppeteer/**/*',
+        './node_modules/chrome-aws-lambda/**/*',
+        './node_modules/aws-sdk/**/*',
+      ],
+    },
   },
 
   // ✅ Stabilize framer-motion resolution under Webpack (Windows+pnpm)
   transpilePackages: ["framer-motion"],
+
+  // ✅ Keep large dependencies out of serverless function
+  serverExternalPackages: [
+    'sharp', 
+    'playwright', 
+    'puppeteer', 
+    'chrome-aws-lambda',
+    'aws-sdk',
+    'pg',
+    'mysql',
+    'sqlite3'
+  ],
 
   images: {
     remotePatterns: [
@@ -76,8 +105,6 @@ const nextConfig = {
     return config;
   },
 
-  // 🛡️ Temporarily disabled for local Windows stability
-  // output: "standalone",
   distDir: ".next",
 };
 
