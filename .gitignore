@@ -185,4 +185,5 @@ id_dsa
 !public/android-chrome-192x192.png
 !public/android-chrome-512x512.png
 !public/site.webmanifest
-!public/robots.txt
+!public/robots.txt_emergency-backup.tar
+*.tar
