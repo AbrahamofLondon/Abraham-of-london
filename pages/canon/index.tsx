@@ -112,21 +112,17 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   try {
     const rawDocs = getAllCanons() || [];
 
- console.log('Raw canon slugs:', rawDocs.map((d: any) => ({
-      original: d.slug,
-      flattened: d._raw?.flattenedPath,
-      normalized: normalizeSlug(d.slug || d._raw?.flattenedPath || "")
-    })));
-    
     if (!rawDocs.length) {
       console.warn("[CANON] No documents found in getAllCanons()");
     }
 
     const seenSlugs = new Set();
     const items: CanonItem[] = rawDocs
-      .filter((doc: any) => !doc.draft) // Only published
+      .filter((doc: any) => !doc.draft)
       .map((doc: any) => {
-        const slug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "").replace(/^canon\//, "");
+        // ✅ FIX: Clean slug properly to prevent double slashes
+        const rawSlug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
+        const slug = rawSlug.replace(/^canon\//, ""); // Remove 'canon/' prefix
         const title = doc.title || "Untitled Volume";
         const date = doc.date ? new Date(doc.date).toISOString() : null;
         const series = doc.series || extractSeries(title);
@@ -136,7 +132,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           subtitle: doc.subtitle || null,
           excerpt: doc.excerpt || doc.description || null,
           slug,
-          href: `/canon/${slug}`,
+          href: `/canon/${slug}`, // ✅ Clean URL: /canon/volume-name
           accessLevel: toAccessLevel(doc.accessLevel || doc.access),
           coverImage: doc.coverImage || null,
           dateISO: date,
