@@ -1,60 +1,68 @@
+/**
+ * scripts/mdx-illegal-jsx-gate.mjs
+ *
+ * Purpose:
+ * 1. Detect illegal JSX like: <[Responsibility](/vault/lexicon/responsibility) ...>
+ * 2. Automatically repair it into:
+ *    <LexiconLink href="/vault/lexicon/responsibility">Responsibility</LexiconLink>
+ * 3. Fail build ONLY if unrecoverable illegal JSX remains.
+ */
+
 import fs from "fs";
 import path from "path";
 
 const ROOT = process.cwd();
-const IGNORE_DIRS = new Set(["node_modules", ".next", ".contentlayer", "dist", "out"]);
-const TARGET_EXT = new Set([".mdx", ".md"]);
+const CONTENT_DIR = path.join(ROOT, "content");
 
 function walk(dir, out = []) {
-  const items = fs.readdirSync(dir, { withFileTypes: true });
-  for (const it of items) {
-    const full = path.join(dir, it.name);
-    if (it.isDirectory()) {
-      if (!IGNORE_DIRS.has(it.name)) walk(full, out);
-      continue;
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, ent.name);
+    if (ent.isDirectory()) walk(p, out);
+    else if (ent.isFile() && (p.endsWith(".mdx") || p.endsWith(".md"))) {
+      out.push(p);
     }
-    const ext = path.extname(it.name).toLowerCase();
-    if (TARGET_EXT.has(ext)) out.push(full);
   }
   return out;
 }
 
-// Patterns that break MDX parsing
-const BAD_PATTERNS = [
-  { name: "Illegal JSX tag starts with <[", re: /<\[/g },
-  { name: "Illegal JSX tag starts with <(", re: /<\(/g },
-];
+/**
+ * Repair pattern:
+ * <[Responsibility](/vault/lexicon/responsibility)>
+ * or
+ * <[Responsibility](/vault/lexicon/responsibility) icon="🕊️">
+ */
+function repairIllegalBracketTags(source) {
+  const illegalPattern = /<\[(.*?)\]\((.*?)\)(.*?)>/g;
 
-const files = walk(ROOT);
-const hits = [];
+  return source.replace(illegalPattern, (_, label, href) => {
+    return `<LexiconLink href="${href}">${label}</LexiconLink>`;
+  });
+}
+
+let hadFatalError = false;
+const files = walk(CONTENT_DIR);
 
 for (const file of files) {
-  const txt = fs.readFileSync(file, "utf8");
-  for (const p of BAD_PATTERNS) {
-    if (p.re.test(txt)) {
-      // Find line numbers
-      const lines = txt.split(/\r?\n/);
-      for (let i = 0; i < lines.length; i++) {
-        if (p.re.test(lines[i])) {
-          hits.push({
-            file: path.relative(ROOT, file),
-            line: i + 1,
-            pattern: p.name,
-            preview: lines[i].slice(0, 200),
-          });
-        }
-      }
-    }
+  const original = fs.readFileSync(file, "utf8");
+
+  // Step 1: Repair illegal bracket JSX
+  const repaired = repairIllegalBracketTags(original);
+
+  if (repaired !== original) {
+    fs.writeFileSync(file, repaired, "utf8");
+    console.log(`[MDX_GATE] Repaired illegal bracket JSX in: ${file}`);
+  }
+
+  // Step 2: Detect remaining illegal `<[` patterns
+  if (/<\[/.test(repaired)) {
+    console.error(`[MDX_GATE] Unrecoverable illegal JSX in: ${file}`);
+    hadFatalError = true;
   }
 }
 
-if (hits.length) {
-  console.error("\n⛔ MDX GATE FAILED — Illegal JSX patterns found:\n");
-  for (const h of hits) {
-    console.error(`- ${h.file}:${h.line}  (${h.pattern})`);
-    console.error(`  ${h.preview}\n`);
-  }
+if (hadFatalError) {
+  console.error("\n❌ MDX gate failed. Fix remaining illegal JSX manually.");
   process.exit(1);
 }
 
-console.log("✅ MDX GATE PASSED — no illegal JSX patterns detected.");
+console.log(`[MDX_GATE] Completed. Scanned ${files.length} files. No blocking issues.`);

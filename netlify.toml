@@ -32,7 +32,8 @@
 [functions]
   included_files = [
     ".next/standalone/**",
-    ".next/static/**"
+    ".next/static/**"      # ✅ Fixed: Closing bracket added below
+  ]
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"

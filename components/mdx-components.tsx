@@ -41,6 +41,9 @@ import ShareRow from "@/components/mdx/ShareRow";
 import Step from "@/components/mdx/Step";
 import Verse from "@/components/mdx/Verse";
 
+// ✅ ADD THIS IMPORT
+import LexiconLink from "@/components/mdx/LexiconLink";
+
 // -----------------------------
 // Helpers
 // -----------------------------
@@ -224,6 +227,7 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   Grid,
   HeroEyebrow,
   JsonLd,
+  LexiconLink, // ✅ ADDED HERE
   Note,
   ProcessSteps,
   PullLine,
