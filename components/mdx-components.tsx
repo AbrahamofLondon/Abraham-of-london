@@ -1,12 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/mdx-components.tsx — PRODUCTION MDX REGISTRY (FULL RESOLUTION)
+/**
+ * components/mdx-components.tsx — HARDENED MDX REGISTRY (FULL RESOLUTION)
+ * Goal: render reliably even when content authors mix:
+ * - <Callout type="info">...</Callout> vs <Callout variant="info" />
+ * - <Divider /> vs <Divider></Divider>
+ * - different casing (Callout/callout)
+ * - older props (intent/tone/kind)
+ */
 
 import * as React from "react";
 import Link from "next/link";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 
-// ---- Institutional MDX blocks (your existing components) ----
+// ---- Institutional MDX blocks ----
 import Badge from "@/components/mdx/Badge";
 import BadgeRow from "@/components/mdx/BadgeRow";
 import BrandFrame from "@/components/mdx/BrandFrame";
@@ -43,10 +50,35 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+// Normalize common callout variants
+type CalloutVariant = "info" | "note" | "warning" | "success" | "danger" | "strategy" | "default";
+
+function normalizeCalloutVariant(input: unknown): CalloutVariant {
+  const raw = String(input ?? "").trim().toLowerCase();
+  if (!raw) return "info";
+
+  // common synonyms
+  if (raw === "warn" || raw === "alert" || raw === "caution") return "warning";
+  if (raw === "ok" || raw === "positive") return "success";
+  if (raw === "error" || raw === "critical") return "danger";
+  if (raw === "tip" || raw === "hint") return "note";
+
+  // allow direct
+  if (["info", "note", "warning", "success", "danger", "strategy", "default"].includes(raw)) {
+    return raw as CalloutVariant;
+  }
+
+  // unknown -> safe default
+  return "info";
+}
+
 // -----------------------------
 // Adapters (MDX authoring-safe)
 // -----------------------------
-const DividerAdapter: ComponentType<any> = (props: AnyProps) => {
+const DividerAdapter: ComponentType<AnyProps> = (props) => {
+  // Prefer your Rule component if you want consistent “institutional” dividers:
+  // return <Rule {...props} />;
+  // Otherwise use a neutral divider that cannot break:
   return (
     <div className={cx("my-14", props?.className)}>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -54,18 +86,33 @@ const DividerAdapter: ComponentType<any> = (props: AnyProps) => {
   );
 };
 
-const CalloutAdapter: ComponentType<any> = (props: AnyProps) => {
-  // Supports both authoring styles:
-  // <Callout type="info" /> and <Callout variant="info" />
-  const variant = props?.variant ?? props?.type ?? "info";
-  const { type, ...rest } = props; // strip type to avoid passing unknown props
-  return <Callout {...rest} variant={variant} />;
+const CalloutAdapter: ComponentType<AnyProps> = (props) => {
+  /**
+   * Supports:
+   *  <Callout type="info">...</Callout>
+   *  <Callout variant="info">...</Callout>
+   *  <Callout intent="warning" />
+   *  <Callout tone="success" />
+   *
+   * And passes BOTH `type` and `variant` to the real Callout
+   * to cover whichever API your Callout component expects.
+   */
+  const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
+
+  // Strip authoring-only props so we don't leak junk into the component
+  // (but keep children and everything else)
+  const { type, variant, intent, tone, kind, ...rest } = props;
+
+  return <Callout {...rest} type={v} variant={v} />;
 };
+
+// Quote adapter (optional hardening)
+const QuoteAdapter: ComponentType<AnyProps> = (props) => <Quote {...props} />;
 
 // -----------------------------
 // Atomic primitives (prose-safe)
 // -----------------------------
-const A: ComponentType<any> = (props: AnyProps) => {
+const A: ComponentType<AnyProps> = (props) => {
   const href = String(props?.href || "");
   const className = cx(
     "text-amber-500 underline underline-offset-4 decoration-amber-500/30 hover:decoration-amber-500 transition-all",
@@ -94,17 +141,14 @@ const A: ComponentType<any> = (props: AnyProps) => {
   );
 };
 
-const H1: ComponentType<any> = (props: AnyProps) => (
+const H1: ComponentType<AnyProps> = (props) => (
   <h1
     {...props}
-    className={cx(
-      "font-serif text-4xl md:text-5xl text-white mb-8 mt-14 tracking-tight",
-      props?.className
-    )}
+    className={cx("font-serif text-4xl md:text-5xl text-white mb-8 mt-14 tracking-tight", props?.className)}
   />
 );
 
-const H2: ComponentType<any> = (props: AnyProps) => (
+const H2: ComponentType<AnyProps> = (props) => (
   <h2
     {...props}
     className={cx(
@@ -114,53 +158,37 @@ const H2: ComponentType<any> = (props: AnyProps) => (
   />
 );
 
-const H3: ComponentType<any> = (props: AnyProps) => (
-  <h3
-    {...props}
-    className={cx(
-      "font-serif text-xl md:text-2xl text-white/90 mb-4 mt-10",
-      props?.className
-    )}
-  />
+const H3: ComponentType<AnyProps> = (props) => (
+  <h3 {...props} className={cx("font-serif text-xl md:text-2xl text-white/90 mb-4 mt-10", props?.className)} />
 );
 
-const P: ComponentType<any> = (props: AnyProps) => (
-  <p
-    {...props}
-    className={cx("font-sans text-lg leading-relaxed text-white/70 my-6 font-light", props?.className)}
-  />
+const P: ComponentType<AnyProps> = (props) => (
+  <p {...props} className={cx("font-sans text-lg leading-relaxed text-white/70 my-6 font-light", props?.className)} />
 );
 
-const Ul: ComponentType<any> = (props: AnyProps) => (
+const Ul: ComponentType<AnyProps> = (props) => (
   <ul {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />
 );
 
-const Ol: ComponentType<any> = (props: AnyProps) => (
+const Ol: ComponentType<AnyProps> = (props) => (
   <ol {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />
 );
 
-const Li: ComponentType<any> = (props: AnyProps) => (
-  <li {...props} className={cx("leading-relaxed", props?.className)} />
-);
+const Li: ComponentType<AnyProps> = (props) => <li {...props} className={cx("leading-relaxed", props?.className)} />;
 
-const Blockquote: ComponentType<any> = (props: AnyProps) => (
+const Blockquote: ComponentType<AnyProps> = (props) => (
   <blockquote
     {...props}
-    className={cx(
-      "my-10 border-l border-amber-500/30 pl-6 text-white/70 italic",
-      props?.className
-    )}
+    className={cx("my-10 border-l border-amber-500/30 pl-6 text-white/70 italic", props?.className)}
   />
 );
 
-const Hr: ComponentType<any> = (props: AnyProps) => (
-  <hr {...props} className={cx("my-16 border-t border-white/10", props?.className)} />
-);
+const Hr: ComponentType<AnyProps> = (props) => <hr {...props} className={cx("my-16 border-t border-white/10", props?.className)} />;
 
 // -----------------------------
 // Institutional wrappers / aliases
 // -----------------------------
-const CTAGroup = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+const CTAGroup = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
   <div className={cx("flex flex-wrap gap-4 my-10", className)}>{children}</div>
 );
 
@@ -199,7 +227,7 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   Note,
   ProcessSteps,
   PullLine,
-  Quote,
+  Quote: QuoteAdapter,
   ResourcesCTA,
   Responsibility,
   ResponsibilityGrid,
@@ -208,23 +236,22 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   Step,
   Verse,
 
-  // ✅ Hard bindings (adapter-proof)
+  // ✅ HARD BINDINGS (cannot “miss” due to authoring style)
   Callout: CalloutAdapter,
   Divider: DividerAdapter,
 
-  // ✅ Extra safety for authoring mistakes / alternate casing
+  // ✅ casing / alias safety
   callout: CalloutAdapter as any,
   divider: DividerAdapter as any,
+  DIVIDER: DividerAdapter as any,
+  CALLOUT: CalloutAdapter as any,
 
-  // Keep explicit duplicates for clarity
-  Note: Note,
-  Quote: Quote,
-
-  // Backward-compat
+  // ✅ old or alternate tags people tend to type
+  HorizontalRule: Hr,
   HR: Hr,
   DividerLine: DividerAdapter,
-  
-  // CTA fallbacks
+
+  // CTA fallbacks (keeps older MDX from exploding)
   FatherhoodCTA: CTA,
   LeadershipCTA: CTA,
   BrotherhoodCTA: CTA,
