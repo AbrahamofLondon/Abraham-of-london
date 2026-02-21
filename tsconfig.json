@@ -36,12 +36,11 @@
       "./types"
     ],
     "types": [
-  "node",
-  "react",
-  "react-dom",
-  "next",
-  "next-auth",
-  "next-auth/jwt"
+      "node",
+      "react",
+      "react-dom",
+      "next",
+      "next-auth"
     ],
     "baseUrl": ".",
     "paths": {
@@ -56,9 +55,7 @@
         "./.contentlayer/generated/*"
       ],
       // Database & Redis
-      "@prisma/client": [
-        "./node_modules/.prisma/client"
-      ],
+      // ✅ @prisma/client REMOVED - let node_modules resolve it naturally
       "@/lib/db": [
         "./lib/db.ts"
       ],

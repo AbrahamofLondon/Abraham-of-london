@@ -1,7 +1,6 @@
-// components/layout/Sidebar.tsx
+// components/layout/Sidebar.tsx — ROUTER-FREE (accepts currentPath prop)
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -15,11 +14,17 @@ import {
 
 interface SidebarProps {
   isOpen?: boolean;
+  /** Current path for active state (passed from parent) */
+  currentPath?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
-  const router = useRouter();
-  const currentPath = router.pathname;
+const Sidebar: React.FC<SidebarProps> = ({ 
+  isOpen = true,
+  currentPath = '/' 
+}) => {
+  // ========== NO useRouter HOOK ==========
+  // Use provided currentPath
+  const path = currentPath;
 
   const menuItems = [
     { path: '/inner-circle/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -56,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
       <nav className="flex-1 p-4">
         <ul className="space-y-1">
           {menuItems.map((item) => {
-            const isActive = currentPath === item.path || currentPath.startsWith(item.path);
+            const isActive = path === item.path || path.startsWith(item.path);
             
             return (
               <li key={item.path}>

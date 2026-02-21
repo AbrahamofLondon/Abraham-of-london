@@ -1,19 +1,19 @@
 // lib/inner-circle/templates/InnerCircleEmail.tsx
-import React from "react";
+import * as React from "react";
 import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Link,
-  Preview,
-  Section,
-  Text,
-  Img,
-  Row,
-  Column,
+  Body as EmailBody,
+  Container as EmailContainer,
+  Head as EmailHead,
+  Heading as EmailHeading,
+  Hr as EmailHr,
+  Html as EmailHtml,
+  Link as EmailLink,
+  Preview as EmailPreview,
+  Section as EmailSection,
+  Text as EmailText,
+  Img as EmailImg,
+  Row as EmailRow,
+  Column as EmailColumn,
 } from "@react-email/components";
 
 interface InnerCircleEmailProps {
@@ -138,133 +138,133 @@ export function InnerCircleEmail({
   };
 
   return (
-    <Html>
-      <Head />
-      <Preview>{getPreviewText()}</Preview>
-      <Body style={main}>
-        <Container style={container}>
+    <EmailHtml lang="en">
+      <EmailHead />
+      <EmailPreview>{getPreviewText()}</EmailPreview>
+      <EmailBody style={main}>
+        <EmailContainer style={container}>
           {/* Header */}
-          <Section style={header}>
-            <Row>
-              <Column style={logoColumn}>
-                <Img
+          <EmailSection style={header}>
+            <EmailRow>
+              <EmailColumn style={logoColumn}>
+                <EmailImg
                   src="https://www.abrahamoflondon.org/logo.png"
                   width="40"
                   height="40"
                   alt="Abraham of London"
                   style={logo}
                 />
-              </Column>
-              <Column style={titleColumn}>
-                <Text style={brand}>Abraham of London</Text>
-                <Text style={subBrand}>Inner Circle</Text>
-              </Column>
-            </Row>
-          </Section>
+              </EmailColumn>
+              <EmailColumn style={titleColumn}>
+                <EmailText style={brand}>Abraham of London</EmailText>
+                <EmailText style={subBrand}>Inner Circle</EmailText>
+              </EmailColumn>
+            </EmailRow>
+          </EmailSection>
 
           {/* Main Content */}
-          <Section style={content}>
-            <Heading style={h1}>
+          <EmailSection style={content}>
+            <EmailHeading style={h1}>
               {getHeaderIcon()} {getSubject()}
-            </Heading>
+            </EmailHeading>
 
-            <Text style={greetingText}>{greeting}</Text>
+            <EmailText style={greetingText}>{greeting}</EmailText>
 
-            <Text style={paragraph}>{getMainMessage()}</Text>
+            <EmailText style={paragraph}>{getMainMessage()}</EmailText>
 
             {/* Access Key Section */}
             {!isWelcome && !isSecurityAlert && (
               <>
-                <Text style={sectionTitle}>Your Access Key</Text>
-                <Section style={codeContainer}>
-                  <Text style={code}>{accessKey}</Text>
-                  <Text style={codeNote}>
+                <EmailText style={sectionTitle}>Your Access Key</EmailText>
+                <EmailSection style={codeContainer}>
+                  <EmailText style={code}>{accessKey}</EmailText>
+                  <EmailText style={codeNote}>
                     Valid for {expiresIn} • Do not share
-                  </Text>
-                </Section>
+                  </EmailText>
+                </EmailSection>
 
-                <Text style={paragraph}>
+                <EmailText style={paragraph}>
                   Click the button below to activate your access:
-                </Text>
+                </EmailText>
 
-                <Section style={buttonContainer}>
-                  <Link href={unlockUrl} style={button}>
+                <EmailSection style={buttonContainer}>
+                  <EmailLink href={unlockUrl} style={button}>
                     {isResend ? "Access Inner Circle" : "Activate Membership"}
-                  </Link>
-                </Section>
+                  </EmailLink>
+                </EmailSection>
 
-                <Text style={smallText}>
+                <EmailText style={smallText}>
                   Or copy and paste this URL into your browser:
-                </Text>
-                <Text style={linkText}>{unlockUrl}</Text>
+                </EmailText>
+                <EmailText style={linkText}>{unlockUrl}</EmailText>
               </>
             )}
 
             {/* Welcome Features */}
             {(isWelcome || mode === "register") && features && (
               <>
-                <Text style={sectionTitle}>What You'll Get Access To:</Text>
-                <Section style={featuresGrid}>
+                <EmailText style={sectionTitle}>What You'll Get Access To:</EmailText>
+                <EmailSection style={featuresGrid}>
                   {features.map((feature, index) => (
-                    <Row key={index} style={featureRow}>
-                      <Column style={featureIconColumn}>
-                        <Text style={featureIcon}>{feature.icon || "✓"}</Text>
-                      </Column>
-                      <Column style={featureContentColumn}>
-                        <Text style={featureTitle}>{feature.title}</Text>
-                        <Text style={featureDescription}>{feature.description}</Text>
-                      </Column>
-                    </Row>
+                    <EmailRow key={index} style={featureRow}>
+                      <EmailColumn style={featureIconColumn}>
+                        <EmailText style={featureIcon}>{feature.icon || "✓"}</EmailText>
+                      </EmailColumn>
+                      <EmailColumn style={featureContentColumn}>
+                        <EmailText style={featureTitle}>{feature.title}</EmailText>
+                        <EmailText style={featureDescription}>{feature.description}</EmailText>
+                      </EmailColumn>
+                    </EmailRow>
                   ))}
-                </Section>
+                </EmailSection>
               </>
             )}
 
             {/* Security Information */}
             {!isWelcome && (
               <>
-                <Hr style={hr} />
-                <Text style={sectionTitle}>Security Information</Text>
-                <Section style={securityInfo}>
-                  <Row>
-                    <Column>
-                      <Text style={securityLabel}>Request IP:</Text>
-                      <Text style={securityValue}>{requestIp}</Text>
-                    </Column>
-                    <Column>
-                      <Text style={securityLabel}>Location:</Text>
-                      <Text style={securityValue}>{requestLocation}</Text>
-                    </Column>
-                    <Column>
-                      <Text style={securityLabel}>Timestamp:</Text>
-                      <Text style={securityValue}>
+                <EmailHr style={hr} />
+                <EmailText style={sectionTitle}>Security Information</EmailText>
+                <EmailSection style={securityInfo}>
+                  <EmailRow>
+                    <EmailColumn>
+                      <EmailText style={securityLabel}>Request IP:</EmailText>
+                      <EmailText style={securityValue}>{requestIp}</EmailText>
+                    </EmailColumn>
+                    <EmailColumn>
+                      <EmailText style={securityLabel}>Location:</EmailText>
+                      <EmailText style={securityValue}>{requestLocation}</EmailText>
+                    </EmailColumn>
+                    <EmailColumn>
+                      <EmailText style={securityLabel}>Timestamp:</EmailText>
+                      <EmailText style={securityValue}>
                         {new Date().toLocaleString('en-US', {
                           timeZone: 'UTC',
                           dateStyle: 'medium',
                           timeStyle: 'short'
                         })}
-                      </Text>
-                    </Column>
-                  </Row>
-                </Section>
+                      </EmailText>
+                    </EmailColumn>
+                  </EmailRow>
+                </EmailSection>
               </>
             )}
 
             {/* Additional Instructions */}
             {additionalInstructions && (
-              <Section style={instructionsBox}>
-                <Text style={instructionsTitle}>Important Instructions:</Text>
-                <Text style={instructionsText}>{additionalInstructions}</Text>
-              </Section>
+              <EmailSection style={instructionsBox}>
+                <EmailText style={instructionsTitle}>Important Instructions:</EmailText>
+                <EmailText style={instructionsText}>{additionalInstructions}</EmailText>
+              </EmailSection>
             )}
 
             {/* Action Required for Security Alert */}
             {isSecurityAlert && (
-              <Section style={alertBox}>
-                <Text style={alertTitle}>⚠️ Action Required</Text>
-                <Text style={alertText}>
+              <EmailSection style={alertBox}>
+                <EmailText style={alertTitle}>⚠️ Action Required</EmailText>
+                <EmailText style={alertText}>
                   If you did not request Inner Circle access, please:
-                </Text>
+                </EmailText>
                 <ol style={alertList}>
                   <li style={alertListItem}>
                     Click the link below to secure your account
@@ -276,65 +276,65 @@ export function InnerCircleEmail({
                     Contact our support team at {supportContact}
                   </li>
                 </ol>
-                <Link href={`${unlockUrl}?action=secure`} style={alertButton}>
+                <EmailLink href={`${unlockUrl}?action=secure`} style={alertButton}>
                   Secure My Account
-                </Link>
-              </Section>
+                </EmailLink>
+              </EmailSection>
             )}
 
             {/* Footer */}
-            <Hr style={hr} />
-            <Section style={footerSection}>
-              <Text style={footerText}>
+            <EmailHr style={hr} />
+            <EmailSection style={footerSection}>
+              <EmailText style={footerText}>
                 <strong>Need Help?</strong><br />
                 Contact our support team at{" "}
-                <Link href={`mailto:${supportContact}`} style={footerLink}>
+                <EmailLink href={`mailto:${supportContact}`} style={footerLink}>
                   {supportContact}
-                </Link>
-              </Text>
+                </EmailLink>
+              </EmailText>
 
-              <Text style={footerText}>
+              <EmailText style={footerText}>
                 <strong>Security Tips:</strong><br />
                 • Never share your access key with anyone<br />
                 • Always log out from shared devices<br />
                 • Use strong, unique passwords<br />
                 • Enable two-factor authentication if available
-              </Text>
+              </EmailText>
 
-              <Text style={disclaimer}>
+              <EmailText style={disclaimer}>
                 This email was sent to {email}. If you believe you received this email in error,
                 please contact support immediately.
-              </Text>
+              </EmailText>
 
-              <Text style={signature}>
+              <EmailText style={signature}>
                 Best regards,<br />
                 <strong>The Abraham of London Team</strong>
-              </Text>
+              </EmailText>
 
               {/* Social Links */}
-              <Section style={socialContainer}>
-                <Link href="https://twitter.com/abrahamoflondon" style={socialLink}>
+              <EmailSection style={socialContainer}>
+                <EmailLink href="https://twitter.com/abrahamoflondon" style={socialLink}>
                   Twitter
-                </Link>
+                </EmailLink>
                 <span style={socialDivider}>•</span>
-                <Link href="https://linkedin.com/company/abrahamoflondon" style={socialLink}>
+                <EmailLink href="https://linkedin.com/company/abrahamoflondon" style={socialLink}>
                   LinkedIn
-                </Link>
+                </EmailLink>
                 <span style={socialDivider}>•</span>
-                <Link href="https://www.abrahamoflondon.org" style={socialLink}>
+                <EmailLink href="https://www.abrahamoflondon.org" style={socialLink}>
                   Website
-                </Link>
-              </Section>
+                </EmailLink>
+              </EmailSection>
 
-              <Text style={copyright}>
+              <EmailText style={copyright}>
                 © {new Date().getFullYear()} Abraham of London. All rights reserved.<br />
                 Canon Inner Circle • Premium Membership
-              </Text>
-            </Section>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
+              </EmailText>
+            </EmailSection>
+          </EmailSection>
+        </EmailContainer>
+      </EmailBody>
+    </EmailHtml>
   );
 }
 
@@ -774,4 +774,3 @@ export async function sendInnerCircleEmail(
     };
   }
 }
-

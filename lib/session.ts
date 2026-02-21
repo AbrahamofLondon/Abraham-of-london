@@ -1,6 +1,6 @@
 /* lib/session.ts */
 import type { NextApiRequest, NextApiResponse } from "next";
-import crypto from "node:crypto";
+import crypto from "crypto";
 
 const COOKIE_NAME = "aofl_sid";
 const ONE_YEAR = 60 * 60 * 24 * 365;

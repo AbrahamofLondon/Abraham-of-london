@@ -3,6 +3,7 @@
 /**
  * lib/content/server.ts — SOVEREIGN SERVER-ONLY CONTENT ACCESS
  * Integrated with AES-256-GCM Decryption and NextAuth Session Verification.
+ * ✅ BUILD-SAFE: Guards against auth calls during static generation
  */
 
 import {
@@ -16,7 +17,7 @@ import {
 
 import { decryptDocument } from "@/lib/security";
 import { getAuthSession } from "@/lib/auth/options";
-import { canAccessDoc } from "@/lib/content/access-engine"; // ✅ FIXED: SSOT role logic (no barrel dependency)
+import { canAccessDoc } from "@/lib/content/access-engine";
 
 // Import all helpers from contentlayer-helper
 import {
@@ -41,6 +42,12 @@ import {
   documentKinds,
   getCardProps,
 } from "@/lib/contentlayer-helper";
+
+// ------------------------------
+// 🔐 BUILD-TIME SAFETY GUARD
+// ------------------------------
+const IS_BUILD = process.env.NODE_ENV === 'production' && 
+                 process.env.NEXT_PHASE === 'phase-production-build';
 
 // ------------------------------
 // TYPES — exported for downstream type re-exports (SSOT)
@@ -120,14 +127,25 @@ export const getDocBySlug = helperGetDocBySlug;
 export const getContentlayerData = helperGetAllContentlayerDocs;
 
 // ------------------------------
-// 🔐 SOVEREIGN DECRYPTION ENGINES
+// 🔐 SOVEREIGN DECRYPTION ENGINES (Build-Safe)
 // ------------------------------
 
 /**
  * The "Secure Lens": Decrypts content if it's marked as encrypted and user is authorized.
+ * ✅ BUILD-SAFE: During build, returns document without auth checks
  */
 async function secureProcessDocument(doc: any): Promise<any | null> {
   if (!doc) return null;
+
+  // 🛡️ CRITICAL: During build, return document without decryption attempts
+  if (IS_BUILD) {
+    return {
+      ...doc,
+      isLocked: true,
+      content: doc.content || doc.body?.raw || "",
+      _buildMode: true
+    };
+  }
 
   // 1. Determine if this document is encrypted via metadata
   let meta = {};
@@ -154,10 +172,19 @@ async function secureProcessDocument(doc: any): Promise<any | null> {
         encryptionData.authTag
       );
       // Return doc with decrypted content
-      return { ...doc, content: decryptedBody, body: { ...doc.body, raw: decryptedBody }, isLocked: false };
+      return { 
+        ...doc, 
+        content: decryptedBody, 
+        body: { ...doc.body, raw: decryptedBody }, 
+        isLocked: false 
+      };
     } catch (error) {
       console.error(`❌ DECRYPTION FAILURE [${doc.slug}]:`, error);
-      return { ...doc, content: "ERROR: Cryptographic Integrity Breach.", isLocked: true };
+      return { 
+        ...doc, 
+        content: "ERROR: Cryptographic Integrity Breach.", 
+        isLocked: true 
+      };
     }
   }
 
@@ -171,7 +198,7 @@ async function secureProcessDocument(doc: any): Promise<any | null> {
 }
 
 // ------------------------------
-// Core data access - REMOVED DUPLICATE getAllStrategies
+// Core data access
 // ------------------------------
 export function getAllContentlayerDocs() { return helperGetAllContentlayerDocs(); }
 export function getAllBooks() { return helperGetAllBooks(); }
@@ -183,7 +210,6 @@ export function getAllPrints() { return helperGetAllPrints(); }
 export function getAllResources() { return helperGetAllResources(); }
 export function getAllShorts() { return helperGetAllShorts(); }
 
-// FIXED: Only one getAllStrategies function
 export function getAllStrategies() { 
   return helperGetAllStrategies().filter(helperIsPublished); 
 }
@@ -200,7 +226,7 @@ export function assertContentlayerHasDocs(): void {
 }
 
 // ------------------------------
-// 🚀 SECURE LOOKUPS
+// 🚀 SECURE LOOKUPS (Build-Safe)
 // ------------------------------
 
 export async function getServerShortBySlug(slug: string) {
@@ -250,7 +276,7 @@ export function getAllCombinedDocs(): any[] {
   const sanitized = (helperSanitizeData(combined) || []) as any[];
 
   // SYSTEMATIC AUDIT: Ensure critical files are resolving
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' && !IS_BUILD) {
     const requiredBriefs = ["institutional-governance"];
     requiredBriefs.forEach(slug => {
       const found = sanitized.find(doc => 
@@ -268,7 +294,6 @@ export function getAllCombinedDocs(): any[] {
   return sanitized;
 }
 
-// Fixed duplicate declaration: Pointing to audited combined docs
 export const getPublishedDocuments = () => getAllCombinedDocs();
 
 // ------------------------------

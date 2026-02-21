@@ -1,4 +1,3 @@
-/* components/EnhancedFooter.tsx — INSTITUTIONAL FOOTER (Portfolio-first, Canon-rooted) */
 "use client";
 
 import * as React from "react";
@@ -11,6 +10,7 @@ import {
   Vault,
   Building2,
   Mail,
+  PenTool,
 } from "lucide-react";
 import SocialLinks, { SocialLinksCompact } from "@/components/SocialLinks";
 import PolicyFooter from "@/components/PolicyFooter";
@@ -58,7 +58,27 @@ function FooterCTA({ href, title, label, icon }: FooterCTAProps) {
 }
 
 export default function EnhancedFooter(): React.ReactElement {
+  const [mounted, setMounted] = React.useState(false);
   const year = new Date().getFullYear();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // During SSR, render static version
+  if (!mounted) {
+    return (
+      <footer className="relative overflow-hidden border-t border-white/5 bg-black pt-20 pb-12">
+        <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-12">
+          <div className="mt-12 border-t border-white/10 pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
+              © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className="relative overflow-hidden border-t border-white/5 bg-black pt-20 pb-12">
@@ -94,10 +114,10 @@ export default function EnhancedFooter(): React.ReactElement {
         {/* Secondary pathways */}
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <FooterCTA
-            href="/briefs"
-            title="Briefs"
-            label="Operator Notes"
-            icon={<Briefcase size={18} />}
+            href="/essays"          // ✅ Changed from "/briefs"
+            title="Essays"          // ✅ Changed from "Briefs"
+            label="Literary"        // ✅ Changed from "Operator Notes"
+            icon={<PenTool size={18} />} // ✅ Changed icon
           />
           <FooterCTA
             href="/downloads"
@@ -166,7 +186,7 @@ export default function EnhancedFooter(): React.ReactElement {
               <ul className="space-y-3 text-xs text-white/45">
                 <li><Link href="/canon" className="hover:text-amber-100 hover:underline">Canon</Link></li>
                 <li><Link href="/library" className="hover:text-amber-100 hover:underline">Library</Link></li>
-                <li><Link href="/briefs" className="hover:text-amber-100 hover:underline">Briefs</Link></li>
+                <li><Link href="/essays" className="hover:text-amber-100 hover:underline">Essays</Link></li> {/* ✅ Changed */}
                 <li><Link href="/shorts" className="hover:text-amber-100 hover:underline">Shorts</Link></li>
               </ul>
             </div>
@@ -202,7 +222,7 @@ export default function EnhancedFooter(): React.ReactElement {
           <PolicyFooter isDark />
         </div>
 
-        {/* Bottom bar with ALL RIGHTS RESERVED */}
+        {/* Bottom bar */}
         <div className="mt-12 border-t border-white/10 pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
             © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED

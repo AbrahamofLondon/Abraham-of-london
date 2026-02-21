@@ -1,6 +1,6 @@
 /* scripts/build-pdfs.mjs */
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 import React from "react";
 import { renderToFile } from "@react-pdf/renderer";
 

@@ -1,8 +1,8 @@
 // scripts/contentlayer-build-safe.js
-import { execSync } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
-import { createRequire } from "node:module";
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 

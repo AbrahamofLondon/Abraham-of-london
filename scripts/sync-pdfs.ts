@@ -3,9 +3,9 @@
 // This is intentionally minimal and safe.
 // It ensures we have a deterministic manifest for /public/downloads assets.
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import crypto from "node:crypto";
+import { promises as fs } from "fs";
+import path from "path";
+import crypto from "crypto";
 
 const ROOT = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, "public");

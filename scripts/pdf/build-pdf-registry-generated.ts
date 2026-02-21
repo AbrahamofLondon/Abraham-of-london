@@ -1,8 +1,8 @@
 // scripts/pdf/build-pdf-registry-generated.ts
 // Generates: scripts/pdf/pdf-registry.generated.ts
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { ALL_SOURCE_PDFS, type SourcePDFItem, type PaperFormat, type PDFFormat, type Tier, type PDFType } from "./pdf-registry.source";
 

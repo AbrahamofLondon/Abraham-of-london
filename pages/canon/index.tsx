@@ -8,26 +8,23 @@ import Link from "next/link";
 import {
   BookOpen,
   Lock,
-  Unlock,
   Users,
   Calendar,
-  Clock,
   ChevronRight,
   Sparkles,
   Award,
   Layers,
   Target,
-  Compass,
   Building2,
   Castle,
   ScrollText,
   Library,
-  Activity
+  Activity,
+  AlertCircle
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData } from "@/lib/content/server";
-import { normalizeSlug, sanitizeData } from "@/lib/content/shared";
+import { getAllCanons, normalizeSlug, sanitizeData } from "@/lib/content/server";
 
 // ============================================================================
 // TYPES
@@ -50,6 +47,7 @@ type CanonItem = {
   featured: boolean;
   isTeachingEdition: boolean;
   volumeNumber: number | null;
+  series: string;
 };
 
 type CanonSeries = {
@@ -66,6 +64,7 @@ type CanonIndexProps = {
   counts: { total: number; public: number; inner: number; private: number };
   series: CanonSeries[];
   featuredItems: CanonItem[];
+  error?: string;
 };
 
 // ============================================================================
@@ -76,8 +75,8 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.o
 
 function toAccessLevel(v: unknown): AccessLevel {
   const s = String(v || "").trim().toLowerCase();
-  if (["inner-circle", "innercircle", "members"].includes(s)) return "inner-circle";
-  if (["private", "restricted", "draft"].includes(s)) return "private";
+  if (s === "inner-circle" || s === "innercircle" || s === "members") return "inner-circle";
+  if (s === "private" || s === "restricted" || s === "draft") return "private";
   return "public";
 }
 
@@ -98,29 +97,39 @@ function extractVolumeNumber(title: string): number | null {
   return numMatch ? parseInt(numMatch[1], 10) : null;
 }
 
+function extractSeries(title: string): string {
+  if (title.includes("Foundations")) return "Volume I";
+  if (title.includes("Governance")) return "Volume II";
+  if (title.includes("Civilisation")) return "Volume III";
+  return "General";
+}
+
 // ============================================================================
 // DATA FETCHING
 // ============================================================================
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   try {
-    const data = getContentlayerData();
-    // Combine all potential Canon sources
-    const rawDocs = [
-      ...(data.allCanons || []),
-      ...(data.allDocuments || []).filter((d: any) => 
-        d._raw?.sourceFileDir?.includes("canon") || 
-        d.category?.toLowerCase() === "canon" ||
-        d.tags?.includes("canon")
-      )
-    ];
+    const rawDocs = getAllCanons() || [];
+
+ console.log('Raw canon slugs:', rawDocs.map((d: any) => ({
+      original: d.slug,
+      flattened: d._raw?.flattenedPath,
+      normalized: normalizeSlug(d.slug || d._raw?.flattenedPath || "")
+    })));
+    
+    if (!rawDocs.length) {
+      console.warn("[CANON] No documents found in getAllCanons()");
+    }
 
     const seenSlugs = new Set();
     const items: CanonItem[] = rawDocs
+      .filter((doc: any) => !doc.draft) // Only published
       .map((doc: any) => {
-        const slug = (doc.slug || doc._raw?.flattenedPath || "").split('/').pop() || "";
+        const slug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "").replace(/^canon\//, "");
         const title = doc.title || "Untitled Volume";
         const date = doc.date ? new Date(doc.date).toISOString() : null;
+        const series = doc.series || extractSeries(title);
         
         return {
           title,
@@ -137,6 +146,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           featured: Boolean(doc.featured),
           isTeachingEdition: title.toLowerCase().includes("teaching edition"),
           volumeNumber: extractVolumeNumber(title),
+          series,
         };
       })
       .filter(item => {
@@ -147,36 +157,58 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       .sort((a, b) => (a.volumeNumber || 99) - (b.volumeNumber || 99));
 
     // Group into Architectural Series
-    const series: CanonSeries[] = [
-      {
-        volume: "Volume I",
-        title: "Foundations of Purpose",
-        description: "First principles: purpose, mandate, meaning, and moral architecture.",
-        icon: Target,
-        items: items.filter(i => i.volumeNumber === 1),
-        color: "from-amber-500/20 to-transparent",
-      },
-      {
-        volume: "Volume II",
-        title: "Governance & Formation",
-        description: "Rules, routines, and structures that survive pressure and personality.",
-        icon: Building2,
-        items: items.filter(i => i.volumeNumber === 2),
-        color: "from-blue-500/20 to-transparent",
-      },
-      {
-        volume: "Volume III",
-        title: "Civilisation & Legacy",
-        description: "Institutions, continuity, and generational systems.",
-        icon: Castle,
-        items: items.filter(i => i.volumeNumber === 3),
-        color: "from-purple-500/20 to-transparent",
+    const seriesMap = new Map<string, CanonSeries>();
+    
+    items.forEach(item => {
+      if (!seriesMap.has(item.series)) {
+        const seriesConfig: Record<string, { title: string; description: string; icon: any; color: string }> = {
+          "Volume I": {
+            title: "Foundations of Purpose",
+            description: "First principles: purpose, mandate, meaning, and moral architecture.",
+            icon: Target,
+            color: "from-amber-500/20 to-transparent",
+          },
+          "Volume II": {
+            title: "Governance & Formation",
+            description: "Rules, routines, and structures that survive pressure and personality.",
+            icon: Building2,
+            color: "from-blue-500/20 to-transparent",
+          },
+          "Volume III": {
+            title: "Civilisation & Legacy",
+            description: "Institutions, continuity, and generational systems.",
+            icon: Castle,
+            color: "from-purple-500/20 to-transparent",
+          },
+        };
+        
+        const config = seriesConfig[item.series] || {
+          title: item.series,
+          description: "Canonical volumes",
+          icon: BookOpen,
+          color: "from-gray-500/20 to-transparent",
+        };
+        
+        seriesMap.set(item.series, {
+          volume: item.series,
+          title: config.title,
+          description: config.description,
+          icon: config.icon,
+          items: [],
+          color: config.color,
+        });
       }
-    ].filter(s => s.items.length > 0);
+      
+      seriesMap.get(item.series)!.items.push(item);
+    });
+
+    const series = Array.from(seriesMap.values()).filter(s => s.items.length > 0);
 
     const counts = items.reduce((acc, it) => {
       acc.total++;
-      acc[it.accessLevel === "inner-circle" ? "inner" : it.accessLevel === "private" ? "private" : "public"]++;
+      if (it.accessLevel === "public") acc.public++;
+      else if (it.accessLevel === "inner-circle") acc.inner++;
+      else acc.private++;
       return acc;
     }, { total: 0, public: 0, inner: 0, private: 0 });
 
@@ -191,7 +223,15 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     };
   } catch (error) {
     console.error("Canon Index Failure:", error);
-    return { props: { items: [], counts: { total: 0, public: 0, inner: 0, private: 0 }, series: [], featuredItems: [] } };
+    return { 
+      props: { 
+        items: [], 
+        counts: { total: 0, public: 0, inner: 0, private: 0 }, 
+        series: [], 
+        featuredItems: [],
+        error: "Failed to load Canon documents"
+      } 
+    };
   }
 };
 
@@ -206,7 +246,11 @@ const Stat = ({ label, value, color }: { label: string, value: any, color: strin
   </div>
 );
 
-const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, featuredItems }) => {
+const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, featuredItems, error }) => {
+  const latestUpdate = items.length > 0 
+    ? new Date(Math.max(...items.map(i => new Date(i.dateISO || 0).getTime()))).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+    : "Feb 2026";
+
   return (
     <Layout title="The Canon">
       <main className="min-h-screen bg-[#050505] text-white selection:bg-amber-500/30">
@@ -226,17 +270,29 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, feat
               <Stat label="Total Volumes" value={counts.total} color="text-white" />
               <Stat label="Public Access" value={counts.public} color="text-white" />
               <Stat label="Inner Circle" value={counts.inner} color="text-amber-500" />
-              <Stat label="Latest Update" value="Feb 2026" color="text-white" />
+              <Stat label="Latest Update" value={latestUpdate} color="text-white" />
             </div>
           </div>
         </section>
 
         {/* Series Explorer */}
         <section className="max-w-7xl mx-auto px-8 py-24">
+          {error && (
+            <div className="mb-12 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 text-center">
+              <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-4" />
+              <p className="text-amber-200/70">{error}</p>
+            </div>
+          )}
+
           {items.length === 0 ? (
             <div className="py-20 text-center border border-dashed border-white/10 rounded-3xl">
               <ScrollText className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
               <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">No volumes resolved in registry</p>
+              {process.env.NODE_ENV === 'development' && (
+                <p className="mt-4 text-amber-500/50 text-xs font-mono">
+                  Check that canon documents exist in content/canon/
+                </p>
+              )}
             </div>
           ) : (
             <div className="space-y-32">
@@ -254,8 +310,8 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, feat
                     {s.items.map((item) => (
                       <Link key={item.slug} href={item.href} className="group relative p-10 bg-[#050505] hover:bg-zinc-900/40 transition-all duration-500">
                         <div className="flex justify-between items-start mb-6">
-                           <span className="text-[10px] font-mono text-zinc-600 uppercase">{item.readTime}</span>
-                           {item.accessLevel !== 'public' && <Lock className="h-3 w-3 text-amber-600" />}
+                          <span className="text-[10px] font-mono text-zinc-600 uppercase">{item.readTime}</span>
+                          {item.accessLevel !== 'public' && <Lock className="h-3 w-3 text-amber-600" />}
                         </div>
                         <h3 className="text-2xl font-medium mb-4 group-hover:text-amber-500 transition-colors">{item.title}</h3>
                         <p className="text-zinc-500 text-sm line-clamp-2 font-light leading-relaxed">{item.excerpt}</p>

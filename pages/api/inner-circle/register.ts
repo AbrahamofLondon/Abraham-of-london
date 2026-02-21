@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
+import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Method not allowed" });
@@ -10,55 +11,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const email = String(req.body?.email || "").trim().toLowerCase();
   const name = String(req.body?.name || "").trim();
 
-  // Basic validation before heavy lifting
-  if (!email.includes("@") || email.length > 254) {
+  if (!email.includes("@")) {
     return res.status(400).json({ ok: false, error: "Invalid institutional email" });
   }
 
   try {
-    // 1. Generate a high-entropy Raw Key
-    // Format: AL-XXXX-XXXX-XXXX (Institutional Prefix)
+    // 1. Generate High-Entropy Asset Key
     const rawKey = `AL-${crypto.randomBytes(4).toString('hex')}-${crypto.randomBytes(4).toString('hex')}`.toUpperCase();
     const keyHash = hashAccessKey(rawKey);
 
-    // 2. Transactional creation: Ensures data integrity across Member and Key tables
+    // 2. Transactional Provisioning
     const result = await prisma.$transaction(async (tx) => {
       const member = await tx.innerCircleMember.upsert({
         where: { email },
-        update: { name }, // Refresh name if they re-register
-        create: { 
-          email, 
-          name, 
-          role: "MEMBER", 
-          tier: "standard" 
-        },
+        update: { name }, 
+        create: { email, name, role: "MEMBER", tier: "standard" },
       });
 
-      // Clear old keys if you want to enforce one-key-at-a-time logic
-      await tx.innerCircleKey.deleteMany({
-        where: { memberId: member.id, status: "active" }
+      // Clear existing active keys to prevent credential stuffing
+      await tx.innerCircleKey.updateMany({
+        where: { memberId: member.id, status: "active" },
+        data: { status: "revoked" }
       });
 
-      const key = await tx.innerCircleKey.create({
+      await tx.innerCircleKey.create({
         data: {
           keyHash,
           memberId: member.id,
           status: "active",
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 Day Window
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
         }
       });
 
       return { member, rawKey };
     });
 
-    // 3. Log the Enrollment (System Logs Only)
-    console.log(`[PROVISIONED]: ${email} | Key: ${result.rawKey}`);
+    // 3. Dispatch Activation Link
+    const unlockUrl = `${process.env.NEXT_PUBLIC_APP_URL}/inner-circle/unlock?key=${result.rawKey}`;
+    
+    await sendInnerCircleEmail(email, "Access Granted | Abraham of London", {
+      name: name || "Principal",
+      email: email,
+      accessKey: result.rawKey,
+      unlockUrl: unlockUrl,
+      mode: "register",
+      requestIp: String(req.headers["x-forwarded-for"] || req.socket.remoteAddress),
+    });
 
-    // 4. Return the key to the UI for immediate display
     return res.status(200).json({ 
       ok: true, 
-      message: "Enrollment verified. Asset key generated.",
-      accessKey: result.rawKey 
+      message: "Alignment confirmed. Asset key dispatched to inbox.",
+      accessKey: result.rawKey // Also returned for immediate UI copy-paste
     });
 
   } catch (error) {

@@ -14,7 +14,7 @@ type RouteId =
   | "home"
   | "canon"
   | "library"
-  | "briefs"
+  | "essays"      // ✅ Changed from "briefs"
   | "shorts"
   | "ventures"
   | "about"
@@ -32,18 +32,17 @@ const ROUTES: Record<RouteId, string> = {
   home: "/",
   canon: "/canon",
   library: "/library",
-  briefs: "/briefs",
+  essays: "/essays",      // ✅ Changed from "/briefs"
   shorts: "/shorts",
   ventures: "/ventures",
   about: "/about",
   contact: "/contact",
-  // ✅ Correct vault destination (your earlier navbar uses /downloads/vault)
   vault: "/downloads/vault",
 };
 
 const NAV_ITEMS: NavItem[] = [
   { route: "canon", label: "Canon", description: "Doctrine & method" },
-  { route: "briefs", label: "Briefs", description: "Operator notes" },
+  { route: "essays", label: "Essays", description: "Literary intelligence" }, // ✅ Changed
   { route: "library", label: "Library", description: "Archive & research" },
   { route: "ventures", label: "Ventures", description: "Execution arms" },
   { route: "shorts", label: "Shorts", description: "Short-form signal", highlight: true },
@@ -76,7 +75,7 @@ export default function Header({ transparent = false }: { transparent?: boolean 
     return () => router.events?.off("routeChangeStart", close);
   }, [router.events]);
 
-  // ✅ Body scroll lock when mobile menu open (prevents “bleed” / horizontal scroll artifacts)
+  // ✅ Body scroll lock when mobile menu open
   React.useEffect(() => {
     if (typeof document === "undefined") return;
     const body = document.body;
@@ -107,7 +106,6 @@ export default function Header({ transparent = false }: { transparent?: boolean 
       <header
         className={[
           "fixed inset-x-0 top-0 z-[70] h-20 flex items-center transition-all duration-300",
-          // ✅ don’t rely on overflow-x-clip (not consistent everywhere)
           "overflow-hidden",
           headerSolid
             ? "bg-black/80 backdrop-blur-md border-b border-white/10"
@@ -122,7 +120,6 @@ export default function Header({ transparent = false }: { transparent?: boolean 
         )}
 
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-12">
-          {/* ✅ Make the row resilient: brand can shrink, nav can shrink, no overlap */}
           <div className="flex items-center justify-between gap-4">
             {/* Brand */}
             <Link href="/" className="group inline-flex min-w-0 flex-1 items-baseline gap-3">
@@ -136,7 +133,6 @@ export default function Header({ transparent = false }: { transparent?: boolean 
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex min-w-0 items-center gap-5" aria-label="Primary">
-              {/* ✅ Explicit gap inside the UL so items never “touch” */}
               <ul className="flex min-w-0 items-center gap-1 whitespace-nowrap">
                 {NAV_ITEMS.map((item) => (
                   <li key={item.route} className="flex">
@@ -192,7 +188,7 @@ export default function Header({ transparent = false }: { transparent?: boolean 
         </div>
       </header>
 
-      {/* ✅ Mobile Drawer MUST be above header, not behind it */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div

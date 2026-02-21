@@ -1,4 +1,4 @@
-/* proxy.ts — PRODUCTION SAFE (NEXT 16 PROXY) */
+/* proxy.ts — INSTITUTIONAL PERIMETER (Hardened for Build/Runtime) */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -12,6 +12,8 @@ import {
 } from "@/lib/server/rate-limit-unified";
 
 import { isAllowedIp, isSensitiveOperation } from "@/lib/server/admin-security";
+// Import only the cookie reader to keep middleware lightweight
+import { readAccessCookie } from "@/lib/server/auth/cookies"; 
 
 const CANONICAL_HOST = "www.abrahamoflondon.org";
 
@@ -31,6 +33,9 @@ const PUBLIC_PREFIXES = [
   "/fonts",
   "/images",
   "/inner-circle/login",
+  "/inner-circle/unlock",
+  "/api/inner-circle/register",
+  "/api/inner-circle/unlock",
   "/admin/login",
 ];
 
@@ -46,7 +51,6 @@ function safeReturnTo(req: NextRequest) {
   const u = req.nextUrl.clone();
   u.searchParams.delete("callbackUrl");
   u.searchParams.delete("returnTo");
-
   const path = u.pathname.startsWith("/") ? u.pathname : `/${u.pathname}`;
   return `${path}${u.search || ""}`;
 }
@@ -84,7 +88,6 @@ export async function proxy(req: NextRequest) {
   if (isPublicPath(pathname)) return NextResponse.next();
 
   const ip = getClientIp(req);
-
   const admin = isAdminPath(pathname);
   const api = isApiPath(pathname);
   const inner = isInnerCirclePath(pathname);
@@ -97,36 +100,42 @@ export async function proxy(req: NextRequest) {
   // 3) Rate limit — Admin + API
   if (admin || api) {
     const opts = admin ? RATE_LIMIT_CONFIGS.ADMIN : RATE_LIMIT_CONFIGS.API_GENERAL;
-    const rl = await rateLimit(ip, opts);
+    // Ensure rateLimit is non-blocking and handles potential internal errors
+    const rl = await rateLimit(ip, opts).catch(() => ({ allowed: true })); 
 
-    if (!rl.allowed) {
+    if (rl && !rl.allowed) {
       return new NextResponse(
         JSON.stringify({
           error: "Rate limit exceeded",
           retryAfterMs: rl.retryAfterMs,
-          resetTime: rl.resetTime,
-          remaining: rl.remaining,
-          limit: rl.limit,
-          source: rl.source,
         }),
         {
           status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            ...createRateLimitHeaders(rl),
-          },
+          headers: { "Content-Type": "application/json", ...createRateLimitHeaders(rl) },
         }
       );
     }
   }
 
-  // 4) Auth gate — ONLY admin + inner-circle (NOT all /api)
+  // 4) Auth gate — Admin + Inner-Circle
   const needsAuth = admin || inner;
 
   if (needsAuth) {
+    // next-auth/jwt is safe for middleware/edge
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-    if (!token) {
+    // RECONCILIATION: Check for Institutional Session Cookie
+    let hasInstitutionalSession = false;
+    if (!token && inner) {
+      try {
+        const sessionId = readAccessCookie(req);
+        if (sessionId) hasInstitutionalSession = true;
+      } catch (e) {
+        console.error("Cookie Read Error in Middleware:", e);
+      }
+    }
+
+    if (!token && !hasInstitutionalSession) {
       const onAdminLogin = pathname.startsWith("/admin/login");
       const onInnerLogin = pathname.startsWith("/inner-circle/login");
       if (onAdminLogin || onInnerLogin) return NextResponse.next();
@@ -134,12 +143,11 @@ export async function proxy(req: NextRequest) {
       const loginPath = admin ? "/admin/login" : "/inner-circle/login";
       const url = new URL(loginPath, req.url);
       url.searchParams.set("returnTo", safeReturnTo(req));
-
       return NextResponse.redirect(url, 307);
     }
 
     // 5) Role gate — Admin only
-    if (admin) {
+    if (admin && token) {
       const role = String((token as any)?.role ?? "guest").toLowerCase();
       const rank = ROLE_HIERARCHY[role] ?? 0;
       const required = ROLE_HIERARCHY.admin ?? 100;
@@ -151,7 +159,7 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // 6) Sensitive operations precondition (optional)
+  // 6) Sensitive operations
   try {
     if (typeof isSensitiveOperation === "function" && isSensitiveOperation(pathname, req.method)) {
       if (!req.headers.get("x-confirmation-token")) {
@@ -161,9 +169,7 @@ export async function proxy(req: NextRequest) {
         );
       }
     }
-  } catch {
-    // never crash perimeter
-  }
+  } catch { /* Silent fail to allow bypass if logic is missing */ }
 
   // 7) Success — perimeter headers
   const res = NextResponse.next();
@@ -172,6 +178,7 @@ export async function proxy(req: NextRequest) {
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
   if (admin || inner) res.headers.set("Cache-Control", "no-store, private, must-revalidate");
+  
   return res;
 }
 

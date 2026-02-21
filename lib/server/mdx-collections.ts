@@ -4,7 +4,7 @@
 
 import fs from "fs";
 import path from "path";
-import { promisify } from "node:util";
+import { promisify } from "util";
 import matter from "gray-matter";
 import { safeListFiles } from "@/lib/fs-utils";
 import { safeSlice } from "@/lib/utils/safe";

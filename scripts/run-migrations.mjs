@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 import Database from "better-sqlite3";
 
 const MIGRATIONS_DIR = path.join(process.cwd(), "lib", "db", "migrations");

@@ -1,23 +1,24 @@
 // lib/database/models/InnerCircleData.ts
-import mongoose, { Document, Schema, Model } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
+import mongoose, { Schema, type Model, type HydratedDocument } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
-export interface IInnerCircleData extends Document {
-  _id: string;
+/** 1) Define plain fields (DO NOT extend Document) */
+export interface InnerCircleDataFields {
+  _id?: string;
   title: string;
   content: string;
   excerpt?: string;
   category: string;
   tags: string[];
-  tierLevel: 'basic' | 'premium' | 'elite';
+  tierLevel: "basic" | "premium" | "elite";
   authorId: string;
   isPublished: boolean;
   isFeatured: boolean;
   views: number;
   likes: number;
   metadata: {
-    difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-    estimatedReadTime: number; // in minutes
+    difficulty: "beginner" | "intermediate" | "advanced" | "expert";
+    estimatedReadTime: number;
     attachments?: Array<{
       fileName: string;
       fileUrl: string;
@@ -41,118 +42,129 @@ export interface IInnerCircleData extends Document {
     ipAddress: string;
     userAgent: string;
   }>;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   publishedAt?: Date;
 }
 
-const InnerCircleDataSchema = new Schema<IInnerCircleData>(
+/** 2) Hydrated document type */
+export type InnerCircleDataDoc = HydratedDocument<InnerCircleDataFields>;
+
+const InnerCircleDataSchema = new Schema<InnerCircleDataFields>(
   {
-    _id: { 
-      type: String, 
-      default: () => `ic_${uuidv4()}` 
+    _id: {
+      type: String,
+      default: () => `ic_${uuidv4()}`,
     },
-    title: { 
-      type: String, 
-      required: [true, 'Title is required'], 
+    title: {
+      type: String,
+      required: [true, "Title is required"],
       trim: true,
-      minlength: [3, 'Title must be at least 3 characters'],
-      maxlength: [200, 'Title cannot exceed 200 characters']
+      minlength: [3, "Title must be at least 3 characters"],
+      maxlength: [200, "Title cannot exceed 200 characters"],
     },
-    content: { 
-      type: String, 
-      required: [true, 'Content is required'] 
+    content: {
+      type: String,
+      required: [true, "Content is required"],
     },
-    excerpt: { 
-      type: String, 
-      maxlength: [500, 'Excerpt cannot exceed 500 characters'] 
+    excerpt: {
+      type: String,
+      maxlength: [500, "Excerpt cannot exceed 500 characters"],
     },
-    category: { 
-      type: String, 
-      required: [true, 'Category is required'],
+    category: {
+      type: String,
+      required: [true, "Category is required"],
       enum: [
-        'trading',
-        'investments', 
-        'insights',
-        'education',
-        'reports',
-        'strategies',
-        'research',
-        'case-studies',
-        'tools',
-        'community'
-      ]
+        "trading",
+        "investments",
+        "insights",
+        "education",
+        "reports",
+        "strategies",
+        "research",
+        "case-studies",
+        "tools",
+        "community",
+      ],
     },
-    tags: [{ 
-      type: String, 
-      lowercase: true,
-      trim: true 
-    }],
-    tierLevel: { 
-      type: String, 
+    tags: [
+      {
+        type: String,
+        lowercase: true,
+        trim: true,
+      },
+    ],
+    tierLevel: {
+      type: String,
       required: true,
-      enum: ['basic', 'premium', 'elite'],
-      default: 'basic'
+      enum: ["basic", "premium", "elite"],
+      default: "basic",
     },
-    authorId: { 
-      type: String, 
-      required: [true, 'Author ID is required'] 
+    authorId: {
+      type: String,
+      required: [true, "Author ID is required"],
     },
-    isPublished: { 
-      type: Boolean, 
-      default: false 
+    isPublished: {
+      type: Boolean,
+      default: false,
     },
-    isFeatured: { 
-      type: Boolean, 
-      default: false 
+    isFeatured: {
+      type: Boolean,
+      default: false,
     },
-    views: { 
-      type: Number, 
-      default: 0 
+    views: {
+      type: Number,
+      default: 0,
     },
-    likes: { 
-      type: Number, 
-      default: 0 
+    likes: {
+      type: Number,
+      default: 0,
     },
     metadata: {
-      difficulty: { 
-        type: String, 
-        enum: ['beginner', 'intermediate', 'advanced', 'expert'],
-        default: 'intermediate'
+      difficulty: {
+        type: String,
+        enum: ["beginner", "intermediate", "advanced", "expert"],
+        default: "intermediate",
       },
-      estimatedReadTime: { 
-        type: Number, 
-        min: [1, 'Estimated read time must be at least 1 minute'],
-        default: 10 
+      estimatedReadTime: {
+        type: Number,
+        min: [1, "Estimated read time must be at least 1 minute"],
+        default: 10,
       },
-      attachments: [{
-        fileName: String,
-        fileUrl: String,
-        fileSize: Number,
-        fileType: String
-      }],
+      attachments: [
+        {
+          fileName: String,
+          fileUrl: String,
+          fileSize: Number,
+          fileType: String,
+        },
+      ],
       videoUrl: String,
       audioUrl: String,
-      externalLinks: [{
-        title: String,
-        url: String,
-        description: String
-      }],
+      externalLinks: [
+        {
+          title: String,
+          url: String,
+          description: String,
+        },
+      ],
       requiresVerification: { type: Boolean, default: false },
       lastVerifiedAt: Date,
-      verificationNotes: String
+      verificationNotes: String,
     },
-    accessLogs: [{
-      userId: String,
-      accessedAt: { type: Date, default: Date.now },
-      ipAddress: String,
-      userAgent: String
-    }]
+    accessLogs: [
+      {
+        userId: String,
+        accessedAt: { type: Date, default: Date.now },
+        ipAddress: String,
+        userAgent: String,
+      },
+    ],
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
   }
 );
 
@@ -160,49 +172,57 @@ const InnerCircleDataSchema = new Schema<IInnerCircleData>(
 InnerCircleDataSchema.index({ category: 1, isPublished: 1, tierLevel: 1 });
 InnerCircleDataSchema.index({ tags: 1, isPublished: 1 });
 InnerCircleDataSchema.index({ isFeatured: 1, publishedAt: -1 });
-InnerCircleDataSchema.index({ title: 'text', content: 'text', excerpt: 'text' });
+InnerCircleDataSchema.index({ title: "text", content: "text", excerpt: "text" });
 InnerCircleDataSchema.index({ authorId: 1, createdAt: -1 });
-InnerCircleDataSchema.index({ 'metadata.difficulty': 1 });
+InnerCircleDataSchema.index({ "metadata.difficulty": 1 });
 
 // Virtual for published date
-InnerCircleDataSchema.virtual('publishedAt').get(function() {
+InnerCircleDataSchema.virtual("publishedAt").get(function (this: InnerCircleDataDoc) {
   return this.isPublished ? this.updatedAt : undefined;
 });
 
-// Middleware
-InnerCircleDataSchema.pre('save', function(next) {
-  if (this.isModified('content')) {
-    // Auto-generate excerpt if not provided
+// Middleware — typed correctly now; "save" hook resolves
+InnerCircleDataSchema.pre("save", function (this: InnerCircleDataDoc) {
+  if (this.isModified("content")) {
     if (!this.excerpt && this.content) {
-      this.excerpt = this.content.substring(0, 250) + '...';
+      this.excerpt = this.content.substring(0, 250) + "...";
     }
   }
-  next();
 });
 
-// Static methods
-InnerCircleDataSchema.statics.findByTier = function(tier: string) {
-  return this.find({ 
+// Static methods (leave runtime intact; type-safe enough)
+InnerCircleDataSchema.statics.findByTier = function (tier: string) {
+  return this.find({
     tierLevel: { $lte: tier },
-    isPublished: true 
+    isPublished: true,
   });
 };
 
-InnerCircleDataSchema.statics.incrementViews = async function(id: string, userId: string, ip: string, userAgent: string) {
-  return this.findByIdAndUpdate(id, {
-    $inc: { views: 1 },
-    $push: {
-      accessLogs: {
-        userId,
-        accessedAt: new Date(),
-        ipAddress: ip,
-        userAgent
-      }
-    }
-  }, { new: true });
+InnerCircleDataSchema.statics.incrementViews = async function (
+  id: string,
+  userId: string,
+  ip: string,
+  userAgent: string
+) {
+  return this.findByIdAndUpdate(
+    id,
+    {
+      $inc: { views: 1 },
+      $push: {
+        accessLogs: {
+          userId,
+          accessedAt: new Date(),
+          ipAddress: ip,
+          userAgent,
+        },
+      },
+    },
+    { new: true }
+  );
 };
 
-const InnerCircleData: Model<IInnerCircleData> = mongoose.models.InnerCircleData || 
-  mongoose.model<IInnerCircleData>('InnerCircleData', InnerCircleDataSchema);
+const InnerCircleData: Model<InnerCircleDataFields> =
+  (mongoose.models.InnerCircleData as Model<InnerCircleDataFields>) ||
+  mongoose.model<InnerCircleDataFields>("InnerCircleData", InnerCircleDataSchema);
 
 export default InnerCircleData;

@@ -11,12 +11,12 @@
 // - Commander negation flags: --no-use-puppeteer / --no-use-universal
 
 import { Command } from "commander";
-import fs from "node:fs";
-import path from "node:path";
-import os from "node:os";
-import crypto from "node:crypto";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import crypto from "crypto";
 import matter from "gray-matter";
-import { spawn, spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "child_process";
 import { SecurePuppeteerPDFGenerator } from "./secure-puppeteer-generator";
 
 // =============================================================================

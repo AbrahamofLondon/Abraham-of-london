@@ -3,9 +3,9 @@
 // Purpose: Windows hygiene + Path Flattening for Deep Build Caches.
 // This must NEVER throw, otherwise it breaks prebuild -> build.
 
-import fs from "node:fs";
-import path from "node:path";
-import { execSync } from "node:child_process";
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
 
 const fsp = fs.promises;
 

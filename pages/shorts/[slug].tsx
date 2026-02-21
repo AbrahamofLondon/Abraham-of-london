@@ -1,31 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// pages/shorts/[slug].tsx — HARRODS-LEVEL PREMIUM (10/10)
-// Institutional excellence meets luxury retail precision
+// pages/shorts/[slug].tsx — HARRODS-LEVEL PREMIUM (Export-safe)
+// Router-free to prevent "NextRouter was not mounted" during prerender/export.
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { 
-  Share2, 
-  ArrowLeft, 
-  Shield, 
-  Loader2, 
-  Bookmark, 
-  Clock, 
+import {
+  Share2,
+  ArrowLeft,
+  Shield,
+  Bookmark,
+  Clock,
   Eye,
   Sparkles,
   TrendingUp,
   Award,
   Feather,
-  Volume2
+  Volume2,
 } from "lucide-react";
 
 // ✅ INSTITUTIONAL IMPORTS
@@ -33,23 +32,18 @@ import Layout from "@/components/Layout";
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import mdxComponents from "@/components/mdx-components";
 
-// 💡 FIX: Import directly from the source file rather than an index barrel
-import { 
-  getAllContentlayerDocs, 
-  getDocBySlug, 
-  normalizeSlug, 
-  sanitizeData 
-} from "@/lib/content/server";
+// 💡 Content utilities (server-side safe in GSP)
+import { getAllContentlayerDocs, getDocBySlug, normalizeSlug, sanitizeData } from "@/lib/content/server";
 import { isDraftContent } from "@/lib/content/shared";
 
 // ✅ DYNAMIC UI COMPONENTS (lazy-loaded for performance)
-const ShortComments = dynamic(() => import("@/components/shorts/ShortComments"), { 
+const ShortComments = dynamic(() => import("@/components/shorts/ShortComments"), {
   ssr: false,
-  loading: () => <div className="h-32 animate-pulse bg-white/5 rounded-2xl" />
+  loading: () => <div className="h-32 animate-pulse bg-white/5 rounded-2xl" />,
 });
-const ShortNavigation = dynamic(() => import("@/components/shorts/ShortNavigation"), { 
+const ShortNavigation = dynamic(() => import("@/components/shorts/ShortNavigation"), {
   ssr: false,
-  loading: () => <div className="h-24 animate-pulse bg-white/5 rounded-2xl" />
+  loading: () => <div className="h-24 animate-pulse bg-white/5 rounded-2xl" />,
 });
 
 /* -----------------------------------------------------------------------------
@@ -59,14 +53,21 @@ function safeString(v: unknown) {
   return typeof v === "string" ? v : "";
 }
 
-// Helper to clean slugs for URLs (removes duplicates and ensures proper format)
 function cleanSlugForURL(slug: string): string {
   if (!slug) return "";
   return slug
-    .replace(/^\/+|\/+$/g, '') // Remove leading/trailing slashes
-    .replace(/^shorts\//i, '') // Remove 'shorts/' prefix
-    .replace(/\/+/g, '/') // Remove duplicate slashes
+    .replace(/^\/+|\/+$/g, "") // Remove leading/trailing slashes
+    .replace(/^shorts\//i, "") // Remove 'shorts/' prefix
+    .replace(/\/+/g, "/") // Remove duplicate slashes
     .trim();
+}
+
+function toAbsoluteUrl(pathOrUrl: string): string {
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+  const p = safeString(pathOrUrl);
+  if (!p) return base;
+  if (/^https?:\/\//i.test(p)) return p;
+  return `${base}${p.startsWith("/") ? p : `/${p}`}`;
 }
 
 /* -----------------------------------------------------------------------------
@@ -85,8 +86,8 @@ type Short = {
   theme: string | null;
   views: number;
   category?: string;
-  intensity?: 1 | 2 | 3 | 4 | 5; // Signal strength
-  lineage?: string; // Related canon/brief
+  intensity?: 1 | 2 | 3 | 4 | 5;
+  lineage?: string;
 };
 
 interface Props {
@@ -105,9 +106,7 @@ const SignalStrength = ({ level = 3 }: { level?: 1 | 2 | 3 | 4 | 5 }) => {
       {bars.map((bar) => (
         <div
           key={bar}
-          className={`w-0.5 h-3 rounded-full transition-all ${
-            bar <= level ? 'bg-amber-500' : 'bg-white/10'
-          }`}
+          className={`w-0.5 h-3 rounded-full transition-all ${bar <= level ? "bg-amber-500" : "bg-white/10"}`}
         />
       ))}
     </div>
@@ -115,8 +114,8 @@ const SignalStrength = ({ level = 3 }: { level?: 1 | 2 | 3 | 4 | 5 }) => {
 };
 
 const ReadingProgress = ({ progress }: { progress: string }) => (
-  <motion.div 
-    style={{ width: progress }} 
+  <motion.div
+    style={{ width: progress }}
     className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 z-[100] shadow-lg shadow-amber-500/20"
   />
 );
@@ -125,7 +124,6 @@ const ReadingProgress = ({ progress }: { progress: string }) => (
   PAGE COMPONENT
 ----------------------------------------------------------------------------- */
 const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
-  const router = useRouter();
   const { scrollYProgress } = useScroll();
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [showShareTooltip, setShowShareTooltip] = React.useState(false);
@@ -141,7 +139,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
     [mdxRaw]
   );
 
-  // 🎯 IMPRINT SYSTEM: Write to localStorage on every view
+  // 🎯 IMPRINT SYSTEM: localStorage view tracking (client-only)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -149,51 +147,57 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
       const IMPRINT_KEY = "aol_shorts_imprint_last";
       const now = Date.now();
       const HOURS_72 = 72 * 60 * 60 * 1000;
-      
-      const imprint = { 
-        slug: short.slugPath, 
-        title: short.title, 
+
+      const imprint = {
+        slug: short.slugPath,
+        title: short.title,
         ts: now,
-        expiresAt: now + HOURS_72
+        expiresAt: now + HOURS_72,
       };
-      
+
       localStorage.setItem(IMPRINT_KEY, JSON.stringify(imprint));
-      
-      // Also add to history (keep last 5)
+
       const historyKey = "aol_shorts_imprint_history";
       const existingHistory = JSON.parse(localStorage.getItem(historyKey) || "[]");
       const filteredHistory = existingHistory.filter((item: any) => item.slug !== short.slugPath);
-      const newHistory = [imprint, ...filteredHistory.slice(0, 4)]; // Keep 5 most recent
+      const newHistory = [imprint, ...filteredHistory.slice(0, 4)];
       localStorage.setItem(historyKey, JSON.stringify(newHistory));
-      
-      // Check if bookmarked
+
       const bookmarks = JSON.parse(localStorage.getItem("aol_shorts_bookmarks") || "[]");
       setIsBookmarked(bookmarks.some((b: any) => b.slug === short.slugPath));
-      
     } catch {
-      // Silent fail — imprint system is non-critical
+      // non-critical
     }
   }, [short.slugPath, short.title]);
 
   const handleBookmark = () => {
+    if (typeof window === "undefined") return;
+
     try {
-      const bookmarks = JSON.parse(localStorage.getItem("aol_shorts_bookmarks") || "[]");
+      const current = JSON.parse(localStorage.getItem("aol_shorts_bookmarks") || "[]");
+
       if (!isBookmarked) {
-        bookmarks.push({
-          slug: short.slugPath,
-          title: short.title,
-          date: new Date().toISOString()
-        });
+        const next = [
+          ...current,
+          {
+            slug: short.slugPath,
+            title: short.title,
+            date: new Date().toISOString(),
+          },
+        ];
+        localStorage.setItem("aol_shorts_bookmarks", JSON.stringify(next));
         setIsBookmarked(true);
       } else {
-        const filtered = bookmarks.filter((b: any) => b.slug !== short.slugPath);
+        const next = current.filter((b: any) => b.slug !== short.slugPath);
+        localStorage.setItem("aol_shorts_bookmarks", JSON.stringify(next));
         setIsBookmarked(false);
       }
-      localStorage.setItem("aol_shorts_bookmarks", JSON.stringify(bookmarks));
     } catch {}
   };
 
   const handleShare = async () => {
+    if (typeof window === "undefined") return;
+
     try {
       await navigator.clipboard.writeText(window.location.href);
       setShowShareTooltip(true);
@@ -201,29 +205,18 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
     } catch {}
   };
 
-  if (router.isFallback) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="relative">
-          <div className="h-16 w-16 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles className="h-6 w-6 text-amber-500/50 animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const canonical = toAbsoluteUrl(`/shorts/${encodeURIComponent(short.slugPath)}`);
 
   return (
-    <Layout title={`${short.title} | Field Note`} className="bg-black">
+    <Layout title={`${short.title} | Field Note`} className="bg-black" canonicalUrl={`/shorts/${short.slugPath}`}>
       <Head>
         <title>{short.title} | Shorts // Abraham of London</title>
         <meta name="description" content={short.excerpt || ""} />
         <meta property="og:type" content="article" />
         <meta property="og:title" content={short.title} />
         <meta property="og:description" content={short.excerpt || ""} />
-        {short.coverImage && <meta property="og:image" content={short.coverImage} />}
-        <link rel="canonical" href={`https://www.abrahamoflondon.org/shorts/${short.slugPath}`} />
+        {short.coverImage ? <meta property="og:image" content={toAbsoluteUrl(short.coverImage)} /> : null}
+        <link rel="canonical" href={canonical} />
       </Head>
 
       <ReadingProgress progress={progressLine as any} />
@@ -233,20 +226,17 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
         style={{ opacity: navOpacity }}
         className="fixed top-0 inset-x-0 z-50 px-6 md:px-12 py-6 flex justify-between items-center pointer-events-none"
       >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => router.push("/shorts")}
-          className="p-3 bg-black/40 backdrop-blur-md border border-white/5 rounded-full hover:border-amber-500/30 transition-all duration-300 group pointer-events-auto"
+        <Link
+          href="/shorts"
+          className="p-3 bg-black/40 backdrop-blur-md border border-white/5 rounded-full hover:border-amber-500/30 transition-all duration-300 group pointer-events-auto inline-flex"
+          aria-label="Back to Shorts"
         >
           <ArrowLeft className="h-4 w-4 text-white/40 group-hover:text-amber-500" />
-        </motion.button>
+        </Link>
 
         <div className="flex items-center gap-4 px-4 py-2 bg-black/40 backdrop-blur-md border border-white/5 rounded-full">
           <Shield size={12} className="text-amber-500/40" />
-          <span className="font-mono text-[8px] tracking-[0.4em] text-white/30 uppercase">
-            Secure Briefing
-          </span>
+          <span className="font-mono text-[8px] tracking-[0.4em] text-white/30 uppercase">Secure Briefing</span>
           <SignalStrength level={short.intensity || 3} />
         </div>
 
@@ -263,7 +253,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -272,7 +262,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
           >
             <Share2 size={16} className="text-white/40 group-hover:text-amber-500" />
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -280,17 +270,17 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
             onClick={handleBookmark}
             aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"}
           >
-            <Bookmark 
-              size={16} 
+            <Bookmark
+              size={16}
               className={`transition-colors ${
-                isBookmarked ? 'text-amber-500 fill-amber-500' : 'text-white/40 group-hover:text-amber-500'
-              }`} 
+                isBookmarked ? "text-amber-500 fill-amber-500" : "text-white/40 group-hover:text-amber-500"
+              }`}
             />
           </motion.button>
         </div>
       </motion.nav>
 
-      {/* Premium header section with parallax */}
+      {/* Premium header section */}
       <div className="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
         {short.coverImage ? (
           <>
@@ -300,11 +290,8 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
               transition={{ duration: 1.5 }}
               className="absolute inset-0"
             >
-              <img
-                src={short.coverImage}
-                alt=""
-                className="h-full w-full object-cover opacity-30"
-              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={short.coverImage} alt="" className="h-full w-full object-cover opacity-30" />
             </motion.div>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
           </>
@@ -314,11 +301,9 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
           </div>
         )}
 
-        {/* Floating elements */}
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-amber-500/5 rounded-full blur-[100px]" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/3 rounded-full blur-[120px]" />
 
-        {/* Content overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="max-w-4xl mx-auto px-6 text-center">
             <motion.div
@@ -333,16 +318,12 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
               </span>
               <div className="w-1 h-1 bg-white/20 rounded-full" />
               <Clock size={10} className="text-white/30" />
-              <span className="font-mono text-[10px] text-white/30">
-                {short.readTime || "3 min"}
-              </span>
+              <span className="font-mono text-[10px] text-white/30">{short.readTime || "3 min"}</span>
               {short.views > 0 && (
                 <>
                   <div className="w-1 h-1 bg-white/20 rounded-full" />
                   <Eye size={10} className="text-white/30" />
-                  <span className="font-mono text-[10px] text-white/30">
-                    {short.views.toLocaleString()}
-                  </span>
+                  <span className="font-mono text-[10px] text-white/30">{short.views.toLocaleString()}</span>
                 </>
               )}
             </motion.div>
@@ -383,8 +364,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
@@ -400,7 +380,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
       {/* Main content */}
       <main className="max-w-2xl mx-auto px-6 py-24">
         <article className="prose prose-invert prose-amber max-w-none prose-p:text-white/60 prose-p:text-lg prose-p:leading-[1.8] prose-p:font-light prose-headings:text-white prose-headings:font-serif prose-headings:italic prose-h2:text-3xl prose-h2:mt-16 prose-h3:text-2xl prose-h3:mt-12 prose-ul:list-none prose-li:text-white/60 prose-li:font-light prose-strong:text-amber-500 prose-strong:font-normal">
-          {source && <MDXRemote {...source} components={safeComponents as any} />}
+          {source ? <MDXRemote {...source} components={safeComponents as any} /> : null}
         </article>
 
         {/* Tags */}
@@ -423,12 +403,11 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
           </div>
         )}
 
-        {/* Footer with navigation and comments */}
+        {/* Footer */}
         <footer className="mt-24 space-y-24">
           <ShortNavigation currentSlug={short.slugPath} />
           <ShortComments shortId={short.slugPath} comments={[]} />
 
-          {/* Premium imprint */}
           <div className="relative pt-16">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-full h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
@@ -444,9 +423,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
               </div>
               <div className="flex items-center gap-2">
                 <Award className="h-3 w-3 text-amber-500/20" />
-                <span className="font-mono text-[8px] text-white/10">
-                  Signal strength: {short.intensity || 3}/5
-                </span>
+                <span className="font-mono text-[8px] text-white/10">Signal strength: {short.intensity || 3}/5</span>
               </div>
             </div>
           </div>
@@ -461,44 +438,38 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
 ----------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Ensure the docs are fetched at build time correctly
   const docs = getAllContentlayerDocs() || [];
 
   const shorts = docs.filter((d: any) => {
-    const type = String(d?.type || d?._raw?.sourceFilePath?.split('/')[0] || "").toLowerCase();
+    const type = String(d?.type || d?._raw?.sourceFilePath?.split("/")?.[0] || "").toLowerCase();
     return type.includes("short");
   });
 
   const paths = shorts
     .filter((s: any) => !isDraftContent(s))
     .map((s: any) => {
-      const raw = s.slug || s._raw.flattenedPath;
-      const bare = cleanSlugForURL(normalizeSlug(raw));
-      
-      // Skip empty or invalid slugs
+      const raw = s.slug || s?._raw?.flattenedPath || "";
+      const bare = cleanSlugForURL(normalizeSlug(String(raw)));
       if (!bare) return null;
-      
       return { params: { slug: bare } };
     })
-    .filter(Boolean); // Remove null entries
+    .filter(Boolean);
 
-  return { paths, fallback: "blocking" };
+  return { paths: paths as any, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const rawSlug = String(params?.slug || "").trim();
     if (!rawSlug) return { notFound: true };
-    
-    // FIX: Clean the incoming slug parameter
+
     const slug = cleanSlugForURL(rawSlug);
-    
-    // Unified lookup through your routing utility
+
     const data = getDocBySlug(`shorts/${slug}`) || getDocBySlug(slug);
-    
     if (!data || isDraftContent(data)) return { notFound: true };
 
     const mdxRaw = String(data?.body?.raw || "");
+
     const source = mdxRaw
       ? await serialize(mdxRaw, {
           mdxOptions: {
@@ -516,7 +487,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       tags: Array.isArray(data?.tags) ? data.tags : [],
       author: data?.author || "Abraham of London",
       url: `/shorts/${slug}`,
-      slugPath: slug, // Use cleaned slug
+      slugPath: slug,
       readTime: (data as any)?.readTime || "3 min",
       theme: (data as any)?.theme || null,
       views: Number((data as any)?.views || 0),
@@ -526,11 +497,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     };
 
     return {
-      props: sanitizeData({
-        short,
-        source,
-        mdxRaw,
-      }),
+      props: sanitizeData({ short, source, mdxRaw }),
       revalidate: 3600,
     };
   } catch (err) {

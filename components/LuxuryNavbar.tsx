@@ -1,4 +1,4 @@
-// components/Navbar.tsx — FINAL (no overlap, no bleed, nav never collides)
+// components/Navbar.tsx — BULLETPROOF (Zero SSR/router issues, Mount-safe, Hydration-safe)
 "use client";
 
 import * as React from "react";
@@ -16,39 +16,83 @@ const NAV = [
   { href: "/shorts", label: "Shorts" },
   { href: "/about", label: "About" },
   { href: "/downloads/vault", label: "Vault" },
-];
+] as const;
 
 export default function Navbar(): React.ReactElement {
-  const router = useRouter();
+  // ========== MOUNT GUARD ==========
+  const [mounted, setMounted] = React.useState(false);
+  
+  // ========== STATE ==========
   const [scrolled, setScrolled] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  
+  // ========== ROUTER (SAFE) ==========
+  const router = useRouter();
+  const asPath = mounted ? router.asPath : "/"; // Safe fallback during SSR
 
+  // ========== EFFECTS ==========
+  // Mount guard
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    setMounted(true);
   }, []);
 
+  // Scroll detection
   React.useEffect(() => {
-    setOpen(false);
-  }, [router.asPath]);
+    if (!mounted) return;
+    
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll(); // Set initial state
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [mounted]);
 
+  // Close mobile menu on route change
   React.useEffect(() => {
+    if (!mounted) return;
+    setOpen(false);
+  }, [asPath, mounted]);
+
+  // Prevent body scroll when mobile menu is open
+  React.useEffect(() => {
+    if (!mounted) return;
+    
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [open, mounted]);
 
-  const isActive = (href: string) => {
-    const as = (router.asPath || "/").split("#")[0] || "/";
-    return href === "/" ? as === "/" : as.startsWith(href);
-  };
+  // ========== HELPER FUNCTIONS ==========
+  const isActive = React.useCallback((href: string): boolean => {
+    if (!mounted) return false; // During SSR, no active states
+    
+    const currentPath = (asPath || "/").split("#")[0] || "/";
+    if (href === "/") return currentPath === "/";
+    return currentPath.startsWith(href);
+  }, [asPath, mounted]);
 
+  // ========== RENDER GUARD ==========
+  // Return a skeleton/placeholder during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <header className="fixed inset-x-0 top-0 z-[100]">
+        <div className="h-20 w-full border-b border-transparent bg-black/0">
+          <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <div className="group flex min-w-0 flex-col pr-2">
+              <span className="truncate font-serif text-xl font-semibold tracking-tight text-amber-100 sm:text-2xl">
+                Abraham<span className="text-amber-300"> of London</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // ========== FULL RENDER (CLIENT ONLY) ==========
   return (
     <header className="fixed inset-x-0 top-0 z-[100]">
-      {/* Single layer (no absolute overlay) — prevents “weird bleed” + click issues */}
+      {/* Navigation Bar */}
       <div
         className={cx(
           "h-20 w-full border-b transition-all duration-300",
@@ -56,7 +100,7 @@ export default function Navbar(): React.ReactElement {
         )}
       >
         <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-          {/* Brand (clamped width so it never crushes nav) */}
+          {/* Brand */}
           <Link href="/" className="group flex min-w-0 flex-col pr-2">
             <span className="truncate font-serif text-xl font-semibold tracking-tight text-amber-100 sm:text-2xl">
               Abraham<span className="text-amber-300"> of London</span>
@@ -66,20 +110,20 @@ export default function Navbar(): React.ReactElement {
             </span>
           </Link>
 
-          {/* Desktop nav: scrollable rail so it NEVER overlaps */}
+          {/* Desktop Navigation */}
           <nav className="hidden min-w-0 flex-1 items-center lg:flex">
             <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <ul className="flex items-center gap-6 whitespace-nowrap pr-6">
-                {NAV.map((x) => (
-                  <li key={x.href}>
+                {NAV.map((item) => (
+                  <li key={item.href}>
                     <Link
-                      href={x.href}
+                      href={item.href}
                       className={cx(
                         "text-[11px] font-extrabold uppercase tracking-[0.22em] transition-colors",
-                        isActive(x.href) ? "text-amber-300" : "text-gray-300 hover:text-white"
+                        isActive(item.href) ? "text-amber-300" : "text-gray-300 hover:text-white"
                       )}
                     >
-                      {x.label}
+                      {item.label}
                     </Link>
                   </li>
                 ))}
@@ -97,7 +141,7 @@ export default function Navbar(): React.ReactElement {
             </Link>
           </nav>
 
-          {/* Mobile toggle */}
+          {/* Mobile Toggle */}
           <button
             onClick={() => setOpen((v) => !v)}
             className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-amber-200 transition-all hover:border-white/20 hover:bg-white/10 lg:hidden"
@@ -108,10 +152,13 @@ export default function Navbar(): React.ReactElement {
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile Drawer */}
       {open && (
         <div className="fixed inset-0 z-[110] lg:hidden">
+          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          
+          {/* Drawer */}
           <div className="absolute right-0 top-0 h-full w-[88vw] max-w-sm border-l border-white/10 bg-black/95 backdrop-blur-xl">
             <div className="flex items-center justify-between border-b border-white/10 p-6">
               <span className="font-serif text-lg font-semibold text-amber-100">Menu</span>
@@ -124,33 +171,37 @@ export default function Navbar(): React.ReactElement {
             </div>
 
             <div className="p-6">
+              {/* Main Navigation Links */}
               <div className="grid gap-2">
                 <Link
                   href="/"
                   className={cx(
                     "rounded-2xl border px-5 py-4 text-sm font-semibold transition-all",
-                    isActive("/") ? "border-amber-400/25 bg-amber-500/10 text-amber-200" : "border-white/10 bg-white/5 text-gray-200 hover:border-white/20 hover:bg-white/10"
+                    isActive("/") 
+                      ? "border-amber-400/25 bg-amber-500/10 text-amber-200" 
+                      : "border-white/10 bg-white/5 text-gray-200 hover:border-white/20 hover:bg-white/10"
                   )}
                 >
                   Home
                 </Link>
 
-                {NAV.map((x) => (
+                {NAV.map((item) => (
                   <Link
-                    key={x.href}
-                    href={x.href}
+                    key={item.href}
+                    href={item.href}
                     className={cx(
                       "rounded-2xl border px-5 py-4 text-sm font-semibold transition-all",
-                      isActive(x.href)
+                      isActive(item.href)
                         ? "border-amber-400/25 bg-amber-500/10 text-amber-200"
                         : "border-white/10 bg-white/5 text-gray-200 hover:border-white/20 hover:bg-white/10"
                     )}
                   >
-                    {x.label}
+                    {item.label}
                   </Link>
                 ))}
               </div>
 
+              {/* Secondary Actions */}
               <div className="mt-6 grid gap-2">
                 <Link
                   href="/resources/strategic-frameworks"
@@ -183,6 +234,7 @@ export default function Navbar(): React.ReactElement {
                 </Link>
               </div>
 
+              {/* Footer */}
               <p className="mt-6 text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
                 Designed in London • built to deploy
               </p>

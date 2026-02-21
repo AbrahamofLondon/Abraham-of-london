@@ -1,16 +1,33 @@
-/* pages/strategy-room/success.tsx */
+/* pages/strategy-room/success.tsx — BULLETPROOF (Router-Safe) */
 import * as React from "react";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import { CheckCircle, Shield, FileText, ArrowRight } from "lucide-react";
+import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
 
 export default function IntakeSuccess() {
-  const router = useRouter();
-  const { id } = router.query;
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  const isReady = useClientIsReady();
+  const [mounted, setMounted] = React.useState(false);
 
-  // Shorten ID for display as a "Reference Code"
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // ✅ Safe access to query params
+  const id = mounted && query ? query.id : null;
   const refCode = id ? String(id).substring(0, 8).toUpperCase() : "PROCESSING...";
+
+  // ✅ Early return during SSR/prerender
+  if (!mounted || !router) {
+    return (
+      <Layout title="Transmission Successful | Abraham of London" className="bg-black">
+        <div className="min-h-screen bg-black" />
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Transmission Successful | Abraham of London" className="bg-black">
@@ -81,3 +98,10 @@ export default function IntakeSuccess() {
     </Layout>
   );
 }
+
+/* -----------------------------------------------------------------------------
+  SERVER SIDE PROPS (Force SSR to avoid static generation)
+----------------------------------------------------------------------------- */
+export const getServerSideProps = async () => {
+  return { props: {} };
+};

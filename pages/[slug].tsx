@@ -2,15 +2,18 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+
+import { MDXRemote } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
 import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
+
 import {
   getAllCombinedDocs,
   getDocBySlug,
@@ -51,14 +54,19 @@ function allowRootSlug(slug: string): boolean {
 }
 
 interface Props {
-  doc: any;
+  doc: {
+    title: string;
+    kind: string;
+    date: string | null;
+    excerpt: string;
+    readTime: string | null;
+  } | null;
   source: MDXRemoteSerializeResult | null;
   mdxRaw: string;
+  canonicalUrl: string; // ✅ use this instead of "currentPath"
 }
 
-const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
-  const router = useRouter();
-
+const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw, canonicalUrl }) => {
   const safeComponents = React.useMemo(
     () =>
       createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
@@ -67,14 +75,28 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
     [mdxRaw]
   );
 
-  if (router.isFallback) return <Layout title="Loading...">...</Layout>;
-  if (!doc) return <Layout title="404">Not Found</Layout>;
+  if (!doc) {
+    return (
+      <Layout title="404 | Abraham of London" description="Content not found" canonicalUrl={canonicalUrl}>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-serif mb-4">404</h1>
+            <p className="text-zinc-500">Content not found</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <Layout title={doc.title}>
+    <Layout
+      title={`${doc.title} | Abraham of London`}
+      description={doc.excerpt}
+      canonicalUrl={canonicalUrl}
+    >
       <Head>
-        <title>{`${doc.title} | Abraham of London`}</title>
-        <meta name="description" content={doc.excerpt} />
+        {/* Layout already sets <title> and meta description; Head here is optional.
+            Keep only truly page-specific tags if you want. */}
       </Head>
 
       <article className="relative min-h-screen bg-black pt-24 pb-32">
@@ -82,11 +104,13 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
           <div className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60 border border-amber-500/20 px-4 py-1.5 rounded-full">
             {doc.kind} // Protocol v2.6
           </div>
+
           <h1 className="font-serif text-5xl md:text-7xl text-white tracking-tight mb-8">
             {doc.title}
           </h1>
+
           <div className="flex justify-center items-center gap-6 font-mono text-[10px] uppercase text-white/30 tracking-widest border-y border-white/5 py-4">
-            <span>{doc.date}</span>
+            <span>{doc.date ?? "—"}</span>
             <span className="h-1 w-1 bg-white/20 rounded-full" />
             <span>{doc.readTime || "5 MIN READ"}</span>
           </div>
@@ -94,7 +118,7 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
 
         <div className="mx-auto max-w-2xl px-6">
           <div className="prose prose-invert max-w-none">
-            {source && <MDXRemote {...source} components={safeComponents as any} />}
+            {source ? <MDXRemote {...source} components={safeComponents as any} /> : null}
           </div>
         </div>
       </article>
@@ -104,6 +128,7 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = getAllCombinedDocs().filter((d) => !isDraftContent(d) && isPublished(d));
+
   const seen = new Set<string>();
   const paths: Array<{ params: { slug: string } }> = [];
 
@@ -121,8 +146,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = norm(String(params?.slug || ""));
+  const canonicalUrl = `/${slug}`;
 
   if (!allowRootSlug(slug)) return { notFound: true, revalidate: 60 };
 
@@ -133,14 +159,14 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return { notFound: true, revalidate: 60 };
   }
 
-  // ✅ FIX: Extract featureGridItems or default to empty array to prevent ReferenceError
-  const featureGridItems = Array.isArray((rawDoc as any).featureGridItems) 
-    ? (rawDoc as any).featureGridItems 
+  // MDX scope safety
+  const featureGridItems = Array.isArray((rawDoc as any).featureGridItems)
+    ? (rawDoc as any).featureGridItems
     : [];
 
   const mdxRaw = rawDoc.body?.raw || "";
-  const source = await serialize(mdxRaw, {
-    // ✅ PASS TO SCOPE: This makes {featureGridItems} available inside MDX files
+
+  const source = await serialize(mdxRaw || " ", {
     scope: { featureGridItems },
     mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
   });
@@ -153,7 +179,15 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     readTime: rawDoc.readTime ?? null,
   });
 
-  return { props: { doc, source, mdxRaw }, revalidate: 3600 };
+  return {
+    props: sanitizeData({
+      doc,
+      source,
+      mdxRaw,
+      canonicalUrl,
+    }),
+    revalidate: 3600,
+  };
 };
 
 export default GenericContentPage;

@@ -2,12 +2,18 @@
 /**
  * Database abstraction layer for the application.
  * Handles different database configurations and fallbacks.
+ *
+ * HARDENED: Prisma is runtime-loaded (server-only) to avoid TS/export breakages
+ * and Edge/bundler incompatibilities.
  */
 
-import { PrismaClient } from '@prisma/client';
+// NOTE: Do NOT import PrismaClient at top-level.
+// Some repos have stubs or broken typings that make TS think PrismaClient doesn't exist.
+// We load it dynamically inside initialize().
+type PrismaClientLike = any;
 
 export interface DatabaseConfig {
-  type: 'redis' | 'postgres' | 'memory' | 'prisma';
+  type: "redis" | "postgres" | "memory" | "prisma";
   url?: string;
   connection?: any;
   connected: boolean;
@@ -38,83 +44,97 @@ class MemoryDatabase {
 
   async connect(): Promise<boolean> {
     this.connected = true;
-    console.log('[MemoryDB] Connected to in-memory storage');
+    console.log("[MemoryDB] Connected to in-memory storage");
     return true;
   }
 
   async disconnect(): Promise<void> {
     this.connected = false;
-    console.log('[MemoryDB] Disconnected');
+    console.log("[MemoryDB] Disconnected");
   }
 
   async query<T = any>(query: string, params?: any[]): Promise<QueryResult<T>> {
     try {
       const startTime = Date.now();
-      
-      if (query.toLowerCase().includes('select')) {
+      const q = query.toLowerCase();
+
+      if (q.includes("select")) {
         const collectionMatch = query.match(/from\s+(\w+)/i);
-        if (collectionMatch) {
-          const collectionName = collectionMatch[1];
-          const collection = this.collections.get(collectionName);
-          
-          if (!collection) {
-            return {
-              success: true,
-              data: [] as T,
-              queryTime: Date.now() - startTime,
-              rowsAffected: 0
-            };
-          }
-          
-          const data = Array.from(collection.values());
+        
+        // ✅ FIXED: strict-safe guard for collectionName
+        const collectionName = collectionMatch?.[1];
+        if (!collectionName) {
           return {
             success: true,
-            data: data as T,
+            data: [] as T,
             queryTime: Date.now() - startTime,
-            rowsAffected: data.length
+            rowsAffected: 0,
           };
         }
-      } else if (query.toLowerCase().includes('insert')) {
+
+        const collection = this.collections.get(collectionName);
+
+        if (!collection) {
+          return {
+            success: true,
+            data: [] as T,
+            queryTime: Date.now() - startTime,
+            rowsAffected: 0,
+          };
+        }
+
+        const data = Array.from(collection.values());
+        return {
+          success: true,
+          data: data as T,
+          queryTime: Date.now() - startTime,
+          rowsAffected: data.length,
+        };
+      } else if (q.includes("insert")) {
         const tableMatch = query.match(/into\s+(\w+)/i);
-        if (tableMatch && params && params[0]) {
-          const tableName = tableMatch[1];
-          const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-          const record = { id, ...params[0] };
-          
-          let collection = this.collections.get(tableName);
-          if (!collection) {
-            collection = new Map();
-            this.collections.set(tableName, collection);
-          }
-          
-          collection.set(id, record);
-          
+        
+        // ✅ FIXED: strict-safe guard for tableName
+        if (!tableMatch || !params || !params[0]) {
           return {
             success: true,
-            data: record as T,
+            data: [] as T,
             queryTime: Date.now() - startTime,
-            rowsAffected: 1
+            rowsAffected: 0,
           };
         }
+
+        const tableName = tableMatch[1];
+        if (!tableName) {
+          return {
+            success: true,
+            data: [] as T,
+            queryTime: Date.now() - startTime,
+            rowsAffected: 0,
+          };
+        }
+
+        const id = Date.now().toString() + Math.random().toString(36).slice(2, 11);
+        const record = { id, ...params[0] };
+
+        let collection = this.collections.get(tableName);
+        if (!collection) {
+          collection = new Map();
+          this.collections.set(tableName, collection);
+        }
+
+        collection.set(id, record);
+
+        return { success: true, data: record as T, queryTime: Date.now() - startTime, rowsAffected: 1 };
       }
-      
-      return {
-        success: true,
-        data: [] as T,
-        queryTime: Date.now() - startTime,
-        rowsAffected: 0
-      };
+
+      return { success: true, data: [] as T, queryTime: Date.now() - startTime, rowsAffected: 0 };
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        queryTime: 0
-      };
+      return { success: false, error: error instanceof Error ? error.message : "Unknown error", queryTime: 0 };
     }
   }
 
   async get<T = any>(key: string): Promise<T | null> {
-    return this.store.get(key) || null;
+    return this.store.get(key) ?? null;
   }
 
   async set(key: string, value: any): Promise<boolean> {
@@ -139,7 +159,7 @@ class MemoryDatabase {
       connections: 1,
       activeConnections: 1,
       memoryUsage: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 
@@ -157,73 +177,104 @@ class MemoryDatabase {
   }
 }
 
+// Export a LIVE binding that gets filled once Prisma initializes.
+// (Do NOT make this const.)
+export let prisma: PrismaClientLike | null = null;
+
 // Database factory with Prisma support
 class Database {
   private static instance: Database;
   private config: DatabaseConfig;
   private db: MemoryDatabase | null = null;
-  private prismaClient: PrismaClient | null = null;
+  private prismaClient: PrismaClientLike | null = null;
   private initialized = false;
 
   private constructor() {
-    if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgres')) {
-      this.config = {
-        type: 'prisma',
-        url: process.env.DATABASE_URL,
-        connected: false
-      };
+    const url = process.env.DATABASE_URL;
+
+    // Prefer Prisma only when DATABASE_URL is set and looks like a DB URL
+    if (url && /(postgres|postgresql|mysql|mongodb|sqlserver|cockroach)/i.test(url)) {
+      this.config = { type: "prisma", url, connected: false };
     } else {
-      this.config = {
-        type: 'memory',
-        connected: true
-      };
+      this.config = { type: "memory", connected: true };
     }
   }
 
   static getInstance(): Database {
-    if (!Database.instance) {
-      Database.instance = new Database();
-    }
+    if (!Database.instance) Database.instance = new Database();
     return Database.instance;
+  }
+
+  private isServerRuntime(): boolean {
+    return typeof window === "undefined";
+  }
+
+  private isEdgeRuntime(): boolean {
+    // Next/Vercel convention. Safe for Netlify/others too.
+    return process.env.NEXT_RUNTIME === "edge";
+  }
+
+  private async loadPrismaClient(): Promise<{ PrismaClient: any } | null> {
+    try {
+      // Dynamic import so TS doesn't need PrismaClient at compile-time here.
+      const mod: any = await import("@prisma/client");
+      return mod && mod.PrismaClient ? { PrismaClient: mod.PrismaClient } : null;
+    } catch (e) {
+      console.warn("[Database] Prisma module not loadable:", e instanceof Error ? e.message : e);
+      return null;
+    }
   }
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
     try {
-      if (this.config.type === 'prisma') {
+      if (this.config.type === "prisma") {
+        // Prisma is server-only and not compatible with Edge runtime.
+        if (!this.isServerRuntime() || this.isEdgeRuntime()) {
+          throw new Error("Prisma not available in browser/edge runtime");
+        }
+
+        const prismaModule = await this.loadPrismaClient();
+        if (!prismaModule) throw new Error("PrismaClient not available from @prisma/client");
+
         try {
-          if (typeof window === 'undefined') {
-            this.prismaClient = new PrismaClient({
-              log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-            });
-            
-            await this.prismaClient.$queryRaw`SELECT 1`;
-            this.config.connected = true;
-            console.log('[Database] Connected to Prisma/PostgreSQL');
-          } else {
-            throw new Error('Prisma not available in browser');
-          }
+          this.prismaClient = new prismaModule.PrismaClient({
+            log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+          });
+
+          // Minimal connectivity check (works across providers)
+          await this.prismaClient.$queryRaw`SELECT 1`;
+
+          this.config.connected = true;
+          prisma = this.prismaClient; // 🔥 fill the live export
+          console.log("[Database] Connected to Prisma-backed database");
         } catch (prismaError) {
-          console.warn('[Database] Prisma connection failed, falling back to memory');
+          console.warn("[Database] Prisma connection failed, falling back to memory");
+          this.prismaClient = null;
+          prisma = null;
+
           this.db = new MemoryDatabase();
-          this.config.type = 'memory';
+          this.config.type = "memory";
+          this.config.connected = true;
           await this.db.connect();
         }
       } else {
         this.db = new MemoryDatabase();
         await this.db.connect();
+        this.config.connected = true;
       }
-      
+
       this.initialized = true;
       this.config.lastHealthCheck = new Date();
     } catch (error) {
-      console.error('[Database] Initialization failed:', error);
+      console.error("[Database] Initialization failed:", error instanceof Error ? error.message : error);
       this.db = new MemoryDatabase();
       await this.db.connect();
-      this.config.type = 'memory';
+      this.config.type = "memory";
       this.config.connected = true;
       this.initialized = true;
+      prisma = null;
     }
   }
 
@@ -233,20 +284,15 @@ class Database {
     if (this.prismaClient) {
       try {
         const startTime = Date.now();
-        // Simplified raw query logic
-        return {
-          success: true,
-          data: [] as T,
-          queryTime: Date.now() - startTime,
-          rowsAffected: 0
-        };
+        // You can extend this with actual prisma.$queryRaw usage if you want.
+        return { success: true, data: [] as T, queryTime: Date.now() - startTime, rowsAffected: 0 };
       } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : 'Query failed', queryTime: 0 };
+        return { success: false, error: error instanceof Error ? error.message : "Query failed", queryTime: 0 };
       }
     }
 
-    if (this.db) return await this.db.query<T>(query, params);
-    return { success: false, error: 'Database not initialized' };
+    if (this.db) return this.db.query<T>(query, params);
+    return { success: false, error: "Database not initialized" };
   }
 
   async healthCheck() {
@@ -257,20 +303,20 @@ class Database {
       try {
         await this.prismaClient.$queryRaw`SELECT 1`;
         return { healthy: true, type: this.config.type, responseTime: Date.now() - startTime };
-      } catch (e) {
+      } catch {
         return { healthy: false, type: this.config.type, responseTime: Date.now() - startTime };
       }
     }
-    
+
     if (this.db) {
       const healthy = await this.db.healthCheck();
       return { healthy, type: this.config.type, responseTime: Date.now() - startTime };
     }
-    
+
     return { healthy: false, type: this.config.type, responseTime: Date.now() - startTime };
   }
 
-  getPrismaClient(): any {
+  getPrismaClient(): PrismaClientLike | null {
     return this.prismaClient;
   }
 
@@ -285,8 +331,9 @@ const db = Database.getInstance();
 /**
  * SOVEREIGN ALIAS BRIDGE
  * Satisfies build requirements for both direct prisma calls and the custom db wrapper.
+ *
+ * NOTE: `prisma` is a LIVE binding exported above and will be filled after initialize().
  */
-export const prisma = db.getPrismaClient();
 
 // Helper functions
 export async function getPrismaClient() {
@@ -296,8 +343,8 @@ export async function getPrismaClient() {
 
 export async function executeQuery<T = any>(query: string, params?: any[]): Promise<T[]> {
   const result = await db.query<T>(query, params);
-  if (!result.success) throw new Error(result.error || 'Query failed');
-  return result.data || [];
+  if (!result.success) throw new Error(result.error || "Query failed");
+  return (result.data || []) as T[];
 }
 
 export async function checkDatabaseConnection() {

@@ -1,10 +1,15 @@
-/* components/StrategyRoom/IntakeForm.tsx */
+/* components/StrategyRoom/IntakeForm.tsx — BULLETPROOF (Router-Safe) */
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
 import { Terminal, Shield, ArrowRight, Loader2 } from 'lucide-react';
+import { useClientRouter, useClientQuery, useClientIsReady } from '@/lib/router/useClientRouter';
 
 export default function StrategyRoomIntake() {
-  const router = useRouter();
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  const isReady = useClientIsReady();
+  const [mounted, setMounted] = React.useState(false);
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -18,6 +23,25 @@ export default function StrategyRoomIntake() {
       { label: 'Operational Sovereignty', reasoning: '', weight: 3 }
     ]
   });
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // ✅ Early return during SSR/prerender
+  if (!mounted || !router) {
+    return (
+      <div className="max-w-2xl mx-auto bg-zinc-950 border border-zinc-800 p-8 font-mono text-zinc-400">
+        <div className="flex items-center gap-3 mb-8 border-b border-zinc-800 pb-4">
+          <Terminal className="text-amber-500" size={20} />
+          <span className="text-white uppercase tracking-[0.3em] text-xs">System_Intake_v2.0</span>
+        </div>
+        <div className="h-64 flex items-center justify-center">
+          <div className="animate-pulse text-zinc-700">Initializing secure connection...</div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     setLoading(true);

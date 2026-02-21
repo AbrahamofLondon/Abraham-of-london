@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react';
 import Head from 'next/head';
 import Script from 'next/script';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 
 // Fixed imports - using named exports
 import { Header as PDFHeader } from '@/components/PDFDashboard/Header';
@@ -61,7 +60,9 @@ interface LayoutProps {
   noHeader?: boolean;
   noFooter?: boolean;
   noSidebar?: boolean;
-  className?: string;   // ✅ Now explicitly accepted
+  className?: string;
+  // Allow path to be passed in from parent (for canonical URL)
+  currentPath?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -74,11 +75,14 @@ const Layout: React.FC<LayoutProps> = ({
   noHeader = false,
   noFooter = false,
   noSidebar = false,
-  className = ''
+  className = '',
+  currentPath = '/'
 }) => {
-  const router = useRouter();
-  const isInnerCirclePage = router.pathname.startsWith('/inner-circle');
-  const currentUrl = `${BASE_URL}${router.asPath}`;
+  // ========== NO useRouter HOOK ==========
+  // Use provided currentPath or default "/"
+  const path = currentPath;
+  const isInnerCirclePage = path.startsWith('/inner-circle');
+  const currentUrl = `${BASE_URL}${path}`;
 
   return (
     <>

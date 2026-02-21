@@ -1,6 +1,6 @@
 // scripts/check-content-boundary.mjs
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 const ROOT = process.cwd();
 

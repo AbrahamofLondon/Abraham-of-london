@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import fs from "fs";
 
 const targets = [
   "pages/auth/signin.tsx",

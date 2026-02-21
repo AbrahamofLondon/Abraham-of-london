@@ -5,23 +5,10 @@ Disallow: /api/*
 Disallow: /inner-circle/*
 Disallow: /admin/*
 Disallow: /_next/*
-Disallow: /assets/private/*
 Disallow: /404
 Disallow: /500
 Disallow: /maintenance
-Disallow: /test/*
-Disallow: /debug/*
-Disallow: /server-sitemap.xml
 Crawl-delay: 2
-
-# Googlebot
-User-agent: Googlebot
-Allow: /
-Disallow: /api/*
-Disallow: /inner-circle/*
-Disallow: /admin/*
-Disallow: /assets/private/*
-Crawl-delay: 1
 
 # Host
 Host: https://www.abrahamoflondon.org
@@ -30,6 +17,7 @@ Host: https://www.abrahamoflondon.org
 Sitemap: https://www.abrahamoflondon.org/sitemap.xml
 Sitemap: https://www.abrahamoflondon.org/blog-sitemap.xml
 Sitemap: https://www.abrahamoflondon.org/canons-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/shorts-sitemap.xml
 Sitemap: https://www.abrahamoflondon.org/strategies-sitemap.xml
+Sitemap: https://www.abrahamoflondon.org/downloads-sitemap.xml
 Sitemap: https://www.abrahamoflondon.org/resources-sitemap.xml
-Sitemap: https://www.abrahamoflondon.org/books-sitemap.xml

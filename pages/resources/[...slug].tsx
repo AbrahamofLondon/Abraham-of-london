@@ -1,8 +1,8 @@
-// pages/resources/[...slug].tsx — BUILD-PROOF (Pages Router)
+// pages/resources/[...slug].tsx — BUILD-PROOF (Pages Router, Harrods/McKinsey Grade)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
@@ -12,6 +12,7 @@ import Layout from "@/components/Layout";
 import mdxComponents from "@/components/mdx-components";
 import AccessGate from "@/components/AccessGate";
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
+import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
 
 import {
   getAllCombinedDocs,
@@ -20,6 +21,8 @@ import {
   isDraftContent,
   sanitizeData,
 } from "@/lib/content/server";
+
+import { ArrowLeft, Lock, Shield, ChevronRight, Calendar, User, Tag } from "lucide-react";
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -202,7 +205,19 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
 };
 
 const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, mdxRaw }) => {
-  const router = useRouter();
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  const isReady = useClientIsReady();
+  
+  const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
+  const [loading, setLoading] = React.useState(false);
+  const [errMsg, setErrMsg] = React.useState<string | null>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const safeComponents = React.useMemo(
     () =>
@@ -211,10 +226,6 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
       }),
     [mdxRaw]
   );
-
-  const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
-  const [loading, setLoading] = React.useState(false);
-  const [errMsg, setErrMsg] = React.useState<string | null>(null);
 
   async function loadLockedContent(): Promise<boolean> {
     setErrMsg(null);
@@ -251,7 +262,24 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
     }
   }
 
+  const handleBackToResources = () => {
+    if (router) router.push("/resources");
+  };
+
+  const handleGoToJoin = () => {
+    if (router) router.push("/inner-circle");
+  };
+
   const requiredTier: AccessLevel = resource.accessLevel === "private" ? "private" : "inner-circle";
+
+  // ✅ Early return during SSR/prerender
+  if (!router || !mounted) {
+    return (
+      <Layout title={resource.title}>
+        <div className="min-h-screen bg-black" />
+      </Layout>
+    );
+  }
 
   return (
     <Layout title={resource.title} description={resource.description || resource.excerpt || undefined}>
@@ -262,46 +290,98 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
         <meta name="robots" content={locked ? "noindex, nofollow" : "index, follow"} />
       </Head>
 
-      <div className="mx-auto max-w-4xl px-4 py-16">
-        <button
-          onClick={() => router.push("/resources")}
-          className="text-sm text-gray-400 hover:text-white transition-colors"
-          type="button"
-        >
-          ← Back to Resources
-        </button>
-
-        <h1 className="mt-6 text-4xl font-bold text-white">{resource.title}</h1>
-
-        {resource.description || resource.excerpt ? (
-          <p className="mt-4 text-gray-300">{resource.description || resource.excerpt}</p>
-        ) : null}
-
-        {locked && !source ? (
-          <div className="mt-10">
-            <AccessGate
-              title={resource.title}
-              message={resource.accessLevel === "private" ? "This resource is restricted." : "This resource is for Inner Circle members."}
-              requiredTier={requiredTier}
-              onUnlocked={() => void loadLockedContent()}
-              onGoToJoin={() => router.push("/inner-circle")}
-            />
+      <div className="min-h-screen bg-gradient-to-b from-black to-zinc-950 text-white">
+        {/* Navigation */}
+        <div className="border-b border-white/5 bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-40">
+          <div className="mx-auto max-w-5xl px-6 py-4">
+            <button
+              onClick={handleBackToResources}
+              className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors group text-sm"
+              type="button"
+            >
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+              <span className="font-mono text-[10px] uppercase tracking-widest">Back to Resources</span>
+            </button>
           </div>
-        ) : null}
+        </div>
 
-        {loading ? <div className="mt-10 text-gray-400">Verifying credentials & decrypting resource…</div> : null}
+        <div className="mx-auto max-w-5xl px-6 py-20">
+          {/* Header */}
+          <header className="mb-16">
+            <div className="flex items-center gap-4 text-amber-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-6">
+              <Shield size={14} />
+              <span>{resource.accessLevel} Clearance</span>
+              <span className="w-12 h-px bg-amber-500/30" />
+              {resource.date && <span className="text-white/30">{new Date(resource.date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</span>}
+            </div>
 
-        {errMsg ? (
-          <div className="mt-8 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-            {errMsg}
-          </div>
-        ) : null}
+            <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-8 leading-tight tracking-tight">
+              {resource.title}
+            </h1>
 
-        {source ? (
-          <div className="prose prose-invert mt-10 max-w-none">
-            <MDXRemote {...source} components={safeComponents as any} />
-          </div>
-        ) : null}
+            {(resource.description || resource.excerpt) && (
+              <p className="text-xl text-white/50 leading-relaxed max-w-3xl">
+                {resource.description || resource.excerpt}
+              </p>
+            )}
+
+            {/* Metadata bar */}
+            <div className="mt-12 flex flex-wrap items-center gap-8 text-sm border-t border-white/5 pt-8">
+              {resource.author && (
+                <div className="flex items-center gap-2 text-white/30">
+                  <User size={14} />
+                  <span className="font-mono text-[10px] uppercase tracking-wider">{resource.author}</span>
+                </div>
+              )}
+              {resource.tags.length > 0 && (
+                <div className="flex items-center gap-2 text-white/30">
+                  <Tag size={14} />
+                  <div className="flex gap-2">
+                    {resource.tags.map(tag => (
+                      <span key={tag} className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 bg-white/5 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* Content */}
+          {locked && !source ? (
+            <div className="mt-16 max-w-2xl">
+              <AccessGate
+                title={resource.title}
+                message={resource.accessLevel === "private" 
+                  ? "This institutional resource is restricted to executive clearance." 
+                  : "This resource requires Inner Circle membership."}
+                requiredTier={requiredTier}
+                onUnlocked={() => void loadLockedContent()}
+                onGoToJoin={handleGoToJoin}
+              />
+            </div>
+          ) : null}
+
+          {loading && (
+            <div className="mt-16 flex items-center gap-3 text-amber-500">
+              <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <span className="font-mono text-[10px] uppercase tracking-widest">Verifying credentials & decrypting resource…</span>
+            </div>
+          )}
+
+          {errMsg && (
+            <div className="mt-8 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-4 text-sm text-red-200">
+              {errMsg}
+            </div>
+          )}
+
+          {source && (
+            <div className="mt-16 prose prose-invert prose-amber max-w-none">
+              <MDXRemote {...source} components={safeComponents as any} />
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );

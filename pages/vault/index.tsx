@@ -1,29 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * pages/vault.tsx — VAULT (2026) — PRODUCTION-SAFE, REGISTRY-FIRST
- *
- * What this fixes (no drama, just results):
- * 1) Shows PDFs that exist on disk even if no matching MDX exists.
- * 2) Uses your PDF registry as the source of truth for file URLs + existence.
- * 3) Still enriches cards with MDX metadata when available (title/excerpt/tags/category/accessLevel).
- * 4) Prevents “empty vault” when Contentlayer is flaky.
+ * pages/vault/index.tsx — VAULT (2026) — PRODUCTION-SAFE, REGISTRY-FIRST, ROUTER-SAFE
  */
 
 import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import {
   Search,
   FileText,
   Download,
   Lock,
+  ArrowRight,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-
-// If your pdf-registry currently lives under /scripts, MOVE IT to /lib (recommended for Next builds),
-// or re-export it from /lib/pdf-registry.ts.
-// This import assumes you have it in /lib.
+import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
 import { getAllPDFItems, type PDFItem } from "@/lib/pdf-registry";
 
 // Contentlayer is optional enrichment. If it fails, vault still works.
@@ -45,8 +37,6 @@ type DownloadDoc = {
 
 async function tryGetContentlayerDownloads(): Promise<DownloadDoc[]> {
   try {
-    // Use whatever you already have in your codebase.
-    // This is intentionally defensive to avoid build failures.
     const mod: any = await import("@/lib/contentlayer-compat");
     const allDownloads: any[] = Array.isArray(mod.allDownloads) ? mod.allDownloads : [];
     return allDownloads as DownloadDoc[];
@@ -72,23 +62,18 @@ function hasAccessCookieClient(): boolean {
 }
 
 type VaultItem = {
-  id: string; // registry id (usually filename without extension)
-  slug: string; // same as id for routing/search
+  id: string;
+  slug: string;
   title: string;
   excerpt: string;
   category: string;
   tags: string[];
   date: string | null;
-
   format: string;
   size: string;
   fileHref: string | null;
-
-  // gating
-  tier: string; // free/member/architect/inner-circle (or your mapping)
+  tier: string;
   requiresAuth: boolean;
-
-  // UI flags
   isInteractive: boolean;
   isFillable: boolean;
 };
@@ -104,20 +89,15 @@ export const getStaticProps: GetStaticProps<{
   totalAssets: number;
 }> = async () => {
   try {
-    // 1) Registry-first: only show what exists (by default your registry returns existing-only)
     const pdfItems: PDFItem[] = getAllPDFItems({ includeMissing: false });
-
-    // 2) Optional enrichment from Contentlayer downloads
     const downloads = await tryGetContentlayerDownloads();
 
-    // Build lookup by slug -> doc
     const bySlug = new Map<string, DownloadDoc>();
     for (const d of downloads) {
       const slug = normalizeSlug(d.slug || d._raw?.flattenedPath || "");
       if (slug) bySlug.set(slug, d);
     }
 
-    // 3) Merge: registry is canonical; MDX enriches when present
     const items: VaultItem[] = pdfItems.map((p) => {
       const slug = normalizeSlug(p.id);
       const d = bySlug.get(slug);
@@ -142,7 +122,6 @@ export const getStaticProps: GetStaticProps<{
 
       const date = d?.date ? String(d.date) : null;
 
-      // Gating: if MDX explicitly says requiresAuth, respect it; else respect registry.
       const requiresAuth =
         typeof d?.requiresAuth === "boolean" ? Boolean(d.requiresAuth) : Boolean(p.requiresAuth);
 
@@ -182,7 +161,6 @@ export const getStaticProps: GetStaticProps<{
       };
     });
 
-    // 4) Categories from computed items
     const categories = Array.from(new Set(items.map((i) => i.category))).sort((a, b) =>
       a.localeCompare(b)
     );
@@ -193,7 +171,6 @@ export const getStaticProps: GetStaticProps<{
         categories,
         totalAssets: items.length,
       },
-      // tighter during launch/debug; raise later if desired
       revalidate: 60,
     };
   } catch (error) {
@@ -212,7 +189,10 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   categories,
   totalAssets,
 }) => {
-  const router = useRouter();
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  const isReady = useClientIsReady();
 
   const [filters, setFilters] = React.useState<FilterState>({
     search: "",
@@ -220,10 +200,21 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
   });
 
   const [hasCookie, setHasCookie] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
+    setMounted(true);
     setHasCookie(hasAccessCookieClient());
   }, []);
+
+  // ✅ Early return during SSR/prerender
+  if (!router) {
+    return (
+      <Layout title="The Vault">
+        <div className="min-h-screen bg-[#050505]" />
+      </Layout>
+    );
+  }
 
   const filteredItems = React.useMemo(() => {
     const q = filters.search.trim().toLowerCase();
@@ -249,9 +240,27 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
     });
   }, [items, filters.search, filters.category]);
 
+  const handleCategoryChange = (category: string | null) => {
+    setFilters((f) => ({ ...f, category }));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((f) => ({ ...f, search: e.target.value }));
+  };
+
+  const handlePrimaryAction = (item: VaultItem) => {
+    if (item.requiresAuth && !hasCookie) {
+      router.push(`/inner-circle?returnTo=${encodeURIComponent("/vault")}`);
+      return;
+    }
+    if (item.fileHref) {
+      window.open(item.fileHref, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <Layout title="The Vault" description="Institutional Archive of Strategic Assets.">
-      <main className="min-h-screen bg-[#050505] pt-32 pb-20 px-6">
+      <main className="min-h-screen bg-gradient-to-b from-[#050505] to-black pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/* VAULT HUD */}
           <header className="mb-20">
@@ -277,7 +286,7 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
                 placeholder="QUERY_ASSET_REGISTRY..."
                 className="w-full bg-[#0a0a0a] border border-white/5 py-6 pl-16 pr-6 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300 focus:border-emerald-800/50 focus:bg-black outline-none transition-all"
                 value={filters.search}
-                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+                onChange={handleSearchChange}
               />
             </div>
 
@@ -285,7 +294,7 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
             {categories.length > 0 && (
               <div className="mt-10 flex flex-wrap gap-2">
                 <button
-                  onClick={() => setFilters((f) => ({ ...f, category: null }))}
+                  onClick={() => handleCategoryChange(null)}
                   className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.2em] border transition-all ${
                     !filters.category
                       ? "border-emerald-900/50 bg-emerald-950/10 text-emerald-500"
@@ -298,7 +307,7 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
                 {categories.map((c) => (
                   <button
                     key={c}
-                    onClick={() => setFilters((f) => ({ ...f, category: c }))}
+                    onClick={() => handleCategoryChange(c)}
                     className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.2em] border transition-all ${
                       filters.category === c
                         ? "border-emerald-900/50 bg-emerald-950/10 text-emerald-500"
@@ -318,32 +327,27 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
               const isLocked = item.requiresAuth && !hasCookie;
               const badgeText = isLocked ? "Classified" : item.tier;
 
-              const onPrimaryAction = () => {
-                if (isLocked) {
-                  router.push(`/inner-circle?returnTo=${encodeURIComponent("/vault")}`);
-                  return;
-                }
-                if (item.fileHref) {
-                  window.open(item.fileHref, "_blank", "noopener,noreferrer");
-                }
-              };
-
               return (
                 <div
                   key={item.id}
-                  className="group bg-black p-10 flex flex-col justify-between min-h-[420px] hover:bg-[#080808] transition-all border-b border-white/5 md:border-b-0"
+                  className="group bg-black p-10 flex flex-col justify-between min-h-[420px] hover:bg-[#080808] transition-all border-b border-white/5 md:border-b-0 relative overflow-hidden"
                 >
+                  {/* Hover indicator */}
+                  <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="h-5 w-5 text-emerald-500/50" />
+                  </div>
+
                   <div>
                     <div className="flex justify-between items-start mb-10">
-                      <div className="p-3 border border-white/5 bg-white/[0.02]">
+                      <div className="p-3 border border-white/5 bg-white/[0.02] rounded-xl group-hover:border-emerald-500/20 transition-colors">
                         <FileText
                           size={18}
-                          className="text-zinc-800 group-hover:text-emerald-600 transition-colors"
+                          className="text-zinc-800 group-hover:text-emerald-500 transition-colors"
                         />
                       </div>
 
                       <span
-                        className={`text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 border ${
+                        className={`text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 border rounded-full ${
                           isLocked
                             ? "text-amber-600 border-amber-900/50 bg-amber-950/10"
                             : "text-emerald-600 border-emerald-900/50 bg-emerald-950/10"
@@ -371,11 +375,11 @@ const VaultPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
                     </div>
 
                     <button
-                      onClick={onPrimaryAction}
+                      onClick={() => handlePrimaryAction(item)}
                       disabled={!isLocked && !item.fileHref}
-                      className={`w-full py-4 bg-transparent border transition-all flex items-center justify-center gap-3 ${
+                      className={`w-full py-4 bg-transparent border transition-all flex items-center justify-center gap-3 rounded-xl ${
                         isLocked
-                          ? "border-amber-900/30 text-amber-600 hover:bg-amber-600 hover:text-black"
+                          ? "border-amber-900/30 text-amber-600 hover:bg-amber-600 hover:text-black hover:border-amber-600"
                           : "border-white/10 text-zinc-400 hover:border-emerald-600 hover:bg-emerald-600 hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400"
                       }`}
                     >

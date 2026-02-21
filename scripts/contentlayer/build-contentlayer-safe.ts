@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawnSync } from "child_process";
 
 type Step = {
   title: string;

@@ -12,6 +12,19 @@
 import { allDocuments } from "contentlayer/generated";
 
 // -----------------------------
+// Tier definitions
+// -----------------------------
+export type Tier = "free" | "basic" | "premium" | "enterprise" | "restricted";
+
+export const TIER_HIERARCHY: Record<Tier, number> = {
+  "free": 0,
+  "basic": 1,
+  "premium": 2,
+  "enterprise": 3,
+  "restricted": 4,
+};
+
+// -----------------------------
 // Minimal doc shape (stable)
 // -----------------------------
 export type ContentDoc = {
@@ -53,6 +66,72 @@ export type DocKind =
   | "unknown";
 
 // -----------------------------
+// Tier utilities
+// -----------------------------
+export function normalizeTier(tier: string | Tier): Tier {
+  if (!tier) return "free";
+  
+  const normalized = tier.toString().toLowerCase().trim();
+  
+  // Handle legacy/public names
+  if (normalized === "public" || normalized === "free") return "free";
+  if (normalized === "inner-circle" || normalized === "basic") return "basic";
+  if (normalized === "inner-circle-plus" || normalized === "premium") return "premium";
+  if (normalized === "inner-circle-elite" || normalized === "enterprise") return "enterprise";
+  if (normalized === "private" || normalized === "restricted") return "restricted";
+  
+  // Try direct match
+  if (isTier(normalized)) return normalized as Tier;
+  
+  return "free";
+}
+
+export function isTier(value: string): value is Tier {
+  return ["free", "basic", "premium", "enterprise", "restricted"].includes(value);
+}
+
+export function getRequiredTier(doc: any): Tier {
+  if (!doc) return "free";
+  
+  // Check explicit tier field
+  if (doc.tier) {
+    return normalizeTier(doc.tier);
+  }
+  
+  // Check accessLevel as fallback
+  if (doc.accessLevel) {
+    return normalizeTier(doc.accessLevel);
+  }
+  
+  // Check classification
+  if (doc.classification) {
+    return normalizeTier(doc.classification);
+  }
+  
+  return "free";
+}
+
+export function isTierAllowed(requiredTier: Tier, userTier: Tier): boolean {
+  return TIER_HIERARCHY[userTier] >= TIER_HIERARCHY[requiredTier];
+}
+
+export function canAccessDoc(doc: any, userTier: string | Tier = "free"): boolean {
+  const required = getRequiredTier(doc);
+  const user = normalizeTier(userTier);
+  return isTierAllowed(required, user);
+}
+
+export function getAccessLevel(doc: any): { tier: Tier; requiresAuth: boolean; requiresInnerCircle: boolean; requiresAdmin: boolean } {
+  const tier = getRequiredTier(doc);
+  return {
+    tier,
+    requiresAuth: tier !== "free",
+    requiresInnerCircle: tier === "basic" || tier === "premium" || tier === "enterprise",
+    requiresAdmin: tier === "restricted",
+  };
+}
+
+// -----------------------------
 // Normalizers
 // -----------------------------
 export function normalizeSlug(input: string): string {
@@ -70,12 +149,31 @@ export function getDocSlug(doc: any): string {
   return normalizeSlug(String(doc?.slug || "").trim()) || normalizeSlug(getFlattenedPath(doc));
 }
 
+// -----------------------------
+// Publication status
+// -----------------------------
 export function isPublished(doc: any): boolean {
   // published defaults to true; draft defaults to false
   const draft = Boolean(doc?.draft);
   const published = doc?.published === undefined ? true : Boolean(doc?.published);
   return published && !draft;
 }
+
+export function isDraft(doc: any): boolean {
+  return Boolean(doc?.draft) || doc?.published === false;
+}
+
+export function isPublic(doc: any): boolean {
+  if (!doc) return false;
+  if (!isPublished(doc)) return false;
+  const tier = getRequiredTier(doc);
+  return tier === "free";
+}
+
+// Aliases for backward compatibility
+export const isPublishedContent = isPublished;
+export const isPublicDoc = isPublic;
+export const isDraftDoc = isDraft;
 
 // -----------------------------
 // Kind resolver (single source)

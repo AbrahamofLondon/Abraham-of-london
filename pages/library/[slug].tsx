@@ -1,23 +1,25 @@
-// pages/library/[slug].tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// pages/library/[slug].tsx — LIBRARY DETAIL (Export-safe, Router-free)
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import { ArrowLeft, ExternalLink, Download, FileText } from "lucide-react";
 
 type PdfAsset = {
-  id: string; // ✅ canonical route key: /library/[id]
+  slug: string;
   title: string;
   description?: string | null;
-  excerpt?: string | null;
   category?: string | null;
   tags?: string[] | null;
-  url?: string | null; // outputPath/fileUrl (web path)
-  tier?: string | null;
+  href?: string | null;
+  url?: string | null;
+  path?: string | null;
   public?: boolean | null;
   updated?: string | null;
+  date?: string | null;
 };
 
 type Props = { asset: PdfAsset };
@@ -26,7 +28,7 @@ function safeStr(v: any): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
 }
 
-function normId(input: string) {
+function normalizeSlug(input: string) {
   return (input || "")
     .trim()
     .replace(/^\/+/, "")
@@ -34,129 +36,134 @@ function normId(input: string) {
     .replace(/\/{2,}/g, "/");
 }
 
-function ensureWebPath(p: string | null | undefined): string | null {
-  const v = safeStr(p).trim();
-  if (!v) return null;
-  return v.startsWith("/") ? v : `/${v}`;
+function toRouteParamSlug(registrySlug: string): string {
+  const n = normalizeSlug(registrySlug);
+  const parts = n.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : "";
+}
+
+function jsonSafe<T>(v: T): T {
+  return JSON.parse(JSON.stringify(v, (_k, val) => (val === undefined ? null : val)));
 }
 
 function coerceAsset(x: any): PdfAsset | null {
   if (!x) return null;
 
-  const id = normId(safeStr(x.id || x.slug || x.key || x.name || ""));
-  if (!id) return null;
+  const rawSlug = safeStr(x.slug || x.id || x.key || x.name || x.file || x.pdf || "");
+  const slug = normalizeSlug(rawSlug);
+  if (!slug) return null;
 
-  const title = safeStr(x.title || x.name || x.label || id || "Untitled").trim() || "Untitled";
-  const description = safeStr(x.description || x.summary || "") || null;
-  const excerpt = safeStr(x.excerpt || "") || null;
-  const category = safeStr(x.category || x.collection || x.kind || "") || null;
+  const title = safeStr(x.title || x.name || x.label || toRouteParamSlug(slug) || "Untitled");
 
-  const tags = Array.isArray(x.tags) ? x.tags.map((t: any) => safeStr(t)).filter(Boolean) : null;
+  const tags = Array.isArray(x.tags)
+    ? x.tags.map((t: any) => safeStr(t)).filter(Boolean)
+    : null;
 
-  const url =
-    ensureWebPath(x.outputPath) ||
-    ensureWebPath(x.fileUrl) ||
-    ensureWebPath(x.url) ||
-    ensureWebPath(x.href) ||
-    ensureWebPath(x.path) ||
-    null;
-
-  const tier = safeStr(x.tier || x.accessLevel || "") || null;
-  const updated =
-    safeStr(x.updatedAt || x.lastModified || x.lastModifiedISO || x.updated || x.date || "") || null;
+  const updated = safeStr(x.updated || x.updatedAt || x.modified || x.lastModified || x.date || "") || null;
 
   const isPublic =
     x.public === true ||
     x.isPublic === true ||
-    String(x.tier || "").toLowerCase() === "free" ||
-    String(x.tier || "").toLowerCase() === "public";
+    x.accessLevel === "public" ||
+    x.tier === "public" ||
+    x.visibility === "public" ||
+    x.visibility === "Public" ||
+    x.access === "public" ||
+    x.access === "Public" ||
+    x.locked === false;
 
   return {
-    id,
+    slug,
     title,
-    description,
-    excerpt,
-    category,
+    description: safeStr(x.description || x.excerpt || x.summary || "") || null,
+    category: safeStr(x.category || x.collection || x.kind || "") || null,
     tags,
-    url,
-    tier,
+    href: safeStr(x.href || "") || null,
+    url: safeStr(x.url || x.publicUrl || "") || null,
+    path: safeStr(x.path || x.filePath || x.file || "") || null,
     public: Boolean(isPublic),
     updated,
+    date: safeStr(x.date || x.publishedAt || "") || null,
   };
 }
 
-function readRegistryJson(): PdfAsset[] {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const fs = require("fs") as typeof import("fs");
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const path = require("path") as typeof import("path");
+function resolveAssetUrl(asset: PdfAsset): string | null {
+  const url = safeStr(asset.url || "");
+  if (url) return url;
 
-  const jsonPath = path.join(process.cwd(), "public", "pdfs", "registry.json");
-  if (!fs.existsSync(jsonPath)) return [];
+  const href = safeStr(asset.href || "");
+  if (href) return href.startsWith("/") ? href : href;
 
-  const raw = fs.readFileSync(jsonPath, "utf8");
-  const parsed = JSON.parse(raw);
-
-  const arr: any[] = Array.isArray(parsed)
-    ? parsed
-    : Array.isArray(parsed?.items)
-      ? parsed.items
-      : [];
-
-  const assets = arr.map(coerceAsset).filter(Boolean) as PdfAsset[];
-
-  // Dedup by id
-  const seen = new Set<string>();
-  const uniq: PdfAsset[] = [];
-  for (const a of assets) {
-    const k = a.id.toLowerCase();
-    if (!seen.has(k)) {
-      seen.add(k);
-      uniq.push(a);
-    }
+  const path = safeStr(asset.path || "");
+  if (path) {
+    const p = normalizeSlug(path);
+    if (p.startsWith("pdfs/")) return `/${p}`;
+    if (p.startsWith("assets/")) return `/${p}`;
+    if (p.startsWith("public/")) return `/${p.replace(/^public\//, "")}`;
+    if (p.startsWith("http://") || p.startsWith("https://")) return p;
   }
-  return uniq;
+
+  return null;
+}
+
+async function loadPdfAssets(): Promise<PdfAsset[]> {
+  try {
+    const mod: any = await import("@/scripts/pdf/pdf-registry.source");
+    const list = mod?.ALL_SOURCE_PDFS || mod?.PDF_REGISTRY || mod?.ALL_PDFS || mod?.default;
+    const arr: any[] = Array.isArray(list) ? list : Array.isArray(list?.items) ? list.items : [];
+    return arr.map(coerceAsset).filter(Boolean) as PdfAsset[];
+  } catch {
+    return [];
+  }
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const assets = readRegistryJson();
-  const paths = assets.map((a) => ({ params: { slug: a.id } }));
-  return { paths, fallback: "blocking" };
+  const assets = await loadPdfAssets();
+
+  const paths = assets
+    .map((a) => toRouteParamSlug(a.slug))
+    .filter(Boolean)
+    .map((slug) => ({ params: { slug } }));
+
+  const seen = new Set<string>();
+  const deduped = paths.filter((p) => {
+    const k = String(p.params.slug);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+
+  return { paths: deduped, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = normId(safeStr(params?.slug || ""));
-  const assets = readRegistryJson();
+  const rawParam = params?.slug;
+  const paramSlug = normalizeSlug(Array.isArray(rawParam) ? rawParam.join("/") : safeStr(rawParam));
+  if (!paramSlug) return { notFound: true, revalidate: 60 };
+
+  const assets = await loadPdfAssets();
+  const needle = paramSlug.toLowerCase();
 
   const asset =
-    assets.find((a) => a.id.toLowerCase() === slug.toLowerCase()) || null;
+    assets.find((a) => toRouteParamSlug(a.slug).toLowerCase() === needle) ||
+    assets.find((a) => normalizeSlug(a.slug).toLowerCase() === needle) ||
+    null;
 
-  if (!asset) return { notFound: true };
+  if (!asset) return { notFound: true, revalidate: 300 };
 
-  return {
-    props: JSON.parse(JSON.stringify({ asset })),
-    revalidate: 900,
-  };
+  return { props: jsonSafe({ asset }), revalidate: 900 };
 };
 
 const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
-  const router = useRouter();
+  const url = resolveAssetUrl(asset);
+  const routeSlug = toRouteParamSlug(asset.slug) || asset.slug;
+  const canonical = `/library/${encodeURIComponent(routeSlug)}`;
+  const desc = asset.description || "Verified Library asset // Abraham of London.";
 
-  if (router.isFallback) {
-    return (
-      <Layout title="Resolving Asset…" fullWidth>
-        <main className="min-h-screen bg-black text-white flex items-center justify-center">
-          <div className="text-[11px] font-mono uppercase tracking-[0.35em] text-white/50">
-            Resolving Library Asset…
-          </div>
-        </main>
-      </Layout>
-    );
-  }
-
-  const url = ensureWebPath(asset.url) || null;
-  const canonical = `/library/${encodeURIComponent(asset.id)}`;
-  const desc = asset.description || asset.excerpt || "Verified Library asset // Abraham of London.";
+  // ✅ No router import, no isFallback check needed because:
+  // - getStaticPaths returns fallback: "blocking"
+  // - Next.js handles the loading state automatically
+  // - The page will only render when props are ready
 
   return (
     <Layout title={asset.title} description={desc} canonicalUrl={canonical} fullWidth>
@@ -187,20 +194,14 @@ const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
                   {asset.title}
                 </h1>
 
-                {(asset.description || asset.excerpt) && (
+                {asset.description && (
                   <p className="mt-4 max-w-3xl text-sm md:text-base text-white/45 leading-relaxed">
-                    {asset.description || asset.excerpt}
+                    {asset.description}
                   </p>
                 )}
 
                 <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                  ID: <span className="text-white/60">{asset.id}</span>
-                  {asset.tier ? (
-                    <>
-                      {" "}
-                      • Tier: <span className="text-white/60">{asset.tier}</span>
-                    </>
-                  ) : null}
+                  Slug: <span className="text-white/60">{asset.slug}</span>
                 </div>
 
                 {Array.isArray(asset.tags) && asset.tags.length > 0 && (
@@ -231,7 +232,6 @@ const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
 
                     <a
                       href={url}
-                      download
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white hover:bg-amber-700 transition-all shadow-lg shadow-amber-900/20"
                     >
                       <Download className="h-4 w-4" /> Download
@@ -241,7 +241,9 @@ const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
                   <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white/45 w-[260px]">
                     No direct URL in registry for this asset.
                     <div className="mt-2 text-[10px] font-mono text-white/35">
-                      Ensure registry.json includes <span className="text-white/55">outputPath</span>.
+                      Add one of: <span className="text-white/55">url</span>,{" "}
+                      <span className="text-white/55">href</span>, or{" "}
+                      <span className="text-white/55">path</span>.
                     </div>
                   </div>
                 )}

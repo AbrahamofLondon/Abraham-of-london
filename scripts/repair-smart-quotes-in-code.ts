@@ -1,6 +1,6 @@
 // scripts/repair-smart-quotes-in-code.ts
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 const targets = [
   "pages/auth/signin.tsx",

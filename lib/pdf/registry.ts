@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * lib/pdf/registry.ts — SINGLE SOURCE OF TRUTH (Next-safe)
- * Reads from: lib/pdf/pdf-registry.generated.ts (committed file)
+ * lib/pdf/registry.ts — TURBOPACK SAFE (NO TOP-LEVEL fs/path)
+ *
+ * Single source of truth: GENERATED_PDF_CONFIGS (committed).
+ * - Safe in Browser / Edge: NO Node built-ins imported at module scope.
+ * - Node runtime enrichment: dynamically imports "fs" + "path" only when executed on Node.
  */
 
-import fs from 'fs'
-import path from 'path'
 import { GENERATED_PDF_CONFIGS } from "./pdf-registry.generated";
 
 /** --- TYPES --- */
@@ -40,7 +41,7 @@ export interface PDFConfig {
   description?: string;
   excerpt?: string;
 
-  outputPath: string;
+  outputPath: string; // web path under /public (e.g. /assets/downloads/x.pdf)
   type?: PDFType;
   format?: PDFFormat;
   formats?: PaperFormat[];
@@ -56,10 +57,11 @@ export interface PDFConfig {
   author?: string;
   tags?: string[];
 
+  // optional registry-provided stats
   exists?: boolean;
   lastModified?: string; // ISO
   fileSizeBytes?: number;
-  fileSize?: string; // computed human-readable (optional)
+  fileSize?: string; // human (optional)
 }
 
 export interface PDFItem extends PDFConfig {
@@ -69,26 +71,32 @@ export interface PDFItem extends PDFConfig {
   existsOnDisk: boolean;
 }
 
-/** --- HELPERS --- */
+/** --- RUNTIME DETECTION --- */
+function isEdgeRuntime(): boolean {
+  return typeof (globalThis as any).EdgeRuntime === "string";
+}
+
+function isBrowserRuntime(): boolean {
+  return typeof window !== "undefined" && typeof document !== "undefined";
+}
+
+/**
+ * We only do fs/path on Node runtime (not Edge, not browser).
+ * Turbopack/Next can still *bundle* this file into edge/client graphs,
+ * so we must not reference "fs" or "path" at top-level.
+ */
+function canUseNodeFs(): boolean {
+  if (isBrowserRuntime()) return false;
+  if (isEdgeRuntime()) return false;
+  return typeof process !== "undefined" && !!(process as any).versions?.node;
+}
+
+/** --- HELPERS (NO fs/path) --- */
 function canonicalizeWebPath(p: string): string {
   let v = String(p || "").trim();
   if (!v.startsWith("/")) v = `/${v}`;
   v = v.replace(/\/{2,}/g, "/");
   return v;
-}
-
-function toFsPathFromWebPath(webPath: string): string {
-  // Assumes webPath is under /public
-  // Example: /assets/downloads/foo.pdf -> <cwd>/public/assets/downloads/foo.pdf
-  return path.join(process.cwd(), "public", webPath.replace(/^\/+/, ""));
-}
-
-function statSafe(fsPath: string): fs.Stats | null {
-  try {
-    return fs.statSync(fsPath);
-  } catch {
-    return null;
-  }
 }
 
 function bytesToHuman(bytes?: number): string {
@@ -133,30 +141,89 @@ function normalizeEntry(raw: any): PDFConfig {
     exists: typeof raw.exists === "boolean" ? raw.exists : undefined,
     lastModified: raw.lastModified ? String(raw.lastModified) : undefined,
     fileSizeBytes: typeof raw.fileSizeBytes === "number" ? raw.fileSizeBytes : undefined,
+    fileSize: raw.fileSize ? String(raw.fileSize) : undefined,
   };
 }
 
-function toItem(cfg: PDFConfig): PDFItem {
+/** --- NODE-ONLY ENRICHMENT (dynamic imports; NO "node:" scheme) --- */
+type FsModule = typeof import("fs");
+type PathModule = typeof import("path");
+
+async function nodeStatIfPossible(webPath: string): Promise<{
+  existsOnDisk: boolean;
+  mtimeISO: string | null;
+  sizeBytes: number | null;
+}> {
+  if (!canUseNodeFs()) {
+    return { existsOnDisk: false, mtimeISO: null, sizeBytes: null };
+  }
+
+  try {
+    const [fsMod, pathMod] = await Promise.all([
+      import("fs") as Promise<FsModule>,
+      import("path") as Promise<PathModule>,
+    ]);
+
+    const fs = (fsMod as any).default ?? fsMod;
+    const path = (pathMod as any).default ?? pathMod;
+
+    const fsPath = path.join(process.cwd(), "public", webPath.replace(/^\/+/, ""));
+    const st = fs.statSync(fsPath);
+
+    const existsOnDisk = !!st && st.isFile();
+    return {
+      existsOnDisk,
+      mtimeISO: st?.mtime ? new Date(st.mtime).toISOString() : null,
+      sizeBytes: typeof st?.size === "number" ? st.size : null,
+    };
+  } catch {
+    return { existsOnDisk: false, mtimeISO: null, sizeBytes: null };
+  }
+}
+
+/**
+ * Base item (safe everywhere). No fs.
+ */
+function toItemBase(cfg: PDFConfig): PDFItem {
   const webPath = canonicalizeWebPath(cfg.outputPath);
-  const fsPath = toFsPathFromWebPath(webPath);
-  const st = statSafe(fsPath);
 
-  const existsOnDisk = Boolean(st && st.isFile());
-  const lastModifiedISO =
-    cfg.lastModified ||
-    (st?.mtime ? new Date(st.mtime).toISOString() : new Date(0).toISOString());
-
-  const bytes =
-    typeof cfg.fileSizeBytes === "number"
-      ? cfg.fileSizeBytes
-      : (st?.size ? Number(st.size) : 0);
+  const lastModifiedISO = cfg.lastModified || new Date(0).toISOString();
+  const bytes = typeof cfg.fileSizeBytes === "number" ? cfg.fileSizeBytes : 0;
 
   return {
     ...cfg,
     outputPath: webPath,
     fileUrl: webPath,
     lastModifiedISO,
-    fileSizeHuman: bytesToHuman(bytes),
+    fileSizeHuman: cfg.fileSize || bytesToHuman(bytes),
+    existsOnDisk: false,
+    fileSize: cfg.fileSize || bytesToHuman(bytes),
+    exists: typeof cfg.exists === "boolean" ? cfg.exists : false,
+  };
+}
+
+/**
+ * Enriched item (node only). Safe to call in API routes / node runtime.
+ */
+async function toItemEnriched(cfg: PDFConfig): Promise<PDFItem> {
+  const base = toItemBase(cfg);
+  const st = await nodeStatIfPossible(base.fileUrl);
+
+  const lastModifiedISO = cfg.lastModified || st.mtimeISO || base.lastModifiedISO;
+
+  const bytes =
+    typeof cfg.fileSizeBytes === "number"
+      ? cfg.fileSizeBytes
+      : typeof st.sizeBytes === "number"
+      ? st.sizeBytes
+      : 0;
+
+  const existsOnDisk = st.existsOnDisk;
+
+  return {
+    ...base,
+    lastModifiedISO,
+    fileSizeHuman: cfg.fileSize || bytesToHuman(bytes),
     existsOnDisk,
     fileSize: cfg.fileSize || bytesToHuman(bytes),
     exists: typeof cfg.exists === "boolean" ? cfg.exists : existsOnDisk,
@@ -184,13 +251,20 @@ export function getAllPDFs(opts?: { includeMissing?: boolean }): PDFConfig[] {
   const reg = getPDFRegistry();
   const arr = Object.values(reg);
   if (includeMissing) return arr;
-  return arr.filter((x) => Boolean(x.exists));
+
+  // If registry doesn't have exists flags, assume includeMissing=false still returns all
+  // (because we can't fs-stat in edge/browser safely)
+  return arr.filter((x) => x.exists !== false);
 }
 
+/**
+ * ✅ SAFE EVERYWHERE (no fs). For client dashboards.
+ * existsOnDisk will be false unless registry provided exists=true.
+ */
 export function getAllPDFItems(opts?: { includeMissing?: boolean }): PDFItem[] {
   const includeMissing = Boolean(opts?.includeMissing);
-  const arr = getAllPDFs({ includeMissing }).map(toItem);
-  // Stable sort: category then title
+  const arr = getAllPDFs({ includeMissing }).map(toItemBase);
+
   return arr.sort((a, b) => {
     const ca = String(a.category || "");
     const cb = String(b.category || "");
@@ -199,24 +273,48 @@ export function getAllPDFItems(opts?: { includeMissing?: boolean }): PDFItem[] {
   });
 }
 
-/** * --- INSTITUTIONAL STATS API --- 
- * Provides aggregate data for the vault-audit and stats routes.
+/**
+ * ✅ NODE-ONLY accurate version (fs stats). Use in pages/api/* and node runtime app routes.
+ * If called in edge/browser it will gracefully return base items.
+ */
+export async function getAllPDFItemsNode(opts?: { includeMissing?: boolean }): Promise<PDFItem[]> {
+  const includeMissing = Boolean(opts?.includeMissing);
+  const cfgs = getAllPDFs({ includeMissing });
+
+  const items = await Promise.all(cfgs.map(toItemEnriched));
+
+  return items.sort((a, b) => {
+    const ca = String(a.category || "");
+    const cb = String(b.category || "");
+    if (ca !== cb) return ca.localeCompare(cb);
+    return String(a.title || "").localeCompare(String(b.title || ""));
+  });
+}
+
+/**
+ * Stats API (safe everywhere).
+ * - In node runtime, it will compute real on-disk stats.
+ * - Else it will compute from registry-only.
  */
 export async function getRegistryStats() {
-  const allItems = getAllPDFItems({ includeMissing: true });
-  
-  // Calculate category distribution
+  const allItems = canUseNodeFs()
+    ? await getAllPDFItemsNode({ includeMissing: true })
+    : getAllPDFItems({ includeMissing: true });
+
   const categories: Record<string, number> = {};
-  allItems.forEach(item => {
-    const cat = item.category || 'Uncategorized';
+  allItems.forEach((item) => {
+    const cat = item.category || "Uncategorized";
     categories[cat] = (categories[cat] || 0) + 1;
   });
 
+  const existsOnDisk = allItems.filter((i) => i.existsOnDisk).length;
+
   return {
     totalAssets: allItems.length,
-    existsOnDisk: allItems.filter(i => i.existsOnDisk).length,
-    missingAssets: allItems.filter(i => !i.existsOnDisk).length,
+    existsOnDisk,
+    missingAssets: allItems.length - existsOnDisk,
     categories,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
+    runtime: canUseNodeFs() ? "node" : isEdgeRuntime() ? "edge" : "unknown",
   };
 }

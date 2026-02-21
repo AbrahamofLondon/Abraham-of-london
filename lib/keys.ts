@@ -1,7 +1,7 @@
 // lib/server/inner-circle/keys.ts
 import { safeSlice } from "@/lib/utils/safe";
 /* eslint-disable no-console */
-import crypto from "node:crypto";
+import crypto from "crypto";
 import { Pool, type PoolClient } from "pg";
 // Ensure these imports match your actual file structure for audit
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";

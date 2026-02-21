@@ -1,6 +1,6 @@
 // scripts/prevent-pages-router.js
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 const ROOT = process.cwd();
 const pagesDir = path.join(ROOT, "pages");

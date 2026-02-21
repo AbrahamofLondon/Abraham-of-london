@@ -1,54 +1,73 @@
-/* components/strategy-room/ArtifactGrid.tsx — BRUTALIST PORTFOLIO GRID */
+/* components/strategy-room/Form.tsx — INSTITUTIONAL INTAKE */
 "use client";
 
 import * as React from "react";
-import { FileText, Lock, Eye, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
+import { Zap, ArrowRight, Loader2 } from "lucide-react";
 
-export default function ArtifactGrid({ hasAccess, artifacts = [] }: { hasAccess: boolean, artifacts?: any[] }) {
-  if (!hasAccess) {
+export default function StrategyRoomForm() {
+  const [loading, setLoading] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const token = await getRecaptchaTokenSafe("strategy_room_intake");
+      const res = await fetch("/api/strategy-room/enrol", {
+        method: "POST",
+        body: JSON.stringify({ ...data, token }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) setSubmitted(true);
+    } catch (err) {
+      console.error("Submission error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5 border border-white/5">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-black p-12 flex flex-col items-center justify-center space-y-6 grayscale opacity-40 select-none">
-            <Lock size={20} className="text-zinc-800" />
-            <div className="text-center space-y-2">
-              <div className="h-4 w-32 bg-zinc-900 mx-auto" />
-              <div className="h-2 w-24 bg-zinc-950 mx-auto" />
-            </div>
-          </div>
-        ))}
+      <div className="p-12 border border-primary/20 bg-primary/5 text-center space-y-4">
+        <Zap className="h-6 w-6 text-primary mx-auto animate-pulse" />
+        <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Intelligence Request Logged.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5 border border-white/5">
-      {artifacts.map((artifact) => (
-        <Link 
-          key={artifact.id} 
-          href={`/strategy/${artifact.slug}`}
-          className="group bg-black p-10 hover:bg-white/[0.02] transition-all duration-500 flex flex-col justify-between aspect-square"
-        >
-          <div className="space-y-6">
-            <div className="flex justify-between items-start">
-              <span className="text-[9px] font-mono text-zinc-700 group-hover:text-primary transition-colors">
-                REF_{artifact.slug.slice(0, 4).toUpperCase()}
-              </span>
-              <ArrowUpRight size={14} className="text-zinc-800 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-            </div>
-            <h3 className="font-editorial text-3xl text-zinc-400 group-hover:text-white leading-tight tracking-tighter">
-              {artifact.title}
-            </h3>
-          </div>
-          
-          <div className="flex items-center gap-4 border-t border-white/5 pt-6">
-            <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">
-              {artifact.category || "Strategic Asset"}
-            </span>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-px bg-white/5 border border-white/5">
+      <div className="grid md:grid-cols-2 gap-px">
+        <input 
+          required name="name" 
+          placeholder="IDENTIFIER (NAME)" 
+          className="bg-black p-6 text-[10px] font-mono uppercase tracking-widest outline-none focus:text-primary transition-colors border-none" 
+        />
+        <input 
+          required name="email" type="email" 
+          placeholder="INSTITUTIONAL EMAIL" 
+          className="bg-black p-6 text-[10px] font-mono uppercase tracking-widest outline-none focus:text-primary transition-colors border-none" 
+        />
+      </div>
+      <textarea 
+        required name="intent" rows={4} 
+        placeholder="NATURE OF INQUIRY / STRATEGIC INTENT" 
+        className="w-full bg-black p-6 text-[10px] font-mono uppercase tracking-widest outline-none focus:text-primary transition-colors border-none resize-none" 
+      />
+      <button 
+        disabled={loading}
+        className="w-full bg-primary text-black p-6 font-mono text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-white transition-colors flex items-center justify-center gap-4 group"
+      >
+        {loading ? <Loader2 className="animate-spin" size={14} /> : (
+          <>Initialize Sequence <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" /></>
+        )}
+      </button>
+    </form>
   );
 }

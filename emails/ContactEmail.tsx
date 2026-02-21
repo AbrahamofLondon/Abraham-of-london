@@ -1,8 +1,9 @@
-// emails/ContactEmail.tsx
+/* emails/ContactEmail.tsx */
+import "server-only";
 import * as React from "react";
 import {
-  Html,
-  Head,
+  Html as EmailHtml,
+  Head as EmailHead,
   Preview,
   Body,
   Container,
@@ -46,22 +47,23 @@ export default function ContactEmail({
   const safeEmail = clamp(email || "—", 254);
   const safeSubject = clamp(subject || "Website contact", 160);
   const safeMessage = clamp(message || "", 6000);
+
   const origin =
     siteUrl ||
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://www.abrahamoflondon.org";
 
   const metaSubmittedAt = submittedAt || new Date().toISOString();
-
   const metaIp = ipAnonymized || "unknown";
   const metaUA = userAgentSnippet ? clamp(userAgentSnippet, 140) : undefined;
 
   return (
-    <Html>
-      <Head />
+    <EmailHtml lang="en">
+      <EmailHead />
       <Preview>
         New enquiry — {safeSubject} ({safeName})
       </Preview>
+
       <Body
         style={{
           backgroundColor: "#f6f6f6",
@@ -180,7 +182,6 @@ export default function ContactEmail({
           </Section>
         </Container>
       </Body>
-    </Html>
+    </EmailHtml>
   );
 }
-

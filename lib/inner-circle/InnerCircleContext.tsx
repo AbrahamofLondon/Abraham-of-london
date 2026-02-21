@@ -1,10 +1,8 @@
-// lib/inner-circle/InnerCircleContext.tsx - CLIENT-SAFE VERSION
+// lib/inner-circle/InnerCircleContext.tsx — INSTITUTIONAL GRADE
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/router'; // Keep this for Pages Router
-
-// NO Redis imports - client-side only
+import Router from 'next/router'; // ✅ Safe singleton
 
 interface InnerCircleUser {
   id: string;
@@ -38,56 +36,64 @@ interface InnerCircleProviderProps {
   children: ReactNode;
 }
 
+// Safe navigation helper (prevents server-side execution)
+function safeNavigate(path: string) {
+  if (typeof window === 'undefined') return;
+  Router.replace(path);
+}
+
 export const InnerCircleProvider: React.FC<InnerCircleProviderProps> = ({ children }) => {
   const [user, setUser] = useState<InnerCircleUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Initialize from localStorage on client
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('innerCircleToken');
-      const userStr = localStorage.getItem('innerCircleUser');
-      
-      if (token && userStr) {
-        try {
-          const userData = JSON.parse(userStr);
-          // Check if token is expired
-          if (userData.expiresAt > Date.now() / 1000) {
-            setUser(userData);
-          } else {
-            localStorage.removeItem('innerCircleToken');
-            localStorage.removeItem('innerCircleUser');
-          }
-        } catch (error) {
-          console.error('Error parsing inner circle user:', error);
+    if (!mounted) return;
+
+    const token = localStorage.getItem('innerCircleToken');
+    const userStr = localStorage.getItem('innerCircleUser');
+    
+    if (token && userStr) {
+      try {
+        const userData = JSON.parse(userStr);
+        // Check if token is expired
+        if (userData.expiresAt > Date.now() / 1000) {
+          setUser(userData);
+        } else {
           localStorage.removeItem('innerCircleToken');
           localStorage.removeItem('innerCircleUser');
         }
+      } catch (error) {
+        console.error('Error parsing inner circle user:', error);
+        localStorage.removeItem('innerCircleToken');
+        localStorage.removeItem('innerCircleUser');
       }
-      setIsLoading(false);
     }
-  }, []);
+    setIsLoading(false);
+  }, [mounted]);
 
   const login = (token: string, userData: InnerCircleUser) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('innerCircleToken', token);
-      localStorage.setItem('innerCircleUser', JSON.stringify(userData));
-      setUser(userData);
-    }
+    if (!mounted) return;
+    localStorage.setItem('innerCircleToken', token);
+    localStorage.setItem('innerCircleUser', JSON.stringify(userData));
+    setUser(userData);
   };
 
   const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('innerCircleToken');
-      localStorage.removeItem('innerCircleUser');
-      setUser(null);
-      router.push('/');
-    }
+    if (!mounted) return;
+    localStorage.removeItem('innerCircleToken');
+    localStorage.removeItem('innerCircleUser');
+    setUser(null);
+    safeNavigate('/'); // SPA-smooth navigation
   };
 
   const refreshUser = async () => {
-    if (typeof window === 'undefined') return;
+    if (!mounted) return;
     
     const token = localStorage.getItem('innerCircleToken');
     if (!token) {
@@ -96,7 +102,6 @@ export const InnerCircleProvider: React.FC<InnerCircleProviderProps> = ({ childr
     }
 
     try {
-      // Client-side API call to refresh user
       const response = await fetch('/api/inner-circle/refresh', {
         method: 'POST',
         headers: {
@@ -120,20 +125,24 @@ export const InnerCircleProvider: React.FC<InnerCircleProviderProps> = ({ childr
 
   const checkAccess = (path: string): boolean => {
     if (!user) return false;
-    
-    // Add your access logic here
+
+    // ✅ Fixed regex patterns for actual routes
     const protectedRoutes = [
-      /^\/canon\/.*/,
-      /^\/strategic-frameworks\/.*/,
+      /^\/canon\/.*/i,
+      /^\/resources\/strategic-frameworks\/.*/i,
+      /^\/vault\/.*/i,
     ];
-    
-    const isProtected = protectedRoutes.some(pattern => pattern.test(path));
-    
+
+    const isProtected = protectedRoutes.some((pattern) => pattern.test(path));
     if (!isProtected) return true;
-    
-    // Check if user has access to this specific content
-    return user.tier !== 'free'; // Example: free tier has no access
+
+    return user.tier !== 'free';
   };
+
+  // During SSR/prerender, return children without any logic
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <InnerCircleContext.Provider

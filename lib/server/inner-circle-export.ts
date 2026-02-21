@@ -1,5 +1,5 @@
 // lib/server/inner-circle-export.ts
-import crypto from "node:crypto";
+import crypto from "crypto";
 import { Pool } from "pg";
 
 function sha256Hex(value: string): string {

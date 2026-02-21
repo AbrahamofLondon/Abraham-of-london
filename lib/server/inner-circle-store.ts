@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { safeSlice } from "@/lib/utils/safe";
-import crypto from "node:crypto";
+import crypto from "crypto";
 // 1. Import Shared Utilities
 import { 
   DatabaseClient, 

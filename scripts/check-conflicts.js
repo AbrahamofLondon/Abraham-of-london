@@ -1,6 +1,6 @@
 /* scripts/check-conflicts.ts - INSTITUTIONAL AUDITOR V2.1 */
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 const SOURCE_DIRS = ["app", "components", "lib", "src", "scripts", "styles", "pages", "config"];
 const IGNORE_DIRS = ["node_modules", ".next", ".netlify", ".contentlayer", ".git", "dist", "build"];

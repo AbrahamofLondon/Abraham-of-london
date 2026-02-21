@@ -1,13 +1,14 @@
-/* pages/inner-circle/resend.tsx — ACCESS RECOVERY (INTEGRITY MODE) */
+/* pages/inner-circle/resend.tsx — ACCESS RECOVERY (INTEGRITY MODE, ROUTER-SAFE) */
 'use client';
 
 import * as React from "react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { Mail, RefreshCw, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import type { NextPage, GetServerSideProps } from "next";
 import Link from "next/link";
+import { Mail, RefreshCw, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
 import Layout from "@/components/Layout";
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
+import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
 
 type ApiResponse = {
   ok: boolean;
@@ -15,18 +16,50 @@ type ApiResponse = {
   error?: string;
 };
 
-const InnerCircleResendPage: NextPage = () => {
-  const router = useRouter();
+interface ResendProps {
+  initialReturnTo?: string;
+  hasActiveSession?: boolean;
+}
+
+const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inner-circle/dashboard", hasActiveSession = false }) => {
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  const isReady = useClientIsReady();
+  
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle");
   const [feedback, setFeedback] = React.useState<string | null>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Redirection target after recovery for UX continuity
   const returnTo = React.useMemo(() => {
-    return typeof router.query.returnTo === "string" ? router.query.returnTo : "/inner-circle/dashboard";
-  }, [router.query.returnTo]);
+    if (!mounted || !router) return initialReturnTo;
+    const queryReturnTo = typeof query.returnTo === "string" ? query.returnTo : null;
+    return queryReturnTo || initialReturnTo;
+  }, [mounted, router, query.returnTo, initialReturnTo]);
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (mounted && router && hasActiveSession) {
+      router.push(returnTo);
+    }
+  }, [mounted, router, hasActiveSession, returnTo]);
+
+  // ✅ Early return during SSR/prerender
+  if (!router) {
+    return (
+      <Layout title="Access Recovery | Inner Circle">
+        <div className="min-h-screen bg-black" />
+      </Layout>
+    );
+  }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -42,7 +75,7 @@ const InnerCircleResendPage: NextPage = () => {
     setFeedback(null);
 
     try {
-      // 1. Security Check: Recaptcha verification to prevent bot exhaustion of SMTP
+      // 1. Security Check: Recaptcha verification
       const recaptchaToken = await getRecaptchaTokenSafe("inner_circle_resend");
 
       if (!recaptchaToken) {
@@ -52,7 +85,7 @@ const InnerCircleResendPage: NextPage = () => {
         return;
       }
 
-      // 2. Postgres Synchronization: Request fresh key via API
+      // 2. Request fresh key via API
       const res = await fetch("/api/inner-circle/resend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,6 +122,7 @@ const InnerCircleResendPage: NextPage = () => {
       <main className="min-h-screen flex items-center justify-center px-4 py-20 bg-black relative overflow-hidden">
         {/* Institutional Ambience */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/[0.03] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-900/[0.02] rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
         
         <section className="w-full max-w-xl relative z-10">
           <header className="mb-12 text-center">
@@ -97,7 +131,7 @@ const InnerCircleResendPage: NextPage = () => {
               Access Recovery
             </div>
             <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              Request <span className="italic">Fresh Link</span>
+              Request <span className="italic text-gold">Fresh Link</span>
             </h1>
             <p className="text-zinc-500 text-sm md:text-base leading-relaxed max-w-md mx-auto">
               Lost your entry point? Enter your registered email to synchronize your session and receive a new secure access key.
@@ -142,7 +176,7 @@ const InnerCircleResendPage: NextPage = () => {
             <button
               type="submit"
               disabled={loading || status === "success"}
-              className="w-full bg-gold text-black py-5 rounded-xl font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-xl shadow-gold/5"
+              className="w-full bg-gradient-to-r from-gold to-amber-600 text-black py-5 rounded-xl font-black uppercase tracking-[0.2em] text-[11px] hover:from-white hover:to-white disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-xl shadow-gold/5 group"
             >
               {loading ? (
                 <RefreshCw size={18} className="animate-spin" />
@@ -155,7 +189,7 @@ const InnerCircleResendPage: NextPage = () => {
 
             {feedback && (
               <div
-                className={`flex items-start gap-4 p-5 rounded-2xl text-xs font-medium border leading-relaxed ${
+                className={`flex items-start gap-4 p-5 rounded-2xl text-xs font-medium border leading-relaxed animate-in fade-in slide-in-from-top-2 duration-500 ${
                   status === "success"
                     ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-400"
                     : "border-red-500/30 bg-red-500/5 text-red-400"
@@ -187,6 +221,33 @@ const InnerCircleResendPage: NextPage = () => {
       </main>
     </Layout>
   );
+};
+
+/* -----------------------------------------------------------------------------
+  SERVER SIDE PROPS
+----------------------------------------------------------------------------- */
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const sessionId = readAccessCookie(context.req as any);
+    const hasActiveSession = !!sessionId;
+    
+    const returnTo = context.query.returnTo || "/inner-circle/dashboard";
+    
+    return {
+      props: {
+        initialReturnTo: returnTo,
+        hasActiveSession,
+      },
+    };
+  } catch (err) {
+    console.error("[RESEND_SSR_ERROR]:", err);
+    return {
+      props: {
+        initialReturnTo: "/inner-circle/dashboard",
+        hasActiveSession: false,
+      },
+    };
+  }
 };
 
 export default InnerCircleResendPage;

@@ -1,5 +1,5 @@
 /* lib/downloads/security.ts */
-import crypto from "node:crypto";
+import crypto from "crypto";
 
 export type InnerCircleTier =
   | "public"

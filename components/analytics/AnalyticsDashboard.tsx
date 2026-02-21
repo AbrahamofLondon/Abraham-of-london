@@ -1,16 +1,10 @@
-'use client';
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { getInstitutionalAnalytics } from "@/app/actions/analytics";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { safeCapitalize } from "@/lib/utils/safe";
 
-// Import types from central types file
-import type { 
-  DashboardStats, 
-  PDFAnalyticsItem, 
-  MetricType 
-} from "@/types/pdf-dashboard";
+import type { DashboardStats, PDFAnalyticsItem, MetricType } from "@/types/pdf-dashboard";
 
 interface AnalyticsDashboardProps {
   theme?: "light" | "dark";
@@ -23,17 +17,16 @@ interface AnalyticsDashboardProps {
 }
 
 /**
- * Normalizes data coming from the server action.
+ * Normalizes data coming from the API endpoint.
  */
 function normalizePDF(input: any): PDFAnalyticsItem {
   const id = String(input?.id ?? "");
   const title = String(input?.title ?? "Untitled PDF");
   const exists = Boolean(input?.exists);
   const error = typeof input?.error === "string" ? input.error : undefined;
+
   const category =
-    typeof input?.category === "string" && input.category.trim()
-      ? input.category.trim()
-      : "uncategorized";
+    typeof input?.category === "string" && input.category.trim() ? input.category.trim() : "uncategorized";
 
   const tier = typeof input?.tier === "string" ? input.tier : undefined;
   const fileSize = typeof input?.fileSize === "string" ? input.fileSize : undefined;
@@ -55,6 +48,24 @@ function normalizePDF(input: any): PDFAnalyticsItem {
   return { id, title, exists, error, category, tier, fileSize, lastModified, updatedAt };
 }
 
+async function fetchInstitutionalAnalytics(timeRange: string, signal?: AbortSignal) {
+  // If you later support server-side filtering, you already have the query param wired.
+  const url = `/api/admin/institutional-analytics?timeRange=${encodeURIComponent(timeRange)}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    signal,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}${text ? `: ${text}` : ""}`);
+  }
+
+  return res.json();
+}
+
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   theme = "light",
   timeRange = "7d",
@@ -68,21 +79,26 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMetric, setSelectedMetric] = useState<MetricType>("generations");
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const loadData = async () => {
       setIsLoading(true);
+      setErrorMsg(null);
+
       try {
-        const result = await getInstitutionalAnalytics();
-        
-        if (!result.success || !result.data) {
-          throw new Error(result.error || "Failed to fetch analytics");
+        const result = await fetchInstitutionalAnalytics(timeRange, controller.signal);
+
+        if (!result?.success || !result?.data) {
+          throw new Error(result?.error || "Failed to fetch analytics");
         }
 
-        const normalized: PDFAnalyticsItem[] = Array.isArray(result.data.rawPdfs) 
-          ? result.data.rawPdfs.map(normalizePDF) 
+        const normalized: PDFAnalyticsItem[] = Array.isArray(result.data.rawPdfs)
+          ? result.data.rawPdfs.map(normalizePDF)
           : [];
-          
+
         setPdfs(normalized);
 
         setStats(
@@ -98,11 +114,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           }
         );
 
-        if (metrics.length > 0 && metrics[0]) {
-          setSelectedMetric(metrics[0]);
-        }
-      } catch (error) {
-        console.error("Failed to load analytics data:", error);
+        if (metrics.length > 0 && metrics[0]) setSelectedMetric(metrics[0]);
+      } catch (e: any) {
+        if (controller.signal.aborted) return;
+
+        console.error("Failed to load analytics data:", e);
         setPdfs([]);
         setStats({
           totalPDFs: 0,
@@ -114,13 +130,17 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           generating: 0,
           lastUpdated: new Date().toISOString(),
         });
+
+        setErrorMsg(typeof e?.message === "string" ? e.message : "Failed to load analytics");
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
 
     void loadData();
-  }, [metrics]);
+
+    return () => controller.abort();
+  }, [metrics, timeRange]);
 
   const analyticsData = useMemo(() => {
     if (!pdfs.length) return null;
@@ -176,12 +196,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     };
   }, [pdfs]);
 
-  // ✅ RECENT PDFS – sorted by date
   const recentPdfs = useMemo(() => {
     return [...pdfs]
-      .sort((a, b) => 
-        new Date(b.lastModified || b.updatedAt || 0).getTime() - 
-        new Date(a.lastModified || a.updatedAt || 0).getTime()
+      .sort(
+        (a, b) =>
+          new Date(b.lastModified || b.updatedAt || 0).getTime() -
+          new Date(a.lastModified || a.updatedAt || 0).getTime()
       )
       .slice(0, 5);
   }, [pdfs]);
@@ -220,9 +240,30 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     );
   }
 
+  if (errorMsg) {
+    return (
+      <div
+        className={`p-8 text-center rounded-xl ${
+          theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"
+        }`}
+      >
+        <div className="text-4xl mb-4">⚠️</div>
+        <h3 className="text-xl font-semibold mb-2">Analytics Unavailable</h3>
+        <p className="text-sm opacity-70 mb-4">{errorMsg}</p>
+        <p className="text-xs opacity-50">
+          If this is an admin page, ensure the API route exists at <code>/pages/api/admin/institutional-analytics.ts</code>.
+        </p>
+      </div>
+    );
+  }
+
   if (!pdfs.length) {
     return (
-      <div className={`p-8 text-center ${theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"} rounded-xl`}>
+      <div
+        className={`p-8 text-center rounded-xl ${
+          theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"
+        }`}
+      >
         <div className="text-4xl mb-4">📊</div>
         <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
         <p className="text-sm opacity-70">No PDFs found to generate analytics. Please check your PDF registry.</p>
@@ -231,7 +272,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   }
 
   return (
-    <div className={`p-6 ${theme === "dark" ? "bg-gradient-to-br from-gray-900 to-gray-950 text-white" : "bg-gradient-to-br from-white to-gray-50 text-gray-900"} ${className} rounded-2xl shadow-2xl`}>
+    <div
+      className={`p-6 rounded-2xl shadow-2xl ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-gray-900 to-gray-950 text-white"
+          : "bg-gradient-to-br from-white to-gray-50 text-gray-900"
+      } ${className}`}
+    >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
@@ -247,10 +294,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <select
               value={selectedMetric}
               onChange={(e) => setSelectedMetric(e.target.value as MetricType)}
-              className={`px-4 py-2.5 rounded-xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700/50 text-white" : "bg-white/80 border-gray-300 text-gray-900"} backdrop-blur-sm focus:ring-2 focus:ring-blue-500 outline-none`}
+              className={`px-4 py-2.5 rounded-xl border backdrop-blur-sm focus:ring-2 focus:ring-blue-500 outline-none ${
+                theme === "dark"
+                  ? "bg-gray-800/50 border-gray-700/50 text-white"
+                  : "bg-white/80 border-gray-300 text-gray-900"
+              }`}
             >
               {metrics.map((metric) => (
-                <option key={metric} value={metric}>{safeCapitalize(metric)}</option>
+                <option key={metric} value={metric}>
+                  {safeCapitalize(metric)}
+                </option>
               ))}
             </select>
           )}
@@ -286,8 +339,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className={`rounded-2xl border p-6 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><span>📊</span> Category Distribution</h3>
+        <div
+          className={`rounded-2xl border p-6 backdrop-blur-sm shadow-lg ${
+            theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"
+          }`}
+        >
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span>📊</span> Category Distribution
+          </h3>
           <div className="space-y-3">
             {analyticsData?.categoryDistribution &&
               Object.entries(analyticsData.categoryDistribution)
@@ -297,7 +356,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     <span className="font-medium opacity-80">{category}</span>
                     <div className="flex items-center gap-3">
                       <div className="w-32 h-2 bg-gray-700/30 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500" style={{ width: `${(count / pdfs.length) * 100}%` }} />
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500"
+                          style={{ width: `${(count / pdfs.length) * 100}%` }}
+                        />
                       </div>
                       <span className="text-sm font-medium w-8 text-right">{count}</span>
                     </div>
@@ -306,18 +368,33 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
         </div>
 
-        <div className={`rounded-2xl border p-6 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><span>🎯</span> Tier Distribution</h3>
+        <div
+          className={`rounded-2xl border p-6 backdrop-blur-sm shadow-lg ${
+            theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"
+          }`}
+        >
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span>🎯</span> Tier Distribution
+          </h3>
           <div className="space-y-3">
             {analyticsData?.tierDistribution &&
               Object.entries(analyticsData.tierDistribution)
                 .sort(([, a], [, b]) => b - a)
                 .map(([tier, count]) => (
                   <div key={tier} className="flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${tier === 'architect' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>{tier}</span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        tier === "architect" ? "bg-purple-500/20 text-purple-400" : "bg-blue-500/20 text-blue-400"
+                      }`}
+                    >
+                      {tier}
+                    </span>
                     <div className="flex items-center gap-3">
                       <div className="w-24 h-2 bg-gray-700/30 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500" style={{ width: `${(count / pdfs.length) * 100}%` }} />
+                        <div
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+                          style={{ width: `${(count / pdfs.length) * 100}%` }}
+                        />
                       </div>
                       <span className="text-sm font-medium w-8 text-right">{count}</span>
                     </div>
@@ -328,18 +405,27 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`rounded-2xl border p-6 lg:col-span-2 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
+        <div
+          className={`rounded-2xl border p-6 lg:col-span-2 backdrop-blur-sm shadow-lg ${
+            theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"
+          }`}
+        >
           <h3 className="text-lg font-semibold mb-4">📈 Recent Activity</h3>
           <div className="space-y-3">
             {recentPdfs.map((pdf) => (
-              <div key={pdf.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-800/10 hover:bg-gray-800/20 transition-all group">
+              <div
+                key={pdf.id}
+                className="flex items-center justify-between p-4 rounded-xl bg-gray-800/10 hover:bg-gray-800/20 transition-all group"
+              >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl ${pdf.exists ? "bg-green-500/20" : pdf.error ? "bg-red-500/20" : "bg-yellow-500/20"}`}>
                     {pdf.exists ? "✅" : pdf.error ? "❌" : "⏳"}
                   </div>
                   <div>
                     <p className="font-medium group-hover:text-blue-400 transition-colors">{pdf.title}</p>
-                    <p className="text-xs opacity-50">{pdf.category} • {pdf.fileSize || "Unknown"}</p>
+                    <p className="text-xs opacity-50">
+                      {pdf.category} • {pdf.fileSize || "Unknown"}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right text-xs opacity-50">
@@ -350,35 +436,22 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
         </div>
 
-        <div className={`rounded-2xl border p-6 backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
+        <div
+          className={`rounded-2xl border p-6 backdrop-blur-sm shadow-lg ${
+            theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"
+          }`}
+        >
           <h3 className="text-lg font-semibold mb-4">📋 Quick Stats</h3>
           <div className="space-y-4">
-            <StatItem 
-              label="Largest PDF" 
-              value={analyticsData?.largestPDF?.title || "None"} 
-              subvalue={analyticsData?.largestPDF?.fileSize || "0KB"} 
-              theme={theme} 
-            />
-            <StatItem 
-              label="Generation Rate" 
-              value={`${Math.round(((analyticsData?.generated || 0) / pdfs.length) * 100)}%`} 
-              subvalue={`${analyticsData?.generated || 0} of ${pdfs.length}`} 
-              theme={theme} 
-            />
-            <StatItem 
-              label="Error Rate" 
-              value={`${Math.round(((analyticsData?.errors || 0) / pdfs.length) * 100)}%`} 
-              subvalue={`${analyticsData?.errors || 0} errors`} 
-              theme={theme} 
-            />
+            <StatItem label="Largest PDF" value={analyticsData?.largestPDF?.title || "None"} subvalue={analyticsData?.largestPDF?.fileSize || "0KB"} theme={theme} />
+            <StatItem label="Generation Rate" value={`${Math.round(((analyticsData?.generated || 0) / pdfs.length) * 100)}%`} subvalue={`${analyticsData?.generated || 0} of ${pdfs.length}`} theme={theme} />
+            <StatItem label="Error Rate" value={`${Math.round(((analyticsData?.errors || 0) / pdfs.length) * 100)}%`} subvalue={`${analyticsData?.errors || 0} errors`} theme={theme} />
           </div>
         </div>
       </div>
     </div>
   );
 };
-
-// -------------------- Helper Components --------------------
 
 const MetricCard: React.FC<{
   title: string;
@@ -387,10 +460,14 @@ const MetricCard: React.FC<{
   theme: "light" | "dark";
   icon: string;
 }> = ({ title, value, change, theme, icon }) => (
-  <div className={`rounded-2xl border p-6 transition-all hover:scale-[1.02] backdrop-blur-sm ${theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"} shadow-lg`}>
+  <div
+    className={`rounded-2xl border p-6 transition-all hover:scale-[1.02] backdrop-blur-sm shadow-lg ${
+      theme === "dark" ? "border-gray-700/50 bg-gray-800/40" : "border-gray-200/80 bg-white/80"
+    }`}
+  >
     <div className="flex items-start justify-between mb-4">
       <div className="text-3xl">{icon}</div>
-      {change && change !== "" && (
+      {change && (
         <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 font-medium">{change}</span>
       )}
     </div>

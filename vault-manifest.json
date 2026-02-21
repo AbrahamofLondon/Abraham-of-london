@@ -618,7 +618,7 @@
     "type": "brief"
   },
   {
-    "title": "canon-introduction-letter",
+    "title": "Canon-Introduction-Letter",
     "slug": "/vault/canon/canon-introduction-letter",
     "category": "canon",
     "type": "brief"
@@ -626,6 +626,12 @@
   {
     "title": "Canon Master Index & Glossary (Preview)",
     "slug": "/vault/canon/canon-master-index-preview",
+    "category": "canon",
+    "type": "brief"
+  },
+  {
+    "title": "The Architecture of Human Purpose",
+    "slug": "/vault/canon/the-architecture-of-human-purpose",
     "category": "canon",
     "type": "brief"
   },

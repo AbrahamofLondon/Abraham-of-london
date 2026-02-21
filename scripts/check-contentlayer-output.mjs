@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 const root = process.cwd();
 const outDir = path.join(root, ".contentlayer", "generated");

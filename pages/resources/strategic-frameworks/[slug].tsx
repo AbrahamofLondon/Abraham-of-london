@@ -1,16 +1,15 @@
-/* pages/resources/strategic-frameworks/[slug].tsx */
+/* pages/resources/strategic-frameworks/[slug].tsx — INSTITUTIONAL GRADE (ROUTER-SAFE) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import { ArrowLeft, Lock, Key, Eye, Shield, Activity, Download, Printer } from "lucide-react";
+import { ArrowLeft, Lock, Eye, Shield, Activity, Download, Printer, ChevronRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { withUnifiedAuth } from "@/lib/auth/withUnifiedAuth";
 import { DecisionMemo } from "@/components/Frameworks/DecisionMemo";
 import { AuditLog } from "@/components/Frameworks/AuditLog";
+import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
 
 import {
   LIBRARY_HREF,
@@ -21,6 +20,10 @@ import {
 
 import type { User } from "@/types/auth";
 import type { InnerCircleAccess } from "@/lib/inner-circle/access.client";
+
+// 🛡️ Build-time guard
+const IS_BUILD = process.env.NODE_ENV === 'production' && 
+                 process.env.NEXT_PHASE === 'phase-production-build';
 
 /* -------------------------------------------------------------------------- */
 /* UTIL & DESIGN SYSTEM                                                       */
@@ -34,11 +37,11 @@ function canonicalFor(slug: string) {
 
 function accentClass(accent: Framework["accent"]) {
   const map = {
-    gold: "border-amber-500/25 bg-amber-500/10 text-amber-200",
-    emerald: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200",
-    blue: "border-sky-500/25 bg-sky-500/10 text-sky-200",
-    rose: "border-rose-500/25 bg-rose-500/10 text-rose-200",
-    indigo: "border-indigo-500/25 bg-indigo-500/10 text-indigo-200",
+    gold: "border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent text-amber-200 shadow-[0_0_30px_-8px_rgba(245,158,11,0.3)]",
+    emerald: "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-transparent text-emerald-200 shadow-[0_0_30px_-8px_rgba(16,185,129,0.3)]",
+    blue: "border-sky-500/30 bg-gradient-to-br from-sky-500/10 to-transparent text-sky-200 shadow-[0_0_30px_-8px_rgba(14,165,233,0.3)]",
+    rose: "border-rose-500/30 bg-gradient-to-br from-rose-500/10 to-transparent text-rose-200 shadow-[0_0_30px_-8px_rgba(244,63,94,0.3)]",
+    indigo: "border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-transparent text-indigo-200 shadow-[0_0_30px_-8px_rgba(99,102,241,0.3)]",
   };
   return map[accent] || map.gold;
 }
@@ -53,29 +56,52 @@ const PublicFrameworkView: React.FC<{ framework: Framework; hidden?: boolean }> 
       <Layout title={`${framework.title} | Strategic Framework`} description={framework.oneLiner} className="bg-black min-h-screen">
         <Head><link rel="canonical" href={canonicalFor(framework.slug)} /></Head>
         
-        <div className="border-b border-white/10 py-4">
-          <div className="mx-auto max-w-7xl px-4">
-            <Link href={LIBRARY_HREF} className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors">
-              <ArrowLeft size={16} /> Back to Library
+        <div className="border-b border-white/5 bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-40">
+          <div className="mx-auto max-w-7xl px-6 py-4">
+            <Link href={LIBRARY_HREF} className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors group text-sm">
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+              <span className="font-mono text-[10px] uppercase tracking-widest">Back to Library</span>
             </Link>
           </div>
         </div>
 
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.05),transparent_50%)]" />
-          <div className="relative mx-auto max-w-7xl px-4 flex flex-col items-center text-center">
-            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-6 py-2 text-amber-200 text-[10px] font-black uppercase tracking-[0.3em]">
+        <section className="relative py-32 overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(245,158,11,0.08),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(245,158,11,0.05),transparent_60%)]" />
+          
+          <div className="relative mx-auto max-w-7xl px-6 flex flex-col items-center text-center">
+            <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-6 py-2 text-amber-200 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-sm">
               <Lock size={14} /> Dossier Protected
             </div>
-            <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-6 uppercase tracking-tighter">
+            <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-6 uppercase tracking-tighter leading-[0.9]">
               {framework.title}
             </h1>
-            <p className="max-w-2xl text-xl text-white/70 leading-relaxed mb-12">
+            <p className="max-w-2xl text-xl text-white/50 leading-relaxed mb-12 font-light">
               {framework.oneLiner}
             </p>
-            <Link href="/login" className="bg-white text-black px-10 py-4 rounded-full font-black uppercase tracking-widest hover:bg-amber-500 transition-all">
+            <Link 
+              href="/login" 
+              className="group bg-white text-black px-10 py-4 rounded-full font-black uppercase tracking-widest hover:bg-amber-500 transition-all inline-flex items-center gap-3 shadow-2xl"
+            >
               Unlock Full Intelligence
+              <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
+          </div>
+        </section>
+
+        {/* Preview teaser */}
+        <section className="border-t border-white/5 py-20">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="grid md:grid-cols-3 gap-8">
+              {framework.operatingLogic?.slice(0, 3).map((logic, i) => (
+                <div key={i} className="p-8 border border-white/5 bg-white/[0.02] rounded-2xl backdrop-blur-sm">
+                  <div className="text-amber-500 text-2xl mb-4 font-serif">0{i+1}</div>
+                  <h3 className="text-white font-bold text-lg mb-3 uppercase tracking-tight">{logic.title}</h3>
+                  <p className="text-zinc-600 text-sm leading-relaxed line-clamp-3">{logic.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </Layout>
@@ -84,148 +110,69 @@ const PublicFrameworkView: React.FC<{ framework: Framework; hidden?: boolean }> 
 };
 
 /* -------------------------------------------------------------------------- */
-/* PRIVATE VIEW (INTELLIGENCE LAYER)                                          */
+/* PROTECTED SHELL (Dynamically imported)                                     */
 /* -------------------------------------------------------------------------- */
 
-const PrivateFrameworkView: React.FC<PrivatePageProps> = ({ framework, user, innerCircleAccess, onPrivateReady }) => {
-  const hasAccess = Boolean(innerCircleAccess?.hasAccess) || user?.role === "admin" || user?.role === "editor";
-
-  React.useEffect(() => {
-    if (hasAccess) onPrivateReady?.();
-  }, [hasAccess, onPrivateReady]);
-
-  if (!hasAccess) return null;
-
-  return (
-    <Layout title={`${framework.title} | Strategic Briefing`} className="bg-black min-h-screen print:bg-white">
-      <Head><meta name="robots" content="noindex,nofollow" /></Head>
-
-      {/* 1. Decision Memo Engine (Print Secret Layer) */}
-      <div className="print:block hidden">
-        <DecisionMemo framework={framework} />
-      </div>
-
-      <div className="print:hidden">
-        {/* Navigation / Header */}
-        <div className="border-b border-white/5 bg-zinc-900/20 backdrop-blur-md sticky top-0 z-50">
-          <div className="mx-auto max-w-7xl px-4 py-3 flex justify-between items-center">
-             <div className="flex items-center gap-4">
-               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-               <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Live_Dossier_Active</span>
-             </div>
-             <div className="flex items-center gap-6">
-               <span className="text-xs font-bold text-amber-500 uppercase tracking-tighter">{user?.name} // {user?.role}</span>
-               <Link href={LIBRARY_HREF} className="text-white/60 hover:text-white text-xs uppercase font-bold tracking-widest">Close Brief</Link>
-             </div>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-7xl px-4 py-16 grid lg:grid-cols-4 gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-3 space-y-20">
-            <header>
-              <span className={`inline-flex items-center rounded-full border px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] mb-6 ${accentClass(framework.accent)}`}>
-                {framework.tag}
-              </span>
-              <h1 className="font-serif text-6xl font-bold text-white mb-6 uppercase leading-none">{framework.title}</h1>
-              <p className="text-2xl text-white/60 font-serif italic border-l-2 border-amber-500/40 pl-8 py-2">"{framework.oneLiner}"</p>
-            </header>
-
-            {/* Decision Memo Component (Screen View) */}
-            <DecisionMemo framework={framework} />
-
-            {/* Structured Content Sections */}
-            <section>
-              <h2 className="text-sm font-black text-amber-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
-                <span className="h-px bg-amber-500/20 flex-1" /> Operating Logic <Activity size={14} />
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {framework.operatingLogic?.map((logic, i) => (
-                  <div key={i} className="bg-zinc-900/50 border border-white/5 p-8 rounded-2xl hover:border-amber-500/30 transition-colors group">
-                    <h3 className="text-white font-bold text-lg mb-4 uppercase tracking-tight group-hover:text-amber-200 transition-colors">{logic.title}</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed">{logic.body}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Board Questions */}
-            <section className="bg-amber-500/5 border border-amber-500/10 rounded-3xl p-10">
-              <h2 className="text-white font-bold text-2xl mb-8 flex items-center gap-3">
-                <Shield className="text-amber-500" /> Fiduciary Inquiries
-              </h2>
-              <div className="space-y-4">
-                {framework.boardQuestions?.map((q, i) => (
-                  <div key={i} className="flex gap-4 text-zinc-300 text-lg font-serif italic border-b border-white/5 pb-4 last:border-0">
-                    <span className="text-amber-500 font-mono text-sm tracking-tighter">Q_{i+1}</span>
-                    <p>{q}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          {/* Sidebar Intelligence */}
-          <aside className="space-y-8">
-            <div className="sticky top-24 space-y-6">
-              <AuditLog slug={framework.slug} userName={user?.name || "Anonymous"} />
-              
-              <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-6">
-                <h4 className="text-white text-xs font-black uppercase tracking-widest mb-4">Metadata</h4>
-                <div className="space-y-4">
-                   <div>
-                     <span className="block text-[10px] text-zinc-500 uppercase">Institutional Tier</span>
-                     <span className="text-amber-200 text-sm font-bold uppercase">{framework.tier.join(" + ")}</span>
-                   </div>
-                   <div>
-                     <span className="block text-[10px] text-zinc-500 uppercase">Canon Root</span>
-                     <span className="text-zinc-300 text-sm italic">"{framework.canonRoot}"</span>
-                   </div>
-                </div>
-              </div>
-
-              {framework.artifactHref && (
-                <a href={framework.artifactHref} className="flex items-center justify-between w-full bg-white text-black p-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 transition-all">
-                  <span>Download Package</span>
-                  <Download size={16} />
-                </a>
-              )}
-            </div>
-          </aside>
+const ProtectedShell = dynamic(
+  () => import('@/components/Frameworks/ProtectedFrameworkShell'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-amber-500 font-mono text-xs uppercase tracking-widest animate-pulse">
+          Decrypting secure layer...
         </div>
       </div>
-    </Layout>
-  );
-};
+    )
+  }
+);
 
 /* -------------------------------------------------------------------------- */
-/* PROTECTED SHELL & PAGE EXPORTS                                             */
+/* PAGE COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
-const ProtectedShell = dynamic(async () => {
-  return (props: PrivatePageProps) => {
-    const ProtectedComponent = withUnifiedAuth(PrivateFrameworkView, {
-      requiredRole: "inner-circle",
-      fallbackComponent: () => null,
-      publicFallback: true,
-    });
-    return <ProtectedComponent {...props} />;
-  };
-}, { ssr: false });
+interface PublicPageProps {
+  framework: Framework;
+}
 
 const FrameworkDetailPage: NextPage<PublicPageProps> = (props) => {
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  const isReady = useClientIsReady();
+  
   const [privateReady, setPrivateReady] = React.useState(false);
-  const router = useRouter();
+  const [mounted, setMounted] = React.useState(false);
 
-  if (router.isFallback) return <div className="bg-black min-h-screen p-20 text-white font-mono uppercase tracking-[0.5em] animate-pulse">Loading_Dossier...</div>;
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // ✅ Early return during SSR/prerender
+  if (!mounted) {
+    return (
+      <Layout title={props.framework.title}>
+        <div className="min-h-screen bg-black" />
+      </Layout>
+    );
+  }
 
   return (
     <>
       <PublicFrameworkView framework={props.framework} hidden={privateReady} />
-      <ProtectedShell {...(props as PrivatePageProps)} onPrivateReady={() => setPrivateReady(true)} />
+      {!IS_BUILD && (
+        <ProtectedShell 
+          framework={props.framework} 
+          onPrivateReady={() => setPrivateReady(true)} 
+        />
+      )}
     </>
   );
 };
+
+/* -------------------------------------------------------------------------- */
+/* STATIC GENERATION                                                          */
+/* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = getAllFrameworkSlugs();

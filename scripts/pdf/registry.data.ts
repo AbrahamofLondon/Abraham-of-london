@@ -1,7 +1,7 @@
 /* scripts/pdf/registry.data.ts — PRODUCTION-OPTIMIZED, NEXT-SAFE, FS-AWARE */
 
-import fs from "node:fs";
-import path from "node:path";
+import fs from "fs";
+import path from "path";
 
 // If your generator produces this file, keep it.
 // If it doesn't exist in some environments, we fallback safely.

@@ -1,10 +1,13 @@
 /* pages/admin/pdf-dashboard.tsx — PDF INTELLIGENCE ENGINE (INTEGRITY MODE) */
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import type { GetServerSideProps } from "next";
+
 import { withAdminAuth } from "@/lib/auth/withAdminAuth";
 import { usePDFDashboard } from "@/hooks/usePDFDashboard";
 import { useToast } from "@/hooks/useToast";
+import { getInstitutionalAnalyticsServer } from "@/lib/server/institutional-analytics";
 
 // Core Dashboard Components
 import DashboardHeader from "@/components/DashboardHeader";
@@ -22,17 +25,47 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import PDFDataDashboard from "@/components/dashboard/PDFDataDashboard";
 import LiveDataDashboard from "@/components/dashboard/LiveDataDashboard";
 
+type AdminUser = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  permissions: string[];
+};
+
+type InstitutionalAnalyticsPayload = {
+  rawPdfs: unknown[];
+  stats: unknown;
+};
+
 interface PDFDashboardProps {
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    permissions: string[];
-  };
+  user?: AdminUser;
+  initialAnalytics: InstitutionalAnalyticsPayload | null;
+  analyticsError: string | null;
 }
 
-const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
+export const getServerSideProps: GetServerSideProps = withAdminAuth(async () => {
+  try {
+    const result = await getInstitutionalAnalyticsServer();
+
+    return {
+      props: {
+        initialAnalytics: result.success ? result.data : null,
+        analyticsError: result.success ? null : result.error || "Analytics failed to load",
+      },
+    };
+  } catch (e: any) {
+    console.error("[PDF_DASHBOARD_SSR_ANALYTICS_ERROR]:", e);
+    return {
+      props: {
+        initialAnalytics: null,
+        analyticsError: typeof e?.message === "string" ? e.message : "Unknown SSR error",
+      },
+    };
+  }
+});
+
+const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, analyticsError }) => {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -78,6 +111,11 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     },
   });
 
+  // Server-side analytics warning surface
+  useEffect(() => {
+    if (analyticsError) toast.warning("Analytics Warning", analyticsError);
+  }, [analyticsError, toast]);
+
   // Persist Filter State to URL (clean query — no undefined)
   useEffect(() => {
     const query: Record<string, string> = {};
@@ -87,7 +125,6 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
     if (filters.sortBy && filters.sortBy !== "updatedAt") query.sort = filters.sortBy;
     if (filters.sortOrder && filters.sortOrder !== "desc") query.order = filters.sortOrder;
 
-    // keep existing "live" param if present
     if (router.query.live === "true") query.live = "true";
 
     router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
@@ -113,11 +150,11 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
   const handleBatchDelete = async () => {
     if (selectedPDFs.size === 0) return;
 
-    if (confirm(`Authorize destruction of ${selectedPDFs.size} restricted volumes?`)) {
+    if (confirm("Authorize destruction of " + selectedPDFs.size + " restricted volumes?")) {
       try {
         await batchDelete(Array.from(selectedPDFs));
         clearSelection();
-        toast.success("Sequence Complete", `${selectedPDFs.size} records purged.`);
+        toast.success("Sequence Complete", selectedPDFs.size + " records purged.");
       } catch {
         toast.error("Authority Rejected", "Batch deletion failed.");
       }
@@ -262,12 +299,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
                     )}
 
                     <div className="flex-grow mt-6">
-                      <PDFViewerPanel
-                        pdf={selectedPDF}
-                        isGenerating={isGenerating}
-                        onGeneratePDF={generatePDF}
-                        refreshKey={stats.totalPDFs}
-                      />
+                      <PDFViewerPanel pdf={selectedPDF} isGenerating={isGenerating} onGeneratePDF={generatePDF} refreshKey={stats.totalPDFs} />
                     </div>
                   </div>
                 </div>
@@ -277,7 +309,7 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user }) => {
 
           <div className="mt-20 border-t border-white/5 pt-12">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] mb-8 text-zinc-600">Archival Analytics</h3>
-            <PDFDataDashboard view="analytics" theme="dark" onPDFSelect={handleSelectPDF} />
+            <PDFDataDashboard initialAnalytics={initialAnalytics} theme="dark" onPDFSelect={handleSelectPDF} />
           </div>
         </div>
       </div>

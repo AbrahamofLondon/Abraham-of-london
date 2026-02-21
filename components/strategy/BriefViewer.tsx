@@ -1,5 +1,6 @@
-/* components/strategy/BriefViewer.tsx — SECURE ASSET RENDERING */
+/* components/strategy/BriefViewer.tsx — SECURE ASSET RENDERING (Router-Free) */
 import * as React from "react";
+import Link from "next/link";
 import { 
   ShieldAlert, 
   Maximize2, 
@@ -8,7 +9,6 @@ import {
   FileText,
   Lock
 } from "lucide-react";
-import { useRouter } from "next/router";
 
 interface BriefViewerProps {
   assetUrl: string;
@@ -23,7 +23,6 @@ const BriefViewer: React.FC<BriefViewerProps> = ({
   classification, 
   serialNumber 
 }) => {
-  const router = useRouter();
   const [isHovered, setIsHovered] = React.useState(false);
 
   // Prevention of basic inspection/save commands
@@ -34,13 +33,13 @@ const BriefViewer: React.FC<BriefViewerProps> = ({
       {/* 1. TACTICAL HEADER */}
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-black z-20">
         <div className="flex items-center gap-8">
-          <button 
-            onClick={() => router.back()}
+          <Link 
+            href="/strategy"
             className="p-2 border border-white/10 hover:border-primary/50 text-zinc-500 hover:text-primary transition-all"
             aria-label="Return to Registry"
           >
             <ChevronLeft size={18} />
-          </button>
+          </Link>
           
           <div className="space-y-1">
             <h1 className="text-xl font-editorial italic text-white tracking-tight">

@@ -1,4 +1,4 @@
-// components/SearchPalette.tsx — BUILD-SAFE (no Fuse generics, pages-router safe)
+// components/SearchPalette.tsx — BULLETPROOF (No Fuse generics, pages-router safe, SSR-proof)
 "use client";
 
 import * as React from "react";
@@ -35,39 +35,61 @@ function resolveBase(kind: string): string {
 }
 
 export default function SearchPalette(): React.ReactElement {
+  // ========== MOUNT GUARD ==========
+  const [mounted, setMounted] = React.useState(false);
+  
+  // ========== ROUTER (SAFE) ==========
   const router = useRouter();
-
+  
+  // ========== STATE ==========
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [items, setItems] = React.useState<RegistryAsset[]>([]);
   const [fuse, setFuse] = React.useState<any>(null); // ✅ DO NOT type Fuse in this codebase
   const [active, setActive] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [mountedOpen, setMountedOpen] = React.useState(false);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Keyboard shortcut: ⌘K / Ctrl+K
+  // ========== MOUNT EFFECT ==========
   React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // ========== KEYBOARD SHORTCUT ==========
+  React.useEffect(() => {
+    if (!mounted) return;
+    
     const down = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((v) => !v);
       }
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+      }
     };
+    
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [mounted]);
 
-  // Load registry when opened
+  // ========== LOAD REGISTRY WHEN OPENED ==========
   React.useEffect(() => {
-    if (!open) return;
+    if (!mounted || !open) return;
 
+    // Track mounted state to prevent state updates after unmount
+    let isActive = true;
+    
     setIsLoading(true);
 
     fetch("/system/content-registry.json")
       .then((res) => res.json())
       .then((data) => {
+        if (!isActive) return;
+        
         const assets: RegistryAsset[] = Array.isArray(data?.index) ? data.index : [];
         setItems(assets);
 
@@ -80,41 +102,78 @@ export default function SearchPalette(): React.ReactElement {
 
         setFuse(instance);
       })
-      .catch((err) => console.error("Registry load failed:", err))
-      .finally(() => setIsLoading(false));
-  }, [open]);
+      .catch((err) => {
+        if (isActive) {
+          console.error("Registry load failed:", err);
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      });
 
-  // Reset on close
-  React.useEffect(() => {
-    if (!open) return;
     return () => {
+      isActive = false;
+    };
+  }, [mounted, open]);
+
+  // ========== RESET ON CLOSE ==========
+  React.useEffect(() => {
+    if (!mounted || !open) return;
+    
+    return () => {
+      // Cleanup when closing
       setQuery("");
       setActive(0);
     };
-  }, [open]);
+  }, [mounted, open]);
 
-  // Focus input when opened
+  // ========== FOCUS INPUT WHEN OPENED ==========
   React.useEffect(() => {
-    if (!open) return;
-    const id = window.setTimeout(() => inputRef.current?.focus(), 30);
-    return () => window.clearTimeout(id);
-  }, [open]);
+    if (!mounted || !open) return;
+    
+    // Small delay to ensure DOM is ready
+    const timeoutId = window.setTimeout(() => {
+      if (inputRef.current && open) {
+        inputRef.current.focus();
+      }
+    }, 50);
+    
+    return () => window.clearTimeout(timeoutId);
+  }, [mounted, open]);
 
-  // Results
-  const results: RegistryAsset[] =
-    query.trim() && fuse
-      ? (fuse.search(query) || []).map((r: any) => r?.item).filter(Boolean)
-      : items;
+  // ========== RESET ACTIVE WHEN QUERY CHANGES ==========
+  React.useEffect(() => {
+    if (!mounted) return;
+    setActive(0);
+  }, [mounted, query]);
 
-  const top = safeArraySlice(results, 0, 12);
+  // ========== RESULTS ==========
+  const results: RegistryAsset[] = React.useMemo(() => {
+    if (!mounted) return [];
+    
+    if (query.trim() && fuse) {
+      const searchResults = (fuse.search(query) || []).map((r: any) => r?.item).filter(Boolean);
+      return searchResults;
+    }
+    return items;
+  }, [mounted, query, fuse, items]);
 
-  const handleSelect = (slug: string, kind: string) => {
+  const top = React.useMemo(() => safeArraySlice(results, 0, 12), [results]);
+
+  // ========== HANDLERS ==========
+  const handleSelect = React.useCallback((slug: string, kind: string) => {
+    if (!mounted) return;
+    
     const base = resolveBase(kind);
     router.push(`${base}/${slug}`);
     setOpen(false);
-  };
+  }, [mounted, router]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+    if (!mounted) return;
+    
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActive((prev) => Math.min(prev + 1, Math.max(top.length - 1, 0)));
@@ -135,14 +194,24 @@ export default function SearchPalette(): React.ReactElement {
       setOpen(false);
       return;
     }
-  };
+  }, [mounted, top, active, handleSelect]);
 
-  // Reset active when query changes
-  React.useEffect(() => {
-    setActive(0);
-  }, [query]);
+  // ========== RENDER GUARD ==========
+  // During SSR, render nothing or a simple button placeholder
+  if (!mounted) {
+    return (
+      <button
+        className="flex items-center gap-2 rounded-md border border-white/10 px-3 py-1.5 text-sm text-white/60"
+        aria-label="Search content"
+        disabled
+      >
+        <Search className="h-4 w-4" />
+        <span className="hidden sm:inline">Search</span>
+      </button>
+    );
+  }
 
-  // Closed state button (header can mount this anywhere)
+  // ========== CLOSED STATE ==========
   if (!open) {
     return (
       <button
@@ -159,7 +228,7 @@ export default function SearchPalette(): React.ReactElement {
     );
   }
 
-  // Open palette modal
+  // ========== OPEN PALETTE MODAL ==========
   return (
     <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm" onClick={() => setOpen(false)}>
       <div

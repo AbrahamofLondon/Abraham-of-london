@@ -1,15 +1,8 @@
-// pages/events/[slug].tsx — FINAL BUILD-PROOF (seed + proxy, Pages Router)
-// ✅ Default export present
-// ✅ Child components are client-only (ssr:false) to prevent SSG crashes
-// ✅ MDXRemote guarded with SEEDED safe components (seed + proxy)
-// ✅ mdxRaw passed from getStaticProps
-// ✅ Build-safe serialization + robust frontmatter defaults
-// ✅ All array operations are safe
-
+// pages/events/[slug].tsx — PREMIUM PRODUCTION (Router-Safe, Sovereign)
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
@@ -17,14 +10,9 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
 import Layout from "@/components/Layout";
-
-// Your MDX components map
 import mdxComponents from "@/components/mdx-components";
-import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components"; // CHANGED: Use seeded-safe function
-
-// Data access
-import { getServerAllEvents, getServerEventBySlug } from "@/lib/content/server";
-import { sanitizeData, normalizeSlug } from "@/lib/content/shared";
+import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
+import { useClientRouter, useClientQuery } from "@/lib/router/useClientRouter";
 
 import {
   Bookmark,
@@ -37,68 +25,20 @@ import {
   Users,
 } from "lucide-react";
 
+import { getServerAllEvents, getServerEventBySlug } from "@/lib/content/server";
+import { sanitizeData, normalizeSlug } from "@/lib/content/shared";
+
 // -------------------------------------------------------------------
-// Client-only components to prevent SSG crashes
+// Client-only components with SSR disabled
 // -------------------------------------------------------------------
-const EventHero = dynamic(() => import("@/components/events/EventHero"), {
-  ssr: false,
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-xl" />,
-});
-
-const EventDetails = dynamic(() => import("@/components/events/EventDetails"), {
-  ssr: false,
-  loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-xl" />,
-});
-
-const EventContent = dynamic(() => import("@/components/events/EventContent"), {
-  ssr: false,
-  loading: () => <div className="h-48 bg-gray-100 animate-pulse rounded-xl" />,
-});
-
-const EventSchedule = dynamic(() => import("@/components/events/EventSchedule"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
-      <p className="text-sm text-gray-500">Loading schedule…</p>
-    </div>
-  ),
-});
-
-const EventSpeakers = dynamic(() => import("@/components/events/EventSpeakers"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
-      <p className="text-sm text-gray-500">Loading speakers…</p>
-    </div>
-  ),
-});
-
-const EventRegistration = dynamic(() => import("@/components/events/EventRegistration"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
-      <p className="text-sm text-gray-500">Loading registration…</p>
-    </div>
-  ),
-});
-
-const RelatedEvents = dynamic(() => import("@/components/events/RelatedEvents"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
-      <p className="text-sm text-gray-500">Loading related events…</p>
-    </div>
-  ),
-});
-
-const ShareButtons = dynamic(() => import("@/components/events/ShareButtons"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-12 rounded-lg bg-gray-50 flex items-center justify-center px-4">
-      <p className="text-sm text-gray-500">Loading share options…</p>
-    </div>
-  ),
-});
+const EventHero = dynamic(() => import("@/components/events/EventHero"), { ssr: false });
+const EventDetails = dynamic(() => import("@/components/events/EventDetails"), { ssr: false });
+const EventContent = dynamic(() => import("@/components/events/EventContent"), { ssr: false });
+const EventSchedule = dynamic(() => import("@/components/events/EventSchedule"), { ssr: false });
+const EventSpeakers = dynamic(() => import("@/components/events/EventSpeakers"), { ssr: false });
+const EventRegistration = dynamic(() => import("@/components/events/EventRegistration"), { ssr: false });
+const RelatedEvents = dynamic(() => import("@/components/events/RelatedEvents"), { ssr: false });
+const ShareButtons = dynamic(() => import("@/components/events/ShareButtons"), { ssr: false });
 
 // -------------------------------------------------------------------
 // Types
@@ -118,29 +58,25 @@ type EventDoc = {
   description: string | null;
   slug: string;
   coverImage: string | null;
-  tags: string[]; // always array
-
+  tags: string[];
   accessLevel: Tier;
   lockMessage: string | null;
-
   eventDate: string | null;
   time: string | null;
   location: string | null;
-
   venue: string | null;
   price: string | null;
   endDate: string | null;
   speaker: string | null;
   category: string | null;
   capacity: number | null;
-
   registrationUrl: string | null;
 };
 
 type Props = {
   event: EventDoc;
   source: MDXRemoteSerializeResult | null;
-  mdxRaw: string | null; // ✅ ADDED: Required for seeding
+  mdxRaw: string | null;
 };
 
 // -------------------------------------------------------------------
@@ -155,7 +91,6 @@ function cleanSlug(raw: unknown): string {
   return s.replace(/^\/+|\/+$/g, "").replace(/^events\//, "").replace(/\.(md|mdx)$/i, "");
 }
 
-// Paranoid MDX extraction
 function getRawBody(d: any): string {
   return (
     d?.body?.raw ||
@@ -205,21 +140,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       slug: String(eventData.slug || s).trim() || String(s),
       coverImage: String(eventData.coverImage || "").trim() ? String(eventData.coverImage).trim() : null,
       tags: Array.isArray(eventData.tags) ? eventData.tags : [],
-
       accessLevel: asTier(eventData.accessLevel),
       lockMessage: String(eventData.lockMessage || "").trim() ? String(eventData.lockMessage).trim() : null,
-
       eventDate: String(eventData.eventDate || eventData.startDate || eventData.date || "").trim() || null,
       endDate: String(eventData.endDate || "").trim() || null,
       time: String(eventData.time || "").trim() || null,
       location: String(eventData.location || "").trim() || null,
-
       venue: String(eventData.venue || "").trim() || null,
       price: String(eventData.price || "").trim() || null,
       speaker: String(eventData.speaker || "").trim() || null,
       category: String(eventData.category || "").trim() || null,
       capacity: typeof eventData.capacity === "number" ? eventData.capacity : null,
-
       registrationUrl: String(eventData.registrationUrl || "").trim() || null,
     };
 
@@ -252,9 +183,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 // Page Component
 // ===================================================================
 const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
-  const router = useRouter();
+  // ✅ Router-safe hooks
+  const router = useClientRouter();
+  const query = useClientQuery();
+  
+  const [isBookmarked, setIsBookmarked] = React.useState(false);
+  const [isPastEvent, setIsPastEvent] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
 
-  // ✅ SEED (enumerable) + PROXY (read-safe) => stops ResourcesCTA/BrandFrame/Rule/etc forever
   const safeComponents = React.useMemo(
     () =>
       createSeededSafeMdxComponents(mdxComponents, mdxRaw || "", {
@@ -263,26 +199,19 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
     [mdxRaw]
   );
 
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
-  const [isPastEvent, setIsPastEvent] = React.useState(false);
-  const [isClient, setIsClient] = React.useState(false);
-
+  // ✅ Client-only effects
   React.useEffect(() => {
-    // ✅ Client-only guard
-    if (typeof window === "undefined") return;
-
     setIsClient(true);
 
-    // bookmarks
+    // Bookmarks
     try {
       const bookmarks = JSON.parse(localStorage.getItem("bookmarkedEvents") || "[]");
       setIsBookmarked(Array.isArray(bookmarks) && bookmarks.includes(event.slug));
-    } catch (error) {
-      console.error("Error parsing bookmarks:", error);
+    } catch {
       localStorage.setItem("bookmarkedEvents", "[]");
     }
 
-    // past/future
+    // Past/future check
     const dateValue = event.eventDate || "";
     const d = dateValue ? new Date(dateValue) : null;
     const isPast = !!d && !Number.isNaN(d.getTime()) && d.getTime() < Date.now();
@@ -305,10 +234,19 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
         localStorage.setItem("bookmarkedEvents", JSON.stringify(safe));
         setIsBookmarked(true);
       }
-    } catch (error) {
-      console.error("Error updating bookmarks:", error);
+    } catch {
+      // Silently fail
     }
   };
+
+  // ✅ Early return during SSR/prerender
+  if (!router) {
+    return (
+      <Layout title={event.title}>
+        <div className="min-h-screen bg-white" />
+      </Layout>
+    );
+  }
 
   const metaDescription =
     (event.excerpt || "").trim() ||
@@ -333,21 +271,10 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
 
   const formattedTime = event.time || "Time TBA";
   const locationText = event.location || "Venue TBA";
-
-  if (router.isFallback) {
-    return (
-      <Layout title="Loading...">
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-sm text-gray-600">Loading event…</div>
-        </div>
-      </Layout>
-    );
-  }
-
   const isLocked = event.accessLevel !== "public";
 
   return (
-    <Layout>
+    <Layout title={event.title}>
       <Head>
         <title>{event.title} | Events | Abraham of London</title>
         <meta name="description" content={metaDescription} />
@@ -367,19 +294,18 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
       {/* Navigation */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <button
-            onClick={() => router.back()}
+          <Link
+            href="/events"
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors group"
-            type="button"
           >
             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Events
-          </button>
+          </Link>
         </div>
       </div>
 
       <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100">
-        {/* Client-only Hero */}
+        {/* Hero */}
         {isClient ? (
           <EventHero
             title={event.title}
@@ -390,7 +316,7 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
             isPast={isPastEvent}
           />
         ) : (
-          <div className="h-96 bg-gray-100 animate-pulse rounded-xl" />
+          <div className="h-96 bg-gradient-to-b from-gray-100 to-gray-200 animate-pulse" />
         )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -401,10 +327,10 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                 <div className="flex flex-wrap gap-4 mb-8">
                   <button
                     onClick={handleBookmark}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                       isBookmarked
-                        ? "bg-amber-500/20 text-amber-600 border border-amber-500/30"
-                        : "bg-gray-100 text-gray-700 border border-gray-200 hover:border-amber-500/30 hover:text-amber-600"
+                        ? "bg-amber-500 text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-amber-50 hover:text-amber-600 border border-gray-200"
                     }`}
                     type="button"
                     disabled={!isClient}
@@ -422,22 +348,22 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                     )}
                   </button>
 
-                  {!isPastEvent && event.registrationUrl ? (
+                  {!isPastEvent && event.registrationUrl && (
                     <a
                       href={event.registrationUrl}
                       target={event.registrationUrl.startsWith("/") ? undefined : "_blank"}
                       rel={event.registrationUrl.startsWith("/") ? undefined : "noopener noreferrer"}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-md hover:shadow-lg"
                     >
                       <Ticket className="w-4 h-4" />
                       <span className="text-sm font-medium">Register Now</span>
                     </a>
-                  ) : null}
+                  )}
                 </div>
 
-                {/* Event metadata cards */}
+                {/* Metadata cards */}
                 <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl">
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
                     <CalendarDays className="w-5 h-5 text-blue-600 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Date</p>
@@ -445,7 +371,7 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-xl">
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
                     <MapPin className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Location</p>
@@ -453,7 +379,7 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl">
+                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl border border-purple-100">
                     <Clock className="w-5 h-5 text-purple-600 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Time</p>
@@ -461,18 +387,18 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                     </div>
                   </div>
 
-                  {typeof event.capacity === "number" ? (
-                    <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-xl">
+                  {typeof event.capacity === "number" && (
+                    <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100">
                       <Users className="w-5 h-5 text-amber-600 flex-shrink-0" />
                       <div>
                         <p className="text-xs text-gray-600 font-medium">Capacity</p>
                         <p className="font-semibold text-gray-900 text-sm">{event.capacity} seats</p>
                       </div>
                     </div>
-                  ) : null}
+                  )}
                 </div>
 
-                {/* Client-only Details */}
+                {/* Details */}
                 {isClient ? (
                   <EventDetails
                     venue={event.venue || undefined}
@@ -498,7 +424,6 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                           </p>
                         </div>
                       ) : source ? (
-                        // ✅ SEED + PROXY: Safe components with mdxRaw seeding
                         <MDXRemote {...source} components={safeComponents as any} />
                       ) : (
                         <div className="text-sm text-gray-600">Content is being prepared.</div>
@@ -510,7 +435,7 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                 </div>
 
                 {/* Tags */}
-                {event.tags.length > 0 ? (
+                {event.tags.length > 0 && (
                   <div className="mt-8 pt-6 border-t border-gray-200">
                     <div className="flex flex-wrap gap-2">
                       {event.tags.map((tag, index) => (
@@ -523,16 +448,16 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                       ))}
                     </div>
                   </div>
-                ) : null}
+                )}
 
-                {/* Client-only components */}
-                {isClient ? (
+                {/* Client-only dynamic sections */}
+                {isClient && (
                   <>
-                    {!isPastEvent ? (
+                    {!isPastEvent && (
                       <div className="mt-12">
                         <EventSchedule eventId={event.slug} />
                       </div>
-                    ) : null}
+                    )}
 
                     <div className="mt-12">
                       <EventSpeakers eventTitle={event.title} />
@@ -560,56 +485,50 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                       </div>
                     </div>
                   </>
-                ) : (
-                  <div className="mt-12 space-y-6">
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-600">
-                      Loading event details…
-                    </div>
-                  </div>
                 )}
               </div>
             </main>
 
             <aside className="lg:col-span-4">
               <div className="sticky top-24 space-y-6">
+                {/* Related Events */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Events</h3>
                   {isClient ? (
                     <RelatedEvents currentEventTitle={event.title} />
                   ) : (
-                    <div className="h-32 rounded-lg bg-gray-50 flex items-center justify-center">
-                      <p className="text-sm text-gray-500">Loading related events…</p>
-                    </div>
+                    <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />
                   )}
                 </div>
 
+                {/* Event Details Sidebar */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
                   <div className="space-y-4">
-                    {event.venue ? (
+                    {event.venue && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">Venue</p>
                         <p className="text-gray-900 font-medium">{event.venue}</p>
                       </div>
-                    ) : null}
-                    {event.price ? (
+                    )}
+                    {event.price && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">Price</p>
                         <p className="text-gray-900 font-medium">{event.price}</p>
                       </div>
-                    ) : null}
-                    {event.speaker ? (
+                    )}
+                    {event.speaker && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">Featured Speaker</p>
                         <p className="text-gray-900 font-medium">{event.speaker}</p>
                       </div>
-                    ) : null}
-                    {event.category ? (
+                    )}
+                    {event.category && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">Category</p>
                         <p className="text-gray-900 font-medium">{event.category}</p>
                       </div>
-                    ) : null}
+                    )}
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Access</p>
                       <p className="text-gray-900 font-medium">{event.accessLevel}</p>
@@ -617,35 +536,30 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                   </div>
                 </div>
 
-                {!isPastEvent && event.eventDate ? (
+                {/* Calendar Integration */}
+                {!isPastEvent && event.eventDate && (
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-lg p-6 border border-blue-200">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Add to Calendar</h3>
                     <div className="space-y-3">
                       <button
                         type="button"
-                        className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-center gap-3"
+                        className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow"
                       >
                         <CalendarDays className="w-5 h-5 text-blue-600" />
                         <span className="text-sm font-medium">Google Calendar</span>
                       </button>
                       <button
                         type="button"
-                        className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-center gap-3"
+                        className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow"
                       >
                         <CalendarDays className="w-5 h-5 text-blue-600" />
                         <span className="text-sm font-medium">Apple Calendar</span>
                       </button>
-                      <button
-                        type="button"
-                        className="w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-center gap-3"
-                      >
-                        <CalendarDays className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm font-medium">Outlook</span>
-                      </button>
                     </div>
                   </div>
-                ) : null}
+                )}
 
+                {/* Newsletter CTA */}
                 <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl shadow-lg p-6 border border-amber-200">
                   <div className="text-center">
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20 mb-4">
@@ -662,13 +576,12 @@ const EventPage: NextPage<Props> = ({ event, source, mdxRaw }) => {
                     <p className="text-sm text-gray-600 mb-6">
                       Get notified about upcoming events and exclusive invitations.
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/newsletter")}
-                      className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all shadow-md"
+                    <Link
+                      href="/newsletter"
+                      className="inline-block w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all shadow-md hover:shadow-lg"
                     >
                       Subscribe to Updates
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -1,11 +1,10 @@
 /* eslint-disable no-restricted-imports */
 import * as React from "react";
-import base from "@/components/mdx/MDXComponents";
+import base from "@/components/mdx-components";
 
 type MDXComponentProps = {
   children?: React.ReactNode;
   className?: string;
-  // allow arbitrary MDX props, but keep them typed as unknown rather than any
   [key: string]: unknown;
 };
 
@@ -17,7 +16,7 @@ const MDXComponents: ComponentMap = base as ComponentMap;
 export const getSafeComponents = (custom: ComponentMap = {}): ComponentMap => {
   const map: ComponentMap = { ...MDXComponents };
 
-  // guarantee fallbacks for commonly used MDX tags
+  // All components that need fallbacks
   const required = [
     "BrandFrame",
     "HeroEyebrow",
@@ -26,8 +25,10 @@ export const getSafeComponents = (custom: ComponentMap = {}): ComponentMap => {
     "Caption",
     "CTA",
     "CTAGroup",
+    "BriefAlert", // ✅ Added to prevent future build errors
   ];
 
+  // Ensure all required components have fallbacks
   for (const comp of required) {
     if (!map[comp]) {
       map[comp] = (props: MDXComponentProps) => {
@@ -35,7 +36,6 @@ export const getSafeComponents = (custom: ComponentMap = {}): ComponentMap => {
         return (
           <div
             className={`mdx-fallback ${comp.toLowerCase()} ${className}`}
-            // eslint-disable-next-line react/jsx-props-no-spreading
             {...rest}
           >
             {children}
@@ -49,4 +49,3 @@ export const getSafeComponents = (custom: ComponentMap = {}): ComponentMap => {
 };
 
 export default MDXComponents;
-

@@ -1,7 +1,6 @@
-// components/SiteLayout.tsx — HARDENED (single-header safe + fixed-header offset)
+// components/SiteLayout.tsx — BULLETPROOF (router-free, SSR-safe)
 import React from "react";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -61,6 +60,9 @@ interface SiteLayoutProps {
    * set withChrome={false} to prevent a second header/footer.
    */
   withChrome?: boolean;
+
+  /** Optional: current path for canonical URL (if not provided, uses absUrl("/")) */
+  currentPath?: string;
 }
 
 const DEFAULT_CONFIG = {
@@ -159,18 +161,19 @@ export default function SiteLayout({
 
   showOrganizationSchema = true,
   headerTransparent = false,
-
-  // ✅ default: render Header/Footer here
   withChrome = true,
+  currentPath = "/", // Optional: allow parent to pass path
 }: SiteLayoutProps) {
-  const router = useRouter();
-  const currentPath = router.asPath || "/";
+  // ========== NO ROUTER HOOK ==========
+  // Using provided currentPath or default "/"
+  const path = currentPath;
 
+  // ========== MEMOIZED VALUES (all safe during SSR) ==========
   const fullTitle = React.useMemo(() => getPageTitle(pageTitle), [pageTitle]);
 
   const fullCanonicalUrl = React.useMemo(
-    () => canonicalUrl || absUrl(currentPath),
-    [canonicalUrl, currentPath]
+    () => canonicalUrl || absUrl(path),
+    [canonicalUrl, path]
   );
 
   const robotsContent = React.useMemo(() => {
@@ -267,6 +270,7 @@ export default function SiteLayout({
     return data;
   }, [structuredData, showOrganizationSchema]);
 
+  // ========== RENDER (always safe) ==========
   return (
     <>
       <Head>
@@ -344,39 +348,51 @@ export default function SiteLayout({
   );
 }
 
-/* Helpers unchanged / safe */
+/* ========== BULLETPROOF HOOK (now router-free, accepts path prop) ========== */
 export function usePageMetadata(
   title: string,
   description?: string,
-  additionalMeta: Partial<SiteLayoutProps> = {}
+  additionalMeta: Partial<SiteLayoutProps> = {},
+  currentPath?: string
 ) {
-  const router = useRouter();
-  const currentPath = router.asPath || "/";
+  // No router! Just use provided path or default
+  const path = currentPath || "/";
 
   return React.useMemo(
     () => ({
       pageTitle: title,
       metaDescription: description,
-      canonicalUrl: absUrl(currentPath),
+      canonicalUrl: absUrl(path),
       ...additionalMeta,
     }),
-    [title, description, currentPath, additionalMeta]
+    [title, description, path, additionalMeta]
   );
 }
 
+/* ========== BULLETPROOF HOC ========== */
 export function withSiteLayout<P extends object>(
   Component: React.ComponentType<P>,
   layoutProps: Omit<SiteLayoutProps, "children">
 ) {
-  return function LayoutWrapper(props: P) {
+  function LayoutWrapper(props: P) {
+    // If the wrapped component has a getLayout function, respect it
+    const ComponentWithLayout = Component as any;
+    if (ComponentWithLayout.getLayout) {
+      return ComponentWithLayout.getLayout(<Component {...props} />);
+    }
+
     return (
       <SiteLayout {...layoutProps}>
         <Component {...props} />
       </SiteLayout>
     );
-  };
+  }
+  
+  LayoutWrapper.displayName = `withSiteLayout(${Component.displayName || Component.name || "Component"})`;
+  return LayoutWrapper;
 }
 
+/* ========== SAFE UTILITY ========== */
 export function generateStructuredData(
   type: "Article" | "WebPage" | "Organization" | "Person" | "Book",
   data: object

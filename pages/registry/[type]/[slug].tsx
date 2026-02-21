@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import Head from "next/head";
 import { serialize } from "next-mdx-remote/serialize";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { getDocBySlug } from "@/lib/content/unified-router";
 import { allPosts, allShorts } from "contentlayer/generated";
 
-// CORRECTED PATH: Removed the 's' from 'layouts' to match your 'find' result
+// ✅ Import ALL MDX components (safe approach)
+import mdxComponents from "@/components/mdx-components";
 import RegistryLayout from "@/components/layout/RegistryLayout";
 
 interface UniversalPageProps {
@@ -21,8 +23,32 @@ interface UniversalPageProps {
 }
 
 const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ source, metadata }) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // During SSR/build, show minimal shell
+  if (!mounted) {
+    return (
+      <RegistryLayout>
+        <div className="min-h-screen bg-black" />
+      </RegistryLayout>
+    );
+  }
+
   return (
     <RegistryLayout>
+      <Head>
+        <title>{metadata.title} | Abraham of London</title>
+        <meta name="description" content={metadata.description || ""} />
+        <meta property="og:title" content={metadata.title} />
+        <meta property="og:description" content={metadata.description || ""} />
+        <meta property="og:type" content="article" />
+        <link rel="canonical" href={`https://www.abrahamoflondon.org/registry/${metadata.type}/${metadata.slug}`} />
+      </Head>
+
       <article className="prose prose-invert max-w-none">
         <header className="mb-12 border-b border-white/10 pb-8">
           <h1 className="font-serif text-4xl italic text-white md:text-5xl">
@@ -41,7 +67,8 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ source, metadata 
         </header>
         
         <div className="text-zinc-300">
-          <MDXRemote {...source} />
+          {/* ✅ Pass ALL MDX components - safe and recommended */}
+          <MDXRemote {...source} components={mdxComponents} />
         </div>
       </article>
     </RegistryLayout>
@@ -51,11 +78,21 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ source, metadata 
 export const getStaticPaths: GetStaticPaths = async () => {
   const dispatches = allPosts
     .filter(p => !p.draft)
-    .map(p => ({ params: { type: 'dispatches', slug: p.slugAsParams || p._raw.flattenedPath.split('/').pop() } }));
+    .map(p => ({ 
+      params: { 
+        type: 'dispatches', 
+        slug: p.slugAsParams || p._raw.flattenedPath.split('/').pop() 
+      } 
+    }));
     
   const shorts = allShorts
     .filter(s => !s.draft)
-    .map(s => ({ params: { type: 'shorts', slug: s.slugAsParams || s._raw.flattenedPath.split('/').pop() } }));
+    .map(s => ({ 
+      params: { 
+        type: 'shorts', 
+        slug: s.slugAsParams || s._raw.flattenedPath.split('/').pop() 
+      } 
+    }));
 
   return {
     paths: [...dispatches, ...shorts],
@@ -65,12 +102,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = params?.slug as string;
+  const type = params?.type as string;
   const docRaw = getDocBySlug(slug);
 
   if (!docRaw || (docRaw as any).draft) return { notFound: true };
 
   const mdxSource = await serialize((docRaw as any).body.raw, {
     parseFrontmatter: true,
+    mdxOptions: {
+      remarkPlugins: [],
+      rehypePlugins: [],
+    },
   });
 
   return {
@@ -81,6 +123,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         subtitle: (docRaw as any).subtitle || null,
         date: (docRaw as any).date || new Date().toISOString(),
         description: (docRaw as any).description || null,
+        type,
+        slug,
       },
     },
     revalidate: 1800

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import { safeSlice } from "@/lib/utils/safe";
-import crypto from "node:crypto";
+import crypto from "crypto";
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
 // ============================================================================
 // CONFIGURATION

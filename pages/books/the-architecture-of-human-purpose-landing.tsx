@@ -7,6 +7,9 @@ import Image from "next/image";
 import Layout from "@/components/Layout";
 import { ArrowRight, BookOpen, Layers, Lock, ShieldCheck } from "lucide-react";
 
+// ✅ Add the missing import
+import { sanitizeData, isDraftContent } from "@/lib/content/server";
+
 type PreludeBook = {
   title: string;
   subtitle?: string | null;
