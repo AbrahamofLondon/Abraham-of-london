@@ -1,36 +1,32 @@
-/* pages/canon/[slug].tsx — RESOLVED & SYNCED (PREFIX-SAFE / SERIALIZE-SAFE) */
-
+/* pages/canon/[slug].tsx — CANON SLUG PIPELINE (HARDENED & PERMANENT) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { MDXRemote } from "next-mdx-remote";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import CanonHero from "@/components/canon/CanonHero";
 import { BriefSummaryCard } from "@/components/mdx/BriefSummaryCard";
-import mdxComponents from "@/components/mdx-components"; // ✅ The Registry
+import mdxComponents from "@/components/mdx-components";
 
 import { useAccess } from "@/hooks/useAccess";
-import { getDocBySlug, getAllCanons, normalizeSlug, sanitizeData } from "@/lib/content/server";
-import { joinHref } from "@/lib/content/shared";
+import { getDocBySlug, getAllCanons, sanitizeData } from "@/lib/content/server";
+import { joinHref, normalizeSlug as normalizeSlugShared } from "@/lib/content/shared";
 import { resolveDocCoverImage } from "@/lib/content/client-utils";
 import { prepareMDX } from "@/lib/server/md-utils";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
-/* -----------------------------------------------------------------------------
-  TYPES
------------------------------------------------------------------------------ */
 type Tier = "public" | "inner-circle" | "private";
 
 type CanonDoc = {
   title: string;
   excerpt?: string | null;
   description?: string | null;
-  slug: string; // ALWAYS bare, e.g. "volume-x-the-arc-of-future-civilisation"
-  href: string; // ALWAYS "/canon/<bare>"
+  slug: string; // ✅ ALWAYS BARE (no canon/, no leading slash)
+  href: string; // ✅ /canon/<bare>
   accessLevel: Tier;
   date?: string | null;
   coverImage?: string | null;
@@ -48,31 +44,67 @@ interface Props {
   mdxRaw: string;
 }
 
-/* -----------------------------------------------------------------------------
-  SLUG HYGIENE (prevents /canon//canon/... and canon/canon/...)
------------------------------------------------------------------------------ */
-function stripCanonPrefix(slug: string): string {
-  let s = normalizeSlug(String(slug || ""));
+// ---------------------------------------------------------------------------
+// SLUG HARDENING (THE FIX)
+// ---------------------------------------------------------------------------
+
+function collapseSlashes(input: string): string {
+  return String(input || "")
+    .replace(/\\/g, "/")
+    .replace(/\/{2,}/g, "/");
+}
+
+function safeDecodeURIComponent(input: string): string {
+  // Decode only when it’s actually encoded (but safe either way)
+  try {
+    return decodeURIComponent(input);
+  } catch {
+    return input; // if malformed, don’t crash build
+  }
+}
+
+function normalizeCanonBareSlug(slugish: unknown): string {
+  // Handles:
+  // - "canon/x"
+  // - "/canon/x"
+  // - "canon/canon/x"
+  // - "%2Fcanon%2Fcanon-introduction-letter"
+  // - "/canon//canon/x"
+  let s = String(slugish ?? "").trim();
+  if (!s) return "";
+
+  s = safeDecodeURIComponent(s);
+  s = collapseSlashes(s);
+
+  // Prefer shared normalizeSlug, but it doesn't always remove leading "/"
+  s = normalizeSlugShared(s);
+  s = collapseSlashes(s).replace(/^\/+/, "").replace(/\/+$/, "");
+
+  // Strip repeated "canon/" prefixes forever
   const prefix = "canon/";
   while (s.toLowerCase().startsWith(prefix)) s = s.slice(prefix.length);
-  return normalizeSlug(s);
+
+  // Remove any remaining leading slashes again
+  s = s.replace(/^\/+/, "");
+
+  // Last sanity: no empty, no "canon" alone
+  if (s.toLowerCase() === "canon") return "";
+
+  return s;
 }
 
-function getRawBody(doc: any): string {
-  return String(doc?.body?.raw || doc?.bodyRaw || doc?.content || doc?.body || "");
+function normalizeCanonHref(bare: string): string {
+  // joinHref is good; just guarantee bare is bare.
+  const b = normalizeCanonBareSlug(bare);
+  return joinHref("canon", b);
 }
 
-function safeClientRedirect(path: string) {
-  if (typeof window === "undefined") return;
-  window.location.assign(path);
-}
+// ---------------------------------------------------------------------------
+// PAGE
+// ---------------------------------------------------------------------------
 
-/* -----------------------------------------------------------------------------
-  PAGE
------------------------------------------------------------------------------ */
 const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) => {
   const { hasClearance, verify, isValidating } = useAccess();
-
   const [mounted, setMounted] = React.useState(false);
   const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
   const [loadingContent, setLoadingContent] = React.useState(false);
@@ -88,7 +120,7 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) =
     setLoadingContent(true);
 
     try {
-      // doc.slug is ALWAYS bare. API should accept bare slugs.
+      // doc.slug is guaranteed bare, so no %2Fcanon%2F nonsense
       const res = await fetch(`/api/canon/${encodeURIComponent(doc.slug)}`);
       const json = await res.json().catch(() => null);
       if (res.ok && json?.source) setSource(json.source);
@@ -147,7 +179,7 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) =
                   message="This foundational brief is restricted to members of the Inner Circle."
                   requiredTier={doc.accessLevel}
                   onUnlocked={() => verify()}
-                  onGoToJoin={() => safeClientRedirect("/inner-circle")}
+                  onGoToJoin={() => window.location.assign("/inner-circle")}
                 />
               ) : (
                 <div className="relative min-h-[400px]">
@@ -185,9 +217,7 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) =
                   </Link>
                 ) : (
                   <div className="bg-black p-8 opacity-20 border-r border-white/5">
-                    <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-zinc-800">
-                      Origin Point
-                    </div>
+                    <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-zinc-800">Origin Point</div>
                   </div>
                 )}
 
@@ -202,9 +232,7 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) =
                   </Link>
                 ) : (
                   <div className="bg-black p-8 opacity-20 text-right">
-                    <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-zinc-800">
-                      Terminal Dispatch
-                    </div>
+                    <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-zinc-800">Terminal Dispatch</div>
                   </div>
                 )}
               </nav>
@@ -216,17 +244,18 @@ const CanonSlugPage: NextPage<Props> = ({ doc, initialLocked, initialSource }) =
   );
 };
 
-/* -----------------------------------------------------------------------------
-  STATIC PATHS
------------------------------------------------------------------------------ */
+// ---------------------------------------------------------------------------
+// SSG
+// ---------------------------------------------------------------------------
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const canons = getAllCanons() || [];
 
   const paths = canons
     .filter((d: any) => !d?.draft)
     .map((d: any) => {
-      const raw = String(d?.slug || d?._raw?.flattenedPath || "");
-      const bare = stripCanonPrefix(raw);
+      const raw = d?.slug || d?._raw?.flattenedPath || "";
+      const bare = normalizeCanonBareSlug(raw);
       return bare ? { params: { slug: bare } } : null;
     })
     .filter(Boolean) as { params: { slug: string } }[];
@@ -234,70 +263,61 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 };
 
-/* -----------------------------------------------------------------------------
-  STATIC PROPS
------------------------------------------------------------------------------ */
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const incoming = String(params?.slug || "");
-  const slug = stripCanonPrefix(incoming);
-  if (!slug) return { notFound: true };
+  const bare = normalizeCanonBareSlug(params?.slug);
 
-  // ✅ IMPORTANT: never try "canon/canon/...".
-  // If getDocBySlug is robust, these two are enough.
-  const rawDoc = getDocBySlug(`canon/${slug}`) || getDocBySlug(slug);
+  if (!bare) return { notFound: true };
+
+  // Canon lookup — try bare, then canon/<bare> (your content patterns vary)
+  const rawDoc =
+    getDocBySlug(`canon/${bare}`) ||
+    getDocBySlug(bare) ||
+    getDocBySlug(`canon/canon/${bare}`); // legacy safety
 
   if (!rawDoc || rawDoc?.draft) return { notFound: true };
 
   const accessLevel = (rawDoc.accessLevel || "inner-circle") as Tier;
   const initialLocked = accessLevel !== "public";
 
-  const mdxRaw = getRawBody(rawDoc);
+  const mdxRaw = rawDoc?.body?.raw || rawDoc?.content || "";
+  const initialSource = initialLocked ? null : await prepareMDX(mdxRaw || " ");
 
-  let initialSource: MDXRemoteSerializeResult | null = null;
-  if (!initialLocked) {
-    initialSource = await prepareMDX(mdxRaw || " ");
-  }
-
-  // Build navigation using BARE slugs only
   const all = (getAllCanons() || [])
     .filter((d: any) => !d?.draft)
     .map((d: any) => {
-      const raw = String(d?.slug || d?._raw?.flattenedPath || "");
-      return { ...d, __bare: stripCanonPrefix(raw) };
+      const b = normalizeCanonBareSlug(d?.slug || d?._raw?.flattenedPath || "");
+      return { ...d, __bare: b };
     })
-    .filter((d: any) => typeof d.__bare === "string" && d.__bare.length > 0);
+    .filter((d: any) => Boolean(d.__bare));
 
-  const idx = all.findIndex((d: any) => d.__bare === slug);
+  const idx = all.findIndex((d: any) => d.__bare === bare);
 
   const doc: CanonDoc = {
     title: rawDoc.title || "Institutional Brief",
-    slug, // ✅ bare
-    href: joinHref("canon", slug), // ✅ joinHref is idempotent
+    slug: bare,
+    href: normalizeCanonHref(bare),
     accessLevel,
+
     excerpt: rawDoc.excerpt || null,
     description: rawDoc.description || null,
     date: rawDoc.date ? String(rawDoc.date) : null,
+
     coverImage: resolveDocCoverImage(rawDoc),
     category: rawDoc.category || null,
     tags: Array.isArray(rawDoc.tags) ? rawDoc.tags : [],
     author: rawDoc.author || "Abraham of London",
-    nextDoc:
-      idx >= 0 && all[idx + 1]
-        ? { title: String(all[idx + 1]?.title || "Next"), href: joinHref("canon", String(all[idx + 1].__bare)) }
-        : null,
-    prevDoc:
-      idx > 0 && all[idx - 1]
-        ? { title: String(all[idx - 1]?.title || "Previous"), href: joinHref("canon", String(all[idx - 1].__bare)) }
-        : null,
+
+    nextDoc: all[idx + 1]
+      ? { title: all[idx + 1].title, href: normalizeCanonHref(all[idx + 1].__bare) }
+      : null,
+
+    prevDoc: all[idx - 1]
+      ? { title: all[idx - 1].title, href: normalizeCanonHref(all[idx - 1].__bare) }
+      : null,
   };
 
   return {
-    props: sanitizeData({
-      doc,
-      initialLocked,
-      initialSource: initialLocked ? null : initialSource,
-      mdxRaw,
-    }),
+    props: sanitizeData({ doc, initialLocked, initialSource, mdxRaw }),
     revalidate: 1800,
   };
 };
