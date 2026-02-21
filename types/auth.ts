@@ -1,3 +1,5 @@
+// types/auth.ts
+
 export type UserRole = 
   | 'guest' 
   | 'viewer' 
@@ -7,6 +9,18 @@ export type UserRole =
   | 'editor' 
   | 'admin' 
   | 'founder';
+
+// ✅ Add this User interface
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  permissions?: string[];
+  membershipDate?: string;
+  lastAccess?: string;
+  image?: string;
+}
 
 /**
  * STRATEGIC HIERARCHY
@@ -32,7 +46,7 @@ export const CONTENT_ACCESS = {
   'member': ['member', 'patron', 'inner-circle', 'editor', 'admin', 'founder'],
   'patron': ['patron', 'inner-circle', 'editor', 'admin', 'founder'],
   'inner-circle': ['inner-circle', 'editor', 'admin', 'founder'],
-  'restricted': ['admin', 'founder'], // Directorate Level Only
+  'restricted': ['admin', 'founder'],
   'admin': ['admin', 'founder'],
   'editor': ['editor', 'admin', 'founder']
 } as const;
