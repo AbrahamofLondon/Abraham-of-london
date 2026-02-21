@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Search, Command, X, Shield, FileText, ArrowRight, Terminal, Sparkles, Crown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import clsx from "clsx";
 
 // Safe navigation that works in both App Router and Pages Router (no hooks, no router dependency)
@@ -12,10 +12,17 @@ function safeNavigate(href: string) {
   window.location.assign(href);
 }
 
-// Luxury animation variants
-const fadeIn = {
+// ✅ FIX: Properly typed animation variants
+const fadeIn: Variants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.6, 
+      ease: [0.22, 1, 0.36, 1] as const // Type assertion for the ease array
+    } 
+  },
 };
 
 export default function RegistrySearch() {

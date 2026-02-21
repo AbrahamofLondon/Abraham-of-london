@@ -66,14 +66,9 @@ async function getRedisClient(): Promise<RedisClient | null> {
     if (!url || !token) return null;
 
     try {
-      // ✅ Edge-safe dynamic import
-      if (isEdgeRuntime()) {
-        const { Redis } = await import("@upstash/redis");
-        return new Redis({ url, token }) as unknown as RedisClient;
-      }
-
-      // ✅ Node-only dynamic import (edge bundler never sees it)
-      const { Redis } = await import("@upstash/redis/nodejs");
+      // ✅ FIX: Use unified import - @upstash/redis works in both runtimes
+      // The package auto-detects the environment, no need for /nodejs subpath
+      const { Redis } = await import("@upstash/redis");
       return new Redis({ url, token }) as unknown as RedisClient;
     } catch (error) {
       if (process.env.NODE_ENV === "development") {

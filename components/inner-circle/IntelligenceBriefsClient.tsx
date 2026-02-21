@@ -7,15 +7,22 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { BRIEF_REGISTRY } from "@/lib/briefs/registry";
 
 export default function IntelligenceBriefsClient() {
-  // ✅ Defensive: in edge/prerender weirdness, don’t destructure undefined
+  // ✅ Defensive: in edge/prerender weirdness, don't destructure undefined
   const sessionHook = useSession?.();
   const session = sessionHook?.data ?? null;
   const status = sessionHook?.status ?? "unauthenticated";
 
-  const { toast } = useToast();
+  // ✅ FIX: useToast returns methods directly, not a toast object
+  const toast = useToast(); // Returns { success, error, warning, info, toasts, addToast, removeToast }
+  
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<string>("All");
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const categories = React.useMemo(
     () => ["All", ...Array.from(new Set(BRIEF_REGISTRY.map((b) => b.series)))],
@@ -33,6 +40,8 @@ export default function IntelligenceBriefsClient() {
 
   const handleDownload = async (briefId: string) => {
     setDownloadingId(briefId);
+    
+    // ✅ Use toast methods directly
     toast.info("Authorizing Access", "Verifying institutional clearance...");
 
     try {
@@ -58,8 +67,16 @@ export default function IntelligenceBriefsClient() {
     }
   };
 
-  // If you want to hard-block unauthenticated users, do it here (client-safe)
-  if (status === "loading") return <LoadingSpinner size="lg" message="Decrypting Portal..." />;
+  // During SSR/build, show minimal shell
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-[#050505]" />
+    );
+  }
+
+  if (status === "loading") {
+    return <LoadingSpinner size="lg" message="Decrypting Portal..." />;
+  }
 
   return (
     <main className="min-h-screen bg-[#050505] text-zinc-400 pb-32">

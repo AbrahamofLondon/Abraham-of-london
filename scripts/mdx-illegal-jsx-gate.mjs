@@ -11,13 +11,22 @@ function stripStrippedMarkers(s) {
   return s.replace(/\{\/\*\s*stripped: duplicate frontmatter block\s*\*\/\}/g, "");
 }
 
-function getFrontmatterBlocks(s) {
-  // Strict: frontmatter blocks starting at line boundary
-  const re = /^---\s*\n[\s\S]*?\n---\s*\n?/gm;
-  return s.match(re) || [];
+/**
+ * SAFE FRONTMATTER DETECTION - ONLY at the very top of the file
+ * This prevents matching markdown horizontal rules (---) in the body
+ */
+function getTopFrontmatter(s) {
+  // Only match if the file STARTS with frontmatter
+  if (!s.startsWith("---\n") && !s.startsWith("---\r\n")) return null;
+  
+  // Capture ONLY top-of-file frontmatter blocks
+  const fmRegex = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
+  const match = s.match(fmRegex);
+  return match ? match[0] : null;
 }
 
 function hasContentBeforeFirstFrontmatter(s) {
+  // This is now a safeguard, but with our safe detection, it's rarely needed
   const idx = s.indexOf("---");
   if (idx === -1) return false;
   const before = s.slice(0, idx);
@@ -25,57 +34,64 @@ function hasContentBeforeFirstFrontmatter(s) {
 }
 
 function moveLeadingContentBelowFrontmatter(s) {
-  const blocks = getFrontmatterBlocks(s);
-  if (!blocks.length) return s;
+  // Only use this if absolutely necessary - better to fail than mangle
+  const firstFm = getTopFrontmatter(s);
+  if (!firstFm) return s;
 
-  const first = blocks[0];
-  const firstStart = s.indexOf(first);
+  const firstStart = s.indexOf(firstFm);
   if (firstStart !== 0) {
-    // There is leading content before the first FM block
     const leading = s.slice(0, firstStart).trimEnd();
-    const rest = s.slice(firstStart + first.length);
-
-    // Put leading content after frontmatter with spacing
-    return `${first}\n${leading}\n\n${rest.trimStart()}`;
+    const rest = s.slice(firstStart + firstFm.length);
+    return `${firstFm}\n${leading}\n\n${rest.trimStart()}`;
   }
   return s;
 }
 
-function keepOnlyFirstFrontmatter(s) {
-  const blocks = getFrontmatterBlocks(s);
-  if (blocks.length <= 1) return s;
+/**
+ * SAFE duplicate frontmatter removal - ONLY removes if duplicate is at the top
+ */
+function removeDuplicateFrontmatter(s) {
+  const firstFm = getTopFrontmatter(s);
+  if (!firstFm) return s;
 
-  const first = blocks[0];
-  // Remove all frontmatter blocks
-  const body = s.replace(/^---\s*\n[\s\S]*?\n---\s*\n?/gm, "").trimStart();
-  return `${first}\n${body}`;
+  const afterFirst = s.slice(firstFm.length);
+  const secondFm = getTopFrontmatter(afterFirst);
+  
+  if (secondFm) {
+    // Remove the duplicate and any content between (though shouldn't exist)
+    const rest = afterFirst.slice(secondFm.length);
+    return firstFm + rest;
+  }
+  
+  return s;
 }
 
 function looksLikeYamlKeyLine(line) {
-  // e.g. "title: X" or "tags:" etc.
   return /^[A-Za-z0-9_-]+\s*:\s*.*$/.test(line);
 }
 
 function detectFatalPatterns(s) {
   const issues = [];
 
-  const blocks = getFrontmatterBlocks(s);
-  if (blocks.length >= 3) {
-    issues.push(`Found ${blocks.length} frontmatter blocks (>=3). This is almost certainly corruption.`);
-  }
-
-  // If file has frontmatter but also looks like YAML keys *before* it, that's usually broken paste.
+  // Check for content that looks like YAML before any frontmatter
   const idx = s.indexOf("---");
   if (idx !== -1) {
-    const before = s.slice(0, idx).split("\n").map((l) => l.trim()).filter(Boolean);
-    const yamlish = before.filter((l) => looksLikeYamlKeyLine(l));
+    const before = s.slice(0, idx).split("\n").map(l => l.trim()).filter(Boolean);
+    const yamlish = before.filter(l => looksLikeYamlKeyLine(l));
     if (yamlish.length) {
       issues.push(`YAML-like keys found before first frontmatter: ${yamlish.slice(0, 3).join(" | ")}${yamlish.length > 3 ? " ..." : ""}`);
     }
   }
 
-  // If there's no frontmatter at all, we don't fail here (some MDX might be allowed),
-  // but you can tighten this if your system requires FM always.
+  // Check for multiple frontmatter blocks (now only relevant if they're truly duplicated)
+  const firstFm = getTopFrontmatter(s);
+  if (firstFm) {
+    const afterFirst = s.slice(firstFm.length);
+    if (getTopFrontmatter(afterFirst)) {
+      issues.push("Duplicate frontmatter blocks detected at top of file");
+    }
+  }
+
   return issues;
 }
 
@@ -91,20 +107,22 @@ async function run() {
     const original = fs.readFileSync(file, "utf8");
     let updated = original;
 
+    // Remove any leftover marker comments (harmless)
     updated = stripStrippedMarkers(updated);
 
-    // If there is content before frontmatter, reposition it (safer than leaving it to break parsers)
-    if (hasContentBeforeFirstFrontmatter(updated)) {
-      updated = moveLeadingContentBelowFrontmatter(updated);
+    // SAFELY handle duplicate frontmatter at the top only
+    updated = removeDuplicateFrontmatter(updated);
+
+    // Only reposition if there's truly content before frontmatter (rare)
+    if (hasContentBeforeFirstFrontmatter(updated) && !getTopFrontmatter(updated)) {
+      // This is a red flag - better to flag than auto-fix
+      const issues = detectFatalPatterns(updated);
+      if (issues.length) {
+        fatal.push({ file, issues });
+      }
     }
 
-    // If duplicate frontmatter blocks exist, keep only the first
-    const fmBlocks = getFrontmatterBlocks(updated);
-    if (fmBlocks.length > 1) {
-      updated = keepOnlyFirstFrontmatter(updated);
-    }
-
-    // Re-check fatal patterns after clean
+    // Check for fatal patterns after cleaning
     const issues = detectFatalPatterns(updated);
     if (issues.length) {
       fatal.push({ file, issues });
