@@ -4,44 +4,44 @@ import clsx from "clsx";
 
 type CalloutType = "info" | "note" | "success" | "warning" | "danger";
 
-const STYLES: Record<
+const TOKENS: Record<
   CalloutType,
-  { rail: string; badge: string; title: string; body: string; glow: string }
+  { ring: string; bg: string; title: string; accent: string; icon: string }
 > = {
   info: {
-    rail: "from-emerald-300/90 via-emerald-400/70 to-amber-300/80",
-    badge: "bg-white/10 text-emerald-100 ring-1 ring-white/12",
+    ring: "border-white/10",
+    bg: "bg-gradient-to-b from-white/[0.06] to-black/[0.40]",
     title: "text-white",
-    body: "text-white/90",
-    glow: "shadow-[0_24px_70px_-40px_rgba(0,0,0,0.95)]",
+    accent: "text-[#D6B25E]",
+    icon: "bg-[#D6B25E]",
   },
   note: {
-    rail: "from-white/70 via-white/25 to-amber-300/70",
-    badge: "bg-white/10 text-white/90 ring-1 ring-white/12",
+    ring: "border-white/10",
+    bg: "bg-gradient-to-b from-white/[0.07] to-black/[0.45]",
     title: "text-white",
-    body: "text-white/90",
-    glow: "shadow-[0_24px_70px_-40px_rgba(0,0,0,0.95)]",
+    accent: "text-[#D6B25E]",
+    icon: "bg-[#D6B25E]",
   },
   success: {
-    rail: "from-emerald-300/90 via-emerald-400/70 to-emerald-200/70",
-    badge: "bg-emerald-500/10 text-emerald-100 ring-1 ring-emerald-300/15",
+    ring: "border-emerald-200/15",
+    bg: "bg-gradient-to-b from-emerald-200/[0.06] to-black/[0.45]",
     title: "text-white",
-    body: "text-white/90",
-    glow: "shadow-[0_24px_70px_-40px_rgba(0,0,0,0.95)]",
+    accent: "text-emerald-200",
+    icon: "bg-emerald-200",
   },
   warning: {
-    rail: "from-amber-300/90 via-amber-400/60 to-amber-200/70",
-    badge: "bg-amber-500/10 text-amber-100 ring-1 ring-amber-300/15",
+    ring: "border-amber-200/15",
+    bg: "bg-gradient-to-b from-amber-200/[0.06] to-black/[0.45]",
     title: "text-white",
-    body: "text-white/90",
-    glow: "shadow-[0_24px_70px_-40px_rgba(0,0,0,0.95)]",
+    accent: "text-amber-200",
+    icon: "bg-amber-200",
   },
   danger: {
-    rail: "from-red-300/90 via-red-400/60 to-amber-300/70",
-    badge: "bg-red-500/10 text-red-100 ring-1 ring-red-300/15",
+    ring: "border-rose-200/15",
+    bg: "bg-gradient-to-b from-rose-200/[0.06] to-black/[0.45]",
     title: "text-white",
-    body: "text-white/90",
-    glow: "shadow-[0_24px_70px_-40px_rgba(0,0,0,0.95)]",
+    accent: "text-rose-200",
+    icon: "bg-rose-200",
   },
 };
 
@@ -56,75 +56,42 @@ export default function Callout({
   children: React.ReactNode;
   className?: string;
 }) {
-  const s = STYLES[type];
+  const t = TOKENS[type];
 
   return (
     <aside
       className={clsx(
-        "not-prose relative my-8 overflow-hidden rounded-2xl",
-        // Premium frame (Harrods: black lacquer + quiet border)
-        "bg-gradient-to-b from-[#0B0B0C] to-[#070707]",
-        "ring-1 ring-white/10",
-        "px-6 py-5 md:px-7 md:py-6",
-        s.glow,
+        "not-prose relative my-10 overflow-hidden rounded-3xl border p-7",
+        "shadow-[0_30px_80px_-50px_rgba(0,0,0,0.85)]",
+        "backdrop-blur-xl",
+        t.ring,
+        t.bg,
         className
       )}
     >
-      {/* Gold/green rail */}
+      {/* subtle top sheen */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-white/15" />
+      <div className="pointer-events-none absolute -top-24 right-[-20%] h-64 w-64 rounded-full bg-white/[0.06] blur-3xl" />
+
+      <div className="mb-4 flex items-center gap-3">
+        <span className={clsx("h-2.5 w-2.5 rounded-full", t.icon)} />
+        <div className={clsx("text-[11px] font-mono font-bold uppercase tracking-[0.28em]", t.accent)}>
+          {title ?? type}
+        </div>
+      </div>
+
       <div
         className={clsx(
-          "absolute left-0 top-0 h-full w-[3px] md:w-[4px]",
-          "bg-gradient-to-b",
-          s.rail
+          "text-[15px] leading-[1.9] text-white/90",
+          "prose prose-invert max-w-none",
+          "[&_a]:text-[#E6C77A] [&_a:hover]:text-[#F3D98C]",
+          "[&_strong]:text-white [&_em]:text-white/90",
+          "[&_hr]:border-white/10",
+          "[&_code]:text-[#E6C77A] [&_code]:bg-white/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded"
         )}
-      />
-
-      {/* Subtle inner sheen */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_0%,rgba(255,255,255,0.06),transparent_55%)]" />
-
-      <div className="relative flex items-start gap-3">
-        <span
-          className={clsx(
-            "mt-0.5 inline-flex select-none items-center rounded-full px-2.5 py-1",
-            "text-[11px] font-semibold tracking-[0.16em] uppercase",
-            s.badge
-          )}
-        >
-          {type}
-        </span>
-
-        <div className="min-w-0 flex-1">
-          <div
-            className={clsx(
-              "text-[15px] md:text-[16px] font-semibold",
-              "tracking-tight",
-              s.title
-            )}
-          >
-            {title ?? toTitle(type)}
-          </div>
-
-          {/* Critical: no wrapper opacity that kills contrast */}
-          <div
-            className={clsx(
-              "mt-2 text-[15px] leading-[1.75]",
-              s.body,
-              // Links: Harrods gold
-              "[&_a]:text-amber-200 [&_a]:underline [&_a]:underline-offset-4",
-              "[&_a:hover]:text-amber-100",
-              // Lists + emphasis
-              "[&_strong]:text-white [&_em]:text-white/90",
-              "[&_code]:rounded [&_code]:bg-white/8 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-white"
-            )}
-          >
-            {children}
-          </div>
-        </div>
+      >
+        {children}
       </div>
     </aside>
   );
-}
-
-function toTitle(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

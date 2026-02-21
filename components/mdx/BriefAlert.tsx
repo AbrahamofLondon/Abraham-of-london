@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ShieldAlert, Info, AlertTriangle, AlertCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 
 type Props = {
   title?: string;
@@ -9,6 +9,33 @@ type Props = {
   icon?: React.ReactNode;
 };
 
+const T = {
+  info: {
+    ring: "border-white/10",
+    bg: "bg-gradient-to-b from-white/[0.06] to-black/[0.45]",
+    label: "text-[#D6B25E]",
+    icon: <Info className="h-4 w-4 text-[#D6B25E]" />,
+  },
+  warn: {
+    ring: "border-amber-200/15",
+    bg: "bg-gradient-to-b from-amber-200/[0.06] to-black/[0.45]",
+    label: "text-amber-200",
+    icon: <AlertTriangle className="h-4 w-4 text-amber-200" />,
+  },
+  danger: {
+    ring: "border-rose-200/15",
+    bg: "bg-gradient-to-b from-rose-200/[0.06] to-black/[0.45]",
+    label: "text-rose-200",
+    icon: <AlertCircle className="h-4 w-4 text-rose-200" />,
+  },
+  success: {
+    ring: "border-emerald-200/15",
+    bg: "bg-gradient-to-b from-emerald-200/[0.06] to-black/[0.45]",
+    label: "text-emerald-200",
+    icon: <CheckCircle2 className="h-4 w-4 text-emerald-200" />,
+  },
+} as const;
+
 export default function BriefAlert({
   title = "Brief Alert",
   level = "info",
@@ -16,36 +43,32 @@ export default function BriefAlert({
   className = "",
   icon,
 }: Props) {
-  const styles = {
-    info: {
-      container: "border-blue-500/25 bg-blue-500/10 text-blue-200",
-      icon: <Info className="h-4 w-4" />,
-    },
-    warn: {
-      container: "border-amber-500/25 bg-amber-500/10 text-amber-200",
-      icon: <AlertTriangle className="h-4 w-4" />,
-    },
-    danger: {
-      container: "border-rose-500/25 bg-rose-500/10 text-rose-200",
-      icon: <AlertCircle className="h-4 w-4" />,
-    },
-    success: {
-      container: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200",
-      icon: <ShieldAlert className="h-4 w-4" />,
-    },
-  };
-
-  const selected = styles[level] || styles.info;
+  const s = T[level] ?? T.info;
 
   return (
-    <div className={`rounded-2xl border p-5 ${selected.container} ${className}`}>
+    <div
+      className={[
+        "not-prose my-8 overflow-hidden rounded-3xl border p-6 backdrop-blur-xl",
+        "shadow-[0_26px_70px_-50px_rgba(0,0,0,0.85)]",
+        s.ring,
+        s.bg,
+        className,
+      ].join(" ")}
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-white/15" />
+
       <div className="flex items-center gap-3">
-        {icon || selected.icon}
-        <div className="text-[11px] font-mono font-bold uppercase tracking-[0.25em]">
+        {icon ?? s.icon}
+        <div className={["text-[11px] font-mono font-bold uppercase tracking-[0.28em]", s.label].join(" ")}>
           {title}
         </div>
       </div>
-      {children ? <div className="mt-3 text-sm text-white/80 prose prose-invert max-w-none">{children}</div> : null}
+
+      {children ? (
+        <div className="mt-4 prose prose-invert max-w-none text-[15px] leading-[1.9] text-white/90">
+          {children}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,16 +1,43 @@
 /* components/Frameworks/DecisionMemo.tsx */
 import React from 'react';
 import { FileText, Printer, ShieldCheck } from 'lucide-react';
-import type { Framework } from '@/lib/resources/strategic-frameworks.static';
+
+// ✅ Only type what DecisionMemo actually uses
+export type FrameworkForMemo = {
+  slug: string;
+  title: string;
+
+  // Optional fields with safe defaults
+  key?: string;
+  oneLiner?: string;
+  tier?: string[];
+  
+  // Operating logic with safe fallback
+  operatingLogic?: Array<{
+    title: string;
+    body: string;
+  }>;
+  
+  // Next steps with safe fallback
+  whatToDoNext?: string[];
+
+  // Keep any other fields DecisionMemo actually reads
+  [key: string]: any; // Allow other fields to pass through
+};
 
 interface DecisionMemoProps {
-  framework: Framework;
+  framework: FrameworkForMemo;
 }
 
 export const DecisionMemo: React.FC<DecisionMemoProps> = ({ framework }) => {
   const handlePrint = () => {
     window.print();
   };
+
+  // Safe defaults
+  const tier = framework.tier?.join(' / ') || 'UNCLASSIFIED';
+  const operatingLogic = framework.operatingLogic || [];
+  const whatToDoNext = framework.whatToDoNext || [];
 
   return (
     <div className="group">
@@ -40,7 +67,7 @@ export const DecisionMemo: React.FC<DecisionMemoProps> = ({ framework }) => {
           <div>
             <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Decision Memo</h1>
             <div className="text-xs font-mono uppercase tracking-widest text-zinc-600">
-              Institutional ID: {framework.key} // {new Date().toLocaleDateString()}
+              Institutional ID: {framework.key || framework.slug} // {new Date().toLocaleDateString()}
             </div>
           </div>
           <div className="text-right">
@@ -57,43 +84,49 @@ export const DecisionMemo: React.FC<DecisionMemoProps> = ({ framework }) => {
           </div>
           <div>
             <span className="block font-bold text-zinc-400 mb-1">CLASSIFICATION</span>
-            <span className="uppercase">{framework.tier.join(' / ')}</span>
+            <span className="uppercase">{tier}</span>
           </div>
         </div>
 
         {/* Summary Directive */}
-        <section className="mb-10">
-          <h2 className="text-lg font-bold uppercase mb-4 bg-black text-white px-2 py-1 inline-block">01. Executive Summary</h2>
-          <p className="text-md leading-relaxed italic border-l-4 border-zinc-300 pl-6">
-            "{framework.oneLiner}"
-          </p>
-        </section>
+        {framework.oneLiner && (
+          <section className="mb-10">
+            <h2 className="text-lg font-bold uppercase mb-4 bg-black text-white px-2 py-1 inline-block">01. Executive Summary</h2>
+            <p className="text-md leading-relaxed italic border-l-4 border-zinc-300 pl-6">
+              "{framework.oneLiner}"
+            </p>
+          </section>
+        )}
 
         {/* Strategic Logic */}
-        <section className="mb-10">
-          <h2 className="text-lg font-bold uppercase mb-4 border-b-2 border-black">02. Institutional Logic</h2>
-          <div className="grid grid-cols-2 gap-8">
-            {framework.operatingLogic.slice(0, 2).map((logic, i) => (
-              <div key={i}>
-                <h3 className="font-bold text-sm mb-2 uppercase">{logic.title}</h3>
-                <p className="text-sm text-zinc-700">{logic.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {operatingLogic.length > 0 && (
+          <section className="mb-10">
+            <h2 className="text-lg font-bold uppercase mb-4 border-b-2 border-black">02. Institutional Logic</h2>
+            <div className="grid grid-cols-2 gap-8">
+              {operatingLogic.slice(0, 2).map((logic, i) => (
+                <div key={i}>
+                  <h3 className="font-bold text-sm mb-2 uppercase">{logic.title}</h3>
+                  <p className="text-sm text-zinc-700">{logic.body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Mandate / Next Steps */}
-        <section className="mb-12">
-          <h2 className="text-lg font-bold uppercase mb-4 border-b-2 border-black">03. Board Mandate</h2>
-          <ul className="space-y-4">
-            {framework.whatToDoNext.map((step, i) => (
-              <li key={i} className="flex gap-4 items-start">
-                <span className="font-mono font-bold text-zinc-400">[{i+1}]</span>
-                <span className="text-sm">{step}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        {whatToDoNext.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-lg font-bold uppercase mb-4 border-b-2 border-black">03. Board Mandate</h2>
+            <ul className="space-y-4">
+              {whatToDoNext.map((step, i) => (
+                <li key={i} className="flex gap-4 items-start">
+                  <span className="font-mono font-bold text-zinc-400">[{i+1}]</span>
+                  <span className="text-sm">{step}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Signature Block */}
         <div className="mt-auto pt-12 border-t border-zinc-200 flex justify-between items-center">

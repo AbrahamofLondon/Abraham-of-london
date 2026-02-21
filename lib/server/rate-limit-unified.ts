@@ -35,27 +35,75 @@ export const RATE_LIMIT_CONFIGS: Record<string, RateLimitOptions> = {
 
 const memoryStore = new Map<string, { count: number; resetTime: number }>();
 
-// -------------------- Upstash Limiter Factory --------------------
+// -------------------- Runtime Detection --------------------
 
-async function getUpstashLimiter(windowMs: number, limit: number) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
+function isEdgeRuntime(): boolean {
+  return (
+    process.env.NEXT_RUNTIME === "edge" ||
+    typeof (globalThis as any).EdgeRuntime !== "undefined"
+  );
+}
+
+// -------------------- Lazy Redis Client --------------------
+
+type RedisClient = {
+  get: (key: string) => Promise<string | null>;
+  set: (key: string, value: string, opts?: any) => Promise<any>;
+  incr: (key: string) => Promise<number>;
+  expire: (key: string, seconds: number) => Promise<number>;
+  del: (key: string) => Promise<number>;
+};
+
+let redisClientPromise: Promise<RedisClient | null> | null = null;
+
+async function getRedisClient(): Promise<RedisClient | null> {
+  if (redisClientPromise) return redisClientPromise;
+
+  redisClientPromise = (async () => {
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+    
+    if (!url || !token) return null;
+
+    try {
+      // ✅ Edge-safe dynamic import
+      if (isEdgeRuntime()) {
+        const { Redis } = await import("@upstash/redis");
+        return new Redis({ url, token }) as unknown as RedisClient;
+      }
+
+      // ✅ Node-only dynamic import (edge bundler never sees it)
+      const { Redis } = await import("@upstash/redis/nodejs");
+      return new Redis({ url, token }) as unknown as RedisClient;
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[rate-limit] Redis unavailable, using memory fallback", error);
+      }
+      return null;
+    }
+  })();
+
+  return redisClientPromise;
+}
+
+// -------------------- Upstash Ratelimit Factory --------------------
+
+async function getUpstashRatelimit(windowMs: number, limit: number) {
+  const client = await getRedisClient();
+  if (!client) return null;
 
   try {
-    // ✅ FIX: Use edge-compatible import
-    const { Redis } = await import("@upstash/redis");
+    // Dynamic import for Ratelimit (edge-safe)
     const { Ratelimit } = await import("@upstash/ratelimit");
-
-    const redis = new Redis({ url, token });
+    
     return new Ratelimit({
-      redis,
+      redis: client as any,
       limiter: Ratelimit.slidingWindow(limit, `${Math.ceil(windowMs / 1000)} s`),
       analytics: false,
     });
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.warn("Upstash rate limit unavailable, using memory fallback", error);
+      console.warn("[rate-limit] Ratelimit unavailable, using memory fallback", error);
     }
     return null;
   }
@@ -102,10 +150,10 @@ export async function rateLimit(
   const now = Date.now();
 
   // Try Upstash (preferred)
-  const limiter = await getUpstashLimiter(options.windowMs, options.limit);
-  if (limiter) {
+  const ratelimit = await getUpstashRatelimit(options.windowMs, options.limit);
+  if (ratelimit) {
     try {
-      const { success, remaining, reset } = await limiter.limit(key);
+      const { success, remaining, reset } = await ratelimit.limit(key);
       const retryAfterMs = success ? 0 : Math.max(0, reset - now);
       return {
         allowed: success,
@@ -158,20 +206,23 @@ export async function resetRateLimit(
   options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
 ): Promise<boolean> {
   const key = `${options.keyPrefix ?? "rl"}:${identifier}`;
+  let deleted = false;
 
   // Try Upstash delete if configured
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) {
+  const client = await getRedisClient();
+  if (client) {
     try {
-      const { Redis } = await import("@upstash/redis");
-      await new Redis({ url, token }).del(key);
+      await client.del(key);
+      deleted = true;
     } catch {
       // ignore
     }
   }
 
-  return memoryStore.delete(key);
+  // Always delete from memory
+  const memoryDeleted = memoryStore.delete(key);
+  
+  return deleted || memoryDeleted;
 }
 
 export const unblock = resetRateLimit;
