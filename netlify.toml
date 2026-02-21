@@ -29,6 +29,11 @@
 [functions.emails]
   included_files = ["./emails/**"]
 
+[functions]
+  included_files = [
+    ".next/standalone/**",
+    ".next/static/**"
+
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"

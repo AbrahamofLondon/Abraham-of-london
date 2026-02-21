@@ -1,6 +1,7 @@
 // lib/server/rate-limit-unified.ts — DUAL RUNTIME (NODE + EDGE) HARDENED
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 // -------------------- Types --------------------
 
@@ -42,7 +43,7 @@ async function getUpstashLimiter(windowMs: number, limit: number) {
   if (!url || !token) return null;
 
   try {
-    // Dynamic imports – safe for both Node.js and Edge runtimes
+    // ✅ FIX: Use edge-compatible import
     const { Redis } = await import("@upstash/redis");
     const { Ratelimit } = await import("@upstash/ratelimit");
 
@@ -53,7 +54,9 @@ async function getUpstashLimiter(windowMs: number, limit: number) {
       analytics: false,
     });
   } catch (error) {
-    console.warn("Upstash rate limit unavailable, using memory fallback", error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Upstash rate limit unavailable, using memory fallback", error);
+    }
     return null;
   }
 }
@@ -96,13 +99,14 @@ export async function rateLimit(
   options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
 ): Promise<RateLimitResult> {
   const key = `${options.keyPrefix ?? "rl"}:${identifier}`;
+  const now = Date.now();
 
   // Try Upstash (preferred)
   const limiter = await getUpstashLimiter(options.windowMs, options.limit);
   if (limiter) {
     try {
       const { success, remaining, reset } = await limiter.limit(key);
-      const retryAfterMs = success ? 0 : Math.max(0, reset - Date.now());
+      const retryAfterMs = success ? 0 : Math.max(0, reset - now);
       return {
         allowed: success,
         remaining,
@@ -118,7 +122,6 @@ export async function rateLimit(
   }
 
   // Memory fallback (deterministic)
-  const now = Date.now();
   let record = memoryStore.get(key);
   if (!record || now > record.resetTime) {
     record = { count: 0, resetTime: now + options.windowMs };
