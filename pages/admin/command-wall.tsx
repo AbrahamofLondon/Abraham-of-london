@@ -5,7 +5,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { withAdminAuth } from "@/lib/auth/withAdminAuth";
 
 import { KnowledgeGraph } from "@/components/Intelligence/KnowledgeGraph";
-import { SecurityDashboard } from "@/components/Admin/SecurityDashboard";
+import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
 import { DiscoveryOverlay } from "@/components/Intelligence/DiscoveryOverlay";
 
 import { ShieldCheck, Search, FileText, Settings, Bell, Cpu } from "lucide-react";
