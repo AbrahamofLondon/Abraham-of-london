@@ -44,6 +44,25 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 // -----------------------------
+// Adapters (MDX authoring-safe)
+// -----------------------------
+const DividerAdapter: ComponentType<any> = (props: AnyProps) => {
+  return (
+    <div className={cx("my-14", props?.className)}>
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    </div>
+  );
+};
+
+const CalloutAdapter: ComponentType<any> = (props: AnyProps) => {
+  // Supports both authoring styles:
+  // <Callout type="info" /> and <Callout variant="info" />
+  const variant = props?.variant ?? props?.type ?? "info";
+  const { type, ...rest } = props; // strip type to avoid passing unknown props
+  return <Callout {...rest} variant={variant} />;
+};
+
+// -----------------------------
 // Atomic primitives (prose-safe)
 // -----------------------------
 const A: ComponentType<any> = (props: AnyProps) => {
@@ -53,7 +72,6 @@ const A: ComponentType<any> = (props: AnyProps) => {
     props.className
   );
 
-  // Internal / hash links
   if (href.startsWith("/") || href.startsWith("#")) {
     return (
       <Link href={href} className={className}>
@@ -62,7 +80,6 @@ const A: ComponentType<any> = (props: AnyProps) => {
     );
   }
 
-  // External link
   return (
     <a
       {...props}
@@ -143,19 +160,12 @@ const Hr: ComponentType<any> = (props: AnyProps) => (
 // -----------------------------
 // Institutional wrappers / aliases
 // -----------------------------
-const Divider: ComponentType<any> = (props: AnyProps) => (
-  <div className={cx("my-14", props?.className)}>
-    <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-  </div>
-);
-
 const CTAGroup = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={cx("flex flex-wrap gap-4 my-10", className)}>{children}</div>
 );
 
 // -----------------------------
 // Registry export (MDXRemote components)
-// NOTE: MDX tags are case-sensitive.
 // -----------------------------
 const mdxComponents: Record<string, ComponentType<any>> = {
   // Markdown primitives
@@ -176,7 +186,6 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   BrandFrame,
   BriefAlert,
   BriefSummaryCard,
-  Callout,
   Caption,
   CTA,
   CTAGroup,
@@ -199,18 +208,23 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   Step,
   Verse,
 
-  // Canon/Book tags used in your documents
-  Divider, // ✅ REAL Divider component
-  // Keep explicit duplicates for clarity + safety
-  Callout: Callout,
+  // ✅ Hard bindings (adapter-proof)
+  Callout: CalloutAdapter,
+  Divider: DividerAdapter,
+
+  // ✅ Extra safety for authoring mistakes / alternate casing
+  callout: CalloutAdapter as any,
+  divider: DividerAdapter as any,
+
+  // Keep explicit duplicates for clarity
   Note: Note,
   Quote: Quote,
 
-  // Backward-compat: if any doc uses <HR/> etc
+  // Backward-compat
   HR: Hr,
-  DividerLine: Divider,
-
-  // CTA fallbacks (some older docs reference these)
+  DividerLine: DividerAdapter,
+  
+  // CTA fallbacks
   FatherhoodCTA: CTA,
   LeadershipCTA: CTA,
   BrotherhoodCTA: CTA,
