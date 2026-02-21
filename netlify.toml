@@ -1,11 +1,8 @@
-# netlify.toml — FINALISED STRATEGIC VERSION (HARDENED FOR ABRAHAM OF LONDON)
+# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — CLEAN, SINGLE-SOURCE)
 
 [build]
   command = "pnpm install --frozen-lockfile && pnpm build:netlify"
   publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
@@ -17,10 +14,9 @@
 
   NETLIFY_USE_PNPM = "true"
   PNPM_FLAGS = "--frozen-lockfile"
-  NPM_FLAGS = "--version"
 
-  # MUST match package.json packageManager
-  PNPM_VERSION = "10.28.2"
+  # Must match package.json `packageManager`
+  PNPM_VERSION = "10.29.3"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -29,12 +25,12 @@
   package = "@netlify/plugin-emails"
 
 [functions.emails]
-  included_files = ["./emails/**"]
+  included_files = ["emails/**"]
 
 [functions]
   included_files = [
     ".next/standalone/**",
-    ".next/static/**"      # ✅ Fixed: Closing bracket added below
+    ".next/static/**"
   ]
 
 [context.production.environment]
@@ -54,13 +50,12 @@
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
 
+# Canonical host enforcement (no loops, no nonsense)
 [[redirects]]
-  from = "https://www.abrahamoflondon.org/*"
+  from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
-  status = 200
+  status = 301
   force = true
-  [redirects.conditions]
-    Host = ["abrahamoflondon.org"]
 
 [[redirects]]
   from = "/index.html"
