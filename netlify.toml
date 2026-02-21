@@ -1,4 +1,4 @@
-# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — INSTITUTIONAL BUILD)
+# netlify.toml — ABRAHAM OF LONDON (LEAN FUNCTIONS, NO 250MB BOMBS)
 
 [build]
   command = "pnpm build:netlify"
@@ -21,21 +21,23 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
+# ⚠️ CRITICAL: Do NOT globally attach .next/standalone or content/** to every function.
+# The Next plugin builds and packages the server handler correctly already.
+
 [functions]
-  node_bundler = "esbuild"
-  # 🛡️ STRATEGIC EXCLUSION:
-  # We exclude .next/static because it is served via CDN, not the function.
-  # We exclude sourcemaps and caches to stay under the 250MB limit.
+  # Leave bundling decisions to the Next plugin for server handler.
+  # Only keep general exclusions (if you need them at all).
   included_files = [
-    ".next/standalone/**",
-    "content/**",
     "!**/*.map",
     "!**/*.cache",
-    "!.next/static/**",
     "!**/node_modules/playwright/**",
-    "!**/node_modules/puppeteer/**"
+    "!**/node_modules/puppeteer/**",
+    "!**/node_modules/chrome-aws-lambda/**",
+    "!**/node_modules/aws-sdk/**"
   ]
 
+# If your emails function needs templates at runtime, scope it here.
+# This does NOT bloat every function—only the emails function.
 [functions.emails]
   included_files = ["emails/**"]
 

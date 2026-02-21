@@ -4,102 +4,123 @@ import glob from "fast-glob";
 
 const CONTENT_DIR = "content";
 
-// -----------------------------
-// Helpers
-// -----------------------------
-function stripStrippedMarkers(s) {
-  return s.replace(/\{\/\*\s*stripped: duplicate frontmatter block\s*\*\/\}/g, "");
+/**
+ * STRICT FRONTMATTER:
+ * - Only valid if it begins at the very start of the file.
+ * - Frontmatter ends at the next standalone --- line.
+ */
+function parseTopFrontmatter(src) {
+  // Normalize BOM
+  const s = src.replace(/^\uFEFF/, "");
+
+  // Must start with a FM fence line
+  if (!s.startsWith("---\n") && !s.startsWith("---\r\n")) {
+    return { hasFrontmatter: false, fm: "", body: s };
+  }
+
+  // Find closing fence line on its own line
+  // We search AFTER the opening fence.
+  const reClose = /\r?\n---\s*(?:\r?\n|$)/g;
+  reClose.lastIndex = 3; // after initial '---'
+  const m = reClose.exec(s);
+  if (!m) {
+    // Frontmatter started but never closed
+    return { hasFrontmatter: true, invalid: true, fm: "", body: s };
+  }
+
+  const fmEndIndex = reClose.lastIndex; // points just after closing fence line
+  const fm = s.slice(0, fmEndIndex);
+  const body = s.slice(fmEndIndex);
+  return { hasFrontmatter: true, invalid: false, fm, body };
 }
 
 /**
- * SAFE FRONTMATTER DETECTION - ONLY at the very top of the file
- * This prevents matching markdown horizontal rules (---) in the body
+ * Detect an IMMEDIATE duplicate frontmatter block at top,
+ * i.e. FM + optional whitespace + FM again.
+ * We remove only the second one.
  */
-function getTopFrontmatter(s) {
-  // Only match if the file STARTS with frontmatter
-  if (!s.startsWith("---\n") && !s.startsWith("---\r\n")) return null;
-  
-  // Capture ONLY top-of-file frontmatter blocks
-  const fmRegex = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
-  const match = s.match(fmRegex);
-  return match ? match[0] : null;
+function stripImmediateDuplicateFrontmatter(src) {
+  const p1 = parseTopFrontmatter(src);
+  if (!p1.hasFrontmatter) return { changed: false, out: src };
+  if (p1.invalid) {
+    return { changed: false, out: src, fatal: "Frontmatter starts but is not closed." };
+  }
+
+  const between = p1.body.match(/^\s*/)?.[0] ?? "";
+  const rest = p1.body.slice(between.length);
+
+  const p2 = parseTopFrontmatter(rest);
+  if (!p2.hasFrontmatter) return { changed: false, out: src };
+
+  if (p2.invalid) {
+    return { changed: false, out: src, fatal: "Duplicate frontmatter starts but is not closed." };
+  }
+
+  // Keep first FM, drop second FM, keep everything else
+  const out = p1.fm + "\n" + rest.slice(p2.fm.length).replace(/^\s+/, "");
+  return { changed: true, out };
 }
 
-function hasContentBeforeFirstFrontmatter(s) {
-  // This is now a safeguard, but with our safe detection, it's rarely needed
-  const idx = s.indexOf("---");
+/**
+ * If there is ANY non-whitespace content before the first FM fence,
+ * we do NOT attempt to "move it" (that is corruption). We fail.
+ */
+function hasNonWhitespaceBeforeFrontmatterFence(src) {
+  const idx = src.indexOf("\n---");
   if (idx === -1) return false;
-  const before = s.slice(0, idx);
+
+  // Check if there is any non-whitespace before the first fence line
+  // by finding the first fence at a line boundary.
+  const m = src.match(/(^|\r?\n)---\s*(\r?\n)/);
+  if (!m) return false;
+
+  const startIndex = m.index + (m[1] ? m[1].length : 0);
+  const before = src.slice(0, startIndex);
   return before.trim().length > 0;
 }
 
-function moveLeadingContentBelowFrontmatter(s) {
-  // Only use this if absolutely necessary - better to fail than mangle
-  const firstFm = getTopFrontmatter(s);
-  if (!firstFm) return s;
-
-  const firstStart = s.indexOf(firstFm);
-  if (firstStart !== 0) {
-    const leading = s.slice(0, firstStart).trimEnd();
-    const rest = s.slice(firstStart + firstFm.length);
-    return `${firstFm}\n${leading}\n\n${rest.trimStart()}`;
-  }
-  return s;
+function stripLegacyMarkers(src) {
+  return src.replace(/\{\/\*\s*stripped: duplicate frontmatter block\s*\*\/\}/g, "");
 }
 
-/**
- * SAFE duplicate frontmatter removal - ONLY removes if duplicate is at the top
- */
-function removeDuplicateFrontmatter(s) {
-  const firstFm = getTopFrontmatter(s);
-  if (!firstFm) return s;
-
-  const afterFirst = s.slice(firstFm.length);
-  const secondFm = getTopFrontmatter(afterFirst);
-  
-  if (secondFm) {
-    // Remove the duplicate and any content between (though shouldn't exist)
-    const rest = afterFirst.slice(secondFm.length);
-    return firstFm + rest;
-  }
-  
-  return s;
-}
-
-function looksLikeYamlKeyLine(line) {
-  return /^[A-Za-z0-9_-]+\s*:\s*.*$/.test(line);
-}
-
-function detectFatalPatterns(s) {
+function detectFatalIntegrityIssues(src) {
   const issues = [];
 
-  // Check for content that looks like YAML before any frontmatter
-  const idx = s.indexOf("---");
-  if (idx !== -1) {
-    const before = s.slice(0, idx).split("\n").map(l => l.trim()).filter(Boolean);
-    const yamlish = before.filter(l => looksLikeYamlKeyLine(l));
-    if (yamlish.length) {
-      issues.push(`YAML-like keys found before first frontmatter: ${yamlish.slice(0, 3).join(" | ")}${yamlish.length > 3 ? " ..." : ""}`);
-    }
+  // Leading content before FM (dangerous in Contentlayer)
+  if (hasNonWhitespaceBeforeFrontmatterFence(src)) {
+    issues.push("Non-whitespace content found before the first frontmatter fence. Fix the file manually.");
   }
 
-  // Check for multiple frontmatter blocks (now only relevant if they're truly duplicated)
-  const firstFm = getTopFrontmatter(s);
-  if (firstFm) {
-    const afterFirst = s.slice(firstFm.length);
-    if (getTopFrontmatter(afterFirst)) {
-      issues.push("Duplicate frontmatter blocks detected at top of file");
+  // FM opened but not closed
+  const top = parseTopFrontmatter(src);
+  if (top.hasFrontmatter && top.invalid) {
+    issues.push("Frontmatter fence opened but not properly closed.");
+  }
+
+  // More than 1 FM block that is NOT immediately duplicated (we do not auto-fix that)
+  // We scan only for FM-like blocks at line starts, but we refuse to touch body.
+  // If you intentionally have '---' in body, that's normal. We do NOT flag it.
+  // We only flag if we detect another FM block *near the top* after the first body begins with '---\n' again
+  // beyond whitespace and beyond immediate duplicate.
+  if (top.hasFrontmatter && !top.invalid) {
+    const body = top.body;
+
+    // If the body (after trimming only leading whitespace) starts with '---', that is likely a duplicate FM.
+    const trimmed = body.replace(/^\s+/, "");
+    if (trimmed.startsWith("---\n") || trimmed.startsWith("---\r\n")) {
+      // Our stripImmediateDuplicateFrontmatter handles immediate duplicates only.
+      // If it’s still here, it means there is something between them (content),
+      // and we refuse to guess intent.
+      issues.push("Possible second frontmatter block detected after content. Manual fix required (no auto-rewrite).");
     }
   }
 
   return issues;
 }
 
-// -----------------------------
-// Run
-// -----------------------------
 async function run() {
   const files = await glob([`${CONTENT_DIR}/**/*.mdx`], { dot: false });
+
   let patched = 0;
   const fatal = [];
 
@@ -107,23 +128,19 @@ async function run() {
     const original = fs.readFileSync(file, "utf8");
     let updated = original;
 
-    // Remove any leftover marker comments (harmless)
-    updated = stripStrippedMarkers(updated);
+    // 1) Strip legacy markers only (safe)
+    updated = stripLegacyMarkers(updated);
 
-    // SAFELY handle duplicate frontmatter at the top only
-    updated = removeDuplicateFrontmatter(updated);
-
-    // Only reposition if there's truly content before frontmatter (rare)
-    if (hasContentBeforeFirstFrontmatter(updated) && !getTopFrontmatter(updated)) {
-      // This is a red flag - better to flag than auto-fix
-      const issues = detectFatalPatterns(updated);
-      if (issues.length) {
-        fatal.push({ file, issues });
-      }
+    // 2) Remove ONLY immediate duplicate top-frontmatter
+    const dup = stripImmediateDuplicateFrontmatter(updated);
+    if (dup.fatal) {
+      fatal.push({ file, issues: [dup.fatal] });
+    } else if (dup.changed) {
+      updated = dup.out;
     }
 
-    // Check for fatal patterns after cleaning
-    const issues = detectFatalPatterns(updated);
+    // 3) Validate integrity (conservative)
+    const issues = detectFatalIntegrityIssues(updated);
     if (issues.length) {
       fatal.push({ file, issues });
     }
@@ -135,19 +152,15 @@ async function run() {
     }
   }
 
-  console.log(
-    `[MDX_GATE] Completed. Files scanned: ${files.length}. Files patched: ${patched}. Fatal: ${fatal.length}.`
-  );
+  console.log(`[MDX_GATE] Completed. Files scanned: ${files.length}. Files patched: ${patched}. Fatal: ${fatal.length}.`);
 
   if (fatal.length) {
     console.error("\n[MDX_GATE] Fatal MDX integrity issues detected:");
-    for (const f of fatal.slice(0, 20)) {
+    for (const f of fatal.slice(0, 25)) {
       console.error(`\n- ${f.file}`);
       for (const issue of f.issues) console.error(`  • ${issue}`);
     }
-    if (fatal.length > 20) {
-      console.error(`\n...and ${fatal.length - 20} more.`);
-    }
+    if (fatal.length > 25) console.error(`\n...and ${fatal.length - 25} more.`);
     process.exit(1);
   }
 }
