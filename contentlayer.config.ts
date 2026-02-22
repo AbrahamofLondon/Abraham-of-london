@@ -63,6 +63,7 @@ function asAccessLevel(v: unknown): AccessLevel {
   return "public";
 }
 
+// ✅ SINGLE DECLARATION - MOVED BEFORE ANY USAGE
 function safeRawBody(doc: any): string {
   try {
     return safeString(doc?.body?.raw ?? doc?.body?.code ?? doc?.body ?? "");
@@ -145,7 +146,6 @@ function parseEventEndISO(raw: unknown): string | null {
   }
 }
 
-// ✅ Moved validateEvent BEFORE it's used in Event document type
 function validateEvent(doc: any): ValidationResult {
   const base = validateBase(doc);
   const errors = [...base.errors];
@@ -273,7 +273,7 @@ const downloadFields = {
 } as const;
 
 // ------------------------------------------------------------
-// COMPUTED FIELDS - FIXED
+// COMPUTED FIELDS - FIXED (REMOVED DUPLICATE safeRawBody)
 // ------------------------------------------------------------
 function createComputedFields(prefix: string, routeBase: string): ComputedFields {
   return {
@@ -317,25 +317,18 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
     readTimeSafe: {
       type: "string",
       resolve: (doc) => {
-        // FIX: Check if readTime exists and is valid
         if (doc?.readTime && typeof doc.readTime === 'string') {
           return doc.readTime.trim();
         }
-        // FIX: Only call safeRawBody if doc exists
-        if (doc) {
-          return estimateReadTime(safeRawBody(doc));
-        }
-        return "";
+        // Using the global safeRawBody (declared above)
+        return estimateReadTime(safeRawBody(doc));
       },
     },
     wordCount: {
       type: "number",
       resolve: (doc) => {
-        // FIX: Only analyze if doc exists
-        if (doc) {
-          return analyzeContent(safeRawBody(doc)).words;
-        }
-        return 0;
+        // Using the global safeRawBody (declared above)
+        return analyzeContent(safeRawBody(doc)).words;
       },
     },
     validation: {
@@ -343,14 +336,10 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
       resolve: (doc) => {
         const r = validateBase(doc);
         if (!r.isValid && FAIL_ON_INVALID) {
-          // FIX: Better error message
           console.error(`[Contentlayer] Invalid doc (${doc?._id || "unknown"}):`, r.errors);
-          // Option 1: Throw but with more context
           throw new Error(
             `[Contentlayer] Invalid doc (${doc?._id || "unknown"}): ${r.errors.join("; ")}`
           );
-          // Option 2: Return validation but don't throw (uncomment to use)
-          // return { ...r, isValid: false, errors: r.errors };
         }
         return r;
       },
@@ -358,14 +347,7 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
   };
 }
 
-// Helper function to safely get raw body
-function safeRawBody(doc: any): string {
-  if (!doc) return "";
-  if (typeof doc.body === "string") return doc.body;
-  if (doc.body?.raw) return doc.body.raw;
-  if (doc.content) return doc.content;
-  return "";
-}
+// ❌ REMOVED: Duplicate safeRawBody function that was here
 
 // ------------------------------------------------------------
 // DOCUMENT TYPES
@@ -582,8 +564,6 @@ export const Lexicon = defineDocumentType(() => ({
   contentType: "mdx",
   fields: {
     ...baseFields,
-    // Claim 'type' as data to prevent Contentlayer from
-    // trying to move these files into the 'Resource' bucket.
     type: { type: "string", required: false },
     docKind: { type: "string", required: false },
     term: { type: "string", required: false },
@@ -592,7 +572,6 @@ export const Lexicon = defineDocumentType(() => ({
   },
   computedFields: {
     ...createComputedFields("lexicon/", "lexicon"),
-    // Force the internal identity for the manifest
     actualType: {
       type: "string",
       resolve: () => "Lexicon",
@@ -669,15 +648,15 @@ export default makeSource({
     "shorts",
     "books",
     "canon",
-    "briefs", // Intelligence Portfolio
-    "dispatches", // Communication Logs
-    "intelligence", // Classified Intelligence
+    "briefs",
+    "dispatches",
+    "intelligence",
     "downloads",
     "events",
     "prints",
     "resources",
     "strategy",
-    "lexicon", // Institutional Glossary
+    "lexicon",
   ],
   contentDirExclude: getExclusions(),
   documentTypes: [
@@ -685,20 +664,19 @@ export default makeSource({
     Short,
     Book,
     Canon,
-    Brief, // Integrated
-    Dispatch, // Integrated
-    Intelligence, // Integrated
+    Brief,
+    Dispatch,
+    Intelligence,
     Download,
     Event,
     Print,
     Resource,
     Strategy,
-    Lexicon, // Integrated
+    Lexicon,
   ],
   disableImportAliasWarning: true,
   mdx: { remarkPlugins: [], rehypePlugins: [] },
 
-  // ✅ onSuccess – Full duplicate detection and validation reporting
   onSuccess: async (importData) => {
     const data = await importData();
     const allDocuments: any[] = (data as any)?.allDocuments || [];
