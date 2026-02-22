@@ -1,4 +1,4 @@
-# netlify.toml — ABRAHAM OF LONDON (PRODUCTION READY - FIXED FUNCTIONS SYNTAX)
+# netlify.toml — ABRAHAM OF LONDON (FIXED - REMOVED PROBLEMATIC TIMEOUT)
 
 [build]
   command = "pnpm build:netlify"
@@ -20,7 +20,7 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# Function configuration - FIXED SYNTAX
+# Function configuration - COMPLETELY REMOVED TIMEOUT
 [functions]
   # Only exclude heavy/unused dependencies
   included_files = [
@@ -31,10 +31,7 @@
     "!**/node_modules/chrome-aws-lambda/**",
     "!**/node_modules/aws-sdk/**"
   ]
-
-# Apply timeout to all functions using the wildcard syntax
-[functions."*"]
-  timeout = 30
+  # TIMEOUT REMOVED - Let Netlify use defaults
 
 # Email function specific includes (if needed)
 [functions.emails]
