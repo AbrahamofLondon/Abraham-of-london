@@ -25,7 +25,6 @@ const nextConfig = {
     '*': [
       'node_modules/@swc/core-linux-x64-gnu',
       'node_modules/@swc/core-linux-x64-musl',
-      './public/**/*',
       './.next/cache/**/*',
       './node_modules/sharp/**/*',
       './node_modules/playwright/**/*',

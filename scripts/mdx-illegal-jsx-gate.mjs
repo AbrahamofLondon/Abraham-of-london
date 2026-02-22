@@ -1,154 +1,189 @@
 // scripts/mdx-illegal-jsx-gate.mjs
 import fs from "fs";
+import path from "path";
 import glob from "fast-glob";
 
 const CONTENT_DIR = "content";
+const FIX = process.argv.includes("--fix");
+const QUARANTINE = process.argv.includes("--quarantine");
 
-// -----------------------------
-// Helpers
-// -----------------------------
-function stripStrippedMarkers(s) {
-  return s.replace(/\{\/\*\s*stripped: duplicate frontmatter block\s*\*\/\}/g, "");
+const BOM = "\uFEFF";
+const FM_RE = /(^|\n)---\s*\n[\s\S]*?\n---\s*(\n|$)/g;
+
+function stripBom(s) {
+  return s.startsWith(BOM) ? s.slice(1) : s;
 }
 
-/**
- * SAFE FRONTMATTER DETECTION - ONLY at the very top of the file
- * This prevents matching markdown horizontal rules (---) in the body
- */
-function getTopFrontmatter(s) {
-  // Only match if the file STARTS with frontmatter
-  if (!s.startsWith("---\n") && !s.startsWith("---\r\n")) return null;
-  
-  // Capture ONLY top-of-file frontmatter blocks
-  const fmRegex = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
-  const match = s.match(fmRegex);
-  return match ? match[0] : null;
+function splitCodeFences(s) {
+  // Returns array of {type:'code'|'text', value}
+  const parts = [];
+  const fenceRe = /```[\s\S]*?```/g;
+  let last = 0;
+  let m;
+  while ((m = fenceRe.exec(s))) {
+    if (m.index > last) parts.push({ type: "text", value: s.slice(last, m.index) });
+    parts.push({ type: "code", value: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) parts.push({ type: "text", value: s.slice(last) });
+  return parts;
 }
 
-function hasContentBeforeFirstFrontmatter(s) {
-  // This is now a safeguard, but with our safe detection, it's rarely needed
-  const idx = s.indexOf("---");
+function unescapeHtmlOutsideCode(s) {
+  const parts = splitCodeFences(s);
+  return parts
+    .map((p) => {
+      if (p.type === "code") return p.value;
+      return p.value
+        .replace(/&gt;/g, ">")
+        .replace(/&lt;/g, "<")
+        .replace(/&amp;/g, "&");
+    })
+    .join("");
+}
+
+function getFrontmatterBlocks(s) {
+  // strict: frontmatter fences at start-of-file or line boundary
+  const re = /^---\s*\n[\s\S]*?\n---\s*(\n|$)/gm;
+  return s.match(re) || [];
+}
+
+function hasNonWhitespaceBeforeFirstFm(s) {
+  const idx = s.search(/^---\s*$/m);
   if (idx === -1) return false;
   const before = s.slice(0, idx);
   return before.trim().length > 0;
 }
 
-function moveLeadingContentBelowFrontmatter(s) {
-  // Only use this if absolutely necessary - better to fail than mangle
-  const firstFm = getTopFrontmatter(s);
-  if (!firstFm) return s;
+function moveSingleFmToTopIfNeeded(s) {
+  const blocks = getFrontmatterBlocks(s);
+  if (blocks.length !== 1) return s;
 
-  const firstStart = s.indexOf(firstFm);
-  if (firstStart !== 0) {
-    const leading = s.slice(0, firstStart).trimEnd();
-    const rest = s.slice(firstStart + firstFm.length);
-    return `${firstFm}\n${leading}\n\n${rest.trimStart()}`;
+  const fm = blocks[0];
+  const start = s.indexOf(fm);
+  if (start === 0) return s;
+
+  const before = s.slice(0, start).trimStart();
+  const after = s.slice(start + fm.length).trimStart();
+
+  // Put FM first, then blank line, then original content without losing it
+  return `${fm}\n${before}${before ? "\n\n" : ""}${after}`;
+}
+
+function demoteExtraFrontmatterFences(s) {
+  // If there are multiple FM blocks, don’t try to “merge”.
+  // Convert any later `---` fence that looks like a divider into `***`
+  // ONLY when it's not followed by typical YAML key patterns.
+  const lines = s.split("\n");
+  let fmCount = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === "---") {
+      // look ahead: if next non-empty line looks like yaml key, treat as frontmatter fence
+      const next = lines.slice(i + 1).find((l) => l.trim().length > 0) ?? "";
+      const isYamlKey = /^[A-Za-z0-9_-]+\s*:\s*.*$/.test(next.trim());
+      if (isYamlKey) {
+        fmCount++;
+        continue;
+      }
+      // divider fence: demote
+      lines[i] = "***";
+    }
   }
-  return s;
+  return lines.join("\n");
 }
 
-/**
- * SAFE duplicate frontmatter removal - ONLY removes if duplicate is at the top
- */
-function removeDuplicateFrontmatter(s) {
-  const firstFm = getTopFrontmatter(s);
-  if (!firstFm) return s;
-
-  const afterFirst = s.slice(firstFm.length);
-  const secondFm = getTopFrontmatter(afterFirst);
-  
-  if (secondFm) {
-    // Remove the duplicate and any content between (though shouldn't exist)
-    const rest = afterFirst.slice(secondFm.length);
-    return firstFm + rest;
-  }
-  
-  return s;
-}
-
-function looksLikeYamlKeyLine(line) {
-  return /^[A-Za-z0-9_-]+\s*:\s*.*$/.test(line);
-}
-
-function detectFatalPatterns(s) {
+function detectOrphanClosingTags(s) {
+  // heuristic: flag stray </X> where <X> never appears
+  const closing = [...s.matchAll(/<\/([A-Za-z][A-Za-z0-9]*)\s*>/g)].map((m) => m[1]);
+  if (!closing.length) return [];
   const issues = [];
-
-  // Check for content that looks like YAML before any frontmatter
-  const idx = s.indexOf("---");
-  if (idx !== -1) {
-    const before = s.slice(0, idx).split("\n").map(l => l.trim()).filter(Boolean);
-    const yamlish = before.filter(l => looksLikeYamlKeyLine(l));
-    if (yamlish.length) {
-      issues.push(`YAML-like keys found before first frontmatter: ${yamlish.slice(0, 3).join(" | ")}${yamlish.length > 3 ? " ..." : ""}`);
-    }
+  for (const tag of new Set(closing)) {
+    const openRe = new RegExp(`<${tag}(\\s|>|\\/)`, "g");
+    if (!openRe.test(s)) issues.push(tag);
   }
-
-  // Check for multiple frontmatter blocks (now only relevant if they're truly duplicated)
-  const firstFm = getTopFrontmatter(s);
-  if (firstFm) {
-    const afterFirst = s.slice(firstFm.length);
-    if (getTopFrontmatter(afterFirst)) {
-      issues.push("Duplicate frontmatter blocks detected at top of file");
-    }
-  }
-
   return issues;
 }
 
-// -----------------------------
-// Run
-// -----------------------------
+function quarantineFile(file, reason) {
+  const qdir = path.join(".mdx-quarantine");
+  fs.mkdirSync(qdir, { recursive: true });
+  const base = file.replace(/[\\/]/g, "__");
+  const dest = path.join(qdir, base);
+  fs.copyFileSync(file, dest);
+  fs.writeFileSync(dest + ".reason.txt", reason + "\n", "utf8");
+}
+
 async function run() {
   const files = await glob([`${CONTENT_DIR}/**/*.mdx`], { dot: false });
-  let patched = 0;
-  const fatal = [];
+  const invalid = [];
+  let fixedCount = 0;
 
   for (const file of files) {
     const original = fs.readFileSync(file, "utf8");
-    let updated = original;
+    let s = original;
+    const issues = [];
 
-    // Remove any leftover marker comments (harmless)
-    updated = stripStrippedMarkers(updated);
+    // BOM
+    if (s.startsWith(BOM)) issues.push("File begins with UTF-8 BOM. Remove BOM so frontmatter starts at byte 0.");
 
-    // SAFELY handle duplicate frontmatter at the top only
-    updated = removeDuplicateFrontmatter(updated);
-
-    // Only reposition if there's truly content before frontmatter (rare)
-    if (hasContentBeforeFirstFrontmatter(updated) && !getTopFrontmatter(updated)) {
-      // This is a red flag - better to flag than auto-fix
-      const issues = detectFatalPatterns(updated);
-      if (issues.length) {
-        fatal.push({ file, issues });
-      }
+    // Frontmatter positioning
+    const fmBlocks = getFrontmatterBlocks(s);
+    if (fmBlocks.length && hasNonWhitespaceBeforeFirstFm(s)) {
+      issues.push("Non-whitespace content found before the first frontmatter fence. Frontmatter must be the first thing in the file.");
     }
 
-    // Check for fatal patterns after cleaning
-    const issues = detectFatalPatterns(updated);
+    // Escaped HTML entities
+    const parts = splitCodeFences(s);
+    const hasEscapes = parts.some((p) => p.type === "text" && /&(gt|lt|amp);/.test(p.value));
+    if (hasEscapes) {
+      issues.push("HTML-escaped entities detected (&gt; / &lt; / &amp;) outside code fences. Convert back to raw markdown ('>') where appropriate.");
+    }
+
+    // Extra frontmatter fences (often corruption)
+    if (fmBlocks.length > 1) {
+      issues.push("Additional '---' frontmatter fence found after the first block. Remove or convert to a divider (e.g. '***').");
+    }
+
+    // Orphan closing tags
+    const orphan = detectOrphanClosingTags(s);
+    if (orphan.length) {
+      issues.push(`Potential orphan closing tag(s) found: ${orphan.join(", ")}. Ensure every </X> has a matching <X>.`);
+    }
+
     if (issues.length) {
-      fatal.push({ file, issues });
-    }
+      if (FIX) {
+        let updated = s;
+        updated = stripBom(updated);
+        updated = unescapeHtmlOutsideCode(updated);
+        updated = moveSingleFmToTopIfNeeded(updated);
+        updated = demoteExtraFrontmatterFences(updated);
 
-    if (updated !== original) {
-      fs.writeFileSync(file, updated, "utf8");
-      console.log(`[MDX_GATE] Cleaned: ${file}`);
-      patched++;
+        if (updated !== original) {
+          fs.writeFileSync(file, updated, "utf8");
+          fixedCount++;
+        } else if (QUARANTINE) {
+          quarantineFile(file, issues.join("\n"));
+        }
+      } else {
+        invalid.push({ file, issues });
+      }
     }
   }
 
-  console.log(
-    `[MDX_GATE] Completed. Files scanned: ${files.length}. Files patched: ${patched}. Fatal: ${fatal.length}.`
-  );
-
-  if (fatal.length) {
-    console.error("\n[MDX_GATE] Fatal MDX integrity issues detected:");
-    for (const f of fatal.slice(0, 20)) {
-      console.error(`\n- ${f.file}`);
-      for (const issue of f.issues) console.error(`  • ${issue}`);
+  if (!FIX) {
+    if (invalid.length) {
+      console.error(`[MDX_GATE] Integrity check failed: ${invalid.length} file(s) invalid.`);
+      for (const f of invalid.slice(0, 40)) {
+        console.error(`- ${f.file}`);
+        for (const i of f.issues) console.error(`  • ${i}`);
+      }
+      if (invalid.length > 40) console.error(`...and ${invalid.length - 40} more.`);
+      process.exit(1);
+    } else {
+      console.log(`[MDX_GATE] OK. ${files.length} file(s) checked. 0 invalid.`);
     }
-    if (fatal.length > 20) {
-      console.error(`\n...and ${fatal.length - 20} more.`);
-    }
-    process.exit(1);
+  } else {
+    console.log(`[MDX_GATE] Fix mode complete. Files checked: ${files.length}. Files modified: ${fixedCount}.`);
   }
 }
 

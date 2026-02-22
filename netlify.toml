@@ -1,8 +1,9 @@
-# netlify.toml — ABRAHAM OF LONDON (LEAN FUNCTIONS, NO 250MB BOMBS)
+# netlify.toml — ABRAHAM OF LONDON (PRODUCTION READY)
 
 [build]
   command = "pnpm build:netlify"
-  publish = ".next"
+  # REMOVED: publish = ".next" - THIS WAS CAUSING 404s
+  # Let the Next.js plugin handle the publish directory automatically
 
 [build.environment]
   NODE_VERSION = "20.20.0"
@@ -21,12 +22,9 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# ⚠️ CRITICAL: Do NOT globally attach .next/standalone or content/** to every function.
-# The Next plugin builds and packages the server handler correctly already.
-
+# Function configuration - lean and mean
 [functions]
-  # Leave bundling decisions to the Next plugin for server handler.
-  # Only keep general exclusions (if you need them at all).
+  # Only exclude heavy/unused dependencies
   included_files = [
     "!**/*.map",
     "!**/*.cache",
@@ -35,40 +33,65 @@
     "!**/node_modules/chrome-aws-lambda/**",
     "!**/node_modules/aws-sdk/**"
   ]
+  # Increase timeout for image optimization if needed
+  timeout = 30
 
-# If your emails function needs templates at runtime, scope it here.
-# This does NOT bloat every function—only the emails function.
+# Email function specific includes (if needed)
 [functions.emails]
   included_files = ["emails/**"]
 
+# Production environment
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
   NEXT_OPTIMIZE_FONTS = "true"
-  NEXT_OPTIMIZE_IMAGES = "false"
+  NEXT_OPTIMIZE_IMAGES = "true"
+  # Add your image domains here if using next/image with remote images
+  NEXT_PUBLIC_IMAGE_DOMAINS = "www.abrahamoflondon.org,abrahamoflondon.org"
 
+# Deploy previews (branch deployments)
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "false"
+  NEXT_PUBLIC_IMAGE_DOMAINS = "${DEPLOY_PRIME_URL}"
 
-# Canonical host enforcement
+# Branch deploys
+[context.branch-deploy.environment]
+  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_APP_ENV = "staging"
+  NEXT_DISABLE_SOURCEMAPS = "false"
+
+# REDIRECTS
+# Canonical www redirect
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
+# Remove index.html from URLs
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
 
+# Blog to insights redirect
 [[redirects]]
   from = "/blog/:slug"
   to = "/insights/:slug"
   status = 301
 
+# Ensure Next.js functions handle all routes
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/__nextjs_ssr"
+  status = 200
+  force = false
+  conditions = {Path = ["!/_next/static/*", "!/_next/image/*", "!/favicon.ico", "!/images/*", "!/fonts/*"]}
+
+# HEADERS
+# Security headers for all routes
 [[headers]]
   for = "/*"
   [headers.values]
@@ -77,7 +100,9 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
+# Cache static assets aggressively
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -88,3 +113,14 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
+
+# Cache images
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/_next/image/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
