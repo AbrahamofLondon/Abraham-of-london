@@ -2,6 +2,7 @@
 
 [build]
   command = "pnpm build:netlify"
+  directory = "netlify/functions_src"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
