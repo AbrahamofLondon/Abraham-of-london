@@ -1,155 +1,109 @@
 // scripts/mdx-illegal-jsx-gate.mjs
+// MDX INTEGRITY GATE (VALIDATION-ONLY)
+// - NEVER mutates files
+// - Fails fast with actionable diagnostics
+// Abraham of London — hardened mode.
+
 import fs from "fs";
+import path from "path";
 import glob from "fast-glob";
 
 const CONTENT_DIR = "content";
 
-// -----------------------------
-// Helpers
-// -----------------------------
-function stripStrippedMarkers(s) {
-  return s.replace(/\{\/\*\s*stripped: duplicate frontmatter block\s*\*\/\}/g, "");
-}
+/**
+ * Frontmatter must:
+ * - start at byte 0 (no BOM, no text, no headings, no stray '---' later)
+ * - be exactly one YAML block
+ * - be followed by body (or empty)
+ */
+const FRONTMATTER_RE = /^---\s*\n[\s\S]*?\n---\s*(\n|$)/;
 
 /**
- * SAFE FRONTMATTER DETECTION - ONLY at the very top of the file
- * This prevents matching markdown horizontal rules (---) in the body
+ * Returns { ok: boolean, errors: string[] }
  */
-function getTopFrontmatter(s) {
-  // Only match if the file STARTS with frontmatter
-  if (!s.startsWith("---\n") && !s.startsWith("---\r\n")) return null;
-  
-  // Capture ONLY top-of-file frontmatter blocks
-  const fmRegex = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
-  const match = s.match(fmRegex);
-  return match ? match[0] : null;
-}
+function validateMdx(filePath, text) {
+  const errors = [];
 
-function hasContentBeforeFirstFrontmatter(s) {
-  // This is now a safeguard, but with our safe detection, it's rarely needed
-  const idx = s.indexOf("---");
-  if (idx === -1) return false;
-  const before = s.slice(0, idx);
-  return before.trim().length > 0;
-}
-
-function moveLeadingContentBelowFrontmatter(s) {
-  // Only use this if absolutely necessary - better to fail than mangle
-  const firstFm = getTopFrontmatter(s);
-  if (!firstFm) return s;
-
-  const firstStart = s.indexOf(firstFm);
-  if (firstStart !== 0) {
-    const leading = s.slice(0, firstStart).trimEnd();
-    const rest = s.slice(firstStart + firstFm.length);
-    return `${firstFm}\n${leading}\n\n${rest.trimStart()}`;
+  // 1) Disallow UTF-8 BOM (invisible, breaks "start at 0" checks)
+  if (text.charCodeAt(0) === 0xfeff) {
+    errors.push("File begins with UTF-8 BOM. Remove BOM so frontmatter starts at byte 0.");
   }
-  return s;
-}
 
-/**
- * SAFE duplicate frontmatter removal - ONLY removes if duplicate is at the top
- */
-function removeDuplicateFrontmatter(s) {
-  const firstFm = getTopFrontmatter(s);
-  if (!firstFm) return s;
+  // 2) Must have frontmatter at top (for your Contentlayer schema)
+  if (!FRONTMATTER_RE.test(text)) {
+    // Determine if there IS a frontmatter fence later (common corruption)
+    const firstFence = text.indexOf("\n---");
+    const firstFenceAtTop = text.startsWith("---");
+    if (!firstFenceAtTop && text.includes("---")) {
+      errors.push("Non-whitespace content found before the first frontmatter fence. Frontmatter must be the first thing in the file.");
+    } else {
+      errors.push("Missing or malformed frontmatter. Expected YAML frontmatter at top delimited by --- fences.");
+    }
+  } else {
+    // 3) Ensure ONLY one frontmatter block
+    const allBlocks = text.match(/^---\s*\n[\s\S]*?\n---\s*(\n|$)/gm) || [];
+    if (allBlocks.length > 1) {
+      errors.push(`Multiple frontmatter blocks detected (${allBlocks.length}). Keep exactly one at the top.`);
+    }
 
-  const afterFirst = s.slice(firstFm.length);
-  const secondFm = getTopFrontmatter(afterFirst);
-  
-  if (secondFm) {
-    // Remove the duplicate and any content between (though shouldn't exist)
-    const rest = afterFirst.slice(secondFm.length);
-    return firstFm + rest;
-  }
-  
-  return s;
-}
-
-function looksLikeYamlKeyLine(line) {
-  return /^[A-Za-z0-9_-]+\s*:\s*.*$/.test(line);
-}
-
-function detectFatalPatterns(s) {
-  const issues = [];
-
-  // Check for content that looks like YAML before any frontmatter
-  const idx = s.indexOf("---");
-  if (idx !== -1) {
-    const before = s.slice(0, idx).split("\n").map(l => l.trim()).filter(Boolean);
-    const yamlish = before.filter(l => looksLikeYamlKeyLine(l));
-    if (yamlish.length) {
-      issues.push(`YAML-like keys found before first frontmatter: ${yamlish.slice(0, 3).join(" | ")}${yamlish.length > 3 ? " ..." : ""}`);
+    // 4) Disallow content that looks like frontmatter AFTER the first block
+    const first = allBlocks[0];
+    const rest = text.slice(first.length);
+    if (/^---\s*\n/m.test(rest)) {
+      errors.push("Additional '---' frontmatter fence found after the first block. Remove or convert to a divider (e.g. '***').");
     }
   }
 
-  // Check for multiple frontmatter blocks (now only relevant if they're truly duplicated)
-  const firstFm = getTopFrontmatter(s);
-  if (firstFm) {
-    const afterFirst = s.slice(firstFm.length);
-    if (getTopFrontmatter(afterFirst)) {
-      issues.push("Duplicate frontmatter blocks detected at top of file");
+  // 5) Detect HTML-escaped markdown that often appears due to copy/paste
+  // This won't break YAML, but it often breaks rendering / expectations.
+  // You can downgrade this to a warning if desired.
+  if (text.includes("&gt;") || text.includes("&lt;") || text.includes("&amp;")) {
+    // avoid false positives in code fences (simple heuristic)
+    const hasCodeFences = text.includes("```");
+    if (!hasCodeFences) {
+      errors.push("HTML-escaped entities detected (&gt; / &lt; / &amp;) outside code fences. Convert back to raw markdown ('>') where appropriate.");
     }
   }
 
-  return issues;
+  // 6) Detect orphaned closing tags that cause Contentlayer MDX parse errors
+  // e.g. </Creed> without <Creed>
+  const orphanClosers = [];
+  const closerRe = /<\/([A-Za-z][A-Za-z0-9]*)\s*>/g;
+  let m;
+  while ((m = closerRe.exec(text))) orphanClosers.push(m[1]);
+  if (orphanClosers.length) {
+    // Not always fatal, but usually indicates broken JSX in MDX
+    // We'll keep it as fatal to prevent CI breakage.
+    errors.push(`Potential orphan closing tag(s) found: ${[...new Set(orphanClosers)].slice(0, 8).join(", ")}. Ensure every </X> has a matching <X>.`);
+  }
+
+  return { ok: errors.length === 0, errors };
 }
 
-// -----------------------------
-// Run
-// -----------------------------
 async function run() {
   const files = await glob([`${CONTENT_DIR}/**/*.mdx`], { dot: false });
-  let patched = 0;
-  const fatal = [];
+  const bad = [];
 
   for (const file of files) {
-    const original = fs.readFileSync(file, "utf8");
-    let updated = original;
-
-    // Remove any leftover marker comments (harmless)
-    updated = stripStrippedMarkers(updated);
-
-    // SAFELY handle duplicate frontmatter at the top only
-    updated = removeDuplicateFrontmatter(updated);
-
-    // Only reposition if there's truly content before frontmatter (rare)
-    if (hasContentBeforeFirstFrontmatter(updated) && !getTopFrontmatter(updated)) {
-      // This is a red flag - better to flag than auto-fix
-      const issues = detectFatalPatterns(updated);
-      if (issues.length) {
-        fatal.push({ file, issues });
-      }
-    }
-
-    // Check for fatal patterns after cleaning
-    const issues = detectFatalPatterns(updated);
-    if (issues.length) {
-      fatal.push({ file, issues });
-    }
-
-    if (updated !== original) {
-      fs.writeFileSync(file, updated, "utf8");
-      console.log(`[MDX_GATE] Cleaned: ${file}`);
-      patched++;
-    }
+    const text = fs.readFileSync(file, "utf8");
+    const res = validateMdx(file, text);
+    if (!res.ok) bad.push({ file, errors: res.errors });
   }
 
-  console.log(
-    `[MDX_GATE] Completed. Files scanned: ${files.length}. Files patched: ${patched}. Fatal: ${fatal.length}.`
-  );
-
-  if (fatal.length) {
-    console.error("\n[MDX_GATE] Fatal MDX integrity issues detected:");
-    for (const f of fatal.slice(0, 20)) {
-      console.error(`\n- ${f.file}`);
-      for (const issue of f.issues) console.error(`  • ${issue}`);
+  if (bad.length) {
+    console.error(`\n[MDX_GATE] Integrity check failed: ${bad.length} file(s) invalid.\n`);
+    for (const item of bad.slice(0, 40)) {
+      console.error(`- ${item.file}`);
+      for (const e of item.errors) console.error(`  • ${e}`);
+      console.error("");
     }
-    if (fatal.length > 20) {
-      console.error(`\n...and ${fatal.length - 20} more.`);
+    if (bad.length > 40) {
+      console.error(`...and ${bad.length - 40} more.\n`);
     }
     process.exit(1);
   }
+
+  console.log(`[MDX_GATE] OK. ${files.length} file(s) validated. 0 invalid.`);
 }
 
 run().catch((err) => {

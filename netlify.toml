@@ -1,8 +1,8 @@
-# netlify.toml — ABRAHAM OF LONDON (LEAN FUNCTIONS, NO 250MB BOMBS)
+# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED)
 
 [build]
   command = "pnpm build:netlify"
-  publish = ".next"
+  publish = ".next" # ✅ The plugin handles the .netlify/ transition automatically
 
 [build.environment]
   NODE_VERSION = "20.20.0"
@@ -21,38 +21,25 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# ⚠️ CRITICAL: Do NOT globally attach .next/standalone or content/** to every function.
-# The Next plugin builds and packages the server handler correctly already.
-
 [functions]
-  # Leave bundling decisions to the Next plugin for server handler.
-  # Only keep general exclusions (if you need them at all).
+  node_bundler = "esbuild"
+  # 🛡️ 250MB LIMIT PROTECTION:
+  # We include standalone and content, but EXCLUDE the static bloat.
   included_files = [
+    ".next/standalone/**",
+    "content/**",
     "!**/*.map",
     "!**/*.cache",
+    "!.next/static/**",
     "!**/node_modules/playwright/**",
-    "!**/node_modules/puppeteer/**",
-    "!**/node_modules/chrome-aws-lambda/**",
-    "!**/node_modules/aws-sdk/**"
+    "!**/node_modules/puppeteer/**"
   ]
 
-# If your emails function needs templates at runtime, scope it here.
-# This does NOT bloat every function—only the emails function.
 [functions.emails]
   included_files = ["emails/**"]
 
-[context.production.environment]
-  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
-  NEXT_PUBLIC_APP_ENV = "production"
-  NEXT_OPTIMIZE_FONTS = "true"
-  NEXT_OPTIMIZE_IMAGES = "false"
+# --- CANONICAL ROUTING & HEADERS ---
 
-[context.deploy-preview.environment]
-  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
-  NEXT_PUBLIC_APP_ENV = "staging"
-  NEXT_DISABLE_SOURCEMAPS = "false"
-
-# Canonical host enforcement
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
