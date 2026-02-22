@@ -273,7 +273,7 @@ const downloadFields = {
 } as const;
 
 // ------------------------------------------------------------
-// COMPUTED FIELDS
+// COMPUTED FIELDS - FIXED
 // ------------------------------------------------------------
 function createComputedFields(prefix: string, routeBase: string): ComputedFields {
   return {
@@ -316,26 +316,55 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
     },
     readTimeSafe: {
       type: "string",
-      resolve: (doc) =>
-        safeString(doc?.readTime).trim() || estimateReadTime(safeRawBody(doc)),
+      resolve: (doc) => {
+        // FIX: Check if readTime exists and is valid
+        if (doc?.readTime && typeof doc.readTime === 'string') {
+          return doc.readTime.trim();
+        }
+        // FIX: Only call safeRawBody if doc exists
+        if (doc) {
+          return estimateReadTime(safeRawBody(doc));
+        }
+        return "";
+      },
     },
     wordCount: {
       type: "number",
-      resolve: (doc) => analyzeContent(safeRawBody(doc)).words,
+      resolve: (doc) => {
+        // FIX: Only analyze if doc exists
+        if (doc) {
+          return analyzeContent(safeRawBody(doc)).words;
+        }
+        return 0;
+      },
     },
     validation: {
       type: "json",
       resolve: (doc) => {
         const r = validateBase(doc);
         if (!r.isValid && FAIL_ON_INVALID) {
+          // FIX: Better error message
+          console.error(`[Contentlayer] Invalid doc (${doc?._id || "unknown"}):`, r.errors);
+          // Option 1: Throw but with more context
           throw new Error(
             `[Contentlayer] Invalid doc (${doc?._id || "unknown"}): ${r.errors.join("; ")}`
           );
+          // Option 2: Return validation but don't throw (uncomment to use)
+          // return { ...r, isValid: false, errors: r.errors };
         }
         return r;
       },
     },
   };
+}
+
+// Helper function to safely get raw body
+function safeRawBody(doc: any): string {
+  if (!doc) return "";
+  if (typeof doc.body === "string") return doc.body;
+  if (doc.body?.raw) return doc.body.raw;
+  if (doc.content) return doc.content;
+  return "";
 }
 
 // ------------------------------------------------------------

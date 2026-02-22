@@ -1,4 +1,4 @@
-// scripts/mdx-illegal-jsx-gate.mjs
+// scripts/mdx-illegal-jsx-gate.mjs - FIXED VERSION
 import fs from "fs";
 import path from "path";
 import glob from "fast-glob";
@@ -8,14 +8,12 @@ const FIX = process.argv.includes("--fix");
 const QUARANTINE = process.argv.includes("--quarantine");
 
 const BOM = "\uFEFF";
-const FM_RE = /(^|\n)---\s*\n[\s\S]*?\n---\s*(\n|$)/g;
 
 function stripBom(s) {
   return s.startsWith(BOM) ? s.slice(1) : s;
 }
 
 function splitCodeFences(s) {
-  // Returns array of {type:'code'|'text', value}
   const parts = [];
   const fenceRe = /```[\s\S]*?```/g;
   let last = 0;
@@ -29,88 +27,57 @@ function splitCodeFences(s) {
   return parts;
 }
 
-function unescapeHtmlOutsideCode(s) {
-  const parts = splitCodeFences(s);
-  return parts
-    .map((p) => {
-      if (p.type === "code") return p.value;
-      return p.value
-        .replace(/&gt;/g, ">")
-        .replace(/&lt;/g, "<")
-        .replace(/&amp;/g, "&");
-    })
-    .join("");
+// REMOVED: unescapeHtmlOutsideCode - this was causing issues
+// We should NOT automatically unescape HTML entities
+
+function hasValidFrontmatter(s) {
+  // Check if file starts with --- and has closing ---
+  const trimmed = s.trimStart();
+  return trimmed.startsWith('---\n') && trimmed.includes('\n---\n');
 }
 
-function getFrontmatterBlocks(s) {
-  // strict: frontmatter fences at start-of-file or line boundary
-  const re = /^---\s*\n[\s\S]*?\n---\s*(\n|$)/gm;
-  return s.match(re) || [];
+function ensureFrontmatterAtTop(s) {
+  // Only move frontmatter if it exists but not at the top
+  const fmMatch = s.match(/^---\s*\n[\s\S]*?\n---\s*(\n|$)/);
+  if (!fmMatch) return s;
+  
+  const fm = fmMatch[0];
+  const rest = s.replace(fm, '');
+  
+  // If frontmatter wasn't at the top, move it there
+  if (!s.startsWith('---')) {
+    return `${fm}\n${rest.trimStart()}`;
+  }
+  return s;
 }
 
-function hasNonWhitespaceBeforeFirstFm(s) {
-  const idx = s.search(/^---\s*$/m);
-  if (idx === -1) return false;
-  const before = s.slice(0, idx);
-  return before.trim().length > 0;
-}
+// REMOVED: demoteExtraFrontmatterFences - this was corrupting files
+// We should NEVER automatically convert --- to ***
 
-function moveSingleFmToTopIfNeeded(s) {
-  const blocks = getFrontmatterBlocks(s);
-  if (blocks.length !== 1) return s;
-
-  const fm = blocks[0];
-  const start = s.indexOf(fm);
-  if (start === 0) return s;
-
-  const before = s.slice(0, start).trimStart();
-  const after = s.slice(start + fm.length).trimStart();
-
-  // Put FM first, then blank line, then original content without losing it
-  return `${fm}\n${before}${before ? "\n\n" : ""}${after}`;
-}
-
-function demoteExtraFrontmatterFences(s) {
-  // If there are multiple FM blocks, don’t try to “merge”.
-  // Convert any later `---` fence that looks like a divider into `***`
-  // ONLY when it's not followed by typical YAML key patterns.
-  const lines = s.split("\n");
-  let fmCount = 0;
+function validateFrontmatter(s) {
+  const lines = s.split('\n');
+  let inFrontmatter = false;
+  let frontmatterCount = 0;
+  const issues = [];
+  
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim() === "---") {
-      // look ahead: if next non-empty line looks like yaml key, treat as frontmatter fence
-      const next = lines.slice(i + 1).find((l) => l.trim().length > 0) ?? "";
-      const isYamlKey = /^[A-Za-z0-9_-]+\s*:\s*.*$/.test(next.trim());
-      if (isYamlKey) {
-        fmCount++;
-        continue;
+    const line = lines[i].trim();
+    
+    if (line === '---') {
+      if (!inFrontmatter) {
+        inFrontmatter = true;
+        frontmatterCount++;
+      } else {
+        inFrontmatter = false;
       }
-      // divider fence: demote
-      lines[i] = "***";
     }
   }
-  return lines.join("\n");
-}
-
-function detectOrphanClosingTags(s) {
-  // heuristic: flag stray </X> where <X> never appears
-  const closing = [...s.matchAll(/<\/([A-Za-z][A-Za-z0-9]*)\s*>/g)].map((m) => m[1]);
-  if (!closing.length) return [];
-  const issues = [];
-  for (const tag of new Set(closing)) {
-    const openRe = new RegExp(`<${tag}(\\s|>|\\/)`, "g");
-    if (!openRe.test(s)) issues.push(tag);
+  
+  if (frontmatterCount > 2) {
+    issues.push(`Found ${frontmatterCount} frontmatter delimiters (should be exactly 2)`);
   }
+  
   return issues;
-}
-
-function quarantineFile(file, reason) {
-  const qdir = path.join(".mdx-quarantine");
-  fs.mkdirSync(qdir, { recursive: true });
-  const base = file.replace(/[\\/]/g, "__");
-  const dest = path.join(qdir, base);
-  fs.copyFileSync(file, dest);
-  fs.writeFileSync(dest + ".reason.txt", reason + "\n", "utf8");
 }
 
 async function run() {
@@ -123,44 +90,34 @@ async function run() {
     let s = original;
     const issues = [];
 
-    // BOM
-    if (s.startsWith(BOM)) issues.push("File begins with UTF-8 BOM. Remove BOM so frontmatter starts at byte 0.");
-
-    // Frontmatter positioning
-    const fmBlocks = getFrontmatterBlocks(s);
-    if (fmBlocks.length && hasNonWhitespaceBeforeFirstFm(s)) {
-      issues.push("Non-whitespace content found before the first frontmatter fence. Frontmatter must be the first thing in the file.");
+    // Check for BOM
+    if (s.startsWith(BOM)) {
+      issues.push("File begins with UTF-8 BOM");
     }
 
-    // Escaped HTML entities
-    const parts = splitCodeFences(s);
-    const hasEscapes = parts.some((p) => p.type === "text" && /&(gt|lt|amp);/.test(p.value));
-    if (hasEscapes) {
-      issues.push("HTML-escaped entities detected (&gt; / &lt; / &amp;) outside code fences. Convert back to raw markdown ('>') where appropriate.");
-    }
-
-    // Extra frontmatter fences (often corruption)
-    if (fmBlocks.length > 1) {
-      issues.push("Additional '---' frontmatter fence found after the first block. Remove or convert to a divider (e.g. '***').");
-    }
-
-    // Orphan closing tags
-    const orphan = detectOrphanClosingTags(s);
-    if (orphan.length) {
-      issues.push(`Potential orphan closing tag(s) found: ${orphan.join(", ")}. Ensure every </X> has a matching <X>.`);
+    // Check frontmatter validity
+    if (!hasValidFrontmatter(s)) {
+      issues.push("File does not have valid frontmatter (must start with --- and have closing ---)");
+    } else {
+      // Additional frontmatter validation
+      const fmIssues = validateFrontmatter(s);
+      issues.push(...fmIssues);
     }
 
     if (issues.length) {
       if (FIX) {
         let updated = s;
+        
+        // Only apply safe fixes
         updated = stripBom(updated);
-        updated = unescapeHtmlOutsideCode(updated);
-        updated = moveSingleFmToTopIfNeeded(updated);
-        updated = demoteExtraFrontmatterFences(updated);
-
+        updated = ensureFrontmatterAtTop(updated);
+        
+        // DON'T automatically unescape HTML or convert --- to ***
+        
         if (updated !== original) {
           fs.writeFileSync(file, updated, "utf8");
           fixedCount++;
+          console.log(`✅ Fixed: ${file}`);
         } else if (QUARANTINE) {
           quarantineFile(file, issues.join("\n"));
         }

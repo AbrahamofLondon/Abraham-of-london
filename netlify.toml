@@ -1,9 +1,7 @@
-# netlify.toml — ABRAHAM OF LONDON (PRODUCTION READY)
+# netlify.toml — ABRAHAM OF LONDON (PRODUCTION READY - FIXED FUNCTIONS SYNTAX)
 
 [build]
   command = "pnpm build:netlify"
-  # REMOVED: publish = ".next" - THIS WAS CAUSING 404s
-  # Let the Next.js plugin handle the publish directory automatically
 
 [build.environment]
   NODE_VERSION = "20.20.0"
@@ -22,7 +20,7 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# Function configuration - lean and mean
+# Function configuration - FIXED SYNTAX
 [functions]
   # Only exclude heavy/unused dependencies
   included_files = [
@@ -33,7 +31,9 @@
     "!**/node_modules/chrome-aws-lambda/**",
     "!**/node_modules/aws-sdk/**"
   ]
-  # Increase timeout for image optimization if needed
+
+# Apply timeout to all functions using the wildcard syntax
+[functions."*"]
   timeout = 30
 
 # Email function specific includes (if needed)
