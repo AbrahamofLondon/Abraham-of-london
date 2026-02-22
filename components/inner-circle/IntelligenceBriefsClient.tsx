@@ -7,13 +7,11 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { BRIEF_REGISTRY } from "@/lib/briefs/registry";
 
 export default function IntelligenceBriefsClient() {
-  // ✅ Defensive: in edge/prerender weirdness, don't destructure undefined
   const sessionHook = useSession?.();
   const session = sessionHook?.data ?? null;
   const status = sessionHook?.status ?? "unauthenticated";
 
-  // ✅ FIX: useToast returns methods directly, not a toast object
-  const toast = useToast(); // Returns { success, error, warning, info, toasts, addToast, removeToast }
+  const toast = useToast();
   
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<string>("All");
@@ -41,7 +39,6 @@ export default function IntelligenceBriefsClient() {
   const handleDownload = async (briefId: string) => {
     setDownloadingId(briefId);
     
-    // ✅ Use toast methods directly
     toast.info("Authorizing Access", "Verifying institutional clearance...");
 
     try {
@@ -67,7 +64,6 @@ export default function IntelligenceBriefsClient() {
     }
   };
 
-  // During SSR/build, show minimal shell
   if (!mounted) {
     return (
       <main className="min-h-screen bg-[#050505]" />
@@ -75,7 +71,15 @@ export default function IntelligenceBriefsClient() {
   }
 
   if (status === "loading") {
-    return <LoadingSpinner size="lg" message="Decrypting Portal..." />;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#050505]">
+        <LoadingSpinner 
+          size="lg" 
+          color="purple" 
+          text="Decrypting Portal..." 
+        />
+      </div>
+    );
   }
 
   return (
