@@ -1,150 +1,143 @@
-// scripts/mdx-illegal-jsx-gate.mjs - FIXED VERSION
+/* scripts/mdx-illegal-jsx-gate.mjs - SAFETY-FIRST INSTITUTIONAL VERSION */
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import glob from "fast-glob";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONTENT_DIR = "content";
 const FIX = process.argv.includes("--fix");
-const QUARANTINE = process.argv.includes("--quarantine");
+const BOM = "\uFEFF"; 
 
-const BOM = "\uFEFF";
+const RESERVED_WORDS = new Set([
+  'Object', 'Array', 'Function', 'String', 'Number', 'Boolean', 'Symbol',
+  'Promise', 'Error', 'Date', 'Math', 'JSON', 'console', 'window', 'document',
+  'undefined', 'null', 'NaN', 'Infinity', 'global', 'process', 'module',
+  'exports', 'require', 'arguments', 'eval', 'this', 'super', 'new', 'typeof',
+  'instanceof', 'delete', 'in', 'with', 'void', 'await', 'async', 'yield',
+  'let', 'const', 'var', 'class', 'extends', 'import', 'export', 'default',
+  'return', 'throw', 'try', 'catch', 'finally', 'if', 'else', 'switch',
+  'case', 'break', 'continue', 'for', 'while', 'do', 'true', 'false'
+]);
 
-function stripBom(s) {
-  return s.startsWith(BOM) ? s.slice(1) : s;
-}
-
-function splitCodeFences(s) {
-  const parts = [];
-  const fenceRe = /```[\s\S]*?```/g;
-  let last = 0;
-  let m;
-  while ((m = fenceRe.exec(s))) {
-    if (m.index > last) parts.push({ type: "text", value: s.slice(last, m.index) });
-    parts.push({ type: "code", value: m[0] });
-    last = m.index + m[0].length;
-  }
-  if (last < s.length) parts.push({ type: "text", value: s.slice(last) });
-  return parts;
-}
-
-// REMOVED: unescapeHtmlOutsideCode - this was causing issues
-// We should NOT automatically unescape HTML entities
-
-function hasValidFrontmatter(s) {
-  // Check if file starts with --- and has closing ---
-  const trimmed = s.trimStart();
-  return trimmed.startsWith('---\n') && trimmed.includes('\n---\n');
-}
-
-function ensureFrontmatterAtTop(s) {
-  // Only move frontmatter if it exists but not at the top
-  const fmMatch = s.match(/^---\s*\n[\s\S]*?\n---\s*(\n|$)/);
-  if (!fmMatch) return s;
-  
-  const fm = fmMatch[0];
-  const rest = s.replace(fm, '');
-  
-  // If frontmatter wasn't at the top, move it there
-  if (!s.startsWith('---')) {
-    return `${fm}\n${rest.trimStart()}`;
-  }
-  return s;
-}
-
-// REMOVED: demoteExtraFrontmatterFences - this was corrupting files
-// We should NEVER automatically convert --- to ***
-
-function validateFrontmatter(s) {
-  const lines = s.split('\n');
-  let inFrontmatter = false;
-  let frontmatterCount = 0;
+/**
+ * Validates MDX structure and looks for characters that cause 
+ * "Invalid code point -4" errors.
+ */
+function auditContent(s, filename) {
   const issues = [];
   
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    if (line === '---') {
-      if (!inFrontmatter) {
-        inFrontmatter = true;
-        frontmatterCount++;
-      } else {
-        inFrontmatter = false;
-      }
+  // 1. CRLF Check (The primary cause of offset errors on Windows)
+  if (s.includes('\r\n')) {
+    issues.push("Structural Risk: CRLF (Windows) line endings detected. Contentlayer requires LF.");
+  }
+
+  // 2. Trailing Whitespace (The cause of 'pointer drift' in MDX parsers)
+  if (/[ \t]+(\n|$)/.test(s)) {
+    issues.push("Structural Risk: Trailing whitespace detected (Common cause of 'Invalid code point').");
+  }
+
+  const analysisTarget = s.replace(/```[\s\S]*?```/g, "");
+
+  // 3. Brace Balance
+  const openBraces = (analysisTarget.match(/\{/g) || []).length;
+  const closeBraces = (analysisTarget.match(/\}/g) || []).length;
+  if (openBraces !== closeBraces) {
+    issues.push(`Structural Risk: Unbalanced braces detected ({:${openBraces}, }: ${closeBraces})`);
+  }
+
+  // 4. Reserved Components
+  const tagRe = /<\/?\s*([A-Z][A-Za-z0-9_]*)\b/g;
+  let m;
+  while ((m = tagRe.exec(analysisTarget)) !== null) {
+    if (RESERVED_WORDS.has(m[1])) {
+      issues.push(`Illegal Component: <${m[1]}> is a JS reserved word.`);
     }
   }
-  
-  if (frontmatterCount > 2) {
-    issues.push(`Found ${frontmatterCount} frontmatter delimiters (should be exactly 2)`);
-  }
-  
+
   return issues;
 }
 
 async function run() {
   const files = await glob([`${CONTENT_DIR}/**/*.mdx`], { dot: false });
-  const invalid = [];
-  let fixedCount = 0;
+  const failures = [];
+  let correctedFiles = 0;
+
+  console.log(`🏛️ [MDX_GATE]: Performing safety audit on ${files.length} assets...`);
 
   for (const file of files) {
-    const original = fs.readFileSync(file, "utf8");
-    let s = original;
-    const issues = [];
+    const originalBuffer = fs.readFileSync(file);
+    let content = originalBuffer.toString("utf8");
+    let fileIssues = [];
 
-    // Check for BOM
-    if (s.startsWith(BOM)) {
-      issues.push("File begins with UTF-8 BOM");
-    }
+    // LAYER 1: BOM & STRUCTURE SANITIZATION
+    if (FIX) {
+      let needsWrite = false;
+      let newContent = content;
 
-    // Check frontmatter validity
-    if (!hasValidFrontmatter(s)) {
-      issues.push("File does not have valid frontmatter (must start with --- and have closing ---)");
-    } else {
-      // Additional frontmatter validation
-      const fmIssues = validateFrontmatter(s);
-      issues.push(...fmIssues);
-    }
-
-    if (issues.length) {
-      if (FIX) {
-        let updated = s;
-        
-        // Only apply safe fixes
-        updated = stripBom(updated);
-        updated = ensureFrontmatterAtTop(updated);
-        
-        // DON'T automatically unescape HTML or convert --- to ***
-        
-        if (updated !== original) {
-          fs.writeFileSync(file, updated, "utf8");
-          fixedCount++;
-          console.log(`✅ Fixed: ${file}`);
-        } else if (QUARANTINE) {
-          quarantineFile(file, issues.join("\n"));
-        }
-      } else {
-        invalid.push({ file, issues });
+      // Strip BOM
+      if (newContent.startsWith(BOM)) {
+        newContent = newContent.slice(1);
+        needsWrite = true;
       }
+
+      // Heal CRLF -> LF
+      if (newContent.includes('\r\n')) {
+        newContent = newContent.replace(/\r\n/g, '\n');
+        needsWrite = true;
+      }
+
+      // Trim Trailing Whitespace
+      if (/[ \t]+(\n|$)/.test(newContent)) {
+        newContent = newContent.replace(/[ \t]+(\n|$)/g, '$1');
+        needsWrite = true;
+      }
+
+      if (needsWrite) {
+        fs.writeFileSync(file, newContent, "utf8");
+        correctedFiles++;
+        content = newContent; // Update local variable for next checks
+      }
+    } else {
+      // If not in FIX mode, flag these as issues
+      if (content.startsWith(BOM)) fileIssues.push("Contains UTF-8 BOM");
+      if (content.includes('\r\n')) fileIssues.push("CRLF Line Endings");
+      if (/[ \t]+(\n|$)/.test(content)) fileIssues.push("Trailing Whitespace");
+    }
+
+    // LAYER 2: FRONTMATTER INTEGRITY
+    if (!content.trimStart().startsWith('---')) {
+      fileIssues.push("Missing Frontmatter: File must start with '---'");
+    }
+
+    // LAYER 3: CONTENT AUDIT
+    const contentIssues = auditContent(content, file);
+    fileIssues = [...fileIssues, ...contentIssues];
+
+    if (fileIssues.length > 0) {
+      failures.push({ file, issues: fileIssues });
     }
   }
 
-  if (!FIX) {
-    if (invalid.length) {
-      console.error(`[MDX_GATE] Integrity check failed: ${invalid.length} file(s) invalid.`);
-      for (const f of invalid.slice(0, 40)) {
-        console.error(`- ${f.file}`);
-        for (const i of f.issues) console.error(`  • ${i}`);
-      }
-      if (invalid.length > 40) console.error(`...and ${invalid.length - 40} more.`);
-      process.exit(1);
-    } else {
-      console.log(`[MDX_GATE] OK. ${files.length} file(s) checked. 0 invalid.`);
-    }
-  } else {
-    console.log(`[MDX_GATE] Fix mode complete. Files checked: ${files.length}. Files modified: ${fixedCount}.`);
+  if (correctedFiles > 0) {
+    console.log(`🩹 [HEALED]: Automatically stabilized ${correctedFiles} assets.`);
   }
+
+  if (failures.length > 0) {
+    console.error(`\n❌ [INTEGRITY FAILURE]: Structural risks in ${failures.length} files:`);
+    failures.forEach(f => {
+      console.error(`\nLocation: ${f.file}`);
+      f.issues.forEach(issue => console.error(`  └─ ${issue}`));
+    });
+    
+    console.error(`\n[ADVISORY]: Run 'node scripts/mdx-illegal-jsx-gate.mjs --fix' to stabilize structures automatically.`);
+    process.exit(1);
+  }
+
+  console.log(`✅ [SUCCESS]: All ${files.length} assets verified.`);
 }
 
-run().catch((err) => {
-  console.error("[MDX_GATE] Failed:", err);
+run().catch(err => {
+  console.error("Critical System Error:", err);
   process.exit(1);
 });

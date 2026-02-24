@@ -1,6 +1,6 @@
 // lib/inner-circle/server-auth.ts
 import type { GetServerSidePropsContext } from 'next';
-import { verifyToken } from './jwt'; // You'll need to implement this
+import { verifyInnerCircleToken } from './jwt'; // ✅ FIXED: Correct function name
 
 export async function validateInnerCircleAccess(ctx: GetServerSidePropsContext) {
   // Check cookies or headers for auth token
@@ -15,7 +15,15 @@ export async function validateInnerCircleAccess(ctx: GetServerSidePropsContext) 
   }
 
   try {
-    const decoded = await verifyToken(token); // JWT verification
+    const decoded = await verifyInnerCircleToken(token); // ✅ FIXED: Use correct function name
+    
+    if (!decoded) {
+      return {
+        hasAccess: false,
+        user: null
+      };
+    }
+
     const validRoles = ['inner-circle', 'founder'];
     
     if (!validRoles.includes(decoded.role)) {

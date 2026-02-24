@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * components/mdx-components.tsx — HARDENED MDX REGISTRY (FULL RESOLUTION)
- * Goal: render reliably even when content authors mix:
- * - <Callout type="info">...</Callout> vs <Callout variant="info" />
- * - <Divider /> vs <Divider></Divider>
- * - different casing (Callout/callout)
- * - older props (intent/tone/kind)
+ * components/mdx/MDXComponents.tsx — AUTHORITATIVE MDX REGISTRY (BUILD-SAFE, RUNTIME-SAFE)
+ * Single source of truth for ALL MDX routes (/content/*, /blog/*, /books/*, etc.)
  */
+
+"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -40,48 +38,59 @@ import Rule from "@/components/mdx/Rule";
 import ShareRow from "@/components/mdx/ShareRow";
 import Step from "@/components/mdx/Step";
 import Verse from "@/components/mdx/Verse";
-
-// ✅ ADD THIS IMPORT
 import LexiconLink from "@/components/mdx/LexiconLink";
 
-// -----------------------------
-// Helpers
-// -----------------------------
 type AnyProps = Record<string, any>;
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-// Normalize common callout variants
+/* -----------------------------
+   Adapters (authoring-safe)
+----------------------------- */
+
+// Normalize common callout variants (author-facing)
 type CalloutVariant = "info" | "note" | "warning" | "success" | "danger" | "strategy" | "default";
+type CalloutTypeActual = "info" | "note" | "success" | "warning" | "danger";
 
 function normalizeCalloutVariant(input: unknown): CalloutVariant {
   const raw = String(input ?? "").trim().toLowerCase();
   if (!raw) return "info";
-
-  // common synonyms
   if (raw === "warn" || raw === "alert" || raw === "caution") return "warning";
   if (raw === "ok" || raw === "positive") return "success";
   if (raw === "error" || raw === "critical") return "danger";
   if (raw === "tip" || raw === "hint") return "note";
-
-  // allow direct
-  if (["info", "note", "warning", "success", "danger", "strategy", "default"].includes(raw)) {
-    return raw as CalloutVariant;
-  }
-
-  // unknown -> safe default
+  if (["info", "note", "warning", "success", "danger", "strategy", "default"].includes(raw)) return raw as CalloutVariant;
   return "info";
 }
 
-// -----------------------------
-// Adapters (MDX authoring-safe)
-// -----------------------------
+function toCalloutType(v: CalloutVariant): CalloutTypeActual {
+  if (v === "strategy") return "note";
+  if (v === "default") return "info";
+  return v as CalloutTypeActual;
+}
+
+const CalloutAdapter: ComponentType<AnyProps> = (props) => {
+  const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
+  const t = toCalloutType(v);
+
+  const { type, variant, intent, tone, kind, className, children, ...rest } = props ?? {};
+  const nextClassName = cx(className, v === "strategy" && "callout--strategy");
+
+  return (
+    <Callout {...rest} className={nextClassName} type={t}>
+      {children ?? null}
+    </Callout>
+  );
+};
+
+const QuoteAdapter: ComponentType<AnyProps> = (props) => {
+  const { children, ...rest } = props ?? {};
+  return <Quote {...rest}>{children ?? null}</Quote>;
+};
+
 const DividerAdapter: ComponentType<AnyProps> = (props) => {
-  // Prefer your Rule component if you want consistent “institutional” dividers:
-  // return <Rule {...props} />;
-  // Otherwise use a neutral divider that cannot break:
   return (
     <div className={cx("my-14", props?.className)}>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -89,36 +98,14 @@ const DividerAdapter: ComponentType<AnyProps> = (props) => {
   );
 };
 
-const CalloutAdapter: ComponentType<AnyProps> = (props) => {
-  /**
-   * Supports:
-   *  <Callout type="info">...</Callout>
-   *  <Callout variant="info">...</Callout>
-   *  <Callout intent="warning" />
-   *  <Callout tone="success" />
-   *
-   * And passes BOTH `type` and `variant` to the real Callout
-   * to cover whichever API your Callout component expects.
-   */
-  const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
+/* -----------------------------
+   Markdown primitives (prose-safe)
+----------------------------- */
 
-  // Strip authoring-only props so we don't leak junk into the component
-  // (but keep children and everything else)
-  const { type, variant, intent, tone, kind, ...rest } = props;
-
-  return <Callout {...rest} type={v} variant={v} />;
-};
-
-// Quote adapter (optional hardening)
-const QuoteAdapter: ComponentType<AnyProps> = (props) => <Quote {...props} />;
-
-// -----------------------------
-// Atomic primitives (prose-safe)
-// -----------------------------
 const A: ComponentType<AnyProps> = (props) => {
   const href = String(props?.href || "");
   const className = cx(
-    "text-amber-500 underline underline-offset-4 decoration-amber-500/30 hover:decoration-amber-500 transition-all",
+    "text-amber-400 underline underline-offset-4 decoration-amber-500/30 hover:decoration-amber-500 transition-all",
     props.className
   );
 
@@ -145,20 +132,11 @@ const A: ComponentType<AnyProps> = (props) => {
 };
 
 const H1: ComponentType<AnyProps> = (props) => (
-  <h1
-    {...props}
-    className={cx("font-serif text-4xl md:text-5xl text-white mb-8 mt-14 tracking-tight", props?.className)}
-  />
+  <h1 {...props} className={cx("font-serif text-4xl md:text-5xl text-white mb-8 mt-14 tracking-tight", props?.className)} />
 );
 
 const H2: ComponentType<AnyProps> = (props) => (
-  <h2
-    {...props}
-    className={cx(
-      "font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 border-b border-white/5 pb-2",
-      props?.className
-    )}
-  />
+  <h2 {...props} className={cx("font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 border-b border-white/5 pb-2", props?.className)} />
 );
 
 const H3: ComponentType<AnyProps> = (props) => (
@@ -169,36 +147,25 @@ const P: ComponentType<AnyProps> = (props) => (
   <p {...props} className={cx("font-sans text-lg leading-relaxed text-white/70 my-6 font-light", props?.className)} />
 );
 
-const Ul: ComponentType<AnyProps> = (props) => (
-  <ul {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />
-);
-
-const Ol: ComponentType<AnyProps> = (props) => (
-  <ol {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />
-);
-
+const Ul: ComponentType<AnyProps> = (props) => <ul {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />;
+const Ol: ComponentType<AnyProps> = (props) => <ol {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />;
 const Li: ComponentType<AnyProps> = (props) => <li {...props} className={cx("leading-relaxed", props?.className)} />;
 
 const Blockquote: ComponentType<AnyProps> = (props) => (
-  <blockquote
-    {...props}
-    className={cx("my-10 border-l border-amber-500/30 pl-6 text-white/70 italic", props?.className)}
-  />
+  <blockquote {...props} className={cx("my-10 border-l border-amber-500/30 pl-6 text-white/70 italic", props?.className)} />
 );
 
 const Hr: ComponentType<AnyProps> = (props) => <hr {...props} className={cx("my-16 border-t border-white/10", props?.className)} />;
 
-// -----------------------------
-// Institutional wrappers / aliases
-// -----------------------------
 const CTAGroup = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
   <div className={cx("flex flex-wrap gap-4 my-10", className)}>{children}</div>
 );
 
-// -----------------------------
-// Registry export (MDXRemote components)
-// -----------------------------
-const mdxComponents: Record<string, ComponentType<any>> = {
+/* -----------------------------
+   Export registry
+----------------------------- */
+
+const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
   // Markdown primitives
   a: A,
   h1: H1,
@@ -211,7 +178,7 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   blockquote: Blockquote,
   hr: Hr,
 
-  // Your MDX component library
+  // Institutional components
   Badge,
   BadgeRow,
   BrandFrame,
@@ -227,11 +194,10 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   Grid,
   HeroEyebrow,
   JsonLd,
-  LexiconLink, // ✅ ADDED HERE
+  LexiconLink,
   Note,
   ProcessSteps,
   PullLine,
-  Quote: QuoteAdapter,
   ResourcesCTA,
   Responsibility,
   ResponsibilityGrid,
@@ -240,22 +206,21 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   Step,
   Verse,
 
-  // ✅ HARD BINDINGS (cannot “miss” due to authoring style)
+  // Hard bindings (the ones that crash if missing)
   Callout: CalloutAdapter,
+  Quote: QuoteAdapter,
   Divider: DividerAdapter,
 
-  // ✅ casing / alias safety
+  // Alias safety (authors will be inconsistent; we will not crash)
   callout: CalloutAdapter as any,
+  CALLOUT: CalloutAdapter as any,
   divider: DividerAdapter as any,
   DIVIDER: DividerAdapter as any,
-  CALLOUT: CalloutAdapter as any,
-
-  // ✅ old or alternate tags people tend to type
+  DividerLine: DividerAdapter as any,
   HorizontalRule: Hr,
   HR: Hr,
-  DividerLine: DividerAdapter,
 
-  // CTA fallbacks (keeps older MDX from exploding)
+  // CTA fallbacks (legacy tags)
   FatherhoodCTA: CTA,
   LeadershipCTA: CTA,
   BrotherhoodCTA: CTA,
@@ -266,4 +231,4 @@ const mdxComponents: Record<string, ComponentType<any>> = {
   NewsletterCTA: CTA,
 };
 
-export default mdxComponents;
+export default MDX_COMPONENTS;

@@ -1,48 +1,77 @@
-#!/usr/bin/env node
-// scripts/run-migrations.ts
-import { migrations } from '../lib/db/schema/migrations';
+// lib/db/schema/migrations.ts
+// Simple migration system for your database
 
-async function main() {
-  const command = process.argv[2];
-
-  switch (command) {
-    case 'up':
-      console.log('Running migrations...');
-      const executed = await migrations.up();
-      console.log(`Executed ${executed.length} migrations`);
-      break;
-
-    case 'status':
-      const status = migrations.status();
-      console.log('\nMigration Status:');
-      console.log(`Total: ${status.total}`);
-      console.log(`Executed: ${status.executed}`);
-      console.log(`Pending: ${status.pending}`);
-      console.log('\nMigrations:');
-      status.migrations.forEach(m => {
-        console.log(`  ${m.executed ? '✅' : '⏳'} ${m.name} ${m.executedAt ? `(${m.executedAt.toISOString()})` : ''}`);
-      });
-      break;
-
-    case 'reset':
-      if (process.env.NODE_ENV === 'production') {
-        console.error('Cannot reset in production!');
-        process.exit(1);
-      }
-      console.log('Resetting database...');
-      await migrations.reset();
-      console.log('Database reset complete');
-      break;
-
-    default:
-      console.log('Usage:');
-      console.log('  run-migrations up     - Run pending migrations');
-      console.log('  run-migrations status - Show migration status');
-      console.log('  run-migrations reset  - Reset database (dev only)');
-      process.exit(1);
-  }
-
-  migrations.close();
+export interface Migration {
+  name: string;
+  up: () => Promise<void>;
+  down?: () => Promise<void>;
 }
 
-main().catch(console.error);
+export interface MigrationStatus {
+  total: number;
+  executed: number;
+  pending: number;
+  migrations: Array<{
+    name: string;
+    executed: boolean;
+    executedAt?: Date;
+  }>;
+}
+
+// Simple in-memory migration registry
+class MigrationRegistry {
+  private migrations: Migration[] = [];
+  private executedMigrations: Set<string> = new Set();
+
+  register(migration: Migration) {
+    this.migrations.push(migration);
+  }
+
+  async up(): Promise<string[]> {
+    const executed: string[] = [];
+    for (const migration of this.migrations) {
+      if (!this.executedMigrations.has(migration.name)) {
+        console.log(`Running migration: ${migration.name}`);
+        await migration.up();
+        this.executedMigrations.add(migration.name);
+        executed.push(migration.name);
+      }
+    }
+    return executed;
+  }
+
+  status(): MigrationStatus {
+    return {
+      total: this.migrations.length,
+      executed: this.executedMigrations.size,
+      pending: this.migrations.length - this.executedMigrations.size,
+      migrations: this.migrations.map(m => ({
+        name: m.name,
+        executed: this.executedMigrations.has(m.name),
+        executedAt: undefined, // You'd need to store this in a real DB
+      })),
+    };
+  }
+
+  async reset(): Promise<void> {
+    this.executedMigrations.clear();
+    console.log('Migration registry reset');
+  }
+
+  close(): void {
+    // Cleanup if needed
+  }
+}
+
+export const migrations = new MigrationRegistry();
+
+// Example migration (you would add your own)
+// migrations.register({
+//   name: '001_initial_schema',
+//   up: async () => {
+//     // Run SQL to create tables
+//   },
+//   down: async () => {
+//     // Rollback
+//   },
+// });

@@ -1,47 +1,43 @@
 // lib/db/interactions.ts
-import { prisma } from './prisma';
-import type { Prisma } from '@prisma/client';
+import { prisma } from "./prisma";
 
-// Re-export Prisma namespace for convenience
-export type { Prisma };
-
-// Stable transaction client type
-type PrismaTransactionClient = Prisma.TransactionClient;
+// ✅ Derive the transaction client type from the actual client instance.
+// This survives Prisma version/typegen differences.
+type PrismaTransactionClient = Parameters<
+  Parameters<typeof prisma.$transaction>[0]
+>[0];
 
 export async function toggleInteraction(
   shortSlug: string,
   action: "like" | "save",
   sessionId: string
 ) {
-  return prisma.$transaction(
-    async (tx: PrismaTransactionClient) => {
-      const existing = await tx.shortInteraction.findUnique({
-        where: {
-          shortSlug_sessionId_action: { 
-            shortSlug, 
-            sessionId, 
-            action 
-          },
+  return prisma.$transaction(async (tx: PrismaTransactionClient) => {
+    const existing = await tx.shortInteraction.findUnique({
+      where: {
+        shortSlug_sessionId_action: {
+          shortSlug,
+          sessionId,
+          action,
         },
-      });
+      },
+    });
 
-      if (existing) {
-        return tx.shortInteraction.update({
-          where: { id: existing.id },
-          data: { deletedAt: existing.deletedAt ? null : new Date() },
-        });
-      }
-
-      return tx.shortInteraction.create({
-        data: { 
-          shortSlug, 
-          sessionId, 
-          action 
-        },
+    if (existing) {
+      return tx.shortInteraction.update({
+        where: { id: existing.id },
+        data: { deletedAt: existing.deletedAt ? null : new Date() },
       });
-    },
-    { isolationLevel: "Serializable" }
-  );
+    }
+
+    return tx.shortInteraction.create({
+      data: {
+        shortSlug,
+        sessionId,
+        action,
+      },
+    });
+  });
 }
 
 // Optional: Add type-safe helper for counting interactions

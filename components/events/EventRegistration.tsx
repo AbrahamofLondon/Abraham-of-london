@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ShieldCheck, UserPlus, CreditCard, AlertCircle } from 'lucide-react';
 
 interface TicketOption {
   id: string;
@@ -40,164 +41,163 @@ const EventRegistration: React.FC<EventRegistrationProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic
-    console.log('Registering...', { selectedTicket, quantity, formData });
+    console.log('Finalizing Intelligence Clearance...', { eventId, selectedTicket, quantity, formData });
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Register Now</h2>
+    <div className="bg-zinc-950 border border-white/10 overflow-hidden">
+      <div className="bg-zinc-900/50 p-6 border-b border-white/5">
+        <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
+          <ShieldCheck className="w-5 h-5 text-amber-500" />
+          Clearance Application
+        </h2>
+      </div>
       
-      {maxAttendees && remainingSpots !== undefined && (
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Spots available</span>
-            <span className="text-sm font-semibold text-blue-600">
-              {remainingSpots} / {maxAttendees}
-            </span>
+      <div className="p-8">
+        {maxAttendees && remainingSpots !== undefined && (
+          <div className="mb-10">
+            <div className="flex justify-between items-end mb-3">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Available Allotment</span>
+              <span className="font-mono text-sm text-amber-500">
+                {remainingSpots} / {maxAttendees} Units
+              </span>
+            </div>
+            <div className="w-full bg-zinc-900 h-1">
+              <div 
+                className="bg-amber-500 h-1 transition-all duration-700 ease-in-out"
+                style={{ width: `${(remainingSpots / maxAttendees) * 100}%` }}
+              />
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(remainingSpots / maxAttendees) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Ticket Options */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Ticket</h3>
-          <div className="space-y-4">
-            {ticketOptions.map((ticket) => (
-              <div
-                key={ticket.id}
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  selectedTicket === ticket.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${!ticket.available ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => ticket.available && setSelectedTicket(ticket.id)}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-semibold text-gray-900">{ticket.name}</h4>
-                      {ticket.earlyBird && (
-                        <span className="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded">
-                          Early Bird
-                        </span>
-                      )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Ticket Options */}
+          <div>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-6">Select Tier</h3>
+            <div className="space-y-3">
+              {ticketOptions.map((ticket) => (
+                <button
+                  key={ticket.id}
+                  disabled={!ticket.available}
+                  onClick={() => setSelectedTicket(ticket.id)}
+                  className={`w-full text-left p-4 border transition-all duration-300 relative overflow-hidden ${
+                    selectedTicket === ticket.id
+                      ? 'border-amber-500 bg-amber-500/5'
+                      : 'border-white/5 bg-zinc-900/30 hover:border-white/20'
+                  } ${!ticket.available ? 'opacity-30 cursor-not-allowed' : ''}`}
+                >
+                  <div className="flex justify-between items-start relative z-10">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-serif italic text-white">{ticket.name}</h4>
+                        {ticket.earlyBird && (
+                          <span className="text-[8px] px-1.5 py-0.5 border border-amber-500/50 text-amber-500 font-bold uppercase tracking-tighter">
+                            Early Access
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1 font-light">{ticket.description}</p>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{ticket.description}</p>
+                    <div className="text-right">
+                      <div className="text-sm font-mono text-white">£{ticket.price.toFixed(2)}</div>
+                      {!ticket.available && <div className="text-[8px] text-red-500 font-bold uppercase mt-1">Exhausted</div>}
+                    </div>
+                  </div>
+                  {selectedTicket === ticket.id && (
+                    <div className="absolute top-0 right-0 w-8 h-8 bg-amber-500 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {selectedTicketData && (
+              <div className="mt-8 pt-8 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 h-8 border border-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-colors"
+                    >
+                      -
+                    </button>
+                    <span className="font-mono text-white text-lg">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-8 h-8 border border-white/10 text-white flex items-center justify-center hover:bg-white hover:text-black transition-colors"
+                    >
+                      +
+                    </button>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold text-gray-900">
-                      ${ticket.price.toFixed(2)}
+                    <div className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Aggregate Cost</div>
+                    <div className="text-2xl font-serif italic text-amber-500">
+                      £{totalPrice.toFixed(2)}
                     </div>
-                    {!ticket.available && (
-                      <div className="text-xs text-red-600 mt-1">Sold Out</div>
-                    )}
                   </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
 
-          {selectedTicketData && (
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quantity
-              </label>
-              <div className="flex items-center space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
-                >
-                  -
-                </button>
-                <span className="text-lg font-semibold">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
-                >
-                  +
-                </button>
-                <div className="ml-auto">
-                  <div className="text-sm text-gray-600">Total</div>
-                  <div className="text-xl font-bold text-gray-900">
-                    ${totalPrice.toFixed(2)}
-                  </div>
-                </div>
+          {/* Registration Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+              <UserPlus className="w-3 h-3" /> Delegate Details
+            </h3>
+            
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Full Identity</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-zinc-900 border border-white/5 px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+                  placeholder="Delegate Name"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Secure Email</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full bg-zinc-900 border border-white/5 px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+                  placeholder="name@domain.com"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Requirements / Remarks</label>
+                <textarea
+                  rows={3}
+                  value={formData.dietaryRequirements}
+                  onChange={(e) => setFormData({ ...formData, dietaryRequirements: e.target.value })}
+                  className="w-full bg-zinc-900 border border-white/5 px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors resize-none"
+                  placeholder="Dietary or accessibility notes..."
+                />
               </div>
             </div>
-          )}
+
+            <button
+              type="submit"
+              disabled={!selectedTicket}
+              className="group flex items-center justify-between w-full p-4 bg-white text-black hover:bg-amber-500 transition-colors duration-300 disabled:opacity-20 disabled:cursor-not-allowed"
+            >
+              <span className="font-bold uppercase tracking-tighter text-lg">Finalise Registration</span>
+              <CreditCard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+            <p className="text-[9px] text-zinc-600 uppercase tracking-[0.2em] text-center">
+              Encrypted Transmission Protocol Active
+            </p>
+          </form>
         </div>
-
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Dietary Requirements
-            </label>
-            <textarea
-              rows={2}
-              value={formData.dietaryRequirements}
-              onChange={(e) => setFormData({ ...formData, dietaryRequirements: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Any allergies or dietary restrictions?"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={!selectedTicket}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Complete Registration
-          </button>
-        </form>
       </div>
     </div>
   );

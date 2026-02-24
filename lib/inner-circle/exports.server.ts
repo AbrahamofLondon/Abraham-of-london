@@ -1,31 +1,66 @@
-// lib/inner-circle/exports.server.ts
+/* lib/inner-circle/exports.server.ts */
 import "server-only";
+import { prisma } from "@/lib/prisma"; // Ensure this matches your prisma instance path
+import * as Core from "./keys.server";
+import { generatePDF } from "@/lib/pdf-generator";
 
-export type { InnerCircleAccess, AccessCheckOptions } from "./access.server";
-
-export {
-  getInnerCircleAccess,
-  normalizeTier,
-} from "./access.server";
-
-// Keys – server-side operations (these are in keys.server.ts)
-export {
-  generateAccessKey,
-  storeKey,
-  getKey,
-  revokeKey,
-  renewKey,
-  incrementKeyUsage,
-  getKeysByMember,
-  getKeysByTier,
-  getActiveKeys,
-  cleanupExpiredKeys,
-  isExpired,
-  getMemoryStoreSize,
+// Bridge existing core functions
+export const {
   createOrUpdateMemberAndIssueKey,
   verifyInnerCircleKey,
   getPrivacySafeStats,
   recordInnerCircleUnlock,
   cleanupExpiredData,
-  getEmailHash,
-} from "./keys.server";
+  normalizeTier
+} = Core;
+
+/**
+ * ✅ RESTORED: Administrative Data Exports
+ * Required by /pages/api/admin/inner-circle/export.ts
+ */
+
+export async function getActiveKeys() {
+  return await prisma.accessKey.findMany({
+    where: { 
+      active: true,
+      OR: [
+        { expiresAt: null },
+        { expiresAt: { gt: new Date() } }
+      ]
+    },
+    include: { user: true }
+  });
+}
+
+export async function getKeysByTier(tier: string) {
+  return await prisma.accessKey.findMany({
+    where: { tier: tier.toUpperCase() },
+    include: { user: true },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+export async function getKeysByMember(userId: string) {
+  return await prisma.accessKey.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+/**
+ * ✅ RESTORED: Expiry Utility
+ */
+export function isExpired(expiresAt: Date | string | null): boolean {
+  if (!expiresAt) return false;
+  return new Date() > new Date(expiresAt);
+}
+
+/**
+ * ON-DEMAND GENERATION CALL
+ * Orchestrates the synthesis of PDF assets from the Vault.
+ */
+export async function generateBriefPDF(id: string) {
+  return await generatePDF(id);
+}
+
+export type { KeyTier, StoredKey } from "./keys.client";

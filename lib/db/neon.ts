@@ -1,47 +1,53 @@
-// lib/db/neon.ts
-import { neon, neonConfig, Pool } from '@neondatabase/serverless';
-import { secrets } from '@/lib/server/secrets'; // Using your Zod-validated secrets
+// lib/db/neon.ts — FIXED + SAFEGUARDED (EDGE/HTTP + OPTIONAL WS POOL)
+import "server-only";
+
+import { neon, neonConfig, Pool } from "@neondatabase/serverless";
+import WebSocket from "ws";
+import { secrets } from "@/lib/server/secrets";
 
 /**
  * Institutional Database Client
- * Optimized for Next.js Edge/Serverless runtimes.
+ * - `sql` uses HTTP (best default for serverless + low cold start)
+ * - `getPool()` provides WS pooling when you truly need it
  */
 
-// Enable connection caching for faster subsequent requests in the same execution context
+// Neon tuning (safe)
 neonConfig.fetchConnectionCache = true;
+neonConfig.webSocketConstructor = WebSocket as any;
 
-// NOTE: neonConfig.logLevel does NOT exist - removed
+if (!secrets.DATABASE_URL) {
+  throw new Error("[DATABASE] DATABASE_URL is required but missing from secrets");
+}
 
 /**
- * 1. Standard SQL Client (HTTP)
- * Best for: Reading Intelligence Briefs, Essays, and Canons.
- * Benefits: Zero cold-start latency over HTTP.
+ * 1) Standard SQL Client (HTTP)
  */
 export const sql = neon(secrets.DATABASE_URL);
 
 /**
- * 2. Connection Pool (WebSockets)
- * Best for: Heavy transactions, Inner Circle Auth, and Administrative CRUD.
- * Benefits: Maintains stateful connections across a single request lifecycle.
+ * 2) Connection Pool (WebSockets)
+ * Use sparingly; pooling is only worth it for heavier transactional workloads.
  */
 let pool: Pool | null = null;
 
 export function getPool(): Pool {
   if (!pool) {
-    pool = new Pool({ 
+    pool = new Pool({
       connectionString: secrets.DATABASE_URL,
-      max: 20, // Maximum number of connections
-      idleTimeoutMillis: 30000, // Close idle connections after 30s
-      connectionTimeoutMillis: 5000, // Fail if cannot connect within 5s
+      max: 10,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+    });
+
+    pool.on("error", (err: Error) => {
+      console.error("[DATABASE] Unexpected pool error:", err);
     });
   }
   return pool;
 }
 
 /**
- * 3. Institutional Helper: getIntelligenceBriefs
- * Directly leverages the 163 briefs you've generated in Contentlayer 
- * if you choose to sync them to the DB for global search.
+ * 3) Query helpers
  */
 export interface BriefResult {
   title: string;
@@ -52,58 +58,60 @@ export interface BriefResult {
 
 export async function queryBriefs(limit = 10): Promise<BriefResult[]> {
   try {
-    // Remove generic type argument - let neon infer
-    const result = await sql`
-      SELECT title, slug, category, published_at 
-      FROM intelligence_briefs 
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+
+    const rows = (await sql`
+      SELECT title, slug, category, published_at
+      FROM intelligence_briefs
       WHERE status = 'published'
-      ORDER BY published_at DESC 
-      LIMIT ${limit}
-    `;
-    
-    // Option A: Map/validate the results to ensure shape
-    const rows = result as any[];
-    return rows.map(row => ({
-      title: String(row.title || ''),
-      slug: String(row.slug || ''),
-      category: row.category ? String(row.category) : null,
-      published_at: row.published_at ? new Date(row.published_at) : null,
-    })) as BriefResult[];
-    
-    // Option B (simpler, if you trust the data shape):
-    // return result as unknown as BriefResult[];
+      ORDER BY published_at DESC
+      LIMIT ${safeLimit}
+    `) as any[];
+
+    return rows.map((row) => ({
+      title: String(row?.title ?? ""),
+      slug: String(row?.slug ?? ""),
+      category: row?.category ? String(row.category) : null,
+      published_at: row?.published_at ? new Date(row.published_at) : null,
+    }));
   } catch (error) {
-    console.error('[DATABASE_ERROR] Failed to fetch briefs:', error);
-    throw new Error('Intelligence repository unreachable.');
+    console.error("[DATABASE_ERROR] Failed to fetch briefs:", error);
+    return [];
   }
 }
 
-/**
- * 4. Health Check
- * Simple query to verify database connectivity
- */
 export async function checkDatabaseHealth(): Promise<boolean> {
   try {
-    const result = await sql`SELECT 1 as healthy`;
-    const rows = result as any[];
-    return rows && rows.length > 0 && rows[0]?.healthy === 1;
+    const start = Date.now();
+    const rows = (await sql`SELECT 1 as healthy`) as any[];
+    const duration = Date.now() - start;
+
+    if (duration > 1000) console.warn(`[DATABASE] Slow health check: ${duration}ms`);
+
+    return rows?.[0]?.healthy === 1;
   } catch (error) {
-    console.error('[DATABASE_HEALTH] Health check failed:', error);
+    console.error("[DATABASE_HEALTH] Health check failed:", error);
     return false;
   }
 }
 
-/**
- * 5. Cleanup function for graceful shutdown
- * Call this in serverless cleanup handlers if needed
- */
+export async function query<T = any>(
+  strings: TemplateStringsArray,
+  ...values: any[]
+): Promise<T[]> {
+  const rows = (await sql(strings, ...values)) as any[];
+  return rows as T[];
+}
+
 export async function closePool(): Promise<void> {
-  if (pool) {
+  if (!pool) return;
+  try {
     await pool.end();
+  } catch (error) {
+    console.error("[DATABASE] Error closing pool:", error);
+  } finally {
     pool = null;
-    console.log('[DATABASE] Connection pool closed');
   }
 }
 
-// Type for better DX
 export type { Pool };

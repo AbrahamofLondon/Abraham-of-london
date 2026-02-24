@@ -51,19 +51,34 @@ export function isNonEmptyString(str: any): boolean {
   return safeString(str).length > 0;
 }
 
-// ✅ FIXED: Array utilities with proper generics
+// ✅ Array utilities
 export function safeArray<T = unknown>(arr: any): T[] {
   return Array.isArray(arr) ? (arr as T[]) : [];
 }
 
-// ✅ CRITICAL FIX: This is what audit.ts needs
-export function safeSlice<T>(arr: any, start: number, end?: number): T[] {
-  if (!Array.isArray(arr)) return [];
-  try {
-    return Array.prototype.slice.call(arr, start, end) as T[];
-  } catch {
-    return [];
+/**
+ * ✅ SYSTEMIC FIX: Polymorphic safeSlice
+ * Overloads allow the compiler to understand that if you pass a string, 
+ * you get a string back. If you pass an array, you get an array back.
+ */
+export function safeSlice(str: string, start: number, end?: number): string;
+export function safeSlice<T>(arr: T[], start: number, end?: number): T[];
+export function safeSlice(input: any, start: number, end?: number): any {
+  if (typeof input === 'string') {
+    try {
+      return input.slice(start, end);
+    } catch {
+      return '';
+    }
   }
+  if (Array.isArray(input)) {
+    try {
+      return input.slice(start, end);
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 // For strings specifically
@@ -77,15 +92,15 @@ export function safeSliceString(str: any, start: number, end?: number): string {
 }
 
 export function safeArraySlice<T>(arr: any, start: number, end?: number): T[] {
-  return safeSlice<T>(arr, start, end);
+  return safeSlice(arr as T[], start, end);
 }
 
 export function safeTrimSlice<T>(arr: any, start: number, end?: number): T[] {
-  return safeSlice<T>(arr, start, end);
+  return safeSlice(arr as T[], start, end);
 }
 
 export function safeSliceAlt<T>(arr: any, start: number, end?: number): T[] {
-  return safeSlice<T>(arr, start, end);
+  return safeSlice(arr as T[], start, end);
 }
 
 // Number utilities
@@ -172,7 +187,6 @@ export function classNames(...parts: Array<string | false | null | undefined>): 
   return parts.filter(Boolean).join(" ");
 }
 
-// Simple versions of other functions (to avoid dependencies)
 export function safeEquals(a: any, b: any): boolean {
   return String(a) === String(b);
 }
@@ -211,7 +225,7 @@ export function toSlug(str: any): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// Default export for easy imports
+// Default export
 const safe = {
   safeString,
   safeNumber,

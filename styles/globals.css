@@ -1,157 +1,261 @@
-/* styles/globals.css — INSTITUTIONAL BASE (Tailwind + Brand Vars + Safety Fixes) */
-
-/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* =============================================================================
-   0) Hard Safety Belt (prevents bleed / horizontal scroll from masks/transforms)
-============================================================================= */
-html,
-body {
-  overflow-x: hidden;
-}
+/* -----------------------------------------------------------------------------
+  ABRAHAM OF LONDON — GLOBAL BRAND SYSTEM
+  Luxury: black + bone + amber, restrained motion, institutional geometry.
+----------------------------------------------------------------------------- */
 
-/* =============================================================================
-   1) Brand Tokens (safe defaults; can be overridden by theme/provider)
-   - Keep these simple: if tokens are missing, the site still renders cleanly.
-============================================================================= */
 :root {
-  /* Brand base */
-  --brand-obsidian: #000000;
-  --brand-charcoal: #050505;
-  --brand-cream: #fdfaf3;
-
-  --brand-gold: #d4af37;
-  --brand-amber: #f59e0b;
-
-  /* UI RGB pipeline (Tailwind can consume rgb(var(--x)/alpha)) */
-  --color-background: 0 0 0;
-  --color-on-background: 253 250 243;
-  --color-surface: 5 5 5;
-
-  --color-primary: 245 158 11; /* amber-500 */
-  --color-primary-light: 251 191 36; /* amber-400 */
-
-  --ui-alpha-border: 255 255 255;
-
-  /* Typography variables (hook these to next/font if you use it)
-     If you don't, fallbacks in tailwind.config.js handle it. */
-  --font-sans: ui-sans-serif;
-  --font-mono: ui-monospace;
-  --font-serif: ui-serif;
-  --font-editorial: ui-serif;
-
-  /* Legacy compatibility variables (your current tailwind config references these) */
-  --font-family-sans: var(--font-sans);
-  --font-family-mono: var(--font-mono);
-  --font-family-serif: var(--font-serif);
-
-  /* Radius + motion */
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+  --aol-bg: #050505;
+  --aol-ink: rgba(255, 255, 255, 0.92);
+  --aol-muted: rgba(255, 255, 255, 0.58);
+  --aol-dim: rgba(255, 255, 255, 0.32);
+  --aol-hairline: rgba(255, 255, 255, 0.08);
+  --aol-hairline-2: rgba(255, 255, 255, 0.06);
+  --aol-amber: 245 158 11; /* Tailwind amber-500 */
+  
+  /* ✅ ADDED: Consistent transitions */
+  --transition-institutional: 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-premium: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Optional: dark mode token alignment (if you toggle .dark on <html>) */
-.dark {
-  --color-background: 0 0 0;
-  --color-on-background: 253 250 243;
-  --color-surface: 5 5 5;
-  --ui-alpha-border: 255 255 255;
+/* Base hygiene */
+html, body {
+  height: 100%;
+  background: var(--aol-bg);
+  /* ✅ ADDED: Prevent scroll jank */
+  scroll-behavior: smooth;
 }
 
-/* =============================================================================
-   2) Base Layer: clean, readable, premium defaults
-============================================================================= */
-@layer base {
-  html {
-    text-rendering: optimizeLegibility;
-    -webkit-text-size-adjust: 100%;
-    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-  }
-
-  body {
-    background: var(--brand-obsidian);
-    color: var(--brand-cream);
-    font-family: var(--font-sans), Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  }
-
-  /* Better defaults for selection + focus */
-  ::selection {
-    background: rgba(245, 158, 11, 0.25);
-    color: var(--brand-cream);
-  }
-
-  :focus-visible {
-    outline: 2px solid rgba(245, 158, 11, 0.7);
-    outline-offset: 3px;
-    border-radius: 10px;
-  }
-
-  /* Links */
-  a {
-    text-underline-offset: 0.2em;
-  }
-
-  /* Media elements */
-  img,
-  video {
-    max-width: 100%;
-    height: auto;
-  }
+body {
+  color: var(--aol-ink);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* ✅ ADDED: Better font loading */
+  font-display: swap;
 }
 
-/* =============================================================================
-   3) Utilities: subtle helpers for institutional polish
-============================================================================= */
-@layer utilities {
-  /* Prevents backdrop blur flicker in some browsers */
+/* Selection = premium cue */
+::selection {
+  background: rgba(245, 158, 11, 0.18);
+  color: white; /* ✅ ADDED: Ensure text remains readable */
+}
+
+/* -----------------------------------------------------------------------------
+  Type system (works with your existing font stack)
+----------------------------------------------------------------------------- */
+
+@layer components {
+  /* Micro label: institutional mono */
+  .aol-micro {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 10px;
+    line-height: 1.2;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+  }
+
+  /* Eyebrow: a touch larger, still mono */
+  .aol-eyebrow {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.58em;
+    text-transform: uppercase;
+  }
+
+  /* Editorial: serif, cinematic but restrained */
+  .aol-editorial {
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-style: italic;
+    letter-spacing: -0.03em;
+  }
+
+  /* ✅ ADDED: Editorial small for captions */
+  .aol-editorial-small {
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Hairline divider */
+  .aol-hairline {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255,255,255,0.10),
+      rgba(245,158,11,0.18),
+      rgba(255,255,255,0.10),
+      transparent
+    );
+  }
+
+  /* ✅ ADDED: Vertical hairline for columns */
+  .aol-hairline-vertical {
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(255,255,255,0.10),
+      rgba(245,158,11,0.18),
+      rgba(255,255,255,0.10),
+      transparent
+    );
+  }
+
+  /* Prevent Safari blur glitch */
   .backdrop-fix {
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
+    /* ✅ ADDED: Hardware acceleration */
     transform: translateZ(0);
     will-change: transform;
   }
 }
 
-/* =============================================================================
-   4) Reduced motion (respect the user)
-============================================================================= */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
+/* -----------------------------------------------------------------------------
+  Hero geometry: grid, vignette, grain
+----------------------------------------------------------------------------- */
+
+@layer utilities {
+  /* Subtle institutional grid */
+  .aol-grid {
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 110px 110px;
+    opacity: 0.18;
+    mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 55%, rgba(0,0,0,0) 100%);
+    /* ✅ ADDED: Better performance */
+    pointer-events: none;
+  }
+
+  /* Chamber vignette */
+  .aol-vignette {
+    background:
+      radial-gradient(circle at 50% 35%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.92) 100%);
+    pointer-events: none;
+  }
+
+  /* Grain overlay */
+  .aol-grain {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  /* ✅ ADDED: Amber glow utility */
+  .aol-glow {
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.12);
+  }
+
+  /* ✅ ADDED: Glass panel (for overlays) */
+  .aol-glass {
+    background: rgba(5, 5, 5, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
-/* =============================================================================
-   5) TYPOGRAPHY + MOTION-SAFE UTILITIES
-   World-class typography polish and institutional motion
-============================================================================= */
+/* -----------------------------------------------------------------------------
+  Motion: premium, slow, non-obnoxious
+  IMPORTANT: never leaves content invisible if prefers-reduced-motion
+----------------------------------------------------------------------------- */
+
+@keyframes aolFadeUp {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes aolBreath {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.65; }
+  50%      { transform: translate3d(0,0,0) scale(1.06); opacity: 0.95; }
+}
+
+@keyframes aolFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .text-pretty {
-    text-wrap: pretty;
-  }
-
-  @keyframes aolFadeUp {
-    0% {
-      opacity: 0;
-      transform: translateY(14px);
-      filter: blur(2px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-  }
-
   .animate-aolFadeUp {
-    animation: aolFadeUp 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: aolFadeUp 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .aol-breath {
+    animation: aolBreath 7.6s ease-in-out infinite;
+  }
+  .animate-aolFadeIn {
+    animation: aolFadeIn 600ms ease-out both;
+  }
+  /* ✅ ADDED: Stagger helpers */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aolFadeUp,
+  .animate-aolFadeIn,
+  .aol-breath,
+  .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+  Interactive elements (quiet, premium)
+----------------------------------------------------------------------------- */
+a {
+  text-decoration: none;
+  /* ✅ ADDED: Smooth transitions for interactive elements */
+  transition: color 300ms ease, opacity 300ms ease;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(245,158,11,0.35);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* ✅ ADDED: Smooth button interactions */
+button {
+  transition: all 300ms ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* -----------------------------------------------------------------------------
+  Scrollbar styling (optional, institutional)
+----------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 158, 11, 0.25);
   }
 }

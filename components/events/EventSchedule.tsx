@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
-
+import { safeCapitalize } from "@/lib/utils/safe";
+import { ChevronDown, Clock, User, Zap } from 'lucide-react';
 
 interface Session {
   id: string;
@@ -31,114 +31,101 @@ const EventSchedule: React.FC<EventScheduleProps> = ({ schedule }) => {
 
   const currentDay = schedule[selectedDay];
 
-  // Guard clause for empty schedule
   if (!currentDay) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Event Schedule</h2>
-        <p className="text-gray-600">No schedule available</p>
+      <div className="bg-zinc-950 border border-white/10 p-12 text-center">
+        <p className="text-zinc-500 font-serif italic">The schedule is currently undergoing verification.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="bg-zinc-950 border border-white/10 overflow-hidden shadow-2xl">
+      <div className="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Event Schedule</h2>
-          <p className="text-gray-600">Plan your experience</p>
+          <h2 className="text-3xl font-serif italic text-white">Event Agenda</h2>
+          <p className="text-xs text-zinc-500 uppercase tracking-[0.3em] font-bold mt-1">Chronological Intel</p>
         </div>
         
-        <div className="flex space-x-2 overflow-x-auto">
+        <div className="flex gap-2">
           {schedule.map((day, index) => (
             <button
               key={day.date}
               onClick={() => setSelectedDay(index)}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+              className={`px-6 py-3 transition-all duration-300 border ${
                 selectedDay === index
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-white text-black border-white'
+                  : 'bg-zinc-900 text-zinc-400 border-white/5 hover:border-white/20'
               }`}
             >
-              {day.day}
-              <div className="text-xs mt-1 opacity-80">{day.date}</div>
+              <div className="text-[10px] font-black uppercase tracking-widest">{day.day}</div>
+              <div className="text-xs font-mono opacity-60">{day.date}</div>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="divide-y divide-white/5">
         {currentDay.sessions.map((session) => (
           <div
             key={session.id}
-            className={`border-l-4 rounded-r-lg p-4 transition-all ${
-              session.type === 'keynote'
-                ? 'border-purple-500 bg-purple-50'
-                : session.type === 'workshop'
-                ? 'border-green-500 bg-green-50'
-                : session.type === 'break'
-                ? 'border-gray-400 bg-gray-50'
-                : 'border-blue-500 bg-blue-50'
+            className={`group transition-all duration-500 ${
+              expandedSession === session.id ? 'bg-zinc-900/40' : 'hover:bg-zinc-900/20'
             }`}
           >
             <div 
-              className="flex flex-col md:flex-row md:items-start justify-between cursor-pointer"
+              className="p-6 md:p-8 flex flex-col md:flex-row gap-6 cursor-pointer"
               onClick={() => setExpandedSession(expandedSession === session.id ? null : session.id)}
             >
-              <div className="flex-1">
-                <div className="flex items-center space-x-4 mb-2">
-                  <span className="text-lg font-bold text-gray-900">
-                    {session.time}
-                  </span>
-                  {session.track && (
-                    <span className="px-3 py-1 text-xs font-semibold bg-white/50 rounded-full">
-                      {session.track}
-                    </span>
-                  )}
-                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                    session.type === 'keynote'
-                      ? 'bg-purple-100 text-purple-800'
-                      : session.type === 'workshop'
-                      ? 'bg-green-100 text-green-800'
-                      : session.type === 'break'
-                      ? 'bg-gray-100 text-gray-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {safeCapitalize(session.type)}
-                  </span>
+              <div className="md:w-32 flex-shrink-0">
+                <div className="flex items-center gap-2 text-amber-500 font-mono text-sm font-bold">
+                  <Clock className="w-3 h-3" />
+                  {session.time}
                 </div>
-                
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {session.title}
-                </h3>
-                
-                {session.speaker && (
-                  <div className="flex items-center space-x-2 text-gray-700">
-                    <span className="font-medium">{session.speaker}</span>
-                    {session.speakerTitle && (
-                      <span className="text-sm">• {session.speakerTitle}</span>
+                <div className={`mt-2 inline-block px-2 py-0.5 text-[8px] font-black uppercase tracking-widest border ${
+                  session.type === 'keynote' ? 'border-amber-500 text-amber-500' : 'border-zinc-700 text-zinc-500'
+                }`}>
+                  {safeCapitalize(session.type)}
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-serif text-white group-hover:text-amber-500 transition-colors">
+                      {session.title}
+                    </h3>
+                    {session.speaker && (
+                      <div className="mt-2 flex items-center gap-2 text-zinc-400">
+                        <User className="w-3.5 h-3.5 text-zinc-600" />
+                        <span className="text-sm font-medium">{session.speaker}</span>
+                        {session.speakerTitle && (
+                          <span className="text-xs text-zinc-600 font-light">— {session.speakerTitle}</span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                  <ChevronDown className={`w-5 h-5 text-zinc-700 transition-transform duration-500 ${
+                    expandedSession === session.id ? 'rotate-180 text-amber-500' : ''
+                  }`} />
+                </div>
               </div>
-              
-              <button className="mt-4 md:mt-0 md:ml-4">
-                <svg
-                  className={`w-5 h-5 text-gray-500 transition-transform ${
-                    expandedSession === session.id ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
             </div>
             
             {expandedSession === session.id && (
-              <div className="mt-4 pt-4 border-t border-white/30">
-                <p className="text-gray-700">{session.description}</p>
+              <div className="px-6 pb-8 md:pl-44 md:pr-24">
+                <div className="h-px bg-white/5 mb-6" />
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <p className="text-zinc-400 leading-relaxed font-light italic">
+                    {session.description}
+                  </p>
+                </div>
+                {session.track && (
+                  <div className="mt-6 flex items-center gap-2">
+                    <Zap className="w-3 h-3 text-amber-500" />
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Track: {session.track}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

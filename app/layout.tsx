@@ -1,4 +1,4 @@
-// app/layout.tsx — HARDENED (Server Shell, Deterministic)
+// app/layout.tsx — HARDENED + PERFORMANCE OPTIMIZED
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -35,6 +35,14 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  // ✅ Performance: Preload critical assets
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
 };
 

@@ -1,30 +1,43 @@
-// pages/api/pdfs/generate-all.ts
+import "server-only";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
-import { getAllPDFs } from "@/lib/pdf/registry.static";
+import { getGeneratedPDFs } from "@/lib/pdf/pdf-registry.generated"; // Use the generated source of truth
 import { SecurePuppeteerPDFGenerator } from "@/scripts/pdf/secure-puppeteer-generator";
+import { prisma } from "@/lib/prisma"; // Institutional singleton
 import path from "path";
 import fs from "fs";
+
+/**
+ * INSTITUTIONAL BATCH GENERATOR
+ * Forced to Node.js runtime to support Puppeteer and Filesystem operations.
+ */
+export const config = {
+  maxDuration: 300, // Extend timeout for large portfolio batches
+  api: {
+    responseLimit: false,
+  },
+};
 
 type ResultRow =
   | { id: string; success: true; outputPath: string }
   | { id: string; success: false; error: string };
 
 const generator = new SecurePuppeteerPDFGenerator({
-  timeout: 90_000,
-  maxRetries: 2,
+  timeout: 120_000, // Increased for heavy institutional briefs
+  maxRetries: 3,
 });
 
-// Small helper: concurrency pool
+/**
+ * CONCURRENCY POOL: Prevents CPU/RAM exhaustion during 718-asset generation.
+ */
 async function runPool<T, R>(
   items: T[],
   concurrency: number,
   worker: (item: T) => Promise<R>
 ): Promise<R[]> {
-  const limit = Math.max(1, Math.min(8, concurrency || 2));
+  const limit = Math.max(1, Math.min(4, concurrency || 2)); // Safer limit for Windows environments
   const results: R[] = new Array(items.length);
-
   let nextIndex = 0;
 
   async function runner() {
@@ -42,7 +55,7 @@ async function runPool<T, R>(
 
 function safeMessage(err: unknown): string {
   if (!err) return "Unknown error";
-  if (err instanceof Error) return err.message || "Error";
+  if (err instanceof Error) return err.message;
   return String(err);
 }
 
@@ -52,70 +65,70 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
+  // 1. Session & Role Validation
   const session = await getServerSession(req, res, authOptions);
-  if (!session) {
-    return res.status(401).json({ success: false, error: "Unauthorized" });
+  if (!session || session.user?.role !== "ADMIN") {
+    return res.status(401).json({ success: false, error: "Unauthorized: Admin access required." });
   }
 
   try {
-    const all = getAllPDFs();
-
-    // “pending” definition: not exists, not error, not generating (tolerate undefined fields)
-    const pending = all.filter((pdf: any) => {
-      const exists = Boolean(pdf?.exists);
-      const hasError = Boolean(pdf?.error);
-      const isGenerating = Boolean(pdf?.isGenerating);
-      return !exists && !hasError && !isGenerating;
-    });
+    // 2. Load Portfolio from Generated Registry
+    const all = getGeneratedPDFs();
+    
+    // Filter for assets requiring generation (Missing physical file)
+    const pending = all.filter((pdf) => !pdf.exists && pdf.format === "PDF");
 
     if (pending.length === 0) {
       return res.status(200).json({
         success: true,
         count: 0,
-        total: 0,
-        results: [],
-        message: "No pending PDFs to generate",
+        total: all.length,
+        message: "Portfolio synchronization complete. No pending generations.",
         generatedAt: new Date().toISOString(),
       });
     }
 
+    // 3. Environment Preparation
     const outputDir = path.join(process.cwd(), "public", "assets", "downloads");
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
     const concurrency = Number(process.env.PDF_BATCH_CONCURRENCY || 2);
+    console.log(`🏛️ [BATCH_GEN]: Processing ${pending.length} assets with concurrency ${concurrency}`);
 
+    // 4. Execution Loop
     const results = await runPool<any, ResultRow>(pending, concurrency, async (pdf) => {
-      const id = String(pdf?.id || "");
-      if (!id) return { id: "unknown", success: false, error: "Missing pdf.id" };
-
-      // Validate required generator inputs
-      const sourceAbsPath = pdf?.sourcePathAbs;
-      const sourceKind = pdf?.sourceKind;
-
-      if (!sourceAbsPath || typeof sourceAbsPath !== "string") {
-        return { id, success: false, error: "Missing sourcePathAbs in registry entry" };
-      }
-
-      if (sourceKind !== "mdx" && sourceKind !== "md" && sourceKind !== "html") {
-        return { id, success: false, error: `Invalid sourceKind: ${String(sourceKind)}` };
-      }
-
-      const outputPath = path.join(outputDir, `${id}.pdf`);
+      const id = String(pdf.id);
+      
+      // Resolve source path: Checking for associated MDX in the content vault
+      const sourceAbsPath = path.join(process.cwd(), "content", "briefs", `${id}.mdx`);
+      const outputPath = path.join(process.cwd(), "public", pdf.outputPath);
 
       try {
+        // Ensure source exists before calling Puppeteer
+        if (!fs.existsSync(sourceAbsPath)) {
+          return { id, success: false, error: `Source MDX not found for ${id}` };
+        }
+
         await generator.generateFromSource({
           sourceAbsPath,
-          sourceKind,
+          sourceKind: "mdx",
           outputAbsPath: outputPath,
           quality: "premium",
           format: "A4",
-          title: String(pdf?.title || id),
+          title: pdf.title,
         });
 
-        return { id, success: true, outputPath: `/assets/downloads/${id}.pdf` };
+        // 5. Telemetry: Update engagement metrics in Neon DB
+        await prisma.contentMetadata.update({
+          where: { slug: id },
+          data: { updatedAt: new Date() }
+        }).catch(() => null); // Silent fail for telemetry to not block generation
+
+        return { id, success: true, outputPath: pdf.outputPath };
       } catch (err) {
+        console.error(`❌ [GEN_FAILED] ${id}:`, err);
         return { id, success: false, error: safeMessage(err) };
       }
     });
@@ -127,14 +140,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       count: succeeded,
       total: pending.length,
       results,
-      message: `Generated ${succeeded} of ${pending.length} PDFs`,
+      message: `Successfully synchronized ${succeeded} of ${pending.length} pending assets.`,
       generatedAt: new Date().toISOString(),
     });
+
   } catch (error) {
-    console.error("[PDF Generate All] Error:", error);
+    console.error("🏛️ [CRITICAL_GEN_ERROR]:", error);
     return res.status(500).json({
       success: false,
-      error: safeMessage(error) || "Batch generation failed",
+      error: safeMessage(error) || "Institutional batch generation failed.",
       generatedAt: new Date().toISOString(),
     });
   }

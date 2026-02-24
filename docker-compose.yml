@@ -1,23 +1,35 @@
 version: "3.8"
 
 services:
-  # The PDF Engine: Consumes Briefs -> Produces PDFs -> Syncs to Postgres
+  # 1. ADDED REDIS: The Registry for your 79 briefs
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  # 2. UPDATED PDF GENERATOR
   pdf-generator:
     build: .
     environment:
       - DATABASE_URL=postgresql://AbrahamofLondon:du9EDnkurJci7DVfxEhTaYuJZatj8/qLK8dozUFNAzM=@postgres:5432/abraham_of_london
+      - REDIS_URL=redis://redis:6379
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
-      # Mount the output directory to your host so you can access the PDFs
-      - ./public/assets/downloads:/app/public/assets/downloads
-      # Mount your briefs so the generator can find them
-      - ./content/downloads:/app/content/downloads
+      # ALIGNED PATHS: Matches your actual project structure
+      - ./public/briefs:/app/public/briefs
+      - ./content/briefs:/app/content/briefs
       - ./lib/pdf:/app/lib/pdf
 
+  # 3. POSTGRES: The Institutional Archive
   postgres:
     image: postgres:15-alpine
     environment:
@@ -37,3 +49,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data: # Ensures your 79 brief keys survive a restart

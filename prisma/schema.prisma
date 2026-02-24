@@ -1,10 +1,10 @@
-// prisma/schema.prisma
 //
 // ABRAHAM OF LONDON — INSTITUTIONAL DATA MODEL (Production-Grade)
 // - PostgreSQL + pgvector enabled for semantic discovery
 // - Strong enums for integrity (roles, tiers, statuses, classifications, severities)
 // - Explicit indexes for auditability + performance
 // - Sensible cascades / set-null behavior for retention + compliance
+// - Strategy Intake Registry integrated for Decision Engine ingestion
 
 generator client {
   provider        = "prisma-client-js"
@@ -101,7 +101,7 @@ enum SessionStatus {
 // ============================================================================
 
 model InnerCircleMember {
-  id        String @id @default(cuid())
+  id         String @id @default(cuid())
 
   // Identity (privacy-by-design: treat emailHash as the real stable key)
   emailHash String  @unique
@@ -122,11 +122,12 @@ model InnerCircleMember {
   updatedAt DateTime @updatedAt
 
   // Relations
-  annotations    PrivateAnnotation[]
-  inquiries      StrategyInquiry[]
-  downloadEvents DownloadAuditEvent[]
-  sessions       Session[]
-  keys           InnerCircleKey[]
+  annotations     PrivateAnnotation[]
+  inquiries       StrategyInquiry[]
+  strategyIntakes StrategyIntake[]
+  downloadEvents  DownloadAuditEvent[]
+  sessions        Session[]
+  keys            InnerCircleKey[]
 
   @@index([status])
   @@index([tier])
@@ -163,7 +164,7 @@ model ContentMetadata {
   embedding Unsupported("vector(1536)")?
 
   // Strategic metrics
-  totalPrints      Int   @default(0)
+  totalPrints     Int   @default(0)
   engagementScore Float @default(0.0)
 
   // Relations
@@ -225,7 +226,7 @@ model PrivateAnnotation {
 }
 
 // ============================================================================
-// 4. STRATEGY INTAKE REGISTRY
+// 4. STRATEGY INTAKE & INQUIRY REGISTRY
 // ============================================================================
 
 model StrategyInquiry {
@@ -249,6 +250,28 @@ model StrategyInquiry {
   @@index([memberId])
 }
 
+model StrategyIntake {
+  id              String   @id @default(cuid())
+  fullName        String
+  organisation    String
+  dependencyLevel String
+  volatility      String
+  readinessScore  Int      @default(5)
+  
+  // Stores the full telemetry and reasoning from the Strategy Room form
+  payload         Json     
+
+  memberId        String?
+  member          InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organisation])
+  @@index([memberId])
+  @@index([createdAt])
+}
+
 // ============================================================================
 // 5. INFRASTRUCTURE & AUDIT
 // ============================================================================
@@ -268,8 +291,8 @@ model SystemConfig {
 }
 
 model SystemAuditLog {
-  id       String @id @default(cuid())
-  action   String // e.g., "BOARD_MEMO_PRINT", "ADMIN_LOGIN_FAILED"
+  id        String @id @default(cuid())
+  action    String // e.g., "BOARD_MEMO_PRINT", "ADMIN_LOGIN_FAILED"
   severity AuditSeverity @default(info)
 
   actorId    String?
@@ -312,9 +335,9 @@ model Session {
 }
 
 model InnerCircleKey {
-  id      String @id @default(cuid())
+  id       String @id @default(cuid())
   memberId String
-  member  InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   // store only hashed keys
   keyHash String @unique

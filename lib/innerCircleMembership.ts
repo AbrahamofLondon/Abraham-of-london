@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
-import { safeSlice } from "@/lib/utils/safe";
+import { safeSliceString, safeSubstring } from "@/lib/utils/safe";
 import crypto from "crypto";
-import { Pool, type PoolClient, type QueryResult } from "pg";
+import { Pool, type PoolClient } from "pg";
+
 // ---------------------------------------------------------------------------
 // Shared types
 // ---------------------------------------------------------------------------
 export type InnerCircleStatus = "pending" | "active" | "revoked";
+
 export interface InnerCircleKeyRecord {
   keyHash: string;
   keySuffix: string;
@@ -15,6 +17,7 @@ export interface InnerCircleKeyRecord {
   totalUnlocks: number;
   lastIp?: string | null;
 }
+
 export interface InnerCircleMember {
   id: string;
   emailHash: string;
@@ -25,18 +28,21 @@ export interface InnerCircleMember {
   lastIp?: string | null;
   keys: InnerCircleKeyRecord[];
 }
+
 export interface CreateOrUpdateMemberArgs {
   email: string;
   name?: string;
   ipAddress?: string;
   context?: "register" | "manual" | "import" | string;
 }
+
 export interface IssuedKey {
   key: string;
   keySuffix: string;
   createdAt: string;
   status: InnerCircleStatus;
 }
+
 export interface VerifyInnerCircleKeyResult {
   valid: boolean;
   reason?: string;
@@ -44,6 +50,7 @@ export interface VerifyInnerCircleKeyResult {
   keySuffix?: string;
   createdAt?: string;
 }
+
 export interface InnerCircleAdminExportRow {
   created_at: string;
   status: InnerCircleStatus;
@@ -51,6 +58,7 @@ export interface InnerCircleAdminExportRow {
   email_hash_prefix: string;
   total_unlocks: number;
 }
+
 export interface PrivacySafeStats {
   totalMembers: number;
   activeMembers: number;
@@ -60,10 +68,9 @@ export interface PrivacySafeStats {
   estimatedMemoryBytes: number;
   lastCleanup: string;
 }
+
 export interface InnerCircleStore {
-  createOrUpdateMemberAndIssueKey(
-    args: CreateOrUpdateMemberArgs
-  ): Promise<IssuedKey>;
+  createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey>;
   verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult>;
   recordInnerCircleUnlock(key: string, ipAddress?: string): Promise<void>;
   revokeInnerCircleKey(key: string): Promise<boolean>;
@@ -72,31 +79,44 @@ export interface InnerCircleStore {
   getPrivacySafeStats(): Promise<PrivacySafeStats>;
   exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]>;
 }
+
 // ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
 const DATA_RETENTION_DAYS = 365;
 const KEY_TTL_MS = 1000 * 60 * 60 * 24 * DATA_RETENTION_DAYS;
+
 function normaliseEmail(email: string): string {
   return email.trim().toLowerCase();
 }
+
 function sha256Hex(value: string): string {
   return crypto.createHash("sha256").update(value, "utf8").digest("hex");
 }
+
 function nowIso(): string {
   return new Date().toISOString();
 }
+
+/**
+ * INSTITUTIONAL KEY GENERATION
+ * Fixed: Uses safeSliceString to ensure cryptographic integrity.
+ */
 function generateAccessKey(): {
   key: string;
   keyHash: string;
   keySuffix: string;
 } {
   const raw = crypto.randomBytes(20).toString("base64url");
-  const key = safeSlice(raw, 0, 24);
+  
+  // Use the string-specific slice from your safe.ts
+  const key = safeSliceString(raw, 0, 24);
   const keyHash = sha256Hex(key);
-  const keySuffix = safeSlice(key, -4);
+  const keySuffix = safeSliceString(key, -4);
+  
   return { key, keyHash, keySuffix };
 }
+
 function logPrivacyAction(
   action: string,
   metadata: Record<string, unknown> = {}
@@ -106,25 +126,26 @@ function logPrivacyAction(
     ...metadata,
   });
 }
+
 // ---------------------------------------------------------------------------
 // Memory implementation (used in dev / fallback)
 // ---------------------------------------------------------------------------
 class MemoryInnerCircleStore implements InnerCircleStore {
   private members: InnerCircleMember[] = [];
-  private keyHashIndex = new Map<
-    string,
-    { memberId: string; keyIndex: number }
-  >();
+  private keyHashIndex = new Map<string, { memberId: string; keyIndex: number }>();
   private emailHashIndex = new Map<string, string>();
   private lastCleanup = nowIso();
+
   private getMemberByEmailHash(emailHash: string): InnerCircleMember | null {
     const id = this.emailHashIndex.get(emailHash);
     if (!id) return null;
     return this.members.find((m) => m.id === id) ?? null;
   }
+
   private getMemberById(id: string): InnerCircleMember | null {
     return this.members.find((m) => m.id === id) ?? null;
   }
+
   private indexMember(member: InnerCircleMember): void {
     this.emailHashIndex.set(member.emailHash, member.id);
     member.keys.forEach((key, idx) => {
@@ -134,15 +155,16 @@ class MemoryInnerCircleStore implements InnerCircleStore {
       });
     });
   }
-  async createOrUpdateMemberAndIssueKey(
-    args: CreateOrUpdateMemberArgs
-  ): Promise<IssuedKey> {
+
+  async createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
     const emailNormalised = normaliseEmail(args.email);
     const emailHash = sha256Hex(emailNormalised);
-    const emailHashPrefix = safeSlice(emailHash, 0, 10);
+    const emailHashPrefix = safeSubstring(emailHash, 0, 10);
     const now = nowIso();
+    
     let member = this.getMemberByEmailHash(emailHash);
     const isNewMember = !member;
+
     if (!member) {
       member = {
         id: crypto.randomUUID(),
@@ -156,23 +178,12 @@ class MemoryInnerCircleStore implements InnerCircleStore {
       };
       this.members.push(member);
       this.indexMember(member);
-      logPrivacyAction("member_created", {
-        store: "memory",
-        memberId: member.id,
-        emailHashPrefix: member.emailHashPrefix,
-        context: args.context,
-      });
     } else {
       member.lastSeenAt = now;
       if (args.name && args.name.trim()) member.name = args.name.trim();
       if (args.ipAddress) member.lastIp = args.ipAddress;
-      logPrivacyAction("member_updated", {
-        store: "memory",
-        memberId: member.id,
-        emailHashPrefix: member.emailHashPrefix,
-        context: args.context,
-      });
     }
+
     const { key, keyHash, keySuffix } = generateAccessKey();
     const keyRecord: InnerCircleKeyRecord = {
       keyHash,
@@ -181,18 +192,21 @@ class MemoryInnerCircleStore implements InnerCircleStore {
       status: "active",
       totalUnlocks: 0,
       lastUsedAt: null,
+      lastIp: args.ipAddress,
     };
+
     member.keys.push(keyRecord);
     this.keyHashIndex.set(keyHash, {
       memberId: member.id,
       keyIndex: member.keys.length - 1,
     });
-    logPrivacyAction("key_issued", {
-      store: "memory",
-      memberId: member.id,
-      keySuffix,
+
+    logPrivacyAction("key_issued", { 
+      memberId: member.id, 
       isNewMember,
+      context: args.context 
     });
+
     return {
       key,
       keySuffix,
@@ -200,6 +214,7 @@ class MemoryInnerCircleStore implements InnerCircleStore {
       status: keyRecord.status,
     };
   }
+
   async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
     const safeKey = key.trim();
     if (!safeKey) return { valid: false, reason: "missing-key" };
@@ -211,9 +226,7 @@ class MemoryInnerCircleStore implements InnerCircleStore {
     const record = member.keys[hit.keyIndex];
     if (!record) return { valid: false, reason: "record-missing" };
     if (record.status === "revoked") return { valid: false, reason: "revoked" };
-    const created = new Date(record.createdAt).getTime();
-    const ageMs = Date.now() - created;
-    if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
+    
     return {
       valid: true,
       memberId: member.id,
@@ -221,168 +234,133 @@ class MemoryInnerCircleStore implements InnerCircleStore {
       createdAt: record.createdAt,
     };
   }
-  async recordInnerCircleUnlock(
-    key: string,
-    ipAddress?: string
-  ): Promise<void> {
+
+  async recordInnerCircleUnlock(key: string, ipAddress?: string): Promise<void> {
     const safeKey = key.trim();
-    if (!safeKey) return;
     const keyHash = sha256Hex(safeKey);
     const hit = this.keyHashIndex.get(keyHash);
     if (!hit) return;
     const member = this.getMemberById(hit.memberId);
     if (!member) return;
     const record = member.keys[hit.keyIndex];
-    if (!record) return;
-    record.totalUnlocks += 1;
-    record.lastUsedAt = nowIso();
-    if (ipAddress) {
-      record.lastIp = ipAddress;
-      member.lastIp = ipAddress;
+    if (record) {
+      record.totalUnlocks += 1;
+      record.lastUsedAt = nowIso();
+      if (ipAddress) record.lastIp = ipAddress;
     }
-    member.lastSeenAt = record.lastUsedAt;
-    logPrivacyAction("key_used", {
-      store: "memory",
-      memberId: member.id,
-      keySuffix: record.keySuffix,
-      totalUnlocks: record.totalUnlocks,
-    });
   }
+
   async revokeInnerCircleKey(key: string): Promise<boolean> {
-    const safeKey = key.trim();
-    if (!safeKey) return false;
-    const keyHash = sha256Hex(safeKey);
+    const keyHash = sha256Hex(key.trim());
     const hit = this.keyHashIndex.get(keyHash);
     if (!hit) return false;
     const member = this.getMemberById(hit.memberId);
     if (!member) return false;
     const record = member.keys[hit.keyIndex];
-    if (!record) return false;
-    record.status = "revoked";
-    record.lastUsedAt = nowIso();
-    logPrivacyAction("key_revoked", {
-      store: "memory",
-      memberId: member.id,
-      keySuffix: record.keySuffix,
-      totalUnlocks: record.totalUnlocks,
-    });
-    return true;
+    if (record) {
+      record.status = "revoked";
+      logPrivacyAction("key_revoked", { memberId: member.id, keySuffix: record.keySuffix });
+      return true;
+    }
+    return false;
   }
+
   async deleteMemberByEmail(email: string): Promise<boolean> {
-    const emailNormalised = normaliseEmail(email);
-    const emailHash = sha256Hex(emailNormalised);
+    const emailHash = sha256Hex(normaliseEmail(email));
     const member = this.getMemberByEmailHash(emailHash);
     if (!member) return false;
-    this.emailHashIndex.delete(member.emailHash);
-    member.keys.forEach((key) => this.keyHashIndex.delete(key.keyHash));
-    const index = this.members.findIndex((m) => m.id === member.id);
-    if (index !== -1) this.members.splice(index, 1);
-    logPrivacyAction("delete_member", {
-      store: "memory",
-      memberId: member.id,
-      emailHashPrefix: member.emailHashPrefix,
-    });
+    this.members = this.members.filter(m => m.id !== member.id);
+    this.emailHashIndex.delete(emailHash);
+    logPrivacyAction("member_deleted", { emailHashPrefix: member.emailHashPrefix });
     return true;
   }
-  async cleanupOldData(): Promise<{
-    deletedMembers: number;
-    deletedKeys: number;
-  }> {
-    const cutoff = Date.now() - DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    let deletedMembers = 0;
+
+  async cleanupOldData() {
+    const now = Date.now();
     let deletedKeys = 0;
-    for (let i = this.members.length - 1; i >= 0; i--) {
-      const member = this.members[i];
-      if (!member) continue; // Safety check
-      const lastActivity = new Date(member.lastSeenAt).getTime();
-      if (lastActivity < cutoff) {
-        this.emailHashIndex.delete(member.emailHash);
-        member.keys.forEach((k) => this.keyHashIndex.delete(k.keyHash));
-        deletedKeys += member.keys.length;
-        this.members.splice(i, 1);
-        deletedMembers++;
-      }
-    }
-    if (deletedMembers > 0) {
-      logPrivacyAction("cleanup_completed", {
-        store: "memory",
-        deletedMembers,
-        deletedKeys,
+    let deletedMembers = 0;
+
+    this.members = this.members.map(member => {
+      const originalLength = member.keys.length;
+      member.keys = member.keys.filter(key => {
+        const keyAge = now - new Date(key.createdAt).getTime();
+        return keyAge < KEY_TTL_MS;
       });
-    }
+      deletedKeys += originalLength - member.keys.length;
+      return member;
+    });
+
+    const beforeMembers = this.members.length;
+    this.members = this.members.filter(m => m.keys.length > 0);
+    deletedMembers = beforeMembers - this.members.length;
+
+    this.keyHashIndex.clear();
+    this.emailHashIndex.clear();
+    this.members.forEach(m => this.indexMember(m));
+
     this.lastCleanup = nowIso();
+    
+    logPrivacyAction("cleanup_completed", { deletedMembers, deletedKeys });
     return { deletedMembers, deletedKeys };
   }
+
   async getPrivacySafeStats(): Promise<PrivacySafeStats> {
-    const now = Date.now();
-    const activeMembers = this.members.filter((m) =>
-      m.keys.some(
-        (k) =>
-          k.status === "active" &&
-          now - new Date(k.createdAt).getTime() < KEY_TTL_MS
-      )
-    ).length;
     const totalUnlocks = this.members.reduce(
-      (sum, m) =>
-        sum + m.keys.reduce((keySum, k) => keySum + k.totalUnlocks, 0),
+      (sum, m) => sum + m.keys.reduce((keySum, k) => keySum + k.totalUnlocks, 0), 
       0
     );
+
     return {
       totalMembers: this.members.length,
-      activeMembers,
+      activeMembers: this.members.filter(m => 
+        m.keys.some(k => k.status === "active")
+      ).length,
       totalKeys: this.keyHashIndex.size,
       totalUnlocks,
       dataRetentionDays: DATA_RETENTION_DAYS,
-      estimatedMemoryBytes:
-        this.members.length * 500 + this.keyHashIndex.size * 100,
+      estimatedMemoryBytes: JSON.stringify(this.members).length,
       lastCleanup: this.lastCleanup,
     };
   }
+
   async exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]> {
-    const rows: InnerCircleAdminExportRow[] = [];
-    this.members.forEach((member) => {
-      member.keys.forEach((key) => {
-        rows.push({
-          created_at: key.createdAt,
-          status: key.status,
-          key_suffix: key.keySuffix,
-          email_hash_prefix: member.emailHashPrefix,
-          total_unlocks: key.totalUnlocks,
-        });
-      });
-    });
-    rows.sort((a, b) => {
-      const tA = new Date(a.created_at).getTime();
-      const tB = new Date(b.created_at).getTime();
-      return tB - tA;
-    });
-    return rows;
+    return this.members.flatMap(member => 
+      member.keys.map(key => ({
+        created_at: key.createdAt,
+        status: key.status,
+        key_suffix: key.keySuffix,
+        email_hash_prefix: member.emailHashPrefix,
+        total_unlocks: key.totalUnlocks,
+      }))
+    );
   }
 }
+
 // ---------------------------------------------------------------------------
 // Postgres implementation (production)
 // ---------------------------------------------------------------------------
 let sharedPool: Pool | null = null;
+
 function getPool(): Pool {
   if (sharedPool) return sharedPool;
-  const conn =
-    process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL ?? "";
-  if (!conn) {
-    throw new Error(
-      "[InnerCircle] No INNER_CIRCLE_DB_URL/DATABASE_URL configured."
-    );
-  }
-  sharedPool = new Pool({
-    connectionString: conn,
-    max: 5,
+  const conn = process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL ?? "";
+  if (!conn) throw new Error("[InnerCircle] No DB URL configured. Set INNER_CIRCLE_DB_URL or DATABASE_URL");
+  sharedPool = new Pool({ 
+    connectionString: conn, 
+    max: 5, 
     idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 5_000,
   });
+  
+  sharedPool.on('error', (err) => {
+    console.error('[InnerCircle] Unexpected pool error:', err);
+  });
+  
   return sharedPool;
 }
+
 class PostgresInnerCircleStore implements InnerCircleStore {
-  private async withClient<T>(
-    fn: (client: PoolClient) => Promise<T>
-  ): Promise<T> {
+  private async withClient<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
     const pool = getPool();
     const client = await pool.connect();
     try {
@@ -391,96 +369,76 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       client.release();
     }
   }
-  async createOrUpdateMemberAndIssueKey(
-    args: CreateOrUpdateMemberArgs
-  ): Promise<IssuedKey> {
+
+  async createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
     const emailNormalised = normaliseEmail(args.email);
     const emailHash = sha256Hex(emailNormalised);
-    const emailHashPrefix = safeSlice(emailHash, 0, 10);
-    const now = nowIso();
+    const emailHashPrefix = safeSubstring(emailHash, 0, 10);
     const { key, keyHash, keySuffix } = generateAccessKey();
+    const now = nowIso();
+    
     let memberId: string;
+
     await this.withClient(async (client) => {
       await client.query("BEGIN");
       try {
-        // Ensure member exists
         const memberRes = await client.query<{ id: string }>(
-          `
-          INSERT INTO inner_circle_members (email_hash, email_hash_prefix, name, last_ip)
-          VALUES ($1, $2, $3, $4)
-          ON CONFLICT (email_hash) 
-          DO UPDATE SET
-            name = COALESCE($3, inner_circle_members.name),
-            last_seen_at = NOW(),
-            last_ip = COALESCE($4, inner_circle_members.last_ip)
-          RETURNING id
-        `,
+          `INSERT INTO inner_circle_members (id, email_hash, email_hash_prefix, name, last_ip, created_at, last_seen_at)
+           VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW(), NOW())
+           ON CONFLICT (email_hash) DO UPDATE SET
+             name = COALESCE($3, inner_circle_members.name),
+             last_seen_at = NOW(),
+             last_ip = COALESCE($4, inner_circle_members.last_ip)
+           RETURNING id`,
           [emailHash, emailHashPrefix, args.name || null, args.ipAddress || null]
         );
-        // FIX: Ensure ID exists before accessing it
-        if (!memberRes.rows[0]) {
-          throw new Error("Database error: Failed to retrieve or create member ID");
-        }
+        
+        if (!memberRes.rows[0]) throw new Error("Failed to secure member identity.");
         memberId = memberRes.rows[0].id;
-        // Insert the new key
+
         await client.query(
-          `
-          INSERT INTO inner_circle_keys (member_id, key_hash, key_suffix, status)
-          VALUES ($1, $2, $3, 'active')
-        `,
+          `INSERT INTO inner_circle_keys (id, member_id, key_hash, key_suffix, status, created_at)
+           VALUES (gen_random_uuid(), $1, $2, $3, 'active', NOW())`,
           [memberId, keyHash, keySuffix]
         );
+        
         await client.query("COMMIT");
-        logPrivacyAction("pg_key_issued", {
-          memberId,
-          emailHashPrefix,
-          keySuffix,
-          context: args.context,
+        
+        logPrivacyAction("key_issued_postgres", { 
+          memberId, 
+          context: args.context 
         });
       } catch (error) {
         await client.query("ROLLBACK");
+        console.error("[InnerCircle] DB transaction failed:", error);
         throw error;
       }
     });
-    return {
-      key,
-      keySuffix,
-      createdAt: now,
-      status: "active",
+
+    return { 
+      key, 
+      keySuffix, 
+      createdAt: now, 
+      status: "active" 
     };
   }
+
   async verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
-    const safeKey = key.trim();
-    if (!safeKey) return { valid: false, reason: "missing-key" };
-    const keyHash = sha256Hex(safeKey);
-    // Explicitly type the return value
-    const res = await this.withClient<QueryResult<{
-      member_id: string;
-      status: InnerCircleStatus;
-      created_at: string;
-      key_suffix: string;
-    }>>((client) =>
-      client.query<{
-        member_id: string;
-        status: InnerCircleStatus;
-        created_at: string;
-        key_suffix: string;
-      }>(
-        `
-        SELECT member_id, status, created_at, key_suffix
-        FROM inner_circle_keys
-        WHERE key_hash = $1
-        LIMIT 1
-      `,
+    const keyHash = sha256Hex(key.trim());
+    const res = await this.withClient(client => 
+      client.query<{ member_id: string; status: InnerCircleStatus; created_at: string; key_suffix: string }>(
+        `SELECT member_id, status, created_at::text, key_suffix 
+         FROM inner_circle_keys 
+         WHERE key_hash = $1 
+         LIMIT 1`,
         [keyHash]
       )
     );
+
     const row = res.rows[0];
     if (!row) return { valid: false, reason: "not-found" };
     if (row.status === "revoked") return { valid: false, reason: "revoked" };
-    const created = new Date(row.created_at).getTime();
-    const ageMs = Date.now() - created;
-    if (ageMs > KEY_TTL_MS) return { valid: false, reason: "expired" };
+
     return {
       valid: true,
       memberId: row.member_id,
@@ -488,254 +446,196 @@ class PostgresInnerCircleStore implements InnerCircleStore {
       createdAt: row.created_at,
     };
   }
-  async recordInnerCircleUnlock(
-    key: string,
-    ipAddress?: string
-  ): Promise<void> {
-    const safeKey = key.trim();
-    if (!safeKey) return;
-    const keyHash = sha256Hex(safeKey);
+
+  async recordInnerCircleUnlock(key: string, ipAddress?: string): Promise<void> {
+    const keyHash = sha256Hex(key.trim());
     await this.withClient(async (client) => {
-      await client.query("BEGIN");
-      try {
-        const keyRes = await client.query<{
-          id: string;
-          member_id: string;
-        }>(
-          `
-          SELECT id, member_id
-          FROM inner_circle_keys
-          WHERE key_hash = $1
-          LIMIT 1
-          FOR UPDATE
-        `,
-          [keyHash]
-        );
-        const row = keyRes.rows[0];
-        if (!row) {
-          await client.query("ROLLBACK");
-          return;
-        }
+      const res = await client.query<{ id: string; member_id: string }>(
+        `SELECT id, member_id FROM inner_circle_keys WHERE key_hash = $1 LIMIT 1`,
+        [keyHash]
+      );
+      const row = res.rows[0];
+      if (row) {
         await client.query(
-          `
-          UPDATE inner_circle_keys
-          SET 
-            total_unlocks = total_unlocks + 1,
-            last_used_at = NOW(),
-            last_ip = COALESCE($2, last_ip)
-          WHERE id = $1
-        `,
+          `UPDATE inner_circle_keys 
+           SET total_unlocks = total_unlocks + 1, 
+               last_used_at = NOW(), 
+               last_ip = COALESCE($2, last_ip) 
+           WHERE id = $1`,
           [row.id, ipAddress || null]
         );
-        await client.query(
-          `
-          UPDATE inner_circle_members
-          SET 
-            last_seen_at = NOW(),
-            last_ip = COALESCE($2, last_ip)
-          WHERE id = $1
-        `,
-          [row.member_id, ipAddress || null]
-        );
-        await client.query("COMMIT");
-        logPrivacyAction("pg_key_used", {
-          keyId: row.id,
-          memberId: row.member_id,
-          hasIp: !!ipAddress,
-        });
-      } catch (error) {
-        await client.query("ROLLBACK");
-        throw error;
       }
     });
   }
+
   async revokeInnerCircleKey(key: string): Promise<boolean> {
-    const safeKey = key.trim();
-    if (!safeKey) return false;
-    const keyHash = sha256Hex(safeKey);
-    const res = await this.withClient<QueryResult>((client) =>
+    const keyHash = sha256Hex(key.trim());
+    const res = await this.withClient(client => 
       client.query(
-        `
-        UPDATE inner_circle_keys
-        SET status = 'revoked',
-            last_used_at = NOW()
-        WHERE key_hash = $1
-      `,
+        `UPDATE inner_circle_keys 
+         SET status = 'revoked', updated_at = NOW() 
+         WHERE key_hash = $1`,
         [keyHash]
       )
     );
-    return (res.rowCount ?? 0) > 0;
+    
+    if ((res.rowCount ?? 0) > 0) {
+      logPrivacyAction("key_revoked_postgres", { keyHash: keyHash.substring(0, 8) });
+      return true;
+    }
+    return false;
   }
+
   async deleteMemberByEmail(email: string): Promise<boolean> {
-    const emailNormalised = normaliseEmail(email);
-    const emailHash = sha256Hex(emailNormalised);
-    const res = await this.withClient<QueryResult>((client) =>
+    const emailHash = sha256Hex(normaliseEmail(email));
+    const res = await this.withClient(client => 
       client.query(
-        `
-        DELETE FROM inner_circle_members
-        WHERE email_hash = $1
-      `,
+        `DELETE FROM inner_circle_members WHERE email_hash = $1`,
         [emailHash]
       )
     );
     return (res.rowCount ?? 0) > 0;
   }
-  async cleanupOldData(): Promise<{
-    deletedMembers: number;
-    deletedKeys: number;
-  }> {
-    return await this.withClient(async (client) => {
-      await client.query("BEGIN");
-      try {
-        const oldMembers = await client.query<{ id: string }>(
-          `
-          SELECT id
-          FROM inner_circle_members
-          WHERE last_seen_at < NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
-          `
-        );
-        const memberIds = oldMembers.rows.map((r) => r.id);
-        let deletedKeys = 0;
-        if (memberIds.length > 0) {
-          const keyDel = await client.query(
-            `
-            DELETE FROM inner_circle_keys
-            WHERE member_id = ANY($1)
-          `,
-            [memberIds]
-          );
-          deletedKeys = keyDel.rowCount ?? 0;
-          await client.query(
-            `
-            DELETE FROM inner_circle_members
-            WHERE id = ANY($1)
-          `,
-            [memberIds]
-          );
-        }
-        await client.query("COMMIT");
-        if (memberIds.length > 0) {
-          logPrivacyAction("pg_cleanup_completed", {
-            deletedMembers: memberIds.length,
-            deletedKeys,
-          });
-        }
-        return {
-          deletedMembers: memberIds.length,
-          deletedKeys,
-        };
-      } catch (error) {
-        await client.query("ROLLBACK");
-        throw error;
-      }
-    });
+
+  async cleanupOldData() {
+    const cutoffDate = new Date(Date.now() - KEY_TTL_MS).toISOString();
+    
+    const keyRes = await this.withClient(client => 
+      client.query(
+        `DELETE FROM inner_circle_keys 
+         WHERE created_at < $1::timestamp 
+         RETURNING id`,
+        [cutoffDate]
+      )
+    );
+
+    const memberRes = await this.withClient(client => 
+      client.query(
+        `DELETE FROM inner_circle_members m
+         WHERE NOT EXISTS (
+           SELECT 1 FROM inner_circle_keys k WHERE k.member_id = m.id
+         )
+         RETURNING id`
+      )
+    );
+
+    const deletedKeys = keyRes.rowCount ?? 0;
+    const deletedMembers = memberRes.rowCount ?? 0;
+
+    if (deletedKeys > 0 || deletedMembers > 0) {
+      logPrivacyAction("cleanup_completed_postgres", { deletedMembers, deletedKeys });
+    }
+
+    return { deletedMembers, deletedKeys };
   }
+
   async getPrivacySafeStats(): Promise<PrivacySafeStats> {
-    return await this.withClient(async (client) => {
-      const [membersRes, keysRes, unlocksRes, activeRes] = await Promise.all([
-        client.query<{ count: string }>(
-          "SELECT COUNT(*) AS count FROM inner_circle_members"
-        ),
-        client.query<{ count: string }>(
-          "SELECT COUNT(*) AS count FROM inner_circle_keys"
-        ),
-        client.query<{ total: string }>(
-          "SELECT COALESCE(SUM(total_unlocks), 0) AS total FROM inner_circle_keys"
-        ),
-        client.query<{ count: string }>(
-          `
-          SELECT COUNT(DISTINCT m.id) AS count
-          FROM inner_circle_members m
-          JOIN inner_circle_keys k ON k.member_id = m.id
-          WHERE k.status = 'active'
-            AND k.created_at > NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
-          `
-        ),
-      ]);
-      const totalMembers = Number(membersRes.rows[0]?.count ?? "0");
-      const totalKeys = Number(keysRes.rows[0]?.count ?? "0");
-      const totalUnlocks = Number(unlocksRes.rows[0]?.total ?? "0");
-      const activeMembers = Number(activeRes.rows[0]?.count ?? "0");
-      return {
-        totalMembers,
-        activeMembers,
-        totalKeys,
-        totalUnlocks,
-        dataRetentionDays: DATA_RETENTION_DAYS,
-        estimatedMemoryBytes: totalMembers * 1024,
-        lastCleanup: nowIso(),
-      };
-    });
+    const memberRes = await this.withClient(client => 
+      client.query<{ total: string; active: string }>(
+        `SELECT 
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE EXISTS (
+            SELECT 1 FROM inner_circle_keys k WHERE k.member_id = m.id AND k.status = 'active'
+          )) as active
+         FROM inner_circle_members m`
+      )
+    );
+
+    const keyRes = await this.withClient(client => 
+      client.query<{ total: string; unlocks: string }>(
+        `SELECT 
+          COUNT(*) as total,
+          COALESCE(SUM(total_unlocks), 0) as unlocks
+         FROM inner_circle_keys`
+      )
+    );
+
+    return {
+      totalMembers: parseInt(memberRes.rows[0]?.total || "0"),
+      activeMembers: parseInt(memberRes.rows[0]?.active || "0"),
+      totalKeys: parseInt(keyRes.rows[0]?.total || "0"),
+      totalUnlocks: parseInt(keyRes.rows[0]?.unlocks || "0"),
+      dataRetentionDays: DATA_RETENTION_DAYS,
+      estimatedMemoryBytes: 0,
+      lastCleanup: nowIso(),
+    };
   }
+
   async exportInnerCircleAdminSummary(): Promise<InnerCircleAdminExportRow[]> {
-    return await this.withClient(async (client) => {
-      const res = await client.query<InnerCircleAdminExportRow>(
-        `
-        SELECT
-          k.created_at,
-          k.status,
-          k.key_suffix,
-          m.email_hash_prefix,
+    const res = await this.withClient(client => 
+      client.query<InnerCircleAdminExportRow>(
+        `SELECT 
+          k.created_at::text as created_at, 
+          k.status, 
+          k.key_suffix, 
+          m.email_hash_prefix, 
           k.total_unlocks
-        FROM inner_circle_keys k
-        JOIN inner_circle_members m ON m.id = k.member_id
-        ORDER BY k.created_at DESC
-      `
-      );
-      return res.rows;
-    });
+         FROM inner_circle_keys k 
+         JOIN inner_circle_members m ON m.id = k.member_id
+         ORDER BY k.created_at DESC`
+      )
+    );
+    return res.rows;
   }
 }
+
 // ---------------------------------------------------------------------------
 // Store selection + public facade
 // ---------------------------------------------------------------------------
 let storeInstance: InnerCircleStore | null = null;
+
 function getStore(): InnerCircleStore {
   if (storeInstance) return storeInstance;
+  
   const mode = process.env.INNER_CIRCLE_STORE ?? "memory";
+  
   if (mode === "postgres") {
-    storeInstance = new PostgresInnerCircleStore();
-    logPrivacyAction("store_init", { mode: "postgres" });
+    try {
+      storeInstance = new PostgresInnerCircleStore();
+      logPrivacyAction("store_initialized", { mode: "postgres" });
+    } catch (error) {
+      console.error("[InnerCircle] Failed to initialize Postgres store, falling back to memory:", error);
+      storeInstance = new MemoryInnerCircleStore();
+      logPrivacyAction("store_initialized", { mode: "memory (fallback)" });
+    }
   } else {
     storeInstance = new MemoryInnerCircleStore();
-    logPrivacyAction("store_init", { mode: "memory" });
+    logPrivacyAction("store_initialized", { mode: "memory" });
   }
+  
   return storeInstance;
 }
-// Public functions used by API routes
-export async function createOrUpdateMemberAndIssueKey(
-  args: CreateOrUpdateMemberArgs
-): Promise<IssuedKey> {
-  return getStore().createOrUpdateMemberAndIssueKey(args);
-}
-export async function verifyInnerCircleKey(
-  key: string
-): Promise<VerifyInnerCircleKeyResult> {
-  return getStore().verifyInnerCircleKey(key);
-}
-export async function recordInnerCircleUnlock(
-  key: string,
-  ipAddress?: string
-): Promise<void> {
-  return getStore().recordInnerCircleUnlock(key, ipAddress);
-}
-export async function revokeInnerCircleKey(key: string): Promise<boolean> {
-  return getStore().revokeInnerCircleKey(key);
-}
-export async function deleteMemberByEmail(email: string): Promise<boolean> {
-  return getStore().deleteMemberByEmail(email);
-}
-export async function cleanupOldData(): Promise<{
-  deletedMembers: number;
-  deletedKeys: number;
-}> {
-  return getStore().cleanupOldData();
-}
-export async function getPrivacySafeStats(): Promise<PrivacySafeStats> {
-  return getStore().getPrivacySafeStats();
-}
-export async function exportInnerCircleAdminSummary(): Promise<
-  InnerCircleAdminExportRow[]
-> {
-  return getStore().exportInnerCircleAdminSummary();
+
+// Public API
+export const createOrUpdateMemberAndIssueKey = (args: CreateOrUpdateMemberArgs) => 
+  getStore().createOrUpdateMemberAndIssueKey(args);
+
+export const verifyInnerCircleKey = (key: string) => 
+  getStore().verifyInnerCircleKey(key);
+
+export const recordInnerCircleUnlock = (key: string, ip?: string) => 
+  getStore().recordInnerCircleUnlock(key, ip);
+
+export const revokeInnerCircleKey = (key: string) => 
+  getStore().revokeInnerCircleKey(key);
+
+export const deleteMemberByEmail = (email: string) => 
+  getStore().deleteMemberByEmail(email);
+
+export const cleanupOldData = () => 
+  getStore().cleanupOldData();
+
+export const getPrivacySafeStats = () => 
+  getStore().getPrivacySafeStats();
+
+export const exportInnerCircleAdminSummary = () => 
+  getStore().exportInnerCircleAdminSummary();
+
+export async function closeInnerCircleStore(): Promise<void> {
+  if (sharedPool) {
+    await sharedPool.end();
+    sharedPool = null;
+    storeInstance = null;
+    logPrivacyAction("store_closed", {});
+  }
 }

@@ -9,7 +9,32 @@ import { useEffect, useState, Component as ReactComponent, type ReactNode } from
 import { SessionProvider } from "next-auth/react";
 
 import "@/styles/tailwind.css";
-import { fontVariables, fontBodyClass } from "@/lib/next-fonts";
+
+// ✅ BRAND TYPOGRAPHY LOADER (Pages Router)
+import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
+
+const aolSans = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const aolMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
+const aolSerif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const fontVariables = `${aolSans.variable} ${aolMono.variable} ${aolSerif.variable}`;
+const fontBodyClass = aolSans.className; // Use Inter as base body font
 
 // ============================================================================
 // 🛡️ BUILD GUARD — Must be top-level, syntactically valid
@@ -83,7 +108,7 @@ class GlobalErrorBoundary extends ReactComponent<{ children: ReactNode }, { hasE
           <h2 className="font-serif text-3xl italic text-white mb-4">Vault Sync Error.</h2>
           <button
             onClick={() => window.location.reload()}
-            className="text-gold uppercase tracking-widest text-xs border border-gold/20 px-6 py-2 rounded-full"
+            className="text-amber-500 uppercase tracking-widest text-xs border border-amber-500/20 px-6 py-2 rounded-full"
           >
             Recalibrate System
           </button>
@@ -151,7 +176,7 @@ function RouteLoadingOverlay({ children }: { children: ReactNode }) {
     <>
       {isClient && routeLoading && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
         </div>
       )}
       {children}
@@ -174,10 +199,9 @@ export default function MyApp({ Component, pageProps: { session, ...pageProps } 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-          <style dangerouslySetInnerHTML={{ __html: `:root { ${fontVariables} }` }} />
           <meta name="robots" content="noindex,nofollow" />
         </Head>
-        <div className={`min-h-screen w-full ${fontBodyClass} bg-black text-cream`}>
+        <div className={`min-h-screen w-full ${fontVariables} ${fontBodyClass} bg-black text-cream`}>
           <Component {...pageProps} />
         </div>
       </>
@@ -189,7 +213,6 @@ export default function MyApp({ Component, pageProps: { session, ...pageProps } 
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <style dangerouslySetInnerHTML={{ __html: `:root { ${fontVariables} }` }} />
       </Head>
 
       {isClient && GA_ID ? (
@@ -217,7 +240,7 @@ export default function MyApp({ Component, pageProps: { session, ...pageProps } 
                 <PDFDashboardProvider>
                   <GlobalErrorBoundary>
                     <RouteLoadingOverlay>
-                      <div className={`min-h-screen w-full ${fontBodyClass} bg-black text-cream`}>
+                      <div className={`min-h-screen w-full ${fontVariables} ${fontBodyClass} bg-black text-cream`}>
                         <Component {...pageProps} />
                       </div>
                     </RouteLoadingOverlay>

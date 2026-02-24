@@ -1,12 +1,10 @@
-// pages/api/books/[slug].ts — SECURE BOOK DECRYPTION
+// pages/api/books/[slug].ts — SECURE VAULT PROXY
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 // Institutional Security & Content Helpers
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { getAccessCookie } from "@/lib/server/auth/cookies";
 import { normalizeSlug, getServerBookBySlug } from "@/lib/content/server";
-import { prepareMDX } from "@/lib/server/md-utils";
 
 type Tier = "public" | "inner-circle" | "private";
 
@@ -14,7 +12,7 @@ type Ok = {
   ok: true;
   tier: Tier;
   requiredTier: Tier;
-  source: MDXRemoteSerializeResult;
+  bodyCode: string; // ✅ Delivering the pre-compiled Contentlayer code
 };
 
 type Fail = { ok: false; reason: string };
@@ -41,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   // 3. Document Retrieval (Server-side bypass of build-time caches)
   const book = await getServerBookBySlug(slug);
-  if (!book || book.draft) {
+  if (!book || (book as any).draft) {
     return res.status(404).json({ ok: false, reason: "Volume not found" });
   }
 
@@ -68,20 +66,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
   }
 
-  // 5. Payload Preparation
-  // We serialize on-the-fly here so the 'raw' markdown never touches the client browser
+  // 5. Payload Delivery
+  // Since we are using next-contentlayer2, the content is already compiled.
+  // We simply serve the bodyCode which SafeMDXRenderer will reify on the client.
   try {
-    const rawMdx = String(book.body?.raw || book.content || "");
-    const source = await prepareMDX(rawMdx);
+    const bodyCode = book.body.code;
+
+    if (!bodyCode) {
+      throw new Error("Compiled content missing from vault asset.");
+    }
 
     return res.status(200).json({
       ok: true,
       tier: userTier,
       requiredTier,
-      source,
+      bodyCode, // ✅ No more next-mdx-remote serialization
     });
   } catch (error) {
-    console.error(`[DECRYPTION_FAILED] Slug: ${slug}`, error);
-    return res.status(500).json({ ok: false, reason: "Failed to process intelligence payload." });
+    console.error(`[VAULT_PROXY_FAILED] Slug: ${slug}`, error);
+    return res.status(500).json({ ok: false, reason: "Failed to retrieve pre-compiled intelligence payload." });
   }
 }

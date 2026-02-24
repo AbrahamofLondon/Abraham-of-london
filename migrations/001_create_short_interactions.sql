@@ -1,43 +1,50 @@
--- migrations/001_create_short_interactions.sql
+-- 1. Create Extensions (for UUID support)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Create the base table
-CREATE TABLE IF NOT EXISTS short_interactions (
-    id SERIAL PRIMARY KEY,
-    short_slug VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255),
-    action VARCHAR(50) NOT NULL CHECK (action IN ('like', 'save')),
+-- 2. Inner Circle Members Table
+-- Stores the identity shell without exposing the raw email
+CREATE TABLE IF NOT EXISTS inner_circle_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email_hash VARCHAR(64) UNIQUE NOT NULL, -- SHA-256 hash
+    email_hash_prefix VARCHAR(10) NOT NULL, -- For admin identification
+    name VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP WITH TIME ZONE NULL
+    last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_ip VARCHAR(45),
+    metadata JSONB DEFAULT '{}'::jsonb
 );
 
--- 2. Ensure unique active interaction per user per short per action
--- We use a UNIQUE INDEX with a WHERE clause to handle the conditional logic.
--- NULLS NOT DISTINCT ensures that if user_id is NULL (guest user), 
--- PostgreSQL treats all NULL user_ids as the same value for uniqueness checks.
-CREATE UNIQUE INDEX idx_unique_active_interaction 
-    ON short_interactions (short_slug, user_id, action) 
-    NULLS NOT DISTINCT
-    WHERE (deleted_at IS NULL);
+-- 3. Inner Circle Keys Table
+-- Hashed keys ensure that even with DB access, keys cannot be stolen
+CREATE TABLE IF NOT EXISTS inner_circle_keys (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    member_id UUID NOT NULL REFERENCES inner_circle_members(id) ON DELETE CASCADE,
+    key_hash VARCHAR(64) UNIQUE NOT NULL, -- SHA-256 of the raw key
+    key_suffix VARCHAR(4) NOT NULL,      -- Last 4 digits for display (e.g., IC-****-A1B2)
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'revoked', 'pending')),
+    total_unlocks INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP WITH TIME ZONE,
+    last_ip VARCHAR(45),
+    
+    CONSTRAINT fk_member FOREIGN KEY (member_id) REFERENCES inner_circle_members(id)
+);
 
--- 3. Create indexes for performance
-CREATE INDEX idx_short_interactions_slug ON short_interactions(short_slug);
-CREATE INDEX idx_short_interactions_user ON short_interactions(user_id);
-CREATE INDEX idx_short_interactions_action ON short_interactions(action);
-CREATE INDEX idx_short_interactions_created ON short_interactions(created_at);
+-- 4. Performance & Security Indexes
+CREATE INDEX IF NOT EXISTS idx_members_email_hash ON inner_circle_members(email_hash);
+CREATE INDEX IF NOT EXISTS idx_keys_key_hash ON inner_circle_keys(key_hash);
+CREATE INDEX IF NOT EXISTS idx_keys_member_id ON inner_circle_keys(member_id);
 
--- 4. Create function to update updated_at timestamp
+-- 5. Auto-Update Timestamp Function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.last_seen_at = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
 $$ language 'plpgsql';
 
--- 5. Create trigger for updated_at
-DROP TRIGGER IF EXISTS update_short_interactions_updated_at ON short_interactions;
-CREATE TRIGGER update_short_interactions_updated_at
-    BEFORE UPDATE ON short_interactions
+CREATE TRIGGER update_member_modtime
+    BEFORE UPDATE ON inner_circle_members
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE PROCEDURE update_updated_at_column();

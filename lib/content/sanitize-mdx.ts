@@ -28,7 +28,7 @@ export function sanitizeMdxContent(content: string): string {
       "script, iframe, object[type^='text/html'], embed[type^='text/html']"
     );
 
-    dangerousElements.forEach((el) => {
+    dangerousElements.forEach((el: Element) => {
       const tagName = el.tagName.toLowerCase();
 
       if (tagName === "script") {
@@ -50,7 +50,7 @@ export function sanitizeMdxContent(content: string): string {
 
     // Remove ONLY truly dangerous attributes
     const allElements = doc.querySelectorAll("*");
-    allElements.forEach((el) => {
+    allElements.forEach((el: Element) => {
       const attrs = Array.from(el.attributes);
       for (const attr of attrs) {
         if (attr && isTrulyDangerousAttribute(attr.name, attr.value || "")) {

@@ -1,4 +1,7 @@
 # netlify.toml — ABRAHAM OF LONDON (NETLIFY-NEXT NATIVE, ASSET-SAFE, NO FAT FUNCTIONS)
+# Canonical routes (as per your UI decisions):
+# - Essays live at /blog (brand alias /essays → /blog)
+# - Vault lives at /vault (legacy /downloads/vault → /vault)
 
 [build]
   command = "pnpm build:netlify"
@@ -20,7 +23,7 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# ✅ Custom functions: keep ONLY your small functions here (no SSR handler)
+# ✅ Custom functions: keep ONLY your small functions here (no SSR handler).
 # IMPORTANT: delete netlify/functions_src/functions/___netlify-server-handler entirely.
 [functions]
   directory = "netlify/functions_src"
@@ -42,23 +45,81 @@
 # REDIRECTS
 # -----------------------
 
-# Canonical host
+# Canonical host (force www)
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
+# Canonical index
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
 
-# Legacy mapping
+# -----------------------
+# BRAND / LEGACY ALIASES
+# -----------------------
+
+# ✅ Essays brand alias → Blog canonical
 [[redirects]]
-  from = "/blog/:slug"
-  to = "/insights/:slug"
+  from = "/essays"
+  to = "/blog"
   status = 301
+
+[[redirects]]
+  from = "/essays/"
+  to = "/blog"
+  status = 301
+
+[[redirects]]
+  from = "/essays/*"
+  to = "/blog/:splat"
+  status = 301
+
+# Optional safety alias: /insights → /blog (only if you ever used it publicly)
+[[redirects]]
+  from = "/insights"
+  to = "/blog"
+  status = 301
+
+[[redirects]]
+  from = "/insights/"
+  to = "/blog"
+  status = 301
+
+[[redirects]]
+  from = "/insights/*"
+  to = "/blog/:splat"
+  status = 301
+
+# ✅ Canonicalize Vault paths (legacy /downloads/vault → /vault canonical)
+[[redirects]]
+  from = "/downloads/vault"
+  to = "/vault"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/vault/"
+  to = "/vault"
+  status = 301
+
+[[redirects]]
+  from = "/downloads/vault/*"
+  to = "/vault/:splat"
+  status = 301
+
+# Optional safety: /downloads → /vault (only if you want to collapse the whole area)
+# [[redirects]]
+#   from = "/downloads"
+#   to = "/vault"
+#   status = 301
+#
+# [[redirects]]
+#   from = "/downloads/*"
+#   to = "/vault/:splat"
+#   status = 301
 
 # ✅ Let the Netlify Next plugin manage SSR routing.
 # DO NOT add a catch-all to /.netlify/functions/__nextjs_ssr here.

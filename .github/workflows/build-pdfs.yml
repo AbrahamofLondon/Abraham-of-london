@@ -5,24 +5,29 @@ on:
     branches: [main]
     paths:
       - "content/**"
-      - "scripts/generate-pdfs.ts"
-      - "scripts/generate-standalone-pdf.tsx"
-      - "scripts/generate-frameworks-pdf.tsx"
-      - "scripts/generate-legacy-canvas.ts"
-      - "scripts/pdf-registry.ts"
-      - "public/assets/images/**"
-      - "lib/pdfs/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
+      - "scripts/**"
+      - "lib/**"
   workflow_dispatch: {}
   schedule:
-    - cron: '0 4 * * 0'  # Weekly on Sunday at 4 AM UTC
+    - cron: '0 4 * * 0' # Weekly on Sunday at 4 AM UTC
 
 jobs:
   generate-pdfs:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30  # Increased from 25 for better reliability
+    timeout-minutes: 45 # Increased for the growing portfolio of 79+ assets
     
+    # 1. INFRASTRUCTURE: Provide a live registry for the vault audit
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
@@ -39,360 +44,91 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          
-      - name: 📚 Install dependencies
-        run: |
-          pnpm install --frozen-lockfile --prod=false
-          echo "✅ Dependencies installed"
-          
-      # ==================== CLEANUP PHASE ====================
-      - name: 🧹 Force Clean Old PDFs
-        run: |
-          echo "🧹 Force cleaning old PDFs..."
-          # Remove everything from both directories
-          rm -rf public/assets/downloads/* 2>/dev/null || true
-          rm -rf lib/pdfs/* 2>/dev/null || true
-          
-          # Recreate directories
-          mkdir -p public/assets/downloads
-          mkdir -p lib/pdfs
-          
-          echo "✅ Force clean completed"
-          
-      - name: 📁 Create directories
-        run: |
-          mkdir -p lib/pdfs
-          mkdir -p public/assets/downloads
-          mkdir -p public/assets/images
-          mkdir -p content
-          echo "📁 Directory structure created"
-          
-      # ==================== VALIDATION PHASE ====================
-      - name: 🔍 Validate scripts exist
-        id: validate-scripts
-        run: |
-          echo "🔍 Validating script existence..."
-          
-          REQUIRED_SCRIPTS=(
-            "scripts/generate-pdfs.ts"
-            "scripts/generate-legacy-canvas.ts"
-          )
-          
-          MISSING_SCRIPTS=()
-          for script in "${REQUIRED_SCRIPTS[@]}"; do
-            if [ ! -f "$script" ]; then
-              MISSING_SCRIPTS+=("$script")
-            fi
-          done
-          
-          if [ ${#MISSING_SCRIPTS[@]} -eq 0 ]; then
-            echo "✅ All required scripts found"
-            echo "scripts_valid=true" >> $GITHUB_OUTPUT
-          else
-            echo "❌ Missing scripts:"
-            for script in "${MISSING_SCRIPTS[@]}"; do
-              echo "  - $script"
-            done
-            echo "scripts_valid=false" >> $GITHUB_OUTPUT
-          fi
-          
-      - name: 🔍 Validate PDF registry
-        id: validate-registry
-        if: steps.validate-scripts.outputs.scripts_valid == 'true'
-        run: |
-          echo "🔍 Validating PDF registry..."
-          
-          # Check for pdf-registry.ts
-          if [ -f "scripts/pdf-registry.ts" ]; then
-            echo "✅ PDF registry found"
-            echo "registry_valid=true" >> $GITHUB_OUTPUT
-          else
-            echo "⚠️  PDF registry not found, but continuing..."
-            echo "registry_valid=true" >> $GITHUB_OUTPUT  # Still true as it's optional
-          fi
-          
-      # ==================== GENERATION PHASE ====================
-      - name: 🚀 Generate all PDFs (using enhanced script)
-        id: generate-batch
-        if: |
-          steps.validate-scripts.outputs.scripts_valid == 'true' &&
-          steps.validate-registry.outputs.registry_valid == 'true'
-        run: |
-          echo "🚀 Generating premium PDFs using enhanced script..."
-          
-          # Use the enhanced generate-pdfs.ts script directly
-          if pnpm tsx scripts/generate-pdfs.ts --force-clean 2>&1 | tee generation.log; then
-            echo "✅ PDF generation completed"
-            echo "batch_generation_success=true" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::PDF generation may have completed with warnings"
-            # Check if any PDFs were actually generated
-            PDF_COUNT=$(find public/assets/downloads -name "*.pdf" -type f 2>/dev/null | wc -l)
-            if [ $PDF_COUNT -gt 0 ]; then
-              echo "⚠️  Generation had issues but produced $PDF_COUNT PDF(s)"
-              echo "batch_generation_success=true" >> $GITHUB_OUTPUT
-            else
-              echo "batch_generation_success=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-          
-      - name: 🚀 Generate standalone PDF (if exists)
-        id: generate-standalone
-        if: |
-          steps.validate-scripts.outputs.scripts_valid == 'true' &&
-          [ -f "scripts/generate-standalone-pdf.tsx" ]
-        run: |
-          echo "🚀 Generating standalone editorial PDF..."
-          
-          if pnpm tsx scripts/generate-standalone-pdf.tsx 2>&1 | tee -a generation.log; then
-            echo "✅ Standalone PDF generation completed"
-            echo "standalone_generation_success=true" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::Standalone PDF generation failed or skipped"
-            echo "standalone_generation_success=false" >> $GITHUB_OUTPUT
-          fi
-          
-      - name: 🚀 Generate frameworks PDF (if exists)
-        id: generate-frameworks
-        if: |
-          steps.validate-scripts.outputs.scripts_valid == 'true' &&
-          [ -f "scripts/generate-frameworks-pdf.tsx" ]
-        run: |
-          echo "🚀 Generating frameworks PDF..."
-          
-          if pnpm tsx scripts/generate-frameworks-pdf.tsx 2>&1 | tee -a generation.log; then
-            echo "✅ Frameworks PDF generation completed"
-            echo "frameworks_generation_success=true" >> $GITHUB_OUTPUT
-          else
-            echo "::warning::Frameworks PDF generation failed or skipped"
-            echo "frameworks_generation_success=false" >> $GITHUB_OUTPUT
-          fi
-          
-      # ==================== CONSOLIDATION PHASE ====================
-      - name: 🔍 Consolidate and deduplicate PDFs
-        id: consolidate
-        if: always()
-        run: |
-          echo "🔍 Consolidating PDFs..."
-          
-          # Count PDFs in both locations
-          LIB_PDFS_COUNT=$(find lib/pdfs -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
-          PUBLIC_PDFS_COUNT=$(find public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
-          
-          echo "📊 PDF counts before consolidation:"
-          echo "  lib/pdfs/: $LIB_PDFS_COUNT PDF(s)"
-          echo "  public/assets/downloads/: $PUBLIC_PDFS_COUNT PDF(s)"
-          
-          # Ensure both directories exist
-          mkdir -p lib/pdfs
-          mkdir -p public/assets/downloads
-          
-          # Sync from lib to downloads
-          if [ $LIB_PDFS_COUNT -gt 0 ]; then
-            echo "📦 Syncing from lib/pdfs to public/assets/downloads..."
-            for pdf in lib/pdfs/*.pdf; do
-              if [ -f "$pdf" ]; then
-                filename=$(basename "$pdf")
-                cp -f "$pdf" "public/assets/downloads/$filename" 2>/dev/null || true
-              fi
-            done
-          fi
-          
-          # Sync from downloads to lib
-          if [ $PUBLIC_PDFS_COUNT -gt 0 ]; then
-            echo "📦 Syncing from public/assets/downloads to lib/pdfs..."
-            for pdf in public/assets/downloads/*.pdf; do
-              if [ -f "$pdf" ]; then
-                filename=$(basename "$pdf")
-                cp -f "$pdf" "lib/pdfs/$filename" 2>/dev/null || true
-              fi
-            done
-          fi
-          
-          # Final counts
-          FINAL_LIB_COUNT=$(find lib/pdfs -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
-          FINAL_PUBLIC_COUNT=$(find public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | wc -l)
-          
-          echo "📊 Final PDF counts:"
-          echo "  lib/pdfs/: $FINAL_LIB_COUNT PDF(s)"
-          echo "  public/assets/downloads/: $FINAL_PUBLIC_COUNT PDF(s)"
-          
-          # List all unique PDFs
-          echo "📋 Generated PDF files:"
-          find lib/pdfs public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | sort | uniq | xargs -I {} basename {} || echo "No PDFs found"
-          
-          # Output the maximum count
-          if [ $FINAL_LIB_COUNT -ge $FINAL_PUBLIC_COUNT ]; then
-            UNIQUE_COUNT=$FINAL_LIB_COUNT
-          else
-            UNIQUE_COUNT=$FINAL_PUBLIC_COUNT
-          fi
-          
-          echo "unique_pdf_count=$UNIQUE_COUNT" >> $GITHUB_OUTPUT
-          echo "lib_pdf_count=$FINAL_LIB_COUNT" >> $GITHUB_OUTPUT
-          echo "public_pdf_count=$FINAL_PUBLIC_COUNT" >> $GITHUB_OUTPUT
-          
-      # ==================== VERIFICATION PHASE ====================
-      - name: 📊 Verify generation success
-        id: verify-success
-        run: |
-          echo "📊 Verifying overall generation success..."
-          
-          # Get consolidated counts
-          UNIQUE_COUNT="${{ steps.consolidate.outputs.unique_pdf_count || 0 }}"
-          LIB_COUNT="${{ steps.consolidate.outputs.lib_pdf_count || 0 }}"
-          PUBLIC_COUNT="${{ steps.consolidate.outputs.public_pdf_count || 0 }}"
-          
-          # Check if we have a reasonable number of PDFs
-          if [ $UNIQUE_COUNT -ge 1 ]; then
-            echo "✅ Generated $UNIQUE_COUNT unique PDF(s)"
-            echo "sufficient_count=true" >> $GITHUB_OUTPUT
-          else
-            echo "⚠️  No PDFs generated"
-            echo "sufficient_count=false" >> $GITHUB_OUTPUT
-          fi
-          
-          # Overall success if we have any PDFs
-          if [ $UNIQUE_COUNT -gt 0 ]; then
-            echo "✅ PDF generation successful"
-            echo "overall_success=true" >> $GITHUB_OUTPUT
-          else
-            echo "❌ No PDFs were generated"
-            echo "overall_success=false" >> $GITHUB_OUTPUT
-          fi
-          
-          # Create a summary file
-          cat > public/assets/downloads/generation-summary.txt << EOF
-          PDF Generation Summary
-          ======================
-          Date: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
-          Unique PDFs: $UNIQUE_COUNT
-          lib/pdfs/: $LIB_COUNT
-          public/assets/downloads/: $PUBLIC_COUNT
-          
-          Generated Files:
-          $(find public/assets/downloads -name "*.pdf" -type f 2>/dev/null | xargs -I {} basename {} | sort | sed 's/^/  • /')
-          EOF
-          
-      # ==================== COMMIT PHASE ====================
-      - name: 📄 Check for file changes
-        id: check-changes
-        if: always()
-        run: |
-          echo "📄 Checking for file changes..."
-          
-          # Check for changes in both directories
-          CHANGED_IN_LIB=$(git status --porcelain lib/pdfs/ 2>/dev/null | wc -l)
-          CHANGED_IN_PUBLIC=$(git status --porcelain public/assets/downloads/ 2>/dev/null | wc -l)
-          TOTAL_CHANGES=$((CHANGED_IN_LIB + CHANGED_IN_PUBLIC))
-          
-          if [ $TOTAL_CHANGES -gt 0 ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "changed_files=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
-            echo "📝 File changes detected:"
-            echo "  lib/pdfs/: $CHANGED_IN_LIB file(s)"
-            echo "  public/assets/downloads/: $CHANGED_IN_PUBLIC file(s)"
-            
-            # List changed files
-            if [ $CHANGED_IN_LIB -gt 0 ]; then
-              git status --porcelain lib/pdfs/
-            fi
-            if [ $CHANGED_IN_PUBLIC -gt 0 ]; then
-              git status --porcelain public/assets/downloads/
-            fi
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "✅ No changes detected"
-          fi
-          
-      - name: 📤 Commit generated PDFs
-        if: |
-          steps.verify-success.outputs.overall_success == 'true' &&
-          steps.check-changes.outputs.has_changes == 'true' &&
-          steps.verify-success.outputs.sufficient_count == 'true'
-        run: |
-          echo "📤 Committing generated PDFs..."
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Add PDFs from both locations
-          git add lib/pdfs/*.pdf 2>/dev/null || true
-          git add public/assets/downloads/*.pdf 2>/dev/null || true
-          git add public/assets/downloads/*.json 2>/dev/null || true
-          git add public/assets/downloads/*.txt 2>/dev/null || true
-          
-          if ! git diff --cached --quiet; then
-            # Get commit details
-            PDF_FILES=$(git diff --cached --name-only | grep '\.pdf$' | wc -l)
-            REPORT_FILES=$(git diff --cached --name-only | grep '\.json$\|\.txt$' | wc -l)
-            
-            LIB_FILES=$(git diff --cached --name-only | grep '^lib/pdfs/' | wc -l)
-            PUBLIC_FILES=$(git diff --cached --name-only | grep '^public/assets/downloads/' | wc -l)
-            
-            git commit -m "chore(pdfs): auto-generate strategic documents [skip ci]
 
-            📊 Generated $PDF_FILES premium PDF(s)
-            📁 Locations:
-              • lib/pdfs/: $LIB_FILES file(s)
-              • public/assets/downloads/: $PUBLIC_FILES file(s)
-            📈 Reports: $REPORT_FILES file(s)
-            ⏰ Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
-            
-            🔄 Automated deduplication applied
-            🤖 Generated by Strategic PDF Engine"
-            
+      # 2. SYSTEM DEPENDENCIES: The "Bouncer" that usually causes 6 months of failure
+      # This ensures the Ubuntu runner can actually execute the PDF rendering engine
+      - name: 🔧 Install System Dependencies (Chromium/Canvas)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev \
+            libnss3 \
+            libnspr4 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            libgbm1 \
+            libasound2
+
+      - name: 📚 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 3. DIRECTORY INTEGRITY
+      - name: 📁 Prepare Vault Paths
+        run: |
+          mkdir -p public/briefs
+          mkdir -p lib/pdfs
+          echo "✅ Directories prepared"
+
+      # 4. THE MASTER ORCHESTRATION
+      - name: 🚀 Execute Vault Master (79+ Parallel Generation)
+        id: generate
+        run: |
+          echo "🛡️ Starting Intelligent Sync and PDF Generation..."
+          # Connect to the Redis Service container defined above
+          export REDIS_URL=redis://localhost:6379
+          # Run the script we perfected for parallel healing and rendering
+          npx tsx scripts/vault-master.ts
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192 --no-warnings"
+
+      # 5. CONSOLIDATION & DEDUPLICATION
+      - name: 🔍 Sync and Cross-Reference Assets
+        if: success()
+        run: |
+          # Ensure both directories are mirrored for the web-app and legacy links
+          cp -rn public/briefs/*.pdf lib/pdfs/ 2>/dev/null || true
+          cp -rn lib/pdfs/*.pdf public/briefs/ 2>/dev/null || true
+          
+          # Final Count for the summary
+          COUNT=$(ls public/briefs/*.pdf | wc -l)
+          echo "FINAL_COUNT=$COUNT" >> $GITHUB_ENV
+          echo "✅ $COUNT PDFs verified in vault."
+
+      # 6. COMMIT RECONCILIATION
+      - name: 📤 Commit Sovereign Portfolio Updates
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add public/briefs/*.pdf lib/pdfs/*.pdf
+          
+          # Only commit if there are actually changes to avoid loop failures
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(vault): auto-reconcile intelligence portfolio [${{ env.FINAL_COUNT }} assets] [skip ci]"
             git pull --rebase origin main
             git push
-            
-            echo "✅ PDFs committed successfully"
           else
-            echo "⚠️  No files to commit"
+            echo "No new changes to commit."
           fi
-          
-      # ==================== ARTIFACT PHASE ====================
-      - name: 📎 Upload logs
+
+      - name: 📊 Upload Artifacts (Debug)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-generation-logs
+          name: sovereign-vault-report
           path: |
+            public/briefs/*.pdf
             generation.log
-          retention-days: 7
-          
-      - name: 📎 Upload generated PDFs (debug)
-        if: always() && steps.consolidate.outputs.unique_pdf_count > 0
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-strategic-pdfs
-          path: |
-            lib/pdfs/
-            public/assets/downloads/
-          retention-days: 3
-          
-      # ==================== SUMMARY PHASE ====================
-      - name: 📊 Final summary
-        if: always()
-        run: |
-          echo ""
-          echo "🎯 STRATEGIC PDF GENERATION SUMMARY"
-          echo "=================================="
-          echo ""
-          echo "📅 Run: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          echo "✅ Scripts validation: ${{ steps.validate-scripts.outputs.scripts_valid || 'N/A' }}"
-          echo "📊 Unique PDFs generated: ${{ steps.consolidate.outputs.unique_pdf_count || 0 }}"
-          echo "📁 lib/pdfs count: ${{ steps.consolidate.outputs.lib_pdf_count || 0 }}"
-          echo "📂 public/downloads count: ${{ steps.consolidate.outputs.public_pdf_count || 0 }}"
-          echo "📄 Files changed: ${{ steps.check-changes.outputs.changed_files || 0 }}"
-          echo ""
-          
-          if [ "${{ steps.verify-success.outputs.overall_success }}" = "true" ] && [ "${{ steps.verify-success.outputs.sufficient_count }}" = "true" ]; then
-            echo "🎉 Mission accomplished: Premium PDFs generated successfully!"
-            echo ""
-            echo "📋 Generated PDFs:"
-            find public/assets/downloads -maxdepth 1 -name "*.pdf" -type f 2>/dev/null | sort | xargs -I {} echo "  • {}"
-          elif [ "${{ steps.verify-success.outputs.overall_success }}" = "false" ]; then
-            echo "❌ Generation failed. Check logs for details."
-          else
-            echo "⚠️  Generation completed with notes. Review logs if needed."
-          fi
+          retention-days: 5

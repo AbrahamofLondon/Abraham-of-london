@@ -54,12 +54,6 @@
     "type": "brief"
   },
   {
-    "title": "When the System Breaks You",
-    "slug": "/vault/blog/post-when-the-system-breaks-you",
-    "category": "blog",
-    "type": "brief"
-  },
-  {
     "title": "Principle For My Son",
     "slug": "/vault/blog/principles-for-my-son",
     "category": "blog",
@@ -114,14 +108,14 @@
     "type": "brief"
   },
   {
-    "title": "When the Storm Finds You: Lessons from Jonah, Jesus, and the Men Who Build Legacies",
-    "slug": "/vault/blog/when-the-storm-finds-you",
+    "title": "When the System Breaks You",
+    "slug": "/vault/blog/when-the-system-breaks-you",
     "category": "blog",
     "type": "brief"
   },
   {
     "title": "Fathering Without Fear",
-    "slug": "/vault/books/book-fathering-without-fear",
+    "slug": "/vault/books/fathering-without-fear",
     "category": "books",
     "type": "brief"
   },
@@ -144,8 +138,20 @@
     "type": "brief"
   },
   {
+    "title": "The Audit of Ease",
+    "slug": "/vault/briefs/audit-of-ease",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
     "title": "The Canon Builder's Rule of Life",
     "slug": "/vault/briefs/canon-builders-rule-of-life",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "The Architecture of Conviction vs. The Mechanics of Coercion",
+    "slug": "/vault/briefs/conviction-vs-coercion",
     "category": "briefs",
     "type": "brief"
   },
@@ -776,12 +782,6 @@
   {
     "title": "THE PRINCIPLES of SURRENDER FRAMEWORK",
     "slug": "/vault/downloads/life-alignment-assessment",
-    "category": "downloads",
-    "type": "brief"
-  },
-  {
-    "title": "The Canon Builder's Rule of Life",
-    "slug": "/vault/downloads/linked-briefs/canon-builders-rule-of-life",
     "category": "downloads",
     "type": "brief"
   },
@@ -1950,12 +1950,6 @@
     "type": "brief"
   },
   {
-    "title": "Canon Builder's Rule of Life",
-    "slug": "/vault/resources/canon-builders-rule-of-life",
-    "category": "resources",
-    "type": "brief"
-  },
-  {
     "title": "THE CANON - A New Era of Builders",
     "slug": "/vault/resources/canon-campaign",
     "category": "resources",
@@ -2544,6 +2538,12 @@
     "type": "brief"
   },
   {
+    "title": "The Extremism Shield",
+    "slug": "/vault/strategy/extremism-shield",
+    "category": "strategy",
+    "type": "brief"
+  },
+  {
     "title": "Institutional Governance",
     "slug": "/vault/strategy/institutional-governance",
     "category": "strategy",
@@ -2636,6 +2636,12 @@
   {
     "title": "Download: surrender-principles.pdf",
     "slug": "/vault/downloads/surrender-principles.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: The_Builders_Catechism_Illuminated_Edition.pdf",
+    "slug": "/vault/downloads/The_Builders_Catechism_Illuminated_Edition.pdf",
     "category": "downloads",
     "type": "asset"
   },

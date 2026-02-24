@@ -24,29 +24,28 @@ if (!MONGODB_URI) {
   }
 }
 
-// ✅ FIXED: Correct global typing (no 'Global' type)
+// ✅ FIXED: Correct global typing
 declare global {
   // eslint-disable-next-line no-var
-  var mongoose:
-    | {
-        conn: typeof mongoose | null;
-        promise: Promise<typeof mongoose> | null;
-      }
-    | undefined;
+  var mongooseCache: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  } | undefined;
 }
 
 const globalWithMongo = globalThis as typeof globalThis & {
-  mongoose?: {
+  mongooseCache?: {
     conn: typeof mongoose | null;
     promise: Promise<typeof mongoose> | null;
   };
 };
 
-let cached = globalWithMongo.mongoose;
-
-if (!cached) {
-  cached = globalWithMongo.mongoose = { conn: null, promise: null };
+// Initialize cache
+if (!globalWithMongo.mongooseCache) {
+  globalWithMongo.mongooseCache = { conn: null, promise: null };
 }
+
+const cached = globalWithMongo.mongooseCache;
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
   if (cached.conn) return cached.conn;
@@ -70,9 +69,9 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
 
     cached.promise = mongoose
       .connect(uri, opts)
-      .then((m) => {
+      .then((mongoose) => {
         console.log("✅ Connected to MongoDB");
-        return m;
+        return mongoose;
       })
       .catch((error) => {
         console.error("❌ MongoDB connection error:", error?.message || error);
