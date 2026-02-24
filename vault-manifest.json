@@ -30,7 +30,7 @@
     "type": "brief"
   },
   {
-    "title": "Kingdon Strategies For A Loving Legacy",
+    "title": "Kingdom Strategies For A Loving Legacy",
     "slug": "/vault/blog/kingdom-strategies-for-a-loving-legacy",
     "category": "blog",
     "type": "brief"
@@ -111,6 +111,12 @@
     "title": "When the System Breaks You",
     "slug": "/vault/blog/when-the-system-breaks-you",
     "category": "blog",
+    "type": "brief"
+  },
+  {
+    "title": "The Architecture of Ascension",
+    "slug": "/vault/books/architecture-of-ascension",
+    "category": "books",
     "type": "brief"
   },
   {
@@ -312,6 +318,12 @@
     "type": "brief"
   },
   {
+    "title": "Governance Diagnostic Toolkit",
+    "slug": "/vault/briefs/governance-diagnostic-toolkit",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
     "title": "Institutional Alpha // Briefing 003",
     "slug": "/vault/briefs/ia-003",
     "category": "briefs",
@@ -458,6 +470,12 @@
   {
     "title": "Institutional Alpha // Briefing 075",
     "slug": "/vault/briefs/ia-075",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
+    "title": "Institutional Integrity Audit",
+    "slug": "/vault/briefs/institutional-integrity-audit",
     "category": "briefs",
     "type": "brief"
   },
@@ -1788,7 +1806,7 @@
     "type": "brief"
   },
   {
-    "title": "The Ultimate Purpose of Man -- Strategic Editorial (PDF)",
+    "title": "The Ultimate Purpose of Man -- Strategic Editorial",
     "slug": "/vault/downloads/ultimate-purpose-of-man-editorial",
     "category": "downloads",
     "type": "brief"
@@ -1824,8 +1842,20 @@
     "type": "brief"
   },
   {
+    "title": "Brotherhood",
+    "slug": "/vault/lexicon/brotherhood",
+    "category": "lexicon",
+    "type": "brief"
+  },
+  {
     "title": "Clarity",
     "slug": "/vault/lexicon/clarity",
+    "category": "lexicon",
+    "type": "brief"
+  },
+  {
+    "title": "Covenant",
+    "slug": "/vault/lexicon/covenant",
     "category": "lexicon",
     "type": "brief"
   },
@@ -1884,7 +1914,13 @@
     "type": "brief"
   },
   {
-    "title": "Sovereignty",
+    "title": "Sisterhood",
+    "slug": "/vault/lexicon/sisterhood",
+    "category": "lexicon",
+    "type": "brief"
+  },
+  {
+    "title": "Integrity",
     "slug": "/vault/lexicon/sovereignty",
     "category": "lexicon",
     "type": "brief"
@@ -1896,8 +1932,20 @@
     "type": "brief"
   },
   {
+    "title": "Strategic Autonomy",
+    "slug": "/vault/lexicon/strategy",
+    "category": "lexicon",
+    "type": "brief"
+  },
+  {
     "title": "Surrender",
     "slug": "/vault/lexicon/surrender",
+    "category": "lexicon",
+    "type": "brief"
+  },
+  {
+    "title": "The Lexicon",
+    "slug": "/vault/lexicon/_index",
     "category": "lexicon",
     "type": "brief"
   },
@@ -1956,7 +2004,7 @@
     "type": "brief"
   },
   {
-    "title": "Council Table Agenda - Canon Leadership Session",
+    "title": "Council Table Agenda",
     "slug": "/vault/resources/canon-council-table-agenda",
     "category": "resources",
     "type": "brief"
@@ -2553,6 +2601,84 @@
     "title": "Strategy Sample",
     "slug": "/vault/strategy/sample-strategy",
     "category": "strategy",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #01: The State of the Modern Household",
+    "slug": "/vault/vault/briefs/brief-001-modern-household",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #02: The Economic Fortress",
+    "slug": "/vault/vault/briefs/brief-002-economic-fortress",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #03: The Education of Heirs",
+    "slug": "/vault/vault/briefs/brief-003-education-of-heirs",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #04: The Architecture of the Parallel Estate",
+    "slug": "/vault/vault/briefs/brief-004-parallel-estate",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #05: The Protocol of the Brotherhood",
+    "slug": "/vault/vault/briefs/brief-005-brotherhood-protocol",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #06: The Sisterhood and the Hearth",
+    "slug": "/vault/vault/briefs/brief-006-sisterhood-and-hearth",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #07: The Covenantal Oath",
+    "slug": "/vault/vault/briefs/brief-007-covenantal-oath",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #08: The Ledger of Legacy",
+    "slug": "/vault/vault/briefs/brief-008-ledger-of-legacy",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #09: The Sovereignty of Time",
+    "slug": "/vault/vault/briefs/brief-009-sovereignty-of-time",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #10: The Geometry of the Inner Circle",
+    "slug": "/vault/vault/briefs/brief-010-geometry-of-inner-circle",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #11: The Geography of the Estate",
+    "slug": "/vault/vault/briefs/brief-011-geography-of-estate",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Brief #12: The Aesthetics of Order",
+    "slug": "/vault/vault/briefs/brief-012-aesthetics-of-order",
+    "category": "vault",
+    "type": "brief"
+  },
+  {
+    "title": "Volume IV: The Rise-Decay Index",
+    "slug": "/vault/vault/indices/rise-decay-index",
+    "category": "vault",
     "type": "brief"
   },
   {

@@ -347,8 +347,6 @@ function createComputedFields(prefix: string, routeBase: string): ComputedFields
   };
 }
 
-// ❌ REMOVED: Duplicate safeRawBody function that was here
-
 // ------------------------------------------------------------
 // DOCUMENT TYPES
 // ------------------------------------------------------------
@@ -581,6 +579,26 @@ export const Lexicon = defineDocumentType(() => ({
   },
 }));
 
+export const Vault = defineDocumentType(() => ({
+  name: "Vault",
+  filePathPattern: "vault/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    vaultId: { type: "string", required: false },
+    category: { type: "string", required: false },
+    classification: {
+      type: "enum",
+      options: ["Unclassified", "Restricted", "Confidential", "Secret", "Top Secret"],
+      default: "Unclassified",
+      required: false,
+    },
+    lastAudit: { type: "string", required: false },
+    fileSize: { type: "string", required: false },
+  },
+  computedFields: createComputedFields("vault/", "vault"),
+}));
+
 // ------------------------------------------------------------
 // EXCLUSIONS
 // ------------------------------------------------------------
@@ -659,6 +677,7 @@ export default makeSource({
     "resources",
     "strategy",
     "lexicon",
+    "Vault",
   ],
   contentDirExclude: getExclusions(),
   documentTypes: [
@@ -675,6 +694,7 @@ export default makeSource({
     Resource,
     Strategy,
     Lexicon,
+    Vault,
   ],
   disableImportAliasWarning: true,
   mdx: { 

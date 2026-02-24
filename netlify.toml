@@ -1,7 +1,7 @@
 # netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED)
 
 [build]
-  command = "pnpm build:netlify"
+  command = "pnpm build:netlify"            
   publish = ".next"
 
 [build.environment]

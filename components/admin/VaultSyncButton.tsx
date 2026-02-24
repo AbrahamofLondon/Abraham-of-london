@@ -1,6 +1,6 @@
 'use client';
 
-// import { actionSyncVault } from '@/lib/pdf/generate-server'; // ❌ Missing export
+// import { actionSyncVault } from '@/lib/pdf/generate-server'; 
 import { useState } from 'react';
 
 export function VaultSyncButton() {

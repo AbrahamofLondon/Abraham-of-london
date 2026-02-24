@@ -1,5 +1,5 @@
 /** * AUTO-GENERATED INSTITUTIONAL REGISTRY
- * Generated at: 2026-02-24T11:18:26.764Z
+ * Generated at: 2026-02-24T20:56:40.130Z
  * Total Assets: 74
  * DO NOT EDIT DIRECTLY.
  */
@@ -1565,7 +1565,7 @@ export function getRegistryStats() {
     manual: 67,
     categories,
     categoryCount: categories.length,
-    generatedAt: "2026-02-24T11:18:26.764Z",
+    generatedAt: "2026-02-24T20:56:40.131Z",
     health: {
       exists: GENERATED_PDF_CONFIGS.filter(c => c.exists).length,
       missing: GENERATED_PDF_CONFIGS.filter(c => !c.exists).length
