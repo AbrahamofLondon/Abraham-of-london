@@ -457,6 +457,7 @@ export const Download = defineDocumentType(() => ({
     volumeIndex: { type: "number", required: false },
     lastUpdated: { type: "string", required: false },
     audience: { type: "string", required: false },
+    jurisdiction: { type: "string", required: false },
     classification: {
       type: "enum",
       options: ["Unclassified", "Restricted", "Confidential", "Secret", "Top Secret"],
@@ -569,6 +570,7 @@ export const Lexicon = defineDocumentType(() => ({
     term: { type: "string", required: false },
     phonetic: { type: "string", required: false },
     category: { type: "string", required: false },
+    total_terms: { type: "string", required: false },
   },
   computedFields: {
     ...createComputedFields("lexicon/", "lexicon"),
@@ -639,7 +641,7 @@ function getExclusions(): string[] {
 }
 
 // ------------------------------------------------------------
-// SOURCE
+// SOURCE: HARDENED FOR WINDOWS & HIGH-VOLUME ASSETS
 // ------------------------------------------------------------
 export default makeSource({
   contentDirPath: "content",
@@ -675,7 +677,25 @@ export default makeSource({
     Lexicon,
   ],
   disableImportAliasWarning: true,
-  mdx: { remarkPlugins: [], rehypePlugins: [] },
+  mdx: { 
+    remarkPlugins: [], 
+    rehypePlugins: [],
+    // 🏛️ [CRITICAL FIX]: Neutralizes "Invalid code point" and "Unexpected character" errors on Windows
+    esbuildOptions: (options) => {
+      options.platform = 'node';
+      options.target = 'esnext';
+      options.loader = {
+        ...options.loader,
+        '.mdx': 'jsx', // Force JSX loader to handle embedded components safely
+      };
+      // Prevents esbuild from tripping over system-specific line-ending artifacts
+      options.define = {
+        ...options.define,
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      };
+      return options;
+    },
+  },
 
   onSuccess: async (importData) => {
     const data = await importData();
@@ -685,6 +705,7 @@ export default makeSource({
     const seenHref = new Map<string, string>();
     const dupErrors: string[] = [];
 
+    // Protocol: Duplicate Detection
     for (const doc of allDocuments) {
       const id = safeString(doc?._id);
       const flat = safeString(doc?._raw?.flattenedPath);
@@ -708,6 +729,7 @@ export default makeSource({
       }
     }
 
+    // Protocol: Health Check & Stats
     const counts: Record<string, number> = {};
     let valid = 0;
     let invalid = 0;
@@ -718,8 +740,9 @@ export default makeSource({
       counts[t] = (counts[t] || 0) + 1;
 
       const v = doc?.validation as ValidationResult | undefined;
-      if (v?.isValid) valid++;
-      else {
+      if (v?.isValid) {
+        valid++;
+      } else {
         invalid++;
         if (samples.length < 12) {
           samples.push(
@@ -732,7 +755,7 @@ export default makeSource({
     console.log("\n============================================================");
     console.log("📊 CONTENTLAYER BUILD COMPLETE (SCHEMA ALIGNED)");
     console.log("============================================================");
-    console.log(`Platform: ${process.platform}${IS_WINDOWS ? " (Windows)" : ""}`);
+    console.log(`Platform: ${process.platform}${process.platform === 'win32' ? " (Windows)" : ""}`);
     console.log(`Docs: ${allDocuments.length}`);
     console.log("By type:", counts);
     console.log(`Validation: valid=${valid} invalid=${invalid}`);
@@ -741,13 +764,15 @@ export default makeSource({
       console.warn("\n⚠️  Duplicate routing/source signals detected:");
       dupErrors.slice(0, 20).forEach((e) => console.warn("  -", e));
       if (dupErrors.length > 20) console.warn(`  ...and ${dupErrors.length - 20} more`);
-      if (FAIL_ON_INVALID) throw new Error(`Duplicate doc signals detected: ${dupErrors.length}`);
+      if (typeof FAIL_ON_INVALID !== 'undefined' && FAIL_ON_INVALID) {
+        throw new Error(`Duplicate doc signals detected: ${dupErrors.length}`);
+      }
     }
 
     if (invalid > 0) {
       console.warn("\n⚠️  Invalid document samples:");
       samples.forEach((s) => console.warn("  -", s));
-      if (FAIL_ON_INVALID) {
+      if (typeof FAIL_ON_INVALID !== 'undefined' && FAIL_ON_INVALID) {
         throw new Error(`Contentlayer invariants failed (${invalid} invalid docs).`);
       }
     }

@@ -13,8 +13,8 @@ Module.prototype.require = function (id) {
     return {}; 
   }
 
-  // 2. Mock Redis to prevent build-time stream errors
-  if (id === '@/lib/redis' || id.endsWith('lib/redis')) {
+  // 2. Mock Redis - Expanded to catch all possible import variations
+  if (id.includes('lib/redis')) {
     return {
       getRedis: () => ({
         on: () => {},
@@ -22,6 +22,10 @@ Module.prototype.require = function (id) {
         get: async () => null,
         set: async () => 'OK',
         quit: async () => {},
+        pipeline: () => ({
+           set: () => {},
+           exec: async () => []
+        })
       }),
       default: {
         getRedis: () => ({ on: () => {}, ping: async () => 'PONG' }),
@@ -80,7 +84,7 @@ async function vaultMaster(): Promise<void> {
       healedLinks: 0 
     };
     
-    if (activeKeys.length === 0) {
+    if (!activeKeys || activeKeys.length === 0) {
       console.warn("⚠️  VAULT_MASTER: No briefs found in registry.");
       process.exit(0);
     }
@@ -93,6 +97,7 @@ async function vaultMaster(): Promise<void> {
     
     for (let i = 0; i < activeKeys.length; i += concurrencyLimit) {
       const batch = activeKeys.slice(i, i + concurrencyLimit);
+      console.log(`📦 Batch [${i / concurrencyLimit + 1}]: Processing ${batch.length} assets...`);
       
       const batchPromises = batch.map(async (id: string): Promise<PDFGenerationResult> => {
         const mdxPath = path.join(process.cwd(), 'content/briefs', `${id}.mdx`);
@@ -108,7 +113,7 @@ async function vaultMaster(): Promise<void> {
           return await generatePDF(id, false, healedContent); 
         }
         
-        return { success: false, error: "MDX Source Missing" };
+        return { success: false, error: `MDX Source Missing at ${mdxPath}` };
       });
 
       const results = await Promise.all(batchPromises);
@@ -182,7 +187,6 @@ function renderHealthReport(stats: VaultStats): void {
  */
 vaultMaster()
   .then(() => {
-    // Small delay to ensure logs are flushed
     setTimeout(() => {
       process.exit(0);
     }, 500);

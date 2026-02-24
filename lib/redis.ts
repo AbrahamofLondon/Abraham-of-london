@@ -1,4 +1,4 @@
-// lib/redis.ts - ULTIMATE SINGLE SOURCE OF TRUTH
+// lib/redis.ts - ULTIMATE SINGLE SOURCE OF TRUTH (RECOVERY-READY)
 import Redis from 'ioredis';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
@@ -7,35 +7,63 @@ const IS_SCRIPT_MODE = process.env.REDIS_DISABLED === 'true' || process.argv[1]?
 
 let redisInstance: Redis | null = null;
 
+/**
+ * Creates a hardened Redis client.
+ * Optimized for high-volume asset registration during Vault Sync.
+ */
 function createRedisClient(): Redis {
   console.log(`[Redis] Initializing ${IS_SCRIPT_MODE ? 'Script-Mode' : 'Standard'} connection`);
   
   const client = new Redis(REDIS_URL, {
-    maxRetriesPerRequest: IS_SCRIPT_MODE ? 1 : 3, // Fail fast in scripts
+    // 🏛️ [RECOVERY LOGIC]: Allow more retries in scripts to handle the "Healing" phase load.
+    maxRetriesPerRequest: IS_SCRIPT_MODE ? 5 : 3, 
+    
     retryStrategy: (times) => {
-      if (times > 3 || IS_SCRIPT_MODE) return null; // No retries in script mode
-      return Math.min(times * 50, 2000);
+      // If we hit 10 attempts, the infrastructure is likely down.
+      if (times > 10) {
+        console.error('[Redis] Max retries reached. Infrastructure unreachable.');
+        return null; 
+      }
+      // Exponential backoff: 100ms, 200ms, etc., capped at 3s.
+      return Math.min(times * 100, 3000);
     },
-    // CRITICAL FIX: Enable queue for scripts so they don't crash on boot
-    enableOfflineQueue: IS_SCRIPT_MODE ? true : false, 
+    
+    // 🏛️ [BUFFER MANAGEMENT]: Must be true to prevent "Stream isn't writeable" during 81+ asset syncs.
+    enableOfflineQueue: true, 
+    
     lazyConnect: true,
-    connectTimeout: 2000,
-    commandTimeout: IS_SCRIPT_MODE ? 1000 : undefined, // Don't hang the vault audit
+    connectTimeout: 5000, // Increased for Windows/WSL environment latencies
+    
+    // 🏛️ [IO PROTECTION]: Removed the 1000ms cap. 
+    // Vault registration of complex metadata can exceed 1s on local hardware.
+    commandTimeout: undefined, 
+    
     reconnectOnError: (err) => {
-      console.warn('[Redis] Reconnect on error:', err.message);
+      // Reconnect automatically if the cluster is in a READONLY state
+      if (err.message.includes("READONLY")) {
+        return true;
+      }
       return false;
     }
   });
 
   client.on('error', (err) => {
-    // Only log errors if we aren't in script mode to keep logs clean
-    if (!IS_SCRIPT_MODE) console.error('[Redis] Connection error:', err.message);
-    redisInstance = null;
+    // Suppress noisy logs in scripts unless they are terminal
+    if (!IS_SCRIPT_MODE) {
+      console.error('[Redis] Connection error:', err.message);
+    }
+    // Only nullify the instance if the connection is truly dead
+    if (err.message.includes('ECONNREFUSED')) {
+      redisInstance = null;
+    }
   });
 
   return client;
 }
 
+/**
+ * Returns the singleton Redis instance.
+ */
 export function getRedis(): Redis {
   if (!redisInstance) {
     redisInstance = createRedisClient();
@@ -43,15 +71,18 @@ export function getRedis(): Redis {
   return redisInstance;
 }
 
+/**
+ * Validates connection health with a timeout race.
+ */
 export async function isRedisAvailable(): Promise<boolean> {
   if (typeof window !== 'undefined') return false;
   
   try {
     const client = getRedis();
-    // In script mode, we use a timeout to ensure we don't hang if Redis is down
+    // Use a strict 1s timeout for the health check
     const pingPromise = client.ping();
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 800)
+      setTimeout(() => reject(new Error('Health Check Timeout')), 1000)
     );
     
     await Promise.race([pingPromise, timeoutPromise]);
@@ -61,10 +92,18 @@ export async function isRedisAvailable(): Promise<boolean> {
   }
 }
 
+/**
+ * Graceful shutdown for cleanup phases.
+ */
 export async function closeRedis(): Promise<void> {
   if (redisInstance) {
-    await redisInstance.quit();
-    redisInstance = null;
+    try {
+      await redisInstance.quit();
+    } catch {
+      redisInstance.disconnect();
+    } finally {
+      redisInstance = null;
+    }
   }
 }
 

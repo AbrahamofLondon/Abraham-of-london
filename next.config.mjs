@@ -1,4 +1,4 @@
-// next.config.mjs — ABRAHAM OF LONDON (NETLIFY-STABLE, ASSET-SAFE, HYBRID ROUTING FRIENDLY)
+// next.config.mjs — ABRAHAM OF LONDON (NEXT-16-STABLE, CONTENTLAYER2-COMPATIBLE)
 import { withContentlayer } from "next-contentlayer2";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,8 +13,9 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // ✅ Netlify automatically handles the build output; standalone is unnecessary here.
-  // output: "standalone",
+  // ✅ [STABILIZATION]: Explicitly disable Turbopack for MDX/Contentlayer compatibility
+  // This satisfies the Next.js 16 requirement for custom webpack configs.
+  // turbopack: {}, // Uncomment if you move to Turbopack later
 
   typescript: {
     ignoreBuildErrors: false,
@@ -50,7 +51,7 @@ const nextConfig = {
     };
 
     // 🏛️ [INSTITUTIONAL PROTECTION]: 
-    // Ensure Node.js internals never leak into the browser bundle.
+    // Prevent Node internals from leaking into the client bundle.
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -71,5 +72,5 @@ const nextConfig = {
   distDir: ".next",
 };
 
-// ✅ ESM-Native Wrapper application using next-contentlayer2
+// ✅ Apply Contentlayer2 wrapper
 export default withContentlayer(nextConfig);

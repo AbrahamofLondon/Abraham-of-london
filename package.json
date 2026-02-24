@@ -423,6 +423,7 @@
       "unrs-resolver"
     ],
     "ignoredBuiltDependencies": [
+      "contentlayer",
       "netlify-cli",
       "unix-dgram"
     ]
