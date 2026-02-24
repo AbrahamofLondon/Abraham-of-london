@@ -1,4 +1,4 @@
 /* components/Footer.tsx */
 "use client";
-
-export { default } from "./EnhancedFooter";
+import EnhancedFooter from "@/components/EnhancedFooter";
+export default EnhancedFooter;

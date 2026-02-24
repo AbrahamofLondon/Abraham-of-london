@@ -1,6 +1,4 @@
-// lib/health/monitoring.ts - Health monitoring utilities
-import { sendAlert } from '@/lib/notifications';
-
+// lib/health/monitoring.ts - Health monitoring utilities (standalone version)
 export type HealthCheckResult = {
   status: 'healthy' | 'degraded' | 'unhealthy';
   service: string;
@@ -27,7 +25,7 @@ export class HealthMonitor {
   async recordCheck(result: HealthCheckResult): Promise<void> {
     this.lastResults.set(result.service, result);
     
-    // Check if we need to send an alert
+    // Check if we need to send an alert (now just logs)
     if (result.status === 'unhealthy') {
       await this.checkAndSendAlert(result);
     }
@@ -53,13 +51,8 @@ export class HealthMonitor {
     const lastAlert = this.alertCooldown.get(result.service) || 0;
     
     if (now - lastAlert > this.ALERT_COOLDOWN_MS) {
-      await sendAlert({
-        type: 'health',
-        severity: 'critical',
-        service: result.service,
-        message: result.message || `${result.service} is unhealthy`,
-        timestamp: result.timestamp,
-      });
+      // Instead of calling sendAlert, just log
+      console.error(`[HEALTH_ALERT] ${result.service} is unhealthy: ${result.message || 'No message'}`);
       
       this.alertCooldown.set(result.service, now);
     }

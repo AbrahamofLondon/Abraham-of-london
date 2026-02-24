@@ -1,46 +1,69 @@
-// lib/redis.ts - ULTIMATE SINGLE SOURCE OF TRUTH
+// lib/redis.ts - ULTIMATE SINGLE SOURCE OF TRUTH (RECOVERY-READY)
 import Redis from 'ioredis';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+// Determine if we are running in a CLI script or the Vault Master Audit
+const IS_SCRIPT_MODE = process.env.REDIS_DISABLED === 'true' || process.argv[1]?.includes('scripts/');
 
-// LAZY initialized client - NO import-time connection
 let redisInstance: Redis | null = null;
 
+/**
+ * Creates a hardened Redis client.
+ * Optimized for high-volume asset registration during Vault Sync.
+ */
 function createRedisClient(): Redis {
-  console.log('[Redis] Creating new connection');
+  console.log(`[Redis] Initializing ${IS_SCRIPT_MODE ? 'Script-Mode' : 'Standard'} connection`);
   
   const client = new Redis(REDIS_URL, {
-    maxRetriesPerRequest: 3,
+    // 🏛️ [RECOVERY LOGIC]: Allow more retries in scripts to handle the "Healing" phase load.
+    maxRetriesPerRequest: IS_SCRIPT_MODE ? 5 : 3, 
+    
     retryStrategy: (times) => {
-      if (times > 3) return null;
-      return Math.min(times * 50, 2000);
+      // If we hit 10 attempts, the infrastructure is likely down.
+      if (times > 10) {
+        console.error('[Redis] Max retries reached. Infrastructure unreachable.');
+        return null; 
+      }
+      // Exponential backoff: 100ms, 200ms, etc., capped at 3s.
+      return Math.min(times * 100, 3000);
     },
-    enableOfflineQueue: false,
+    
+    // 🏛️ [BUFFER MANAGEMENT]: Must be true to prevent "Stream isn't writeable" during 81+ asset syncs.
+    enableOfflineQueue: true, 
+    
     lazyConnect: true,
+    connectTimeout: 5000, // Increased for Windows/WSL environment latencies
+    
+    // 🏛️ [IO PROTECTION]: Removed the 1000ms cap. 
+    // Vault registration of complex metadata can exceed 1s on local hardware.
+    commandTimeout: undefined, 
+    
     reconnectOnError: (err) => {
-      console.warn('[Redis] Reconnect on error:', err.message);
-      return false; // Don't auto-reconnect
+      // Reconnect automatically if the cluster is in a READONLY state
+      if (err.message.includes("READONLY")) {
+        return true;
+      }
+      return false;
     }
   });
 
   client.on('error', (err) => {
-    console.error('[Redis] Connection error:', err.message);
-    redisInstance = null;
-  });
-
-  client.on('connect', () => {
-    console.log('[Redis] Connected');
-  });
-
-  client.on('close', () => {
-    console.log('[Redis] Connection closed');
-    redisInstance = null;
+    // Suppress noisy logs in scripts unless they are terminal
+    if (!IS_SCRIPT_MODE) {
+      console.error('[Redis] Connection error:', err.message);
+    }
+    // Only nullify the instance if the connection is truly dead
+    if (err.message.includes('ECONNREFUSED')) {
+      redisInstance = null;
+    }
   });
 
   return client;
 }
 
-// MAIN EXPORT - LAZY GETTER
+/**
+ * Returns the singleton Redis instance.
+ */
 export function getRedis(): Redis {
   if (!redisInstance) {
     redisInstance = createRedisClient();
@@ -48,39 +71,46 @@ export function getRedis(): Redis {
   return redisInstance;
 }
 
-// Health check
+/**
+ * Validates connection health with a timeout race.
+ */
 export async function isRedisAvailable(): Promise<boolean> {
-  if (typeof window !== 'undefined') {
-    return false; // Redis not available in browser
-  }
+  if (typeof window !== 'undefined') return false;
   
   try {
     const client = getRedis();
-    await client.ping();
+    // Use a strict 1s timeout for the health check
+    const pingPromise = client.ping();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Health Check Timeout')), 1000)
+    );
+    
+    await Promise.race([pingPromise, timeoutPromise]);
     return true;
   } catch {
     return false;
   }
 }
 
-// Cleanup
+/**
+ * Graceful shutdown for cleanup phases.
+ */
 export async function closeRedis(): Promise<void> {
   if (redisInstance) {
-    await redisInstance.quit();
-    redisInstance = null;
-    console.log('[Redis] Connection closed');
+    try {
+      await redisInstance.quit();
+    } catch {
+      redisInstance.disconnect();
+    } finally {
+      redisInstance = null;
+    }
   }
 }
 
-// For TypeScript
-export type { Redis };
-
-// Default export for compatibility
 const redisExports = {
   getRedis,
   isRedisAvailable,
   closeRedis,
-  // Add a dummy property for any code expecting direct access
   get client() {
     return getRedis();
   }

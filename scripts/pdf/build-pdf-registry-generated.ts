@@ -1,10 +1,20 @@
-// scripts/pdf/build-pdf-registry-generated.ts
-// Generates: scripts/pdf/pdf-registry.generated.ts
+/**
+ * scripts/pdf/build-pdf-registry-generated.ts
+ * INSTITUTIONAL REGISTRY GENERATOR — PRODUCTION STABLE
+ */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { ALL_SOURCE_PDFS, type SourcePDFItem, type PaperFormat, type PDFFormat, type Tier, type PDFType } from "./pdf-registry.source";
+// Importing source definitions and shared types
+import { 
+  ALL_SOURCE_PDFS, 
+  type SourcePDFItem, 
+  type PaperFormat, 
+  type PDFFormat, 
+  type Tier, 
+  type PDFType 
+} from "./pdf-registry.source";
 
 type Paper = "A4" | "Letter" | "A3";
 const PAPER_ORDER: Paper[] = ["A4", "Letter", "A3"];
@@ -39,16 +49,18 @@ interface GeneratedPDFConfig {
   fileSizeBytes?: number;
 }
 
+/** HELPER: Force invariant conditions */
 function invariant(condition: any, message: string): asserts condition {
   if (!condition) throw new Error(`[build-pdf-registry-generated] ${message}`);
 }
 
-/** HELPER: Fixed ReferenceError from previous run */
+/** HELPER: Filter for valid paper formats */
 function paperFormatsOnly(formats?: PaperFormat[]): Paper[] {
   if (!Array.isArray(formats)) return [];
   return formats.filter((f): f is Paper => f === "A4" || f === "Letter" || f === "A3");
 }
 
+/** HELPER: Normalize web paths for Cross-Platform (Windows/Linux) compatibility */
 function normalizeWebPath(p: string): string {
   const raw = String(p || "").trim();
   let v = raw.replace(/\\/g, "/");
@@ -58,6 +70,7 @@ function normalizeWebPath(p: string): string {
   return v;
 }
 
+/** HELPER: Determine extension based on format enum */
 function extensionForFormat(fmt: GeneratedFileFormat): string {
   switch (fmt) {
     case "PDF": return ".pdf";
@@ -69,12 +82,14 @@ function extensionForFormat(fmt: GeneratedFileFormat): string {
   }
 }
 
+/** HELPER: Ensure file extension is present */
 function ensureExtensionByFormat(webPath: string, fmt: GeneratedFileFormat): string {
   const ext = extensionForFormat(fmt);
   if (webPath.toLowerCase().endsWith(ext)) return webPath;
   return `${webPath}${ext}`;
 }
 
+/** HELPER: Verify physical file existence in public directory */
 function statPublicFile(webPath: string): { exists: boolean; lastModified?: string; fileSizeBytes?: number } {
   try {
     const fullPath = path.join(process.cwd(), "public", webPath.replace(/^\/+/, ""));
@@ -89,6 +104,10 @@ function statPublicFile(webPath: string): { exists: boolean; lastModified?: stri
   }
 }
 
+/**
+ * STRATEGIC DISCOVERY: 
+ * Scans physical directories to find files that aren't manually mapped.
+ */
 function discoverUnmappedFiles(mappedPaths: Set<string>): GeneratedPDFConfig[] {
   const searchRoots = [
     path.join(process.cwd(), "public", "assets", "downloads"),
@@ -138,6 +157,7 @@ function discoverUnmappedFiles(mappedPaths: Set<string>): GeneratedPDFConfig[] {
   return discovered;
 }
 
+/** HELPER: Generate variant paths for multi-format prints */
 function addPaperSuffix(webPath: string, paper: Paper): string {
   const ext = path.posix.extname(webPath);
   const base = webPath.substring(0, webPath.length - ext.length);
@@ -145,6 +165,8 @@ function addPaperSuffix(webPath: string, paper: Paper): string {
 }
 
 async function main(): Promise<void> {
+  console.log("🛠️  [REGISTRY BUILD]: Reconciling manual source with physical assets...");
+  
   const source = (ALL_SOURCE_PDFS || []) as SourcePDFItem[];
   const generated: GeneratedPDFConfig[] = [];
   const mappedPaths = new Set<string>();
@@ -191,25 +213,62 @@ async function main(): Promise<void> {
     }
   }
 
-  // Sweep unmapped files
+  // Sweep unmapped files to catch ghost assets
   const discovered = discoverUnmappedFiles(mappedPaths);
   const final = [...generated, ...discovered];
 
   const outFile = path.join(process.cwd(), "lib/pdf/pdf-registry.generated.ts");
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
   
-  const content = `/** AUTO-GENERATED - DO NOT EDIT */
+  const content = `/** * AUTO-GENERATED INSTITUTIONAL REGISTRY
+ * Generated at: ${new Date().toISOString()}
+ * Total Assets: ${final.length}
+ * DO NOT EDIT DIRECTLY.
+ */
+
 export const GENERATED_PDF_CONFIGS = ${JSON.stringify(final, null, 2)} as const;
+
+export type GeneratedPDFId = typeof GENERATED_PDF_CONFIGS[number]['id'];
+
+/** Returns all generated PDF configurations */
 export const getGeneratedPDFs = () => GENERATED_PDF_CONFIGS;
+
+/** Returns a specific PDF config by ID (Required by PDF Engine) */
+export function getPDFById(id: string) {
+  return GENERATED_PDF_CONFIGS.find((config) => config.id === id);
+}
+
+/** * INSTITUTIONAL STATS UTILITY
+ * Satisfies: /app/api/stats/route.ts
+ */
+export function getRegistryStats() {
+  const categories = [...new Set(GENERATED_PDF_CONFIGS.map(c => c.category || 'Uncategorized'))];
+  return {
+    totalAssets: GENERATED_PDF_CONFIGS.length,
+    discovered: ${discovered.length},
+    manual: ${source.length},
+    categories,
+    categoryCount: categories.length,
+    generatedAt: "${new Date().toISOString()}",
+    health: {
+      exists: GENERATED_PDF_CONFIGS.filter(c => c.exists).length,
+      missing: GENERATED_PDF_CONFIGS.filter(c => !c.exists).length
+    }
+  };
+}
 `;
 
   fs.writeFileSync(outFile, content, "utf8");
-  console.log(`✅ Registry built: ${final.length} assets (${source.length} manual, ${discovered.length} discovered).`);
+  console.log(`✅ [SUCCESS]: Registry built with ${final.length} records.`);
 }
 
+/** EXECUTION */
 const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] === path.resolve(__filename)) {
-  main().catch(console.error);
+  main().catch((err) => {
+    console.error("❌ [REGISTRY_FAILURE]:", err);
+    process.exit(1);
+  });
 }
 
 export default main;

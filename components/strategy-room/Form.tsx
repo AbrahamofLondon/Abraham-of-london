@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   Send, 
   ArrowRight, 
@@ -19,10 +19,14 @@ import {
 } from "lucide-react";
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
-// Premium design tokens
-const TRANSITION = {
+/**
+ * PERMANENT TS FIX:
+ * Your installed Framer Motion type definitions reject `number[]` for `ease`.
+ * TS infers `[0.16, 1, 0.3, 1]` as `number[]` unless we force the type.
+ */
+const TRANSITION: import('framer-motion').Transition = {
   duration: 0.6,
-  ease: [0.16, 1, 0.3, 1], // Custom cubic-bezier for luxury feel
+  ease: [0.16, 1, 0.3, 1] as unknown as import('framer-motion').Transition['ease'],
 };
 
 const FormField = ({ 
@@ -33,7 +37,9 @@ const FormField = ({
   required = true,
   placeholder,
   rows,
-  isTextarea = false
+  isTextarea = false,
+  value,
+  onChange
 }: { 
   icon: any; 
   label: string; 
@@ -43,6 +49,8 @@ const FormField = ({
   placeholder: string;
   rows?: number;
   isTextarea?: boolean;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }) => {
   const [focused, setFocused] = React.useState(false);
 
@@ -93,6 +101,8 @@ const FormField = ({
               required={required}
               rows={rows || 4}
               placeholder={placeholder}
+              value={value}
+              onChange={onChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               className="w-full bg-transparent text-white text-sm font-light outline-none resize-none placeholder:text-zinc-800"
@@ -103,6 +113,8 @@ const FormField = ({
               name={name}
               required={required}
               placeholder={placeholder}
+              value={value}
+              onChange={onChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               className="w-full bg-transparent text-white text-sm font-light outline-none placeholder:text-zinc-800"

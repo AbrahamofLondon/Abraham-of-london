@@ -6,7 +6,7 @@ const { PrismaClient } = require('@prisma/client');
 // Import Prisma namespace for types
 import type * as Prisma from '@prisma/client';
 
-// Define the SystemAuditLog type locally since we can't import it
+// Define the SystemAuditLog type locally
 export interface SystemAuditLog {
   id: string;
   actorType: string;
@@ -67,8 +67,18 @@ export interface AuditEvent {
   version?: string;
 }
 
+export interface AuditQueryFilters {
+  startDate?: Date;
+  endDate?: Date;
+  action?: string;
+  category?: AuditCategory;
+  severity?: AuditSeverity;
+  resourceId?: string;
+  limit?: number;
+}
+
 type LoggerConfig = {
-  prisma: any; // Use any for the Prisma client
+  prisma: any;
   service: string;
   environment: string;
   version?: string;
@@ -103,6 +113,30 @@ export class AuditLogger {
         void this.flushBatch();
       }, this.batchIntervalMs);
     }
+  }
+
+  // --- Core Query Method for Intelligence ---
+  async query(filters: AuditQueryFilters): Promise<SystemAuditLog[]> {
+    if (!this.prisma) throw new Error("Prisma client not initialized");
+
+    const { startDate, endDate, action, category, severity, resourceId, limit = 100 } = filters;
+
+    const where: any = {};
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = startDate;
+      if (endDate) where.createdAt.lte = endDate;
+    }
+    if (action) where.action = action;
+    if (category) where.category = category;
+    if (severity) where.severity = severity;
+    if (resourceId) where.resourceId = resourceId;
+
+    return await this.prisma.systemAuditLog.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
   }
 
   async log(event: Omit<AuditEvent, "timestamp">): Promise<SystemAuditLog | null> {
@@ -217,7 +251,6 @@ export class AuditLogger {
     await this.flushBatch();
   }
 
-  // Domain Helper: Auth
   async logAuthEvent(userId: string, action: string, details: any): Promise<void> {
     await this.log({
       actorId: userId,
@@ -232,13 +265,12 @@ export class AuditLogger {
   }
 }
 
-// Singleton Initialization
+// Singleton Facade Initialization
 let auditLoggerInstance: AuditLogger | null = null;
 
 export const auditLogger = {
   async ensureInitialized(): Promise<AuditLogger> {
     if (!auditLoggerInstance) {
-      // Use dynamic import with require pattern for db
       const dbModule = await import("@/lib/db");
       const prisma = dbModule.prisma;
       
@@ -259,6 +291,12 @@ export const auditLogger = {
   async logAuthEvent(userId: string, action: string, details: any) {
     const logger = await this.ensureInitialized();
     return await logger.logAuthEvent(userId, action, details);
+  },
+
+  // Facade access to query
+  async query(filters: AuditQueryFilters) {
+    const logger = await this.ensureInitialized();
+    return await logger.query(filters);
   }
 };
 

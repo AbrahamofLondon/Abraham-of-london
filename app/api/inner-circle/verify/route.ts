@@ -1,10 +1,14 @@
-// app/api/inner-circle/verify/route.ts — PRODUCTION STABLE (NO GHOST EXPORTS)
+// app/api/inner-circle/verify/route.ts
 import "server-only";
+
+// Force the Node.js runtime to prevent Webpack from trying to bundle 
+// Node-specific dependencies for the Edge runtime.
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyInnerCircleKey } from "@/lib/inner-circle/exports.server";
 
-// Best-effort in-memory limiter (resets on cold start; acceptable for light abuse protection)
 type Bucket = { count: number; resetAt: number };
 const BUCKETS = new Map<string, Bucket>();
 

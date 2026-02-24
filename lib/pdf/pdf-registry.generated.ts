@@ -1,11 +1,16 @@
-/** AUTO-GENERATED - DO NOT EDIT */
+/** * AUTO-GENERATED INSTITUTIONAL REGISTRY
+ * Generated at: 2026-02-24T11:18:26.764Z
+ * Total Assets: 74
+ * DO NOT EDIT DIRECTLY.
+ */
+
 export const GENERATED_PDF_CONFIGS = [
   {
     "id": "abraham-vault-pack",
     "title": "Abraham Vault Pack",
     "type": "bundle",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
+    "outputPath": "/assets/downloads/abraham-vault-pack.pdf",
     "category": "vault",
     "description": "Comprehensive vault pack with foundational resources",
     "format": "PDF",
@@ -19,15 +24,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-01-28T09:08:15.864Z",
-    "fileSizeBytes": 2023
+    "lastModified": "2026-02-12T21:26:18.863Z",
+    "fileSizeBytes": 77701
   },
   {
     "id": "board-decision-log-template",
     "title": "Board Decision Log Template",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+    "outputPath": "/assets/downloads/board-decision-log-template.pdf",
     "category": "governance",
     "description": "Template for tracking board decisions and resolutions",
     "format": "PDF",
@@ -41,15 +46,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:11:20.268Z",
-    "fileSizeBytes": 926
+    "lastModified": "2026-02-12T21:26:18.869Z",
+    "fileSizeBytes": 63006
   },
   {
     "id": "board-investor-onepager",
     "title": "Board Investor One-Pager",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
+    "outputPath": "/assets/downloads/board-investor-onepager.pdf",
     "category": "governance",
     "description": "One-page summary for board and investor communications",
     "format": "PDF",
@@ -63,15 +68,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:07:10.299Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.873Z",
+    "fileSizeBytes": 57629
   },
   {
     "id": "brotherhood-covenant",
     "title": "Brotherhood Covenant",
     "type": "framework",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
+    "outputPath": "/assets/downloads/brotherhood-covenant.pdf",
     "category": "leadership",
     "description": "Covenant framework for brotherhood and fellowship",
     "format": "PDF",
@@ -85,15 +90,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:07:27.780Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.880Z",
+    "fileSizeBytes": 110637
   },
   {
     "id": "brotherhood-leader-guide",
     "title": "Brotherhood Leader Guide",
     "type": "toolkit",
     "tier": "free",
-    "outputPath": "/assets/downloads/brotherhood-leader-guide.pdf",
+    "outputPath": "/vault/downloads/lib-pdf/brotherhood-leader-guide.pdf",
     "category": "leadership",
     "description": "Guide for leading brotherhood groups and communities",
     "format": "PDF",
@@ -115,7 +120,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Brotherhood Starter Kit",
     "type": "toolkit",
     "tier": "free",
-    "outputPath": "/assets/downloads/brotherhood-starter-kit.pdf",
+    "outputPath": "/vault/downloads/lib-pdf/brotherhood-starter-kit.pdf",
     "category": "leadership",
     "description": "Starter kit for establishing brotherhood groups",
     "format": "PDF",
@@ -137,7 +142,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Canon Volume IV Diagnostic Toolkit",
     "type": "toolkit",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+    "outputPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
     "category": "canon",
     "description": "Diagnostic tools from Canon Volume IV",
     "format": "PDF",
@@ -151,15 +156,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:07:37.292Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.887Z",
+    "fileSizeBytes": 162920
   },
   {
     "id": "canon-volume-v-governance-diagnostic-toolkit",
     "title": "Canon Volume V Governance Diagnostic Toolkit",
     "type": "toolkit",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+    "outputPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
     "category": "governance",
     "description": "Governance diagnostic tools from Canon Volume V",
     "format": "PDF",
@@ -173,15 +178,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:07:50.588Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.897Z",
+    "fileSizeBytes": 163679
   },
   {
     "id": "communication-script-bpf",
     "title": "Communication Script (BPF)",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
+    "outputPath": "/assets/downloads/communication-script-bpf.pdf",
     "category": "leadership",
     "description": "Business Process Framework communication script",
     "format": "PDF",
@@ -195,15 +200,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:07:56.964Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.904Z",
+    "fileSizeBytes": 108958
   },
   {
     "id": "core-alignment",
     "title": "Core Alignment Framework",
     "type": "framework",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/core-alignment.pdf",
+    "outputPath": "/assets/downloads/core-alignment.pdf",
     "category": "personal-growth",
     "description": "Framework for aligning with core values and purpose",
     "format": "PDF",
@@ -216,16 +221,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:15.879Z",
-    "fileSizeBytes": 94161
+    "exists": false
   },
   {
     "id": "core-legacy",
     "title": "Core Legacy Framework",
     "type": "framework",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/core-legacy.pdf",
+    "outputPath": "/assets/downloads/core-legacy.pdf",
     "category": "legacy",
     "description": "Framework for building and sustaining legacy",
     "format": "PDF",
@@ -238,16 +241,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:15.893Z",
-    "fileSizeBytes": 10765
+    "exists": false
   },
   {
     "id": "decision-log-template",
     "title": "Decision Log Template",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/decision-log-template.pdf",
+    "outputPath": "/assets/downloads/decision-log-template.pdf",
     "category": "operations",
     "description": "Template for logging and tracking decisions",
     "format": "PDF",
@@ -261,15 +262,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:06.256Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.909Z",
+    "fileSizeBytes": 60316
   },
   {
     "id": "decision-matrix-scorecard",
     "title": "Decision Matrix Scorecard",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
+    "outputPath": "/assets/downloads/decision-matrix-scorecard.pdf",
     "category": "operations",
     "description": "Scorecard for decision matrix evaluation",
     "format": "PDF",
@@ -283,15 +284,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:12.231Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.918Z",
+    "fileSizeBytes": 63671
   },
   {
     "id": "download-legacy-architecture-canvas",
     "title": "Legacy Architecture Canvas",
     "type": "canvas",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+    "outputPath": "/assets/downloads/download-legacy-architecture-canvas.pdf",
     "category": "legacy",
     "description": "Canvas for designing legacy architecture",
     "format": "PDF",
@@ -305,15 +306,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:26.531Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.926Z",
+    "fileSizeBytes": 135859
   },
   {
     "id": "entrepreneur-operating-pack",
     "title": "Entrepreneur Operating Pack",
     "type": "pack",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
+    "outputPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
     "category": "operations",
     "description": "Operating pack for entrepreneurs",
     "format": "PDF",
@@ -327,15 +328,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:40.950Z",
-    "fileSizeBytes": 929
+    "lastModified": "2026-02-12T21:26:18.934Z",
+    "fileSizeBytes": 83276
   },
   {
     "id": "entrepreneur-survival-checklist",
     "title": "Entrepreneur Survival Checklist",
     "type": "checklist",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
+    "outputPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
     "category": "operations",
     "description": "Checklist for entrepreneurial survival and resilience",
     "format": "PDF",
@@ -349,15 +350,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:46.897Z",
-    "fileSizeBytes": 933
+    "lastModified": "2026-02-12T21:26:18.940Z",
+    "fileSizeBytes": 111543
   },
   {
     "id": "family-altar-liturgy",
     "title": "Family Altar Liturgy",
     "type": "liturgy",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
+    "outputPath": "/assets/downloads/family-altar-liturgy.pdf",
     "category": "theology",
     "description": "Liturgy for family altar and worship",
     "format": "PDF",
@@ -371,15 +372,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:52.957Z",
-    "fileSizeBytes": 922
+    "lastModified": "2026-02-12T21:26:18.945Z",
+    "fileSizeBytes": 111754
   },
   {
     "id": "fathers-family-court-pack",
     "title": "Family Court Practical Pack",
     "type": "bundle",
     "tier": "member",
-    "outputPath": "/assets/downloads/fathers-family-court-pack.pdf",
+    "outputPath": "/vault/downloads/lib-pdf/fathers-family-court-pack.pdf",
     "requiresAuth": true,
     "category": "family-court",
     "description": "Practical resources for family court proceedings",
@@ -401,7 +402,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Leaders Cue Card (Two-Up)",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
+    "outputPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
     "category": "leadership",
     "description": "Two-up cue card for leaders",
     "format": "PDF",
@@ -415,15 +416,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:58.889Z",
-    "fileSizeBytes": 925
+    "lastModified": "2026-02-12T21:26:18.949Z",
+    "fileSizeBytes": 75023
   },
   {
     "id": "leadership-playbook",
     "title": "Leadership Playbook",
     "type": "playbook",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/leadership-playbook.pdf",
+    "outputPath": "/assets/downloads/leadership-playbook.pdf",
     "category": "leadership",
     "description": "Comprehensive leadership playbook",
     "format": "PDF",
@@ -437,15 +438,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:04.966Z",
-    "fileSizeBytes": 921
+    "lastModified": "2026-02-12T21:26:18.957Z",
+    "fileSizeBytes": 116740
   },
   {
     "id": "legacy-canvas",
     "title": "Legacy Canvas",
     "type": "canvas",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/legacy-canvas.pdf",
+    "outputPath": "/assets/downloads/legacy-canvas.pdf",
     "category": "legacy",
     "description": "Canvas for legacy planning and design",
     "format": "PDF",
@@ -459,15 +460,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:10.042Z",
-    "fileSizeBytes": 915
+    "lastModified": "2026-02-12T21:26:18.973Z",
+    "fileSizeBytes": 110606
   },
   {
     "id": "legacy-architecture-canvas",
     "title": "Legacy Architecture Canvas",
     "type": "canvas",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/legacy-architecture-canvas.pdf",
+    "outputPath": "/assets/downloads/legacy-architecture-canvas.pdf",
     "category": "legacy",
     "description": "High-fidelity legacy architecture canvas",
     "format": "PDF",
@@ -480,9 +481,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-05T14:19:45.482Z",
-    "fileSizeBytes": 1189632
+    "exists": false
   },
   {
     "id": "life-alignment-assessment",
@@ -504,15 +503,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:15.160Z",
-    "fileSizeBytes": 927
+    "lastModified": "2026-02-12T21:26:18.987Z",
+    "fileSizeBytes": 224776
   },
   {
     "id": "mentorship-starter-kit",
     "title": "Mentorship Starter Kit",
     "type": "toolkit",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
+    "outputPath": "/assets/downloads/mentorship-starter-kit.pdf",
     "category": "leadership",
     "description": "Starter kit for mentorship relationships",
     "format": "PDF",
@@ -526,15 +525,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:20.212Z",
-    "fileSizeBytes": 924
+    "lastModified": "2026-02-12T21:26:18.991Z",
+    "fileSizeBytes": 82363
   },
   {
     "id": "operating-cadence-pack",
     "title": "Operating Cadence Pack",
     "type": "pack",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+    "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
     "category": "operations",
     "description": "Pack for establishing operating cadence",
     "format": "PDF",
@@ -548,15 +547,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:11:26.947Z",
-    "fileSizeBytes": 925
+    "lastModified": "2026-02-12T21:26:18.996Z",
+    "fileSizeBytes": 71517
   },
   {
     "id": "personal-alignment-assessment-fillable",
     "title": "Personal Alignment Assessment (Fillable)",
     "type": "assessment",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/personal-alignment-assessment-fillable.pdf",
+    "outputPath": "/assets/downloads/personal-alignment-assessment-fillable.pdf",
     "isInteractive": true,
     "isFillable": true,
     "category": "personal-growth",
@@ -569,16 +568,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:11:32.047Z",
-    "fileSizeBytes": 935
+    "exists": false
   },
   {
     "id": "principles-for-my-son",
     "title": "Principles for My Son",
     "type": "editorial",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
+    "outputPath": "/assets/downloads/principles-for-my-son.pdf",
     "category": "family",
     "description": "Editorial on principles for raising sons",
     "format": "PDF",
@@ -592,15 +589,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:35.540Z",
-    "fileSizeBytes": 923
+    "lastModified": "2026-02-12T21:26:19.007Z",
+    "fileSizeBytes": 110584
   },
   {
     "id": "principles-for-my-son-cue-card",
     "title": "Principles for My Son (Cue Card)",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
+    "outputPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
     "category": "family",
     "description": "Cue card version of principles for sons",
     "format": "PDF",
@@ -614,15 +611,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:46.848Z",
-    "fileSizeBytes": 932
+    "lastModified": "2026-02-12T21:26:19.001Z",
+    "fileSizeBytes": 74393
   },
   {
     "id": "purpose-pyramid-worksheet",
     "title": "Purpose Pyramid Worksheet",
     "type": "worksheet",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
+    "outputPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
     "category": "personal-growth",
     "description": "Worksheet for purpose pyramid development",
     "format": "PDF",
@@ -636,15 +633,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:51.953Z",
-    "fileSizeBytes": 927
+    "lastModified": "2026-02-12T21:26:19.016Z",
+    "fileSizeBytes": 76221
   },
   {
     "id": "scripture-track-john14",
     "title": "Scripture Track: John 14",
     "type": "study",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
+    "outputPath": "/assets/downloads/scripture-track-john14.pdf",
     "category": "theology",
     "description": "Scripture study track for John 14",
     "format": "PDF",
@@ -658,15 +655,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:09:57.051Z",
-    "fileSizeBytes": 924
+    "lastModified": "2026-02-12T21:26:19.021Z",
+    "fileSizeBytes": 115425
   },
   {
     "id": "standards-brief",
     "title": "Standards Brief",
     "type": "brief",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/standards-brief.pdf",
+    "outputPath": "/assets/downloads/standards-brief.pdf",
     "category": "leadership",
     "description": "Brief on leadership and operational standards",
     "format": "PDF",
@@ -680,15 +677,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:10:03.276Z",
-    "fileSizeBytes": 917
+    "lastModified": "2026-02-12T21:26:19.029Z",
+    "fileSizeBytes": 78672
   },
   {
     "id": "surrender-framework",
     "title": "Surrender Framework",
     "type": "framework",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/surrender-framework.pdf",
+    "outputPath": "/assets/downloads/surrender-framework.pdf",
     "category": "personal-growth",
     "description": "Framework for spiritual and personal surrender",
     "format": "PDF",
@@ -701,16 +698,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:10:09.522Z",
-    "fileSizeBytes": 921
+    "exists": false
   },
   {
     "id": "surrender-principles",
     "title": "Surrender Principles",
     "type": "editorial",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/surrender-principles.pdf",
+    "outputPath": "/assets/downloads/surrender-principles.pdf",
     "category": "personal-growth",
     "description": "Principles of surrender in life and leadership",
     "format": "PDF",
@@ -723,9 +718,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:10:16.058Z",
-    "fileSizeBytes": 922
+    "exists": false
   },
   {
     "id": "ultimate-purpose-of-man-editorial",
@@ -746,8 +739,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-01-28T09:08:16.091Z",
-    "fileSizeBytes": 2435211
+    "lastModified": "2026-02-12T21:26:19.037Z",
+    "fileSizeBytes": 177188
   },
   {
     "id": "ultimate-purpose-of-man-editorial-a4-premium-architect",
@@ -767,16 +760,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:10:22.458Z",
-    "fileSizeBytes": 956
+    "exists": false
   },
   {
     "id": "weekly-operating-rhythm",
     "title": "Weekly Operating Rhythm",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
+    "outputPath": "/assets/downloads/weekly-operating-rhythm.pdf",
     "category": "operations",
     "description": "Template for weekly operating rhythm and cadence",
     "format": "PDF",
@@ -790,8 +781,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:10:28.675Z",
-    "fileSizeBytes": 925
+    "lastModified": "2026-02-12T21:26:19.042Z",
+    "fileSizeBytes": 71676
   },
   {
     "id": "decision-matrix-scorecard-fillable",
@@ -812,8 +803,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-01-28T09:08:15.970Z",
-    "fileSizeBytes": 36611
+    "lastModified": "2026-02-12T21:26:18.913Z",
+    "fileSizeBytes": 28981
   },
   {
     "id": "legacy-canvas-fillable",
@@ -833,9 +824,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:16.005Z",
-    "fileSizeBytes": 10765
+    "exists": false
   },
   {
     "id": "legacy-architecture-canvas-a3-premium-architect",
@@ -855,9 +844,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:15.997Z",
-    "fileSizeBytes": 15255
+    "exists": false
   },
   {
     "id": "legacy-architecture-canvas-a4-premium-architect",
@@ -877,9 +864,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:15.997Z",
-    "fileSizeBytes": 15018
+    "exists": false
   },
   {
     "id": "legacy-architecture-canvas-letter-premium-architect",
@@ -899,9 +884,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:16.002Z",
-    "fileSizeBytes": 14666
+    "exists": false
   },
   {
     "id": "purpose-pyramid-worksheet-fillable",
@@ -922,8 +905,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-01-28T09:08:16.042Z",
-    "fileSizeBytes": 20245
+    "lastModified": "2026-02-12T21:26:19.012Z",
+    "fileSizeBytes": 26399
   },
   {
     "id": "lib-brotherhood-leader-guide",
@@ -944,7 +927,7 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-04T17:42:13.606Z",
+    "lastModified": "2026-02-04T17:41:48.621Z",
     "fileSizeBytes": 264122
   },
   {
@@ -966,7 +949,7 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-04T17:40:29.492Z",
+    "lastModified": "2026-02-04T17:40:50.282Z",
     "fileSizeBytes": 353980
   },
   {
@@ -974,7 +957,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Decision Log Template (Library)",
     "type": "tool",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/decision-log-template.pdf",
+    "outputPath": "/assets/downloads/decision-log-template.pdf",
     "category": "operations",
     "description": "Library version of decision log template",
     "format": "PDF",
@@ -988,8 +971,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:06.256Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.909Z",
+    "fileSizeBytes": 60316
   },
   {
     "id": "lib-decision-matrix-fillable",
@@ -1018,7 +1001,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Family Court Practical Pack (Library)",
     "type": "bundle",
     "tier": "member",
-    "outputPath": "/assets/downloads/lib-pdf/fathers-family-court-pack.pdf",
+    "outputPath": "/vault/downloads/lib-pdf/fathers-family-court-pack.pdf",
     "requiresAuth": true,
     "category": "family-court",
     "description": "Library version of family court pack",
@@ -1032,7 +1015,7 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-04T17:39:41.389Z",
+    "lastModified": "2026-02-04T17:39:09.141Z",
     "fileSizeBytes": 276382
   },
   {
@@ -1062,7 +1045,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Life Alignment Assessment (Library)",
     "type": "assessment",
     "tier": "free",
-    "outputPath": "/assets/downloads/lib-pdf/life-alignment-assessment.pdf",
+    "outputPath": "/assets/downloads/life-alignment-assessment.pdf",
     "category": "personal-growth",
     "description": "Library version of life alignment assessment",
     "format": "PDF",
@@ -1076,15 +1059,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:10:36.468Z",
-    "fileSizeBytes": 935
+    "lastModified": "2026-02-12T21:26:18.987Z",
+    "fileSizeBytes": 224776
   },
   {
     "id": "lib-personal-alignment-fillable",
     "title": "Personal Alignment Assessment (Fillable Library)",
     "type": "assessment",
     "tier": "free",
-    "outputPath": "/assets/downloads/content-downloads/personal-alignment-assessment-fillable.pdf",
+    "outputPath": "/assets/downloads/lib-pdf/personal-alignment-assessment-fillable.pdf",
     "isInteractive": true,
     "isFillable": true,
     "category": "personal-growth",
@@ -1097,9 +1080,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:11:32.047Z",
-    "fileSizeBytes": 935
+    "exists": false
   },
   {
     "id": "lib-purpose-pyramid-fillable",
@@ -1128,7 +1109,7 @@ export const GENERATED_PDF_CONFIGS = [
     "title": "Ultimate Purpose of Man (Editorial Library)",
     "type": "editorial",
     "tier": "free",
-    "outputPath": "/assets/downloads/lib-pdf/ultimate-purpose-of-man-editorial.pdf",
+    "outputPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
     "category": "theology",
     "description": "Library version of ultimate purpose editorial",
     "format": "PDF",
@@ -1142,15 +1123,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-01-02T17:18:50.916Z",
-    "fileSizeBytes": 2435211
+    "lastModified": "2026-02-12T21:26:19.037Z",
+    "fileSizeBytes": 177188
   },
   {
     "id": "res-brotherhood-starter-kit",
     "title": "Brotherhood Starter Kit (Resources)",
     "type": "toolkit",
     "tier": "free",
-    "outputPath": "/assets/downloads/public-assets/resources/pdfs/brotherhood-starter-kit.pdf",
+    "outputPath": "/vault/downloads/lib-pdf/brotherhood-starter-kit.pdf",
     "category": "leadership",
     "description": "Resources version of brotherhood starter kit",
     "format": "PDF",
@@ -1164,8 +1145,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:10:51.737Z",
-    "fileSizeBytes": 929
+    "lastModified": "2026-02-04T17:40:50.282Z",
+    "fileSizeBytes": 353980
   },
   {
     "id": "res-destiny-mapping",
@@ -1185,9 +1166,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:10:58.000Z",
-    "fileSizeBytes": 921
+    "exists": false
   },
   {
     "id": "res-fatherhood-impact",
@@ -1207,9 +1186,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:11:02.958Z",
-    "fileSizeBytes": 923
+    "exists": false
   },
   {
     "id": "res-institutional-health",
@@ -1229,9 +1206,7 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:11:08.723Z",
-    "fileSizeBytes": 926
+    "exists": false
   },
   {
     "id": "res-leadership-blueprint",
@@ -1251,16 +1226,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:11:14.621Z",
-    "fileSizeBytes": 926
+    "exists": false
   },
   {
     "id": "vault-board-decision-log",
     "title": "Board Decision Log (Vault)",
     "type": "tool",
     "tier": "architect",
-    "outputPath": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+    "outputPath": "/assets/downloads/board-decision-log-template.pdf",
     "category": "governance",
     "description": "Vault version of board decision log",
     "format": "PDF",
@@ -1274,15 +1247,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:11:20.268Z",
-    "fileSizeBytes": 926
+    "lastModified": "2026-02-12T21:26:18.869Z",
+    "fileSizeBytes": 63006
   },
   {
     "id": "vault-decision-log",
     "title": "Decision Log Template (Vault)",
     "type": "tool",
     "tier": "architect",
-    "outputPath": "/assets/downloads/content-downloads/decision-log-template.pdf",
+    "outputPath": "/assets/downloads/decision-log-template.pdf",
     "category": "operations",
     "description": "Vault version of decision log template",
     "format": "PDF",
@@ -1296,15 +1269,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:08:06.256Z",
-    "fileSizeBytes": 140609
+    "lastModified": "2026-02-12T21:26:18.909Z",
+    "fileSizeBytes": 60316
   },
   {
     "id": "vault-decision-matrix-fillable",
     "title": "Decision Matrix Scorecard (Vault Fillable)",
     "type": "tool",
     "tier": "architect",
-    "outputPath": "/assets/downloads/public-assets/vault/decision-matrix-scorecard-fillable.pdf",
+    "outputPath": "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
     "isFillable": true,
     "category": "operations",
     "description": "Vault fillable version of decision matrix",
@@ -1318,8 +1291,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2025-12-28T16:40:32.387Z",
-    "fileSizeBytes": 36611
+    "lastModified": "2026-02-12T21:26:18.913Z",
+    "fileSizeBytes": 28981
   },
   {
     "id": "vault-legacy-canvas-fillable",
@@ -1339,16 +1312,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2025-12-28T16:40:32.418Z",
-    "fileSizeBytes": 10765
+    "exists": false
   },
   {
     "id": "vault-operating-cadence",
     "title": "Operating Cadence Pack (Vault)",
     "type": "pack",
     "tier": "architect",
-    "outputPath": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+    "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
     "category": "operations",
     "description": "Vault version of operating cadence pack",
     "format": "PDF",
@@ -1362,15 +1333,15 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2026-02-05T12:11:26.947Z",
-    "fileSizeBytes": 925
+    "lastModified": "2026-02-12T21:26:18.996Z",
+    "fileSizeBytes": 71517
   },
   {
     "id": "vault-personal-alignment-fillable",
     "title": "Personal Alignment Assessment (Vault Fillable)",
     "type": "assessment",
     "tier": "architect",
-    "outputPath": "/assets/downloads/content-downloads/personal-alignment-assessment-fillable.pdf",
+    "outputPath": "/assets/downloads/public-assets/vault/personal-alignment-assessment-fillable.pdf",
     "isFillable": true,
     "category": "personal-growth",
     "description": "Vault fillable version of personal alignment",
@@ -1383,16 +1354,14 @@ export const GENERATED_PDF_CONFIGS = [
     "version": "1.0.0",
     "author": "Abraham of London",
     "tags": [],
-    "exists": true,
-    "lastModified": "2026-02-05T12:11:32.047Z",
-    "fileSizeBytes": 935
+    "exists": false
   },
   {
     "id": "vault-purpose-pyramid-fillable",
     "title": "Purpose Pyramid Worksheet (Vault Fillable)",
     "type": "worksheet",
     "tier": "architect",
-    "outputPath": "/assets/downloads/public-assets/vault/purpose-pyramid-worksheet-fillable.pdf",
+    "outputPath": "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf",
     "isFillable": true,
     "category": "personal-growth",
     "description": "Vault fillable version of purpose pyramid",
@@ -1406,8 +1375,8 @@ export const GENERATED_PDF_CONFIGS = [
     "author": "Abraham of London",
     "tags": [],
     "exists": true,
-    "lastModified": "2025-12-28T16:38:56.104Z",
-    "fileSizeBytes": 20245
+    "lastModified": "2026-02-12T21:26:19.012Z",
+    "fileSizeBytes": 26399
   },
   {
     "id": "vault-lib-brotherhood-leader",
@@ -1476,29 +1445,15 @@ export const GENERATED_PDF_CONFIGS = [
     "fileSizeBytes": 276382
   },
   {
-    "id": "auto__downloads__abraham-vault-pack",
-    "title": "Abraham Vault Pack",
+    "id": "auto__downloads__abraham-vault-artifacts",
+    "title": "Abraham Vault Artifacts",
     "type": "other",
     "tier": "architect",
-    "outputPath": "/assets/downloads/abraham-vault-pack.pdf",
-    "format": "PDF",
+    "outputPath": "/assets/downloads/abraham-vault-artifacts.zip",
+    "format": "BINARY",
     "exists": true,
-    "lastModified": "2026-02-05T11:49:42.512Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__board-decision-log-template",
-    "title": "Board Decision Log Template",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/board-decision-log-template.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.512Z",
-    "fileSizeBytes": 23,
+    "lastModified": "2026-02-12T21:26:18.857Z",
+    "fileSizeBytes": 612,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
@@ -1511,260 +1466,64 @@ export const GENERATED_PDF_CONFIGS = [
     "outputPath": "/assets/downloads/board-decision-log-template.xlsx",
     "format": "BINARY",
     "exists": true,
-    "lastModified": "2025-12-28T15:53:30.295Z",
+    "lastModified": "2026-01-28T09:27:35.984Z",
     "fileSizeBytes": 8704,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
   },
   {
-    "id": "auto__downloads__board-investor-onepager",
-    "title": "Board Investor Onepager",
+    "id": "auto__downloads__download-legacy-architecture-canvas.fillable",
+    "title": "Download Legacy Architecture Canvas.Fillable",
     "type": "other",
     "tier": "architect",
-    "outputPath": "/assets/downloads/board-investor-onepager.pdf",
+    "outputPath": "/assets/downloads/download-legacy-architecture-canvas.fillable.pdf",
     "format": "PDF",
     "exists": true,
-    "lastModified": "2026-02-05T11:49:42.512Z",
-    "fileSizeBytes": 23,
+    "lastModified": "2026-02-12T21:26:18.922Z",
+    "fileSizeBytes": 81124,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
   },
   {
-    "id": "auto__downloads__brotherhood-covenant",
-    "title": "Brotherhood Covenant",
+    "id": "auto__downloads__legacy-architecture-canvas-a4-premium-architect-interactive",
+    "title": "Legacy Architecture Canvas A4 Premium Architect Interactive",
     "type": "other",
     "tier": "architect",
-    "outputPath": "/assets/downloads/brotherhood-covenant.pdf",
+    "outputPath": "/assets/downloads/legacy-architecture-canvas-a4-premium-architect-interactive.pdf",
     "format": "PDF",
     "exists": true,
-    "lastModified": "2026-02-05T11:49:42.527Z",
-    "fileSizeBytes": 23,
+    "lastModified": "2026-02-12T21:26:18.960Z",
+    "fileSizeBytes": 11271,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
   },
   {
-    "id": "auto__downloads__canon-volume-iv-diagnostic-toolkit",
-    "title": "Canon Volume Iv Diagnostic Toolkit",
+    "id": "auto__downloads__legacy-architecture-canvas-letter-premium-architect-interactive",
+    "title": "Legacy Architecture Canvas Letter Premium Architect Interactive",
     "type": "other",
     "tier": "architect",
-    "outputPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+    "outputPath": "/assets/downloads/legacy-architecture-canvas-letter-premium-architect-interactive.pdf",
     "format": "PDF",
     "exists": true,
-    "lastModified": "2026-02-05T11:49:42.527Z",
-    "fileSizeBytes": 23,
+    "lastModified": "2026-02-12T21:26:18.962Z",
+    "fileSizeBytes": 11283,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
   },
   {
-    "id": "auto__downloads__canon-volume-v-governance-diagnostic-toolkit",
-    "title": "Canon Volume V Governance Diagnostic Toolkit",
+    "id": "auto__lib-pdf__family-court-practical-pack",
+    "title": "Family Court Practical Pack",
     "type": "other",
     "tier": "architect",
-    "outputPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+    "outputPath": "/assets/downloads/lib-pdf/family-court-practical-pack.pdf",
     "format": "PDF",
     "exists": true,
-    "lastModified": "2026-02-05T11:49:42.527Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__communication-script-bpf",
-    "title": "Communication Script Bpf",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/communication-script-bpf.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.537Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__decision-log-template",
-    "title": "Decision Log Template",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/decision-log-template.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-01-28T09:08:15.967Z",
-    "fileSizeBytes": 344232,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__decision-matrix-scorecard",
-    "title": "Decision Matrix Scorecard",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/decision-matrix-scorecard.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.541Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__download-legacy-architecture-canvas",
-    "title": "Download Legacy Architecture Canvas",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/download-legacy-architecture-canvas.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__entrepreneur-operating-pack",
-    "title": "Entrepreneur Operating Pack",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__entrepreneur-survival-checklist",
-    "title": "Entrepreneur Survival Checklist",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__family-altar-liturgy",
-    "title": "Family Altar Liturgy",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/family-altar-liturgy.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__leaders-cue-card-two-up",
-    "title": "Leaders Cue Card Two Up",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__leadership-playbook",
-    "title": "Leadership Playbook",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/leadership-playbook.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__legacy-canvas",
-    "title": "Legacy Canvas",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/legacy-canvas.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.543Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__lib-pdf__decision-log-template",
-    "title": "Decision Log Template",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/lib-pdf/decision-log-template.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2025-12-28T16:40:32.356Z",
-    "fileSizeBytes": 344232,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__lib-pdf__personal-alignment-assessment-fillable",
-    "title": "Personal Alignment Assessment Fillable",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/lib-pdf/personal-alignment-assessment-fillable.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.577Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__mentorship-starter-kit",
-    "title": "Mentorship Starter Kit",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/mentorship-starter-kit.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.558Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__operating-cadence-pack",
-    "title": "Operating Cadence Pack",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.558Z",
-    "fileSizeBytes": 23,
+    "lastModified": "2026-02-12T21:26:18.980Z",
+    "fileSizeBytes": 276382,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
@@ -1777,165 +1536,39 @@ export const GENERATED_PDF_CONFIGS = [
     "outputPath": "/assets/downloads/operating-cadence-pack.pptx",
     "format": "BINARY",
     "exists": true,
-    "lastModified": "2025-12-28T15:59:43.214Z",
+    "lastModified": "2026-01-28T09:27:46.052Z",
     "fileSizeBytes": 142484,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__personal-alignment-assessment-fillable",
-    "title": "Personal Alignment Assessment Fillable",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/personal-alignment-assessment-fillable.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.558Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__principles-for-my-son-cue-card",
-    "title": "Principles For My Son Cue Card",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.558Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__principles-for-my-son",
-    "title": "Principles For My Son",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/principles-for-my-son.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.558Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__vault__board-decision-log-template",
-    "title": "Board Decision Log Template",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/public-assets/vault/board-decision-log-template.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-01-05T14:20:14.916Z",
-    "fileSizeBytes": 74855,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__vault__decision-log-template",
-    "title": "Decision Log Template",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/public-assets/vault/decision-log-template.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2025-12-28T16:40:32.356Z",
-    "fileSizeBytes": 344232,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__vault__operating-cadence-pack",
-    "title": "Operating Cadence Pack",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/public-assets/vault/operating-cadence-pack.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-01-05T14:20:18.490Z",
-    "fileSizeBytes": 82849,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__vault__personal-alignment-assessment-fillable",
-    "title": "Personal Alignment Assessment Fillable",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/public-assets/vault/personal-alignment-assessment-fillable.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.590Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__purpose-pyramid-worksheet",
-    "title": "Purpose Pyramid Worksheet",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.558Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__scripture-track-john14",
-    "title": "Scripture Track John14",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/scripture-track-john14.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.574Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__standards-brief",
-    "title": "Standards Brief",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/standards-brief.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.574Z",
-    "fileSizeBytes": 23,
-    "category": "unmapped-discovery",
-    "version": "1.0.0",
-    "requiresAuth": true
-  },
-  {
-    "id": "auto__downloads__weekly-operating-rhythm",
-    "title": "Weekly Operating Rhythm",
-    "type": "other",
-    "tier": "architect",
-    "outputPath": "/assets/downloads/weekly-operating-rhythm.pdf",
-    "format": "PDF",
-    "exists": true,
-    "lastModified": "2026-02-05T11:49:42.577Z",
-    "fileSizeBytes": 23,
     "category": "unmapped-discovery",
     "version": "1.0.0",
     "requiresAuth": true
   }
 ] as const;
+
+export type GeneratedPDFId = typeof GENERATED_PDF_CONFIGS[number]['id'];
+
+/** Returns all generated PDF configurations */
 export const getGeneratedPDFs = () => GENERATED_PDF_CONFIGS;
+
+/** Returns a specific PDF config by ID (Required by PDF Engine) */
+export function getPDFById(id: string) {
+  return GENERATED_PDF_CONFIGS.find((config) => config.id === id);
+}
+
+/** * INSTITUTIONAL STATS UTILITY
+ * Satisfies: /app/api/stats/route.ts
+ */
+export function getRegistryStats() {
+  const categories = [...new Set(GENERATED_PDF_CONFIGS.map(c => c.category || 'Uncategorized'))];
+  return {
+    totalAssets: GENERATED_PDF_CONFIGS.length,
+    discovered: 7,
+    manual: 67,
+    categories,
+    categoryCount: categories.length,
+    generatedAt: "2026-02-24T11:18:26.764Z",
+    health: {
+      exists: GENERATED_PDF_CONFIGS.filter(c => c.exists).length,
+      missing: GENERATED_PDF_CONFIGS.filter(c => !c.exists).length
+    }
+  };
+}

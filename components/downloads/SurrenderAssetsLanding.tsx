@@ -1,8 +1,8 @@
-// components/downloads/SurrenderAssetsLanding.tsx - FINAL FIX
+/* components/downloads/SurrenderAssetsLanding.tsx - FINAL FIX */
 import { safeArraySlice } from "@/lib/utils/safe";
 import React from 'react';
 import { getAllPDFItems } from "@/lib/pdf/registry";
-import type { PDFItem } from "@/lib/pdf/registry";
+import type { PDFItem, PDFType } from "@/lib/pdf/registry";
 import { Shield, Download, FileText, Users, Zap, Award } from 'lucide-react';
 
 interface AssetCardProps {
@@ -11,10 +11,12 @@ interface AssetCardProps {
 }
 
 const SurrenderAssetsLanding: React.FC = () => {
-  // Get all PDF items and filter by relevant types, ensuring type is defined
+  // Get all PDF items and filter by relevant types
   const allItems = getAllPDFItems({ includeMissing: false });
+  
+  // We cast the strings to PDFType to satisfy the overlap check
   const surrenderAssets = allItems.filter(asset => 
-    asset.type && ['worksheet', 'assessment', 'tool', 'framework'].includes(asset.type)
+    asset.type && (['worksheet', 'assessment', 'tool', 'framework'] as PDFType[]).includes(asset.type)
   );
 
   const categories = [
@@ -22,19 +24,19 @@ const SurrenderAssetsLanding: React.FC = () => {
       title: 'Worksheets & Templates',
       description: 'Interactive tools for daily practice',
       icon: <FileText className="w-6 h-6" />,
-      assets: surrenderAssets.filter(a => a.type === 'worksheet')
+      assets: surrenderAssets.filter(a => a.type === ('worksheet' as PDFType))
     },
     {
       title: 'Assessments & Diagnostics',
       description: 'Measure your surrender orientation',
       icon: <Shield className="w-6 h-6" />,
-      assets: surrenderAssets.filter(a => a.type === 'assessment')
+      assets: surrenderAssets.filter(a => a.type === ('assessment' as PDFType))
     },
     {
       title: 'Tools & Frameworks',
       description: 'Decision-making frameworks',
       icon: <Zap className="w-6 h-6" />,
-      assets: surrenderAssets.filter(a => a.type === 'tool' || a.type === 'framework')
+      assets: surrenderAssets.filter(a => a.type === ('tool' as PDFType) || a.type === ('framework' as PDFType))
     }
   ];
 
@@ -64,7 +66,6 @@ const SurrenderAssetsLanding: React.FC = () => {
       </p>
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          {/* Cast the result to string[] since asset.tags is string[] | undefined */}
           {(safeArraySlice(asset.tags || [], 0, 2) as string[]).map((tag) => (
             <span key={tag} className="text-xs px-2 py-1 rounded bg-white/5 text-gray-400">
               {tag}
@@ -113,7 +114,8 @@ const SurrenderAssetsLanding: React.FC = () => {
             </a>
           </div>
         </div>
-        {/* Stats */}
+
+        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
             <div className="text-2xl font-bold text-white mb-1">{surrenderAssets.length}</div>
@@ -140,7 +142,7 @@ const SurrenderAssetsLanding: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories */}
+      {/* Categories Section */}
       <div id="downloads" className="max-w-6xl mx-auto">
         {categories.map((category, catIndex) => (
           <div key={catIndex} className="mb-12">
@@ -162,14 +164,14 @@ const SurrenderAssetsLanding: React.FC = () => {
         ))}
       </div>
 
-      {/* CTA Section */}
+      {/* Institutional CTA */}
       <div className="max-w-4xl mx-auto mt-16 p-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Get the Complete Surrender Framework Starter Kit
           </h2>
           <p className="text-gray-300 mb-6">
-            All worksheets, assessments, and tools in one comprehensive bundle. Save 60% versus purchasing separately.
+            All worksheets, assessments, and tools in one comprehensive bundle.
           </p>
           <a
             href="/assets/downloads/surrender-starter-kit.zip"
@@ -178,9 +180,6 @@ const SurrenderAssetsLanding: React.FC = () => {
             <Download className="w-5 h-5" />
             Download Complete Starter Kit (5.0 MB)
           </a>
-          <p className="text-sm text-gray-500 mt-4">
-            Includes: All 9 assets • Lifetime updates • Commercial use license
-          </p>
         </div>
       </div>
     </div>

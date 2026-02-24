@@ -1,0 +1,37 @@
+name: "Institutional Content Protection"
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  integrity-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🛡️ Verify MDX Integrity (No Mangling)
+        run: pnpm mdx:integrity
+
+      - name: 🚪 Verify MDX Gate (No Illegal JSX)
+        run: pnpm mdx:gate
+
+      - name: 🏗️ Verify Contentlayer Build
+        run: pnpm contentlayer2:build

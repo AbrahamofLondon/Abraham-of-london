@@ -1,4 +1,4 @@
-// tailwind.config.js — WORLD-CLASS (10/10)
+// tailwind.config.js — WORLD-CLASS (10/10) — FINAL, NO SILENT FAILS
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -11,6 +11,7 @@ module.exports = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{md,mdx}",
     "./.contentlayer/**/*.{json,js,ts}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}", // ✅ future-proof
   ],
 
   theme: {
@@ -71,6 +72,15 @@ module.exports = {
           700: "#8c6f21",
           800: "#684f16",
           900: "#44300b",
+        },
+
+        // ✅ Brand semantic alias (prevents “amber vs gold drift”)
+        brand: {
+          obsidian: "var(--brand-obsidian, #000000)",
+          charcoal: "var(--brand-charcoal, #050505)",
+          cream: "var(--brand-cream, #fdfaf3)",
+          amber: "var(--brand-amber, #f59e0b)",
+          gold: "var(--brand-gold, #d4af37)",
         },
 
         border: "rgba(255, 255, 255, 0.08)",
@@ -143,8 +153,8 @@ module.exports = {
         "gold-glow": "0 0 25px rgba(245, 158, 11, 0.15)",
         "gold-glow-strong": "0 0 50px rgba(212, 175, 55, 0.25)",
         "inner-line": "inset 0 1px 1px 0 rgba(255, 255, 255, 0.05)",
-        "premium": "0 20px 40px -15px rgba(0, 0, 0, 0.5)",
-        "card": "0 10px 30px -15px rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(255, 255, 255, 0.03) inset",
+        premium: "0 20px 40px -15px rgba(0, 0, 0, 0.5)",
+        card: "0 10px 30px -15px rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(255, 255, 255, 0.03) inset",
       },
 
       animation: {
@@ -158,65 +168,28 @@ module.exports = {
       },
 
       keyframes: {
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-15px)" },
-        },
-        "protocol-shimmer": {
-          from: { backgroundPosition: "200% 0" },
-          to: { backgroundPosition: "-200% 0" },
-        },
-        "slide-in": {
-          "0%": { transform: "translateX(-100%)", opacity: "0" },
-          "100%": { transform: "translateX(0)", opacity: "1" },
-        },
-        "slide-out": {
-          "0%": { transform: "translateX(0)", opacity: "1" },
-          "100%": { transform: "translateX(100%)", opacity: "0" },
-        },
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        "scale-up": {
-          "0%": { transform: "scale(0.95)", opacity: "0" },
-          "100%": { transform: "scale(1)", opacity: "1" },
-        },
+        float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-15px)" } },
+        "protocol-shimmer": { from: { backgroundPosition: "200% 0" }, to: { backgroundPosition: "-200% 0" } },
+        "slide-in": { "0%": { transform: "translateX(-100%)", opacity: "0" }, "100%": { transform: "translateX(0)", opacity: "1" } },
+        "slide-out": { "0%": { transform: "translateX(0)", opacity: "1" }, "100%": { transform: "translateX(100%)", opacity: "0" } },
+        "fade-in": { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+        "scale-up": { "0%": { transform: "scale(0.95)", opacity: "0" }, "100%": { transform: "scale(1)", opacity: "1" } },
       },
 
-      backdropBlur: {
-        xs: "2px",
-        "2xl": "40px",
-      },
+      backdropBlur: { xs: "2px", "2xl": "40px" },
 
-      zIndex: {
-        60: "60",
-        70: "70",
-        80: "80",
-        90: "90",
-        100: "100",
-      },
+      zIndex: { 60: "60", 70: "70", 80: "80", 90: "90", 100: "100" },
 
-      maxWidth: {
-        "screen-safe": "100vw",
-        "8xl": "1440px",
-        "9xl": "1600px",
-      },
+      maxWidth: { "screen-safe": "100vw", "8xl": "1440px", "9xl": "1600px" },
 
-      screens: {
-        xs: "475px",
-      },
+      screens: { xs: "475px" },
 
       transitionTimingFunction: {
-        "institutional": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "premium": "cubic-bezier(0.4, 0, 0.2, 1)",
+        institutional: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        premium: "cubic-bezier(0.4, 0, 0.2, 1)",
       },
 
-      transitionDuration: {
-        400: "400ms",
-        600: "600ms",
-        800: "800ms",
-      },
+      transitionDuration: { 400: "400ms", 600: "600ms", 800: "800ms" },
     },
   },
 
@@ -224,5 +197,6 @@ module.exports = {
     require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
     require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/line-clamp"), // ✅ REQUIRED: you use line-clamp-*
   ],
 };

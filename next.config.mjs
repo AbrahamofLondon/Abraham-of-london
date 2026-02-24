@@ -1,8 +1,8 @@
-import { createRequire } from "module";
+// next.config.mjs — ABRAHAM OF LONDON (NEXT-16-STABLE, CONTENTLAYER2-COMPATIBLE)
+import { withContentlayer } from "next-contentlayer2";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -12,27 +12,17 @@ const nextConfig = {
   trailingSlash: false,
   compress: true,
   poweredByHeader: false,
-  staticPageGenerationTimeout: 300,
-  output: 'standalone', // Essential for minimizing bundle size
+
+  // ✅ [STABILIZATION]: Explicitly disable Turbopack for MDX/Contentlayer compatibility
+  // This satisfies the Next.js 16 requirement for custom webpack configs.
+  // turbopack: {}, // Uncomment if you move to Turbopack later
 
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
-  // ✅ Optimized File Tracing (Moves heavy lifting outside the bundle)
-  outputFileTracingRoot: path.join(__dirname, './'),
-  outputFileTracingExcludes: {
-    '*': [
-      'node_modules/@swc/core-linux-x64-gnu',
-      'node_modules/@swc/core-linux-x64-musl',
-      './public/**/*',
-      './.next/cache/**/*',
-      './node_modules/sharp/**/*',
-      './node_modules/playwright/**/*',
-      './node_modules/puppeteer/**/*',
-      './node_modules/chrome-aws-lambda/**/*',
-      './node_modules/aws-sdk/**/*',
-    ],
+  eslint: {
+    ignoreDuringBuilds: false,
   },
 
   experimental: {
@@ -41,17 +31,6 @@ const nextConfig = {
   },
 
   transpilePackages: ["framer-motion"],
-
-  serverExternalPackages: [
-    'sharp', 
-    'playwright', 
-    'puppeteer', 
-    'chrome-aws-lambda',
-    'aws-sdk',
-    'pg',
-    'mysql',
-    'sqlite3'
-  ],
 
   images: {
     remotePatterns: [
@@ -62,45 +41,36 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    qualities: [75, 85],
   },
 
   webpack: (config, { isServer }) => {
+    // Standardize alias
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": path.resolve(__dirname),
+    };
+
+    // 🏛️ [INSTITUTIONAL PROTECTION]: 
+    // Prevent Node internals from leaking into the client bundle.
     if (!isServer) {
       config.resolve.fallback = {
-        ...(config.resolve.fallback || {}),
-        crypto: require.resolve("crypto-browserify"),
-        stream: require.resolve("stream-browserify"),
-        url: require.resolve("url"),
-        util: require.resolve("util"),
-        path: require.resolve("path-browserify"),
-        os: require.resolve("os-browserify/browser"),
+        ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
+        crypto: false,
+        os: false,
+        path: false,
+        module: false,
       };
     }
 
     config.infrastructureLogging = { level: "error" };
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@": path.resolve(__dirname),
-    };
-
     return config;
   },
 
   distDir: ".next",
 };
 
-// --- CONTENTLAYER WRAPPER ---
-let finalConfig = nextConfig;
-
-try {
-  const { withContentlayer } = require("next-contentlayer2");
-  finalConfig = withContentlayer(nextConfig);
-} catch (e) {
-  console.log("⚠️ Contentlayer setup fallback initiated");
-}
-
-export default finalConfig;
+// ✅ Apply Contentlayer2 wrapper
+export default withContentlayer(nextConfig);

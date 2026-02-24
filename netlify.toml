@@ -2,7 +2,7 @@
 
 [build]
   command = "pnpm build:netlify"
-  publish = ".next" # ✅ The plugin handles the .netlify/ transition automatically
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
@@ -21,40 +21,56 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
+# ✅ Custom functions: keep ONLY your small functions here (no SSR handler).
+# IMPORTANT: ensure netlify/functions_src/functions/___netlify-server-handler is DELETED.
 [functions]
+  directory = "netlify/functions_src"
   node_bundler = "esbuild"
-  # 🛡️ 250MB LIMIT PROTECTION:
-  # We include standalone and content, but EXCLUDE the static bloat.
-  included_files = [
-    ".next/standalone/**",
-    "content/**",
-    "!**/*.map",
-    "!**/*.cache",
-    "!.next/static/**",
-    "!**/node_modules/playwright/**",
-    "!**/node_modules/puppeteer/**"
-  ]
 
 [functions.emails]
   included_files = ["emails/**"]
 
-# --- CANONICAL ROUTING & HEADERS ---
+[context.production.environment]
+  NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
+  NEXT_PUBLIC_APP_ENV = "production"
 
+[context.deploy-preview.environment]
+  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  NEXT_PUBLIC_APP_ENV = "staging"
+  NEXT_DISABLE_SOURCEMAPS = "false"
+
+# -----------------------
+# REDIRECTS
+# -----------------------
+
+# Canonical host (force www)
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
+# Canonical index
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
 
+# ✅ Essays brand alias → Blog canonical
 [[redirects]]
-  from = "/blog/:slug"
-  to = "/insights/:slug"
+  from = "/essays/*"
+  to = "/blog/:splat"
   status = 301
+
+# ✅ Canonicalize Vault paths (legacy /downloads/vault → /vault canonical)
+[[redirects]]
+  from = "/downloads/vault/*"
+  to = "/vault/:splat"
+  status = 301
+
+# -----------------------
+# HEADERS
+# -----------------------
 
 [[headers]]
   for = "/*"
@@ -69,9 +85,3 @@
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Access-Control-Allow-Origin = "*"

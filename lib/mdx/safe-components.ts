@@ -1,5 +1,8 @@
 // lib/mdx/safe-components.ts — BUILD-PROOF MDX COMPONENT RESOLVER
 import * as React from "react";
+import { Rule } from "@/components/mdx/Rule";
+import { BriefingHeader } from "@/components/mdx/BriefingHeader"; // Added Import
+import { DataGrid } from "@/components/mdx/DataGrid";             // Added Import
 
 export type MDXComponentMap = Record<string, React.ComponentType<any>>;
 
@@ -8,15 +11,6 @@ export type SafeMdxOptions = {
   seeded?: MDXComponentMap;
 };
 
-function isComponent(x: any): x is React.ComponentType<any> {
-  return typeof x === "function" || (x && typeof x === "object" && x.$$typeof);
-}
-
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
-
-// List of JavaScript reserved words that can't be used as component names
 const RESERVED_WORDS = new Set([
   'Object', 'Array', 'Function', 'String', 'Number', 'Boolean', 'Symbol',
   'Promise', 'Error', 'Date', 'Math', 'JSON', 'console', 'window', 'document',
@@ -28,31 +22,26 @@ const RESERVED_WORDS = new Set([
   'case', 'break', 'continue', 'for', 'while', 'do', 'true', 'false'
 ]);
 
+function isComponent(x: any): x is React.ComponentType<any> {
+  return typeof x === "function" || (x && typeof x === "object" && x.$$typeof);
+}
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+/**
+ * SOVEREIGN FALLBACK
+ * Renders a technical diagnostic box in Dev, or silent fragment in Production.
+ */
 function createMissingComponent(name: string, warnOnFallback: boolean): React.ComponentType<any> {
   const isDev = process.env.NODE_ENV !== "production";
 
-  // If it's a reserved word, return a safe component that doesn't break
-  if (RESERVED_WORDS.has(name)) {
-    const SafeReserved: React.ComponentType<any> = (props: any) => {
-      if (warnOnFallback && isDev) {
-        console.warn(`[MDX Safe] Reserved word "${name}" used as component - using fallback.`);
-      }
-      return React.createElement(React.Fragment, null, props?.children || null);
-    };
-    SafeReserved.displayName = `SafeReserved(${name})`;
-    return SafeReserved;
-  }
-
   const Missing: React.ComponentType<any> = (props: any) => {
-    const p = props || {};
-    const children = p.children;
-    const className = p.className;
-    const rest = { ...p };
-    delete rest.children;
-    delete rest.className;
+    const { children, className, ...rest } = props || {};
 
     if (warnOnFallback && isDev) {
-      console.warn(`[MDX Safe] Missing component "${name}" — rendered fallback.`);
+      console.warn(`[MDX Safe] Missing component "${name}" — rendered diagnostic fallback.`);
     }
 
     if (isDev) {
@@ -60,12 +49,12 @@ function createMissingComponent(name: string, warnOnFallback: boolean): React.Co
         "div",
         {
           "data-missing-component": name,
-          className: cx("my-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-100", className),
+          className: cx("my-8 rounded-xl border border-amber-500/30 bg-black p-6 font-mono", className),
           ...rest,
         },
-        React.createElement("div", { className: "text-xs font-bold uppercase tracking-widest text-red-200" }, "Missing MDX Component"),
-        React.createElement("div", { className: "mt-1 font-mono text-sm text-red-100" }, name),
-        children ? React.createElement("div", { className: "mt-3 rounded-lg border border-red-500/20 bg-black/20 p-3 text-sm text-red-50" }, children) : null
+        React.createElement("div", { className: "text-[10px] font-black uppercase tracking-[0.2em] text-amber-500" }, "UNRESOLVED_INTEL_COMPONENT"),
+        React.createElement("div", { className: "mt-2 text-sm text-zinc-400" }, `Component: <${name} />`),
+        children ? React.createElement("div", { className: "mt-4 rounded border border-zinc-800 bg-zinc-900/50 p-3 text-xs text-zinc-500" }, children) : null
       );
     }
 
@@ -76,17 +65,32 @@ function createMissingComponent(name: string, warnOnFallback: boolean): React.Co
   return Missing;
 }
 
+/**
+ * SOVEREIGN SEEDED DEFAULTS
+ * Standardizing the look of the 75 Intelligence Briefs.
+ */
 function seededDefaults(): MDXComponentMap {
   const BrandFrame: React.ComponentType<any> = (props: any) =>
-    React.createElement("section", { className: cx("my-8 rounded-2xl border border-white/10 bg-white/[0.02] p-6", props?.className), ...props }, props?.children);
-
-  const Rule: React.ComponentType<any> = (props: any) =>
-    React.createElement("hr", { className: cx("my-10 border-0 h-px bg-white/10", props?.className), ...props });
+    React.createElement("section", { 
+      className: cx("my-12 rounded-3xl border border-zinc-200 bg-zinc-50/50 p-8 md:p-12 shadow-sm", props?.className) 
+    }, props?.children);
 
   const Note: React.ComponentType<any> = (props: any) =>
-    React.createElement("div", { className: cx("my-6 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-amber-100", props?.className), ...props }, props?.children);
+    React.createElement("div", { 
+      className: cx("my-8 rounded-2xl border-l-4 border-amber-500 bg-amber-50/30 p-6 text-zinc-800 shadow-sm", props?.className) 
+    }, 
+    React.createElement("span", { className: "block text-[10px] font-black uppercase tracking-widest text-amber-600 mb-2" }, "Internal Note"),
+    props?.children
+    );
 
-  return { BrandFrame, Rule, Note };
+  return { 
+    BrandFrame, 
+    hr: Rule, 
+    Rule, 
+    Note, // Fixed: Added missing comma
+    BriefingHeader, // Fixed: Now has import
+    DataGrid,       // Fixed: Now has import
+  };
 }
 
 export function createProxySafeMdxComponents(base: unknown, options: SafeMdxOptions = {}): MDXComponentMap {
@@ -98,23 +102,15 @@ export function createProxySafeMdxComponents(base: unknown, options: SafeMdxOpti
   return new Proxy(seeded, {
     get(target, prop: string | symbol) {
       const key = String(prop);
-      if (key === "then" || key === "__esModule") return (target as any)[key];
-      
-      // Check if it's a reserved word
-      if (RESERVED_WORDS.has(key)) {
-        if (!cache.has(key)) {
-          cache.set(key, createMissingComponent(key, warnOnFallback));
-        }
-        return cache.get(key);
-      }
+      if (key === "then" || key === "__esModule" || key === "displayName") return (target as any)[key];
       
       const existing = (target as any)[key];
       if (isComponent(existing)) return existing;
-      if (cache.has(key)) return cache.get(key);
       
-      const missing = createMissingComponent(key, warnOnFallback);
-      cache.set(key, missing);
-      return missing;
+      if (!cache.has(key)) {
+        cache.set(key, createMissingComponent(key, warnOnFallback));
+      }
+      return cache.get(key);
     },
   }) as unknown as MDXComponentMap;
 }
@@ -122,19 +118,15 @@ export function createProxySafeMdxComponents(base: unknown, options: SafeMdxOpti
 export function detectMdxComponentNames(mdxRaw: string): string[] {
   const mdx = String(mdxRaw || "");
   const names = new Set<string>();
-  
-  // Match component tags like <Component> or </Component>
   const tagRe = /<\/?\s*([A-Z][A-Za-z0-9_]*)\b/g;
   let m: RegExpExecArray | null;
   
   while ((m = tagRe.exec(mdx))) {
     const name = m[1];
-    // Only add non-reserved words
-    if (!RESERVED_WORDS.has(name)) {
+    if (name && !RESERVED_WORDS.has(name)) {
       names.add(name);
     }
   }
-  
   return Array.from(names);
 }
 

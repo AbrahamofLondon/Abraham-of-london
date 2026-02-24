@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 
 import * as React from "react";
 import Image from "next/image";
@@ -28,98 +28,119 @@ import ResourcesCTA from "./ResourcesCTA";
 import Rule from "./Rule";
 import ShareRow from "./ShareRow";
 import Verse from "./Verse";
+import Divider from "./Divider"; // ✅ FIX: Divider exists in your folder — bind it here
+
 import { components as shortcodes } from "./shortcodes";
 import MissingComponent from "./MissingComponent";
 
-// List of components we're explicitly importing to avoid duplicates
+// Components explicitly imported (so we can avoid shortcode duplicates)
 const explicitComponents = [
-  'Badge',
-  'BadgeRow',
-  'BrandFrame',
-  'Callout',
-  'Caption',
-  'CTA',
-  'CTAPreset',
-  'CtaPresetComponent',
-  'DownloadCard',
-  'EmbossedBrandMark',
-  'Grid',
-  'HeroEyebrow',
-  'Note',
-  'PullLine',
-  'Quote',
-  'ResourcesCTA',
-  'Rule',
-  'ShareRow',
-  'Verse'
+  "Badge",
+  "BadgeRow",
+  "BrandFrame",
+  "Callout",
+  "Caption",
+  "CTA",
+  "CTAPreset",
+  "CtaPresetComponent",
+  "DownloadCard",
+  "EmbossedBrandMark",
+  "Grid",
+  "HeroEyebrow",
+  "Note",
+  "PullLine",
+  "Quote",
+  "ResourcesCTA",
+  "Rule",
+  "ShareRow",
+  "Verse",
+  "Divider",
 ];
 
-// Filter out any components from shortcodes that we're explicitly importing
+// Filter out any components from shortcodes that we explicitly import
 const filteredShortcodes = Object.entries(shortcodes).reduce((acc, [key, value]) => {
-  if (!explicitComponents.includes(key)) {
-    acc[key] = value;
-  }
+  if (!explicitComponents.includes(key)) acc[key] = value;
   return acc;
 }, {} as Record<string, any>);
+
+// Small helper
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
 
 // ✅ HARDENED MDX COMPONENT REGISTRY
 const mdxComponents: any = {
   Image,
   JsonLd,
-  a: ({ href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-    const isInternal = href?.startsWith("/") || href?.startsWith("#");
+
+  // ---------- Markdown primitives ----------
+  a: ({ href, className, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    const h = String(href || "");
+    const isInternal = h.startsWith("/") || h.startsWith("#");
+
+    const base = cx(
+      "text-amber-500 underline underline-offset-4 decoration-amber-500/30 transition-all",
+      "hover:text-white hover:decoration-amber-500/60",
+      className
+    );
+
     if (isInternal) {
       return (
-        <Link
-          href={href || "#"}
-          {...props}
-          className="text-amber-500 hover:text-white underline underline-offset-4 decoration-amber-500/30 transition-all"
-        />
+        <Link href={h || "#"} {...(props as any)} className={base}>
+          {(props as any).children}
+        </Link>
       );
     }
+
     return (
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href={href}
+        href={h}
         {...props}
-        className="text-amber-500/80 hover:text-white transition-colors border-b border-amber-500/20"
+        className={cx(base, "border-b border-amber-500/20 no-underline")}
       />
     );
   },
-  hr: (p: any) => <Rule {...p} className="my-16 opacity-20" />,
+
+  hr: (p: any) => <Rule {...p} className={cx("my-16 opacity-20", p?.className)} />,
+
   h1: (p: any) => (
     <h1
       {...p}
-      className="font-serif text-4xl md:text-6xl italic mb-12 text-white leading-tight tracking-tight"
+      className={cx("font-serif text-4xl md:text-6xl italic mb-12 text-white leading-tight tracking-tight", p?.className)}
     />
   ),
+
   h2: (p: any) => (
     <h2
       {...p}
-      className="text-amber-500 font-mono text-[10px] uppercase tracking-[0.4em] border-b border-white/5 pb-4 mt-20 mb-8"
+      className={cx(
+        "text-amber-500 font-mono text-[10px] uppercase tracking-[0.4em]",
+        "border-b border-white/5 pb-4 mt-20 mb-8",
+        p?.className
+      )}
     />
   ),
-  h3: (p: any) => (
-    <h3 {...p} className="font-serif text-2xl italic text-zinc-200 mt-12 mb-4" />
-  ),
+
+  h3: (p: any) => <h3 {...p} className={cx("font-serif text-2xl italic text-zinc-200 mt-12 mb-4", p?.className)} />,
+
   p: (p: any) => (
-    <p
-      {...p}
-      className="font-sans text-lg font-light leading-relaxed text-zinc-400 mb-8 italic"
-    />
+    <p {...p} className={cx("font-sans text-lg font-light leading-relaxed text-zinc-400 mb-8", p?.className)} />
   ),
-  strong: (p: any) => (
-    <strong {...p} className="font-bold text-amber-500/90" />
-  ),
-  ul: (p: any) => <ul {...p} className="space-y-4 mb-8 list-none" />,
+
+  strong: (p: any) => <strong {...p} className={cx("font-bold text-amber-500/90", p?.className)} />,
+
+  ul: (p: any) => <ul {...p} className={cx("space-y-4 mb-8 list-none", p?.className)} />,
+
   li: (p: any) => (
-    <li className="flex gap-4 items-start text-zinc-400 font-sans text-base">
+    <li className={cx("flex gap-4 items-start text-zinc-400 font-sans text-base", p?.className)}>
       <span className="h-1 w-1 bg-amber-500 mt-2.5 shrink-0" />
       {p.children}
     </li>
   ),
-  // Explicitly imported components
+
+  // ---------- Institutional components ----------
   Badge,
   BadgeRow,
   BrandFrame,
@@ -139,8 +160,17 @@ const mdxComponents: any = {
   Rule,
   ShareRow,
   Verse,
+
+  // ✅ FIX: Divider binding + aliases (authoring-safe)
+  Divider,
+  divider: Divider,
+  DIVIDER: Divider,
+  DividerLine: Divider,
+
   // Spread filtered shortcodes (without duplicates)
   ...filteredShortcodes,
+
+  // Fallbacks
   Unknown: MissingComponent,
 };
 
@@ -165,52 +195,45 @@ export function MDXLayoutRenderer({
   coverImage,
   ...rest
 }: MDXProps) {
-  // ✅ 1. RESOLVE COMPONENT
+  // 1) Resolve compiled MDX "code" to a component, if present.
   const MDXContent = React.useMemo(() => {
     if (source) return null;
 
     if (code && typeof code === "string" && code.trim()) {
       try {
-        // Construct a safe function body – avoid template literal issues
         const functionBody = `
           const {jsx: _jsx, jsxs: _jsxs, Fragment: _Fragment} = arguments[0];
           ${code}
           return { default: MDXContent };
         `;
-        // Use Function constructor with the runtime as first argument
         const fn = new Function("runtime", functionBody);
         return fn(runtime).default;
       } catch (e) {
         console.error("MDX Runtime Error:", e);
-        // Optionally log the offending code in development
         if (process.env.NODE_ENV === "development") {
-          console.error("Offending code snippet:", code.slice(0, 500));
+          console.error("Offending code snippet:", code.slice(0, 800));
         }
-        // Return a fallback component that shows the error
         const ErrorFallback = () => (
           <div className="p-8 border border-red-500/20 bg-red-500/5 text-red-500 font-mono text-[10px] uppercase tracking-widest">
-            ERROR // SYSTEM_DECRYPTION_FAILURE:{" "}
-            {e instanceof Error ? e.message : "Critical runtime error in dispatch content."}
+            ERROR // SYSTEM_DECRYPTION_FAILURE: {e instanceof Error ? e.message : "Critical runtime error."}
           </div>
         );
         return ErrorFallback;
       }
     }
+
     return null;
   }, [code, source]);
 
-  // ✅ 2. STRUCTURED DATA (SEO)
+  // 2) Structured Data (SEO)
   const structuredData = React.useMemo(
     () => ({
       "@context": "https://schema.org",
       "@type": "Report",
-      headline: title || "Abraham of London Intelligence Brief",
-      description: excerpt || "Strategic insights and tactical blueprints.",
+      headline: title || "Abraham of London Dispatch",
+      description: excerpt || "Institutional thinking: purpose, governance, cadence, durable execution.",
       datePublished: date,
-      author: {
-        "@type": "Organization",
-        name: author || "Abraham of London",
-      },
+      author: { "@type": "Organization", name: author || "Abraham of London" },
       image: coverImage ? `https://www.abrahamoflondon.org${coverImage}` : undefined,
     }),
     [title, excerpt, date, author, coverImage]
@@ -226,7 +249,6 @@ export function MDXLayoutRenderer({
     );
   }
 
-  // If we have a source, use MDXRemote; otherwise use the compiled component
   const ContentComponent = source ? (
     <MDXRemote {...source} components={mdxComponents} />
   ) : MDXContent ? (
@@ -239,7 +261,6 @@ export function MDXLayoutRenderer({
 
       <div className="prose-hardened relative">{ContentComponent}</div>
 
-      {/* Institutional Source Verification */}
       <footer className="mt-24 border-t border-white/5 pt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">

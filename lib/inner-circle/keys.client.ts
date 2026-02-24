@@ -1,7 +1,9 @@
-import { safeSlice } from "@/lib/utils/safe";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/inner-circle/keys.client.ts
+import { safeSlice } from "@/lib/utils/safe";
+
 export type KeyTier = "member" | "patron" | "founder";
+
 export type StoredKey = {
   key: string;
   memberId: string;
@@ -14,12 +16,14 @@ export type StoredKey = {
   usedCount?: number;
   metadata?: Record<string, any>;
 };
+
 export type CreateOrUpdateMemberArgs = {
   email: string;
   name?: string;
   ipAddress: string;
   source: "api" | "web" | "admin";
 };
+
 export type IssuedKey = {
   key: string;
   keySuffix: string;
@@ -27,6 +31,7 @@ export type IssuedKey = {
   memberId: string;
   tier: KeyTier;
 };
+
 export type VerifyInnerCircleKeyResult = {
   valid: boolean;
   reason:
@@ -40,6 +45,7 @@ export type VerifyInnerCircleKeyResult = {
   keySuffix?: string;
   tier?: KeyTier;
 };
+
 export type InnerCircleStats = {
   totalMembers: number;
   totalKeys: number;
@@ -48,11 +54,14 @@ export type InnerCircleStats = {
   recentUnlocks: number;
   memoryStoreSize: number;
 };
+
 export type CleanupResult = {
   deleted: number;
   message: string;
   details?: Record<string, number>;
 };
+
+// --- INTERNAL DATA STORES ---
 const mem = new Map<string, StoredKey>();
 const memberStore = new Map<
   string,
@@ -62,20 +71,29 @@ const keyUsageStore = new Map<
   string,
   { keySuffix: string; memberId: string; timestamp: Date; ipAddress?: string }
 >();
+
+// --- UTILITIES ---
+
 export function isExpired(expiresAt?: string): boolean {
   if (!expiresAt) return false;
   return new Date(expiresAt).getTime() <= Date.now();
 }
+
 export function getMemoryStoreSize(): number {
   return mem.size;
 }
+
 export function generateAccessKey(): string {
   const array = new Uint8Array(20);
-  if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(array);
-  else for (let i = 0; i < array.length; i++) array[i] = Math.floor(Math.random() * 256);
+  if (globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(array);
+  } else {
+    for (let i = 0; i < array.length; i++) array[i] = Math.floor(Math.random() * 256);
+  }
   const hex = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
   return `IC-${hex.toUpperCase()}`;
 }
+
 export async function getEmailHash(email: string): Promise<string> {
   const normalized = email.trim().toLowerCase();
   if (globalThis.crypto?.subtle) {
@@ -86,25 +104,31 @@ export async function getEmailHash(email: string): Promise<string> {
       .join("");
     return hex.substring(0, 32);
   }
-  // fallback
+  // Fallback hashing logic
   let h = 0;
   for (let i = 0; i < normalized.length; i++) {
     h = ((h << 5) - h + normalized.charCodeAt(i)) | 0;
   }
   return Math.abs(h).toString(16).padStart(32, "0").substring(0, 32);
 }
+
+// --- CORE OPERATIONS ---
+
 export async function storeKey(record: StoredKey): Promise<void> {
   mem.set(record.key, record);
 }
+
 export async function getKey(key: string): Promise<StoredKey | null> {
   return mem.get(key) || null;
 }
+
 export async function revokeKey(key: string): Promise<boolean> {
   const existing = await getKey(key);
   if (!existing) return false;
   await storeKey({ ...existing, revoked: true, revokedAt: new Date().toISOString() });
   return true;
 }
+
 export async function renewKey(
   key: string,
   newExpiresAt?: string,
@@ -122,6 +146,7 @@ export async function renewKey(
   await storeKey(updated);
   return updated;
 }
+
 export async function incrementKeyUsage(key: string): Promise<boolean> {
   const existing = await getKey(key);
   if (!existing || existing.revoked) return false;
@@ -130,17 +155,23 @@ export async function incrementKeyUsage(key: string): Promise<boolean> {
   await storeKey({ ...existing, usedCount: (existing.usedCount || 0) + 1 });
   return true;
 }
+
+// --- RETRIEVAL ---
+
 export async function getKeysByMember(memberId: string): Promise<StoredKey[]> {
   return Array.from(mem.values()).filter((k) => k.memberId === memberId);
 }
+
 export async function getKeysByTier(tier: KeyTier): Promise<StoredKey[]> {
   return Array.from(mem.values()).filter((k) => k.tier === tier);
 }
+
 export async function getActiveKeys(): Promise<StoredKey[]> {
   return Array.from(mem.values()).filter(
     (k) => !k.revoked && (!k.expiresAt || !isExpired(k.expiresAt))
   );
 }
+
 export async function cleanupExpiredKeys(): Promise<{ cleaned: number }> {
   const now = Date.now();
   let cleaned = 0;
@@ -152,20 +183,26 @@ export async function cleanupExpiredKeys(): Promise<{ cleaned: number }> {
   }
   return { cleaned };
 }
-// These higher level APIs still exist client-side (memory only)
+
+// --- HIGH LEVEL API ---
+
 export async function createOrUpdateMemberAndIssueKey(
   args: CreateOrUpdateMemberArgs
 ): Promise<IssuedKey> {
   const memberId = await getEmailHash(args.email);
   const existing = memberStore.get(memberId);
+  
   memberStore.set(memberId, {
     email: args.email,
     name: args.name || existing?.name,
     createdAt: existing?.createdAt || new Date(),
     lastSeen: new Date(),
   });
+
   const key = generateAccessKey();
-  const keySuffix = safeSlice(key, -8);
+  // Using institutional safeSlice instead of local helper
+  const keySuffix = safeSlice(key, -8); 
+
   const storedKey: StoredKey = {
     key,
     memberId,
@@ -176,7 +213,9 @@ export async function createOrUpdateMemberAndIssueKey(
     usedCount: 0,
     metadata: { source: args.source, ipAddress: args.ipAddress },
   };
+
   await storeKey(storedKey);
+
   return {
     key,
     keySuffix,
@@ -185,23 +224,32 @@ export async function createOrUpdateMemberAndIssueKey(
     tier: "member",
   };
 }
+
 export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
-  if (!key.startsWith("IC-") || key.length !== 44) return { valid: false, reason: "invalid_format" };
+  if (!key.startsWith("IC-") || key.length !== 44) {
+    return { valid: false, reason: "invalid_format" };
+  }
+  
   const storedKey = await getKey(key);
   if (!storedKey) return { valid: false, reason: "not_found" };
   if (storedKey.revoked) return { valid: false, reason: "revoked" };
   if (storedKey.expiresAt && isExpired(storedKey.expiresAt)) return { valid: false, reason: "expired" };
-  if (storedKey.maxUses && (storedKey.usedCount || 0) >= storedKey.maxUses)
+  
+  if (storedKey.maxUses && (storedKey.usedCount || 0) >= storedKey.maxUses) {
     return { valid: false, reason: "rate_limited" };
+  }
+
   await incrementKeyUsage(key);
+
   return {
     valid: true,
     reason: "valid",
     memberId: storedKey.memberId,
-    keySuffix: safeSlice(key, -8),
+    keySuffix: safeSlice(key, -8), // Using institutional safeSlice
     tier: storedKey.tier,
   };
 }
+
 export async function recordInnerCircleUnlock(
   memberId: string,
   keySuffix: string
@@ -214,11 +262,16 @@ export async function recordInnerCircleUnlock(
   });
   return { success: true, timestamp: timestamp.toISOString() };
 }
+
 export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
   const activeKeys = await getActiveKeys();
   const allKeys = Array.from(mem.values());
   const byTier: Record<KeyTier, number> = { member: 0, patron: 0, founder: 0 };
-  for (const k of activeKeys) byTier[k.tier] = (byTier[k.tier] || 0) + 1;
+  
+  for (const k of activeKeys) {
+    byTier[k.tier] = (byTier[k.tier] || 0) + 1;
+  }
+
   return {
     totalMembers: memberStore.size,
     totalKeys: allKeys.length,
@@ -228,6 +281,7 @@ export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
     memoryStoreSize: mem.size,
   };
 }
+
 export async function cleanupExpiredData(): Promise<CleanupResult> {
   const keyResult = await cleanupExpiredKeys();
   return {
@@ -236,6 +290,7 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
     details: { keys: keyResult.cleaned },
   };
 }
+
 const keysApi = {
   generateAccessKey,
   storeKey,
@@ -256,4 +311,5 @@ const keysApi = {
   recordInnerCircleUnlock,
   cleanupExpiredData,
 };
+
 export default keysApi;

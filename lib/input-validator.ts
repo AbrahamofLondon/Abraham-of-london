@@ -1,5 +1,5 @@
 // lib/input-validator.ts
-import { safeSlice } from "@/lib/utils/safe";
+import { safeSubstring } from "@/lib/utils/safe";
 
 /**
  * Sanitize user input to prevent XSS and injection attacks
@@ -7,10 +7,12 @@ import { safeSlice } from "@/lib/utils/safe";
 export function sanitizeInput(input: string): string {
   if (typeof input !== 'string') return '';
   
-  return input
+  const cleaned = input
     .trim()
-    .replace(/[<>]/g, '') // Remove angle brackets
-    safeSubstring(value, 0, 1000); // Limit length
+    .replace(/[<>]/g, ''); // Remove angle brackets
+    
+  // Fixed: using the correctly imported safeSubstring from your safe.ts
+  return safeSubstring(cleaned, 0, 1000); 
 }
 
 /**
@@ -101,7 +103,6 @@ export function validateApiInput(data: any, schema: {
   for (const [field, rules] of Object.entries(schema)) {
     const value = data?.[field];
 
-    // Check required
     if (rules.required && (value === undefined || value === null || value === '')) {
       errors.push(`${field} is required`);
       continue;
@@ -111,7 +112,6 @@ export function validateApiInput(data: any, schema: {
       continue;
     }
 
-    // Type validation
     switch (rules.type) {
       case 'string':
         if (typeof value !== 'string') {
@@ -175,5 +175,3 @@ export function validateApiInput(data: any, schema: {
     sanitized,
   };
 }
-
-

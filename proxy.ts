@@ -19,6 +19,7 @@ const CANONICAL_HOST = "www.abrahamoflondon.org";
 
 /**
  * Public prefixes that must NEVER be blocked by auth
+ * ADDED: /strategy-room (Initial Assessment) and its submission API
  */
 const PUBLIC_PREFIXES = [
   "/api/auth",
@@ -37,13 +38,26 @@ const PUBLIC_PREFIXES = [
   "/api/inner-circle/register",
   "/api/inner-circle/unlock",
   "/admin/login",
+  "/strategy-room",           // Public Intake
+  "/api/strategy-room/submit", // Public Submission
+  "/api/strategy-room/analyze" // Public Analysis trigger (internal validation handles security)
 ];
 
+/**
+ * Matcher updated to include Strategy Room sensitive paths
+ */
 export const config = {
-  matcher: ["/admin/:path*", "/inner-circle/:path*", "/api/:path*"],
+  matcher: [
+    "/admin/:path*", 
+    "/inner-circle/:path*", 
+    "/api/:path*", 
+    "/strategy-room/success/:path*" // Protect the results
+  ],
 };
 
 function isPublicPath(pathname: string) {
+  // Check if it's the root strategy room (public) but NOT the success page (private)
+  if (pathname === "/strategy-room/success") return false;
   return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
@@ -60,7 +74,7 @@ function isAdminPath(pathname: string) {
 }
 
 function isInnerCirclePath(pathname: string) {
-  return pathname.startsWith("/inner-circle");
+  return pathname.startsWith("/inner-circle") || pathname.startsWith("/strategy-room/success");
 }
 
 function isApiPath(pathname: string) {
@@ -100,7 +114,6 @@ export async function proxy(req: NextRequest) {
   // 3) Rate limit — Admin + API
   if (admin || api) {
     const opts = admin ? RATE_LIMIT_CONFIGS.ADMIN : RATE_LIMIT_CONFIGS.API_GENERAL;
-    // Ensure rateLimit is non-blocking and handles potential internal errors
     const rl = await rateLimit(ip, opts).catch(() => ({ allowed: true })); 
 
     if (rl && !rl.allowed) {
@@ -117,11 +130,10 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // 4) Auth gate — Admin + Inner-Circle
+  // 4) Auth gate — Admin + Inner-Circle (Including Strategy Success)
   const needsAuth = admin || inner;
 
   if (needsAuth) {
-    // next-auth/jwt is safe for middleware/edge
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // RECONCILIATION: Check for Institutional Session Cookie
@@ -140,6 +152,7 @@ export async function proxy(req: NextRequest) {
       const onInnerLogin = pathname.startsWith("/inner-circle/login");
       if (onAdminLogin || onInnerLogin) return NextResponse.next();
 
+      // If they are on /strategy-room/success without auth, we treat it as Inner Circle login requirement
       const loginPath = admin ? "/admin/login" : "/inner-circle/login";
       const url = new URL(loginPath, req.url);
       url.searchParams.set("returnTo", safeReturnTo(req));
@@ -169,7 +182,7 @@ export async function proxy(req: NextRequest) {
         );
       }
     }
-  } catch { /* Silent fail to allow bypass if logic is missing */ }
+  } catch { /* Silent fail */ }
 
   // 7) Success — perimeter headers
   const res = NextResponse.next();

@@ -48,7 +48,13 @@ export function checkInnerCircleAccessSafe(): SafeInnerCircleAccess {
 
     // Check if token is expired (basic check)
     try {
-      const payload = JSON.parse(atob(tokenParts[1]));
+      // ✅ FIX: Ensure tokenParts[1] exists before using it
+      const payloadPart = tokenParts[1];
+      if (!payloadPart) {
+        throw new Error('Invalid token format');
+      }
+
+      const payload = JSON.parse(atob(payloadPart));
       const now = Math.floor(Date.now() / 1000);
       
       if (payload.exp < now) {

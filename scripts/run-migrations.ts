@@ -1,128 +1,73 @@
 #!/usr/bin/env node
 // scripts/run-migrations.ts
-import fs from "fs";
-import path from "path";
+import * as fs from "fs";
+import * as path from "path";
 import Database from "better-sqlite3";
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const MIGRATIONS_DIR = path.join(process.cwd(), "lib", "db", "migrations");
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), "data", "app.db");
 
-interface Migration {
+interface MigrationRecord {
   name: string;
   executed_at: string;
 }
 
 function splitSql(sql: string): string[] {
-  // A pragmatic SQLite-friendly splitter:
-  // - splits on semicolons ONLY when not inside:
-  //   - single/double-quoted strings
-  //   - line comments (-- ...)
-  //   - block comments (/* ... */)
-  //   - CREATE TRIGGER ... BEGIN ... END; blocks
-  const out: string[] = [];
-  let buf = "";
-
-  let inSingle = false;
-  let inDouble = false;
-  let inLineComment = false;
-  let inBlockComment = false;
-
-  // Trigger block guard
-  let inTrigger = false;
-  let triggerBeginDepth = 0;
-
-  const s = sql.replace(/\r\n/g, "\n");
-
-  for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    const next = s[i + 1] ?? "";
-
-    // Handle line comments
-    if (!inSingle && !inDouble && !inBlockComment) {
-      if (!inLineComment && ch === "-" && next === "-") {
-        inLineComment = true;
-        buf += ch;
-        continue;
+  // Simple but effective SQL splitter
+  const statements: string[] = [];
+  let current = '';
+  let inString = false;
+  let stringChar = '';
+  let inComment = false;
+  
+  for (let i = 0; i < sql.length; i++) {
+    const char = sql[i];
+    const next = sql[i + 1];
+    
+    // Handle string literals
+    if ((char === "'" || char === '"') && !inComment) {
+      if (!inString) {
+        inString = true;
+        stringChar = char;
+      } else if (char === stringChar && sql[i - 1] !== '\\') {
+        inString = false;
       }
-      if (inLineComment && ch === "\n") {
-        inLineComment = false;
-      }
+      current += char;
+      continue;
     }
-
-    // Handle block comments
-    if (!inSingle && !inDouble && !inLineComment) {
-      if (!inBlockComment && ch === "/" && next === "*") {
-        inBlockComment = true;
-        buf += ch;
-        continue;
-      }
-      if (inBlockComment && ch === "*" && next === "/") {
-        inBlockComment = false;
-        buf += ch;
-        buf += next;
-        i++;
-        continue;
-      }
+    
+    // Handle comments
+    if (!inString && char === '-' && next === '-') {
+      inComment = true;
     }
-
-    // Handle quotes (ignore inside comments)
-    if (!inLineComment && !inBlockComment) {
-      if (!inDouble && ch === "'" && s[i - 1] !== "\\") inSingle = !inSingle;
-      if (!inSingle && ch === `"` && s[i - 1] !== "\\") inDouble = !inDouble;
+    if (inComment && char === '\n') {
+      inComment = false;
     }
-
-    // Detect start of CREATE TRIGGER (outside strings/comments)
-    if (!inSingle && !inDouble && !inLineComment && !inBlockComment) {
-      // crude but effective: look back a bit for "CREATE TRIGGER"
-      if (!inTrigger) {
-        const lookback = (buf + ch).slice(-40).toUpperCase();
-        if (lookback.includes("CREATE TRIGGER")) {
-          inTrigger = true;
-          triggerBeginDepth = 0;
-        }
-      } else {
-        // Track BEGIN/END inside trigger so we know when it finishes
-        // SQLite triggers typically have one BEGIN ... END; block.
-        const tail = (buf + ch).slice(-10).toUpperCase();
-
-        // Count BEGIN tokens
-        if (/\bBEGIN\b/.test(tail)) triggerBeginDepth++;
-
-        // Count END tokens
-        if (/\bEND\b/.test(tail) && triggerBeginDepth > 0) triggerBeginDepth--;
-      }
+    
+    // Skip adding comment content
+    if (inComment) {
+      continue;
     }
-
-    buf += ch;
-
-    // Statement boundary: semicolon not inside quote/comment.
-    // If inside trigger, only allow split when we've closed BEGIN...END (depth==0)
-    if (
-      ch === ";" &&
-      !inSingle &&
-      !inDouble &&
-      !inLineComment &&
-      !inBlockComment &&
-      (!inTrigger || triggerBeginDepth === 0)
-    ) {
-      const stmt = buf.trim();
-      if (stmt) out.push(stmt);
-      buf = "";
-
-      // If we were in a trigger and just completed a statement, exit trigger mode
-      if (inTrigger && triggerBeginDepth === 0) {
-        inTrigger = false;
+    
+    // Statement delimiter
+    if (char === ';' && !inString) {
+      const trimmed = current.trim();
+      if (trimmed) {
+        statements.push(trimmed);
       }
+      current = '';
+    } else {
+      current += char;
     }
   }
-
-  const tail = buf.trim();
-  if (tail) out.push(tail.endsWith(";") ? tail : tail + ";");
-  return out;
+  
+  // Add final statement
+  const trimmed = current.trim();
+  if (trimmed) {
+    statements.push(trimmed);
+  }
+  
+  return statements.filter(s => s.length > 0);
 }
 
 function ensureMigrationsTable(db: Database.Database): void {
@@ -138,21 +83,37 @@ function ensureMigrationsTable(db: Database.Database): void {
 
 function getExecutedMigrations(db: Database.Database): Set<string> {
   try {
-    const rows = db.prepare('SELECT name FROM _migrations').all() as Migration[];
+    const rows = db.prepare('SELECT name FROM _migrations ORDER BY executed_at').all() as MigrationRecord[];
     return new Set(rows.map(r => r.name));
   } catch {
-    // Table might not exist yet
     return new Set();
   }
 }
 
-function main() {
+function getMigrationFiles(): { name: string; path: string }[] {
+  if (!fs.existsSync(MIGRATIONS_DIR)) {
+    return [];
+  }
+  
+  return fs.readdirSync(MIGRATIONS_DIR)
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .map(name => ({
+      name,
+      path: path.join(MIGRATIONS_DIR, name)
+    }));
+}
+
+function main(): void {
   const command = process.argv[2] || 'up';
+  const migrationName = process.argv[3];
 
   if (!fs.existsSync(MIGRATIONS_DIR)) {
     console.error(`❌ Migrations dir not found: ${MIGRATIONS_DIR}`);
     process.exit(1);
   }
+
+  const migrationFiles = getMigrationFiles();
 
   // Ensure data directory exists
   const dataDir = path.dirname(DB_PATH);
@@ -162,23 +123,28 @@ function main() {
 
   const db = new Database(DB_PATH);
   db.pragma('foreign_keys = ON');
+  db.pragma('journal_mode = WAL');
 
   if (command === 'status') {
     ensureMigrationsTable(db);
     const executed = getExecutedMigrations(db);
-    const files = fs.readdirSync(MIGRATIONS_DIR)
-      .filter((f) => f.endsWith(".sql"))
-      .sort();
 
     console.log('\n📊 Migration Status:');
-    console.log(`Total migrations: ${files.length}`);
+    console.log(`Database: ${DB_PATH}`);
+    console.log(`Total migrations: ${migrationFiles.length}`);
     console.log(`Executed: ${executed.size}`);
-    console.log(`Pending: ${files.length - executed.size}`);
+    console.log(`Pending: ${migrationFiles.length - executed.size}`);
     
     console.log('\n📋 Details:');
-    for (const file of files) {
-      const status = executed.has(file) ? '✅' : '⏳';
-      console.log(`  ${status} ${file}`);
+    
+    const executedDetails = db.prepare('SELECT name, executed_at FROM _migrations ORDER BY executed_at').all() as MigrationRecord[];
+    const executedMap = new Map(executedDetails.map(m => [m.name, m]));
+    
+    for (const file of migrationFiles) {
+      const exec = executedMap.get(file.name);
+      const status = exec ? '✅' : '⏳';
+      const timestamp = exec ? ` (${new Date(exec.executed_at).toLocaleString()})` : '';
+      console.log(`  ${status} ${file.name}${timestamp}`);
     }
     
     db.close();
@@ -190,69 +156,97 @@ function main() {
       console.error('❌ Cannot reset database in production');
       process.exit(1);
     }
+    
     db.close();
     fs.unlinkSync(DB_PATH);
     console.log('✅ Database reset. Run migrations again with: pnpm db:sqlite:migrate');
     return;
   }
 
+  if (command === 'create') {
+    if (!migrationName) {
+      console.error('❌ Please provide a migration name');
+      console.log('Usage: pnpm db:sqlite:migrate create add_users_table');
+      process.exit(1);
+    }
+    
+    const date = new Date();
+    const timestamp = date.getFullYear().toString() +
+      (date.getMonth() + 1).toString().padStart(2, '0') +
+      date.getDate().toString().padStart(2, '0') +
+      date.getHours().toString().padStart(2, '0') +
+      date.getMinutes().toString().padStart(2, '0');
+    
+    const filename = `${timestamp}_${migrationName.replace(/\s+/g, '_')}.sql`;
+    const filepath = path.join(MIGRATIONS_DIR, filename);
+    
+    const template = `-- Migration: ${migrationName}
+-- Created: ${new Date().toISOString()}
+
+-- Write your SQL here
+
+`;
+    
+    fs.writeFileSync(filepath, template);
+    console.log(`✅ Created migration: ${filename}`);
+    process.exit(0);
+  }
+
   // Default: run migrations
   ensureMigrationsTable(db);
   const executed = getExecutedMigrations(db);
   
-  const files = fs.readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith(".sql"))
-    .sort();
+  const pending = migrationFiles.filter(f => !executed.has(f.name));
+
+  if (pending.length === 0) {
+    console.log("✅ No pending migrations.");
+    db.close();
+    return;
+  }
+
+  console.log(`🚀 Running ${pending.length} pending migrations...`);
 
   let migrated = 0;
 
-  for (const file of files) {
-    if (executed.has(file)) {
-      console.log(`⏭️  Skipping ${file} (already executed)`);
-      continue;
-    }
-
-    const full = path.join(MIGRATIONS_DIR, file);
-    const sql = fs.readFileSync(full, "utf8");
-
-    const statements = splitSql(sql);
-    console.log(`🚀 Running migration: ${file} (${statements.length} statements)`);
-
-    // Run migration in a transaction
-    const runMigration = db.transaction((fileName: string) => {
-      for (let i = 0; i < statements.length; i++) {
-        const stmt = statements[i];
-        try {
-          db.exec(stmt);
-        } catch (err) {
-          console.error(`\n❌ Failed in ${fileName} at statement #${i + 1}\n`);
-          console.error(stmt.substring(0, 200) + (stmt.length > 200 ? '...' : ''));
-          console.error("\nSQLite error:\n", err);
-          throw err;
-        }
-      }
-      
-      // Record migration
-      db.prepare('INSERT INTO _migrations (name) VALUES (?)').run(fileName);
-    });
+  for (const file of pending) {
+    const sql = fs.readFileSync(file.path, "utf8");
+    const statements = splitSql(sql).filter(s => s.trim().length > 0);
+    console.log(`\n📦 ${file.name} (${statements.length} statements)`);
 
     try {
-      runMigration(file);
+      // Run migration in a transaction
+      const runMigration = db.transaction(() => {
+        for (let i = 0; i < statements.length; i++) {
+          const stmt = statements[i];
+          if (!stmt) continue;
+          
+          try {
+            db.exec(stmt);
+          } catch (err) {
+            console.error(`\n❌ Failed in ${file.name} at statement #${i + 1}\n`);
+            console.error(stmt.substring(0, 200) + (stmt.length > 200 ? '...' : ''));
+            console.error("\nSQLite error:\n", err);
+            throw err;
+          }
+        }
+        
+        // Record migration
+        db.prepare('INSERT INTO _migrations (name) VALUES (?)').run(file.name);
+      });
+
+      runMigration();
       migrated++;
-      console.log(`✅ Completed ${file}`);
+      console.log(`✅ Completed ${file.name}`);
     } catch (err) {
-      console.error(`❌ Migration failed: ${file}`);
+      console.error(`❌ Migration failed: ${file.name}`);
+      db.close();
       process.exit(1);
     }
   }
 
   db.close();
   
-  if (migrated === 0) {
-    console.log("✅ No pending migrations.");
-  } else {
-    console.log(`✅ Migrations complete. (${migrated} new migrations applied)`);
-  }
+  console.log(`\n✅ Migrations complete. (${migrated} new migrations applied)`);
 }
 
 main();

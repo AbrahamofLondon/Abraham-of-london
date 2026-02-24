@@ -1,22 +1,21 @@
-/* pages/books/[slug].tsx — PRODUCTION-GRADE BOOK RENDERER (FULL RESOLUTION) */
+/* pages/books/[slug].tsx — PRODUCTION-GRADE BOOK RENDERER (V2.6 RESILIENCE) */
+"use client";
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
-import { MDXRemote } from "next-mdx-remote";
-import { ChevronLeft, BookOpen, Loader2, Lock } from "lucide-react";
+import { ChevronLeft, BookOpen, Lock, Loader2 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import { BriefSummaryCard } from "@/components/mdx/BriefSummaryCard";
-import mdxComponents from "@/components/mdx-components";
+import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 
 import { useAccess, type Tier } from "@/hooks/useAccess";
-import { prepareMDX } from "@/lib/server/md-utils";
 
-// IMPORTANT: keep server utilities server-only
+// Server utilities (Note: These are only used in getStaticProps/Paths)
 import {
   getAllContentlayerDocs,
   getDocBySlug,
@@ -37,53 +36,55 @@ type BookDoc = {
   date?: string | null;
   author?: string | null;
   coverImage?: string | null;
+  bodyCode: string; 
 };
 
 interface Props {
   book: BookDoc;
   initialLocked: boolean;
-  initialSource: MDXRemoteSerializeResult | null;
-  mdxRaw: string;
   canonicalAbs: string;
   ogImageAbs: string;
 }
 
 const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
-const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw, canonicalAbs, ogImageAbs }) => {
+const BookPage: NextPage<Props> = ({ book, initialLocked, canonicalAbs, ogImageAbs }) => {
   const { hasClearance, verify, isValidating } = useAccess();
   const [mounted, setMounted] = React.useState(false);
-  const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
-  const [loading, setLoading] = React.useState(false);
+  
+  // ✅ Manage active source state to allow post-unlock reification
+  const [activeCode, setActiveCode] = React.useState<string>(book.bodyCode);
+  const [isDecrypting, setIsDecrypting] = React.useState(false);
 
   React.useEffect(() => setMounted(true), []);
 
   const isAuthorized = hasClearance(book.accessLevel);
 
-  const fetchSecurePayload = React.useCallback(async () => {
-    if (loading || source) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/books/${encodeURIComponent(book.slug)}`);
-      const json = await res.json().catch(() => null);
-      if (res.ok && json?.source) setSource(json.source);
-      else console.error("[BOOK_SECURE_PAYLOAD] Bad response", { status: res.status });
-    } catch (e) {
-      console.error("[BOOK_SECURE_PAYLOAD] Failed", e);
-    } finally {
-      setLoading(false);
+  /**
+   * Institutional Protocol: Reify Secure Content
+   * Triggered after AccessGate confirms credentials.
+   */
+  const handleUnlock = async () => {
+    verify(); // Update global access state
+    
+    // If it was locked, we need to fetch the actual full content from the secure proxy
+    if (initialLocked) {
+      setIsDecrypting(true);
+      try {
+        const res = await fetch(`/api/books/${encodeURIComponent(book.slug)}`);
+        const json = await res.json();
+        if (res.ok && json.bodyCode) {
+          setActiveCode(json.bodyCode);
+        }
+      } catch (err) {
+        console.error("Protocol Error: Secure payload acquisition failed.", err);
+      } finally {
+        setIsDecrypting(false);
+      }
     }
-  }, [book.slug, loading, source]);
+  };
 
-  // When unlocked, load content (for locked volumes)
-  React.useEffect(() => {
-    if (!mounted) return;
-    if (initialLocked && isAuthorized && !source) void fetchSecurePayload();
-  }, [mounted, initialLocked, isAuthorized, source, fetchSecurePayload]);
-
-  // If this is PUBLIC but we somehow have no source, recover by serializing client-side is NOT ideal.
-  // Instead, show a clear warning banner to avoid silent broken UX.
-  const publicButMissing = mounted && !initialLocked && !source;
+  if (!mounted) return null;
 
   return (
     <Layout title={book.title} description={book.description || book.excerpt || ""} className="bg-black" fullWidth>
@@ -93,7 +94,7 @@ const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw,
         <meta name="robots" content={initialLocked ? "noindex, nofollow" : "index, follow"} />
       </Head>
 
-      {/* Top Bar */}
+      {/* Navigation Bar */}
       <div className="sticky top-0 z-50 bg-zinc-950/85 backdrop-blur-xl border-b border-white/5 px-6 py-3">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
           <Link
@@ -117,23 +118,20 @@ const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw,
         </div>
       </div>
 
-      {/* Hero */}
       <header className="border-b border-white/5 bg-zinc-950/40 py-16">
         <div className="mx-auto max-w-6xl px-6 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
-          <div>
+          <div className="animate-aolFadeUp">
             <div className="font-mono text-[10px] text-amber-500 uppercase tracking-[0.5em] mb-6 flex items-center gap-3">
               <BookOpen size={14} />
               <span>{book.category || "Book"}</span>
             </div>
-
             <h1 className="text-4xl md:text-6xl font-serif italic text-white leading-tight">{book.title}</h1>
-
-            {book.subtitle ? (
+            {book.subtitle && (
               <p className="mt-6 text-lg text-white/60 font-light max-w-2xl">{book.subtitle}</p>
-            ) : null}
+            )}
           </div>
 
-          <div className="flex justify-center lg:justify-end">
+          <div className="flex justify-center lg:justify-end animate-aolFadeIn">
             {book.coverImage ? (
               <div className="relative rounded-3xl border border-amber-500/20 bg-black/30 p-3 shadow-2xl">
                 <Image
@@ -141,7 +139,7 @@ const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw,
                   alt={book.title}
                   width={300}
                   height={420}
-                  className="rounded-2xl h-auto w-auto"
+                  className="rounded-2xl h-auto"
                   priority
                 />
               </div>
@@ -152,7 +150,6 @@ const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw,
         </div>
       </header>
 
-      {/* Body */}
       <main className="mx-auto max-w-6xl px-6 py-12">
         <BriefSummaryCard
           category="BOOK"
@@ -161,61 +158,25 @@ const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw,
           author={book.author || undefined}
         />
 
-        <div className="mt-10 relative">
-          {/* Premium loading overlay */}
-          {loading ? (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/55 backdrop-blur-sm rounded-2xl border border-white/10">
-              <div className="flex items-center gap-3 text-amber-500">
-                <Loader2 className="animate-spin" size={18} />
-                <span className="font-mono text-[10px] tracking-[0.35em] uppercase italic">
-                  Securing Transmission...
-                </span>
-              </div>
+        <div className="mt-10 relative min-h-[400px]">
+          {isDecrypting && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+              <Loader2 className="h-8 w-8 animate-spin text-amber-500 mb-4" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-500/80">Reifying Asset...</span>
             </div>
-          ) : null}
+          )}
 
           {!isAuthorized && !isValidating && initialLocked ? (
             <AccessGate
               title={book.title}
               message="Restricted to authorized personnel."
-              requiredTier={book.accessLevel}
-              onUnlocked={() => verify()}
+              requiredTier={book.accessLevel as any}
+              onUnlocked={handleUnlock}
               onGoToJoin={() => window.location.assign("/inner-circle")}
             />
           ) : (
-            <div className={loading ? "opacity-20 transition-opacity" : "opacity-100 transition-opacity"}>
-              {publicButMissing ? (
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber-300 mb-2">
-                    Render Warning
-                  </div>
-                  <p className="text-white/70 text-sm">
-                    This is a public volume but no precompiled MDX payload was provided at build time.
-                    Verify the book MDX is being serialized in <code>getStaticProps</code>.
-                  </p>
-                  <pre className="mt-4 text-xs text-white/50 overflow-auto">
-                    {String(mdxRaw || "").slice(0, 800)}
-                  </pre>
-                </div>
-              ) : null}
-
-              {source ? (
-                <div className="prose prose-invert prose-amber max-w-none">
-                  {/* ✅ This is where Callout/Note/Divider resolve */}
-                  <MDXRemote {...source} components={mdxComponents} />
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-zinc-500">
-                    Content Pending
-                  </div>
-                  <p className="mt-3 text-white/60 text-sm">
-                    {initialLocked
-                      ? "Unlock access to load this volume."
-                      : "No compiled content available."}
-                  </p>
-                </div>
-              )}
+            <div className="prose prose-invert prose-amber max-w-none animate-aolFadeIn">
+              <SafeMDXRenderer code={activeCode} />
             </div>
           )}
         </div>
@@ -224,41 +185,27 @@ const BookPage: NextPage<Props> = ({ book, initialLocked, initialSource, mdxRaw,
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllContentlayerDocs()
-    .filter((d: any) => !isDraftContent(d))
-    .filter((d: any) => {
-      const t = String(d?.type || "").toLowerCase();
-      const fp = String(d?._raw?.flattenedPath || "");
-      return t === "book" || fp.startsWith("books/");
-    });
-
-  const paths = docs.map((b: any) => {
-    const s = normalizeSlug(String(b?.slug || b?._raw?.flattenedPath || ""));
-    const bare = s.replace(/^books\//, "");
-    return { params: { slug: bare } };
-  });
-
-  return { paths, fallback: "blocking" };
-};
-
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = normalizeSlug(String(params?.slug || ""));
-  const rawDoc =
-    getDocBySlug(`books/${slug}`) ||
-    getDocBySlug(slug);
+  const rawDoc = getDocBySlug(`books/${slug}`) || getDocBySlug(slug);
 
   if (!rawDoc || isDraftContent(rawDoc)) return { notFound: true };
 
   const accessLevel = (rawDoc.accessLevel || "inner-circle") as Tier;
   const initialLocked = accessLevel !== "public";
-
-  const mdxRaw = String(rawDoc?.body?.raw || rawDoc?.content || "");
-
-  // ✅ Public books: compile MDX at build time so components resolve immediately.
-  const initialSource = initialLocked ? null : await prepareMDX(mdxRaw || " ");
-
   const coverImage = resolveDocCoverImage(rawDoc);
+
+  // 🛡️ Institutional Security Guard: Prevent content leaking in Static HTML
+  // If locked, we send a redacted version. The full code is fetched via API on-unlock.
+  const secureBodyCode = initialLocked 
+    ? `
+      <div className="py-20 border-y border-white/5 my-10">
+        <p className="text-zinc-500 italic font-serif text-center">
+          This intelligence brief is encrypted. Please initialize decryption protocols via the security gate.
+        </p>
+      </div>
+      `
+    : rawDoc.body.code;
 
   const book: BookDoc = {
     title: rawDoc.title || "Untitled",
@@ -271,6 +218,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     date: rawDoc.date ? String(rawDoc.date) : null,
     author: rawDoc.author || "Abraham of London",
     coverImage,
+    bodyCode: secureBodyCode, 
   };
 
   const canonicalAbs = `${BASE_URL}/books/${slug}`;
@@ -280,13 +228,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: sanitizeData({
       book,
       initialLocked,
-      initialSource,
-      mdxRaw,
       canonicalAbs,
       ogImageAbs,
     }),
     revalidate: 3600,
   };
 };
-
-export default BookPage;

@@ -304,11 +304,40 @@ export type TransitionPreset = keyof typeof TransitionPresets;
 export type TransitionConfig = TransitionLike;
 
 // =============================================================================
+// PERFORMANCE OPTIMIZATIONS FOR LAGGING LOADING
+// =============================================================================
+
+// Use these in components to reduce lag:
+// - For heavy pages: use shortTransition or microTransition
+// - For initial load: use instantTransition or skip animations
+// - For lists: use staggeredFastSpringTransition with small delays
+
+// Pre-optimized transitions for faster loading
+export const optimizedPageTransition = {
+  duration: 0.25, // Reduced from 0.4
+  ease: [0.25, 0.46, 0.45, 0.94] as const,
+} as const satisfies DurationConfig;
+
+export const optimizedModalTransition = {
+  duration: 0.2, // Reduced from 0.3
+  ease: [0.4, 0, 0.2, 1] as const,
+} as const satisfies DurationConfig;
+
+export const optimizedFadeTransition = {
+  duration: 0.15, // Reduced from 0.8
+  ease: "easeOut",
+} as const satisfies DurationConfig;
+
+export const skipTransition = {
+  duration: 0.01, // Almost instant, use for initial load
+  ease: "linear",
+} as const satisfies DurationConfig;
+
+// =============================================================================
 // DEFAULT EXPORT
 // =============================================================================
 
 const framerTransitionsApi = {
-
   // Core
   springTransition,
   fastSpringTransition,
@@ -359,50 +388,11 @@ const framerTransitionsApi = {
   createDurationTransition,
   createStaggeredTransition,
 
-};
-
-
-
-
-
-
-const framerTransitionsApi = {
-  bouncySpringTransition,
-  breatheTransition,
-  createDurationTransition,
-  createSpringTransition,
-  createStaggeredTransition,
-  defaultTransition,
-  drawerTransition,
-  easeInOutTransition,
-  easeInTransition,
-  easeOutTransition,
-  EasingCurves,
-  extraLongTransition,
-  fadeInTransition,
-  fastSpringTransition,
-  gentleSpringTransition,
-  instantTransition,
-  linearTransition,
-  loaderTransition,
-  longTransition,
-  microTransition,
-  modalTransition,
-  pageTransition,
-  pulseTransition,
-  rotateTransition,
-  scaleTransition,
-  sharpTransition,
-  shortTransition,
-  slideDownTransition,
-  slideUpTransition,
-  smoothTransition,
-  springTransition,
-  staggeredFastSpringTransition,
-  staggeredSpringTransition,
-  staggeredTransition,
-  stiffSpringTransition,
-  TransitionPresets
+  // Optimized versions for performance
+  optimizedPageTransition,
+  optimizedModalTransition,
+  optimizedFadeTransition,
+  skipTransition,
 };
 
 export default framerTransitionsApi;

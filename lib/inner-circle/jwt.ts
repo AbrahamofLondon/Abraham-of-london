@@ -180,7 +180,11 @@ export function decodeTokenUnverified(token: string): InnerCircleJWT | null {
     const parts = token.split(".");
     if (parts.length < 2) return null;
 
-    const json = base64UrlToString(parts[1]);
+    // ✅ FIX: Check that parts[1] exists before using it
+    const payloadPart = parts[1];
+    if (!payloadPart) return null;
+
+    const json = base64UrlToString(payloadPart);
     const payload = safeJsonParse<any>(json);
     if (!payload || !isInnerCirclePayload(payload)) return null;
 

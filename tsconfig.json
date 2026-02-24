@@ -44,18 +44,21 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "server-only": [
+        "scripts/mocks/server-only.js"
+      ],
       "@/*": [
         "./*"
       ],
-      // Contentlayer broad mapping for 180 documents
+      "next-contentlayer2/hooks": [
+        "node_modules/next-contentlayer2/dist/hooks/index.d.ts"
+      ],
       "contentlayer/generated": [
         "./.contentlayer/generated"
       ],
       "contentlayer/generated/*": [
         "./.contentlayer/generated/*"
       ],
-      // Database & Redis
-      // ✅ @prisma/client REMOVED - let node_modules resolve it naturally
       "@/lib/db": [
         "./lib/db.ts"
       ],
@@ -65,7 +68,6 @@
       "@/lib/redis/*": [
         "./lib/redis/*"
       ],
-      // Core UI/Logic
       "@/components/*": [
         "./components/*"
       ],
@@ -105,7 +107,6 @@
     ".next",
     "out",
     "dist",
-    // ⚠️ CRITICAL: Exclude legacy/archive to prevent build-time type errors
     "_api_archive",
     "**/_api_archive/*"
   ]

@@ -2,16 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Library,
-  Briefcase,
-  Vault,
-  Building2,
-  Mail,
-  PenTool,
-} from "lucide-react";
+import { ArrowRight, BookOpen, Library, Building2, Mail, PenTool, Vault, Bookmark } from "lucide-react";
+
 import SocialLinks, { SocialLinksCompact } from "@/components/SocialLinks";
 import PolicyFooter from "@/components/PolicyFooter";
 
@@ -38,18 +30,11 @@ function FooterCTA({ href, title, label, icon }: FooterCTAProps) {
       </div>
 
       <div className="relative z-10 flex items-center gap-2 text-amber-200/50 group-hover:text-amber-200 transition-all">
-        <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-[0.3em]">
-          Open
-        </span>
-        <span className="transition-transform duration-500 group-hover:translate-x-0.5">
-          {icon}
-        </span>
+        <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-[0.3em]">Open</span>
+        <span className="transition-transform duration-500 group-hover:translate-x-0.5">{icon}</span>
       </div>
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-      >
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_10%_20%,rgba(245,158,11,0.14),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_90%_80%,rgba(255,255,255,0.06),transparent_55%)]" />
       </div>
@@ -57,74 +42,38 @@ function FooterCTA({ href, title, label, icon }: FooterCTAProps) {
   );
 }
 
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="hover:text-amber-100 hover:underline transition-colors">
+      {children}
+    </Link>
+  );
+}
+
 export default function EnhancedFooter(): React.ReactElement {
-  const [mounted, setMounted] = React.useState(false);
   const year = new Date().getFullYear();
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // During SSR, render static version
-  if (!mounted) {
-    return (
-      <footer className="relative overflow-hidden border-t border-white/5 bg-black pt-20 pb-12">
-        <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-12">
-          <div className="mt-12 border-t border-white/10 pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-              © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
-            </div>
-          </div>
-        </div>
-      </footer>
-    );
-  }
 
   return (
     <footer className="relative overflow-hidden border-t border-white/5 bg-black pt-20 pb-12">
-      {/* Subtle premium wash */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.055]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.65),transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_70%,rgba(245,158,11,0.25),transparent_55%)]" />
       </div>
 
       <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-12">
         {/* Primary pathways */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <FooterCTA
-            href="/canon"
-            title="The Canon"
-            label="Doctrine"
-            icon={<BookOpen size={18} />}
-          />
-          <FooterCTA
-            href="/library"
-            title="Library"
-            label="Archive"
-            icon={<Library size={18} />}
-          />
-          <FooterCTA
-            href="/ventures"
-            title="Ventures"
-            label="Execution"
-            icon={<Building2 size={18} />}
-          />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <FooterCTA href="/canon" title="The Canon" label="Doctrine" icon={<BookOpen size={18} />} />
+          <FooterCTA href="/books" title="Books" label="Works" icon={<Bookmark size={18} />} />
+          <FooterCTA href="/library" title="Library" label="Archive" icon={<Library size={18} />} />
+          <FooterCTA href="/ventures" title="Ventures" label="Execution" icon={<Building2 size={18} />} />
         </div>
 
         {/* Secondary pathways */}
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FooterCTA
-            href="/essays"          // ✅ Changed from "/briefs"
-            title="Essays"          // ✅ Changed from "Briefs"
-            label="Literary"        // ✅ Changed from "Operator Notes"
-            icon={<PenTool size={18} />} // ✅ Changed icon
-          />
-          <FooterCTA
-            href="/downloads"
-            title="Vault"
-            label="Resources"
-            icon={<Vault size={18} />}
-          />
+          {/* ✅ FIXED: essays -> /blog */}
+          <FooterCTA href="/blog" title="Essays" label="Literary" icon={<PenTool size={18} />} />
+          <FooterCTA href="/vault" title="Vault" label="Resources" icon={<Vault size={18} />} />
         </div>
 
         {/* Social */}
@@ -134,9 +83,7 @@ export default function EnhancedFooter(): React.ReactElement {
               <div className="text-[9px] font-mono font-semibold uppercase tracking-[0.45em] text-amber-200/60">
                 Social
               </div>
-              <h3 className="mt-3 font-serif text-2xl text-white/90 tracking-tight">
-                Signal over noise.
-              </h3>
+              <h3 className="mt-3 font-serif text-2xl text-white/90 tracking-tight">Signal over noise.</h3>
               <p className="mt-2 max-w-xl text-sm text-white/45 leading-relaxed">
                 Updates land where they matter: field notes, releases, and the occasional hard-edged clarity.
               </p>
@@ -180,66 +127,57 @@ export default function EnhancedFooter(): React.ReactElement {
 
           <div className="lg:col-span-7 grid grid-cols-2 gap-10 sm:grid-cols-3">
             <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">
-                Registry
-              </h4>
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Registry</h4>
               <ul className="space-y-3 text-xs text-white/45">
-                <li><Link href="/canon" className="hover:text-amber-100 hover:underline">Canon</Link></li>
-                <li><Link href="/library" className="hover:text-amber-100 hover:underline">Library</Link></li>
-                <li><Link href="/essays" className="hover:text-amber-100 hover:underline">Essays</Link></li> {/* ✅ Changed */}
-                <li><Link href="/shorts" className="hover:text-amber-100 hover:underline">Shorts</Link></li>
+                <li><FooterLink href="/canon">Canon</FooterLink></li>
+                <li><FooterLink href="/books">Books</FooterLink></li>
+                <li><FooterLink href="/library">Library</FooterLink></li>
+                {/* ✅ FIXED: essays -> /blog */}
+                <li><FooterLink href="/blog">Essays</FooterLink></li>
+                <li><FooterLink href="/shorts">Shorts</FooterLink></li>
               </ul>
             </div>
 
             <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">
-                Work
-              </h4>
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Work</h4>
               <ul className="space-y-3 text-xs text-white/45">
-                <li><Link href="/ventures" className="hover:text-amber-100 hover:underline">Ventures</Link></li>
-                <li><Link href="/consulting" className="hover:text-amber-100 hover:underline">Advisory</Link></li>
-                <li><Link href="/resources" className="hover:text-amber-100 hover:underline">Resources</Link></li>
-                <li><Link href="/downloads" className="hover:text-amber-100 hover:underline">Vault</Link></li>
+                <li><FooterLink href="/ventures">Ventures</FooterLink></li>
+                <li><FooterLink href="/consulting">Advisory</FooterLink></li>
+                <li><FooterLink href="/vault">Vault</FooterLink></li>
+                <li><FooterLink href="/events">Events</FooterLink></li>
               </ul>
             </div>
 
             <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">
-                Company
-              </h4>
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Company</h4>
               <ul className="space-y-3 text-xs text-white/45">
-                <li><Link href="/about" className="hover:text-amber-100 hover:underline">About</Link></li>
-                <li><Link href="/events" className="hover:text-amber-100 hover:underline">Events</Link></li>
-                <li><Link href="/security" className="hover:text-amber-100 hover:underline">Security</Link></li>
-                <li><Link href="/contact" className="hover:text-amber-100 hover:underline">Contact</Link></li>
+                <li><FooterLink href="/about">About</FooterLink></li>
+                <li><FooterLink href="/security">Security</FooterLink></li>
+                <li><FooterLink href="/contact">Contact</FooterLink></li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Policies */}
         <div className="mt-16">
           <PolicyFooter isDark />
         </div>
 
-        {/* Bottom bar */}
         <div className="mt-12 border-t border-white/10 pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
             © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
           </div>
           <div className="flex items-center gap-6">
-            <Link
-              href="/privacy"
-              className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35 hover:text-amber-100 transition-colors"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35 hover:text-amber-100 transition-colors"
-            >
-              Terms
-            </Link>
+            <FooterLink href="/privacy">
+              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35 hover:text-amber-100">
+                Privacy
+              </span>
+            </FooterLink>
+            <FooterLink href="/terms">
+              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35 hover:text-amber-100">
+                Terms
+              </span>
+            </FooterLink>
           </div>
         </div>
       </div>

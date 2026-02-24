@@ -3,16 +3,10 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 
-import { MDXRemote } from "next-mdx-remote";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
-
+// ✅ REMOVED: next-mdx-remote imports (the source of your bundle bloat/errors)
+// ✅ ADDED: Your resilient Contentlayer2 renderer
+import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
-import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 
 import {
   getAllCombinedDocs,
@@ -24,17 +18,10 @@ import {
 import { getDocKind, sanitizeData } from "@/lib/content/shared";
 
 // -----------------------------
-// Routing Guardrails
+// Routing Guardrails (Institutional Standard)
 // -----------------------------
 function norm(input: string): string {
-  return String(input || "")
-    .trim()
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "");
-}
-
-function isNested(slug: string): boolean {
-  return slug.includes("/");
+  return String(input || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
 }
 
 const RESERVED_ROOT = new Set<string>([
@@ -49,8 +36,7 @@ const RESERVED_ROOT = new Set<string>([
 
 function allowRootSlug(slug: string): boolean {
   const s = norm(slug).toLowerCase();
-  if (!s || isNested(s) || RESERVED_ROOT.has(s)) return false;
-  return true;
+  return !(!s || s.includes("/") || RESERVED_ROOT.has(s));
 }
 
 interface Props {
@@ -60,28 +46,19 @@ interface Props {
     date: string | null;
     excerpt: string;
     readTime: string | null;
+    bodyCode: string; // ✅ The pre-compiled code from Contentlayer
   } | null;
-  source: MDXRemoteSerializeResult | null;
-  mdxRaw: string;
-  canonicalUrl: string; // ✅ use this instead of "currentPath"
+  canonicalUrl: string;
 }
 
-const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw, canonicalUrl }) => {
-  const safeComponents = React.useMemo(
-    () =>
-      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
-        warnOnFallback: process.env.NODE_ENV === "development",
-      }),
-    [mdxRaw]
-  );
-
+const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl }) => {
   if (!doc) {
     return (
       <Layout title="404 | Abraham of London" description="Content not found" canonicalUrl={canonicalUrl}>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-serif mb-4">404</h1>
-            <p className="text-zinc-500">Content not found</p>
+        <div className="min-h-screen flex items-center justify-center bg-black">
+          <div className="text-center animate-aolFadeUp">
+            <h1 className="aol-editorial text-4xl mb-4">404</h1>
+            <p className="aol-micro text-white/30 uppercase tracking-widest">Asset Not Found</p>
           </div>
         </div>
       </Layout>
@@ -94,18 +71,13 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw, canonicalUrl
       description={doc.excerpt}
       canonicalUrl={canonicalUrl}
     >
-      <Head>
-        {/* Layout already sets <title> and meta description; Head here is optional.
-            Keep only truly page-specific tags if you want. */}
-      </Head>
-
       <article className="relative min-h-screen bg-black pt-24 pb-32">
-        <header className="mx-auto max-w-3xl px-6 text-center mb-16">
+        <header className="mx-auto max-w-3xl px-6 text-center mb-16 animate-aolFadeUp">
           <div className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60 border border-amber-500/20 px-4 py-1.5 rounded-full">
             {doc.kind} // Protocol v2.6
           </div>
 
-          <h1 className="font-serif text-5xl md:text-7xl text-white tracking-tight mb-8">
+          <h1 className="aol-editorial text-5xl md:text-7xl text-white tracking-tight mb-8">
             {doc.title}
           </h1>
 
@@ -118,7 +90,8 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw, canonicalUrl
 
         <div className="mx-auto max-w-2xl px-6">
           <div className="prose prose-invert max-w-none">
-            {source ? <MDXRemote {...source} components={safeComponents as any} /> : null}
+            {/* ✅ Using the SafeMDXRenderer with pre-compiled code */}
+            <SafeMDXRenderer code={doc.bodyCode} />
           </div>
         </div>
       </article>
@@ -128,7 +101,6 @@ const GenericContentPage: NextPage<Props> = ({ doc, source, mdxRaw, canonicalUrl
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = getAllCombinedDocs().filter((d) => !isDraftContent(d) && isPublished(d));
-
   const seen = new Set<string>();
   const paths: Array<{ params: { slug: string } }> = [];
 
@@ -136,9 +108,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const raw = normalizeSlug(d.slug || d?._raw?.flattenedPath || "");
     const slug = norm(raw);
     const key = slug.toLowerCase();
-
     if (!slug || !allowRootSlug(slug) || seen.has(key)) continue;
-
     seen.add(key);
     paths.push({ params: { slug } });
   }
@@ -159,33 +129,21 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true, revalidate: 60 };
   }
 
-  // MDX scope safety
-  const featureGridItems = Array.isArray((rawDoc as any).featureGridItems)
-    ? (rawDoc as any).featureGridItems
-    : [];
-
-  const mdxRaw = rawDoc.body?.raw || "";
-
-  const source = await serialize(mdxRaw || " ", {
-    scope: { featureGridItems },
-    mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
-  });
-
+  // ✅ Optimized: Sanitizing only what is necessary for the client
   const doc = sanitizeData({
     title: rawDoc.title || "Untitled",
     kind: getDocKind(rawDoc) || "Content",
     date: rawDoc.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
     excerpt: rawDoc.excerpt || rawDoc.description || "",
     readTime: rawDoc.readTime ?? null,
+    bodyCode: rawDoc.body.code, // ✅ Passing compiled code directly
   });
 
   return {
-    props: sanitizeData({
+    props: {
       doc,
-      source,
-      mdxRaw,
       canonicalUrl,
-    }),
+    },
     revalidate: 3600,
   };
 };

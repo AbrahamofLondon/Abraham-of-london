@@ -1,6 +1,7 @@
 // lib/fs-safe-walk.ts
 import fs from "fs/promises";
 import path from "path";
+import type { Dirent } from "fs"; // Import Dirent from fs, not fs/promises
 
 export type WalkOptions = {
   ignoreExt?: Set<string>;
@@ -23,9 +24,10 @@ export async function safeWalkDirsOnly(
       if (dir.includes(part)) return;
     }
 
-    let entries: Awaited<ReturnType<typeof fs.readdir>>;
+    // FIXED: Use imported Dirent type
+    let entries: Dirent[];
     try {
-      entries = await fs.readdir(dir, { withFileTypes: true });
+      entries = await fs.readdir(dir, { withFileTypes: true }) as Dirent[];
     } catch (e: any) {
       if (e?.code === "EPERM" || e?.code === "ENOENT") return;
       throw e;
@@ -53,3 +55,53 @@ export async function safeWalkDirsOnly(
   return results;
 }
 
+// Helper function for safe file existence check
+export async function safeFileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Helper function for safe directory creation
+export async function safeMkdir(dirPath: string): Promise<boolean> {
+  try {
+    await fs.mkdir(dirPath, { recursive: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Helper function for safe file read with fallback
+export async function safeReadFile(
+  filePath: string, 
+  encoding: BufferEncoding = 'utf-8'
+): Promise<string | null> {
+  try {
+    return await fs.readFile(filePath, encoding);
+  } catch {
+    return null;
+  }
+}
+
+// Helper function for safe directory reading
+export async function safeReaddir(dirPath: string): Promise<string[]> {
+  try {
+    return await fs.readdir(dirPath);
+  } catch {
+    return [];
+  }
+}
+
+// Helper function to check if path is a directory
+export async function safeIsDirectory(dirPath: string): Promise<boolean> {
+  try {
+    const stat = await fs.stat(dirPath);
+    return stat.isDirectory();
+  } catch {
+    return false;
+  }
+}

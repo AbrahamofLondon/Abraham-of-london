@@ -21,7 +21,7 @@ import Grid from "@/components/mdx/Grid";
 import HeroEyebrow from "@/components/mdx/HeroEyebrow";
 import JsonLd from "@/components/mdx/JsonLd";
 import LexiconLink from "@/components/mdx/LexiconLink";
-import MDXComponents from "@/components/mdx/MDXComponents";
+// Note: We do NOT import MDXComponents here if it is just a mapping object.
 import MDXContentWrapper from "@/components/mdx/MDXContentWrapper";
 import MDXLayoutRenderer from "@/components/mdx/MDXLayoutRenderer";
 import MinimalMdxComponents from "@/components/mdx/MinimalMdxComponents";
@@ -41,6 +41,7 @@ import Verse from "@/components/mdx/Verse";
 
 type AnyComp = React.ComponentType<any>;
 
+// Use 'any' cast for the registry object to prevent the build from stalling on complex union types
 const REGISTRY: Record<string, AnyComp> = {
   Badge,
   BadgeRow,
@@ -62,7 +63,7 @@ const REGISTRY: Record<string, AnyComp> = {
   HeroEyebrow,
   JsonLd,
   LexiconLink,
-  MDXComponents,
+  // MDXComponents removed - it is a collection, not a single component
   MDXContentWrapper,
   MDXLayoutRenderer,
   MinimalMdxComponents,
@@ -79,11 +80,11 @@ const REGISTRY: Record<string, AnyComp> = {
   ShareRow,
   Step,
   Verse,
-};
+} as any; 
 
 // Aliases for legacy MDX tags used across your content
 const ALIASES: Record<string, string> = {
-  Alert: "BriefAlert", // your content uses <Alert ...>
+  Alert: "BriefAlert", 
   ProTip: "Callout",
   Tip: "Callout",
   Warning: "Callout",
@@ -95,10 +96,15 @@ function resolveName(name: string) {
 
 export function getComponentSync(componentName: string): AnyComp {
   const name = resolveName(componentName);
-  return (
-    REGISTRY[name] ??
-    ((props: any) => <MissingComponent componentName={componentName} {...props} />)
+  const Component = REGISTRY[name];
+  
+  if (Component) return Component;
+
+  // Return a stable functional component for missing items
+  const Missing: React.FC<any> = (props) => (
+    <MissingComponent componentName={componentName} {...props} />
   );
+  return Missing;
 }
 
 /**
@@ -107,9 +113,9 @@ export function getComponentSync(componentName: string): AnyComp {
  */
 export function createDynamicComponent(componentName: string): React.FC<any> {
   const Resolved = getComponentSync(componentName);
-  const Wrapped: React.FC<any> = React.memo((props) => <Resolved {...props} />);
+  const Wrapped: React.FC<any> = (props) => <Resolved {...props} />;
   Wrapped.displayName = `MDX(${componentName})`;
-  return Wrapped;
+  return React.memo(Wrapped);
 }
 
 // Back-compat for any callers expecting async
