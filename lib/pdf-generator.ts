@@ -7,8 +7,9 @@ import matter from 'gray-matter';
 import { getPDFById } from './pdf/registry';
 
 /**
- * INSTITUTIONAL PDF GENERATION ENGINE (v2.2)
+ * INSTITUTIONAL PDF GENERATION ENGINE (v2.3)
  * Optimized for Parallel Vault Sync, Safe-Healing Buffers, and Virtual Registry.
+ * Fixed: TypeScript null-pointer safety for production builds.
  */
 export async function generatePDF(
   id: string, 
@@ -17,27 +18,36 @@ export async function generatePDF(
 ): Promise<{ success: boolean; path?: string; error?: string; cached?: boolean }> {
   
   // 1. Intelligent Registry Fallback
-  // If id is not in registry, we virtually construct a default config
-  let config = getPDFById(id);
+  // We fetch the config and immediately provide a fallback to ensure 'config' is never undefined.
+  const registryConfig = getPDFById(id);
   
-  if (!config) {
+  const config = registryConfig || {
+    id: id,
+    title: id.replace(/-/g, ' ').toUpperCase(),
+    outputPath: `/briefs/${id}.pdf`,
+    category: 'General',
+  };
+
+  // If it's a virtual config, we log it and inject the date (casting to any to bypass strict PDFConfig interface)
+  if (!registryConfig) {
     console.warn(`⚠️ [PDF_GEN]: Asset "${id}" not in registry. Generating virtual config.`);
-    config = {
-      id: id,
-      title: id.replace(/-/g, ' ').toUpperCase(), // Default title from ID
-      outputPath: `/briefs/${id}.pdf`,             // Standard pathing
-      category: 'General',
-      date: new Date().toISOString()
-    };
+    (config as any).date = new Date().toISOString();
   }
 
   try {
+    // Determine source path (defaulting to briefs, but extensible for vault)
     const mdxPath = path.join(process.cwd(), 'content/briefs', `${id}.mdx`);
-    const outputPath = path.join(process.cwd(), 'public', config.outputPath.replace(/^\//, ''));
+    
+    // Line 40 Fix: TypeScript now knows config.outputPath exists
+    const outputPath = path.join(
+      process.cwd(), 
+      'public', 
+      config.outputPath.replace(/^\//, '')
+    );
     
     // 2. Source Verification
     if (!fs.existsSync(mdxPath) && !contentOverride) {
-      return { success: false, error: "Source MDX missing and no override provided." };
+      return { success: false, error: `Source MDX missing at ${mdxPath} and no override provided.` };
     }
 
     // 3. Content Acquisition
@@ -55,6 +65,7 @@ export async function generatePDF(
       const stats = fs.statSync(outputPath);
       const mdxStats = fs.statSync(mdxPath);
       
+      // If the PDF is newer than the MDX, skip regeneration
       if (stats.mtime > mdxStats.mtime) {
         return { success: true, path: config.outputPath, cached: true };
       }
@@ -64,20 +75,20 @@ export async function generatePDF(
     const dir = path.dirname(outputPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    // 6. Dynamic Imports for Sovereign Rendering
+    // 6. Dynamic Imports for Sovereign Rendering (Reduces bundle size in serverless)
     const [React, ReactPDF, { BriefDocument }] = await Promise.all([
       import('react'),
       import('@react-pdf/renderer'),
       import('./pdf-templates/BriefDocument')
     ]);
 
-    // 7. Type-Safe Render
+    // 7. Render
     const pdfElement = React.createElement(BriefDocument as any, { 
       config: config,
       content: contentBody.trim() 
     });
 
-    // Render directly to the public assets directory
+    // Write to public directory
     await ReactPDF.default.renderToFile(
       pdfElement as React.ReactElement<any>, 
       outputPath
