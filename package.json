@@ -315,7 +315,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/algoliasearch": "^4.0.4",
     "@types/argon2": "^0.15.4",
-    "@types/bcryptjs": "^2.4.6",
+    "@types/bcryptjs": "^3.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cheerio": "^1.0.0",
     "@types/color": "^4.2.0",
