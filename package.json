@@ -234,7 +234,7 @@
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
-    "lucide-react": "^0.563.0",
+    "lucide-react": "^0.575.0",
     "markdown-it": "^14.1.1",
     "marked": "^17.0.1",
     "md-to-pdf": "^5.2.5",
