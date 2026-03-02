@@ -52,7 +52,7 @@ jobs:
           fi
 
       - name: Upload patch artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: prettier-fix-patch
           path: prettier-fix.patch
