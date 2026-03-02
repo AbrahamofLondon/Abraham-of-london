@@ -74,6 +74,7 @@ export interface PDFRegistryEntry {
   exists?: boolean;
   fileSizeBytes?: number;
 
+  // optional runtime-enrichment fields
   existsOnDisk?: boolean;
   fileSizeHuman?: string;
   lastModifiedISO?: string;
@@ -93,6 +94,9 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> =
 
 export const GENERATED_AT: string = String(_GENERATED_AT || "");
 export const GENERATED_COUNT: number = Number(_GENERATED_COUNT || GENERATED_PDF_CONFIGS.length);
+
+// ✅ Backward-compat alias expected by runtime.ts and legacy callers
+export const PDF_REGISTRY: ReadonlyArray<PDFRegistryEntry> = GENERATED_PDF_CONFIGS;
 
 export type GeneratedPDFId = PDFRegistryEntry["id"];
 
@@ -138,7 +142,13 @@ function formatBytes(bytes: number): string {
   return `${size.toFixed(digits)} ${units[unitIndex]}`;
 }
 
-export async function getAllPDFItemsNode(options?: { includeMissing?: boolean }): Promise<PDFRegistryEntry[]> {
+export type NodePDFItem = PDFRegistryEntry & {
+  existsOnDisk?: boolean;
+  fileSizeHuman?: string;
+  lastModifiedISO?: string;
+};
+
+export async function getAllPDFItemsNode(options?: { includeMissing?: boolean }): Promise<NodePDFItem[]> {
   if (typeof window !== "undefined") {
     throw new Error("[registry.static] getAllPDFItemsNode is Node-only but was called in the browser.");
   }
@@ -149,7 +159,7 @@ export async function getAllPDFItemsNode(options?: { includeMissing?: boolean })
   const fs: typeof import("fs") = (fsMod as any).default ?? (fsMod as any);
   const path: typeof import("path") = (pathMod as any).default ?? (pathMod as any);
 
-  const items: PDFRegistryEntry[] = GENERATED_PDF_CONFIGS.map((item) => {
+  const items: NodePDFItem[] = GENERATED_PDF_CONFIGS.map((item) => {
     const rel = String(item.outputPath || "").replace(/^\//, "");
     const fullPath = path.join(process.cwd(), "public", rel);
 

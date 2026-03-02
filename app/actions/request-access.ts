@@ -1,35 +1,62 @@
-'use server'
+'use server';
 
 import { getPrisma } from '@/lib/prisma.server';
 import { sendAccessRequestEmail } from '@/lib/mail';
 
-export async function requestAccessAction(formData: FormData) {
-  const email = formData.get('email') as string;
-  const slug = formData.get('slug') as string;
-  const title = formData.get('title') as string;
+function normalizeEmail(input: unknown): string {
+  return String(input ?? '').trim().toLowerCase();
+}
 
-  const prisma = await getPrisma();
-  if (!prisma) {
-    throw new Error("Database connection unavailable");
+function normalizeSlug(input: unknown): string {
+  return String(input ?? '').trim();
+}
+
+function normalizeTitle(input: unknown): string {
+  return String(input ?? '').trim();
+}
+
+export async function requestAccessAction(formData: FormData) {
+  const email = normalizeEmail(formData.get('email'));
+  const slug = normalizeSlug(formData.get('slug'));
+  const title = normalizeTitle(formData.get('title'));
+
+  if (!email || !email.includes('@')) {
+    throw new Error('Please enter a valid email address.');
+  }
+  if (!slug) {
+    throw new Error('Missing resource identifier.');
   }
 
-  // 1. Audit the request in the System Log
+  const prisma = await getPrisma();
+  if (!prisma) throw new Error('Database connection unavailable');
+
+  // 1) Audit (schema-aligned: actorEmail + Json metadata)
   await prisma.systemAuditLog.create({
     data: {
       action: 'ACCESS_REQUEST',
+      severity: 'info', // AuditSeverity enum value (matches your schema default)
       resourceId: slug,
       actorEmail: email,
-      metadata: JSON.stringify({ source: 'VaultGuard_UI' }),
-      severity: 'info'
-    }
+
+      // ✅ metadata is Json? in Prisma, so pass an object (NOT JSON.stringify)
+      metadata: {
+        source: 'VaultGuard_UI',
+        title,
+        slug,
+      },
+
+      // Optional: capture request headers if you pass them in later.
+      // ipAddress: null,
+      // userAgent: null,
+    },
   });
 
-  // 2. Send the Institutional Notification
+  // 2) Notification
   const mailResult = await sendAccessRequestEmail(email, title, slug);
 
-  if (mailResult.success) {
-    return { message: "Request received. An advisor will review your session." };
-  } else {
-    throw new Error("Connectivity error. Please retry.");
+  if (mailResult?.success) {
+    return { message: 'Request received. An advisor will review your session.' };
   }
+
+  throw new Error('Connectivity error. Please retry.');
 }

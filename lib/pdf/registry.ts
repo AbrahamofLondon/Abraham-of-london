@@ -1,35 +1,45 @@
-// lib/pdf/registry.ts — PDF Registry with SSOT Alignment
-import { 
-  getAllPDFs as getStaticAllPDFs, 
-  getPDFById as getStaticGetPDFById, 
+// lib/pdf/registry.ts — PDF Registry Facade (SSOT Aligned, Compile-Safe)
+// -----------------------------------------------------------------------------
+// Provides:
+//  - Backward-compatible exports for legacy imports
+//  - Extra helper functions for UI / dashboards
+//
+// HARD RULE:
+//  - Do NOT import+re-export the same type names in this file.
+//  - Re-export types ONLY via `export type { ... } from "./registry.static"`.
+
+import {
+  getAllPDFs as getStaticAllPDFs,
+  getPDFById as getStaticGetPDFById,
   getAllPDFItemsNode as getStaticGetAllPDFItemsNode,
   getRegistryStats as getStaticGetRegistryStats,
   getGeneratedPDFs as getStaticGetGeneratedPDFs,
   GENERATED_PDF_CONFIGS,
-  type PDFRegistryEntry,
-  type PDFType,
-  type PDFFormat,
-  type PaperFormat,
-  type GeneratedPDFId,
+  PDF_REGISTRY as STATIC_PDF_REGISTRY,
 } from "./registry.static";
 
-// Re-export from static registry
-export { 
+// -----------------------------------------------------------------------------
+// Re-export SSOT runtime exports (values)
+// -----------------------------------------------------------------------------
+export {
   GENERATED_PDF_CONFIGS,
-  getGeneratedPDFs,
-  getAllPDFs,
-  getPDFById,
-  getAllPDFItemsNode,
-  getRegistryStats,
-  type PDFRegistryEntry,
-  type PDFType,
-  type PDFFormat,
-  type PaperFormat,
-  type GeneratedPDFId,
-} from "./registry.static";
+  STATIC_PDF_REGISTRY as PDF_REGISTRY, // canonical alias
+  getStaticGetGeneratedPDFs as getGeneratedPDFs,
+  getStaticAllPDFs as getAllPDFs,
+  getStaticGetPDFById as getPDFById,
+  getStaticGetAllPDFItemsNode as getAllPDFItemsNode,
+  getStaticGetRegistryStats as getRegistryStats,
+};
 
-// Export PDFItem type for dashboard components
-export type PDFItem = PDFRegistryEntry & {
+// -----------------------------------------------------------------------------
+// Re-export SSOT types (types ONLY)
+// -----------------------------------------------------------------------------
+export type { PDFRegistryEntry, PDFType, PDFFormat, PaperFormat, GeneratedPDFId, NodePDFItem } from "./registry.static";
+
+// -----------------------------------------------------------------------------
+// Local helper types (safe extensions)
+// -----------------------------------------------------------------------------
+export type PDFItem = import("./registry.static").PDFRegistryEntry & {
   existsOnDisk?: boolean;
   fileSizeHuman?: string;
   lastModifiedISO?: string;
@@ -37,167 +47,133 @@ export type PDFItem = PDFRegistryEntry & {
   error?: string;
   downloadCount?: number;
   status?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 };
 
-// Export PDF_REGISTRY alias for backward compatibility
-export const PDF_REGISTRY = GENERATED_PDF_CONFIGS;
-
-// Local type with normalized tier
-export type PDFWithNormalizedTier = PDFRegistryEntry & {
+export type PDFWithNormalizedTier = import("./registry.static").PDFRegistryEntry & {
   normalizedTier?: string;
   requiresAuth?: boolean;
 };
 
-/**
- * Get all PDFs with normalized tier information
- */
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+function normalizeTierValue(v: unknown): string {
+  const s = String(v ?? "public").trim().toLowerCase();
+  if (s === "free") return "public"; // migration compatibility
+  if (!s) return "public";
+  return s;
+}
+
+function formatFileSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"] as const;
+  let size = bytes;
+  let i = 0;
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024;
+    i++;
+  }
+  return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+// -----------------------------------------------------------------------------
+// Public helper APIs (UI / dashboards)
+// -----------------------------------------------------------------------------
 export function getAllPDFsWithNormalizedTier(): PDFWithNormalizedTier[] {
-  const allPDFs = getStaticAllPDFs();
-  
-  return allPDFs.map((pdf) => {
-    // Normalize tier from whatever source is available
-    const tierValue = pdf.tier || pdf.accessLevel || "public";
-    
-    return {
-      ...pdf,
-      normalizedTier: String(tierValue).toLowerCase(),
-      requiresAuth: String(tierValue).toLowerCase() !== "public",
-    };
+  const all = getStaticAllPDFs();
+  return all.map((pdf) => {
+    const tierValue = normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public");
+    return { ...pdf, normalizedTier: tierValue, requiresAuth: tierValue !== "public" };
   });
 }
 
-/**
- * Get PDF by ID with normalized tier
- */
 export function getPDFByIdWithNormalizedTier(id: string): PDFWithNormalizedTier | undefined {
   const pdf = getStaticGetPDFById(id);
   if (!pdf) return undefined;
-  
-  const tierValue = pdf.tier || pdf.accessLevel || "public";
-  
-  return {
-    ...pdf,
-    normalizedTier: String(tierValue).toLowerCase(),
-    requiresAuth: String(tierValue).toLowerCase() !== "public",
-  };
+  const tierValue = normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public");
+  return { ...pdf, normalizedTier: tierValue, requiresAuth: tierValue !== "public" };
 }
 
-/**
- * Get all PDF items (with optional filtering by existence)
- * Used by dashboards and UI components
- */
 export function getAllPDFItems(options?: { includeMissing?: boolean }): PDFItem[] {
-  const allPDFs = getStaticAllPDFs();
+  const all = getStaticAllPDFs();
 
-  const items: PDFItem[] = allPDFs.map((pdf) => {
+  const items: PDFItem[] = all.map((pdf) => {
+    const sizeBytes = typeof (pdf as any).fileSizeBytes === "number" ? (pdf as any).fileSizeBytes : 0;
+
     const exists =
       Boolean((pdf as any).exists) ||
       Boolean((pdf as any).existsOnDisk) ||
-      (typeof (pdf as any).fileSizeBytes === "number" && (pdf as any).fileSizeBytes > 0);
+      sizeBytes > 0;
 
-    const sizeBytes =
-      typeof (pdf as any).fileSizeBytes === "number" ? (pdf as any).fileSizeBytes : 0;
-
-    const lastModified =
-      String((pdf as any).lastModified || "") || new Date().toISOString();
+    const lastModifiedISO =
+      typeof (pdf as any).lastModified === "string" && (pdf as any).lastModified
+        ? String((pdf as any).lastModified)
+        : new Date().toISOString();
 
     return {
       ...pdf,
-
-      // ✅ Canonical boolean existence (and backwards compatible)
-      exists,
       existsOnDisk: exists,
-
-      // ✅ Display helpers
       fileSizeHuman: sizeBytes ? formatFileSize(sizeBytes) : "0 B",
-      lastModifiedISO: lastModified,
-
-      // ✅ UI state fields
+      lastModifiedISO,
       isGenerating: false,
       downloadCount: 0,
       status: exists ? "generated" : "pending",
       metadata: {},
+      error: (pdf as any).error ? String((pdf as any).error) : undefined,
     };
   });
 
   if (options?.includeMissing) return items;
-  return items.filter((item) => item.exists === true);
+  return items.filter((x) => x.existsOnDisk === true);
 }
 
-/**
- * Format file size for display
- */
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  let size = bytes;
-  let unitIndex = 0;
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex++;
-  }
-  return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
-}
+export function getAccessiblePDFs(userTier: string): import("./registry.static").PDFRegistryEntry[] {
+  const all = getStaticAllPDFs();
+  const user = normalizeTierValue(userTier);
 
-/**
- * Get accessible PDFs for a user tier
- */
-export function getAccessiblePDFs(userTier: string): PDFRegistryEntry[] {
-  const allPDFs = getStaticAllPDFs();
-  const userTierLower = userTier.toLowerCase();
-  
-  // Simple tier hierarchy (can be replaced with proper SSOT import)
-  const tierRank: Record<string, number> = {
-    'public': 0,
-    'member': 1,
-    'inner-circle': 2,
-    'client': 3,
-    'legacy': 4,
-    'architect': 5,
-    'owner': 6,
+  const rank: Record<string, number> = {
+    public: 0,
+    member: 1,
+    verified: 2,
+    "inner-circle": 3,
+    client: 4,
+    legacy: 5,
+    architect: 6,
+    owner: 7,
   };
-  
-  const userRank = tierRank[userTierLower] ?? 0;
-  
-  return allPDFs.filter((pdf) => {
-    const pdfTier = (pdf.tier || pdf.accessLevel || "public").toLowerCase();
-    const pdfRank = tierRank[pdfTier] ?? 0;
+
+  const userRank = rank[user] ?? 0;
+
+  return all.filter((pdf) => {
+    const pdfTier = normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public");
+    const pdfRank = rank[pdfTier] ?? 0;
     return pdfRank <= userRank;
   });
 }
 
-/**
- * Get PDF stats by tier
- */
 export function getPDFStatsByTier(): Record<string, number> {
-  const allPDFs = getStaticAllPDFs();
+  const all = getStaticAllPDFs();
   const stats: Record<string, number> = {};
-  
-  allPDFs.forEach((pdf) => {
-    const tier = (pdf.tier || pdf.accessLevel || "public").toLowerCase();
+  for (const pdf of all) {
+    const tier = normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public");
     stats[tier] = (stats[tier] || 0) + 1;
-  });
-  
+  }
   return stats;
 }
 
-/**
- * Get PDFs by tier
- */
-export function getPDFsByTier(tier: string): PDFRegistryEntry[] {
-  const allPDFs = getStaticAllPDFs();
-  const tierLower = tier.toLowerCase();
-  
-  return allPDFs.filter((pdf) => {
-    const pdfTier = (pdf.tier || pdf.accessLevel || "public").toLowerCase();
-    return pdfTier === tierLower;
-  });
+export function getPDFsByTier(tier: string): import("./registry.static").PDFRegistryEntry[] {
+  const all = getStaticAllPDFs();
+  const target = normalizeTierValue(tier);
+  return all.filter((pdf) => normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public") === target);
 }
 
+// -----------------------------------------------------------------------------
+// Default export (legacy consumers)
+// -----------------------------------------------------------------------------
 export default {
   GENERATED_PDF_CONFIGS,
-  PDF_REGISTRY,
+  PDF_REGISTRY: STATIC_PDF_REGISTRY,
   getAllPDFs: getStaticAllPDFs,
   getPDFById: getStaticGetPDFById,
   getAllPDFItemsNode: getStaticGetAllPDFItemsNode,
@@ -209,13 +185,4 @@ export default {
   getAccessiblePDFs,
   getPDFStatsByTier,
   getPDFsByTier,
-};
-
-// Re-export types
-export type { 
-  PDFRegistryEntry, 
-  PDFType, 
-  PDFFormat, 
-  PaperFormat, 
-  GeneratedPDFId 
 };

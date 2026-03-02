@@ -13,7 +13,7 @@ import type * as React from "react";
 // Fuse.js
 declare module "fuse.js";
 
-// WebSocket
+// WebSocket (Node-only usage)
 declare module "ws";
 
 // Rehype plugins
@@ -22,6 +22,11 @@ declare module "rehype-external-links";
 
 // React Email
 declare module "@react-email/components";
+
+// ✅ IMPORTANT:
+// Prisma ships its own TypeScript definitions.
+// Keep this file limited to *your* ambient declarations only.
+// If Prisma types look broken, the fix is NOT to add ambient module stubs here.
 
 // ==================== ASSET MODULES (TOP-LEVEL) ====================
 

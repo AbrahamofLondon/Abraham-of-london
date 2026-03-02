@@ -336,7 +336,9 @@ model SystemAuditLog {
   severity AuditSeverity @default(info)
 
   actorId    String?
+  actorEmail String?
   resourceId String?
+  
 
   ipAddress String?
   userAgent String?

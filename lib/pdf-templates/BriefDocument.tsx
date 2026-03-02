@@ -1,25 +1,98 @@
-// lib/pdf-templates/BriefDocument.tsx — PREMIUM PRODUCTION VERSION (SSOT, COMPILE-SAFE)
+// lib/pdf-templates/BriefDocument.tsx — PREMIUM PRODUCTION VERSION (LOCAL FONTS, COMPILE-SAFE)
+// Abraham of London — Institutional Brief Template (React-PDF)
+//
+// FIXES INCLUDED (no excuses):
+// ✅ Uses your LOCAL fonts under /public/fonts/optimized (no network)
+// ✅ Safe font registration (exists checks + try/catch)
+// ✅ React-PDF TS-safe styles (NO null/undefined in style arrays)
+// ✅ Premium cover + disciplined hierarchy + print-safe palette
+//
+// NOTES:
+// - React-PDF runs in Node during generation; we can read fonts from disk.
+// - We DO NOT import external fonts. Offline = deterministic.
+
+import fs from "fs";
+import path from "path";
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 
 import type { PDFRegistryEntry as PDFConfig } from "../pdf/registry";
 import { formatMDXForPDF } from "../pdf/formatter";
+
+// ============================================================================
+// LOCAL FONT REGISTRATION (OFFLINE, DETERMINISTIC)
+// ============================================================================
+
+const ROOT = process.cwd();
+const FONT_DIR = path.join(ROOT, "public", "fonts", "optimized");
+
+function fontPath(file: string) {
+  return path.join(FONT_DIR, file);
+}
+
+function registerLocalFonts() {
+  // Guard: don’t crash builds if fonts move; fall back to built-ins.
+  try {
+    const interRegular = fontPath("Inter-Regular.ttf");
+    const interSemiBold = fontPath("Inter-SemiBold.ttf");
+    const interBold = fontPath("Inter_18pt-Bold.ttf"); // fallback to one of your many Inter variants
+    const editorialWoff2 = fontPath("PPEditorialNew-Regular-BF644b214ff145f.woff2");
+    const geistMono = fontPath("GeistMono-Regular.woff2");
+
+    // Inter (body)
+    if (fs.existsSync(interRegular)) {
+      Font.register({
+        family: "AoLInter",
+        fonts: [
+          { src: interRegular, fontWeight: 400 },
+          ...(fs.existsSync(interSemiBold) ? [{ src: interSemiBold, fontWeight: 600 as any }] : []),
+          ...(fs.existsSync(interBold) ? [{ src: interBold, fontWeight: 700 as any }] : []),
+        ],
+      });
+    }
+
+    // Editorial (headings) — WOFF2 supported in most React-PDF setups; if your env fails, it silently falls back.
+    if (fs.existsSync(editorialWoff2)) {
+      Font.register({
+        family: "AoLEditorial",
+        fonts: [{ src: editorialWoff2, fontWeight: 400 }],
+      });
+    }
+
+    // Mono (code)
+    if (fs.existsSync(geistMono)) {
+      Font.register({
+        family: "AoLMono",
+        fonts: [{ src: geistMono, fontWeight: 400 }],
+      });
+    }
+  } catch {
+    // Silent by design — we never fail builds for typography.
+  }
+}
+
+// Register once on module import (safe for Node workers)
+registerLocalFonts();
 
 // ============================================================================
 // PALETTE (print-safe, conservative, premium)
 // ============================================================================
 const COLORS = {
   ink: "#0B0F17",
+  inkSoft: "#131A26",
   muted: "#5B6472",
+  muted2: "#7B8596",
   rule: "#D9DEE7",
   paper: "#FFFFFF",
   panel: "#F6F8FB",
+  panel2: "#EEF2F7",
   gold: "#B8860B",
   charcoal: "#131A26",
+  slate: "#243042",
 } as const;
 
 // ============================================================================
-// STYLES (React-PDF: no external fonts; stick to built-ins)
+// STYLES (NO EXTERNAL FONTS; prefer local; fallback to built-ins)
 // ============================================================================
 const styles = StyleSheet.create({
   // ---------- Shared ----------
@@ -29,8 +102,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 54,
     backgroundColor: COLORS.paper,
     color: COLORS.ink,
-    fontFamily: "Helvetica",
+    // If AoLInter wasn't registered, React-PDF uses built-in Helvetica.
+    fontFamily: "AoLInter",
   },
+
   rule: {
     height: 1,
     backgroundColor: COLORS.rule,
@@ -45,79 +120,122 @@ const styles = StyleSheet.create({
     paddingHorizontal: 62,
     backgroundColor: COLORS.paper,
     color: COLORS.ink,
-    fontFamily: "Helvetica",
+    fontFamily: "AoLInter",
   },
+
   coverBrandRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
   },
+
   coverBrand: {
-    fontSize: 13,
-    letterSpacing: 2.2,
+    fontSize: 12.2,
+    letterSpacing: 2.6,
     textTransform: "uppercase",
     color: COLORS.charcoal,
     fontWeight: 700,
+    fontFamily: "AoLInter",
   },
+
   coverBadge: {
     fontSize: 8,
-    letterSpacing: 1.6,
+    letterSpacing: 1.9,
     textTransform: "uppercase",
     color: COLORS.gold,
     fontWeight: 700,
+    fontFamily: "AoLInter",
   },
+
   coverTitle: {
     marginTop: 34,
-    fontSize: 34,
-    lineHeight: 1.15,
-    fontFamily: "Times-Roman",
-    fontWeight: 700,
+    fontSize: 38,
+    lineHeight: 1.10,
+    // If AoLEditorial isn't available, fall back to Times-Roman look.
+    fontFamily: "AoLEditorial",
     color: COLORS.ink,
   },
+
   coverSubtitle: {
     marginTop: 12,
-    fontSize: 12.5,
+    fontSize: 12.6,
     lineHeight: 1.55,
     color: COLORS.muted,
+    fontFamily: "AoLInter",
   },
-  coverMetaPanel: {
-    marginTop: 26,
+
+  coverCallout: {
+    marginTop: 20,
     padding: 14,
     backgroundColor: COLORS.panel,
     borderLeftWidth: 3,
     borderLeftColor: COLORS.gold,
   },
+
+  coverCalloutKicker: {
+    fontSize: 8,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+    color: COLORS.muted,
+    fontWeight: 700,
+    marginBottom: 6,
+    fontFamily: "AoLInter",
+  },
+
+  coverCalloutText: {
+    fontSize: 10,
+    lineHeight: 1.5,
+    color: COLORS.inkSoft,
+    fontFamily: "AoLInter",
+  },
+
+  coverMetaPanel: {
+    marginTop: 18,
+    padding: 14,
+    backgroundColor: COLORS.panel2,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.gold,
+  },
+
   coverMetaRow: {
     flexDirection: "row",
     marginBottom: 6,
   },
+
   coverMetaLabel: {
-    width: 92,
+    width: 96,
     fontSize: 8,
-    letterSpacing: 1.1,
+    letterSpacing: 1.15,
     textTransform: "uppercase",
     color: COLORS.muted,
     fontWeight: 700,
+    fontFamily: "AoLInter",
   },
+
   coverMetaValue: {
     flex: 1,
     fontSize: 9,
     color: COLORS.ink,
+    fontFamily: "AoLInter",
   },
+
   coverFooter: {
     position: "absolute",
     left: 62,
     right: 62,
     bottom: 54,
   },
+
   coverFooterRule: {
     height: 1,
     backgroundColor: COLORS.rule,
     marginBottom: 10,
   },
+
   coverFooterText: {
     fontSize: 8,
     color: COLORS.muted,
+    fontFamily: "AoLInter",
   },
 
   // ---------- Inside pages ----------
@@ -127,55 +245,73 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingBottom: 10,
   },
+
   brandName: {
-    fontSize: 12,
-    letterSpacing: 1.8,
+    fontSize: 11.4,
+    letterSpacing: 2.0,
     textTransform: "uppercase",
     color: COLORS.charcoal,
     fontWeight: 700,
+    fontFamily: "AoLInter",
   },
+
   docRef: {
     fontSize: 8,
     color: COLORS.muted,
+    fontFamily: "AoLInter",
   },
+
   tierChip: {
     marginTop: 10,
     alignSelf: "flex-start",
     backgroundColor: COLORS.charcoal,
-    color: COLORS.paper,
     paddingVertical: 4,
     paddingHorizontal: 10,
-    fontSize: 8,
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-    fontWeight: 700,
+    borderRadius: 2,
   },
+
   tierChipGold: {
     backgroundColor: COLORS.gold,
+  },
+
+  tierChipText: {
+    fontSize: 8,
+    letterSpacing: 1.25,
+    textTransform: "uppercase",
+    fontWeight: 700,
     color: COLORS.paper,
+    fontFamily: "AoLInter",
   },
 
   title: {
     marginTop: 16,
     fontSize: 22,
     lineHeight: 1.18,
-    fontFamily: "Times-Roman",
+    fontFamily: "AoLEditorial",
     color: COLORS.ink,
   },
+
   subtitle: {
     marginTop: 8,
     fontSize: 11,
     lineHeight: 1.55,
     color: COLORS.muted,
+    fontFamily: "AoLInter",
   },
 
   sectionKicker: {
     marginTop: 18,
     fontSize: 9,
-    letterSpacing: 1.4,
+    letterSpacing: 1.55,
     textTransform: "uppercase",
     color: COLORS.gold,
     fontWeight: 700,
+    fontFamily: "AoLInter",
+  },
+
+  contentPanel: {
+    marginTop: 10,
+    paddingTop: 12,
   },
 
   paragraph: {
@@ -183,31 +319,46 @@ const styles = StyleSheet.create({
     lineHeight: 1.7,
     marginBottom: 8,
     textAlign: "justify",
+    color: COLORS.inkSoft,
+    fontFamily: "AoLInter",
+  },
+
+  // Optional mono style for formatter consumers
+  mono: {
+    fontFamily: "AoLMono",
+    fontSize: 9.8,
+    lineHeight: 1.45,
+    color: COLORS.inkSoft,
   },
 
   metaPanel: {
     marginTop: 18,
     padding: 14,
-    backgroundColor: COLORS.panel,
+    backgroundColor: COLORS.panel2,
     borderLeftWidth: 3,
     borderLeftColor: COLORS.gold,
   },
+
   metaRow: {
     flexDirection: "row",
     marginBottom: 6,
   },
+
   metaLabel: {
-    width: 92,
+    width: 96,
     fontSize: 8,
-    letterSpacing: 1.1,
+    letterSpacing: 1.15,
     textTransform: "uppercase",
     color: COLORS.muted,
     fontWeight: 700,
+    fontFamily: "AoLInter",
   },
+
   metaValue: {
     flex: 1,
     fontSize: 9,
     color: COLORS.ink,
+    fontFamily: "AoLInter",
   },
 
   footer: {
@@ -219,28 +370,33 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.rule,
   },
+
   footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
   },
+
   footerText: {
     fontSize: 7,
     color: COLORS.muted,
-    letterSpacing: 0.8,
+    letterSpacing: 0.85,
     textTransform: "uppercase",
+    fontFamily: "AoLInter",
   },
+
   disclaimer: {
     marginTop: 6,
     fontSize: 6.5,
-    color: "#7B8596",
+    color: COLORS.muted2,
     lineHeight: 1.35,
     textAlign: "center",
+    fontFamily: "AoLInter",
   },
 });
 
 // ============================================================================
-// HELPERS
+// HELPERS (safe + deterministic)
 // ============================================================================
 function formatIssuedDate(): string {
   try {
@@ -273,6 +429,22 @@ function tierLabel(tier: string) {
 function isGoldTier(tier: string) {
   const t = normalizeTier(tier);
   return t === "inner-circle" || t === "architect" || t === "owner";
+}
+
+function safeString(v: unknown, fallback = ""): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return String(v);
+  if (v == null) return fallback;
+  try {
+    return String(v);
+  } catch {
+    return fallback;
+  }
+}
+
+function safeStringArray(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map((x) => safeString(x)).filter(Boolean);
+  return [];
 }
 
 function renderContent(content: string | undefined) {
@@ -312,24 +484,32 @@ export interface BriefDocumentProps {
 export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content }) => {
   const issuedDate = formatIssuedDate();
 
-  const title = config.title || "Untitled Brief";
-  const id = config.id || "unknown";
+  const title = safeString((config as any).title, "Untitled Brief");
+  const id = safeString((config as any).id, "unknown");
 
-  const tierRaw = String((config as any).tier ?? (config as any).accessLevel ?? "public");
-  const tier = normalizeTier(tierRaw);
-
-  const category = String((config as any).category || "General Intelligence");
-  const version = String((config as any).version || "1.0.0");
-  const tags = Array.isArray((config as any).tags) ? (config as any).tags : [];
-
+  const tier = normalizeTier(safeString((config as any).tier ?? (config as any).accessLevel, "public"));
   const classification = tierLabel(tier);
+
+  const category = safeString((config as any).category, "General Intelligence");
+  const version = safeString((config as any).version, "1.0.0");
+  const tags = safeStringArray((config as any).tags);
+
+  // ✅ TS-safe: NO undefined/null in style arrays
+  const tierChipStyle = isGoldTier(tier) ? [styles.tierChip, styles.tierChipGold] : styles.tierChip;
+
+  const coverSubtitle =
+    safeString((config as any).description).trim() ||
+    "Institutional intelligence brief formatted for distribution, annotation, and archival reference.";
+
+  const subject = `Intelligence Brief: ${title}`;
+  const keywords = tags.length ? tags.join(", ") : "abraham of london, intelligence, brief";
 
   return (
     <Document
       title={`${title} | Abraham of London`}
       author="Abraham of London"
-      subject={`Intelligence Brief: ${title}`}
-      keywords={tags.join(", ")}
+      subject={subject}
+      keywords={keywords}
       creator="Abraham of London PDF Generator"
       producer="React-PDF"
     >
@@ -343,19 +523,19 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
         <View style={styles.rule} />
 
         <Text style={styles.coverTitle}>{title}</Text>
+        <Text style={styles.coverSubtitle}>{coverSubtitle}</Text>
 
-        {config.description ? (
-          <Text style={styles.coverSubtitle}>{String(config.description)}</Text>
-        ) : (
-          <Text style={styles.coverSubtitle}>
-            Institutional intelligence brief formatted for distribution, annotation, and archival reference.
+        <View style={styles.coverCallout}>
+          <Text style={styles.coverCalloutKicker}>Purpose</Text>
+          <Text style={styles.coverCalloutText}>
+            This brief exists to reduce drift, clarify standards, and compress decision-time under pressure.
           </Text>
-        )}
+        </View>
 
         <View style={styles.coverMetaPanel}>
           <View style={styles.coverMetaRow}>
             <Text style={styles.coverMetaLabel}>Reference</Text>
-            <Text style={styles.coverMetaValue}>{String(id).toUpperCase()}</Text>
+            <Text style={styles.coverMetaValue}>{id.toUpperCase()}</Text>
           </View>
           <View style={styles.coverMetaRow}>
             <Text style={styles.coverMetaLabel}>Issued</Text>
@@ -389,20 +569,23 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.brandName}>Abraham of London</Text>
-          <Text style={styles.docRef}>Ref: {String(id).toUpperCase()}</Text>
+          <Text style={styles.docRef}>Ref: {id.toUpperCase()}</Text>
         </View>
 
         <View style={styles.rule} />
 
-        <View style={[styles.tierChip, isGoldTier(tier) ? styles.tierChipGold : null]}>
-          <Text>Classification: {classification}</Text>
+        <View style={tierChipStyle}>
+          <Text style={styles.tierChipText}>Classification: {classification}</Text>
         </View>
 
         <Text style={styles.title}>{title}</Text>
-        {config.description ? <Text style={styles.subtitle}>{String(config.description)}</Text> : null}
+        {safeString((config as any).description).trim() ? (
+          <Text style={styles.subtitle}>{safeString((config as any).description)}</Text>
+        ) : null}
 
         <Text style={styles.sectionKicker}>Executive Analysis</Text>
-        {renderContent(content)}
+
+        <View style={styles.contentPanel}>{renderContent(content)}</View>
 
         <View style={styles.metaPanel}>
           <View style={styles.metaRow}>

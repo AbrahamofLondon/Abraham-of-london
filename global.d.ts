@@ -62,10 +62,6 @@ declare module "contentlayer/generated" {
 }
 
 declare module "@prisma/migrate";
-declare module "@prisma/client" {
-  export function defineClientConfig(config: any): any;
-}
-
 // Missing canvas module
 declare module "canvas" {
   export function createCanvas(width: number, height: number): any;
