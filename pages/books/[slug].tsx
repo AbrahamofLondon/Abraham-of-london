@@ -1,236 +1,354 @@
-/* pages/books/[slug].tsx — PRODUCTION-GRADE BOOK RENDERER (V2.6 RESILIENCE) */
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* pages/books/[slug].tsx — BOOK READER (SSOT, build-safe, public-first, no header bleed)
+   - ZERO server-only imports at module scope (Prisma-safe)
+   - Dynamic imports ONLY inside getStaticProps/getStaticPaths
+   - Public ships MDX at build-time; restricted unlocks via API
+*/
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, BookOpen, Lock, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { ArrowLeft, Lock, Loader2, Shield } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import AccessGate from "@/components/AccessGate";
-import { BriefSummaryCard } from "@/components/mdx/BriefSummaryCard";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import AccessGate from "@/components/AccessGate";
 
-import { useAccess, type Tier } from "@/hooks/useAccess";
+// Client-safe util only
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
-// Server utilities (Note: These are only used in getStaticProps/Paths)
-import {
-  getAllContentlayerDocs,
-  getDocBySlug,
-  isDraftContent,
-  sanitizeData,
-  normalizeSlug,
-  resolveDocCoverImage,
-} from "@/lib/content/server";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier, normalizeRequiredTier, hasAccess, getTierLabel } from "@/lib/access/tier-policy";
 
-type BookDoc = {
-  title: string;
-  slug: string;
-  accessLevel: Tier;
-  subtitle?: string | null;
-  description?: string | null;
-  excerpt?: string | null;
-  category?: string | null;
-  date?: string | null;
-  author?: string | null;
-  coverImage?: string | null;
-  bodyCode: string; 
+type BookPageProps = {
+  doc: any;
+  initialCode: string; // always present for public
+  requiredTier: AccessTier; // SSOT
 };
 
-interface Props {
-  book: BookDoc;
-  initialLocked: boolean;
-  canonicalAbs: string;
-  ogImageAbs: string;
+const DEFAULT_COVER = "/assets/images/books/default-book.jpg";
+
+// ------------------------------
+// SLUG HELPERS (PURE, CLIENT-SAFE)
+// ------------------------------
+
+function normalizeSlug(input: string): string {
+  return String(input || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
 }
 
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+function toBareBookSlug(input: string) {
+  const n = normalizeSlug(input || "");
+  return n.replace(/^\/?books\//, "").replace(/^\/?books\//, "");
+}
 
-const BookPage: NextPage<Props> = ({ book, initialLocked, canonicalAbs, ogImageAbs }) => {
-  const { hasClearance, verify, isValidating } = useAccess();
-  const [mounted, setMounted] = React.useState(false);
-  
-  // ✅ Manage active source state to allow post-unlock reification
-  const [activeCode, setActiveCode] = React.useState<string>(book.bodyCode);
-  const [isDecrypting, setIsDecrypting] = React.useState(false);
+function ensureBooksPrefix(slugOrBare: string) {
+  const s = normalizeSlug(slugOrBare || "");
+  if (!s) return "";
+  return s.startsWith("books/") ? s : `books/${s}`;
+}
 
-  React.useEffect(() => setMounted(true), []);
+function extractCode(doc: any): string {
+  return String(
+    doc?.body?.code ||
+      doc?.bodyCode ||
+      doc?.content ||
+      doc?.mdx ||
+      doc?.body?.raw ||
+      (typeof doc?.body === "string" ? doc.body : "") ||
+      "",
+  );
+}
 
-  const isAuthorized = hasClearance(book.accessLevel);
+// ------------------------------
+// PAGE
+// ------------------------------
 
-  /**
-   * Institutional Protocol: Reify Secure Content
-   * Triggered after AccessGate confirms credentials.
-   */
+const BookSlugPage: NextPage<BookPageProps> = ({ doc, initialCode, requiredTier }) => {
+  const { data: session, status } = useSession();
+
+  const title = doc?.title || "Untitled";
+  const subtitle = doc?.subtitle || null;
+  const cover = resolveDocCoverImage(doc) || DEFAULT_COVER;
+
+  const bareSlug = toBareBookSlug(doc?.slug || doc?._raw?.flattenedPath || "");
+  const canonicalUrl = `/books/${bareSlug || ""}`;
+
+  const required = normalizeRequiredTier(requiredTier);
+  const userTier = normalizeUserTier(
+    (session?.user as any)?.tier ?? (session?.user as any)?.role ?? "public",
+  );
+
+  const needsAuth = required !== "public";
+  const canRead = !needsAuth || (!!session?.user && hasAccess(userTier, required));
+
+  const [activeCode, setActiveCode] = React.useState(initialCode || "");
+  const [loading, setLoading] = React.useState(false);
+  const [unlockError, setUnlockError] = React.useState<string | null>(null);
+
   const handleUnlock = async () => {
-    verify(); // Update global access state
-    
-    // If it was locked, we need to fetch the actual full content from the secure proxy
-    if (initialLocked) {
-      setIsDecrypting(true);
-      try {
-        const res = await fetch(`/api/books/${encodeURIComponent(book.slug)}`);
-        const json = await res.json();
-        if (res.ok && json.bodyCode) {
-          setActiveCode(json.bodyCode);
-        }
-      } catch (err) {
-        console.error("Protocol Error: Secure payload acquisition failed.", err);
-      } finally {
-        setIsDecrypting(false);
+    if (!needsAuth) return;
+    if (!bareSlug) return;
+
+    setUnlockError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/books/${encodeURIComponent(bareSlug)}`, { method: "GET" });
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json?.ok) {
+        setUnlockError(json?.reason || "UNLOCK_FAILED");
+        return;
       }
+
+      if (typeof json?.bodyCode === "string") {
+        setActiveCode(json.bodyCode);
+      } else {
+        setUnlockError("UNLOCK_PAYLOAD_MISSING");
+      }
+    } catch {
+      setUnlockError("UNLOCK_NETWORK_FAILURE");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!mounted) return null;
-
-  return (
-    <Layout title={book.title} description={book.description || book.excerpt || ""} className="bg-black" fullWidth>
-      <Head>
-        <link rel="canonical" href={canonicalAbs} />
-        <meta property="og:image" content={ogImageAbs} />
-        <meta name="robots" content={initialLocked ? "noindex, nofollow" : "index, follow"} />
-      </Head>
-
-      {/* Navigation Bar */}
-      <div className="sticky top-0 z-50 bg-zinc-950/85 backdrop-blur-xl border-b border-white/5 px-6 py-3">
-        <div className="mx-auto max-w-6xl flex items-center justify-between">
-          <Link
-            href="/books"
-            className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-zinc-500 hover:text-amber-300 transition-colors"
-          >
-            <ChevronLeft size={14} />
-            Back to Library
-          </Link>
-
-          {initialLocked ? (
-            <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-400/80">
-              <Lock size={12} />
-              Restricted Volume
-            </span>
-          ) : (
-            <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-zinc-500">
-              Public Edition
-            </span>
-          )}
+  // Auth loading only matters for restricted
+  if (needsAuth && status === "loading") {
+    return (
+      <Layout title={title}>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying access…</div>
         </div>
-      </div>
+      </Layout>
+    );
+  }
 
-      <header className="border-b border-white/5 bg-zinc-950/40 py-16">
-        <div className="mx-auto max-w-6xl px-6 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
-          <div className="animate-aolFadeUp">
-            <div className="font-mono text-[10px] text-amber-500 uppercase tracking-[0.5em] mb-6 flex items-center gap-3">
-              <BookOpen size={14} />
-              <span>{book.category || "Book"}</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-serif italic text-white leading-tight">{book.title}</h1>
-            {book.subtitle && (
-              <p className="mt-6 text-lg text-white/60 font-light max-w-2xl">{book.subtitle}</p>
-            )}
-          </div>
-
-          <div className="flex justify-center lg:justify-end animate-aolFadeIn">
-            {book.coverImage ? (
-              <div className="relative rounded-3xl border border-amber-500/20 bg-black/30 p-3 shadow-2xl">
-                <Image
-                  src={book.coverImage}
-                  alt={book.title}
-                  width={300}
-                  height={420}
-                  className="rounded-2xl h-auto"
-                  priority
-                />
-              </div>
-            ) : (
-              <div className="w-[300px] h-[420px] rounded-3xl border border-white/10 bg-white/5" />
-            )}
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <BriefSummaryCard
-          category="BOOK"
-          classification={book.accessLevel}
-          date={book.date || undefined}
-          author={book.author || undefined}
-        />
-
-        <div className="mt-10 relative min-h-[400px]">
-          {isDecrypting && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
-              <Loader2 className="h-8 w-8 animate-spin text-amber-500 mb-4" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-500/80">Reifying Asset...</span>
-            </div>
-          )}
-
-          {!isAuthorized && !isValidating && initialLocked ? (
+  // Gate restricted content
+  if (needsAuth && (!session?.user || !canRead)) {
+    return (
+      <Layout title={title}>
+        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+          <div className="w-full max-w-lg">
             <AccessGate
-              title={book.title}
-              message="Restricted to authorized personnel."
-              requiredTier={book.accessLevel as any}
-              onUnlocked={handleUnlock}
+              title={title}
+              requiredTier={required}
+              message={doc?.lockMessage || "This book requires appropriate clearance."}
+              onUnlocked={() => void handleUnlock()}
               onGoToJoin={() => window.location.assign("/inner-circle")}
             />
-          ) : (
-            <div className="prose prose-invert prose-amber max-w-none animate-aolFadeIn">
-              <SafeMDXRenderer code={activeCode} />
-            </div>
-          )}
+            {unlockError ? (
+              <div className="mt-6 text-center text-[10px] font-mono uppercase tracking-widest text-red-400/90">
+                {unlockError}
+              </div>
+            ) : null}
+          </div>
         </div>
-      </main>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout
+      title={`${title} // Abraham of London`}
+      canonicalUrl={canonicalUrl}
+      className="bg-black text-white"
+      fullWidth
+      headerTransparent={false}
+    >
+      <Head>
+        <title>{title} // Abraham of London</title>
+        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
+      </Head>
+
+      {/* HERO (header-safe padding to stop bleed) */}
+      <section className="relative overflow-hidden border-b border-white/10">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 aol-vignette" />
+          <div className="absolute inset-0 aol-grain opacity-[0.10]" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-10 pt-[calc(var(--aol-header-h,88px)+2rem)] pb-10">
+          <div className="flex items-center justify-between gap-6">
+            <Link
+              href="/books"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 hover:bg-white/[0.05] transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 text-white/70" />
+              <span className="aol-micro text-white/55">Back</span>
+            </Link>
+
+            <div className="flex items-center gap-3">
+              {required !== "public" && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 border border-amber-500/30 bg-amber-500/10 rounded-full text-amber-400">
+                  <Lock size={12} />
+                  <span className="aol-micro">{getTierLabel(required)}</span>
+                </span>
+              )}
+              {doc?.readTime ? <div className="aol-micro text-white/35">{doc.readTime}</div> : null}
+            </div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-12 gap-10 items-start">
+            {/* Cover */}
+            <div className="md:col-span-4">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+                <div className="relative w-full" style={{ aspectRatio: "3 / 4" }}>
+                  <Image
+                    src={cover}
+                    alt={title}
+                    fill
+                    priority
+                    className={doc?.coverFit === "contain" ? "object-contain" : "object-cover"}
+                    style={{ objectPosition: doc?.coverPosition || "center" }}
+                    sizes="(max-width: 768px) 100vw, 420px"
+                  />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+                </div>
+              </div>
+            </div>
+
+            {/* Meta */}
+            <div className="md:col-span-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
+                <Shield size={12} className="text-amber-500/60" />
+                <span className="aol-micro text-amber-200/60">{doc?.docKind || "Book"}</span>
+                <span className="h-1 w-1 rounded-full bg-white/20" />
+                <span className="aol-micro text-white/35">{doc?.volume || "Canon"}</span>
+                {required === "public" ? (
+                  <>
+                    <span className="h-1 w-1 rounded-full bg-white/20" />
+                    <span className="aol-micro text-emerald-500/60">Public</span>
+                  </>
+                ) : null}
+              </div>
+
+              <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">{title}</h1>
+
+              {subtitle ? (
+                <p className="mt-3 text-base md:text-lg text-white/55 leading-relaxed max-w-2xl">{subtitle}</p>
+              ) : null}
+
+              {doc?.description ? (
+                <p className="mt-6 text-sm md:text-base text-white/45 leading-relaxed max-w-2xl">{doc.description}</p>
+              ) : null}
+
+              {/* Optional unlock panel if restricted AND no code */}
+              {needsAuth && !activeCode ? (
+                <div className="mt-8 rounded-3xl border border-amber-500/20 bg-amber-500/10 p-6">
+                  <div className="flex items-center gap-3">
+                    <Lock className="h-5 w-5 text-amber-200/80" />
+                    <div>
+                      <div className="aol-micro text-amber-200/70">Restricted • {getTierLabel(required)}</div>
+                      <div className="mt-2 text-sm text-white/70">Unlock to continue.</div>
+                      {unlockError ? (
+                        <div className="mt-2 text-[10px] font-mono uppercase tracking-widest text-red-400/90">
+                          {unlockError}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleUnlock()}
+                    className="mt-6 inline-flex items-center justify-center rounded-2xl border border-amber-500/25 bg-amber-500/15 px-5 py-3 text-sm text-amber-100 hover:bg-amber-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Unlocking…
+                      </span>
+                    ) : (
+                      "Unlock"
+                    )}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* READER */}
+      <section className="relative z-10 mx-auto max-w-4xl px-6 lg:px-10 py-14">
+        <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-7 md:p-10">
+          <SafeMDXRenderer code={activeCode} loadingLabel="Loading book…" />
+        </div>
+
+        <div className="mt-10 aol-hairline" />
+        <div className="mt-8 text-center">
+          <div className="aol-micro text-white/35">Abraham of London • Institutional Library</div>
+        </div>
+      </section>
     </Layout>
   );
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = normalizeSlug(String(params?.slug || ""));
-  const rawDoc = getDocBySlug(`books/${slug}`) || getDocBySlug(slug);
+// ------------------------------
+// SSG — SERVER ONLY (dynamic imports)
+// ------------------------------
 
-  if (!rawDoc || isDraftContent(rawDoc)) return { notFound: true };
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { getBooks } = await import("@/lib/content/server");
 
-  const accessLevel = (rawDoc.accessLevel || "inner-circle") as Tier;
-  const initialLocked = accessLevel !== "public";
-  const coverImage = resolveDocCoverImage(rawDoc);
+  const books = (await (async () => {
+    // getBooks may be sync or async depending on your SSOT; normalize safely.
+    const r = (getBooks as any)();
+    return r && typeof r.then === "function" ? await r : r;
+  })()) || [];
 
-  // 🛡️ Institutional Security Guard: Prevent content leaking in Static HTML
-  // If locked, we send a redacted version. The full code is fetched via API on-unlock.
-  const secureBodyCode = initialLocked 
-    ? `
-      <div className="py-20 border-y border-white/5 my-10">
-        <p className="text-zinc-500 italic font-serif text-center">
-          This intelligence brief is encrypted. Please initialize decryption protocols via the security gate.
-        </p>
-      </div>
-      `
-    : rawDoc.body.code;
+  const paths = books
+    .map((b: any) => {
+      const raw = normalizeSlug(b?._raw?.flattenedPath || "") || normalizeSlug(b?.slug || "");
+      const bare = toBareBookSlug(raw);
+      if (!bare) return null;
+      return { params: { slug: bare } };
+    })
+    .filter(Boolean) as Array<{ params: { slug: string } }>;
 
-  const book: BookDoc = {
-    title: rawDoc.title || "Untitled",
-    subtitle: rawDoc.subtitle || null,
-    description: rawDoc.description || null,
-    excerpt: rawDoc.excerpt || null,
-    slug,
-    accessLevel,
-    category: rawDoc.category || "Volume",
-    date: rawDoc.date ? String(rawDoc.date) : null,
-    author: rawDoc.author || "Abraham of London",
-    coverImage,
-    bodyCode: secureBodyCode, 
-  };
+  return { paths, fallback: "blocking" };
+};
 
-  const canonicalAbs = `${BASE_URL}/books/${slug}`;
-  const ogImageAbs = coverImage ? `${BASE_URL}${coverImage}` : `${BASE_URL}/assets/images/social/og-image.jpg`;
+export const getStaticProps: GetStaticProps<BookPageProps> = async ({ params }) => {
+  const [{ getServerBookBySlug, sanitizeData }, tierMod] = await Promise.all([
+    import("@/lib/content/server"),
+    import("@/lib/access/tier-policy"),
+  ]);
+
+  const bare = toBareBookSlug(String(params?.slug || ""));
+  if (!bare) return { notFound: true };
+
+  // Some projects store slugs with or without "books/" prefix — try both.
+  const doc =
+    (await getServerBookBySlug(bare)) ||
+    (await getServerBookBySlug(`books/${bare}`));
+
+  if (!doc || doc?.draft) return { notFound: true };
+
+  const requiredTier = normalizeRequiredTier((tierMod as any).requiredTierFromDoc(doc));
+
+  // Public always ships code at build time; restricted requires unlock via API.
+  const initialCode = requiredTier === "public" ? extractCode(doc) : "";
+
+  const finalSlug = ensureBooksPrefix(doc?.slug || bare);
 
   return {
     props: sanitizeData({
-      book,
-      initialLocked,
-      canonicalAbs,
-      ogImageAbs,
+      doc: { ...doc, slug: finalSlug },
+      initialCode,
+      requiredTier,
     }),
-    revalidate: 3600,
+    revalidate: 1800,
   };
 };
+
+export default BookSlugPage;

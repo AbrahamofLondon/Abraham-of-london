@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-03-02T16:18:00.723Z",
+  "policy": {
+    "requirePdfHeader": true,
+    "minKbStandardPdf": 12,
+    "minKbFillablePdf": 8,
+    "warnKbSmallPdf": 50,
+    "minKbZip": 12,
+    "requireZipHeader": true,
+    "allowSmallZip": false,
+    "outAuditAbs": "C:\\Abraham-of-london\\public\\assets\\downloads\\pdf-ssot-validate.json",
+    "printLimit": 40
+  },
+  "totals": {
+    "registryRecords": 194,
+    "ok": 194,
+    "failed": 0,
+    "warnings": 3
+  },
+  "failures": [],
+  "warnings": [
+    {
+      "id": "decision-matrix-scorecard-fillable",
+      "path": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
+      "warn": "SMALL_PDF_36KB",
+      "sizeKb": 36
+    },
+    {
+      "id": "legacy-canvas-fillable",
+      "path": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
+      "warn": "SMALL_PDF_11KB",
+      "sizeKb": 11
+    },
+    {
+      "id": "purpose-pyramid-worksheet-fillable",
+      "path": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
+      "warn": "SMALL_PDF_20KB",
+      "sizeKb": 20
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GetServerSideProps, NextPage } from "next";
 // Corrected export member based on your schema
-import { allBriefs, type Brief } from "contentlayer/generated";
+import { allBriefs, type Brief } from "@/lib/contentlayer";
 import IntelligenceBrief from "@/components/IntelligenceBrief";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";

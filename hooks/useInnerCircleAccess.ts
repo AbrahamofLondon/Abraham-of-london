@@ -50,10 +50,10 @@ export function useInnerCircleAccess(): {
       console.error('Failed to check inner circle access:', err);
       setError(err instanceof Error ? err : new Error('Unknown error'));
       
-      // Create fallback that matches InnerCircleAccess exactly
+      // ✅ FIX: Use a valid AccessReason from the type definition
       const fallbackAccess: InnerCircleAccess = {
         hasAccess: false,
-        reason: 'error',
+        reason: 'internal_error', // Changed from 'error' to 'internal_error'
         // tier is optional, so we can omit it
       };
       

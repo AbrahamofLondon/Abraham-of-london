@@ -33,10 +33,10 @@ category: Institutional Alpha
 
 **The 12 structural pillars of durable, intergenerational leadership.**
 
-{"Leadership is often sold as a personality trait. In the Canon, leadership is understood as a set of engineering standards. If you meet the standards, the structure stands. If you fail them, the structure collapses—regardless of your charisma."}
+{"[Leadership](/vault/lexicon/leadership) is often sold as a personality trait. In the Canon, leadership is understood as a set of engineering standards. If you meet the standards, the structure stands. If you fail them, the structure collapses—regardless of your charisma."}
 
 <DownloadCard
-  title="Download the Leadership Blueprint (PDF)"
+  title="Download the [Leadership](/vault/lexicon/leadership) Blueprint (PDF)"
   label="Download PDF"
   href="/assets/resources/pdfs/leadership-standards-blueprint.pdf"
 >
@@ -64,17 +64,17 @@ category: Institutional Alpha
 
 ---
 
-## The Leadership Audit
+## The [Leadership](/vault/lexicon/leadership) Audit
 
 {"\"Legacies don't emerge from gifts—they emerge from standards.\""}
 
-**The Strategic Question**: Which of these 12 pillars, if strengthened today, would most significantly increase the "Sovereignty Score" of your organization?
+**The Strategic Question**: Which of these 12 pillars, if strengthened today, would most significantly increase the "[Sovereignty](/vault/lexicon/sovereignty) Score" of your organization?
 
 **Next Step**: Audit your current leadership team against these 12 standards. Identify the "Drift Points" and implement a corrective governance cadence within the next 14 days.
 
 ---
 
 <Note tone="key" title="Institutional Record">
-  **Resource ID**: IA-LSB-001 | **Category**: Institutional Alpha  
+  **Resource ID**: IA-LSB-001 | **Category**: Institutional Alpha
   **Part of the Abraham of London Portfolio** — Engineered for the restoration of order.
 </Note>

@@ -1,13 +1,31 @@
 // lib/db/db-gate.ts
-export function shouldUseDatabase() {
-  // build workers (next build) should not require DB
-  if (process.env.SKIP_DB === "1") return false;
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
-  // no URL, no DB
-  if (!process.env.DATABASE_URL) return false;
+/**
+ * Determines if database access should be attempted in the current environment.
+ * Critical for preventing build-time database connections that would cause failures.
+ */
+export function shouldUseDatabase(): boolean {
+  // Build-time detection (most reliable for Next.js)
+  if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
+    return false;
+  }
 
-  // optional: disable in CI environments
-  if (process.env.CI === "true") return false;
+  // Manual override for build workers
+  if (process.env.SKIP_DB === "1" || process.env.SKIP_DB === "true") {
+    return false;
+  }
 
+  // No connection string available
+  if (!process.env.DATABASE_URL) {
+    return false;
+  }
+
+  // CI environments (GitHub Actions, etc.) often don't need DB access
+  if (process.env.CI === "true") {
+    return false;
+  }
+
+  // Safe to attempt database connection
   return true;
 }

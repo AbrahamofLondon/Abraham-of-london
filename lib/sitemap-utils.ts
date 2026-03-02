@@ -1,4 +1,4 @@
-import { allDocuments } from "contentlayer/generated";
+import { allDocuments } from "@/lib/contentlayer";
 
 const SITE_URL = "https://www.abrahamoflondon.org";
 

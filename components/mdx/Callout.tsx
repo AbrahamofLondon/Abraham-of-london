@@ -1,4 +1,4 @@
- // components/mdx/Callout.tsx
+// components/mdx/Callout.tsx
 import * as React from "react";
 import clsx from "clsx";
 
@@ -6,7 +6,7 @@ type CalloutType = "info" | "note" | "success" | "warning" | "danger";
 
 const TOKENS: Record<
   CalloutType,
-  { ring: string; bg: string; title: string; accent: string; icon: string }
+  { ring: string; bg: string; title: string; accent: string; icon: string; body: string }
 > = {
   info: {
     ring: "border-white/10",
@@ -14,6 +14,7 @@ const TOKENS: Record<
     title: "text-white",
     accent: "text-[#D6B25E]",
     icon: "bg-[#D6B25E]",
+    body: "text-white/90",
   },
   note: {
     ring: "border-white/10",
@@ -21,6 +22,7 @@ const TOKENS: Record<
     title: "text-white",
     accent: "text-[#D6B25E]",
     icon: "bg-[#D6B25E]",
+    body: "text-white/90",
   },
   success: {
     ring: "border-emerald-200/15",
@@ -28,6 +30,7 @@ const TOKENS: Record<
     title: "text-white",
     accent: "text-emerald-200",
     icon: "bg-emerald-200",
+    body: "text-white/90",
   },
   warning: {
     ring: "border-amber-200/15",
@@ -35,6 +38,7 @@ const TOKENS: Record<
     title: "text-white",
     accent: "text-amber-200",
     icon: "bg-amber-200",
+    body: "text-white/90",
   },
   danger: {
     ring: "border-rose-200/15",
@@ -42,6 +46,7 @@ const TOKENS: Record<
     title: "text-white",
     accent: "text-rose-200",
     icon: "bg-rose-200",
+    body: "text-white/90",
   },
 };
 
@@ -69,7 +74,6 @@ export default function Callout({
         className
       )}
     >
-      {/* subtle top sheen */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-white/15" />
       <div className="pointer-events-none absolute -top-24 right-[-20%] h-64 w-64 rounded-full bg-white/[0.06] blur-3xl" />
 
@@ -80,14 +84,17 @@ export default function Callout({
         </div>
       </div>
 
+      {/* IMPORTANT: do NOT wrap children in a nested `.prose` that can create nested <p> */}
       <div
         className={clsx(
-          "text-[15px] leading-[1.9] text-white/90",
-          "prose prose-invert max-w-none",
+          "text-[15px] leading-[1.9]",
+          t.body,
           "[&_a]:text-[#E6C77A] [&_a:hover]:text-[#F3D98C]",
           "[&_strong]:text-white [&_em]:text-white/90",
           "[&_hr]:border-white/10",
-          "[&_code]:text-[#E6C77A] [&_code]:bg-white/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded"
+          "[&_code]:text-[#E6C77A] [&_code]:bg-white/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded",
+          // If markdown produces <p>, ensure it doesn't inherit weird margins
+          "[&_p]:my-4 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0"
         )}
       >
         {children}

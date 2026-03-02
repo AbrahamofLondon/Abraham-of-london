@@ -19,7 +19,7 @@ type SourceKind = "mdx" | "md" | "xlsx" | "xls" | "pptx" | "ppt" | "pdf";
 
 type GenCtx = {
   quality: "premium" | "enterprise" | "draft";
-  tier: "free" | "member" | "architect" | "inner-circle";
+  tier: "public" | "member" | "architect" | "inner-circle";
   format?: PaperFormat;
 };
 

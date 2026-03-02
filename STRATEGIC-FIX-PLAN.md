@@ -35,7 +35,7 @@ Parameter 'n' implicitly has an 'any' type
 
 ```typescript
 // Mixed old and new imports
-import { allEvents } from "contentlayer/generated"; // Old
+import { allEvents } from "@/lib/contentlayer"; // Old
 import { getAllEvents } from "@/lib/events"; // New
 ```
 

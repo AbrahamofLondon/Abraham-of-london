@@ -1,13 +1,33 @@
-// lib/services/InnerCircleDataService.ts - FIXED
+// lib/services/InnerCircleDataService.ts - FULLY SSOT ALIGNED
 import InnerCircleData, { IInnerCircleData } from '@/lib/database/models/InnerCircleData';
 import { connectToDatabase } from '@/lib/database/connection';
+
+// Import directly from SSOT
+import type { AccessTier } from '@/lib/access/tier-policy';
+import {
+  normalizeUserTier,
+  normalizeRequiredTier,
+  hasAccess,
+  getTierLabel,
+  TIER_HIERARCHY,
+  TIER_ORDER,
+} from '@/lib/access/tier-policy';
+
+// Use SSOT AccessTier directly - no need to redefine
+export type InnerCircleTierLevel = AccessTier;
+
+// Legacy tier mapping - use SSOT's TIER_ALIASES via normalize functions
+// Don't duplicate the mapping here - trust the SSOT
+
+// Access hierarchy - use SSOT's TIER_HIERARCHY
+// const tierHierarchy = TIER_HIERARCHY; // Already defined in SSOT
 
 export interface CreateDataInput {
   title: string;
   content: string;
   category: string;
   tags?: string[];
-  tierLevel?: 'basic' | 'premium' | 'elite';
+  tierLevel?: AccessTier | string; // Accept string, will normalize
   authorId: string;
   metadata?: {
     difficulty?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -34,7 +54,7 @@ export interface UpdateDataInput {
   content?: string;
   category?: string;
   tags?: string[];
-  tierLevel?: 'basic' | 'premium' | 'elite';
+  tierLevel?: AccessTier | string;
   isPublished?: boolean;
   isFeatured?: boolean;
   metadata?: Partial<IInnerCircleData['metadata']>;
@@ -45,13 +65,14 @@ export interface QueryOptions {
   limit?: number;
   category?: string;
   tags?: string[];
-  tierLevel?: string;
+  tierLevel?: AccessTier | string | (AccessTier | string)[]; // Can filter by multiple tiers
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   isPublished?: boolean;
   isFeatured?: boolean;
   difficulty?: string;
+  userTier?: AccessTier | string; // For filtering based on user access
 }
 
 export interface PaginatedResponse<T> {
@@ -67,15 +88,51 @@ export interface PaginatedResponse<T> {
 }
 
 export class InnerCircleDataService {
+  /**
+   * Normalize a tier value to SSOT (for REQUIRED context)
+   */
+  static normalizeTier(tier: unknown): AccessTier {
+    return normalizeRequiredTier(tier);
+  }
+
+  /**
+   * Get accessible tiers for a user tier
+   * Uses SSOT's hasAccess to determine what tiers user can access
+   */
+  static getAccessibleTiers(userTier: unknown): AccessTier[] {
+    const normalizedUser = normalizeUserTier(userTier);
+    
+    // Return all tiers that the user can access (their level and below)
+    return TIER_ORDER.filter(tier => hasAccess(normalizedUser, tier));
+  }
+
+  /**
+   * Check if user can access content with required tier
+   * Uses SSOT's hasAccess
+   */
+  static canAccess(userTier: unknown, requiredTier: unknown): boolean {
+    const user = normalizeUserTier(userTier);
+    const required = normalizeRequiredTier(requiredTier);
+    return hasAccess(user, required);
+  }
+
   static async create(data: CreateDataInput): Promise<IInnerCircleData> {
     await connectToDatabase();
     
+    // Normalize tier to SSOT
+    const normalizedTier = this.normalizeTier(data.tierLevel);
+    
     const innerCircleData = new InnerCircleData({
       ...data,
+      tierLevel: normalizedTier, // Store normalized tier
       isPublished: false,
       views: 0,
       likes: 0,
-      accessLogs: []
+      accessLogs: [],
+      metadata: {
+        ...data.metadata,
+        originalTier: data.tierLevel, // Keep original for reference
+      },
     });
 
     await innerCircleData.save();
@@ -87,18 +144,11 @@ export class InnerCircleDataService {
     return InnerCircleData.findById(id);
   }
 
-  static async findByUserTier(userTier: string): Promise<IInnerCircleData[]> {
+  static async findByUserTier(userTier: unknown): Promise<IInnerCircleData[]> {
     await connectToDatabase();
     
-    // Map user tier to data tier levels they can access
-    const tierMapping = {
-      'free': [],
-      'inner-circle': ['basic'],
-      'inner-circle-plus': ['basic', 'premium'],
-      'inner-circle-elite': ['basic', 'premium', 'elite']
-    };
-
-    const accessibleTiers = tierMapping[userTier as keyof typeof tierMapping] || ['basic'];
+    // Get all tiers this user can access
+    const accessibleTiers = this.getAccessibleTiers(userTier);
     
     return InnerCircleData.find({
       tierLevel: { $in: accessibleTiers },
@@ -120,39 +170,35 @@ export class InnerCircleDataService {
       sortOrder = 'desc',
       isPublished = true,
       isFeatured,
-      difficulty
+      difficulty,
+      userTier,
     } = options;
 
     const skip = (page - 1) * limit;
     const query: any = {};
 
-    if (isPublished !== undefined) {
-      query.isPublished = isPublished;
+    if (isPublished !== undefined) query.isPublished = isPublished;
+    if (isFeatured !== undefined) query.isFeatured = isFeatured;
+    if (category) query.category = category;
+
+    // Handle tier filtering using SSOT
+    if (userTier) {
+      // Filter by what this user can access
+      const accessibleTiers = this.getAccessibleTiers(userTier);
+      query.tierLevel = { $in: accessibleTiers };
+    } else if (tierLevel) {
+      // Direct tier filter
+      if (Array.isArray(tierLevel)) {
+        const normalizedTiers = tierLevel.map(t => this.normalizeTier(t));
+        query.tierLevel = { $in: normalizedTiers };
+      } else {
+        query.tierLevel = this.normalizeTier(tierLevel);
+      }
     }
 
-    if (isFeatured !== undefined) {
-      query.isFeatured = isFeatured;
-    }
-
-    if (category) {
-      query.category = category;
-    }
-
-    if (tierLevel) {
-      query.tierLevel = tierLevel;
-    }
-
-    if (tags && tags.length > 0) {
-      query.tags = { $all: tags };
-    }
-
-    if (difficulty) {
-      query['metadata.difficulty'] = difficulty;
-    }
-
-    if (search) {
-      query.$text = { $search: search };
-    }
+    if (tags?.length) query.tags = { $all: tags };
+    if (difficulty) query['metadata.difficulty'] = difficulty;
+    if (search) query.$text = { $search: search };
 
     const [data, total] = await Promise.all([
       InnerCircleData.find(query)
@@ -181,35 +227,36 @@ export class InnerCircleDataService {
   static async update(id: string, data: UpdateDataInput): Promise<IInnerCircleData | null> {
     await connectToDatabase();
     
+    const updateData: any = { ...data, updatedAt: new Date() };
+    
+    // Normalize tier if provided
+    if (data.tierLevel) {
+      updateData.tierLevel = this.normalizeTier(data.tierLevel);
+    }
+    
     return InnerCircleData.findByIdAndUpdate(
       id,
-      { ...data, updatedAt: new Date() },
+      updateData,
       { new: true, runValidators: true }
     );
   }
 
   static async delete(id: string): Promise<boolean> {
     await connectToDatabase();
-    
     const result = await InnerCircleData.findByIdAndDelete(id);
     return !!result;
   }
 
-  static async incrementViews(id: string, _userId: string, _ip: string, _userAgent: string): Promise<IInnerCircleData | null> {
+  static async incrementViews(id: string, userId: string, ip: string, userAgent: string): Promise<IInnerCircleData | null> {
     await connectToDatabase();
-    // Prefix unused parameters with underscore to satisfy ESLint
-    return InnerCircleData.incrementViews(id, _userId, _ip, _userAgent);
+    return InnerCircleData.incrementViews(id, userId, ip, userAgent);
   }
 
-  static async toggleLike(id: string, _userId: string): Promise<IInnerCircleData | null> {
+  static async toggleLike(id: string, userId: string): Promise<IInnerCircleData | null> {
     await connectToDatabase();
-    
-    // Check if user already liked
     const data = await InnerCircleData.findById(id);
     if (!data) return null;
-
-    // In production, you'd have a separate likes collection
-    // For simplicity, we'll just increment
+    
     return InnerCircleData.findByIdAndUpdate(
       id,
       { $inc: { likes: 1 } },
@@ -219,7 +266,6 @@ export class InnerCircleDataService {
 
   static async getCategories(): Promise<string[]> {
     await connectToDatabase();
-    
     const categories = await InnerCircleData.distinct('category', { isPublished: true });
     return categories.sort();
   }
@@ -261,11 +307,55 @@ export class InnerCircleDataService {
     return {
       total,
       byCategory: Object.fromEntries(byCategory.map((item: any) => [item._id, item.count])),
-      byTier: Object.fromEntries(byTier.map((item: any) => [item._id, item.count])),
+      byTier: Object.fromEntries(
+        byTier.map((item: any) => [
+          getTierLabel(item._id) || item._id, 
+          item.count
+        ])
+      ),
       byDifficulty: Object.fromEntries(byDifficulty.map((item: any) => [item._id, item.count])),
       totalViews: totalViews[0]?.total || 0,
       totalLikes: totalLikes[0]?.total || 0
     };
+  }
+
+  /**
+   * Migrate legacy tier data to SSOT
+   */
+  static async migrateLegacyData(): Promise<{ migrated: number; failed: number }> {
+    await connectToDatabase();
+    
+    const result = { migrated: 0, failed: 0 };
+    
+    // Get all legacy values that aren't SSOT
+    const allDocs = await InnerCircleData.find({}).lean();
+    const legacyValues = new Set<string>();
+    
+    for (const doc of allDocs) {
+      const tier = doc.tierLevel as string;
+      const normalized = this.normalizeTier(tier);
+      if (tier !== normalized) {
+        legacyValues.add(tier);
+      }
+    }
+    
+    // Migrate each legacy value
+    for (const legacyTier of legacyValues) {
+      try {
+        const normalized = this.normalizeTier(legacyTier);
+        const updateResult = await InnerCircleData.updateMany(
+          { tierLevel: legacyTier },
+          { $set: { tierLevel: normalized } }
+        );
+        result.migrated += updateResult.modifiedCount;
+        console.log(`[Migration] ${legacyTier} -> ${normalized}: ${updateResult.modifiedCount} documents`);
+      } catch (error) {
+        console.error(`Failed to migrate tier ${legacyTier}:`, error);
+        result.failed += 1;
+      }
+    }
+    
+    return result;
   }
 }
 

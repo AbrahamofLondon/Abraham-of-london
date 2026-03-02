@@ -1,22 +1,20 @@
 /**
  * Premium content download token system
+ * ABRAHAM OF LONDON: V2.7 Institutional Security
  */
 
 // Import crypto properly with edge runtime support
 let crypto: any;
 
-// Safely import crypto for different environments
 if (typeof window === 'undefined') {
-  // Node.js/Server environment
   try {
     crypto = require('crypto');
   } catch (error) {
-    // Fallback for Edge runtime
     crypto = {
       randomBytes: (size: number) => {
         const bytes = new Uint8Array(size);
-        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-          crypto.getRandomValues(bytes);
+        if (typeof (global as any).crypto !== 'undefined' && (global as any).crypto.getRandomValues) {
+          (global as any).crypto.getRandomValues(bytes);
         } else {
           for (let i = 0; i < size; i++) {
             bytes[i] = Math.floor(Math.random() * 256);
@@ -27,7 +25,6 @@ if (typeof window === 'undefined') {
     };
   }
 } else {
-  // Browser environment
   crypto = {
     randomBytes: (size: number) => {
       const bytes = new Uint8Array(size);
@@ -37,6 +34,7 @@ if (typeof window === 'undefined') {
   };
 }
 
+// 🏛️ [FIX]: These are already exported via 'export interface'
 export interface DownloadToken {
   token: string;
   contentId: string;
@@ -62,13 +60,13 @@ class DownloadTokenManager {
     contentId: string,
     options: {
       userId?: string;
-      expiresIn?: number; // milliseconds
+      expiresIn?: number; 
       maxDownloads?: number;
       metadata?: Record<string, any>;
     } = {}
   ): DownloadToken {
     const token = this.generateSecureToken();
-    const expiresAt = new Date(Date.now() + (options.expiresIn || 3600000)); // 1 hour default
+    const expiresAt = new Date(Date.now() + (options.expiresIn || 3600000));
     const maxDownloads = options.maxDownloads || 1;
     
     const downloadToken: DownloadToken = {
@@ -123,18 +121,11 @@ class DownloadTokenManager {
 
   incrementUsage(token: string): boolean {
     const storedToken = this.tokens.get(token);
-    
-    if (!storedToken) {
+    if (!storedToken || storedToken.usedCount >= storedToken.maxDownloads) {
       return false;
     }
-    
-    if (storedToken.usedCount >= storedToken.maxDownloads) {
-      return false;
-    }
-    
     storedToken.usedCount += 1;
     this.tokens.set(token, storedToken);
-    
     return true;
   }
 
@@ -143,46 +134,37 @@ class DownloadTokenManager {
   }
 
   getTokensByUser(userId: string): DownloadToken[] {
-    return Array.from(this.tokens.values())
-      .filter(token => token.userId === userId);
+    return Array.from(this.tokens.values()).filter(t => t.userId === userId);
   }
 
   getTokensByContent(contentId: string): DownloadToken[] {
-    return Array.from(this.tokens.values())
-      .filter(token => token.contentId === contentId);
+    return Array.from(this.tokens.values()).filter(t => t.contentId === contentId);
   }
 
   private generateSecureToken(): string {
     try {
       const randomBytes = crypto.randomBytes(32);
+      const b64 = (randomBytes instanceof Uint8Array) 
+        ? Buffer.from(randomBytes).toString('base64')
+        : randomBytes.toString('base64');
+        
       return 'dl_' + 
         Date.now().toString(36) + 
-        Math.random().toString(36).substr(2, 9) +
-        randomBytes.toString('base64').replace(/[^a-zA-Z0-9]/g, '').substr(0, 16);
+        b64.replace(/[^a-zA-Z0-9]/g, '').substr(0, 24);
     } catch (error) {
-      // Fallback token generation
-      return 'dl_' + 
-        Date.now().toString(36) + 
-        Math.random().toString(36).substr(2, 9) +
-        Math.random().toString(36).substr(2, 9) +
-        Math.random().toString(36).substr(2, 9);
+      return 'dl_fallback_' + Math.random().toString(36).substr(2, 15);
     }
   }
 
   private cleanupExpiredTokens(): void {
     const now = Date.now();
-    
-    // Only cleanup every 5 minutes
-    if (now - this.tokenExpiryCheck < 300000) {
-      return;
-    }
+    if (now - this.tokenExpiryCheck < 300000) return;
     
     for (const [token, tokenData] of this.tokens.entries()) {
       if (tokenData.expiresAt < new Date()) {
         this.tokens.delete(token);
       }
     }
-    
     this.tokenExpiryCheck = now;
   }
 }
@@ -203,10 +185,7 @@ export function generateDownloadToken(
   return downloadTokenManager.generateToken(contentId, options);
 }
 
-export function validateDownloadToken(
-  token: string, 
-  contentId?: string
-): TokenValidationResult {
+export function validateDownloadToken(token: string, contentId?: string): TokenValidationResult {
   return downloadTokenManager.validateToken(token, contentId);
 }
 
@@ -226,12 +205,9 @@ export function getContentDownloadTokens(contentId: string): DownloadToken[] {
   return downloadTokenManager.getTokensByContent(contentId);
 }
 
-// Create alias functions for compatibility
+// Compatibility Aliases
 export const createDownloadToken = generateDownloadToken;
 export const verifyDownloadToken = validateDownloadToken;
 
-// Export the manager for advanced use
+// 🏛️ [INSTITUTIONAL EXPORTS]
 export default downloadTokenManager;
-
-// Export all types
-export type { DownloadToken, TokenValidationResult };

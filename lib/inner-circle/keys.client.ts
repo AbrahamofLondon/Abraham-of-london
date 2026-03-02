@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// lib/inner-circle/keys.client.ts
-import { safeSlice } from "@/lib/utils/safe";
+// lib/inner-circle/keys.client.ts — SSOT ALIGNED (Client-safe)
 
-export type KeyTier = "member" | "patron" | "founder";
+import { safeSlice } from "@/lib/utils/safe";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier } from "@/lib/access/tier-policy";
+
+/**
+ * Key tier is now SSOT AccessTier.
+ * We still tolerate legacy strings at runtime via normalizeUserTier().
+ */
+export type KeyTier = AccessTier;
 
 export type StoredKey = {
   key: string;
@@ -22,6 +29,11 @@ export type CreateOrUpdateMemberArgs = {
   name?: string;
   ipAddress: string;
   source: "api" | "web" | "admin";
+  /**
+   * Optional tier request. Legacy tolerated.
+   * If omitted, defaults to "member".
+   */
+  tier?: string | AccessTier;
 };
 
 export type IssuedKey = {
@@ -34,13 +46,7 @@ export type IssuedKey = {
 
 export type VerifyInnerCircleKeyResult = {
   valid: boolean;
-  reason:
-    | "valid"
-    | "invalid_format"
-    | "not_found"
-    | "revoked"
-    | "expired"
-    | "rate_limited";
+  reason: "valid" | "invalid_format" | "not_found" | "revoked" | "expired" | "rate_limited";
   memberId?: string;
   keySuffix?: string;
   tier?: KeyTier;
@@ -63,14 +69,11 @@ export type CleanupResult = {
 
 // --- INTERNAL DATA STORES ---
 const mem = new Map<string, StoredKey>();
-const memberStore = new Map<
-  string,
-  { email: string; name?: string; createdAt: Date; lastSeen: Date }
->();
-const keyUsageStore = new Map<
-  string,
-  { keySuffix: string; memberId: string; timestamp: Date; ipAddress?: string }
->();
+const memberStore = new Map<string, { email: string; name?: string; createdAt: Date; lastSeen: Date }>();
+const keyUsageStore = new Map<string, { keySuffix: string; memberId: string; timestamp: Date; ipAddress?: string }>();
+
+// Canonical tier order used only for stats bucketing.
+const TIER_ORDER: KeyTier[] = ["public", "member", "inner-circle", "client", "legacy", "architect", "owner"];
 
 // --- UTILITIES ---
 
@@ -83,6 +86,10 @@ export function getMemoryStoreSize(): number {
   return mem.size;
 }
 
+/**
+ * Generate an access key (client-safe).
+ * NOTE: Server should mint real keys. Client minting is for dev/test or offline.
+ */
 export function generateAccessKey(): string {
   const array = new Uint8Array(20);
   if (globalThis.crypto?.getRandomValues) {
@@ -94,6 +101,10 @@ export function generateAccessKey(): string {
   return `IC-${hex.toUpperCase()}`;
 }
 
+/**
+ * Stable, client-safe email hash (not cryptographically perfect fallback),
+ * used only as an in-memory member key.
+ */
 export async function getEmailHash(email: string): Promise<string> {
   const normalized = email.trim().toLowerCase();
   if (globalThis.crypto?.subtle) {
@@ -104,7 +115,8 @@ export async function getEmailHash(email: string): Promise<string> {
       .join("");
     return hex.substring(0, 32);
   }
-  // Fallback hashing logic
+
+  // Fallback (non-crypto) hashing for runtimes without subtle
   let h = 0;
   for (let i = 0; i < normalized.length; i++) {
     h = ((h << 5) - h + normalized.charCodeAt(i)) | 0;
@@ -112,14 +124,27 @@ export async function getEmailHash(email: string): Promise<string> {
   return Math.abs(h).toString(16).padStart(32, "0").substring(0, 32);
 }
 
+/**
+ * Normalize any tier-like input into SSOT tier.
+ * Unknown -> public (never privilege by accident).
+ */
+export function normalizeKeyTier(input: unknown): KeyTier {
+  return normalizeUserTier(input);
+}
+
 // --- CORE OPERATIONS ---
 
 export async function storeKey(record: StoredKey): Promise<void> {
-  mem.set(record.key, record);
+  // Ensure tier is canonical on write
+  const tier = normalizeKeyTier(record.tier);
+  mem.set(record.key, { ...record, tier });
 }
 
 export async function getKey(key: string): Promise<StoredKey | null> {
-  return mem.get(key) || null;
+  const v = mem.get(key) || null;
+  if (!v) return null;
+  // Ensure canonical tier on read too (in case old data exists)
+  return { ...v, tier: normalizeKeyTier(v.tier) };
 }
 
 export async function revokeKey(key: string): Promise<boolean> {
@@ -129,13 +154,10 @@ export async function revokeKey(key: string): Promise<boolean> {
   return true;
 }
 
-export async function renewKey(
-  key: string,
-  newExpiresAt?: string,
-  resetUsage?: boolean
-): Promise<StoredKey | null> {
+export async function renewKey(key: string, newExpiresAt?: string, resetUsage?: boolean): Promise<StoredKey | null> {
   const existing = await getKey(key);
   if (!existing || existing.revoked) return null;
+
   const updated: StoredKey = {
     ...existing,
     expiresAt: newExpiresAt || existing.expiresAt,
@@ -143,6 +165,7 @@ export async function renewKey(
     revoked: false,
     revokedAt: undefined,
   };
+
   await storeKey(updated);
   return updated;
 }
@@ -152,6 +175,7 @@ export async function incrementKeyUsage(key: string): Promise<boolean> {
   if (!existing || existing.revoked) return false;
   if (existing.expiresAt && isExpired(existing.expiresAt)) return false;
   if (existing.maxUses && (existing.usedCount || 0) >= existing.maxUses) return false;
+
   await storeKey({ ...existing, usedCount: (existing.usedCount || 0) + 1 });
   return true;
 }
@@ -159,17 +183,22 @@ export async function incrementKeyUsage(key: string): Promise<boolean> {
 // --- RETRIEVAL ---
 
 export async function getKeysByMember(memberId: string): Promise<StoredKey[]> {
-  return Array.from(mem.values()).filter((k) => k.memberId === memberId);
+  return Array.from(mem.values())
+    .filter((k) => k.memberId === memberId)
+    .map((k) => ({ ...k, tier: normalizeKeyTier(k.tier) }));
 }
 
 export async function getKeysByTier(tier: KeyTier): Promise<StoredKey[]> {
-  return Array.from(mem.values()).filter((k) => k.tier === tier);
+  const t = normalizeKeyTier(tier);
+  return Array.from(mem.values())
+    .filter((k) => normalizeKeyTier(k.tier) === t)
+    .map((k) => ({ ...k, tier: normalizeKeyTier(k.tier) }));
 }
 
 export async function getActiveKeys(): Promise<StoredKey[]> {
-  return Array.from(mem.values()).filter(
-    (k) => !k.revoked && (!k.expiresAt || !isExpired(k.expiresAt))
-  );
+  return Array.from(mem.values())
+    .filter((k) => !k.revoked && (!k.expiresAt || !isExpired(k.expiresAt)))
+    .map((k) => ({ ...k, tier: normalizeKeyTier(k.tier) }));
 }
 
 export async function cleanupExpiredKeys(): Promise<{ cleaned: number }> {
@@ -186,12 +215,10 @@ export async function cleanupExpiredKeys(): Promise<{ cleaned: number }> {
 
 // --- HIGH LEVEL API ---
 
-export async function createOrUpdateMemberAndIssueKey(
-  args: CreateOrUpdateMemberArgs
-): Promise<IssuedKey> {
+export async function createOrUpdateMemberAndIssueKey(args: CreateOrUpdateMemberArgs): Promise<IssuedKey> {
   const memberId = await getEmailHash(args.email);
   const existing = memberStore.get(memberId);
-  
+
   memberStore.set(memberId, {
     email: args.email,
     name: args.name || existing?.name,
@@ -200,13 +227,15 @@ export async function createOrUpdateMemberAndIssueKey(
   });
 
   const key = generateAccessKey();
-  // Using institutional safeSlice instead of local helper
-  const keySuffix = safeSlice(key, -8); 
+  const keySuffix = safeSlice(key, -8) as string;
+
+  // Default SSOT tier: member (unless supplied)
+  const tier = normalizeKeyTier(args.tier ?? "member");
 
   const storedKey: StoredKey = {
     key,
     memberId,
-    tier: "member",
+    tier,
     createdAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     maxUses: 1000,
@@ -221,20 +250,21 @@ export async function createOrUpdateMemberAndIssueKey(
     keySuffix,
     expiresAt: storedKey.expiresAt!,
     memberId,
-    tier: "member",
+    tier: storedKey.tier,
   };
 }
 
 export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCircleKeyResult> {
+  // Keep your current key format gate
   if (!key.startsWith("IC-") || key.length !== 44) {
     return { valid: false, reason: "invalid_format" };
   }
-  
+
   const storedKey = await getKey(key);
   if (!storedKey) return { valid: false, reason: "not_found" };
   if (storedKey.revoked) return { valid: false, reason: "revoked" };
   if (storedKey.expiresAt && isExpired(storedKey.expiresAt)) return { valid: false, reason: "expired" };
-  
+
   if (storedKey.maxUses && (storedKey.usedCount || 0) >= storedKey.maxUses) {
     return { valid: false, reason: "rate_limited" };
   }
@@ -245,8 +275,8 @@ export async function verifyInnerCircleKey(key: string): Promise<VerifyInnerCirc
     valid: true,
     reason: "valid",
     memberId: storedKey.memberId,
-    keySuffix: safeSlice(key, -8), // Using institutional safeSlice
-    tier: storedKey.tier,
+    keySuffix: safeSlice(key, -8) as string,
+    tier: normalizeKeyTier(storedKey.tier),
   };
 }
 
@@ -266,10 +296,13 @@ export async function recordInnerCircleUnlock(
 export async function getPrivacySafeStats(): Promise<InnerCircleStats> {
   const activeKeys = await getActiveKeys();
   const allKeys = Array.from(mem.values());
-  const byTier: Record<KeyTier, number> = { member: 0, patron: 0, founder: 0 };
-  
+
+  // Initialize all SSOT tiers (stable stats shape)
+  const byTier = Object.fromEntries(TIER_ORDER.map((t) => [t, 0])) as Record<KeyTier, number>;
+
   for (const k of activeKeys) {
-    byTier[k.tier] = (byTier[k.tier] || 0) + 1;
+    const t = normalizeKeyTier(k.tier);
+    byTier[t] = (byTier[t] || 0) + 1;
   }
 
   return {
@@ -292,6 +325,7 @@ export async function cleanupExpiredData(): Promise<CleanupResult> {
 }
 
 const keysApi = {
+  normalizeKeyTier,
   generateAccessKey,
   storeKey,
   getKey,

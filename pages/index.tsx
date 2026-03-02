@@ -23,13 +23,8 @@ import Layout from "@/components/Layout";
 import fs from "fs";
 import path from "path";
 
-import {
-  HeroSection,
-  TrustSignals,
-  StatsBar,
-  CanonInstitutionalIntro,
-  OperatorBriefing,
-} from "@/components/homepage";
+import StatsBar from "@/components/homepage/StatsBar";
+import { HeroSection, TrustSignals, CanonInstitutionalIntro, OperatorBriefing } from "@/components/homepage";
 
 import type { CanonPrelude } from "@/components/homepage/CanonInstitutionalIntro";
 import { joinHref, normalizeSlug, sanitizeData } from "@/lib/content/shared";
@@ -47,6 +42,9 @@ import {
 } from "lucide-react";
 
 import WhoIWorkWith from "@/components/WhoIWorkWith";
+
+// ✅ NEW: Homepage engagement lanes (Media / Education / Private / Institutional)
+import EngagementLanes from "@/components/homepage/EngagementLanes";
 
 /* ============================================================================
    LAZY-LOADED BELOW-THE-FOLD SECTIONS (performance)
@@ -219,15 +217,7 @@ function toEvent(d: any): EventItem | null {
   const rawSlug = computedSlug(d);
   const bare = normalizeSlug(String(rawSlug)).replace(/^events\//, "");
 
-  const date =
-    d?.eventDate ||
-    d?.date ||
-    d?.startDate ||
-    d?.datetime ||
-    d?.start ||
-    d?.startsAt ||
-    null;
-
+  const date = d?.eventDate || d?.date || d?.startDate || d?.datetime || d?.start || d?.startsAt || null;
   if (!date) return null;
 
   const mode = deriveEventMode(d);
@@ -272,11 +262,8 @@ const Section = ({
   className = "",
   containerClassName = "",
 }: SectionProps) => {
-  // 🔧 MODIFIED: Mobile padding reduced, desktop untouched
-  const py = tight 
-    ? "py-10 sm:py-14 md:py-20 lg:py-24"  // mobile: 2.5rem, tablet: 3.5rem, desktop: 5rem
-    : "py-12 sm:py-16 md:py-24 lg:py-28 xl:py-32"; // mobile: 3rem, tablet: 4rem, desktop: 6-8rem
-  
+  const py = tight ? "py-10 sm:py-14 md:py-20 lg:py-24" : "py-12 sm:py-16 md:py-24 lg:py-28 xl:py-32";
+
   const bg = surface
     ? "bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.05),transparent_55%),radial-gradient(circle_at_80%_60%,rgba(255,255,255,0.03),transparent_55%)]"
     : "bg-black";
@@ -284,16 +271,12 @@ const Section = ({
 
   return (
     <section id={id} className={["relative", bg, topBorder, py, className].join(" ")}>
-      <div className={["mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", containerClassName].join(" ")}>
-        {children}
-      </div>
+      <div className={["mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", containerClassName].join(" ")}>{children}</div>
     </section>
   );
 };
 
-const Hairline = () => (
-  <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />
-);
+const Hairline = () => <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />;
 
 /* ============================================================================
    Anchor Offset Helper — prevents sticky header collisions (no JS)
@@ -350,7 +333,6 @@ function ParallaxBackdrop(): React.ReactElement {
 function HeroFrame(): React.ReactElement {
   return (
     <div className="relative overflow-hidden rounded-2xl sm:rounded-[2.25rem] border border-white/10 bg-white/[0.02] shadow-2xl shadow-black/60">
-      {/* Cinematic backdrop image (subtle) */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <Image
           src="/assets/images/abraham-of-london-banner.webp"
@@ -366,7 +348,6 @@ function HeroFrame(): React.ReactElement {
         <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)] [background-size:96px_96px]" />
       </div>
 
-      {/* Inner frame - 🔧 MODIFIED mobile padding */}
       <div className="relative px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-14">
         <div className="flex flex-col gap-4 md:gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
@@ -382,7 +363,7 @@ function HeroFrame(): React.ReactElement {
 
             <h2 className="mt-4 sm:mt-6 font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/95 tracking-tight text-balance">
               This is the lobby.
-              <span className="text-white/55"> Shorts are the corridor.</span>
+              <span className="text-white/55"> Everything else is downstream.</span>
             </h2>
 
             <p className="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-white/55 leading-relaxed max-w-xl">
@@ -443,7 +424,6 @@ function HeroFrame(): React.ReactElement {
           <Hairline />
         </div>
 
-        {/* Tightened: TrustSignals inside the frame, but visually “quiet” */}
         <div className="mt-4 sm:mt-6 lg:mt-8">
           <TrustSignals />
         </div>
@@ -475,12 +455,18 @@ function SectionHeading({
           isCenter ? "mx-auto" : "",
         ].join(" ")}
       >
-        <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.4em] sm:tracking-[0.45em] text-amber-200/65">{eyebrow}</span>
+        <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.4em] sm:tracking-[0.45em] text-amber-200/65">
+          {eyebrow}
+        </span>
         <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white/15" />
-        <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white/35">indexed</span>
+        <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white/35">
+          indexed
+        </span>
       </div>
 
-      <h2 className="mt-4 sm:mt-5 md:mt-7 font-serif text-2xl sm:text-3xl md:text-4xl text-white/95 tracking-tight text-balance">{title}</h2>
+      <h2 className="mt-4 sm:mt-5 md:mt-7 font-serif text-2xl sm:text-3xl md:text-4xl text-white/95 tracking-tight text-balance">
+        {title}
+      </h2>
 
       {description ? (
         <p
@@ -505,7 +491,9 @@ function NarrativeBridge({ text }: { text: string }) {
       <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/5 to-transparent" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Hairline />
-        <p className="mt-4 sm:mt-6 md:mt-8 text-center text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.3em] sm:tracking-[0.35em] md:tracking-[0.38em] text-white/35">{text}</p>
+        <p className="mt-4 sm:mt-6 md:mt-8 text-center text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.3em] sm:tracking-[0.35em] md:tracking-[0.38em] text-white/35">
+          {text}
+        </p>
       </div>
     </div>
   );
@@ -519,6 +507,7 @@ function QuickNav(): React.ReactElement {
     { href: "#prelude", label: "Prelude" },
     { href: "#fit", label: "Fit" },
     { href: "#proof", label: "Proof" },
+    { href: "#lanes", label: "Lanes" }, // ✅ NEW
     { href: "#vault", label: "Vault" },
     { href: "#ventures", label: "Ventures" },
     { href: "#dispatches", label: "Shorts" },
@@ -655,7 +644,9 @@ function ProofStack({ counts }: { counts: HomePageProps["counts"] }): React.Reac
               Credibility Layer
             </span>
             <ChevronRight className="h-3 w-3 sm:h-3.25 sm:w-3.25 md:h-3.5 md:w-3.5 text-white/15" />
-            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.22em] sm:tracking-[0.25em] md:tracking-[0.28em] text-white/40">proof-stack</span>
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.22em] sm:tracking-[0.25em] md:tracking-[0.28em] text-white/40">
+              proof-stack
+            </span>
           </div>
 
           <h2 className="mt-3 sm:mt-4 md:mt-5 lg:mt-6 font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-white tracking-tight text-balance">
@@ -718,7 +709,9 @@ function ProofStack({ counts }: { counts: HomePageProps["counts"] }): React.Reac
                 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 rounded-full bg-amber-500/8 opacity-0 blur-xl transition-opacity group-hover:opacity-100"
               />
             </div>
-            <h3 className="mt-3 sm:mt-4 md:mt-5 font-serif text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-white text-balance">{p.title}</h3>
+            <h3 className="mt-3 sm:mt-4 md:mt-5 font-serif text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-white text-balance">
+              {p.title}
+            </h3>
             <p className="mt-2 sm:mt-2.5 md:mt-3 text-xs sm:text-sm leading-relaxed text-white/60 group-hover:text-white/75 transition-colors">
               {p.body}
             </p>
@@ -749,7 +742,9 @@ function SectionSkeleton({ label }: { label: string }) {
         <SkeletonLine w="w-2/3" />
         <SkeletonLine w="w-1/2" />
       </div>
-      <div className="mt-5 sm:mt-6 md:mt-7 lg:mt-8 text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.28em] md:tracking-[0.3em] text-white/30">{label}</div>
+      <div className="mt-5 sm:mt-6 md:mt-7 lg:mt-8 text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.28em] md:tracking-[0.3em] text-white/30">
+        {label}
+      </div>
     </div>
   );
 }
@@ -770,7 +765,9 @@ function RailSkeleton({ label }: { label: string }) {
           </div>
         ))}
       </div>
-      <div className="mt-5 sm:mt-6 md:mt-7 lg:mt-8 text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.28em] md:tracking-[0.3em] text-white/30">{label}</div>
+      <div className="mt-5 sm:mt-6 md:mt-7 lg:mt-8 text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.25em] sm:tracking-[0.28em] md:tracking-[0.3em] text-white/30">
+        {label}
+      </div>
     </div>
   );
 }
@@ -805,7 +802,7 @@ function ContentShowcaseSkeleton() {
 }
 
 /* ============================================================================
-   HomePage Component - 🔧 MODIFIED FOR MOBILE (hero section spacing)
+   HomePage Component
 ============================================================================ */
 const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, events, counts, canonPrelude }) => {
   const hasShorts = featuredShorts.length > 0;
@@ -829,7 +826,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* A11Y: skip link for keyboard scanners */}
       <a
         href="#prelude"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-black focus:px-4 focus:py-3 focus:text-[12px] focus:font-mono focus:uppercase focus:tracking-widest focus:text-amber-100 focus:ring-2 focus:ring-amber-500"
@@ -837,10 +833,8 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         Skip to Prelude
       </a>
 
-      {/* QUICK NAV (scanner control) */}
       <QuickNav />
 
-      {/* HERO STACK — flagship + restraint */}
       <section className="relative bg-black overflow-hidden">
         <ParallaxBackdrop />
 
@@ -848,7 +842,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
           <div className="relative">
             <HeroSection counts={heroCounts} />
 
-            {/* subtle “scroll cue” for first-time landers */}
             <div className="mt-6 sm:mt-8 md:mt-10 flex items-center justify-center">
               <Link
                 href="#prelude"
@@ -865,7 +858,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
             <Hairline />
           </div>
 
-          {/* Hero premium lobby frame */}
           <div className="mt-8 sm:mt-10 md:mt-12 lg:mt-14">
             <HeroFrame />
           </div>
@@ -875,11 +867,9 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
           </div>
         </div>
 
-        {/* Stats (kept) */}
         <StatsBar />
       </section>
 
-      {/* MINI-BOOK (SPINE) — immediately after hero */}
       <Section id="prelude" tight border>
         <AnchorOffset id="prelude" />
         <div id="canon" className="sr-only" aria-hidden />
@@ -893,7 +883,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
           />
 
           <div className="mt-8 sm:mt-10 md:mt-12 relative">
-            <div aria-hidden className="pointer-events-none absolute -inset-6 sm:-inset-8 md:-inset-10 bg-amber-500/5 blur-[80px] sm:blur-[100px] md:blur-[130px] rounded-full" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -inset-6 sm:-inset-8 md:-inset-10 bg-amber-500/5 blur-[80px] sm:blur-[100px] md:blur-[130px] rounded-full"
+            />
             <div className="relative">
               <CanonInstitutionalIntro prelude={canonPrelude} />
             </div>
@@ -901,7 +894,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </div>
       </Section>
 
-      {/* WHO I WORK WITH */}
       <Section id="fit" tight={false} border={false} surface={false}>
         <AnchorOffset id="fit" />
         <div className="max-w-5xl mx-auto">
@@ -919,15 +911,29 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
 
       <NarrativeBridge text="From doctrine → to deployment" />
 
-      {/* PROOF STACK */}
       <Section id="proof" tight border surface>
         <AnchorOffset id="proof" />
         <ProofStack counts={counts} />
       </Section>
 
-      <NarrativeBridge text="From standards → to operating systems" />
+      <NarrativeBridge text="From standards → to engagement lanes" />
 
-      {/* OPERATIONAL FUNNEL (lazy) */}
+      {/* ✅ NEW: Engagement lanes (Media / Education / Private / Institutional) */}
+      <Section id="lanes" tight border surface>
+        <AnchorOffset id="lanes" />
+        <SectionHeading
+          eyebrow="Engagement"
+          title="Four lanes. No confusion."
+          description="Public signals stay public. Private work stays private. The architecture is designed to scale without leaking."
+          align="center"
+        />
+        <div className="mt-6 sm:mt-8 md:mt-10">
+          <EngagementLanes />
+        </div>
+      </Section>
+
+      <NarrativeBridge text="From lanes → to operating systems" />
+
       <Section id="strategy" tight border surface>
         <AnchorOffset id="strategy" />
         <SectionHeading
@@ -942,7 +948,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
 
       <NarrativeBridge text="From design → to assets" />
 
-      {/* VAULT (lazy) */}
       <Section id="vault" tight border>
         <AnchorOffset id="vault" />
         <SectionHeading
@@ -955,7 +960,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </div>
       </Section>
 
-      {/* START HERE RAIL */}
       <Section id="pathways" tight border surface>
         <AnchorOffset id="pathways" />
         <SectionHeading
@@ -969,7 +973,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </div>
       </Section>
 
-      {/* FEATURED BRIEFING */}
       {featuredBriefing && (
         <Section id="briefing" tight border surface>
           <AnchorOffset id="briefing" />
@@ -984,7 +987,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </Section>
       )}
 
-      {/* EVENTS (lazy) */}
       {events.length > 0 ? (
         <Section id="events" tight border>
           <AnchorOffset id="events" />
@@ -1022,7 +1024,9 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
                     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                   ].join(" ")}
                 >
-                  <span className="group-hover:tracking-[0.3em] sm:group-hover:tracking-[0.32em] md:group-hover:tracking-[0.35em] transition-all">View Events</span>
+                  <span className="group-hover:tracking-[0.3em] sm:group-hover:tracking-[0.32em] md:group-hover:tracking-[0.35em] transition-all">
+                    View Events
+                  </span>
                 </Link>
                 <Link
                   href="/contact"
@@ -1042,7 +1046,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </Section>
       )}
 
-      {/* VENTURES (lazy) */}
       <Section id="ventures" tight border surface>
         <AnchorOffset id="ventures" />
         <SectionHeading
@@ -1055,7 +1058,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </div>
       </Section>
 
-      {/* DISPATCHES (lazy) */}
       {hasShorts && (
         <Section id="dispatches" tight border>
           <AnchorOffset id="dispatches" />
@@ -1075,7 +1077,6 @@ const HomePage: NextPage<HomePageProps> = ({ featuredShorts, featuredBriefing, e
         </Section>
       )}
 
-      {/* CLOSE (lazy) */}
       <Section border surface>
         <div className="mx-auto max-w-5xl">
           <InstitutionalClose />
@@ -1251,7 +1252,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
     if (shouldForceFallback(counts, docs.length)) {
       console.warn(
-        `[Home/getStaticProps] SSOT low/empty docs (docs=${docs.length}, sum=${counts.canon + counts.briefs + counts.shorts + counts.downloads}) — forcing generated fallback`
+        `[Home/getStaticProps] SSOT low/empty docs (docs=${docs.length}, sum=${
+          counts.canon + counts.briefs + counts.shorts + counts.downloads
+        }) — forcing generated fallback`
       );
       throw new Error("FORCE_FALLBACK_TO_GENERATED");
     }

@@ -4,8 +4,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import { getRegistryStats } from "@/lib/pdf/pdf-registry.generated"; // Note the specific import path
-import { prisma } from "@/lib/prisma";
+import { getRegistryStats } from '@/lib/pdf/registry.static';
+import { prisma } from "@/lib/prisma.server";
 
 export async function GET() {
   try {

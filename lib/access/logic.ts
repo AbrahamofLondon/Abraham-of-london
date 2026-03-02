@@ -1,30 +1,11 @@
-// lib/access/logic.ts
-// Centralised access-control logic for AoL content tiers (incl. PRIVATE / in-house).
-// Production-ready, no UI assumptions. Works in Pages Router or App Router.
-//
-// Key principles:
-// 1) "private" is NEVER granted to the public. Only explicit private sessions/users.
-// 2) inner-circle is a *membership gate*; tiers sit inside membership.
-// 3) You can layer business rules via `checkDocumentAccess` (e.g. staff allowlist, IP check, etc.)
+// lib/access/logic.ts — SSOT Access Engine (Next-safe, production-stable)
 
-export type Tier =
-  | "public" // free
-  | "inner-circle" // basic
-  | "inner-circle-plus" // premium
-  | "inner-circle-elite" // enterprise
-  | "private"; // in-house only (restricted)
+import tiers, { type AccessTier } from "@/lib/access/tiers";
 
-export type AccessTierAlias =
-  | "free"
-  | "basic"
-  | "premium"
-  | "enterprise"
-  | "restricted";
-
-export type ContentTier = Tier | AccessTierAlias | "all";
+export type ContentTier = AccessTier | "all";
 
 export type AccessDecision =
-  | { ok: true; redirectUrl?: string } // Allow optional redirectUrl here
+  | { ok: true; redirectUrl?: string }
   | {
       ok: false;
       reason:
@@ -35,73 +16,40 @@ export type AccessDecision =
         | "MAINTENANCE_MODE"
         | "GEO_BLOCKED"
         | "RATE_LIMITED";
-      requiredTier?: Tier;
-      currentTier?: Tier;
-      redirectUrl?: string; // Already exists here
+      requiredTier?: AccessTier;
+      currentTier?: AccessTier;
+      redirectUrl?: string;
       maintenanceUntil?: string;
-      retryAfter?: number; // seconds
+      retryAfter?: number;
       suggestedAction?: "upgrade" | "login" | "contact_support";
     };
 
 export type AccessContext = {
-  /** current user tier. If absent, defaults to "public" */
-  tier?: Tier;
-  /** inner circle membership (cookie, session claim, etc.) */
+  /** current user tier (raw). If absent, defaults to "public" */
+  tier?: unknown;
+
+  /** membership marker (cookie/session claim/etc.) */
   innerCircleAccess?: boolean;
 
-  /**
-   * Explicit in-house flag. Use this for staff, admin, internal preview accounts, etc.
-   * If true, tier is treated as "private" unless explicitly set higher or equal.
-   */
+  /** internal staff / admin bypass */
   isInternal?: boolean;
 
-  /** optional: used to stamp redirect urls with returnTo */
+  /** used to stamp redirect urls with returnTo */
   returnTo?: string;
 
-  /**
-   * optional: allowlist approach for "private" even inside "internal" contexts
-   * (e.g., only certain emails can view a specific doc).
-   */
+  /** optional extra hardening for internal/private */
   allowPrivate?: boolean;
-  
-  /**
-   * optional: User ID for audit logging and fine-grained permissions
-   */
+
+  /** audit / rules inputs */
   userId?: string;
-  
-  /**
-   * optional: User email for allowlist checks
-   */
   userEmail?: string;
-  
-  /**
-   * optional: User roles for advanced permission logic
-   */
   roles?: string[];
-  
-  /**
-   * optional: IP address for geo-blocking or rate limiting
-   */
   ipAddress?: string;
-  
-  /**
-   * optional: User agent for device/context awareness
-   */
   userAgent?: string;
-  
-  /**
-   * optional: Request timestamp for time-based access rules
-   */
   requestTime?: Date;
-  
-  /**
-   * optional: Session metadata
-   */
   sessionId?: string;
-  
-  /**
-   * optional: Subscription status and expiration
-   */
+
+  /** subscription (optional) */
   subscription?: {
     status: "active" | "canceled" | "expired" | "trialing";
     expiresAt?: Date;
@@ -113,318 +61,248 @@ export type AccessContext = {
 export type AccessControlledDocument = {
   slug: string;
   title?: string;
-  /** Some documents are free but still inside app pages; treat as content gate */
-  tier?: ContentTier[]; // e.g. ["public"] or ["inner-circle-plus"] or ["private"] or ["all"]
-  /** Secondary gate. Useful for "app-only" experiences */
+
+  /**
+   * Document tier requirements.
+   * - ["all"] or undefined means "public"
+   * - otherwise a list of tiers; most restrictive wins
+   */
+  tier?: ContentTier[];
+
+  /** Secondary membership gate */
   requiresInnerCircle?: boolean;
-  /** Optional. If true, disallow download and enforce inline-only in routes */
+
+  /** Preview-only mode (optional, does not change access decision itself) */
   previewOnly?: boolean;
-  /** Optional: Document-specific access rules */
+
+  /** Fine-grain rules (optional) */
   accessRules?: {
-    /** Allow specific users by email */
     allowedEmails?: string[];
-    /** Allow specific users by ID */
     allowedUserIds?: string[];
-    /** Require specific roles */
     requiredRoles?: string[];
-    /** Block specific countries by ISO code */
     blockedCountries?: string[];
-    /** Allow access only during specific time windows (ISO time ranges) */
     accessHours?: { start: string; end: string; timezone?: string }[];
-    /** Maximum views per user */
-    maxViewsPerUser?: number;
-    /** Expiration date for document access */
     expiresAt?: string;
-    /** Available from date */
     availableFrom?: string;
-  };
-  /** Audit logging metadata */
-  audit?: {
-    createdBy?: string;
-    createdAt?: string;
-    lastModifiedBy?: string;
-    lastModifiedAt?: string;
   };
 };
 
 // -----------------------------------------------------------------------------
-// Tier model (order matters)
+// Business configuration (lightweight, safe defaults)
 // -----------------------------------------------------------------------------
-const TIER_ORDER: Record<Tier, number> = {
-  public: 0,
-  "inner-circle": 1,
-  "inner-circle-plus": 2,
-  "inner-circle-elite": 3,
-  private: 99, // not "higher"; it's "different class" (restricted)
-} as const;
-
-// aliases -> canonical
-const TIER_ALIASES: Record<AccessTierAlias, Tier> = {
-  free: "public",
-  basic: "inner-circle",
-  premium: "inner-circle-plus",
-  enterprise: "inner-circle-elite",
-  restricted: "private",
-} as const;
-
-const TIER_NAMES = Object.keys(TIER_ORDER) as Tier[];
-
-// Business configuration - can be environment-based
 export const ACCESS_CONFIG = {
-  // Enable maintenance mode for specific tiers
   maintenanceMode: {
     enabled: false,
-    allowedTiers: ["private", "inner-circle-elite"] as Tier[],
     message: "System maintenance in progress",
-    estimatedCompletion: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+    estimatedCompletion: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    // If enabled, only these tiers can pass (optional)
+    allowedTiers: ["owner", "architect"] as AccessTier[],
   },
-  // Rate limiting configuration
-  rateLimiting: {
-    enabled: process.env.NODE_ENV === "production",
-    requestsPerMinute: {
-      public: 30,
-      "inner-circle": 60,
-      "inner-circle-plus": 100,
-      "inner-circle-elite": 200,
-      private: 500,
-    },
-  },
-  // Geo-blocking configuration
+
   geoBlocking: {
     enabled: false,
-    blockedCountries: [] as string[], // ISO country codes
-    allowedCountries: ["US", "CA", "GB", "AU", "NZ"], // Allow only these
+    blockedCountries: [] as string[],
   },
-  // Audit logging
+
   auditLogging: {
     enabled: process.env.NODE_ENV === "production",
-    logLevel: "info" as "info" | "warn" | "error",
   },
 } as const;
 
-const isTier = (v: unknown): v is Tier =>
-  TIER_NAMES.includes(v as Tier);
-
-export function resolveTierName(tier: ContentTier | undefined | null): Tier {
-  if (!tier) return "public";
-  if (tier === "all") return "public"; // "all" is a content marker; not a user tier
-  if (isTier(tier)) return tier;
-  // alias
-  if (tier in TIER_ALIASES) return TIER_ALIASES[tier as AccessTierAlias];
-  // fallback safe
-  return "public";
+// -----------------------------------------------------------------------------
+// Core helpers
+// -----------------------------------------------------------------------------
+function nowOf(ctx: AccessContext) {
+  return ctx.requestTime instanceof Date ? ctx.requestTime : new Date();
 }
 
-export function getTierDisplayName(tier: ContentTier): string {
-  const t = resolveTierName(tier);
-  switch (t) {
-    case "public":
-      return "Public";
-    case "inner-circle":
-      return "Inner Circle";
-    case "inner-circle-plus":
-      return "Inner Circle Plus";
-    case "inner-circle-elite":
-      return "Inner Circle Elite";
-    case "private":
-      return "Private (In-House)";
-    default:
-      return "Public";
+function normalizeDocTiers(doc: AccessControlledDocument): AccessTier[] {
+  const list = Array.isArray(doc.tier) && doc.tier.length ? doc.tier : ["public"];
+
+  // "all" means “no tier restriction”
+  if (list.includes("all")) return ["public"];
+
+  // Normalize via REQUIRED-normalizer so typos never create paywalls
+  const normalized = list
+    .map((t) => tiers.normalizeRequired(t))
+    .filter(Boolean);
+
+  // De-dup
+  return Array.from(new Set(normalized));
+}
+
+/**
+ * Most-restrictive tier wins.
+ * Example: ["public","member","client"] => "client"
+ */
+function mostRestrictiveTier(list: AccessTier[]): AccessTier {
+  // Empty => public
+  if (!list.length) return "public";
+
+  // Use the SSOT order array from tiers.ts
+  const order = tiers.order as readonly AccessTier[];
+
+  return list.reduce<AccessTier>((acc, t) => {
+    return order.indexOf(t) > order.indexOf(acc) ? t : acc;
+  }, "public");
+}
+
+/**
+ * Derive user tier from ctx:
+ * - internal => owner (max)
+ * - subscription planId can map to tiers (optional)
+ * - else ctx.tier normalized as USER tier
+ */
+function deriveUserTier(ctx: AccessContext): AccessTier {
+  if (ctx.isInternal) {
+    // internal bypass to maximum tier
+    return "owner";
   }
-}
 
-export function getTierDescription(tier: ContentTier): string {
-  const t = resolveTierName(tier);
-  switch (t) {
-    case "public":
-      return "Open access content.";
-    case "inner-circle":
-      return "Member access: core tools and curated materials.";
-    case "inner-circle-plus":
-      return "Premium access: advanced operating systems and frameworks.";
-    case "inner-circle-elite":
-      return "Enterprise access: institutional-grade packs and executive tooling.";
-    case "private":
-      return "Internal use only: firm IP, staff previews, and restricted assets.";
-    default:
-      return "Open access content.";
+  // subscription sanity (optional)
+  const sub = ctx.subscription;
+  if (sub) {
+    if (sub.status !== "active") return "public";
+    if (sub.expiresAt && new Date(sub.expiresAt) < new Date()) return "public";
+
+    // Map plan -> tier (adjust these to your actual plan IDs)
+    if (sub.planId) {
+      const planTierMap: Record<string, AccessTier> = {
+        "member-plan": "member",
+        "inner-circle-plan": "inner-circle",
+        "client-plan": "client",
+        "legacy-plan": "legacy",
+      };
+      const mapped = planTierMap[sub.planId];
+      if (mapped) return mapped;
+    }
   }
+
+  return tiers.normalizeUser(ctx.tier ?? "public");
 }
 
-// -----------------------------------------------------------------------------
-// Comparators
-// -----------------------------------------------------------------------------
-export function isHigherTier(a: Tier, b: Tier): boolean {
-  // "private" is not just "higher"; treat it as separate access class.
-  if (a === "private") return b !== "private"; // true unless both private
-  if (b === "private") return false;
-  return TIER_ORDER[a] > TIER_ORDER[b];
-}
-
-export function isSameOrHigherTier(current: Tier, required: Tier): boolean {
-  if (required === "private") return current === "private";
-  if (current === "private") return true; // internal can view all non-private by default
-  return TIER_ORDER[current] >= TIER_ORDER[required];
-}
-
-// -----------------------------------------------------------------------------
-// Inner-circle gate
-// -----------------------------------------------------------------------------
+/**
+ * Whether a doc requires membership gate (auth cookie/session) even before tier.
+ * Rule: any tier > public implies membership required.
+ */
 export function requiresInnerCircle(doc: AccessControlledDocument): boolean {
-  // Explicit doc rule wins.
   if (doc.requiresInnerCircle === true) return true;
 
-  // Any tier above public implies inner-circle gate
-  const tiers = normalizeDocTiers(doc);
-  if (tiers.includes("private")) return true;
-  
-  // Check if there are any non-public tiers
-  // normalizeDocTiers already converts "all" to ["public"]
-  return tiers.some(tier => tier !== "public");
+  const list = normalizeDocTiers(doc);
+  const required = mostRestrictiveTier(list);
+  return required !== "public";
 }
 
 export function hasInnerCircleAccess(ctx: AccessContext): boolean {
-  // If internal, allow.
   if (ctx.isInternal) return true;
-  
-  // Check subscription status
-  if (ctx.subscription) {
-    if (ctx.subscription.status !== "active") return false;
-    if (ctx.subscription.expiresAt && new Date(ctx.subscription.expiresAt) < new Date()) {
-      return false;
-    }
-  }
-  
   return ctx.innerCircleAccess === true;
 }
 
 // -----------------------------------------------------------------------------
-// Advanced access checks
+// Advanced rules
 // -----------------------------------------------------------------------------
-function checkDocumentSpecificRules(
-  doc: AccessControlledDocument,
-  ctx: AccessContext
-): AccessDecision | null {
+function checkDocumentSpecificRules(doc: AccessControlledDocument, ctx: AccessContext): AccessDecision | null {
   const rules = doc.accessRules;
   if (!rules) return null;
 
-  const now = ctx.requestTime || new Date();
-  
-  // Check expiration
+  const now = nowOf(ctx);
+
+  // expiry window
   if (rules.expiresAt) {
     const expiresAt = new Date(rules.expiresAt);
-    if (now > expiresAt) {
+    if (!Number.isNaN(expiresAt.getTime()) && now > expiresAt) {
       return {
         ok: false,
         reason: "INSUFFICIENT_TIER",
-        requiredTier: "private",
+        requiredTier: "client",
         currentTier: deriveUserTier(ctx),
         suggestedAction: "contact_support",
       };
     }
   }
 
-  // Check availability date
+  // availability window
   if (rules.availableFrom) {
     const availableFrom = new Date(rules.availableFrom);
-    if (now < availableFrom) {
+    if (!Number.isNaN(availableFrom.getTime()) && now < availableFrom) {
       return {
         ok: false,
         reason: "INSUFFICIENT_TIER",
-        requiredTier: "private",
+        requiredTier: "client",
         currentTier: deriveUserTier(ctx),
         suggestedAction: "contact_support",
       };
     }
   }
 
-  // Check allowed emails
-  if (rules.allowedEmails && ctx.userEmail) {
-    const normalizedEmail = ctx.userEmail.toLowerCase().trim();
-    const isAllowed = rules.allowedEmails.some(
-      email => email.toLowerCase().trim() === normalizedEmail
-    );
-    if (!isAllowed) {
-      return {
-        ok: false,
-        reason: "PRIVATE_ONLY",
-        currentTier: deriveUserTier(ctx),
-        suggestedAction: "contact_support",
-      };
+  // allowlist emails
+  if (Array.isArray(rules.allowedEmails) && rules.allowedEmails.length) {
+    const email = String(ctx.userEmail || "").toLowerCase().trim();
+    if (!email) {
+      return { ok: false, reason: "AUTH_REQUIRED", currentTier: deriveUserTier(ctx), suggestedAction: "login" };
+    }
+    const ok = rules.allowedEmails.some((e) => String(e).toLowerCase().trim() === email);
+    if (!ok) {
+      return { ok: false, reason: "PRIVATE_ONLY", currentTier: deriveUserTier(ctx), suggestedAction: "contact_support" };
     }
   }
 
-  // Check allowed user IDs
-  if (rules.allowedUserIds && ctx.userId) {
-    if (!rules.allowedUserIds.includes(ctx.userId)) {
-      return {
-        ok: false,
-        reason: "PRIVATE_ONLY",
-        currentTier: deriveUserTier(ctx),
-        suggestedAction: "contact_support",
-      };
+  // allowlist userIds
+  if (Array.isArray(rules.allowedUserIds) && rules.allowedUserIds.length) {
+    const uid = String(ctx.userId || "").trim();
+    if (!uid || !rules.allowedUserIds.includes(uid)) {
+      return { ok: false, reason: "PRIVATE_ONLY", currentTier: deriveUserTier(ctx), suggestedAction: "contact_support" };
     }
   }
 
-  // Check required roles
-  if (rules.requiredRoles && ctx.roles) {
-    const hasRequiredRole = rules.requiredRoles.some(role =>
-      ctx.roles!.includes(role)
-    );
-    if (!hasRequiredRole) {
-      return {
-        ok: false,
-        reason: "PRIVATE_ONLY",
-        currentTier: deriveUserTier(ctx),
-        suggestedAction: "contact_support",
-      };
+  // required roles
+  if (Array.isArray(rules.requiredRoles) && rules.requiredRoles.length) {
+    const roles = Array.isArray(ctx.roles) ? ctx.roles : [];
+    const ok = rules.requiredRoles.some((r) => roles.includes(r));
+    if (!ok) {
+      return { ok: false, reason: "PRIVATE_ONLY", currentTier: deriveUserTier(ctx), suggestedAction: "contact_support" };
     }
   }
 
-  // Check access hours - ROBUST VERSION
-if (rules.accessHours && rules.accessHours.length > 0) {
-  const firstAccessHour = rules.accessHours[0];
-  if (!firstAccessHour) return null;
-  
-  const userTimezone = firstAccessHour.timezone || "UTC";
-  const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }));
-  
-  const isWithinAccessHours = rules.accessHours.some((rule) => {
-    if (!rule) return false;
-    
-    // Ensure we have valid start and end times
-    const startTime = String(rule.start || "00:00");
-    const endTime = String(rule.end || "00:00");
-    
-    const startHour = parseInt(startTime.split(':')[0] || "0");
-    const endHour = parseInt(endTime.split(':')[0] || "0");
-    
-    const ruleTimezone = rule.timezone || userTimezone;
-    const ruleNow = new Date(now.toLocaleString("en-US", { timeZone: ruleTimezone }));
-    const ruleHour = ruleNow.getHours();
-    
-    return ruleHour >= startHour && ruleHour < endHour;
-  });
-  
-  if (!isWithinAccessHours) {
-    return {
-      ok: false,
-      reason: "INSUFFICIENT_TIER",
-      currentTier: deriveUserTier(ctx),
-      suggestedAction: "contact_support",
-    };
+  // blocked countries (placeholder – you’ll need real geo lookup)
+  if (Array.isArray(rules.blockedCountries) && rules.blockedCountries.length) {
+    // Implement real geo lookup later; for now do nothing.
   }
-}
+
+  // access hours (safe, best-effort)
+  if (Array.isArray(rules.accessHours) && rules.accessHours.length) {
+    const ok = rules.accessHours.some((w) => {
+      if (!w) return false;
+      const tz = w.timezone || "UTC";
+
+      const start = String(w.start || "00:00");
+      const end = String(w.end || "23:59");
+
+      const startHour = parseInt(start.split(":")[0] || "0", 10);
+      const endHour = parseInt(end.split(":")[0] || "23", 10);
+
+      const local = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+      const h = local.getHours();
+
+      // simple hour window; refine later if you need minutes + wrap-around support
+      return h >= startHour && h < endHour;
+    });
+
+    if (!ok) {
+      return { ok: false, reason: "INSUFFICIENT_TIER", currentTier: deriveUserTier(ctx), suggestedAction: "contact_support" };
+    }
+  }
 
   return null;
 }
 
 function checkMaintenanceMode(ctx: AccessContext): AccessDecision | null {
   if (!ACCESS_CONFIG.maintenanceMode.enabled) return null;
-  
+
   const userTier = deriveUserTier(ctx);
-  
-  if (!ACCESS_CONFIG.maintenanceMode.allowedTiers.includes(userTier)) {
+  const allowed = ACCESS_CONFIG.maintenanceMode.allowedTiers.includes(userTier);
+
+  if (!allowed) {
     return {
       ok: false,
       reason: "MAINTENANCE_MODE",
@@ -433,305 +311,140 @@ function checkMaintenanceMode(ctx: AccessContext): AccessDecision | null {
       suggestedAction: "contact_support",
     };
   }
-  
+
   return null;
 }
 
-function checkGeoBlocking(ctx: AccessContext): AccessDecision | null {
-  if (!ACCESS_CONFIG.geoBlocking.enabled || !ctx.ipAddress) return null;
-  
-  // In a real implementation, you would:
-  // 1. Use a geo-IP service or local database
-  // 2. Check country against ACCESS_CONFIG.geoBlocking.blockedCountries
-  // 3. Or check against allowedCountries if using allowlist approach
-  
-  // This is a placeholder implementation
-  const mockCountryCode = "US"; // You would get this from IP
-  
-  if (ACCESS_CONFIG.geoBlocking.blockedCountries.includes(mockCountryCode)) {
-    return {
-      ok: false,
-      reason: "GEO_BLOCKED",
-      currentTier: deriveUserTier(ctx),
-      suggestedAction: "contact_support",
-    };
-  }
-  
+function checkGeoBlocking(_ctx: AccessContext): AccessDecision | null {
+  if (!ACCESS_CONFIG.geoBlocking.enabled) return null;
+  // Add real geo later.
   return null;
 }
 
 // -----------------------------------------------------------------------------
-// Core access decisions
+// Redirect builder
 // -----------------------------------------------------------------------------
-export function canAccessByTier(required: Tier, ctx: AccessContext): boolean {
-  const current = deriveUserTier(ctx);
-
-  // "private" requires explicit internal/private permission.
-  if (required === "private") {
-    if (current !== "private") return false;
-    // optional allowlist hardening
-    if (ctx.allowPrivate === false) return false;
-    return true;
-  }
-
-  // Non-private resources:
-  return isSameOrHigherTier(current, required);
-}
-
-/**
- * STRATEGIC FIX: Accept generic AccessDecision.
- * Handles both ok: true and ok: false branches of the union.
- */
-export function getAccessRedirectUrl(
-  decision: AccessDecision,
-  ctx: AccessContext
-): string {
-  // You can route these to your existing pages. Keep predictable URLs.
+export function getAccessRedirectUrl(decision: AccessDecision, ctx: AccessContext): string {
   const returnTo = ctx.returnTo ? encodeURIComponent(ctx.returnTo) : "";
-  const withReturnTo = (base: string) =>
-    returnTo ? `${base}?returnTo=${returnTo}` : base;
+  const withReturnTo = (base: string) => (returnTo ? `${base}?returnTo=${returnTo}` : base);
 
-  // If technically 'ok', return home or provided custom redirect
   if (decision.ok) return decision.redirectUrl || withReturnTo("/");
 
   switch (decision.reason) {
     case "AUTH_REQUIRED":
       return withReturnTo("/login");
+
     case "INNER_CIRCLE_REQUIRED":
       return withReturnTo("/inner-circle");
+
     case "INSUFFICIENT_TIER":
-      // Upsell/upgrade page. You can add requiredTier query for contextual CTA.
       return withReturnTo(
-        `/inner-circle/upgrade${
-          decision.requiredTier ? `?required=${encodeURIComponent(decision.requiredTier)}` : ""
-        }`
+        `/inner-circle/upgrade${decision.requiredTier ? `?required=${encodeURIComponent(decision.requiredTier)}` : ""}`
       );
+
     case "PRIVATE_ONLY":
-      // No upsell. Internal only.
       return withReturnTo("/access-denied");
+
     case "MAINTENANCE_MODE":
       return withReturnTo("/maintenance");
+
     case "GEO_BLOCKED":
       return withReturnTo("/geo-blocked");
+
     case "RATE_LIMITED":
       return withReturnTo("/rate-limited");
+
     default:
       return withReturnTo("/");
   }
 }
 
-/**
- * Main policy engine.
- * - evaluates maintenance mode
- * - evaluates geo-blocking
- * - evaluates document-specific rules
- * - evaluates membership gate
- * - evaluates tier
- * - returns deterministic denial reason + redirect
- */
-export function checkDocumentAccess(
-  doc: AccessControlledDocument,
-  ctx: AccessContext
-): AccessDecision {
-  // Check maintenance mode
-  const maintenanceCheck = checkMaintenanceMode(ctx);
-  if (maintenanceCheck) {
-    const decision: AccessDecision = maintenanceCheck;
-    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+// -----------------------------------------------------------------------------
+// Main engine
+// -----------------------------------------------------------------------------
+export function checkDocumentAccess(doc: AccessControlledDocument, ctx: AccessContext): AccessDecision {
+  // Maintenance
+  const maintenance = checkMaintenanceMode(ctx);
+  if (maintenance) {
+    const d: AccessDecision = maintenance;
+    return { ...d, redirectUrl: getAccessRedirectUrl(d, ctx) };
   }
 
-  // Check geo-blocking
-  const geoCheck = checkGeoBlocking(ctx);
-  if (geoCheck) {
-    const decision: AccessDecision = geoCheck;
-    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+  // Geo
+  const geo = checkGeoBlocking(ctx);
+  if (geo) {
+    const d: AccessDecision = geo;
+    return { ...d, redirectUrl: getAccessRedirectUrl(d, ctx) };
   }
 
-  // Check document-specific rules
-  const docRulesCheck = checkDocumentSpecificRules(doc, ctx);
-  if (docRulesCheck) {
-    const decision: AccessDecision = docRulesCheck;
-    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+  // Doc specific rules
+  const docRules = checkDocumentSpecificRules(doc, ctx);
+  if (docRules) {
+    const d: AccessDecision = docRules;
+    return { ...d, redirectUrl: getAccessRedirectUrl(d, ctx) };
   }
 
-  const tiers = normalizeDocTiers(doc);
+  const userTier = deriveUserTier(ctx);
 
-  // "all" means no tier restriction. Still may require inner-circle if doc flag set explicitly.
-  const docRequiresIC = requiresInnerCircle(doc);
-
-  // membership gate
-  if (docRequiresIC && !hasInnerCircleAccess(ctx)) {
-    const decision: AccessDecision = {
+  // Membership gate
+  if (requiresInnerCircle(doc) && !hasInnerCircleAccess(ctx)) {
+    const d: AccessDecision = {
       ok: false,
       reason: "INNER_CIRCLE_REQUIRED",
-      requiredTier: "inner-circle",
-      currentTier: deriveUserTier(ctx),
+      requiredTier: "member",
+      currentTier: userTier,
+      suggestedAction: "upgrade",
     };
-    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+    return { ...d, redirectUrl: getAccessRedirectUrl(d, ctx) };
   }
 
-  // private-only gate
-  if (tiers.includes("private")) {
-    const current = deriveUserTier(ctx);
-    const allowed = current === "private" && ctx.allowPrivate !== false;
-    if (!allowed) {
-      const decision: AccessDecision = {
-        ok: false,
-        reason: "PRIVATE_ONLY",
-        requiredTier: "private",
-        currentTier: current,
-      };
-      return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
-    }
-    return { ok: true };
+  // Tier gate
+  const docTiers = normalizeDocTiers(doc);
+  const requiredTier = mostRestrictiveTier(docTiers);
+
+  // Public is always readable once membership gate (if any) is passed
+  if (requiredTier === "public") return { ok: true };
+
+  // Internal can optionally be restricted further
+  if (ctx.isInternal && ctx.allowPrivate === false) {
+    const d: AccessDecision = {
+      ok: false,
+      reason: "PRIVATE_ONLY",
+      requiredTier,
+      currentTier: userTier,
+      suggestedAction: "contact_support",
+    };
+    return { ...d, redirectUrl: getAccessRedirectUrl(d, ctx) };
   }
-  // public/all access
-  if (tiers.length === 0 || tiers.includes("public")) return { ok: true };
 
-  // required tier is the *highest* among doc tiers (most restrictive wins)
-  const requiredTier = highestTierFromList(tiers.filter((t) => t !== "public"));
-
-  if (!canAccessByTier(requiredTier, ctx)) {
-    const decision: AccessDecision = {
+  const ok = tiers.hasAccess(userTier, requiredTier);
+  if (!ok) {
+    const d: AccessDecision = {
       ok: false,
       reason: "INSUFFICIENT_TIER",
       requiredTier,
-      currentTier: deriveUserTier(ctx),
+      currentTier: userTier,
+      suggestedAction: "upgrade",
     };
-    return { ...decision, redirectUrl: getAccessRedirectUrl(decision, ctx) };
+    return { ...d, redirectUrl: getAccessRedirectUrl(d, ctx) };
   }
 
-  // Log successful access (in production)
+  // Audit success
   if (ACCESS_CONFIG.auditLogging.enabled && ctx.userId) {
-    console.log(`[ACCESS] ${ctx.userId} accessed ${doc.slug} at ${new Date().toISOString()}`);
+    // keep it cheap
+    console.log(`[ACCESS_OK] user=${ctx.userId} tier=${userTier} doc=${doc.slug} required=${requiredTier}`);
   }
 
   return { ok: true };
 }
 
 // -----------------------------------------------------------------------------
-// Filtering helpers (for catalogs, search, navigation)
+// Catalog helpers
 // -----------------------------------------------------------------------------
-export function filterByAccess<T extends AccessControlledDocument>(
-  docs: T[],
-  ctx: AccessContext
-): T[] {
+export function filterByAccess<T extends AccessControlledDocument>(docs: T[], ctx: AccessContext): T[] {
   return docs.filter((d) => checkDocumentAccess(d, ctx).ok);
 }
 
-/**
- * Get accessible documents grouped by tier
- */
-export function groupDocumentsByAccessibleTier<T extends AccessControlledDocument>(
-  docs: T[],
-  ctx: AccessContext
-): Record<Tier, T[]> {
-  const groups = {} as Record<Tier, T[]>;
-  
-  // Initialize groups
-  TIER_NAMES.forEach(tier => {
-    groups[tier] = [];
-  });
-  
-  // Group documents
-  docs.forEach(doc => {
-    const tiers = normalizeDocTiers(doc);
-    
-    // For each tier that the user can access, add the document
-    tiers.forEach(tier => {
-      if (canAccessByTier(tier, ctx)) {
-        groups[tier].push(doc);
-      }
-    });
-  });
-  
-  return groups;
-}
-
-/**
- * Check if user can upgrade to a specific tier
- */
-export function canUpgradeToTier(
-  currentTier: Tier,
-  targetTier: Tier
-): { allowed: boolean; reason?: string } {
-  if (currentTier === "private") {
-    return { allowed: false, reason: "Private tier cannot be upgraded from" };
-  }
-  
-  if (targetTier === "private") {
-    return { allowed: false, reason: "Private tier is invite-only" };
-  }
-  
-  if (isSameOrHigherTier(currentTier, targetTier)) {
-    return { allowed: false, reason: "Already at or above target tier" };
-  }
-  
-  return { allowed: true };
-}
-
-// -----------------------------------------------------------------------------
-// Internals
-// -----------------------------------------------------------------------------
-function deriveUserTier(ctx: AccessContext): Tier {
-  if (ctx.isInternal) return "private";
-  
-  // Check subscription status
-  if (ctx.subscription) {
-    if (ctx.subscription.status !== "active") return "public";
-    if (ctx.subscription.expiresAt && new Date(ctx.subscription.expiresAt) < new Date()) {
-      return "public";
-    }
-    
-    // Map planId to tier if available
-    if (ctx.subscription.planId) {
-      const planTierMap: Record<string, Tier> = {
-        "basic-plan": "inner-circle",
-        "premium-plan": "inner-circle-plus",
-        "elite-plan": "inner-circle-elite",
-      };
-      
-      const tierFromPlan = planTierMap[ctx.subscription.planId];
-      if (tierFromPlan) return tierFromPlan;
-    }
-  }
-  
-  return ctx.tier ?? "public";
-}
-
-function normalizeDocTiers(doc: AccessControlledDocument): Tier[] {
-  const list = doc.tier ?? ["public"];
-
-  // if "all" present, treat as public (no tier restriction)
-  if (list.includes("all")) return ["public"];
-
-  // resolve aliases and canonical names
-  const resolved = list.map((t) => resolveTierName(t));
-
-  // de-dup
-  return Array.from(new Set(resolved));
-}
-
-function highestTierFromList(tiers: Tier[]): Tier {
-  // If no tiers are provided, default to public (most permissive)
-  if (!tiers || tiers.length === 0) return "public";
-
-  // Use "public" as the initial value (seed) for the reduction.
-  // This ensures 'acc' is never undefined.
-  return tiers.reduce((acc: Tier, t: Tier) => {
-    // 1. Private is a separate class; ignore it in numeric comparison
-    if (t === "private") return acc;
-    if (acc === "private") return t;
-
-    // 2. Compare numeric order defined in TIER_ORDER
-    // If current tier 't' is higher than accumulator 'acc', it becomes the new winner.
-    return TIER_ORDER[t] > TIER_ORDER[acc] ? t : acc;
-  }, "public" as Tier); 
-}
-
-/**
- * Utility to create a mock access context for testing
- */
 export function createMockAccessContext(overrides: Partial<AccessContext> = {}): AccessContext {
   return {
     tier: "public",
@@ -749,20 +462,25 @@ export function createMockAccessContext(overrides: Partial<AccessContext> = {}):
 }
 
 /**
- * Parse access context from request (for server-side usage)
+ * Parse access context from a request-like shape (safe, low-assumption)
  */
 export function parseAccessContextFromRequest(req: {
-  headers: Record<string, string | string[] | undefined>;
-  cookies: Record<string, string>;
+  headers?: Record<string, string | string[] | undefined>;
+  cookies?: Record<string, string>;
   ip?: string;
 }): AccessContext {
+  const cookies = req.cookies || {};
+  const headers = req.headers || {};
+
   return {
-    tier: req.cookies["access-tier"] as Tier | undefined,
-    innerCircleAccess: req.cookies["inner-circle"] === "true",
-    isInternal: req.cookies["internal-access"] === "true",
-    ipAddress: req.ip || (req.headers["x-forwarded-for"] as string)?.split(",")[0] || undefined,
-    userAgent: req.headers["user-agent"] as string | undefined,
-    sessionId: req.cookies["session-id"],
+    tier: cookies["access-tier"] ?? cookies["tier"] ?? "public",
+    innerCircleAccess: cookies["innerCircleAccess"] === "true" || cookies["inner-circle"] === "true",
+    isInternal: cookies["internal-access"] === "true",
+    ipAddress:
+      req.ip ||
+      (typeof headers["x-forwarded-for"] === "string" ? headers["x-forwarded-for"].split(",")[0]?.trim() : undefined),
+    userAgent: typeof headers["user-agent"] === "string" ? headers["user-agent"] : undefined,
+    sessionId: cookies["session-id"],
     requestTime: new Date(),
   };
 }

@@ -1,8 +1,5 @@
 // lib/contentlayer-generated.ts
-// Single canonical re-export of Contentlayer output.
-// Do NOT import .contentlayer output directly all over the codebase.
-//
-// This relies on tsconfig paths mapping:
-// "contentlayer/generated" -> "./.contentlayer/generated"
+// Legacy compatibility layer (safe re-export)
 
-export * from "contentlayer/generated";
+export * from "@/lib/contentlayer";
+export { default } from "@/lib/contentlayer";

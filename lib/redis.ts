@@ -40,22 +40,17 @@ function createRedisClient(): Redis {
     
     reconnectOnError: (err) => {
       // Reconnect automatically if the cluster is in a READONLY state
-      if (err.message.includes("READONLY")) {
-        return true;
-      }
-      return false;
+      return err.message.includes("READONLY");
     }
   });
 
   client.on('error', (err) => {
-    // Suppress noisy logs in scripts unless they are terminal
-    if (!IS_SCRIPT_MODE) {
-      console.error('[Redis] Connection error:', err.message);
-    }
-    // Only nullify the instance if the connection is truly dead
-    if (err.message.includes('ECONNREFUSED')) {
-      redisInstance = null;
-    }
+    // Always log errors, but keep them concise
+    console.error(`[Redis] ${err.message}`);
+    
+    // DO NOT nullify redisInstance on transient errors
+    // Let ioredis handle reconnection internally
+    // Only nullify on fatal conditions if absolutely necessary
   });
 
   return client;
@@ -79,10 +74,10 @@ export async function isRedisAvailable(): Promise<boolean> {
   
   try {
     const client = getRedis();
-    // Use a strict 1s timeout for the health check
+    // Use a relaxed 3s timeout for Windows/Docker health checks
     const pingPromise = client.ping();
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Health Check Timeout')), 1000)
+      setTimeout(() => reject(new Error('Health Check Timeout')), 3000)
     );
     
     await Promise.race([pingPromise, timeoutPromise]);

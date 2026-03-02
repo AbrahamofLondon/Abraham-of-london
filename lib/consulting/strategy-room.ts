@@ -1,6 +1,5 @@
 /* lib/consulting/strategy-room.ts */
-// CORRECTED IMPORT: Removed curly braces to match default export in lib/prisma.ts
-import prisma from "@/lib/prisma"; 
+import { prisma } from "@/lib/prisma"; // ✅ Use named import, not default
 import fs from 'fs';
 import path from 'path';
 
@@ -36,7 +35,7 @@ export async function archiveIntake(
 
   // 1. Primary: Prisma/Neon Integration
   try {
-    // Verified: uses default-imported prisma client
+    // ✅ Verified: uses named-imported prisma client
     await prisma.strategyRoomIntake.create({
       data: {
         fullName: payload.contact.fullName,
@@ -138,5 +137,3 @@ export function computeScore(payload: StrategyRoomIntakePayload) {
   const total = baseGravity + decisionWeight + tradeOffWeight + urgencyWeight;
   return { total: Math.min(25, total) };
 }
-
-

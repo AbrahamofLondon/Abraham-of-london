@@ -1,5 +1,5 @@
 /* lib/content-loader.ts — SYSTEMATIC MDX LOADER FOR INTELLIGENCE ASSETS */
-import { allPosts } from 'contentlayer/generated';
+import { allPosts } from '@/lib/contentlayer';
 import { Post } from '@/types/post';
 import { compareDesc, parseISO } from 'date-fns';
 

@@ -1,195 +1,104 @@
 /* ============================================================================
- * SOVEREIGN CONTENT ENGINE [CLIENT-SAFE] — HARDENED v2.0
+ * SOVEREIGN CONTENT ENGINE [CLIENT-SAFE] — SSOT ALIGNED
  * ============================================================================ */
 
-import { UserRole, ROLE_HIERARCHY } from "@/types/auth";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import {
+  normalizeUserTier,
+  requiredTierFromDoc,
+  hasAccess,
+  getTierLabel,
+} from "@/lib/access/tier-policy";
 
-export type { UserRole };
+export type { AccessTier };
 
-// Document classification levels mapped to UserRole requirements
-export type ContentClassification =
-  | "public" // Anyone can view
-  | "member" // Requires member role
-  | "inner-circle" // Requires inner-circle role
-  | "restricted" // Requires admin role
-  | "private" // Requires admin role (alias for restricted)
-  | "confidential" // Requires founder role
-  | "top-secret"; // Requires founder role
-
-/**
- * Normalizes classification from frontmatter/DB to our UserRole system
- * with comprehensive fallback and validation
- */
-export function getRequiredRole(doc: unknown): UserRole {
-  // Guard against null/undefined
-  if (!doc || typeof doc !== "object") {
-    return "guest";
-  }
-
-  // Safely access classification with multiple fallbacks
-  const rawClassification =
-    (doc as any).classification ||
-    (doc as any).accessLevel ||
-    (doc as any).tier ||
-    (doc as any).security ||
-    "public";
-
-  const classification = String(rawClassification).toLowerCase().trim();
-
-  // Comprehensive classification mapping
-  switch (classification) {
-    // Public access
-    case "public":
-    case "open":
-    case "unclassified":
-      return "guest";
-
-    // Member access
-    case "member":
-    case "members":
-    case "premium":
-    case "subscriber":
-      return "member";
-
-    // Inner circle access
-    case "inner-circle":
-    case "innercircle":
-    case "circle":
-    case "inner":
-      return "inner-circle";
-
-    // Restricted access (admin required)
-    case "restricted":
-    case "private":
-    case "sensitive":
-    case "protected":
-    case "admin":
-    case "director":
-      return "admin";
-
-    // Confidential access (founder only)
-    case "confidential":
-    case "top-secret":
-    case "secret":
-    case "founder":
-    case "executive":
-      return "founder";
-
-    // Default fallback
-    default:
-      return "guest";
-  }
+export function getRequiredTier(doc: unknown): AccessTier {
+  return requiredTierFromDoc(doc as any);
 }
 
-/**
- * Core Logic: Can this specific role see this specific document?
- * With edge case handling and optional debug logging
- */
 export function canAccessDoc(
   doc: unknown,
-  userRole: UserRole = "guest",
+  userTier: unknown = "public",
   options?: { debug?: boolean }
 ): boolean {
   try {
-    const requiredRole = getRequiredRole(doc);
-
-    const userWeight = ROLE_HIERARCHY[userRole] ?? 0;
-    const requiredWeight = ROLE_HIERARCHY[requiredRole] ?? 0;
-
-    const hasAccess = userWeight >= requiredWeight;
+    const required = getRequiredTier(doc);
+    const user = normalizeUserTier(userTier);
+    const ok = hasAccess(user, required);
 
     if (options?.debug) {
       console.debug("[Access]", {
         doc: (doc as any)?.title || (doc as any)?.slug || "unknown",
-        userRole,
-        requiredRole,
-        userWeight,
-        requiredWeight,
-        hasAccess,
+        userTier: user,
+        requiredTier: required,
+        requiredLabel: getTierLabel(required),
+        ok,
       });
     }
 
-    return hasAccess;
+    return ok;
   } catch (error) {
-    // Log error but fail safe - deny access
     console.error("[Access] Error checking document access:", error);
-    return false;
+    return false; // fail closed
   }
 }
 
-/**
- * Check if document is publicly accessible
- */
 export function isPublic(doc: unknown): boolean {
-  return getRequiredRole(doc) === "guest";
+  return getRequiredTier(doc) === "public";
 }
 
-/**
- * Check if document requires any authentication at all
- */
 export function requiresAuth(doc: unknown): boolean {
-  return getRequiredRole(doc) !== "guest";
+  return getRequiredTier(doc) !== "public";
 }
 
-/**
- * Get all roles that can access this document
- */
-export function getAccessibleRoles(doc: unknown): UserRole[] {
-  const requiredRole = getRequiredRole(doc);
-
-  // Return all roles that have sufficient hierarchy
-  return Object.entries(ROLE_HIERARCHY)
-    .filter(([_, weight]) => weight >= (ROLE_HIERARCHY[requiredRole] ?? 0))
-    .map(([role]) => role as UserRole);
+export function getAccessibleTiers(doc: unknown): AccessTier[] {
+  // tiers that can access are those >= required tier
+  const required = getRequiredTier(doc);
+  const order: AccessTier[] = [
+    "public",
+    "member",
+    "inner-circle",
+    "client",
+    "legacy",
+    "architect",
+    "owner",
+  ];
+  const idx = order.indexOf(required);
+  return idx === -1 ? order : order.slice(idx);
 }
 
-/**
- * Get minimum required role for this document
- */
-export function getMinimumRequiredRole(doc: unknown): UserRole {
-  return getRequiredRole(doc);
-}
-
-/**
- * Validate if a document has valid access configuration
- */
 export function validateDocumentAccess(doc: unknown): {
   valid: boolean;
-  requiredRole: UserRole;
+  requiredTier: AccessTier;
   issues?: string[];
 } {
   const issues: string[] = [];
-
   try {
-    const requiredRole = getRequiredRole(doc);
+    const requiredTier = getRequiredTier(doc);
 
-    // Check if required role exists in hierarchy
-    if (!(requiredRole in ROLE_HIERARCHY)) {
-      issues.push(`Required role '${requiredRole}' not found in hierarchy`);
-    }
+    // Basic sanity: requiredTier always resolves to a valid SSOT tier
+    if (!requiredTier) issues.push("Required tier resolved empty");
 
     return {
       valid: issues.length === 0,
-      requiredRole,
-      issues: issues.length > 0 ? issues : undefined,
+      requiredTier,
+      issues: issues.length ? issues : undefined,
     };
   } catch (error) {
     return {
       valid: false,
-      requiredRole: "guest",
-      issues: [`Validation error: ${error}`],
+      requiredTier: "public",
+      issues: [`Validation error: ${String(error)}`],
     };
   }
 }
 
-// Convenience exports
 export const AccessEngine = {
-  getRequiredRole,
+  getRequiredTier,
   canAccessDoc,
   isPublic,
   requiresAuth,
-  getAccessibleRoles,
-  getMinimumRequiredRole,
+  getAccessibleTiers,
   validateDocumentAccess,
 };
 

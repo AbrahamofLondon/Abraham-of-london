@@ -1,8 +1,16 @@
-// content/downloads/TEMPLATE_FILENAME.tsx - FIXED VERSION
+﻿// content/downloads/THE-FILE-SLUG.tsx — SSOT FIXED VERSION
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 
-export type DownloadTier = "free" | "member" | "inner-circle" | "architect";
+export type DownloadTier =
+  | "public"
+  | "member"
+  | "inner-circle"
+  | "client"
+  | "legacy"
+  | "architect"
+  | "owner";
+
 export type DownloadFormat = "PDF" | "EXCEL" | "POWERPOINT" | "ZIP" | "BINARY";
 export type PaperFormat = "A4" | "Letter" | "A3" | "bundle";
 
@@ -14,9 +22,24 @@ export type DownloadMetadata = {
   date?: string;
   updated?: string;
   author?: string;
+  authorTitle?: string;
 
   subtitle?: string;
   description?: string;
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  socialCaption?: string;
+  language?: string;
+
+  readTime?: string;
+  readingTime?: string;
+  featured?: boolean;
+
+  coverImage?: string;
+  coverAspect?: "wide" | "book" | "square";
+  coverFit?: "cover" | "contain";
+  coverPosition?: "top" | "center" | "bottom";
 
   category?: string;
   tags?: string[];
@@ -26,26 +49,9 @@ export type DownloadMetadata = {
 
   format?: DownloadFormat;
   formats?: PaperFormat[];
-
   fileUrl?: string;
   fileSize?: string;
   version?: string;
-
-  canonicalUrl?: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  socialCaption?: string;
-
-  coverImage?: string;
-  coverAspect?: "wide" | "book" | "square";
-  coverFit?: "cover" | "contain";
-  coverPosition?: "top" | "center" | "bottom";
-
-  readTime?: string;
-  readingTime?: string;
-
-  featured?: boolean;
-  language?: string;
 };
 
 export const metadata: DownloadMetadata = {
@@ -53,16 +59,17 @@ export const metadata: DownloadMetadata = {
   slug: "the-file-slug",
   type: "Download",
 
-  date: "YYYY-MM-DD",
+  date: "2025-10-21",
   author: "Abraham of London",
+  authorTitle: "Founder • Strategist",
 
   subtitle: "A concise description of the download.",
-  description: "One or two lines explaining the outcome this asset enables.",
+  description: "One-line summary of what this asset does and who it is for. Keep it crisp and benefits-led.",
 
-  category: "Correct Category",
-  tags: [],
+  category: "Frameworks",
+  tags: ["legacy", "governance", "strategy"],
 
-  tier: "free",
+  tier: "public",
   requiresAuth: false,
 
   format: "PDF",
@@ -73,63 +80,28 @@ export const metadata: DownloadMetadata = {
 
   canonicalUrl: "/downloads/the-file-slug",
   ogTitle: "The Correct Title for This Download",
-  ogDescription: "Short OG description.",
-  socialCaption: "Short share caption.",
+  ogDescription: "A concise, benefits-led summary for sharing.",
+  socialCaption: "Short share caption. Strong, clean, no waffle.",
+  language: "en-GB",
+
   coverAspect: "wide",
   coverFit: "cover",
   coverPosition: "center",
-
-  language: "en-GB",
 };
 
-type Props = {
-  showHeader?: boolean;
-};
-
-const DownloadTemplate: React.FC<Props> = ({ showHeader = true }) => {
-  // Create props object with only defined values
-  const brandFrameProps = {
-    title: metadata.title,
-    subtitle: metadata.subtitle || "", // Provide default for required prop
-    pageSize: "A4" as const,
-    children: (
+const DownloadTemplate: React.FC = () => {
+  return (
+    <BrandFrame title={metadata.title} subtitle={metadata.subtitle || ""} pageSize="A4">
       <div className="space-y-4">
-        {showHeader ? (
-          <header className="space-y-1">
-            <h1 className="text-2xl font-semibold">{metadata.title}</h1>
-            {metadata.subtitle ? (
-              <p className="text-sm opacity-80">{metadata.subtitle}</p>
-            ) : null}
-          </header>
-        ) : null}
+        <h1 className="text-2xl font-semibold">{metadata.title}</h1>
+        {metadata.subtitle ? <p className="text-sm opacity-80">{metadata.subtitle}</p> : null}
 
         <hr className="opacity-20" />
 
-        <section className="space-y-3">
-          <p className="text-sm">
-            This is where the unique content for this download goes.
-          </p>
-
-          <ul className="list-disc pl-5 text-sm space-y-1">
-            <li>Replace this scaffold with actual steps, prompts, or framework.</li>
-            <li>Keep text printable: short paragraphs, clear headings.</li>
-            <li>Use spacing like a grown-up — whitespace is governance.</li>
-          </ul>
-        </section>
+        <p className="text-sm">This is the content of the download. Replace with your real material.</p>
       </div>
-    )
-  };
-
-  // Conditionally add optional props
-  if (metadata.author !== undefined) {
-    (brandFrameProps as any).author = metadata.author;
-  }
-  
-  if (metadata.date !== undefined) {
-    (brandFrameProps as any).date = metadata.date;
-  }
-
-  return <BrandFrame {...brandFrameProps} />;
+    </BrandFrame>
+  );
 };
 
 export default DownloadTemplate;

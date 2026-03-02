@@ -1,51 +1,91 @@
+// app/actions/sync-vault.ts
 'use server';
 
-import prisma from "@/lib/prisma";
-import { getAllPDFItemsNode } from "@/lib/pdf/registry"; // Use the Node-accurate version
+import { getPrisma } from "@/lib/prisma.server";
+import { getAllPDFItemsNode } from "@/lib/pdf/registry";
 import { revalidatePath } from "next/cache";
 
 /**
  * Institutional Sync: Reconciles File System with PostgreSQL
+ * - Server-only
+ * - Chunked transactions to avoid huge $transaction payloads
+ * - Safe classification normalization
  */
 export async function syncVaultRegistry() {
   try {
-    // 1. Fetch current ground truth with real FS stats
+    const prisma = await getPrisma();
+    if (!prisma) {
+      throw new Error("Database connection unavailable (DATABASE_URL not configured).");
+    }
+
+    // 1) Ground truth from FS stats
     const fsItems = await getAllPDFItemsNode({ includeMissing: true });
-    
+
     console.log(`[SYNC_START]: Processing ${fsItems.length} portfolio items.`);
 
-    // 2. Atomic Upsert
-    const operations = fsItems.map((item) => 
-      prisma.contentMetadata.upsert({
-        where: { slug: item.id },
-        update: {
-          title: item.title,
-          type: item.type || 'brief',
-          classification: item.tier || 'restricted',
-          updatedAt: new Date(),
-          // Store actual disk status in metadata
-          metadata: JSON.stringify({ 
-            version: item.version || '1.0.0',
-            existsOnDisk: item.existsOnDisk,
-            fileSize: item.fileSizeHuman 
-          }),
-        },
-        create: {
-          slug: item.id,
-          title: item.title,
-          type: item.type || 'brief',
-          classification: item.tier || 'restricted',
-          metadata: JSON.stringify({ version: item.version || '1.0.0' }),
-        },
-      })
-    );
+    // 2) Normalize fields (don’t let bad data poison DB)
+    const now = new Date();
 
-    await prisma.$transaction(operations);
+    const normalizeClassification = (tier: any): string => {
+      const t = String(tier || "restricted").toLowerCase();
+      // Map your tiers to DB classification as needed
+      if (t === "free" || t === "public") return "public";
+      if (t === "member") return "member";
+      if (t === "architect") return "architect";
+      if (t === "inner-circle") return "inner-circle";
+      return "restricted";
+    };
 
-    revalidatePath('/dashboard');
+    // 3) Chunk upserts to avoid DB limits / huge transactions
+    const CHUNK = 50;
+    let upserted = 0;
+
+    for (let i = 0; i < fsItems.length; i += CHUNK) {
+      const batch = fsItems.slice(i, i + CHUNK);
+
+      const ops = batch.map((item: any) =>
+        prisma.contentMetadata.upsert({
+          where: { slug: String(item.id) },
+          update: {
+            title: String(item.title || item.id),
+            type: String(item.type || "brief"),
+            classification: normalizeClassification(item.tier),
+            updatedAt: now,
+            metadata: JSON.stringify({
+              version: String(item.version || "1.0.0"),
+              existsOnDisk: Boolean(item.existsOnDisk),
+              fileSize: String(item.fileSizeHuman || ""),
+              lastModifiedISO: String(item.lastModifiedISO || ""),
+              outputPath: String(item.outputPath || item.path || ""),
+            }),
+          },
+          create: {
+            slug: String(item.id),
+            title: String(item.title || item.id),
+            type: String(item.type || "brief"),
+            classification: normalizeClassification(item.tier),
+            createdAt: now,
+            updatedAt: now,
+            metadata: JSON.stringify({
+              version: String(item.version || "1.0.0"),
+              existsOnDisk: Boolean(item.existsOnDisk),
+              fileSize: String(item.fileSizeHuman || ""),
+              lastModifiedISO: String(item.lastModifiedISO || ""),
+              outputPath: String(item.outputPath || item.path || ""),
+            }),
+          },
+        }),
+      );
+
+      await prisma.$transaction(ops);
+      upserted += batch.length;
+      console.log(`[SYNC_PROGRESS]: ${upserted}/${fsItems.length}`);
+    }
+
+    revalidatePath("/dashboard");
     return { success: true, count: fsItems.length };
   } catch (error: any) {
     console.error("[SYNC_CRITICAL_FAILURE]:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error?.message || String(error) };
   }
 }

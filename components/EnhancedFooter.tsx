@@ -2,7 +2,19 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Library, Building2, Mail, PenTool, Vault, Bookmark } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Library,
+  Building2,
+  Mail,
+  PenTool,
+  Vault,
+  Bookmark,
+  Layers,
+  Shield,
+  ChevronRight,
+} from "lucide-react";
 
 import SocialLinks, { SocialLinksCompact } from "@/components/SocialLinks";
 import PolicyFooter from "@/components/PolicyFooter";
@@ -12,9 +24,10 @@ interface FooterCTAProps {
   title: string;
   label: string;
   icon: React.ReactNode;
+  hint?: string;
 }
 
-function FooterCTA({ href, title, label, icon }: FooterCTAProps) {
+function FooterCTA({ href, title, label, icon, hint }: FooterCTAProps) {
   return (
     <Link
       href={href}
@@ -27,6 +40,11 @@ function FooterCTA({ href, title, label, icon }: FooterCTAProps) {
         <div className="font-serif text-lg text-white/90 group-hover:text-amber-100 transition-colors">
           {title}
         </div>
+        {hint ? (
+          <div className="text-[11px] leading-relaxed text-white/40 group-hover:text-white/50 transition-colors">
+            {hint}
+          </div>
+        ) : null}
       </div>
 
       <div className="relative z-10 flex items-center gap-2 text-amber-200/50 group-hover:text-amber-200 transition-all">
@@ -34,7 +52,10 @@ function FooterCTA({ href, title, label, icon }: FooterCTAProps) {
         <span className="transition-transform duration-500 group-hover:translate-x-0.5">{icon}</span>
       </div>
 
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+      >
         <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_10%_20%,rgba(245,158,11,0.14),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_90%_80%,rgba(255,255,255,0.06),transparent_55%)]" />
       </div>
@@ -69,11 +90,41 @@ export default function EnhancedFooter(): React.ReactElement {
           <FooterCTA href="/ventures" title="Ventures" label="Execution" icon={<Building2 size={18} />} />
         </div>
 
+        {/* Frameworks (elevated) */}
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <FooterCTA
+            href="/resources/strategic-frameworks"
+            title="Strategic Frameworks"
+            label="Operating Systems"
+            icon={<Layers size={18} />}
+            hint="Board-grade models • decision rights • institutional resilience"
+          />
+          <FooterCTA
+            href="/resources/surrender-framework"
+            title="Surrender Framework"
+            label="Formation"
+            icon={<Shield size={18} />}
+            hint="Personal governance • alignment under pressure • weekly audit"
+          />
+          <FooterCTA
+            href="/vault"
+            title="Vault"
+            label="Resources"
+            icon={<Vault size={18} />}
+            hint="Toolkits • templates • premium briefs • downloads"
+          />
+        </div>
+
         {/* Secondary pathways */}
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* ✅ FIXED: essays -> /blog */}
           <FooterCTA href="/blog" title="Essays" label="Literary" icon={<PenTool size={18} />} />
-          <FooterCTA href="/vault" title="Vault" label="Resources" icon={<Vault size={18} />} />
+          <FooterCTA
+            href="/inner-circle"
+            title="Inner Circle"
+            label="Clearance"
+            icon={<ChevronRight size={18} />}
+            hint="Unlock restricted dossiers and private briefings"
+          />
         </div>
 
         {/* Social */}
@@ -112,8 +163,8 @@ export default function EnhancedFooter(): React.ReactElement {
             </Link>
 
             <p className="text-sm leading-relaxed text-white/45 max-w-md">
-              A home for institutional thinking: purpose, governance, cadence, and durable execution—
-              expressed through writing, tools, ventures, and private work.
+              A home for institutional thinking: purpose, governance, cadence, and durable execution—expressed through
+              writing, tools, ventures, and private work.
             </p>
 
             <Link
@@ -132,19 +183,18 @@ export default function EnhancedFooter(): React.ReactElement {
                 <li><FooterLink href="/canon">Canon</FooterLink></li>
                 <li><FooterLink href="/books">Books</FooterLink></li>
                 <li><FooterLink href="/library">Library</FooterLink></li>
-                {/* ✅ FIXED: essays -> /blog */}
                 <li><FooterLink href="/blog">Essays</FooterLink></li>
                 <li><FooterLink href="/shorts">Shorts</FooterLink></li>
               </ul>
             </div>
 
             <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Work</h4>
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Frameworks</h4>
               <ul className="space-y-3 text-xs text-white/45">
-                <li><FooterLink href="/ventures">Ventures</FooterLink></li>
-                <li><FooterLink href="/consulting">Advisory</FooterLink></li>
+                <li><FooterLink href="/resources/strategic-frameworks">Strategic Frameworks</FooterLink></li>
+                <li><FooterLink href="/resources/surrender-framework">Surrender Framework</FooterLink></li>
+                <li><FooterLink href="/resources">Resources Index</FooterLink></li>
                 <li><FooterLink href="/vault">Vault</FooterLink></li>
-                <li><FooterLink href="/events">Events</FooterLink></li>
               </ul>
             </div>
 

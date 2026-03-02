@@ -1,4 +1,7 @@
-// types/download-cta.ts
+// types/download-cta.ts — CTA TYPES (Production Grade)
+
+import type * as React from "react";
+
 export interface CTADetail {
   label: string;
   value: string;
@@ -12,6 +15,12 @@ export interface DownloadCTAProps {
   features: string[];
   steps: string[];
   buttonText: string;
+
+  /**
+   * Use a type-safe MouseEvent signature for anchors.
+   * If your CTA uses <button>, change HTMLAnchorElement accordingly.
+   */
   onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+
   href: string;
 }

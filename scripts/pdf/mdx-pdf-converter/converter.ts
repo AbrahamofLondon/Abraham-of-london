@@ -1,4 +1,3 @@
-// scripts/pdf/mdx-pdf-converter/converter.ts
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -21,14 +20,16 @@ import {
 const BRAND = {
   author: "Abraham of London",
   site: "abrahamoflondon.org",
+  product: "AoL MDX-to-PDF (Branded)",
   colors: {
     charcoal: rgb(0.10, 0.10, 0.12),
     slate: rgb(0.30, 0.32, 0.36),
     faint: rgb(0.55, 0.55, 0.58),
     gold: rgb(0.78, 0.64, 0.30),
-    paper: rgb(0.98, 0.98, 0.975),
+    paper: rgb(0.985, 0.985, 0.98),
     rule: rgb(0.88, 0.88, 0.88),
     watermark: rgb(0.88, 0.88, 0.90),
+    codeBg: rgb(0.965, 0.965, 0.97),
   },
 };
 
@@ -43,12 +44,7 @@ function pageSize(format: PaperFormat): { w: number; h: number } {
 }
 
 // -----------------------------------------------------------------------------
-// Fonts
-// - Put these files here:
-//   scripts/pdf/fonts/PlayfairDisplay-Regular.ttf
-//   scripts/pdf/fonts/PlayfairDisplay-Bold.ttf
-//   scripts/pdf/fonts/NotoSans-Regular.ttf
-//   scripts/pdf/fonts/NotoSans-Bold.ttf
+// Fonts (hard requirement)
 // -----------------------------------------------------------------------------
 
 type EmbeddedFonts = {
@@ -56,6 +52,7 @@ type EmbeddedFonts = {
   headingBold: any;
   body: any;
   bodyBold: any;
+  mono: any;
 };
 
 function fontBytes(rel: string) {
@@ -64,7 +61,7 @@ function fontBytes(rel: string) {
     throw new Error(
       `Missing font: ${abs}\n` +
         `Add fonts under scripts/pdf/fonts/:\n` +
-        `- PlayfairDisplay-Regular.ttf\n- PlayfairDisplay-Bold.ttf\n- NotoSans-Regular.ttf\n- NotoSans-Bold.ttf`,
+        `- PlayfairDisplay-Regular.ttf\n- PlayfairDisplay-Bold.ttf\n- NotoSans-Regular.ttf\n- NotoSans-Bold.ttf\n- JetBrainsMono-Regular.ttf (recommended)\n`,
     );
   }
   return fs.readFileSync(abs);
@@ -78,17 +75,20 @@ async function embedFonts(pdfDoc: PDFDocument): Promise<EmbeddedFonts> {
   const notoR = fontBytes("NotoSans-Regular.ttf");
   const notoB = fontBytes("NotoSans-Bold.ttf");
 
+  // Optional mono; hard-fail if missing because code blocks look cheap without mono.
+  const monoR = fontBytes("JetBrainsMono-Regular.ttf");
+
   const heading = await pdfDoc.embedFont(playfairR, { subset: true });
   const headingBold = await pdfDoc.embedFont(playfairB, { subset: true });
   const body = await pdfDoc.embedFont(notoR, { subset: true });
   const bodyBold = await pdfDoc.embedFont(notoB, { subset: true });
+  const mono = await pdfDoc.embedFont(monoR, { subset: true });
 
-  return { heading, headingBold, body, bodyBold };
+  return { heading, headingBold, body, bodyBold, mono };
 }
 
 // -----------------------------------------------------------------------------
-// Minimal MDX -> “printable” text normalization
-// (We’re not rendering React; we’re generating a premium print doc.)
+// MDX -> “printable” text normalization (safer)
 // -----------------------------------------------------------------------------
 
 function stripFrontmatter(raw: string) {
@@ -96,21 +96,30 @@ function stripFrontmatter(raw: string) {
   return { data: (data || {}) as Record<string, any>, content: String(content || "") };
 }
 
+/**
+ * Remove only what *must* be removed for a print doc:
+ * - import/export lines
+ * - JSX tags (best effort) WITHOUT deleting paragraphs around them
+ * - MDX expressions { ... } best effort, but avoid deleting common JSON-like blocks by limiting to single-line braces
+ */
 function normalizeMdxToPrintable(md: string): string {
   let s = String(md || "");
 
-  // Remove import/export lines
+  // Remove import/export lines (whole line)
   s = s.replace(/^\s*(import|export)\s+.+$/gm, "");
 
-  // Remove JSX blocks (best-effort)
-  s = s.replace(/<[^>\n]+\/>/g, ""); // self-closing
-  s = s.replace(/<([A-Z][A-Za-z0-9]*)[^>]*>[\s\S]*?<\/\1>/g, ""); // Components
-  s = s.replace(/<([a-z][a-z0-9-]*)[^>]*>[\s\S]*?<\/\1>/g, ""); // HTML blocks
+  // Remove MDX JSX fragments safely
+  // 1) self-closing tags
+  s = s.replace(/<[^>\n]+\/>\s*/g, "");
+  // 2) Component blocks (capitalized)
+  s = s.replace(/<([A-Z][A-Za-z0-9]*)\b[^>]*>[\s\S]*?<\/\1>\s*/g, "");
+  // 3) HTML blocks (lowercase) — keep very small inline tags by targeting multi-line blocks
+  s = s.replace(/<([a-z][a-z0-9-]*)\b[^>]*>[\s\S]*?<\/\1>\s*/g, "");
 
-  // Remove MDX expressions { ... } (best-effort)
-  s = s.replace(/\{[\s\S]*?\}/g, "");
+  // Remove MDX expressions: conservative (single-line only), avoids nuking big braces sections
+  s = s.replace(/\{[^\n\r]*?\}\s*/g, "");
 
-  // Collapse excessive blank lines
+  // Replace multiple blank lines
   s = s.replace(/\n{3,}/g, "\n\n");
 
   return s.trim();
@@ -124,14 +133,15 @@ type Layout = {
   marginX: number;
   marginTop: number;
   marginBottom: number;
-  gutter: number;
   heading1: number;
   heading2: number;
   heading3: number;
   body: number;
   small: number;
+  code: number;
   lineHeight: number;
   paragraphGap: number;
+  blockGap: number;
 };
 
 function layoutFor(format: PaperFormat, quality: Quality): Layout {
@@ -141,44 +151,46 @@ function layoutFor(format: PaperFormat, quality: Quality): Layout {
           marginX: 62,
           marginTop: 68,
           marginBottom: 54,
-          gutter: 10,
           heading1: 26,
           heading2: 18,
           heading3: 14,
           body: 11.25,
           small: 9,
+          code: 9.5,
           lineHeight: 1.45,
           paragraphGap: 10,
+          blockGap: 14,
         }
       : quality === "premium"
         ? {
             marginX: 56,
             marginTop: 64,
             marginBottom: 52,
-            gutter: 10,
             heading1: 24,
             heading2: 17,
             heading3: 13.5,
             body: 11,
             small: 9,
+            code: 9.25,
             lineHeight: 1.42,
             paragraphGap: 10,
+            blockGap: 14,
           }
         : {
             marginX: 52,
             marginTop: 58,
             marginBottom: 48,
-            gutter: 10,
             heading1: 22,
             heading2: 16,
             heading3: 13,
             body: 10.75,
             small: 8.5,
-            lineHeight: 1.40,
+            code: 9,
+            lineHeight: 1.4,
             paragraphGap: 9,
+            blockGap: 12,
           };
 
-  // Slightly widen margins for A3 so it stays elegant
   if (format === "A3") return { ...base, marginX: base.marginX + 10, marginTop: base.marginTop + 10 };
   return base;
 }
@@ -187,12 +199,7 @@ function layoutFor(format: PaperFormat, quality: Quality): Layout {
 // Text wrapping
 // -----------------------------------------------------------------------------
 
-function wrapText(args: {
-  text: string;
-  font: any;
-  fontSize: number;
-  maxWidth: number;
-}): string[] {
+function wrapText(args: { text: string; font: any; fontSize: number; maxWidth: number }): string[] {
   const { text, font, fontSize, maxWidth } = args;
   const words = String(text || "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
   const lines: string[] = [];
@@ -213,7 +220,7 @@ function wrapText(args: {
 }
 
 // -----------------------------------------------------------------------------
-// Markdown-ish block parsing (headings, lists, quotes, code)
+// Markdown-ish block parsing
 // -----------------------------------------------------------------------------
 
 type Block =
@@ -227,8 +234,8 @@ type Block =
 
 function parseBlocks(md: string): Block[] {
   const lines = String(md || "").split(/\r?\n/);
-
   const blocks: Block[] = [];
+
   let inCode = false;
   let codeBuf: string[] = [];
   let paraBuf: string[] = [];
@@ -245,7 +252,7 @@ function parseBlocks(md: string): Block[] {
     codeBuf = [];
   };
 
-  for (let raw of lines) {
+  for (const raw of lines) {
     const line = raw ?? "";
 
     // fenced code
@@ -265,35 +272,19 @@ function parseBlocks(md: string): Block[] {
       continue;
     }
 
-    // heading
+    // headings
     const h1 = line.match(/^\s*#\s+(.+)\s*$/);
     const h2 = line.match(/^\s*##\s+(.+)\s*$/);
     const h3 = line.match(/^\s*###\s+(.+)\s*$/);
-    if (h1) {
-      flushPara();
-      blocks.push({ kind: "h1", text: h1[1].trim() });
-      continue;
-    }
-    if (h2) {
-      flushPara();
-      blocks.push({ kind: "h2", text: h2[1].trim() });
-      continue;
-    }
-    if (h3) {
-      flushPara();
-      blocks.push({ kind: "h3", text: h3[1].trim() });
-      continue;
-    }
+    if (h1) { flushPara(); blocks.push({ kind: "h1", text: h1[1].trim() }); continue; }
+    if (h2) { flushPara(); blocks.push({ kind: "h2", text: h2[1].trim() }); continue; }
+    if (h3) { flushPara(); blocks.push({ kind: "h3", text: h3[1].trim() }); continue; }
 
     // quote
     const q = line.match(/^\s*>\s?(.+)\s*$/);
-    if (q) {
-      flushPara();
-      blocks.push({ kind: "quote", text: q[1].trim() });
-      continue;
-    }
+    if (q) { flushPara(); blocks.push({ kind: "quote", text: q[1].trim() }); continue; }
 
-    // list items
+    // list
     const li = line.match(/^(\s*)([-*]|\d+\.)\s+(.+)\s*$/);
     if (li) {
       flushPara();
@@ -304,10 +295,7 @@ function parseBlocks(md: string): Block[] {
     }
 
     // blank line separates paragraphs
-    if (!line.trim()) {
-      flushPara();
-      continue;
-    }
+    if (!line.trim()) { flushPara(); continue; }
 
     // inline markdown cleanup (light)
     const cleaned = line
@@ -320,7 +308,6 @@ function parseBlocks(md: string): Block[] {
     paraBuf.push(cleaned);
   }
 
-  // final flush
   if (inCode) flushCode();
   flushPara();
 
@@ -344,46 +331,42 @@ function drawHeaderFooter(args: {
 }) {
   const { page, w, h, layout, fonts, title, tier, quality, pageNum } = args;
 
-  const topY = h - layout.marginTop + 26;
   const leftX = layout.marginX;
   const rightX = w - layout.marginX;
 
-  // Top rule
+  const headerY = h - layout.marginTop + 26;
+
   page.drawLine({
-    start: { x: leftX, y: topY - 8 },
-    end: { x: rightX, y: topY - 8 },
+    start: { x: leftX, y: headerY - 8 },
+    end: { x: rightX, y: headerY - 8 },
     thickness: 1,
     color: BRAND.colors.rule,
   });
 
-  // Brand left
   page.drawText("ABRAHAM OF LONDON", {
     x: leftX,
-    y: topY,
+    y: headerY,
     size: layout.small,
     font: fonts.bodyBold,
     color: BRAND.colors.slate,
   });
 
-  // Doc title right (trim)
   const t = String(title || "").trim();
   const maxTitleWidth = (rightX - leftX) * 0.62;
+
   let shown = t;
-  while (shown.length > 6 && fonts.body.widthOfTextAtSize(shown, layout.small) > maxTitleWidth) {
-    shown = shown.slice(0, -1);
-  }
+  while (shown.length > 6 && fonts.body.widthOfTextAtSize(shown, layout.small) > maxTitleWidth) shown = shown.slice(0, -1);
   if (shown !== t) shown = shown.replace(/\s+$/, "") + "…";
 
   const titleWidth = fonts.body.widthOfTextAtSize(shown, layout.small);
   page.drawText(shown, {
     x: rightX - titleWidth,
-    y: topY,
+    y: headerY,
     size: layout.small,
     font: fonts.body,
     color: BRAND.colors.faint,
   });
 
-  // Footer
   const footerY = layout.marginBottom - 26;
 
   page.drawLine({
@@ -393,8 +376,7 @@ function drawHeaderFooter(args: {
     color: BRAND.colors.rule,
   });
 
-  const leftFooter = `${BRAND.site} • ${tier.toUpperCase()} • ${quality.toUpperCase()}`;
-  page.drawText(leftFooter, {
+  page.drawText(`${BRAND.site} • ${tier.toUpperCase()} • ${quality.toUpperCase()}`, {
     x: leftX,
     y: footerY,
     size: layout.small,
@@ -414,7 +396,30 @@ function drawHeaderFooter(args: {
 }
 
 // -----------------------------------------------------------------------------
-// Cover page (premium AoL look)
+// Watermark (non-free)
+// -----------------------------------------------------------------------------
+
+function maybeWatermark(args: { page: PDFPage; w: number; h: number; fonts: EmbeddedFonts; tier: string }) {
+  const { page, w, h, fonts, tier } = args;
+  if (!tier || tier === "free") return;
+
+  const text = `ABRAHAM OF LONDON • ${tier.toUpperCase()}`;
+  const size = 30;
+  const tw = fonts.heading.widthOfTextAtSize(text, size);
+
+  page.drawText(text, {
+    x: (w - tw) / 2,
+    y: h / 2,
+    size,
+    font: fonts.heading,
+    color: BRAND.colors.watermark,
+    rotate: { type: "degrees", angle: 25 },
+    opacity: 0.22,
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Cover page
 // -----------------------------------------------------------------------------
 
 function drawCover(args: {
@@ -432,10 +437,8 @@ function drawCover(args: {
   const page = pdfDoc.addPage([w, h]);
   page.drawRectangle({ x: 0, y: 0, width: w, height: h, color: BRAND.colors.paper });
 
-  // Gold accent bar
   page.drawRectangle({ x: 0, y: h - 18, width: w, height: 18, color: BRAND.colors.gold });
 
-  // Title block
   const x = layout.marginX;
   const titleY = h - layout.marginTop - 90;
 
@@ -444,7 +447,6 @@ function drawCover(args: {
   const desc = String(meta.description || "").trim();
   const category = String(meta.category || "").trim();
 
-  // Category
   if (category) {
     page.drawText(category.toUpperCase(), {
       x,
@@ -455,7 +457,6 @@ function drawCover(args: {
     });
   }
 
-  // Title
   const titleLines = wrapText({
     text: title,
     font: fonts.headingBold,
@@ -475,7 +476,6 @@ function drawCover(args: {
     y -= (layout.heading1 + 10) * 1.15;
   }
 
-  // Subtitle
   if (subtitle) {
     y -= 12;
     const subLines = wrapText({
@@ -485,52 +485,26 @@ function drawCover(args: {
       maxWidth: w - layout.marginX * 2,
     });
     for (const line of subLines.slice(0, 3)) {
-      page.drawText(line, {
-        x,
-        y,
-        size: layout.body + 1.5,
-        font: fonts.body,
-        color: BRAND.colors.slate,
-      });
+      page.drawText(line, { x, y, size: layout.body + 1.5, font: fonts.body, color: BRAND.colors.slate });
       y -= (layout.body + 1.5) * layout.lineHeight;
     }
   }
 
-  // Description (short)
   if (desc) {
     y -= 10;
-    const dLines = wrapText({
-      text: desc,
-      font: fonts.body,
-      fontSize: layout.body,
-      maxWidth: w - layout.marginX * 2,
-    });
+    const dLines = wrapText({ text: desc, font: fonts.body, fontSize: layout.body, maxWidth: w - layout.marginX * 2 });
     for (const line of dLines.slice(0, 6)) {
-      page.drawText(line, {
-        x,
-        y,
-        size: layout.body,
-        font: fonts.body,
-        color: BRAND.colors.faint,
-      });
+      page.drawText(line, { x, y, size: layout.body, font: fonts.body, color: BRAND.colors.faint });
       y -= layout.body * layout.lineHeight;
     }
   }
 
-  // Tier badge
   const badge = `${tier.toUpperCase()} • ${quality.toUpperCase()}`;
   const badgeSize = layout.small + 1;
   const badgeW = fonts.bodyBold.widthOfTextAtSize(badge, badgeSize) + 20;
   const badgeH = 22;
 
-  page.drawRectangle({
-    x,
-    y: layout.marginBottom + 36,
-    width: badgeW,
-    height: badgeH,
-    color: BRAND.colors.charcoal,
-  });
-
+  page.drawRectangle({ x, y: layout.marginBottom + 36, width: badgeW, height: badgeH, color: BRAND.colors.charcoal });
   page.drawText(badge, {
     x: x + 10,
     y: layout.marginBottom + 42,
@@ -539,9 +513,7 @@ function drawCover(args: {
     color: BRAND.colors.paper,
   });
 
-  // Footer identity
-  const foot = `© ${new Date().getFullYear()} ${BRAND.author}`;
-  page.drawText(foot, {
+  page.drawText(`© ${new Date().getFullYear()} ${BRAND.author}`, {
     x,
     y: layout.marginBottom,
     size: layout.small,
@@ -549,37 +521,32 @@ function drawCover(args: {
     color: BRAND.colors.faint,
   });
 
+  maybeWatermark({ page, w, h, fonts, tier });
+
   return page;
 }
 
 // -----------------------------------------------------------------------------
-// Watermark (for non-free tiers)
+// Integrity helpers (no stubs)
 // -----------------------------------------------------------------------------
 
-function maybeWatermark(args: {
-  page: PDFPage;
-  w: number;
-  h: number;
-  fonts: EmbeddedFonts;
-  tier: string;
-}) {
-  const { page, w, h, fonts, tier } = args;
-  if (!tier || tier === "free") return;
+function isPdfHeaderBytes(bytes: Uint8Array) {
+  if (!bytes || bytes.length < 4) return false;
+  const head = Buffer.from(bytes.slice(0, 4)).toString("utf8");
+  return head === "%PDF";
+}
 
-  const text = `ABRAHAM OF LONDON • ${tier.toUpperCase()}`;
-  const size = 32;
-  const tw = fonts.heading.widthOfTextAtSize(text, size);
+function atomicWrite(absPath: string, bytes: Uint8Array) {
+  fs.mkdirSync(path.dirname(absPath), { recursive: true });
+  const tmp = absPath.replace(/\.pdf$/i, `.__tmp__.pdf`);
+  fs.writeFileSync(tmp, bytes);
+  fs.renameSync(tmp, absPath);
+}
 
-  // Light diagonal watermark
-  page.drawText(text, {
-    x: (w - tw) / 2,
-    y: h / 2,
-    size,
-    font: fonts.heading,
-    color: BRAND.colors.watermark,
-    rotate: { type: "degrees", angle: 25 },
-    opacity: 0.25,
-  });
+function minBytesForTier(tierSlug: string) {
+  // keep soft: real PDFs can be small; stubs are tiny
+  if (tierSlug === "free") return 8000;
+  return 9000;
 }
 
 // -----------------------------------------------------------------------------
@@ -591,6 +558,7 @@ type ConvertResult = {
   outputPublicPath?: string;
   outputAbsPath?: string;
   bytes?: number;
+  pageCount?: number;
   error?: string;
 };
 
@@ -621,8 +589,9 @@ export class MdxToPdfConverter {
   ): Promise<ConvertResult> {
     try {
       const absMdx = path.isAbsolute(doc.mdxPath) ? doc.mdxPath : path.join(process.cwd(), doc.mdxPath);
-      const raw = fs.readFileSync(absMdx, "utf-8");
+      if (!fs.existsSync(absMdx)) throw new Error(`MDX source missing: ${absMdx}`);
 
+      const raw = fs.readFileSync(absMdx, "utf-8");
       const { data: fm, content: mdxBody } = stripFrontmatter(raw);
 
       const title = String(fm.title || doc.displayName || doc.pdfName || "Document").trim();
@@ -641,33 +610,20 @@ export class MdxToPdfConverter {
       });
       const outAbs = repoAbsFromPublic(outPublic);
 
-      // Ensure folder exists
-      fs.mkdirSync(path.dirname(outAbs), { recursive: true });
-
-      // Build PDF
       const pdfDoc = await PDFDocument.create();
       const fonts = await embedFonts(pdfDoc);
 
-      // PDF metadata
       pdfDoc.setTitle(title);
       pdfDoc.setAuthor(BRAND.author);
-      pdfDoc.setCreator("AoL MDX-to-PDF (Branded)");
+      pdfDoc.setCreator(BRAND.product);
       pdfDoc.setProducer("pdf-lib");
       if (description) pdfDoc.setSubject(description);
 
       const lay = layoutFor(format, quality);
       const { w, h } = pageSize(format);
 
-      // Cover
-      drawCover({
-        pdfDoc,
-        format,
-        layout: lay,
-        fonts,
-        meta: { title, subtitle, description, category },
-        tier: tier.slug,
-        quality,
-      });
+      // Cover first
+      drawCover({ pdfDoc, format, layout: lay, fonts, meta: { title, subtitle, description, category }, tier: tier.slug, quality });
 
       // Content pages
       let pageNum = 1;
@@ -679,39 +635,26 @@ export class MdxToPdfConverter {
       const rightX = w - lay.marginX;
       const contentW = rightX - leftX;
 
-      const newPage = () => {
-        // header/footer + watermark for completed page
-        drawHeaderFooter({
-          page,
-          w,
-          h,
-          layout: lay,
-          fonts,
-          title,
-          tier: tier.slug,
-          quality,
-          pageNum: pageNum - 1,
-        });
-        maybeWatermark({ page, w, h, fonts, tier: tier.slug });
+      const finalizePage = (p: PDFPage, num: number) => {
+        drawHeaderFooter({ page: p, w, h, layout: lay, fonts, title, tier: tier.slug, quality, pageNum: num });
+        maybeWatermark({ page: p, w, h, fonts, tier: tier.slug });
+      };
 
+      const newPage = () => {
+        finalizePage(page, pageNum - 1);
         page = pdfDoc.addPage([w, h]);
         cursorY = h - lay.marginTop;
         pageNum++;
       };
 
       const ensureSpace = (needed: number) => {
-        const bottomLimit = lay.marginBottom + 34; // footer clearance
+        const bottomLimit = lay.marginBottom + 34;
         if (cursorY - needed < bottomLimit) newPage();
       };
 
-      // Initial opener line
+      // opener rule
       ensureSpace(40);
-      page.drawLine({
-        start: { x: leftX, y: cursorY },
-        end: { x: rightX, y: cursorY },
-        thickness: 2,
-        color: BRAND.colors.rule,
-      });
+      page.drawLine({ start: { x: leftX, y: cursorY }, end: { x: rightX, y: cursorY }, thickness: 2, color: BRAND.colors.rule });
       cursorY -= 18;
 
       for (const b of blocks) {
@@ -722,7 +665,7 @@ export class MdxToPdfConverter {
             page.drawText(ln, { x: leftX, y: cursorY, size: lay.heading1, font: fonts.headingBold, color: BRAND.colors.charcoal });
             cursorY -= lay.heading1 * 1.15;
           }
-          cursorY -= 10;
+          cursorY -= lay.blockGap;
           continue;
         }
 
@@ -731,9 +674,9 @@ export class MdxToPdfConverter {
           const lines = wrapText({ text: b.text, font: fonts.headingBold, fontSize: lay.heading2, maxWidth: contentW });
           for (const ln of lines) {
             page.drawText(ln, { x: leftX, y: cursorY, size: lay.heading2, font: fonts.headingBold, color: BRAND.colors.charcoal });
-            cursorY -= lay.heading2 * 1.20;
+            cursorY -= lay.heading2 * 1.2;
           }
-          cursorY -= 8;
+          cursorY -= lay.blockGap;
           continue;
         }
 
@@ -744,31 +687,28 @@ export class MdxToPdfConverter {
             page.drawText(ln, { x: leftX, y: cursorY, size: lay.heading3, font: fonts.bodyBold, color: BRAND.colors.slate });
             cursorY -= lay.heading3 * 1.22;
           }
-          cursorY -= 6;
+          cursorY -= lay.paragraphGap;
           continue;
         }
 
         if (b.kind === "quote") {
-          ensureSpace(44);
+          ensureSpace(52);
           const quoteX = leftX + 14;
           const quoteW = contentW - 14;
 
-          // left rule
-          page.drawRectangle({
-            x: leftX,
-            y: cursorY - 6,
-            width: 3,
-            height: 34,
-            color: BRAND.colors.gold,
-          });
+          // calculate quote height roughly for box sizing
+          const qLines = wrapText({ text: b.text, font: fonts.body, fontSize: lay.body, maxWidth: quoteW });
+          const qH = qLines.length * lay.body * lay.lineHeight + 12;
 
-          const lines = wrapText({ text: b.text, font: fonts.body, fontSize: lay.body, maxWidth: quoteW });
-          for (const ln of lines) {
+          // left gold rule sized to content
+          page.drawRectangle({ x: leftX, y: cursorY - qH + 6, width: 3, height: qH, color: BRAND.colors.gold });
+
+          for (const ln of qLines) {
             ensureSpace(lay.body * lay.lineHeight + 2);
             page.drawText(ln, { x: quoteX, y: cursorY, size: lay.body, font: fonts.body, color: BRAND.colors.slate });
             cursorY -= lay.body * lay.lineHeight;
           }
-          cursorY -= lay.paragraphGap;
+          cursorY -= lay.blockGap;
           continue;
         }
 
@@ -780,36 +720,29 @@ export class MdxToPdfConverter {
 
           const lines = wrapText({ text: b.text, font: fonts.body, fontSize: lay.body, maxWidth: maxW });
 
-          // bullet
           ensureSpace(lay.body * lay.lineHeight + 2);
           page.drawText("•", { x: bulletX, y: cursorY, size: lay.body + 2, font: fonts.bodyBold, color: BRAND.colors.gold });
 
-          let first = true;
           for (const ln of lines) {
             ensureSpace(lay.body * lay.lineHeight + 2);
-            page.drawText(ln, {
-              x: first ? textX : textX,
-              y: cursorY,
-              size: lay.body,
-              font: fonts.body,
-              color: BRAND.colors.charcoal,
-            });
+            page.drawText(ln, { x: textX, y: cursorY, size: lay.body, font: fonts.body, color: BRAND.colors.charcoal });
             cursorY -= lay.body * lay.lineHeight;
-            first = false;
           }
-          cursorY -= 4;
+          cursorY -= 6;
           continue;
         }
 
         if (b.kind === "code") {
-          // code block box
-          const codeSize = lay.small + 0.5;
-          const codeLines = String(b.text || "").split("\n").slice(0, 120); // safety cap
+          const codeSize = lay.code;
+          const codeLines = String(b.text || "").split("\n").slice(0, 160);
           const boxPad = 12;
           const lineH = codeSize * 1.35;
-          const neededH = Math.min(18 + codeLines.length * lineH, 360);
 
-          ensureSpace(neededH + 14);
+          const maxLines = 28; // keeps aesthetic consistent
+          const visible = codeLines.slice(0, maxLines);
+
+          const neededH = 18 + visible.length * lineH + 16;
+          ensureSpace(neededH + 10);
 
           const boxTop = cursorY + 8;
           const boxH = neededH;
@@ -820,25 +753,25 @@ export class MdxToPdfConverter {
             y: boxY,
             width: contentW,
             height: boxH,
-            color: rgb(0.965, 0.965, 0.97),
+            color: BRAND.colors.codeBg,
             borderColor: BRAND.colors.rule,
             borderWidth: 1,
           });
 
           let cy = boxTop - boxPad - codeSize;
-          for (const ln of codeLines) {
+          for (const ln of visible) {
             if (cy < boxY + 10) break;
             page.drawText(ln, {
               x: leftX + boxPad,
               y: cy,
               size: codeSize,
-              font: fonts.body,
+              font: fonts.mono,
               color: BRAND.colors.slate,
             });
             cy -= lineH;
           }
 
-          cursorY = boxY - lay.paragraphGap;
+          cursorY = boxY - lay.blockGap;
           continue;
         }
 
@@ -855,27 +788,19 @@ export class MdxToPdfConverter {
         }
       }
 
-      // finalize last page header/footer
-      drawHeaderFooter({
-        page,
-        w,
-        h,
-        layout: lay,
-        fonts,
-        title,
-        tier: tier.slug,
-        quality,
-        pageNum: pageNum - 1,
-      });
-      maybeWatermark({ page, w, h, fonts, tier: tier.slug });
+      finalizePage(page, pageNum - 1);
 
-      // Also finalize cover? (optional, keep clean)
-      // Save
       const bytes = await pdfDoc.save();
-      fs.writeFileSync(outAbs, bytes);
+
+      // Hard integrity
+      const minBytes = minBytesForTier(tier.slug);
+      if (bytes.length < minBytes) throw new Error(`Generated PDF too small (${bytes.length} bytes) for ${doc.pdfName}`);
+      if (!isPdfHeaderBytes(bytes)) throw new Error(`Generated PDF missing %PDF header for ${doc.pdfName}`);
+
+      atomicWrite(outAbs, bytes);
 
       this.stats.processed++;
-      return { success: true, outputPublicPath: outPublic, outputAbsPath: outAbs, bytes: bytes.length };
+      return { success: true, outputPublicPath: outPublic, outputAbsPath: outAbs, bytes: bytes.length, pageCount: pdfDoc.getPageCount() };
     } catch (e: any) {
       this.stats.errors++;
       const msg = e?.message || String(e);

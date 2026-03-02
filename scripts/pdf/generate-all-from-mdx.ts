@@ -1,4 +1,4 @@
-// scripts/pdf/generate-all-from-mdx.ts
+﻿// scripts/pdf/generate-all-from-mdx.ts
 import { MdxToPdfConverter } from "./mdx-pdf-converter/converter";
 import {
   DOCUMENT_REGISTRY,
@@ -108,7 +108,7 @@ class AllMdxPdfGenerator {
       const autoTier: TierConfig = {
         slug: "free",
         displayName: "Free",
-        accessLevel: "free",
+        accessLevel: "public",
         generatePdf: true,
         generateFillable: false,
         formats: ["A4"],

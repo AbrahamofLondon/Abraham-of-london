@@ -1,4 +1,5 @@
 /* lib/redis-safe.ts — DUAL RUNTIME SAFE (UPSTASH + MEMORY), ESM CLEAN, FULL API */
+
 export type RedisStats = {
   available: boolean;
   type: "upstash" | "memory";
@@ -36,9 +37,7 @@ function env(key: string): string | undefined {
 }
 
 const isEdgeRuntime =
-  // Next Edge runtime global
   typeof (globalThis as any).EdgeRuntime === "string" ||
-  // Next also signals this when process exists
   env("NEXT_RUNTIME") === "edge";
 
 function getRuntime(): RedisStats["runtime"] {
@@ -79,7 +78,6 @@ const memoryClient: SafeRedisClient = {
   get: async (k) => memGet(k),
 
   set: async (k, v, ...args) => {
-    // support: set(key, value, "EX", seconds)
     if (args[0] === "EX") {
       const seconds = Number(args[1] ?? 0);
       memSet(k, String(v), seconds);
@@ -110,18 +108,15 @@ const memoryClient: SafeRedisClient = {
 
     if (!pattern || pattern === "*") return Array.from(all);
 
-    // simple glob: prefix*
     if (pattern.endsWith("*")) {
       const prefix = pattern.slice(0, -1);
       return Array.from(all).filter((k) => k.startsWith(prefix));
     }
 
-    // exact match
     return all.has(pattern) ? [pattern] : [];
   },
 
-  exists: async (...keys) =>
-    keys.reduce((a, k) => a + (memGet(k) !== null ? 1 : 0), 0),
+  exists: async (...keys) => keys.reduce((a, k) => a + (memGet(k) !== null ? 1 : 0), 0),
 
   expire: async (k, seconds) => {
     const v = memGet(k);
@@ -152,7 +147,6 @@ const memoryClient: SafeRedisClient = {
     return next;
   },
 
-  // Hashes
   hget: async (k, f) => {
     const h = memoryHashes.get(k);
     if (!h) return null;
@@ -178,7 +172,6 @@ const memoryClient: SafeRedisClient = {
     return obj;
   },
 
-  // Lists
   lpush: async (k, ...values) => {
     const list = memoryLists.get(k) ?? [];
     for (const v of values) list.unshift(String(v));
@@ -202,7 +195,7 @@ const memoryClient: SafeRedisClient = {
   },
 };
 
-// -------------------- Upstash Resolver (SAFE, dynamic, Edge-compatible) --------------------
+// -------------------- Upstash Resolver (SAFE, platform entrypoints) --------------------
 let cached: { client: SafeRedisClient; type: RedisStats["type"] } | null = null;
 
 async function resolveClient(): Promise<{ client: SafeRedisClient; type: RedisStats["type"] }> {
@@ -211,17 +204,19 @@ async function resolveClient(): Promise<{ client: SafeRedisClient; type: RedisSt
   const url = env("UPSTASH_REDIS_REST_URL");
   const token = env("UPSTASH_REDIS_REST_TOKEN");
 
-  // If env missing, go memory (no drama)
   if (!url || !token) {
     return (cached = { client: memoryClient, type: "memory" });
   }
 
   try {
     // IMPORTANT:
-    // - We only use "@upstash/redis" (fetch-based) which works in Edge and Node.
-    // - We do NOT import "@upstash/redis/nodejs" at all (avoids Edge bundle trap).
-    const mod = await import("@upstash/redis");
-    const Redis = mod.Redis;
+    // - Edge runtime must NOT pull nodejs.mjs. Use cloudflare entrypoint.
+    // - Node runtime can use the default entrypoint.
+    const mod = isEdgeRuntime
+      ? await import("@upstash/redis/cloudflare")
+      : await import("@upstash/redis");
+
+    const Redis = (mod as any).Redis;
     const r = new Redis({ url, token });
 
     const client: SafeRedisClient = {
@@ -235,7 +230,7 @@ async function resolveClient(): Promise<{ client: SafeRedisClient; type: RedisSt
       },
       del: async (...keys) => {
         const res = await Promise.all(keys.map((k) => r.del(k)));
-        return res.reduce((a, b) => a + Number(b), 0);
+        return res.reduce((a: number, b: any) => a + Number(b), 0);
       },
       ping: async () => r.ping(),
       keys: async (p) => r.keys(p),
@@ -251,7 +246,6 @@ async function resolveClient(): Promise<{ client: SafeRedisClient; type: RedisSt
       hset: async (k, f, v2) => Number(await r.hset(k, f, v2)),
       hgetall: async (k) => {
         const obj = await r.hgetall(k);
-        // Upstash returns Record<string, string> already, but keep safe:
         const out: Record<string, string> = {};
         for (const [kk, vv] of Object.entries(obj ?? {})) out[kk] = String(vv);
         return out;
@@ -262,20 +256,17 @@ async function resolveClient(): Promise<{ client: SafeRedisClient; type: RedisSt
     };
 
     return (cached = { client, type: "upstash" });
-  } catch (e: any) {
+  } catch {
     return (cached = { client: memoryClient, type: "memory" });
   }
 }
 
 // -------------------- Public API --------------------
-
-/** Get the Redis client (Upstash if available, otherwise memory fallback) */
 export async function getRedis(): Promise<SafeRedisClient> {
   const resolved = await resolveClient();
   return resolved.client;
 }
 
-/** Ping the Redis server */
 export async function safePing(): Promise<boolean> {
   try {
     const r = await getRedis();
@@ -286,7 +277,6 @@ export async function safePing(): Promise<boolean> {
   }
 }
 
-/** Get connection statistics */
 export async function getRedisStats(): Promise<RedisStats> {
   const resolved = await resolveClient();
   const runtime = getRuntime();
@@ -314,17 +304,14 @@ export async function getRedisStats(): Promise<RedisStats> {
   };
 }
 
-/** Convenience: get a single key */
 export async function safeGet(key: string): Promise<string | null> {
   const r = await getRedis();
   return r.get(key);
 }
 
-/** Convenience: set a single key with optional expiration */
 export async function safeSet(key: string, value: string, options?: { ex: number }) {
   const r = await getRedis();
   return options?.ex ? r.set(key, value, "EX", options.ex) : r.set(key, value);
 }
 
-// Default export for legacy compatibility
 export default { getRedis, getRedisStats, safePing, safeGet, safeSet };

@@ -1,83 +1,145 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Use the singleton
-import { decryptDocument } from '@/lib/security';
+// app/api/vault/[...slug]/route.ts — VAULT REGISTRY RETRIEVAL (Node runtime)
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { NextRequest, NextResponse } from "next/server";
+import tiers from "@/lib/access/tiers";
+import { prisma } from "@/lib/prisma.server";
+import { decryptDocument } from "@/lib/security";
+
+export const runtime = "nodejs";
+
+type AccessCheckResponse = {
+  hasAccess: boolean;
+  reason?: string;
+  tier?: string;
+};
+
+function jsonNoStore(body: any, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      "Cache-Control": "no-store, max-age=0",
+      Pragma: "no-cache",
+    },
+  });
+}
+
+function normalizeSlugParts(parts: string[]) {
+  return parts
+    .map((p) => String(p || "").trim())
+    .filter(Boolean)
+    .map((p) => p.replace(/\\/g, "/"))
+    .filter((p) => p !== "." && p !== ".." && !p.includes("..") && !p.includes("\0"));
+}
+
+async function checkAccessViaPagesAPI(req: NextRequest): Promise<AccessCheckResponse> {
+  // Bridge: reuse your existing Pages API access check (cookie-based).
+  const cookie = req.headers.get("cookie") || "";
+  const origin = req.nextUrl.origin;
+
+  try {
+    const r = await fetch(`${origin}/api/access/check`, {
+      method: "GET",
+      headers: { cookie, accept: "application/json" },
+      cache: "no-store",
+    });
+
+    const j = (await r.json().catch(() => ({}))) as any;
+    // normalize to our shape
+    return {
+      hasAccess: Boolean(j?.hasAccess ?? j?.ok ?? false),
+      reason: j?.reason,
+      tier: j?.tier,
+    };
+  } catch {
+    return { hasAccess: false, reason: "internal_error" };
+  }
+}
 
 /**
  * GET /api/vault/[...slug]
- * Secure retrieval and decryption of institutional assets.
+ * Secure retrieval + decryption of institutional assets in registry.
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string[] }> }
-) {
-  const resolvedParams = await params;
-  
-  if (!resolvedParams.slug || resolvedParams.slug.length === 0) {
-    return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+export async function GET(req: NextRequest, ctx: { params: { slug: string[] } }) {
+  const parts = normalizeSlugParts(ctx.params?.slug || []);
+  if (!parts.length) return jsonNoStore({ ok: false, reason: "BAD_PATH" }, 400);
+
+  const slugPath = parts.join("/");
+
+  // 1) Registry lookup
+  const asset = await prisma.contentMetadata.findUnique({
+    where: { slug: slugPath },
+  });
+
+  if (!asset) {
+    return jsonNoStore({ ok: false, reason: "NOT_FOUND" }, 404);
   }
 
-  const slugPath = resolvedParams.slug.join('/');
-  console.log(`[VAULT_LOOKUP]: Requesting Asset >> ${slugPath}`);
+  // 2) Determine required tier from registry classification fields
+  const requiredTier = tiers.normalizeRequired(
+    (asset as any).classification ??
+      (asset as any).accessLevel ??
+      (asset as any).tier ??
+      "member"
+  );
 
-  try {
-    // 1. Interrogate Registry via Singleton
-    const asset = await prisma.contentMetadata.findUnique({
-      where: { slug: slugPath }
-    });
+  // 3) Enforce access using existing access service
+  if (requiredTier !== "public") {
+    const access = await checkAccessViaPagesAPI(req);
 
-    if (!asset) {
-      console.warn(`[VAULT_MISSING]: ${slugPath} not in registry.`);
-      return NextResponse.json({ error: 'Asset not found in Registry' }, { status: 404 });
-    }
-
-    // 2. Security Envelope Validation
-    let security;
-    try {
-      security = typeof asset.metadata === 'string' 
-        ? JSON.parse(asset.metadata) 
-        : asset.metadata;
-    } catch (e) {
-      throw new Error("Registry metadata is malformed or corrupted.");
-    }
-
-    if (!security?.content || !security?.iv || !security?.authTag) {
-      throw new Error("Incomplete security envelope (missing IV or AuthTag).");
-    }
-
-    // 3. Decryption Engine Execution
-    let decrypted: string;
-    try {
-      decrypted = decryptDocument(
-        security.content,
-        security.iv,
-        security.authTag
+    if (!access?.hasAccess) {
+      return jsonNoStore(
+        { ok: false, reason: access?.reason || "REQUIRES_AUTH", requiredTier },
+        401
       );
-    } catch (cryptoErr: any) {
-      console.error(`[VAULT_DECRYPT_FAIL]: ${slugPath} - ${cryptoErr.message}`);
-      return NextResponse.json({ 
-        error: 'Security Handshake Failed', 
-        details: 'Decryption failed. Check system encryption keys.' 
-      }, { status: 403 });
     }
 
-    // 4. Return Verified Payload
-    return NextResponse.json({
-      ok: true,
-      asset: {
-        title: asset.title,
-        content: decrypted,
-        classification: asset.classification,
-        lastUpdated: asset.updatedAt,
-        type: asset.type
-      }
-    });
-
-  } catch (error: any) {
-    console.error(`[VAULT_CRITICAL_ERROR]:`, error.message);
-    return NextResponse.json({ 
-      error: 'Internal System Failure', 
-      details: error.message 
-    }, { status: 500 });
+    const userTier = tiers.normalizeUser(access?.tier ?? "public");
+    if (!tiers.hasAccess(userTier, requiredTier)) {
+      return jsonNoStore(
+        { ok: false, reason: "INSUFFICIENT_TIER", requiredTier },
+        403
+      );
+    }
   }
-  // Note: No need for $disconnect() here when using a singleton pool
+
+  // 4) Validate security envelope
+  let security: any;
+  try {
+    security = typeof (asset as any).metadata === "string" ? JSON.parse((asset as any).metadata) : (asset as any).metadata;
+  } catch {
+    return jsonNoStore({ ok: false, reason: "MALFORMED_REGISTRY_METADATA" }, 500);
+  }
+
+  if (!security?.content || !security?.iv || !security?.authTag) {
+    return jsonNoStore({ ok: false, reason: "INCOMPLETE_SECURITY_ENVELOPE" }, 500);
+  }
+
+  // 5) Decrypt
+  let decrypted: string;
+  try {
+    decrypted = decryptDocument(security.content, security.iv, security.authTag);
+  } catch (e: any) {
+    return jsonNoStore(
+      {
+        ok: false,
+        reason: "DECRYPTION_FAILED",
+        details: "Decryption failed. Verify encryption keys and envelope integrity.",
+      },
+      403
+    );
+  }
+
+  // 6) Return verified payload
+  return jsonNoStore({
+    ok: true,
+    requiredTier,
+    asset: {
+      title: (asset as any).title ?? null,
+      type: (asset as any).type ?? null,
+      classification: (asset as any).classification ?? null,
+      lastUpdated: (asset as any).updatedAt ? new Date((asset as any).updatedAt).toISOString() : null,
+      content: decrypted,
+    },
+  });
 }

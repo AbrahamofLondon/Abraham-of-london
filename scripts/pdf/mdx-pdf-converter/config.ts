@@ -1,4 +1,4 @@
-// scripts/pdf/mdx-pdf-converter/config.ts
+﻿// scripts/pdf/mdx-pdf-converter/config.ts
 import fs from "fs";
 import path from "path";
 
@@ -91,7 +91,7 @@ export const DOCUMENT_REGISTRY: DocumentRegistryEntry[] = [
   //   category: "Leadership",
   //   description: "A field manual for operators.",
   //   tiers: [
-  //     { slug: "free", displayName: "Free", accessLevel: "free", generatePdf: true, generateFillable: false, formats: ["A4"], quality: ["standard", "premium"] },
+  //     { slug: "free", displayName: "Free", accessLevel: "public", generatePdf: true, generateFillable: false, formats: ["A4"], quality: ["standard", "premium"] },
   //   ],
   // },
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma.server";
 import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";

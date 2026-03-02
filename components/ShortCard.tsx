@@ -1,176 +1,211 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/ShortCard.tsx — BRAND EQUITY UNIT (Quiet. Expensive. Recognisable.)
+// components/ShortCard.tsx — HOUSE TYPEFINISH (confident, groomed, no tantrums)
 
 import * as React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowUpRight, Clock, Eye, Shield, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 
-type Intensity = 1 | 2 | 3 | 4 | 5;
-
-export type ShortCardData = {
+type ShortCardModel = {
   slug: string;
   title: string;
-  excerpt?: string | null;
+  excerpt: string;
   category?: string | null;
   readTime?: string | null;
   views?: number;
-  intensity?: Intensity;
+  intensity?: 1 | 2 | 3 | 4 | 5;
   lineage?: string | null;
   coverImage?: string | null;
 };
 
-type Props = {
-  short: ShortCardData;
+function safeNumber(n: unknown, fallback = 0) {
+  const x = typeof n === "number" ? n : Number(n);
+  return Number.isFinite(x) ? x : fallback;
+}
+
+function intensityLabel(i?: number) {
+  const v = safeNumber(i, 3);
+  if (v <= 2) return "quiet";
+  if (v === 3) return "steel";
+  if (v === 4) return "edge";
+  return "fire";
+}
+
+export default function ShortCard({
+  short,
+  onClick,
+}: {
+  short: ShortCardModel;
   onClick?: () => void;
-  className?: string;
-};
+}) {
+  const href = `/shorts/${short.slug}`;
+  const hasCover = !!short.coverImage;
 
-function safeString(v: unknown) {
-  return typeof v === "string" ? v : "";
-}
-
-function cleanSlugForURL(slug: string): string {
-  if (!slug) return "";
-  return slug
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/^shorts\//i, "")
-    .replace(/\/+/g, "/")
-    .trim();
-}
-
-const SignalStrength = ({ level = 3 }: { level?: Intensity }) => {
-  const bars = [1, 2, 3, 4, 5];
-  return (
-    <div className="flex items-center gap-1">
-      {bars.map((b) => (
-        <span
-          key={b}
-          className={`h-3 w-[2px] rounded-full ${
-            b <= level ? "bg-amber-500/80" : "bg-white/10"
-          }`}
-        />
-      ))}
-    </div>
-  );
-};
-
-export default function ShortCard({ short, onClick, className = "" }: Props) {
-  const slug = cleanSlugForURL(safeString(short.slug));
-  const href = `/shorts/${slug}`;
-
-  const title = safeString(short.title) || "Untitled";
-  const excerpt = safeString(short.excerpt) || "A short note from the archive.";
-  const category = safeString(short.category) || "Intel";
-  const readTime = safeString(short.readTime) || "2 min";
-  const views = Number(short.views || 0);
-  const intensity = (short.intensity || 3) as Intensity;
-  const lineage = safeString(short.lineage);
-  const coverImage = safeString(short.coverImage);
+  const tagA = (short.category || "Intel").toUpperCase();
+  const tagB = short.readTime || "2 min";
+  const power = intensityLabel(short.intensity);
 
   return (
-    <Link href={href} className={`group block ${className}`} onClick={onClick}>
-      <motion.article
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+    <Link
+      href={href}
+      onClick={onClick}
+      // ✅ stop “global link underline” leaks
+      className="group block no-underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
+    >
+      <article
         className={[
-          "relative overflow-hidden rounded-3xl",
+          "relative overflow-hidden rounded-2xl",
+          "bg-black/70 backdrop-blur-md",
           "border border-white/[0.06]",
-          "bg-white/[0.012]",
-          "shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55),inset_0_1px_1px_rgba(255,255,255,0.03)]",
-          "hover:border-amber-500/20 hover:bg-white/[0.02]",
-          "transition-colors duration-500",
+          "shadow-[0_18px_70px_-55px_rgba(0,0,0,0.85)]",
+          "transition-all duration-700",
+          "hover:-translate-y-[1px]",
+          "hover:border-amber-500/18",
+          "hover:shadow-[0_34px_120px_-70px_rgba(245,158,11,0.22)]",
         ].join(" ")}
       >
-        {/* Signature spine line — recognisable brand cue */}
-        <div className="pointer-events-none absolute inset-y-0 left-7 w-px bg-gradient-to-b from-amber-500/0 via-white/10 to-amber-500/0 opacity-60 group-hover:opacity-90 transition-opacity" />
+        {/* Inner lacquer + bevel */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-[1px] rounded-2xl"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.72), inset 0 0 0 1px rgba(255,255,255,0.02)",
+          }}
+        />
 
-        {/* Foil edge (top) */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/25 to-transparent" />
+        {/* Canvas integration wash */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(1200px 380px at 20% 0%, rgba(245,158,11,0.06), transparent 55%), radial-gradient(900px 320px at 100% 10%, rgba(255,255,255,0.04), transparent 55%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.28) 55%, rgba(0,0,0,0.55))",
+          }}
+        />
 
-        {/* Cover image (optional) */}
-        {coverImage ? (
-          <div className="absolute inset-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={coverImage}
-              alt=""
-              className="h-full w-full object-cover opacity-[0.10] group-hover:opacity-[0.16] transition-opacity duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black" />
-          </div>
-        ) : (
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(245,158,11,0.10),transparent_52%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_30%,rgba(255,255,255,0.05),transparent_58%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_95%,rgba(245,158,11,0.06),transparent_55%)]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-black/60 to-black" />
-          </div>
-        )}
+        {/* Quiet micro-grain */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-soft-light"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")`,
+          }}
+        />
 
-        {/* Content */}
-        <div className="relative p-8">
-          {/* Top band */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/30 px-4 py-2 backdrop-blur-xl">
-              <Shield className="h-3.5 w-3.5 text-amber-500/60" />
-              <span className="font-mono text-[9px] tracking-[0.45em] uppercase text-white/30">
-                Entry_{category}
+        {/* Specular sweep */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+        >
+          <div className="absolute -inset-x-24 -top-24 h-52 rotate-12 bg-white/[0.05] blur-2xl" />
+        </div>
+
+        <div className="relative p-5">
+          {/* META ROW (quiet confidence) */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[10px] font-mono tracking-[0.22em] text-amber-300/60">
+                {tagA}
               </span>
-              <span className="h-1 w-1 rounded-full bg-white/20" />
-              <SignalStrength level={intensity} />
+              <span className="text-white/10 text-xs">•</span>
+              <span className="text-[10px] font-mono tracking-[0.18em] text-white/32">
+                {tagB}
+              </span>
+
+              {/* Power chip: stamped, subdued */}
+              <span className="ml-1 text-[9px] px-2 py-[2px] rounded-full border border-white/[0.08] bg-black/35 text-amber-200/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                {power}
+              </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              {lineage ? (
-                <div className="hidden sm:inline-flex items-center gap-2 rounded-full border border-amber-500/15 bg-amber-500/5 px-3 py-2">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500/35" />
-                  <span className="font-mono text-[9px] tracking-[0.35em] uppercase text-amber-500/50">
-                    {lineage}
-                  </span>
-                </div>
-              ) : null}
-
-              <ArrowUpRight className="h-5 w-5 text-white/10 group-hover:text-amber-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
-            </div>
+            <ArrowUpRight className="h-4 w-4 text-amber-700/40 group-hover:text-amber-300/85 transition-colors duration-300" />
           </div>
 
-          {/* Title */}
-          <h3 className="mt-8 font-serif italic text-[1.9rem] leading-[1.05] text-white/85 group-hover:text-white transition-colors">
-            {title}
+          {/* COVER */}
+          {hasCover && (
+            <div className="mt-4">
+              <div className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-black/40">
+                <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
+                  <Image
+                    src={short.coverImage as string}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 520px"
+                    className="object-cover brightness-[0.90] saturate-[0.92] contrast-[1.02] group-hover:brightness-[0.98] group-hover:saturate-[0.98] transition-all duration-1000 group-hover:scale-[1.02]"
+                    priority={false}
+                  />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/18 to-transparent" />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-35 mix-blend-screen"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.00) 36%, rgba(255,255,255,0.07) 68%, rgba(255,255,255,0.00) 100%)",
+                    }}
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 rounded-xl"
+                    style={{
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.65)",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TITLE (authoritative, groomed) */}
+          <h3
+            className={[
+              "mt-4 font-serif",
+              // controlled sizing: strong but not loud
+              "text-[22px] md:text-[26px]",
+              // finishing school: leading + tracking + smoothing
+              "leading-[1.14] tracking-[-0.015em] antialiased",
+              // color discipline
+              "text-amber-50/95 group-hover:text-amber-50",
+              // ✅ kill underline leaks
+              "no-underline decoration-transparent",
+            ].join(" ")}
+          >
+            {short.title}
           </h3>
 
-          {/* Excerpt */}
-          <p className="mt-5 text-[1.02rem] leading-relaxed text-white/45 font-light line-clamp-3">
-            {excerpt}
+          {/* EXCERPT (confident, readable) */}
+          <p
+            className={[
+              "mt-2",
+              // slightly larger + steadier baseline
+              "text-[13px] leading-[1.55]",
+              // contrast up: no more timid whispers
+              "text-white/52 group-hover:text-white/58",
+              "transition-colors duration-700",
+              "line-clamp-2",
+              // ✅ kill underline leaks
+              "no-underline decoration-transparent",
+            ].join(" ")}
+          >
+            {short.excerpt}
           </p>
 
-          {/* Footer */}
-          <div className="mt-10 flex items-center justify-between border-t border-white/[0.06] pt-6">
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.35em] text-white/25">
-                <Clock className="h-3.5 w-3.5 text-white/20" />
-                {readTime}
-              </div>
-
-              {views > 0 ? (
-                <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.35em] text-white/20">
-                  <Eye className="h-3.5 w-3.5 text-white/15" />
-                  {views.toLocaleString()}
-                </div>
-              ) : null}
+          {/* FOOTER (quiet engraving) */}
+          <div className="mt-5 flex items-center justify-between pt-3 border-t border-white/[0.06]">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-7 h-[1px] bg-gradient-to-r from-amber-600/45 to-transparent" />
+              <span className="text-[9px] font-mono tracking-[0.22em] text-white/26 uppercase truncate">
+                {short.lineage ? short.lineage.replace(/\s+/g, "·") : "ARCHIVE"}
+              </span>
             </div>
 
-            {/* Micro “living” dot — signature subtle movement */}
-            <motion.div
-              aria-hidden
-              animate={{ opacity: [0.18, 0.72, 0.18] }}
-              transition={{ repeat: Infinity, duration: 5.2, ease: "easeInOut" }}
-              className="h-1.5 w-1.5 rounded-full bg-amber-500/40 group-hover:bg-amber-500/75 transition-colors"
-            />
+            <span className="text-[9px] font-mono tracking-[0.26em] text-white/22 group-hover:text-amber-300/65 transition-colors duration-700 uppercase">
+              open
+            </span>
           </div>
         </div>
-      </motion.article>
+      </article>
     </Link>
   );
 }

@@ -19,6 +19,7 @@ import {
 
 import Layout from "@/components/Layout";
 import { getAllCanons, normalizeSlug, sanitizeData } from "@/lib/content/server";
+import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
 // ============================================================================
 // TYPES
@@ -73,30 +74,36 @@ function collapseSlashes(s: string): string {
     .replace(/\/{2,}/g, "/");
 }
 
-function normalizeBareSlug(input: unknown): string {
-  // normalizeSlug from server is good, but we harden against:
-  // - leading "/" -> "/canon/x"
-  // - repeated slashes -> "canon//x"
-  // - repeated prefixes -> "canon/canon/x"
+function normalizeBareCanonSlug(input: unknown): string {
   let s = collapseSlashes(String(input || "").trim());
-  s = normalizeSlug(s); // your SSOT normalizer
+  if (!s) return "";
+
+  // Use your SSOT normalizer
+  s = normalizeSlug(s);
   s = collapseSlashes(s).replace(/^\/+/, "").replace(/\/+$/, "");
 
-  // strip leading "canon/" repeatedly
-  const prefix = "canon/";
-  while (s.toLowerCase().startsWith(prefix)) s = s.slice(prefix.length);
-
-  // strip any accidental leading "/" again
-  s = s.replace(/^\/+/, "");
+  // Strip common prefixes repeatedly
+  const prefixes = ["canon/", "vault/canon/", "/canon/", "/vault/canon/"].map((p) => p.replace(/^\/+/, ""));
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const p of prefixes) {
+      if (s.toLowerCase().startsWith(p)) {
+        s = s.slice(p.length);
+        s = s.replace(/^\/+/, "");
+        changed = true;
+      }
+    }
+  }
 
   return s;
 }
 
-function toAccessLevel(v: unknown): AccessLevel {
-  const s = String(v || "").trim().toLowerCase();
-  if (s === "inner-circle" || s === "innercircle" || s === "members") return "inner-circle";
-  if (s === "private" || s === "restricted" || s === "draft") return "private";
-  return "public";
+function accessTierToLevel(required: AccessTier): AccessLevel {
+  const r = tiers.normalizeRequired(required);
+  if (r === "public") return "public";
+  if (r === "member" || r === "verified") return "inner-circle";
+  return "private";
 }
 
 function extractVolumeNumber(title: string): number | null {
@@ -104,8 +111,8 @@ function extractVolumeNumber(title: string): number | null {
   if (romanMatch) {
     const roman = romanMatch[1].toUpperCase();
     const values: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
-    let total = 0,
-      prev = 0;
+    let total = 0;
+    let prev = 0;
     for (let i = roman.length - 1; i >= 0; i--) {
       const cur = values[roman[i]];
       total += cur < prev ? -cur : cur;
@@ -125,7 +132,6 @@ function extractSeries(title: string): string {
 }
 
 function safeHref(path: string): string {
-  // final hardening: never allow // in href
   const p = collapseSlashes(String(path || "/")).replace(/\/{2,}/g, "/");
   return p.startsWith("/") ? p : `/${p}`;
 }
@@ -148,20 +154,23 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       .filter((doc: any) => !doc?.draft)
       .map((doc: any) => {
         const raw = doc?.slug || doc?._raw?.flattenedPath || "";
-        const bare = normalizeBareSlug(raw);
+        const bare = normalizeBareCanonSlug(raw);
 
-        // If bare is empty, skip later
         const title = String(doc?.title || "Untitled Volume");
         const dateISO = doc?.date ? new Date(doc.date).toISOString() : null;
         const series = String(doc?.series || extractSeries(title));
+
+        // ✅ SSOT required tier extraction
+        const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+        const accessLevel = accessTierToLevel(requiredTier);
 
         return {
           title,
           subtitle: doc?.subtitle ? String(doc.subtitle) : null,
           excerpt: (doc?.excerpt || doc?.description) ? String(doc.excerpt || doc.description) : null,
           slug: bare,
-          href: safeHref(`/canon/${bare}`), // ✅ never /canon//canon/...
-          accessLevel: toAccessLevel(doc?.accessLevel || doc?.access),
+          href: safeHref(`/canon/${bare}`),
+          accessLevel,
           coverImage: doc?.coverImage ? String(doc.coverImage) : null,
           dateISO,
           readTime: doc?.readTime ? String(doc.readTime) : "10 min",
@@ -290,7 +299,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, erro
       </Head>
 
       <main className="min-h-screen bg-[#050505] text-white selection:bg-amber-500/30">
-        {/* Institutional Hero */}
         <section className="relative pt-32 pb-20 border-b border-white/5">
           <div className="max-w-7xl mx-auto px-8">
             <div className="flex items-center gap-3 mb-8">
@@ -311,7 +319,6 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, erro
           </div>
         </section>
 
-        {/* Series Explorer */}
         <section className="max-w-7xl mx-auto px-8 py-24">
           {error && (
             <div className="mb-12 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 text-center">

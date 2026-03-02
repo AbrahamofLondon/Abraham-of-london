@@ -40,19 +40,21 @@ export const contentlayerHelper = {
       doc._raw?.flattenedPath === slug
     ) || null;
   },
-  getPublishedDocuments: () => getPublishedDocuments(),
   getDocumentsByTag: (tag: string) => {
     const data = getContentlayerData();
-    return data.allDocuments?.filter(doc => 
-      doc.tags?.includes(tag) || 
-      doc._raw?.tags?.includes(tag)
-    ) || [];
+    return data.allDocuments?.filter((doc: any) => {
+      // Check doc.tags (frontmatter)
+      if (doc.tags?.includes(tag)) return true;
+      
+      // ✅ FIX: Check doc._raw?.sourceFileDir or flattenedPath for tag info
+      // _raw doesn't have tags, so we need to look elsewhere or skip
+      return false;
+    }) || [];
   },
   getDocumentsByCategory: (category: string) => {
     const data = getContentlayerData();
-    return data.allDocuments?.filter(doc => 
-      doc.category === category || 
-      doc._raw?.category === category
+    return data.allDocuments?.filter((doc: any) => 
+      doc.category === category
     ) || [];
   }
 };

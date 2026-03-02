@@ -13,10 +13,10 @@ import {
   toUiDoc as sharedToUiDoc,
   resolveDocCoverImage,
   resolveDocDownloadUrl,
+  normalizeSlug as sharedNormalizeSlug,
 } from "@/lib/content/shared";
 
 import { decryptDocument } from "@/lib/security";
-import { getAuthSession } from "@/lib/auth/options";
 import { canAccessDoc } from "@/lib/content/access-engine";
 
 // Import all helpers from contentlayer-helper
@@ -46,8 +46,25 @@ import {
 // ------------------------------
 // 🔐 BUILD-TIME SAFETY GUARD
 // ------------------------------
-const IS_BUILD = process.env.NODE_ENV === 'production' && 
-                 process.env.NEXT_PHASE === 'phase-production-build';
+const IS_BUILD =
+  process.env.NEXT_PHASE === "phase-production-build" ||
+  process.env.NEXT_PHASE === "phase-export";
+
+// ------------------------------
+// DYNAMIC IMPORTS for auth (prevents client bundling)
+// ------------------------------
+async function getAuthSession() {
+  if (IS_BUILD) return null;
+  
+  try {
+    // Dynamic import to keep auth out of client bundles
+    const { getAuthSession: getServerAuthSession } = await import("@/lib/auth/server");
+    return await getServerAuthSession();
+  } catch (error) {
+    console.error("[CONTENT_SERVER] Failed to load auth:", error);
+    return null;
+  }
+}
 
 // ------------------------------
 // TYPES — exported for downstream type re-exports (SSOT)
@@ -73,24 +90,18 @@ export type ContentDoc = {
   _id?: string;
   type?: string;
   kind?: string;
-
   title?: string;
   slug?: string;
   href?: string;
-
   draft?: boolean;
   published?: boolean;
-
   accessLevel?: string;
   tier?: string;
   classification?: string;
   requiresAuth?: boolean;
-
   body?: { raw?: string; code?: string };
   content?: string;
-
   metadata?: any;
-
   _raw?: {
     flattenedPath?: string;
     sourceFilePath?: string;
@@ -98,11 +109,12 @@ export type ContentDoc = {
     sourceFileDir?: string;
     contentType?: string;
   };
-
   [key: string]: any;
 };
 
+// ------------------------------
 // Re-exports - EXPORT EVERYTHING THAT PAGES ARE TRYING TO IMPORT
+// ------------------------------
 export {
   isDraftContent,
   getDocHref,
@@ -122,96 +134,85 @@ export const getDocKind = sharedGetDocKind;
 
 export { documentKinds, getCardProps };
 
-// Export getDocBySlug and getContentlayerData
-export const getDocBySlug = helperGetDocBySlug;
-export const getContentlayerData = helperGetAllContentlayerDocs;
-
 // ------------------------------
-// 🔐 SOVEREIGN DECRYPTION ENGINES (Build-Safe)
+// PRIMARY EXPORTS - Core document access functions
 // ------------------------------
 
 /**
- * The "Secure Lens": Decrypts content if it's marked as encrypted and user is authorized.
- * ✅ BUILD-SAFE: During build, returns document without auth checks
+ * Get document by slug (primary export - used everywhere)
  */
-async function secureProcessDocument(doc: any): Promise<any | null> {
-  if (!doc) return null;
-
-  // 🛡️ CRITICAL: During build, return document without decryption attempts
-  if (IS_BUILD) {
-    return {
-      ...doc,
-      isLocked: true,
-      content: doc.content || doc.body?.raw || "",
-      _buildMode: true
-    };
-  }
-
-  // 1. Determine if this document is encrypted via metadata
-  let meta = {};
-  try {
-    meta = typeof doc.metadata === 'string' ? JSON.parse(doc.metadata) : (doc.metadata || {});
-  } catch (e) {
-    meta = {};
-  }
-
-  const encryptionData = meta as any;
-  if (!encryptionData.isEncrypted) return doc; // Not encrypted, return as is.
-
-  // 2. Fetch Session & Check Clearance
-  const session = await getAuthSession();
-  const userRole = (session?.user?.role as any) || "guest";
-  const isAuthorized = canAccessDoc(doc, userRole);
-
-  // 3. Decrypt or Redact
-  if (isAuthorized) {
-    try {
-      const decryptedBody = decryptDocument(
-        doc.content || doc.body?.raw || "", 
-        encryptionData.iv, 
-        encryptionData.authTag
-      );
-      // Return doc with decrypted content
-      return { 
-        ...doc, 
-        content: decryptedBody, 
-        body: { ...doc.body, raw: decryptedBody }, 
-        isLocked: false 
-      };
-    } catch (error) {
-      console.error(`❌ DECRYPTION FAILURE [${doc.slug}]:`, error);
-      return { 
-        ...doc, 
-        content: "ERROR: Cryptographic Integrity Breach.", 
-        isLocked: true 
-      };
-    }
-  }
-
-  // Fallback: Return doc with redacted content for unauthorized users
-  return { 
-    ...doc, 
-    content: "CLASSIFIED: This document is restricted to Directorate level access only.", 
-    body: { ...doc.body, raw: "REDACTED" },
-    isLocked: true 
-  };
+export function getDocumentBySlug(slug: string): any | null {
+  return helperGetDocBySlug(slug);
 }
 
-// ------------------------------
-// Core data access
-// ------------------------------
-export function getAllContentlayerDocs() { return helperGetAllContentlayerDocs(); }
-export function getAllBooks() { return helperGetAllBooks(); }
-export function getAllCanons() { return helperGetAllCanons(); }
-export function getAllDownloads() { return helperGetAllDownloads(); }
-export function getAllPosts() { return helperGetAllPosts(); }
-export function getAllEvents() { return helperGetAllEvents(); }
-export function getAllPrints() { return helperGetAllPrints(); }
-export function getAllResources() { return helperGetAllResources(); }
-export function getAllShorts() { return helperGetAllShorts(); }
+/**
+ * Alias for getDocumentBySlug (for backward compatibility)
+ */
+export const getDocBySlug = getDocumentBySlug;
 
-export function getAllStrategies() { 
-  return helperGetAllStrategies().filter(helperIsPublished); 
+/**
+ * Get download document by slug - LEGACY SHIM
+ * Used by downloads/dl routes and tokenStore.postgres.ts
+ */
+export function getDownloadBySlug(slug: string): any | null {
+  const s = normalizeSlug(String(slug || ""));
+  
+  // Try downloads collection first
+  const downloads = getAllDownloads();
+  const download = downloads.find((d: any) => 
+    d.slug === s || d._raw?.flattenedPath?.includes(s)
+  );
+  
+  if (download) return download;
+  
+  // Fallback to generic document lookup
+  return getDocumentBySlug(s) || getDocumentBySlug(`downloads/${s}`);
+}
+
+// Export all contentlayer data accessors
+export const getContentlayerData = helperGetAllContentlayerDocs;
+
+// ------------------------------
+// Core data access functions
+// ------------------------------
+export function getAllContentlayerDocs() {
+  return helperGetAllContentlayerDocs();
+}
+
+export function getAllBooks() {
+  return helperGetAllBooks();
+}
+
+export function getAllCanons() {
+  return helperGetAllCanons();
+}
+
+export function getAllDownloads() {
+  return helperGetAllDownloads();
+}
+
+export function getAllPosts() {
+  return helperGetAllPosts();
+}
+
+export function getAllEvents() {
+  return helperGetAllEvents();
+}
+
+export function getAllPrints() {
+  return helperGetAllPrints();
+}
+
+export function getAllResources() {
+  return helperGetAllResources();
+}
+
+export function getAllShorts() {
+  return helperGetAllShorts();
+}
+
+export function getAllStrategies() {
+  return helperGetAllStrategies().filter(helperIsPublished);
 }
 
 export function isContentlayerLoaded(): boolean {
@@ -226,65 +227,166 @@ export function assertContentlayerHasDocs(): void {
 }
 
 // ------------------------------
-// 🚀 SECURE LOOKUPS (Build-Safe)
-// ------------------------------
-
-export async function getServerShortBySlug(slug: string) {
-  const target = helperNormalizeSlug(slug);
-  const doc = getShorts().find((s: any) => {
-    const sSlug = helperNormalizeSlug(s.slug || s._raw?.flattenedPath || "");
-    return sSlug === target || sSlug.endsWith(`/${target}`) || sSlug.includes(`/shorts/${target}`);
-  }) || null;
-  
-  return await secureProcessDocument(doc);
-}
-
-export async function getServerBookBySlug(slug: string) {
-  const doc = helperGetServerBookBySlug(slug);
-  return await secureProcessDocument(doc);
-}
-
-export async function getServerCanonBySlug(slug: string) {
-  const doc = helperGetServerCanonBySlug(slug);
-  return await secureProcessDocument(doc);
-}
-
-export async function getPostBySlug(slug: string): Promise<any | null> {
-  const target = helperNormalizeSlug(slug);
-  const doc = getPublishedPosts().find((p: any) => {
-    const pSlug = helperNormalizeSlug(p.slug || p._raw?.flattenedPath || "");
-    return pSlug === target || pSlug.endsWith(`/${target}`);
-  }) || null;
-
-  return await secureProcessDocument(doc);
-}
-
-// ------------------------------
-// Collection Helpers
+// Collection Helpers (Published)
 // ------------------------------
 export const getShorts = () => getAllShorts().filter(helperIsPublished);
 export const getCanons = () => getAllCanons().filter(helperIsPublished);
 export const getBooks = () => getAllBooks().filter(helperIsPublished);
+export const getDownloads = () => getAllDownloads().filter(helperIsPublished);
 export const getPublishedPosts = () => getAllPosts().filter(helperIsPublished);
+export const getPublishedBooks = () => getBooks();
 
-/**
- * Unified combined document access with built-in Link-Integrity Audit
- */
+// ------------------------------
+// 🔒 SLUG NORMALIZATION (SSOT)
+// ------------------------------
+function bareSectionSlug(section: string, input: any): string {
+  const s = String(input || "")
+    .trim()
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
+
+  const sectionRe = new RegExp(`^${section}\\/`, "i");
+  if (sectionRe.test(s)) return s.replace(sectionRe, "");
+
+  const n = helperNormalizeSlug(s).replace(/^\/+/, "").replace(/\/+$/, "");
+  return n.replace(sectionRe, "");
+}
+
+function matchesSlugVariants(section: string, doc: any, targetBare: string): boolean {
+  const a = bareSectionSlug(section, doc?.slug);
+  const b = bareSectionSlug(section, doc?._raw?.flattenedPath);
+  const c = bareSectionSlug(section, doc?._raw?.sourceFilePath);
+
+  return a === targetBare || b === targetBare || c === targetBare;
+}
+
+// ------------------------------
+// 🔐 SOVEREIGN DECRYPTION ENGINES (Build-Safe)
+// ------------------------------
+async function secureProcessDocument(doc: any): Promise<any | null> {
+  if (!doc) return null;
+
+  // 🛡️ During build, skip auth checks
+  if (IS_BUILD) {
+    return {
+      ...doc,
+      isLocked: false,
+      content: doc.content || doc.body?.raw || "",
+      _buildMode: true,
+    };
+  }
+
+  // 1. Check if document is encrypted
+  let meta: any = {};
+  try {
+    meta = typeof doc.metadata === "string" ? JSON.parse(doc.metadata) : doc.metadata || {};
+  } catch {
+    meta = {};
+  }
+
+  const encryptionData = meta;
+  if (!encryptionData?.isEncrypted) return doc;
+
+  // 2. Get session and check clearance
+  const session = await getAuthSession();
+  const userRole = (session?.user as any)?.tier || (session?.user as any)?.role || "public";
+  const isAuthorized = canAccessDoc(doc, userRole);
+
+  // 3. Decrypt or redact
+  if (isAuthorized) {
+    try {
+      const decryptedBody = decryptDocument(
+        doc.content || doc.body?.raw || "",
+        encryptionData.iv,
+        encryptionData.authTag
+      );
+
+      return {
+        ...doc,
+        content: decryptedBody,
+        body: { ...doc.body, raw: decryptedBody },
+        isLocked: false,
+      };
+    } catch (error) {
+      console.error(`❌ DECRYPTION FAILURE [${doc.slug}]:`, error);
+      return {
+        ...doc,
+        content: "ERROR: Cryptographic Integrity Breach.",
+        isLocked: true,
+      };
+    }
+  }
+
+  return {
+    ...doc,
+    content: "CLASSIFIED: This document requires higher clearance.",
+    body: { ...doc.body, raw: "REDACTED" },
+    isLocked: true,
+  };
+}
+
+// ------------------------------
+// 🚀 SECURE LOOKUPS (Build-Safe)
+// ------------------------------
+export async function getServerShortBySlug(slug: string) {
+  const targetBare = bareSectionSlug("shorts", slug);
+  const doc = getShorts().find((s: any) => matchesSlugVariants("shorts", s, targetBare)) || null;
+  return await secureProcessDocument(doc);
+}
+
+export function getBookBySlug(slug: string): any | null {
+  const targetBare = bareSectionSlug("books", slug);
+  const doc = getBooks().find((b: any) => matchesSlugVariants("books", b, targetBare)) || null;
+  return doc;
+}
+
+export async function getServerBookBySlug(slug: string) {
+  const targetBare = bareSectionSlug("books", slug);
+
+  const helperDoc =
+    helperGetServerBookBySlug(targetBare) ||
+    helperGetServerBookBySlug(`books/${targetBare}`) ||
+    helperGetServerBookBySlug(`/books/${targetBare}`);
+
+  if (helperDoc) return await secureProcessDocument(helperDoc);
+
+  const fallback = getBookBySlug(targetBare);
+  return await secureProcessDocument(fallback);
+}
+
+export async function getServerCanonBySlug(slug: string) {
+  const targetBare = bareSectionSlug("canon", slug);
+
+  const helperDoc =
+    helperGetServerCanonBySlug(targetBare) ||
+    helperGetServerCanonBySlug(`canon/${targetBare}`) ||
+    helperGetServerCanonBySlug(`/canon/${targetBare}`);
+
+  return await secureProcessDocument(helperDoc);
+}
+
+export async function getPostBySlug(slug: string): Promise<any | null> {
+  const targetBare = bareSectionSlug("blog", slug);
+  const doc = getPublishedPosts().find((p: any) => matchesSlugVariants("blog", p, targetBare)) || null;
+  return await secureProcessDocument(doc);
+}
+
+// ------------------------------
+// Unified combined document access
+// ------------------------------
 export function getAllCombinedDocs(): any[] {
   const d = helperGetAllContentlayerDocs();
   const combined = [...d].filter(helperIsPublished);
   const sanitized = (helperSanitizeData(combined) || []) as any[];
 
-  // SYSTEMATIC AUDIT: Ensure critical files are resolving
-  if (process.env.NODE_ENV === 'development' && !IS_BUILD) {
+  if (process.env.NODE_ENV === "development" && !IS_BUILD) {
     const requiredBriefs = ["institutional-governance"];
-    requiredBriefs.forEach(slug => {
-      const found = sanitized.find(doc => 
-        (doc.slug === slug) || 
-        (doc._raw?.flattenedPath?.includes(slug))
+    requiredBriefs.forEach((slug) => {
+      const found = sanitized.find(
+        (doc) => doc.slug === slug || String(doc._raw?.flattenedPath || "").includes(slug)
       );
       if (!found) {
-        console.error(`🚨 [Link-Integrity Alert]: Critical asset '${slug}' is missing from the build.`);
+        console.error(`🚨 [Link-Integrity Alert]: Critical asset '${slug}' is missing.`);
       } else {
         console.log(`✅ [Vault Verified]: Asset '${slug}' is live.`);
       }
@@ -297,20 +399,15 @@ export function getAllCombinedDocs(): any[] {
 export const getPublishedDocuments = () => getAllCombinedDocs();
 
 // ------------------------------
-// Intelligence Portfolio Extensions
+// Misc collections
 // ------------------------------
-
 export function getAllLexicons() {
   const docs = getAllCombinedDocs();
-  return docs.filter(d => d.kind === 'lexicon' || d._raw?.sourceFilePath.includes('lexicon/'));
+  return docs.filter((d) => d.kind === "lexicon" || String(d._raw?.sourceFilePath || "").includes("lexicon/"));
 }
 
 export function getAllBlogs() {
   return getAllPosts();
-}
-
-export function getDocumentBySlug(slug: string) {
-  return helperGetDocBySlug(slug);
 }
 
 export function getServerAllEvents() {
@@ -318,18 +415,11 @@ export function getServerAllEvents() {
 }
 
 export function getServerEventBySlug(slug: string) {
-  const target = helperNormalizeSlug(slug);
-  return getAllEvents().find((e: any) => {
-    const eSlug = helperNormalizeSlug(e.slug || e._raw?.flattenedPath || "");
-    return eSlug === target || eSlug.endsWith(`/${target}`);
-  }) || null;
+  const targetBare = bareSectionSlug("events", slug);
+  return getAllEvents().find((e: any) => matchesSlugVariants("events", e, targetBare)) || null;
 }
 
 export function getSecureDocument(id: string) {
   console.warn(`getSecureDocument lookup for id: ${id}`);
   return null;
-}
-
-export function getDownloads() {
-  return getAllDownloads().filter(helperIsPublished);
 }

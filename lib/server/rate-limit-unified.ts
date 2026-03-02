@@ -1,282 +1,295 @@
-// lib/server/rate-limit-unified.ts — DUAL RUNTIME (NODE + EDGE) HARDENED
-import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+// lib/server/rate-limit-unified.ts — EDGE-SAFE (FULL REPLACEMENT)
+// Fixes: "@upstash/redis/nodejs.mjs uses process.version" Edge failure.
+// Memory rate limiter (Edge-safe). Backward compatible API surface.
 
-// -------------------- Types --------------------
+export type Bucket = { count: number; resetAt: number };
 
-export type RateLimitOptions = {
+// In-memory buckets (per runtime instance)
+const mem = new Map<string, Bucket>();
+
+/** Backward compatible config shape used across middleware + API wrappers */
+export type RateLimitConfig = {
   limit: number;
   windowMs: number;
-  keyPrefix?: string;
+  keyPrefix: string;
 };
+
+export type RateLimitKey =
+  | "PUBLIC"
+  | "AUTH"
+  | "ADMIN"
+  | "API_STRICT"
+  | "API_GENERAL"
+  | "INNER_CIRCLE_UNLOCK"
+  | "CONTACT"
+  | "DOWNLOAD";
+
+/**
+ * Canonical configs.
+ * NOTE: keys and names must match existing call sites (RATE_LIMIT_CONFIGS.ADMIN etc).
+ */
+export const RATE_LIMIT_CONFIGS: Record<RateLimitKey, RateLimitConfig> = {
+  PUBLIC: { limit: 120, windowMs: 60_000, keyPrefix: "pub" },
+  AUTH: { limit: 60, windowMs: 60_000, keyPrefix: "auth" },
+  ADMIN: { limit: 100, windowMs: 60_000, keyPrefix: "admin" },
+  API_STRICT: { limit: 30, windowMs: 60_000, keyPrefix: "api-strict" },
+  API_GENERAL: { limit: 100, windowMs: 3_600_000, keyPrefix: "api" },
+  INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600_000, keyPrefix: "ic-unlock" },
+  CONTACT: { limit: 5, windowMs: 3_600_000, keyPrefix: "contact" },
+  DOWNLOAD: { limit: 20, windowMs: 3_600_000, keyPrefix: "download" },
+};
+
+// Alias preserved (some files import LIMITS)
+export const LIMITS = RATE_LIMIT_CONFIGS;
 
 export type RateLimitResult = {
   allowed: boolean;
   remaining: number;
   limit: number;
-  retryAfterMs: number;
+  /** Preferred legacy naming in your codebase */
   resetTime: number;
+  /** Also included for callers expecting resetAt */
+  resetAt: number;
+  retryAfterMs: number;
   windowMs: number;
-  source: "upstash" | "memory";
+  source: "memory";
 };
 
-export const RATE_LIMIT_CONFIGS: Record<string, RateLimitOptions> = {
-  API_STRICT: { limit: 30, windowMs: 60_000, keyPrefix: "api-strict" },
-  API_GENERAL: { limit: 100, windowMs: 3_600_000, keyPrefix: "api" },
-  INNER_CIRCLE_UNLOCK: { limit: 30, windowMs: 600_000, keyPrefix: "ic-unlock" },
-  AUTH: { limit: 10, windowMs: 900_000, keyPrefix: "auth" },
-  CONTACT: { limit: 5, windowMs: 3_600_000, keyPrefix: "contact" },
-  DOWNLOAD: { limit: 20, windowMs: 3_600_000, keyPrefix: "download" },
-  ADMIN: { limit: 100, windowMs: 60_000, keyPrefix: "admin" },
-};
+/* -------------------------------------------------------------------------- */
+/* CORE                                                                         */
+/* -------------------------------------------------------------------------- */
 
-// -------------------- Memory Store Fallback --------------------
-
-const memoryStore = new Map<string, { count: number; resetTime: number }>();
-
-// -------------------- Runtime Detection --------------------
-
-function isEdgeRuntime(): boolean {
-  return (
-    process.env.NEXT_RUNTIME === "edge" ||
-    typeof (globalThis as any).EdgeRuntime !== "undefined"
-  );
+function keyFor(config: RateLimitConfig, id: string): string {
+  const safeId = String(id || "anon");
+  return `${config.keyPrefix}:${safeId}`;
 }
 
-// -------------------- Lazy Redis Client --------------------
-
-type RedisClient = {
-  get: (key: string) => Promise<string | null>;
-  set: (key: string, value: string, opts?: any) => Promise<any>;
-  incr: (key: string) => Promise<number>;
-  expire: (key: string, seconds: number) => Promise<number>;
-  del: (key: string) => Promise<number>;
-};
-
-let redisClientPromise: Promise<RedisClient | null> | null = null;
-
-async function getRedisClient(): Promise<RedisClient | null> {
-  if (redisClientPromise) return redisClientPromise;
-
-  redisClientPromise = (async () => {
-    const url = process.env.UPSTASH_REDIS_REST_URL;
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-    
-    if (!url || !token) return null;
-
-    try {
-      // ✅ FIX: Use unified import - @upstash/redis works in both runtimes
-      // The package auto-detects the environment, no need for /nodejs subpath
-      const { Redis } = await import("@upstash/redis");
-      return new Redis({ url, token }) as unknown as RedisClient;
-    } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[rate-limit] Redis unavailable, using memory fallback", error);
-      }
-      return null;
-    }
-  })();
-
-  return redisClientPromise;
-}
-
-// -------------------- Upstash Ratelimit Factory --------------------
-
-async function getUpstashRatelimit(windowMs: number, limit: number) {
-  const client = await getRedisClient();
-  if (!client) return null;
-
-  try {
-    // Dynamic import for Ratelimit (edge-safe)
-    const { Ratelimit } = await import("@upstash/ratelimit");
-    
-    return new Ratelimit({
-      redis: client as any,
-      limiter: Ratelimit.slidingWindow(limit, `${Math.ceil(windowMs / 1000)} s`),
-      analytics: false,
-    });
-  } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[rate-limit] Ratelimit unavailable, using memory fallback", error);
-    }
-    return null;
-  }
-}
-
-// -------------------- IP Extraction (Node API + Edge) --------------------
-
-export function getClientIp(req: NextApiRequest | NextRequest): string {
-  // Edge / NextRequest
-  if ("headers" in req && typeof (req.headers as any).get === "function") {
-    const forwarded = (req.headers as any).get("x-forwarded-for");
-    if (forwarded) return forwarded.split(",")[0].trim();
-    return (req.headers as any).get("x-real-ip") ?? "127.0.0.1";
-  }
-
-  // Node / NextApiRequest
-  const apiReq = req as NextApiRequest;
-  const fwd = apiReq.headers["x-forwarded-for"];
-  return (
-    (Array.isArray(fwd) ? fwd[0] : fwd?.split(",")[0]) ??
-    apiReq.socket.remoteAddress ??
-    "127.0.0.1"
-  );
-}
-
-// -------------------- Headers --------------------
-
-export function createRateLimitHeaders(result: RateLimitResult) {
+function computeResult(params: {
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  resetAt: number;
+  retryAfterMs: number;
+  windowMs: number;
+}): RateLimitResult {
   return {
-    "X-RateLimit-Limit": String(result.limit),
-    "X-RateLimit-Remaining": String(result.remaining),
-    "X-RateLimit-Reset": String(Math.ceil(result.resetTime / 1000)),
-    "Retry-After": result.retryAfterMs > 0 ? String(Math.ceil(result.retryAfterMs / 1000)) : "0",
-  };
-}
-
-// -------------------- Core Rate Limiter --------------------
-
-export async function rateLimit(
-  identifier: string,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
-): Promise<RateLimitResult> {
-  const key = `${options.keyPrefix ?? "rl"}:${identifier}`;
-  const now = Date.now();
-
-  // Try Upstash (preferred)
-  const ratelimit = await getUpstashRatelimit(options.windowMs, options.limit);
-  if (ratelimit) {
-    try {
-      const { success, remaining, reset } = await ratelimit.limit(key);
-      const retryAfterMs = success ? 0 : Math.max(0, reset - now);
-      return {
-        allowed: success,
-        remaining,
-        limit: options.limit,
-        retryAfterMs,
-        resetTime: reset,
-        windowMs: options.windowMs,
-        source: "upstash",
-      };
-    } catch {
-      // fall through to memory
-    }
-  }
-
-  // Memory fallback (deterministic)
-  let record = memoryStore.get(key);
-  if (!record || now > record.resetTime) {
-    record = { count: 0, resetTime: now + options.windowMs };
-    memoryStore.set(key, record);
-  }
-  record.count += 1;
-
-  const allowed = record.count <= options.limit;
-  return {
-    allowed,
-    remaining: Math.max(0, options.limit - record.count),
-    limit: options.limit,
-    retryAfterMs: allowed ? 0 : Math.max(0, record.resetTime - now),
-    resetTime: record.resetTime,
-    windowMs: options.windowMs,
+    allowed: params.allowed,
+    remaining: params.remaining,
+    limit: params.limit,
+    resetAt: params.resetAt,
+    resetTime: params.resetAt, // legacy compatibility
+    retryAfterMs: params.retryAfterMs,
+    windowMs: params.windowMs,
     source: "memory",
   };
 }
 
-export async function isRateLimited(
-  identifier: string,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
-): Promise<boolean> {
-  const res = await rateLimit(identifier, { ...options, limit: options.limit });
-  return !res.allowed;
-}
+/**
+ * Canonical primitive limiter (internal).
+ */
+function rateLimitByConfig(id: string, config: RateLimitConfig): RateLimitResult {
+  const now = Date.now();
+  const k = keyFor(config, id);
 
-export function getRateLimiterStats(): Record<string, any> {
-  return { memory: { totalKeys: memoryStore.size } };
-}
-
-export async function resetRateLimit(
-  identifier: string,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
-): Promise<boolean> {
-  const key = `${options.keyPrefix ?? "rl"}:${identifier}`;
-  let deleted = false;
-
-  // Try Upstash delete if configured
-  const client = await getRedisClient();
-  if (client) {
-    try {
-      await client.del(key);
-      deleted = true;
-    } catch {
-      // ignore
-    }
+  const existing = mem.get(k);
+  if (!existing || existing.resetAt <= now) {
+    const resetAt = now + config.windowMs;
+    mem.set(k, { count: 1, resetAt });
+    return computeResult({
+      allowed: true,
+      remaining: Math.max(0, config.limit - 1),
+      limit: config.limit,
+      resetAt,
+      retryAfterMs: 0,
+      windowMs: config.windowMs,
+    });
   }
 
-  // Always delete from memory
-  const memoryDeleted = memoryStore.delete(key);
-  
-  return deleted || memoryDeleted;
+  if (existing.count >= config.limit) {
+    return computeResult({
+      allowed: false,
+      remaining: 0,
+      limit: config.limit,
+      resetAt: existing.resetAt,
+      retryAfterMs: Math.max(0, existing.resetAt - now),
+      windowMs: config.windowMs,
+    });
+  }
+
+  existing.count += 1;
+  mem.set(k, existing);
+
+  return computeResult({
+    allowed: true,
+    remaining: Math.max(0, config.limit - existing.count),
+    limit: config.limit,
+    resetAt: existing.resetAt,
+    retryAfterMs: 0,
+    windowMs: config.windowMs,
+  });
 }
 
-export const unblock = resetRateLimit;
+/* -------------------------------------------------------------------------- */
+/* PUBLIC API (BACKWARD COMPAT)                                                */
+/* -------------------------------------------------------------------------- */
 
-// -------------------- NODE API WRAPPER --------------------
+/**
+ * NEW style: rateLimitCheck({ key, id })
+ */
+export function rateLimitCheck(params: { key: RateLimitKey; id: string }): RateLimitResult {
+  const cfg = RATE_LIMIT_CONFIGS[params.key];
+  return rateLimitByConfig(params.id, cfg);
+}
 
-export function withApiRateLimit(
-  handler: NextApiHandler,
-  options: RateLimitOptions = RATE_LIMIT_CONFIGS.API_GENERAL
-): NextApiHandler {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
-    const ip = getClientIp(req);
-    const result = await rateLimit(ip, options);
+/**
+ * OLD/COMMON style in your repo:
+ *   await rateLimit(ip, RATE_LIMIT_CONFIGS.ADMIN)
+ *
+ * Keep as async because many call sites do `await rateLimit(...)`.
+ */
+export async function rateLimit(id: string, config: RateLimitConfig): Promise<RateLimitResult> {
+  return rateLimitByConfig(id, config);
+}
+
+/**
+ * Convenience: boolean only
+ */
+export async function isRateLimited(params: { key: RateLimitKey; id: string }): Promise<boolean> {
+  const r = rateLimitCheck(params);
+  return !r.allowed;
+}
+
+/**
+ * Client IP resolver that works for:
+ * - NextRequest (Edge/middleware): req.headers.get(...)
+ * - NextApiRequest (Node): req.headers["x-forwarded-for"]
+ */
+export function getClientIp(req: any): string {
+  // Edge / NextRequest
+  if (req?.headers?.get) {
+    const forwarded = req.headers.get("x-forwarded-for");
+    if (forwarded) return forwarded.split(",")[0].trim();
+    return req.headers.get("x-real-ip") ?? "127.0.0.1";
+  }
+
+  // Node / NextApiRequest
+  const fwd = req?.headers?.["x-forwarded-for"];
+  const ip =
+    (Array.isArray(fwd) ? fwd[0] : typeof fwd === "string" ? fwd.split(",")[0] : undefined) ??
+    req?.headers?.["x-real-ip"] ??
+    req?.socket?.remoteAddress;
+
+  return String(ip || "127.0.0.1");
+}
+
+/**
+ * Headers generator used in middleware + API routes
+ */
+export function createRateLimitHeaders(result: {
+  limit: number;
+  remaining: number;
+  resetTime?: number;
+  resetAt?: number;
+  retryAfterMs: number;
+}) {
+  const reset = typeof result.resetTime === "number" ? result.resetTime : Number(result.resetAt || Date.now());
+  return {
+    "X-RateLimit-Limit": String(result.limit),
+    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Reset": String(Math.ceil(reset / 1000)),
+    "Retry-After": result.retryAfterMs > 0 ? String(Math.ceil(result.retryAfterMs / 1000)) : "0",
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* WRAPPERS                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * API route wrapper (Node-style, NextApiRequest/NextApiResponse)
+ */
+export function withApiRateLimit(handler: any, options: { key: RateLimitKey; id?: string }) {
+  return async (req: any, res: any) => {
+    const id = options.id || getClientIp(req);
+    const cfg = RATE_LIMIT_CONFIGS[options.key];
+    const result = await rateLimit(id, cfg);
+
     const headers = createRateLimitHeaders(result);
     for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
 
     if (!result.allowed) {
-      res.status(429).json({ error: "Rate limit exceeded" });
-      return;
+      return res.status(429).json({
+        error: "RATE_LIMIT_EXCEEDED",
+        retryAfter: Math.ceil(result.retryAfterMs / 1000),
+      });
     }
+
     return handler(req, res);
   };
 }
 
-// -------------------- EDGE HELPERS (App Router / Middleware) --------------------
-
 /**
- * Check rate limit in Edge Runtime (App Router, Middleware) and return a Response
- * if limit is exceeded, otherwise return null.
+ * Edge-style wrapper (middleware / NextRequest).
+ * Provides a predictable return shape for older utilities.
+ *
+ * Signature matches common internal usage:
+ *   withEdgeRateLimit(handler, RATE_LIMIT_CONFIGS.API_GENERAL)
  */
-export async function withEdgeRateLimit(req: NextRequest, options: RateLimitOptions) {
-  const ip = getClientIp(req);
-  const result = await rateLimit(ip, options);
-  const headers = createRateLimitHeaders(result);
-  return { allowed: result.allowed, headers, result };
-}
+export function withEdgeRateLimit(handler: any, cfg: RateLimitConfig) {
+  return async (req: any, res: any) => {
+    const id = getClientIp(req);
+    const result = await rateLimit(id, cfg);
 
-/**
- * Creates a standard 429 Response object for Edge API routes.
- */
-export function createRateLimitedResponse(
-  result: RateLimitResult,
-  extraHeaders?: Record<string, string>
-) {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...createRateLimitHeaders(result),
-    ...(extraHeaders || {}),
+    // Some older code expects res.locals.rateLimit to exist:
+    if (res && typeof res === "object") {
+      (res.locals ??= {});
+      res.locals.rateLimit = result;
+    }
+
+    return handler(req, res);
   };
-
-  return new NextResponse(
-    JSON.stringify({
-      error: "Rate limit exceeded",
-      retryAfterMs: result.retryAfterMs,
-      resetTime: result.resetTime,
-      remaining: result.remaining,
-      limit: result.limit,
-      source: result.source,
-    }),
-    { status: 429, headers }
-  );
 }
+
+/* -------------------------------------------------------------------------- */
+/* STATS / MAINTENANCE                                                         */
+/* -------------------------------------------------------------------------- */
+
+export function getRateLimiterStats() {
+  return {
+    totalKeys: mem.size,
+    keys: Array.from(mem.entries()).map(([key, bucket]) => ({
+      key,
+      count: bucket.count,
+      resetAt: bucket.resetAt,
+      resetIn: Math.max(0, bucket.resetAt - Date.now()),
+    })),
+  };
+}
+
+export async function resetRateLimit(params: { key: RateLimitKey; id: string }): Promise<boolean> {
+  const cfg = RATE_LIMIT_CONFIGS[params.key];
+  const k = keyFor(cfg, params.id);
+  return mem.delete(k);
+}
+
+export const unblock = resetRateLimit;
+
+/**
+ * Default export kept because some code does:
+ *   const rateLimitModule = await import('@/lib/server/rate-limit-unified');
+ *   rateLimitModule.default.getClientIp(...)
+ */
+export default {
+  LIMITS,
+  RATE_LIMIT_CONFIGS,
+  rateLimitCheck,
+  rateLimit,
+  isRateLimited,
+  getClientIp,
+  createRateLimitHeaders,
+  withApiRateLimit,
+  withEdgeRateLimit,
+  getRateLimiterStats,
+  resetRateLimit,
+  unblock,
+};

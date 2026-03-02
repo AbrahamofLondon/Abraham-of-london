@@ -1,5 +1,5 @@
 // lib/content/series-provider.ts — HARDENED (Automated Knowledge Graph)
-import { allPosts } from "contentlayer/generated";
+import { allPosts } from "@/lib/contentlayer";
 import { normalizeSlug } from "./shared";
 
 // Define the Post type locally (safe, stable)

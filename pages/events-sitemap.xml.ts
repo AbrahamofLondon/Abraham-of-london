@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { allEvents } from "contentlayer/generated"; // events sitemap
+import { allEvents } from "@/lib/contentlayer"; // events sitemap
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 

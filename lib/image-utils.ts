@@ -1,5 +1,5 @@
 // lib/image-utils.ts - COMPLETELY FIXED VERSION
-import { safeString } from "./utils";
+// No tier dependencies - this file is already SSOT-clean
 
 /* -------------------------------------------------------------------------- */
 /* TYPES & INTERFACES                                                         */
@@ -18,7 +18,8 @@ interface ImageMetadata {
 
 interface FallbackConfig {
   type: "book" | "post" | "avatar" | "project";
-  theme?: "light" | "dark" | "gradient" | "luxury" | "business" | "philosophy" | "deep" | "premium" |"strategy";
+  // These are UI theme variants, NOT access tiers
+  theme?: "light" | "dark" | "gradient" | "luxury" | "business" | "philosophy" | "deep" | "premium" | "strategy";
   category?: string;
 }
 
@@ -131,6 +132,16 @@ const FALLBACK_IMAGES = {
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                    */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * Simple safe string utility (replaces imported safeString)
+ */
+function safeString(value: unknown, fallback: string = ""): string {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.trim();
+  }
+  return fallback;
+}
 
 function getFileExtension(path: string): string {
   const fileName = path.split("/").pop() || "";
@@ -571,10 +582,7 @@ function getSafeImageProps(
         )
       : undefined;
 
-  // Fallback for safeString if it doesn't exist
-  const safeAlt = typeof safeString === 'function' 
-    ? safeString(alt, "Image")
-    : alt || "Image";
+  const safeAlt = safeString(alt, "Image");
 
   return {
     src,
@@ -602,6 +610,7 @@ export {
 };
 
 export {
+  safeString,
   isValidImageUrl,
   getFileExtension,
   normalizeImageUrl,
@@ -622,6 +631,7 @@ const imageUtilsApi = {
   PREFERRED_FORMAT,
   IMAGE_OPTIMIZATION,
   FALLBACK_IMAGES,
+  safeString,
   isValidImageUrl,
   getFileExtension,
   normalizeImageUrl,

@@ -1,13 +1,13 @@
-// pages/api/pdfs/list.ts
+// pages/api/pdfs/list.ts - SSOT ALIGNED
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth/auth-options";
 import { getAllPDFItems } from "@/lib/pdf/registry";
 import type { PDFItem, PDFListResponse, DashboardStats } from "@/types/pdf-dashboard";
-
-// Canon unions
-import type { PDFTier, PDFType } from "@/lib/pdf/types";
+import type { PDFType } from "@/lib/pdf/types";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
 function toInt(input: unknown, fallback: number): number {
   const n = typeof input === "string" ? parseInt(input, 10) : Number(input);
@@ -29,10 +29,9 @@ function canonicalizeWebPath(p: unknown): string {
   return v.replace(/\/{2,}/g, "/");
 }
 
-const DEFAULT_TIER: PDFTier = "free";
-const DEFAULT_TYPE: PDFType = "other";
+// Use AccessTier directly from SSOT
+const DEFAULT_TIER: AccessTier = "public";
 
-const ALLOWED_TIERS: PDFTier[] = ["free", "member", "architect", "inner-circle", "inner-circle-elite"];
 const ALLOWED_TYPES: PDFType[] = [
   "editorial",
   "framework",
@@ -56,21 +55,21 @@ const ALLOWED_TYPES: PDFType[] = [
   "other",
 ];
 
-function normalizeTier(v: unknown): PDFTier {
-  const s = typeof v === "string" ? v.toLowerCase().trim() : "";
-  return (ALLOWED_TIERS as string[]).includes(s) ? (s as PDFTier) : DEFAULT_TIER;
+/**
+ * Normalize tier using SSOT
+ */
+function normalizeTier(v: unknown): AccessTier {
+  return normalizeRequiredTier(v);
 }
 
 /**
- * CRITICAL FIX:
  * If registry gives you "pdf" (or anything unknown), map to "other"
- * so the API is Canon-valid.
  */
 function normalizeType(v: unknown): PDFType {
   const s = typeof v === "string" ? v.toLowerCase().trim() : "";
-  if (!s) return DEFAULT_TYPE;
+  if (!s) return "other";
   if (s === "pdf") return "other";
-  return (ALLOWED_TYPES as string[]).includes(s) ? (s as PDFType) : DEFAULT_TYPE;
+  return (ALLOWED_TYPES as string[]).includes(s) ? (s as PDFType) : "other";
 }
 
 function emptyResponse(page: number, limit: number): PDFListResponse {
@@ -132,15 +131,17 @@ export default async function handler(
       // Keep fileUrl for compatibility, but never empty if outputPath exists
       const fileUrl = canonicalizeWebPath(pdf.fileUrl || outputPath);
 
-      // Canon-valid enums (no more "pdf" poison)
-      const type = normalizeType(pdf.type);
+      // Normalize tier using SSOT
       const tier = normalizeTier(pdf.tier);
+      
+      // Normalize type
+      const type = normalizeType(pdf.type);
 
       return {
         id: String(pdf.id),
         title: String(pdf.title || pdf.id),
 
-        // Canon-required fields (via your PDFItem = Canon + dashboard fields)
+        // Canon-required fields
         type,
         tier,
         outputPath,
@@ -167,8 +168,14 @@ export default async function handler(
       } as PDFItem;
     });
 
+    // Filter by user access if needed
+    const userTier = normalizeUserTier((session as any)?.aol?.tier || "public");
+    const accessiblePDFs = mapped.filter(pdf => 
+      hasAccess(userTier, pdf.tier)
+    );
+
     const start = (page - 1) * limit;
-    const paginated = mapped.slice(start, start + limit);
+    const paginated = accessiblePDFs.slice(start, start + limit);
 
     const categories = Array.from(new Set(mapped.map((p) => p.category).filter(Boolean)));
 
@@ -188,12 +195,13 @@ export default async function handler(
       pagination: {
         page,
         limit,
-        total: mapped.length,
-        totalPages: Math.ceil(mapped.length / limit),
+        total: accessiblePDFs.length,
+        totalPages: Math.ceil(accessiblePDFs.length / limit),
       },
       stats,
     });
-  } catch {
+  } catch (error) {
+    console.error("[PDF List API] Error:", error);
     return res.status(500).json({ error: "Internal Server Error: Registry inaccessible" });
   }
 }

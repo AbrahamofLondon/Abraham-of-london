@@ -2,7 +2,7 @@
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 
-export type DownloadTier = "free" | "member" | "inner-circle" | "architect";
+export type DownloadTier = "public" | "free" | "member" | "inner-circle" | "architect";
 export type DownloadFormat = "PDF" | "EXCEL" | "POWERPOINT" | "ZIP" | "BINARY";
 export type PaperFormat = "A4" | "Letter" | "A3" | "bundle";
 
@@ -60,7 +60,7 @@ export const metadata: DownloadMetadata = {
   category: "Frameworks",
   tags: ["legacy", "governance", "strategy"],
 
-  tier: "free",
+  tier: "public",
   requiresAuth: false,
   format: "PDF",
   formats: ["A4"],

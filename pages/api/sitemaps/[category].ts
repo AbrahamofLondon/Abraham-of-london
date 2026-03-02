@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { allShorts, allCanons, allBooks } from "contentlayer/generated";
+import { allShorts, allCanons, allBooks } from "@/lib/contentlayer";
 import { generateSitemapXml } from "@/lib/sitemap-utils";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {

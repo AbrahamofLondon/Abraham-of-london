@@ -126,14 +126,16 @@ async function checkServerSideInnerCircleAccess(
       };
     }
     
+    // ✅ FIX: Use a valid AccessReason from the type definition
     return {
       hasAccess: false,
-      reason: 'api_error',
+      reason: 'internal_error', // Changed from 'api_error' to 'internal_error'
     };
   } catch (error) {
+    // ✅ FIX: Use a valid AccessReason from the type definition
     return {
       hasAccess: false,
-      reason: 'api_error',
+      reason: 'internal_error', // Changed from 'api_error' to 'internal_error'
     };
   }
 }

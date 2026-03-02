@@ -1,4 +1,4 @@
-// lib/server/prints-data.ts
+// lib/server/prints-data.ts - SSOT ALIGNED
 // Prints under content/prints/* - COMPLETE ROBUST VERSION
 
 import {
@@ -9,7 +9,8 @@ import {
 } from "@/lib/server/mdx-collections";
 import type { Print, ContentEntry, ContentMeta } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
-
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, normalizeUserTier } from "@/lib/access/tier-policy";
 
 export type PrintWithContent = Print & {
   content: string;
@@ -27,7 +28,7 @@ type PrintishMdxDocument = MdxDocument & {
 } & Partial<Print>;
 
 // ---------------------------------------------------------------------------
-// SAFE TYPE CONVERTERS
+// SAFE TYPE CONVERTERS (SSOT ALIGNED)
 // ---------------------------------------------------------------------------
 
 function safeString(value: unknown): string | undefined {
@@ -77,13 +78,13 @@ function safeStatus(
   return undefined;
 }
 
-function safeAccessLevel(
-  value: unknown
-): "public" | "premium" | "private" | undefined {
-  if (value === "public" || value === "premium" || value === "private") {
-    return value;
-  }
-  return undefined;
+/**
+ * Safe access level converter - SSOT ALIGNED
+ * Accepts legacy values and normalizes to AccessTier
+ */
+function safeAccessLevel(value: unknown): AccessTier | undefined {
+  if (!value) return undefined;
+  return normalizeRequiredTier(value);
 }
 
 /**
@@ -172,7 +173,7 @@ function fromMdxMeta(meta: MdxMeta): Print {
     numbered: safeBoolean(m.numbered),
     certificate: safeBoolean(m.certificate),
     frameIncluded: safeBoolean(m.frameIncluded),
-    inStock: safeBoolean(m.inStock) || true, // Default to true
+    inStock: safeBoolean(m.inStock) || true,
     stockQuantity: safeNumber(m.stockQuantity),
     purchaseUrl: safeString(m.purchaseUrl),
     maxPurchaseQuantity: safeNumber(m.maxPurchaseQuantity),
@@ -185,7 +186,7 @@ function fromMdxMeta(meta: MdxMeta): Print {
     published: safeBoolean(m.published),
     status: safeStatus(m.status),
 
-    // Access
+    // Access - SSOT ALIGNED
     accessLevel: safeAccessLevel(m.accessLevel) || "public",
     lockMessage: safeString(m.lockMessage),
 
@@ -299,7 +300,7 @@ export async function getPrintBySlug(slug: string): Promise<PrintWithContent | n
     }
     
     const resolvedDoc = await doc;
-return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
+    return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
   } catch (error) {
     console.error(`Error fetching print by slug (${slug}):`, error);
     return null;
@@ -314,7 +315,7 @@ export async function getAllPrints(): Promise<PrintWithContent[]> {
     const printsWithContent: PrintWithContent[] = [];
     
     for (const meta of metas) {
-      const print = getPrintBySlug(meta.slug);
+      const print = await getPrintBySlug(meta.slug);
       if (print) {
         printsWithContent.push(print);
       } else {
@@ -325,6 +326,38 @@ export async function getAllPrints(): Promise<PrintWithContent[]> {
     return printsWithContent;
   } catch (error) {
     console.error("Error fetching all prints:", error);
+    return [];
+  }
+}
+
+/**
+ * Check if user can access a print
+ */
+export function canAccessPrint(
+  print: Print,
+  userTier?: string | AccessTier | null
+): boolean {
+  const { hasAccess, normalizeUserTier } = require('@/lib/access/tier-policy');
+  const user = normalizeUserTier(userTier || "public");
+  const required = print.accessLevel || "public";
+  return hasAccess(user, required);
+}
+
+/**
+ * Get prints accessible to a user
+ */
+export function getAccessiblePrints(userTier?: string | AccessTier | null): Print[] {
+  try {
+    const prints = getAllPrintsMeta();
+    const { hasAccess, normalizeUserTier } = require('@/lib/access/tier-policy');
+    const user = normalizeUserTier(userTier || "public");
+    
+    return prints.filter(print => {
+      const required = print.accessLevel || "public";
+      return hasAccess(user, required);
+    });
+  } catch (error) {
+    console.error("Error getting accessible prints:", error);
     return [];
   }
 }
@@ -673,6 +706,10 @@ const printsData = {
   getPrintBySlug,
   getAllPrints,
   
+  // Access control
+  canAccessPrint,
+  getAccessiblePrints,
+  
   // Filter functions
   getPrintsByCategory,
   getPrintsByTag,
@@ -703,10 +740,3 @@ const printsData = {
 };
 
 export default printsData;
-
-
-
-
-
-
-

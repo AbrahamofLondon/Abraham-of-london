@@ -3,7 +3,7 @@ import {
   allPosts,
   allShorts,
   allDownloads,
-} from "contentlayer/generated";
+} from "@/lib/contentlayer";
 
 // Minimal structural typing (avoids import-type breakage if Contentlayer changes)
 type BaseDoc = {

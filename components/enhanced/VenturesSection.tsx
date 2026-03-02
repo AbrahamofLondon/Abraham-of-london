@@ -12,7 +12,7 @@ import {
   Landmark,
   Shield,
   Target,
-  Vault,
+  Database, // Changed from Vault
   Workflow,
 } from "lucide-react";
 
@@ -29,8 +29,6 @@ const cx = (...parts: Array<string | false | null | undefined>) =>
   parts.filter(Boolean).join(" ");
 
 export default function EnhancedVenturesSection() {
-  // Everything live. Choose only routes you actually have.
-  // You can swap hrefs later without touching layout.
   const dossiers: Dossier[] = [
     {
       title: "Institutional Advisory",
@@ -63,7 +61,7 @@ export default function EnhancedVenturesSection() {
       title: "The Vault",
       description:
         "Templates, operator packs, and execution artefacts. Practical, clean, and brutally deployable.",
-      icon: <Vault className="h-6 w-6" />,
+      icon: <Database className="h-6 w-6" />, // Changed from Vault to Database
       href: "/downloads/vault",
       meta: "Packs • templates • operating assets",
       accent: "amber",

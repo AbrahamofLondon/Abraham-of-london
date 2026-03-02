@@ -7,7 +7,7 @@ type Format = "A4" | "Letter" | "A3";
 
 type GenCtx = {
   quality: "premium" | "enterprise";
-  tier: "free" | "member" | "architect" | "inner-circle";
+  tier: "public" | "member" | "architect" | "inner-circle";
 };
 
 type Args = {

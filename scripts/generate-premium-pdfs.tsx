@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
 
 interface PremiumPDFConfig {
   format: 'A4' | 'Letter' | 'A3' | 'bundle';
-  tier: 'free' | 'member' | 'architect' | 'inner-circle';
+  tier: "public" | 'member' | 'architect' | 'inner-circle';
   quality: 'draft' | 'premium' | 'enterprise';
   outputDir: string;
   interactive?: boolean;

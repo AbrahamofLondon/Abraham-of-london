@@ -5,7 +5,8 @@ import * as React from "react";
 import { Search, X, Shield, ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 
-export function VaultSearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+// ✅ FIXED: Keep both named and default exports, but ensure consistency
+const VaultSearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -40,8 +41,14 @@ export function VaultSearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClo
 
   // Prevent background scroll
   React.useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "unset";
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -115,4 +122,8 @@ export function VaultSearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClo
       </div>
     </div>
   );
-}
+};
+
+// ✅ FIXED: Export both ways for maximum compatibility
+export { VaultSearchOverlay };
+export default VaultSearchOverlay;

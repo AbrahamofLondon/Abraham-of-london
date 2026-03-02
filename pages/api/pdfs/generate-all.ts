@@ -1,12 +1,15 @@
-import "server-only";
+// pages/api/pdfs/generate-all.ts — SSOT Admin Gate (FIXED)
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth-options";
-import { getGeneratedPDFs } from "@/lib/pdf/pdf-registry.generated"; // Use the generated source of truth
+import { authOptions } from "@/lib/auth/options";
+import { getGeneratedPDFs } from '@/lib/pdf/registry.static';
 import { SecurePuppeteerPDFGenerator } from "@/scripts/pdf/secure-puppeteer-generator";
 import { prisma } from "@/lib/prisma"; // Institutional singleton
 import path from "path";
 import fs from "fs";
+
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
 /**
  * INSTITUTIONAL BATCH GENERATOR
@@ -23,10 +26,23 @@ type ResultRow =
   | { id: string; success: true; outputPath: string }
   | { id: string; success: false; error: string };
 
+type Ok = { ok: true; count: number; total: number; message: string; generatedAt: string; results?: ResultRow[] };
+type Fail = { ok: false; error: string; generatedAt: string };
+
 const generator = new SecurePuppeteerPDFGenerator({
   timeout: 120_000, // Increased for heavy institutional briefs
   maxRetries: 3,
 });
+
+/**
+ * Get user tier from session (SSOT compliant)
+ */
+function getUserTier(session: any): AccessTier {
+  // Prefer token.aol/session.aol if present
+  const fromAol = session?.aol?.tier ?? session?.user?.tier;
+  const fallback = session?.user?.role;
+  return normalizeUserTier(fromAol ?? fallback ?? "public");
+}
 
 /**
  * CONCURRENCY POOL: Prevents CPU/RAM exhaustion during 718-asset generation.
@@ -59,20 +75,35 @@ function safeMessage(err: unknown): string {
   return String(err);
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
+  const startTime = new Date().toISOString();
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ success: false, error: "Method not allowed" });
+    return res.status(405).json({ ok: false, error: "Method not allowed", generatedAt: startTime });
   }
 
-  // 1. Session & Role Validation
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+
+  // 1. Session Validation
   const session = await getServerSession(req, res, authOptions);
-  if (!session || session.user?.role !== "ADMIN") {
-    return res.status(401).json({ success: false, error: "Unauthorized: Admin access required." });
+  if (!session) {
+    return res.status(401).json({ ok: false, error: "Authentication required", generatedAt: startTime });
+  }
+
+  // 2. SSOT: Only architect+ can generate-all PDFs
+  const tier = getUserTier(session);
+  if (!hasAccess(tier, "architect")) {
+    return res.status(403).json({ 
+      ok: false, 
+      error: "Forbidden: architect clearance required", 
+      generatedAt: startTime 
+    });
   }
 
   try {
-    // 2. Load Portfolio from Generated Registry
+    // 3. Load Portfolio from Generated Registry
     const all = getGeneratedPDFs();
     
     // Filter for assets requiring generation (Missing physical file)
@@ -80,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (pending.length === 0) {
       return res.status(200).json({
-        success: true,
+        ok: true,
         count: 0,
         total: all.length,
         message: "Portfolio synchronization complete. No pending generations.",
@@ -88,7 +119,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 3. Environment Preparation
+    // 4. Environment Preparation
     const outputDir = path.join(process.cwd(), "public", "assets", "downloads");
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -97,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const concurrency = Number(process.env.PDF_BATCH_CONCURRENCY || 2);
     console.log(`🏛️ [BATCH_GEN]: Processing ${pending.length} assets with concurrency ${concurrency}`);
 
-    // 4. Execution Loop
+    // 5. Execution Loop
     const results = await runPool<any, ResultRow>(pending, concurrency, async (pdf) => {
       const id = String(pdf.id);
       
@@ -120,7 +151,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title: pdf.title,
         });
 
-        // 5. Telemetry: Update engagement metrics in Neon DB
+        // 6. Telemetry: Update engagement metrics in Neon DB
         await prisma.contentMetadata.update({
           where: { slug: id },
           data: { updatedAt: new Date() }
@@ -136,7 +167,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const succeeded = results.filter((r) => r.success).length;
 
     return res.status(200).json({
-      success: true,
+      ok: true,
       count: succeeded,
       total: pending.length,
       results,
@@ -147,7 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error("🏛️ [CRITICAL_GEN_ERROR]:", error);
     return res.status(500).json({
-      success: false,
+      ok: false,
       error: safeMessage(error) || "Institutional batch generation failed.",
       generatedAt: new Date().toISOString(),
     });

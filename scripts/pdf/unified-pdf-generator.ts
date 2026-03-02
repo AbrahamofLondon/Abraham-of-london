@@ -1,14 +1,22 @@
 // scripts/pdf/unified-pdf-generator.ts
-// ABRAHAM OF LONDON — Unified PDF Generator (Production Grade)
-// - Deterministic scanning + conversion
-// - Correct Windows path mapping (NO leading-slash join bugs)
-// - Hard PDF validation gate
-// - Integrity hashing (sha256 + md5)
-// - Optional Prisma upsert (metadata only)
-// - Per-file START/DONE/FAIL with timers
-// - Timeout-safe LibreOffice (spawn + kill process tree)
-// - Puppeteer hard timeouts per entry
-// - Commander negation flags: --no-use-puppeteer / --no-use-universal
+// ABRAHAM OF LONDON — Unified PDF Generator (Institutional Production Grade)
+// -----------------------------------------------------------------------------
+// PURPOSE:
+// - Generate PDFs from SOURCE content (content/downloads + lib/pdf)
+// - Output to public/assets/downloads/{content-downloads|lib-pdf}/<id>.pdf
+// - Optional: write a diagnostic registry JSON (NOT SSOT). Your SSOT registry is
+//   inventory-first from public/assets/downloads via build-pdf-registry-generated.ts
+//
+// INSTITUTIONAL GUARANTEES:
+// - Deterministic scan + de-dupe by id
+// - Windows-safe path mapping
+// - Atomic writes (tmp -> rename)
+// - Hard PDF validation (size + optional %PDF header)
+// - Concurrency worker pool (default 1)
+// - LibreOffice conversion timeout w/ process-tree kill on Windows
+// - Puppeteer conversion with explicit Chrome path support
+// - STRICT mode exits non-zero on any failure
+// - allow-fallback is explicit (no silent placeholder drift)
 
 import { Command } from "commander";
 import fs from "fs";
@@ -17,6 +25,7 @@ import os from "os";
 import crypto from "crypto";
 import matter from "gray-matter";
 import { spawn, spawnSync } from "child_process";
+import { fileURLToPath } from "url";
 import { SecurePuppeteerPDFGenerator } from "./secure-puppeteer-generator";
 
 // =============================================================================
@@ -33,21 +42,39 @@ type GenerationOptions = {
   tier: Tier;
   quality: Quality;
   formats: Format[];
-  outputDirAbs: string;         // absolute path to .../public/assets/downloads (or custom)
-  outputBaseWeb: string;        // default "/assets/downloads"
+
+  outputDirAbs: string; // abs path to .../public/assets/downloads
+  outputBaseWeb: string; // default "/assets/downloads"
+
   verbose: boolean;
+
   scanContent: boolean;
   scanOnly: boolean;
+  generate: boolean;
+
   usePuppeteer: boolean;
   useUniversal: boolean;
+
   strict: boolean;
   overwrite: boolean;
+
+  requirePdfHeader: boolean;
   minBytes: number;
-  generate: boolean;
+  minBytesFillable: number;
+
+  allowFallback: boolean;
+
   writeRegistry: boolean;
   registryOutAbs: string;
+
   db: boolean;
-  sofficePath?: string;         // optional explicit path to soffice
+
+  concurrency: number;
+  timeoutLibreOfficeMs: number;
+  timeoutPuppeteerMs: number;
+
+  sofficePath?: string;
+  chromePath?: string;
 };
 
 type SourceFile = {
@@ -66,9 +93,8 @@ type ContentRegistryEntry = {
   description: string;
   excerpt?: string;
 
-  // deterministic mapping
-  outputAbsPath: string;       // physical
-  outputPathWeb: string;       // web
+  outputAbsPath: string;
+  outputPathWeb: string;
 
   sourcePathAbs: string;
   sourceKind: SourceKind;
@@ -76,19 +102,26 @@ type ContentRegistryEntry = {
 
   type: string;
   format: string;
+
   isInteractive: boolean;
   isFillable: boolean;
+
   category: string;
   tier: Exclude<Tier, "all">;
   formats: Format[];
+
   exists: boolean;
   needsGeneration: boolean;
+
   fileSizeBytes: number;
   fileSizeLabel: string;
   lastModifiedIso: string;
+
   tags: string[];
   requiresAuth: boolean;
+
   version: string;
+
   sha256?: string;
   md5?: string;
 };
@@ -105,7 +138,7 @@ type ProcessResult = {
 };
 
 // =============================================================================
-// CLI
+// CLI (Commander-correct; supports --foo and --no-foo where applicable)
 // =============================================================================
 
 const program = new Command();
@@ -113,27 +146,46 @@ const program = new Command();
 program
   .name("unified-pdf-generator")
   .description("Institutional PDF generator (scan + convert + validate + register + optional DB sync)")
-  .version("5.0.0")
+  .version("6.2.0")
+
   .option("-t, --tier <tier>", "Tier filter (architect|member|free|all)", "all")
   .option("-q, --quality <quality>", "PDF quality (premium|enterprise|draft)", "premium")
   .option("-f, --formats <formats>", "Formats (A4,Letter,A3)", "A4")
   .option("-o, --output <output>", "Output directory (relative or abs)", "./public/assets/downloads")
   .option("--output-base-web <path>", "Web base for outputs", "/assets/downloads")
   .option("-v, --verbose", "Verbose logging", false)
+
   .option("--scan-content", "Scan content/downloads and lib/pdf for sources", false)
   .option("--scan-only", "Scan only (no generation)", false)
-  .option("--generate", "Generate outputs", true)
-  .option("--use-puppeteer", "Use Puppeteer for MD/MDX/HTML -> PDF", true)
+
+  // Negatable booleans:
+  // default generate is true; user can pass --no-generate
+  .option("--no-generate", "Disable generation (scan-only behavior)")
+  // default usePuppeteer is true; supports --no-use-puppeteer and --use-puppeteer
   .option("--no-use-puppeteer", "Disable Puppeteer for MD/MDX/HTML -> PDF")
-  .option("--use-universal", "Use LibreOffice for Office -> PDF", true)
+  // default useUniversal is true; supports --no-use-universal and --use-universal
   .option("--no-use-universal", "Disable LibreOffice conversion")
+
   .option("--strict", "Fail process if any conversion fails", false)
   .option("--overwrite", "Overwrite existing PDFs", false)
+
+  .option("--no-require-pdf-header", "Do not require %PDF header")
   .option("--min-bytes <bytes>", "Minimum bytes for a PDF to be considered valid", "8000")
+  .option("--min-bytes-fillable <bytes>", "Minimum bytes for fillable PDFs", "4000")
+
+  .option("--allow-fallback", "Allow fallback PDFs when conversion not available", false)
+
+  .option("--concurrency <n>", "Concurrent conversions (default 1)", "1")
+  .option("--timeout-libreoffice <ms>", "LibreOffice timeout per file (ms)", "120000")
+  .option("--timeout-puppeteer <ms>", "Puppeteer timeout per file (ms)", "120000")
+
   .option("--write-registry", "Write registry JSON to disk", true)
   .option("--registry-out <file>", "Registry JSON output file", "./public/assets/downloads/_generated.registry.json")
+
   .option("--db", "Upsert ContentMetadata in DB (metadata only)", false)
-  .option("--soffice <path>", "Explicit soffice path (optional)", "");
+
+  .option("--soffice <path>", "Explicit soffice path (optional)", "")
+  .option("--chrome <path>", "Explicit Chrome/Chromium executablePath (optional)", "");
 
 // =============================================================================
 // LOGGING
@@ -154,6 +206,10 @@ class Log {
 
 function toAbs(p: string) {
   return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+}
+
+function safePosixUrl(p: string): string {
+  return String(p || "").replace(/\\/g, "/").replace(/\/{2,}/g, "/");
 }
 
 function normalizeId(baseName: string): string {
@@ -186,13 +242,15 @@ function isPdfHeader(buf: Buffer): boolean {
   return !!buf && buf.length >= 4 && buf.subarray(0, 4).toString("utf8") === "%PDF";
 }
 
-function validatePdf(absPath: string, minBytes: number): { ok: boolean; reason: string; size?: number } {
+function validatePdf(absPath: string, minBytes: number, requireHeader: boolean): { ok: boolean; reason: string; size?: number } {
   try {
     const st = fs.statSync(absPath);
     if (!st.isFile()) return { ok: false, reason: "not a file" };
     if (st.size < minBytes) return { ok: false, reason: `too small (${st.size} bytes)`, size: st.size };
-    const head = fs.readFileSync(absPath);
-    if (!isPdfHeader(head)) return { ok: false, reason: "missing %PDF header", size: st.size };
+    if (requireHeader) {
+      const head = fs.readFileSync(absPath);
+      if (!isPdfHeader(head)) return { ok: false, reason: "missing %PDF header", size: st.size };
+    }
     return { ok: true, reason: "ok", size: st.size };
   } catch (e: any) {
     return { ok: false, reason: `cannot read (${e?.message || "unknown"})` };
@@ -211,14 +269,35 @@ function ensureDirForFile(absFile: string) {
   fs.mkdirSync(path.dirname(absFile), { recursive: true });
 }
 
+function resolveSofficePath(explicit?: string): string {
+  const env = process.env.SOFFICE_PATH || process.env.LIBREOFFICE_PATH || "";
+  const candidate = explicit && explicit.trim() ? explicit.trim() : env.trim() ? env.trim() : "soffice";
+  return candidate;
+}
+
+function hasSoffice(sofficePath: string): boolean {
+  try {
+    const r = spawnSync(sofficePath, ["--version"], { stdio: "ignore" });
+    return r.status === 0;
+  } catch {
+    return false;
+  }
+}
+
+function resolveChromePath(explicit?: string): string | undefined {
+  const env = process.env.CHROME_PATH || process.env.PUPPETEER_EXECUTABLE_PATH || "";
+  const candidate = explicit && explicit.trim() ? explicit.trim() : env.trim() ? env.trim() : "";
+  return candidate ? candidate : undefined;
+}
+
+function isOffice(kind: SourceKind) {
+  return kind === "xlsx" || kind === "xls" || kind === "pptx" || kind === "ppt";
+}
+
 /**
  * Timeout-safe spawn. Kills entire tree on Windows.
  */
-async function spawnWithTimeout(
-  cmd: string,
-  args: string[],
-  timeoutMs: number
-): Promise<{ stdout: string; stderr: string }> {
+async function spawnWithTimeout(cmd: string, args: string[], timeoutMs: number): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"], shell: false });
 
@@ -252,23 +331,28 @@ async function spawnWithTimeout(
   });
 }
 
-function resolveSofficePath(explicit?: string): string {
-  const env = process.env.SOFFICE_PATH || process.env.LIBREOFFICE_PATH || "";
-  const candidate = (explicit && explicit.trim()) ? explicit.trim() : (env.trim() ? env.trim() : "soffice");
-  return candidate;
-}
+/** Simple concurrency pool */
+async function runPool<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+  const n = Math.max(1, Math.min(16, concurrency));
+  let idx = 0;
 
-function hasSoffice(sofficePath: string): boolean {
-  try {
-    const r = spawnSync(sofficePath, ["--version"], { stdio: "ignore" });
-    return r.status === 0;
-  } catch {
-    return false;
-  }
+  const runners = new Array(n).fill(0).map(async () => {
+    for (;;) {
+      const i = idx++;
+      if (i >= items.length) return;
+      await worker(items[i], i);
+    }
+  });
+
+  await Promise.all(runners);
 }
 
 // =============================================================================
-// SCANNER (ONLY what you said: content/downloads + lib/pdf)
+// SCANNER
 // =============================================================================
 
 class ContentScanner {
@@ -285,7 +369,7 @@ class ContentScanner {
         const ext = path.extname(ent.name).toLowerCase().replace(".", "");
         if (!allowed.has(ext)) continue;
 
-        const kind: SourceKind = (ext === "htm" ? "html" : (ext as SourceKind));
+        const kind: SourceKind = ext === "htm" ? "html" : (ext as SourceKind);
         const st = fs.statSync(abs);
 
         out.push({
@@ -332,7 +416,7 @@ class ContentScanner {
   static detectCategory(id: string, tags: string[], meta: Record<string, any>): string {
     if (meta?.category) return String(meta.category);
     const tagFirst = tags.map((t) => t.toLowerCase());
-    const known = new Set(["legacy", "leadership", "theology", "surrender-framework", "personal-growth", "organizational", "tools", "templates"]);
+    const known = new Set(["legacy","leadership","theology","surrender-framework","personal-growth","organizational","tools","templates"]);
     for (const t of tagFirst) if (known.has(t)) return t;
 
     const s = id.toLowerCase();
@@ -366,11 +450,6 @@ class ContentScanner {
     return String(meta?.description || meta?.excerpt || `${title} — A resource from Abraham of London`);
   }
 
-  /**
-   * Deterministic folder mapping:
-   * - content/downloads => content-downloads/
-   * - lib/pdf => lib-pdf/
-   */
   static subdirFor(from: SourceFrom): "content-downloads" | "lib-pdf" {
     return from === "content/downloads" ? "content-downloads" : "lib-pdf";
   }
@@ -379,33 +458,31 @@ class ContentScanner {
     const id = normalizeId(sf.baseName);
     const meta = this.extractMeta(sf.absPath, sf.kind);
     const tags = this.tagsFrom(meta);
+
     const title = this.titleFrom(sf.baseName, meta);
     const description = this.descriptionFrom(title, meta);
-    const excerpt =
-      String(meta?.excerpt || "").trim() ||
-      (description.length > 140 ? `${description.slice(0, 140)}…` : description);
+    const excerpt = String(meta?.excerpt || "").trim() || (description.length > 140 ? `${description.slice(0, 140)}…` : description);
 
     const category = this.detectCategory(id, tags, meta);
     const tier = this.detectTier(id, meta);
     const subdir = this.subdirFor(sf.from);
 
-    // ✅ FIX: physical output is always based on opts.outputDirAbs (no leading slash surprises)
     const outputAbsPath = path.join(opts.outputDirAbs, subdir, `${id}.pdf`);
-
-    // ✅ FIX: web output is always a clean posix URL
-    const outputPathWeb = `${opts.outputBaseWeb}/${subdir}/${id}.pdf`.replace(/\/{2,}/g, "/");
+    const outputPathWeb = safePosixUrl(`${opts.outputBaseWeb}/${subdir}/${id}.pdf`);
 
     const exists = fs.existsSync(outputAbsPath);
 
-    // needsGeneration: compare src mtime vs output mtime, and also validate PDF
+    const isFillable = id.includes("fillable") || sf.kind === "xlsx" || sf.kind === "xls";
+    const isInteractive = id.includes("interactive") || isFillable;
+
+    const minBytes = isFillable ? opts.minBytesFillable : opts.minBytes;
+
     const needsGeneration = (() => {
       if (!exists) return true;
       try {
         const outSt = fs.statSync(outputAbsPath);
-        // if source is newer (allow 1s slack)
         if (sf.mtimeMs > outSt.mtimeMs + 1000) return true;
-        // if output is invalid
-        const v = validatePdf(outputAbsPath, opts.minBytes);
+        const v = validatePdf(outputAbsPath, minBytes, opts.requirePdfHeader);
         return !v.ok;
       } catch {
         return true;
@@ -421,8 +498,8 @@ class ContentScanner {
       (sf.kind === "html") ? "HTML" :
       "PDF";
 
-    const isFillable = id.includes("fillable") || sf.kind === "xlsx" || sf.kind === "xls";
-    const isInteractive = id.includes("interactive") || isFillable;
+    const isInteractiveFlag = Boolean(meta?.isInteractive) || isInteractive;
+    const isFillableFlag = Boolean(meta?.isFillable) || isFillable;
 
     return {
       id,
@@ -436,8 +513,8 @@ class ContentScanner {
       from: sf.from,
       type: String(meta?.type || "tool"),
       format,
-      isInteractive,
-      isFillable,
+      isInteractive: isInteractiveFlag,
+      isFillable: isFillableFlag,
       category,
       tier,
       formats: opts.formats,
@@ -454,11 +531,11 @@ class ContentScanner {
 }
 
 // =============================================================================
-// UNIVERSAL CONVERTER (LibreOffice) + fallback PDF
+// CONVERTERS
 // =============================================================================
 
 class UniversalConverter {
-  static async convertOfficeToPdf(sofficePath: string, srcAbs: string, destAbs: string): Promise<void> {
+  static async convertOfficeToPdf(sofficePath: string, srcAbs: string, destAbs: string, timeoutMs: number): Promise<void> {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "aol-pdf-"));
     try {
       ensureDirForFile(destAbs);
@@ -478,7 +555,7 @@ class UniversalConverter {
           tmpDir,
           srcAbs,
         ],
-        120_000
+        timeoutMs,
       );
 
       const base = path.basename(srcAbs, path.extname(srcAbs));
@@ -489,7 +566,6 @@ class UniversalConverter {
         return;
       }
 
-      // Some LO builds alter output filename; pick first PDF in tmpDir
       const pdfs = fs.readdirSync(tmpDir).filter((f) => f.toLowerCase().endsWith(".pdf"));
       if (!pdfs.length) throw new Error("LibreOffice produced no PDF output");
       fs.copyFileSync(path.join(tmpDir, pdfs[0]), destAbs);
@@ -503,13 +579,12 @@ class UniversalConverter {
     ensureDirForFile(destAbs);
 
     const doc = await PDFDocument.create();
-    const page = doc.addPage([595.28, 841.89]); // A4
+    const page = doc.addPage([595.28, 841.89]);
     const font = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
 
-    page.drawText("Abraham of London — Fallback PDF", { x: 50, y: 780, size: 18, font: bold, color: rgb(0.1, 0.1, 0.1) });
+    page.drawText("Abraham of London — Generation Notice", { x: 50, y: 780, size: 18, font: bold, color: rgb(0.1, 0.1, 0.1) });
     page.drawText(entry.title, { x: 50, y: 745, size: 14, font: bold, color: rgb(0.2, 0.2, 0.2), maxWidth: 500 });
-    page.drawText(entry.description.slice(0, 250), { x: 50, y: 715, size: 10, font, color: rgb(0.35, 0.35, 0.35), maxWidth: 500 });
 
     const lines = [
       `ID: ${entry.id}`,
@@ -520,9 +595,9 @@ class UniversalConverter {
       `Generated: ${new Date().toISOString()}`,
     ];
 
-    let y = 675;
+    let y = 705;
     for (const l of lines) {
-      page.drawText(l, { x: 50, y, size: 10, font, color: rgb(0.4, 0.4, 0.4) });
+      page.drawText(l, { x: 50, y, size: 10, font, color: rgb(0.35, 0.35, 0.35) });
       y -= 18;
     }
 
@@ -542,25 +617,31 @@ class GeneratorEngine {
 
   constructor(opts: GenerationOptions) {
     this.opts = opts;
-    this.puppeteer = new SecurePuppeteerPDFGenerator({
-      timeout: 70_000,
-      maxRetries: 2,
-    });
+
     this.sofficePath = resolveSofficePath(opts.sofficePath);
+
+    // Enforce executablePath via env too (covers libraries that read env instead of param)
+    if (opts.chromePath) {
+      process.env.CHROME_PATH = opts.chromePath;
+      process.env.PUPPETEER_EXECUTABLE_PATH = opts.chromePath;
+    }
+
+    this.puppeteer = new SecurePuppeteerPDFGenerator({
+      timeout: Math.max(30_000, opts.timeoutPuppeteerMs),
+      maxRetries: 2,
+      chromePath: opts.chromePath,
+    } as any);
   }
 
   async run(): Promise<void> {
     this.banner();
 
     const entries = this.opts.scanContent ? this.scanSources() : [];
-    if (this.opts.scanOnly) {
+
+    if (this.opts.scanOnly || !this.opts.generate) {
       this.printScanSummary(entries);
       if (this.opts.writeRegistry) this.writeRegistry(entries);
-      return;
-    }
-
-    if (!this.opts.generate) {
-      this.printScanSummary(entries);
+      await this.puppeteer.close().catch(() => {});
       return;
     }
 
@@ -586,7 +667,6 @@ class GeneratorEngine {
       await this.syncToDb(entries, results);
     }
 
-    // Always close Puppeteer cleanly
     await this.puppeteer.close().catch(() => {});
 
     const failed = results.filter((r) => !r.ok);
@@ -599,7 +679,8 @@ class GeneratorEngine {
   }
 
   private banner() {
-    console.log(Log.mag("\n✨ UNIFIED PDF GENERATOR (Institutional) ✨"));
+    const chromePath = this.opts.chromePath || "(auto)";
+    console.log(Log.mag("\n✨ UNIFIED PDF GENERATOR (Institutional v6.2) ✨"));
     console.log(Log.dim("────────────────────────────────────────────────────────────"));
     console.log(`${Log.cya("Tier:")} ${this.opts.tier}`);
     console.log(`${Log.cya("Quality:")} ${this.opts.quality}`);
@@ -607,10 +688,15 @@ class GeneratorEngine {
     console.log(`${Log.cya("Scan:")} ${this.opts.scanContent ? "ON" : "OFF"}  ${Log.cya("Generate:")} ${this.opts.generate ? "ON" : "OFF"}`);
     console.log(`${Log.cya("Puppeteer:")} ${this.opts.usePuppeteer ? "ON" : "OFF"}  ${Log.cya("LibreOffice:")} ${this.opts.useUniversal ? "ON" : "OFF"}`);
     console.log(`${Log.cya("Overwrite:")} ${this.opts.overwrite ? "YES" : "NO"}  ${Log.cya("Strict:")} ${this.opts.strict ? "YES" : "NO"}`);
-    console.log(`${Log.cya("Min bytes:")} ${this.opts.minBytes}`);
+    console.log(`${Log.cya("Min bytes:")} ${this.opts.minBytes}  ${Log.cya("Min bytes fillable:")} ${this.opts.minBytesFillable}`);
+    console.log(`${Log.cya("Require header:")} ${this.opts.requirePdfHeader ? "YES" : "NO"}`);
+    console.log(`${Log.cya("Allow fallback:")} ${this.opts.allowFallback ? "YES" : "NO"}`);
+    console.log(`${Log.cya("Concurrency:")} ${this.opts.concurrency}`);
+    console.log(`${Log.cya("Timeout LO:")} ${this.opts.timeoutLibreOfficeMs}ms  ${Log.cya("Timeout PUP:")} ${this.opts.timeoutPuppeteerMs}ms`);
     console.log(`${Log.cya("Output (abs):")} ${this.opts.outputDirAbs}`);
     console.log(`${Log.cya("Output base web):")} ${this.opts.outputBaseWeb}`);
-    console.log(`${Log.cya("soffice):")} ${resolveSofficePath(this.opts.sofficePath)}`);
+    console.log(`${Log.cya("soffice):")} ${this.sofficePath}`);
+    console.log(`${Log.cya("chrome):")} ${chromePath}`);
     console.log(Log.dim("────────────────────────────────────────────────────────────\n"));
     fs.mkdirSync(this.opts.outputDirAbs, { recursive: true });
   }
@@ -625,7 +711,7 @@ class GeneratorEngine {
     console.log(Log.cya(`🔍 Scanning ${libDir}`));
     const b = ContentScanner.discover(libDir, "lib/pdf", true);
 
-    // De-dupe by id (prefer content/downloads over lib/pdf if collision)
+    // De-dupe by id (prefer content/downloads over lib/pdf)
     const all = [...a, ...b];
     const map = new Map<string, SourceFile>();
     for (const sf of all) {
@@ -639,6 +725,7 @@ class GeneratorEngine {
 
     const entries = Array.from(map.values()).map((sf) => ContentScanner.toRegistryEntry(sf, this.opts));
     entries.sort((x, y) => x.title.localeCompare(y.title));
+
     this.printScanSummary(entries);
     return entries;
   }
@@ -658,7 +745,7 @@ class GeneratorEngine {
     fs.writeFileSync(
       this.opts.registryOutAbs,
       JSON.stringify({ generatedAt: new Date().toISOString(), entries }, null, 2),
-      "utf8"
+      "utf8",
     );
     console.log(Log.grn(`🧾 Registry written: ${this.opts.registryOutAbs}`));
   }
@@ -668,8 +755,9 @@ class GeneratorEngine {
     return this.opts.tier === entryTier;
   }
 
-  private postValidateOrThrow(outAbs: string) {
-    const v = validatePdf(outAbs, this.opts.minBytes);
+  private postValidateOrThrow(entry: ContentRegistryEntry, outAbs: string) {
+    const minBytes = entry.isFillable ? this.opts.minBytesFillable : this.opts.minBytes;
+    const v = validatePdf(outAbs, minBytes, this.opts.requirePdfHeader);
     if (!v.ok) {
       try { fs.unlinkSync(outAbs); } catch {}
       throw new Error(`Invalid PDF (${v.reason})`);
@@ -679,10 +767,10 @@ class GeneratorEngine {
   private async processEntry(entry: ContentRegistryEntry, index: number, total: number): Promise<ProcessResult> {
     const start = Date.now();
     const dest = entry.outputAbsPath;
+    const tmp = dest.replace(/\.pdf$/i, `.__tmp__.pdf`);
 
-    console.log(`\n🧾 [${index + 1}/${total}] ${entry.id} :: ${entry.sourceKind} → ${entry.outputPathWeb}`);
-    if (this.opts.verbose) console.log(Log.dim(`   src: ${entry.sourcePathAbs}`));
-    if (this.opts.verbose) console.log(Log.dim(`   out: ${dest}`));
+    // Short deterministic console line (good UX even in concurrency)
+    console.log(`🧾 [${index + 1}/${total}] ${entry.id} :: ${entry.sourceKind} → ${entry.outputPathWeb}`);
 
     if (!fs.existsSync(entry.sourcePathAbs) || fs.statSync(entry.sourcePathAbs).size < 10) {
       throw new Error(`Source missing/empty: ${entry.sourcePathAbs}`);
@@ -690,115 +778,100 @@ class GeneratorEngine {
 
     ensureDirForFile(dest);
 
-    try {
-      // 1) Direct PDF copy
-      if (entry.sourceKind === "pdf") {
-        fs.copyFileSync(entry.sourcePathAbs, dest);
-        this.postValidateOrThrow(dest);
-        const { sha256, md5 } = hashFile(dest);
-        return {
-          id: entry.id,
-          ok: true,
-          method: "copy",
-          durationMs: Date.now() - start,
-          outputBytes: fs.statSync(dest).size,
-          sha256,
-          md5,
-        };
-      }
-
-      // 2) Office conversion via LibreOffice (if enabled + available)
-      if (["xlsx", "xls", "pptx", "ppt"].includes(entry.sourceKind)) {
-        const sofficeOk = this.opts.useUniversal && hasSoffice(this.sofficePath);
-
-        if (sofficeOk) {
-          await UniversalConverter.convertOfficeToPdf(this.sofficePath, entry.sourcePathAbs, dest);
-          this.postValidateOrThrow(dest);
-          const { sha256, md5 } = hashFile(dest);
-          return {
-            id: entry.id,
-            ok: true,
-            method: "libreoffice",
-            durationMs: Date.now() - start,
-            outputBytes: fs.statSync(dest).size,
-            sha256,
-            md5,
-          };
-        }
-
-        // fallback
-        await UniversalConverter.createFallbackPdf(entry, dest, "LibreOffice disabled/unavailable.");
-        this.postValidateOrThrow(dest);
-        const { sha256, md5 } = hashFile(dest);
-        return {
-          id: entry.id,
-          ok: true,
-          method: "fallback",
-          durationMs: Date.now() - start,
-          outputBytes: fs.statSync(dest).size,
-          sha256,
-          md5,
-        };
-      }
-
-      // 3) MD/MDX/HTML via Puppeteer (if enabled)
-      if ((entry.sourceKind === "mdx" || entry.sourceKind === "md" || entry.sourceKind === "html")) {
-        if (this.opts.usePuppeteer) {
-          const timeoutMs = this.opts.quality === "premium" ? 120_000 : this.opts.quality === "enterprise" ? 90_000 : 60_000;
-
-          await this.puppeteer.generateFromSource({
-            sourceAbsPath: entry.sourcePathAbs,
-            sourceKind: entry.sourceKind,
-            outputAbsPath: dest,
-            quality: this.opts.quality,
-            format: this.opts.formats[0] ?? "A4",
-            title: entry.title,
-            timeoutMs,
-          });
-
-          this.postValidateOrThrow(dest);
-          const { sha256, md5 } = hashFile(dest);
-          return {
-            id: entry.id,
-            ok: true,
-            method: "puppeteer",
-            durationMs: Date.now() - start,
-            outputBytes: fs.statSync(dest).size,
-            sha256,
-            md5,
-          };
-        }
-
-        // fallback if puppeteer disabled
-        await UniversalConverter.createFallbackPdf(entry, dest, "Puppeteer disabled.");
-        this.postValidateOrThrow(dest);
-        const { sha256, md5 } = hashFile(dest);
-        return {
-          id: entry.id,
-          ok: true,
-          method: "fallback",
-          durationMs: Date.now() - start,
-          outputBytes: fs.statSync(dest).size,
-          sha256,
-          md5,
-        };
-      }
-
-      // Unknown => fallback
-      await UniversalConverter.createFallbackPdf(entry, dest, "No renderer configured for this kind.");
-      this.postValidateOrThrow(dest);
+    // If not overwriting and output exists and does not need generation, skip early
+    if (!this.opts.overwrite && entry.exists && !entry.needsGeneration) {
+      const st = fs.statSync(dest);
       const { sha256, md5 } = hashFile(dest);
       return {
         id: entry.id,
         ok: true,
-        method: "fallback",
+        method: "copy",
         durationMs: Date.now() - start,
-        outputBytes: fs.statSync(dest).size,
+        outputBytes: st.size,
         sha256,
         md5,
       };
+    }
+
+    try {
+      // 1) Direct PDF copy
+      if (entry.sourceKind === "pdf") {
+        fs.copyFileSync(entry.sourcePathAbs, tmp);
+        fs.renameSync(tmp, dest);
+        this.postValidateOrThrow(entry, dest);
+        const { sha256, md5 } = hashFile(dest);
+        return { id: entry.id, ok: true, method: "copy", durationMs: Date.now() - start, outputBytes: fs.statSync(dest).size, sha256, md5 };
+      }
+
+      // 2) Office conversion via LibreOffice (if enabled + available)
+      if (isOffice(entry.sourceKind)) {
+        const sofficeOk = this.opts.useUniversal && hasSoffice(this.sofficePath);
+
+        if (sofficeOk) {
+          await UniversalConverter.convertOfficeToPdf(this.sofficePath, entry.sourcePathAbs, tmp, this.opts.timeoutLibreOfficeMs);
+          fs.renameSync(tmp, dest);
+          this.postValidateOrThrow(entry, dest);
+          const { sha256, md5 } = hashFile(dest);
+          return { id: entry.id, ok: true, method: "libreoffice", durationMs: Date.now() - start, outputBytes: fs.statSync(dest).size, sha256, md5 };
+        }
+
+        if (!this.opts.allowFallback) {
+          throw new Error("LibreOffice disabled/unavailable and --allow-fallback not set.");
+        }
+
+        await UniversalConverter.createFallbackPdf(entry, tmp, "LibreOffice disabled/unavailable.");
+        fs.renameSync(tmp, dest);
+        this.postValidateOrThrow(entry, dest);
+        const { sha256, md5 } = hashFile(dest);
+        return { id: entry.id, ok: true, method: "fallback", durationMs: Date.now() - start, outputBytes: fs.statSync(dest).size, sha256, md5 };
+      }
+
+      // 3) MD/MDX/HTML via Puppeteer (if enabled)
+      if (entry.sourceKind === "mdx" || entry.sourceKind === "md" || entry.sourceKind === "html") {
+        if (this.opts.usePuppeteer) {
+          await this.puppeteer.generateFromSource({
+            sourceAbsPath: entry.sourcePathAbs,
+            sourceKind: entry.sourceKind,
+            outputAbsPath: tmp,
+            quality: this.opts.quality,
+            format: this.opts.formats[0] ?? "A4",
+            title: entry.title,
+            timeoutMs: this.opts.timeoutPuppeteerMs,
+          });
+
+          fs.renameSync(tmp, dest);
+          this.postValidateOrThrow(entry, dest);
+          const { sha256, md5 } = hashFile(dest);
+          return { id: entry.id, ok: true, method: "puppeteer", durationMs: Date.now() - start, outputBytes: fs.statSync(dest).size, sha256, md5 };
+        }
+
+        if (!this.opts.allowFallback) {
+          throw new Error("Puppeteer disabled and --allow-fallback not set.");
+        }
+
+        await UniversalConverter.createFallbackPdf(entry, tmp, "Puppeteer disabled.");
+        fs.renameSync(tmp, dest);
+        this.postValidateOrThrow(entry, dest);
+        const { sha256, md5 } = hashFile(dest);
+        return { id: entry.id, ok: true, method: "fallback", durationMs: Date.now() - start, outputBytes: fs.statSync(dest).size, sha256, md5 };
+      }
+
+      // Unknown => fallback (only if allowed)
+      if (!this.opts.allowFallback) throw new Error(`No renderer for kind "${entry.sourceKind}" and --allow-fallback not set.`);
+      await UniversalConverter.createFallbackPdf(entry, tmp, "No renderer configured for this kind.");
+      fs.renameSync(tmp, dest);
+      this.postValidateOrThrow(entry, dest);
+      const { sha256, md5 } = hashFile(dest);
+      return { id: entry.id, ok: true, method: "fallback", durationMs: Date.now() - start, outputBytes: fs.statSync(dest).size, sha256, md5 };
     } catch (error: any) {
-      if (fs.existsSync(dest)) { try { fs.unlinkSync(dest); } catch {} }
+      // Clean tmp, keep dest only if overwrite is false and dest existed (never destroy good artifacts)
+      try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch {}
+
+      // If overwrite=true, remove bad dest
+      if (this.opts.overwrite) {
+        try { if (fs.existsSync(dest)) fs.unlinkSync(dest); } catch {}
+      }
+
       throw new Error(`${entry.id}: ${error?.message || "unknown error"}`);
     }
   }
@@ -810,24 +883,22 @@ class GeneratorEngine {
 
     console.log(Log.cya(`⚙️ Generating ${candidates.length} assets...`));
 
-    const results: ProcessResult[] = [];
+    const results: ProcessResult[] = new Array(candidates.length);
 
-    for (let i = 0; i < candidates.length; i++) {
-      const entry = candidates[i];
+    await runPool(candidates, this.opts.concurrency, async (entry, i) => {
       const t0 = Date.now();
-
       try {
         const r = await this.processEntry(entry, i, candidates.length);
-        console.log(Log.grn(`✅ DONE: ${entry.id} (${r.durationMs}ms, ${formatBytes(r.outputBytes ?? 0)})`));
-        results.push(r);
+        if (this.opts.verbose) console.log(Log.grn(`✅ DONE: ${entry.id} (${r.durationMs}ms, ${formatBytes(r.outputBytes ?? 0)})`));
+        results[i] = r;
       } catch (e: any) {
         const msg = e?.message || "unknown error";
         console.log(Log.red(`❌ FAIL: ${entry.id} (${Date.now() - t0}ms) :: ${msg}`));
-        results.push({ id: entry.id, ok: false, method: "fallback", durationMs: Date.now() - t0, error: msg });
+        results[i] = { id: entry.id, ok: false, method: "fallback", durationMs: Date.now() - t0, error: msg };
       }
-    }
+    });
 
-    const ok = results.filter((r) => r.ok).length;
+    const ok = results.filter((r) => r?.ok).length;
     const fail = results.length - ok;
 
     console.log(Log.dim("────────────────────────────────────────────────────────────"));
@@ -875,7 +946,7 @@ class GeneratorEngine {
           }),
         };
 
-        await prisma.contentMetadata.upsert({
+        await (prisma as any).contentMetadata.upsert({
           where: { slug: payload.slug },
           create: payload as any,
           update: payload as any,
@@ -886,63 +957,107 @@ class GeneratorEngine {
 
       console.log(Log.grn(`✅ DB sync complete. Upserted: ${upserted}`));
     } finally {
-      await prisma.$disconnect();
+      await prisma.$disconnect().catch(() => {});
     }
   }
 }
 
 // =============================================================================
-// OPTIONS
+// OPTIONS (Fixed defaults + Commander negation model)
 // =============================================================================
 
 function buildOptions(): GenerationOptions {
   const raw = program.opts();
 
-  const tier = String(raw.tier || "all") as Tier;
-  const quality = String(raw.quality || "premium") as Quality;
-  const formats = parseFormats(String(raw.formats || "A4"));
+  const tierRaw = String(raw.tier || "all");
+  const qualityRaw = String(raw.quality || "premium");
 
+  const tier = (["architect", "member", "free", "all"].includes(tierRaw) ? tierRaw : "all") as Tier;
+  const quality = (["premium", "enterprise", "draft"].includes(qualityRaw) ? qualityRaw : "premium") as Quality;
+
+  const formats = parseFormats(String(raw.formats || "A4"));
   const outputDirAbs = toAbs(String(raw.output || "./public/assets/downloads"));
   const outputBaseWeb = String(raw.outputBaseWeb || "/assets/downloads").trim() || "/assets/downloads";
-
   const registryOutAbs = toAbs(String(raw.registryOut || "./public/assets/downloads/_generated.registry.json"));
 
-  const sofficePath = (raw.soffice && String(raw.soffice).trim()) ? String(raw.soffice).trim() : undefined;
+  const sofficePath = raw.soffice && String(raw.soffice).trim() ? String(raw.soffice).trim() : undefined;
+  const chromePath = resolveChromePath(raw.chrome && String(raw.chrome).trim() ? String(raw.chrome).trim() : undefined);
+
+  const concurrency = Math.max(1, Math.min(16, parseInt(String(raw.concurrency || "1"), 10) || 1));
+
+  const timeoutLibreOfficeMs = Math.max(10_000, parseInt(String(raw.timeoutLibreoffice || "120000"), 10) || 120_000);
+  const timeoutPuppeteerMs = Math.max(10_000, parseInt(String(raw.timeoutPuppeteer || "120000"), 10) || 120_000);
+
+  const minBytes = Math.max(1000, parseInt(String(raw.minBytes || "8000"), 10) || 8000);
+  const minBytesFillable = Math.max(1000, parseInt(String(raw.minBytesFillable || "4000"), 10) || 4000);
 
   return {
-    tier: (["architect", "member", "free", "all"].includes(tier) ? tier : "all") as Tier,
-    quality: (["premium", "enterprise", "draft"].includes(quality) ? quality : "premium") as Quality,
+    tier,
+    quality,
     formats,
+
     outputDirAbs,
     outputBaseWeb,
+
     verbose: Boolean(raw.verbose),
+
     scanContent: Boolean(raw.scanContent),
     scanOnly: Boolean(raw.scanOnly),
+    generate: Boolean(raw.generate),
+
     usePuppeteer: Boolean(raw.usePuppeteer),
     useUniversal: Boolean(raw.useUniversal),
+
     strict: Boolean(raw.strict),
     overwrite: Boolean(raw.overwrite),
-    minBytes: Math.max(1000, parseInt(String(raw.minBytes || "8000"), 10) || 8000),
-    generate: Boolean(raw.generate),
+
+    requirePdfHeader: Boolean(raw.requirePdfHeader),
+    minBytes,
+    minBytesFillable,
+
+    allowFallback: Boolean(raw.allowFallback),
+
     writeRegistry: Boolean(raw.writeRegistry),
     registryOutAbs,
+
     db: Boolean(raw.db),
+
+    concurrency,
+    timeoutLibreOfficeMs,
+    timeoutPuppeteerMs,
+
     sofficePath,
+    chromePath,
   };
 }
 
 // =============================================================================
-// MAIN
+// MAIN (ESM-safe execution)
 // =============================================================================
 
-(async () => {
+const invokedAsScript = (() => {
+  const argv1 = process.argv[1] ? path.resolve(process.argv[1]) : "";
   try {
-    program.parse(process.argv);
-    const opts = buildOptions();
-    const engine = new GeneratorEngine(opts);
-    await engine.run();
-  } catch (e: any) {
-    console.error(Log.red(`\nCRITICAL ENGINE FAILURE: ${e?.message || "unknown"}\n`));
-    process.exit(1);
+    const here = path.resolve(fileURLToPath(import.meta.url));
+    return argv1 === here;
+  } catch {
+    return true;
   }
 })();
+
+async function main() {
+  program.parse(process.argv);
+  const opts = buildOptions();
+  const engine = new GeneratorEngine(opts);
+  await engine.run();
+}
+
+if (invokedAsScript) {
+  main().catch((e: any) => {
+    console.error(Log.red(`\nCRITICAL ENGINE FAILURE: ${e?.message || "unknown"}\n`));
+    process.exit(1);
+  });
+}
+
+export default main;
+export type { GenerationOptions, ContentRegistryEntry, ProcessResult };

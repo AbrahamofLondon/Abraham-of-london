@@ -1,4 +1,5 @@
-/* pages/private/frameworks/[slug].tsx — PRIVATE PREVIEW (INTEGRITY MODE) */
+/* pages/private/frameworks/[slug].tsx — PRIVATE PREVIEW (INTEGRITY MODE, HARDENED) */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
@@ -7,37 +8,43 @@ import Layout from "@/components/Layout";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import { ShieldAlert, Lock, ArrowLeft } from "lucide-react";
 
-type Props = { slug: string };
+import tiers from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
-function normalizePrivateSlug(input: string): string {
-  // 1) decode safely (if already decoded, keep original)
-  let s = input ?? "";
+type Props = { slug: string; requiredTier: AccessTier };
+
+function normalizePrivateSlug(input: unknown): string {
+  let s = String(input ?? "");
   try {
     s = decodeURIComponent(s);
   } catch {
-    // ignore decoding errors; keep raw input
+    // ignore
   }
 
-  // 2) trim + remove surrounding slashes
-  s = s.trim().replace(/^\/+/, "").replace(/\/+$/, "");
-
-  // 3) forbid traversal and backslashes
-  if (!s || s.includes("..") || s.includes("\\") || s.startsWith(".")) return "";
-
-  // 4) allow only safe path chars (tighten if you want)
-  // permits nested slugs: abc/def-123
-  const ok = /^[a-zA-Z0-9/_-]+$/.test(s);
-  if (!ok) return "";
-
-  // 5) collapse duplicate slashes
+  s = s.trim().replace(/\\/g, "/");
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "");
   s = s.replace(/\/{2,}/g, "/");
 
-  return s;
+  if (!s) return "";
+  if (s.includes("..")) return "";
+  if (s.startsWith(".")) return "";
+
+  // Reject empty segments (e.g. "a//b") after collapsing, and dot segments
+  const parts = s.split("/").filter(Boolean);
+  if (!parts.length) return "";
+  if (parts.some((p) => p === "." || p === "..")) return "";
+
+  // Tight character set per segment
+  // (Allows nested slugs and filenames like "foo-bar_01.pdf")
+  const ok = parts.every((p) => /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(p));
+  if (!ok) return "";
+
+  return parts.join("/");
 }
 
-const PrivateFrameworkPreviewPage: NextPage<Props> = ({ slug }) => {
-  // Use the established private API route for streaming the asset
+const PrivateFrameworkPreviewPage: NextPage<Props> = ({ slug, requiredTier }) => {
   const src = `/api/private/frameworks/${encodeURIComponent(slug)}`;
+  const label = tiers.getLabel(requiredTier);
 
   return (
     <Layout title="Private Framework Preview">
@@ -48,40 +55,36 @@ const PrivateFrameworkPreviewPage: NextPage<Props> = ({ slug }) => {
       <main className="mx-auto w-full max-w-6xl px-4 py-12 lg:py-20">
         <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-3 py-1">
-              <ShieldAlert size={12} className="text-gold" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-                Internal Restricted Asset
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/5 px-3 py-1">
+              <ShieldAlert size={12} className="text-amber-500" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500">
+                Internal Restricted Asset • {label}
               </span>
             </div>
 
             <h1 className="font-serif text-3xl font-semibold text-white md:text-4xl">
-              Framework <span className="italic text-gold/90">Preview</span>
+              Framework <span className="italic text-amber-500/90">Preview</span>
             </h1>
 
             <p className="mt-2 max-w-xl text-sm text-gray-500">
-              Streamed via secure session tunnel. Access is logged and audited.
-              Unauthorized distribution is a breach of institutional mandate.
+              Streamed via secure session tunnel. Access is logged. Unauthorized distribution is a breach of mandate.
             </p>
           </div>
 
           <Link
             href="/inner-circle/dashboard"
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-gold transition-colors"
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-amber-500 transition-colors"
           >
             <ArrowLeft size={14} />
             Return to Vault
           </Link>
         </header>
 
-        {/* SECURE VIEWPORT */}
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 shadow-2xl shadow-black/50">
           <div className="absolute inset-0 -z-10 flex items-center justify-center bg-black">
             <div className="flex flex-col items-center gap-4 text-gray-700">
               <Lock size={40} className="animate-pulse" />
-              <span className="text-xs font-mono uppercase tracking-widest">
-                Initialising Secure Stream...
-              </span>
+              <span className="text-xs font-mono uppercase tracking-widest">Initialising Secure Stream...</span>
             </div>
           </div>
 
@@ -91,8 +94,8 @@ const PrivateFrameworkPreviewPage: NextPage<Props> = ({ slug }) => {
             className="relative z-10 h-[80vh] w-full border-none"
             loading="lazy"
             referrerPolicy="no-referrer"
-            // keep it tight; expand only if your PDF viewer needs more
-            sandbox="allow-same-origin allow-scripts allow-downloads"
+            // PDFs do not need scripts. Keep this tight.
+            sandbox="allow-same-origin allow-downloads"
           />
         </div>
       </main>
@@ -100,23 +103,19 @@ const PrivateFrameworkPreviewPage: NextPage<Props> = ({ slug }) => {
   );
 };
 
-/**
- * SERVER SIDE: POSTGRES ACCESS ENFORCEMENT
- */
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-  const rawSlug = String(ctx.params?.slug ?? "");
-  const slug = normalizePrivateSlug(rawSlug);
+  const slug = normalizePrivateSlug(ctx.params?.slug);
 
   if (!slug) return { notFound: true };
 
-  // Prevent CDN/proxy caching for restricted pages
-  ctx.res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  // No caching anywhere for private routes
+  ctx.res.setHeader("Cache-Control", "no-store, max-age=0");
+  ctx.res.setHeader("Pragma", "no-cache");
+  ctx.res.setHeader("Expires", "0");
 
   try {
-    // 1) Establish session integrity via Postgres (or your source of truth)
     const auth = await getInnerCircleAccess(ctx.req);
 
-    // 2) UX redirect: guests go to join/locked with returnTo
     if (!auth?.hasAccess) {
       return {
         redirect: {
@@ -126,21 +125,28 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       };
     }
 
-    // 3) Optional: enforce a minimum tier/role for /private/*
-    // If your auth object has tier/role, enforce it here.
-    // Example:
-    // if (auth.tier !== "private" && auth.role !== "founder") { ... }
+    // OPTIONAL: minimum tier for /private/frameworks/*
+    // If your auth object includes tier, enforce it.
+    const requiredTier: AccessTier = "restricted";
+    const userTier = tiers.normalizeUser((auth as any)?.tier ?? "public");
 
-    return { props: { slug } };
+    if (!tiers.hasAccess(userTier, requiredTier)) {
+      return {
+        redirect: {
+          destination: `/inner-circle/locked?reason=INSUFFICIENT_CLEARANCE&returnTo=${encodeURIComponent(
+            ctx.resolvedUrl
+          )}`,
+          permanent: false,
+        },
+      };
+    }
+
+    return { props: { slug, requiredTier } };
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("[PRIVATE_PREVIEW_SSR_ERROR]", error);
-
     return {
-      redirect: {
-        destination: "/inner-circle/locked",
-        permanent: false,
-      },
+      redirect: { destination: "/inner-circle/locked?reason=internal_error", permanent: false },
     };
   }
 };

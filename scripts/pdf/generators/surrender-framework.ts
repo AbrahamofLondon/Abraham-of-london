@@ -8,7 +8,7 @@ type GenerateArgs = {
   variant: "framework" | "principles";
   ctx?: {
     quality?: "premium" | "enterprise";
-    tier?: "free" | "member" | "architect" | "inner-circle";
+    tier?: "public" | "member" | "inner-circle" | "client" | "legacy" | "architect" | "owner";
   };
 };
 
@@ -134,7 +134,7 @@ export async function generateSurrenderPDF({ outPath, variant, ctx }: GenerateAr
     });
 
     // Watermark: keep it only on free/member
-    if (tier === "free" || tier === "member") {
+    if (tier === "public" || tier === "member") {
       page.drawText("ABRAHAM OF LONDON", {
         x: margin + innerPad,
         y: margin + 36,

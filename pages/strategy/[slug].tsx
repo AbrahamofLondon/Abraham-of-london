@@ -1,21 +1,20 @@
-/* pages/strategy/[slug].tsx — EXPORT-SAFE (NO BriefViewer, NO router deps) */
+/* pages/strategy/[slug].tsx — SECURE, NO PROP MUTATION, SAFEMDX */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { ChevronLeft, Download, ShieldCheck } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { ChevronLeft, Download, ShieldCheck, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import AccessGate from "@/components/AccessGate";
+import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer"; // ✅ Use SafeMDXRenderer, not MDXRemote
 import { getDocBySlug, getAllContentlayerDocs, sanitizeData } from "@/lib/content/server";
 import { safeString, safeSplit } from "@/lib/utils/safe-string";
-
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
-import { MDXRemote } from "next-mdx-remote";
-
-// ✅ Import MDX components
-import mdxComponents from "@/components/mdx-components";
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 // -----------------------------
 // Types
@@ -26,9 +25,12 @@ type StrategyDoc = {
   date?: string | null;
   excerpt?: string | null;
   description?: string | null;
-  body?: { raw?: string | null } | null;
+  body?: { raw?: string | null; code?: string | null } | null;
   _id?: string | null;
   draft?: boolean | null;
+  accessLevel?: string | null;
+  classification?: string | null;
+  tier?: string | null;
 };
 
 type Props = {
@@ -38,21 +40,29 @@ type Props = {
     date: string | null;
     _id: string;
   };
-  source: MDXRemoteSerializeResult | null;
+  initialBodyCode: string | null; // ✅ Pre-compiled MDX code, not raw
   isPdf: boolean;
   dbMeta: string | null;
   mode: "mdx" | "pdf";
+  requiredTier: AccessTier;
+  hasContent: boolean;
 };
 
 // -----------------------------
 // Helpers
 // -----------------------------
 function normalizeSlug(input: unknown): string {
-  return safeString(input)
+  const s = safeString(input)
     .trim()
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
+  
+  // ✅ Prevent path traversal
+  if (s.includes('..') || s.includes('\\') || s.includes('//')) {
+    return '';
+  }
+  return s;
 }
 
 function stripStrategyPrefix(slug: string): string {
@@ -87,53 +97,58 @@ function buildSafeId(slug: string) {
     : `AOL-S-${Math.random().toString(16).slice(2, 10).toUpperCase()}`;
 }
 
-async function serializeMdx(raw: string) {
-  const { serialize } = await import("next-mdx-remote/serialize");
-  return serialize(raw || " ");
-}
-
 // -----------------------------
 // Page Component
 // -----------------------------
-const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }) => {
+const StrategyDetailPage: NextPage<Props> = ({ 
+  strategy, 
+  initialBodyCode, 
+  isPdf, 
+  dbMeta, 
+  requiredTier,
+  hasContent 
+}) => {
+  const { data: session, status } = useSession();
   const [progress, setProgress] = React.useState(0);
-  const [mounted, setMounted] = React.useState(false);
+  const [bodyCode, setBodyCode] = React.useState<string | null>(initialBodyCode);
+  const [loading, setLoading] = React.useState(false);
+  const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  // ✅ Normalize at render boundary
+  const required = tiers.normalizeRequired(requiredTier);
+  const user = tiers.normalizeUser(session?.user?.tier ?? "public");
 
-  React.useEffect(() => {
-    if (isPdf || !mounted) return;
+  const needsAuth = required !== "public";
+  const canAccess = tiers.hasAccess(user, required);
 
-    const handleScroll = () => {
-      const doc = document.documentElement;
-      const denom = doc.scrollHeight - window.innerHeight;
-      const pct = denom > 0 ? (window.scrollY / denom) * 100 : 0;
-      setProgress(Math.max(0, Math.min(100, pct)));
-    };
+  // ✅ Unlock flow for restricted MDX content
+  const handleUnlock = async () => {
+    setLoading(true);
+    setUnlockError(null);
+    
+    try {
+      const res = await fetch(`/api/strategy/${encodeURIComponent(strategy.slug)}`);
+      const data = await res.json();
+      
+      if (data.ok && data.bodyCode) {
+        // ✅ Set state with compiled code - no re-serialization needed
+        setBodyCode(data.bodyCode);
+      } else {
+        setUnlockError(data.reason || "Failed to unlock content");
+      }
+    } catch (err) {
+      setUnlockError("Network error during unlock");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll as any);
-  }, [isPdf, mounted]);
-
-  // During SSR/build, show minimal shell
-  if (!mounted) {
-    return (
-      <Layout title="Strategic Dispatch">
-        <div className="min-h-screen bg-black" />
-      </Layout>
-    );
-  }
-
-  const meta = safeJsonParse<any>(dbMeta, {});
-  const title = safeString(strategy?.title, "Strategic Dispatch");
-  const slug = safeString(strategy?.slug, "");
-  const dateLabel = formatDateForDisplay(strategy?.date);
-
-  // PDF MODE — Export-safe viewer (NO BriefViewer component)
+  // PDF MODE
   if (isPdf) {
+    const meta = safeJsonParse<any>(dbMeta, {});
+    const title = safeString(strategy?.title, "Strategic Dispatch");
+    const slug = safeString(strategy?.slug, "");
+    const dateLabel = formatDateForDisplay(strategy?.date);
     const classification = safeString(meta?.classification, "LEVEL 3");
     const serialNumber = safeString(meta?.institutional_code, buildSafeId(slug));
     const assetUrl = `/api/assets/serve-pdf?id=${encodeURIComponent(slug || strategy?._id || "")}`;
@@ -141,7 +156,7 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }
     return (
       <Layout title={`${title} | Strategy Dossier`} description="Strategy dossier (PDF).">
         <Head>
-          <meta name="robots" content="noindex, nofollow" />
+          <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
         </Head>
 
         <div className="min-h-screen bg-black text-white">
@@ -168,7 +183,14 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }
 
           <div className="max-w-6xl mx-auto px-6 py-10">
             <div className="rounded-3xl border border-white/10 overflow-hidden bg-black">
-              <iframe title={title} src={assetUrl} className="w-full h-[80vh] bg-black" />
+              <iframe 
+                title={title} 
+                src={assetUrl} 
+                className="w-full h-[80vh] bg-black"
+                // ✅ Tight sandbox for PDFs - no scripts needed
+                sandbox="allow-same-origin allow-downloads"
+                referrerPolicy="no-referrer"
+              />
             </div>
           </div>
         </div>
@@ -176,11 +198,56 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }
     );
   }
 
-  // MDX MODE — With components
+  // MDX MODE — SSR/build shell
+  if (status === "loading") {
+    return (
+      <Layout title="Strategic Dispatch">
+        <div className="min-h-screen bg-black" />
+      </Layout>
+    );
+  }
+
+  // Gate for unauthorized users
+  if (needsAuth && (!session?.user || !canAccess)) {
+    return (
+      <Layout title={safeString(strategy?.title, "Strategic Dispatch")}>
+        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+          <AccessGate
+            title={safeString(strategy?.title, "Strategic Dispatch")}
+            requiredTier={required}
+            message="This strategic dispatch requires appropriate clearance."
+            onUnlocked={handleUnlock}
+            onGoToJoin={() => window.location.href = "/inner-circle"}
+          />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Scroll progress effect for MDX content
+  React.useEffect(() => {
+    if (isPdf) return;
+
+    const handleScroll = () => {
+      const doc = document.documentElement;
+      const denom = doc.scrollHeight - window.innerHeight;
+      const pct = denom > 0 ? (window.scrollY / denom) * 100 : 0;
+      setProgress(Math.max(0, Math.min(100, pct)));
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isPdf]);
+
+  const title = safeString(strategy?.title, "Strategic Dispatch");
+  const slug = safeString(strategy?.slug, "");
+  const dateLabel = formatDateForDisplay(strategy?.date);
+
   return (
     <Layout title={`${title} | Strategy`} description="Strategic dispatch (MDX).">
       <Head>
-        <meta name="robots" content="index, follow" />
+        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
       </Head>
 
       <div
@@ -205,6 +272,11 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }
                 </span>
                 <div className="h-px w-12 bg-amber-500/20" />
                 <span className="text-[9px] font-mono text-zinc-600">{buildSafeId(slug)}</span>
+                {required !== "public" && (
+                  <span className="px-2 py-1 text-[8px] font-mono uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400">
+                    <Lock size={8} className="inline mr-1" /> {required}
+                  </span>
+                )}
               </div>
 
               <h1 className="font-serif text-4xl md:text-7xl lg:text-8xl font-light text-white tracking-tighter leading-[0.9] italic">
@@ -217,7 +289,7 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }
                 <p>
                   Classification:{" "}
                   <span className="text-zinc-300 inline-flex items-center gap-1">
-                    <ShieldCheck size={12} className="text-amber-400" /> Level 3 Private
+                    <ShieldCheck size={12} className="text-amber-400" /> {required}
                   </span>
                 </p>
                 <p>
@@ -265,14 +337,33 @@ const StrategyDetailPage: NextPage<Props> = ({ strategy, source, isPdf, dbMeta }
 
           <main className="lg:col-span-9">
             <div className="prose prose-invert max-w-none">
-              {source ? (
-                // ✅ MDXRemote with components
-                <MDXRemote {...source} components={mdxComponents} />
-              ) : (
+              {loading && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+              
+              {unlockError && (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                  {unlockError}
+                </div>
+              )}
+              
+              {bodyCode ? (
+                <SafeMDXRenderer code={bodyCode} />
+              ) : needsAuth ? (
+                <AccessGate
+                  title={title}
+                  requiredTier={required}
+                  message="This strategic dispatch requires appropriate clearance."
+                  onUnlocked={handleUnlock}
+                  onGoToJoin={() => window.location.href = "/inner-circle"}
+                />
+              ) : !hasContent ? (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-white/60">
                   This dispatch has no MDX body available.
                 </div>
-              )}
+              ) : null}
             </div>
           </main>
         </div>
@@ -312,14 +403,20 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   if (!strategyRaw || strategyRaw?.draft) return { notFound: true };
 
+  // ✅ Normalize tier at data boundary
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(strategyRaw));
+  const isPublic = requiredTier === "public";
+
   // Your real PDF detection can live here (DB metadata, frontmatter, etc.)
   const isPdf = false;
   const mode: Props["mode"] = isPdf ? "pdf" : "mdx";
 
-  let source: MDXRemoteSerializeResult | null = null;
-  if (!isPdf) {
-    const rawBody = safeString(strategyRaw?.body?.raw || "");
-    source = await serializeMdx(rawBody || " ");
+  let initialBodyCode: string | null = null;
+  const hasContent = !isPdf && !!strategyRaw?.body?.code;
+
+  // ✅ Only ship pre-compiled code for public content
+  if (!isPdf && isPublic && hasContent) {
+    initialBodyCode = strategyRaw?.body?.code || null;
   }
 
   const title = safeString(strategyRaw?.title || "Strategic Dispatch");
@@ -333,10 +430,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         date,
         _id: safeString(strategyRaw?._id || `strategy:${slugBare}`),
       },
-      source,
+      initialBodyCode,
       isPdf,
       dbMeta: null,
       mode,
+      requiredTier,
+      hasContent,
     }),
     revalidate: 3600,
   };

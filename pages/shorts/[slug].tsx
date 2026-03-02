@@ -1,28 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// pages/shorts/[slug].tsx — PREMIUM BRIEFING (No Hero. Fast entry. Index owns the ceremony.)
-// Router-free to prevent "NextRouter was not mounted" during prerender/export.
+// pages/shorts/[slug].tsx — PREMIUM BRIEFING (FIXED TIER NORMALIZATION)
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react";
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Share2, ArrowLeft, Shield, Bookmark, Clock, Eye } from "lucide-react";
+import { Share2, ArrowLeft, Shield, Bookmark, Clock, Eye, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import AccessGate from "@/components/AccessGate";
 import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import mdxComponents from "@/components/mdx-components";
 
 import { getAllContentlayerDocs, getDocBySlug, normalizeSlug, sanitizeData } from "@/lib/content/server";
 import { isDraftContent } from "@/lib/content/shared";
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
-// ✅ DYNAMIC UI COMPONENTS
+// DYNAMIC UI COMPONENTS
 const ShortComments = dynamic(() => import("@/components/shorts/ShortComments"), {
   ssr: false,
   loading: () => <div className="h-32 animate-pulse bg-white/5 rounded-2xl" />,
@@ -80,6 +82,7 @@ interface Props {
   short: Short;
   source: MDXRemoteSerializeResult | null;
   mdxRaw: string;
+  requiredTier: AccessTier;
 }
 
 /* -----------------------------------------------------------------------------
@@ -120,7 +123,8 @@ function MicroPill({ children }: { children: React.ReactNode }) {
 /* -----------------------------------------------------------------------------
   PAGE
 ----------------------------------------------------------------------------- */
-const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
+const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => {
+  const { data: session, status } = useSession();
   const { scrollYProgress } = useScroll();
   const progressLine = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
@@ -137,11 +141,19 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
+    
     try {
       const bookmarks = JSON.parse(localStorage.getItem("aol_shorts_bookmarks") || "[]");
       setIsBookmarked(bookmarks.some((b: any) => b.slug === short.slugPath));
     } catch {}
   }, [short.slugPath]);
+
+  // ✅ FIX: Use correct normalizers
+  const required = tiers.normalizeRequired(requiredTier);
+  const user = tiers.normalizeUser(session?.user?.tier ?? "public");
+
+  const needsAuth = required !== "public";
+  const canAccess = tiers.hasAccess(user, required);
 
   const handleBookmark = () => {
     if (typeof window === "undefined") return;
@@ -170,6 +182,31 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
 
   const canonical = toAbsoluteUrl(`/shorts/${encodeURIComponent(short.slugPath)}`);
 
+  if (status === "loading") {
+    return (
+      <Layout title={short.title}>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (needsAuth && (!session?.user || !canAccess)) {
+    return (
+      <Layout title={short.title}>
+        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+          <AccessGate
+            title={short.title}
+            requiredTier={required}
+            message="This short requires appropriate clearance."
+            onGoToJoin={() => window.location.href = "/inner-circle"}
+          />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout
       title={`${short.title} | Shorts`}
@@ -186,11 +223,12 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
         <meta property="og:description" content={short.excerpt || ""} />
         {short.coverImage ? <meta property="og:image" content={toAbsoluteUrl(short.coverImage)} /> : null}
         <link rel="canonical" href={canonical} />
+        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
       </Head>
 
       <ReadingProgress progress={progressLine as any} />
 
-      {/* Minimal top nav (no hero, no theatre) */}
+      {/* Minimal top nav */}
       <div className="fixed top-0 inset-x-0 z-50 pointer-events-none">
         <div className="mx-auto max-w-[1200px] px-6 md:px-10 pt-6 flex items-center justify-between">
           <Link
@@ -237,7 +275,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
         </div>
       </div>
 
-      {/* Subtle background (breathing, but empty) */}
+      {/* Subtle background */}
       <div className="relative">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
@@ -247,7 +285,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
           <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-px bg-gradient-to-b from-[rgba(245,158,11,0.10)] via-white/5 to-transparent" />
         </div>
 
-        {/* Title block (compact) */}
+        {/* Title block */}
         <header className="relative z-10 mx-auto max-w-[800px] px-6 md:px-10 pt-32 md:pt-36 pb-10 md:pb-12">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <MicroPill>
@@ -263,6 +301,13 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
                   <span className="aol-micro text-white/18">{short.views.toLocaleString()}</span>
                 </>
               ) : null}
+              {required !== "public" && (
+                <>
+                  <span className="h-1 w-1 rounded-full bg-white/20" />
+                  <Lock size={10} className="text-amber-500/60" />
+                  <span className="aol-micro text-amber-500/60">{required}</span>
+                </>
+              )}
             </MicroPill>
 
             <MicroPill>
@@ -286,7 +331,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw }) => {
 
         {/* Main content */}
         <main className="relative z-10 mx-auto max-w-[800px] px-6 md:px-10 pb-24">
-          <article className="prose prose-invert prose-amber max-w-none prose-p:text-white/60 prose-p:text-lg prose-p:leading-[1.85] prose-p:font-light prose-headings:text-white prose-headings:font-serif prose-headings:italic prose-h2:text-3xl prose-h2:mt-16 prose-h3:text-2xl prose-h3:mt-12 prose-ul:list-none prose-li:text-white/60 prose-li:font-light prose-strong:text-amber-500 prose-strong:font-normal">
+          <article className="prose prose-invert prose-amber max-w-none">
             {source ? <MDXRemote {...source} components={safeComponents as any} /> : null}
           </article>
 
@@ -362,6 +407,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         })
       : null;
 
+    // ✅ FIX: Use normalizeRequired for content tiers
+    const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(data));
+
     const short: Short = {
       title: data?.title || "Untitled Brief",
       excerpt: data?.excerpt || data?.description || null,
@@ -380,7 +428,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     };
 
     return {
-      props: sanitizeData({ short, source, mdxRaw }),
+      props: sanitizeData({ 
+        short, 
+        source, 
+        mdxRaw, 
+        requiredTier
+      }),
       revalidate: 3600,
     };
   } catch (err) {

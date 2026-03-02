@@ -1,24 +1,89 @@
-// lib/database/models/InnerCircleData.ts
+/* lib/database/models/InnerCircleData.ts — ENTERPRISE SSOT + TS-SAFE MONGOOSE (NO HOOKS, WITH INVARIANTS)
+   COMPILES IN NEXT.JS + TS:
+
+   - Validators: do NOT type `this` (Mongoose validator context can be Query).
+   - Statics: attach via `(schema.statics as any)` so TS doesn’t mis-type `this`.
+   - Invariants: normalizedTier must match normalizeRequiredTier(tierLevel).
+*/
+
 import mongoose, { Schema, type Model, type HydratedDocument } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
-/** 1) Define plain fields (DO NOT extend Document) */
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, hasAccess, getTierLabel } from "@/lib/access/tier-policy";
+
+// -----------------------------------------------------------------------------
+// SSOT Tier Order + Validation
+// -----------------------------------------------------------------------------
+
+const TIER_ORDER: AccessTier[] = ["public", "member", "inner-circle", "client", "legacy", "architect", "owner"];
+
+const VALID_TIERS = [
+  // SSOT tiers
+  "public",
+  "member",
+  "inner-circle",
+  "client",
+  "legacy",
+  "architect",
+  "owner",
+
+  // Legacy values (accepted for backward compatibility)
+  "free",
+  "basic",
+  "standard",
+  "premium",
+  "inner-circle-plus",
+  "inner_circle_plus",
+  "inner-circle-elite",
+  "inner_circle_elite",
+  "elite",
+  "enterprise",
+  "founder",
+  "admin",
+  "private",
+  "restricted",
+  "confidential",
+  "vip",
+] as const;
+
+type ValidTierValue = (typeof VALID_TIERS)[number];
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
 export interface InnerCircleDataFields {
   _id?: string;
+
   title: string;
+  slug?: string;
+
   content: string;
   excerpt?: string;
+
   category: string;
-  tags: string[];
-  tierLevel: "basic" | "premium" | "elite";
+  tags?: string[];
+
+  // Stored tier (may be legacy string)
+  tierLevel: AccessTier | ValidTierValue | string;
+
+  // Normalized SSOT tier
+  normalizedTier?: AccessTier;
+
   authorId: string;
+  authorName?: string;
+
   isPublished: boolean;
   isFeatured: boolean;
+  publishedAt?: Date;
+
   views: number;
   likes: number;
+
   metadata: {
-    difficulty: "beginner" | "intermediate" | "advanced" | "expert";
-    estimatedReadTime: number;
+    difficulty?: "beginner" | "intermediate" | "advanced" | "expert";
+    estimatedReadTime?: number;
     attachments?: Array<{
       fileName: string;
       fileUrl: string;
@@ -33,196 +98,301 @@ export interface InnerCircleDataFields {
       description?: string;
     }>;
     requiresVerification?: boolean;
-    lastVerifiedAt?: Date;
-    verificationNotes?: string;
+
+    // For audit trail
+    originalTier?: string;
   };
+
   accessLogs: Array<{
     userId: string;
     accessedAt: Date;
-    ipAddress: string;
+    ip: string;
     userAgent: string;
   }>;
+
   createdAt?: Date;
   updatedAt?: Date;
-  publishedAt?: Date;
 }
 
-/** 2) Hydrated document type */
 export type InnerCircleDataDoc = HydratedDocument<InnerCircleDataFields>;
+
+// -----------------------------------------------------------------------------
+// Helpers (NO HOOKS)
+// -----------------------------------------------------------------------------
+
+function safeString(value: unknown): string {
+  if (value == null) return "";
+  return String(value);
+}
+
+function slugifyTitle(t: string): string {
+  return safeString(t)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function ensureMetadata(doc: any): any {
+  if (!doc.metadata) doc.metadata = {};
+  return doc.metadata;
+}
+
+function expectedNormalizedTier(doc: any): AccessTier {
+  return normalizeRequiredTier(doc?.tierLevel);
+}
+
+// -----------------------------------------------------------------------------
+// Schema
+// -----------------------------------------------------------------------------
 
 const InnerCircleDataSchema = new Schema<InnerCircleDataFields>(
   {
-    _id: {
+    _id: { type: String, default: () => `icd_${uuidv4()}` },
+
+    title: { type: String, required: [true, "Title is required"], trim: true },
+
+    slug: {
       type: String,
-      default: () => `ic_${uuidv4()}`,
-    },
-    title: {
-      type: String,
-      required: [true, "Title is required"],
       trim: true,
-      minlength: [3, "Title must be at least 3 characters"],
-      maxlength: [200, "Title cannot exceed 200 characters"],
-    },
-    content: {
-      type: String,
-      required: [true, "Content is required"],
-    },
-    excerpt: {
-      type: String,
-      maxlength: [500, "Excerpt cannot exceed 500 characters"],
-    },
-    category: {
-      type: String,
-      required: [true, "Category is required"],
-      enum: [
-        "trading",
-        "investments",
-        "insights",
-        "education",
-        "reports",
-        "strategies",
-        "research",
-        "case-studies",
-        "tools",
-        "community",
-      ],
-    },
-    tags: [
-      {
-        type: String,
-        lowercase: true,
-        trim: true,
+      lowercase: true,
+      // ✅ No hooks: compute slug on write if missing.
+      set: function (this: any, v: unknown) {
+        const raw = safeString(v).trim();
+        const final = raw ? raw : slugifyTitle(safeString(this?.title));
+        return final;
       },
-    ],
+    },
+
+    content: { type: String, required: [true, "Content is required"] },
+    excerpt: { type: String, trim: true },
+
+    category: { type: String, required: [true, "Category is required"], index: true },
+    tags: [{ type: String, index: true }],
+
+    // Tier fields + invariants (NO HOOKS)
     tierLevel: {
       type: String,
       required: true,
-      enum: ["basic", "premium", "elite"],
-      default: "basic",
+      enum: VALID_TIERS as unknown as string[],
+      default: "member",
+      set: function (this: any, value: unknown) {
+        const v = safeString(value || "member");
+        const md = ensureMetadata(this);
+        md.originalTier = v;
+        this.normalizedTier = normalizeRequiredTier(v);
+        return v;
+      },
+      validate: {
+        validator: function (this: any) {
+          const exp = expectedNormalizedTier(this);
+          const cur = normalizeRequiredTier(this?.normalizedTier ?? this?.tierLevel);
+          return exp === cur;
+        },
+        message: "Invariant failed: normalizedTier must match tierLevel",
+      },
     },
-    authorId: {
+
+    normalizedTier: {
       type: String,
-      required: [true, "Author ID is required"],
+      enum: TIER_ORDER as unknown as string[],
+      index: true,
+      default: "member",
+      set: function (_this: any, value: unknown) {
+        return normalizeRequiredTier(value);
+      },
+      validate: {
+        validator: function (this: any, v: unknown) {
+          const exp = expectedNormalizedTier(this);
+          const cur = normalizeRequiredTier(v);
+          return exp === cur;
+        },
+        message: "Invariant failed: normalizedTier must equal normalizeRequiredTier(tierLevel)",
+      },
     },
+
+    authorId: { type: String, required: true, index: true },
+    authorName: { type: String },
+
     isPublished: {
       type: Boolean,
       default: false,
+      index: true,
+      set: function (this: any, v: unknown) {
+        const next = Boolean(v);
+        if (next && !this.publishedAt) this.publishedAt = new Date();
+        return next;
+      },
     },
-    isFeatured: {
-      type: Boolean,
-      default: false,
-    },
-    views: {
-      type: Number,
-      default: 0,
-    },
-    likes: {
-      type: Number,
-      default: 0,
-    },
+
+    isFeatured: { type: Boolean, default: false, index: true },
+    publishedAt: { type: Date },
+
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+
     metadata: {
-      difficulty: {
-        type: String,
-        enum: ["beginner", "intermediate", "advanced", "expert"],
-        default: "intermediate",
-      },
-      estimatedReadTime: {
-        type: Number,
-        min: [1, "Estimated read time must be at least 1 minute"],
-        default: 10,
-      },
-      attachments: [
-        {
-          fileName: String,
-          fileUrl: String,
-          fileSize: Number,
-          fileType: String,
-        },
-      ],
-      videoUrl: String,
-      audioUrl: String,
-      externalLinks: [
-        {
-          title: String,
-          url: String,
-          description: String,
-        },
-      ],
-      requiresVerification: { type: Boolean, default: false },
-      lastVerifiedAt: Date,
-      verificationNotes: String,
+      difficulty: { type: String, enum: ["beginner", "intermediate", "advanced", "expert"] },
+      estimatedReadTime: { type: Number },
+      attachments: [{ fileName: String, fileUrl: String, fileSize: Number, fileType: String }],
+      videoUrl: { type: String },
+      audioUrl: { type: String },
+      externalLinks: [{ title: String, url: String, description: String }],
+      requiresVerification: { type: Boolean },
+      originalTier: { type: String },
     },
+
     accessLogs: [
       {
-        userId: String,
+        userId: { type: String },
         accessedAt: { type: Date, default: Date.now },
-        ipAddress: String,
-        userAgent: String,
+        ip: { type: String },
+        userAgent: { type: String },
       },
     ],
   },
-  {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-// Indexes for performance
-InnerCircleDataSchema.index({ category: 1, isPublished: 1, tierLevel: 1 });
-InnerCircleDataSchema.index({ tags: 1, isPublished: 1 });
-InnerCircleDataSchema.index({ isFeatured: 1, publishedAt: -1 });
+// -----------------------------------------------------------------------------
+// Indexes
+// -----------------------------------------------------------------------------
+
+InnerCircleDataSchema.index({ slug: 1 }, { unique: true, sparse: true });
+InnerCircleDataSchema.index({ category: 1, isPublished: 1 });
+InnerCircleDataSchema.index({ isFeatured: 1, isPublished: 1 });
+InnerCircleDataSchema.index({ createdAt: -1 });
 InnerCircleDataSchema.index({ title: "text", content: "text", excerpt: "text" });
-InnerCircleDataSchema.index({ authorId: 1, createdAt: -1 });
-InnerCircleDataSchema.index({ "metadata.difficulty": 1 });
 
-// Virtual for published date
-InnerCircleDataSchema.virtual("publishedAt").get(function (this: InnerCircleDataDoc) {
-  return this.isPublished ? this.updatedAt : undefined;
+// -----------------------------------------------------------------------------
+// Virtuals
+// -----------------------------------------------------------------------------
+
+InnerCircleDataSchema.virtual("tierLabel").get(function (this: any) {
+  return getTierLabel(this.normalizedTier || this.tierLevel);
 });
 
-// Middleware — typed correctly now; "save" hook resolves
-InnerCircleDataSchema.pre("save", function (this: InnerCircleDataDoc) {
-  if (this.isModified("content")) {
-    if (!this.excerpt && this.content) {
-      this.excerpt = this.content.substring(0, 250) + "...";
-    }
-  }
+InnerCircleDataSchema.virtual("accessDescription").get(function (this: any) {
+  const tier = (this.normalizedTier || normalizeRequiredTier(this.tierLevel)) as AccessTier;
+
+  const descriptions: Record<AccessTier, string> = {
+    public: "Available to everyone",
+    member: "Available to all members",
+    "inner-circle": "Inner Circle exclusive content",
+    client: "Client access only",
+    legacy: "Legacy member exclusive",
+    architect: "Architect level access",
+    owner: "Owner only",
+  };
+
+  return descriptions[tier] || `Requires ${tier} access`;
 });
 
-// Static methods (leave runtime intact; type-safe enough)
-InnerCircleDataSchema.statics.findByTier = function (tier: string) {
-  return this.find({
-    tierLevel: { $lte: tier },
+// -----------------------------------------------------------------------------
+// Model statics interface
+// -----------------------------------------------------------------------------
+
+export interface InnerCircleDataModel extends Model<InnerCircleDataFields> {
+  findByAccessibleTiers(
+    userTier: unknown,
+    options?: { categories?: string[]; tags?: string[]; limit?: number; skip?: number }
+  ): Promise<InnerCircleDataDoc[]>;
+
+  findByCategory(category: string, userTier?: unknown): Promise<InnerCircleDataDoc[]>;
+
+  incrementViews(id: string, userId: string, ip: string, userAgent: string): Promise<InnerCircleDataDoc | null>;
+
+  setTier(id: string, tierLevel: unknown): Promise<InnerCircleDataDoc | null>;
+}
+
+// -----------------------------------------------------------------------------
+// Statics (ATTACH VIA `as any` — the only sane way with Mongoose typings)
+// -----------------------------------------------------------------------------
+
+function findByAccessibleTiers(
+  this: any,
+  userTier: unknown,
+  options: { categories?: string[]; tags?: string[]; limit?: number; skip?: number } = {}
+): Promise<InnerCircleDataDoc[]> {
+  const u = normalizeRequiredTier(userTier);
+  const accessibleTiers = TIER_ORDER.filter((tier) => hasAccess(u, tier));
+
+  const query: Record<string, any> = {
     isPublished: true,
-  });
-};
+    normalizedTier: { $in: accessibleTiers },
+  };
 
-InnerCircleDataSchema.statics.incrementViews = async function (
+  if (options.categories?.length) query.category = { $in: options.categories };
+  if (options.tags?.length) query.tags = { $in: options.tags };
+
+  let dbQuery = this.find(query).sort({ isFeatured: -1, createdAt: -1 });
+  if (typeof options.limit === "number") dbQuery = dbQuery.limit(options.limit);
+  if (typeof options.skip === "number") dbQuery = dbQuery.skip(options.skip);
+
+  return dbQuery.exec();
+}
+
+function findByCategory(this: any, category: string, userTier?: unknown): Promise<InnerCircleDataDoc[]> {
+  const query: Record<string, any> = { category, isPublished: true };
+
+  if (userTier != null) {
+    const u = normalizeRequiredTier(userTier);
+    const accessibleTiers = TIER_ORDER.filter((tier) => hasAccess(u, tier));
+    query.normalizedTier = { $in: accessibleTiers };
+  }
+
+  return this.find(query).sort({ createdAt: -1 }).exec();
+}
+
+function incrementViews(
+  this: any,
   id: string,
   userId: string,
   ip: string,
   userAgent: string
-) {
+): Promise<InnerCircleDataDoc | null> {
   return this.findByIdAndUpdate(
     id,
     {
       $inc: { views: 1 },
-      $push: {
-        accessLogs: {
-          userId,
-          accessedAt: new Date(),
-          ipAddress: ip,
-          userAgent,
-        },
-      },
+      $push: { accessLogs: { userId, accessedAt: new Date(), ip, userAgent } },
     },
     { new: true }
-  );
-};
+  ).exec();
+}
 
-const InnerCircleData: Model<InnerCircleDataFields> =
-  (mongoose.models.InnerCircleData as Model<InnerCircleDataFields>) ||
-  mongoose.model<InnerCircleDataFields>("InnerCircleData", InnerCircleDataSchema);
+function setTier(this: any, id: string, tierLevel: unknown): Promise<InnerCircleDataDoc | null> {
+  const raw = safeString(tierLevel || "member");
+  const normalizedTier = normalizeRequiredTier(raw);
+
+  return this.findByIdAndUpdate(
+    id,
+    {
+      tierLevel: raw,
+      normalizedTier,
+      "metadata.originalTier": raw,
+    },
+    {
+      new: true,
+      runValidators: true, // ✅ enforce invariants on updates
+    }
+  ).exec();
+}
+
+// Attach
+(InnerCircleDataSchema.statics as any).findByAccessibleTiers = findByAccessibleTiers;
+(InnerCircleDataSchema.statics as any).findByCategory = findByCategory;
+(InnerCircleDataSchema.statics as any).incrementViews = incrementViews;
+(InnerCircleDataSchema.statics as any).setTier = setTier;
+
+// -----------------------------------------------------------------------------
+// Model creation (Next.js / HMR safe + TS safe)
+// -----------------------------------------------------------------------------
+
+const MODEL_NAME = "InnerCircleData";
+
+const InnerCircleData =
+  (mongoose.models[MODEL_NAME] as unknown as InnerCircleDataModel) ||
+  mongoose.model<InnerCircleDataFields, InnerCircleDataModel>(MODEL_NAME, InnerCircleDataSchema);
 
 export default InnerCircleData;

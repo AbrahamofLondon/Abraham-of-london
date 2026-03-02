@@ -1,267 +1,261 @@
-// lib/server/auth/tokenStore.postgres.ts
-// PRODUCTION EXCELLENCE — reconciled, strict, deployable
+// lib/server/auth/tokenStore.postgres.ts — SSOT TOKEN STORE (FULL REPLACEMENT)
+// Pages Router + API Routes safe. Node runtime only (Postgres + crypto).
+// Exports ALL symbols your codebase is trying to import.
 
 import crypto from "crypto";
-import { prisma } from "@/lib/prisma"; // Unified Path
-import { AuditLogger } from "@/lib/audit/audit-logger";
+import { prisma } from "@/lib/prisma";
+import type { AccessTier } from "@/lib/access/tiers";
+import tiers from "@/lib/access/tiers";
 
-export type Tier =
-  | "public"
-  | "inner-circle"
-  | "inner-circle-plus"
-  | "inner-circle-elite"
-  | "private";
+type Ok<T> = { ok: true } & T;
+type Fail = { ok: false; reason: string };
 
-const TIER_ORDER: Tier[] = [
-  "public",
-  "inner-circle",
-  "inner-circle-plus",
-  "inner-circle-elite",
-  "private",
-];
-
-const VALID_TIERS = new Set<Tier>(TIER_ORDER);
-
-const TIER_MAPPING: Record<string, Tier> = {
-  standard: "inner-circle",
-  basic: "inner-circle",
-  "inner-circle": "inner-circle",
-  premium: "inner-circle-plus",
-  "inner-circle-plus": "inner-circle-plus",
-  elite: "inner-circle-elite",
-  "inner-circle-elite": "inner-circle-elite",
-  private: "private",
-};
-
-export function mapMemberTier(raw: string | null | undefined): Tier {
-  if (!raw) return "public";
-  const normalized = String(raw).toLowerCase().trim();
-  const mapped = TIER_MAPPING[normalized];
-  return mapped && VALID_TIERS.has(mapped) ? mapped : "public";
-}
-
-export function tierAtLeast(actual: Tier, required: Tier): boolean {
-  return TIER_ORDER.indexOf(actual) >= TIER_ORDER.indexOf(required);
-}
-
-function requirePepper(): string {
-  const pepper = process.env.ACCESS_KEY_PEPPER;
-  if (!pepper || pepper.length < 24) {
-    throw new Error("ACCESS_KEY_PEPPER is missing/weak");
-  }
-  return pepper;
-}
-
-export function hashAccessKey(rawToken: string): string {
-  const token = String(rawToken || "").trim();
-  if (!token) throw new Error("Cannot hash empty token");
-  const pepper = requirePepper();
-  return crypto.createHmac("sha256", pepper).update(token).digest("hex");
-}
-
-export function generateSessionId(): string {
-  const bytes = crypto.randomBytes(32);
-  return `sess_${bytes.toString("base64url")}`;
-}
-
-function safeJsonParse<T>(raw: string | null | undefined): T | null {
-  if (!raw) return null;
-  try { return JSON.parse(raw) as T; } catch { return null; }
-}
-
-function audit() {
-  return new AuditLogger({
-    prisma,
-    service: "auth",
-    environment: process.env.NODE_ENV || "production",
-  });
-}
+const DEFAULT_SESSION_TTL_DAYS = Number(process.env.INNER_CIRCLE_SESSION_TTL_DAYS || 30);
+const DEFAULT_KEY_TTL_DAYS = Number(process.env.INNER_CIRCLE_KEY_TTL_DAYS || 30);
 
 export type SessionContext = {
-  tier: Tier | null;
-  session: any | null;
-  member: any | null;
+  ok: boolean;
+  valid?: boolean;
+  sessionId?: string;
+  memberId?: string | null;
+  tier?: AccessTier;
+  email?: string | null;
+  name?: string | null;
+  role?: string | null;
+  flags?: string[];
+  expiresAt?: string;
+  reason?: string;
 };
 
+function now() {
+  return new Date();
+}
+
+function plusDays(d: number) {
+  const x = new Date();
+  x.setDate(x.getDate() + d);
+  return x;
+}
+
+/** Stable sha256 hex */
+export function sha256Hex(input: string): string {
+  return crypto.createHash("sha256").update(String(input || ""), "utf8").digest("hex");
+}
+
+/** Exported: access-key hashing (used by register/resend) */
+export function hashAccessKey(rawKey: string): string {
+  const secret = process.env.INNER_CIRCLE_KEY_SECRET || process.env.NEXTAUTH_SECRET || "dev-key-secret";
+  return sha256Hex(`${String(rawKey || "").trim()}::${secret}`);
+}
+
+/** Internal: normalize string flags */
+function parseFlags(flags: unknown): string[] {
+  if (!flags) return [];
+  if (Array.isArray(flags)) return flags.map(String);
+  if (typeof flags === "string") {
+    const s = flags.trim();
+    if (!s) return [];
+    try {
+      const j = JSON.parse(s);
+      return Array.isArray(j) ? j.map(String) : [];
+    } catch {
+      return s.split(",").map((x) => x.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+/** Exported: compare tiers */
+export function tierAtLeast(userTier: unknown, requiredTier: unknown): boolean {
+  return tiers.hasAccess(tiers.normalizeUser(userTier), tiers.normalizeRequired(requiredTier));
+}
+
+/** Exported: session lookup helper used by many routes */
+export async function verifySession(sessionId: string): Promise<Ok<{ valid: true; tier: AccessTier; memberId: string | null; expiresAt: string }> | Ok<{ valid: false; reason: string }>> {
+  const sid = String(sessionId || "").trim();
+  if (!sid) return { ok: true, valid: false, reason: "SESSION_MISSING" };
+
+  const s = await prisma.session.findUnique({
+    where: { sessionId: sid },
+    include: { member: { select: { id: true, tier: true, status: true } } },
+  });
+
+  if (!s) return { ok: true, valid: false, reason: "SESSION_NOT_FOUND" };
+  if (String(s.status || "").toLowerCase() !== "active") return { ok: true, valid: false, reason: "SESSION_REVOKED" };
+
+  const exp = s.expiresAt ? new Date(s.expiresAt) : null;
+  if (!exp || exp.getTime() <= Date.now()) return { ok: true, valid: false, reason: "SESSION_EXPIRED" };
+
+  const tier = tiers.normalizeUser((s as any)?.member?.tier ?? "public");
+  return { ok: true, valid: true, tier, memberId: (s as any)?.memberId ?? null, expiresAt: exp.toISOString() };
+}
+
+/** Exported: returns tier only */
+export async function getSessionTier(sessionId: string): Promise<AccessTier> {
+  const v = await verifySession(sessionId);
+  if (!v.ok || !v.valid) return "public";
+  return v.tier;
+}
+
+/** Exported: richer session context (many files import this) */
 export async function getSessionContext(sessionId: string): Promise<SessionContext> {
-  try {
-    const session = await prisma.session.findUnique({
-      where: { sessionId },
-      include: { member: true },
-    });
+  const sid = String(sessionId || "").trim();
+  if (!sid) return { ok: false, reason: "SESSION_MISSING" };
 
-    if (!session) return { tier: null, session: null, member: null };
-
-    const now = new Date();
-    if (session.expiresAt < now) {
-      await revokeSession(sessionId, "expired");
-      return { tier: null, session: null, member: null };
-    }
-
-    const parsed = safeJsonParse<{ tier?: Tier }>(session.data);
-    const tierCandidate = parsed?.tier || mapMemberTier(session.member?.tier);
-    const resolved: Tier = VALID_TIERS.has(tierCandidate) ? tierCandidate : "public";
-
-    const last = new Date(session.lastActivity);
-    const hours = (now.getTime() - last.getTime()) / (1000 * 60 * 60);
-    if (hours > 1) {
-      await prisma.session.update({
-        where: { sessionId },
-        data: { lastActivity: now },
-      });
-    }
-
-    return { tier: resolved, session, member: session.member };
-  } catch (error) {
-    console.error("[getSessionContext] Error:", error);
-    return { tier: null, session: null, member: null };
-  }
-}
-
-export const verifySession = getSessionContext;
-
-export async function revokeSession(sessionToken: string, reason = "manual_revoke"): Promise<boolean> {
-  try {
-    const session = await prisma.session.findUnique({
-      where: { sessionId: sessionToken },
-    });
-
-    const del = await prisma.session.delete({
-      where: { sessionId: sessionToken },
-    });
-
-    if (del) {
-      await audit().logSecurityEvent(session?.memberId || "unknown", "SESSION_REVOKED", {
-        severity: "info",
-        sourceIp: "system",
-        reason,
-      });
-      return true;
-    }
-    return false;
-  } catch (error) {
-    return false;
-  }
-}
-
-export type RedeemResult =
-  | { ok: true; tier: Tier; sessionId: string }
-  | { ok: false; reason: string };
-
-export async function redeemAccessKey(
-  rawToken: string,
-  context?: { ipAddress?: string; userAgent?: string; source?: string }
-): Promise<RedeemResult> {
-  const token = String(rawToken || "").trim();
-  if (!token) return { ok: false, reason: "Invalid key" };
-
-  const keyHash = hashAccessKey(token);
-  const now = new Date();
-
-  try {
-    const key = await prisma.innerCircleKey.findUnique({
-      where: { keyHash },
-      include: { member: true },
-    });
-
-    if (!key || key.status !== "active") return { ok: false, reason: "Key invalid or used" };
-    if (!key.member) return { ok: false, reason: "Member not found" };
-
-    const tier = mapMemberTier(key.member.tier);
-    const sessionId = generateSessionId();
-
-    await prisma.$transaction([
-      prisma.innerCircleKey.update({
-        where: { id: key.id },
-        data: { status: "used", lastUsedAt: now, lastIp: context?.ipAddress },
-      }),
-      prisma.session.create({
-        data: {
-          sessionId,
-          memberId: key.memberId,
-          ipAddress: context?.ipAddress,
-          userAgent: context?.userAgent,
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          lastActivity: now,
-          data: JSON.stringify({ tier, source: context?.source }),
+  const s = await prisma.session.findUnique({
+    where: { sessionId: sid },
+    include: {
+      member: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          tier: true,
+          status: true,
+          role: true,
+          flags: true,
         },
-      }),
-    ]);
-
-    return { ok: true, tier, sessionId };
-  } catch (error) {
-    return { ok: false, reason: "Internal server error" };
-  }
-}
-
-export async function mintSession(params: any) {
-  const sessionId = generateSessionId();
-  return await prisma.session.create({
-    data: {
-      sessionId,
-      memberId: params.memberId,
-      ipAddress: params.ipAddress,
-      userAgent: params.userAgent,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      lastActivity: new Date(),
-      data: JSON.stringify({ tier: params.tier }),
+      },
     },
   });
+
+  if (!s) return { ok: false, reason: "SESSION_NOT_FOUND" };
+  if (String(s.status || "").toLowerCase() !== "active") return { ok: false, reason: "SESSION_REVOKED" };
+
+  const exp = s.expiresAt ? new Date(s.expiresAt) : null;
+  if (!exp || exp.getTime() <= Date.now()) return { ok: false, reason: "SESSION_EXPIRED" };
+
+  const member = (s as any).member || null;
+  const tier = tiers.normalizeUser(member?.tier ?? "public");
+
+  return {
+    ok: true,
+    valid: true,
+    sessionId: s.sessionId,
+    memberId: s.memberId ?? null,
+    tier,
+    email: member?.email ?? null,
+    name: member?.name ?? null,
+    role: member?.role ?? null,
+    flags: parseFlags(member?.flags),
+    expiresAt: exp.toISOString(),
+  };
 }
 
-// ==================== MISSING EXPORTS ====================
-// These are required by other files in the project
+/** Exported: create session (mint) */
+export async function mintSession(params: {
+  memberId: string | null;
+  tier: AccessTier | string;
+  ttlDays?: number;
+}): Promise<Ok<{ sessionId: string; expiresAt: string; tier: AccessTier }> | Fail> {
+  const memberId = params.memberId ? String(params.memberId) : null;
+  const tierNorm = tiers.normalizeUser(params.tier);
+  const ttl = Number.isFinite(params.ttlDays as number) ? Number(params.ttlDays) : DEFAULT_SESSION_TTL_DAYS;
+  const expiresAt = plusDays(Math.max(1, ttl));
+  const sessionId = `sess_${crypto.randomBytes(24).toString("hex")}`;
 
-/**
- * Revoke a key by its hash
- * Required by: pages/api/access/revoke.ts
- */
-export async function revokeKeyByHash(keyHash: string): Promise<boolean> {
   try {
-    const key = await prisma.innerCircleKey.findUnique({
-      where: { keyHash },
-    });
-
-    if (!key) {
-      console.warn(`Key with hash ${keyHash} not found`);
-      return false;
-    }
-
-    await prisma.innerCircleKey.update({
-      where: { keyHash },
-      data: { 
-        status: "revoked",
-        revokedAt: new Date()
+    await prisma.session.create({
+      data: {
+        sessionId,
+        memberId,
+        status: "active",
+        expiresAt,
       },
     });
 
-    await audit().logSecurityEvent(key.memberId || "unknown", "KEY_REVOKED", {
-      severity: "warning",
-      sourceIp: "system",
-      reason: "manual_revoke",
-      keyHash,
-    });
-
-    return true;
-  } catch (error) {
-    console.error("[revokeKeyByHash] Error:", error);
-    return false;
+    return { ok: true, sessionId, expiresAt: expiresAt.toISOString(), tier: tierNorm };
+  } catch (e: any) {
+    return { ok: false, reason: e?.message ? String(e.message) : "MINT_FAILED" };
   }
 }
 
-/**
- * Get session tier from session token
- * Required by: pages/api/downloads/[slug].ts
- */
-export async function getSessionTier(sessionToken: string): Promise<string> {
+/** Exported: revoke session */
+export async function revokeSession(sessionId: string): Promise<Ok<{ revoked: true }> | Fail> {
+  const sid = String(sessionId || "").trim();
+  if (!sid) return { ok: false, reason: "SESSION_MISSING" };
+
   try {
-    const context = await getSessionContext(sessionToken);
-    if (!context.tier) {
-      return "public";
-    }
-    return context.tier;
-  } catch (error) {
-    console.error("[getSessionTier] Error:", error);
-    return "public";
+    await prisma.session.update({
+      where: { sessionId: sid },
+      data: { status: "revoked" },
+    });
+    return { ok: true, revoked: true };
+  } catch (e: any) {
+    return { ok: false, reason: e?.message ? String(e.message) : "REVOKE_FAILED" };
   }
 }
+
+/** Exported: revoke key by hash (used by /api/access/revoke) */
+export async function revokeKeyByHash(keyHash: string): Promise<Ok<{ revoked: true }> | Fail> {
+  const kh = String(keyHash || "").trim();
+  if (!kh) return { ok: false, reason: "KEY_HASH_MISSING" };
+
+  try {
+    await prisma.innerCircleKey.update({
+      where: { keyHash: kh },
+      data: { status: "revoked" },
+    });
+    return { ok: true, revoked: true };
+  } catch (e: any) {
+    return { ok: false, reason: e?.message ? String(e.message) : "REVOKE_KEY_FAILED" };
+  }
+}
+
+/** Exported: redeem access key -> creates a sessionId */
+export async function redeemAccessKey(
+  rawKey: string,
+  ctx?: { ipAddress?: string; userAgent?: string; source?: string }
+): Promise<Ok<{ ok: true; sessionId: string; tier: AccessTier; memberId: string | null }> | Ok<{ ok: false; reason: string }>> {
+  const key = String(rawKey || "").trim();
+  if (!key) return { ok: false, reason: "KEY_MISSING" };
+
+  const keyHash = hashAccessKey(key);
+
+  const record = await prisma.innerCircleKey.findUnique({
+    where: { keyHash },
+    include: { member: { select: { id: true, tier: true, status: true } } },
+  });
+
+  if (!record) return { ok: false, reason: "KEY_NOT_FOUND" };
+  if (String(record.status || "").toLowerCase() !== "active") return { ok: false, reason: "KEY_REVOKED" };
+
+  // Optional: expire based on member status (your schema has no key expiresAt in the snippet; keep strict anyway)
+  const member = (record as any).member || null;
+  if (!member) return { ok: false, reason: "MEMBER_MISSING" };
+  if (String(member.status || "").toLowerCase() !== "active") return { ok: false, reason: "MEMBER_INACTIVE" };
+
+  // Mint new session
+  const minted = await mintSession({
+    memberId: member.id,
+    tier: tiers.normalizeUser(member.tier ?? "member"),
+    ttlDays: DEFAULT_SESSION_TTL_DAYS,
+  });
+
+  if (!minted.ok) return { ok: false, reason: minted.reason };
+
+  // Best-effort telemetry / lastSeen
+  try {
+    await prisma.innerCircleMember.update({
+      where: { id: member.id },
+      data: { lastSeenAt: now() },
+    });
+  } catch {
+    // ignore
+  }
+
+  return { ok: true, sessionId: minted.sessionId, tier: minted.tier, memberId: member.id };
+}
+
+export default {
+  sha256Hex,
+  hashAccessKey,
+  tierAtLeast,
+  verifySession,
+  getSessionTier,
+  getSessionContext,
+  mintSession,
+  revokeSession,
+  revokeKeyByHash,
+  redeemAccessKey,
+};

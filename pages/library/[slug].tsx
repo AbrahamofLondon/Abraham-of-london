@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/library/[slug].tsx — LIBRARY DETAIL (Export-safe, Router-free)
+// pages/library/[slug].tsx — LIBRARY DETAIL (Export-safe, Router-free, SSOT, no-leak)
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import Layout from "@/components/Layout";
-import { ArrowLeft, ExternalLink, Download, FileText } from "lucide-react";
+import AccessGate from "@/components/AccessGate";
+import { ArrowLeft, ExternalLink, Download, FileText, Lock, Loader2 } from "lucide-react";
+
+import tiers, { type AccessTier } from "@/lib/access/tiers";
 
 type PdfAsset = {
   slug: string;
@@ -14,15 +18,27 @@ type PdfAsset = {
   description?: string | null;
   category?: string | null;
   tags?: string[] | null;
+
+  // raw registry fields (DO NOT trust; DO NOT ship for restricted)
   href?: string | null;
   url?: string | null;
   path?: string | null;
+
   public?: boolean | null;
   updated?: string | null;
   date?: string | null;
+  accessLevel?: string | null;
+  tier?: string | null;
 };
 
-type Props = { asset: PdfAsset };
+type Props = {
+  asset: PdfAsset;
+  requiredTier: AccessTier;
+
+  // IMPORTANT: this is the only thing the page uses for restricted assets
+  // If restricted => `/api/library/<slug>` (session gated)
+  resolvedUrl: string | null;
+};
 
 function safeStr(v: any): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
@@ -64,14 +80,13 @@ function coerceAsset(x: any): PdfAsset | null {
   const isPublic =
     x.public === true ||
     x.isPublic === true ||
-    x.accessLevel === "public" ||
-    x.tier === "public" ||
-    x.visibility === "public" ||
-    x.visibility === "Public" ||
-    x.access === "public" ||
-    x.access === "Public" ||
+    String(x.accessLevel || "").toLowerCase() === "public" ||
+    String(x.tier || "").toLowerCase() === "public" ||
+    String(x.visibility || "").toLowerCase() === "public" ||
+    String(x.access || "").toLowerCase() === "public" ||
     x.locked === false;
 
+  // IMPORTANT: we keep raw url/href/path here, but we will NOT ship them if restricted.
   return {
     slug,
     title,
@@ -84,10 +99,14 @@ function coerceAsset(x: any): PdfAsset | null {
     public: Boolean(isPublic),
     updated,
     date: safeStr(x.date || x.publishedAt || "") || null,
+    // Use SSOT variants; if not public, default to member (not “inner-circle”)
+    accessLevel: safeStr(x.accessLevel || x.tier || (isPublic ? "public" : "member")) || null,
+    tier: safeStr(x.tier || x.accessLevel || (isPublic ? "public" : "member")) || null,
   };
 }
 
-function resolveAssetUrl(asset: PdfAsset): string | null {
+function resolvePublicAssetUrl(asset: PdfAsset): string | null {
+  // Only used for PUBLIC assets (safe to reveal).
   const url = safeStr(asset.url || "");
   if (url) return url;
 
@@ -151,24 +170,81 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   if (!asset) return { notFound: true, revalidate: 300 };
 
-  return { props: jsonSafe({ asset }), revalidate: 900 };
+  const requiredTier = tiers.normalizeRequired(
+    asset.accessLevel ?? asset.tier ?? (asset.public ? "public" : "member")
+  );
+
+  const isPublic = requiredTier === "public";
+
+  // ✅ No leakage: only resolve real URL for public assets.
+  // For restricted, we supply ONLY a session-gated proxy URL.
+  const resolvedUrl = isPublic ? resolvePublicAssetUrl(asset) : `/api/library/${encodeURIComponent(toRouteParamSlug(asset.slug))}`;
+
+  // ✅ If restricted, strip sensitive fields from props
+  const safeAsset: PdfAsset = isPublic
+    ? asset
+    : {
+        ...asset,
+        url: null,
+        href: null,
+        path: null,
+      };
+
+  return {
+    props: jsonSafe({
+      asset: safeAsset,
+      requiredTier,
+      resolvedUrl,
+    }),
+    revalidate: 900,
+  };
 };
 
-const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
-  const url = resolveAssetUrl(asset);
+const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl }) => {
   const routeSlug = toRouteParamSlug(asset.slug) || asset.slug;
   const canonical = `/library/${encodeURIComponent(routeSlug)}`;
   const desc = asset.description || "Verified Library asset // Abraham of London.";
 
-  // ✅ No router import, no isFallback check needed because:
-  // - getStaticPaths returns fallback: "blocking"
-  // - Next.js handles the loading state automatically
-  // - The page will only render when props are ready
+  const { data: session, status } = useSession();
+
+  const required = tiers.normalizeRequired(requiredTier);
+  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
+
+  const needsAuth = required !== "public";
+  const canAccess = !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
+
+  // ✅ Do not block PUBLIC with auth-loading flicker
+  if (needsAuth && status === "loading") {
+    return (
+      <Layout title={asset.title}>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (needsAuth && (!session?.user || !canAccess)) {
+    return (
+      <Layout title={asset.title}>
+        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+          <AccessGate
+            title={asset.title}
+            requiredTier={required}
+            message="This library asset requires appropriate clearance."
+            onGoToJoin={() => (window.location.href = "/inner-circle")}
+          />
+        </div>
+      </Layout>
+    );
+  }
+
+  const url = resolvedUrl || null;
 
   return (
     <Layout title={asset.title} description={desc} canonicalUrl={canonical} fullWidth>
       <Head>
-        <meta name="robots" content="index, follow" />
+        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
       </Head>
 
       <main className="min-h-screen bg-black text-white">
@@ -188,6 +264,15 @@ const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
                   <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/55">
                     {asset.category || "Library Asset"}
                   </span>
+                  {required !== "public" && (
+                    <>
+                      <span className="h-1 w-1 bg-white/20 rounded-full" />
+                      <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-400">
+                        <Lock className="h-3 w-3 inline mr-1" />
+                        {required}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 <h1 className="mt-6 font-serif text-3xl md:text-5xl text-white/95 leading-tight">
@@ -239,9 +324,9 @@ const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
                   </>
                 ) : (
                   <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white/45 w-[260px]">
-                    No direct URL in registry for this asset.
+                    No resolvable URL for this asset.
                     <div className="mt-2 text-[10px] font-mono text-white/35">
-                      Add one of: <span className="text-white/55">url</span>,{" "}
+                      For public assets, add one of: <span className="text-white/55">url</span>,{" "}
                       <span className="text-white/55">href</span>, or{" "}
                       <span className="text-white/55">path</span>.
                     </div>
@@ -259,7 +344,18 @@ const LibrarySlugPage: NextPage<Props> = ({ asset }) => {
                 Preview
               </div>
               <div className="aspect-[16/10] w-full">
-                <iframe src={url} className="h-full w-full" title={asset.title} />
+                {needsAuth && !session?.user ? (
+                  <div className="h-full w-full flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+                  </div>
+                ) : (
+                  <iframe
+                    src={url}
+                    className="h-full w-full"
+                    title={asset.title}
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-downloads"
+                  />
+                )}
               </div>
             </div>
           ) : (

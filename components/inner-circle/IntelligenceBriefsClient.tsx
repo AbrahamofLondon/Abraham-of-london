@@ -6,13 +6,41 @@ import { useToast } from "@/hooks/useToast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { BRIEF_REGISTRY } from "@/lib/briefs/registry";
 
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+
+/**
+ * Decide what tier counts as "restricted" for iconography.
+ * - If you want "restricted" to mean admin-grade only, set to "architect".
+ * - If you want "restricted" to mean paid/locked content, set to "client".
+ */
+const RESTRICTED_ICON_MIN_TIER: AccessTier = "client";
+
+function getBriefRequiredTier(brief: any): AccessTier {
+  // Prefer explicit tier-like fields; fall back to classification if present.
+  // normalizeRequiredTier safely maps legacy strings -> SSOT tiers.
+  return normalizeRequiredTier(
+    brief?.accessLevel ??
+      brief?.accessLevelSafe ??
+      brief?.tier ??
+      brief?.classification ??
+      brief?.clearance ??
+      (brief?.requiresAuth ? "client" : "public")
+  );
+}
+
+function isRestrictedForIcon(required: AccessTier): boolean {
+  // "restricted" icon means required >= RESTRICTED_ICON_MIN_TIER
+  return hasAccess(required, RESTRICTED_ICON_MIN_TIER);
+}
+
 export default function IntelligenceBriefsClient() {
   const sessionHook = useSession?.();
   const session = sessionHook?.data ?? null;
   const status = sessionHook?.status ?? "unauthenticated";
 
   const toast = useToast();
-  
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<string>("All");
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null);
@@ -23,14 +51,14 @@ export default function IntelligenceBriefsClient() {
   }, []);
 
   const categories = React.useMemo(
-    () => ["All", ...Array.from(new Set(BRIEF_REGISTRY.map((b) => b.series)))],
+    () => ["All", ...Array.from(new Set(BRIEF_REGISTRY.map((b: any) => b.series)))],
     []
   );
 
   const filteredBriefs = React.useMemo(() => {
     const q = searchQuery.toLowerCase();
-    return BRIEF_REGISTRY.filter((brief) => {
-      const matchesSearch = brief.title.toLowerCase().includes(q);
+    return BRIEF_REGISTRY.filter((brief: any) => {
+      const matchesSearch = String(brief.title || "").toLowerCase().includes(q);
       const matchesCategory = activeCategory === "All" || brief.series === activeCategory;
       return matchesSearch && matchesCategory;
     });
@@ -38,7 +66,7 @@ export default function IntelligenceBriefsClient() {
 
   const handleDownload = async (briefId: string) => {
     setDownloadingId(briefId);
-    
+
     toast.info("Authorizing Access", "Verifying institutional clearance...");
 
     try {
@@ -65,22 +93,21 @@ export default function IntelligenceBriefsClient() {
   };
 
   if (!mounted) {
-    return (
-      <main className="min-h-screen bg-[#050505]" />
-    );
+    return <main className="min-h-screen bg-[#050505]" />;
   }
 
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#050505]">
-        <LoadingSpinner 
-          size="lg" 
-          color="purple" 
-          text="Decrypting Portal..." 
-        />
+        <LoadingSpinner size="lg" color="purple" text="Decrypting Portal..." />
       </div>
     );
   }
+
+  // Optional: derive user's tier for UI hints (not required for rendering)
+  const userTier: AccessTier = normalizeUserTier(
+    (session as any)?.user?.tier ?? (session as any)?.user?.role ?? "public"
+  );
 
   return (
     <main className="min-h-screen bg-[#050505] text-zinc-400 pb-32">
@@ -99,7 +126,11 @@ export default function IntelligenceBriefsClient() {
                 Intelligence Portfolio
               </h1>
               <p className="text-zinc-500 max-w-xl text-lg font-light">
-                Accessing <span className="text-white font-medium">{BRIEF_REGISTRY.length} verified dispatches</span>.
+                Accessing{" "}
+                <span className="text-white font-medium">{BRIEF_REGISTRY.length} verified dispatches</span>.
+              </p>
+              <p className="mt-2 text-xs text-zinc-600 font-mono uppercase tracking-widest">
+                Clearance: <span className="text-zinc-300">{userTier}</span>
               </p>
             </div>
 
@@ -134,37 +165,48 @@ export default function IntelligenceBriefsClient() {
       </div>
 
       <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredBriefs.map((brief) => (
-          <div
-            key={brief.id}
-            className="group relative bg-zinc-900/20 border border-white/5 rounded-2xl p-8 hover:border-amber-500/20 transition-all"
-          >
-            <div className="flex justify-between items-start mb-8">
-              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">VOL. {brief.volume}</span>
-              {brief.classification === "Restricted" ? (
-                <ShieldAlert size={16} className="text-rose-500" />
-              ) : (
-                <Lock size={16} className="text-amber-500/50" />
-              )}
-            </div>
+        {filteredBriefs.map((brief: any) => {
+          const required = getBriefRequiredTier(brief);
+          const restricted = isRestrictedForIcon(required);
 
-            <h3 className="text-xl font-serif text-white italic mb-4 group-hover:text-amber-500 transition-colors">
-              {brief.title}
-            </h3>
-            <p className="text-sm text-zinc-500 font-light mb-10 line-clamp-3">{brief.abstract}</p>
+          return (
+            <div
+              key={brief.id}
+              className="group relative bg-zinc-900/20 border border-white/5 rounded-2xl p-8 hover:border-amber-500/20 transition-all"
+            >
+              <div className="flex justify-between items-start mb-8">
+                <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+                  VOL. {brief.volume}
+                </span>
 
-            <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-zinc-400">{brief.readingTime}</span>
-              <button
-                onClick={() => handleDownload(brief.id)}
-                disabled={!!downloadingId}
-                className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white hover:text-amber-500 transition-all"
-              >
-                {downloadingId === brief.id ? "Authorizing..." : "Retrieve"} <Download size={14} />
-              </button>
+                {restricted ? (
+                  <ShieldAlert size={16} className="text-rose-500" />
+                ) : (
+                  <Lock size={16} className="text-amber-500/50" />
+                )}
+              </div>
+
+              <h3 className="text-xl font-serif text-white italic mb-4 group-hover:text-amber-500 transition-colors">
+                {brief.title}
+              </h3>
+
+              <p className="text-sm text-zinc-500 font-light mb-10 line-clamp-3">{brief.abstract}</p>
+
+              <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between">
+                <span className="text-[11px] font-mono text-zinc-400">{brief.readingTime}</span>
+
+                <button
+                  onClick={() => handleDownload(brief.id)}
+                  disabled={!!downloadingId}
+                  className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white hover:text-amber-500 transition-all disabled:opacity-60"
+                  title={`Requires: ${required}`}
+                >
+                  {downloadingId === brief.id ? "Authorizing..." : "Retrieve"} <Download size={14} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </main>
   );

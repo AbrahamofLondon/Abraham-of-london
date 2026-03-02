@@ -1,4 +1,4 @@
-/* pages/api/downloads/mdx.ts — RAW MDX GATE (REDIS SESSION) */
+/* pages/api/downloads/mdx.ts — RAW MDX GATE (SSOT ALIGNED) */
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
@@ -8,34 +8,39 @@ import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 import { 
   toUiDoc,
   resolveDocDownloadUrl,
-  getAccessLevel
+  getAccessLevel,
+  normalizeSlug,
+  getDocumentBySlug,
+  isDraftContent,
 } from "@/lib/content/server";
 
-type Tier = "public" | "inner-circle" | "private";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { 
+  normalizeRequiredTier, 
+  normalizeUserTier, 
+  hasAccess,
+  getTierLabel,
+} from "@/lib/access/tier-policy";
 
 type Ok = {
   ok: true;
-  tier: Tier;
-  requiredTier: Tier;
+  tier: AccessTier;
+  requiredTier: AccessTier;
   mdx: string;
+  tierLabel?: string;
 };
 
 type Fail = {
   ok: false;
   reason: string;
+  requiredTier?: AccessTier;
 };
 
-const ORDER: Tier[] = ["public", "inner-circle", "private"];
-
-function asTier(v: unknown): Tier {
-  const n = String(v ?? "").toLowerCase().trim();
-  if (n === "private" || n === "restricted") return "private";
-  if (n === "inner-circle" || n === "members" || n === "member") return "inner-circle";
-  return "public";
-}
-
-function canAccess(sessionTier: Tier, requiredTier: Tier) {
-  return ORDER.indexOf(sessionTier) >= ORDER.indexOf(requiredTier);
+/**
+ * Map any input to SSOT AccessTier
+ */
+function mapToAccessTier(v: unknown): AccessTier {
+  return normalizeRequiredTier(v);
 }
 
 function stripDownloadsPrefix(input: string): string {
@@ -50,19 +55,36 @@ function rawMdxFromDoc(doc: any): string {
   return "";
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
-  if (req.method !== "GET") return res.status(405).json({ ok: false, reason: "Method not allowed" });
+export default async function handler(
+  req: NextApiRequest, 
+  res: NextApiResponse<Ok | Fail>
+) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ ok: false, reason: "Method not allowed" });
+  }
 
   const slug = stripDownloadsPrefix(String(req.query.slug ?? ""));
-  if (!slug) return res.status(400).json({ ok: false, reason: "Missing slug" });
+  if (!slug) {
+    return res.status(400).json({ ok: false, reason: "Missing slug" });
+  }
 
   try {
-    const doc = await getServerDownloadBySlug(slug);
-    if (!doc || isDraftContent(doc)) return res.status(404).json({ ok: false, reason: "Not found" });
+    // Try multiple lookup strategies
+    const doc = 
+      (await getDocumentBySlug(slug, "download")) ||
+      (await getDocumentBySlug(`downloads/${slug}`, "download")) ||
+      (await getDocumentBySlug(slug));
 
-    const requiredTier = asTier(doc.accessLevel ?? "inner-circle");
+    if (!doc || isDraftContent(doc)) {
+      return res.status(404).json({ ok: false, reason: "Not found" });
+    }
 
-    // Cache policy: never cache gated responses, and be conservative overall
+    // Determine required tier using SSOT
+    const requiredTier = mapToAccessTier(
+      doc.accessLevel ?? doc.tier ?? doc.classification ?? "member"
+    );
+
+    // Cache policy
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Vary", "Cookie");
     res.setHeader(
@@ -73,7 +95,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     );
 
     const mdx = rawMdxFromDoc(doc);
-    if (!mdx) return res.status(500).json({ ok: false, reason: "Invalid document format" });
+    if (!mdx) {
+      return res.status(500).json({ 
+        ok: false, 
+        reason: "Invalid document format" 
+      });
+    }
 
     // Public: serve immediately
     if (requiredTier === "public") {
@@ -82,18 +109,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         tier: "public",
         requiredTier,
         mdx,
+        tierLabel: getTierLabel("public"),
       });
     }
 
     // Protected: Redis session gating
     const token = getAccessTokenFromReq(req);
-    if (!token) return res.status(401).json({ ok: false, reason: "Access required" });
+    if (!token) {
+      return res.status(401).json({ 
+        ok: false, 
+        reason: "Access required",
+        requiredTier,
+      });
+    }
 
-    const sessionTier = asTier(await getSessionTier(token));
-    if (sessionTier === "public") return res.status(401).json({ ok: false, reason: "Session expired" });
+    const sessionTierRaw = await getSessionTier(token);
+    if (!sessionTierRaw) {
+      return res.status(401).json({ 
+        ok: false, 
+        reason: "Session expired",
+        requiredTier,
+      });
+    }
 
-    if (!canAccess(sessionTier, requiredTier)) {
-      return res.status(403).json({ ok: false, reason: "Insufficient access" });
+    const sessionTier = normalizeUserTier(sessionTierRaw);
+    
+    if (!hasAccess(sessionTier, requiredTier)) {
+      return res.status(403).json({ 
+        ok: false, 
+        reason: `Insufficient access - requires ${getTierLabel(requiredTier)}`,
+        requiredTier,
+      });
     }
 
     return res.status(200).json({
@@ -101,10 +147,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       tier: sessionTier,
       requiredTier,
       mdx,
+      tierLabel: getTierLabel(sessionTier),
     });
+    
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error("[API_DOWNLOADS_MDX_ERROR]", err);
-    return res.status(500).json({ ok: false, reason: "Server error" });
+    return res.status(500).json({ 
+      ok: false, 
+      reason: "Server error" 
+    });
   }
 }

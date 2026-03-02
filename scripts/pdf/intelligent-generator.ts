@@ -1,223 +1,225 @@
-/* scripts/pdf/intelligent-generator.ts - INSTITUTIONAL SAFE-GUARD VERSION 2.0 */
+// scripts/pdf/intelligent-generator.ts
+/* scripts/pdf/intelligent-generator.ts — INVENTORY-FIRST SYNC (NO PLACEHOLDERS)
+ * ----------------------------------------------------------------------------
+ * Purpose:
+ * - Reconcile sources (lib/pdf + content/downloads) into public/assets/downloads
+ * - Deterministic paths: /assets/downloads/{lib-pdf|content-downloads}/<id>.pdf
+ * - Never generate placeholders.
+ *
+ * This script does NOT render MDX/Office -> PDF.
+ * That is handled by unified generator / converters.
+ */
+
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-// Import from legacy barrel file (client-safe)
-import { 
-  getAllPDFItems as getAllPDFs, 
-  getPDFById, 
-  PDFItem as PDFConfig, 
-  PDFTier, 
-  PDFType 
-} from "@/scripts/pdf-registry";
-
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
-
-type SourceKind = "mdx" | "md" | "xlsx" | "xls" | "pptx" | "ppt" | "pdf";
+type SourceKind = "pdf";
 
 export type SyncResult = {
   id: string;
   success: boolean;
-  outputPath?: string;
-  filename?: string;
-  timeMs?: number;
-  error?: string;
-  action?: "copied" | "skipped" | "generated" | "missing-source" | "placeholder" | "scanned";
+  action: "copied" | "skipped" | "missing-source" | "invalid-source" | "error";
   sourcePath?: string;
-  sourceKind?: SourceKind;
+  outputPath?: string;
   md5?: string;
-  fileSize?: number;
+  bytes?: number;
+  error?: string;
 };
 
-export type GeneratorOptions = {
-  libPdfDir?: string;
-  contentDownloadsDir?: string;
-  publicDownloadsDir?: string;
-  enableContentScan?: boolean;
-  generateRegistryFromScan?: boolean;
-  contentSubDir?: string;
-  allowDelete?: boolean;
-  dryRun?: boolean;
-  enforceRegistryFilenames?: boolean;
-  createPlaceholders?: boolean;
-  useUniversalConverter?: boolean;
-  quality?: "premium" | "enterprise" | "draft";
+type Options = {
+  libPdfDir: string;
+  contentDownloadsDir: string;
+  publicDownloadsDir: string;
+  overwrite: boolean;
+  dryRun: boolean;
 };
 
-/* -------------------------------------------------------------------------- */
-/* UTILITIES & SANITIZATION                                                   */
-/* -------------------------------------------------------------------------- */
+function root() {
+  return process.cwd();
+}
 
-function projectRoot() { return path.resolve(process.cwd()); }
-
-function defaultOptions(): Required<GeneratorOptions> {
+function defaults(): Options {
   return {
-    libPdfDir: path.join(projectRoot(), "lib", "pdf"),
-    contentDownloadsDir: path.join(projectRoot(), "content", "downloads"),
-    publicDownloadsDir: path.join(projectRoot(), "public", "assets", "downloads"),
-    enableContentScan: true,
-    generateRegistryFromScan: true,
-    contentSubDir: "content-downloads",
-    allowDelete: false,
+    libPdfDir: path.join(root(), "lib", "pdf"),
+    contentDownloadsDir: path.join(root(), "content", "downloads"),
+    publicDownloadsDir: path.join(root(), "public", "assets", "downloads"),
+    overwrite: false,
     dryRun: false,
-    enforceRegistryFilenames: true,
-    createPlaceholders: true,
-    useUniversalConverter: true,
-    quality: "premium",
   };
 }
 
-/**
- * STRATEGIC FIX: Character Sanitization
- * Replaces WinAnsi-incompatible characters (like →) with safe equivalents.
- */
-function sanitizePdfText(text: string): string {
-  if (!text) return "";
-  return text
-    .replace(/[\u2190-\u2199]/g, "->") // Replace arrows with safe ASCII
-    .replace(/[\u2013\u2014]/g, "-")    // En/Em dashes to hyphens
-    .replace(/[\u2018\u2019]/g, "'")    // Smart single quotes
-    .replace(/[\u201C\u201D]/g, '"')    // Smart double quotes
-    .replace(/[\u2022]/g, "*")          // Bullets to asterisks
-    .replace(/[^\x00-\x7F]/g, "");      // Final fallback: Strip non-ASCII
+function ensureDir(p: string) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
-function fileExists(p: string) {
-  try { fs.accessSync(p, fs.constants.F_OK); return true; } catch { return false; }
+function md5File(p: string): string {
+  const b = fs.readFileSync(p);
+  return crypto.createHash("md5").update(b).digest("hex");
 }
 
-function ensureDir(p: string) { if (!fileExists(p)) fs.mkdirSync(p, { recursive: true }); }
-
-function statSafe(p: string): fs.Stats | null {
-  try { return fs.statSync(p); } catch { return null; }
-}
-
-function md5File(p: string): string | null {
+function isPdfHeader(abs: string): boolean {
   try {
-    const b = fs.readFileSync(p);
-    return crypto.createHash("md5").update(b).digest("hex");
-  } catch { return null; }
-}
-
-/* -------------------------------------------------------------------------- */
-/* CORE: PLACEHOLDER GENERATION                                               */
-/* -------------------------------------------------------------------------- */
-
-async function createPlaceholderPDF(id: string, title: string, description: string, outputPath: string): Promise<boolean> {
-  try {
-    const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
-    const doc = await PDFDocument.create();
-    const page = doc.addPage([595.28, 841.89]); // A4
-    const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-
-    // Apply sanitization to inputs
-    const cleanTitle = sanitizePdfText(title);
-    const cleanDesc = sanitizePdfText(description);
-
-    page.drawText('PROVISIONAL TRANSMISSION', { x: 50, y: 800, size: 10, font: fontBold, color: rgb(0.7, 0.5, 0.2) });
-    page.drawText(cleanTitle.toUpperCase(), { x: 50, y: 750, size: 24, font: fontBold, color: rgb(0.1, 0.1, 0.1) });
-    
-    const descLines = cleanDesc.match(/.{1,70}(\s|$)/g) || [cleanDesc];
-    descLines.slice(0, 5).forEach((line, i) => {
-      page.drawText(line.trim(), { x: 50, y: 710 - (i * 15), size: 11, font, color: rgb(0.4, 0.4, 0.4) });
-    });
-
-    page.drawText(`ASSET_ID: ${id}`, { x: 50, y: 100, size: 8, font, color: rgb(0.6, 0.6, 0.6) });
-    page.drawText(`GEN_DATE: ${new Date().toISOString()}`, { x: 50, y: 85, size: 8, font, color: rgb(0.6, 0.6, 0.6) });
-    page.drawText('ABRAHAM OF LONDON INSTITUTIONAL ASSET', { x: 350, y: 85, size: 8, fontBold, color: rgb(0.1, 0.1, 0.1) });
-
-    const pdfBytes = await doc.save();
-    ensureDir(path.dirname(outputPath));
-    fs.writeFileSync(outputPath, pdfBytes);
-    return true;
-  } catch (error) {
-    console.error(`❌ Placeholder failure for ${id}:`, error);
+    const fd = fs.openSync(abs, "r");
+    const buf = Buffer.alloc(4);
+    fs.readSync(fd, buf, 0, 4, 0);
+    fs.closeSync(fd);
+    return buf.toString("utf8") === "%PDF";
+  } catch {
     return false;
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* CORE: SYNC LOGIC                                                           */
-/* -------------------------------------------------------------------------- */
-
-function pickCandidateSourceFile(opts: Required<GeneratorOptions>, registryOutputPath: string): string | null {
-  const base = path.basename(registryOutputPath);
-  const c1 = path.join(opts.libPdfDir, base);
-  if (fileExists(c1)) return c1;
-  
-  const all = (function walk(dir: string): string[] {
-    const out: string[] = [];
-    if (!fs.existsSync(dir)) return out;
-    fs.readdirSync(dir, { withFileTypes: true }).forEach(e => {
-      const full = path.join(dir, e.name);
-      if (e.isDirectory()) out.push(...walk(full)); else out.push(full);
-    });
-    return out;
-  })(opts.contentDownloadsDir);
-
-  return all.find((p) => path.basename(p) === base) || null;
+function normalizeId(base: string) {
+  return String(base || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\.pdf$/i, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
-export async function syncOne(id: string, options?: GeneratorOptions): Promise<SyncResult> {
-  const opts = { ...defaultOptions(), ...(options || {}) };
-  const start = Date.now();
-  const cfg = getPDFById(id);
+function bucketForSource(abs: string): "lib-pdf" | "content-downloads" {
+  const n = abs.replace(/\\/g, "/").toLowerCase();
+  return n.includes("/lib/pdf/") ? "lib-pdf" : "content-downloads";
+}
 
-  if (!cfg) return { id, success: false, error: "Unknown Institutional ID" };
+function outputAbsFor(id: string, bucket: "lib-pdf" | "content-downloads"): { abs: string; web: string } {
+  const web = `/assets/downloads/${bucket}/${id}.pdf`;
+  const abs = path.join(root(), "public", web.replace(/^\/+/, ""));
+  return { abs, web };
+}
 
-  const targetDisk = path.join(opts.publicDownloadsDir, path.basename(cfg.outputPath));
-  const source = pickCandidateSourceFile(opts, cfg.outputPath);
+function walkPdfs(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const out: string[] = [];
+  const stack = [dir];
 
-  if (!source) {
-    if (opts.createPlaceholders) {
-      const pSuccess = await createPlaceholderPDF(cfg.id, cfg.title, cfg.description, targetDisk);
-      if (pSuccess) return { id, success: true, action: "placeholder", timeMs: Date.now() - start };
+  while (stack.length) {
+    const d = stack.pop()!;
+    const entries = fs.readdirSync(d, { withFileTypes: true });
+    for (const e of entries) {
+      const abs = path.join(d, e.name);
+      if (e.isDirectory()) stack.push(abs);
+      else if (e.isFile() && path.extname(e.name).toLowerCase() === ".pdf") out.push(abs);
     }
-    return { id, success: false, action: "missing-source", error: "No source manuscript found" };
   }
+  return out;
+}
 
-  const sMd5 = md5File(source);
-  const tMd5 = md5File(targetDisk);
+function pickSources(opts: Options): { id: string; abs: string; bucket: "lib-pdf" | "content-downloads" }[] {
+  const libPdfs = walkPdfs(opts.libPdfDir);
+  const contentPdfs = walkPdfs(opts.contentDownloadsDir);
 
-  if (fileExists(targetDisk) && sMd5 === tMd5) {
-    return { id, success: true, action: "skipped", timeMs: Date.now() - start, md5: tMd5 || undefined };
-  }
+  // prefer lib/pdf if duplicate id exists
+  const map = new Map<string, { abs: string; bucket: "lib-pdf" | "content-downloads" }>();
 
-  if (!opts.dryRun) {
-    ensureDir(path.dirname(targetDisk));
-    if (fileExists(targetDisk) && !opts.allowDelete) {
-      fs.copyFileSync(targetDisk, `${targetDisk}.${Date.now()}.bak`);
+  const ingest = (abs: string) => {
+    const id = normalizeId(path.basename(abs, path.extname(abs)));
+    const bucket = bucketForSource(abs);
+    const current = map.get(id);
+    if (!current) {
+      map.set(id, { abs, bucket });
+      return;
     }
-    fs.copyFileSync(source, targetDisk);
-  }
+    // precedence: lib-pdf > content-downloads
+    if (current.bucket !== "lib-pdf" && bucket === "lib-pdf") {
+      map.set(id, { abs, bucket });
+    }
+  };
 
-  return { id, success: true, action: "copied", timeMs: Date.now() - start, md5: sMd5 || undefined };
+  for (const p of contentPdfs) ingest(p);
+  for (const p of libPdfs) ingest(p);
+
+  return Array.from(map.entries()).map(([id, v]) => ({ id, abs: v.abs, bucket: v.bucket }));
 }
 
-/* -------------------------------------------------------------------------- */
-/* PUBLIC API                                                                 */
-/* -------------------------------------------------------------------------- */
+export async function syncAll(options?: Partial<Options>): Promise<SyncResult[]> {
+  const opts = { ...defaults(), ...(options || {}) };
+  ensureDir(opts.publicDownloadsDir);
 
-export async function generateOnePdfById(id: string, options?: GeneratorOptions): Promise<SyncResult> {
-  return syncOne(id, options);
-}
-
-export async function generateMissingPdfs(options?: GeneratorOptions): Promise<SyncResult[]> {
-  const opts = { ...defaultOptions(), ...(options || {}) };
-  const all = getAllPDFs();
+  const sources = pickSources(opts);
   const results: SyncResult[] = [];
 
-  for (const cfg of all) {
-    const disk = path.join(opts.publicDownloadsDir, path.basename(cfg.outputPath));
-    if (!fileExists(disk) || !cfg.exists) {
-      results.push(await syncOne(cfg.id, opts));
+  for (const s of sources) {
+    const { abs: outAbs, web: outWeb } = outputAbsFor(s.id, s.bucket);
+
+    try {
+      const srcAbs = s.abs;
+
+      if (!fs.existsSync(srcAbs)) {
+        results.push({ id: s.id, success: false, action: "missing-source", sourcePath: srcAbs });
+        continue;
+      }
+
+      const st = fs.statSync(srcAbs);
+      if (st.size < 8000) {
+        results.push({
+          id: s.id,
+          success: false,
+          action: "invalid-source",
+          sourcePath: srcAbs,
+          error: `Source too small (${Math.round(st.size / 1024)}KB)`,
+        });
+        continue;
+      }
+
+      if (!isPdfHeader(srcAbs)) {
+        results.push({ id: s.id, success: false, action: "invalid-source", sourcePath: srcAbs, error: "Missing %PDF header" });
+        continue;
+      }
+
+      const exists = fs.existsSync(outAbs);
+      if (exists && !opts.overwrite) {
+        results.push({ id: s.id, success: true, action: "skipped", outputPath: outWeb, md5: md5File(outAbs) });
+        continue;
+      }
+
+      if (!opts.dryRun) {
+        ensureDir(path.dirname(outAbs));
+        fs.copyFileSync(srcAbs, outAbs);
+      }
+
+      results.push({
+        id: s.id,
+        success: true,
+        action: "copied",
+        sourcePath: srcAbs,
+        outputPath: outWeb,
+        md5: opts.dryRun ? undefined : md5File(outAbs),
+        bytes: st.size,
+      });
+    } catch (e: any) {
+      results.push({ id: s.id, success: false, action: "error", error: e?.message || String(e) });
     }
   }
 
-  console.log(`📊 TRANSMISSION SUMMARY: Success=${results.filter(r => r.success).length}, Failed=${results.filter(r => !r.success).length}`);
   return results;
+}
+
+// CLI
+if (require.main === module) {
+  const overwrite = process.argv.includes("--overwrite");
+  const dryRun = process.argv.includes("--dry-run");
+
+  syncAll({ overwrite, dryRun })
+    .then((r) => {
+      const ok = r.filter((x) => x.success).length;
+      const fail = r.length - ok;
+      console.log(`\n✅ Sync complete: ok=${ok} fail=${fail}`);
+      if (fail) process.exit(1);
+    })
+    .catch((e) => {
+      console.error("❌ Sync failed:", e);
+      process.exit(1);
+    });
+}
+
+export async function generateOnePdfById(id: string) {
+  // TODO: wire to your actual registry-driven generator.
+  // This placeholder prevents build breakage and gives a clean error at runtime.
+  throw new Error(
+    `generateOnePdfById is not wired yet. Requested id="${id}". ` +
+    `Implement this by calling your registry generator (generate-from-registry.ts / renderAssetPDF).`
+  );
 }

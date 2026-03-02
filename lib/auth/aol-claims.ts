@@ -1,21 +1,11 @@
-// lib/auth/aol-claims.ts
-export type AoLTier =
-  | "public"
-  | "inner-circle"
-  | "inner-circle-plus"
-  | "inner-circle-elite"
-  | "private";
+// lib/auth/aol-claims.ts — SSOT Claims Types
+import type { AccessTier } from "@/lib/access/tier-policy";
+
+export type AoLClaimTier = AccessTier;
 
 export type AoLClaims = {
-  aol?: {
-    tier: AoLTier;
-    innerCircleAccess: boolean;
-    isInternal: boolean; // staff/internal
-    allowPrivate: boolean; // explicit private gate
-    memberId?: string | null;
-    emailHash?: string | null;
-    flags?: string[]; // decoded from InnerCircleMember.flags JSON
-  };
+  tier?: AoLClaimTier | string; // tolerate legacy from providers
+  flags?: string[];
+  roles?: string[];
+  [k: string]: unknown;
 };
-
-

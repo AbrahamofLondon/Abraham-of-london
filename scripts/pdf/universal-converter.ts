@@ -1,7 +1,7 @@
 // scripts/pdf/universal-converter.ts
 // Universal converter with:
 // - source roots: content/downloads + lib/pdf ONLY
-// - print-grade HTML -> PDF for MD/MDX via Puppeteer
+// - print-grade HTML -> PDF for MD/MDX via SecurePuppeteerPDFGenerator (flagship renderer)
 // - LibreOffice for Office docs (if available)
 // - PDF validation + rebuild/upgrade path for invalid lib/pdf files
 // - deterministic output structure + manifest
@@ -12,6 +12,7 @@ import path from "path";
 import crypto from "crypto";
 import os from "os";
 import { execSync } from "child_process";
+import { fileURLToPath } from "url";
 
 type SourceKind = "mdx" | "md" | "xlsx" | "xls" | "pptx" | "ppt" | "pdf";
 
@@ -128,16 +129,6 @@ function hasLibreOffice(): boolean {
     } catch {
       return false;
     }
-  }
-}
-
-async function hasPuppeteer(): Promise<boolean> {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require.resolve("puppeteer");
-    return true;
-  } catch {
-    return false;
   }
 }
 
@@ -280,383 +271,36 @@ function buildDedupPlan(sources: SourceFile[]) {
   return { chosen, skipped };
 }
 
-function stripFrontmatter(raw: string) {
-  // Minimal frontmatter stripper: --- ... --- at file start
-  if (!raw.startsWith("---")) return raw;
-  const end = raw.indexOf("\n---", 3);
-  if (end === -1) return raw;
-  // advance past closing '---\n'
-  const after = raw.indexOf("\n", end + 1);
-  return after === -1 ? "" : raw.slice(after + 1);
-}
-
-function escapeHtml(s: string) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-// A deliberately conservative, print-oriented markdown-ish renderer.
-// Not trying to be a full markdown engine; aiming for beautiful, stable output.
-function mdToHtml(md: string) {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
-  const out: string[] = [];
-
-  let inCode = false;
-  let codeLang = "";
-  let inUl = false;
-  let inOl = false;
-
-  const flushLists = () => {
-    if (inUl) {
-      out.push("</ul>");
-      inUl = false;
-    }
-    if (inOl) {
-      out.push("</ol>");
-      inOl = false;
-    }
-  };
-
-  const inline = (t: string) => {
-    // very light inline support
-    let x = escapeHtml(t);
-
-    // bold **x**
-    x = x.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    // italics *x*
-    x = x.replace(/\*(.+?)\*/g, "<em>$1</em>");
-    // inline code `x`
-    x = x.replace(/`(.+?)`/g, "<code class=\"inline\">$1</code>");
-
-    return x;
-  };
-
-  for (const line of lines) {
-    // fenced code
-    const fence = line.match(/^```(\w+)?\s*$/);
-    if (fence) {
-      if (!inCode) {
-        flushLists();
-        inCode = true;
-        codeLang = fence[1] || "";
-        out.push(`<pre class="code"><code data-lang="${escapeHtml(codeLang)}">`);
-      } else {
-        out.push("</code></pre>");
-        inCode = false;
-        codeLang = "";
-      }
-      continue;
-    }
-
-    if (inCode) {
-      out.push(escapeHtml(line) + "\n");
-      continue;
-    }
-
-    // headings
-    const h = line.match(/^(#{1,6})\s+(.*)$/);
-    if (h) {
-      flushLists();
-      const level = h[1].length;
-      out.push(`<h${level}>${inline(h[2].trim())}</h${level}>`);
-      continue;
-    }
-
-    // blockquote
-    const bq = line.match(/^\s*>\s?(.*)$/);
-    if (bq) {
-      flushLists();
-      out.push(`<blockquote>${inline(bq[1])}</blockquote>`);
-      continue;
-    }
-
-    // ordered list "1. "
-    const ol = line.match(/^\s*\d+\.\s+(.*)$/);
-    if (ol) {
-      if (!inOl) {
-        flushLists();
-        inOl = true;
-        out.push("<ol>");
-      }
-      out.push(`<li>${inline(ol[1])}</li>`);
-      continue;
-    }
-
-    // unordered list "- " or "* "
-    const ul = line.match(/^\s*[-*]\s+(.*)$/);
-    if (ul) {
-      if (!inUl) {
-        flushLists();
-        inUl = true;
-        out.push("<ul>");
-      }
-      out.push(`<li>${inline(ul[1])}</li>`);
-      continue;
-    }
-
-    // horizontal rule
-    if (/^\s*---\s*$/.test(line)) {
-      flushLists();
-      out.push("<hr/>");
-      continue;
-    }
-
-    // empty line
-    if (!line.trim()) {
-      flushLists();
-      out.push(`<div class="spacer"></div>`);
-      continue;
-    }
-
-    // paragraph
-    flushLists();
-    out.push(`<p>${inline(line.trim())}</p>`);
-  }
-
-  flushLists();
-  if (inCode) out.push("</code></pre>");
-
-  return out.join("\n");
-}
-
-function buildPrintHtml(opts: {
-  title: string;
-  subtitle?: string;
-  bodyHtml: string;
-  watermarkText?: string | null;
-  docMetaLine?: string;
-  quality: "print" | "draft";
-}) {
-  const { title, subtitle, bodyHtml, watermarkText, docMetaLine, quality } = opts;
-
-  const isDraft = quality === "draft";
-  const wm = watermarkText ? `<div class="watermark">${escapeHtml(watermarkText)}</div>` : "";
-
-  // Typography is intentionally classic + restrained.
-  // We avoid shouting words, badges, “premium” labels, etc.
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${escapeHtml(title)}</title>
-<style>
-  @page { margin: 18mm 16mm 18mm 16mm; }
-  html, body { padding: 0; margin: 0; }
-  body {
-    font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
-    color: #121316;
-    background: #ffffff;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .page {
-    position: relative;
-    min-height: 100vh;
-  }
-
-  /* Watermark: subtle, not gimmicky */
-  .watermark {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: rotate(-22deg);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    font-size: 68px;
-    color: rgba(0,0,0,0.04);
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .frame {
-    padding: 0;
-  }
-
-  header {
-    margin: 0 0 18px 0;
-    padding: 0 0 14px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.12);
-  }
-
-  .kicker {
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.55);
-    margin: 0 0 8px 0;
-  }
-
-  h1 {
-    font-size: 28px;
-    line-height: 1.15;
-    margin: 0;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .subtitle {
-    margin-top: 8px;
-    font-size: 14px;
-    line-height: 1.45;
-    color: rgba(0,0,0,0.70);
-  }
-
-  .meta {
-    margin-top: 10px;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-size: 10.5px;
-    color: rgba(0,0,0,0.55);
-    letter-spacing: 0.04em;
-  }
-
-  main {
-    margin-top: 12px;
-    font-size: ${isDraft ? "12.8px" : "13.6px"};
-    line-height: 1.62;
-  }
-
-  h2 { margin: 18px 0 8px; font-size: 18px; line-height: 1.3; }
-  h3 { margin: 16px 0 6px; font-size: 16px; line-height: 1.35; }
-  h4 { margin: 14px 0 6px; font-size: 14px; line-height: 1.35; text-transform: uppercase; letter-spacing: 0.06em; }
-
-  p { margin: 8px 0; hyphens: auto; }
-  ul, ol { margin: 8px 0 8px 22px; }
-  li { margin: 4px 0; }
-
-  hr {
-    border: none;
-    height: 1px;
-    background: rgba(0,0,0,0.14);
-    margin: 16px 0;
-  }
-
-  blockquote {
-    margin: 12px 0;
-    padding: 10px 14px;
-    border-left: 3px solid rgba(0,0,0,0.18);
-    background: rgba(0,0,0,0.03);
-  }
-
-  pre.code {
-    margin: 12px 0;
-    padding: 12px 14px;
-    background: rgba(0,0,0,0.04);
-    border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  code.inline {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 0.95em;
-    padding: 0.14em 0.38em;
-    background: rgba(0,0,0,0.05);
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 6px;
-  }
-
-  .spacer { height: 6px; }
-
-  footer {
-    margin-top: 18px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0,0,0,0.10);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-size: 10.5px;
-    color: rgba(0,0,0,0.60);
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .muted { color: rgba(0,0,0,0.55); }
-
-  /* Keep layout stable in print */
-  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
-  p, li, blockquote, pre { orphans: 3; widows: 3; }
-
-</style>
-</head>
-<body>
-${wm}
-<div class="page">
-  <div class="frame">
-    <header>
-      <div class="kicker">Abraham of London</div>
-      <h1>${escapeHtml(title)}</h1>
-      ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ""}
-      ${docMetaLine ? `<div class="meta">${escapeHtml(docMetaLine)}</div>` : ""}
-    </header>
-    <main>
-      ${bodyHtml}
-    </main>
-    <footer>
-      <div>© ${new Date().getFullYear()} Abraham of London</div>
-      <div class="muted">${escapeHtml(nowIso().split("T")[0])}</div>
-    </footer>
-  </div>
-</div>
-</body>
-</html>`;
-}
-
+// =============================================================================
+// ELITE FIX: Delegate MDX/MD conversion to SecurePuppeteerPDFGenerator
+// =============================================================================
 async function convertMdxOrMdWithPuppeteer(src: SourceFile, outAbsPath: string, quality: "print" | "draft") {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const puppeteer = require("puppeteer") as typeof import("puppeteer");
+  // Dynamic import to avoid circular dependencies
+  const { SecurePuppeteerPDFGenerator } = await import("./secure-puppeteer-generator");
 
-  const raw = fs.readFileSync(src.absPath, "utf8");
-  const body = stripFrontmatter(raw);
-
-  // Title heuristic: first # Heading, else basename.
-  const titleMatch = body.match(/^#\s+(.+)\s*$/m);
-  const title = (titleMatch?.[1] || src.baseName).trim();
-
-  // Subtitle heuristic: first "##" if present
-  const subtitleMatch = body.match(/^##\s+(.+)\s*$/m);
-  const subtitle = subtitleMatch?.[1]?.trim();
-
-  const bodyHtml = mdToHtml(body);
-
-  const docMetaLine = `${src.from} • ${src.relPath.replace(/\\/g, "/")}`;
-  const watermarkText = "ABRAHAM OF LONDON";
-
-  const html = buildPrintHtml({
-    title,
-    subtitle,
-    bodyHtml,
-    watermarkText,
-    docMetaLine,
-    quality,
-  });
-
-  safeMkdir(path.dirname(outAbsPath));
-
-  const browser = await puppeteer.launch({
+  const gen = new SecurePuppeteerPDFGenerator({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    chromePath: process.env.CHROME_PATH || process.env.PUPPETEER_EXECUTABLE_PATH,
+    timeout: 90_000,
+    watchdogMs: 160_000,
+    maxRetries: 2,
   });
 
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+  const q = quality === "draft" ? "draft" : "premium";
 
-    await page.pdf({
-      path: outAbsPath,
-      printBackground: true,
-      preferCSSPageSize: true,
-      // margins handled via @page
-    });
-  } finally {
-    await browser.close();
-  }
+  // Treat content as “free” unless your frontmatter overrides it
+  await gen.generateFromSource({
+    sourceAbsPath: src.absPath,
+    sourceKind: src.kind === "md" ? "md" : "mdx",
+    outputAbsPath: outAbsPath,
+    quality: q,
+    format: "A4",
+    includeCover: true,
+    allowFileUrls: false,
+    // title/tier/subtitle/description resolved from frontmatter automatically
+  });
+
+  await gen.close().catch(() => {});
 }
 
 function convertWithLibreOffice(srcAbsPath: string, outAbsPath: string) {
@@ -874,7 +518,6 @@ async function main() {
   safeMkdir(CONFIG.tempDir);
 
   const libreofficeAvailable = hasLibreOffice();
-  const puppeteerAvailable = await hasPuppeteer();
 
   // Discover only two sources (as required)
   const contentFiles = discoverFiles(CONFIG.sourceContent, "content/downloads", CONFIG.recursive);
@@ -904,7 +547,7 @@ async function main() {
       quality: CONFIG.quality,
       minPdfBytes: CONFIG.minPdfBytes,
       libreoffice: libreofficeAvailable,
-      puppeteer: puppeteerAvailable,
+      puppeteer: true, // always available with our flagship renderer
     },
     counts: {
       contentFound: contentFiles.length,
@@ -932,7 +575,7 @@ async function main() {
   console.log(`[INFO] recursive=${String(CONFIG.recursive)} overwrite=${String(CONFIG.overwrite)} dryRun=${String(CONFIG.dryRun)}`);
   console.log(`[INFO] quality=${CONFIG.quality}`);
   console.log(`[INFO] libreoffice=${libreofficeAvailable ? "available" : "missing"}`);
-  console.log(`[INFO] puppeteer=${puppeteerAvailable ? "available" : "missing"}`);
+  console.log(`[INFO] puppeteer=available (via SecurePuppeteerPDFGenerator)`);
   console.log(`[INFO] files=${chosen.length}`);
 
   const results: ConvertResult[] = [];
@@ -955,7 +598,7 @@ async function main() {
       },
       {
         libreoffice: libreofficeAvailable,
-        puppeteer: puppeteerAvailable,
+        puppeteer: true, // always available
       }
     );
 
@@ -1014,7 +657,7 @@ async function main() {
         },
         {
           libreoffice: libreofficeAvailable,
-          puppeteer: puppeteerAvailable,
+          puppeteer: true, // always available
         }
       );
 
@@ -1083,14 +726,7 @@ async function main() {
   process.exit(0);
 }
 
-const invokedAsScript = (() => {
-  const argv1 = process.argv[1] ? path.resolve(process.argv[1]) : "";
-  const here = path.resolve(fileURLToPath(import.meta.url));
-  return argv1 === here;
-})();
-
-import { fileURLToPath } from "url";
-if (invokedAsScript) {
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
   main().catch((e) => {
     console.error(`[ERROR] fatal: ${e?.message || String(e)}`);
     process.exit(1);

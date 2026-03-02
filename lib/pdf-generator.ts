@@ -1,15 +1,12 @@
 import "server-only";
-
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-
 import { getPDFById } from './pdf/registry';
 
 /**
- * INSTITUTIONAL PDF GENERATION ENGINE (v2.4)
- * Optimized for Parallel Vault Sync, Safe-Healing Buffers, and Virtual Registry.
- * Fixed: TypeScript null-pointer safety and cross-directory source resolution.
+ * INSTITUTIONAL PDF ORCHESTRATOR (v2.5)
+ * Scans all content directories and outputs to public/downloads/
  */
 export async function generatePDF(
   id: string, 
@@ -17,81 +14,77 @@ export async function generatePDF(
   contentOverride?: string 
 ): Promise<{ success: boolean; path?: string; error?: string; cached?: boolean }> {
   
-  // 1. Intelligent Registry Fallback
   const registryConfig = getPDFById(id);
   
+  // Defaulting output to public/downloads if not specified
   const config = registryConfig || {
     id: id,
     title: id.replace(/-/g, ' ').toUpperCase(),
-    outputPath: `/briefs/${id}.pdf`,
+    outputPath: `/downloads/briefs/${id}.pdf`,
     category: 'General',
   };
 
   if (!registryConfig) {
-    console.warn(`⚠️ [PDF_GEN]: Asset "${id}" not in registry. Generating virtual config.`);
     (config as any).date = new Date().toISOString();
   }
 
   try {
-    // 2. Source Resolution (Check Briefs, then Vault)
-    let mdxPath = path.join(process.cwd(), 'content/briefs', `${id}.mdx`);
-    
-    if (!fs.existsSync(mdxPath)) {
-      mdxPath = path.join(process.cwd(), 'content/vault', `${id}.mdx`);
+    // 1. Omni-Directory Scan (Finding the MDX source)
+    const sourceFolders = ['briefs', 'vault', 'blog', 'lexicon', 'strategy', 'resources'];
+    let mdxPath = "";
+
+    for (const folder of sourceFolders) {
+      const checkPath = path.join(process.cwd(), 'content', folder, `${id}.mdx`);
+      if (fs.existsSync(checkPath)) {
+        mdxPath = checkPath;
+        break;
+      }
     }
 
+    // 2. Output Path Alignment (Saving to public/downloads)
     const outputPath = path.join(
       process.cwd(), 
       'public', 
       config.outputPath.replace(/^\//, '')
     );
     
-    // 3. Source Verification
-    if (!fs.existsSync(mdxPath) && !contentOverride) {
-      return { success: false, error: `Source MDX missing for "${id}" and no override provided.` };
+    if (!mdxPath && !contentOverride) {
+      return { success: false, error: `Source not found in: ${sourceFolders.join(', ')}` };
     }
 
-    // 4. Content Acquisition
+    // 3. Content Acquisition
     let contentBody: string;
     if (contentOverride) {
       contentBody = contentOverride;
     } else {
       const fileContent = fs.readFileSync(mdxPath, 'utf8');
-      const parsed = matter(fileContent);
-      contentBody = parsed.content;
+      const { content } = matter(fileContent);
+      contentBody = content;
     }
 
-    // 5. Cache Check Logic
-    if (!force && !contentOverride && fs.existsSync(outputPath)) {
+    // 4. Cache & Directory Integrity
+    if (!force && fs.existsSync(outputPath)) {
       const stats = fs.statSync(outputPath);
       const mdxStats = fs.statSync(mdxPath);
-      
-      if (stats.mtime > mdxStats.mtime) {
-        return { success: true, path: config.outputPath, cached: true };
-      }
+      if (stats.mtime > mdxStats.mtime) return { success: true, path: config.outputPath, cached: true };
     }
 
-    // 6. Ensure Directory Integrity
     const dir = path.dirname(outputPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    // 7. Dynamic Imports for Sovereign Rendering
+    // 5. Rendering Engine (Dynamic Imports)
     const [React, ReactPDF, { BriefDocument }] = await Promise.all([
       import('react'),
       import('@react-pdf/renderer'),
       import('./pdf-templates/BriefDocument')
     ]);
 
-    // 8. Render
     const pdfElement = React.createElement(BriefDocument as any, { 
       config: config,
       content: contentBody.trim() 
     });
 
-    await ReactPDF.default.renderToFile(
-      pdfElement as React.ReactElement<any>, 
-      outputPath
-    );
+    await ReactPDF.default.renderToFile(pdfElement as React.ReactElement<any>, outputPath);
 
     return { success: true, path: config.outputPath, cached: false };
     

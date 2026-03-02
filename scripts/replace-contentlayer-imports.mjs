@@ -31,8 +31,8 @@ const replacements = [
   ["from '@/lib/contentlayer'", "from '@/lib/content'"],
 
   // also catch legacy direct generated imports if any
-  ['from "contentlayer/generated"', 'from "@/lib/content"'],
-  ["from 'contentlayer/generated'", "from '@/lib/content'"],
+  ['from "@/lib/contentlayer"', 'from "@/lib/content"'],
+  ["from '@/lib/contentlayer'", "from '@/lib/content'"],
 ];
 
 let changed = 0;

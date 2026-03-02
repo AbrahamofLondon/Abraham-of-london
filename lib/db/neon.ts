@@ -1,7 +1,7 @@
 // lib/db/neon.ts — FIXED + SAFEGUARDED (EDGE/HTTP + OPTIONAL WS POOL)
 import "server-only";
 
-import { neon, neonConfig, Pool } from "@neondatabase/serverless";
+import { neon, neonConfig, Pool, type PoolConfig } from "@neondatabase/serverless";
 import WebSocket from "ws";
 import { secrets } from "@/lib/server/secrets";
 
@@ -13,7 +13,7 @@ import { secrets } from "@/lib/server/secrets";
 
 // Neon tuning (safe)
 neonConfig.fetchConnectionCache = true;
-neonConfig.webSocketConstructor = WebSocket as any;
+neonConfig.webSocketConstructor = WebSocket;
 
 if (!secrets.DATABASE_URL) {
   throw new Error("[DATABASE] DATABASE_URL is required but missing from secrets");
@@ -32,16 +32,27 @@ let pool: Pool | null = null;
 
 export function getPool(): Pool {
   if (!pool) {
-    pool = new Pool({
+    const poolConfig: PoolConfig = {
       connectionString: secrets.DATABASE_URL,
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
-    });
+    };
+
+    pool = new Pool(poolConfig);
 
     pool.on("error", (err: Error) => {
       console.error("[DATABASE] Unexpected pool error:", err);
     });
+
+    // Optional: Handle process termination gracefully
+    const cleanup = async () => {
+      await closePool();
+      process.exit(0);
+    };
+
+    process.once("SIGTERM", cleanup);
+    process.once("SIGINT", cleanup);
   }
   return pool;
 }
@@ -95,12 +106,20 @@ export async function checkDatabaseHealth(): Promise<boolean> {
   }
 }
 
+/**
+ * 4) Generic query helper with proper typing
+ */
 export async function query<T = any>(
   strings: TemplateStringsArray,
   ...values: any[]
 ): Promise<T[]> {
-  const rows = (await sql(strings, ...values)) as any[];
-  return rows as T[];
+  try {
+    const rows = (await sql(strings, ...values)) as any[];
+    return rows as T[];
+  } catch (error) {
+    console.error("[DATABASE] Query failed:", error);
+    throw error; // Re-throw to let caller handle
+  }
 }
 
 export async function closePool(): Promise<void> {

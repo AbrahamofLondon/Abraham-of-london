@@ -4,8 +4,8 @@
       "id": "abraham-vault-pack",
       "title": "Abraham Vault Pack",
       "type": "bundle",
-      "tier": "free",
-      "outputPath": "/assets/downloads/abraham-vault-pack.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
       "category": "vault",
       "description": "Comprehensive vault pack with foundational resources",
       "format": "PDF",
@@ -17,14 +17,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "vault"
     },
     {
       "id": "board-decision-log-template",
       "title": "Board Decision Log Template",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/board-decision-log-template.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
       "category": "governance",
       "description": "Template for tracking board decisions and resolutions",
       "format": "PDF",
@@ -36,14 +37,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "governance"
     },
     {
       "id": "board-investor-onepager",
       "title": "Board Investor One-Pager",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/board-investor-onepager.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
       "category": "governance",
       "description": "One-page summary for board and investor communications",
       "format": "PDF",
@@ -55,14 +57,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "governance"
     },
     {
       "id": "brotherhood-covenant",
       "title": "Brotherhood Covenant",
       "type": "framework",
-      "tier": "free",
-      "outputPath": "/assets/downloads/brotherhood-covenant.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
       "category": "leadership",
       "description": "Covenant framework for brotherhood and fellowship",
       "format": "PDF",
@@ -74,14 +77,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "brotherhood-leader-guide",
       "title": "Brotherhood Leader Guide",
       "type": "toolkit",
-      "tier": "free",
-      "outputPath": "/vault/downloads/lib-pdf/brotherhood-leader-guide.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/lib-pdf/brotherhood-leader-guide.pdf",
       "category": "leadership",
       "description": "Guide for leading brotherhood groups and communities",
       "format": "PDF",
@@ -93,14 +97,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "brotherhood-starter-kit",
       "title": "Brotherhood Starter Kit",
       "type": "toolkit",
-      "tier": "free",
-      "outputPath": "/vault/downloads/lib-pdf/brotherhood-starter-kit.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
       "category": "leadership",
       "description": "Starter kit for establishing brotherhood groups",
       "format": "PDF",
@@ -112,14 +117,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "canon-volume-iv-diagnostic-toolkit",
       "title": "Canon Volume IV Diagnostic Toolkit",
       "type": "toolkit",
-      "tier": "free",
-      "outputPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
       "category": "canon",
       "description": "Diagnostic tools from Canon Volume IV",
       "format": "PDF",
@@ -131,14 +137,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "canon"
     },
     {
       "id": "canon-volume-v-governance-diagnostic-toolkit",
       "title": "Canon Volume V Governance Diagnostic Toolkit",
       "type": "toolkit",
-      "tier": "free",
-      "outputPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
       "category": "governance",
       "description": "Governance diagnostic tools from Canon Volume V",
       "format": "PDF",
@@ -150,14 +157,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "governance"
     },
     {
       "id": "communication-script-bpf",
       "title": "Communication Script (BPF)",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/communication-script-bpf.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
       "category": "leadership",
       "description": "Business Process Framework communication script",
       "format": "PDF",
@@ -169,13 +177,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "core-alignment",
       "title": "Core Alignment Framework",
       "type": "framework",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/core-alignment.pdf",
       "category": "personal-growth",
       "description": "Framework for aligning with core values and purpose",
@@ -188,13 +197,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "core-legacy",
       "title": "Core Legacy Framework",
       "type": "framework",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/core-legacy.pdf",
       "category": "legacy",
       "description": "Framework for building and sustaining legacy",
@@ -207,14 +217,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "decision-log-template",
       "title": "Decision Log Template",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/decision-log-template.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/decision-log-template.pdf",
       "category": "operations",
       "description": "Template for logging and tracking decisions",
       "format": "PDF",
@@ -226,14 +237,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "decision-matrix-scorecard",
       "title": "Decision Matrix Scorecard",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
       "category": "operations",
       "description": "Scorecard for decision matrix evaluation",
       "format": "PDF",
@@ -245,14 +257,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "download-legacy-architecture-canvas",
       "title": "Legacy Architecture Canvas",
       "type": "canvas",
-      "tier": "free",
-      "outputPath": "/assets/downloads/download-legacy-architecture-canvas.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
       "category": "legacy",
       "description": "Canvas for designing legacy architecture",
       "format": "PDF",
@@ -264,14 +277,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "entrepreneur-operating-pack",
       "title": "Entrepreneur Operating Pack",
       "type": "pack",
-      "tier": "free",
-      "outputPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
       "category": "operations",
       "description": "Operating pack for entrepreneurs",
       "format": "PDF",
@@ -283,14 +297,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "entrepreneur-survival-checklist",
       "title": "Entrepreneur Survival Checklist",
       "type": "checklist",
-      "tier": "free",
-      "outputPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
       "category": "operations",
       "description": "Checklist for entrepreneurial survival and resilience",
       "format": "PDF",
@@ -302,14 +317,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "family-altar-liturgy",
       "title": "Family Altar Liturgy",
       "type": "liturgy",
-      "tier": "free",
-      "outputPath": "/assets/downloads/family-altar-liturgy.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
       "category": "theology",
       "description": "Liturgy for family altar and worship",
       "format": "PDF",
@@ -321,7 +337,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "theology"
     },
     {
       "id": "fathers-family-court-pack",
@@ -340,14 +357,15 @@
       "isFillable": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "family-court"
     },
     {
       "id": "leaders-cue-card-two-up",
       "title": "Leaders Cue Card (Two-Up)",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
       "category": "leadership",
       "description": "Two-up cue card for leaders",
       "format": "PDF",
@@ -359,14 +377,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "leadership-playbook",
       "title": "Leadership Playbook",
       "type": "playbook",
-      "tier": "free",
-      "outputPath": "/assets/downloads/leadership-playbook.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/leadership-playbook.pdf",
       "category": "leadership",
       "description": "Comprehensive leadership playbook",
       "format": "PDF",
@@ -378,14 +397,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "legacy-canvas",
       "title": "Legacy Canvas",
       "type": "canvas",
-      "tier": "free",
-      "outputPath": "/assets/downloads/legacy-canvas.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/legacy-canvas.pdf",
       "category": "legacy",
       "description": "Canvas for legacy planning and design",
       "format": "PDF",
@@ -397,13 +417,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "legacy-architecture-canvas",
       "title": "Legacy Architecture Canvas",
       "type": "canvas",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/legacy-architecture-canvas.pdf",
       "category": "legacy",
       "description": "High-fidelity legacy architecture canvas",
@@ -416,14 +437,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "life-alignment-assessment",
       "title": "Life Alignment Assessment",
       "type": "assessment",
-      "tier": "free",
-      "outputPath": "/assets/downloads/life-alignment-assessment.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
       "category": "personal-growth",
       "description": "Assessment for life alignment and purpose discovery",
       "preload": true,
@@ -436,14 +458,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "mentorship-starter-kit",
       "title": "Mentorship Starter Kit",
       "type": "toolkit",
-      "tier": "free",
-      "outputPath": "/assets/downloads/mentorship-starter-kit.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
       "category": "leadership",
       "description": "Starter kit for mentorship relationships",
       "format": "PDF",
@@ -455,14 +478,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "operating-cadence-pack",
       "title": "Operating Cadence Pack",
       "type": "pack",
-      "tier": "free",
-      "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
       "category": "operations",
       "description": "Pack for establishing operating cadence",
       "format": "PDF",
@@ -474,13 +498,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "personal-alignment-assessment-fillable",
       "title": "Personal Alignment Assessment (Fillable)",
       "type": "assessment",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/personal-alignment-assessment-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
@@ -493,14 +518,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "principles-for-my-son",
       "title": "Principles for My Son",
       "type": "editorial",
-      "tier": "free",
-      "outputPath": "/assets/downloads/principles-for-my-son.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
       "category": "family",
       "description": "Editorial on principles for raising sons",
       "format": "PDF",
@@ -512,14 +538,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "family"
     },
     {
       "id": "principles-for-my-son-cue-card",
       "title": "Principles for My Son (Cue Card)",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
       "category": "family",
       "description": "Cue card version of principles for sons",
       "format": "PDF",
@@ -531,14 +558,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "family"
     },
     {
       "id": "purpose-pyramid-worksheet",
       "title": "Purpose Pyramid Worksheet",
       "type": "worksheet",
-      "tier": "free",
-      "outputPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
       "category": "personal-growth",
       "description": "Worksheet for purpose pyramid development",
       "format": "PDF",
@@ -550,14 +578,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "scripture-track-john14",
       "title": "Scripture Track: John 14",
       "type": "study",
-      "tier": "free",
-      "outputPath": "/assets/downloads/scripture-track-john14.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
       "category": "theology",
       "description": "Scripture study track for John 14",
       "format": "PDF",
@@ -569,14 +598,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "theology"
     },
     {
       "id": "standards-brief",
       "title": "Standards Brief",
       "type": "brief",
-      "tier": "free",
-      "outputPath": "/assets/downloads/standards-brief.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/standards-brief.pdf",
       "category": "leadership",
       "description": "Brief on leadership and operational standards",
       "format": "PDF",
@@ -588,52 +618,67 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "surrender-framework",
       "title": "Surrender Framework",
       "type": "framework",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/surrender-framework.pdf",
-      "category": "personal-growth",
       "description": "Framework for spiritual and personal surrender",
-      "format": "PDF",
-      "formats": [
-        "A4"
+      "category": "Surrender Framework",
+      "tags": [
+        "surrender",
+        "surrender-framework",
+        "leadership",
+        "theology"
       ],
+      "format": "PDF",
+      "paper": "A4",
       "isInteractive": false,
       "isFillable": false,
       "requiresAuth": false,
+      "formats": [
+        "A4"
+      ],
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "categorySlug": "surrender-framework"
     },
     {
       "id": "surrender-principles",
-      "title": "Surrender Principles",
-      "type": "editorial",
-      "tier": "free",
+      "title": "Principles of Surrender (Worksheet)",
+      "type": "worksheet",
+      "tier": "public",
       "outputPath": "/assets/downloads/surrender-principles.pdf",
-      "category": "personal-growth",
       "description": "Principles of surrender in life and leadership",
+      "category": "Surrender Framework",
+      "tags": [
+        "surrender",
+        "surrender-framework",
+        "worksheet",
+        "leadership"
+      ],
       "format": "PDF",
+      "paper": "A4",
+      "isInteractive": true,
+      "isFillable": true,
+      "requiresAuth": false,
       "formats": [
         "A4"
       ],
-      "isInteractive": false,
-      "isFillable": false,
-      "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "categorySlug": "surrender-framework"
     },
     {
       "id": "ultimate-purpose-of-man-editorial",
       "title": "Ultimate Purpose of Man (Editorial)",
       "type": "editorial",
-      "tier": "free",
-      "outputPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
       "category": "theology",
       "description": "Editorial on the ultimate purpose of man",
       "format": "PDF",
@@ -645,7 +690,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "theology"
     },
     {
       "id": "ultimate-purpose-of-man-editorial-a4-premium-architect",
@@ -655,6 +701,7 @@
       "outputPath": "/assets/downloads/ultimate-purpose-of-man-editorial-a4-premium-architect.pdf",
       "category": "theology",
       "description": "Premium A4 version of Ultimate Purpose of Man",
+      "paper": "A4",
       "format": "PDF",
       "formats": [
         "A4"
@@ -664,14 +711,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "theology"
     },
     {
       "id": "weekly-operating-rhythm",
       "title": "Weekly Operating Rhythm",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/weekly-operating-rhythm.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
       "category": "operations",
       "description": "Template for weekly operating rhythm and cadence",
       "format": "PDF",
@@ -683,14 +731,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "decision-matrix-scorecard-fillable",
       "title": "Decision Matrix Scorecard (Fillable)",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
       "category": "operations",
@@ -702,14 +751,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "legacy-canvas-fillable",
       "title": "Legacy Canvas (Fillable)",
       "type": "canvas",
-      "tier": "free",
-      "outputPath": "/assets/downloads/legacy-canvas-fillable.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
       "category": "legacy",
@@ -721,35 +771,39 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "legacy-architecture-canvas-a3-premium-architect",
       "title": "Legacy Architecture Canvas (A3)",
       "type": "canvas",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/legacy-architecture-canvas-a3-premium-architect.pdf",
       "category": "legacy",
       "description": "A3 premium version of legacy architecture canvas",
+      "paper": "A3",
       "format": "PDF",
       "formats": [
-        "A4"
+        "A3"
       ],
       "isInteractive": false,
       "isFillable": false,
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "legacy-architecture-canvas-a4-premium-architect",
       "title": "Legacy Architecture Canvas (A4)",
       "type": "canvas",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/legacy-architecture-canvas-a4-premium-architect.pdf",
       "category": "legacy",
       "description": "A4 premium version of legacy architecture canvas",
+      "paper": "A4",
       "format": "PDF",
       "formats": [
         "A4"
@@ -759,33 +813,36 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "legacy-architecture-canvas-letter-premium-architect",
       "title": "Legacy Architecture Canvas (Letter)",
       "type": "canvas",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/legacy-architecture-canvas-letter-premium-architect.pdf",
       "category": "legacy",
       "description": "Letter premium version of legacy architecture canvas",
+      "paper": "Letter",
       "format": "PDF",
       "formats": [
-        "A4"
+        "Letter"
       ],
       "isInteractive": false,
       "isFillable": false,
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "purpose-pyramid-worksheet-fillable",
       "title": "Purpose Pyramid Worksheet (Fillable)",
       "type": "worksheet",
-      "tier": "free",
-      "outputPath": "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
       "category": "personal-growth",
@@ -797,7 +854,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "lib-brotherhood-leader-guide",
@@ -816,13 +874,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "lib-brotherhood-starter-kit",
       "title": "Brotherhood Starter Kit (Library)",
       "type": "toolkit",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
       "category": "leadership",
       "description": "Library version of brotherhood starter kit",
@@ -835,14 +894,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "lib-decision-log",
       "title": "Decision Log Template (Library)",
       "type": "tool",
-      "tier": "free",
-      "outputPath": "/assets/downloads/decision-log-template.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/decision-log-template.pdf",
       "category": "operations",
       "description": "Library version of decision log template",
       "format": "PDF",
@@ -854,13 +914,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "lib-decision-matrix-fillable",
       "title": "Decision Matrix Scorecard (Fillable Library)",
       "type": "tool",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
@@ -873,7 +934,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "lib-family-court-pack",
@@ -892,13 +954,14 @@
       "isFillable": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "family-court"
     },
     {
       "id": "lib-legacy-canvas-fillable",
       "title": "Legacy Canvas (Fillable Library)",
       "type": "canvas",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
@@ -911,14 +974,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "lib-life-alignment-assessment-alt",
       "title": "Life Alignment Assessment (Library)",
       "type": "assessment",
-      "tier": "free",
-      "outputPath": "/assets/downloads/life-alignment-assessment.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
       "category": "personal-growth",
       "description": "Library version of life alignment assessment",
       "format": "PDF",
@@ -930,13 +994,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "lib-personal-alignment-fillable",
       "title": "Personal Alignment Assessment (Fillable Library)",
       "type": "assessment",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/lib-pdf/personal-alignment-assessment-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
@@ -949,13 +1014,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "lib-purpose-pyramid-fillable",
       "title": "Purpose Pyramid Worksheet (Fillable Library)",
       "type": "worksheet",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
       "isInteractive": true,
       "isFillable": true,
@@ -968,14 +1034,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "lib-ultimate-purpose-editorial-alt",
       "title": "Ultimate Purpose of Man (Editorial Library)",
       "type": "editorial",
-      "tier": "free",
-      "outputPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
       "category": "theology",
       "description": "Library version of ultimate purpose editorial",
       "format": "PDF",
@@ -987,14 +1054,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "theology"
     },
     {
       "id": "res-brotherhood-starter-kit",
       "title": "Brotherhood Starter Kit (Resources)",
       "type": "toolkit",
-      "tier": "free",
-      "outputPath": "/vault/downloads/lib-pdf/brotherhood-starter-kit.pdf",
+      "tier": "public",
+      "outputPath": "/assets/downloads/lib-pdf/brotherhood-starter-kit.pdf",
       "category": "leadership",
       "description": "Resources version of brotherhood starter kit",
       "format": "PDF",
@@ -1006,13 +1074,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "res-destiny-mapping",
       "title": "Destiny Mapping Worksheet",
       "type": "worksheet",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/public-assets/resources/pdfs/destiny-mapping-worksheet.pdf",
       "category": "strategic",
       "description": "Destiny mapping worksheet for strategic planning",
@@ -1025,13 +1094,14 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "strategic"
     },
     {
       "id": "res-fatherhood-impact",
       "title": "Fatherhood Impact Framework",
       "type": "framework",
-      "tier": "free",
+      "tier": "public",
       "outputPath": "/assets/downloads/public-assets/resources/pdfs/fatherhood-impact-framework.pdf",
       "category": "family",
       "description": "Framework for fatherhood impact and legacy",
@@ -1044,7 +1114,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "family"
     },
     {
       "id": "res-institutional-health",
@@ -1054,6 +1125,7 @@
       "outputPath": "/assets/downloads/public-assets/resources/pdfs/institutional-health-scorecard.pdf",
       "category": "governance",
       "description": "Scorecard for institutional health assessment",
+      "paper": "A4",
       "format": "PDF",
       "formats": [
         "A4"
@@ -1063,7 +1135,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "governance"
     },
     {
       "id": "res-leadership-blueprint",
@@ -1073,6 +1146,7 @@
       "outputPath": "/assets/downloads/public-assets/resources/pdfs/leadership-standards-blueprint.pdf",
       "category": "leadership",
       "description": "Blueprint for leadership standards development",
+      "paper": "A4",
       "format": "PDF",
       "formats": [
         "A4"
@@ -1082,14 +1156,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "vault-board-decision-log",
       "title": "Board Decision Log (Vault)",
       "type": "tool",
       "tier": "architect",
-      "outputPath": "/assets/downloads/board-decision-log-template.pdf",
+      "outputPath": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
       "category": "governance",
       "description": "Vault version of board decision log",
       "format": "PDF",
@@ -1101,14 +1176,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "governance"
     },
     {
       "id": "vault-decision-log",
       "title": "Decision Log Template (Vault)",
       "type": "tool",
       "tier": "architect",
-      "outputPath": "/assets/downloads/decision-log-template.pdf",
+      "outputPath": "/assets/downloads/content-downloads/decision-log-template.pdf",
       "category": "operations",
       "description": "Vault version of decision log template",
       "format": "PDF",
@@ -1120,14 +1196,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "vault-decision-matrix-fillable",
       "title": "Decision Matrix Scorecard (Vault Fillable)",
       "type": "tool",
       "tier": "architect",
-      "outputPath": "/assets/downloads/decision-matrix-scorecard-fillable.pdf",
+      "outputPath": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
       "isFillable": true,
       "category": "operations",
       "description": "Vault fillable version of decision matrix",
@@ -1139,14 +1216,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "vault-legacy-canvas-fillable",
       "title": "Legacy Canvas (Vault Fillable)",
       "type": "canvas",
       "tier": "architect",
-      "outputPath": "/assets/downloads/public-assets/vault/legacy-canvas-fillable.pdf",
+      "outputPath": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
       "isFillable": true,
       "category": "legacy",
       "description": "Vault fillable version of legacy canvas",
@@ -1158,14 +1236,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "legacy"
     },
     {
       "id": "vault-operating-cadence",
       "title": "Operating Cadence Pack (Vault)",
       "type": "pack",
       "tier": "architect",
-      "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
+      "outputPath": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
       "category": "operations",
       "description": "Vault version of operating cadence pack",
       "format": "PDF",
@@ -1177,7 +1256,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "operations"
     },
     {
       "id": "vault-personal-alignment-fillable",
@@ -1196,14 +1276,15 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "vault-purpose-pyramid-fillable",
       "title": "Purpose Pyramid Worksheet (Vault Fillable)",
       "type": "worksheet",
       "tier": "architect",
-      "outputPath": "/assets/downloads/purpose-pyramid-worksheet-fillable.pdf",
+      "outputPath": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
       "isFillable": true,
       "category": "personal-growth",
       "description": "Vault fillable version of purpose pyramid",
@@ -1215,7 +1296,8 @@
       "requiresAuth": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "personal-growth"
     },
     {
       "id": "vault-lib-brotherhood-leader",
@@ -1234,7 +1316,8 @@
       "isFillable": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "vault-lib-brotherhood-starter",
@@ -1253,7 +1336,8 @@
       "isFillable": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "leadership"
     },
     {
       "id": "vault-lib-family-court-pack",
@@ -1272,7 +1356,8 @@
       "isFillable": false,
       "version": "1.0.0",
       "author": "Abraham of London",
-      "tags": []
+      "tags": [],
+      "categorySlug": "family-court"
     }
   ]
 }

@@ -148,9 +148,9 @@ class PDFRepair {
       { tier: 'member', format: 'A4' },
       { tier: 'member', format: 'Letter' },
       { tier: 'member', format: 'A3' },
-      { tier: 'free', format: 'A4' },
-      { tier: 'free', format: 'Letter' },
-      { tier: 'free', format: 'A3' }
+      { tier: "public", format: 'A4' },
+      { tier: "public", format: 'Letter' },
+      { tier: "public", format: 'A3' }
     ];
     
     const validFiles = this.files.filter(f => f.valid);

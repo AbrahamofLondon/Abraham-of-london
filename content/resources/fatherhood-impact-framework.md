@@ -47,7 +47,7 @@ category: Institutional Alpha
 
 ### 1. **[Identity](/lexicon/identity) Formation**
 * **The Question**: "Who am I and where do I come from?"
-* **The Mandate**: You must define the "Family Creed." If you do not name your children, the world will. Carrying the family name should represent a specific set of values and a shared history.
+* **The Mandate**: You must define the "[Family](/vault/lexicon/family) Creed." If you do not name your children, the world will. Carrying the family name should represent a specific set of values and a shared history.
 
 ### 2. **Moral Architecture**
 * **The Question**: "What are the rules of reality?"
@@ -67,14 +67,14 @@ category: Institutional Alpha
 
 ---
 
-## The Father's Rule
+## The [Father](/vault/lexicon/father)'s Rule
 
 {"A father's presence becomes a child's first definition of safety. His absence becomes their first definition of chaos."}
 
 **Implementation Steps:**
 1.  **Audit**: Which domain is currently the weakest in your home?
-2.  **Calibrate**: Set one "Family Ritual" per week that addresses that domain.
-3.  **Endure**: Governance is not a one-time event; it is the rhythm of years.
+2.  **Calibrate**: Set one "[Family](/vault/lexicon/family) Ritual" per week that addresses that domain.
+3.  **Endure**: [Governance](/vault/lexicon/governance) is not a one-time event; it is the rhythm of years.
 
 ---
 

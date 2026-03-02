@@ -10,7 +10,7 @@
     "strict": true,
     "noEmit": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "Bundler", // Optimized for Next.js 14/15
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
@@ -28,9 +28,25 @@
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": false,
     "sourceMap": true,
-    "inlineSources": false,
     "removeComments": true,
     "preserveConstEnums": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "contentlayer/generated": [
+        "./.contentlayer/generated"
+      ],
+      "contentlayer/generated/*": [
+        "./.contentlayer/generated/*"
+      ],
+      "server-only": [
+        "scripts/mocks/server-only.js"
+      ]
+      // 🛡️ REMOVED: Manual next/navigation mappings. 
+      // The 'Bundler' resolution handles this natively without breaking path logic.
+    },
     "typeRoots": [
       "./node_modules/@types",
       "./types"
@@ -42,42 +58,6 @@
       "next",
       "next-auth"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "server-only": [
-        "scripts/mocks/server-only.js"
-      ],
-      "@/*": [
-        "./*"
-      ],
-      "next-contentlayer2/hooks": [
-        "node_modules/next-contentlayer2/dist/hooks/index.d.ts"
-      ],
-      "contentlayer/generated": [
-        "./.contentlayer/generated"
-      ],
-      "contentlayer/generated/*": [
-        "./.contentlayer/generated/*"
-      ],
-      "@/lib/db": [
-        "./lib/db.ts"
-      ],
-      "@/lib/redis": [
-        "./lib/redis.ts"
-      ],
-      "@/lib/redis/*": [
-        "./lib/redis/*"
-      ],
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ],
-      "@/styles/*": [
-        "./styles/*"
-      ]
-    },
     "plugins": [
       {
         "name": "next"
@@ -89,8 +69,8 @@
     "experimentalSpecifiers": true,
     "transpileOnly": true,
     "compilerOptions": {
-      "module": "ESNext",
-      "moduleResolution": "Node"
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext"
     }
   },
   "include": [
@@ -99,15 +79,14 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".contentlayer/generated",
-    ".next/dev/types/**/*.ts",
-    ".next/dev/dev/types/**/*.ts"
+    "types/**/*.d.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".next",
     "out",
     "dist",
-    "_api_archive",
-    "**/_api_archive/*"
+    "_api_archive"
   ]
 }

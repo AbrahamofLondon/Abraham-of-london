@@ -1,10 +1,12 @@
-// next.config.mjs — ABRAHAM OF LONDON (NEXT-16-STABLE, CONTENTLAYER2-COMPATIBLE)
+// next.config.mjs
 import { withContentlayer } from "next-contentlayer2";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
@@ -13,64 +15,51 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // ✅ [STABILIZATION]: Explicitly disable Turbopack for MDX/Contentlayer compatibility
-  // This satisfies the Next.js 16 requirement for custom webpack configs.
-  // turbopack: {}, // Uncomment if you move to Turbopack later
-
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  serverExternalPackages: ["@prisma/client", "contentlayer2"],
 
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
+    optimizePackageImports: ["date-fns", "clsx", "tailwind-merge"],
   },
 
   transpilePackages: ["framer-motion"],
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "www.abrahamoflondon.org", pathname: "/**" },
-      { protocol: "https", hostname: "abrahamoflondon.org", pathname: "/**" },
-      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
+      { protocol: "https", hostname: "www.abrahamoflondon.org" },
+      { protocol: "https", hostname: "abrahamoflondon.org" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  webpack: (config, { isServer }) => {
-    // Standardize alias
+  webpack: (config, { isServer, webpack }) => {
     config.resolve.alias = {
-      ...(config.resolve.alias || {}),
+      ...config.resolve.alias,
       "@": path.resolve(__dirname),
     };
 
-    // 🏛️ [INSTITUTIONAL PROTECTION]: 
-    // Prevent Node internals from leaking into the client bundle.
     if (!isServer) {
+      // ✅ FIX: Use require with createRequire
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
-        crypto: false,
-        os: false,
-        path: false,
-        module: false,
+        process: require.resolve("process/browser"),
       };
+
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          process: "process/browser",
+        })
+      );
     }
 
-    config.infrastructureLogging = { level: "error" };
     return config;
   },
-
-  distDir: ".next",
 };
 
-// ✅ Apply Contentlayer2 wrapper
 export default withContentlayer(nextConfig);

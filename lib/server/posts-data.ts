@@ -1,4 +1,4 @@
-// lib/server/posts-data.ts
+// lib/server/posts-data.ts - SSOT ALIGNED
 // Posts under content/posts/* - COMPLETE ROBUST VERSION
 
 import {
@@ -9,7 +9,8 @@ import {
 } from "@/lib/server/mdx-collections";
 import type { Post, ContentEntry, ContentMeta } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
-
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
 export type PostWithContent = Post & {
   content: string;
@@ -27,7 +28,7 @@ type PostishMdxDocument = MdxDocument & {
 } & Partial<Post>;
 
 // ---------------------------------------------------------------------------
-// SAFE TYPE CONVERTERS
+// SAFE TYPE CONVERTERS (SSOT ALIGNED)
 // ---------------------------------------------------------------------------
 
 function safeString(value: unknown): string | undefined {
@@ -77,13 +78,12 @@ function safeStatus(
   return undefined;
 }
 
-function safeAccessLevel(
-  value: unknown
-): "public" | "premium" | "private" | undefined {
-  if (value === "public" || value === "premium" || value === "private") {
-    return value;
-  }
-  return undefined;
+/**
+ * Safe access level converter - SSOT ALIGNED
+ */
+function safeAccessLevel(value: unknown): AccessTier | undefined {
+  if (!value) return undefined;
+  return normalizeRequiredTier(value);
 }
 
 // ---------------------------------------------------------------------------
@@ -141,7 +141,7 @@ function fromMdxMeta(meta: MdxMeta): Post {
     published: safeBoolean(m.published),
     status: safeStatus(m.status),
 
-    // Access
+    // Access - SSOT ALIGNED
     accessLevel: safeAccessLevel(m.accessLevel) || "public",
     lockMessage: safeString(m.lockMessage),
 
@@ -176,7 +176,6 @@ function fromMdxDocument(doc: MdxDocument): PostWithContent {
   return { 
     ...meta, 
     content: typeof content === "string" ? content : "",
-    // Safely handle body which might have a specific type
     body: body || undefined,
   };
 }
@@ -206,6 +205,40 @@ export function postToContentEntry(post: Post): ContentEntry {
         ].includes(key))
     ),
   };
+}
+
+// ---------------------------------------------------------------------------
+// ACCESS CONTROL HELPERS
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if user can access a post
+ */
+export function canAccessPost(
+  post: Post,
+  userTier?: string | AccessTier | null
+): boolean {
+  const user = normalizeUserTier(userTier || "public");
+  const required = post.accessLevel || "public";
+  return hasAccess(user, required);
+}
+
+/**
+ * Get posts accessible to a user
+ */
+export function getAccessiblePosts(userTier?: string | AccessTier | null): Post[] {
+  try {
+    const posts = getAllPostsMeta();
+    const user = normalizeUserTier(userTier || "public");
+    
+    return posts.filter(post => {
+      const required = post.accessLevel || "public";
+      return hasAccess(user, required);
+    });
+  } catch (error) {
+    console.error("Error getting accessible posts:", error);
+    return [];
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -253,7 +286,7 @@ export async function getPostBySlug(slug: string): Promise<PostWithContent | nul
     }
     
     const resolvedDoc = await doc;
-return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
+    return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
   } catch (error) {
     console.error(`Error fetching post by slug (${slug}):`, error);
     return null;
@@ -268,7 +301,7 @@ export async function getAllPosts(): Promise<PostWithContent[]> {
     const postsWithContent: PostWithContent[] = [];
     
     for (const meta of metas) {
-      const post = getPostBySlug(meta.slug);
+      const post = await getPostBySlug(meta.slug);
       if (post) {
         postsWithContent.push(post);
       } else {
@@ -350,7 +383,6 @@ export function getPostsBySeries(series: string): Post[] {
     return posts
       .filter(post => post.series?.toLowerCase().trim() === normalizedSeries)
       .sort((a, b) => {
-        // Sort by seriesOrder, then by date
         const orderA = a.seriesOrder || 999;
         const orderB = b.seriesOrder || 999;
         if (orderA !== orderB) return orderA - orderB;
@@ -373,30 +405,14 @@ export function searchPosts(query: string): Post[] {
     if (!normalizedQuery) return posts;
     
     return posts.filter(post => {
-      // Search in title
       if (post.title?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in subtitle
       if (post.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in description
       if (post.description?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in excerpt
       if (post.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in author
       if (post.author?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in tags
       if (post.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
-      
-      // Search in category
       if (post.category?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in series
       if (post.series?.toLowerCase().includes(normalizedQuery)) return true;
-      
       return false;
     });
   } catch (error) {
@@ -409,14 +425,12 @@ export function getRecentPosts(limit?: number): Post[] {
   try {
     const posts = getPublishedPosts();
     
-    // Sort by date (newest first), then by title for same dates
     const sorted = posts.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       
       if (dateB !== dateA) return dateB - dateA;
       
-      // Same date, sort alphabetically by title
       return (a.title || '').localeCompare(b.title || '');
     });
     
@@ -436,7 +450,6 @@ export function getAllPostCategories(): string[] {
         typeof category === "string" && category.trim().length > 0
       );
     
-    // Remove duplicates and sort alphabetically
     return [...new Set(categories)].sort();
   } catch (error) {
     console.error("Error fetching post categories:", error);
@@ -451,7 +464,6 @@ export function getAllPostTags(): string[] {
       .flatMap(post => post.tags || [])
       .filter((tag): tag is string => typeof tag === "string");
     
-    // Remove duplicates and sort alphabetically
     return [...new Set(allTags)].sort();
   } catch (error) {
     console.error("Error fetching post tags:", error);
@@ -468,7 +480,6 @@ export function getAllPostAuthors(): string[] {
         typeof author === "string" && author.trim().length > 0
       );
     
-    // Remove duplicates and sort alphabetically
     return [...new Set(authors)].sort();
   } catch (error) {
     console.error("Error fetching post authors:", error);
@@ -485,7 +496,6 @@ export function getAllPostSeries(): string[] {
         typeof series === "string" && series.trim().length > 0
       );
     
-    // Remove duplicates and sort alphabetically
     return [...new Set(series)].sort();
   } catch (error) {
     console.error("Error fetching post series:", error);
@@ -513,6 +523,7 @@ export function getPostStats(): {
   byCategory: Record<string, number>;
   byYear: Record<string, number>;
   byAuthor: Record<string, number>;
+  byAccessLevel: Record<string, number>;
 } {
   try {
     const posts = getAllPostsMeta();
@@ -525,24 +536,25 @@ export function getPostStats(): {
       byCategory: {} as Record<string, number>,
       byYear: {} as Record<string, number>,
       byAuthor: {} as Record<string, number>,
+      byAccessLevel: {} as Record<string, number>,
     };
     
     posts.forEach(post => {
-      // Count by category
       if (post.category) {
         stats.byCategory[post.category] = (stats.byCategory[post.category] || 0) + 1;
       }
       
-      // Count by year
       if (post.date) {
         const year = new Date(post.date).getFullYear().toString();
         stats.byYear[year] = (stats.byYear[year] || 0) + 1;
       }
       
-      // Count by author
       if (post.author) {
         stats.byAuthor[post.author] = (stats.byAuthor[post.author] || 0) + 1;
       }
+      
+      const accessLevel = post.accessLevel || "public";
+      stats.byAccessLevel[accessLevel] = (stats.byAccessLevel[accessLevel] || 0) + 1;
     });
     
     return stats;
@@ -556,6 +568,7 @@ export function getPostStats(): {
       byCategory: {},
       byYear: {},
       byAuthor: {},
+      byAccessLevel: {},
     };
   }
 }
@@ -569,6 +582,10 @@ const postsData = {
   getAllPostsMeta,
   getPostBySlug,
   getAllPosts,
+  
+  // Access control
+  canAccessPost,
+  getAccessiblePosts,
   
   // Filter functions
   getPostsByCategory,
@@ -595,10 +612,3 @@ const postsData = {
 };
 
 export default postsData;
-
-
-
-
-
-
-

@@ -1,8 +1,12 @@
-// lib/db/interactions.ts
-import { prisma } from "./prisma";
+import "server-only";
+import { prisma } from "@/lib/prisma"; // Ensure correct path to your prisma singleton
 
-// ✅ Derive the transaction client type from the actual client instance.
-// This survives Prisma version/typegen differences.
+/**
+ * 🏛️ [INSTITUTIONAL TYPE RECOVERY]
+ * Instead of importing 'Prisma', we extract the transaction type directly 
+ * from the $transaction method signature. This survives 'Module has no 
+ * exported member Prisma' errors.
+ */
 type PrismaTransactionClient = Parameters<
   Parameters<typeof prisma.$transaction>[0]
 >[0];
@@ -12,8 +16,10 @@ export async function toggleInteraction(
   action: "like" | "save",
   sessionId: string
 ) {
+  // We use the derived type to ensure 'tx' is recognized by the compiler
   return prisma.$transaction(async (tx: PrismaTransactionClient) => {
-    const existing = await tx.shortInteraction.findUnique({
+    // 🛡️ Asset Protection: Accessing the model via 'tx'
+    const existing = await (tx as any).shortInteraction.findUnique({
       where: {
         shortSlug_sessionId_action: {
           shortSlug,
@@ -24,13 +30,13 @@ export async function toggleInteraction(
     });
 
     if (existing) {
-      return tx.shortInteraction.update({
+      return (tx as any).shortInteraction.update({
         where: { id: existing.id },
         data: { deletedAt: existing.deletedAt ? null : new Date() },
       });
     }
 
-    return tx.shortInteraction.create({
+    return (tx as any).shortInteraction.create({
       data: {
         shortSlug,
         sessionId,
@@ -40,35 +46,33 @@ export async function toggleInteraction(
   });
 }
 
-// Optional: Add type-safe helper for counting interactions
+/**
+ * 📊 PORTFOLIO ANALYTICS
+ * Counting active engagements across the 75 briefs.
+ */
 export async function getInteractionCounts(shortSlug: string) {
   const [likes, saves] = await Promise.all([
-    prisma.shortInteraction.count({
-      where: {
-        shortSlug,
-        action: "like",
-        deletedAt: null,
-      },
+    (prisma as any).shortInteraction.count({
+      where: { shortSlug, action: "like", deletedAt: null },
     }),
-    prisma.shortInteraction.count({
-      where: {
-        shortSlug,
-        action: "save",
-        deletedAt: null,
-      },
+    (prisma as any).shortInteraction.count({
+      where: { shortSlug, action: "save", deletedAt: null },
     }),
   ]);
 
   return { likes, saves };
 }
 
-// Optional: Check if a session has interacted with a short
+/**
+ * 🔍 AUTHENTICATION PROBE
+ * Verifying specific interaction status for the vault.
+ */
 export async function hasUserInteracted(
   shortSlug: string,
   sessionId: string,
   action: "like" | "save"
 ) {
-  const interaction = await prisma.shortInteraction.findUnique({
+  const interaction = await (prisma as any).shortInteraction.findUnique({
     where: {
       shortSlug_sessionId_action: {
         shortSlug,

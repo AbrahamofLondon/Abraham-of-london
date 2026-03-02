@@ -1,89 +1,75 @@
-// pages/api/books/[slug].ts — SECURE VAULT PROXY
+// pages/api/books/[slug].ts — SECURE VAULT PROXY (SSOT, Postgres sessions, public bypass)
 import type { NextApiRequest, NextApiResponse } from "next";
 
-// Institutional Security & Content Helpers
-import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
-import { getAccessCookie } from "@/lib/server/auth/cookies";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier, normalizeRequiredTier, hasAccess, requiredTierFromDoc } from "@/lib/access/tier-policy";
+
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
+
 import { normalizeSlug, getServerBookBySlug } from "@/lib/content/server";
 
-type Tier = "public" | "inner-circle" | "private";
-
-type Ok = {
-  ok: true;
-  tier: Tier;
-  requiredTier: Tier;
-  bodyCode: string; // ✅ Delivering the pre-compiled Contentlayer code
+type ResponseData = {
+  ok: boolean;
+  reason?: string;
+  tier?: AccessTier;
+  requiredTier?: AccessTier;
+  bodyCode?: string;
 };
 
-type Fail = { ok: false; reason: string };
-
-const TIER_ORDER: Tier[] = ["public", "inner-circle", "private"];
-
-/**
- * Institutional Clearance Logic
- * Higher indices in TIER_ORDER represent higher clearance.
- */
-function hasClearance(userTier: Tier, requiredTier: Tier): boolean {
-  return TIER_ORDER.indexOf(userTier) >= TIER_ORDER.indexOf(requiredTier);
+function extractCode(doc: any): string {
+  return String(
+    doc?.body?.code ||
+      doc?.bodyCode ||
+      doc?.content ||
+      doc?.mdx ||
+      doc?.body?.raw ||
+      (typeof doc?.body === "string" ? doc.body : "") ||
+      ""
+  );
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
-  // 1. Protocol Validation
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method !== "GET") {
-    return res.status(405).json({ ok: false, reason: "Method not allowed" });
+    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
   }
 
-  // 2. Resource Identification
   const slug = normalizeSlug(String(req.query.slug || ""));
-  if (!slug) return res.status(400).json({ ok: false, reason: "Slug missing" });
+  if (!slug) return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
 
-  // 3. Document Retrieval (Server-side bypass of build-time caches)
-  const book = await getServerBookBySlug(slug);
-  if (!book || (book as any).draft) {
-    return res.status(404).json({ ok: false, reason: "Volume not found" });
-  }
+  const doc: any = (await getServerBookBySlug(slug)) || (await getServerBookBySlug(`books/${slug}`));
+  if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "VOLUME_NOT_FOUND" });
 
-  const requiredTier = (book.accessLevel || "public") as Tier;
-  let userTier: Tier = "public";
+  const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
 
-  // 4. Institutional Security Gate
-  if (requiredTier !== "public") {
-    const sessionId = getAccessCookie(req);
-    
-    if (!sessionId) {
-      return res.status(401).json({ ok: false, reason: "Access denied. Identification required." });
-    }
-
-    // Direct check against Postgres Token Store
-    const session = await verifySession(sessionId);
-    if (!session || !session.valid) {
-      return res.status(401).json({ ok: false, reason: "Session expired or invalid." });
-    }
-
-    userTier = session.tier as Tier;
-    if (!hasClearance(userTier, requiredTier)) {
-      return res.status(403).json({ ok: false, reason: "Insufficient clearance for this intelligence brief." });
-    }
-  }
-
-  // 5. Payload Delivery
-  // Since we are using next-contentlayer2, the content is already compiled.
-  // We simply serve the bodyCode which SafeMDXRenderer will reify on the client.
-  try {
-    const bodyCode = book.body.code;
-
-    if (!bodyCode) {
-      throw new Error("Compiled content missing from vault asset.");
-    }
-
+  // ✅ Public bypass
+  if (requiredTier === "public") {
     return res.status(200).json({
       ok: true,
-      tier: userTier,
-      requiredTier,
-      bodyCode, // ✅ No more next-mdx-remote serialization
+      tier: "public",
+      requiredTier: "public",
+      bodyCode: extractCode(doc),
     });
-  } catch (error) {
-    console.error(`[VAULT_PROXY_FAILED] Slug: ${slug}`, error);
-    return res.status(500).json({ ok: false, reason: "Failed to retrieve pre-compiled intelligence payload." });
   }
+
+  // ✅ Gate: session cookie -> Postgres session context
+  const sessionId = readAccessCookie(req);
+  if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
+
+  const ctx = await getSessionContext(sessionId);
+  const sessionTierRaw = ctx?.tier ?? ctx?.member?.tier ?? null;
+  if (!sessionTierRaw) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+
+  const userTier: AccessTier = normalizeUserTier(sessionTierRaw);
+
+  if (!hasAccess(userTier, requiredTier)) {
+    return res.status(403).json({ ok: false, reason: "INSUFFICIENT_CLEARANCE", tier: userTier, requiredTier });
+  }
+
+  return res.status(200).json({
+    ok: true,
+    tier: userTier,
+    requiredTier,
+    bodyCode: extractCode(doc),
+  });
 }

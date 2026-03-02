@@ -1,6 +1,14 @@
-// lib/content/shared.ts — CLIENT-SAFE SHARED CONTENT UTILITIES
+// lib/content/shared.ts — CLIENT-SAFE SHARED CONTENT UTILITIES (SSOT ALIGNED)
 // Shared utilities used across Pages Router + App Router.
 // MUST remain client-safe (no fs, no server-only imports).
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { AccessTier } from "@/lib/access/tier-policy";
+import {
+  normalizeRequiredTier,
+  requiredTierFromDoc,
+} from "@/lib/access/tier-policy";
 
 export type DocKind =
   | "blog"
@@ -14,12 +22,10 @@ export type DocKind =
   | "strategy"
   | "unknown";
 
-export type AccessLevel =
-  | "free"
-  | "member"
-  | "architect"
-  | "inner-circle"
-  | "inner-circle-elite";
+/**
+ * SSOT-aligned access level - re-export from tier-policy
+ */
+export type AccessLevel = AccessTier;
 
 type AnyDoc = Record<string, any>;
 
@@ -55,11 +61,6 @@ export function normalizeHref(input: string): string {
 /**
  * stripCollectionPrefix (generic)
  * Safely strips a known collection prefix from a slug/path.
- * Examples:
- * - stripCollectionPrefix("canon", "canon/vol-i") -> "vol-i"
- * - stripCollectionPrefix("canon", "/canon/vol-i") -> "vol-i"
- * - stripCollectionPrefix("canon", "vol-i") -> "vol-i"
- * - stripCollectionPrefix("canon", "canon") -> ""
  */
 export function stripCollectionPrefix(prefix: string, slug: string): string {
   const p = normalizeSlug(prefix);
@@ -79,15 +80,6 @@ export function stripCollectionPrefix(prefix: string, slug: string): string {
 
 /**
  * joinHref — HARD-LOCKED (idempotent, prefix-safe)
- *
- * Goals:
- *  - Never produce // or backslashes
- *  - Never duplicate collection prefixes when given mixed inputs:
- *      joinHref("canon", "canon/vol-i") -> "/canon/vol-i"
- *      joinHref("canon", "/canon/vol-i") -> "/canon/vol-i"
- *      joinHref("/canon", "vol-i") -> "/canon/vol-i"
- *  - If a later segment already contains earlier segments, keep the later, normalized:
- *      joinHref("books", "books/the-x") -> "/books/the-x"
  */
 export function joinHref(...args: (string | undefined | null)[]): string {
   const raw = args
@@ -102,8 +94,6 @@ export function joinHref(...args: (string | undefined | null)[]): string {
   for (const curr of raw) {
     if (!curr) continue;
 
-    // If curr is absolute-ish already like "canon/vol-i" and we already have "canon",
-    // we want to drop the earlier "canon" and keep curr.
     const prev = parts[parts.length - 1];
 
     if (!prev) {
@@ -132,7 +122,6 @@ export function joinHref(...args: (string | undefined | null)[]): string {
     parts.push(curr);
   }
 
-  // Join, collapse any accidental doubles, and force leading slash
   const joined = parts.join("/").replace(/\/{2,}/g, "/");
   return joined ? "/" + joined : "/";
 }
@@ -159,27 +148,34 @@ export function isPublished(doc: AnyDoc): boolean {
 }
 
 /**
- * Get the access level (tier) for a document
+ * Get the access level (tier) for a document - SSOT ALIGNED
+ * Uses tier-policy.ts for canonical mapping
  */
 export function getAccessLevel(doc: AnyDoc): AccessLevel {
-  const tier = doc?.tier || doc?.access || doc?.accessLevel || "free";
+  // Use SSOT policy to get required tier
+  return requiredTierFromDoc(doc);
+}
 
-  switch (String(tier).toLowerCase()) {
-    case "member":
-    case "premium":
-      return "member";
-    case "architect":
-    case "enterprise":
-      return "architect";
-    case "inner-circle":
-    case "innercircle":
-      return "inner-circle";
-    case "inner-circle-elite":
-    case "elite":
-      return "inner-circle-elite";
-    default:
-      return "free";
-  }
+/**
+ * Legacy alias for backward compatibility
+ * @deprecated Use getAccessLevel instead - returns SSOT AccessTier
+ */
+export function getDocTier(doc: AnyDoc): AccessLevel {
+  return getAccessLevel(doc);
+}
+
+/**
+ * Check if document is public
+ */
+export function isPublic(doc: AnyDoc): boolean {
+  return getAccessLevel(doc) === "public";
+}
+
+/**
+ * Check if document requires authentication
+ */
+export function requiresAuth(doc: AnyDoc): boolean {
+  return getAccessLevel(doc) !== "public";
 }
 
 export function getDocKind(doc: AnyDoc): DocKind {
@@ -218,7 +214,6 @@ export function getDocKind(doc: AnyDoc): DocKind {
 export function getDocHref(doc: AnyDoc): string {
   const explicit = doc?.href || doc?.url || doc?.permalink;
   if (typeof explicit === "string" && explicit.trim()) {
-    // IMPORTANT: normalize explicit paths too (prevents //canon//canon)
     return normalizeHref(explicit.trim());
   }
 
@@ -247,7 +242,6 @@ export function getDocHref(doc: AnyDoc): string {
     case "strategy":
       return joinHref("strategy", stripCollectionPrefix("strategy", rawSlug));
     default:
-      // If already nested, use it as-is; otherwise put in /content
       return rawSlug.includes("/") ? normalizeHref(rawSlug) : joinHref("content", rawSlug);
   }
 }

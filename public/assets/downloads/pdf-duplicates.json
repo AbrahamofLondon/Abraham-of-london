@@ -1,0 +1,215 @@
+{
+  "generatedAt": "2026-03-02T17:15:31.504Z",
+  "totalDuplicateIds": 26,
+  "duplicates": [
+    {
+      "id": "abraham-vault-pack",
+      "chosen": "/assets/downloads/content-downloads/abraham-vault-pack.pdf",
+      "dropped": [
+        "/assets/downloads/abraham-vault-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(98KB) > mtime"
+    },
+    {
+      "id": "board-decision-log-template",
+      "chosen": "/assets/downloads/content-downloads/board-decision-log-template.pdf",
+      "dropped": [
+        "/assets/downloads/board-decision-log-template.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "board-investor-onepager",
+      "chosen": "/assets/downloads/content-downloads/board-investor-onepager.pdf",
+      "dropped": [
+        "/assets/downloads/board-investor-onepager.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(85KB) > mtime"
+    },
+    {
+      "id": "brotherhood-covenant",
+      "chosen": "/assets/downloads/content-downloads/brotherhood-covenant.pdf",
+      "dropped": [
+        "/assets/downloads/brotherhood-covenant.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(136KB) > mtime"
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "chosen": "/assets/downloads/content-downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "dropped": [
+        "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(153KB) > mtime"
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "chosen": "/assets/downloads/content-downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "dropped": [
+        "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(135KB) > mtime"
+    },
+    {
+      "id": "communication-script-bpf",
+      "chosen": "/assets/downloads/content-downloads/communication-script-bpf.pdf",
+      "dropped": [
+        "/assets/downloads/communication-script-bpf.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(139KB) > mtime"
+    },
+    {
+      "id": "decision-log-template",
+      "chosen": "/assets/downloads/lib-pdf/decision-log-template.pdf",
+      "dropped": [
+        "/assets/downloads/content-downloads/decision-log-template.pdf",
+        "/assets/downloads/decision-log-template.pdf"
+      ],
+      "reason": "bucket(lib-pdf) > type(.pdf) > size(336KB) > mtime"
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "chosen": "/assets/downloads/content-downloads/decision-matrix-scorecard.pdf",
+      "dropped": [
+        "/assets/downloads/decision-matrix-scorecard.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(96KB) > mtime"
+    },
+    {
+      "id": "download-legacy-architecture-canvas",
+      "chosen": "/assets/downloads/content-downloads/download-legacy-architecture-canvas.pdf",
+      "dropped": [
+        "/assets/downloads/download-legacy-architecture-canvas.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(112KB) > mtime"
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "chosen": "/assets/downloads/content-downloads/entrepreneur-operating-pack.pdf",
+      "dropped": [
+        "/assets/downloads/entrepreneur-operating-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(103KB) > mtime"
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "chosen": "/assets/downloads/content-downloads/entrepreneur-survival-checklist.pdf",
+      "dropped": [
+        "/assets/downloads/entrepreneur-survival-checklist.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(135KB) > mtime"
+    },
+    {
+      "id": "family-altar-liturgy",
+      "chosen": "/assets/downloads/content-downloads/family-altar-liturgy.pdf",
+      "dropped": [
+        "/assets/downloads/family-altar-liturgy.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(129KB) > mtime"
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "chosen": "/assets/downloads/content-downloads/leaders-cue-card-two-up.pdf",
+      "dropped": [
+        "/assets/downloads/leaders-cue-card-two-up.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(70KB) > mtime"
+    },
+    {
+      "id": "leadership-playbook",
+      "chosen": "/assets/downloads/content-downloads/leadership-playbook.pdf",
+      "dropped": [
+        "/assets/downloads/leadership-playbook.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(94KB) > mtime"
+    },
+    {
+      "id": "legacy-canvas",
+      "chosen": "/assets/downloads/content-downloads/legacy-canvas.pdf",
+      "dropped": [
+        "/assets/downloads/legacy-canvas.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(132KB) > mtime"
+    },
+    {
+      "id": "life-alignment-assessment",
+      "chosen": "/assets/downloads/content-downloads/life-alignment-assessment.pdf",
+      "dropped": [
+        "/assets/downloads/life-alignment-assessment.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(179KB) > mtime"
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "chosen": "/assets/downloads/content-downloads/mentorship-starter-kit.pdf",
+      "dropped": [
+        "/assets/downloads/mentorship-starter-kit.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(105KB) > mtime"
+    },
+    {
+      "id": "operating-cadence-pack",
+      "chosen": "/assets/downloads/content-downloads/operating-cadence-pack.pdf",
+      "dropped": [
+        "/assets/downloads/operating-cadence-pack.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(95KB) > mtime"
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "chosen": "/assets/downloads/content-downloads/principles-for-my-son-cue-card.pdf",
+      "dropped": [
+        "/assets/downloads/principles-for-my-son-cue-card.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(67KB) > mtime"
+    },
+    {
+      "id": "principles-for-my-son",
+      "chosen": "/assets/downloads/content-downloads/principles-for-my-son.pdf",
+      "dropped": [
+        "/assets/downloads/principles-for-my-son.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(138KB) > mtime"
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "chosen": "/assets/downloads/content-downloads/purpose-pyramid-worksheet.pdf",
+      "dropped": [
+        "/assets/downloads/purpose-pyramid-worksheet.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(105KB) > mtime"
+    },
+    {
+      "id": "scripture-track-john14",
+      "chosen": "/assets/downloads/content-downloads/scripture-track-john14.pdf",
+      "dropped": [
+        "/assets/downloads/scripture-track-john14.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(137KB) > mtime"
+    },
+    {
+      "id": "standards-brief",
+      "chosen": "/assets/downloads/content-downloads/standards-brief.pdf",
+      "dropped": [
+        "/assets/downloads/standards-brief.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(70KB) > mtime"
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "chosen": "/assets/downloads/content-downloads/ultimate-purpose-of-man-editorial.pdf",
+      "dropped": [
+        "/assets/downloads/ultimate-purpose-of-man-editorial.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(156KB) > mtime"
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "chosen": "/assets/downloads/content-downloads/weekly-operating-rhythm.pdf",
+      "dropped": [
+        "/assets/downloads/weekly-operating-rhythm.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(86KB) > mtime"
+    }
+  ]
+}

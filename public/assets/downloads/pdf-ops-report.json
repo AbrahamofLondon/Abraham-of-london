@@ -1,0 +1,24 @@
+{
+  "ranAt": "2026-03-02T13:52:50.036Z",
+  "platform": "win32 x64",
+  "node": "v20.20.0",
+  "quality": "premium",
+  "concurrency": 1,
+  "steps": [
+    {
+      "name": "Generate PDFs (unified)",
+      "ok": true,
+      "ms": 67430
+    },
+    {
+      "name": "Build registry (inventory-first)",
+      "ok": true,
+      "ms": 1023
+    },
+    {
+      "name": "Validate SSOT assets",
+      "ok": true,
+      "ms": 1322
+    }
+  ]
+}

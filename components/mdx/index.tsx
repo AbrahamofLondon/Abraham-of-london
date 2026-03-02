@@ -18,6 +18,13 @@ export { default as JsonLd } from "./JsonLd";
 export { default as ResourcesCTA } from "./ResourcesCTA";
 export { default as Caption } from "./Caption";
 
+// NEW PREMIUM COMPONENTS for Strategic Autonomy series
+export { default as Diagram } from "./Diagram";
+export { default as DataTable } from "./DataTable";
+export { default as Matrix } from "./Matrix";
+export { default as DocumentHeader } from "./DocumentHeader";
+export { default as DocumentFooter } from "./DocumentFooter";
+
 // Implementation of the mdxComponents object for lib/mdx-components.ts
 import Badge from "./Badge";
 import Callout from "./Callout";
@@ -35,6 +42,13 @@ import JsonLd from "./JsonLd";
 import ResourcesCTA from "./ResourcesCTA";
 import Caption from "./Caption";
 
+// NEW PREMIUM IMPORTS
+import Diagram from "./Diagram";
+import DataTable from "./DataTable";
+import Matrix from "./Matrix";
+import DocumentHeader from "./DocumentHeader";
+import DocumentFooter from "./DocumentFooter";
+
 export const mdxComponents = {
   Badge,
   Callout,
@@ -51,6 +65,11 @@ export const mdxComponents = {
   JsonLd,
   ResourcesCTA,
   Caption,
+  Diagram,
+  DataTable,
+  Matrix,
+  DocumentHeader,
+  DocumentFooter,
   // Add global typography overrides if needed for the portfolio style
   hr: Rule,
 };

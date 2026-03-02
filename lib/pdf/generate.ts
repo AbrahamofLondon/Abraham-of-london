@@ -1,29 +1,41 @@
-import { spawn, execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+// scripts/pdf/generate-pdf-batch.ts
+import { spawn, execFileSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import os from "os";
 
-// -----------------------------------------------------------------------------
-// TYPES & EXPORTS
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   TYPES
+----------------------------------------------------------------------------- */
+
+export type PDFQuality = "draft" | "standard" | "premium" | "enterprise";
+export type LogLevel = "silent" | "error" | "warn" | "info" | "debug";
 
 export interface PDFGenerationConfig {
-  timeout?: number;
+  timeoutMs?: number; // per task
   retries?: number;
-  retryDelay?: number;
-  quality?: 'draft' | 'standard' | 'premium' | 'enterprise';
+  retryDelayMs?: number;
+
+  quality?: PDFQuality;
+
   outputDir?: string;
   enterpriseOutputDir?: string;
-  logLevel?: 'silent' | 'error' | 'warn' | 'info' | 'debug';
+
+  logLevel?: LogLevel;
+
+  /**
+   * When true, skips Ghostscript even if installed.
+   * Useful for CI where GS isn't present.
+   */
+  disableOptimization?: boolean;
 }
 
 export interface GenerationResult {
   name: string;
   success: boolean;
-  duration: number;
-  size?: number;
+  durationMs: number;
   error?: string;
-  timestamp: string;
+  timestampISO: string;
 }
 
 export interface PDFFile {
@@ -36,324 +48,449 @@ export interface OptimizationResult {
   optimized: boolean;
   originalSize: number;
   newSize: number;
-  qualityGain?: number;
-  method: string;
+  qualityGainPct?: number;
+  method: "ghostscript" | "skipped" | "original_better" | "error";
 }
 
-/**
- * EXPORTED CONSTANTS (Fixes build worker error 10:3)
- */
-export const DEFAULT_CONFIG: PDFGenerationConfig = {
-  timeout: 10 * 60 * 1000, // 10 minutes
+/* -----------------------------------------------------------------------------
+   DEFAULT CONFIG (SSOT)
+----------------------------------------------------------------------------- */
+
+export const DEFAULT_CONFIG: Required<PDFGenerationConfig> = {
+  timeoutMs: 10 * 60 * 1000,
   retries: 3,
-  retryDelay: 2000,
-  quality: 'premium',
-  outputDir: path.join(process.cwd(), 'public/assets/downloads'),
-  enterpriseOutputDir: path.join(process.cwd(), 'public/assets/downloads/enterprise'),
-  logLevel: 'info'
+  retryDelayMs: 2000,
+  quality: "premium",
+  outputDir: path.join(process.cwd(), "public/assets/downloads"),
+  enterpriseOutputDir: path.join(process.cwd(), "public/assets/downloads/enterprise"),
+  logLevel: "info",
+  disableOptimization: false,
 };
 
-// -----------------------------------------------------------------------------
-// INSTITUTIONAL LOGGER
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   LOGGER
+----------------------------------------------------------------------------- */
+
+const LEVELS: readonly LogLevel[] = ["silent", "error", "warn", "info", "debug"];
 
 class Logger {
-  static colors = {
-    reset: '\x1b[0m',
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    blue: '\x1b[34m',
-    cyan: '\x1b[36m',
-    gray: '\x1b[90m'
-  };
+  private cfg: Required<PDFGenerationConfig>;
 
-  private static config: PDFGenerationConfig = DEFAULT_CONFIG;
-
-  static setConfig(config: PDFGenerationConfig) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+  constructor(cfg: Required<PDFGenerationConfig>) {
+    this.cfg = cfg;
   }
 
-  private static shouldLog(level: string): boolean {
-    const levels = ['silent', 'error', 'warn', 'info', 'debug'];
-    const currentLevel = levels.indexOf(this.config.logLevel || 'info');
-    const targetLevel = levels.indexOf(level);
-    return targetLevel <= currentLevel;
+  private shouldLog(level: LogLevel): boolean {
+    const current = LEVELS.indexOf(this.cfg.logLevel);
+    const target = LEVELS.indexOf(level);
+    return target <= current && current !== 0;
   }
 
-  private static formatTime(): string {
-    return new Date().toISOString().split('T')[1].split('.')[0];
+  private ts(): string {
+    const d = new Date();
+    // HH:mm:ss
+    const t = d.toISOString().split("T")[1];
+    return t ? t.split(".")[0] ?? "00:00:00" : "00:00:00";
   }
 
-  private static log(level: string, message: string, color: string = ''): void {
+  private out(level: LogLevel, msg: string): void {
     if (!this.shouldLog(level)) return;
-    const prefix = `[${this.formatTime()}] ${level.toUpperCase().padEnd(5)}`;
-    const formatted = color ? `${color}${message}${this.colors.reset}` : message;
-    
-    switch (level) {
-      case 'error': console.error(prefix, formatted); break;
-      case 'warn': console.warn(prefix, formatted); break;
-      default: console.log(prefix, formatted);
-    }
+
+    const prefix = `[${this.ts()}] ${level.toUpperCase().padEnd(5)}`;
+
+    if (level === "error") console.error(prefix, msg);
+    else if (level === "warn") console.warn(prefix, msg);
+    else console.log(prefix, msg);
   }
 
-  static info(message: string): void { this.log('info', message, this.colors.cyan); }
-  static success(message: string): void { this.log('info', message, this.colors.green); }
-  static warn(message: string): void { this.log('warn', message, this.colors.yellow); }
-  static error(message: string): void { this.log('error', message, this.colors.red); }
-  static debug(message: string): void { this.log('debug', message, this.colors.gray); }
-  static start(name: string): void { this.log('info', `▶️ Starting: ${name}`, this.colors.blue); }
-  static complete(name: string, dur?: number): void { 
-    this.log('info', `✅ Completed: ${name}${dur ? ` (${dur}ms)` : ''}`, this.colors.green); 
-  }
+  info(m: string) { this.out("info", m); }
+  warn(m: string) { this.out("warn", m); }
+  error(m: string) { this.out("error", m); }
+  debug(m: string) { this.out("debug", m); }
+
+  start(name: string) { this.out("info", `▶️  ${name}`); }
+  done(name: string, ms: number) { this.out("info", `✅ ${name} (${ms}ms)`); }
 }
 
-// -----------------------------------------------------------------------------
-// COMMAND RUNNER (Sovereign Execution)
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   HELPERS
+----------------------------------------------------------------------------- */
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function ensureDir(dir: string): void {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function listPdfFiles(dir: string): PDFFile[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.toLowerCase().endsWith(".pdf"))
+    .map((f) => ({ source: path.join(dir, f), target: path.join(dir, f) }));
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"] as const;
+  let size = bytes;
+  let i = 0;
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024;
+    i++;
+  }
+  return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+/* -----------------------------------------------------------------------------
+   COMMAND RUNNER (NO SHELL INJECTION)
+----------------------------------------------------------------------------- */
 
 export class CommandRunner {
-  private isWindows: boolean;
-  private npxCmd: string;
-  private config: PDFGenerationConfig;
+  private cfg: Required<PDFGenerationConfig>;
+  private log: Logger;
 
-  constructor(config: PDFGenerationConfig = DEFAULT_CONFIG) {
-    this.isWindows = os.platform() === 'win32';
-    this.npxCmd = this.isWindows ? 'npx.cmd' : 'npx';
-    this.config = { ...DEFAULT_CONFIG, ...config };
-    Logger.setConfig(this.config);
+  constructor(cfg: PDFGenerationConfig = DEFAULT_CONFIG) {
+    this.cfg = { ...DEFAULT_CONFIG, ...cfg };
+    this.log = new Logger(this.cfg);
   }
 
-  async runWithRetry(name: string, script: string, args: string[] = [], options: any = {}): Promise<any> {
-    const { timeout = this.config.timeout } = options;
-    let lastError: any;
-    
-    for (let attempt = 1; attempt <= (this.config.retries || 3); attempt++) {
-      try {
-        if (attempt > 1) {
-          Logger.warn(`Retry ${attempt}/${this.config.retries} for: ${name}`);
-          await new Promise(r => setTimeout(r, (this.config.retryDelay || 2000) * attempt));
-        }
-        return await this.runCommand(name, script, args, options);
-      } catch (error: any) {
-        lastError = error;
-        if (error.message.includes('ENOENT')) throw error;
-      }
-    }
-    throw new Error(`Failed after ${this.config.retries} attempts: ${lastError.message}`);
-  }
+  /**
+   * Runs a script:
+   * - .ts/.tsx => npx tsx <script>
+   * - .js      => node <script>
+   * - otherwise treated as a binary path
+   *
+   * This uses execFile/spawn with args array — no `shell: true`.
+   */
+  run(name: string, scriptPath: string, args: string[] = [], opts?: { cwd?: string; timeoutMs?: number }): Promise<{ code: 0; durationMs: number }> {
+    const cwd = opts?.cwd ?? process.cwd();
+    const timeoutMs = opts?.timeoutMs ?? this.cfg.timeoutMs;
 
-  async runCommand(name: string, script: string, args: string[] = [], options: any = {}): Promise<any> {
-    const { timeout = this.config.timeout, cwd = process.cwd() } = options;
-    const startTime = Date.now();
-    
-    let command = script;
-    let commandArgs = args;
+    const isWin = os.platform() === "win32";
+    const npx = isWin ? "npx.cmd" : "npx";
 
-    if (script.endsWith('.ts') || script.endsWith('.tsx')) {
-      command = this.npxCmd;
-      commandArgs = ['tsx', script, ...args];
-    } else if (script.endsWith('.js')) {
-      command = 'node';
-      commandArgs = [script, ...args];
+    const ext = path.extname(scriptPath).toLowerCase();
+    let cmd = scriptPath;
+    let cmdArgs: string[] = [...args];
+
+    if (ext === ".ts" || ext === ".tsx") {
+      cmd = npx;
+      cmdArgs = ["tsx", scriptPath, ...args];
+    } else if (ext === ".js" || ext === ".mjs" || ext === ".cjs") {
+      cmd = "node";
+      cmdArgs = [scriptPath, ...args];
     }
 
-    Logger.start(name);
-    
+    this.log.start(name);
+
+    const start = Date.now();
+
     return new Promise((resolve, reject) => {
-      const child = spawn(command, commandArgs, {
-        stdio: 'inherit',
-        shell: true,
+      const child = spawn(cmd, cmdArgs, {
         cwd,
-        env: { ...process.env, PDF_QUALITY: this.config.quality || 'premium' },
-        timeout
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          PDF_QUALITY: this.cfg.quality,
+        },
       });
 
-      child.on('close', (code) => {
-        const duration = Date.now() - startTime;
+      const killTimer =
+        timeoutMs > 0
+          ? setTimeout(() => {
+              try {
+                child.kill("SIGKILL");
+              } catch {
+                // ignore
+              }
+            }, timeoutMs)
+          : null;
+
+      child.on("error", (err) => {
+        if (killTimer) clearTimeout(killTimer);
+        reject(err);
+      });
+
+      child.on("close", (code) => {
+        if (killTimer) clearTimeout(killTimer);
+        const durationMs = Date.now() - start;
+
         if (code === 0) {
-          Logger.complete(name, duration);
-          resolve({ code, duration });
+          this.log.done(name, durationMs);
+          resolve({ code: 0, durationMs });
         } else {
-          Logger.error(`Process failed: ${name} (Code: ${code})`);
-          reject(new Error(`Exit code ${code}`));
+          const msg = `Process failed: ${name} (exit ${code ?? "null"})`;
+          this.log.error(msg);
+          reject(new Error(msg));
         }
       });
-
-      child.on('error', (err) => reject(err));
     });
   }
 
-  async checkDependencies(): Promise<void> {
-    Logger.info('Verifying Environment Dependencies...');
+  async runWithRetry(name: string, scriptPath: string, args: string[] = [], opts?: { cwd?: string; timeoutMs?: number }): Promise<{ durationMs: number }> {
+    let lastErr: unknown = null;
+
+    for (let attempt = 1; attempt <= this.cfg.retries; attempt++) {
+      try {
+        if (attempt > 1) {
+          this.log.warn(`Retry ${attempt}/${this.cfg.retries}: ${name}`);
+          await sleep(this.cfg.retryDelayMs * attempt);
+        }
+        const res = await this.run(name, scriptPath, args, opts);
+        return { durationMs: res.durationMs };
+      } catch (e) {
+        lastErr = e;
+        // if missing binary/script, don't retry meaninglessly
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes("ENOENT")) throw e;
+      }
+    }
+
+    const msg = lastErr instanceof Error ? lastErr.message : String(lastErr);
+    throw new Error(`Failed after ${this.cfg.retries} attempts: ${name} :: ${msg}`);
+  }
+
+  /**
+   * Hard dependency check: does `tsx` resolve?
+   * We do NOT auto-install in production scripts; that’s how projects rot.
+   */
+  checkDependencies(): void {
+    this.log.info("Verifying build tooling...");
     try {
-      execSync(`${this.npxCmd} tsx --version`, { stdio: 'ignore' });
-      Logger.success('✓ Core dependencies verified.');
+      execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", ["tsx", "--version"], {
+        stdio: "ignore",
+      });
+      this.log.info("✓ tsx available");
     } catch {
-      Logger.warn('! tsx missing. Attempting critical recovery...');
-      execSync('npm install tsx --no-save', { stdio: 'inherit' });
+      throw new Error("Missing dependency: tsx. Install it (dev dependency) and re-run.");
     }
   }
 }
 
-// -----------------------------------------------------------------------------
-// PDF QUALITY OPTIMIZER (Ghostscript Implementation)
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   PDF OPTIMIZER (GHOSTSCRIPT)
+----------------------------------------------------------------------------- */
 
 export class PDFQualityOptimizer {
-  private isWindows: boolean;
-  private gsAvailable: boolean;
-  private config: PDFGenerationConfig;
+  private cfg: Required<PDFGenerationConfig>;
+  private log: Logger;
+  private gsCmd: string | null;
 
-  constructor(config: PDFGenerationConfig = DEFAULT_CONFIG) {
-    this.isWindows = os.platform() === 'win32';
-    this.config = config;
-    this.gsAvailable = this.checkGS();
+  constructor(cfg: PDFGenerationConfig = DEFAULT_CONFIG) {
+    this.cfg = { ...DEFAULT_CONFIG, ...cfg };
+    this.log = new Logger(this.cfg);
+    this.gsCmd = this.cfg.disableOptimization ? null : this.detectGhostscript();
   }
 
-  private checkGS(): boolean {
-    try {
-      const cmd = this.isWindows ? 'gswin64c --version' : 'gs --version';
-      execSync(cmd, { stdio: 'ignore' });
-      return true;
-    } catch {
-      Logger.warn('Ghostscript not found. Skipping advanced compression.');
-      return false;
+  private detectGhostscript(): string | null {
+    const isWin = os.platform() === "win32";
+    const candidates = isWin ? ["gswin64c", "gswin32c"] : ["gs"];
+
+    for (const c of candidates) {
+      try {
+        execFileSync(c, ["--version"], { stdio: "ignore" });
+        this.log.info(`✓ Ghostscript detected: ${c}`);
+        return c;
+      } catch {
+        // continue
+      }
     }
+
+    this.log.warn("Ghostscript not found. Optimization will be skipped.");
+    return null;
   }
 
   async optimizePDF(source: string, target: string): Promise<OptimizationResult> {
     const originalSize = fs.statSync(source).size;
-    const tempPath = `${target}.tmp`;
 
-    if (!this.gsAvailable || originalSize < 100 * 1024) {
-      return { success: true, optimized: false, originalSize, newSize: originalSize, method: 'skipped' };
+    // Skip tiny files or missing GS
+    if (!this.gsCmd || originalSize < 100 * 1024) {
+      return { success: true, optimized: false, originalSize, newSize: originalSize, method: "skipped" };
     }
 
-    try {
-      const gsCmd = this.isWindows ? 'gswin64c' : 'gs';
-      const qualityMap = {
-        draft: '/screen',
-        standard: '/ebook',
-        premium: '/printer',
-        enterprise: '/prepress'
-      };
+    const tmp = `${target}.tmp`;
 
+    const qualityMap: Record<PDFQuality, string> = {
+      draft: "/screen",
+      standard: "/ebook",
+      premium: "/printer",
+      enterprise: "/prepress",
+    };
+
+    const pdfSettings = qualityMap[this.cfg.quality];
+
+    try {
+      // IMPORTANT: args array, no shell.
       const args = [
-        '-q -dNOPAUSE -dBATCH -dSAFER',
-        '-sDEVICE=pdfwrite',
-        `-dPDFSETTINGS=${qualityMap[this.config.quality || 'premium']}`,
-        `-sOutputFile="${tempPath}"`,
-        `"${source}"`
+        "-q",
+        "-dNOPAUSE",
+        "-dBATCH",
+        "-dSAFER",
+        "-sDEVICE=pdfwrite",
+        `-dPDFSETTINGS=${pdfSettings}`,
+        `-sOutputFile=${tmp}`,
+        source,
       ];
 
-      execSync(`${gsCmd} ${args.join(' ')}`, { stdio: 'pipe' });
+      execFileSync(this.gsCmd, args, { stdio: "ignore" });
 
-      const newSize = fs.statSync(tempPath).size;
-      if (newSize < originalSize) {
-        fs.renameSync(tempPath, target);
-        return { 
-          success: true, 
-          optimized: true, 
-          originalSize, 
-          newSize, 
-          qualityGain: ((originalSize - newSize) / originalSize) * 100,
-          method: 'ghostscript' 
-        };
+      const newSize = fs.statSync(tmp).size;
+
+      if (newSize > 0 && newSize < originalSize) {
+        fs.renameSync(tmp, target);
+        const gain = ((originalSize - newSize) / originalSize) * 100;
+        return { success: true, optimized: true, originalSize, newSize, qualityGainPct: gain, method: "ghostscript" };
       }
-      fs.unlinkSync(tempPath);
-      return { success: true, optimized: false, originalSize, newSize: originalSize, method: 'original_better' };
-    } catch (e) {
-      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-      return { success: false, optimized: false, originalSize, newSize: originalSize, method: 'error' };
+
+      if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
+      return { success: true, optimized: false, originalSize, newSize: originalSize, method: "original_better" };
+    } catch {
+      if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
+      return { success: false, optimized: false, originalSize, newSize: originalSize, method: "error" };
     }
   }
 
-  async optimizeBatch(files: PDFFile[]) {
-    Logger.info(`⚖️ Optimizing ${files.length} assets...`);
-    let savings = 0;
-    for (const file of files) {
-      const res = await this.optimizePDF(file.source, file.target);
-      if (res.optimized) savings += (res.originalSize - res.newSize);
+  async optimizeBatch(files: PDFFile[]): Promise<{ optimized: number; savedBytes: number }> {
+    if (!files.length) return { optimized: 0, savedBytes: 0 };
+
+    this.log.info(`Optimizing ${files.length} PDFs...`);
+
+    let optimized = 0;
+    let savedBytes = 0;
+
+    for (const f of files) {
+      const res = await this.optimizePDF(f.source, f.target);
+      if (res.optimized) {
+        optimized++;
+        savedBytes += res.originalSize - res.newSize;
+        this.log.debug(`Optimized: ${path.basename(f.target)} (-${formatBytes(res.originalSize - res.newSize)})`);
+      }
     }
-    Logger.success(`Optimization complete. Total saved: ${(savings / 1024 / 1024).toFixed(2)} MB`);
+
+    this.log.info(`Optimization complete: ${optimized}/${files.length} optimized, saved ${formatBytes(savedBytes)}`);
+    return { optimized, savedBytes };
   }
 }
 
-// -----------------------------------------------------------------------------
-// MAIN EXECUTION LOGIC
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   MAIN: BATCH GENERATION
+----------------------------------------------------------------------------- */
 
-export async function generatePDFBatch(config: PDFGenerationConfig = DEFAULT_CONFIG) {
-  const startTime = Date.now();
+export type BatchTask = {
+  name: string;
+  script: string; // relative to repo root OR absolute
+  args?: string[];
+};
+
+function resolveScript(p: string): string {
+  const abs = path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+  return abs;
+}
+
+function fileExists(p: string): boolean {
+  try {
+    return fs.existsSync(p);
+  } catch {
+    return false;
+  }
+}
+
+export async function generatePDFBatch(cfg: PDFGenerationConfig = DEFAULT_CONFIG) {
+  const config: Required<PDFGenerationConfig> = { ...DEFAULT_CONFIG, ...cfg };
+  const log = new Logger(config);
+
+  const start = Date.now();
   const runner = new CommandRunner(config);
   const optimizer = new PDFQualityOptimizer(config);
-  const results: GenerationResult[] = [];
 
-  const out = config.outputDir || DEFAULT_CONFIG.outputDir!;
-  if (!fs.existsSync(out)) fs.mkdirSync(out, { recursive: true });
+  ensureDir(config.outputDir);
+  ensureDir(config.enterpriseOutputDir);
 
-  await runner.checkDependencies();
+  runner.checkDependencies();
 
-  const taskList = [
-    { name: 'Canvas (A4)', script: 'scripts/generate-legacy-canvas.ts', args: ['A4'] },
-    { name: 'Canvas (Letter)', script: 'scripts/generate-legacy-canvas.ts', args: ['Letter'] },
-    { name: 'Canvas (A3)', script: 'scripts/generate-legacy-canvas.ts', args: ['A3'] }
+  // Expand this task list as needed.
+  const tasks: BatchTask[] = [
+    { name: "Legacy Canvas (A4)", script: "scripts/generate-legacy-canvas.ts", args: ["A4"] },
+    { name: "Legacy Canvas (Letter)", script: "scripts/generate-legacy-canvas.ts", args: ["Letter"] },
+    { name: "Legacy Canvas (A3)", script: "scripts/generate-legacy-canvas.ts", args: ["A3"] },
   ];
 
-  for (const task of taskList) {
-    const fullScriptPath = path.join(process.cwd(), task.script);
-    if (!fs.existsSync(fullScriptPath)) continue;
+  const results: GenerationResult[] = [];
+
+  for (const t of tasks) {
+    const scriptPath = resolveScript(t.script);
+
+    if (!fileExists(scriptPath)) {
+      log.warn(`Skipping missing script: ${t.script}`);
+      results.push({
+        name: t.name,
+        success: false,
+        durationMs: 0,
+        error: `Missing script: ${t.script}`,
+        timestampISO: new Date().toISOString(),
+      });
+      continue;
+    }
 
     try {
-      const res = await runner.runWithRetry(task.name, fullScriptPath, task.args);
+      const res = await runner.runWithRetry(t.name, scriptPath, t.args ?? []);
       results.push({
-        name: task.name,
+        name: t.name,
         success: true,
-        duration: res.duration,
-        timestamp: new Date().toISOString()
+        durationMs: res.durationMs,
+        timestampISO: new Date().toISOString(),
       });
-    } catch (e: any) {
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
       results.push({
-        name: task.name,
+        name: t.name,
         success: false,
-        duration: 0,
-        error: e.message,
-        timestamp: new Date().toISOString()
+        durationMs: 0,
+        error: msg,
+        timestampISO: new Date().toISOString(),
       });
     }
   }
 
-  const pdfFiles = fs.readdirSync(out)
-    .filter(f => f.endsWith('.pdf'))
-    .map(f => ({ source: path.join(out, f), target: path.join(out, f) }));
+  // Optimize outputDir PDFs (you can also include enterprise dir)
+  const pdfs = listPdfFiles(config.outputDir);
+  await optimizer.optimizeBatch(pdfs);
 
-  await optimizer.optimizeBatch(pdfFiles);
+  const totalMs = Date.now() - start;
 
   return {
-    success: results.every(r => r.success),
+    success: results.every((r) => r.success),
     results,
     summary: {
       total: results.length,
-      successful: results.filter(r => r.success).length,
-      failed: results.filter(r => !r.success).length,
-      totalDuration: Date.now() - startTime
-    }
+      successful: results.filter((r) => r.success).length,
+      failed: results.filter((r) => !r.success).length,
+      totalDurationMs: totalMs,
+    },
   };
 }
 
-export async function verifyGeneratedPDFs(config: PDFGenerationConfig = DEFAULT_CONFIG) {
-  const out = config.outputDir || DEFAULT_CONFIG.outputDir!;
-  const files = fs.readdirSync(out).filter(f => f.endsWith('.pdf'));
-  
-  return files.map(f => {
-    const stats = fs.statSync(path.join(out, f));
-    return {
-      filename: f,
-      exists: true,
-      sizeKB: (stats.size / 1024).toFixed(1),
-      isValid: stats.size > 5000,
-      path: path.join(out, f)
-    };
-  });
+export async function verifyGeneratedPDFs(cfg: PDFGenerationConfig = DEFAULT_CONFIG) {
+  const config: Required<PDFGenerationConfig> = { ...DEFAULT_CONFIG, ...cfg };
+  const dir = config.outputDir;
+
+  if (!fs.existsSync(dir)) return [];
+
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.toLowerCase().endsWith(".pdf"))
+    .map((f) => {
+      const full = path.join(dir, f);
+      const st = fs.statSync(full);
+      return {
+        filename: f,
+        exists: true,
+        sizeKB: Number((st.size / 1024).toFixed(1)),
+        isValid: st.size > 5000,
+        path: full,
+      };
+    });
 }

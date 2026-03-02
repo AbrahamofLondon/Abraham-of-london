@@ -1,14 +1,14 @@
 // app/admin/audit/page.tsx
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma.server";
 import { Shield, Clock, User, AlertCircle, Database } from "lucide-react";
 
 export default async function AuditDashboard() {
-  // Use getPrisma instead of direct prisma import
-  const prisma = getPrisma();
-  
   try {
-    // Check if we have a real Prisma client or a stub
-    const isPrismaAvailable = prisma && prisma.systemAuditLog && typeof prisma.systemAuditLog.findMany === "function";
+    // ✅ Await the prisma client FIRST
+    const prisma = await getPrisma();
+    
+    // Now check if we have a real Prisma client or a stub
+    const isPrismaAvailable = prisma && (prisma as any).systemAuditLog && typeof (prisma as any).systemAuditLog.findMany === "function";
     
     if (!isPrismaAvailable) {
       return (
@@ -40,7 +40,7 @@ export default async function AuditDashboard() {
     }
 
     // If we get here, Prisma is available
-    const logs = await prisma.systemAuditLog.findMany({
+    const logs = await (prisma as any).systemAuditLog.findMany({
       take: 50,
       orderBy: { createdAt: 'desc' },
     });

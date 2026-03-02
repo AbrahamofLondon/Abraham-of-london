@@ -1,35 +1,69 @@
-/* lib/resources/strategic-frameworks.static.ts */
+/* lib/resources/strategic-frameworks.static.ts — SSOT STATIC (BUILD-SAFE)
+   - No prisma, no fs, no node APIs
+   - Exports Framework + helpers + requiredTier (used by server layer)
+*/
 
-export type FrameworkTier = "Board" | "Founder" | "Household";
-export type FrameworkAccent = "gold" | "emerald" | "blue" | "rose" | "indigo";
-
-export type Framework = {
-  key: string;
-  slug: string;
-  title: string;
-  oneLiner: string;
-  tier: FrameworkTier[];
-  tag: string;
-  canonRoot: string;
-  executiveSummary: string[];
-  useWhen: string[];
-  inputs: string[];
-  outputs: string[];
-  operatingLogic: Array<{ title: string; body: string }>;
-  applicationPlaybook: Array<{ step: string; detail: string; deliverable: string }>;
-  metrics: Array<{ metric: string; whyItMatters: string; reviewCadence: string }>;
-  boardQuestions: string[];
-  failureModes: string[];
-  whatToDoNext: string[];
-  artifactHref?: string;
-  accent: FrameworkAccent;
-};
+import type { AccessTier } from "@/lib/access/tier-policy";
 
 export const LIBRARY_HREF = "/resources/strategic-frameworks";
 
-export const FRAMEWORKS: Framework[] = [
+/* -------------------------------------------------------------------------- */
+/* TYPES                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export interface OperatingLogic {
+  title: string;
+  body: string;
+}
+
+export interface PlaybookStep {
+  step: number;
+  detail: string;
+  deliverable: string;
+}
+
+export interface Metric {
+  metric: string;
+  whyItMatters: string;
+  reviewCadence: string;
+}
+
+/**
+ * NOTE:
+ * - `tier` here is brand-language labels (Founder/Board/etc).
+ * - Access policy maps these labels to SSOT AccessTier for gating.
+ */
+export interface Framework {
+  slug: string;
+  title: string;
+  oneLiner: string;
+
+  /** Brand-language labels (UI + policy input) */
+  tier: string[];
+
+  tag?: string;
+  accent?: "gold" | "emerald" | "blue" | "rose" | "indigo";
+  canonRoot?: string;
+
+  executiveSummary?: string[];
+  operatingLogic?: OperatingLogic[];
+  applicationPlaybook?: PlaybookStep[];
+  metrics?: Metric[];
+  boardQuestions?: string[];
+  failureModes?: string[];
+  whatToDoNext?: string[];
+
+  artifactHref?: string;
+
+  [k: string]: unknown;
+}
+
+/* -------------------------------------------------------------------------- */
+/* REGISTRY                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const FOUNDATION_TRACK: Framework[] = [
   {
-    key: "S-001",
     slug: "sovereignty-index",
     title: "The Sovereignty Index",
     oneLiner: "A diagnostic tool for measuring institutional autonomy against external volatility.",
@@ -38,46 +72,63 @@ export const FRAMEWORKS: Framework[] = [
     accent: "gold",
     canonRoot: "The Architecture of Human Purpose",
     executiveSummary: [
-      "Sovereignty is not isolation; it is the strategic management of dependencies.",
-      "This framework quantifies your agency relative to external market nodes."
+      "Sovereignty is the ratio of internal agency to external dependency.",
+      "This index benchmarks your 'Survival Horizon'—the time your institution can operate if external nodes are severed.",
     ],
-    useWhen: [
-      "Assessing vendor concentration risk",
-      "During institutional restructuring",
-      "Evaluating geopolitical exposure"
-    ],
-    inputs: ["Vendor Audit", "Critical Infrastructure Map", "Capital Runway"],
-    outputs: ["Sovereignty Ratio", "Dependency Hot-Map", "Redundancy Playbook"],
     operatingLogic: [
-      { 
-        title: "The Dependency Axial", 
-        body: "Calculates the probability of institutional halt if any single node is severed." 
-      }
+      {
+        title: "The Dependency Axial",
+        body: "Identify critical nodes (Vendors, Talent, Capital) that lack immediate redundancy.",
+      },
     ],
     applicationPlaybook: [
-      { step: "01", detail: "Identify the top 5 critical external nodes.", deliverable: "Node Inventory" },
-      { step: "02", detail: "Simulate a 72-hour node blackout.", deliverable: "Impact Report" }
+      { step: 1, detail: "Map primary external dependencies.", deliverable: "Dependency Map" },
+      { step: 2, detail: "Calculate cost of node failure.", deliverable: "Risk Assessment" },
     ],
-    metrics: [
-      { metric: "Autonomy Ratio", whyItMatters: "Indicates time-to-halt.", reviewCadence: "Monthly" }
-    ],
-    boardQuestions: ["Is our agency borrowed or owned?"],
-    failureModes: ["Treating digital services as utilities rather than strategic vulnerabilities."],
-    whatToDoNext: ["Begin a Dark Node Audit with the CTO and Legal."],
-    artifactHref: "/artifacts/sovereignty-index-v1.pdf"
-  }
+    metrics: [{ metric: "Autonomy Ratio", whyItMatters: "Measures independence.", reviewCadence: "Quarterly" }],
+    boardQuestions: ["If our primary cloud provider pivots, do we exist?"],
+    failureModes: ["Treating sovereignty as isolationism rather than resilience."],
+    whatToDoNext: ["Execute a 'Dark Node' simulation with your executive team."],
+    artifactHref: "/artifacts/sovereignty-index-v1.pdf",
+  },
 ];
 
-export function getAllFrameworks(): Framework[] {
-  return FRAMEWORKS;
+export const FRAMEWORKS: readonly Framework[] = FOUNDATION_TRACK;
+
+/* -------------------------------------------------------------------------- */
+/* ACCESS POLICY (STATIC, DETERMINISTIC)                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Maps brand-language labels -> SSOT AccessTier.
+ * Deterministic, build-safe, and shared by server & API layers.
+ */
+export function requiredTier(fw: Framework): AccessTier {
+  const labels = (fw?.tier ?? []).map((x) => String(x).toLowerCase().trim());
+  const set = new Set(labels);
+
+  if (set.has("owner")) return "owner";
+  if (set.has("architect") || set.has("founder") || set.has("board")) return "architect";
+  if (set.has("legacy")) return "legacy";
+  if (set.has("client")) return "client";
+  if (set.has("inner-circle") || set.has("inner circle")) return "inner-circle";
+  if (set.has("member")) return "member";
+  return "public";
 }
 
-export function getFrameworkBySlug(slug: string): Framework | null {
-  const s = String(slug || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
-  if (!s) return null;
-  return FRAMEWORKS.find((f) => f.slug === s) ?? null;
+/* -------------------------------------------------------------------------- */
+/* PURE HELPERS                                                                */
+/* -------------------------------------------------------------------------- */
+
+export function getAllFrameworks(): Framework[] {
+  return [...FOUNDATION_TRACK];
 }
 
 export function getAllFrameworkSlugs(): string[] {
-  return FRAMEWORKS.map((f) => f.slug);
+  return FOUNDATION_TRACK.map((f) => f.slug);
+}
+
+export function getFrameworkBySlug(slug: string): Framework | undefined {
+  const s = String(slug || "").trim();
+  return FOUNDATION_TRACK.find((f) => f.slug === s);
 }

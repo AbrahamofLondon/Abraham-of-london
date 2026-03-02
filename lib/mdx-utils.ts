@@ -1,5 +1,5 @@
 // lib/mdx-utils.ts — AUTHORITATIVE CONTENT PROXY
-import * as Generated from "contentlayer/generated";
+import * as Generated from "@/lib/contentlayer";
 
 // 1. STRATEGIC TYPE EXTRACTION & FALLBACKS
 const allPosts = Generated.allPosts || [];

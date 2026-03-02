@@ -13,7 +13,7 @@ import {
   allPrints,
   allResources,
   allStrategies,
-} from "contentlayer/generated";
+} from "@/lib/contentlayer";
 
 // Import from shared utilities
 import { 

@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import Layout from "@/components/Layout";
-import { hasInnerCircleAccess } from "@/lib/inner-circle/access.client";
+import { checkAccess } from "@/lib/inner-circle/access.client"; // ✅ Fix import
 
 // ------------------------------
 // Client-only Motion wrappers
@@ -59,11 +59,18 @@ const StrategyRoomPage: NextPage<Props> = () => {
 
   React.useEffect(() => {
     setMounted(true);
-    try {
-      setIcAccess(hasInnerCircleAccess());
-    } catch {
-      setIcAccess(false);
-    }
+    
+    // ✅ Fix: Use checkAccess correctly
+    const checkInnerCircleAccess = async () => {
+      try {
+        const access = await checkAccess();
+        setIcAccess(access.hasAccess);
+      } catch {
+        setIcAccess(false);
+      }
+    };
+    
+    checkInnerCircleAccess();
   }, []);
 
   // SSR-safe skeleton (prevents hydration weirdness)

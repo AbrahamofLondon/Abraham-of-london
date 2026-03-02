@@ -2,11 +2,13 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import { useSession } from "next-auth/react"; // ✅ Add useSession
 
 // ✅ REMOVED: next-mdx-remote imports (the source of your bundle bloat/errors)
 // ✅ ADDED: Your resilient Contentlayer2 renderer
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import Layout from "@/components/Layout";
+import AccessGate from "@/components/AccessGate"; // ✅ Add AccessGate
 
 import {
   getAllCombinedDocs,
@@ -16,6 +18,8 @@ import {
   isPublished,
 } from "@/lib/content/server";
 import { getDocKind, sanitizeData } from "@/lib/content/shared";
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers"; // ✅ Add SSOT imports
+import type { AccessTier } from "@/lib/access/tiers";
 
 // -----------------------------
 // Routing Guardrails (Institutional Standard)
@@ -49,9 +53,19 @@ interface Props {
     bodyCode: string; // ✅ The pre-compiled code from Contentlayer
   } | null;
   canonicalUrl: string;
+  requiredTier: AccessTier; // ✅ Add required tier to props
 }
 
-const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl }) => {
+const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }) => {
+  const { data: session, status } = useSession(); // ✅ Add useSession
+
+  // ✅ Normalize at render boundary
+  const required = tiers.normalize(requiredTier);
+  const user = tiers.normalize(session?.user?.tier ?? "public");
+
+  const needsAuth = required !== "public";
+  const canAccess = tiers.hasAccess(user, required);
+
   if (!doc) {
     return (
       <Layout title="404 | Abraham of London" description="Content not found" canonicalUrl={canonicalUrl}>
@@ -60,6 +74,31 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl }) => {
             <h1 className="aol-editorial text-4xl mb-4">404</h1>
             <p className="aol-micro text-white/30 uppercase tracking-widest">Asset Not Found</p>
           </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (status === "loading") {
+    return (
+      <Layout title={doc.title} description={doc.excerpt} canonicalUrl={canonicalUrl}>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (needsAuth && (!session?.user || !canAccess)) {
+    return (
+      <Layout title={doc.title} description={doc.excerpt} canonicalUrl={canonicalUrl}>
+        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+          <AccessGate
+            title={doc.title}
+            requiredTier={required}
+            message="This content requires appropriate clearance."
+            onGoToJoin={() => window.location.href = "/inner-circle"}
+          />
         </div>
       </Layout>
     );
@@ -74,7 +113,7 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl }) => {
       <article className="relative min-h-screen bg-black pt-24 pb-32">
         <header className="mx-auto max-w-3xl px-6 text-center mb-16 animate-aolFadeUp">
           <div className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60 border border-amber-500/20 px-4 py-1.5 rounded-full">
-            {doc.kind} // Protocol v2.6
+            {doc.kind} // {required === "public" ? "Public" : required}
           </div>
 
           <h1 className="aol-editorial text-5xl md:text-7xl text-white tracking-tight mb-8">
@@ -85,6 +124,12 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl }) => {
             <span>{doc.date ?? "—"}</span>
             <span className="h-1 w-1 bg-white/20 rounded-full" />
             <span>{doc.readTime || "5 MIN READ"}</span>
+            {required !== "public" && (
+              <>
+                <span className="h-1 w-1 bg-white/20 rounded-full" />
+                <span className="text-amber-500/60">{required}</span>
+              </>
+            )}
           </div>
         </header>
 
@@ -129,6 +174,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true, revalidate: 60 };
   }
 
+  // ✅ Normalize required tier at data boundary
+  const requiredTier = tiers.normalize(requiredTierFromDoc(rawDoc));
+
   // ✅ Optimized: Sanitizing only what is necessary for the client
   const doc = sanitizeData({
     title: rawDoc.title || "Untitled",
@@ -143,6 +191,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: {
       doc,
       canonicalUrl,
+      requiredTier, // ✅ Pass to props
     },
     revalidate: 3600,
   };

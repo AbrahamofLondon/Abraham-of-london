@@ -1,184 +1,228 @@
-/* components/downloads/SurrenderAssetsLanding.tsx - FINAL FIX */
+/* components/downloads/SurrenderAssetsLanding.tsx — SSOT SAFE (PRESENTATIONAL, PROP-DRIVEN)
+   - Never renders empty silently: shows deterministic diagnostics if assets are missing.
+   - Accepts pre-grouped props, but can derive grouped+stats from `assets` if caller passes only assets.
+   - No registry imports here (presentational only).
+*/
+import * as React from "react";
 import { safeArraySlice } from "@/lib/utils/safe";
-import React from 'react';
-import { getAllPDFItems } from "@/lib/pdf/registry";
-import type { PDFItem, PDFType } from "@/lib/pdf/registry";
-import { Shield, Download, FileText, Users, Zap, Award } from 'lucide-react';
+import {
+  Download as DownloadIcon,
+  FileText,
+  Shield,
+  Users,
+  Zap,
+  Award,
+  Sparkles,
+  Lock,
+  ChevronRight,
+} from "lucide-react";
 
-interface AssetCardProps {
-  asset: PDFItem;
-  index: number;
+type AssetTier = string;
+
+export type SurrenderAsset = {
+  id: string;
+  title: string;
+
+  type?: string; // "worksheet" | "assessment" | "tool" | "framework" | ...
+  tier?: AssetTier; // "public" | "member" | "inner-circle" | etc.
+  outputPath?: string; // SSOT href for downloads (public-relative)
+
+  description?: string;
+  excerpt?: string;
+  tags?: string[];
+  category?: string;
+
+  format?: string;
+  formats?: string[];
+
+  isInteractive?: boolean;
+  isFillable?: boolean;
+  requiresAuth?: boolean;
+
+  version?: string;
+  author?: string;
+  priority?: number;
+
+  fileSizeHuman?: string; // optional UI helper
+};
+
+type GroupKey = "worksheets" | "assessments" | "tools" | "other";
+
+export type SurrenderAssetsLandingProps = {
+  assets: SurrenderAsset[];
+
+  // Optional — caller may pre-group.
+  grouped?: Record<GroupKey, SurrenderAsset[]>;
+
+  // Optional — caller may pre-compute.
+  stats?: {
+    total: number;
+    interactive: number;
+    fillable: number;
+    public: number;
+  };
+};
+
+function norm(input: unknown) {
+  return String(input ?? "")
+    .replace(/\u00a0/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
-const SurrenderAssetsLanding: React.FC = () => {
-  // Get all PDF items and filter by relevant types
-  const allItems = getAllPDFItems({ includeMissing: false });
-  
-  // We cast the strings to PDFType to satisfy the overlap check
-  const surrenderAssets = allItems.filter(asset => 
-    asset.type && (['worksheet', 'assessment', 'tool', 'framework'] as PDFType[]).includes(asset.type)
-  );
+function safeStringArray(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input.map((x) => String(x ?? "").trim()).filter(Boolean);
+}
 
-  const categories = [
-    {
-      title: 'Worksheets & Templates',
-      description: 'Interactive tools for daily practice',
-      icon: <FileText className="w-6 h-6" />,
-      assets: surrenderAssets.filter(a => a.type === ('worksheet' as PDFType))
-    },
-    {
-      title: 'Assessments & Diagnostics',
-      description: 'Measure your surrender orientation',
-      icon: <Shield className="w-6 h-6" />,
-      assets: surrenderAssets.filter(a => a.type === ('assessment' as PDFType))
-    },
-    {
-      title: 'Tools & Frameworks',
-      description: 'Decision-making frameworks',
-      icon: <Zap className="w-6 h-6" />,
-      assets: surrenderAssets.filter(a => a.type === ('tool' as PDFType) || a.type === ('framework' as PDFType))
-    }
-  ];
+function hrefFromAsset(asset: SurrenderAsset): string {
+  const href = String(asset.outputPath || "").trim();
+  if (!href) return "#";
+  return href.startsWith("/") ? href : `/${href.replace(/^\/+/, "")}`;
+}
 
-  const AssetCard: React.FC<AssetCardProps> = ({ asset, index }) => (
-    <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-xl p-6 hover:border-amber-500/30 transition-all group hover:scale-[1.02]">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-            {index % 4 === 0 && <FileText className="w-5 h-5" />}
-            {index % 4 === 1 && <Shield className="w-5 h-5" />}
-            {index % 4 === 2 && <Zap className="w-5 h-5" />}
-            {index % 4 === 3 && <Users className="w-5 h-5" />}
-          </div>
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-500/70">
-            {asset.type}
-          </span>
-        </div>
-        <div className="text-xs font-mono text-gray-500">
-          {asset.fileSizeHuman || 'PDF'}
-        </div>
-      </div>
-      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition">
-        {asset.title}
-      </h3>
-      <p className="text-sm text-gray-400 mb-4">
-        {asset.description}
-      </p>
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          {(safeArraySlice(asset.tags || [], 0, 2) as string[]).map((tag) => (
-            <span key={tag} className="text-xs px-2 py-1 rounded bg-white/5 text-gray-400">
-              {tag}
-            </span>
-          ))}
-        </div>
-        <a
-          href={asset.fileUrl}
-          download
-          className="flex items-center gap-2 text-sm text-amber-500 hover:text-amber-400 font-medium"
-        >
-          <Download className="w-4 h-4" />
-          Download
-        </a>
-      </div>
-    </div>
-  );
+function tierBadge(tier: unknown) {
+  const t = norm(tier);
+  if (!t || t === "public") {
+    return {
+      label: "Public",
+      Icon: Sparkles,
+      cls: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200",
+    };
+  }
+  return {
+    label: t.replace(/-/g, " "),
+    Icon: Lock,
+    cls: "border-amber-500/25 bg-amber-500/10 text-amber-200",
+  };
+}
+
+function typeBadge(type: unknown) {
+  const t = norm(type);
+  if (t === "worksheet") return { label: "Worksheet", Icon: FileText, cls: "border-amber-500/25 bg-amber-500/10 text-amber-200" };
+  if (t === "assessment") return { label: "Assessment", Icon: Shield, cls: "border-sky-500/25 bg-sky-500/10 text-sky-200" };
+  if (t === "tool") return { label: "Tool", Icon: Zap, cls: "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" };
+  if (t === "framework") return { label: "Framework", Icon: Users, cls: "border-indigo-500/25 bg-indigo-500/10 text-indigo-200" };
+  return { label: (t || "PDF").toUpperCase(), Icon: FileText, cls: "border-white/10 bg-white/[0.03] text-white/70" };
+}
+
+function groupAssets(assets: SurrenderAsset[]): Record<GroupKey, SurrenderAsset[]> {
+  const out: Record<GroupKey, SurrenderAsset[]> = {
+    worksheets: [],
+    assessments: [],
+    tools: [],
+    other: [],
+  };
+
+  for (const a of assets) {
+    const t = norm(a.type);
+    if (t === "worksheet") out.worksheets.push(a);
+    else if (t === "assessment") out.assessments.push(a);
+    else if (t === "tool" || t === "framework") out.tools.push(a);
+    else out.other.push(a);
+  }
+
+  return out;
+}
+
+function computeStats(assets: SurrenderAsset[]) {
+  const total = assets.length;
+  const interactive = assets.filter((a) => Boolean(a.isInteractive)).length;
+  const fillable = assets.filter((a) => Boolean(a.isFillable)).length;
+  const pub = assets.filter((a) => norm(a.tier) === "public" || !norm(a.tier)).length;
+
+  return { total, interactive, fillable, public: pub };
+}
+
+type AssetCardProps = {
+  asset: SurrenderAsset;
+  index: number;
+};
+
+const AssetCard: React.FC<AssetCardProps> = ({ asset, index }) => {
+  const href = hrefFromAsset(asset);
+
+  const tb = typeBadge(asset.type);
+  const rb = tierBadge(asset.tier);
+
+  const TypeIcon = tb.Icon;
+  const TierIcon = rb.Icon;
+
+  const tags = (safeArraySlice(asset.tags || [], 0, 3) as unknown[])
+  .map((x) => String(x).trim())
+  .filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
-      {/* Hero Section */}
-      <div className="max-w-6xl mx-auto mb-12">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
-            <Award className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-bold text-amber-500">SURRENDER FRAMEWORK ASSETS</span>
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-6 transition-all duration-500 hover:-translate-y-0.5 hover:border-amber-500/25 hover:bg-white/[0.07]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+        <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_10%_20%,rgba(245,158,11,0.14),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_90%_80%,rgba(255,255,255,0.06),transparent_55%)]" />
+      </div>
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${tb.cls}`}>
+              <TypeIcon className="h-3.5 w-3.5" />
+              {tb.label}
+            </span>
+
+            <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${rb.cls}`}>
+              <TierIcon className="h-3.5 w-3.5" />
+              {rb.label}
+            </span>
+
+            {asset.isInteractive ? (
+              <span className="inline-flex items-center rounded-full border border-purple-500/25 bg-purple-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-purple-200">
+                interactive
+              </span>
+            ) : null}
+
+            {asset.isFillable ? (
+              <span className="inline-flex items-center rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-fuchsia-200">
+                fillable
+              </span>
+            ) : null}
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif italic font-bold mb-6">
-            Transform Theory Into <span className="text-amber-500">Practice</span>
-          </h1>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
-            Downloadable resources, worksheets, and tools to implement the surrender framework in your daily life and work.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href="#downloads"
-              className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg transition"
-            >
-              Browse All Downloads
-            </a>
-            <a
-              href="/assets/downloads/surrender-starter-kit.zip"
-              className="px-6 py-3 border border-amber-500 text-amber-500 hover:bg-amber-500/10 font-bold rounded-lg transition"
-            >
-              Get Starter Kit
-            </a>
+
+          <div className="text-[10px] font-mono uppercase tracking-widest text-white/35">
+            {asset.fileSizeHuman || asset.format || "PDF"}
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
-            <div className="text-2xl font-bold text-white mb-1">{surrenderAssets.length}</div>
-            <div className="text-sm text-gray-400">Total Assets</div>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
-            <div className="text-2xl font-bold text-amber-500 mb-1">
-              {surrenderAssets.filter(a => a.isInteractive).length}
-            </div>
-            <div className="text-sm text-gray-400">Interactive</div>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
-            <div className="text-2xl font-bold text-emerald-500 mb-1">
-              {surrenderAssets.filter(a => a.tier === 'free').length}
-            </div>
-            <div className="text-sm text-gray-400">Free Resources</div>
-          </div>
-          <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
-            <div className="text-2xl font-bold text-purple-500 mb-1">
-              {surrenderAssets.filter(a => a.isFillable).length}
-            </div>
-            <div className="text-sm text-gray-400">Fillable PDFs</div>
-          </div>
-        </div>
-      </div>
+        <h3 className="mt-5 font-serif text-xl text-white/90 tracking-tight group-hover:text-amber-100 transition-colors">
+          {asset.title}
+        </h3>
 
-      {/* Categories Section */}
-      <div id="downloads" className="max-w-6xl mx-auto">
-        {categories.map((category, catIndex) => (
-          <div key={catIndex} className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600">
-                {category.icon}
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">{category.title}</h2>
-                <p className="text-gray-500">{category.description}</p>
-              </div>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.assets.map((asset, assetIndex) => (
-                <AssetCard key={asset.id} asset={asset} index={assetIndex} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+        {asset.description ? (
+          <p className="mt-2 text-sm text-white/55 leading-relaxed">{asset.description}</p>
+        ) : null}
 
-      {/* Institutional CTA */}
-      <div className="max-w-4xl mx-auto mt-16 p-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Get the Complete Surrender Framework Starter Kit
-          </h2>
-          <p className="text-gray-300 mb-6">
-            All worksheets, assessments, and tools in one comprehensive bundle.
-          </p>
+        {tags.length ? (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span
+                key={`${asset.id}-${tag}`}
+                className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white/45"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="mt-7 flex items-center justify-between border-t border-white/10 pt-5">
+          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/35">
+            asset_{String(index + 1).padStart(2, "0")}
+          </div>
+
           <a
-            href="/assets/downloads/surrender-starter-kit.zip"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-lg transition-all hover:scale-105"
+            href={href}
+            className="inline-flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-amber-200 hover:bg-amber-500/15 transition-colors"
           >
-            <Download className="w-5 h-5" />
-            Download Complete Starter Kit (5.0 MB)
+            <DownloadIcon className="h-4 w-4" />
+            Download
+            <ChevronRight className="h-4 w-4" />
           </a>
         </div>
       </div>
@@ -186,4 +230,182 @@ const SurrenderAssetsLanding: React.FC = () => {
   );
 };
 
-export default SurrenderAssetsLanding;
+function Section({
+  title,
+  description,
+  icon,
+  assets,
+}: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  assets: SurrenderAsset[];
+}) {
+  return (
+    <section className="mt-14">
+      <div className="mb-7 flex items-center gap-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-amber-200">
+          {icon}
+        </div>
+        <div>
+          <h2 className="font-serif text-2xl text-white/95 tracking-tight">{title}</h2>
+          <p className="text-sm text-white/45">{description}</p>
+        </div>
+      </div>
+
+      {assets.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 text-center">
+          <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+            No assets indexed in this category
+          </div>
+          <div className="mt-2 text-white/60">
+            Ensure items are typed correctly (<span className="font-mono text-amber-200">worksheet</span>,{" "}
+            <span className="font-mono text-amber-200">assessment</span>,{" "}
+            <span className="font-mono text-amber-200">tool</span>,{" "}
+            <span className="font-mono text-amber-200">framework</span>) and have a valid <span className="font-mono text-amber-200">outputPath</span>.
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {assets.map((asset, i) => (
+            <AssetCard key={asset.id} asset={asset} index={i} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default function SurrenderAssetsLanding(props: SurrenderAssetsLandingProps): React.ReactElement {
+  const assets = Array.isArray(props.assets) ? props.assets : [];
+  const grouped = props.grouped ?? groupAssets(assets);
+  const stats = props.stats ?? computeStats(assets);
+
+  const total = stats.total;
+
+  // Hard diagnostic: never render a blank page again.
+  const diagnostics = {
+    received: assets.length,
+    worksheets: grouped.worksheets.length,
+    assessments: grouped.assessments.length,
+    tools: grouped.tools.length,
+    other: grouped.other.length,
+    interactive: stats.interactive,
+    fillable: stats.fillable,
+    public: stats.public,
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* HERO */}
+      <section className="relative overflow-hidden border-b border-white/5">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(245,158,11,0.10),transparent_55%)]" />
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_85%_70%,rgba(245,158,11,0.06),transparent_55%)]" />
+
+        <div className="relative mx-auto max-w-7xl px-6 py-16 md:py-20">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-5 py-2">
+              <Award className="h-4 w-4 text-amber-300" />
+              <span className="text-[10px] font-black uppercase tracking-[0.35em] text-amber-200">
+                Surrender Framework Assets
+              </span>
+            </div>
+
+            <h1 className="mt-8 font-serif text-5xl md:text-6xl font-bold tracking-tight italic">
+              Transform Theory Into <span className="text-amber-500">Practice</span>
+            </h1>
+
+            <p className="mt-5 max-w-3xl text-lg md:text-xl text-white/55 leading-relaxed">
+              Worksheets, diagnostics, and tools that turn surrender into an operating discipline.
+            </p>
+
+            {/* STAT RAIL */}
+            <div className="mt-10 grid w-full max-w-5xl grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center">
+                <div className="text-3xl font-bold">{total}</div>
+                <div className="mt-1 text-sm text-white/45">Total Assets</div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center">
+                <div className="text-3xl font-bold text-amber-400">{stats.interactive}</div>
+                <div className="mt-1 text-sm text-white/45">Interactive</div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center">
+                <div className="text-3xl font-bold text-emerald-400">{stats.public}</div>
+                <div className="mt-1 text-sm text-white/45">Public</div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center">
+                <div className="text-3xl font-bold text-fuchsia-300">{stats.fillable}</div>
+                <div className="mt-1 text-sm text-white/45">Fillable</div>
+              </div>
+            </div>
+
+            {/* Diagnostic ribbon (subtle, but decisive) */}
+            <div className="mt-8 w-full max-w-5xl rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-left">
+              <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+                Diagnostics (render-proof)
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 text-[10px] font-mono uppercase tracking-widest text-white/45">
+                <div>received: <span className="text-white/80">{diagnostics.received}</span></div>
+                <div>worksheets: <span className="text-white/80">{diagnostics.worksheets}</span></div>
+                <div>assessments: <span className="text-white/80">{diagnostics.assessments}</span></div>
+                <div>tools: <span className="text-white/80">{diagnostics.tools}</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* BODY */}
+      <div id="downloads" className="mx-auto max-w-7xl px-6 py-14">
+        {total === 0 ? (
+          <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
+            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+              No assets available
+            </div>
+            <h2 className="mt-4 font-serif text-3xl text-white">This page received zero items.</h2>
+            <p className="mt-3 text-white/60 max-w-3xl mx-auto">
+              This component is presentational only. Your page must pass props from a registry-backed loader.
+              If you see <span className="font-mono text-amber-200">received: 0</span>, your upstream loader is returning nothing.
+            </p>
+          </div>
+        ) : (
+          <>
+            <Section
+              title="Worksheets & Templates"
+              description="Interactive tools for daily practice"
+              icon={<FileText className="h-6 w-6" />}
+              assets={grouped.worksheets}
+            />
+
+            <Section
+              title="Assessments & Diagnostics"
+              description="Measure your surrender orientation"
+              icon={<Shield className="h-6 w-6" />}
+              assets={grouped.assessments}
+            />
+
+            <Section
+              title="Tools & Frameworks"
+              description="Decision-making frameworks and operational instruments"
+              icon={<Zap className="h-6 w-6" />}
+              assets={grouped.tools}
+            />
+
+            {grouped.other.length > 0 ? (
+              <Section
+                title="Other Assets"
+                description="Indexed items that don’t fit the primary buckets"
+                icon={<Users className="h-6 w-6" />}
+                assets={grouped.other}
+              />
+            ) : null}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

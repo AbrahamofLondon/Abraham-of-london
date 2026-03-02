@@ -1,4 +1,4 @@
-// scripts/pdf/generate-all-from-mdx-canonical.ts
+﻿// scripts/pdf/generate-all-from-mdx-canonical.ts
 //
 // Generates TWO output tracks (no collisions):
 // A) Canonical (flat) PDFs for the public site paths you already use:
@@ -142,7 +142,7 @@ function resolveTierForDoc(doc: DocumentRegistryEntry, desiredTierSlug: string):
   return {
     slug: "free",
     displayName: "Free",
-    accessLevel: "free",
+    accessLevel: "public",
     generatePdf: true,
     generateFillable: false,
     formats: ["A4"],
@@ -214,7 +214,7 @@ class CanonicalAndTieredRunner {
           {
             slug: "free",
             displayName: "Free",
-            accessLevel: "free",
+            accessLevel: "public",
             generatePdf: true,
             generateFillable: false,
             formats: ["A4"],

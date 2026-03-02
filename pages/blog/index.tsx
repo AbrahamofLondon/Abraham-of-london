@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/blog/index.tsx — ESSAYS ARCHIVE (Premium hero, stable banner, no title shove) */
+/* pages/blog/index.tsx — ESSAYS ARCHIVE (Premium, scan-optimized + SmartCover: no-crop with blurred backdrop) */
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -8,11 +8,24 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { Search, ArrowRight, Tag } from "lucide-react";
+import { Search, ArrowRight, Tag, Sparkles, Clock, RotateCcw } from "lucide-react";
 
 import { getPublishedPosts } from "@/lib/content/server";
 import { normalizeSlug, joinHref } from "@/lib/content/shared";
 import { resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
+
+type CoverAspect = "wide" | "book" | "square" | "standard" | "auto";
+type CoverFit = "cover" | "contain" | "smart";
+type CoverPosition =
+  | "center"
+  | "top"
+  | "bottom"
+  | "left"
+  | "right"
+  | "top left"
+  | "top right"
+  | "bottom left"
+  | "bottom right";
 
 type BlogPost = {
   slug: string;
@@ -26,6 +39,10 @@ type BlogPost = {
   tags: string[];
   author: string | null;
   featured?: boolean;
+
+  coverAspect?: CoverAspect | null;
+  coverFit?: CoverFit | null;
+  coverPosition?: CoverPosition | null;
 };
 
 type BlogIndexProps = {
@@ -33,7 +50,137 @@ type BlogIndexProps = {
   totalPosts: number;
 };
 
-const HEADER_HEIGHT = 80; // your Header is h-20
+const HEADER_HEIGHT = 80;
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+function aspectRatioFor(aspect?: CoverAspect | null): string {
+  switch ((aspect || "auto").toLowerCase()) {
+    case "wide":
+      return "16 / 9";
+    case "book":
+      return "3 / 4";
+    case "square":
+      return "1 / 1";
+    case "standard":
+      return "4 / 3";
+    case "auto":
+    default:
+      return "4 / 3";
+  }
+}
+
+function objectPositionFor(pos?: CoverPosition | null): string {
+  const p = (pos || "center").toLowerCase().trim();
+  const allowed = new Set([
+    "center",
+    "top",
+    "bottom",
+    "left",
+    "right",
+    "top left",
+    "top right",
+    "bottom left",
+    "bottom right",
+  ]);
+  return allowed.has(p) ? p : "center";
+}
+
+/**
+ * SmartCover:
+ * - If fit === "cover" => classic crop (object-cover).
+ * - Else ("smart"/"contain") => foreground contain (no crop) + background blurred cover (premium fill).
+ */
+function SmartCover({
+  src,
+  alt,
+  aspect,
+  fit,
+  position,
+  sizes,
+  priority,
+}: {
+  src: string;
+  alt: string;
+  aspect: string;
+  fit: CoverFit;
+  position: string;
+  sizes: string;
+  priority?: boolean;
+}) {
+  const isCover = fit === "cover";
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+      <div className="relative w-full" style={{ aspectRatio: aspect }}>
+        {/* Backdrop layer (always cover) */}
+        {!isCover && (
+          <>
+            <Image
+              src={src}
+              alt=""
+              fill
+              className="object-cover scale-[1.08]"
+              style={{ objectPosition: position, filter: "blur(18px)" }}
+              sizes={sizes}
+              priority={priority}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-black/55"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(245,158,11,0.10),transparent_55%)]"
+            />
+          </>
+        )}
+
+        {/* Foreground layer */}
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className={cx(
+            isCover ? "object-cover" : "object-contain",
+            "transition-transform duration-700"
+          )}
+          style={{
+            objectPosition: position,
+            // contain needs breathing room; cover does not
+            padding: isCover ? undefined : "14px",
+          }}
+          sizes={sizes}
+          priority={priority}
+        />
+
+        {/* Premium vignette / legibility */}
+        <div
+          aria-hidden
+          className={cx(
+            "absolute inset-0",
+            isCover
+              ? "bg-gradient-to-t from-black/60 via-transparent to-transparent"
+              : "bg-gradient-to-t from-black/35 via-transparent to-transparent"
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function normalizeFit(aspect?: CoverAspect | null, fit?: CoverFit | null): CoverFit {
+  // If explicitly set, respect it.
+  if (fit === "cover" || fit === "contain" || fit === "smart") return fit;
+
+  // Default behavior: no-crop smart, but allow wide banners to be cover if you want.
+  // In practice, smart still looks excellent for wide too, so we default to smart.
+  // If you want wide to crop intentionally, set coverFit: cover in that post.
+  return "smart";
+}
 
 const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -47,6 +194,14 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
       .slice(0, 14)
       .map(([t]) => t);
   }, [items]);
+
+  const featured = React.useMemo(() => {
+    const flagged = items.filter((p) => p.featured);
+    const pick = flagged.length ? flagged : items.slice(0, 3);
+    return pick.slice(0, 3);
+  }, [items]);
+
+  const latest = React.useMemo(() => items.slice(0, 6), [items]);
 
   const filteredPosts = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -62,8 +217,12 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
     });
   }, [items, searchQuery, selectedTag]);
 
-  const heroImage =
-    items.find((p) => p.coverImage)?.coverImage || "/assets/images/blog/default-blog-cover.jpg";
+  const heroImage = items.find((p) => p.coverImage)?.coverImage || DEFAULT_COVER;
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedTag(null);
+  };
 
   return (
     <Layout
@@ -80,12 +239,10 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
       {/* HERO */}
       <section
         className="relative overflow-hidden border-b border-white/10"
-        style={{ paddingTop: HEADER_HEIGHT }}
+        style={{ paddingTop: "calc(var(--aol-header-h,88px) + 12px)" }}
       >
-        {/* Banner: stable aspect; doesn’t crush title */}
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left: Title block */}
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
                 <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
@@ -100,67 +257,27 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
               <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">
                 Essays &amp; Insights
               </h1>
-              <p className="mt-3 max-w-xl text-sm md:text-base text-white/50 leading-relaxed">
-                Explorations in the craft of building meaningful institutions.
+              <p className="mt-3 max-w-xl text-sm md:text-base text-white/55 leading-relaxed">
+                Institutional thinking, strategic frameworks, and civilizational notes — written for builders who govern
+                what they touch.
               </p>
 
-              {/* Search */}
-              <div className="mt-8">
-                <div className="relative max-w-xl">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
-                  <input
-                    type="text"
-                    placeholder="Search essays, tags, themes…"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 placeholder:text-white/20 outline-none focus:border-amber-500/25 focus:bg-white/[0.05]"
-                  />
-                </div>
-
-                {/* Tag chips */}
-                {allTags.length > 0 && (
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTag(null)}
-                      className={[
-                        "inline-flex items-center gap-2 rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
-                        !selectedTag
-                          ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                          : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]",
-                      ].join(" ")}
-                    >
-                      <Tag className="h-3.5 w-3.5" />
-                      All
-                    </button>
-
-                    {allTags.map((t) => {
-                      const active = selectedTag === t;
-                      return (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => setSelectedTag(active ? null : t)}
-                          className={[
-                            "rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
-                            active
-                              ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                              : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]",
-                          ].join(" ")}
-                        >
-                          {t}
-                        </button>
-                      );
-                    })}
+              <div className="mt-6 grid grid-cols-3 gap-3 max-w-xl">
+                {[
+                  ["Signal", "No noise. Only essentials."],
+                  ["Blueprints", "Principles → execution."],
+                  ["Legacy", "Order that outlasts."],
+                ].map(([k, v]) => (
+                  <div key={k} className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/40">{k}</div>
+                    <div className="mt-2 text-xs text-white/70 leading-snug">{v}</div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
 
-            {/* Right: Banner image */}
             <div className="lg:col-span-7">
               <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
-                {/* Stable aspect ratio box */}
                 <div className="relative w-full" style={{ aspectRatio: "21 / 9" }}>
                   <Image
                     src={heroImage}
@@ -170,91 +287,332 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 900px"
                   />
-                  {/* overlays */}
-                  <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/15 to-black/35" />
-                  <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.18),transparent_55%)]" />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-black/40" />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.18),transparent_55%)]"
+                  />
                 </div>
 
-                {/* Caption strip */}
                 <div className="flex items-center justify-between gap-4 px-6 py-4">
                   <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                    Institutional thinking • published notes
+                    Institutional notes • scan-ready
                   </div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/55">
-                    Read ↓
-                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/55">Index ↓</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* LIST */}
-      <section className="mx-auto max-w-7xl px-6 lg:px-12 py-14">
-        <div className="grid gap-8">
-          {filteredPosts.map((post) => (
-            <Link
-              key={post.url}
-              href={post.url}
-              className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
-            >
-              <article className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 md:p-7">
-                {/* thumb */}
-                <div className="md:col-span-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-                    <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
-                      <Image
-                        src={post.coverImage || "/assets/images/blog/default-blog-cover.jpg"}
-                        alt={post.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                        sizes="(max-width: 768px) 100vw, 420px"
-                      />
-                      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* meta */}
-                <div className="md:col-span-8 flex flex-col justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
-                      {post.date ? <span>{post.date}</span> : null}
-                      {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
-                      {post.tags?.[0] ? <span className="text-white/25">{post.tags[0]}</span> : null}
-                    </div>
-
-                    <h2 className="mt-4 font-serif text-2xl md:text-3xl text-white/92 tracking-tight group-hover:text-amber-100 transition-colors">
-                      {post.title}
-                    </h2>
-
-                    {post.excerpt ? (
-                      <p className="mt-4 text-sm md:text-base text-white/50 leading-relaxed line-clamp-3">
-                        {post.excerpt}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-6 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
-                    Read essay
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </div>
-                </div>
-              </article>
-            </Link>
-          ))}
-
-          {filteredPosts.length === 0 && (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
-              <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                No matches
+          {/* Featured */}
+          {featured.length > 0 && (
+            <div className="mt-10">
+              <div className="mb-4 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
+                <Sparkles className="h-4 w-4" />
+                Featured
               </div>
-              <div className="mt-3 text-white/70">
-                Try a different keyword or clear the tag filter.
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {featured.map((post) => {
+                  const src = post.coverImage || DEFAULT_COVER;
+                  const aspect = aspectRatioFor(post.coverAspect || "wide");
+                  const fit = normalizeFit(post.coverAspect, post.coverFit) === "smart" ? "smart" : (post.coverFit || "smart");
+                  const pos = objectPositionFor(post.coverPosition);
+
+                  return (
+                    <Link
+                      key={post.url}
+                      href={post.url}
+                      className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
+                    >
+                      <article className="p-5">
+                        <SmartCover
+                          src={src}
+                          alt={post.title}
+                          aspect={aspect}
+                          fit={fit as CoverFit}
+                          position={pos}
+                          sizes="(max-width: 768px) 100vw, 360px"
+                          priority
+                        />
+
+                        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em]">
+                          {post.date ? <span className="text-amber-200/70">{post.date}</span> : null}
+                          {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
+                          {post.tags?.[0] ? <span className="text-white/25">{post.tags[0]}</span> : null}
+                        </div>
+
+                        <h3 className="mt-3 font-serif text-xl text-white/92 leading-tight tracking-tight group-hover:text-amber-100 transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+
+                        {post.excerpt ? (
+                          <p className="mt-3 text-sm text-white/55 leading-relaxed line-clamp-2">{post.excerpt}</p>
+                        ) : null}
+
+                        <div className="mt-4 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
+                          Read
+                          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                        </div>
+                      </article>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Sticky filters */}
+      <section className="sticky top-20 z-30 border-b border-white/10 bg-black/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 lg:px-12 py-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+            <div className="lg:col-span-5">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+                <input
+                  type="text"
+                  placeholder="Search essays, tags, themes…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 placeholder:text-white/20 outline-none focus:border-amber-500/25 focus:bg-white/[0.05]"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTag(null)}
+                  className={cx(
+                    "inline-flex items-center gap-2 rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                    !selectedTag
+                      ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
+                      : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+                  )}
+                >
+                  <Tag className="h-3.5 w-3.5" />
+                  All
+                </button>
+
+                {allTags.map((t) => {
+                  const active = selectedTag === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setSelectedTag(active ? null : t)}
+                      className={cx(
+                        "rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                        active
+                          ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
+                          : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+                      )}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+              Showing {filteredPosts.length} of {items.length}
+            </div>
+
+            {(searchQuery || selectedTag) && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[10px] font-mono uppercase tracking-[0.35em] text-white/55 hover:text-white/75 hover:bg-white/[0.05] transition-all"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* MAIN */}
+      <section className="mx-auto max-w-7xl px-6 lg:px-12 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Cards */}
+          <div className="lg:col-span-8">
+            {filteredPosts.length === 0 ? (
+              <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
+                <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">No matches</div>
+                <div className="mt-3 text-white/70">Try a different keyword or clear the tag filter.</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredPosts.map((post) => {
+                  const src = post.coverImage || DEFAULT_COVER;
+                  const aspect = aspectRatioFor(post.coverAspect);
+                  const fit = normalizeFit(post.coverAspect, post.coverFit);
+                  const pos = objectPositionFor(post.coverPosition);
+
+                  return (
+                    <Link
+                      key={post.url}
+                      href={post.url}
+                      className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
+                    >
+                      <article className="p-5">
+                        <SmartCover
+                          src={src}
+                          alt={post.title}
+                          aspect={aspect}
+                          fit={fit}
+                          position={pos}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                        />
+
+                        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em]">
+                          {post.date ? <span className="text-amber-200/70">{post.date}</span> : null}
+                          {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
+                          {post.tags?.[0] ? <span className="text-white/25">{post.tags[0]}</span> : null}
+                        </div>
+
+                        <h2 className="mt-3 font-serif text-xl text-white/92 tracking-tight leading-tight group-hover:text-amber-100 transition-colors line-clamp-2">
+                          {post.title}
+                        </h2>
+
+                        {post.excerpt ? (
+                          <p className="mt-3 text-sm text-white/55 leading-relaxed line-clamp-2">{post.excerpt}</p>
+                        ) : null}
+
+                        <div className="mt-4 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
+                          Read essay
+                          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                        </div>
+                      </article>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Executive Sidebar */}
+          <aside className="hidden lg:block lg:col-span-4">
+            <div className="sticky top-28 space-y-6">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+                <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">Quick Index</div>
+
+                <div className="mt-4 grid gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">Current Filters</div>
+                    <div className="mt-2 text-sm text-white/75">
+                      {selectedTag ? (
+                        <span className="text-amber-200/80">{selectedTag}</span>
+                      ) : (
+                        <span className="text-white/50">All tags</span>
+                      )}
+                      <span className="mx-2 text-white/25">•</span>
+                      {searchQuery ? (
+                        <span className="text-white/75">“{searchQuery}”</span>
+                      ) : (
+                        <span className="text-white/50">No search</span>
+                      )}
+                    </div>
+
+                    {(searchQuery || selectedTag) && (
+                      <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[10px] font-mono uppercase tracking-[0.35em] text-white/55 hover:text-white/75 hover:bg-white/[0.05] transition-all"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+                <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
+                  <Sparkles className="h-4 w-4" />
+                  Featured
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  {featured.map((p) => (
+                    <Link key={p.url} href={p.url} className="group block">
+                      <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+                        {p.date || "—"} {p.readTime ? `• ${p.readTime}` : ""}
+                      </div>
+                      <div className="mt-1 font-serif text-lg text-white/85 group-hover:text-amber-100 transition-colors line-clamp-2">
+                        {p.title}
+                      </div>
+                      <div className="mt-2 h-px bg-white/10" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+                <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
+                  <Clock className="h-4 w-4" />
+                  Latest
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {latest.map((p) => (
+                    <Link key={p.url} href={p.url} className="group block">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+                            {p.tags?.[0] ? p.tags[0] : "Essay"}
+                          </div>
+                          <div className="mt-1 text-sm text-white/75 group-hover:text-amber-100 transition-colors line-clamp-2">
+                            {p.title}
+                          </div>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-white/25 group-hover:text-amber-200/80 transition-colors" />
+                      </div>
+                      <div className="mt-3 h-px bg-white/10" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {allTags.length > 0 && (
+                <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
+                    <Tag className="h-4 w-4" />
+                    Top Tags
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {allTags.slice(0, 10).map((t) => {
+                      const active = selectedTag === t;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSelectedTag(active ? null : t)}
+                          className={cx(
+                            "rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                            active
+                              ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
+                              : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+                          )}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       </section>
     </Layout>
@@ -282,6 +640,10 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
           tags: Array.isArray(doc.tags) ? doc.tags : [],
           author: doc.author || "Abraham of London",
           featured: !!doc.featured,
+
+          coverAspect: (doc.coverAspect || null) as CoverAspect | null,
+          coverFit: (doc.coverFit || null) as CoverFit | null,
+          coverPosition: (doc.coverPosition || null) as CoverPosition | null,
         };
       })
       .sort((a, b) => (b.dateIso || "").localeCompare(a.dateIso || ""));

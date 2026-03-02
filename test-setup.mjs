@@ -1,5 +1,5 @@
 // test-setup.mjs - Updated version
-import { allShorts } from './.contentlayer/generated/index.mjs'; // Changed from 'contentlayer/generated'
+import { allShorts } from './.contentlayer/generated/index.mjs'; // Changed from '@/lib/contentlayer'
 
 console.log('✅ Configuration test successful!');
 console.log(`Found ${allShorts.length} shorts`);

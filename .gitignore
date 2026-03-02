@@ -12,6 +12,7 @@ node_modules/
 .yarn/
 .yarn-cache/
 .yarn-integrity
+.npmrc.tmp
 
 # ------------------------------
 # Build outputs & framework caches
@@ -31,6 +32,8 @@ build/
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 tsconfig.next.tsbuildinfo
+.next-env.d.ts
+.next.bkp/
 
 # ------------------------------
 # Environment (sensitive)
@@ -38,6 +41,8 @@ tsconfig.next.tsbuildinfo
 .env
 .env.*
 !.env.example
+!.env.local.example
+.envrc
 
 # ------------------------------
 # Logs & diagnostics
@@ -54,6 +59,7 @@ lerna-debug.log*
 *.seed
 *.pid.lock
 .fixlogs/
+instrumentation*.log
 
 # ------------------------------
 # Database & local state (sensitive)
@@ -77,6 +83,8 @@ _backups/
 *.swp
 *.swo
 *.swn
+*.db-wal
+*.db-shm
 
 # ------------------------------
 # 🚨 CRITICAL: PROJECT BLOAT PREVENTION (744MB FIX)
@@ -87,6 +95,8 @@ Abraham-of-london-backup/
 *-copy/
 node_modules_old/
 _old/
+*-old/
+*_old/
 
 # ------------------------------
 # Temp files / OS junk
@@ -101,6 +111,12 @@ desktop.ini
 .temp/
 tmp/
 temp/
+*~
+~$*
+._*
+*.lock
+*.part
+*.crdownload
 
 # ------------------------------
 # IDE / editor
@@ -111,6 +127,13 @@ temp/
 *.ntvs*
 *.njsproj
 *.sln
+*.swp
+*.swo
+*.swn
+*.launcher
+*.local
+*.orig
+.history/
 
 # ------------------------------
 # Asset pipeline (generated)
@@ -122,6 +145,8 @@ public/user-uploads/
 exports/
 downloads/cache/
 scripts/output/
+public/og/
+public/_next/
 
 # ------------------------------
 # Public downloads (prevent Windows lock issues)
@@ -136,12 +161,18 @@ public/downloads/**/*.xls
 public/downloads/**/*.xlsx
 public/downloads/**/*.ppt
 public/downloads/**/*.pptx
+public/downloads/**/*.exe
+public/downloads/**/*.msi
 
 # ------------------------------
 # Windows-specific helper caches
 # ------------------------------
 .wfix/
 _sc/
+[Windows/]
+[Content_Types].xml
+_rels/
+.rels
 
 # ------------------------------
 # Backup artifacts created by hotfix tooling
@@ -151,6 +182,8 @@ _sc/
 *.simple-backup
 _fixbak/
 lib/content - Copy/
+lib/* - Copy/
+components/* - Copy/
 
 # ------------------------------
 # Secrets & key material
@@ -162,6 +195,9 @@ lib/content - Copy/
 id_rsa
 *.p12
 *.pfx
+*.keystore
+*.jks
+.secrets/
 
 # ------------------------------
 # Archive files (Prevents large binary commits)
@@ -171,6 +207,37 @@ id_rsa
 *.gz
 *.7z
 *.rar
+*.bz2
+*.xz
+*.tgz
+*.dmg
+*.iso
+*.exe
+
+# ------------------------------
+# Testing & coverage
+# ------------------------------
+coverage/
+.nyc_output/
+.coveralls.yml
+*.lcov
+*.lcov.info
+jest-stare/
+.rollup.cache/
+
+# ------------------------------
+# Misc generated files
+# ------------------------------
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+*.lnk
+*.url
+*.website
+*.desktop
+*.directory
 
 # ------------------------------
 # Keep institutional assets tracked
@@ -184,6 +251,10 @@ id_rsa
 !public/android-chrome-512x512.png
 !public/site.webmanifest
 !public/robots.txt
+!public/sitemap.xml
+!public/sitemap-*.xml
 !/sql/**/*.sql
 !/prisma/**/*.sql
 !/db/**/*.sql
+!/prisma/schema.prisma
+!/prisma/migrations/

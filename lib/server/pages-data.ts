@@ -1,3 +1,4 @@
+// lib/server/pages-data.ts - SSOT ALIGNED
 // Pages under content/pages/* - Using MDX collections
 
 import {
@@ -8,7 +9,8 @@ import {
 } from "@/lib/server/mdx-collections";
 import type { Page, ContentEntry, ContentMeta } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
-
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
 export type PageWithContent = Page & {
   content: string;
@@ -26,7 +28,7 @@ type PageishMdxDocument = MdxDocument & {
 } & Partial<Page>;
 
 // ---------------------------------------------------------------------------
-// SAFE TYPE CONVERTERS
+// SAFE TYPE CONVERTERS (SSOT ALIGNED)
 // ---------------------------------------------------------------------------
 
 function safeString(value: unknown): string | undefined {
@@ -76,13 +78,12 @@ function safeStatus(
   return undefined;
 }
 
-function safeAccessLevel(
-  value: unknown
-): "public" | "premium" | "private" | undefined {
-  if (value === "public" || value === "premium" || value === "private") {
-    return value;
-  }
-  return undefined;
+/**
+ * Safe access level converter - SSOT ALIGNED
+ */
+function safeAccessLevel(value: unknown): AccessTier | undefined {
+  if (!value) return undefined;
+  return normalizeRequiredTier(value);
 }
 
 function safeLayout(
@@ -204,6 +205,40 @@ export function pageToContentEntry(page: Page): ContentEntry {
 }
 
 // ---------------------------------------------------------------------------
+// ACCESS CONTROL HELPERS
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if user can access a page
+ */
+export function canAccessPage(
+  page: Page,
+  userTier?: string | AccessTier | null
+): boolean {
+  const user = normalizeUserTier(userTier || "public");
+  const required = page.accessLevel || "public";
+  return hasAccess(user, required);
+}
+
+/**
+ * Get pages accessible to a user
+ */
+export function getAccessiblePages(userTier?: string | AccessTier | null): Page[] {
+  try {
+    const pages = getAllPagesMeta();
+    const user = normalizeUserTier(userTier || "public");
+    
+    return pages.filter(page => {
+      const required = page.accessLevel || "public";
+      return hasAccess(user, required);
+    });
+  } catch (error) {
+    console.error("Error getting accessible pages:", error);
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // PUBLIC API FUNCTIONS
 // ---------------------------------------------------------------------------
 
@@ -247,7 +282,7 @@ export async function getPageBySlug(slug: string): Promise<PageWithContent | nul
     }
     
     const resolvedDoc = await doc;
-return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
+    return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
   } catch (error) {
     console.error(`Error fetching page by slug (${slug}):`, error);
     return null;
@@ -262,7 +297,7 @@ export async function getAllPages(): Promise<PageWithContent[]> {
     const pagesWithContent: PageWithContent[] = [];
     
     for (const meta of metas) {
-      const page = getPageBySlug(meta.slug);
+      const page = await getPageBySlug(meta.slug);
       if (page) {
         pagesWithContent.push(page);
       } else {
@@ -506,7 +541,6 @@ export function getHomePage(): PageWithContent | null {
     }
     
     const publishedPages = getPublishedPages();
-    // FIX: Ensure array has elements before accessing index 0
     if (publishedPages.length > 0 && publishedPages[0]) {
       return await getPageBySlug(publishedPages[0].slug);
     }
@@ -526,6 +560,7 @@ export function getPageStats(): {
   byCategory: Record<string, number>;
   byType: Record<string, number>;
   byYear: Record<string, number>;
+  byAccessLevel: Record<string, number>;
 } {
   try {
     const pages = getAllPagesMeta();
@@ -538,6 +573,7 @@ export function getPageStats(): {
       byCategory: {} as Record<string, number>,
       byType: {} as Record<string, number>,
       byYear: {} as Record<string, number>,
+      byAccessLevel: {} as Record<string, number>,
     };
     
     pages.forEach(page => {
@@ -553,6 +589,9 @@ export function getPageStats(): {
         const year = new Date(page.date).getFullYear().toString();
         stats.byYear[year] = (stats.byYear[year] || 0) + 1;
       }
+      
+      const accessLevel = page.accessLevel || "public";
+      stats.byAccessLevel[accessLevel] = (stats.byAccessLevel[accessLevel] || 0) + 1;
     });
     
     return stats;
@@ -566,6 +605,7 @@ export function getPageStats(): {
       byCategory: {},
       byType: {},
       byYear: {},
+      byAccessLevel: {},
     };
   }
 }
@@ -578,6 +618,12 @@ const pagesData = {
   getAllPagesMeta,
   getPageBySlug,
   getAllPages,
+  
+  // Access control
+  canAccessPage,
+  getAccessiblePages,
+  
+  // Filter functions
   getPagesByCategory,
   getPagesByTag,
   getFeaturedPages,
@@ -588,20 +634,19 @@ const pagesData = {
   searchPages,
   getRecentPages,
   getHomePage,
+  
+  // List functions
   getAllPageCategories,
   getAllPageTags,
   getAllPageAuthors,
   getAllPageSlugs,
+  
+  // Stats
   getPageStats,
+  
+  // Utility functions
   pageToContentMeta,
   pageToContentEntry,
 };
 
 export default pagesData;
-
-
-
-
-
-
-

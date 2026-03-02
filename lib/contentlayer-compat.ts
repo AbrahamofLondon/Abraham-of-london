@@ -17,7 +17,7 @@ import {
   allResources,
   allShorts,
   allStrategies,
-} from "contentlayer/generated";
+} from "@/lib/contentlayer";
 
 // Export DocBase type for use in other files
 export type DocBase = {

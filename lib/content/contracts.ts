@@ -1,35 +1,74 @@
-// lib/content/contracts.ts
-export const ACCESS_LEVELS = [
-  "public",
-  "free",
-  "inner-circle",
-  "basic",
-  "inner-circle-plus",
-  "premium",
-  "inner-circle-elite",
-  "enterprise",
-  "private",
-  "restricted",
-] as const;
+// lib/content/contracts.ts — SSOT Content Contracts (single policy source)
+import type { AccessTier } from "@/lib/access/tier-policy";
+import {
+  TIER_ORDER,
+  TIER_LABELS,
+  normalizeRequiredTier,
+  normalizeUserTier,
+  hasAccess,
+} from "@/lib/access/tier-policy";
 
-export type AccessLevel = (typeof ACCESS_LEVELS)[number];
+// Canonical enforcement levels
+export const ACCESS_LEVELS = TIER_ORDER;
+export type AccessLevel = AccessTier;
 
-// Optional legacy/UX “tier” field (maps to membership display, not enforcement)
+// Legacy/UI display tiers tolerated as inputs (normalizeRequiredTier handles these via SSOT aliases)
 export const CONTENT_TIERS = [
   "public",
+  "open",
   "free",
-  "inner-circle",
+  "guest",
+  "member",
   "basic",
-  "inner-circle-plus",
+  "inner-circle",
+  "innercircle",
+  "inner_circle",
+  "ic",
   "premium",
-  "inner-circle-elite",
+  "client",
+  "inner-circle-plus",
   "enterprise",
-  "private",
   "restricted",
+  "private",
+  "legacy",
+  "elite",
+  "inner-circle-elite",
+  "architect",
+  "founder",
+  "owner",
+  "admin",
+  "top-secret",
+  "confidential",
 ] as const;
 
 export type ContentTier = (typeof CONTENT_TIERS)[number];
 
+/**
+ * Normalize any tier input to SSOT AccessLevel (required-context).
+ * Unknown -> public (do not lock content by accident).
+ */
+export function normalizeToAccessLevel(input: string | null | undefined): AccessLevel {
+  return normalizeRequiredTier(input);
+}
+
+/**
+ * Check access (user-tier vs required-tier).
+ * Unknown user tier -> public (never grant by accident).
+ */
+export function hasTierAccess(userTier: string | null | undefined, requiredTier: AccessLevel): boolean {
+  const u = normalizeUserTier(userTier);
+  const r = normalizeRequiredTier(requiredTier);
+  return hasAccess(u, r);
+}
+
+/**
+ * Get display label for a tier (SSOT).
+ */
+export function getTierLabel(tier: AccessLevel | ContentTier): string {
+  return TIER_LABELS[normalizeRequiredTier(tier)];
+}
+
+// UI display variants for cover images
 export const COVER_ASPECTS = ["wide", "book", "square"] as const;
 export type CoverAspect = (typeof COVER_ASPECTS)[number];
 
@@ -50,7 +89,7 @@ export const COVER_POSITIONS = [
 export type CoverPosition = (typeof COVER_POSITIONS)[number];
 
 /**
- * ✅ “24 download types” enum (use consistently)
+ * ✅ Download types enum
  */
 export const DOWNLOAD_TYPES = [
   "other",
@@ -81,16 +120,7 @@ export const DOWNLOAD_TYPES = [
 
 export type DownloadType = (typeof DOWNLOAD_TYPES)[number];
 
-export const DOWNLOAD_FORMATS = [
-  "PDF",
-  "EXCEL",
-  "POWERPOINT",
-  "DOCX",
-  "ZIP",
-  "IMAGE",
-  "BINARY",
-] as const;
-
+export const DOWNLOAD_FORMATS = ["PDF", "EXCEL", "POWERPOINT", "DOCX", "ZIP", "IMAGE", "BINARY"] as const;
 export type DownloadFormat = (typeof DOWNLOAD_FORMATS)[number];
 
 export const RESOURCE_TYPES = [
@@ -114,4 +144,3 @@ export type ShortType = (typeof SHORT_TYPES)[number];
 
 export const EVENT_TYPES = ["other", "workshop", "salon", "webinar", "training", "live"] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
-

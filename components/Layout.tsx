@@ -1,21 +1,28 @@
-// components/Layout.tsx — PRODUCTION GRADE (ROUTER-FREE, SSR-SAFE, NO LAYOUT JUMP)
-// Stable render: no mount-gated tree swap. Canonical can upgrade client-side quietly.
-
+/* components/Layout.tsx — PRODUCTION GRADE */
 import * as React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+// 🏛️ Import the component correctly
+import EnhancedFooter from "@/components/EnhancedFooter";
 
+// ✅ FIXED: Dynamic import with error handling - removed suspense option
 const VaultSearchOverlay = dynamic(
-  () => import("./VaultSearchOverlay").then((mod) => mod.VaultSearchOverlay),
-  { ssr: false, loading: () => null }
+  () => import("./VaultSearchOverlay").catch(err => {
+    console.error("Failed to load VaultSearchOverlay:", err);
+    return { default: () => null };
+  }),
+  { 
+    ssr: false, 
+    loading: () => null
+    // ❌ suspense: false removed - not available in Pages Router
+  }
 );
 
 const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
-const HEADER_HEIGHT_PX = 80;
+// 🏛️ FIXED: Header height reduced to match actual header size (h-16/py-3 = ~64-72px)
+const HEADER_HEIGHT_PX = 72;
 
-// Build-phase guard (no window listeners, no overlay)
 const IS_BUILD =
   process.env.NEXT_PHASE === "phase-production-build" || process.env.NEXT_PHASE === "phase-export";
 
@@ -64,29 +71,23 @@ export default function Layout({
 }: LayoutProps) {
   const serverCanonicalAbs = toAbsoluteUrl(canonicalUrl ? canonicalUrl : "/");
   const [canonicalAbs, setCanonicalAbs] = React.useState<string>(serverCanonicalAbs);
-
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
-  // Quiet client-side canonical upgrade (only when canonicalUrl not explicitly set)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     if (canonicalUrl) return;
     const p = getClientPathname();
     setCanonicalAbs(toAbsoluteUrl(p));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canonicalUrl]);
 
-  // CMD+K handler (client-only, not during build)
   React.useEffect(() => {
     if (IS_BUILD || typeof window === "undefined") return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setIsSearchOpen(true);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
@@ -96,22 +97,18 @@ export default function Layout({
   return (
     <>
       <Head>
-        {/* NO <title> here — pages own the title */}
         <meta name="description" content={description} />
         {keywords ? <meta name="keywords" content={keywords} /> : null}
         <link rel="canonical" href={canonicalAbs} />
-
         <meta property="og:type" content={ogType} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImageAbs} />
         <meta property="og:url" content={canonicalAbs} />
-
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={ogImageAbs} />
-
         {structuredData ? (
           <script
             type="application/ld+json"
@@ -122,11 +119,11 @@ export default function Layout({
 
       <Header transparent={headerTransparent} />
 
-      {/* Stable header spacing. Hero pages can visually “sit under” header by using -mt-[80px] + pt-[80px] in the page. */}
+      {/* 🏛️ FIXED: Conditional padding based on header transparency */}
       <main
-        style={{ paddingTop: headerTransparent ? HEADER_HEIGHT_PX : HEADER_HEIGHT_PX }}
         className={[
           "min-h-screen w-full max-w-full overflow-x-hidden",
+          headerTransparent ? "" : "pt-[72px]", // Using exact value to match HEADER_HEIGHT_PX
           fullWidth ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10",
           className,
         ].join(" ")}
@@ -134,10 +131,15 @@ export default function Layout({
         {children}
       </main>
 
-      <Footer />
+      {/* 🏛️ FIXED: Using the imported name EnhancedFooter */}
+      <EnhancedFooter />
 
-      {/* Search overlay — client only */}
-      {!IS_BUILD ? <VaultSearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} /> : null}
+      {!IS_BUILD && (
+        <VaultSearchOverlay 
+          isOpen={isSearchOpen} 
+          onClose={() => setIsSearchOpen(false)} 
+        />
+      )}
     </>
   );
 }

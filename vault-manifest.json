@@ -1806,7 +1806,19 @@
     "type": "brief"
   },
   {
-    "title": "The Ultimate Purpose of Man -- Strategic Editorial",
+    "title": "the-builders-catechism-founders-illuminated-edition",
+    "slug": "/vault/downloads/the-builders-catechism-founders-illuminated-edition",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
+    "title": "THE BUILDER’S CATECHISM",
+    "slug": "/vault/downloads/the-builders-catechism",
+    "category": "downloads",
+    "type": "brief"
+  },
+  {
+    "title": "The Ultimate Purpose of Man — Strategic Editorial",
     "slug": "/vault/downloads/ultimate-purpose-of-man-editorial",
     "category": "downloads",
     "type": "brief"
@@ -1830,14 +1842,74 @@
     "type": "brief"
   },
   {
-    "title": "sovereignty-001",
-    "slug": "/vault/intelligence/sovereignty-001",
+    "title": "The Autonomy Spectrum",
+    "slug": "/vault/intelligence/strategic-autonomy-001",
     "category": "intelligence",
     "type": "brief"
   },
   {
     "title": "Strategic Autonomy",
     "slug": "/vault/intelligence/strategic-autonomy-002",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "Decision Sovereignty",
+    "slug": "/vault/intelligence/strategic-autonomy-003",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "Intellectual Sovereignty",
+    "slug": "/vault/intelligence/strategic-autonomy-004",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "Legacy Sovereignty",
+    "slug": "/vault/intelligence/strategic-autonomy-005",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Sovereign's Sequence",
+    "slug": "/vault/intelligence/strategic-autonomy-006",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Autonomous Institution",
+    "slug": "/vault/intelligence/strategic-autonomy-007",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Sovereign's Economics",
+    "slug": "/vault/intelligence/strategic-autonomy-008",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Sovereign's Relationships",
+    "slug": "/vault/intelligence/strategic-autonomy-009",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Sovereign's Communication",
+    "slug": "/vault/intelligence/strategic-autonomy-010",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Sovereign's Rhythm",
+    "slug": "/vault/intelligence/strategic-autonomy-011",
+    "category": "intelligence",
+    "type": "brief"
+  },
+  {
+    "title": "The Complete Sovereign",
+    "slug": "/vault/intelligence/strategic-autonomy-012",
     "category": "intelligence",
     "type": "brief"
   },
@@ -2010,6 +2082,12 @@
     "type": "brief"
   },
   {
+    "title": "Household Charter Template",
+    "slug": "/vault/resources/canon-household-charter-template",
+    "category": "resources",
+    "type": "brief"
+  },
+  {
     "title": "Canon Household Charter",
     "slug": "/vault/resources/canon-household-charter",
     "category": "resources",
@@ -2078,6 +2156,12 @@
   {
     "title": "Strategy Room Intake",
     "slug": "/vault/resources/strategy-room-intake",
+    "category": "resources",
+    "type": "brief"
+  },
+  {
+    "title": "Surrender Operational Framework",
+    "slug": "/vault/resources/surrender-framework/surrender-operational-framework",
     "category": "resources",
     "type": "brief"
   },
@@ -2676,10 +2760,496 @@
     "type": "brief"
   },
   {
-    "title": "Volume IV: The Rise-Decay Index",
+    "title": "Rise-Decay Index",
     "slug": "/vault/vault/indices/rise-decay-index",
     "category": "vault",
     "type": "brief"
+  },
+  {
+    "title": "Download: audit-of-ease.pdf",
+    "slug": "/vault/downloads/audit-of-ease.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: canon-builders-rule-of-life.pdf",
+    "slug": "/vault/downloads/canon-builders-rule-of-life.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: conviction-vs-coercion.pdf",
+    "slug": "/vault/downloads/conviction-vs-coercion.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-001.pdf",
+    "slug": "/vault/downloads/fr-001.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-004.pdf",
+    "slug": "/vault/downloads/fr-004.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-007.pdf",
+    "slug": "/vault/downloads/fr-007.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-010.pdf",
+    "slug": "/vault/downloads/fr-010.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-013.pdf",
+    "slug": "/vault/downloads/fr-013.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-016.pdf",
+    "slug": "/vault/downloads/fr-016.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-019.pdf",
+    "slug": "/vault/downloads/fr-019.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-022.pdf",
+    "slug": "/vault/downloads/fr-022.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-025.pdf",
+    "slug": "/vault/downloads/fr-025.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-028.pdf",
+    "slug": "/vault/downloads/fr-028.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-031.pdf",
+    "slug": "/vault/downloads/fr-031.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-034.pdf",
+    "slug": "/vault/downloads/fr-034.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-037.pdf",
+    "slug": "/vault/downloads/fr-037.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-040.pdf",
+    "slug": "/vault/downloads/fr-040.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-043.pdf",
+    "slug": "/vault/downloads/fr-043.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-046.pdf",
+    "slug": "/vault/downloads/fr-046.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-049.pdf",
+    "slug": "/vault/downloads/fr-049.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-052.pdf",
+    "slug": "/vault/downloads/fr-052.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-055.pdf",
+    "slug": "/vault/downloads/fr-055.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-058.pdf",
+    "slug": "/vault/downloads/fr-058.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-061.pdf",
+    "slug": "/vault/downloads/fr-061.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-064.pdf",
+    "slug": "/vault/downloads/fr-064.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-067.pdf",
+    "slug": "/vault/downloads/fr-067.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-070.pdf",
+    "slug": "/vault/downloads/fr-070.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: fr-073.pdf",
+    "slug": "/vault/downloads/fr-073.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: frontier-resilience-01.pdf",
+    "slug": "/vault/downloads/frontier-resilience-01.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: governance-diagnostic-toolkit.pdf",
+    "slug": "/vault/downloads/governance-diagnostic-toolkit.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-003.pdf",
+    "slug": "/vault/downloads/ia-003.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-006.pdf",
+    "slug": "/vault/downloads/ia-006.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-009.pdf",
+    "slug": "/vault/downloads/ia-009.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-012.pdf",
+    "slug": "/vault/downloads/ia-012.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-015.pdf",
+    "slug": "/vault/downloads/ia-015.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-018.pdf",
+    "slug": "/vault/downloads/ia-018.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-021.pdf",
+    "slug": "/vault/downloads/ia-021.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-024.pdf",
+    "slug": "/vault/downloads/ia-024.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-027.pdf",
+    "slug": "/vault/downloads/ia-027.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-030.pdf",
+    "slug": "/vault/downloads/ia-030.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-033.pdf",
+    "slug": "/vault/downloads/ia-033.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-036.pdf",
+    "slug": "/vault/downloads/ia-036.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-039.pdf",
+    "slug": "/vault/downloads/ia-039.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-042.pdf",
+    "slug": "/vault/downloads/ia-042.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-045.pdf",
+    "slug": "/vault/downloads/ia-045.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-048.pdf",
+    "slug": "/vault/downloads/ia-048.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-051.pdf",
+    "slug": "/vault/downloads/ia-051.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-054.pdf",
+    "slug": "/vault/downloads/ia-054.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-057.pdf",
+    "slug": "/vault/downloads/ia-057.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-060.pdf",
+    "slug": "/vault/downloads/ia-060.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-063.pdf",
+    "slug": "/vault/downloads/ia-063.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-066.pdf",
+    "slug": "/vault/downloads/ia-066.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-069.pdf",
+    "slug": "/vault/downloads/ia-069.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-072.pdf",
+    "slug": "/vault/downloads/ia-072.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: ia-075.pdf",
+    "slug": "/vault/downloads/ia-075.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: institutional-integrity-audit.pdf",
+    "slug": "/vault/downloads/institutional-integrity-audit.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-002.pdf",
+    "slug": "/vault/downloads/si-002.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-005.pdf",
+    "slug": "/vault/downloads/si-005.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-008.pdf",
+    "slug": "/vault/downloads/si-008.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-011.pdf",
+    "slug": "/vault/downloads/si-011.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-014.pdf",
+    "slug": "/vault/downloads/si-014.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-017.pdf",
+    "slug": "/vault/downloads/si-017.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-020.pdf",
+    "slug": "/vault/downloads/si-020.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-023.pdf",
+    "slug": "/vault/downloads/si-023.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-026.pdf",
+    "slug": "/vault/downloads/si-026.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-029.pdf",
+    "slug": "/vault/downloads/si-029.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-032.pdf",
+    "slug": "/vault/downloads/si-032.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-035.pdf",
+    "slug": "/vault/downloads/si-035.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-038.pdf",
+    "slug": "/vault/downloads/si-038.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-041.pdf",
+    "slug": "/vault/downloads/si-041.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-044.pdf",
+    "slug": "/vault/downloads/si-044.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-047.pdf",
+    "slug": "/vault/downloads/si-047.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-050.pdf",
+    "slug": "/vault/downloads/si-050.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-053.pdf",
+    "slug": "/vault/downloads/si-053.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-056.pdf",
+    "slug": "/vault/downloads/si-056.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-059.pdf",
+    "slug": "/vault/downloads/si-059.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-062.pdf",
+    "slug": "/vault/downloads/si-062.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-065.pdf",
+    "slug": "/vault/downloads/si-065.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-068.pdf",
+    "slug": "/vault/downloads/si-068.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-071.pdf",
+    "slug": "/vault/downloads/si-071.pdf",
+    "category": "downloads",
+    "type": "asset"
+  },
+  {
+    "title": "Download: si-074.pdf",
+    "slug": "/vault/downloads/si-074.pdf",
+    "category": "downloads",
+    "type": "asset"
   },
   {
     "title": "Download: decision-matrix-scorecard-fillable.pdf",

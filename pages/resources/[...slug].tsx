@@ -3,15 +3,11 @@ import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
-import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
+import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
-import mdxComponents from "@/components/mdx-components";
+import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer"; // ✅ Use SafeMDXRenderer
 import AccessGate from "@/components/AccessGate";
-import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
 
 import {
@@ -21,17 +17,17 @@ import {
   isDraftContent,
   sanitizeData,
 } from "@/lib/content/server";
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
-import { ArrowLeft, Lock, Shield, ChevronRight, Calendar, User, Tag } from "lucide-react";
-
-type AccessLevel = "public" | "inner-circle" | "private";
+import { ArrowLeft, Lock, Shield, Calendar, User, Tag } from "lucide-react";
 
 type ResourceMeta = {
   title: string;
   excerpt: string | null;
   description: string | null;
   slugPath: string;
-  accessLevel: AccessLevel;
+  accessLevel: AccessTier;
   date: string | null;
   tags: string[];
   author: string | null;
@@ -41,39 +37,21 @@ type ResourceMeta = {
 type Props = {
   resource: ResourceMeta;
   locked: boolean;
-  initialSource: MDXRemoteSerializeResult | null;
-  mdxRaw: string;
+  requiredTier: AccessTier;
+  initialBodyCode: string | null; // ✅ Pre-compiled MDX code
 };
 
 type ApiOk = {
   ok: true;
-  tier: AccessLevel;
-  requiredTier: AccessLevel;
-  source: MDXRemoteSerializeResult;
-  mdxRaw: string;
+  tier: AccessTier;
+  requiredTier: AccessTier;
+  bodyCode: string; // ✅ Compiled code, not serialized source
 };
 
 type ApiFail = {
   ok: false;
   reason: string;
 };
-
-function toAccessLevel(v: unknown): AccessLevel {
-  const n = String(v || "").toLowerCase().trim();
-  if (n === "private" || n === "restricted") return "private";
-  if (
-    n === "inner-circle" ||
-    n === "inner circle" ||
-    n === "member" ||
-    n === "members" ||
-    n === "basic" ||
-    n === "premium" ||
-    n === "enterprise"
-  ) {
-    return "inner-circle";
-  }
-  return "public";
-}
 
 function isResourceDoc(d: any): boolean {
   const kind = String(d?.kind || d?.type || "").toLowerCase();
@@ -89,7 +67,12 @@ function stripMdxExt(s: string): string {
 }
 
 function stripResourcesPrefix(input: string): string {
-  return normalizeSlug(input).replace(/^resources\//, "");
+  const normalized = normalizeSlug(input).replace(/^resources\//, "");
+  // ✅ Prevent path traversal
+  if (normalized.includes('..') || normalized.includes('\\') || normalized.includes('//')) {
+    return '';
+  }
+  return normalized;
 }
 
 function resourceSlugFromDoc(d: any): string {
@@ -113,9 +96,11 @@ function getRawBody(d: any): string {
   );
 }
 
-// Prevent conflicts with real routes under /resources
+// ✅ FIXED: Prevent conflicts with real routes under /resources
+// Add all dedicated framework routes here
 const RESERVED_RESOURCE_ROUTES = new Set<string>([
   "strategic-frameworks",
+  "surrender-framework",
 ]);
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -166,27 +151,19 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   const doc = getDocBySlug(keyA) || getDocBySlug(keyB);
   if (!doc || !isResourceDoc(doc) || isDraftContent(doc)) return { notFound: true };
 
-  const accessLevel = toAccessLevel((doc as any).accessLevel ?? (doc as any).tier);
-  const locked = accessLevel !== "public";
+  // ✅ Use normalizeRequired for content tiers
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const locked = requiredTier !== "public";
 
-  const mdxRaw = getRawBody(doc);
-
-  let initialSource: MDXRemoteSerializeResult | null = null;
-  if (!locked) {
-    initialSource = await serialize(mdxRaw || " ", {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug],
-      },
-    });
-  }
+  // ✅ Only ship pre-compiled code for public content
+  const initialBodyCode = !locked ? (doc.body?.code || doc.bodyCode || null) : null;
 
   const resource: ResourceMeta = {
     title: (doc as any).title || "Untitled Resource",
     excerpt: (doc as any).excerpt || null,
     description: (doc as any).description || null,
     slugPath,
-    accessLevel,
+    accessLevel: requiredTier,
     date: (doc as any).date || null,
     tags: Array.isArray((doc as any).tags) ? (doc as any).tags : [],
     author: (doc as any).author || null,
@@ -197,20 +174,25 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
     props: {
       resource: sanitizeData(resource),
       locked,
-      initialSource,
-      mdxRaw,
+      requiredTier,
+      initialBodyCode,
     },
     revalidate: 3600,
   };
 };
 
-const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, mdxRaw }) => {
-  // ✅ Router-safe hooks
+const ResourceSlugPage: NextPage<Props> = ({ 
+  resource, 
+  locked, 
+  requiredTier, 
+  initialBodyCode 
+}) => {
   const router = useClientRouter();
   const query = useClientQuery();
   const isReady = useClientIsReady();
+  const { data: session, status } = useSession();
   
-  const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(initialSource);
+  const [bodyCode, setBodyCode] = React.useState<string | null>(initialBodyCode);
   const [loading, setLoading] = React.useState(false);
   const [errMsg, setErrMsg] = React.useState<string | null>(null);
   const [mounted, setMounted] = React.useState(false);
@@ -219,13 +201,12 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
     setMounted(true);
   }, []);
 
-  const safeComponents = React.useMemo(
-    () =>
-      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
-        warnOnFallback: process.env.NODE_ENV === "development",
-      }),
-    [mdxRaw]
-  );
+  // ✅ Use correct normalizers
+  const required = tiers.normalizeRequired(requiredTier);
+  const user = tiers.normalizeUser(session?.user?.tier ?? "public");
+
+  const needsAuth = required !== "public";
+  const canAccess = tiers.hasAccess(user, required);
 
   async function loadLockedContent(): Promise<boolean> {
     setErrMsg(null);
@@ -247,12 +228,13 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
       }
 
       const ok = json as ApiOk;
-      if (!ok.source?.compiledSource) {
+      if (!ok.bodyCode) {
         setErrMsg("Invalid payload");
         return false;
       }
 
-      setSource(ok.source);
+      // ✅ Set state with compiled code - no re-serialization
+      setBodyCode(ok.bodyCode);
       return true;
     } catch {
       setErrMsg("Failed to unlock content");
@@ -270,13 +252,55 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
     if (router) router.push("/inner-circle");
   };
 
-  const requiredTier: AccessLevel = resource.accessLevel === "private" ? "private" : "inner-circle";
-
-  // ✅ Early return during SSR/prerender
+  // ✅ SSR/build shell - no loading state
   if (!router || !mounted) {
     return (
       <Layout title={resource.title}>
         <div className="min-h-screen bg-black" />
+      </Layout>
+    );
+  }
+
+  // ✅ Only show loading for restricted content
+  if (needsAuth && status === "loading") {
+    return (
+      <Layout title={resource.title}>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // ✅ Gate for unauthorized users
+  if (needsAuth && (!session?.user || !canAccess)) {
+    return (
+      <Layout title={resource.title}>
+        <div className="min-h-screen bg-gradient-to-b from-black to-zinc-950 text-white">
+          <div className="border-b border-white/5 bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-40">
+            <div className="mx-auto max-w-5xl px-6 py-4">
+              <button
+                onClick={handleBackToResources}
+                className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors group text-sm"
+                type="button"
+              >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+                <span className="font-mono text-[10px] uppercase tracking-widest">Back to Resources</span>
+              </button>
+            </div>
+          </div>
+          <div className="mx-auto max-w-5xl px-6 py-20">
+            <AccessGate
+              title={resource.title}
+              message={required === "private" || required === "top-secret"
+                ? "This institutional resource is restricted to executive clearance." 
+                : "This resource requires Inner Circle membership."}
+              requiredTier={required}
+              onUnlocked={() => void loadLockedContent()}
+              onGoToJoin={handleGoToJoin}
+            />
+          </div>
+        </div>
       </Layout>
     );
   }
@@ -310,7 +334,7 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
           <header className="mb-16">
             <div className="flex items-center gap-4 text-amber-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-6">
               <Shield size={14} />
-              <span>{resource.accessLevel} Clearance</span>
+              <span>{required} Clearance</span>
               <span className="w-12 h-px bg-amber-500/30" />
               {resource.date && <span className="text-white/30">{new Date(resource.date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</span>}
             </div>
@@ -349,19 +373,19 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
           </header>
 
           {/* Content */}
-          {locked && !source ? (
+          {locked && !bodyCode && (
             <div className="mt-16 max-w-2xl">
               <AccessGate
                 title={resource.title}
-                message={resource.accessLevel === "private" 
+                message={required === "private" || required === "top-secret"
                   ? "This institutional resource is restricted to executive clearance." 
                   : "This resource requires Inner Circle membership."}
-                requiredTier={requiredTier}
+                requiredTier={required}
                 onUnlocked={() => void loadLockedContent()}
                 onGoToJoin={handleGoToJoin}
               />
             </div>
-          ) : null}
+          )}
 
           {loading && (
             <div className="mt-16 flex items-center gap-3 text-amber-500">
@@ -376,9 +400,9 @@ const ResourceSlugPage: NextPage<Props> = ({ resource, locked, initialSource, md
             </div>
           )}
 
-          {source && (
+          {bodyCode && (
             <div className="mt-16 prose prose-invert prose-amber max-w-none">
-              <MDXRemote {...source} components={safeComponents as any} />
+              <SafeMDXRenderer code={bodyCode} />
             </div>
           )}
         </div>

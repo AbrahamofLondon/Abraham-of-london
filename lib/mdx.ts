@@ -131,9 +131,9 @@ export async function getAllContent(collection?: string): Promise<PostDocument[]
       });
     }
     
-    // Filter out drafts and convert
+    // Filter out drafts and convert - ✅ FIX: use optional chaining
     return filteredDocs
-      .filter(doc => !doc.draft)
+      .filter((doc: any) => !doc?.draft) // Use optional chaining and any type
       .map(convertToPostDocument);
   } catch (error) {
     console.error('Error getting content:', error);
@@ -223,4 +223,3 @@ export async function getContentBySlug(
     return null;
   }
 }
-

@@ -64,8 +64,24 @@ export function safeFirstChar(str: string | undefined | null): string {
   return str?.[0] || '';
 }
 
-export function safeSlice<T>(arr: T[] | undefined | null, start?: number, end?: number): T[] {
-  return arr?.slice(start, end) || [];
+export function safeSlice<T>(
+  input: T[] | string | undefined | null, 
+  start?: number, 
+  end?: number
+): T[] | string {
+  if (input === undefined || input === null) {
+    return Array.isArray(input) ? ([] as T[]) : '';
+  }
+  
+  if (typeof input === 'string') {
+    return input.slice(start, end);
+  }
+  
+  if (Array.isArray(input)) {
+    return input.slice(start, end);
+  }
+  
+  return '';
 }
 
 // Content filtering and sorting

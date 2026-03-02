@@ -5,7 +5,7 @@ import Link from "next/link";
 import { BookOpen, ShieldCheck, Lock, RefreshCw, Search, ArrowRight, TrendingUp } from "lucide-react";
 
 // Contentlayer integration (with defensive import)
-import { allBriefs } from "contentlayer/generated";
+import { allBriefs } from "@/lib/contentlayer";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast, type Tier } from "@/lib/server/auth/tokenStore.postgres";

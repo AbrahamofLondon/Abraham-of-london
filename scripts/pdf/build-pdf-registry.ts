@@ -1,147 +1,394 @@
-// scripts/pdf/build-pdf-registry.ts
-// Prebuild orchestrator for PDF registry + variants (Windows-safe, no npx).
-//
-// Order:
-// 1) Ensure scripts/pdf/pdf-registry.generated.ts exists (build-pdf-registry-generated.ts)
-// 2) Generate missing variants (generate-from-generated-registry.ts)
-// 3) Rebuild generated registry to refresh metadata (exists/fileSize/lastModified)
-
+/**
+ * scripts/pdf/build-pdf-registry-generated.ts
+ * INSTITUTIONAL REGISTRY GENERATOR — PRODUCTION STABLE
+ */
 import fs from "fs";
 import path from "path";
-import { spawnSync } from "child_process";
+import { fileURLToPath } from "url";
 
-type StepResult = {
-  step: string;
-  ok: boolean;
-  code: number | null;
-  error?: string;
-};
+// Importing source definitions and shared types
+import { 
+  ALL_SOURCE_PDFS, 
+  type SourcePDFItem, 
+  type PaperFormat, 
+  type PDFFormat, 
+  type Tier, 
+  type PDFType 
+} from "./pdf-registry.source";
 
-const ROOT = process.cwd();
+import type { AccessTier } from "../../lib/access/tier-policy";
 
-function fileExists(p: string) {
+type Paper = "A4" | "Letter" | "A3";
+const PAPER_ORDER: Paper[] = ["A4", "Letter", "A3"];
+
+type GeneratedTier = Tier | AccessTier;
+type GeneratedType = PDFType;
+type GeneratedFileFormat = PDFFormat;
+
+interface GeneratedPDFConfig {
+  id: string;
+  title: string;
+  type: GeneratedType;
+  tier: GeneratedTier;
+  outputPath: string;
+  description?: string;
+  excerpt?: string;
+  tags?: string[];
+  paper?: Paper;
+  format: GeneratedFileFormat;
+  isInteractive?: boolean;
+  isFillable?: boolean;
+  requiresAuth?: boolean;
+  version?: string;
+  author?: string;
+  category?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  priority?: number;
+  preload?: boolean;
+  lastModified?: string;
+  exists?: boolean;
+  fileSizeBytes?: number;
+}
+
+/** HELPER: Force invariant conditions */
+function invariant(condition: any, message: string): asserts condition {
+  if (!condition) throw new Error(`[build-pdf-registry-generated] ${message}`);
+}
+
+/** HELPER: Filter for valid paper formats */
+function paperFormatsOnly(formats?: PaperFormat[]): Paper[] {
+  if (!Array.isArray(formats)) return [];
+  return formats.filter((f): f is Paper => f === "A4" || f === "Letter" || f === "A3");
+}
+
+/** HELPER: Normalize web paths for Cross-Platform (Windows/Linux) compatibility */
+function normalizeWebPath(p: string): string {
+  const raw = String(p || "").trim();
+  let v = raw.replace(/\\/g, "/");
+  if (!v.startsWith("/")) v = `/${v}`;
+  v = v.replace(/^\/public\//, "/");
+  v = v.replace(/\/{2,}/g, "/");
+  return v;
+}
+
+/** HELPER: Determine extension based on format enum */
+function extensionForFormat(fmt: GeneratedFileFormat): string {
+  switch (fmt) {
+    case "PDF": return ".pdf";
+    case "EXCEL": return ".xlsx";
+    case "POWERPOINT": return ".pptx";
+    case "ZIP": return ".zip";
+    case "BINARY": return ".bin";
+    default: return ".pdf";
+  }
+}
+
+/** HELPER: Ensure file extension is present */
+function ensureExtensionByFormat(webPath: string, fmt: GeneratedFileFormat): string {
+  const ext = extensionForFormat(fmt);
+  if (webPath.toLowerCase().endsWith(ext)) return webPath;
+  return `${webPath}${ext}`;
+}
+
+/** HELPER: Verify physical file existence in public directory */
+function statPublicFile(webPath: string): { exists: boolean; lastModified?: string; fileSizeBytes?: number } {
   try {
-    return fs.statSync(p).isFile();
-  } catch {
-    return false;
-  }
-}
-
-function ensureDir(p: string) {
-  fs.mkdirSync(p, { recursive: true });
-}
-
-function findLocalTsxBin(): string {
-  // Prefer the .cmd on Windows; plain bin on others.
-  const bin = process.platform === "win32" ? "tsx.cmd" : "tsx";
-  const p = path.join(ROOT, "node_modules", ".bin", bin);
-  if (!fileExists(p)) {
-    throw new Error(
-      `Local tsx binary not found at ${p}. Install devDependency "tsx" and run pnpm i.`,
-    );
-  }
-  return p;
-}
-
-function runTsx(scriptRelPath: string, args: string[] = [], env?: Record<string, string>): StepResult {
-  const scriptAbs = path.join(ROOT, scriptRelPath);
-  const stepName = scriptRelPath.replace(/\\/g, "/").split("/").slice(-1)[0];
-
-  if (!fileExists(scriptAbs)) {
+    const fullPath = path.join(process.cwd(), "public", webPath.replace(/^\/+/, ""));
+    const st = fs.statSync(fullPath);
     return {
-      step: stepName,
-      ok: false,
-      code: 1,
-      error: `Script not found: ${scriptRelPath}`,
+      exists: true,
+      lastModified: st.mtime.toISOString(),
+      fileSizeBytes: st.size,
     };
+  } catch {
+    return { exists: false };
   }
-
-  let tsxBin: string;
-  try {
-    tsxBin = findLocalTsxBin();
-  } catch (e: any) {
-    return { step: stepName, ok: false, code: 1, error: e?.message || String(e) };
-  }
-
-  // Spawn the local tsx runner directly.
-  // On Windows, node can run the .cmd via shell:true — but shell introduces quoting bugs.
-  // Better: run the .cmd directly with shell:true ONLY on win32.
-  const useShell = process.platform === "win32";
-
-  const res = spawnSync(
-    tsxBin,
-    [scriptAbs, ...args],
-    {
-      cwd: ROOT,
-      stdio: "inherit",
-      env: { ...process.env, ...(env || {}), FORCE_COLOR: "1" },
-      shell: useShell,
-      windowsHide: true,
-    },
-  );
-
-  if (res.error) {
-    return { step: stepName, ok: false, code: res.status, error: res.error.message };
-  }
-
-  return { step: stepName, ok: res.status === 0, code: res.status };
 }
 
-function printHeader(title: string) {
-  console.log(`\n${title}`);
-  console.log("—".repeat(72));
+/**
+ * STRATEGIC DISCOVERY: 
+ * Scans physical directories to find files that aren't manually mapped.
+ */
+function discoverUnmappedFiles(mappedPaths: Set<string>): GeneratedPDFConfig[] {
+  const searchRoots = [
+    path.join(process.cwd(), "public", "assets", "downloads"),
+    path.join(process.cwd(), "public", "vault", "downloads")
+  ];
+  
+  const discovered: GeneratedPDFConfig[] = [];
+
+  const scan = (dir: string) => {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        scan(fullPath);
+      } else {
+        const webPath = normalizeWebPath("/" + path.relative(path.join(process.cwd(), "public"), fullPath));
+        if (mappedPaths.has(webPath)) continue;
+
+        const ext = path.extname(entry.name).toLowerCase();
+        if (![".pdf", ".xlsx", ".pptx", ".zip", ".bin"].includes(ext)) continue;
+
+        const idBase = path.basename(entry.name, ext);
+        const parentFolder = path.basename(path.dirname(fullPath));
+        const stats = statPublicFile(webPath);
+
+        discovered.push({
+          id: `auto__${parentFolder}__${idBase}`,
+          title: idBase.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+          type: "other",
+          tier: "architect",
+          outputPath: webPath,
+          format: ext === ".pdf" ? "PDF" : "BINARY",
+          exists: stats.exists,
+          lastModified: stats.lastModified,
+          fileSizeBytes: stats.fileSizeBytes,
+          category: "unmapped-discovery",
+          version: "1.0.0",
+          requiresAuth: true
+        });
+      }
+    }
+  };
+
+  searchRoots.forEach(scan);
+  return discovered;
 }
 
-function failFast(results: StepResult[]): never {
-  const failed = results.filter((r) => !r.ok);
-  console.error("\n❌ PDF registry build failed.");
-  for (const f of failed) {
-    console.error(`- ${f.step}: exit=${f.code}${f.error ? `, ${f.error}` : ""}`);
+/** HELPER: Generate variant paths for multi-format prints */
+function addPaperSuffix(webPath: string, paper: Paper): string {
+  const ext = path.posix.extname(webPath);
+  const base = webPath.substring(0, webPath.length - ext.length);
+  return `${base}-${paper.toLowerCase()}${ext}`;
+}
+
+async function main(): Promise<void> {
+  console.log("🛠️  [REGISTRY BUILD]: Reconciling manual source with physical assets...");
+  
+  const source = (ALL_SOURCE_PDFS || []) as SourcePDFItem[];
+  const generated: GeneratedPDFConfig[] = [];
+  const mappedPaths = new Set<string>();
+
+  for (const item of source) {
+    const baseId = String(item.id).trim();
+    const fmt: GeneratedFileFormat = (item.format ?? "PDF") as GeneratedFileFormat;
+    const basePath = ensureExtensionByFormat(normalizeWebPath(item.outputPath), fmt);
+    
+    mappedPaths.add(basePath);
+    const baseStat = statPublicFile(basePath);
+
+    const baseEntry: GeneratedPDFConfig = {
+      ...item,
+      id: baseId,
+      type: item.type as GeneratedType,
+      tier: item.tier as GeneratedTier,
+      outputPath: basePath,
+      format: fmt,
+      exists: baseStat.exists,
+      lastModified: baseStat.lastModified,
+      fileSizeBytes: baseStat.fileSizeBytes,
+    };
+
+    generated.push(baseEntry);
+
+    const papers = paperFormatsOnly(item.formats as PaperFormat[]);
+    if (fmt === "PDF" && papers.length >= 2) {
+      for (const paper of papers) {
+        const variantPath = addPaperSuffix(basePath, paper);
+        mappedPaths.add(variantPath);
+        const st = statPublicFile(variantPath);
+        generated.push({
+          ...baseEntry,
+          id: `${baseId}__${paper.toLowerCase()}`,
+          title: `${item.title} (${paper})`,
+          outputPath: variantPath,
+          paper,
+          exists: st.exists,
+          lastModified: st.lastModified,
+          fileSizeBytes: st.fileSizeBytes,
+        });
+      }
+    }
   }
-  process.exit(1);
+
+  // Sweep unmapped files to catch ghost assets
+  const discovered = discoverUnmappedFiles(mappedPaths);
+  const final = [...generated, ...discovered];
+
+  console.log(`✅ Generated ${final.length} total entries (${source.length} manual, ${discovered.length} discovered)`);
+
+  // Write to scripts location (for CLI tools)
+  const scriptsOut = path.join(process.cwd(), "scripts", "pdf", "pdf-registry.generated.ts");
+  fs.mkdirSync(path.dirname(scriptsOut), { recursive: true });
+  
+  const scriptsContent = `/** 
+ * AUTO-GENERATED INSTITUTIONAL REGISTRY (CLI TOOLING)
+ * Generated at: ${new Date().toISOString()}
+ * Total Assets: ${final.length}
+ * DO NOT EDIT DIRECTLY.
+ */
+
+import type { AccessTier } from "../../lib/access/tier-policy";
+
+export type PDFType = 
+  | "editorial" | "framework" | "academic" | "strategic" | "tool" | "canvas"
+  | "worksheet" | "assessment" | "journal" | "tracker" | "bundle" | "toolkit"
+  | "playbook" | "brief" | "checklist" | "pack" | "blueprint" | "liturgy"
+  | "study" | "other";
+
+export type PDFFormat = "PDF" | "EXCEL" | "POWERPOINT" | "ZIP" | "BINARY";
+export type PaperFormat = "A4" | "Letter" | "A3" | "bundle";
+
+export interface PDFRegistryEntry {
+  id: string;
+  title: string;
+  type: PDFType;
+  tier: string | AccessTier;
+  outputPath: string;
+  description?: string;
+  excerpt?: string;
+  tags?: string[];
+  paper?: PaperFormat;
+  format: PDFFormat;
+  isInteractive?: boolean;
+  isFillable?: boolean;
+  requiresAuth?: boolean;
+  version?: string;
+  author?: string;
+  category?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  priority?: number;
+  preload?: boolean;
+  lastModified?: string;
+  exists?: boolean;
+  fileSizeBytes?: number;
 }
 
-async function main() {
-  const results: StepResult[] = [];
+export const GENERATED_PDF_CONFIGS: readonly PDFRegistryEntry[] = ${JSON.stringify(final, null, 2)};
 
-  const generatedFile = path.join(ROOT, "lib", "pdf", "pdf-registry.generated.ts");
-  ensureDir(path.dirname(generatedFile));
+export type GeneratedPDFId = typeof GENERATED_PDF_CONFIGS[number]['id'];
 
-  // 1) Build generated registry
-  printHeader("📦 Step 1/3 — Build generated PDF registry");
-  results.push(runTsx("scripts/pdf/build-pdf-registry-generated.ts"));
+export const getGeneratedPDFs = (): readonly PDFRegistryEntry[] => GENERATED_PDF_CONFIGS;
 
-  if (!fileExists(generatedFile)) {
-    results.push({
-      step: "pdf-registry.generated.ts",
-      ok: false,
-      code: 1,
-      error: `Expected generated file not created: ${path.relative(ROOT, generatedFile)}`,
-    });
-    failFast(results);
-  }
-
-  // 2) Generate variants
-  printHeader("🧱 Step 2/3 — Generate missing format variants");
-  results.push(
-    runTsx("scripts/pdf/generate-from-generated-registry.ts", [], {
-      PDF_QUALITY: (process.env.PDF_QUALITY as string) || "premium",
-      PDF_TIER: (process.env.PDF_TIER as string) || "free",
-    }),
-  );
-
-  // 3) Rebuild registry to refresh metadata
-  printHeader("🔁 Step 3/3 — Rebuild registry metadata (post-variants)");
-  results.push(runTsx("scripts/pdf/build-pdf-registry-generated.ts"));
-
-  if (!results.every((r) => r.ok)) failFast(results);
-
-  console.log("\n✅ PDF registry is GREEN.");
-  console.log(`Generated file: ${path.relative(ROOT, generatedFile)}`);
+export function getPDFById(id: string): PDFRegistryEntry | undefined {
+  return GENERATED_PDF_CONFIGS.find((config) => config.id === id);
 }
 
-main().catch((err: any) => {
-  console.error("❌ Unexpected error in scripts/pdf/build-pdf-registry.ts");
-  console.error(err?.stack || err?.message || String(err));
-  process.exit(1);
-});
+export function getRegistryStats() {
+  const categories = [...new Set(GENERATED_PDF_CONFIGS.map(c => c.category || 'Uncategorized'))];
+  return {
+    totalAssets: GENERATED_PDF_CONFIGS.length,
+    discovered: ${discovered.length},
+    manual: ${source.length},
+    categories,
+    categoryCount: categories.length,
+    generatedAt: "${new Date().toISOString()}",
+    health: {
+      exists: GENERATED_PDF_CONFIGS.filter(c => c.exists).length,
+      missing: GENERATED_PDF_CONFIGS.filter(c => !c.exists).length
+    }
+  };
+}
+`;
+
+  fs.writeFileSync(scriptsOut, scriptsContent, "utf8");
+  console.log(`✅ Written to: ${path.relative(process.cwd(), scriptsOut)}`);
+
+  // Write to lib location (for Next.js runtime)
+  const libOut = path.join(process.cwd(), "lib", "pdf", "registry.static.ts");
+  fs.mkdirSync(path.dirname(libOut), { recursive: true });
+
+  const libContent = `/** 
+ * AUTO-GENERATED INSTITUTIONAL REGISTRY (RUNTIME SSOT)
+ * Generated at: ${new Date().toISOString()}
+ * Total Assets: ${final.length}
+ * DO NOT EDIT DIRECTLY.
+ */
+
+import type { AccessTier } from "../access/tier-policy";
+
+export type PDFType = 
+  | "editorial" | "framework" | "academic" | "strategic" | "tool" | "canvas"
+  | "worksheet" | "assessment" | "journal" | "tracker" | "bundle" | "toolkit"
+  | "playbook" | "brief" | "checklist" | "pack" | "blueprint" | "liturgy"
+  | "study" | "other";
+
+export type PDFFormat = "PDF" | "EXCEL" | "POWERPOINT" | "ZIP" | "BINARY";
+export type PaperFormat = "A4" | "Letter" | "A3" | "bundle";
+
+export interface PDFRegistryEntry {
+  id: string;
+  title: string;
+  type: PDFType;
+  tier: string | AccessTier;
+  outputPath: string;
+  description?: string;
+  excerpt?: string;
+  tags?: string[];
+  paper?: PaperFormat;
+  formats?: PaperFormat[];
+  format: PDFFormat;
+  isInteractive?: boolean;
+  isFillable?: boolean;
+  requiresAuth?: boolean;
+  version?: string;
+  author?: string;
+  category?: string;
+  priority?: number;
+  preload?: boolean;
+  lastModified?: string;
+  exists?: boolean;
+  fileSizeBytes?: number;
+}
+
+export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = ${JSON.stringify(final, null, 2)};
+
+export type GeneratedPDFId = PDFRegistryEntry['id'];
+
+export const getGeneratedPDFs = (): ReadonlyArray<PDFRegistryEntry> => GENERATED_PDF_CONFIGS;
+
+export function getAllPDFs(): PDFRegistryEntry[] {
+  return GENERATED_PDF_CONFIGS.map(x => ({ ...x }));
+}
+
+export function getPDFById(id: string): PDFRegistryEntry | undefined {
+  return GENERATED_PDF_CONFIGS.find((config) => config.id === id);
+}
+
+export function getRegistryStats() {
+  const categories = [...new Set(GENERATED_PDF_CONFIGS.map(c => c.category || 'Uncategorized'))];
+  return {
+    totalAssets: GENERATED_PDF_CONFIGS.length,
+    discovered: ${discovered.length},
+    manual: ${source.length},
+    categories,
+    categoryCount: categories.length,
+    generatedAt: "${new Date().toISOString()}",
+    health: {
+      exists: GENERATED_PDF_CONFIGS.filter(c => c.exists).length,
+      missing: GENERATED_PDF_CONFIGS.filter(c => !c.exists).length
+    }
+  };
+}
+`;
+
+  fs.writeFileSync(libOut, libContent, "utf8");
+  console.log(`✅ Written to: ${path.relative(process.cwd(), libOut)}`);
+  console.log(`✅ [SUCCESS]: Registry built with ${final.length} records.`);
+}
+
+/** EXECUTION */
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] === path.resolve(__filename)) {
+  main().catch((err) => {
+    console.error("❌ [REGISTRY_FAILURE]:", err);
+    process.exit(1);
+  });
+}
+
+export default main;

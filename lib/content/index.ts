@@ -2,34 +2,33 @@
 
 /**
  * lib/content/index.ts — SSOT Content API (Client-safe)
- *
- * HARD RULE:
- * - Do NOT import per-type exports (Post/Book/etc) from contentlayer/generated,
- *   because contentlayer2 output may not export them as named types.
- * - Use `allDocuments` and infer.
  */
-
-import { allDocuments } from "contentlayer/generated";
+import { allDocuments } from "@/lib/contentlayer";
 import { normalizeSlug as normalizeSlugShared, joinHref, getDocHref as getDocHrefShared } from "@/lib/content/shared";
 
-// -----------------------------
-// Tier definitions
-// -----------------------------
-export type Tier = "free" | "basic" | "premium" | "enterprise" | "restricted";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import {
+  TIER_ORDER,
+  normalizeRequiredTier,
+  normalizeUserTier,
+  hasAccess,
+  requiredTierFromDoc,
+} from "@/lib/access/tier-policy";
 
-export const TIER_HIERARCHY: Record<Tier, number> = {
-  free: 0,
-  basic: 1,
-  premium: 2,
-  enterprise: 3,
-  restricted: 4,
-};
+// -----------------------------
+// Tier definitions (SSOT)
+// -----------------------------
+export type Tier = AccessTier;
+
+export const TIER_HIERARCHY: Record<Tier, number> = Object.fromEntries(
+  (TIER_ORDER as readonly Tier[]).map((t, i) => [t, i])
+) as Record<Tier, number>;
 
 // -----------------------------
 // Minimal doc shape (stable)
 // -----------------------------
 export type ContentDoc = {
-  type?: string; // "Post" | "Short" | ...
+  type?: string;
   title?: string;
   slug?: string;
   href?: string;
@@ -67,46 +66,33 @@ export type DocKind =
   | "unknown";
 
 // -----------------------------
-// Tier utilities
+// Tier utilities (SSOT)
 // -----------------------------
+/** Back-compat: normalize a tier-ish string for USER context */
 export function normalizeTier(tier: string | Tier): Tier {
-  if (!tier) return "free";
-
-  const normalized = tier.toString().toLowerCase().trim();
-
-  if (normalized === "public" || normalized === "free") return "free";
-  if (normalized === "inner-circle" || normalized === "basic") return "basic";
-  if (normalized === "inner-circle-plus" || normalized === "premium") return "premium";
-  if (normalized === "inner-circle-elite" || normalized === "enterprise") return "enterprise";
-  if (normalized === "private" || normalized === "restricted") return "restricted";
-
-  if (isTier(normalized)) return normalized as Tier;
-
-  return "free";
+  return normalizeUserTier(tier);
 }
 
+/** Back-compat: tier guard */
 export function isTier(value: string): value is Tier {
-  return ["free", "basic", "premium", "enterprise", "restricted"].includes(value);
+  return (TIER_ORDER as readonly string[]).includes(String(value));
 }
 
+/** SSOT: required tier for a doc */
 export function getRequiredTier(doc: any): Tier {
-  if (!doc) return "free";
-
-  if (doc.tier) return normalizeTier(doc.tier);
-  if (doc.accessLevel) return normalizeTier(doc.accessLevel);
-  if (doc.classification) return normalizeTier(doc.classification);
-
-  return "free";
+  return requiredTierFromDoc(doc);
 }
 
+/** Back-compat: allowed check (user >= required) */
 export function isTierAllowed(requiredTier: Tier, userTier: Tier): boolean {
-  return TIER_HIERARCHY[userTier] >= TIER_HIERARCHY[requiredTier];
+  return hasAccess(userTier, requiredTier);
 }
 
-export function canAccessDoc(doc: any, userTier: string | Tier = "free"): boolean {
+/** Back-compat: can user access doc */
+export function canAccessDoc(doc: any, userTier: string | Tier = "public"): boolean {
   const required = getRequiredTier(doc);
-  const user = normalizeTier(userTier);
-  return isTierAllowed(required, user);
+  const user = normalizeUserTier(userTier);
+  return hasAccess(user, required);
 }
 
 export function getAccessLevel(doc: any): {
@@ -118,9 +104,9 @@ export function getAccessLevel(doc: any): {
   const tier = getRequiredTier(doc);
   return {
     tier,
-    requiresAuth: tier !== "free",
-    requiresInnerCircle: tier === "basic" || tier === "premium" || tier === "enterprise",
-    requiresAdmin: tier === "restricted",
+    requiresAuth: tier !== "public",
+    requiresInnerCircle: hasAccess(tier, "inner-circle"), // required >= inner-circle
+    requiresAdmin: hasAccess(tier, "architect"), // required >= architect
   };
 }
 
@@ -128,7 +114,6 @@ export function getAccessLevel(doc: any): {
 // Normalizers (SSOT, consistent)
 // -----------------------------
 export function normalizeSlug(input: string): string {
-  // Use shared normalizer + strip file extensions
   return normalizeSlugShared(String(input || "")).replace(/\.(md|mdx)$/i, "");
 }
 
@@ -158,8 +143,7 @@ export function isDraft(doc: any): boolean {
 export function isPublic(doc: any): boolean {
   if (!doc) return false;
   if (!isPublished(doc)) return false;
-  const tier = getRequiredTier(doc);
-  return tier === "free";
+  return getRequiredTier(doc) === "public";
 }
 
 // Aliases for backward compatibility
@@ -168,7 +152,7 @@ export const isPublicDoc = isPublic;
 export const isDraftDoc = isDraft;
 
 // -----------------------------
-// Kind resolver (single source)
+// Kind resolver
 // -----------------------------
 export function getDocKind(doc: any): DocKind {
   const t = String(doc?.type || "").toLowerCase();
@@ -223,7 +207,6 @@ export function getDocBySlug(slug: string): ContentDoc | null {
   if (!target) return null;
 
   const docs = getAllContentlayerDocs();
-
   for (const d of docs) {
     const s = getDocSlug(d);
     if (s === target || s.endsWith(`/${target}`)) return d;
@@ -232,10 +215,9 @@ export function getDocBySlug(slug: string): ContentDoc | null {
 }
 
 // -----------------------------
-// Href helpers (optional, but stops duplication if used project-wide)
+// Href helpers
 // -----------------------------
 export function getDocHref(doc: any): string {
-  // Prefer the shared, already-hardened href builder
   return getDocHrefShared(doc);
 }
 

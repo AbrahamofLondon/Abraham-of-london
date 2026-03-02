@@ -1,18 +1,16 @@
 // app/api/v2/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma, safePrismaQuery } from "@/lib/prisma";
+import { prisma, safePrismaQuery } from "@/lib/prisma.server";
 
-export const runtime = "nodejs";        // ✅ FIX: Node runtime (Prisma, env, etc.)
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 type AnyObj = Record<string, any>;
 
 function getBaseUrl(request: NextRequest): string {
-  // Prefer explicit site URL in production
   const prod = process.env.NODE_ENV === "production";
   if (prod) return process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  // Local dev
   return "http://localhost:3000";
 }
 
@@ -85,7 +83,6 @@ async function forwardToV1(request: NextRequest, method: Method = "GET", body?: 
 }
 
 async function dbFallback(request: NextRequest) {
-  // Prisma schema note: you said InnerCircleMember exists (not User)
   const usersResult = await safePrismaQuery(() =>
     prisma.innerCircleMember.findMany({
       select: {
@@ -177,7 +174,6 @@ export async function DELETE(request: NextRequest) {
     const userId = searchParams.get("id");
     if (!userId) return NextResponse.json({ error: "User ID is required for deletion" }, { status: 400 });
 
-    // if v1 expects ?id=, include it; otherwise delete by body, etc.
     return await forwardToV1(request, "DELETE");
   } catch (err) {
     console.error("[Users API v2] DELETE error:", err);
