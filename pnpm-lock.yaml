@@ -29,7 +29,7 @@ overrides:
   diff: 5.2.2
   '@types/dompurify': 3.2.0
   fast-xml-parser: ^5.3.4
-  '@prisma/client': 6.6.0
+  '@prisma/client': 7.3.0
   prisma: 6.6.0
   cookie@<0.7.0: '>=0.7.0'
   undici@<6.23.0: '>=6.23.0'
@@ -97,8 +97,8 @@ importers:
         specifier: ^7.3.0
         version: 7.4.1
       '@prisma/client':
-        specifier: 6.6.0
-        version: 6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3)
+        specifier: 7.3.0
+        version: 7.3.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -2665,12 +2665,15 @@ packages:
   '@prisma/adapter-neon@7.4.1':
     resolution: {integrity: sha512-qXKK6Pd+57qwzYaivJOX1PhLAfFledSD7e+zexoxLHusbvvgg+mDBhkerHJXm6MzAExrL3DlkK1wrGVelNUzQQ==}
 
-  '@prisma/client@6.6.0':
-    resolution: {integrity: sha512-vfp73YT/BHsWWOAuthKQ/1lBgESSqYqAWZEYyTdGXyFAHpmewwWL2Iz6ErIzkj4aHbuc6/cGSsE6ZY+pBO04Cg==}
-    engines: {node: '>=18.18'}
+  '@prisma/client-runtime-utils@7.3.0':
+    resolution: {integrity: sha512-dG/ceD9c+tnXATPk8G+USxxYM9E6UdMTnQeQ+1SZUDxTz7SgQcfxEqafqIQHcjdlcNK/pvmmLfSwAs3s2gYwUw==}
+
+  '@prisma/client@7.3.0':
+    resolution: {integrity: sha512-FXBIxirqQfdC6b6HnNgxGmU7ydCPEPk7maHMOduJJfnTP+MuOGa15X4omjR/zpPUUpm8ef/mEFQjJudOGkXFcQ==}
+    engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: 6.6.0
-      typescript: '>=5.1.0'
+      typescript: '>=5.4.0'
     peerDependenciesMeta:
       prisma:
         optional: true
@@ -13594,7 +13597,11 @@ snapshots:
       '@prisma/driver-adapter-utils': 7.4.1
       postgres-array: 3.0.4
 
-  '@prisma/client@6.6.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client-runtime-utils@7.3.0': {}
+
+  '@prisma/client@7.3.0(prisma@6.6.0(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@prisma/client-runtime-utils': 7.3.0
     optionalDependencies:
       prisma: 6.6.0(typescript@5.9.3)
       typescript: 5.9.3
