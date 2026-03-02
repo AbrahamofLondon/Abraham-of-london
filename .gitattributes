@@ -1,120 +1,212 @@
 # ============================================
-# ABRAHAM OF LONDON — .GITATTRIBUTES (PRODUCTION)
+# ABRAHAM OF LONDON — .GITATTRIBUTES (SSOT)
+# Production-grade, Windows-safe, CI-safe
 # ============================================
 
-# Default: normalize all text to LF in the repo
+# --------------------------------------------
+# 1) GLOBAL DEFAULTS
+# --------------------------------------------
+# Normalize text files to LF in repository.
+# (This is the core fix for Contentlayer + MDX sanity.)
 * text=auto eol=lf
 
-# Windows command scripts keep CRLF
-*.bat text eol=crlf
-*.cmd text eol=crlf
+# --------------------------------------------
+# 2) WINDOWS-SPECIFIC SCRIPT EXCEPTIONS
+# --------------------------------------------
+# Keep Windows batch scripts as CRLF (PowerShell handles LF fine)
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
 
-# PowerShell is text (LF is fine)
-*.ps1 text eol=lf
+# Shell scripts should be LF (important for CI + WSL)
+*.sh   text eol=lf
+*.bash text eol=lf
+*.zsh  text eol=lf
 
-# Explicit text types (LF)
-*.ts text eol=lf
-*.tsx text eol=lf
-*.js text eol=lf
-*.jsx text eol=lf
-*.mjs text eol=lf
-*.cjs text eol=lf
-*.css text eol=lf
-*.scss text eol=lf
-*.sass text eol=lf
-*.less text eol=lf
-*.md text eol=lf
-*.mdx text eol=lf
-*.txt text eol=lf
-*.json text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
-*.toml text eol=lf
-*.xml text eol=lf
-*.csv text eol=lf
-*.html text eol=lf
-*.htm text eol=lf
-*.svg text eol=lf
-*.sql text eol=lf
+# PowerShell
+*.ps1  text eol=lf
+*.psm1 text eol=lf
+*.psd1 text eol=lf
+
+# --------------------------------------------
+# 3) SOURCE CODE (LF)
+# --------------------------------------------
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.js   text eol=lf
+*.jsx  text eol=lf
+*.mjs  text eol=lf
+*.cjs  text eol=lf
+*.mts  text eol=lf
+*.cts  text eol=lf
+
+*.py   text eol=lf
+*.rb   text eol=lf
+*.php  text eol=lf
+*.java text eol=lf
+*.kt   text eol=lf
+*.go   text eol=lf
+*.rs   text eol=lf
+*.c    text eol=lf
+*.h    text eol=lf
+*.cpp  text eol=lf
+*.hpp  text eol=lf
+
+# --------------------------------------------
+# 4) STYLES / MARKUP (LF)
+# --------------------------------------------
+*.css   text eol=lf
+*.scss  text eol=lf
+*.sass  text eol=lf
+*.less  text eol=lf
+
+*.html  text eol=lf
+*.htm   text eol=lf
+*.xml   text eol=lf
+*.svg   text eol=lf
+
+# --------------------------------------------
+# 5) CONTENT (LF + UTF-8 where it matters)
+# --------------------------------------------
+*.md   text eol=lf working-tree-encoding=UTF-8
+*.mdx  text eol=lf working-tree-encoding=UTF-8
+*.txt  text eol=lf working-tree-encoding=UTF-8
+
+# Optional: enforce UTF-8 for common structured text
+# (Safe for most repos; remove if you store legacy encodings.)
+*.json  text eol=lf working-tree-encoding=UTF-8
+*.yml   text eol=lf working-tree-encoding=UTF-8
+*.yaml  text eol=lf working-tree-encoding=UTF-8
+*.toml  text eol=lf working-tree-encoding=UTF-8
+*.csv   text eol=lf working-tree-encoding=UTF-8
+*.tsv   text eol=lf working-tree-encoding=UTF-8
+
+# --------------------------------------------
+# 6) CONFIG / TOOLING (LF)
+# --------------------------------------------
+*.env           text eol=lf
+*.env.*         text eol=lf
+*.ini           text eol=lf
+*.conf          text eol=lf
+*.config        text eol=lf
+*.properties    text eol=lf
+
+*.npmrc         text eol=lf
+*.pnpmfile.cjs  text eol=lf
+*.yarnrc        text eol=lf
+*.yarnrc.yml    text eol=lf
+
+*.prettierrc     text eol=lf
+*.prettierrc.*   text eol=lf
+*.eslintrc       text eol=lf
+*.eslintrc.*     text eol=lf
+*.stylelintrc    text eol=lf
+*.stylelintrc.*  text eol=lf
+
+*.editorconfig  text eol=lf
+*.gitignore     text eol=lf
+.gitattributes  text eol=lf
+
+Dockerfile      text eol=lf
+Dockerfile.*    text eol=lf
+Makefile        text eol=lf
+Procfile        text eol=lf
+
+*.lock          text eol=lf
+package-lock.json text eol=lf
+pnpm-lock.yaml    text eol=lf
+yarn.lock         text eol=lf
+
+# Graph / Schema / API
+*.sql     text eol=lf
+*.prisma  text eol=lf
 *.graphql text eol=lf
-*.gql text eol=lf
-*.proto text eol=lf
-*.prisma text eol=lf
-Dockerfile text eol=lf
-Makefile text eol=lf
-Procfile text eol=lf
-README* text eol=lf
-LICENSE* text eol=lf
-CHANGELOG* text eol=lf
-CONTRIBUTING* text eol=lf
-.editorconfig text eol=lf
-.gitignore text eol=lf
-.npmrc text eol=lf
-.prettierrc* text eol=lf
-.eslintrc* text eol=lf
+*.gql     text eol=lf
+*.proto   text eol=lf
 
-# Binary (never touch line endings; disable diffs/merges for safety)
-*.png binary
-*.jpg binary
+# READMEs / legal
+README*        text eol=lf working-tree-encoding=UTF-8
+LICENSE*       text eol=lf working-tree-encoding=UTF-8
+CHANGELOG*     text eol=lf working-tree-encoding=UTF-8
+CONTRIBUTING*  text eol=lf working-tree-encoding=UTF-8
+
+# --------------------------------------------
+# 7) GENERATED / VENDOR (OPTIONAL: reduce diffs/noise)
+# --------------------------------------------
+# These are often regenerated; keeping them "generated" is helpful for GitHub/Linguist.
+# Remove if you want GitHub language stats to include them.
+.contentlayer/** linguist-generated
+.next/**         linguist-generated
+out/**           linguist-generated
+dist/**          linguist-generated
+coverage/**      linguist-generated
+
+# --------------------------------------------
+# 8) BINARY — DO NOT NORMALIZE / DO NOT DIFF
+# --------------------------------------------
+# Images
+*.png  binary
+*.jpg  binary
 *.jpeg binary
-*.gif binary
-*.ico binary
-*.bmp binary
-*.tif binary
+*.gif  binary
+*.ico  binary
+*.bmp  binary
+*.tif  binary
 *.tiff binary
 *.webp binary
 *.avif binary
 *.heic binary
 *.heif binary
 
-*.woff binary
+# Fonts
+*.woff  binary
 *.woff2 binary
-*.ttf binary
-*.eot binary
-*.otf binary
+*.ttf   binary
+*.eot   binary
+*.otf   binary
 
-*.mp3 binary
-*.wav binary
-*.ogg binary
+# Audio / Video
+*.mp3  binary
+*.wav  binary
+*.ogg  binary
 *.flac binary
-*.aac binary
-*.m4a binary
-*.mp4 binary
+*.aac  binary
+*.m4a  binary
+*.mp4  binary
 *.webm binary
-*.mov binary
-*.avi binary
-*.mkv binary
+*.mov  binary
+*.avi  binary
+*.mkv  binary
 
+# Archives
 *.zip binary
 *.tar binary
-*.gz binary
+*.gz  binary
 *.tgz binary
 *.bz2 binary
-*.xz binary
-*.7z binary
+*.xz  binary
+*.7z  binary
 *.rar binary
 
-*.exe binary
-*.dll binary
-*.so binary
+# Executables / Native
+*.exe  binary
+*.dll  binary
+*.so   binary
 *.dylib binary
-*.msi binary
+*.msi  binary
 
-*.pdf binary
-*.doc binary
+# Documents (binary)
+*.pdf  binary
+*.doc  binary
 *.docx binary
-*.xls binary
+*.xls  binary
 *.xlsx binary
-*.ppt binary
+*.ppt  binary
 *.pptx binary
-*.odt binary
-*.ods binary
-*.odp binary
+*.odt  binary
+*.ods  binary
+*.odp  binary
 
-*.db binary -diff -merge
-*.sqlite binary -diff -merge
+# Databases (also disable diff/merge)
+*.db      binary -diff -merge
+*.sqlite  binary -diff -merge
 *.sqlite3 binary -diff -merge
-
-# UTF-8 working tree encoding for markdown (prevents odd Windows encodings)
-*.md  text working-tree-encoding=UTF-8
-*.mdx text working-tree-encoding=UTF-8
