@@ -6,7 +6,7 @@
  */
 import "server-only";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma.server";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 

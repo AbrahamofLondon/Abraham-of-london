@@ -1,11 +1,12 @@
-export type AccessTier = "public" | "inner-circle" | "private";
+import type { AccessTier as PolicyTier } from "@/lib/access/tier-policy";
+export type AccessTier = PolicyTier;
 
 export type AccessSession = {
   sessionId: string;
   tier: AccessTier;
-  subject: string; // user id or email hash or "anon"
+  subject: string;
   issuedAt: number;
-  expiresAt: number; // epoch ms
+  expiresAt: number;
   revoked?: boolean;
 };
 

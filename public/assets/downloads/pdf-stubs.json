@@ -1,0 +1,456 @@
+{
+  "generatedAt": "2026-03-04T12:15:12.473Z",
+  "total": 75,
+  "stubs": [
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-001.pdf",
+      "sizeBytes": 6250,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-004.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-007.pdf",
+      "sizeBytes": 6251,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-010.pdf",
+      "sizeBytes": 6246,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-013.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-016.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-019.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-022.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-025.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-028.pdf",
+      "sizeBytes": 6246,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-031.pdf",
+      "sizeBytes": 6249,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-034.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-037.pdf",
+      "sizeBytes": 6249,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-040.pdf",
+      "sizeBytes": 6246,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-043.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-046.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-049.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-052.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-055.pdf",
+      "sizeBytes": 6249,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-058.pdf",
+      "sizeBytes": 6248,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-061.pdf",
+      "sizeBytes": 6249,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-064.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-067.pdf",
+      "sizeBytes": 6249,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-070.pdf",
+      "sizeBytes": 6246,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/fr-073.pdf",
+      "sizeBytes": 6247,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-003.pdf",
+      "sizeBytes": 6229,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-006.pdf",
+      "sizeBytes": 6229,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-009.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-012.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-015.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-018.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-021.pdf",
+      "sizeBytes": 6228,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-024.pdf",
+      "sizeBytes": 6228,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-027.pdf",
+      "sizeBytes": 6228,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-030.pdf",
+      "sizeBytes": 6229,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-033.pdf",
+      "sizeBytes": 6228,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-036.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-039.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-042.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-045.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-048.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-051.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-054.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-057.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-060.pdf",
+      "sizeBytes": 6229,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-063.pdf",
+      "sizeBytes": 6228,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-066.pdf",
+      "sizeBytes": 6229,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-069.pdf",
+      "sizeBytes": 6231,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-072.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/ia-075.pdf",
+      "sizeBytes": 6230,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-002.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-005.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-008.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-011.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-014.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-017.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-020.pdf",
+      "sizeBytes": 6240,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-023.pdf",
+      "sizeBytes": 6241,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-026.pdf",
+      "sizeBytes": 6240,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-029.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-032.pdf",
+      "sizeBytes": 6245,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-035.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-038.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-041.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-044.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-047.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-050.pdf",
+      "sizeBytes": 6242,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-053.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-056.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-059.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-062.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-065.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-068.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-071.pdf",
+      "sizeBytes": 6244,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    },
+    {
+      "outputPath": "/assets/downloads/content-downloads/si-074.pdf",
+      "sizeBytes": 6243,
+      "sizeHuman": "6.1 KB",
+      "reason": "Valid PDF but below keep threshold (7KB)."
+    }
+  ]
+}

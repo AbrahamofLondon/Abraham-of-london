@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getTokenStore } from "./tokenStore";
-import type { AccessSession, AccessTier } from "./types";
-import { safeSlice } from "@/lib/utils/safe";
+import tiers from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 
 const COOKIE_NAME = "aol_access";
@@ -38,6 +38,7 @@ export function newSessionId(): string {
   return crypto.randomBytes(24).toString("hex");
 }
 
+
 export function buildSession(args: { tier: AccessTier; subject: string }): AccessSession {
   const now = Date.now();
   const ttlMs = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000;
@@ -52,6 +53,5 @@ export function buildSession(args: { tier: AccessTier; subject: string }): Acces
 }
 
 export function tierAtLeast(current: AccessTier, required: AccessTier): boolean {
-  const order: AccessTier[] = ["public", "inner-circle", "private"];
-  return order.indexOf(current) >= order.indexOf(required);
+  return hasAccess(current, required);
 }

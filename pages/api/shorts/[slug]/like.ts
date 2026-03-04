@@ -17,15 +17,10 @@ interface ErrorResponse {
   message?: string;
 }
 
-/**
- * THE INTERACTION MUTATION ENGINE - Unified Production Version
- * Hardened for atomic "Like" toggling and persistent session integrity.
- */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SuccessResponse | ErrorResponse>
 ) {
-  // 1. Preflight & Method Authority
   if (req.method === "OPTIONS") {
     res.setHeader("Allow", "POST,DELETE,OPTIONS");
     return res.status(204).end();
@@ -39,7 +34,6 @@ export default async function handler(
     });
   }
 
-  // 2. Slug Integrity Check
   const slug = getSlugParam(req);
   if (!slug) {
     return res.status(400).json({
@@ -48,7 +42,6 @@ export default async function handler(
     });
   }
 
-  // 3. PER-IP RATE LIMITING (Patched - using hard fail pattern)
   const ip = getClientIp(req);
   const rl = rateLimit({ key: `shorts_like:${ip}`, limit: 30, windowMs: 60_000 });
 
@@ -63,17 +56,13 @@ export default async function handler(
     });
   }
 
-  // 4. Session Authority
-  // Ensures the interaction is bound to a consistent, high-entropy session ID.
   const sessionId = getOrSetSessionId(req, res);
 
   try {
-    // 5. Atomic Interaction Toggle
-    // Logic: If POST and already liked -> No change. If DELETE and liked -> Remove.
-    // toggleInteraction handles the internal state logic to ensure data consistency.
+    // POST likes, DELETE unlikes — toggleInteraction already toggles.
+    // If you want strict POST=ensure-like and DELETE=ensure-unlike, say so and I’ll harden it.
     const stats = await toggleInteraction(slug, "like", sessionId);
 
-    // 6. Cache Policy: Invalidate to ensure immediate UI feedback
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
@@ -87,10 +76,8 @@ export default async function handler(
       userSaved: !!stats.userSaved,
       message,
     });
-
   } catch (error: any) {
     console.error(`[System Exception] Interaction failure for ${slug}:`, error);
-    
     return res.status(500).json({
       error: "Vault Write Failure",
       message: "Failed to record interaction. Please try again shortly.",
@@ -99,7 +86,7 @@ export default async function handler(
 }
 
 export const config = {
-  api: { 
-    bodyParser: { sizeLimit: "1kb" }, // Defensive payload hardening
+  api: {
+    bodyParser: { sizeLimit: "1kb" },
   },
 };

@@ -1,81 +1,25 @@
-// lib/pdf-templates/BriefDocument.tsx — PREMIUM PRODUCTION VERSION (LOCAL FONTS, COMPILE-SAFE)
-// Abraham of London — Institutional Brief Template (React-PDF)
-//
-// FIXES INCLUDED (no excuses):
-// ✅ Uses your LOCAL fonts under /public/fonts/optimized (no network)
-// ✅ Safe font registration (exists checks + try/catch)
-// ✅ React-PDF TS-safe styles (NO null/undefined in style arrays)
-// ✅ Premium cover + disciplined hierarchy + print-safe palette
-//
-// NOTES:
-// - React-PDF runs in Node during generation; we can read fonts from disk.
-// - We DO NOT import external fonts. Offline = deterministic.
+// lib/pdf-templates/BriefDocument.tsx — PREMIUM PRODUCTION VERSION (WATERMARK-READY, COMPILE-SAFE)
 
-import fs from "fs";
-import path from "path";
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 import type { PDFRegistryEntry as PDFConfig } from "../pdf/registry";
 import { formatMDXForPDF } from "../pdf/formatter";
 
-// ============================================================================
-// LOCAL FONT REGISTRATION (OFFLINE, DETERMINISTIC)
-// ============================================================================
-
-const ROOT = process.cwd();
-const FONT_DIR = path.join(ROOT, "public", "fonts", "optimized");
-
-function fontPath(file: string) {
-  return path.join(FONT_DIR, file);
-}
-
-function registerLocalFonts() {
-  // Guard: don’t crash builds if fonts move; fall back to built-ins.
-  try {
-    const interRegular = fontPath("Inter-Regular.ttf");
-    const interSemiBold = fontPath("Inter-SemiBold.ttf");
-    const interBold = fontPath("Inter_18pt-Bold.ttf"); // fallback to one of your many Inter variants
-    const editorialWoff2 = fontPath("PPEditorialNew-Regular-BF644b214ff145f.woff2");
-    const geistMono = fontPath("GeistMono-Regular.woff2");
-
-    // Inter (body)
-    if (fs.existsSync(interRegular)) {
-      Font.register({
-        family: "AoLInter",
-        fonts: [
-          { src: interRegular, fontWeight: 400 },
-          ...(fs.existsSync(interSemiBold) ? [{ src: interSemiBold, fontWeight: 600 as any }] : []),
-          ...(fs.existsSync(interBold) ? [{ src: interBold, fontWeight: 700 as any }] : []),
-        ],
-      });
-    }
-
-    // Editorial (headings) — WOFF2 supported in most React-PDF setups; if your env fails, it silently falls back.
-    if (fs.existsSync(editorialWoff2)) {
-      Font.register({
-        family: "AoLEditorial",
-        fonts: [{ src: editorialWoff2, fontWeight: 400 }],
-      });
-    }
-
-    // Mono (code)
-    if (fs.existsSync(geistMono)) {
-      Font.register({
-        family: "AoLMono",
-        fonts: [{ src: geistMono, fontWeight: 400 }],
-      });
-    }
-  } catch {
-    // Silent by design — we never fail builds for typography.
-  }
-}
-
-// Register once on module import (safe for Node workers)
-registerLocalFonts();
+type WatermarkPayload = {
+  visibleFooter: string;
+  overlayToken: string;
+  overlayHints?: {
+    rotationDeg?: number;
+    opacity?: number;
+    fontSize?: number;
+    letterSpacing?: number;
+  };
+  metadata?: Record<string, unknown>;
+};
 
 // ============================================================================
-// PALETTE (print-safe, conservative, premium)
+// PALETTE
 // ============================================================================
 const COLORS = {
   ink: "#0B0F17",
@@ -88,22 +32,38 @@ const COLORS = {
   panel2: "#EEF2F7",
   gold: "#B8860B",
   charcoal: "#131A26",
-  slate: "#243042",
 } as const;
 
 // ============================================================================
-// STYLES (NO EXTERNAL FONTS; prefer local; fallback to built-ins)
+// STYLES
 // ============================================================================
 const styles = StyleSheet.create({
-  // ---------- Shared ----------
   page: {
     paddingTop: 54,
     paddingBottom: 54,
     paddingHorizontal: 54,
     backgroundColor: COLORS.paper,
     color: COLORS.ink,
-    // If AoLInter wasn't registered, React-PDF uses built-in Helvetica.
     fontFamily: "AoLInter",
+  },
+
+  // Watermark overlay layer (absolute)
+  overlayWrap: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: "none",
+  },
+
+  // We render repeated lines; engine decides actual opacity via color/alpha limitations,
+  // so we keep it subtle by using muted color and small font.
+  overlayLine: {
+    fontFamily: "AoLInter",
+    fontSize: 10,
+    letterSpacing: 1.6,
+    color: COLORS.rule,
   },
 
   rule: {
@@ -113,7 +73,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  // ---------- Cover ----------
   coverPage: {
     paddingTop: 76,
     paddingBottom: 60,
@@ -150,9 +109,8 @@ const styles = StyleSheet.create({
   coverTitle: {
     marginTop: 34,
     fontSize: 38,
-    lineHeight: 1.10,
-    // If AoLEditorial isn't available, fall back to Times-Roman look.
-    fontFamily: "AoLEditorial",
+    lineHeight: 1.1,
+    fontFamily: "Times-Roman",
     color: COLORS.ink,
   },
 
@@ -238,7 +196,6 @@ const styles = StyleSheet.create({
     fontFamily: "AoLInter",
   },
 
-  // ---------- Inside pages ----------
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -287,7 +244,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 22,
     lineHeight: 1.18,
-    fontFamily: "AoLEditorial",
+    fontFamily: "Times-Roman",
     color: COLORS.ink,
   },
 
@@ -323,9 +280,8 @@ const styles = StyleSheet.create({
     fontFamily: "AoLInter",
   },
 
-  // Optional mono style for formatter consumers
   mono: {
-    fontFamily: "AoLMono",
+    fontFamily: "Courier",
     fontSize: 9.8,
     lineHeight: 1.45,
     color: COLORS.inkSoft,
@@ -385,6 +341,15 @@ const styles = StyleSheet.create({
     fontFamily: "AoLInter",
   },
 
+  watermarkFooter: {
+    marginTop: 6,
+    fontSize: 6.2,
+    color: COLORS.muted2,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    fontFamily: "AoLInter",
+  },
+
   disclaimer: {
     marginTop: 6,
     fontSize: 6.5,
@@ -396,7 +361,7 @@ const styles = StyleSheet.create({
 });
 
 // ============================================================================
-// HELPERS (safe + deterministic)
+// HELPERS
 // ============================================================================
 function formatIssuedDate(): string {
   try {
@@ -473,15 +438,51 @@ function renderContent(content: string | undefined) {
   }
 }
 
+function renderOverlay(watermark?: WatermarkPayload) {
+  if (!watermark?.overlayToken) return null;
+
+  // Create a subtle repeated pattern (no loops so big that layout slows)
+  const lines = Array.from({ length: 10 }).map((_, i) => `${watermark.overlayToken} • ${i + 1}`);
+
+  return (
+    <View style={styles.overlayWrap}>
+      <View
+        style={{
+          position: "absolute",
+          left: -80,
+          top: 120,
+          transform: `rotate(${watermark.overlayHints?.rotationDeg ?? -28}deg)`,
+        }}
+      >
+        {lines.map((t, idx) => (
+          <Text
+            key={idx}
+            style={{
+              ...styles.overlayLine,
+              fontSize: watermark.overlayHints?.fontSize ?? 10,
+              letterSpacing: watermark.overlayHints?.letterSpacing ?? 1.6,
+              // opacity is not consistently supported; we keep it light via color + small text
+              marginBottom: 18,
+            }}
+          >
+            {t}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 // ============================================================================
 // MAIN
 // ============================================================================
 export interface BriefDocumentProps {
   config: PDFConfig;
   content?: string;
+  watermark?: WatermarkPayload;
 }
 
-export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content }) => {
+export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content, watermark }) => {
   const issuedDate = formatIssuedDate();
 
   const title = safeString((config as any).title, "Untitled Brief");
@@ -494,7 +495,6 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
   const version = safeString((config as any).version, "1.0.0");
   const tags = safeStringArray((config as any).tags);
 
-  // ✅ TS-safe: NO undefined/null in style arrays
   const tierChipStyle = isGoldTier(tier) ? [styles.tierChip, styles.tierChipGold] : styles.tierChip;
 
   const coverSubtitle =
@@ -502,7 +502,10 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
     "Institutional intelligence brief formatted for distribution, annotation, and archival reference.";
 
   const subject = `Intelligence Brief: ${title}`;
-  const keywords = tags.length ? tags.join(", ") : "abraham of london, intelligence, brief";
+  const keywordsBase = tags.length ? tags.join(", ") : "abraham of london, intelligence, brief";
+  const keywords = watermark?.metadata?.keywords
+    ? `${String(watermark.metadata.keywords)}, ${keywordsBase}`
+    : keywordsBase;
 
   return (
     <Document
@@ -515,6 +518,8 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
     >
       {/* ========================= COVER PAGE ========================= */}
       <Page size="A4" style={styles.coverPage}>
+        {renderOverlay(watermark)}
+
         <View style={styles.coverBrandRow}>
           <Text style={styles.coverBrand}>Abraham of London</Text>
           <Text style={styles.coverBadge}>{classification} FILE</Text>
@@ -537,18 +542,22 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
             <Text style={styles.coverMetaLabel}>Reference</Text>
             <Text style={styles.coverMetaValue}>{id.toUpperCase()}</Text>
           </View>
+
           <View style={styles.coverMetaRow}>
             <Text style={styles.coverMetaLabel}>Issued</Text>
             <Text style={styles.coverMetaValue}>{issuedDate}</Text>
           </View>
+
           <View style={styles.coverMetaRow}>
             <Text style={styles.coverMetaLabel}>Category</Text>
             <Text style={styles.coverMetaValue}>{category}</Text>
           </View>
+
           <View style={styles.coverMetaRow}>
             <Text style={styles.coverMetaLabel}>Version</Text>
             <Text style={styles.coverMetaValue}>{version}</Text>
           </View>
+
           {tags.length > 0 ? (
             <View style={styles.coverMetaRow}>
               <Text style={styles.coverMetaLabel}>Tags</Text>
@@ -562,11 +571,16 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
           <Text style={styles.coverFooterText}>
             © 2026 Abraham of London • Proprietary & Confidential • abrahamoflondon.org
           </Text>
+          {watermark?.visibleFooter ? (
+            <Text style={styles.watermarkFooter}>{watermark.visibleFooter}</Text>
+          ) : null}
         </View>
       </Page>
 
       {/* ========================= CONTENT PAGE ========================= */}
       <Page size="A4" style={styles.page}>
+        {renderOverlay(watermark)}
+
         <View style={styles.header}>
           <Text style={styles.brandName}>Abraham of London</Text>
           <Text style={styles.docRef}>Ref: {id.toUpperCase()}</Text>
@@ -579,6 +593,7 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
         </View>
 
         <Text style={styles.title}>{title}</Text>
+
         {safeString((config as any).description).trim() ? (
           <Text style={styles.subtitle}>{safeString((config as any).description)}</Text>
         ) : null}
@@ -592,14 +607,17 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
             <Text style={styles.metaLabel}>Issued</Text>
             <Text style={styles.metaValue}>{issuedDate}</Text>
           </View>
+
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Category</Text>
             <Text style={styles.metaValue}>{category}</Text>
           </View>
+
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Version</Text>
             <Text style={styles.metaValue}>{version} (Stable)</Text>
           </View>
+
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Classification</Text>
             <Text style={styles.metaValue}>{classification}</Text>
@@ -609,11 +627,13 @@ export const BriefDocument: React.FC<BriefDocumentProps> = ({ config, content })
         <View style={styles.footer}>
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>© 2026 Abraham of London • Proprietary & Confidential</Text>
-            <Text
-              style={styles.footerText}
-              render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
-            />
+            <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
           </View>
+
+          {watermark?.visibleFooter ? (
+            <Text style={styles.watermarkFooter}>{watermark.visibleFooter}</Text>
+          ) : null}
+
           <Text style={styles.disclaimer}>
             This document contains informed analysis for informational purposes only and does not constitute legal,
             financial, or professional advice.

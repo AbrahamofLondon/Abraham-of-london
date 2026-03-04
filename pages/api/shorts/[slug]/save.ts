@@ -17,15 +17,10 @@ interface ErrorResponse {
   message?: string;
 }
 
-/**
- * THE BOOKMARK MUTATION ENGINE - Unified Production Version
- * Hardened for atomic "Save" toggling and persistent session integrity.
- */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SuccessResponse | ErrorResponse>
 ) {
-  // 1. Preflight & Method Authority
   if (req.method === "OPTIONS") {
     res.setHeader("Allow", "POST,DELETE,OPTIONS");
     return res.status(204).end();
@@ -39,7 +34,6 @@ export default async function handler(
     });
   }
 
-  // 2. Slug Integrity Check
   const slug = getSlugParam(req);
   if (!slug) {
     return res.status(400).json({
@@ -48,10 +42,9 @@ export default async function handler(
     });
   }
 
-  // 3. Institutional Rate Limiting
   try {
     const rl = await checkRateLimit(req, res, RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS);
-    
+
     if (rl.headers) {
       Object.entries(rl.headers).forEach(([k, v]) => res.setHeader(k, v));
     }
@@ -62,20 +55,15 @@ export default async function handler(
         message: "Interaction limit reached. Please wait.",
       });
     }
-  } catch (rlError) {
+  } catch {
     console.warn("[System Warning] Rate limiting subsystem silent.");
   }
 
-  // 4. Session Authority
-  // Utilizes a unified session handler to ensure cookie consistency.
   const sessionId = getOrSetSessionId(req, res);
 
   try {
-    // 5. Atomic Interaction Toggle
-    // Specifically targets the "save" interaction type for this endpoint.
     const stats = await toggleInteraction(slug, "save", sessionId);
 
-    // 6. Cache Policy: Invalidate to ensure immediate UI feedback
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
@@ -89,10 +77,8 @@ export default async function handler(
       userSaved: !!stats.userSaved,
       message,
     });
-
   } catch (error: any) {
     console.error(`[System Exception] Bookmark failure for ${slug}:`, error);
-    
     return res.status(500).json({
       error: "Vault Write Failure",
       message: "Failed to record bookmark. Please try again shortly.",
@@ -101,7 +87,7 @@ export default async function handler(
 }
 
 export const config = {
-  api: { 
-    bodyParser: { sizeLimit: "1kb" }, 
+  api: {
+    bodyParser: { sizeLimit: "1kb" },
   },
 };

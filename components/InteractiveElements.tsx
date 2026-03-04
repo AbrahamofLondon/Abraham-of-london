@@ -1,10 +1,11 @@
-// components/InteractiveElements.tsx
+/* components/InteractiveElements.tsx */
 "use client";
 
 import * as React from "react";
 import { motion } from "framer-motion";
 import { WifiOff, Wifi, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Button from "@/components/ui/Button";
 
 type TextAlign = "left" | "center" | "right";
 
@@ -12,6 +13,7 @@ type CTAConfig = {
   text: string;
   href: string;
   variant?: "solid" | "outline";
+  external?: boolean;
 };
 
 export interface HeroBannerProps {
@@ -35,6 +37,10 @@ const textAlignClasses: Record<TextAlign, string> = {
   right: "items-end text-right",
 };
 
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
+}
+
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   title,
   subtitle,
@@ -51,7 +57,6 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 }) => {
   const [isOnline, setIsOnline] = React.useState(true);
 
-  // Simple client-side online/offline indicator (no WebSocket dependency)
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -70,25 +75,21 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   }, []);
 
   return (
-    <section
-      className="relative w-full overflow-hidden border-b border-white/10"
-      style={{ minHeight: height }}
-    >
+    <section className="relative w-full overflow-hidden border-b border-white/10" style={{ minHeight: height }}>
       {/* Background image */}
-      {backgroundImage && (
+      {backgroundImage ? (
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${backgroundImage})` }}
           aria-hidden="true"
         />
-      )}
+      ) : null}
 
       {/* Overlay */}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "radial-gradient(circle at top, rgba(0,0,0,0.35), rgba(0,0,0,0.98))",
+          background: "radial-gradient(circle at top, rgba(0,0,0,0.35), rgba(0,0,0,0.98))",
           opacity: overlayOpacity,
         }}
       />
@@ -96,23 +97,20 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       {/* Content */}
       <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-4 py-16 lg:py-24">
         <motion.div
-          className={cn(
-            "flex w-full flex-col gap-6 text-white",
-            textAlignClasses[textAlign]
-          )}
+          className={cn("flex w-full flex-col gap-6 text-white", textAlignClasses[textAlign])}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           {/* Eyebrow + status */}
           <div className="flex flex-wrap items-center gap-3">
-            {eyebrow && (
+            {eyebrow ? (
               <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-400">
                 {eyebrow}
               </div>
-            )}
+            ) : null}
 
-            {showConnectionStatus && (
+            {showConnectionStatus ? (
               <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[11px] font-medium text-gray-200">
                 {isOnline ? (
                   <>
@@ -126,7 +124,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                   </>
                 )}
               </span>
-            )}
+            ) : null}
           </div>
 
           {/* Title */}
@@ -134,51 +132,58 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <h1 className="max-w-3xl font-serif text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">
               {title}
             </h1>
-            {subtitle && (
-              <div className="max-w-2xl text-base text-gray-200 md:text-lg">
-                {subtitle}
-              </div>
-            )}
+
+            {subtitle ? (
+              <div className="max-w-2xl text-base text-gray-200 md:text-lg">{subtitle}</div>
+            ) : null}
           </div>
 
           {/* CTA + children */}
           <div className="mt-4 flex flex-wrap items-center gap-4">
-            {ctaText && ctaOnClick && (
-              <button
-                type="button"
+            {ctaText && ctaOnClick ? (
+              <Button
+                variant="primary"
+                size="lg"
                 onClick={ctaOnClick}
-                className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-black/40 transition-all hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
+                className="gap-2 uppercase tracking-wide shadow-lg shadow-black/40"
               >
                 {ctaText}
                 <ArrowRight className="h-4 w-4" />
-              </button>
-            )}
+              </Button>
+            ) : null}
 
             {additionalCTAs?.length ? (
               <div className="flex flex-wrap gap-3">
-                {additionalCTAs.map((cta) => (
-                  <a
-                    key={`${cta.text}-${cta.href}`}
-                    href={cta.href}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wide transition-all focus:outline-none focus:ring-2 focus:ring-amber-500",
-                      cta.variant === "outline"
-                        ? "border border-amber-500/60 bg-black/20 text-amber-400 hover:bg-amber-500/10"
-                        : "bg-white/10 text-white hover:bg-white/20"
-                    )}
-                  >
-                    {cta.text}
-                    <ArrowRight className="h-3 w-3" />
-                  </a>
-                ))}
+                {additionalCTAs.map((cta) => {
+                  const href = String(cta.href || "").trim();
+                  if (!href) return null;
+
+                  const external = Boolean(cta.external) || isExternalHref(href);
+                  const variant = cta.variant === "outline" ? "secondary" : "ghost";
+
+                  return (
+                    <Button
+                      key={`${cta.text}-${href}`}
+                      href={href}
+                      variant={variant}
+                      size="md"
+                      className={cn(
+                        "gap-2 uppercase tracking-wide",
+                        cta.variant === "outline"
+                          ? "border border-amber-500/60 bg-black/20 text-amber-200 hover:bg-amber-500/10"
+                          : "bg-white/10 text-white hover:bg-white/20"
+                      )}
+                      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
+                      {cta.text}
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  );
+                })}
               </div>
             ) : null}
 
-            {children && (
-              <div className="w-full text-xs text-gray-200 md:w-auto">
-                {children}
-              </div>
-            )}
+            {children ? <div className="w-full text-xs text-gray-200 md:w-auto">{children}</div> : null}
           </div>
         </motion.div>
       </div>
@@ -186,6 +191,4 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   );
 };
 
-// Export as default for backward compatibility
 export default HeroBanner;
-

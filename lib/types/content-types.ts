@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AccessTier } from "@/lib/access/tier-policy";
+import { requiredTierFromDoc, getTierLabel } from "@/lib/access/tier-policy";
 
 /**
  * Content access level - SSOT aligned
@@ -63,10 +64,13 @@ export interface ContentBase {
  * Helper to get normalized access tier from any content object
  * Use this instead of directly accessing accessLevel
  */
+
 export function getContentAccessTier(content: ContentBase): AccessTier {
-  // Import dynamically to avoid circular dependencies
-  const { requiredTierFromDoc } = require('@/lib/access/tier-policy');
   return requiredTierFromDoc(content);
+}
+
+export function getContentAccessLabel(content: ContentBase): string {
+  return getTierLabel(getContentAccessTier(content));
 }
 
 /**

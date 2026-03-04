@@ -1,3 +1,6 @@
+// lib/server/access/tokenStore.ts
+// Transitional TokenStore façade — exports getTokenStore (fixes "not exported" build error)
+
 import type { AccessSession, OneTimeToken } from "./types";
 
 export interface TokenStore {
@@ -26,7 +29,9 @@ export async function getTokenStore(): Promise<TokenStore> {
 
   if (backend === "postgres") {
     const mod = await import("./tokenStore.postgres");
-    singleton = await mod.createPostgresTokenStore();
+    // Support either async or sync creator (your codebase has both patterns)
+    const created = (mod as any).createPostgresTokenStore?.();
+    singleton = created instanceof Promise ? await created : created;
     return singleton;
   }
 

@@ -1,54 +1,87 @@
+/* scripts/vault-master.ts — VAULT MASTER ORCHESTRATOR (Hardened, Deterministic) */
+/* eslint-disable no-console */
+
 /**
  * PHASE 0: SYSTEM-LEVEL INTERCEPTORS
- * Prevents environment crashes and neutralizes server-only constraints.
+ * - Loads .env deterministically (relative to this file, not cwd)
+ * - Neutralizes Next.js 'server-only' in script runtime
+ * - Mocks Redis imports for local/offline runs (prevents ECONNREFUSED hang/retries)
  */
-import Module from 'module';
+
+import dotenv from "dotenv";
+import path from "path";
+import Module from "module";
+import { fileURLToPath } from "url";
+
+// Resolve project root reliably: scripts/..
+// (Works even if you run the command from a different working directory)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ENV_PATH = path.join(__dirname, "..", ".env");
+
+// Load env once, early, before any other imports execute logic.
+dotenv.config({ path: ENV_PATH });
+
+console.log(
+  "[ENV_CHECK]",
+  "cwd=", process.cwd(),
+  "envPath=", ENV_PATH,
+  "saltLen=", (process.env.SYSTEM_INTEGRITY_SALT || "").length,
+  "issuer=", process.env.AOL_ISSUER_ID || "(unset)"
+);
 
 // @ts-ignore
 const originalRequire = Module.prototype.require;
 // @ts-ignore
-Module.prototype.require = function (id) {
-  // 1. Neutralize Next.js 'server-only' package
-  if (id === 'server-only') {
-    return {}; 
+Module.prototype.require = function (id: any) {
+  // 0) Ensure any late dotenv/config requires remain consistent
+  if (id === "dotenv/config") {
+    dotenv.config({ path: ENV_PATH });
+    return {};
   }
 
-  // 2. Mock Redis - Expanded to catch all possible import variations
-  if (id.includes('lib/redis')) {
+  // 1) Neutralize Next.js 'server-only' package for scripts
+  if (id === "server-only") {
+    return {};
+  }
+
+  // 2) Mock Redis imports (catch common variations)
+  if (typeof id === "string" && (id.includes("lib/redis") || id.includes("@/lib/redis") || id.includes("\\lib\\redis"))) {
     return {
       getRedis: () => ({
         on: () => {},
-        ping: async () => 'PONG',
+        ping: async () => "PONG",
         get: async () => null,
-        set: async () => 'OK',
+        set: async () => "OK",
         quit: async () => {},
         pipeline: () => ({
-           set: () => {},
-           exec: async () => []
-        })
+          set: () => {},
+          exec: async () => [],
+        }),
       }),
       default: {
-        getRedis: () => ({ on: () => {}, ping: async () => 'PONG' }),
+        getRedis: () => ({ on: () => {}, ping: async () => "PONG" }),
         isRedisAvailable: async () => true,
-        client: { get: async () => null }
+        client: { get: async () => null },
       },
       isRedisAvailable: async () => true,
       closeRedis: async () => {},
     };
   }
-  return originalRequire.apply(this, arguments);
+
+  return originalRequire.apply(this, arguments as any);
 };
 
 /**
  * PHASE 1: IMPORTS & CORE LOGIC
  */
+
 // @ts-ignore - Local .mjs file
-import { verifyDatabaseIntegrity } from './audit-vault.mjs';
-import { generatePDF } from '../lib/pdf-generator';
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import os from 'os';
+import { verifyDatabaseIntegrity } from "./audit-vault.mjs";
+import { generatePDF } from "../lib/pdf-generator";
+import fs from "fs";
+import matter from "gray-matter";
+import os from "os";
 
 interface PDFGenerationResult {
   success: boolean;
@@ -74,16 +107,16 @@ interface LinkReconciliation {
  */
 async function vaultMaster(): Promise<void> {
   try {
-    // 1. Registry Audit
+    // 1) Registry Audit
     const activeKeys: string[] = await verifyDatabaseIntegrity();
-    
-    const stats: VaultStats = { 
-      success: 0, 
-      cached: 0, 
-      failed: 0, 
-      healedLinks: 0 
+
+    const stats: VaultStats = {
+      success: 0,
+      cached: 0,
+      failed: 0,
+      healedLinks: 0,
     };
-    
+
     if (!activeKeys || activeKeys.length === 0) {
       console.warn("⚠️  VAULT_MASTER: No briefs found in registry.");
       process.exit(0);
@@ -91,33 +124,34 @@ async function vaultMaster(): Promise<void> {
 
     console.log(`🏛️  VAULT_MASTER: Processing ${activeKeys.length} verified briefs...`);
 
-    // 2. Optimized Parallel Generation
-    // We use CPU-1 to leave room for the OS and the PDF engine processes
+    // 2) Optimized Parallel Generation
     const concurrencyLimit = Math.max(1, os.cpus().length - 1);
-    
+
     for (let i = 0; i < activeKeys.length; i += concurrencyLimit) {
       const batch = activeKeys.slice(i, i + concurrencyLimit);
       console.log(`📦 Batch [${i / concurrencyLimit + 1}]: Processing ${batch.length} assets...`);
-      
+
       const batchPromises = batch.map(async (id: string): Promise<PDFGenerationResult> => {
-        const mdxPath = path.join(process.cwd(), 'content/briefs', `${id}.mdx`);
-        
-        if (fs.existsSync(mdxPath)) {
-          const fileContent = fs.readFileSync(mdxPath, 'utf8');
-          const { content } = matter(fileContent);
+        // Keep deterministic resolution (no relative ambiguity)
+        const mdxPath = path.join(process.cwd(), "content", "briefs", `${id}.mdx`);
 
-          const { healedContent, issuesFound }: LinkReconciliation = reconcileLinks(content, activeKeys);
-          stats.healedLinks += issuesFound;
-
-          // Process PDF generation
-          return await generatePDF(id, false, healedContent); 
+        if (!fs.existsSync(mdxPath)) {
+          return { success: false, error: `MDX Source Missing at ${mdxPath}` };
         }
-        
-        return { success: false, error: `MDX Source Missing at ${mdxPath}` };
+
+        const fileContent = fs.readFileSync(mdxPath, "utf8");
+        const { content } = matter(fileContent);
+
+        const { healedContent, issuesFound }: LinkReconciliation = reconcileLinks(content, activeKeys);
+        stats.healedLinks += issuesFound;
+
+        // PDF generation
+        // NOTE: generatePDF handles cache truth via fingerprint now.
+        return await generatePDF(id, false, healedContent);
       });
 
       const results = await Promise.all(batchPromises);
-      
+
       results.forEach((r: PDFGenerationResult, index: number) => {
         if (r.cached) {
           stats.cached++;
@@ -125,24 +159,23 @@ async function vaultMaster(): Promise<void> {
           stats.success++;
         } else {
           stats.failed++;
-          console.error(`❌ FAILURE [${batch[index]}]: ${r.error || 'Unknown Error'}`);
+          console.error(`❌ FAILURE [${batch[index]}]: ${r.error || "Unknown Error"}`);
         }
       });
     }
 
-    // 3. Health Reporting
+    // 3) Health Reporting
     renderHealthReport(stats);
 
-    // 4. Outcome Determination
+    // 4) Outcome Determination
     if (stats.failed > 0) {
       console.error(`🚨 System fail-safe triggered: ${stats.failed} failures detected.`);
       process.exit(1);
     }
 
     console.log("✅ VAULT_MASTER: Portfolio synchronization complete.");
-
   } catch (error: any) {
-    console.error("🚨 MASTER_SYNC_CRITICAL_FAILURE:", error.message);
+    console.error("🚨 MASTER_SYNC_CRITICAL_FAILURE:", error?.message || error);
     process.exit(1);
   }
 }
@@ -152,14 +185,18 @@ async function vaultMaster(): Promise<void> {
  * Corrects internal references to prevent broken links in the PDF vault.
  */
 function reconcileLinks(content: string, activeKeys: string[]): LinkReconciliation {
+  // Matches: [Text](/briefs/<id>) OR [Text](#<id>)
   const linkRegex = /\[(.*?)\]\((\/briefs\/|#)(.*?)\)/g;
   let issuesFound = 0;
-  
+
   const healedContent = content.replace(linkRegex, (match, text, prefix, targetId) => {
-    if (prefix === '/briefs/' && !activeKeys.includes(targetId)) {
+    const target = String(targetId || "").trim();
+
+    if (prefix === "/briefs/" && target && !activeKeys.includes(target)) {
       issuesFound++;
-      return `[${text} (REF_PENDING: ${targetId})](#)`;
+      return `[${text} (REF_PENDING: ${target})](#)`;
     }
+
     return match;
   });
 
@@ -182,14 +219,11 @@ function renderHealthReport(stats: VaultStats): void {
 
 /**
  * TERMINATION HANDLER
- * Explicitly kills the process to prevent the "hang" caused by unclosed 
- * handles in lib/pdf-generator.ts or Redis connections.
+ * Explicitly kills the process to prevent hangs caused by unclosed handles.
  */
 vaultMaster()
   .then(() => {
-    setTimeout(() => {
-      process.exit(0);
-    }, 500);
+    setTimeout(() => process.exit(0), 250);
   })
   .catch((err) => {
     console.error("FATAL_VAULT_ERROR:", err);

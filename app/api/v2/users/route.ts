@@ -14,6 +14,41 @@ function getBaseUrl(request: NextRequest): string {
   return "http://localhost:3000";
 }
 
+function getClientIp(req: NextRequest): string {
+  const xf = req.headers.get("x-forwarded-for") || "";
+  const first = xf.split(",")[0]?.trim();
+  return first || "unknown";
+}
+
+async function auditApiCall(args: {
+  endpoint: string;
+  method: Method;
+  statusCode: number;
+  userAgent: string;
+  ipAddress: string;
+  note?: string;
+}) {
+  // Best-effort logging: MUST NEVER break the request
+  await safePrismaQuery(() =>
+    prisma.systemAuditLog.create({
+      data: {
+        action: "API_CALL",
+        severity: "info",
+        resourceId: args.endpoint,
+        ipAddress: args.ipAddress,
+        userAgent: args.userAgent,
+        metadata: {
+          endpoint: args.endpoint,
+          method: args.method,
+          statusCode: args.statusCode,
+          note: args.note || null,
+          at: new Date().toISOString(),
+        },
+      },
+    })
+  );
+}
+
 async function forwardToV1(request: NextRequest, method: Method = "GET", body?: AnyObj) {
   const baseUrl = getBaseUrl(request);
   const v1Url = `${baseUrl}/api/v1/users`;
@@ -38,7 +73,23 @@ async function forwardToV1(request: NextRequest, method: Method = "GET", body?: 
     fetchOptions.body = JSON.stringify(body);
   }
 
+  const t0 = Date.now();
   const response = await fetch(v1Url, fetchOptions);
+  const durationMs = Date.now() - t0;
+
+  // Best-effort logging (never throw)
+  try {
+    await auditApiCall({
+      endpoint: "/api/v2/users",
+      method,
+      statusCode: response.status,
+      userAgent: request.headers.get("user-agent") || "unknown",
+      ipAddress: getClientIp(request),
+      note: `forwarded_to=v1 durationMs=${durationMs}`,
+    });
+  } catch {
+    // swallow
+  }
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => "");
@@ -53,24 +104,6 @@ async function forwardToV1(request: NextRequest, method: Method = "GET", body?: 
   }
 
   const data = await response.json();
-
-  // Best-effort logging (must never break the request)
-  try {
-    await safePrismaQuery(() =>
-      prisma.apiLog.create({
-        data: {
-          endpoint: "/api/v2/users",
-          method,
-          statusCode: response.status,
-          userAgent: request.headers.get("user-agent") || "unknown",
-          ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown",
-          responseTime: 0,
-        },
-      })
-    );
-  } catch (e) {
-    console.warn("[Users API v2] log failed:", e);
-  }
 
   return NextResponse.json(data, {
     headers: {
@@ -100,6 +133,20 @@ async function dbFallback(request: NextRequest) {
   );
 
   const users = Array.isArray(usersResult) ? usersResult : [];
+
+  // Best-effort audit
+  try {
+    await auditApiCall({
+      endpoint: "/api/v2/users",
+      method: "GET",
+      statusCode: 200,
+      userAgent: request.headers.get("user-agent") || "unknown",
+      ipAddress: getClientIp(request),
+      note: `fallback=direct-db count=${users.length}`,
+    });
+  } catch {
+    // swallow
+  }
 
   return NextResponse.json(
     {

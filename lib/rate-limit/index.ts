@@ -1,9 +1,3 @@
-// lib/rate-limit/index.ts
-// ONLY export client-side rate limiting
-export { withRateLimit } from './rate-limit'
-
-// Only client-safe types
-export type {
-  RateLimitOptions,
-  RateLimitResult
-} from './server/rate-limit'
+// lib/rate-limit/index.ts — CLIENT-SAFE BARREL
+export { withRateLimit, clearRateLimit } from "@/lib/rate-limit";
+export type { RateLimitOptions, RateLimitResult } from "@/lib/rate-limit";

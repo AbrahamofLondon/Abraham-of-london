@@ -1,12 +1,13 @@
-// lib/auth/gateway.ts — TYPE-SAFE + NORMALIZED (no unsafe casts)
+// lib/auth/gateway.ts — TYPE-SAFE + NORMALIZED (Pages Router safe, SSOT session-backed)
 
 import { NextRequest } from "next/server";
 import { getAdminSession } from "@/lib/server/auth/admin-session";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
+import tiers from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
 
 /**
- * Infer the TRUE return types from the actual functions
- * (no fantasy interfaces, no brittle casts).
+ * Infer the TRUE return types from actual functions.
  */
 type AdminSession = Awaited<ReturnType<typeof getAdminSession>>;
 type InnerCircleAccess = Awaited<ReturnType<typeof getInnerCircleAccess>>;
@@ -22,6 +23,8 @@ type AuthGatewayResult = {
     memberId: string | null;
     tier: string | null;
     reason?: string;
+    sessionId?: string;
+    expiresAt?: string;
   };
   combined: {
     hasAnyAccess: boolean;
@@ -31,7 +34,6 @@ type AuthGatewayResult = {
 
 /**
  * Convert Request -> minimal NextRequest-like surface for cookie/header access.
- * This prevents "instanceof NextRequest" issues when calling from route handlers.
  */
 function toCompatibleReq(request: NextRequest | Request): any {
   if (request instanceof NextRequest) return request;
@@ -41,7 +43,6 @@ function toCompatibleReq(request: NextRequest | Request): any {
 
   const cookieHeader = request.headers.get("cookie") || "";
   const cookies: Record<string, string> = {};
-
   cookieHeader.split(";").forEach((cookie) => {
     const [name, ...rest] = cookie.trim().split("=");
     const value = rest.join("=");
@@ -62,14 +63,15 @@ function toCompatibleReq(request: NextRequest | Request): any {
 }
 
 /**
- * Normalize whatever getInnerCircleAccess() returns into a stable contract.
- * We DO NOT assume the exact key names; we map defensively.
+ * Normalize whatever getInnerCircleAccess() returns into stable contract.
  */
 function normalizeInnerCircle(inner: InnerCircleAccess | null): {
   hasAccess: boolean;
   memberId: string | null;
   tier: string | null;
   reason?: string;
+  sessionId?: string;
+  expiresAt?: string;
 } {
   if (!inner) {
     return { hasAccess: false, memberId: null, tier: null, reason: "INNER_CIRCLE_UNAVAILABLE" };
@@ -77,41 +79,28 @@ function normalizeInnerCircle(inner: InnerCircleAccess | null): {
 
   const anyInner = inner as any;
 
-  // These are common patterns across auth gates:
-  const hasAccess =
-    Boolean(anyInner.hasAccess) ||
-    Boolean(anyInner.allowed) ||
-    Boolean(anyInner.ok) ||
-    Boolean(anyInner.access === true) ||
-    Boolean(anyInner.authorized) ||
-    false;
+  // Your access.server.ts returns: { hasAccess, reason, tier, sessionId?, expiresAt? }
+  const hasAccess = Boolean(anyInner.hasAccess);
 
+  // memberId may not always be present in your access object; keep null if absent
   const memberId: string | null =
     anyInner.memberId ??
     anyInner.userId ??
-    anyInner.id ??
-    (typeof anyInner.email === "string" ? `user-${anyInner.email}` : null) ??
     null;
 
   const tier: string | null =
-    anyInner.tier ??
-    anyInner.accessLevel ??
-    anyInner.level ??
-    anyInner.plan ??
-    (hasAccess ? "standard" : null);
+    anyInner.tier ? String(anyInner.tier) : null;
 
   const reason: string | undefined =
-    anyInner.reason ??
-    anyInner.code ??
-    anyInner.error ??
-    (hasAccess ? undefined : "INNER_CIRCLE_REQUIRED");
+    anyInner.reason ? String(anyInner.reason) : (hasAccess ? undefined : "INNER_CIRCLE_REQUIRED");
 
-  return {
-    hasAccess,
-    memberId,
-    tier: tier ? String(tier) : null,
-    reason: reason ? String(reason) : undefined,
-  };
+  const sessionId: string | undefined =
+    anyInner.sessionId ? String(anyInner.sessionId) : undefined;
+
+  const expiresAt: string | undefined =
+    anyInner.expiresAt ? String(anyInner.expiresAt) : undefined;
+
+  return { hasAccess, memberId, tier, reason, sessionId, expiresAt };
 }
 
 /**
@@ -122,7 +111,8 @@ export async function authGateway(request: NextRequest | Request): Promise<AuthG
 
   const [adminAuth, innerCircleAuth] = await Promise.allSettled([
     getAdminSession(compatibleReq),
-    getInnerCircleAccess(compatibleReq),
+    // getInnerCircleAccess is async in SSOT session-backed version
+    getInnerCircleAccess(compatibleReq as any),
   ]);
 
   const admin: AdminSession | null = adminAuth.status === "fulfilled" ? adminAuth.value : null;
@@ -144,6 +134,7 @@ export async function authGateway(request: NextRequest | Request): Promise<AuthG
     innerCircleAccess: innerCircle,
     combined: {
       hasAnyAccess,
+      // if they have any access, they are effectively authenticated for gated routes
       isAuthenticated: hasAnyAccess,
     },
   };
@@ -169,23 +160,10 @@ export async function checkTierAccess(
     };
   }
 
-  const userTier = (auth.innerCircleAccess.tier || "").toLowerCase();
-  const reqTier = (requiredTier || "").toLowerCase();
+  const userTier = tiers.normalizeUser((auth.innerCircleAccess.tier || "").toLowerCase() as any);
+  const reqTier = tiers.normalizeRequired((requiredTier || "").toLowerCase() as any);
 
-  // Tier hierarchy (lower number = higher privilege)
-  const tierOrder: Record<string, number> = {
-    elite: 1,
-    premium: 2,
-    standard: 3,
-    basic: 3,
-    member: 3,
-    public: 4,
-  };
-
-  const userLevel = tierOrder[userTier] ?? 999;
-  const requiredLevel = tierOrder[reqTier] ?? 999;
-
-  if (userLevel > requiredLevel) {
+  if (!tiers.hasAccess(userTier, reqTier)) {
     return {
       hasAccess: false,
       reason: `INSUFFICIENT_TIER: You have ${auth.innerCircleAccess.tier} but ${requiredTier} is required`,
@@ -198,7 +176,9 @@ export async function checkTierAccess(
 /**
  * Middleware wrapper for route handlers.
  */
-export function withAuth(handler: (request: NextRequest | Request, context: any) => Promise<Response> | Response) {
+export function withAuth(
+  handler: (request: NextRequest | Request, context: any) => Promise<Response> | Response
+) {
   return async function (request: NextRequest | Request, ...args: any[]) {
     try {
       const auth = await authGateway(request);

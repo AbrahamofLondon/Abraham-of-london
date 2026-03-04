@@ -1,4 +1,10 @@
 // lib/prisma.pages.ts — PAGES ROUTER SAFE (no server-only)
+//
+// IMPORTANT:
+// - Pages Router cannot import `server-only`.
+// - This module is still SERVER-EXECUTED (SSR / API routes), but must be pages-safe.
+// - It must NOT re-export itself or other barrels (avoid circular exports).
+
 import { PrismaClient } from "@prisma/client";
 
 declare global {
@@ -30,7 +36,9 @@ export async function safePrismaQuery<T>(query: () => Promise<T>): Promise<T | n
   }
 }
 
-// ✅ Ensure BOTH environments expose the same helpers:
+/**
+ * Helpers exposed for Pages Router usage
+ */
 export async function getVaultStatus() {
   try {
     await prisma.$queryRaw`SELECT 1`;

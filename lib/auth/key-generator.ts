@@ -1,32 +1,67 @@
-/* lib/auth/key-generator.ts */
-import crypto from 'crypto';
-import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
+/* lib/auth/key-generator.ts — TOKENSTORE ALIGNED (DETERMINISTIC HASH) */
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
+import { KeyStatus, Prisma } from "@prisma/client";
+import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 
-export async function generatePrincipalKey(memberId: string, tier: string = 'inner-circle') {
-  // 1. Generate 32-byte (256-bit) high-entropy raw key
-  const rawKey = `AOL-${crypto.randomBytes(24).toString('hex').toUpperCase()}`;
-  
-  // 2. Hash the key for the database (Institutional Standard: 12 Rounds)
-  const keyHash = await bcrypt.hash(rawKey, 12);
-  const keySuffix = rawKey.slice(-4); // For identification in logs
+export type GenerateKeyOptions = {
+  keyType?: string; // stored as string in schema
+  expiresInDays?: number; // default: 365 here (tokenStore default is 30)
+  metadata?: Prisma.JsonObject; // ✅ Prisma-safe JSON object
+};
 
-  // 3. Persist Key Metadata
+function normalizeKeyType(input?: string): string {
+  const raw = (input ?? "member").trim();
+  const normalized = raw
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-_]/g, "")
+    .slice(0, 64);
+  return normalized || "member";
+}
+
+export async function generatePrincipalKey(memberId: string, options: GenerateKeyOptions = {}) {
+  if (!memberId) throw new Error("memberId is required");
+
+  // 1) Generate raw key (return ONCE)
+  const rawKey = `AOL-${crypto.randomBytes(24).toString("hex").toUpperCase()}`;
+  const keySuffix = rawKey.slice(-4);
+
+  // 2) Deterministic hash that matches tokenStore.redeemAccessKey()
+  const keyHash = hashAccessKey(rawKey);
+
+  // 3) Persist schema-aligned record
+  const keyType = normalizeKeyType(options.keyType);
+
+  const expiresInDays =
+    Number.isFinite(options.expiresInDays as number)
+      ? Math.max(1, Math.floor(options.expiresInDays as number))
+      : 365;
+
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+
+  // NOTE:
+  // If your generated Prisma client still does not include `keySuffix` (stale client),
+  // comment out the `keySuffix` line below and keep it only inside metadata.
   await prisma.innerCircleKey.create({
     data: {
       memberId,
       keyHash,
       keySuffix,
-      status: 'active',
-      keyType: tier,
-      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 Year default
-    }
+      keyType,
+      status: KeyStatus.active,
+      expiresAt,
+      lastUsedAt: null,
+      // ✅ must be Prisma InputJsonValue-compatible
+      metadata: (options.metadata ?? { keySuffix }) as Prisma.InputJsonValue,
+    },
   });
 
-  // 4. Return RAW KEY (This is the only time it is visible)
   return {
     rawKey,
     keySuffix,
-    instructions: "Provide this key to the Principal. It cannot be recovered once this session ends."
+    keyType,
+    expiresAt,
+    instructions: "Provide this key to the Principal. It cannot be recovered once this session ends.",
   };
 }

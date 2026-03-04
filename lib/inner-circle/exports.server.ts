@@ -1,8 +1,10 @@
 /* lib/inner-circle/exports.server.ts */
 import "server-only";
-import { prisma } from "@/lib/prisma"; // Ensure this matches your prisma instance path
+
+import { prisma } from "@/lib/prisma.server";
 import * as Core from "./keys.server";
 import { generatePDF } from "@/lib/pdf-generator";
+import type { AccessTier } from "@prisma/client";
 
 // Bridge existing core functions
 export const {
@@ -11,44 +13,80 @@ export const {
   getPrivacySafeStats,
   recordInnerCircleUnlock,
   cleanupExpiredData,
-  normalizeTier
+  normalizeTier,
 } = Core;
 
 /**
- * ✅ RESTORED: Administrative Data Exports
- * Required by /pages/api/admin/inner-circle/export.ts
+ * Administrative Data Exports
+ * Required by: /pages/api/admin/inner-circle/export.ts
+ *
+ * Prisma SSOT:
+ * model InnerCircleKey {
+ *   memberId  String
+ *   member    InnerCircleMember @relation(...)
+ *   status    KeyStatus @default(active)
+ *   expiresAt DateTime
+ * }
+ *
+ * Tier is on InnerCircleMember (AccessTier), NOT on InnerCircleKey.
  */
 
+function parseAccessTier(input: string): AccessTier {
+  const t = String(input || "").trim().toLowerCase();
+
+  // allow common legacy aliases without polluting DB logic
+  if (t === "free") return "public";
+  if (t === "inner-circle") return "inner_circle";
+
+  // strict mapping
+  switch (t) {
+    case "public":
+    case "member":
+    case "inner_circle":
+    case "client":
+    case "legacy":
+    case "architect":
+    case "owner":
+      return t;
+    default:
+      // conservative default; prevents leaking all keys if tier param is junk
+      return "public";
+  }
+}
+
 export async function getActiveKeys() {
-  return await prisma.accessKey.findMany({
-    where: { 
-      active: true,
-      OR: [
-        { expiresAt: null },
-        { expiresAt: { gt: new Date() } }
-      ]
+  return await prisma.innerCircleKey.findMany({
+    where: {
+      status: "active",
+      expiresAt: { gt: new Date() },
     },
-    include: { user: true }
+    include: { member: true },
+    orderBy: { createdAt: "desc" },
   });
 }
 
 export async function getKeysByTier(tier: string) {
-  return await prisma.accessKey.findMany({
-    where: { tier: tier.toUpperCase() },
-    include: { user: true },
-    orderBy: { createdAt: 'desc' }
+  const parsedTier = parseAccessTier(tier);
+
+  return await prisma.innerCircleKey.findMany({
+    where: {
+      member: { tier: parsedTier },
+    },
+    include: { member: true },
+    orderBy: { createdAt: "desc" },
   });
 }
 
-export async function getKeysByMember(userId: string) {
-  return await prisma.accessKey.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' }
+export async function getKeysByMember(memberId: string) {
+  return await prisma.innerCircleKey.findMany({
+    where: { memberId },
+    include: { member: true },
+    orderBy: { createdAt: "desc" },
   });
 }
 
 /**
- * ✅ RESTORED: Expiry Utility
+ * Expiry Utility
  */
 export function isExpired(expiresAt: Date | string | null): boolean {
   if (!expiresAt) return false;
@@ -57,7 +95,6 @@ export function isExpired(expiresAt: Date | string | null): boolean {
 
 /**
  * ON-DEMAND GENERATION CALL
- * Orchestrates the synthesis of PDF assets from the Vault.
  */
 export async function generateBriefPDF(id: string) {
   return await generatePDF(id);

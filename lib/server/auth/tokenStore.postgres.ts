@@ -4,8 +4,8 @@
 
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import type { AccessTier } from "@/lib/access/tiers";
-import tiers from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
 type Ok<T> = { ok: true } & T;
 type Fail = { ok: false; reason: string };
@@ -67,11 +67,16 @@ function parseFlags(flags: unknown): string[] {
 
 /** Exported: compare tiers */
 export function tierAtLeast(userTier: unknown, requiredTier: unknown): boolean {
-  return tiers.hasAccess(tiers.normalizeUser(userTier), tiers.normalizeRequired(requiredTier));
+  return hasAccess(userTier, requiredTier);
 }
 
 /** Exported: session lookup helper used by many routes */
-export async function verifySession(sessionId: string): Promise<Ok<{ valid: true; tier: AccessTier; memberId: string | null; expiresAt: string }> | Ok<{ valid: false; reason: string }>> {
+export async function verifySession(
+  sessionId: string
+): Promise<
+  Ok<{ valid: true; tier: AccessTier; memberId: string | null; expiresAt: string }> |
+  Ok<{ valid: false; reason: string }>
+> {
   const sid = String(sessionId || "").trim();
   if (!sid) return { ok: true, valid: false, reason: "SESSION_MISSING" };
 
@@ -86,7 +91,7 @@ export async function verifySession(sessionId: string): Promise<Ok<{ valid: true
   const exp = s.expiresAt ? new Date(s.expiresAt) : null;
   if (!exp || exp.getTime() <= Date.now()) return { ok: true, valid: false, reason: "SESSION_EXPIRED" };
 
-  const tier = tiers.normalizeUser((s as any)?.member?.tier ?? "public");
+  const tier = normalizeUserTier((s as any)?.member?.tier ?? "public");
   return { ok: true, valid: true, tier, memberId: (s as any)?.memberId ?? null, expiresAt: exp.toISOString() };
 }
 
@@ -126,7 +131,7 @@ export async function getSessionContext(sessionId: string): Promise<SessionConte
   if (!exp || exp.getTime() <= Date.now()) return { ok: false, reason: "SESSION_EXPIRED" };
 
   const member = (s as any).member || null;
-  const tier = tiers.normalizeUser(member?.tier ?? "public");
+  const tier = normalizeUserTier(member?.tier ?? "public");
 
   return {
     ok: true,
@@ -149,7 +154,7 @@ export async function mintSession(params: {
   ttlDays?: number;
 }): Promise<Ok<{ sessionId: string; expiresAt: string; tier: AccessTier }> | Fail> {
   const memberId = params.memberId ? String(params.memberId) : null;
-  const tierNorm = tiers.normalizeUser(params.tier);
+  const tierNorm = normalizeUserTier(params.tier);
   const ttl = Number.isFinite(params.ttlDays as number) ? Number(params.ttlDays) : DEFAULT_SESSION_TTL_DAYS;
   const expiresAt = plusDays(Math.max(1, ttl));
   const sessionId = `sess_${crypto.randomBytes(24).toString("hex")}`;
@@ -202,14 +207,18 @@ export async function revokeKeyByHash(keyHash: string): Promise<Ok<{ revoked: tr
   }
 }
 
-/** Exported: redeem access key -> creates a sessionId */
+/** Exported: redeem access key -> creates a sessionId (SCHEMA-ALIGNED) */
 export async function redeemAccessKey(
   rawKey: string,
   ctx?: { ipAddress?: string; userAgent?: string; source?: string }
-): Promise<Ok<{ ok: true; sessionId: string; tier: AccessTier; memberId: string | null }> | Ok<{ ok: false; reason: string }>> {
+): Promise<
+  Ok<{ ok: true; sessionId: string; tier: AccessTier; memberId: string | null }> |
+  Ok<{ ok: false; reason: string }>
+> {
   const key = String(rawKey || "").trim();
   if (!key) return { ok: false, reason: "KEY_MISSING" };
 
+  // Deterministic hash lookup (must match what generator stores)
   const keyHash = hashAccessKey(key);
 
   const record = await prisma.innerCircleKey.findUnique({
@@ -220,21 +229,55 @@ export async function redeemAccessKey(
   if (!record) return { ok: false, reason: "KEY_NOT_FOUND" };
   if (String(record.status || "").toLowerCase() !== "active") return { ok: false, reason: "KEY_REVOKED" };
 
-  // Optional: expire based on member status (your schema has no key expiresAt in the snippet; keep strict anyway)
+  // ✅ Enforce key expiry
+  const keyExp = record.expiresAt ? new Date(record.expiresAt) : null;
+  if (!keyExp || keyExp.getTime() <= Date.now()) return { ok: false, reason: "KEY_EXPIRED" };
+
   const member = (record as any).member || null;
   if (!member) return { ok: false, reason: "MEMBER_MISSING" };
   if (String(member.status || "").toLowerCase() !== "active") return { ok: false, reason: "MEMBER_INACTIVE" };
 
-  // Mint new session
+  // Mint new session (tier from member)
   const minted = await mintSession({
     memberId: member.id,
-    tier: tiers.normalizeUser(member.tier ?? "member"),
+    tier: normalizeUserTier(member.tier ?? "member"),
     ttlDays: DEFAULT_SESSION_TTL_DAYS,
   });
 
   if (!minted.ok) return { ok: false, reason: minted.reason };
 
-  // Best-effort telemetry / lastSeen
+  // ✅ Update lastUsedAt + telemetry into metadata (best-effort)
+  try {
+    const prevMeta =
+      record.metadata && typeof record.metadata === "object" ? (record.metadata as Record<string, any>) : {};
+
+    const telemetry = {
+      at: new Date().toISOString(),
+      ipAddress: ctx?.ipAddress ? String(ctx.ipAddress).slice(0, 64) : undefined,
+      userAgent: ctx?.userAgent ? String(ctx.userAgent).slice(0, 256) : undefined,
+      source: ctx?.source ? String(ctx.source).slice(0, 64) : undefined,
+      keySuffix: record.keySuffix ?? undefined,
+      sessionId: minted.sessionId,
+    };
+
+    await prisma.innerCircleKey.update({
+      where: { id: record.id },
+      data: {
+        lastUsedAt: new Date(),
+        metadata: {
+          ...prevMeta,
+          lastRedeem: telemetry,
+          redeems: Array.isArray((prevMeta as any).redeems)
+            ? [...((prevMeta as any).redeems as any[]).slice(-9), telemetry]
+            : [telemetry],
+        },
+      },
+    });
+  } catch {
+    // telemetry must never block access
+  }
+
+  // Best-effort member lastSeen
   try {
     await prisma.innerCircleMember.update({
       where: { id: member.id },

@@ -9,8 +9,6 @@ import {
   normalizeRequiredTier,
   hasAccess,
   getTierLabel,
-  getTierLevel,
-  requiredTierFromDoc,
   TIER_HIERARCHY,
   TIER_ALIASES,
 } from "@/lib/access/tier-policy";
@@ -30,15 +28,6 @@ export type AoLClaims = {
   memberId: string | null;
   emailHash: string | null;
   flags: string[];
-};
-
-type MemberResult = {
-  id: string;
-  status: string | null;
-  tier: string | null;     // DB AccessTier enum comes back as string
-  flags: string | null;
-  emailHash: string | null;
-  email?: string | null;
 };
 
 /* ============================================================================
@@ -67,9 +56,9 @@ function computeAccess(tier: AccessTier, isInternal: boolean) {
 /**
  * Normalize member tier using SSOT
  */
-function normalizeMemberTier(dbTier: string | null, flags: string[]): AccessTier {
+function normalizeMemberTier(dbTier: unknown, flags: string[]): AccessTier {
   if (hasInternalFlag(flags)) return "owner";
-  return normalizeUserTier(dbTier);
+  return normalizeUserTier(dbTier as any);
 }
 
 /**
@@ -92,41 +81,42 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims
   const normalizedEmail = email.trim().toLowerCase();
   const hashedEmail = sha256Hex(normalizedEmail);
 
-  const member = await safePrismaQuery<MemberResult | null>(() =>
+  // IMPORTANT:
+  // Your current SSOT schema (as pasted) does NOT include `flags` on InnerCircleMember.
+  // So this select is intentionally minimal and ALWAYS compile-safe.
+  // If you add `flags` to the schema later, you can safely extend this select.
+  const member = await safePrismaQuery(() =>
     prisma.innerCircleMember.findFirst({
       where: {
-        OR: [
-          { email: normalizedEmail },
-          { emailHash: hashedEmail },
-          { emailHash: normalizedEmail }, // Directorate master-key support (if used)
-        ],
+        OR: [{ email: normalizedEmail }, { emailHash: hashedEmail }, { emailHash: normalizedEmail }],
       },
       select: {
         id: true,
         status: true,
         tier: true,
-        flags: true,
         emailHash: true,
         email: true,
+        // flags: true, // ✅ only enable AFTER adding `flags` to schema.prisma
       },
-    })
+    }),
   );
 
   if (!member) {
     return { ...BASE_CLAIMS, emailHash: hashedEmail };
   }
 
-  const isActive = member.status === "active";
+  const isActive = String(member.status || "").toLowerCase() === "active";
   if (!isActive) {
     return { ...BASE_CLAIMS, emailHash: hashedEmail, memberId: member.id };
   }
 
-  const flags = safeParseFlags(member.flags);
+  // If schema does not have flags, treat as empty.
+  // If you later add it, you can replace with:
+  // const flags = safeParseFlags((member as any).flags);
+  const flags = safeParseFlags((member as any)?.flags);
 
-  // Internal flags are the ONLY internal override at this layer
   const isInternal = hasInternalFlag(flags);
-
-  const tier: AccessTier = normalizeMemberTier(member.tier, flags);
+  const tier: AccessTier = normalizeMemberTier((member as any).tier, flags);
   const { innerCircleAccess, allowPrivate } = computeAccess(tier, isInternal);
 
   return {
@@ -135,7 +125,7 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims
     isInternal,
     allowPrivate,
     memberId: member.id,
-    emailHash: member.emailHash || hashedEmail,
+    emailHash: (member as any).emailHash || hashedEmail,
     flags,
   };
 }
@@ -169,7 +159,7 @@ export const authOptions: NextAuthOptions = {
             id: "system-admin",
             email: ADMIN_EMAIL,
             name: "Vault Administrator",
-            role: "owner", // SSOT tier
+            role: "owner",
           };
         }
 
@@ -187,7 +177,6 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-      // Stabilize token identity
       if (user) {
         (token as any).id = (user as any).id;
         (token as any).role = (user as any).role || "public";
@@ -197,14 +186,10 @@ export const authOptions: NextAuthOptions = {
       const role = String((token as any).role || "public").trim();
       const email = typeof token.email === "string" ? token.email : undefined;
 
-      // DB-backed claims (SSOT)
       const resolved = await resolveAoLClaimsByEmail(email);
 
-      // Escalation rules:
-      // - if role maps to owner via SSOT alias map
-      // - or role tier >= architect (legacy)
-      // - or resolved says internal/owner already
       const roleTier = normalizeUserTier(role);
+
       const shouldElevateToOwner =
         roleMapsToOwner(role) ||
         hasAccess(roleTier, "architect") ||
@@ -223,10 +208,8 @@ export const authOptions: NextAuthOptions = {
           }
         : resolved;
 
-      // Hard guarantee: never undefined
       (token as any).aol = aol;
 
-      // Keep normalized tier stable across app (legacy compatibility)
       (token as any).id = String((token as any).id || token.sub || "");
       (token as any).role = aol.tier;
       (token as any).tierLevel = TIER_HIERARCHY[aol.tier];
@@ -242,7 +225,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).tier = aol.tier;
         (session.user as any).tierLabel = getTierLabel(aol.tier);
         (session.user as any).tierLevel = TIER_HIERARCHY[aol.tier];
-        (session.user as any).role = aol.tier; // backward compatibility
+        (session.user as any).role = aol.tier;
         (session.user as any).flags = aol.flags ?? [];
       }
 
@@ -279,12 +262,7 @@ export async function currentUserHasAccess(requiredTier: AccessTier | string): P
 }
 
 export function resolveTierFromSessionLike(session: any): AccessTier {
-  const rawTier =
-    session?.user?.tier ??
-    session?.user?.role ??
-    session?.tier ??
-    session?.role ??
-    "public";
+  const rawTier = session?.user?.tier ?? session?.user?.role ?? session?.tier ?? session?.role ?? "public";
 
   const flags: string[] = Array.isArray(session?.user?.flags)
     ? session.user.flags.map(String)
@@ -292,7 +270,6 @@ export function resolveTierFromSessionLike(session: any): AccessTier {
     ? session.flags.map(String)
     : [];
 
-  // Internal markers => owner
   const INTERNAL_MARKERS = new Set(["admin", "internal", "staff", "director", "root", "superadmin", "private_access"]);
   if (flags.some((f) => INTERNAL_MARKERS.has(String(f).toLowerCase()))) return "owner";
 

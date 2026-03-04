@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-02T17:15:31.504Z",
-  "totalDuplicateIds": 26,
+  "generatedAt": "2026-03-04T12:15:12.473Z",
+  "totalDuplicateIds": 27,
   "duplicates": [
     {
       "id": "abraham-vault-pack",
@@ -210,6 +210,14 @@
         "/assets/downloads/weekly-operating-rhythm.pdf"
       ],
       "reason": "bucket(content-downloads) > type(.pdf) > size(86KB) > mtime"
+    },
+    {
+      "id": "frontier-resilience-01",
+      "chosen": "/assets/downloads/content-downloads/frontier-resilience-01.pdf",
+      "dropped": [
+        "/downloads/briefs/frontier-resilience-01.pdf"
+      ],
+      "reason": "bucket(content-downloads) > type(.pdf) > size(22KB) > mtime"
     }
   ]
 }

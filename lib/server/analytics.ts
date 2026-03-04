@@ -1,5 +1,5 @@
 /* lib/server/analytics.ts */
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma.server";
 
 export type StrategicHealthReport = {
   summary: {

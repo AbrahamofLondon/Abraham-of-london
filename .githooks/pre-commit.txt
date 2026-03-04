@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+# Fail if any MD/MDX contains trailing whitespace
+if rg -n --hidden --glob '!.git/**' --glob '**/*.{md,mdx}' "[\t ]+$" >/dev/null; then
+  echo "⛔ Trailing whitespace detected in Markdown/MDX."
+  rg -n --hidden --glob '!.git/**' --glob '**/*.{md,mdx}' "[\t ]+$"
+  exit 1
+fi

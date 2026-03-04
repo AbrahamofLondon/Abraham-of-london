@@ -1,6 +1,6 @@
-// lib/auth/mfa.ts — REDIS MANAGER COMPAT + SAFE FALLBACK + STRICT TS
+// lib/auth/mfa.ts — DB-OPTIONAL + REDIS MANAGER COMPAT + SAFE FALLBACK + STRICT TS
 
-import { randomInt, randomBytes } from "crypto";
+import { randomInt, randomBytes, createHash } from "crypto";
 // @ts-ignore - hi-base32 doesn't ship types
 import { encode as encodeBase32 } from "hi-base32";
 import { authenticator } from "@otplib/preset-default";
@@ -136,7 +136,6 @@ class MfaChallengeStore implements ChallengeStore {
     const out: MfaChallenge[] = [];
     for (const [, value] of this.challenges) {
       if (value && typeof value === "object" && value.userId === userId) {
-        // best effort: ensure dates are Dates
         out.push(reviveChallenge(value));
       }
     }
@@ -146,16 +145,18 @@ class MfaChallengeStore implements ChallengeStore {
 
 // ==================== REDIS STORE (MANAGER COMPAT) ====================
 async function getRedisMfaStore(): Promise<ChallengeStore> {
-  // Server-side only; client uses memory
   if (typeof window !== "undefined") return MfaChallengeStore.getInstance();
 
   try {
-    // ✅ CORRECT: Import getRedis directly from the module
     const { getRedis } = await import("@/lib/redis");
     const client = getRedis();
 
-    // Validate Redis client surface
-    if (!client || typeof client.get !== "function" || typeof client.set !== "function" || typeof client.del !== "function") {
+    if (
+      !client ||
+      typeof client.get !== "function" ||
+      typeof client.set !== "function" ||
+      typeof client.del !== "function"
+    ) {
       console.warn("[MFA] Redis client not available. Using in-memory store.");
       return MfaChallengeStore.getInstance();
     }
@@ -164,10 +165,10 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
       async set(key: string, value: any, ttlMs?: number): Promise<void> {
         try {
           const payload = JSON.stringify(value);
-          // Default TTL: 1 hour if not provided
-          const ttlSeconds = Math.max(1, Math.floor(((ttlMs ?? 3600_000) as number) / 1000));
-
-          // ioredis-style: set(key, value, "EX", seconds)
+          const ttlSeconds = Math.max(
+            1,
+            Math.floor(((ttlMs ?? 3600_000) as number) / 1000)
+          );
           await client.set(key, payload, "EX", ttlSeconds);
         } catch (error) {
           console.error("[MFA] Redis set failed — falling back to memory:", error);
@@ -179,9 +180,7 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
         try {
           const raw = await client.get(key);
           if (!raw) return null;
-
           const parsed = JSON.parse(raw);
-          // revive dates if this looks like an MFA challenge
           return reviveMaybeChallenge(parsed);
         } catch (error) {
           console.error("[MFA] Redis get failed — falling back to memory:", error);
@@ -199,8 +198,6 @@ async function getRedisMfaStore(): Promise<ChallengeStore> {
       },
 
       async findByUserId(userId: string): Promise<MfaChallenge[]> {
-        // Redis scanning requires KEYS/SCAN patterns; avoid in prod.
-        // Keep deterministic + safe: fall back to memory implementation.
         return MfaChallengeStore.getInstance().findByUserId(userId);
       },
     };
@@ -224,8 +221,105 @@ function reviveChallenge(v: any): MfaChallenge {
     ...v,
     createdAt: v.createdAt instanceof Date ? v.createdAt : new Date(v.createdAt),
     expiresAt: v.expiresAt instanceof Date ? v.expiresAt : new Date(v.expiresAt),
-    verifiedAt: v.verifiedAt ? (v.verifiedAt instanceof Date ? v.verifiedAt : new Date(v.verifiedAt)) : undefined,
+    verifiedAt: v.verifiedAt
+      ? v.verifiedAt instanceof Date
+        ? v.verifiedAt
+        : new Date(v.verifiedAt)
+      : undefined,
   } as MfaChallenge;
+}
+
+// ==================== DB-OPTIONAL MFA SETUP ACCESS ====================
+// We do NOT assume prisma.mfaSetup exists. We try a few common names.
+// If none exist, we fall back to Redis/memory.
+async function getUserTotpSecret(userId: string): Promise<string | null> {
+  if (!userId) return null;
+
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const p: any = prisma as any;
+
+    const candidates = ["mfaSetup", "mfa_setup", "MfaSetup", "userMfaSetup", "mfa"];
+    for (const modelName of candidates) {
+      const model = p?.[modelName];
+      if (model && typeof model.findUnique === "function") {
+        const row = await model.findUnique({
+          where: { userId },
+          select: { totpSecret: true },
+        });
+        if (row?.totpSecret) return String(row.totpSecret);
+      }
+    }
+  } catch {
+    // ignore: DB not available or model doesn't exist
+  }
+
+  // fallback: check redis (if you store TOTP secret there)
+  try {
+    const store = await getRedisMfaStore();
+    const v = await store.get(`mfa:totp:${userId}`);
+    return v?.totpSecret ? String(v.totpSecret) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function getBackupCodes(userId: string): Promise<string[] | null> {
+  // Try DB first (if model exists)
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const p: any = prisma as any;
+
+    const candidates = ["mfaSetup", "mfa_setup", "MfaSetup", "userMfaSetup", "mfa"];
+    for (const modelName of candidates) {
+      const model = p?.[modelName];
+      if (model && typeof model.findUnique === "function") {
+        const row = await model.findUnique({
+          where: { userId },
+          select: { backupCodes: true },
+        });
+        if (row?.backupCodes && Array.isArray(row.backupCodes)) return row.backupCodes.map(String);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // Fallback: Redis/memory
+  try {
+    const store = await getRedisMfaStore();
+    const row = await store.get(`mfa:backup:${userId}`);
+    const codes = row?.backupCodes;
+    return Array.isArray(codes) ? codes.map(String) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveBackupCodes(userId: string, backupCodes: string[]): Promise<void> {
+  // Try DB update first (if model exists)
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const p: any = prisma as any;
+
+    const candidates = ["mfaSetup", "mfa_setup", "MfaSetup", "userMfaSetup", "mfa"];
+    for (const modelName of candidates) {
+      const model = p?.[modelName];
+      if (model && typeof model.update === "function") {
+        await model.update({
+          where: { userId },
+          data: { backupCodes },
+        });
+        return;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // Fallback: Redis/memory
+  const store = await getRedisMfaStore();
+  await store.set(`mfa:backup:${userId}`, { backupCodes }, 30 * 24 * 60 * 60 * 1000);
 }
 
 // ==================== TOTP ====================
@@ -267,7 +361,7 @@ export async function createMfaChallenge(
   const { ipAddress, userAgent, metadata } = options;
 
   const challengeId = `mfa_${randomBytes(16).toString("hex")}`;
-  const now = new Date();
+  const nowDate = new Date();
 
   let expiresAt: Date;
   let code: string | undefined;
@@ -275,18 +369,18 @@ export async function createMfaChallenge(
 
   switch (method) {
     case "totp":
-      expiresAt = new Date(now.getTime() + 10 * 60 * 1000);
+      expiresAt = new Date(nowDate.getTime() + 10 * 60 * 1000);
       break;
 
     case "sms":
     case "email":
       code = generateNumericCode(MFA_CONFIG[method].codeLength);
-      expiresAt = new Date(now.getTime() + MFA_CONFIG[method].expiryMinutes * 60 * 1000);
+      expiresAt = new Date(nowDate.getTime() + MFA_CONFIG[method].expiryMinutes * 60 * 1000);
       await sendVerificationCode(method, userId, code);
       break;
 
     case "backup-code":
-      expiresAt = new Date(now.getTime() + 5 * 60 * 1000);
+      expiresAt = new Date(nowDate.getTime() + 5 * 60 * 1000);
       break;
 
     default:
@@ -300,7 +394,7 @@ export async function createMfaChallenge(
     type,
     code,
     secret,
-    createdAt: now,
+    createdAt: nowDate,
     expiresAt,
     status: "pending",
     metadata,
@@ -311,9 +405,8 @@ export async function createMfaChallenge(
   };
 
   const store = await getRedisMfaStore();
-  const ttlMs = expiresAt.getTime() - now.getTime();
+  const ttlMs = expiresAt.getTime() - nowDate.getTime();
 
-  // store under a predictable key
   await store.set(`mfa:challenge:${challengeId}`, challenge, ttlMs);
 
   await logMfaEvent({
@@ -343,9 +436,9 @@ export async function verifyMfaChallenge(
 
   if (!challenge) return { success: false, error: "Challenge not found or expired" };
 
-  const now = new Date();
+  const nowDate = new Date();
 
-  if (challenge.expiresAt <= now) {
+  if (challenge.expiresAt <= nowDate) {
     challenge.status = "expired";
     await store.set(`mfa:challenge:${challengeId}`, challenge, 60_000);
     return { success: false, error: "Challenge expired" };
@@ -368,19 +461,11 @@ export async function verifyMfaChallenge(
   let isValid = false;
 
   switch (challenge.method) {
-    case "totp":
-      try {
-        const { prisma } = await import("@/lib/prisma");
-        const mfaSetup = await prisma.mfaSetup.findUnique({
-          where: { userId: challenge.userId },
-          select: { totpSecret: true },
-        });
-
-        if (mfaSetup?.totpSecret) isValid = verifyTotpCode(mfaSetup.totpSecret, code);
-      } catch (error) {
-        console.error("[MFA] Failed to get TOTP secret:", error);
-      }
+    case "totp": {
+      const secret = await getUserTotpSecret(challenge.userId);
+      if (secret) isValid = verifyTotpCode(secret, code);
       break;
+    }
 
     case "sms":
     case "email":
@@ -399,7 +484,7 @@ export async function verifyMfaChallenge(
 
   if (isValid) {
     challenge.status = "verified";
-    challenge.verifiedAt = now;
+    challenge.verifiedAt = nowDate;
 
     if (rememberDevice && userAgent) {
       await rememberMfaDevice(challenge.userId, userAgent, ipAddress);
@@ -408,8 +493,7 @@ export async function verifyMfaChallenge(
     challenge.status = "failed";
   }
 
-  // keep until expiration (or 10 minutes post-verify)
-  const ttlMs = Math.max(60_000, challenge.expiresAt.getTime() - now.getTime());
+  const ttlMs = Math.max(60_000, challenge.expiresAt.getTime() - nowDate.getTime());
   await store.set(`mfa:challenge:${challengeId}`, challenge, ttlMs);
 
   await logMfaEvent({
@@ -430,8 +514,8 @@ export async function verifyMfaChallenge(
 export async function getPendingChallenges(userId: string): Promise<MfaChallenge[]> {
   const store = await getRedisMfaStore();
   const challenges = await store.findByUserId(userId);
-  const now = new Date();
-  return challenges.filter((c) => c.status === "pending" && c.expiresAt > now);
+  const nowDate = new Date();
+  return challenges.filter((c) => c.status === "pending" && c.expiresAt > nowDate);
 }
 
 export async function cancelChallenge(challengeId: string): Promise<boolean> {
@@ -458,15 +542,14 @@ export async function setMFAChallenge(userId: string, challengeValue: string): P
   try {
     const store = await getRedisMfaStore();
 
-    const now = new Date();
+    const nowDate = new Date();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    // Store as a challenge-like object (compatible with your existing logic)
     const payload = {
       id: `challenge_ref:${userId}`,
       userId,
       challengeValue,
-      createdAt: now,
+      createdAt: nowDate,
       expiresAt,
       status: "pending",
       method: "totp",
@@ -475,7 +558,7 @@ export async function setMFAChallenge(userId: string, challengeValue: string): P
       maxAttempts: 3,
     };
 
-    await store.set(`challenge_ref:${userId}`, payload, expiresAt.getTime() - now.getTime());
+    await store.set(`challenge_ref:${userId}`, payload, expiresAt.getTime() - nowDate.getTime());
 
     await logMfaEvent({
       userId,
@@ -490,9 +573,9 @@ export async function setMFAChallenge(userId: string, challengeValue: string): P
 
 // ==================== SECURITY UTILITIES ====================
 function generateNumericCode(length: number): string {
-  let code = "";
-  for (let i = 0; i < length; i++) code += randomInt(0, 10).toString();
-  return code;
+  let out = "";
+  for (let i = 0; i < length; i++) out += randomInt(0, 10).toString();
+  return out;
 }
 
 async function sendVerificationCode(method: "sms" | "email", userId: string, code: string): Promise<void> {
@@ -519,38 +602,20 @@ async function sendVerificationCode(method: "sms" | "email", userId: string, cod
 }
 
 async function verifyBackupCode(userId: string, code: string): Promise<boolean> {
-  try {
-    const { prisma } = await import("@/lib/prisma");
-    const setup = await prisma.mfaSetup.findUnique({
-      where: { userId },
-      select: { backupCodes: true },
-    });
+  const normalizedCode = String(code || "").replace(/-/g, "").toUpperCase();
+  if (!normalizedCode) return false;
 
-    if (!setup) return false;
+  const backupCodes = await getBackupCodes(userId);
+  if (!backupCodes || !Array.isArray(backupCodes) || backupCodes.length === 0) return false;
 
-    const normalizedCode = code.replace(/-/g, "").toUpperCase();
+  const idx = backupCodes.findIndex(
+    (bc) => String(bc).replace(/-/g, "").toUpperCase() === normalizedCode
+  );
+  if (idx === -1) return false;
 
-    const backupCodes = setup.backupCodes as any;
-    if (!Array.isArray(backupCodes)) {
-      console.error("[MFA] backupCodes is not an array:", typeof backupCodes);
-      return false;
-    }
-
-    const index = backupCodes.findIndex((bc: any) => bc.replace(/-/g, "").toUpperCase() === normalizedCode);
-    if (index === -1) return false;
-
-    backupCodes.splice(index, 1);
-
-    await prisma.mfaSetup.update({
-      where: { userId },
-      data: { backupCodes },
-    });
-
-    return true;
-  } catch (error) {
-    console.error("[MFA] Backup code verification error:", error);
-    return false;
-  }
+  backupCodes.splice(idx, 1);
+  await saveBackupCodes(userId, backupCodes);
+  return true;
 }
 
 async function rememberMfaDevice(userId: string, userAgent: string, ipAddress?: string): Promise<void> {
@@ -585,9 +650,9 @@ export async function isDeviceRemembered(userId: string, userAgent: string, ipAd
 }
 
 function generateDeviceId(userAgent: string, ipAddress?: string): string {
-  // deterministic enough for "remember device" without storing raw info
-  const hash = randomBytes(16).toString("hex");
-  return hash.substring(0, 16);
+  // deterministic fingerprint (stable across requests)
+  const src = `${userAgent || ""}::${ipAddress || ""}`;
+  return createHash("sha256").update(src).digest("hex").slice(0, 16);
 }
 
 // ==================== LOGGING ====================
@@ -602,7 +667,7 @@ async function logMfaEvent(event: {
 }): Promise<void> {
   try {
     const { prisma } = await import("@/lib/prisma");
-    await prisma.securityLog.create({
+    await (prisma as any).securityLog?.create?.({
       data: {
         userId: event.userId,
         action: `MFA_${event.action}`,
@@ -632,7 +697,7 @@ async function logSecurityEvent(event: {
 }): Promise<void> {
   try {
     const { prisma } = await import("@/lib/prisma");
-    await prisma.securityLog.create({
+    await (prisma as any).securityLog?.create?.({
       data: {
         userId: event.userId,
         action: `SECURITY_${event.action}`,

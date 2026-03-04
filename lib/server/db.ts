@@ -1,5 +1,5 @@
 // lib/server/db.ts
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma.server";
 
 export async function withDb<T>(fn: () => Promise<T>): Promise<T> {
   try {

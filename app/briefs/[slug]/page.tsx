@@ -34,7 +34,6 @@ function findBriefBySlug(slug: string) {
 
 /**
  * Minimal, build-safe "not found" UI.
- * (Avoids notFound() to prevent unexpected behavior during export/build.)
  */
 function NotFoundView() {
   return (
@@ -57,7 +56,6 @@ function NotFoundView() {
 
 /**
  * SEO & Metadata Generation
- * Always safe and public (even if content is restricted).
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const brief: any = findBriefBySlug(params.slug);
@@ -86,43 +84,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 /**
  * Main Intelligence Brief Page
- * Guarantees:
- * - Public briefs never get blocked.
- * - Access checks use SSOT functions that exist: normalizeRequired + normalizeUser.
- * - DB interaction queries only run after access is confirmed.
- * - Never crashes build with notFound().
  */
 export default async function BriefPage({ params }: PageProps) {
   const slug = String(params?.slug || "").trim();
   const brief: any = findBriefBySlug(slug);
 
-  // Build-safe: show a stable not-found view instead of throwing.
   if (!brief) return <NotFoundView />;
 
   const session = await getServerSession(authOptions);
 
-  // REQUIRED tier: canonicalize using the function your file ACTUALLY exports.
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(brief));
-
-  // USER tier: canonicalize using normalizeUser.
   const userTier = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
 
-  // Public bypass is absolute.
   const isPublic = requiredTier === "public";
-
-  // If not public: require authenticated user + sufficient tier.
-  const hasAccess =
-    isPublic || (!!session?.user && tiers.hasAccess(userTier, requiredTier));
+  const hasAccess = isPublic || (!!session?.user && tiers.hasAccess(userTier, requiredTier));
 
   // 📊 Interaction data only if server-side access is confirmed.
   const userEmail = session?.user?.email;
-  const [counts, likeStatus, saveStatus] = hasAccess
+
+  const [counts, userLiked, userSaved] = hasAccess
     ? await Promise.all([
         getInteractionCounts(slug),
-        userEmail ? hasUserInteracted(slug, userEmail, "like") : { interacted: false },
-        userEmail ? hasUserInteracted(slug, userEmail, "save") : { interacted: false },
+        userEmail ? hasUserInteracted(slug, "like", userEmail) : Promise.resolve(false),
+        userEmail ? hasUserInteracted(slug, "save", userEmail) : Promise.resolve(false),
       ])
-    : [{ likes: 0, saves: 0 }, { interacted: false }, { interacted: false }];
+    : [{ likes: 0, saves: 0, userLiked: false, userSaved: false }, false, false];
 
   const category = brief.category || "Intelligence";
   const status = brief.status || "ACTIVE";
@@ -176,9 +162,7 @@ export default async function BriefPage({ params }: PageProps) {
             {(brief.date || brief.lastUpdated) && (
               <div className="mt-6 flex items-center gap-6 text-[10px] font-mono text-zinc-600">
                 <span>ISSUED: {brief.date ? new Date(brief.date).toLocaleDateString() : "N/A"}</span>
-                {brief.lastUpdated && (
-                  <span>UPDATED: {new Date(brief.lastUpdated).toLocaleDateString()}</span>
-                )}
+                {brief.lastUpdated && <span>UPDATED: {new Date(brief.lastUpdated).toLocaleDateString()}</span>}
               </div>
             )}
           </header>
@@ -205,8 +189,8 @@ export default async function BriefPage({ params }: PageProps) {
           slug={slug}
           initialLikes={counts.likes}
           initialSaves={counts.saves}
-          isLiked={likeStatus.interacted}
-          isSaved={saveStatus.interacted}
+          isLiked={!!userLiked}
+          isSaved={!!userSaved}
         />
       </div>
     </BriefAccessGuard>

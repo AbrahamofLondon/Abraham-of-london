@@ -1,5 +1,5 @@
 /* lib/server/cron.ts */
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma.server";
 import { logAuditEvent } from "./audit";
 
 export async function executeInstitutionalHygiene() {

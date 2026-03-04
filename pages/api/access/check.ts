@@ -16,7 +16,7 @@ const TIMEOUT_MS = 3000;
 
 function parseCookies(cookieHeader: string | undefined): Record<string, string> {
   if (!cookieHeader || cookieHeader.length > MAX_COOKIE_SIZE) return {};
-  
+
   const cookies: Record<string, string> = {};
   const pairs = cookieHeader.split(";");
 
@@ -45,15 +45,18 @@ function parseCookies(cookieHeader: string | undefined): Record<string, string> 
 
 function getClientIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
-  const forwardedIp = Array.isArray(forwarded) 
-    ? forwarded[0] 
+  const forwardedIp = Array.isArray(forwarded)
+    ? forwarded[0]
     : forwarded?.split(",")[0]?.trim();
-  
+
   const ip = req.socket?.remoteAddress || forwardedIp || "";
   return ip.length > 45 ? "" : ip;
 }
 
-function createSafeResponse(data: Partial<InnerCircleAccess>, status = 200): InnerCircleAccess {
+function createSafeResponse(
+  data: Partial<InnerCircleAccess>,
+  _status = 200
+): InnerCircleAccess {
   return {
     hasAccess: !!data.hasAccess,
     reason: data.reason || "internal_error",
@@ -83,33 +86,47 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<InnerCircleAccess>
 ) {
-  // Set security headers
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  // Security headers
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
   res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
-  // Handle HEAD requests (lightweight check)
+  // HEAD: lightweight presence check (transition-safe)
   if (req.method === "HEAD") {
-    const hasToken = String(req.headers.cookie || "").includes("innerCircleAccess=");
+    const cookieStr = String(req.headers.cookie || "");
+    const hasToken =
+      cookieStr.includes("aol_access=") ||
+      cookieStr.includes("innerCircleAccess=");
     return res.status(hasToken ? 200 : 401).end();
   }
 
   // Only allow GET and HEAD
   if (req.method !== "GET") {
     res.setHeader("Allow", ["GET", "HEAD"]);
-    return res.status(405).json({ hasAccess: false, reason: "no_request" });
+    return res.status(405).json({ hasAccess: false, reason: "no_request" } as any);
   }
 
   try {
     const cookieHeader = req.headers.cookie;
-    const userAgent = (req.headers["user-agent"] as string || "unknown").substring(0, UA_MAX_LEN);
+    const userAgent = String(req.headers["user-agent"] || "unknown").substring(0, UA_MAX_LEN);
     const cookies = parseCookies(cookieHeader);
     const ip = getClientIp(req);
 
+    // Transition-safe: allow either cookie name to be passed through
+    const sessionCookie =
+      cookies.aol_access || cookies.innerCircleAccess || "";
+
     const accessInput = {
-      cookies: { innerCircleAccess: cookies.innerCircleAccess || "" },
+      cookies: {
+        // your access gate can read whichever it supports
+        aol_access: sessionCookie,
+        innerCircleAccess: sessionCookie,
+      },
       headers: { "user-agent": userAgent },
       ip,
     };
@@ -119,14 +136,14 @@ export default async function handler(
       TIMEOUT_MS
     );
 
-    return res.status(200).json(createSafeResponse(accessResult as InnerCircleAccess, 200));
+    return res.status(200).json(createSafeResponse(accessResult as any, 200));
   } catch (error: any) {
     const msg = String(error?.message || "").toLowerCase();
     const isTimeout = msg === "timeout";
 
     return res.status(isTimeout ? 504 : 500).json(
       createSafeResponse(
-        { hasAccess: false, reason: isTimeout ? "internal_error" : "internal_error" },
+        { hasAccess: false, reason: "internal_error" },
         isTimeout ? 504 : 500
       )
     );

@@ -1,7 +1,13 @@
-/* lib/consulting/strategy-room.ts */
-import { prisma } from "@/lib/prisma"; // ✅ Use named import, not default
+// lib/consulting/strategy-room.ts
+import { prisma } from "@/lib/prisma";
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+
+// Helper to hash email
+function hashEmail(email: string): string {
+  return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
+}
 
 // --- TYPES ---
 
@@ -35,17 +41,20 @@ export async function archiveIntake(
 
   // 1. Primary: Prisma/Neon Integration
   try {
-    // ✅ Verified: uses named-imported prisma client
-    await prisma.strategyRoomIntake.create({
+    await prisma.strategyIntake.create({
       data: {
         fullName: payload.contact.fullName,
-        emailHash: payload.contact.email, 
+        emailHash: hashEmail(payload.contact.email),
         organisation: payload.contact.organisation,
+        readinessScore: score,
+        dependencyLevel: "standard",
+        volatility: "medium",
         status: result.status,
-        score: score,
-        decisionStatement: payload.decision.statement,
-        payload: JSON.stringify(payload),
-        createdAt: createdAtDate,
+        payload: JSON.stringify({
+          ...payload,
+          message: result.message,
+          nextUrl: (result as any).nextUrl,
+        }),
       },
     });
     return; 

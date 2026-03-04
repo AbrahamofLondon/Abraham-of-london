@@ -1,37 +1,187 @@
+/* styles/globals.css
+   ABRAHAM OF LONDON — LEGIBILITY BASELINE (Cinematic, not illegible)
+*/
+
+/* -----------------------------------------------------------------------------
+  CSS Vars (single source of truth)
+----------------------------------------------------------------------------- */
+:root {
+  --aol-dark: #0b0b0b;
+  --aol-darker: #060606;
+
+  --aol-ink: #f2f1ee;          /* primary text */
+  --aol-ink-dim: rgba(242, 241, 238, 0.82);
+  --aol-ink-muted: rgba(242, 241, 238, 0.68);
+
+  --aol-gold: #b89b6e;
+  --aol-gold-strong: #f59e0b;
+
+  --aol-border: rgba(255, 255, 255, 0.12);
+  --aol-surface: rgba(255, 255, 255, 0.04);
+  --aol-surface-2: rgba(255, 255, 255, 0.06);
+}
+
+/* -----------------------------------------------------------------------------
+  Base document defaults (THIS is where your app becomes readable)
+----------------------------------------------------------------------------- */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--aol-dark);
+  color: var(--aol-ink);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent accidental “transparent text” inheritance */
+* {
+  color: inherit;
+}
+
 /* -----------------------------------------------------------------------------
   Links / focus
 ----------------------------------------------------------------------------- */
-
 a {
   text-decoration: none;
-  transition: color 300ms ease, opacity 300ms ease;
+  transition: color 250ms ease, opacity 250ms ease, transform 250ms ease;
+}
+
+a:hover {
+  opacity: 0.95;
 }
 
 :focus-visible {
-  outline: 2px solid rgba(245,158,11,0.35);
+  outline: 2px solid rgba(245, 158, 11, 0.45);
   outline-offset: 3px;
   border-radius: 12px;
 }
 
 /* -----------------------------------------------------------------------------
-  MDX CONTENT — THE IMPORTANT PART
-  Fixes: readability, scanability, and "overlay layer over text" issues.
+  Global selection (readable on dark)
 ----------------------------------------------------------------------------- */
+::selection {
+  background: rgba(245, 158, 11, 0.35);
+  color: var(--aol-ink);
+}
 
+/* -----------------------------------------------------------------------------
+  Film grain texture (keep subtle; do NOT crush text)
+----------------------------------------------------------------------------- */
+.aol-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.35'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  opacity: 0.012; /* keep tiny */
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* -----------------------------------------------------------------------------
+  MDX / Prose — readable, scannable (no “gray-on-black faint text”)
+----------------------------------------------------------------------------- */
 .aol-mdx-content {
   position: relative;
   z-index: 10;
   color: var(--aol-ink);
   font-size: 16px;
-  line-height: 1.75;
+  line-height: 1.8;
 }
 
-/* ... all your MDX content styles ... */
+.aol-mdx-content p,
+.aol-mdx-content li {
+  color: var(--aol-ink-dim);
+}
+
+.aol-mdx-content h1,
+.aol-mdx-content h2,
+.aol-mdx-content h3,
+.aol-mdx-content h4 {
+  color: var(--aol-ink);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.aol-mdx-content a {
+  color: rgba(245, 158, 11, 0.95);
+  text-decoration: underline;
+  text-decoration-color: rgba(245, 158, 11, 0.35);
+  text-underline-offset: 3px;
+}
+
+.aol-mdx-content a:hover {
+  text-decoration-color: rgba(245, 158, 11, 0.7);
+}
+
+.aol-mdx-content code {
+  color: var(--aol-ink);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.aol-mdx-content pre {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.9rem;
+  padding: 1rem;
+  overflow: auto;
+}
+
+.aol-mdx-content blockquote {
+  border-left: 2px solid rgba(245, 158, 11, 0.35);
+  padding-left: 1rem;
+  color: var(--aol-ink-muted);
+}
 
 /* -----------------------------------------------------------------------------
   Utility overrides (keep at the end)
 ----------------------------------------------------------------------------- */
+a.no-underline {
+  text-decoration: none !important;
+}
+a.no-underline * {
+  text-decoration: none !important;
+}
 
-/* Prevent global anchor styling from underlining “card links” */
-a.no-underline { text-decoration: none !important; }
-a.no-underline * { text-decoration: none !important; }
+/* -----------------------------------------------------------------------------
+  Cinematic animations (shared)
+----------------------------------------------------------------------------- */
+@keyframes cinematic-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translate(8px, -18px) scale(1.1);
+    opacity: 0.32;
+  }
+}
+
+@keyframes cinematic-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

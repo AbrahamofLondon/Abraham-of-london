@@ -1,8 +1,8 @@
-// components/homepage/HeroBanner.tsx
+// components/homepage/HeroBanner.tsx — UPGRADED (AoL premium, canonical Button, no nested Link)
+// NOTE: this component is UI only; keep it router-safe and brand-consistent.
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import Button from "@/components/Button";
+import Button from "@/components/ui/Button";
 
 export interface HeroBannerProps {
   title: string;
@@ -13,11 +13,13 @@ export interface HeroBannerProps {
   secondaryCtaHref?: string;
   imageSrc?: string | null;
   imageAlt?: string | null;
+  eyebrow?: string;
 }
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   title,
   subtitle,
+  eyebrow = "Abraham of London",
   ctaLabel = "Explore the work",
   ctaHref = "/",
   secondaryCtaLabel,
@@ -25,50 +27,47 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   imageSrc = "/assets/images/abraham-of-london-banner.webp",
   imageAlt = "Abraham of London hero banner",
 }) => {
-  // Defensive: always end up with a usable image path or null
   const resolvedImageSrc =
-    typeof imageSrc === "string" && imageSrc.trim().length > 0
-      ? imageSrc
-      : "/assets/images/abraham-of-london-banner.webp";
+    typeof imageSrc === "string" && imageSrc.trim().length > 0 ? imageSrc : "/assets/images/abraham-of-london-banner.webp";
 
-  const hasImage =
-    typeof resolvedImageSrc === "string" && resolvedImageSrc.length > 0;
+  const hasImage = typeof resolvedImageSrc === "string" && resolvedImageSrc.length > 0;
 
   return (
-    <section className="relative overflow-hidden bg-warmWhite">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 md:flex-row md:items-center">
+    <section className="relative overflow-hidden bg-[color:var(--color-warmWhite)]">
+      {/* subtle brand texture */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
+        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[color:var(--color-softGold)] blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[color:var(--color-primary)] blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 md:flex-row md:items-center">
         {/* Copy column */}
         <div className="flex-1 space-y-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-500">
-            Abraham of London
-          </p>
+          <p className="text-xs uppercase tracking-[0.28em] text-gray-500">{eyebrow}</p>
 
-          <h1 className="text-3xl font-semibold text-deepCharcoal sm:text-4xl lg:text-5xl">
+          <h1 className="text-3xl font-semibold text-[color:var(--color-deepCharcoal)] sm:text-4xl lg:text-5xl">
             {title}
           </h1>
 
-          {subtitle && (
-            <p className="max-w-xl text-sm text-gray-600 sm:text-base">
-              {subtitle}
-            </p>
-          )}
+          {subtitle ? <p className="max-w-xl text-sm text-gray-600 sm:text-base">{subtitle}</p> : null}
 
           <div className="flex flex-wrap gap-3 pt-2">
-            {ctaHref && ctaLabel && (
-              <Link href={ctaHref}>
-                <Button size="lg" variant="primary">
-                  {ctaLabel}
-                </Button>
-              </Link>
-            )}
+            {ctaHref && ctaLabel ? (
+              <Button href={ctaHref} size="lg" variant="primary" className="uppercase tracking-wide">
+                {ctaLabel}
+              </Button>
+            ) : null}
 
-            {secondaryCtaHref && secondaryCtaLabel && (
-              <Link href={secondaryCtaHref}>
-                <Button size="lg" variant="ghost">
-                  {secondaryCtaLabel}
-                </Button>
-              </Link>
-            )}
+            {secondaryCtaHref && secondaryCtaLabel ? (
+              <Button
+                href={secondaryCtaHref}
+                size="lg"
+                variant="secondary"
+                className="uppercase tracking-wide"
+              >
+                {secondaryCtaLabel}
+              </Button>
+            ) : null}
           </div>
         </div>
 
@@ -85,13 +84,15 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             ) : (
-              // Fallback gradient card if, for any reason, the image path is unusable
-              <div className="flex h-full w-full items-center justify-center rounded-2xl bg-gradient-to-br from-deepCharcoal via-black to-forest/40 shadow-lg shadow-black/20">
-                <span className="text-xs uppercase tracking-[0.2em] text-softGold/80">
+              <div className="flex h-full w-full items-center justify-center rounded-2xl bg-gradient-to-br from-[color:var(--color-deepCharcoal)] via-black to-[color:var(--color-primary)/0.35] shadow-lg shadow-black/20">
+                <span className="text-xs uppercase tracking-[0.2em] text-[color:var(--color-softGold)/0.85]">
                   Abraham of London
                 </span>
               </div>
             )}
+
+            {/* premium frame */}
+            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/10" />
           </div>
         </div>
       </div>
@@ -100,4 +101,3 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 };
 
 export default HeroBanner;
-

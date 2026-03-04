@@ -1,12 +1,11 @@
 // lib/server/rateLimit.ts
-import "server-only";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export type RateLimitConfig = {
   limit: number;
   windowSeconds: number;
-  windowMs?: number; // For backwards compatibility
-  max?: number; // For backwards compatibility
+  windowMs?: number; // backwards compat
+  max?: number; // backwards compat
 };
 
 export const RATE_LIMIT_CONFIGS = {
@@ -16,18 +15,20 @@ export const RATE_LIMIT_CONFIGS = {
   teaser: { limit: 15, windowSeconds: 60 },
   shortsSave: { limit: 30, windowSeconds: 60 },
   shortsInteractions: { limit: 60, windowSeconds: 60 },
-  // Add missing configs that your code references
+
+  // legacy names referenced elsewhere
   CONTACT_FORM: { limit: 10, windowSeconds: 60 },
   SHORTS_INTERACTIONS: { limit: 30, windowSeconds: 60 },
 } satisfies Record<string, RateLimitConfig>;
 
 export type RateLimitResult = {
   ok: boolean;
-  allowed?: boolean; // For backwards compatibility
   remaining: number;
   resetSeconds: number;
   limit: number;
-  // Backwards compatibility fields
+
+  // backwards compat fields used in some routes
+  allowed?: boolean;
   limited?: boolean;
   resetAt?: number;
 };
@@ -55,112 +56,106 @@ export function isRateLimited(result: RateLimitResult) {
   return !result.ok;
 }
 
-// Helper to get config for backward compatibility
 export function getRateLimitKey(req: NextApiRequest, prefix: string): string {
   const ip = getClientIp(req);
   return `${prefix}:${ip}`;
 }
 
-// Core rate limit logic (pure function) - OLD SIGNATURE: rateLimit(key, config)
+// Core server rate limit: rateLimit(key, config)
 export function rateLimit(key: string, config: RateLimitConfig): RateLimitResult & { allowed: boolean } {
   const now = Date.now();
-  const windowMs = (config.windowSeconds || config.windowMs || 60000);
-  
+  const windowMs = config.windowSeconds ? config.windowSeconds * 1000 : config.windowMs || 60_000;
+
   const cur = mem.get(key);
   if (!cur || now >= cur.resetAt) {
     mem.set(key, { count: 1, resetAt: now + windowMs });
-    const resetSeconds = Math.ceil(windowMs / 1000);
-    return { 
+    return {
       ok: true,
       allowed: true,
-      remaining: config.limit - 1, 
-      resetSeconds, 
+      remaining: config.limit - 1,
+      resetSeconds: Math.ceil(windowMs / 1000),
       limit: config.limit,
-      resetAt: now + windowMs 
+      resetAt: now + windowMs,
     };
   }
 
   const resetSeconds = Math.max(0, Math.ceil((cur.resetAt - now) / 1000));
 
   if (cur.count >= config.limit) {
-    return { 
+    return {
       ok: false,
       allowed: false,
-      remaining: 0, 
-      resetSeconds, 
+      remaining: 0,
+      resetSeconds,
       limit: config.limit,
       limited: true,
-      resetAt: cur.resetAt
+      resetAt: cur.resetAt,
     };
   }
 
   cur.count += 1;
-  return { 
+  return {
     ok: true,
     allowed: true,
-    remaining: Math.max(0, config.limit - cur.count), 
-    resetSeconds, 
+    remaining: Math.max(0, config.limit - cur.count),
+    resetSeconds,
     limit: config.limit,
-    resetAt: cur.resetAt
+    resetAt: cur.resetAt,
   };
 }
 
-// NEW style: rateLimit({ key, limit, windowMs }) - matches your contact.ts pattern
-export function rateLimitWithOptions(options: { key: string; limit: number; windowMs: number }): RateLimitResult & { ok: boolean } {
+// NEW style: rateLimit({ key, limit, windowMs })
+export function rateLimitWithOptions(options: { key: string; limit: number; windowMs: number }): RateLimitResult {
   const { key, limit, windowMs } = options;
   const now = Date.now();
-  
+
   const cur = mem.get(key);
   if (!cur || now >= cur.resetAt) {
     mem.set(key, { count: 1, resetAt: now + windowMs });
-    const resetSeconds = Math.ceil(windowMs / 1000);
-    return { 
-      ok: true, 
-      remaining: limit - 1, 
-      resetSeconds, 
+    return {
+      ok: true,
+      remaining: limit - 1,
+      resetSeconds: Math.ceil(windowMs / 1000),
       limit,
-      resetAt: now + windowMs 
+      resetAt: now + windowMs,
     };
   }
 
   const resetSeconds = Math.max(0, Math.ceil((cur.resetAt - now) / 1000));
 
   if (cur.count >= limit) {
-    return { 
-      ok: false, 
-      remaining: 0, 
-      resetSeconds, 
+    return {
+      ok: false,
+      remaining: 0,
+      resetSeconds,
       limit,
       limited: true,
-      resetAt: cur.resetAt
+      resetAt: cur.resetAt,
     };
   }
 
   cur.count += 1;
-  return { 
-    ok: true, 
-    remaining: Math.max(0, limit - cur.count), 
-    resetSeconds, 
+  return {
+    ok: true,
+    remaining: Math.max(0, limit - cur.count),
+    resetSeconds,
     limit,
-    resetAt: cur.resetAt
+    resetAt: cur.resetAt,
   };
 }
 
-// Old style: rateLimitForRequest(req, res, config, key) - for backwards compatibility
 export function rateLimitForRequest(
-  req: NextApiRequest, 
-  res: NextApiResponse, 
-  config: RateLimitConfig, 
+  _req: NextApiRequest,
+  res: NextApiResponse,
+  config: RateLimitConfig,
   key: string
 ): RateLimitResult {
   const result = rateLimit(key, config);
-  
   const headers = createRateLimitHeaders(result);
-  Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
-
+  for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
   return result;
 }
 
-// Backwards compatibility aliases
-export const checkRateLimit = rateLimit; // checkRateLimit(key, config) → rateLimit(key, config)
+// Back-compat aliases
+export const checkRateLimit = rateLimit;
 export const withRateLimit = rateLimitForRequest;
