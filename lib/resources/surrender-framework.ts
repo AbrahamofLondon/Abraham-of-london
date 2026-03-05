@@ -1,4 +1,6 @@
-/* lib/resources/surrender-framework.ts — SSOT ALIGNED (PUBLIC ENTRY) */
+/* lib/resources/surrender-framework.ts — PUBLIC SSOT BARREL */
+
+export type { SurrenderFramework } from "./surrender-framework.static";
 
 export {
   LIBRARY_HREF,
@@ -7,5 +9,4 @@ export {
   getAllSurrenderFrameworkSlugs,
   getSurrenderFrameworkBySlug,
   FRAMEWORKS,
-  type SurrenderFramework,
 } from "./surrender-framework.static";

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/ShortCard.tsx — HOUSE TYPEFINISH (confident, groomed, no tantrums)
+// components/ShortCard.tsx — HOUSE TYPEFINISH + QUIET UTILITIES (12/10)
 
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Heart, Bookmark, Eye } from "lucide-react";
 
 type ShortCardModel = {
   slug: string;
@@ -16,6 +16,19 @@ type ShortCardModel = {
   intensity?: 1 | 2 | 3 | 4 | 5;
   lineage?: string | null;
   coverImage?: string | null;
+
+  /** Optional: your utilities layer (likes/saves/etc) */
+  metrics?: {
+    likes?: number;
+    saves?: number;
+    views?: number; // can override views
+  };
+
+  /** Optional: whether the viewer has liked/saved (for subtle state) */
+  state?: {
+    liked?: boolean;
+    saved?: boolean;
+  };
 };
 
 function safeNumber(n: unknown, fallback = 0) {
@@ -29,6 +42,12 @@ function intensityLabel(i?: number) {
   if (v === 3) return "steel";
   if (v === 4) return "edge";
   return "fire";
+}
+
+function formatCompact(n: number) {
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}m`;
 }
 
 export default function ShortCard({
@@ -45,11 +64,16 @@ export default function ShortCard({
   const tagB = short.readTime || "2 min";
   const power = intensityLabel(short.intensity);
 
+  const likes = safeNumber(short.metrics?.likes, 0);
+  const saves = safeNumber(short.metrics?.saves, 0);
+  const views = safeNumber(short.metrics?.views ?? short.views, 0);
+
+  const showUtilities = likes > 0 || saves > 0 || views > 0;
+
   return (
     <Link
       href={href}
       onClick={onClick}
-      // ✅ stop “global link underline” leaks
       className="group block no-underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
     >
       <article
@@ -64,7 +88,6 @@ export default function ShortCard({
           "hover:shadow-[0_34px_120px_-70px_rgba(245,158,11,0.22)]",
         ].join(" ")}
       >
-        {/* Inner lacquer + bevel */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-[1px] rounded-2xl"
@@ -74,7 +97,6 @@ export default function ShortCard({
           }}
         />
 
-        {/* Canvas integration wash */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -84,7 +106,6 @@ export default function ShortCard({
           }}
         />
 
-        {/* Quiet micro-grain */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-soft-light"
@@ -93,7 +114,6 @@ export default function ShortCard({
           }}
         />
 
-        {/* Specular sweep */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
@@ -102,7 +122,7 @@ export default function ShortCard({
         </div>
 
         <div className="relative p-5">
-          {/* META ROW (quiet confidence) */}
+          {/* META ROW */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-[10px] font-mono tracking-[0.22em] text-amber-300/60">
@@ -113,7 +133,6 @@ export default function ShortCard({
                 {tagB}
               </span>
 
-              {/* Power chip: stamped, subdued */}
               <span className="ml-1 text-[9px] px-2 py-[2px] rounded-full border border-white/[0.08] bg-black/35 text-amber-200/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 {power}
               </span>
@@ -157,41 +176,60 @@ export default function ShortCard({
             </div>
           )}
 
-          {/* TITLE (authoritative, groomed) */}
+          {/* TITLE */}
           <h3
             className={[
               "mt-4 font-serif",
-              // controlled sizing: strong but not loud
               "text-[22px] md:text-[26px]",
-              // finishing school: leading + tracking + smoothing
               "leading-[1.14] tracking-[-0.015em] antialiased",
-              // color discipline
               "text-amber-50/95 group-hover:text-amber-50",
-              // ✅ kill underline leaks
               "no-underline decoration-transparent",
             ].join(" ")}
           >
             {short.title}
           </h3>
 
-          {/* EXCERPT (confident, readable) */}
+          {/* EXCERPT */}
           <p
             className={[
               "mt-2",
-              // slightly larger + steadier baseline
               "text-[13px] leading-[1.55]",
-              // contrast up: no more timid whispers
               "text-white/52 group-hover:text-white/58",
               "transition-colors duration-700",
               "line-clamp-2",
-              // ✅ kill underline leaks
               "no-underline decoration-transparent",
             ].join(" ")}
           >
             {short.excerpt}
           </p>
 
-          {/* FOOTER (quiet engraving) */}
+          {/* UTILITIES (quiet) */}
+          {showUtilities && (
+            <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-white/[0.06] bg-black/35 px-4 py-3">
+              <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.22em] text-white/40">
+                <span className="inline-flex items-center gap-2">
+                  <Eye className="h-3.5 w-3.5 text-white/25" />
+                  {formatCompact(views)}
+                </span>
+
+                <span className="inline-flex items-center gap-2">
+                  <Heart className={["h-3.5 w-3.5", short.state?.liked ? "text-amber-300/80" : "text-white/25"].join(" ")} />
+                  {formatCompact(likes)}
+                </span>
+
+                <span className="inline-flex items-center gap-2">
+                  <Bookmark className={["h-3.5 w-3.5", short.state?.saved ? "text-amber-300/80" : "text-white/25"].join(" ")} />
+                  {formatCompact(saves)}
+                </span>
+              </div>
+
+              <span className="text-[9px] font-mono tracking-[0.26em] text-white/22 group-hover:text-amber-300/60 transition-colors duration-700 uppercase">
+                open
+              </span>
+            </div>
+          )}
+
+          {/* FOOTER */}
           <div className="mt-5 flex items-center justify-between pt-3 border-t border-white/[0.06]">
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-7 h-[1px] bg-gradient-to-r from-amber-600/45 to-transparent" />
@@ -201,7 +239,7 @@ export default function ShortCard({
             </div>
 
             <span className="text-[9px] font-mono tracking-[0.26em] text-white/22 group-hover:text-amber-300/65 transition-colors duration-700 uppercase">
-              open
+              indexed
             </span>
           </div>
         </div>

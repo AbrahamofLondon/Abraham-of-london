@@ -1,19 +1,3 @@
-//
-// ABRAHAM OF LONDON — INSTITUTIONAL DATA MODEL (Enterprise-Grade / Future-Proof)
-// PostgreSQL + pgvector enabled
-//
-// DESIGN PRINCIPLES
-// 1) SSOT AccessTier + RBAC/permissions (tier is coarse access, permissions are fine-grain)
-// 2) Multi-tenancy ready (Organization + Membership) without forcing you to use it today
-// 3) Security-by-design: immutable audit trails, session/key hygiene, least-privilege API keys
-// 4) Operational excellence: explicit indexes, retention-friendly deletes, observability tables
-// 5) Growth-ready: MFA, security logs, webhooks, jobs, feature flags, rate-limits
-//
-// IMPORTANT
-// - Prisma enum values cannot contain hyphens → use underscores and map in app if needed
-// - Keep your existing tables/mappings stable; add fields/models in a forward-compatible way
-//
-
 generator client {
   provider        = "prisma-client-js"
   output          = "../node_modules/.prisma/client"
@@ -24,12 +8,706 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  extensions = [pgvector(map: "vector")]
+  extensions = [vector]
 }
 
-// ============================================================================
-// 0. SSOT ACCESS + RBAC
-// ============================================================================
+/**
+ * ============================================================================
+ * ORG / MULTI-TENANCY
+ * ============================================================================
+ */
+
+model Organization {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  status    String   @default("active")
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invites OrganizationInvite[]
+  members OrganizationMember[]
+
+  @@index([slug])
+  @@index([status])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String @id @default(cuid())
+  organizationId String
+  memberId       String @db.Uuid
+
+  role        MemberRole   @default(MEMBER)
+  status      MemberStatus @default(active)
+  permissions Permission[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  member       InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, memberId])
+  @@index([organizationId])
+  @@index([memberId])
+  @@map("organization_members")
+}
+
+model OrganizationInvite {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  tokenHash      String    @unique
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  metadata       Json?     @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([expiresAt])
+  @@map("organization_invites")
+}
+
+/**
+ * ============================================================================
+ * CORE MEMBER
+ * ============================================================================
+ */
+
+model InnerCircleMember {
+  // ✅ MUST be UUID to match DB + all FK columns
+  id String @id @map("id") @db.Uuid
+
+  emailHash String  @unique(map: "inner_circle_members_emailHash_key") @map("email_hash")
+  email     String? @unique @map("email")
+  name      String? @map("name")
+
+  role   MemberRole   @default(MEMBER) @map("role")
+  tier   AccessTier   @default(member) @map("tier")
+  status MemberStatus @default(active) @map("status")
+
+  viewCount  Int      @default(0) @map("view_count")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  flags           String?      @map("flags")
+  permissions     Permission[] @default([]) @map("permissions")
+  emailHashPrefix String?      @map("email_hash_prefix")
+  lastIp          String?      @map("last_ip")
+
+  // Relations (make Prisma Client usable)
+  adminSessions  AdminSession[]
+  orgMemberships OrganizationMember[]
+
+  sessions     Session[]
+  keys         InnerCircleKey[]
+  apiKeys      ApiKey[]
+  apiLogs      ApiLog[]
+  pageViews    PageView[]
+  securityLogs SecurityLog[]
+
+  annotations     PrivateAnnotation[]
+  inquiries       StrategyInquiry[]
+  strategyIntakes StrategyIntake[]
+  downloadEvents  DownloadAuditEvent[] @relation("MemberDownloads")
+
+  preferences UserPreference?
+  MfaSetup    MfaSetup?
+
+  @@index([status])
+  @@index([tier])
+  @@index([role])
+  @@index([lastSeenAt])
+  @@index([lastSeenAt], map: "inner_circle_members_lastSeenAt_idx")
+  @@map("inner_circle_members")
+}
+
+/**
+ * ============================================================================
+ * CONTENT GRAPH
+ * ============================================================================
+ */
+
+model ContentMetadata {
+  id              String                 @id @default(cuid())
+  slug            String                 @unique
+  title           String
+  contentType     ContentType            @default(Briefing)
+  classification  AccessTier             @default(client)
+  summary         String?
+  content         String?
+  metadata        Json?                  @default("{}")
+  version         String                 @default("1.0.0")
+  embedding       Unsupported("vector")?
+  totalPrints     Int                    @default(0)
+  engagementScore Float                  @default(0.0)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  canonEntries    CanonEntry[]
+  sourceRelations ContentRelation[]   @relation("SourceRelations")
+  targetRelations ContentRelation[]   @relation("TargetRelations")
+  annotations     PrivateAnnotation[]
+  dependencies    StrategicLink[]     @relation("SourceBrief")
+  dependents      StrategicLink[]     @relation("TargetBrief")
+
+  @@index([slug])
+  @@index([classification])
+  @@index([contentType])
+  @@map("content_metadata")
+}
+
+model StrategicLink {
+  id        String   @id @default(cuid())
+  sourceId  String
+  targetId  String
+  strength  Float    @default(1.0)
+  linkType  LinkType @default(DEPENDENCY)
+  createdAt DateTime @default(now())
+
+  sourceBrief ContentMetadata @relation("SourceBrief", fields: [sourceId], references: [id], onDelete: Cascade)
+  targetBrief ContentMetadata @relation("TargetBrief", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId])
+  @@index([sourceId])
+  @@index([targetId])
+  @@index([linkType])
+  @@map("strategic_links")
+}
+
+model ContentRelation {
+  id           String   @id @default(cuid())
+  sourceId     String
+  targetId     String
+  relationType String
+  weight       Float    @default(1.0)
+  createdAt    DateTime @default(now())
+
+  source ContentMetadata @relation("SourceRelations", fields: [sourceId], references: [id], onDelete: Cascade)
+  target ContentMetadata @relation("TargetRelations", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId, relationType])
+  @@index([sourceId])
+  @@index([targetId])
+  @@map("content_relations")
+}
+
+model PrivateAnnotation {
+  id        String                 @id @default(cuid())
+  body      String
+  priority  AnnotationPriority     @default(ROUTINE)
+  memberId  String                 @db.Uuid
+  contentId String
+  embedding Unsupported("vector")?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  content ContentMetadata   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  member  InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([contentId])
+  @@index([priority])
+  @@map("private_annotations")
+}
+
+/**
+ * ============================================================================
+ * STRATEGY ROOM
+ * ============================================================================
+ */
+
+model StrategyInquiry {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  intent    String
+  status    InquiryStatus @default(PENDING)
+  metadata  Json?         @default("{}")
+  memberId  String?       @db.Uuid
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  member InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([memberId])
+  @@map("strategy_inquiries")
+}
+
+model StrategyIntake {
+  id              String   @id @default(cuid())
+  fullName        String
+  organisation    String
+  dependencyLevel String
+  volatility      String
+  readinessScore  Int      @default(5)
+  payload         Json
+  memberId        String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  emailHash       String?
+
+  member InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([organisation])
+  @@index([createdAt])
+  @@index([memberId])
+  @@map("strategy_intakes")
+}
+
+/**
+ * ============================================================================
+ * SYSTEM CONFIG / AUDIT / SECURITY
+ * ============================================================================
+ */
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@map("system_configs")
+}
+
+model SystemAuditLog {
+  id       String        @id @default(cuid())
+  action   String
+  severity AuditSeverity @default(info)
+
+  actorId    String?
+  actorEmail String?
+  resourceId String?
+
+  ipAddress String?
+  userAgent String?
+
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now())
+
+  actorType    String? @default("system") @map("actor_type") @db.VarChar(32)
+  status       String? @default("success") @map("status") @db.VarChar(16)
+  resourceType String? @map("resource_type") @db.VarChar(64)
+  resourceName String? @map("resource_name") @db.VarChar(256)
+  requestId    String? @map("request_id") @db.VarChar(128)
+  sessionId    String? @map("session_id") @db.VarChar(128)
+  durationMs   Int?    @map("duration_ms")
+  errorMessage String? @map("error_message")
+  category     String? @map("category") @db.VarChar(64)
+  subCategory  String? @map("sub_category") @db.VarChar(128)
+  tags         Json?   @default("[]") @map("tags")
+
+  @@index([action])
+  @@index([severity])
+  @@index([actorId])
+  @@index([resourceId])
+  @@index([createdAt])
+  @@index([actorType])
+  @@index([status])
+  @@index([category])
+  @@index([requestId])
+  @@index([sessionId])
+  @@map("system_audit_logs")
+}
+
+model SecurityLog {
+  id       String        @id @default(cuid())
+  event    SecurityEvent
+  severity AuditSeverity @default(info)
+
+  memberId String?            @db.Uuid
+  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  action    String
+  details   Json?    @default("{}")
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([event])
+  @@index([severity])
+  @@index([memberId])
+  @@index([createdAt])
+  @@map("security_logs")
+}
+
+/**
+ * ============================================================================
+ * API LOGS / SESSIONS / KEYS / MFA
+ * ============================================================================
+ */
+
+model ApiLog {
+  id             String     @id @default(cuid())
+  endpoint       String
+  method         HttpMethod
+  statusCode     Int
+  responseTimeMs Int        @default(0)
+  ipAddress      String?
+  userAgent      String?
+  actorId        String?
+  actorEmail     String?
+  metadata       Json?      @default("{}")
+  createdAt      DateTime   @default(now())
+
+  memberId String?            @db.Uuid
+  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([endpoint])
+  @@index([method])
+  @@index([statusCode])
+  @@index([createdAt])
+  @@index([memberId])
+  @@map("api_logs")
+}
+
+model Session {
+  id        String @id @default(cuid())
+  sessionId String @unique
+
+  memberId String?            @db.Uuid
+  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  status    SessionStatus @default(active)
+  expiresAt DateTime
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([memberId])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("sessions")
+}
+
+model InnerCircleKey {
+  id            String    @id @default(cuid())
+  keyHash       String    @unique
+  status        KeyStatus @default(active)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  expiresAt     DateTime
+  keySuffix     String?   @db.VarChar(8)
+  keyType       String
+  lastUsedAt    DateTime?
+  metadata      Json?     @default("{}")
+  revokedAt     DateTime?
+  revokedReason String?
+
+  memberId String            @db.Uuid
+  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([keyHash])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("inner_circle_keys")
+}
+
+model MfaSetup {
+  id     String @id @default(cuid())
+  userId String @unique @db.Uuid
+
+  member InnerCircleMember @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  enabled       Boolean     @default(false)
+  methods       MfaMethod[] @default([totp])
+  totpSecret    String?
+  totpVerified  Boolean     @default(false)
+  backupCodes   Json?       @default("[]")
+  phoneNumber   String?
+  phoneVerified Boolean     @default(false)
+  emailVerified Boolean     @default(false)
+  recoveryEmail String?
+  lastUsedAt    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([enabled])
+  @@map("mfa_setups")
+}
+
+/**
+ * ============================================================================
+ * CONTENT REGISTRY / PRINTS / DOWNLOAD EVENTS
+ * ============================================================================
+ */
+
+model StrategicFramework {
+  id          String     @id @default(cuid())
+  key         String     @unique
+  slug        String     @unique
+  title       String
+  oneLiner    String
+  tag         String
+  accent      String
+  canonRoot   String
+  audience    String[]
+  tier        AccessTier @default(member)
+  content     String?
+  artifactUrl String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([tier])
+  @@index([slug])
+  @@map("strategic_frameworks")
+}
+
+model PrintAsset {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  description String?
+  tier        AccessTier @default(member)
+  filePath    String
+  fileSize    Int?
+  fileFormat  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  downloads DownloadAuditEvent[] @relation("PrintDownloads")
+
+  @@index([tier])
+  @@index([slug])
+  @@map("print_assets")
+}
+
+model CanonEntry {
+  id          String           @id @default(cuid())
+  slug        String           @unique
+  title       String
+  description String?
+  tier        AccessTier       @default(member)
+  contentType String
+  readTime    Int?
+  metadataId  String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  metadata    ContentMetadata? @relation(fields: [metadataId], references: [id], onDelete: SetNull)
+
+  @@index([tier])
+  @@index([contentType])
+  @@map("canon_entries")
+}
+
+model DownloadAuditEvent {
+  id   String @id @default(cuid())
+  slug String
+
+  printAssetId String?
+  printAsset   PrintAsset? @relation("PrintDownloads", fields: [printAssetId], references: [id], onDelete: SetNull)
+
+  memberId String?            @db.Uuid
+  member   InnerCircleMember? @relation("MemberDownloads", fields: [memberId], references: [id], onDelete: SetNull)
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  // option-2 security fields (your DB has these)
+  contentType String?   @db.VarChar(64)
+  eventType   String?   @db.VarChar(32)
+  fileHash    String?   @db.VarChar(128)
+  processedAt DateTime?
+  success     Boolean   @default(true)
+
+  @@index([slug])
+  @@index([memberId])
+  @@index([printAssetId])
+  @@index([createdAt])
+  @@index([eventType])
+  @@index([success])
+  @@index([processedAt])
+  @@map("download_audit_events")
+}
+
+/**
+ * ============================================================================
+ * API KEYS / ANALYTICS
+ * ============================================================================
+ */
+
+model ApiKey {
+  id         String       @id @default(cuid())
+  name       String
+  keyHash    String       @unique
+  tier       AccessTier   @default(member)
+  rateLimit  Int          @default(100)
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  metadata   Json?        @default("{}")
+  scopes     String[]     @default([])
+  status     ApiKeyStatus @default(active)
+
+  memberId String?            @db.Uuid
+  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([keyHash])
+  @@index([tier])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([memberId])
+  @@map("api_keys")
+}
+
+model PageView {
+  id   String  @id @default(cuid())
+  path String
+  slug String?
+
+  memberId String?            @db.Uuid
+  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  requiredTier AccessTier?
+  userTier     AccessTier?
+  referrer     String?
+  userAgent    String?
+  ipAddress    String?
+  viewedAt     DateTime    @default(now())
+
+  @@index([path])
+  @@index([memberId])
+  @@index([viewedAt])
+  @@map("page_views")
+}
+
+model UserPreference {
+  id String @id @default(cuid())
+
+  memberId String            @unique @db.Uuid
+  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  theme              String?   @default("dark")
+  emailNotifications Boolean   @default(true)
+  digestFrequency    String?
+  bookmarks          Json?     @default("[]")
+  lastReadAt         DateTime?
+  updatedAt          DateTime  @updatedAt
+
+  @@map("user_preferences")
+}
+
+/**
+ * ============================================================================
+ * OPS: WEBHOOKS / EVENTS / JOBS / ADMIN SESSIONS
+ * ============================================================================
+ */
+
+model WebhookEndpoint {
+  id         String            @id @default(cuid())
+  name       String
+  url        String
+  secret     String?
+  status     WebhookStatus     @default(active)
+  eventTypes String[]          @default([])
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  deliveries WebhookDelivery[]
+
+  @@index([status])
+  @@map("webhook_endpoints")
+}
+
+model WebhookDelivery {
+  id          String    @id @default(cuid())
+  endpointId  String
+  eventType   String
+  payload     Json
+  statusCode  Int?
+  ok          Boolean   @default(false)
+  attempts    Int       @default(0)
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  deliveredAt DateTime?
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+model SystemEvent {
+  id          String    @id @default(cuid())
+  eventType   String
+  payload     Json
+  source      String?
+  status      String    @default("pending")
+  processedAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([eventType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("system_events")
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  queue       String    @default("default")
+  type        String
+  payload     Json      @default("{}")
+  status      String    @default("queued")
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  runAfter    DateTime  @default(now())
+  lockedAt    DateTime?
+  lockedBy    String?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([queue])
+  @@index([status])
+  @@index([runAfter])
+  @@map("jobs")
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  metadata  Json?    @default("{}")
+
+  userId String            @db.Uuid
+  user   InnerCircleMember @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@index([userId])
+  @@map("admin_sessions")
+}
+
+/**
+ * ============================================================================
+ * ENUMS
+ * ============================================================================
+ */
 
 enum AccessTier {
   public
@@ -56,167 +734,30 @@ enum MemberStatus {
   active
   paused
   disabled
+  suspended
 
   @@map("member_status")
 }
 
-// Fine-grain permissions (scales beyond tier)
 enum Permission {
-  // content
   content_read
   content_write
   content_publish
-
-  // downloads / vault
   downloads_read
   downloads_premium
-
-  // inner circle
   inner_circle_access
   inner_circle_issue_keys
   inner_circle_revoke_keys
-
-  // admin
   admin_all
   billing_read
   billing_write
   system_config_write
-
-  // security
   security_read
   security_write
   security_revoke_sessions
 
   @@map("permission")
 }
-
-// ============================================================================
-// 1. CORE IDENTITY + MULTI-TENANCY READY (OPTIONAL)
-// ============================================================================
-
-model Organization {
-  id       String @id @default(cuid())
-  slug     String @unique
-  name     String
-  status   String @default("active") // keep flexible; can be enum later
-  metadata Json?  @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  members OrganizationMember[]
-  invites OrganizationInvite[]
-
-  @@index([slug])
-  @@index([status])
-  @@map("organizations")
-}
-
-model OrganizationMember {
-  id             String @id @default(cuid())
-  organizationId String
-  memberId       String
-
-  // Organization-level role + overrides (separate from global tier)
-  role        MemberRole   @default(MEMBER)
-  status      MemberStatus @default(active)
-  permissions Permission[] @default([])
-
-  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  member       InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([organizationId, memberId])
-  @@index([organizationId])
-  @@index([memberId])
-  @@map("organization_members")
-}
-
-model OrganizationInvite {
-  id             String    @id @default(cuid())
-  organizationId String
-  email          String
-  tokenHash      String    @unique
-  expiresAt      DateTime
-  acceptedAt     DateTime?
-  revokedAt      DateTime?
-  metadata       Json?     @default("{}")
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([organizationId])
-  @@index([email])
-  @@index([expiresAt])
-  @@map("organization_invites")
-}
-
-model InnerCircleMember {
-  // ✅ Neon currently uses uuid + snake_case columns.
-  // Prisma can keep `String` and map to `Uuid` if you want strict typing.
-  id String @id @map("id") @db.Uuid
-
-  flags String? @map("flags") @db.Text
-
-  // Identity (privacy-by-design)
-  emailHash String  @unique @map("email_hash")
-  email     String? @unique @map("email")
-  name      String? @map("name")
-
-  // Role & Tier
-  role   MemberRole   @default(MEMBER) @map("role")
-  tier   AccessTier   @default(member) @map("tier")
-  status MemberStatus @default(active) @map("status")
-
-  // Fine-grain permissions (optional overrides)
-  permissions Permission[] @default([]) @map("permissions")
-
-  // Activity tracking
-  viewCount  Int      @default(0) @map("view_count")
-  lastSeenAt DateTime @default(now()) @map("last_seen_at")
-
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Legacy column in your DB (keep it mapped so Prisma doesn't ignore it)
-  // Optional: keep until you decide to remove it later.
-  emailHashPrefix String? @map("email_hash_prefix")
-  lastIp          String? @map("last_ip")
-
-  // Relations
-  annotations     PrivateAnnotation[]
-  inquiries       StrategyInquiry[]
-  strategyIntakes StrategyIntake[]
-  downloadEvents  DownloadAuditEvent[]
-  sessions        Session[]
-  keys            InnerCircleKey[]
-  apiKeys         ApiKey[]
-  pageViews       PageView[]
-  preferences     UserPreference?
-  apiLogs         ApiLog[]
-  adminSessions   AdminSession[]
-  securityLogs    SecurityLog[]
-  mfaSetup        MfaSetup?
-  orgMemberships  OrganizationMember[]
-
-  // ✅ NEW: durable member-bound interactions (likes/saves)
-  assetInteractions AssetInteraction[]
-
-  @@index([status])
-  @@index([tier])
-  @@index([role])
-  @@index([lastSeenAt])
-  @@map("inner_circle_members")
-}
-
-// ============================================================================
-// 2. CONTENT + SEMANTIC SEARCH + RELATIONS
-// ============================================================================
 
 enum ContentType {
   Dossier
@@ -236,89 +777,6 @@ enum LinkType {
   @@map("link_type")
 }
 
-model ContentMetadata {
-  id String @id @default(cuid())
-
-  slug  String @unique
-  title String
-
-  contentType    ContentType @default(Briefing)
-  classification AccessTier  @default(client)
-
-  summary String? @db.Text
-  content String? @db.Text
-
-  metadata Json?  @default("{}")
-  version  String @default("1.0.0")
-
-  embedding Unsupported("vector(1536)")?
-
-  totalPrints     Int   @default(0)
-  engagementScore Float @default(0.0)
-
-  annotations     PrivateAnnotation[]
-  dependencies    StrategicLink[]     @relation("SourceBrief")
-  dependents      StrategicLink[]     @relation("TargetBrief")
-  sourceRelations ContentRelation[]   @relation("SourceRelations")
-  targetRelations ContentRelation[]   @relation("TargetRelations")
-  canonEntries    CanonEntry[]
-
-  // ✅ NEW: optional link for “member-bound” interactions (likes/saves)
-  assetInteractions AssetInteraction[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([slug])
-  @@index([classification])
-  @@index([contentType])
-  @@map("content_metadata")
-}
-
-model StrategicLink {
-  id       String @id @default(cuid())
-  sourceId String
-  targetId String
-
-  strength Float    @default(1.0)
-  linkType LinkType @default(DEPENDENCY)
-
-  sourceBrief ContentMetadata @relation("SourceBrief", fields: [sourceId], references: [id], onDelete: Cascade)
-  targetBrief ContentMetadata @relation("TargetBrief", fields: [targetId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([sourceId, targetId])
-  @@index([sourceId])
-  @@index([targetId])
-  @@index([linkType])
-  @@map("strategic_links")
-}
-
-model ContentRelation {
-  id String @id @default(cuid())
-
-  sourceId String
-  targetId String
-
-  relationType String
-  weight       Float  @default(1.0)
-
-  source ContentMetadata @relation("SourceRelations", fields: [sourceId], references: [id], onDelete: Cascade)
-  target ContentMetadata @relation("TargetRelations", fields: [targetId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([sourceId, targetId, relationType])
-  @@index([sourceId])
-  @@index([targetId])
-  @@map("content_relations")
-}
-
-// ============================================================================
-// 3. PRIVATE ANNOTATIONS
-// ============================================================================
-
 enum AnnotationPriority {
   ROUTINE
   URGENT
@@ -326,32 +784,6 @@ enum AnnotationPriority {
 
   @@map("annotation_priority")
 }
-
-model PrivateAnnotation {
-  id       String             @id @default(cuid())
-  body     String             @db.Text
-  priority AnnotationPriority @default(ROUTINE)
-
-  memberId  String
-  contentId String
-
-  member  InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  content ContentMetadata   @relation(fields: [contentId], references: [id], onDelete: Cascade)
-
-  embedding Unsupported("vector(1536)")?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([memberId])
-  @@index([contentId])
-  @@index([priority])
-  @@map("private_annotations")
-}
-
-// ============================================================================
-// 4. STRATEGY ROOM / INTAKES
-// ============================================================================
 
 enum InquiryStatus {
   PENDING
@@ -363,63 +795,6 @@ enum InquiryStatus {
   @@map("inquiry_status")
 }
 
-model StrategyInquiry {
-  id     String @id @default(cuid())
-  name   String
-  email  String
-  intent String @db.Text
-
-  status   InquiryStatus @default(PENDING)
-  metadata Json?         @default("{}")
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([email])
-  @@index([status])
-  @@index([createdAt])
-  @@index([memberId])
-  @@map("strategy_inquiries")
-}
-
-model StrategyIntake {
-  id              String @id @default(cuid())
-  fullName        String
-  emailHash       String @unique // ✅ ADDED: for privacy and lookups
-  organisation    String
-  dependencyLevel String
-  volatility      String
-  readinessScore  Int    @default(5)
-
-  // Store the full submission payload
-  payload Json
-
-  // Optional relation to member if they're authenticated
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  // Status tracking
-  status String @default("pending") // "pending" | "accepted" | "declined"
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([emailHash])
-  @@index([organisation])
-  @@index([status])
-  @@index([createdAt])
-  @@index([memberId])
-  @@map("strategy_intakes")
-}
-
-// ============================================================================
-// 5. SYSTEM CONFIG + AUDIT + SECURITY LOGS
-// ============================================================================
-
 enum AuditSeverity {
   info
   warning
@@ -430,96 +805,22 @@ enum AuditSeverity {
 }
 
 enum SecurityEvent {
-  // auth
   login_success
   login_failed
   logout
   session_revoked
   session_expired
-
-  // mfa
   mfa_challenge_created
   mfa_verified
   mfa_failed
   mfa_max_attempts
-
-  // keys
   key_redeemed
   key_revoked
   key_expired
-
-  // admin
   admin_action
 
   @@map("security_event")
 }
-
-model SystemConfig {
-  id          String  @id @default(cuid())
-  key         String  @unique
-  value       String
-  type        String  @default("string")
-  description String?
-  isPublic    Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([key])
-  @@map("system_configs")
-}
-
-model SystemAuditLog {
-  id       String        @id @default(cuid())
-  action   String
-  severity AuditSeverity @default(info)
-
-  actorId    String?
-  actorEmail String?
-  resourceId String?
-
-  ipAddress String?
-  userAgent String?
-
-  metadata Json? @default("{}")
-
-  createdAt DateTime @default(now())
-
-  @@index([action])
-  @@index([severity])
-  @@index([actorId])
-  @@index([resourceId])
-  @@index([createdAt])
-  @@map("system_audit_logs")
-}
-
-// Your code expects prisma.securityLog.create(...)
-model SecurityLog {
-  id       String        @id @default(cuid())
-  event    SecurityEvent
-  severity AuditSeverity @default(info)
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  action  String // free text classifier e.g. "MFA_CHALLENGE_CREATED"
-  details Json?  @default("{}")
-
-  ipAddress String?
-  userAgent String?
-
-  createdAt DateTime @default(now())
-
-  @@index([event])
-  @@index([severity])
-  @@index([memberId])
-  @@index([createdAt])
-  @@map("security_logs")
-}
-
-// ============================================================================
-// 6. API LOG TELEMETRY
-// ============================================================================
 
 enum HttpMethod {
   GET
@@ -532,40 +833,6 @@ enum HttpMethod {
 
   @@map("http_method")
 }
-
-model ApiLog {
-  id String @id @default(cuid())
-
-  endpoint   String
-  method     HttpMethod
-  statusCode Int
-
-  responseTimeMs Int @default(0)
-
-  ipAddress String?
-  userAgent String?
-
-  actorId    String?
-  actorEmail String?
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  metadata Json? @default("{}")
-
-  createdAt DateTime @default(now())
-
-  @@index([endpoint])
-  @@index([method])
-  @@index([statusCode])
-  @@index([createdAt])
-  @@index([memberId])
-  @@map("api_logs")
-}
-
-// ============================================================================
-// 7. SESSIONS + KEYS + DOWNLOAD EVENTS + INTERACTIONS (LIKES/SAVES)
-// ============================================================================
 
 enum KeyStatus {
   active
@@ -583,161 +850,6 @@ enum SessionStatus {
   @@map("session_status")
 }
 
-model Session {
-  id        String @id @default(cuid())
-  sessionId String @unique
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  status    SessionStatus @default(active)
-  expiresAt DateTime
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // ✅ NEW: optional session-bound interactions (anonymous / pre-auth)
-  shortInteractions ShortInteraction[]
-
-  @@index([memberId])
-  @@index([expiresAt])
-  @@index([status])
-  @@map("sessions")
-}
-
-model InnerCircleKey {
-  id       String            @id @default(cuid())
-  memberId String
-  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  keyHash   String  @unique
-  keySuffix String? @db.VarChar(8)
-
-  keyType   String
-  status    KeyStatus @default(active)
-  expiresAt DateTime
-
-  lastUsedAt DateTime?
-  metadata   Json?     @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([memberId])
-  @@index([keyHash])
-  @@index([status])
-  @@index([expiresAt])
-  @@map("inner_circle_keys")
-}
-
-//
-// ✅ INTERACTIONS: Brand-grade, audit-friendly, safe logic
-// - Member-bound: durable, premium (InnerCircleMember)
-// - Session-bound: optional for anonymous / shorts / pre-auth
-//
-
-enum InteractionAction {
-  like
-  save
-
-  @@map("interaction_action")
-}
-
-model AssetInteraction {
-  id String @id @default(cuid())
-
-  // Target (slug is canonical identifier across MDX/registry)
-  slug String
-
-  // Optional FK to ContentMetadata (not required; keeps forward-compat)
-  contentId String?
-  content   ContentMetadata? @relation(fields: [contentId], references: [id], onDelete: SetNull)
-
-  // Who did it (durable, authenticated)
-  memberId String
-  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  action InteractionAction
-
-  createdAt DateTime @default(now())
-
-  // ✅ Guarantees clean toggling semantics (one row per slug/member/action)
-  @@unique([slug, memberId, action])
-
-  @@index([slug])
-  @@index([memberId])
-  @@index([action])
-  @@index([contentId])
-
-  @@map("asset_interactions")
-}
-
-model ShortInteraction {
-  id String @id @default(cuid())
-
-  // Target
-  shortSlug String
-
-  // Session-bound identity (anonymous or pre-auth)
-  sessionId String
-  session   Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-
-  action InteractionAction
-
-  createdAt DateTime @default(now())
-
-  // ✅ One row per slug/session/action
-  @@unique([shortSlug, sessionId, action])
-
-  @@index([shortSlug])
-  @@index([sessionId])
-  @@index([action])
-
-  @@map("short_interactions")
-}
-
-model DownloadAuditEvent {
-  id String @id @default(cuid())
-
-  slug         String
-  printAssetId String?
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  // ✅ Additive fields to align with your existing create(...) calls (non-breaking)
-  email       String?
-  eventType   String?
-  contentType String?
-  fileHash    String?
-
-  success     Boolean @default(true)
-  processedAt DateTime?
-
-  ipAddress String?
-  userAgent String?
-
-  createdAt DateTime @default(now())
-
-  printAsset PrintAsset? @relation(fields: [printAssetId], references: [id], onDelete: SetNull)
-
-  @@index([slug])
-  @@index([memberId])
-  @@index([printAssetId])
-  @@index([createdAt])
-
-  // ✅ Useful ops indexes (optional but pragmatic)
-  @@index([eventType])
-  @@index([processedAt])
-  @@index([success])
-
-  @@map("download_audit_events")
-}
-
-// ============================================================================
-// 8. MFA (ENTERPRISE-READY) — FIXES prisma.mfaSetup MISSING
-// ============================================================================
-
 enum MfaMethod {
   totp
   sms
@@ -748,111 +860,6 @@ enum MfaMethod {
   @@map("mfa_method")
 }
 
-model MfaSetup {
-  id     String            @id @default(cuid())
-  userId String            @unique
-  member InnerCircleMember @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  enabled Boolean     @default(false)
-  methods MfaMethod[] @default([totp])
-
-  totpSecret   String? @db.Text
-  totpVerified Boolean @default(false)
-
-  // Store backup codes as JSON array of strings (or move to dedicated table if you prefer)
-  backupCodes Json? @default("[]")
-
-  phoneNumber   String?
-  phoneVerified Boolean @default(false)
-
-  emailVerified Boolean @default(false)
-  recoveryEmail String?
-
-  lastUsedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([enabled])
-  @@map("mfa_setups")
-}
-
-// ============================================================================
-// 9. STRATEGIC FRAMEWORKS + PRINT ASSETS + CANON REGISTRY
-// ============================================================================
-
-model StrategicFramework {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  slug      String   @unique
-  title     String
-  oneLiner  String
-  tag       String
-  accent    String
-  canonRoot String
-  audience  String[]
-
-  tier AccessTier @default(member)
-
-  content     String? @db.Text
-  artifactUrl String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([tier])
-  @@index([slug])
-  @@map("strategic_frameworks")
-}
-
-model PrintAsset {
-  id          String  @id @default(cuid())
-  slug        String  @unique
-  title       String
-  description String?
-
-  tier AccessTier @default(member)
-
-  filePath   String
-  fileSize   Int?
-  fileFormat String?
-
-  downloads DownloadAuditEvent[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([tier])
-  @@index([slug])
-  @@map("print_assets")
-}
-
-model CanonEntry {
-  id          String  @id @default(cuid())
-  slug        String  @unique
-  title       String
-  description String?
-
-  tier AccessTier @default(member)
-
-  contentType String
-  readTime    Int?
-
-  metadataId String?
-  metadata   ContentMetadata? @relation(fields: [metadataId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([tier])
-  @@index([contentType])
-  @@map("canon_entries")
-}
-
-// ============================================================================
-// 10. API KEYS (SERVICE / INTEGRATION ACCESS)
-// ============================================================================
-
 enum ApiKeyStatus {
   active
   revoked
@@ -861,199 +868,9 @@ enum ApiKeyStatus {
   @@map("api_key_status")
 }
 
-model ApiKey {
-  id      String @id @default(cuid())
-  name    String
-  keyHash String @unique
-
-  tier      AccessTier   @default(member)
-  status    ApiKeyStatus @default(active)
-  rateLimit Int          @default(100)
-
-  // Optional scope control (future-proof)
-  scopes String[] @default([])
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  lastUsedAt DateTime?
-  expiresAt  DateTime?
-
-  metadata Json? @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([keyHash])
-  @@index([tier])
-  @@index([status])
-  @@index([expiresAt])
-  @@map("api_keys")
-}
-
-// ============================================================================
-// 11. ANALYTICS + METRICS
-// ============================================================================
-
-model PageView {
-  id   String  @id @default(cuid())
-  path String
-  slug String?
-
-  memberId String?
-  member   InnerCircleMember? @relation(fields: [memberId], references: [id], onDelete: SetNull)
-
-  requiredTier AccessTier?
-  userTier     AccessTier?
-
-  referrer  String?
-  userAgent String?
-  ipAddress String?
-
-  viewedAt DateTime @default(now())
-
-  @@index([path])
-  @@index([memberId])
-  @@index([viewedAt])
-  @@map("page_views")
-}
-
-// ============================================================================
-// 12. USER PREFERENCES
-// ============================================================================
-
-model UserPreference {
-  id String @id @default(cuid())
-
-  memberId String            @unique
-  member   InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  theme              String? @default("dark")
-  emailNotifications Boolean @default(true)
-  digestFrequency    String?
-
-  bookmarks  Json?     @default("[]")
-  lastReadAt DateTime?
-
-  updatedAt DateTime @updatedAt
-
-  @@map("user_preferences")
-}
-
-// ============================================================================
-// 13. SYSTEM EVENTS + WEBHOOKS + JOBS (OPS READY)
-// ============================================================================
-
 enum WebhookStatus {
   active
   disabled
 
   @@map("webhook_status")
-}
-
-model WebhookEndpoint {
-  id     String        @id @default(cuid())
-  name   String
-  url    String
-  secret String?       @db.Text
-  status WebhookStatus @default(active)
-
-  eventTypes String[] @default([]) // e.g. ["download.created","member.created"]
-
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  WebhookDelivery WebhookDelivery[]
-
-  @@index([status])
-  @@map("webhook_endpoints")
-}
-
-model WebhookDelivery {
-  id         String          @id @default(cuid())
-  endpointId String
-  endpoint   WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
-
-  eventType  String
-  payload    Json
-  statusCode Int?
-  ok         Boolean @default(false)
-  attempts   Int     @default(0)
-  lastError  String?
-
-  createdAt   DateTime  @default(now())
-  deliveredAt DateTime?
-
-  @@index([endpointId])
-  @@index([eventType])
-  @@index([createdAt])
-  @@map("webhook_deliveries")
-}
-
-model SystemEvent {
-  id        String @id @default(cuid())
-  eventType String
-
-  payload Json
-  source  String?
-
-  status      String    @default("pending")
-  processedAt DateTime?
-  error       String?
-
-  createdAt DateTime @default(now())
-
-  @@index([eventType])
-  @@index([status])
-  @@index([createdAt])
-  @@map("system_events")
-}
-
-// Simple job table (for async processing / retries)
-model Job {
-  id      String @id @default(cuid())
-  queue   String @default("default")
-  type    String
-  payload Json   @default("{}")
-
-  status      String @default("queued") // queued|running|succeeded|failed
-  attempts    Int    @default(0)
-  maxAttempts Int    @default(5)
-
-  runAfter  DateTime  @default(now())
-  lockedAt  DateTime?
-  lockedBy  String?
-  lastError String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([queue])
-  @@index([status])
-  @@index([runAfter])
-  @@map("jobs")
-}
-
-// ============================================================================
-// 14. ADMIN SESSIONS
-// ============================================================================
-
-model AdminSession {
-  id    String @id @default(cuid())
-  token String @unique
-
-  userId String
-  user   InnerCircleMember @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  ipAddress String?
-  userAgent String?
-  metadata  Json?   @default("{}")
-
-  @@index([token])
-  @@index([expiresAt])
-  @@index([userId])
-  @@map("admin_sessions")
 }

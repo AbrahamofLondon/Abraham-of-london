@@ -1,10 +1,10 @@
 // lib/server/access/tokenStore.ts
-// Transitional TokenStore façade — exports getTokenStore (fixes "not exported" build error)
+// Transitional TokenStore façade — stable typed export
 
 import type { AccessSession, OneTimeToken } from "./types";
 
 export interface TokenStore {
-  // one-time token (redeem once)
+  // one-time token
   getOneTimeToken(token: string): Promise<OneTimeToken | null>;
   consumeOneTimeToken(token: string): Promise<boolean>;
 
@@ -16,26 +16,37 @@ export interface TokenStore {
 
 let singleton: TokenStore | null = null;
 
+function assertTokenStore(store: TokenStore | null | undefined, backend: string): TokenStore {
+  if (!store) {
+    throw new Error(`TokenStore backend "${backend}" failed to initialize.`);
+  }
+  return store;
+}
+
 export async function getTokenStore(): Promise<TokenStore> {
   if (singleton) return singleton;
 
-  const backend = (process.env.AOL_TOKENSTORE_BACKEND || "memory").toLowerCase();
+  const backend = String(process.env.AOL_TOKENSTORE_BACKEND || "memory").toLowerCase();
 
   if (backend === "redis") {
     const mod = await import("./tokenStore.redis");
-    singleton = await mod.createRedisTokenStore();
+    const created = await mod.createRedisTokenStore();
+    singleton = assertTokenStore(created, backend);
     return singleton;
   }
 
   if (backend === "postgres") {
     const mod = await import("./tokenStore.postgres");
-    // Support either async or sync creator (your codebase has both patterns)
-    const created = (mod as any).createPostgresTokenStore?.();
-    singleton = created instanceof Promise ? await created : created;
+    const factory = (mod as { createPostgresTokenStore?: () => Promise<TokenStore> | TokenStore })
+      .createPostgresTokenStore;
+
+    const created = factory ? await factory() : null;
+    singleton = assertTokenStore(created, backend);
     return singleton;
   }
 
   const mod = await import("./tokenStore.memory");
-  singleton = mod.createMemoryTokenStore();
+  const created = mod.createMemoryTokenStore();
+  singleton = assertTokenStore(created, backend);
   return singleton;
 }

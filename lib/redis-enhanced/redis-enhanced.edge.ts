@@ -7,8 +7,9 @@
 
 import Redis from 'ioredis';
 
-// Determine if we're in edge runtime
-const isEdgeRuntime = typeof EdgeRuntime !== 'undefined';
+// Determine if we're in edge runtime using Next.js environment variables
+// This is more reliable than checking for EdgeRuntime global
+const isEdgeRuntime = process.env.NEXT_RUNTIME === 'edge';
 
 // Create a Redis client factory
 function createRedisClient() {

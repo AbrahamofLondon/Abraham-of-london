@@ -93,14 +93,14 @@ export function initRedis() {
   return redis;
 }
 
-export function getRedis() {
+export function getRedis(): Redis | null {
   if (!redis) {
     return initRedis();
   }
   return redis;
 }
 
-export function isRedisAvailable() {
+export function isRedisAvailable(): boolean {
   return isAvailable && redis?.status === "ready";
 }
 

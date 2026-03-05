@@ -12,10 +12,36 @@ import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 
 type ReqLike = NextApiRequest | GetServerSidePropsContext["req"] | any;
 
+// Minimal “duck type” for safe extraction
+type SessionContextLike = {
+  tier?: unknown;
+  profile?: { tier?: unknown } | null;
+  member?: { tier?: unknown } | null;
+  role?: unknown;
+  accessTier?: unknown;
+  clearance?: unknown;
+  [k: string]: unknown;
+};
+
+function extractTier(ctx: SessionContextLike | null | undefined): unknown {
+  if (!ctx) return undefined;
+  return (
+    ctx.tier ??
+    ctx.accessTier ??
+    ctx.clearance ??
+    ctx.role ??
+    ctx.profile?.tier ??
+    ctx.member?.tier ??
+    undefined
+  );
+}
+
 export async function getUserTierFromReq(req: ReqLike): Promise<AccessTier> {
   const sessionId = readAccessCookie(req);
   if (!sessionId) return "public";
 
-  const ctx = await getSessionContext(sessionId);
-  return normalizeUserTier(ctx.tier ?? ctx.member?.tier ?? "public");
+  const ctx = (await getSessionContext(sessionId)) as unknown as SessionContextLike;
+
+  // ✅ No ctx.user access at all — fixes your compile error
+  return normalizeUserTier(extractTier(ctx) ?? "public");
 }

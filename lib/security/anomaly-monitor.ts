@@ -1,61 +1,122 @@
-/* lib/security/anomaly-monitor.ts */
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
 import { notifyPrincipalOfSecurityAction } from "@/lib/intelligence/notification-delegate";
+import { logSystemAudit } from "@/lib/audit/audit-logger";
 
-/**
- * THRESHOLD CONFIGURATION
- * 10 Briefs in 60 Minutes = Immediate Suspension
- */
 const VELOCITY_LIMIT = 10;
 const TIME_WINDOW_MINUTES = 60;
 
-export async function detectAnomalousActivity(memberId: string) {
-  const lookbackPeriod = new Date(Date.now() - TIME_WINDOW_MINUTES * 60 * 1000);
+type AnomalyResult =
+  | { status: "SAFE"; count: number }
+  | { status: "LOCKED"; count: number }
+  | { status: "SKIPPED"; count: number };
 
-  // 1. Calculate Velocity of Exports
-  const recentExports = await prisma.downloadAuditEvent.count({
-    where: {
-      memberId,
-      eventType: "EXPORT",
-      createdAt: { gte: lookbackPeriod }
-    }
-  });
-
-  // 2. Threshold Breach Protocol
-  if (recentExports >= VELOCITY_LIMIT) {
-    return await executeAutomaticLockout(memberId, recentExports);
+export async function detectAnomalousActivity(memberId: string): Promise<AnomalyResult> {
+  const safeMemberId = String(memberId || "").trim();
+  if (!safeMemberId) {
+    return { status: "SKIPPED", count: 0 };
   }
 
-  return { status: "SAFE", count: recentExports };
-}
+  const lookback = new Date(Date.now() - TIME_WINDOW_MINUTES * 60 * 1000);
 
-async function executeAutomaticLockout(memberId: string, count: number) {
-  // ATOMIC LOCKOUT: Member status and Key revocation
-  const [member] = await prisma.$transaction([
-    prisma.innerCircleMember.update({
-      where: { id: memberId },
-      data: { status: "suspended" }
-    }),
-    prisma.innerCircleKey.updateMany({
-      where: { memberId, status: "active" },
-      data: { 
-        status: "revoked", 
-        revokedAt: new Date(), 
-        revokedReason: "VELOCITY_EXCEEDED" 
-      }
-    }),
-    prisma.systemAuditLog.create({
+  // Count only successful exports
+  const recentExports = await prisma.downloadAuditEvent.count({
+    where: {
+      memberId: safeMemberId,
+      eventType: "EXPORT",
+      success: true,
+      createdAt: { gte: lookback },
+    },
+  });
+
+  if (recentExports < VELOCITY_LIMIT) {
+    return { status: "SAFE", count: recentExports };
+  }
+
+  const outcome = await prisma.$transaction(async (tx) => {
+    const member = await tx.innerCircleMember.findUnique({
+      where: { id: safeMemberId },
+      select: {
+        id: true,
+        status: true,
+        role: true,
+        email: true,
+        lastSeenAt: true,
+      },
+    });
+
+    if (!member) {
+      return { changed: false as const, notify: false as const, member: null as any, revoked: 0 };
+    }
+
+    if (member.role === "ADMIN") {
+      return { changed: false as const, notify: false as const, member, revoked: 0 };
+    }
+
+    // Only act on active accounts; paused/disabled/etc are already constrained
+    if (member.status !== "active") {
+      return { changed: false as const, notify: false as const, member, revoked: 0 };
+    }
+
+    const updated = await tx.innerCircleMember.update({
+      where: { id: safeMemberId },
+      data: { status: "paused" },
+    });
+
+    const revoked = await tx.innerCircleKey.updateMany({
+      where: { memberId: safeMemberId, status: "active" },
       data: {
-        action: "SECURITY_AUTO_LOCK",
-        severity: "CRITICAL",
-        resourceId: memberId,
-        metadata: { exports: count, window: `${TIME_WINDOW_MINUTES}m` }
-      }
-    })
-  ]);
+        status: "revoked",
+        revokedAt: new Date(),
+        revokedReason: "VELOCITY_EXCEEDED_EXPORT",
+      },
+    });
 
-  // Notify the Principal and Backup Emails
-  await notifyPrincipalOfSecurityAction(member, "SUSPENSION_VELOCITY");
+    await logSystemAudit(tx, {
+      action: "SECURITY_AUTO_LOCK",
+      severity: "critical",
 
-  return { status: "LOCKED", count };
+      actorType: "system",
+      actorId: null,
+      actorEmail: "system",
+
+      resourceType: "InnerCircleMember",
+      resourceId: safeMemberId,
+      resourceName: member.email ?? null,
+
+      status: "success",
+      category: "security",
+      subCategory: "anomaly_velocity",
+      tags: ["velocity", "export", "auto_pause", "keys_revoked"],
+
+      metadata: {
+        exports: recentExports,
+        window: `${TIME_WINDOW_MINUTES}m`,
+        rule: `EXPORT(success=true) >= ${VELOCITY_LIMIT}`,
+        lookbackIso: lookback.toISOString(),
+        revokedKeys: revoked.count,
+        memberLastSeenAtIso: member.lastSeenAt ? new Date(member.lastSeenAt).toISOString() : null,
+      },
+    });
+
+    return {
+      changed: true as const,
+      notify: true as const,
+      member: updated,
+      revoked: revoked.count,
+    };
+  });
+
+  if (outcome.notify && outcome.member) {
+    try {
+      await notifyPrincipalOfSecurityAction(outcome.member, "PAUSE_VELOCITY");
+    } catch (e) {
+      console.error("[SECURITY_NOTIFY_FAILED]", { memberId: safeMemberId, error: e });
+    }
+  }
+
+  return { status: "LOCKED", count: recentExports };
 }
+
+export default detectAnomalousActivity;

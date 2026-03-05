@@ -1,18 +1,39 @@
-export class SecurityAuditLogger {
-  async logHealthCheck(data: any) {
-    console.log('[AUDIT] Health Check:', data);
-    // Implement your audit logging (Sentry, LogDNA, etc.)
-  }
+// lib/security/audit.ts
+import "server-only";
 
-  async logRateLimitExceeded(data: any) {
-    console.log('[AUDIT] Rate Limit Exceeded:', data);
-  }
+import type { Prisma } from "@/lib/prisma";
 
-  async logUnauthorizedAccess(data: any) {
-    console.log('[AUDIT] Unauthorized Access:', data);
+/**
+ * Centralized, schema-safe audit logging.
+ * - no actorType column (store it in metadata)
+ * - uses lowercase AuditSeverity enum values
+ */
+export async function logSystemAudit(
+  tx: Prisma.TransactionClient,
+  input: {
+    action: string;
+    severity?: "info" | "warning" | "high" | "critical";
+    resourceId?: string | null;
+    actorId?: string | null;
+    actorEmail?: string | null;
+    ipAddress?: string | null;
+    userAgent?: string | null;
+    metadata?: Record<string, unknown>;
   }
-
-  async logHealthCheckFailure(data: any) {
-    console.error('[AUDIT] Health Check Failure:', data);
-  }
+) {
+  return tx.systemAuditLog.create({
+    data: {
+      action: input.action,
+      severity: input.severity ?? "info",
+      actorId: input.actorId ?? null,
+      actorEmail: input.actorEmail ?? "system",
+      resourceId: input.resourceId ?? null,
+      ipAddress: input.ipAddress ?? null,
+      userAgent: input.userAgent ?? null,
+      metadata: {
+        actorType: "system",
+        ...((input.metadata ?? {}) as Record<string, unknown>),
+      },
+    },
+  });
 }

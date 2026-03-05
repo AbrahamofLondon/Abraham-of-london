@@ -1,4 +1,5 @@
 import type { AccessTier as PolicyTier } from "@/lib/access/tier-policy";
+
 export type AccessTier = PolicyTier;
 
 export type AccessSession = {

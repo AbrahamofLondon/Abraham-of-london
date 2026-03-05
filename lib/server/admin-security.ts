@@ -11,15 +11,22 @@ const IS_PROD = process.env.NODE_ENV === "production";
  */
 function normalizeIp(ip?: string | null): string {
   if (!ip) return "";
+
   let v = String(ip).trim();
+  if (!v) return "";
 
   // If it's "x-forwarded-for" style: "a, b, c"
-  if (v.includes(",")) v = v.split(",")[0].trim();
+  if (v.includes(",")) {
+    const first = v.split(",")[0];
+    v = typeof first === "string" ? first.trim() : "";
+  }
+
+  if (!v) return "";
 
   // Strip port if present (rare)
   v = v.replace(/:\d+$/, "");
 
-  return v;
+  return v.trim();
 }
 
 /**
@@ -56,13 +63,15 @@ export function isAllowedIp(ipRaw?: string | null): boolean {
   if (IS_PROD) {
     if (allowlist.length === 0) return false;
   } else {
-    // Non-prod: no allowlist => allow everything (optional convenience)
+    // Non-prod: no allowlist => allow everything
     if (allowlist.length === 0) return true;
   }
 
   // Match exact or prefix
   return allowlist.some((rule) => {
-    const base = rule.includes("/") ? rule.split("/")[0] : rule; // tolerate CIDR-like inputs
+    const basePart = rule.includes("/") ? rule.split("/")[0] : rule;
+    const base = typeof basePart === "string" ? basePart.trim() : "";
+    if (!base) return false;
     return ip === base || ip.startsWith(base);
   });
 }
@@ -80,7 +89,7 @@ export function isSensitiveOperation(pathname: string, method: string): boolean 
   const sensitivePrefixes = [
     "/api/admin",
     "/api/vault",
-    "/api/pdfs", // if you have delete/rename/generate endpoints under here
+    "/api/pdfs",
     "/admin",
   ];
 
@@ -88,16 +97,14 @@ export function isSensitiveOperation(pathname: string, method: string): boolean 
 }
 
 /**
- * OPTIONAL: if you want a single source of IP extraction for middleware.
- * Use this in proxy.ts if desired.
+ * Single source of IP extraction for middleware.
  */
 export function getRequestIp(req: NextRequest): string {
-  // Trust the platform header first (Netlify/CDN)
+  // Trust platform/CDN header first
   const xf = req.headers.get("x-forwarded-for");
   if (xf) return normalizeIp(xf);
 
-  // Next middleware often provides req.ip
-  // @ts-ignore
-  const direct = req.ip as string | undefined;
+  // Next middleware may expose req.ip depending on platform/runtime
+  const direct = (req as NextRequest & { ip?: string }).ip;
   return normalizeIp(direct);
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/shorts/[slug].tsx — PREMIUM BRIEFING (FIXED TIER NORMALIZATION)
+// pages/shorts/[slug].tsx — PREMIUM BRIEFING (CINEMATIC STAGE UPGRADE + FIXED TIER NORMALIZATION)
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -121,6 +121,36 @@ function MicroPill({ children }: { children: React.ReactNode }) {
 }
 
 /* -----------------------------------------------------------------------------
+  CINEMATIC STAGE (VELVET BLACK - CLEAN, READABLE)
+----------------------------------------------------------------------------- */
+function ShortStageBackdrop() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Velvet black foundation */}
+      <div className="absolute inset-0 bg-black" />
+
+      {/* Ultra-subtle top glow for depth (NOT visible, just lift) */}
+      <div className="absolute inset-0 opacity-[0.10] bg-[radial-gradient(ellipse_at_50%_0%,rgba(245,158,11,0.12),transparent_62%)]" />
+
+      {/* Ultra-fine grain (NOT TV noise - barely perceptible) */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] mix-blend-soft-light"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='380'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.45' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E\")",
+        }}
+      />
+
+      {/* Soft vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.55)_85%,rgba(0,0,0,0.92)_100%)]" />
+
+      {/* Bottom fade */}
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black via-black/60 to-transparent" />
+    </div>
+  );
+}
+
+/* -----------------------------------------------------------------------------
   PAGE
 ----------------------------------------------------------------------------- */
 const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => {
@@ -141,14 +171,12 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => 
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    
     try {
       const bookmarks = JSON.parse(localStorage.getItem("aol_shorts_bookmarks") || "[]");
       setIsBookmarked(bookmarks.some((b: any) => b.slug === short.slugPath));
     } catch {}
   }, [short.slugPath]);
 
-  // ✅ FIX: Use correct normalizers
   const required = tiers.normalizeRequired(requiredTier);
   const user = tiers.normalizeUser(session?.user?.tier ?? "public");
 
@@ -200,7 +228,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => 
             title={short.title}
             requiredTier={required}
             message="This short requires appropriate clearance."
-            onGoToJoin={() => window.location.href = "/inner-circle"}
+            onGoToJoin={() => (window.location.href = "/inner-circle")}
           />
         </div>
       </Layout>
@@ -275,15 +303,9 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => 
         </div>
       </div>
 
-      {/* Subtle background */}
-      <div className="relative">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
-          <div className="absolute inset-0 aol-grid" />
-          <div className="absolute inset-0 aol-vignette" />
-          <div className="absolute inset-0 aol-grain opacity-[0.07] mix-blend-soft-light" />
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-px bg-gradient-to-b from-[rgba(245,158,11,0.10)] via-white/5 to-transparent" />
-        </div>
+      {/* Velvet stage (clean, readable) */}
+      <div className="relative bg-black">
+        <ShortStageBackdrop />
 
         {/* Title block */}
         <header className="relative z-10 mx-auto max-w-[800px] px-6 md:px-10 pt-32 md:pt-36 pb-10 md:pb-12">
@@ -321,7 +343,7 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => 
           </h1>
 
           {short.excerpt ? (
-            <p className="mt-5 text-white/52 text-lg md:text-xl font-light leading-relaxed">
+            <p className="mt-5 text-white/52 text-lg md:text-xl font-light leading-relaxed max-w-[72ch]">
               {short.excerpt}
             </p>
           ) : null}
@@ -329,9 +351,72 @@ const ShortPage: NextPage<Props> = ({ short, source, mdxRaw, requiredTier }) => 
           <div className="mt-10 aol-hairline w-full" />
         </header>
 
-        {/* Main content */}
+        {/* Main content - reading column with perfect contrast */}
         <main className="relative z-10 mx-auto max-w-[800px] px-6 md:px-10 pb-24">
           <article className="prose prose-invert prose-amber max-w-none">
+            <style jsx global>{`
+              /* Make reading effortless (slug page only) */
+              .prose {
+                color: rgba(255,255,255,0.78);
+                line-height: 2.0;
+                font-size: 18px;
+                max-width: 72ch;
+              }
+              .prose p {
+                color: rgba(255,255,255,0.78);
+                line-height: 2.05;
+                font-weight: 300;
+                margin-bottom: 1.5rem;
+              }
+              .prose strong {
+                color: rgba(255,255,255,0.92);
+                font-weight: 500;
+              }
+              .prose h2, .prose h3, .prose h4 {
+                color: rgba(255,255,255,0.94);
+                letter-spacing: -0.01em;
+                font-weight: 400;
+                margin-top: 2rem;
+                margin-bottom: 1rem;
+              }
+              .prose a {
+                color: rgba(245,158,11,0.80);
+                text-decoration: none;
+                border-bottom: 1px solid rgba(245,158,11,0.2);
+                transition: all 0.2s ease;
+              }
+              .prose a:hover {
+                color: rgba(245,158,11,0.95);
+                border-bottom-color: rgba(245,158,11,0.4);
+              }
+              .prose blockquote {
+                border-left-color: rgba(245,158,11,0.35);
+                color: rgba(255,255,255,0.72);
+                font-style: italic;
+                padding-left: 1.5rem;
+                margin-left: 0;
+              }
+              .prose ul, .prose ol {
+                color: rgba(255,255,255,0.78);
+                line-height: 1.8;
+              }
+              .prose li {
+                margin-bottom: 0.5rem;
+              }
+              .prose code {
+                color: rgba(245,158,11,0.8);
+                background: rgba(0,0,0,0.3);
+                padding: 0.2rem 0.4rem;
+                border-radius: 4px;
+                font-size: 0.9em;
+              }
+              .prose pre {
+                background: rgba(0,0,0,0.5);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 8px;
+                padding: 1rem;
+              }
+            `}</style>
             {source ? <MDXRemote {...source} components={safeComponents as any} /> : null}
           </article>
 
@@ -407,7 +492,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         })
       : null;
 
-    // ✅ FIX: Use normalizeRequired for content tiers
     const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(data));
 
     const short: Short = {
@@ -428,11 +512,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     };
 
     return {
-      props: sanitizeData({ 
-        short, 
-        source, 
-        mdxRaw, 
-        requiredTier
+      props: sanitizeData({
+        short,
+        source,
+        mdxRaw,
+        requiredTier,
       }),
       revalidate: 3600,
     };

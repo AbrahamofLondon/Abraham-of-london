@@ -13,17 +13,25 @@ export async function checkRedisHealth() {
   try {
     status.connected = isRedisAvailable();
     
+    // Check if Redis is available and get the client
     if (status.connected) {
       const redis = getRedis();
-      const pong = await redis.ping();
-      status.ping = pong === "PONG";
+      
+      // Ensure redis exists before using it
+      if (redis) {
+        const pong = await redis.ping();
+        status.ping = pong === "PONG";
 
-      const info = await redis.info("memory");
-      const usedMemory = info.match(/used_memory_human:(.*)/)?.[1]?.trim();
-      status.memory = usedMemory || null;
+        const info = await redis.info("memory");
+        const usedMemory = info.match(/used_memory_human:(.*)/)?.[1]?.trim();
+        status.memory = usedMemory || null;
 
-      const keys = await redis.keys("vault:*");
-      status.keys = keys.length;
+        const keys = await redis.keys("vault:*");
+        status.keys = keys.length;
+      } else {
+        status.connected = false;
+        status.error = "Redis client is null despite reporting available";
+      }
     }
   } catch (error) {
     status.error = error instanceof Error ? error.message : String(error);

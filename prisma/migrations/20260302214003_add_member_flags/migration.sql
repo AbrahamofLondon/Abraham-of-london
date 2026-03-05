@@ -54,25 +54,21 @@ DO $$ BEGIN
         WHERE table_schema='public' AND table_name='api_logs' AND column_name='memberId'
           AND data_type IN ('text','character varying')
       ) THEN
-        -- Drop existing FK if present (by name) to allow type change
-        IF EXISTS (
-          SELECT 1 FROM pg_constraint WHERE conname='api_logs_memberId_fkey'
-        ) THEN
-          EXECUTE 'ALTER TABLE public.api_logs DROP CONSTRAINT api_logs_memberId_fkey';
-        END IF;
+        -- Drop any FK that references api_logs.memberId (regardless of name)
+DO $$
+DECLARE
+  fk_name text;
+BEGIN
+  SELECT c.conname INTO fk_name
+  FROM pg_constraint c
+  JOIN pg_class t ON t.oid = c.conrelid
+  WHERE c.contype = 'f'
+    AND t.relname = 'api_logs'
+    AND c.conname ILIKE 'api_logs_%member%_fkey'
+  LIMIT 1;
 
-        -- Convert only if values look like UUID; otherwise set to NULL
-        EXECUTE '
-          ALTER TABLE public.api_logs
-          ALTER COLUMN "memberId" TYPE UUID
-          USING (CASE
-            WHEN "memberId" ~* ''^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$''
-            THEN "memberId"::uuid
-            ELSE NULL
-          END)
-        ';
-      END IF;
-    END IF;
+  IF fk_name IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE public.api_logs DROP CONSTRAINT IF EXISTS %I', fk_name);
   END IF;
 END $$;
 

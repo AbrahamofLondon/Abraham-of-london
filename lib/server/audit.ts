@@ -1,699 +1,203 @@
-// lib/server/audit.ts - PRODUCTION SAFE VERSION - FIXED
-import { safeString, safeSubstring, safeJsonStringify } from "@/lib/utils/safe";
+/* lib/server/audit.ts — CANONICAL AUDIT FACADE (pages/ + node safe)
+   - DO NOT import "server-only" here (pages router will explode)
+   - This file exists to satisfy legacy imports:
+       import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit"
+*/
 
-/**
- * AUDIT EVENT INTERFACE
- */
-export interface AuditEvent {
-  actorType: "system" | "api" | "member" | "admin" | "cron" | "webhook";
-  actorId?: string | null;
-  actorEmail?: string | null;
-  ipAddress?: string | null;
-  action: string;
-  resourceType: string;
-  resourceId?: string | null;
-  status: "success" | "failed" | "warning" | "pending";
-  severity?: "low" | "medium" | "high" | "critical";
-  userAgent?: string | null;
-  requestId?: string | null;
-  sessionId?: string | null;
-  oldValue?: string | null;
-  newValue?: string | null;
-  metadata?: Record<string, any> | null;
-  details?: Record<string, any> | null;
-  durationMs?: number;
-  errorMessage?: string | null;
-}
+import type { AuditSeverity } from "@prisma/client";
+import { getAuditLogger, type AuditEvent as LoggerAuditEvent } from "@/lib/audit/audit-logger";
 
-/**
- * AUDIT EVENT CATEGORIES
- */
+/* -----------------------------------------------------------------------------
+ * PUBLIC CONSTANTS (legacy compatibility)
+ * -------------------------------------------------------------------------- */
+
 export const AUDIT_CATEGORIES = {
-  AUTHENTICATION: "authentication",
-  AUTHORIZATION: "authorization",
-  DATA_ACCESS: "data_access",
-  DATA_MODIFICATION: "data_modification",
-  SYSTEM_OPERATION: "system_operation",
+  AUTHENTICATION: "auth",
+  AUTHORIZATION: "security",
+  DATA_ACCESS: "content",
+  DATA_MODIFICATION: "content",
+  SYSTEM_OPERATION: "system",
   SECURITY: "security",
-  COMPLIANCE: "compliance",
-  PERFORMANCE: "performance",
-  USER_ACTION: "user_action",
-  API_CALL: "api_call",
-  ADMIN_ACTION: "admin_action",
+  COMPLIANCE: "security",
+  PERFORMANCE: "system",
+  USER_ACTION: "user",
+  API_CALL: "api",
+  ADMIN_ACTION: "admin",
 } as const;
 
-/**
- * COMMON AUDIT ACTIONS
- */
 export const AUDIT_ACTIONS = {
   // Authentication
-  LOGIN_SUCCESS: "login_success",
-  LOGIN_FAILED: "login_failed",
-  LOGOUT: "logout",
-  SESSION_CREATED: "session_created",
-  SESSION_EXPIRED: "session_expired",
+  LOGIN_SUCCESS: "LOGIN_SUCCESS",
+  LOGIN_FAILED: "LOGIN_FAILED",
+  LOGOUT: "LOGOUT",
+  SESSION_CREATED: "SESSION_CREATED",
+  SESSION_EXPIRED: "SESSION_EXPIRED",
+
   // Authorization
-  ACCESS_GRANTED: "access_granted",
-  ACCESS_DENIED: "access_denied",
-  PERMISSION_CHANGED: "permission_changed",
+  ACCESS_GRANTED: "ACCESS_GRANTED",
+  ACCESS_DENIED: "ACCESS_DENIED",
+  PERMISSION_CHANGED: "PERMISSION_CHANGED",
+
   // Data Operations
-  CREATE: "create",
-  READ: "read",
-  UPDATE: "update",
-  DELETE: "delete",
-  EXPORT: "export",
-  IMPORT: "import",
+  CREATE: "CREATE",
+  READ: "READ",
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+  EXPORT: "EXPORT",
+  IMPORT: "IMPORT",
+
   // System Operations
-  CONFIGURATION_CHANGE: "configuration_change",
-  MAINTENANCE_START: "maintenance_start",
-  MAINTENANCE_END: "maintenance_end",
-  BACKUP_CREATED: "backup_created",
-  RESTORE_INITIATED: "restore_initiated",
+  CONFIGURATION_CHANGE: "CONFIGURATION_CHANGE",
+  MAINTENANCE_START: "MAINTENANCE_START",
+  MAINTENANCE_END: "MAINTENANCE_END",
+  BACKUP_CREATED: "BACKUP_CREATED",
+  RESTORE_INITIATED: "RESTORE_INITIATED",
+
   // Security
-  RATE_LIMIT_HIT: "rate_limit_hit",
-  SUSPICIOUS_ACTIVITY: "suspicious_activity",
-  IP_BLOCKED: "ip_blocked",
-  USER_BLOCKED: "user_blocked",
+  RATE_LIMIT_HIT: "RATE_LIMIT_HIT",
+  RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+  SUSPICIOUS_ACTIVITY: "SUSPICIOUS_ACTIVITY",
+  IP_BLOCKED: "IP_BLOCKED",
+  USER_BLOCKED: "USER_BLOCKED",
+
   // User Actions
-  PROFILE_UPDATED: "profile_updated",
-  PASSWORD_CHANGED: "password_changed",
-  EMAIL_VERIFIED: "email_verified",
+  PROFILE_UPDATED: "PROFILE_UPDATED",
+  PASSWORD_CHANGED: "PASSWORD_CHANGED",
+  EMAIL_VERIFIED: "EMAIL_VERIFIED",
+
   // API Operations
-  API_CALL: "api_call",
-  API_ERROR: "api_error",
-  WEBHOOK_RECEIVED: "webhook_received",
-  WEBHOOK_PROCESSED: "webhook_processed",
+  API_CALL: "API_CALL",
+  API_ERROR: "API_ERROR",
+  WEBHOOK_RECEIVED: "WEBHOOK_RECEIVED",
+  WEBHOOK_PROCESSED: "WEBHOOK_PROCESSED",
 } as const;
 
-export interface PerformanceMetrics {
-  operation: string;
-  durationMs: number;
-  resourceType: string;
-  resourceId?: string;
-  metadata?: Record<string, any>;
+/* -----------------------------------------------------------------------------
+ * TYPES (legacy input shape used across your pages/*)
+ * -------------------------------------------------------------------------- */
+
+export type LegacyAuditStatus = "success" | "failed" | "warning" | "pending";
+export type LegacyActorType = "system" | "api" | "member" | "admin" | "cron" | "webhook";
+
+export interface AuditEvent {
+  actorType: LegacyActorType;
+  actorId?: string | null;
+  actorEmail?: string | null;
+
+  ipAddress?: string | null;
+  userAgent?: string | null;
+
+  action: string;
+
+  resourceType: string; // legacy uses "category-like" values; we map it
+  resourceId?: string | null;
+
+  status: LegacyAuditStatus;
+
+  // legacy severities were: low|medium|high|critical (your DB enum is info|warning|high|critical)
+  severity?: "low" | "medium" | "high" | "critical";
+
+  requestId?: string | null;
+  sessionId?: string | null;
+
+  durationMs?: number;
+  errorMessage?: string | null;
+
+  metadata?: Record<string, any> | null;
+  details?: Record<string, any> | null;
 }
 
-// SAFE: Environment detection
-const isEdgeRuntime = (): boolean => {
-  if (typeof process === 'undefined') return false;
-  if (!process.env) return false;
-  return process.env.NEXT_RUNTIME === 'edge';
-};
+/* -----------------------------------------------------------------------------
+ * NORMALIZERS
+ * -------------------------------------------------------------------------- */
 
-const isProduction = (): boolean => {
-  if (typeof process === 'undefined') return false;
-  if (!process.env) return false;
-  return process.env.NODE_ENV === 'production';
-};
-
-const isDevelopment = (): boolean => {
-  if (typeof process === 'undefined') return false;
-  if (!process.env) return false;
-  return process.env.NODE_ENV === 'development';
-};
-
-/**
- * SAFE: Sanitize audit event data before processing - FIXED VERSION
- */
-function sanitizeAuditEvent(event: AuditEvent): AuditEvent {
-  const sanitized: any = { ...event };
-  
-  // SAFE: Helper to sanitize fields - FIXED: Use safeString for strings, not safeSlice
-  const sanitizeField = (field: any, maxLength: number): any => {
-    if (field == null) return field;
-    
-    // Always convert to string first
-    let strValue: string;
-    try {
-      strValue = typeof field === 'string' ? field : String(field);
-    } catch {
-      return '';
-    }
-    
-    // Use safeString to limit length and ensure it's a string
-    const safeStr = safeString(strValue, maxLength);
-    
-    // Remove control characters
-    return safeStr.replace(/[\x00-\x1F\x7F]/g, '');
-  };
-
-  sanitized.actorId = sanitizeField(sanitized.actorId, 255);
-  sanitized.actorEmail = sanitizeField(sanitized.actorEmail, 255);
-  sanitized.ipAddress = sanitizeField(sanitized.ipAddress, 45);
-  sanitized.action = sanitizeField(sanitized.action, 100) || 'unknown';
-  sanitized.resourceType = sanitizeField(sanitized.resourceType, 100) || 'unknown';
-  sanitized.resourceId = sanitizeField(sanitized.resourceId, 255);
-  sanitized.userAgent = sanitizeField(sanitized.userAgent, 500);
-  sanitized.requestId = sanitizeField(sanitized.requestId, 100);
-  sanitized.sessionId = sanitizeField(sanitized.sessionId, 100);
-  sanitized.errorMessage = sanitizeField(sanitized.errorMessage, 1000);
-
-  // SAFE: JSON size limits
-  const limitJsonSize = (obj: any, maxSize: number): any => {
-    try {
-      const jsonStr = JSON.stringify(obj);
-      if (jsonStr.length > maxSize) {
-        return { 
-          _truncated: true, 
-          originalSize: jsonStr.length,
-          maxSize,
-          timestamp: new Date().toISOString()
-        };
-      }
-      return obj;
-    } catch {
-      return { _invalidJson: true };
-    }
-  };
-
-  sanitized.oldValue = limitJsonSize(sanitized.oldValue, 10000);
-  sanitized.newValue = limitJsonSize(sanitized.newValue, 10000);
-  sanitized.metadata = limitJsonSize(sanitized.metadata, 5000);
-  sanitized.details = limitJsonSize(sanitized.details, 5000);
-
-  // Numeric bounds
-  if (typeof sanitized.durationMs === 'number') {
-    sanitized.durationMs = Math.max(0, Math.min(999999, sanitized.durationMs));
-  }
-
-  return sanitized;
+function normalizeSeverity(s?: AuditEvent["severity"]): AuditSeverity {
+  const v = String(s || "").toLowerCase();
+  if (v === "critical") return "critical";
+  if (v === "high") return "high";
+  // map legacy "medium" and "warning" and "warn" → warning
+  if (v === "medium" || v === "warning" || v === "warn") return "warning";
+  return "info";
 }
 
-export class AuditContext {
-  private context: {
-    requestId?: string;
-    sessionId?: string;
-    userId?: string;
-    userEmail?: string;
-    userIp?: string;
-    userAgent?: string;
-    startTime: number;
-  };
+function normalizeStatus(s: LegacyAuditStatus): "success" | "failure" | "pending" {
+  const v = String(s || "").toLowerCase();
+  if (v === "failed" || v === "failure" || v === "error") return "failure";
+  if (v === "pending") return "pending";
+  return "success";
+}
 
-  constructor(context?: Partial<Omit<AuditContext['context'], 'startTime'>>) {
-    this.context = {
-      requestId: this.generateRequestId(),
-      startTime: Date.now(),
-      ...this.sanitizeContext(context || {}),
-    };
-  }
-
-  private sanitizeContext(context: Partial<Omit<AuditContext['context'], 'startTime'>>) {
-    const sanitized: any = {};
-    
-    if (context.requestId && typeof context.requestId === 'string') {
-      sanitized.requestId = safeString(context.requestId, 100);
-    }
-    if (context.sessionId && typeof context.sessionId === 'string') {
-      sanitized.sessionId = safeString(context.sessionId, 100);
-    }
-    if (context.userId && typeof context.userId === 'string') {
-      sanitized.userId = safeString(context.userId, 255);
-    }
-    if (context.userEmail && typeof context.userEmail === 'string') {
-      sanitized.userEmail = safeString(context.userEmail, 255);
-    }
-    if (context.userIp && typeof context.userIp === 'string') {
-      sanitized.userIp = safeString(context.userIp, 45);
-    }
-    if (context.userAgent && typeof context.userAgent === 'string') {
-      sanitized.userAgent = safeString(context.userAgent, 500);
-    }
-
-    return sanitized;
-  }
-
-  private generateRequestId(): string {
-    try {
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        return `req_${crypto.randomUUID()}`;
-      }
-    } catch {
-      // Fall through to timestamp method
-    }
-    
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 10);
-    return `req_${timestamp}_${random}`;
-  }
-
-  getContext() {
-    return { ...this.context };
-  }
-
-  updateContext(updates: Partial<Omit<AuditContext['context'], 'startTime'>>) {
-    this.context = { 
-      ...this.context, 
-      ...this.sanitizeContext(updates) 
-    };
-  }
-
-  getDuration(): number {
-    return Date.now() - this.context.startTime;
-  }
+function normalizeActorType(v: LegacyActorType): "system" | "user" | "admin" | "service" {
+  const s = String(v || "").toLowerCase();
+  if (s === "member" || s === "user") return "user";
+  if (s === "admin") return "admin";
+  // Treat api/cron/webhook as "service"
+  if (s === "api" || s === "cron" || s === "webhook") return "service";
+  return "system";
 }
 
 /**
- * INSTITUTIONAL AUDIT LOGGER
+ * Legacy callers pass `resourceType` as a category-ish label.
+ * We map it into:
+ * - category (one of your indexed columns)
+ * - resourceType (the "domain object" when available)
  */
-export async function logAuditEvent(event: AuditEvent): Promise<any> {
-  const startTime = Date.now();
-  
-  // SAFE: Always sanitize event data first
-  const sanitizedEvent = sanitizeAuditEvent(event);
+function deriveCategoryAndResourceType(resourceType: string): { category?: string; resourceType?: string } {
+  const rt = String(resourceType || "").trim();
 
-  try {
-    // CRITICAL: Edge Runtime Guard
-    if (isEdgeRuntime()) {
-      const edgeLog = {
-        timestamp: new Date().toISOString(),
-        actorType: sanitizedEvent.actorType,
-        action: sanitizedEvent.action,
-        resourceType: sanitizedEvent.resourceType,
-        status: sanitizedEvent.status,
-        _edge: true,
-        _fallback: true
-      };
-      
-      if (isDevelopment()) {
-        console.log('[AUDIT_EDGE_FALLBACK]', edgeLog);
-      }
-      
-      return { success: true, edge: true, logged: edgeLog };
-    }
+  // If they passed one of our canonical categories, accept it
+  const lc = rt.toLowerCase();
 
-    // SAFE: Dynamic Import - Prevents Edge runtime crashes
-    const { default: prisma } = await import("@/lib/prisma");
-    
-    const finalDetails = sanitizedEvent.details || sanitizedEvent.metadata || null;
-    const severity = sanitizedEvent.severity || determineSeverity(sanitizedEvent.action, sanitizedEvent.status);
+  if (lc === "auth" || lc === "authentication") return { category: "auth", resourceType: rt };
+  if (lc === "admin") return { category: "admin", resourceType: rt };
+  if (lc === "api") return { category: "api", resourceType: rt };
+  if (lc === "security" || lc === "authorization" || lc === "compliance") return { category: "security", resourceType: rt };
+  if (lc === "content" || lc === "data_access" || lc === "data_modification") return { category: "content", resourceType: rt };
+  if (lc === "system" || lc === "system_operation" || lc === "performance") return { category: "system", resourceType: rt };
+  if (lc === "user" || lc === "user_action") return { category: "user", resourceType: rt };
 
-    // SAFE: Create audit log with sanitized data
-    const auditLog = await prisma.systemAuditLog.create({
-      data: {
-        actorType: sanitizedEvent.actorType,
-        actorId: sanitizedEvent.actorId || null,
-        actorEmail: sanitizedEvent.actorEmail || null,
-        ipAddress: sanitizedEvent.ipAddress || null,
-        action: sanitizedEvent.action,
-        resourceType: sanitizedEvent.resourceType,
-        resourceId: sanitizedEvent.resourceId || null,
-        status: sanitizedEvent.status,
-        severity,
-        userAgent: sanitizedEvent.userAgent || null,
-        requestId: sanitizedEvent.requestId || null,
-        sessionId: sanitizedEvent.sessionId || null,
-        oldValue: sanitizedEvent.oldValue || null,
-        newValue: sanitizedEvent.newValue || null,
-        errorMessage: sanitizedEvent.errorMessage || null,
-        durationMs: sanitizedEvent.durationMs || null,
-        metadata: finalDetails ? finalDetails as any : null,
-        createdAt: new Date(),
-      },
-    });
-
-    const durationMs = Date.now() - startTime;
-    
-    if (durationMs > 1000 && isDevelopment()) {
-      console.warn(`[AUDIT_PERF_WARNING] Audit logging took ${durationMs}ms`);
-    }
-
-    return auditLog;
-  } catch (error) {
-    // SAFE: Comprehensive error handling
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = isDevelopment() && error instanceof Error ? error.stack : undefined;
-
-    console.error("[AUDIT_CRITICAL_FAILURE] Failed to persist institutional log:", {
-      timestamp: new Date().toISOString(),
-      actorType: sanitizedEvent.actorType,
-      action: sanitizedEvent.action,
-      resourceType: sanitizedEvent.resourceType,
-      status: sanitizedEvent.status,
-      error: isProduction() ? 'Database persistence failed' : errorMessage,
-    });
-
-    const fallbackLog = {
-      timestamp: new Date().toISOString(),
-      ...sanitizedEvent,
-      severity: sanitizedEvent.severity || determineSeverity(sanitizedEvent.action, sanitizedEvent.status),
-      _fallback: true,
-      _error: isProduction() ? undefined : errorMessage,
-      _stack: isDevelopment() ? errorStack : undefined
-    };
-
-    console.log("[AUDIT_FALLBACK]", JSON.stringify(fallbackLog));
-    
-    return { 
-      success: false, 
-      error: 'Audit logging failed', 
-      fallback: true,
-      fallbackLog
-    };
-  }
+  // fallback
+  return { category: "system", resourceType: rt || "system" };
 }
 
-function determineSeverity(action: string, status: string): AuditEvent['severity'] {
-  if ([
-    AUDIT_ACTIONS.LOGIN_FAILED,
-    AUDIT_ACTIONS.ACCESS_DENIED,
-    AUDIT_ACTIONS.DELETE,
-    AUDIT_ACTIONS.SUSPICIOUS_ACTIVITY,
-    AUDIT_ACTIONS.IP_BLOCKED,
-    AUDIT_ACTIONS.USER_BLOCKED,
-  ].includes(action as any)) {
-    return status === 'failed' ? 'critical' : 'high';
-  }
+/* -----------------------------------------------------------------------------
+ * MAIN EXPORT: logAuditEvent (expected by pages + api)
+ * -------------------------------------------------------------------------- */
 
-  if ([
-    AUDIT_ACTIONS.CONFIGURATION_CHANGE,
-    AUDIT_ACTIONS.PERMISSION_CHANGED,
-    AUDIT_ACTIONS.PASSWORD_CHANGED,
-    AUDIT_ACTIONS.RESTORE_INITIATED,
-  ].includes(action as any)) {
-    return 'high';
-  }
+export async function logAuditEvent(event: AuditEvent) {
+  const logger = getAuditLogger();
 
-  if ([
-    AUDIT_ACTIONS.UPDATE,
-    AUDIT_ACTIONS.EXPORT,
-    AUDIT_ACTIONS.IMPORT,
-    AUDIT_ACTIONS.API_ERROR,
-  ].includes(action as any)) {
-    return 'medium';
-  }
+  const { category, resourceType } = deriveCategoryAndResourceType(event.resourceType);
 
-  return 'low';
-}
+  // Map legacy event into the new audit-logger contract
+  const mapped: LoggerAuditEvent = {
+    action: String(event.action || "UNKNOWN_ACTION"),
 
-// SAFE: Helper functions
-export async function logAuthEvent(data: any) {
-  if (!data || typeof data !== 'object') {
-    console.error('[AUDIT_INVALID_INPUT] logAuthEvent received invalid data:', data);
-    return null;
-  }
+    actorType: normalizeActorType(event.actorType),
+    actorId: event.actorId ?? undefined,
+    actorEmail: event.actorEmail ?? undefined,
 
-  const safeData = { ...data };
-  
-  return logAuditEvent({
-    actorType: safeData.actorType || 'member',
-    actorId: safeData.actorId,
-    actorEmail: safeData.actorEmail,
-    ipAddress: safeData.ipAddress,
-    action: AUDIT_ACTIONS[safeData.action as keyof typeof AUDIT_ACTIONS] || safeData.action || 'unknown',
-    resourceType: AUDIT_CATEGORIES.AUTHENTICATION,
-    resourceId: safeData.actorId,
-    status: safeData.status || 'success',
-    userAgent: safeData.userAgent,
-    requestId: safeData.requestId,
-    details: safeData.details,
-    errorMessage: safeData.errorMessage,
-  });
-}
+    severity: normalizeSeverity(event.severity),
+    status: normalizeStatus(event.status),
 
-export async function logDataAccessEvent(data: any) {
-  if (!data || typeof data !== 'object') {
-    console.error('[AUDIT_INVALID_INPUT] logDataAccessEvent received invalid data:', data);
-    return null;
-  }
+    category,
+    subCategory: undefined,
 
-  const safeData = { ...data };
-  
-  return logAuditEvent({
-    actorType: safeData.actorType || 'member',
-    actorId: safeData.actorId,
-    actorEmail: safeData.actorEmail,
-    ipAddress: safeData.ipAddress,
-    action: AUDIT_ACTIONS[safeData.action as keyof typeof AUDIT_ACTIONS] || safeData.action || 'read',
-    resourceType: safeData.resourceType || 'unknown',
-    resourceId: safeData.resourceId,
-    status: safeData.status || 'success',
-    userAgent: safeData.userAgent,
-    requestId: safeData.requestId,
-    oldValue: safeData.oldValue,
-    newValue: safeData.newValue,
-    details: safeData.details,
-  });
-}
+    resourceType: resourceType || undefined,
+    resourceId: event.resourceId ?? undefined,
 
-export async function logSecurityEvent(data: any) {
-  if (!data || typeof data !== 'object') {
-    console.error('[AUDIT_INVALID_INPUT] logSecurityEvent received invalid data:', data);
-    return null;
-  }
+    ipAddress: event.ipAddress ?? undefined,
+    userAgent: event.userAgent ?? undefined,
+    requestId: event.requestId ?? undefined,
+    sessionId: event.sessionId ?? undefined,
 
-  const safeData = { ...data };
-  
-  return logAuditEvent({
-    actorType: safeData.actorType || 'system',
-    actorId: safeData.actorId,
-    actorEmail: safeData.actorEmail,
-    ipAddress: safeData.ipAddress,
-    action: AUDIT_ACTIONS[safeData.action as keyof typeof AUDIT_ACTIONS] || safeData.action || 'security_event',
-    resourceType: safeData.resourceType || AUDIT_CATEGORIES.SECURITY,
-    resourceId: safeData.resourceId,
-    status: safeData.status || 'success',
-    severity: safeData.severity || 'high',
-    userAgent: safeData.userAgent,
-    requestId: safeData.requestId,
-    details: safeData.details,
-    errorMessage: safeData.errorMessage,
-  });
-}
+    durationMs: typeof event.durationMs === "number" ? event.durationMs : undefined,
+    errorMessage: event.errorMessage ?? undefined,
 
-export async function logPerformanceMetrics(metrics: PerformanceMetrics) {
-  if (!metrics || typeof metrics !== 'object') {
-    console.error('[AUDIT_INVALID_INPUT] logPerformanceMetrics received invalid data:', metrics);
-    return null;
-  }
-
-  const safeMetrics = { ...metrics };
-  
-  return logAuditEvent({
-    actorType: "system",
-    action: AUDIT_ACTIONS.API_CALL,
-    resourceType: AUDIT_CATEGORIES.PERFORMANCE,
-    resourceId: safeMetrics.resourceId,
-    status: "success",
-    severity: "low",
-    durationMs: safeMetrics.durationMs,
-    details: {
-      operation: safeMetrics.operation || 'unknown',
-      durationMs: safeMetrics.durationMs || 0,
-      ...(typeof safeMetrics.metadata === 'object' ? safeMetrics.metadata : {}),
-    },
-  });
-}
-
-export function withAuditLog(handler: Function, options?: any) {
-  return async (req: any, res: any, ...args: any[]) => {
-    const context = new AuditContext({
-      userId: req.user?.id,
-      userEmail: req.user?.email,
-      userIp: req.headers['x-forwarded-for']?.split(',')[0]?.trim(),
-      userAgent: req.headers['user-agent'],
-    });
-
-    const startTime = Date.now();
-    let status: AuditEvent['status'] = 'success';
-    let errorMessage: string | undefined;
-
-    try {
-      const result = await handler(req, res, ...args);
-      
-      if (options?.logSuccess !== false) {
-        await logAuditEvent({
-          actorType: req.user?.id ? "member" : "api",
-          actorId: req.user?.id,
-          actorEmail: req.user?.email,
-          ipAddress: context.getContext().userIp,
-          action: `${req.method?.toLowerCase() || 'unknown'}_request`,
-          resourceType: options?.resourceType || 'api_endpoint',
-          resourceId: req.url?.split('?')[0],
-          status: 'success',
-          userAgent: context.getContext().userAgent,
-          requestId: context.getContext().requestId,
-          durationMs: Date.now() - startTime,
-          details: {
-            method: req.method,
-            path: req.url,
-            statusCode: res.statusCode,
-            ...(options?.extraDetails || {}),
-          },
-        });
-      }
-      
-      return result;
-    } catch (error) {
-      status = 'failed';
-      errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
-      if (options?.logErrors !== false) {
-        await logAuditEvent({
-          actorType: req.user?.id ? "member" : "api",
-          actorId: req.user?.id,
-          actorEmail: req.user?.email,
-          ipAddress: context.getContext().userIp,
-          action: `${req.method?.toLowerCase() || 'unknown'}_request`,
-          resourceType: options?.resourceType || 'api_endpoint',
-          resourceId: req.url?.split('?')[0],
-          status: 'failed',
-          severity: 'high',
-          userAgent: context.getContext().userAgent,
-          requestId: context.getContext().requestId,
-          errorMessage: isProduction() ? 'Internal server error' : errorMessage,
-          durationMs: Date.now() - startTime,
-          details: {
-            method: req.method,
-            path: req.url,
-            error: isProduction() ? undefined : errorMessage,
-          },
-        });
-      }
-      
-      throw error;
-    }
-  };
-}
-
-export async function queryAuditLogs(filters?: any) {
-  if (isEdgeRuntime()) return { 
-    success: false, 
-    error: 'Not supported in Edge runtime',
-    data: [],
-    pagination: { total: 0, limit: 0, offset: 0, pageCount: 0 }
+    // Preserve payloads
+    metadata: event.metadata ?? undefined,
+    details: event.details ?? undefined,
   };
 
-  try {
-    const { default: prisma } = await import("@/lib/prisma");
-    
-    const where: any = {};
-    const validActorTypes = ['system', 'api', 'member', 'admin', 'cron', 'webhook'];
-    const validStatuses = ['success', 'failed', 'warning', 'pending'];
-    const validSeverities = ['low', 'medium', 'high', 'critical'];
-
-    if (filters?.actorType && typeof filters.actorType === 'string' && validActorTypes.includes(filters.actorType)) {
-      where.actorType = filters.actorType;
-    }
-    
-    if (filters?.actorId && typeof filters.actorId === 'string') {
-      where.actorId = safeString(filters.actorId, 255);
-    }
-    
-    if (filters?.action && typeof filters.action === 'string') {
-      where.action = { contains: safeString(filters.action, 100), mode: 'insensitive' };
-    }
-    
-    if (filters?.resourceType && typeof filters.resourceType === 'string') {
-      where.resourceType = safeString(filters.resourceType, 100);
-    }
-    
-    if (filters?.resourceId && typeof filters.resourceId === 'string') {
-      where.resourceId = safeString(filters.resourceId, 255);
-    }
-    
-    if (filters?.status && typeof filters.status === 'string' && validStatuses.includes(filters.status)) {
-      where.status = filters.status;
-    }
-    
-    if (filters?.severity && typeof filters.severity === 'string' && validSeverities.includes(filters.severity)) {
-      where.severity = filters.severity;
-    }
-
-    if (filters?.startDate || filters?.endDate) {
-      where.createdAt = {};
-      
-      if (filters?.startDate) {
-        const startDate = new Date(filters.startDate);
-        if (!isNaN(startDate.getTime())) {
-          where.createdAt.gte = startDate;
-        }
-      }
-      
-      if (filters?.endDate) {
-        const endDate = new Date(filters.endDate);
-        if (!isNaN(endDate.getTime())) {
-          where.createdAt.lte = endDate;
-        }
-      }
-    }
-
-    const limit = Math.max(1, Math.min(1000, Number(filters?.limit) || 100));
-    const offset = Math.max(0, Number(filters?.offset) || 0);
-
-    const [logs, total] = await Promise.all([
-      prisma.systemAuditLog.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.systemAuditLog.count({ where }),
-    ]);
-
-    return {
-      success: true,
-      data: logs,
-      pagination: {
-        total,
-        limit,
-        offset,
-        pageCount: Math.ceil(total / limit),
-      },
-    };
-  } catch (error) {
-    console.error('[AUDIT_QUERY_ERROR]', error instanceof Error ? error.message : 'Unknown error');
-    return {
-      success: false,
-      error: 'Failed to query audit logs',
-      data: [],
-      pagination: { total: 0, limit: 0, offset: 0, pageCount: 0 }
-    };
-  }
+  return logger.log(mapped);
 }
-
-export async function cleanupOldAuditLogs(retentionDays: number = 90) {
-  if (isEdgeRuntime()) return { 
-    success: false, 
-    error: 'Not supported in Edge runtime',
-    deletedCount: 0 
-  };
-
-  try {
-    const { default: prisma } = await import("@/lib/prisma");
-    
-    const safeRetentionDays = Math.max(1, Math.min(365 * 10, retentionDays));
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - safeRetentionDays);
-
-    const result = await prisma.systemAuditLog.deleteMany({
-      where: {
-        createdAt: { lt: cutoffDate },
-        severity: { in: ['low', 'medium'] },
-      },
-    });
-
-    console.log(`[AUDIT_CLEANUP] Deleted ${result.count} audit logs older than ${safeRetentionDays} days`);
-    
-    return { success: true, deletedCount: result.count };
-  } catch (error) {
-    console.error('[AUDIT_CLEANUP_ERROR]', error instanceof Error ? error.message : 'Unknown error');
-    return { success: false, error: 'Cleanup failed', deletedCount: 0 };
-  }
-}
-
-const auditApi = {
-  logAuditEvent,
-  logAuthEvent,
-  logDataAccessEvent,
-  logSecurityEvent,
-  logPerformanceMetrics,
-  withAuditLog,
-  queryAuditLogs,
-  cleanupOldAuditLogs,
-  AUDIT_CATEGORIES,
-  AUDIT_ACTIONS,
-  AuditContext,
-};
-
-export default auditApi;

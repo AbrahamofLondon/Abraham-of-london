@@ -3,6 +3,14 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
+// Add the missing RateLimitOptions type
+export type RateLimitOptions = {
+  key: string;
+  limit: number;
+  windowMs: number;
+  persist?: boolean;
+};
+
 export type RateLimitConfig = {
   limit: number;
   windowSeconds: number;
@@ -13,8 +21,8 @@ export type RateLimitConfig = {
 export type RateLimitResult = {
   ok: boolean;
   remaining: number;
-  resetSeconds: number;
-  limit: number;
+  resetSeconds?: number;
+  limit?: number;
   allowed?: boolean;
   limited?: boolean;
   resetAt?: number;
@@ -77,7 +85,9 @@ export async function checkRateLimit(
     console.warn("[Rate Limit] Server implementation unavailable, using client fallback");
     
     // Fallback to client-side implementation
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "0.0.0.0";
+    const ip = Array.isArray(req.headers["x-forwarded-for"]) 
+      ? req.headers["x-forwarded-for"][0] 
+      : req.headers["x-forwarded-for"] || req.socket.remoteAddress || "0.0.0.0";
     const key = `rate_limit:${ip}:${req.url || 'unknown'}`;
     const windowMs = config.windowSeconds * 1000;
     

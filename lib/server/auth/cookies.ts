@@ -1,7 +1,10 @@
-// lib/server/auth/cookies.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+// lib/server/auth/cookies.ts — Edge + Node compatible cookie SSOT
+// - Middleware/App Router: uses req.cookies.get()
+// - Pages Router (NextApiRequest): parses req.headers.cookie
+// - Exposes stable legacy aliases expected across the codebase
+
+import type { NextApiResponse } from "next";
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
@@ -25,6 +28,62 @@ function isProd(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function parseCookieHeader(cookieHeader: string | null | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  const raw = String(cookieHeader || "");
+  if (!raw) return out;
+
+  // minimal, safe parser: "a=b; c=d"
+  const parts = raw.split(";");
+
+  for (const part of parts) {
+    const [k, ...rest] = part.split("=");
+    const key = (k || "").trim();
+    if (!key) continue;
+
+    const valueRaw = rest.join("=").trim();
+    if (!valueRaw) continue;
+
+    try {
+      out[key] = decodeURIComponent(valueRaw);
+    } catch {
+      out[key] = valueRaw;
+    }
+  }
+
+  return out;
+}
+
+function readCookieFromAnyReq(req: any, name: string): string | null {
+  // 1) Edge-style cookies store (NextRequest / middleware / app router)
+  try {
+    if (req?.cookies && typeof req.cookies.get === "function") {
+      const v = req.cookies.get(name)?.value;
+      if (typeof v === "string" && v.trim()) return v.trim();
+    }
+  } catch {
+    // fall through
+  }
+
+  // 2) Pages Router: req.headers.cookie string
+  try {
+    const cookieStr =
+      req?.headers?.cookie ||
+      (typeof req?.headers?.get === "function" ? req.headers.get("cookie") : "") ||
+      "";
+
+    const parsed = parseCookieHeader(cookieStr);
+    const v = parsed[name];
+    return typeof v === "string" && v.trim() ? v.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
 function cookieOptions(maxAgeSeconds: number) {
   return {
     path: "/",
@@ -35,16 +94,68 @@ function cookieOptions(maxAgeSeconds: number) {
   };
 }
 
-function setCookieHeader(res: NextApiResponse, value: string) {
-  const existing = res.getHeader("Set-Cookie");
-  if (!existing) res.setHeader("Set-Cookie", value);
-  else if (Array.isArray(existing)) res.setHeader("Set-Cookie", [...existing, value]);
-  else res.setHeader("Set-Cookie", [String(existing), value]);
+/* ============================================================================
+  READERS
+============================================================================ */
+
+/** Edge-safe: explicit for middleware/app router */
+export function readAccessCookieFromRequest(req: NextRequest): string | null {
+  // Prefer canonical cookie name, allow a legacy alt if you used it
+  return (
+    readCookieFromAnyReq(req, ACCESS_COOKIE) ||
+    readCookieFromAnyReq(req, "aol_session") ||
+    null
+  );
 }
 
-/**
- * Pages Router: set session cookie via NextApiResponse header
- */
+/** Edge-safe: tier reader */
+export function readTierCookieFromRequest(req: NextRequest): AccessTier {
+  for (const key of LEGACY_TIER_COOKIE_KEYS) {
+    const v = readCookieFromAnyReq(req, key);
+    if (v) return normalizeUserTier(v);
+  }
+  return "public";
+}
+
+/** Pages Router only: NextApiRequest reader */
+export function readAccessCookieFromApi(req: any): string | null {
+  return (
+    readCookieFromAnyReq(req, ACCESS_COOKIE) ||
+    readCookieFromAnyReq(req, "aol_session") ||
+    null
+  );
+}
+
+/** Universal: works in Edge or Node */
+export function readAccessCookie(req: NextRequest | any): string | null {
+  return (
+    readCookieFromAnyReq(req, ACCESS_COOKIE) ||
+    readCookieFromAnyReq(req, "aol_session") ||
+    null
+  );
+}
+
+/** Universal tier reader */
+export function readTierCookie(req: NextRequest | any): AccessTier {
+  for (const key of LEGACY_TIER_COOKIE_KEYS) {
+    const v = readCookieFromAnyReq(req, key);
+    if (v) return normalizeUserTier(v);
+  }
+  return "public";
+}
+
+/* ============================================================================
+  WRITERS (Pages Router)
+============================================================================ */
+
+function appendSetCookie(res: NextApiResponse, cookieLine: string) {
+  const existing = res.getHeader("Set-Cookie");
+  if (!existing) res.setHeader("Set-Cookie", cookieLine);
+  else if (Array.isArray(existing)) res.setHeader("Set-Cookie", [...existing, cookieLine]);
+  else res.setHeader("Set-Cookie", [String(existing), cookieLine]);
+}
+
+/** Pages Router: set session cookie */
 export function setAccessCookie(res: NextApiResponse, sessionId: string): void {
   const token = encodeURIComponent(String(sessionId ?? "").trim());
   if (!token) throw new Error("setAccessCookie: sessionId is empty");
@@ -58,107 +169,24 @@ export function setAccessCookie(res: NextApiResponse, sessionId: string): void {
     `SameSite=${opt.sameSite}`,
     `Max-Age=${opt.maxAge}`,
   ];
+
   if (opt.secure) parts.push("Secure");
-
-  setCookieHeader(res, parts.join("; "));
+  appendSetCookie(res, parts.join("; "));
 }
 
-/**
- * App Router / middleware: set session cookie via NextResponse.cookies
- */
-export function setAppRouterCookie(res: NextResponse, sessionId: string): void {
-  const token = String(sessionId ?? "").trim();
-  if (!token) throw new Error("setAppRouterCookie: sessionId is empty");
-  res.cookies.set(ACCESS_COOKIE, token, cookieOptions(MAX_AGE_SECONDS));
-}
-
-/**
- * Pages Router: clear session cookie via header
- */
+/** Pages Router: clear access cookie */
 export function clearAccessCookie(res: NextApiResponse): void {
   const secure = isProd() ? "; Secure" : "";
   const expired =
     `${ACCESS_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; ` +
     `Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`;
-  setCookieHeader(res, expired);
+
+  appendSetCookie(res, expired);
 }
 
 export const removeAccessCookie = clearAccessCookie;
 
-/**
- * Read a named cookie from:
- * - NextRequest (req.cookies.get)
- * - NextApiRequest (req.headers.cookie)
- * - standard Request (headers.get("cookie"))
- */
-export function readCookie(
-  req: NextRequest | NextApiRequest | Request | any,
-  name: string
-): string | null {
-  // NextRequest style
-  try {
-    const anyReq = req as any;
-    if (anyReq?.cookies && typeof anyReq.cookies.get === "function") {
-      const v = anyReq.cookies.get(name)?.value;
-      return v ? String(v) : null;
-    }
-  } catch {
-    // fall through
-  }
-
-  // NextApiRequest style
-  try {
-    const anyReq = req as any;
-    const cookieStr =
-      typeof anyReq?.headers?.cookie === "string" ? anyReq.headers.cookie : "";
-    if (cookieStr) {
-      const match = cookieStr.match(new RegExp(`(?:^|;\\s*)${escapeRegExp(name)}=([^;]+)`));
-      return match ? decodeURIComponent(match[1]) : null;
-    }
-  } catch {
-    // fall through
-  }
-
-  // Standard Request style
-  try {
-    const anyReq = req as any;
-    const hdrs = anyReq?.headers;
-    const cookieStr =
-      hdrs && typeof hdrs.get === "function" ? String(hdrs.get("cookie") || "") : "";
-    if (!cookieStr) return null;
-
-    const match = cookieStr.match(new RegExp(`(?:^|;\\s*)${escapeRegExp(name)}=([^;]+)`));
-    return match ? decodeURIComponent(match[1]) : null;
-  } catch {
-    return null;
-  }
-}
-
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/** SSOT: read session token cookie */
-export function readAccessCookie(req: NextRequest | NextApiRequest | Request | any): string | null {
-  return readCookie(req, ACCESS_COOKIE);
-}
-
-/**
- * Optional: read tier cookie (supports legacy keys).
- * Never grants privilege by accident: normalizes through tier-policy.
- */
-export function readTierCookie(req: NextRequest | NextApiRequest | Request | any): AccessTier {
-  for (const key of LEGACY_TIER_COOKIE_KEYS) {
-    const v = readCookie(req, key);
-    if (v) return normalizeUserTier(v);
-  }
-  return "public";
-}
-
-/**
- * Pages Router: set tier cookie (not HttpOnly by default so client can render UI if you want)
- * If you want it HttpOnly, set httpOnly: true.
- */
+/** Pages Router: set tier cookie (optionally httpOnly) */
 export function setTierCookie(
   res: NextApiResponse,
   tier: AccessTier,
@@ -174,11 +202,10 @@ export function setTierCookie(
     `Max-Age=${maxAge}`,
   ];
 
-  // Tier cookie is often useful for UI — default non-HttpOnly.
   if (opts?.httpOnly) parts.push("HttpOnly");
   if (isProd()) parts.push("Secure");
 
-  setCookieHeader(res, parts.join("; "));
+  appendSetCookie(res, parts.join("; "));
 }
 
 /** Pages Router: clear tier cookie */
@@ -186,10 +213,30 @@ export function clearTierCookie(res: NextApiResponse) {
   const secure = isProd() ? "; Secure" : "";
   const expired =
     `${TIER_COOKIE}=; Path=/; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`;
-  setCookieHeader(res, expired);
+
+  appendSetCookie(res, expired);
 }
 
-// Legacy aliases expected by older imports
+/* ============================================================================
+  WRITERS (App Router / middleware)
+  NOTE: These require a Response object that supports cookies.set(...)
+============================================================================ */
+
+export function setAppRouterCookie(res: any, sessionId: string): void {
+  const token = String(sessionId ?? "").trim();
+  if (!token) throw new Error("setAppRouterCookie: sessionId is empty");
+
+  if (!res?.cookies || typeof res.cookies.set !== "function") {
+    throw new Error("setAppRouterCookie: response does not support cookies.set");
+  }
+
+  res.cookies.set(ACCESS_COOKIE, token, cookieOptions(MAX_AGE_SECONDS));
+}
+
+/* ============================================================================
+  LEGACY ALIASES (do not remove)
+============================================================================ */
+
 export const COOKIE_NAME = ACCESS_COOKIE;
 export const getAccessCookie = readAccessCookie;
 export const getAccessTokenFromReq = readAccessCookie;

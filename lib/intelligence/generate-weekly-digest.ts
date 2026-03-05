@@ -22,7 +22,6 @@ function normalizeLog(input: unknown): NormalizedLog | null {
   const r = input as Record<string, unknown>;
 
   const action = typeof r.action === "string" ? r.action : "";
-  // Some loggers use resourceId / resource_id / targetId etc. Keep it resilient.
   const resourceId =
     typeof r.resourceId === "string"
       ? r.resourceId
@@ -39,9 +38,6 @@ function normalizeLog(input: unknown): NormalizedLog | null {
 export async function generateWeeklyIntelligenceDigest(): Promise<Buffer> {
   const logger = getAuditLogger();
 
-  // Ensure the DB connection is live before querying
-  await logger.ensureInitialized();
-
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -51,7 +47,7 @@ export async function generateWeeklyIntelligenceDigest(): Promise<Buffer> {
     limit: 5000,
   });
 
-  // 2) Normalize logs without unsafe casts
+  // 2) Normalize logs
   const normalized: NormalizedLog[] = Array.isArray(logsRaw)
     ? (logsRaw as unknown[]).map(normalizeLog).filter((x): x is NormalizedLog => x !== null)
     : [];
@@ -70,7 +66,7 @@ export async function generateWeeklyIntelligenceDigest(): Promise<Buffer> {
     scores[resourceId] = (scores[resourceId] || 0) + weight;
   }
 
-  // 4) Select top 5 (deterministic)
+  // 4) Select top 5
   const topSlugs = Object.entries(scores)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
@@ -84,11 +80,11 @@ export async function generateWeeklyIntelligenceDigest(): Promise<Buffer> {
   const dossiers: DigestDossier[] = frameworks.map((f) => ({
     title: f.title,
     logic: f.operatingLogic?.[0]?.body || "No logic defined",
-    criticalRisks: Array.isArray(f.failureModes) ? (f.failureModes.slice(0, 2) as unknown[]) : [],
+    criticalRisks: Array.isArray(f.failureModes) ? f.failureModes.slice(0, 2) : [],
     engagementScore: scores[f.slug] || 0,
   }));
 
-  // If nothing scored, still generate a valid digest (brand consistency)
+  // 6) Fallback if no signals
   if (dossiers.length === 0) {
     dossiers.push({
       title: "No High-Signal Intelligence This Week",
@@ -99,13 +95,13 @@ export async function generateWeeklyIntelligenceDigest(): Promise<Buffer> {
     });
   }
 
-  // 6) Structure data for PDF engine
+  // 7) Structure data for PDF engine
   const digestData = {
     generatedAt: new Date().toISOString(),
     weekRange: `${oneWeekAgo.toLocaleDateString("en-GB")} - ${new Date().toLocaleDateString("en-GB")}`,
     dossiers,
   };
 
-  // 7) Create artifact
+  // 8) Create artifact
   return await generateInstitutionalPDF(digestData, "WEEKLY_INTEL_DIGEST");
 }

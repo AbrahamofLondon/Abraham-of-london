@@ -5,7 +5,7 @@ import {
   getAllContentlayerDocs,
   getDocHref,
   getDocKind,
-  isDraftContent, // Changed from isDraft to isDraftContent
+  isDraft,
   normalizeSlug,
 } from "@/lib/content";
 
@@ -14,6 +14,16 @@ type Props = {
   canonicalPath: string;
   source: any;
 };
+
+// Helper function to extract slug from document
+function getDocSlug(doc: any): string {
+  // Try different possible slug locations
+  return doc?.slug || 
+         doc?._raw?.flattenedPath || 
+         doc?.slugComputed || 
+         doc?.id || 
+         "";
+}
 
 const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath, source }) => {
   return (
@@ -30,7 +40,7 @@ const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath, source }) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const paths = getAllContentlayerDocs()
-      .filter((d) => !isDraftContent(d)) // Changed from isDraft to isDraftContent
+      .filter((d) => !isDraft(d))
       .filter((d) => getDocKind(d) === "resource")
       .map((d) => getDocHref(d))
       .filter((href) => href.startsWith("/resources/"))
@@ -51,8 +61,18 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
     const doc =
       getAllContentlayerDocs()
-        .filter((d) => !isDraftContent(d)) // Changed from isDraft to isDraftContent
-        .find((d) => getDocKind(d) === "resource" && normalizeSlug(d) === slug) ?? null;
+        .filter((d) => !isDraft(d))
+        .find((d) => {
+          // Check if kind matches
+          if (getDocKind(d) !== "resource") return false;
+          
+          // Get the document's slug and normalize it
+          const docSlug = getDocSlug(d);
+          const normalizedDocSlug = normalizeSlug(docSlug);
+          
+          // Compare with the requested slug
+          return normalizedDocSlug === slug;
+        }) ?? null;
 
     if (!doc) return { notFound: true };
 
@@ -81,6 +101,3 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 export default ResourceSlugPage;
-
-
-

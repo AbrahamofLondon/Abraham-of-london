@@ -372,11 +372,20 @@ export async function getPostBySlug(slug: string): Promise<any | null> {
 }
 
 // ------------------------------
-// Unified combined document access
+// Unified combined document access (FIXED: tolerant publish logic)
 // ------------------------------
+function isLiveDoc(d: any): boolean {
+  // Treat as live unless explicitly draft or explicitly unpublished.
+  if (!d) return false;
+  if (d.draft === true) return false;
+  if (d.published === false) return false;
+  // If published is true or missing entirely, we treat it as live.
+  return true;
+}
+
 export function getAllCombinedDocs(): any[] {
-  const d = helperGetAllContentlayerDocs();
-  const combined = [...d].filter(helperIsPublished);
+  const d = helperGetAllContentlayerDocs() || [];
+  const combined = [...d].filter(isLiveDoc);
   const sanitized = (helperSanitizeData(combined) || []) as any[];
 
   if (process.env.NODE_ENV === "development" && !IS_BUILD) {
@@ -422,4 +431,44 @@ export function getServerEventBySlug(slug: string) {
 export function getSecureDocument(id: string) {
   console.warn(`getSecureDocument lookup for id: ${id}`);
   return null;
+}
+
+// ------------------------------
+// Published lookups by kind/type (SSOT helper for Search Index)
+// ------------------------------
+
+/**
+ * Returns published docs filtered by a DocKind.
+ * Supports both `doc.kind` and `doc.type` (mixed legacy + helper output).
+ */
+export function getPublishedDocumentsByType(kind: DocKind): ContentDoc[] {
+  const k = String(kind || "").toLowerCase().trim() as DocKind;
+  if (!k) return [];
+
+  const docs = (getPublishedDocuments?.() || []) as ContentDoc[];
+
+  return docs.filter((d) => {
+    const dk = String((d as any)?.kind || "").toLowerCase();
+    const dt = String((d as any)?.type || "").toLowerCase();
+    const fp = String((d as any)?._raw?.flattenedPath || "").toLowerCase();
+
+    // Primary: kind/type match
+    if (dk === k || dt === k) return true;
+
+    // Secondary: folder inference (covers cases where kind/type missing)
+    // e.g. "shorts/..." => "short", "events/..." => "event"
+    if (k === "short" && fp.startsWith("shorts/")) return true;
+    if (k === "event" && fp.startsWith("events/")) return true;
+    if (k === "post" && (fp.startsWith("blog/") || fp.startsWith("posts/"))) return true;
+    if (k === "brief" && fp.startsWith("briefs/")) return true;
+    if (k === "canon" && fp.startsWith("canon/")) return true;
+    if (k === "book" && fp.startsWith("books/")) return true;
+    if (k === "download" && fp.startsWith("downloads/")) return true;
+    if (k === "resource" && fp.startsWith("resources/")) return true;
+    if (k === "strategy" && fp.startsWith("strategy/")) return true;
+    if (k === "lexicon" && fp.startsWith("lexicon/")) return true;
+    if (k === "print" && fp.startsWith("prints/")) return true;
+
+    return false;
+  });
 }

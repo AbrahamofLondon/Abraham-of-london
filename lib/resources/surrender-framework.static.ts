@@ -1,19 +1,18 @@
-/* lib/resources/strategic-frameworks.static.ts — SSOT ALIGNED (STATIC REGISTRY) */
+/* lib/resources/surrender-framework.static.ts — SSOT (STATIC REGISTRY) */
 
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeRequiredTier } from "@/lib/access/tier-policy";
 
-export const LIBRARY_HREF = "/resources/strategic-frameworks";
+export const LIBRARY_HREF = "/resources/surrender-framework";
 
-export type Framework = {
+/** Registry item */
+export type SurrenderFramework = {
   key: string;
   slug: string;
   title: string;
   oneLiner: string;
   tier: AccessTier | AccessTier[];
-  audience?: string[];
   tag?: string;
-  canonRoot?: string;
+  audience?: string[];
   executiveSummary?: string[];
   useWhen?: string[];
   inputs?: string[];
@@ -21,58 +20,68 @@ export type Framework = {
   operatingLogic?: Array<{ title: string; body: string }>;
   applicationPlaybook?: Array<{ step: string; detail: string; deliverable: string }>;
   metrics?: Array<{ metric: string; whyItMatters: string; reviewCadence: string }>;
-  boardQuestions?: string[];
   failureModes?: string[];
+  boardQuestions?: string[];
   whatToDoNext?: string[];
   artifactHref?: string;
   accent?: string;
   [k: string]: any;
 };
 
-const ORDER: AccessTier[] = ["public", "member", "inner-circle", "client", "legacy", "architect", "owner"];
+const ORDER: AccessTier[] = [
+  "public",
+  "member",
+  "inner-circle",
+  "client",
+  "legacy",
+  "architect",
+  "owner",
+];
 
-export function requiredTier(framework: Framework): AccessTier {
+/** Minimum required tier for a framework (lowest in ORDER wins) */
+export function requiredTier(framework: SurrenderFramework): AccessTier {
   const tiers = Array.isArray(framework.tier) ? framework.tier : [framework.tier];
-  let min = tiers[0] ?? "member";
+  let min: AccessTier = (tiers[0] ?? "member") as AccessTier;
+
   for (const t of tiers) {
-    if (ORDER.indexOf(t) < ORDER.indexOf(min)) min = t;
+    if (ORDER.indexOf(t) >= 0 && ORDER.indexOf(t) < ORDER.indexOf(min)) min = t;
   }
   return min;
 }
 
-export const FRAMEWORKS: Framework[] = [
+/** Static registry */
+export const FRAMEWORKS: SurrenderFramework[] = [
   {
-    key: "S-001",
-    slug: "sovereignty-index",
-    title: "The Sovereignty Index",
-    oneLiner: "A diagnostic tool for measuring institutional autonomy against external volatility.",
-    tier: "architect",
-    audience: ["Founder", "Board"],
+    key: "SF-001",
+    slug: "surrender-protocol",
+    title: "The Surrender Protocol",
+    oneLiner: "A framework for voluntary submission to principle before consequence enforces it.",
+    tier: "member",
     tag: "Protocol 01",
-    canonRoot: "The Architecture of Human Purpose",
-    executiveSummary: [
-      "Sovereignty is not isolation; it is the strategic management of dependencies.",
-      "This framework quantifies agency relative to external market nodes.",
-    ],
+    audience: ["Founder", "Leader", "Operator"],
     accent: "gold",
+    executiveSummary: [
+      "You either choose discipline or life assigns it.",
+      "Surrender is not weakness; it is governance of the self.",
+    ],
   },
-  // Add more frameworks as needed
 ];
 
-export function getAllFrameworks(): Framework[] {
+/* ---------------------------------------------------------------------------
+  REQUIRED EXPORTS (match imports in surrender-framework.ts)
+--------------------------------------------------------------------------- */
+export function getAllSurrenderFrameworks(): SurrenderFramework[] {
   return FRAMEWORKS;
 }
 
-export function getFrameworkBySlug(slug: string): Framework | undefined {
+export function getSurrenderFrameworkBySlug(slug: string): SurrenderFramework | undefined {
   const s = String(slug || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
   if (!s) return undefined;
   return FRAMEWORKS.find((f) => f.slug === s);
 }
 
-export function getAllFrameworkSlugs(): string[] {
+export function getAllSurrenderFrameworkSlugs(): string[] {
   return FRAMEWORKS.map((f) => f.slug);
 }
 
-export const __internal = {
-  ORDER,
-};
+export const __internal = { ORDER };

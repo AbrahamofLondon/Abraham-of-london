@@ -1,4 +1,6 @@
 /* lib/server/analytics.ts */
+import "server-only";
+
 import { prisma } from "@/lib/prisma.server";
 
 export type StrategicHealthReport = {
@@ -11,7 +13,7 @@ export type StrategicHealthReport = {
   engagement: Array<{
     shortSlug: string;
     viewCount: number;
-    uniquePrincipals: number;
+    uniquePrincipals: number; // computed as distinct memberIds per slug
   }>;
   auditTrends: Array<{
     action: string;
@@ -21,12 +23,12 @@ export type StrategicHealthReport = {
 
 /**
  * INSTITUTIONAL HEALTH REPORT
- * Principled Analysis: Aggregates behavioral and security data for Board review.
- * Outcome: Provides high-gravity trends without leaking individual PII.
+ * - Uses only models that exist in your current Prisma schema:
+ *   InnerCircleMember, InnerCircleKey, StrategyIntake, SystemAuditLog, PageView
+ * - No PII leakage; only aggregate signals.
  */
 export async function getStrategicHealthReport(): Promise<StrategicHealthReport> {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   try {
     const [
@@ -34,52 +36,77 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
       keyCount,
       intakeCount,
       breachCount,
-      engagementStats,
-      auditStats
+      // PageView aggregates
+      viewsBySlug,
+      uniqueBySlugMember,
+      auditStats,
     ] = await Promise.all([
-      // 1. Total Principals
-      prisma.innerCircleMember.count({ where: { status: "active" } }),
-      
-      // 2. Total Active Keys
-      prisma.innerCircleKey.count({ where: { status: "active" } }),
-      
-      // 3. Recent Strategy Room Intakes (30 Days)
-      prisma.strategyRoomIntake.count({
-        where: { createdAt: { gte: thirtyDaysAgo } }
+      // 1) Total active members
+      prisma.innerCircleMember.count({
+        where: { status: "active" },
       }),
 
-      // 4. Perimeter Breaches (Rate Limit Exceeded events)
+      // 2) Total active keys
+      prisma.innerCircleKey.count({
+        where: { status: "active" },
+      }),
+
+      // 3) Recent Strategy Intakes (30 days)
+      prisma.strategyIntake.count({
+        where: { createdAt: { gte: thirtyDaysAgo } },
+      }),
+
+      // 4) Perimeter breaches / rate limit hits (30 days)
       prisma.systemAuditLog.count({
-        where: { 
+        where: {
           action: "RATE_LIMIT_EXCEEDED",
-          createdAt: { gte: thirtyDaysAgo }
-        }
+          createdAt: { gte: thirtyDaysAgo },
+        },
       }),
 
-      // 5. Content Engagement Trends
-      prisma.shortInteraction.groupBy({
-        by: ['shortSlug'],
-        where: { action: 'view' },
-        _count: {
-          _all: true,
-          memberId: true // Count unique principals
+      // 5a) Total views per short slug (top 10)
+      prisma.pageView.groupBy({
+        by: ["slug"],
+        where: {
+          createdAt: { gte: thirtyDaysAgo },
+          slug: { not: null },
+          path: { startsWith: "/shorts/" },
         },
-        orderBy: {
-          _count: { shortSlug: 'desc' }
-        },
-        take: 10
+        _count: { _all: true },
+        orderBy: { _count: { _all: "desc" } },
+        take: 10,
       }),
 
-      // 6. Security & System Action Distribution
+      // 5b) Unique principals per short slug:
+      // group by (slug, memberId) then count the groups per slug
+      prisma.pageView.groupBy({
+        by: ["slug", "memberId"],
+        where: {
+          createdAt: { gte: thirtyDaysAgo },
+          slug: { not: null },
+          memberId: { not: null },
+          path: { startsWith: "/shorts/" },
+        },
+        _count: { _all: true },
+      }),
+
+      // 6) Action distribution (top 5)
       prisma.systemAuditLog.groupBy({
-        by: ['action'],
-        _count: true,
-        orderBy: {
-          _count: { action: 'desc' }
-        },
-        take: 5
-      })
+        by: ["action"],
+        _count: { _all: true },
+        where: { createdAt: { gte: thirtyDaysAgo } },
+        orderBy: { _count: { _all: "desc" } },
+        take: 5,
+      }),
     ]);
+
+    // Build a map slug -> unique principals
+    const uniqueMap = new Map<string, number>();
+    for (const row of uniqueBySlugMember) {
+      const slug = row.slug ?? "";
+      if (!slug) continue;
+      uniqueMap.set(slug, (uniqueMap.get(slug) ?? 0) + 1);
+    }
 
     return {
       summary: {
@@ -88,20 +115,21 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
         recentIntakes: intakeCount,
         perimeterBreaches: breachCount,
       },
-      engagement: engagementStats.map(stat => ({
-        shortSlug: stat.shortSlug,
-        viewCount: stat._count._all,
-        uniquePrincipals: stat._count.memberId || 0
-      })),
-      auditTrends: auditStats.map(stat => ({
+      engagement: viewsBySlug.map((stat) => {
+        const slug = stat.slug ?? "unknown";
+        return {
+          shortSlug: slug,
+          viewCount: stat._count._all,
+          uniquePrincipals: uniqueMap.get(slug) ?? 0,
+        };
+      }),
+      auditTrends: auditStats.map((stat) => ({
         action: stat.action,
-        _count: stat._count
-      }))
+        _count: stat._count._all,
+      })),
     };
   } catch (error) {
     console.error("[ANALYTICS_FAILURE] Could not aggregate Board Intelligence:", error);
     throw new Error("Institutional Analytics subsystem offline.");
   }
 }
-
-

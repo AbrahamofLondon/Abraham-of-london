@@ -2,15 +2,25 @@ import "server-only";
 
 import type { TokenStore } from "./tokenStore";
 import type { AccessSession, OneTimeToken } from "./types";
-import { prisma } from "@/lib/prisma.server";
+
+import { prisma } from "@/lib/prisma";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
+/**
+ * Postgres-backed TokenStore using your `sessions` table.
+ *
+ * Why this version:
+ * - avoids `include: { member: ... }` because your generated Prisma client
+ *   currently does not expose that relation on `prisma.session`
+ * - fetches member tier in a second query
+ * - keeps app tier canonical via normalizeUserTier()
+ */
 export async function createPostgresTokenStore(): Promise<TokenStore> {
   return {
-    // One-time tokens are NOT supported in this adapter (keep redis backend for OTT during transition)
     async getOneTimeToken(_token: string): Promise<OneTimeToken | null> {
       return null;
     },
+
     async consumeOneTimeToken(_token: string): Promise<boolean> {
       return false;
     },
@@ -21,21 +31,40 @@ export async function createPostgresTokenStore(): Promise<TokenStore> {
 
       const s = await prisma.session.findUnique({
         where: { sessionId: sid },
-        include: { member: { select: { tier: true } } },
       });
 
       if (!s) return null;
-      if (String(s.status || "").toLowerCase() !== "active") return null;
+
+      // Only active sessions are valid
+      if (String((s as any).status || "").toLowerCase() !== "active") {
+        return null;
+      }
 
       const exp = s.expiresAt ? new Date(s.expiresAt) : null;
-      if (!exp || exp.getTime() <= Date.now()) return null;
+      if (!exp || exp.getTime() <= Date.now()) {
+        return null;
+      }
 
-      const tier = normalizeUserTier((s as any)?.member?.tier ?? "public");
+      let tier = normalizeUserTier("public");
+
+      // Resolve member tier separately because relation typing is not available
+      if (s.memberId) {
+        try {
+          const member = await prisma.innerCircleMember.findUnique({
+            where: { id: String(s.memberId) },
+            select: { tier: true },
+          });
+
+          tier = normalizeUserTier((member as any)?.tier ?? "public");
+        } catch {
+          tier = normalizeUserTier("public");
+        }
+      }
 
       return {
         sessionId: s.sessionId,
         tier,
-        subject: s.memberId ?? "anon",
+        subject: s.memberId ? String(s.memberId) : "anon",
         issuedAt: s.createdAt ? new Date(s.createdAt).getTime() : Date.now(),
         expiresAt: exp.getTime(),
       };
@@ -74,7 +103,7 @@ export async function createPostgresTokenStore(): Promise<TokenStore> {
           data: { status: "revoked" },
         });
       } catch {
-        // ignore
+        // no-op
       }
     },
   };

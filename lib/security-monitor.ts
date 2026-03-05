@@ -1,11 +1,35 @@
-// lib/security-monitor.ts
-// Detect and respond to suspicious activity
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * lib/security-monitor.ts — Suspicious activity detection & response
+ *
+ * Principles:
+ * - No assumptions about ./rate-limit export signatures (we do NOT import blockers from there).
+ * - Immediate enforcement via process-local denylist (sync, middleware-safe).
+ * - Durable denylist via DB+Redis (denyIp) in the background (compliance-grade).
+ * - Fixes slicing/this.events bugs and actually blocks.
+ */
 
-import { blockPermanently, RATE_LIMIT_CONFIGS } from './rate-limit';
-import { safeSlice, safeArraySlice } from "@/lib/utils/safe";
+import "server-only";
 
+import { denyIp } from "@/lib/server/denylist";
+import { RATE_LIMIT_CONFIGS } from "./rate-limit";
 
-// 1. Pre-compiled Patterns for Performance
+// -------------------------------------
+// Process-local denylist (immediate, sync)
+// -------------------------------------
+const PERMA_BLOCK = new Set<string>();
+
+function normalizeIp(ip: string): string {
+  return String(ip || "").trim().toLowerCase();
+}
+
+function isBlocked(ip: string): boolean {
+  return PERMA_BLOCK.has(normalizeIp(ip));
+}
+
+// -------------------------------------
+// Patterns
+// -------------------------------------
 const SQL_INJECTION_PATTERNS = [
   /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|DECLARE)\b)/i,
   /(--|;|\/\*|\*\/|xp_|sp_)/i,
@@ -32,74 +56,123 @@ const PATH_TRAVERSAL_PATTERNS = [
   /\.\.\%2f/gi,
 ];
 
-const BAD_USER_AGENTS = ['sqlmap', 'nikto', 'nmap', 'masscan', 'metasploit', 'havij'];
+const BAD_USER_AGENTS = ["sqlmap", "nikto", "nmap", "masscan", "metasploit", "havij"];
 
+// -------------------------------------
+// Types
+// -------------------------------------
 interface SecurityEvent {
-  type: 'sql_injection' | 'xss' | 'path_traversal' | 'suspicious_headers' | 'rapid_requests' | 'brute_force';
+  type:
+    | "sql_injection"
+    | "xss"
+    | "path_traversal"
+    | "suspicious_headers"
+    | "rapid_requests"
+    | "brute_force";
   ip: string;
   endpoint: string;
   details: string;
   timestamp: number;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
+// -------------------------------------
+// Safe array tail helper
+// -------------------------------------
+function tail<T>(arr: T[], count: number): T[] {
+  if (!Array.isArray(arr)) return [];
+  const n = Math.max(0, Math.floor(count));
+  if (n <= 0) return [];
+  return arr.length <= n ? arr : arr.slice(arr.length - n);
+}
+
+// -------------------------------------
+// Block threshold policy
+// -------------------------------------
+function getBlockThreshold(): number {
+  // Your client-safe RATE_LIMIT_CONFIGS does NOT define API_READ.
+  // Use something real and conservative.
+  const base = (RATE_LIMIT_CONFIGS as any)?.standard?.limit ?? 60; // from your file: standard.limit = 60
+  const n = Number(base);
+  const baseLimit = Number.isFinite(n) ? n : 60;
+
+  // e.g. standard 60 -> threshold 6 (but minimum 5)
+  return Math.max(5, Math.floor(baseLimit / 10));
+}
+
+function shouldEscalate(event: { severity: SecurityEvent["severity"] }, incidents: number): boolean {
+  if (event.severity === "critical") return true;
+  if (event.severity === "high" && incidents >= getBlockThreshold()) return true;
+  if (event.severity === "medium" && incidents >= getBlockThreshold() + 3) return true;
+  return false;
+}
+
+/**
+ * Durable block (DB+Redis) happens in background.
+ * Sync middleware blocks immediately via PERMA_BLOCK.
+ */
+function enforceBlockNowAndDurably(ip: string, reason: string, severity: SecurityEvent["severity"]) {
+  const nip = normalizeIp(ip);
+  if (!nip || nip === "unknown") return;
+
+  // 1) Immediate: process-local
+  PERMA_BLOCK.add(nip);
+
+  // 2) Durable: DB + Redis (Option C), fire-and-forget
+  // denyIp expects severity: "low" | "medium" | "high" | "critical" in your denylist module
+  // (If your denylist uses different type names, align there — not here.)
+  void denyIp(nip, reason, severity as any).catch(() => {
+    // if DB/Redis is down, we still keep the process-local block
+  });
+}
+
+// -------------------------------------
+// Monitor
+// -------------------------------------
 class SecurityMonitor {
   private events: SecurityEvent[] = [];
   private readonly MAX_EVENTS = 1000;
   private suspiciousIps = new Map<string, number>(); // IP -> incident count
 
-  logEvent(event: Omit<SecurityEvent, 'timestamp'>): void {
+  logEvent(event: Omit<SecurityEvent, "timestamp">): void {
+    const ip = normalizeIp(event.ip);
+
     const fullEvent: SecurityEvent = {
       ...event,
+      ip,
       timestamp: Date.now(),
     };
 
     this.events.push(fullEvent);
-
-    // Keep only recent events
     if (this.events.length > this.MAX_EVENTS) {
-      this.events = this.safeArraySlice(events, -this.MAX_EVENTS);
+      this.events = tail(this.events, this.MAX_EVENTS);
     }
 
-    // Track suspicious IPs
-    const count = (this.suspiciousIps.get(event.ip) || 0) + 1;
-    this.suspiciousIps.set(event.ip, count);
+    const incidents = (this.suspiciousIps.get(ip) || 0) + 1;
+    this.suspiciousIps.set(ip, incidents);
 
-    // 2. Enhanced Blocking Logic using Configuration
-    // FIX: Switched from API_GENERAL to API_READ (which exists in your config)
-    // We access the 'max' property, defaulting to 60 if unavailable.
-    const baseLimit = (RATE_LIMIT_CONFIGS as any).API_READ?.max || 60;
-    const blockThreshold = Math.max(5, Math.floor(baseLimit / 10));
-
-    // Auto-block for critical events or repeated offenders
-    if (event.severity === 'critical' || count >= blockThreshold) {
-      blockPermanently(event.ip);
-      console.error(`[Security] BLOCKED IP: ${event.ip} (${count} incidents, threshold: ${blockThreshold})`);
+    if (shouldEscalate(event, incidents)) {
+      enforceBlockNowAndDurably(
+        ip,
+        `${event.type}: ${event.details} (incidents=${incidents})`,
+        event.severity
+      );
+      console.error(`[Security] BLOCKED IP: ${ip} (${incidents} incidents)`);
     }
 
-    // Log based on severity
-    const logMsg = `[Security:${event.severity}] ${event.type} from ${event.ip} at ${event.endpoint}: ${event.details}`;
-    
-    switch (event.severity) {
-      case 'critical':
-      case 'high':
-        console.error(logMsg);
-        break;
-      case 'medium':
-        console.warn(logMsg);
-        break;
-      case 'low':
-        console.info(logMsg);
-        break;
-    }
+    const logMsg = `[Security:${event.severity}] ${event.type} from ${ip} at ${event.endpoint}: ${event.details}`;
+    if (event.severity === "critical" || event.severity === "high") console.error(logMsg);
+    else if (event.severity === "medium") console.warn(logMsg);
+    else console.info(logMsg);
   }
 
   getRecentEvents(limit = 100): SecurityEvent[] {
-    return this.safeArraySlice(events, -limit);
+    return tail(this.events, Math.max(1, limit));
   }
 
   getEventsByIp(ip: string): SecurityEvent[] {
-    return this.events.filter(e => e.ip === ip);
+    const nip = normalizeIp(ip);
+    return this.events.filter((e) => e.ip === nip);
   }
 
   getSuspiciousIps(): Array<{ ip: string; incidents: number }> {
@@ -111,62 +184,61 @@ class SecurityMonitor {
   clearHistory(): void {
     this.events = [];
     this.suspiciousIps.clear();
+    PERMA_BLOCK.clear();
   }
 }
 
 const monitor = new SecurityMonitor();
 
-// Detection functions
-
+// -------------------------------------
+// Detection
+// -------------------------------------
 export function detectSqlInjection(input: string): boolean {
   if (!input) return false;
-  return SQL_INJECTION_PATTERNS.some(p => p.test(input));
+  return SQL_INJECTION_PATTERNS.some((p) => p.test(input));
 }
 
 export function detectXss(input: string): boolean {
   if (!input) return false;
-  return XSS_PATTERNS.some(p => p.test(input));
+  return XSS_PATTERNS.some((p) => p.test(input));
 }
 
 export function detectPathTraversal(input: string): boolean {
   if (!input) return false;
-  return PATH_TRAVERSAL_PATTERNS.some(p => p.test(input));
+  return PATH_TRAVERSAL_PATTERNS.some((p) => p.test(input));
 }
 
-export function detectSuspiciousHeaders(headers: Record<string, string | string[] | undefined>): string[] {
+export function detectSuspiciousHeaders(
+  headers: Record<string, string | string[] | undefined>
+): string[] {
   const suspicious: string[] = [];
-  
-  // Check for suspicious user agents
-  const ua = String(headers['user-agent'] || '').toLowerCase();
-  
-  if (BAD_USER_AGENTS.some(bad => ua.includes(bad))) {
-    suspicious.push('Suspicious user agent');
-  }
 
-  // Check for proxy headers manipulation
-  const xForwardedFor = headers['x-forwarded-for'];
+  const ua = String(headers["user-agent"] || "").toLowerCase();
+  if (BAD_USER_AGENTS.some((bad) => ua.includes(bad))) suspicious.push("Suspicious user agent");
+
+  const xForwardedFor = headers["x-forwarded-for"];
   if (xForwardedFor) {
-    const chain = Array.isArray(xForwardedFor) ? xForwardedFor : xForwardedFor.split(',');
-    if (chain.length > 5) {
-      suspicious.push('Excessive proxy chain');
-    }
+    const chain = Array.isArray(xForwardedFor) ? xForwardedFor : xForwardedFor.split(",");
+    if (chain.length > 5) suspicious.push("Excessive proxy chain");
   }
 
-  // Check for unusual accept headers
-  const accept = String(headers['accept'] || '');
-  if (accept && !accept.includes('text') && !accept.includes('application') && !accept.includes('*/*')) {
-    suspicious.push('Unusual accept header');
+  const accept = String(headers["accept"] || "");
+  if (accept && !accept.includes("text") && !accept.includes("application") && !accept.includes("*/*")) {
+    suspicious.push("Unusual accept header");
   }
 
   return suspicious;
 }
 
+// -------------------------------------
+// Public API
+// -------------------------------------
 export function logSecurityEvent(
-  type: SecurityEvent['type'],
+  type: SecurityEvent["type"],
   ip: string,
   endpoint: string,
   details: string,
-  severity: SecurityEvent['severity'] = 'medium'
+  severity: SecurityEvent["severity"] = "medium"
 ): void {
   monitor.logEvent({ type, ip, endpoint, details, severity });
 }
@@ -187,91 +259,93 @@ export function clearSecurityHistory(): void {
   monitor.clearHistory();
 }
 
-// Middleware for API routes
-export function securityMiddleware(req: any, endpoint: string): {
-  safe: boolean;
-  issues: string[];
-} {
+// -------------------------------------
+// Middleware (sync) — actually blocks
+// -------------------------------------
+export function securityMiddleware(
+  req: any,
+  endpoint: string
+): { safe: boolean; issues: string[]; blocked?: boolean } {
   const issues: string[] = [];
   const ip = getIpFromRequest(req);
 
-  // Check headers
-  const headerIssues = detectSuspiciousHeaders(req.headers || {});
+  // Hard block (immediate)
+  if (isBlocked(ip)) {
+    return { safe: false, blocked: true, issues: ["IP is permanently blocked"] };
+  }
+
+  // Headers
+  const headerIssues = detectSuspiciousHeaders(req?.headers || {});
   if (headerIssues.length > 0) {
     issues.push(...headerIssues);
-    logSecurityEvent('suspicious_headers', ip, endpoint, headerIssues.join(', '), 'medium');
+    logSecurityEvent("suspicious_headers", ip, endpoint, headerIssues.join(", "), "medium");
   }
 
-  // Check query parameters
-  const query = req.query || {};
+  // Query
+  const query = req?.query || {};
   for (const [key, value] of Object.entries(query)) {
     const str = String(value);
-    
+
     if (detectSqlInjection(str)) {
       issues.push(`SQL injection in query param: ${key}`);
-      logSecurityEvent('sql_injection', ip, endpoint, `Query param: ${key}`, 'critical');
+      logSecurityEvent("sql_injection", ip, endpoint, `Query param: ${key}`, "critical");
     }
-    
     if (detectXss(str)) {
       issues.push(`XSS attempt in query param: ${key}`);
-      logSecurityEvent('xss', ip, endpoint, `Query param: ${key}`, 'high');
+      logSecurityEvent("xss", ip, endpoint, `Query param: ${key}`, "high");
     }
-    
     if (detectPathTraversal(str)) {
       issues.push(`Path traversal in query param: ${key}`);
-      logSecurityEvent('path_traversal', ip, endpoint, `Query param: ${key}`, 'high');
+      logSecurityEvent("path_traversal", ip, endpoint, `Query param: ${key}`, "high");
     }
   }
 
-  // Check body
-  if (req.body && typeof req.body === 'object') {
+  // Body
+  if (req?.body && typeof req.body === "object") {
     try {
       const bodyStr = JSON.stringify(req.body);
-      
+
       if (detectSqlInjection(bodyStr)) {
-        issues.push('SQL injection in request body');
-        logSecurityEvent('sql_injection', ip, endpoint, 'Request body', 'critical');
+        issues.push("SQL injection in request body");
+        logSecurityEvent("sql_injection", ip, endpoint, "Request body", "critical");
       }
-      
       if (detectXss(bodyStr)) {
-        issues.push('XSS attempt in request body');
-        logSecurityEvent('xss', ip, endpoint, 'Request body', 'high');
+        issues.push("XSS attempt in request body");
+        logSecurityEvent("xss", ip, endpoint, "Request body", "high");
       }
     } catch (e) {
-      // Body might be circular or unparsable; ignore but log warning
-      console.warn('[Security] Could not parse request body for scan', e);
+      console.warn("[Security] Could not stringify request body for scan", e);
     }
   }
 
-  return {
-    safe: issues.length === 0,
-    issues,
-  };
+  // Re-check: critical events may have blocked
+  if (isBlocked(ip)) {
+    return { safe: false, blocked: true, issues: [...issues, "IP blocked by security policy"] };
+  }
+
+  return { safe: issues.length === 0, issues };
 }
 
 function getIpFromRequest(req: any): string {
-  const headers = [
-    'cf-connecting-ip',
-    'x-client-ip',
-    'x-forwarded-for',
-    'x-real-ip',
-  ];
-  
+  const headers = ["cf-connecting-ip", "x-client-ip", "x-forwarded-for", "x-real-ip"];
+
   for (const header of headers) {
-    const value = req.headers?.[header];
-    if (value) {
-      // Handle both string and string[] cases for headers
-      const ipRaw = Array.isArray(value) ? value[0] : value;
-      // Handle "IP1, IP2" format in single string
-      return ipRaw.split(',')[0].trim();
-    }
+    const value = req?.headers?.[header];
+    if (!value) continue;
+
+    const raw = Array.isArray(value) ? value.find(Boolean) : value;
+    if (!raw) continue;
+
+    const first = String(raw).split(",")[0]?.trim();
+    if (first) return first;
   }
-  
-  return req.socket?.remoteAddress || 'unknown';
+
+  const sock = req?.socket?.remoteAddress;
+  return sock ? String(sock) : "unknown";
 }
 
-// 3. Named Export Object to Satisfy Linter
-const securityMonitorExports = {
+// Legacy default export
+export default {
   detectSqlInjection,
   detectXss,
   detectPathTraversal,
@@ -283,6 +357,3 @@ const securityMonitorExports = {
   clearSecurityHistory,
   securityMiddleware,
 };
-
-export default securityMonitorExports;
-
