@@ -74,29 +74,41 @@ function collapseSlashes(s: string): string {
     .replace(/\/{2,}/g, "/");
 }
 
+// ✅ FIXED: Proper slug normalizer that preserves path structure
 function normalizeBareCanonSlug(input: unknown): string {
-  let s = collapseSlashes(String(input || "").trim());
-  if (!s) return "";
+  let s = String(input || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
 
-  // Use your SSOT normalizer
-  s = normalizeSlug(s);
-  s = collapseSlashes(s).replace(/^\/+/, "").replace(/\/+$/, "");
+  if (!s || s.includes("..")) return "";
 
-  // Strip common prefixes repeatedly
-  const prefixes = ["canon/", "vault/canon/", "/canon/", "/vault/canon/"].map((p) => p.replace(/^\/+/, ""));
+  // strip common prefixes repeatedly (case-insensitive)
+  const lower = () => s.toLowerCase();
+  const strip = (p: string) => {
+    const pl = p.toLowerCase();
+    if (lower().startsWith(pl)) {
+      s = s.slice(p.length).replace(/^\/+/, "");
+      return true;
+    }
+    return false;
+  };
+
   let changed = true;
   while (changed) {
     changed = false;
-    for (const p of prefixes) {
-      if (s.toLowerCase().startsWith(p)) {
-        s = s.slice(p.length);
-        s = s.replace(/^\/+/, "");
-        changed = true;
-      }
-    }
+    changed = strip("canon/") || changed;
+    changed = strip("vault/canon/") || changed;
   }
 
-  return s;
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  if (!s || s.includes("..")) return "";
+
+  // preserve slashes, normalise each segment
+  const segments = s.split("/").filter(Boolean).map((seg) => normalizeSlug(seg));
+  return segments.filter(Boolean).join("/");
 }
 
 function accessTierToLevel(required: AccessTier): AccessLevel {
@@ -155,6 +167,9 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       .map((doc: any) => {
         const raw = doc?.slug || doc?._raw?.flattenedPath || "";
         const bare = normalizeBareCanonSlug(raw);
+        
+        // ✅ CRITICAL GUARD: Skip if no slug
+        if (!bare) return null;
 
         const title = String(doc?.title || "Untitled Volume");
         const dateISO = doc?.date ? new Date(doc.date).toISOString() : null;
@@ -182,7 +197,8 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           series,
         };
       })
-      .filter((item) => {
+      .filter(Boolean) // ✅ Remove null entries from guard
+      .filter((item: any) => {
         if (!item.slug) return false;
         if (seenSlugs.has(item.slug)) return false;
         seenSlugs.add(item.slug);

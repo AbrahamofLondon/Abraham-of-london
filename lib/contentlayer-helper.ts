@@ -1,33 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * lib/contentlayer-helper.ts — SSOT CONTENT ADAPTER (Contentlayer → App)
+ * lib/contentlayer-helper.ts — SSOT CONTENT ADAPTER (SERVER-ONLY)
  *
- * Guarantees exports expected by:
- * - lib/content/server.ts
- * - lib/mdx.ts
- * - lib/searchIndex.ts
- * - registry pages + sitemaps + api routes
+ * Non-negotiables:
+ * - No require("contentlayer/generated") in ESM runtime (Next 16 can run without require)
+ * - Deterministic on Windows + Linux
+ * - Always returns docs when .contentlayer/generated/<Type>/_index.json exists
  *
- * This file is intentionally defensive: it does not assume exact generated model names.
+ * IMPORTANT:
+ * - Server-only module. Do not import from client components.
  */
+
+import fs from "fs";
+import path from "path";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier } from "@/lib/access/tier-policy";
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Generated Contentlayer (runtime require to stay build-safe)
-──────────────────────────────────────────────────────────────────────────── */
-let gen: any = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  gen = require("contentlayer/generated");
-} catch {
-  gen = null;
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
-   Types
-──────────────────────────────────────────────────────────────────────────── */
 export type DocKind =
   | "post"
   | "short"
@@ -42,6 +30,7 @@ export type DocKind =
   | "resource"
   | "strategy"
   | "lexicon"
+  | "vault"
   | "unknown";
 
 export type ContentDoc = {
@@ -58,7 +47,13 @@ export type ContentDoc = {
   classification?: string;
   requiresAuth?: boolean;
   body?: { raw?: string; code?: string };
+  bodyCode?: string;
   content?: string;
+  excerpt?: string;
+  description?: string;
+  tags?: any[];
+  category?: string;
+  date?: string;
   metadata?: any;
   _raw?: {
     flattenedPath?: string;
@@ -72,8 +67,8 @@ export type ContentDoc = {
 
 export type CardProps = {
   kind: DocKind;
-  slug: string;       // bare slug (no collection prefix)
-  href: string;       // canonical href
+  slug: string;
+  href: string;
   title: string;
   description?: string | null;
   dateISO?: string | null;
@@ -85,7 +80,6 @@ export type CardProps = {
   published: boolean;
 };
 
-/** Used by searchIndex iteration */
 export const documentKinds: DocKind[] = [
   "post",
   "short",
@@ -100,11 +94,13 @@ export const documentKinds: DocKind[] = [
   "resource",
   "strategy",
   "lexicon",
+  "vault",
 ];
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Small utilities
-──────────────────────────────────────────────────────────────────────────── */
+function isServerRuntime() {
+  return typeof window === "undefined";
+}
+
 function safeString(v: unknown, fallback = ""): string {
   return typeof v === "string" && v.trim() ? v.trim() : fallback;
 }
@@ -128,16 +124,26 @@ export function sanitizeData<T>(v: T): T {
 
 export function normalizeSlug(input: string): string {
   return safeString(input, "")
+    .trim()
+    .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
+}
+
+/** tolerate content/<collection>/... */
+function normalizeFlattenedPath(input: string): string {
+  let s = normalizeSlug(input);
+  if (!s) return "";
+  if (s.toLowerCase().startsWith("content/")) s = s.slice("content/".length);
+  return normalizeSlug(s);
 }
 
 export function isPublished(doc: any): boolean {
   if (!doc) return false;
   if (doc?.draft === true) return false;
   if (doc?.published === false) return false;
-  return true; // default published unless explicitly draft/false
+  return true;
 }
 
 export function getAccessLevel(doc: any): AccessTier {
@@ -145,12 +151,14 @@ export function getAccessLevel(doc: any): AccessTier {
 }
 
 function fp(doc: any): string {
-  return lower(doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || doc?.slug || "");
+  const raw =
+    safeString(doc?._raw?.flattenedPath) ||
+    safeString(doc?._raw?.sourceFilePath) ||
+    safeString(doc?.slug) ||
+    "";
+  return lower(normalizeFlattenedPath(raw));
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Kind inference (folder + optional kind/type fields)
-──────────────────────────────────────────────────────────────────────────── */
 export function getDocKind(doc: any): DocKind {
   const k = lower(doc?.kind || doc?.type || doc?.docKind);
   const p = fp(doc);
@@ -167,14 +175,12 @@ export function getDocKind(doc: any): DocKind {
   if (p.startsWith("resources/")) return "resource";
   if (p.startsWith("strategy/")) return "strategy";
   if (p.startsWith("lexicon/")) return "lexicon";
+  if (p.startsWith("vault/")) return "vault";
   if (p.startsWith("blog/") || p.startsWith("posts/")) return "post";
 
   return "unknown";
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Canonical href builder
-──────────────────────────────────────────────────────────────────────────── */
 function buildHref(kind: DocKind, bareSlug: string): string {
   const s = normalizeSlug(bareSlug);
   if (!s) return "/";
@@ -204,6 +210,8 @@ function buildHref(kind: DocKind, bareSlug: string): string {
       return `/strategy/${s}`;
     case "lexicon":
       return `/lexicon/${s}`;
+    case "vault":
+      return `/vault/${s}`;
     default:
       return s.startsWith("/") ? s : `/${s}`;
   }
@@ -215,11 +223,17 @@ function stripPrefix(input: string, prefix: string) {
 }
 
 function computeRawSlug(doc: any): string {
-  return safeString(doc?.slugComputed || doc?.slug || doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || "");
+  const raw =
+    safeString(doc?.slugComputed) ||
+    safeString(doc?.slug) ||
+    safeString(doc?._raw?.flattenedPath) ||
+    safeString(doc?._raw?.sourceFilePath) ||
+    "";
+  return normalizeFlattenedPath(raw);
 }
 
 function computeBareSlug(kind: DocKind, raw: string): string {
-  let s = normalizeSlug(raw);
+  let s = normalizeFlattenedPath(raw);
   if (!s) return "";
 
   if (kind === "short") s = stripPrefix(s, "shorts");
@@ -235,58 +249,93 @@ function computeBareSlug(kind: DocKind, raw: string): string {
   else if (kind === "resource") s = stripPrefix(s, "resources");
   else if (kind === "strategy") s = stripPrefix(s, "strategy");
   else if (kind === "lexicon") s = stripPrefix(s, "lexicon");
+  else if (kind === "vault") s = stripPrefix(s, "vault");
 
-  return s;
+  return normalizeSlug(s);
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
-   MASTER DOC ACCESS
-──────────────────────────────────────────────────────────────────────────── */
-export function getAllContentlayerDocs(): any[] {
-  if (!gen) return [];
+/* -------------------- JSON index loader -------------------- */
+const GENERATED_ROOT = path.join(process.cwd(), ".contentlayer", "generated");
+
+let _cache: any[] | null = null;
+
+function parseIndexJson(jsonPath: string): any[] {
+  try {
+    const raw = fs.readFileSync(jsonPath, "utf8");
+    const data = JSON.parse(raw);
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray((data as any).documents)) return (data as any).documents;
+    if (data && Array.isArray((data as any).allDocuments)) return (data as any).allDocuments;
+
+    if (data && typeof data === "object") {
+      const out: any[] = [];
+      for (const v of Object.values(data)) if (Array.isArray(v)) out.push(...v);
+      return out;
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function loadAllFromGeneratedIndexes(): any[] {
+  if (!fs.existsSync(GENERATED_ROOT)) return [];
+  const dirs = fs.readdirSync(GENERATED_ROOT, { withFileTypes: true }).filter((d) => d.isDirectory());
 
   const buckets: any[] = [];
-  if (Array.isArray(gen.allDocuments)) buckets.push(...gen.allDocuments);
-
-  // collect any "allX" arrays
-  for (const k of Object.keys(gen)) {
-    if (k.startsWith("all") && Array.isArray((gen as any)[k])) buckets.push(...(gen as any)[k]);
+  for (const d of dirs) {
+    const idx = path.join(GENERATED_ROOT, d.name, "_index.json");
+    if (fs.existsSync(idx)) buckets.push(...parseIndexJson(idx));
   }
+  return buckets;
+}
+
+export function getAllContentlayerDocs(): any[] {
+  if (!isServerRuntime()) {
+    throw new Error("lib/contentlayer-helper.ts is server-only but was imported in a client bundle.");
+  }
+  if (_cache) return _cache;
+
+  const docs = loadAllFromGeneratedIndexes();
 
   // de-dupe
   const seen = new Set<string>();
   const out: any[] = [];
-  for (const d of buckets) {
+  for (const doc of docs) {
     const key =
-      safeString(d?._id) ||
-      safeString(d?._raw?.flattenedPath) ||
-      safeString(d?.slug) ||
-      JSON.stringify(d);
-    if (!seen.has(key)) {
-      seen.add(key);
-      out.push(d);
+      safeString(doc?._id) ||
+      safeString(doc?._raw?.flattenedPath) ||
+      safeString(doc?._raw?.sourceFilePath) ||
+      safeString(doc?.slug) ||
+      "";
+    const stable = key || JSON.stringify(doc);
+    if (!seen.has(stable)) {
+      seen.add(stable);
+      out.push(doc);
     }
   }
+
+  _cache = out;
   return out;
 }
 
 function matchesSlug(doc: any, normalized: string): boolean {
-  const a = normalizeSlug(safeString(doc?.slug));
-  const b = normalizeSlug(safeString(doc?._raw?.flattenedPath));
-  const c = normalizeSlug(safeString(doc?._raw?.sourceFilePath));
+  const a = normalizeFlattenedPath(safeString(doc?.slug));
+  const b = normalizeFlattenedPath(safeString(doc?._raw?.flattenedPath));
+  const c = normalizeFlattenedPath(safeString(doc?._raw?.sourceFilePath));
   return a === normalized || b === normalized || c === normalized;
 }
 
 export function getDocBySlug(slug: string): any | null {
-  const s = normalizeSlug(String(slug || ""));
+  const s = normalizeFlattenedPath(String(slug || ""));
   if (!s) return null;
+
   const docs = getAllContentlayerDocs();
-  return docs.find((d) => matchesSlug(d, s) || matchesSlug(d, `/${s}`)) || null;
+  return docs.find((d) => matchesSlug(d, s) || matchesSlug(d, `/${s}`) || matchesSlug(d, `content/${s}`)) || null;
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
-   COLLECTION GETTERS
-──────────────────────────────────────────────────────────────────────────── */
+/* COLLECTION GETTERS */
 function byKind(kind: DocKind): any[] {
   return getAllContentlayerDocs().filter((d) => getDocKind(d) === kind);
 }
@@ -300,21 +349,14 @@ export const getAllPrints = () => byKind("print");
 export const getAllResources = () => byKind("resource");
 export const getAllStrategies = () => byKind("strategy");
 export const getAllShorts = () => byKind("short");
+export const getAllLexicon = () => byKind("lexicon");
+export const getAllVault = () => byKind("vault");
 
-/* ────────────────────────────────────────────────────────────────────────────
-   BY-SLUG LOOKUPS (the exact exports lib/mdx.ts expects)
-──────────────────────────────────────────────────────────────────────────── */
+/* BY-SLUG LOOKUPS (names server.ts expects) */
 function getByCollectionSlug(collection: string, slug: string): any | null {
   const s = normalizeSlug(String(slug || ""));
   if (!s) return null;
-
-  // allow bare or prefixed
-  return (
-    getDocBySlug(`${collection}/${s}`) ||
-    getDocBySlug(s) ||
-    getAllContentlayerDocs().find((d) => matchesSlug(d, `${collection}/${s}`)) ||
-    null
-  );
+  return getDocBySlug(`${collection}/${s}`) || getDocBySlug(s) || getDocBySlug(`content/${collection}/${s}`) || null;
 }
 
 export function getPostBySlug(slug: string) {
@@ -345,7 +387,6 @@ export function getShortBySlug(slug: string) {
   return getByCollectionSlug("shorts", slug);
 }
 
-/* server helper shims (server.ts imports these names) */
 export function getServerBookBySlug(slug: string) {
   return getBookBySlug(slug);
 }
@@ -353,59 +394,30 @@ export function getServerCanonBySlug(slug: string) {
   return getCanonBySlug(slug);
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
-   getCardProps — search-index safe
-──────────────────────────────────────────────────────────────────────────── */
+/* getCardProps */
 export function getCardProps(doc: any): CardProps {
   const kind = getDocKind(doc);
-
   const title = safeString(doc?.title, "Untitled");
   const description = safeString(doc?.excerpt || doc?.description || doc?.summary || "", "") || null;
 
   const rawSlug = computeRawSlug(doc);
   const slug = computeBareSlug(kind, rawSlug) || "unknown";
-
   const href = slug !== "unknown" ? buildHref(kind, slug) : "/";
 
   const dateISO = safeISO(doc?.date || doc?.eventDate || doc?.startDate || doc?.datetime || doc?.startsAt) ?? null;
-
   const tags = safeArray(doc?.tags);
 
-  const coverImage =
-    safeString(doc?.coverImage || doc?.image || doc?.heroImage || doc?.ogImage || "", "") || null;
-
-  const coverAspect =
-    safeString(doc?.coverAspect || doc?.imageAspect || doc?.aspect || "", "") || null;
-
+  const coverImage = safeString(doc?.coverImage || doc?.image || doc?.heroImage || doc?.ogImage || "", "") || null;
+  const coverAspect = safeString(doc?.coverAspect || doc?.imageAspect || doc?.aspect || "", "") || null;
   const category = safeString(doc?.category || doc?.theme || doc?.tag || "", "") || null;
 
   const tier = getAccessLevel(doc);
   const published = isPublished(doc);
 
-  return {
-    kind,
-    slug,
-    href,
-    title,
-    description,
-    dateISO,
-    tags,
-    coverImage,
-    coverAspect,
-    category,
-    tier,
-    published,
-  };
+  return { kind, slug, href, title, description, dateISO, tags, coverImage, coverAspect, category, tier, published };
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
-   toUiDoc — stable UI adapter
-──────────────────────────────────────────────────────────────────────────── */
 export function toUiDoc(doc: any) {
   const props = getCardProps(doc);
-  return {
-    ...props,
-    id: safeString(doc?._id) || props.slug,
-    raw: doc,
-  };
+  return { ...props, id: safeString(doc?._id) || props.slug, raw: doc };
 }

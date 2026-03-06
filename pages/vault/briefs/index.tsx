@@ -11,11 +11,11 @@ import { Search, Shield, Lock, ArrowRight, Filter } from "lucide-react";
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 
-import { allBriefs } from "@/lib/contentlayer";
+import { getPublishedDocuments, sanitizeData, normalizeSlug } from "@/lib/content/server";
 import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
 type BriefCard = {
-  slug: string; // bare (brief-001-modern-household)
+  slug: string; // brief-001-modern-household
   href: string; // /vault/briefs/<slug>
   title: string;
   series: string;
@@ -31,36 +31,25 @@ type BriefCard = {
 type Props = {
   items: BriefCard[];
   total: number;
-  requiredTier: AccessTier; // page-level (max of all items; default inner-circle)
+  requiredTier: AccessTier; // page-level gate (keep public)
 };
 
-/**
- * ✅ FIXED: Extract the bare slug from the full path
- * Example: "content/vault/briefs/brief-001-modern-household.mdx" -> "brief-001-modern-household"
- */
 function normalizeBriefSlug(input: string): string {
   if (!input) return "";
-  
-  // Get the filename without extension
-  const fullPath = String(input).trim();
-  const fileName = fullPath.split(/[\\/]/).pop() || ""; // Get last part after slash
-  const baseName = fileName.replace(/\.mdx$/i, ""); // Remove .mdx extension
-  
-  return baseName;
+  const s = normalizeSlug(String(input));
+  // Accept: "vault/briefs/brief-001-x" OR "content/vault/briefs/brief-001-x" OR file path
+  const cleaned = s.replace(/^content\//i, "");
+  const parts = cleaned.split("/").filter(Boolean);
+  const last = parts[parts.length - 1] || "";
+  return last.replace(/\.mdx$/i, "");
 }
 
-/**
- * ✅ FIXED: Create proper href for brief pages
- */
 function toBriefHref(slug: string) {
   return `/vault/briefs/${slug}`;
 }
 
 function getSeriesFromDoc(doc: any): string {
-  return (
-    String(doc?.series || doc?.category || doc?.section || doc?.group || "Vault Briefs").trim() ||
-    "Vault Briefs"
-  );
+  return String(doc?.series || doc?.category || doc?.section || doc?.group || "Vault Briefs").trim() || "Vault Briefs";
 }
 
 function getAbstractFromDoc(doc: any): string {
@@ -74,21 +63,25 @@ function getReadTimeFromDoc(doc: any): string | null {
 }
 
 function safeTags(doc: any): string[] {
-  return Array.isArray(doc?.tags) ? doc.tags.map(String) : [];
+  return Array.isArray(doc?.tags) ? doc.tags.map(String).filter(Boolean) : [];
+}
+
+function isVaultBrief(doc: any): boolean {
+  const fp = String(doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || doc?.slug || "").replace(/\\/g, "/").toLowerCase();
+  // Vault briefs live under: content/vault/briefs/...
+  return fp.includes("vault/briefs/") || fp.startsWith("vault/briefs/");
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const docs = (allBriefs || []).filter((b: any) => !b?.draft);
+  const docs = (getPublishedDocuments() || []).filter((d: any) => !d?.draft);
 
   const items: BriefCard[] = docs
+    .filter(isVaultBrief)
     .map((doc: any) => {
-      // ✅ Get the slug from either doc.slug or _raw.flattenedPath
-      const rawSlug = doc?.slug || doc?._raw?.flattenedPath || "";
+      const rawSlug = doc?.slug || doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || "";
       const slugBare = normalizeBriefSlug(rawSlug);
-      
-      // Skip if no slug
       if (!slugBare) return null;
-      
+
       const required = tiers.normalizeRequired(requiredTierFromDoc(doc));
 
       return {
@@ -105,12 +98,11 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         publishedAt: doc?.date ? String(doc.date) : null,
       };
     })
-    .filter((x): x is BriefCard => x !== null && x.slug); // Type-safe filter
+    .filter((x): x is BriefCard => !!x && !!x.slug);
 
-  // Page-level requirement: default to "public" for index
+  // Keep index public; detail pages can gate.
   const pageTier: AccessTier = "public";
 
-  // Sort: newest first if date present, else alphabetical
   items.sort((a, b) => {
     const da = a.publishedAt ? new Date(a.publishedAt).toISOString() : "";
     const db = b.publishedAt ? new Date(b.publishedAt).toISOString() : "";
@@ -119,11 +111,11 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   });
 
   return {
-    props: {
+    props: sanitizeData({
       items,
       total: items.length,
       requiredTier: pageTier,
-    },
+    }),
     revalidate: 1800,
   };
 };
@@ -209,9 +201,11 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total, requiredTier }) => {
                   Vault Briefs • {total} assets
                 </span>
               </div>
+
               <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">
                 Intelligence Briefs Index
               </h1>
+
               <p className="mt-3 max-w-2xl text-sm md:text-base text-white/55 leading-relaxed">
                 Technical briefs that turn manifesto-level vision into operational specification. Built for builders — not spectators.
               </p>

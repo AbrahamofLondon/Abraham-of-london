@@ -1,19 +1,21 @@
 // lib/strategies.ts
-// Strategies data facade
+// Strategies data facade (MDX-backed)
 
-import { getAllStrategiesMeta } from "@/lib/server/strategies-data";
+import {
+  getAllStrategiesMeta,
+  getStrategyBySlug as getStrategyBySlugServer,
+} from "@/lib/server/strategies-data";
 
-// Type definitions
 export type Strategy = any;
 export type StrategyMeta = Strategy;
 export type StrategyFieldKey = keyof StrategyMeta;
 
 /**
- * Get all strategies
+ * Get all strategies (async)
  */
-export function getAllStrategies(): StrategyMeta[] {
+export async function getAllStrategies(): Promise<StrategyMeta[]> {
   try {
-    const strategies = getAllStrategiesMeta();
+    const strategies = await getAllStrategiesMeta();
     return Array.isArray(strategies) ? strategies : [];
   } catch {
     return [];
@@ -21,44 +23,48 @@ export function getAllStrategies(): StrategyMeta[] {
 }
 
 /**
- * Get strategy by slug
+ * Get strategy by slug (async)
  */
-export function getStrategyBySlug(slug: string): Strategy | null {
+export async function getStrategyBySlug(slug: string): Promise<Strategy | null> {
   try {
-    const strategies = getAllStrategies();
-    return strategies.find(s => s.slug === slug) || null;
+    // Prefer server loader (loads content when available)
+    const doc = await getStrategyBySlugServer(slug);
+    if (doc) return doc;
+
+    // Fallback to meta list
+    const strategies = await getAllStrategies();
+    return strategies.find((s: any) => s?.slug === slug) || null;
   } catch {
     return null;
   }
 }
 
 /**
- * Get strategy slugs
+ * Get strategy slugs (async)
  */
-export function getStrategySlugs(): string[] {
-  const strategies = getAllStrategies();
-  return strategies.map(s => s.slug).filter(Boolean);
+export async function getStrategySlugs(): Promise<string[]> {
+  const strategies = await getAllStrategies();
+  return strategies.map((s: any) => s?.slug).filter(Boolean);
 }
 
 /**
- * Get public strategies
+ * Get public strategies (async)
  */
-export function getPublicStrategies(): StrategyMeta[] {
-  const strategies = getAllStrategies();
-  return strategies.filter(strategy => {
-    const isDraft = strategy.draft === true;
-    const isNotPublished = strategy.published === false;
-    const isStatusDraft = strategy.status === 'draft';
+export async function getPublicStrategies(): Promise<StrategyMeta[]> {
+  const strategies = await getAllStrategies();
+  return strategies.filter((strategy: any) => {
+    const isDraft = strategy?.draft === true;
+    const isNotPublished = strategy?.published === false;
+    const isStatusDraft = strategy?.status === "draft";
     return !(isDraft || isNotPublished || isStatusDraft);
   });
 }
 
 /**
- * Get strategies by type
+ * Get strategies by type (async)
  */
-export function getStrategiesByType(type: string): StrategyMeta[] {
-  const strategies = getPublicStrategies();
-  return strategies.filter(s => s.strategyType === type);
+export async function getStrategiesByType(type: string): Promise<StrategyMeta[]> {
+  const strategies = await getPublicStrategies();
+  const target = String(type || "").toLowerCase().trim();
+  return strategies.filter((s: any) => String(s?.strategyType || "").toLowerCase().trim() === target);
 }
-
-

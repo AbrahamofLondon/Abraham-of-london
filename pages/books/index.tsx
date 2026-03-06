@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/books/index.tsx — BOOKS ARCHIVE (Premium, scan-ready, no /books/books) */
+/* pages/books/index.tsx — BOOKS ARCHIVE (Premium, scan-ready, SSOT-safe slugs) */
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -10,16 +10,14 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { Search, ArrowRight, Tag } from "lucide-react";
 
-import {
-  getPublishedBooks,
-  normalizeSlug,
-  sanitizeData,
-  resolveDocCoverImage,
-  getDocHref,
-} from "@/lib/content/server";
+import { getPublishedBooks, sanitizeData, resolveDocCoverImage } from "@/lib/content/server";
+
+/* -----------------------------------------------------------------------------
+  TYPES
+----------------------------------------------------------------------------- */
 
 type BookItem = {
-  slug: string; // bare
+  slug: string; // bare (may include nested segments)
   url: string;
   title: string;
   subtitle?: string | null;
@@ -33,7 +31,7 @@ type BookItem = {
   featured?: boolean;
 
   coverAspect?: "wide" | "book" | "square" | string | null;
-  coverFit?: "cover" | "contain" | string | null;
+  coverFit?: "cover" | "contain" | "smart" | string | null;
   coverPosition?: "center" | string | null;
 };
 
@@ -42,7 +40,56 @@ type BooksIndexProps = {
   totalBooks: number;
 };
 
-const HEADER_HEIGHT = 80;
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
+
+/* -----------------------------------------------------------------------------
+  SLUG HELPERS — preserve slashes, normalize segments (same as canon pattern)
+----------------------------------------------------------------------------- */
+
+function collapseSlashes(s: string): string {
+  return String(s || "")
+    .replace(/\\/g, "/")
+    .replace(/\/{2,}/g, "/");
+}
+
+/** Books SSOT slug normalizer:
+ * - keeps nested paths intact
+ * - strips only known prefixes
+ * - blocks traversal
+ */
+function booksBareSlug(input: unknown): string {
+  let s = String(input ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
+
+  if (!s || s.includes("..")) return "";
+
+  // Strip prefixes repeatedly
+  const stripOnce = (prefix: string) => {
+    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
+    if (s.toLowerCase().startsWith(p.toLowerCase())) {
+      s = s.slice(p.length);
+      s = s.replace(/^\/+/, "");
+      return true;
+    }
+    return false;
+  };
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    changed = stripOnce("content") || changed;
+    changed = stripOnce("vault") || changed;
+    changed = stripOnce("books") || changed;
+  }
+
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  if (!s || s.includes("..")) return "";
+  return s;
+}
 
 function aspectToStyle(a?: string | null): React.CSSProperties {
   const v = (a || "").toLowerCase();
@@ -59,6 +106,9 @@ function objectPos(pos?: string | null): string {
   return "center";
 }
 
+/**
+ * CoverCard (premium no-crop foreground + blurred backdrop)
+ */
 const CoverCard: React.FC<{
   src: string;
   alt: string;
@@ -97,10 +147,9 @@ const CoverCard: React.FC<{
               priority={!!priority}
               className={[
                 "transition-transform duration-700 will-change-transform",
-                "object-contain",
+                fgContain ? "object-contain" : fitMode === "contain" ? "object-contain" : "object-cover",
                 "drop-shadow-[0_18px_45px_rgba(0,0,0,0.55)]",
                 "group-hover:scale-[1.02]",
-                fgContain ? "object-contain" : fitMode === "contain" ? "object-contain" : "object-cover",
               ].join(" ")}
               style={{ objectPosition: objectPos(position) }}
               sizes="(max-width: 768px) 100vw, 420px"
@@ -111,6 +160,10 @@ const CoverCard: React.FC<{
     </div>
   );
 };
+
+/* -----------------------------------------------------------------------------
+  PAGE
+----------------------------------------------------------------------------- */
 
 const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -143,8 +196,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
   const featured = React.useMemo(() => filtered.filter((x) => !!x.featured).slice(0, 3), [filtered]);
   const rest = React.useMemo(() => filtered.filter((x) => !x.featured), [filtered]);
 
-  const heroImage =
-    items.find((p) => p.coverImage)?.coverImage || "/assets/images/blog/default-blog-cover.jpg";
+  const heroImage = items.find((p) => p.coverImage)?.coverImage || DEFAULT_COVER;
 
   return (
     <Layout
@@ -159,7 +211,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
       </Head>
 
       {/* HERO */}
-      <section className="relative overflow-hidden border-b border-white/10" style={{ paddingTop: HEADER_HEIGHT }}>
+      <section className="relative overflow-hidden border-b border-white/10" style={{ paddingTop: 80 }}>
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left */}
@@ -174,9 +226,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                 </span>
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">
-                Books
-              </h1>
+              <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">Books</h1>
               <p className="mt-3 max-w-xl text-sm md:text-base text-white/50 leading-relaxed">
                 Premium long-form work — built for builders who govern what they touch.
               </p>
@@ -237,7 +287,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
             <div className="lg:col-span-7">
               <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
                 <div className="relative w-full" style={{ aspectRatio: "21 / 9" }}>
-                  {/* BACKDROP (full-bleed stage) */}
                   <Image
                     src={heroImage}
                     alt=""
@@ -246,8 +295,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                     className="object-cover scale-[1.10] blur-[16px] opacity-55"
                     sizes="(max-width: 1024px) 100vw, 900px"
                   />
-
-                  {/* Stage glaze + contrast control */}
                   <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/62 via-black/16 to-black/42" />
                   <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
                   <div
@@ -255,7 +302,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                     className="absolute inset-0 bg-[radial-gradient(circle_at_22%_22%,rgba(245,158,11,0.18),transparent_55%)]"
                   />
 
-                  {/* FOREGROUND (proper “exhibit plaque”, right-aligned, big, no crop) */}
                   <div className="absolute inset-0 flex items-center justify-end pr-6 md:pr-10 lg:pr-12">
                     <div
                       className={[
@@ -271,11 +317,9 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                         "overflow-hidden",
                       ].join(" ")}
                     >
-                      {/* Heirloom frame */}
                       <div className="absolute inset-3 rounded-2xl border border-white/10 pointer-events-none" />
                       <div className="absolute inset-[18px] rounded-xl border border-white/[0.06] pointer-events-none" />
 
-                      {/* Cover itself */}
                       <div className="absolute inset-0 p-5 md:p-6 lg:p-7">
                         <div className="relative h-full w-full">
                           <Image
@@ -289,7 +333,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                         </div>
                       </div>
 
-                      {/* Museum-glass reflection (very subtle) */}
                       <div
                         aria-hidden
                         className="absolute inset-0 opacity-60"
@@ -302,7 +345,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                     </div>
                   </div>
 
-                  {/* Left-side lift so the text block feels “anchored” */}
                   <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgba(0,0,0,0.10),_rgba(0,0,0,0.60)_70%)]" />
                 </div>
 
@@ -324,9 +366,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
       {featured.length > 0 && (
         <section className="mx-auto max-w-7xl px-6 lg:px-12 pt-12">
           <div className="mb-6 flex items-center justify-between">
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
-              Featured
-            </div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">Featured</div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -338,7 +378,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
               >
                 <article className="p-6">
                   <CoverCard
-                    src={b.coverImage || "/assets/images/blog/default-blog-cover.jpg"}
+                    src={b.coverImage || DEFAULT_COVER}
                     alt={b.title}
                     aspect={b.coverAspect || "book"}
                     fit={b.coverFit || "cover"}
@@ -358,15 +398,11 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                     </h2>
 
                     {b.subtitle ? (
-                      <p className="mt-2 text-sm text-white/50 leading-relaxed line-clamp-2">
-                        {b.subtitle}
-                      </p>
+                      <p className="mt-2 text-sm text-white/50 leading-relaxed line-clamp-2">{b.subtitle}</p>
                     ) : null}
 
                     {b.excerpt ? (
-                      <p className="mt-3 text-sm text-white/45 leading-relaxed line-clamp-2">
-                        {b.excerpt}
-                      </p>
+                      <p className="mt-3 text-sm text-white/45 leading-relaxed line-clamp-2">{b.excerpt}</p>
                     ) : null}
 
                     <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
@@ -384,9 +420,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
       {/* GRID */}
       <section className="mx-auto max-w-7xl px-6 lg:px-12 py-12">
         <div className="mb-6 flex items-center justify-between">
-          <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-            Library
-          </div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">Library</div>
           <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
             showing {filtered.length} of {totalBooks}
           </div>
@@ -401,7 +435,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
             >
               <article className="p-6">
                 <CoverCard
-                  src={b.coverImage || "/assets/images/blog/default-blog-cover.jpg"}
+                  src={b.coverImage || DEFAULT_COVER}
                   alt={b.title}
                   aspect={b.coverAspect || "book"}
                   fit={b.coverFit || "cover"}
@@ -420,9 +454,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                   </h2>
 
                   {b.subtitle ? (
-                    <p className="mt-2 text-sm text-white/50 leading-relaxed line-clamp-2">
-                      {b.subtitle}
-                    </p>
+                    <p className="mt-2 text-sm text-white/50 leading-relaxed line-clamp-2">{b.subtitle}</p>
                   ) : null}
 
                   <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
@@ -436,12 +468,8 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 
           {filtered.length === 0 && (
             <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center lg:col-span-3">
-              <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                No matches
-              </div>
-              <div className="mt-3 text-white/70">
-                Try a different keyword or clear the tag filter.
-              </div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">No matches</div>
+              <div className="mt-3 text-white/70">Try a different keyword or clear the tag filter.</div>
             </div>
           )}
         </div>
@@ -455,11 +483,14 @@ export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
     const all = getPublishedBooks() || [];
 
     const items: BookItem[] = all
+      .filter((doc: any) => !doc?.draft)
       .map((doc: any) => {
-        const raw = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
-        const bare = raw.replace(/^books\//, "").replace(/^\/+/, "").replace(/\/+$/, "");
+        // ✅ SSOT: flattenedPath is the truth
+        const fp = String(doc?._raw?.flattenedPath || doc?.slug || "");
+        const bare = booksBareSlug(fp);
+        if (!bare) return null;
 
-        const url = getDocHref(doc) || `/books/${bare}`;
+        const url = `/books/${bare}`;
 
         return {
           slug: bare,
@@ -479,7 +510,10 @@ export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
           coverPosition: doc.coverPosition || null,
         };
       })
-      .sort((a, b) => (b.dateIso || "").localeCompare(a.dateIso || ""));
+      .filter(Boolean) as BookItem[];
+
+    // newest first
+    items.sort((a, b) => (b.dateIso || "").localeCompare(a.dateIso || ""));
 
     return {
       props: sanitizeData({

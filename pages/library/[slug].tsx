@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/library/[slug].tsx — LIBRARY DETAIL (Export-safe, Router-free, SSOT, no-leak)
+// pages/library/[slug].tsx — LIBRARY DETAIL (SSG, SSOT, no URL leakage)
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import { ArrowLeft, ExternalLink, Download, FileText, Lock, Loader2 } from "lucide-react";
@@ -13,13 +14,13 @@ import { ArrowLeft, ExternalLink, Download, FileText, Lock, Loader2 } from "luci
 import tiers, { type AccessTier } from "@/lib/access/tiers";
 
 type PdfAsset = {
-  slug: string;
+  slug: string; // registry slug (may include folders)
   title: string;
   description?: string | null;
   category?: string | null;
   tags?: string[] | null;
 
-  // raw registry fields (DO NOT trust; DO NOT ship for restricted)
+  // raw registry fields (never shipped for restricted)
   href?: string | null;
   url?: string | null;
   path?: string | null;
@@ -34,10 +35,8 @@ type PdfAsset = {
 type Props = {
   asset: PdfAsset;
   requiredTier: AccessTier;
-
-  // IMPORTANT: this is the only thing the page uses for restricted assets
-  // If restricted => `/api/library/<slug>` (session gated)
-  resolvedUrl: string | null;
+  resolvedUrl: string | null; // public => real URL, restricted => /api/library/<routeSlug>
+  routeSlug: string; // /library/[routeSlug]
 };
 
 function safeStr(v: any): string {
@@ -47,12 +46,13 @@ function safeStr(v: any): string {
 function normalizeSlug(input: string) {
   return (input || "")
     .trim()
+    .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
 }
 
-function toRouteParamSlug(registrySlug: string): string {
+function toRouteSlug(registrySlug: string): string {
   const n = normalizeSlug(registrySlug);
   const parts = n.split("/").filter(Boolean);
   return parts.length ? parts[parts.length - 1] : "";
@@ -69,11 +69,9 @@ function coerceAsset(x: any): PdfAsset | null {
   const slug = normalizeSlug(rawSlug);
   if (!slug) return null;
 
-  const title = safeStr(x.title || x.name || x.label || toRouteParamSlug(slug) || "Untitled");
+  const title = safeStr(x.title || x.name || x.label || toRouteSlug(slug) || "Untitled");
 
-  const tags = Array.isArray(x.tags)
-    ? x.tags.map((t: any) => safeStr(t)).filter(Boolean)
-    : null;
+  const tags = Array.isArray(x.tags) ? x.tags.map((t: any) => safeStr(t)).filter(Boolean) : null;
 
   const updated = safeStr(x.updated || x.updatedAt || x.modified || x.lastModified || x.date || "") || null;
 
@@ -86,7 +84,6 @@ function coerceAsset(x: any): PdfAsset | null {
     String(x.access || "").toLowerCase() === "public" ||
     x.locked === false;
 
-  // IMPORTANT: we keep raw url/href/path here, but we will NOT ship them if restricted.
   return {
     slug,
     title,
@@ -99,14 +96,12 @@ function coerceAsset(x: any): PdfAsset | null {
     public: Boolean(isPublic),
     updated,
     date: safeStr(x.date || x.publishedAt || "") || null,
-    // Use SSOT variants; if not public, default to member (not “inner-circle”)
     accessLevel: safeStr(x.accessLevel || x.tier || (isPublic ? "public" : "member")) || null,
     tier: safeStr(x.tier || x.accessLevel || (isPublic ? "public" : "member")) || null,
   };
 }
 
 function resolvePublicAssetUrl(asset: PdfAsset): string | null {
-  // Only used for PUBLIC assets (safe to reveal).
   const url = safeStr(asset.url || "");
   if (url) return url;
 
@@ -140,13 +135,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const assets = await loadPdfAssets();
 
   const paths = assets
-    .map((a) => toRouteParamSlug(a.slug))
+    .map((a) => toRouteSlug(a.slug))
     .filter(Boolean)
     .map((slug) => ({ params: { slug } }));
 
   const seen = new Set<string>();
   const deduped = paths.filter((p) => {
-    const k = String(p.params.slug);
+    const k = String(p.params.slug).toLowerCase();
     if (seen.has(k)) return false;
     seen.add(k);
     return true;
@@ -164,44 +159,36 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const needle = paramSlug.toLowerCase();
 
   const asset =
-    assets.find((a) => toRouteParamSlug(a.slug).toLowerCase() === needle) ||
+    assets.find((a) => toRouteSlug(a.slug).toLowerCase() === needle) ||
     assets.find((a) => normalizeSlug(a.slug).toLowerCase() === needle) ||
     null;
 
   if (!asset) return { notFound: true, revalidate: 300 };
 
-  const requiredTier = tiers.normalizeRequired(
-    asset.accessLevel ?? asset.tier ?? (asset.public ? "public" : "member")
-  );
-
+  const routeSlug = toRouteSlug(asset.slug);
+  const requiredTier = tiers.normalizeRequired(asset.accessLevel ?? asset.tier ?? (asset.public ? "public" : "member"));
   const isPublic = requiredTier === "public";
 
-  // ✅ No leakage: only resolve real URL for public assets.
-  // For restricted, we supply ONLY a session-gated proxy URL.
-  const resolvedUrl = isPublic ? resolvePublicAssetUrl(asset) : `/api/library/${encodeURIComponent(toRouteParamSlug(asset.slug))}`;
+  const resolvedUrl = isPublic
+    ? resolvePublicAssetUrl(asset)
+    : `/api/library/${encodeURIComponent(routeSlug)}`;
 
-  // ✅ If restricted, strip sensitive fields from props
   const safeAsset: PdfAsset = isPublic
     ? asset
-    : {
-        ...asset,
-        url: null,
-        href: null,
-        path: null,
-      };
+    : { ...asset, url: null, href: null, path: null };
 
   return {
     props: jsonSafe({
       asset: safeAsset,
       requiredTier,
       resolvedUrl,
+      routeSlug,
     }),
     revalidate: 900,
   };
 };
 
-const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl }) => {
-  const routeSlug = toRouteParamSlug(asset.slug) || asset.slug;
+const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, routeSlug }) => {
   const canonical = `/library/${encodeURIComponent(routeSlug)}`;
   const desc = asset.description || "Verified Library asset // Abraham of London.";
 
@@ -213,7 +200,6 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl }) 
   const needsAuth = required !== "public";
   const canAccess = !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
 
-  // ✅ Do not block PUBLIC with auth-loading flicker
   if (needsAuth && status === "loading") {
     return (
       <Layout title={asset.title}>
@@ -242,7 +228,7 @@ const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl }) 
   const url = resolvedUrl || null;
 
   return (
-    <Layout title={asset.title} description={desc} canonicalUrl={canonical} fullWidth>
+    <Layout title={asset.title} description={desc} canonicalUrl={canonical} fullWidth className="bg-black text-white">
       <Head>
         <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
       </Head>

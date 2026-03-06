@@ -1,11 +1,13 @@
 /* lib/server/audit.ts — CANONICAL AUDIT FACADE (pages/ + node safe)
-   - DO NOT import "server-only" here (pages router will explode)
-   - This file exists to satisfy legacy imports:
+   - MUST be pages-safe (no `server-only`, no Node-only imports at top-level)
+   - MUST be client-safe (pages router may bundle this)
+   - Keeps legacy imports working:
        import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit"
+   - Dynamically imports the Node-only logger at runtime (server execution only)
 */
 
 import type { AuditSeverity } from "@prisma/client";
-import { getAuditLogger, type AuditEvent as LoggerAuditEvent } from "@/lib/audit/audit-logger";
+import type { AuditEvent as LoggerAuditEvent } from "@/lib/audit/audit-logger";
 
 /* -----------------------------------------------------------------------------
  * PUBLIC CONSTANTS (legacy compatibility)
@@ -70,10 +72,13 @@ export const AUDIT_ACTIONS = {
   API_ERROR: "API_ERROR",
   WEBHOOK_RECEIVED: "WEBHOOK_RECEIVED",
   WEBHOOK_PROCESSED: "WEBHOOK_PROCESSED",
+
+  // Back-compat alias used by some handlers
+  WRITE: "UPDATE",
 } as const;
 
 /* -----------------------------------------------------------------------------
- * TYPES (legacy input shape used across your pages/*)
+ * TYPES (legacy call sites across pages/* + pages/api/*)
  * -------------------------------------------------------------------------- */
 
 export type LegacyAuditStatus = "success" | "failed" | "warning" | "pending";
@@ -89,12 +94,17 @@ export interface AuditEvent {
 
   action: string;
 
-  resourceType: string; // legacy uses "category-like" values; we map it
+  // legacy callers use this like a "category-ish" label
+  resourceType: string;
+
   resourceId?: string | null;
+  resourceName?: string | null;
+  tags?: string[] | null;
+  subCategory?: string | null;
 
   status: LegacyAuditStatus;
 
-  // legacy severities were: low|medium|high|critical (your DB enum is info|warning|high|critical)
+  // legacy severities: low|medium|high|critical
   severity?: "low" | "medium" | "high" | "critical";
 
   requestId?: string | null;
@@ -108,95 +118,135 @@ export interface AuditEvent {
 }
 
 /* -----------------------------------------------------------------------------
- * NORMALIZERS
+ * NORMALIZERS (defensive)
  * -------------------------------------------------------------------------- */
 
+function safeTrim(v: unknown): string {
+  return typeof v === "string" ? v.trim() : "";
+}
+
+function safeStr(v: unknown, fallback = ""): string {
+  const s = safeTrim(v);
+  return s || fallback;
+}
+
+function safeTags(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => safeStr(x)).filter(Boolean).slice(0, 50);
+}
+
 function normalizeSeverity(s?: AuditEvent["severity"]): AuditSeverity {
-  const v = String(s || "").toLowerCase();
+  const v = safeStr(s).toLowerCase();
   if (v === "critical") return "critical";
   if (v === "high") return "high";
-  // map legacy "medium" and "warning" and "warn" → warning
   if (v === "medium" || v === "warning" || v === "warn") return "warning";
   return "info";
 }
 
 function normalizeStatus(s: LegacyAuditStatus): "success" | "failure" | "pending" {
-  const v = String(s || "").toLowerCase();
+  const v = safeStr(s).toLowerCase();
   if (v === "failed" || v === "failure" || v === "error") return "failure";
   if (v === "pending") return "pending";
   return "success";
 }
 
 function normalizeActorType(v: LegacyActorType): "system" | "user" | "admin" | "service" {
-  const s = String(v || "").toLowerCase();
+  const s = safeStr(v).toLowerCase();
   if (s === "member" || s === "user") return "user";
   if (s === "admin") return "admin";
-  // Treat api/cron/webhook as "service"
   if (s === "api" || s === "cron" || s === "webhook") return "service";
   return "system";
 }
 
-/**
- * Legacy callers pass `resourceType` as a category-ish label.
- * We map it into:
- * - category (one of your indexed columns)
- * - resourceType (the "domain object" when available)
- */
-function deriveCategoryAndResourceType(resourceType: string): { category?: string; resourceType?: string } {
-  const rt = String(resourceType || "").trim();
-
-  // If they passed one of our canonical categories, accept it
+function deriveCategoryAndResourceType(resourceTypeRaw: unknown): { category: string; resourceType: string } {
+  const rt = safeStr(resourceTypeRaw, "system");
   const lc = rt.toLowerCase();
 
   if (lc === "auth" || lc === "authentication") return { category: "auth", resourceType: rt };
-  if (lc === "admin") return { category: "admin", resourceType: rt };
-  if (lc === "api") return { category: "api", resourceType: rt };
-  if (lc === "security" || lc === "authorization" || lc === "compliance") return { category: "security", resourceType: rt };
-  if (lc === "content" || lc === "data_access" || lc === "data_modification") return { category: "content", resourceType: rt };
-  if (lc === "system" || lc === "system_operation" || lc === "performance") return { category: "system", resourceType: rt };
-  if (lc === "user" || lc === "user_action") return { category: "user", resourceType: rt };
+  if (lc === "admin" || lc === "admin_action") return { category: "admin", resourceType: rt };
+  if (lc === "api" || lc === "api_call") return { category: "api", resourceType: rt };
 
-  // fallback
+  if (lc === "security" || lc === "authorization" || lc === "compliance") {
+    return { category: "security", resourceType: rt };
+  }
+
+  if (lc === "content" || lc === "data_access" || lc === "data_modification") {
+    return { category: "content", resourceType: rt };
+  }
+
+  if (lc === "system" || lc === "system_operation" || lc === "performance") {
+    return { category: "system", resourceType: rt };
+  }
+
+  if (lc === "user" || lc === "user_action") {
+    return { category: "user", resourceType: rt };
+  }
+
   return { category: "system", resourceType: rt || "system" };
 }
 
 /* -----------------------------------------------------------------------------
- * MAIN EXPORT: logAuditEvent (expected by pages + api)
+ * MAIN EXPORT: logAuditEvent (expected by pages + pages/api)
  * -------------------------------------------------------------------------- */
 
 export async function logAuditEvent(event: AuditEvent) {
-  const logger = getAuditLogger();
+  // 🚫 Client/Browser guard: never attempt DB writes from browser bundle
+  if (typeof window !== "undefined") {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[AUDIT_CLIENT_NOOP]", {
+        at: new Date().toISOString(),
+        action: event?.action,
+        resourceId: event?.resourceId,
+      });
+    }
+    return null;
+  }
 
-  const { category, resourceType } = deriveCategoryAndResourceType(event.resourceType);
+  // ✅ Lazy import (prevents pages-router client bundle from touching node-only code)
+  const mod = await import("@/lib/audit/audit-logger");
+  const logger = mod.getAuditLogger();
 
-  // Map legacy event into the new audit-logger contract
+  const action = safeStr(event?.action, "UNKNOWN_ACTION");
+  const actorId = safeTrim(event?.actorId) || undefined;
+  const actorEmail = safeTrim(event?.actorEmail) || undefined;
+
+  const ipAddress = safeTrim(event?.ipAddress) || undefined;
+  const userAgent = safeTrim(event?.userAgent) || undefined;
+
+  const { category, resourceType } = deriveCategoryAndResourceType(event?.resourceType);
+
+  const resourceId = safeTrim(event?.resourceId) || undefined;
+  const resourceName = safeTrim(event?.resourceName) || undefined;
+
   const mapped: LoggerAuditEvent = {
-    action: String(event.action || "UNKNOWN_ACTION"),
+    action,
 
     actorType: normalizeActorType(event.actorType),
-    actorId: event.actorId ?? undefined,
-    actorEmail: event.actorEmail ?? undefined,
+    actorId,
+    actorEmail,
 
     severity: normalizeSeverity(event.severity),
     status: normalizeStatus(event.status),
 
     category,
-    subCategory: undefined,
+    subCategory: safeTrim(event?.subCategory) || undefined,
+    tags: safeTags(event?.tags),
 
     resourceType: resourceType || undefined,
-    resourceId: event.resourceId ?? undefined,
+    resourceId,
+    resourceName,
 
-    ipAddress: event.ipAddress ?? undefined,
-    userAgent: event.userAgent ?? undefined,
-    requestId: event.requestId ?? undefined,
-    sessionId: event.sessionId ?? undefined,
+    requestId: safeTrim(event?.requestId) || undefined,
+    sessionId: safeTrim(event?.sessionId) || undefined,
 
-    durationMs: typeof event.durationMs === "number" ? event.durationMs : undefined,
-    errorMessage: event.errorMessage ?? undefined,
+    ipAddress,
+    userAgent,
 
-    // Preserve payloads
-    metadata: event.metadata ?? undefined,
-    details: event.details ?? undefined,
+    durationMs: typeof event?.durationMs === "number" && Number.isFinite(event.durationMs) ? event.durationMs : undefined,
+    errorMessage: safeTrim(event?.errorMessage) || undefined,
+
+    metadata: event?.metadata && typeof event.metadata === "object" ? event.metadata : undefined,
+    details: event?.details && typeof event.details === "object" ? event.details : undefined,
   };
 
   return logger.log(mapped);

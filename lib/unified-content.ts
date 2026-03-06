@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/unified-content.ts
-// ✅ Server-safe unified content facade
-// ✅ Supports all Vault types (Canon, Books, Strategy, etc.)
+// ✅ Server-only unified content facade (guarded)
 
 import { safeSlice } from "@/lib/utils/safe";
 import {
@@ -12,9 +11,6 @@ import {
   resolveDocCoverImage,
 } from "@/lib/content/server";
 
-/**
- * Predictable, serialisable unified content shape for UI components.
- */
 export interface UnifiedContentSummary {
   id: string;
   type: string;
@@ -30,21 +26,31 @@ export interface UnifiedContentSummary {
   image?: string | null;
 }
 
-/**
- * Normalises raw Contentlayer documents into UnifiedContentSummary.
- */
+function assertServerOnly(): void {
+  if (typeof window !== "undefined") {
+    throw new Error("UnifiedContentFacade is server-only. Do not import in client code.");
+  }
+}
+
+function toISO(value: any): string | null {
+  if (!value) return null;
+  const t = Date.parse(String(value));
+  if (!Number.isFinite(t)) return null;
+  return new Date(t).toISOString();
+}
+
 function normalizeToSummary(doc: any): UnifiedContentSummary {
   const kind = getDocKind(doc);
   const slug = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
-  
+
   return {
     id: doc._id ?? `${kind}-${slug}`,
     type: kind,
-    slug: slug,
+    slug,
     title: doc.title ?? "Untitled",
     description: doc.description ?? doc.excerpt ?? null,
     excerpt: doc.excerpt ?? doc.description ?? null,
-    date: doc.date ? new Date(doc.date).toISOString() : null,
+    date: toISO(doc.date),
     author: doc.author ?? null,
     category: doc.category ?? null,
     tags: Array.isArray(doc.tags) ? doc.tags : null,
@@ -54,78 +60,75 @@ function normalizeToSummary(doc: any): UnifiedContentSummary {
 }
 
 // -----------------------------------------------------------------------------
-// SYNCHRONOUS VERSION (for server components where async isn't needed)
+// SYNCHRONOUS VERSION
 // -----------------------------------------------------------------------------
-
-/**
- * Synchronous unified content access for server components.
- * @param limit - Maximum number of items to return
- */
 export function getUnifiedContent(limit = 50): UnifiedContentSummary[] {
+  assertServerOnly();
   const docs = getAllCombinedDocs();
   const normalized = docs.map(normalizeToSummary);
   return safeSlice(normalized, 0, limit);
 }
 
 // -----------------------------------------------------------------------------
-// ASYNC VERSION (for compatibility with async architecture patterns)
+// ASYNC VERSION (kept for compatibility; still server-only)
 // -----------------------------------------------------------------------------
-
 export async function getAllUnifiedContentSafe(): Promise<UnifiedContentSummary[]> {
+  assertServerOnly();
   const docs = getAllCombinedDocs();
   return docs.map(normalizeToSummary);
 }
 
 export async function getRecentUnifiedContentSafe(limit?: number): Promise<UnifiedContentSummary[]> {
+  assertServerOnly();
   const all = await getAllUnifiedContentSafe();
   const sorted = all.sort((a, b) => {
-    const da = a.date ? new Date(a.date).getTime() : 0;
-    const db = b.date ? new Date(b.date).getTime() : 0;
+    const da = a.date ? Date.parse(a.date) : 0;
+    const db = b.date ? Date.parse(b.date) : 0;
     return db - da;
   });
   return limit ? safeSlice(sorted, 0, limit) : sorted;
 }
 
 export async function getUnifiedContentByTypeSafe(type: string): Promise<UnifiedContentSummary[]> {
+  assertServerOnly();
   const all = await getAllUnifiedContentSafe();
-  const target = type.toLowerCase();
-  return all.filter(item => item.type === target);
+  const target = String(type || "").toLowerCase().trim();
+  return all.filter((item) => item.type === target);
 }
 
 export async function getUnifiedContentBySlugSafe(slug: string): Promise<UnifiedContentSummary | null> {
+  assertServerOnly();
   const all = await getAllUnifiedContentSafe();
-  const target = slug.toLowerCase();
-  return all.find(item => item.slug === target) || null;
+  const target = normalizeSlug(String(slug || ""));
+  return all.find((item) => item.slug === target) || null;
 }
 
 export async function getAllTagsSafe(): Promise<string[]> {
+  assertServerOnly();
   const all = await getAllUnifiedContentSafe();
   const tags = new Set<string>();
-  all.forEach(item => item.tags?.forEach(t => tags.add(t)));
+  all.forEach((item) => item.tags?.forEach((t) => tags.add(String(t))));
   return Array.from(tags).sort();
 }
 
 export async function getAllCategoriesSafe(): Promise<string[]> {
+  assertServerOnly();
   const all = await getAllUnifiedContentSafe();
   const cats = new Set<string>();
-  all.forEach(item => { if (item.category) cats.add(item.category); });
+  all.forEach((item) => {
+    if (item.category) cats.add(String(item.category));
+  });
   return Array.from(cats).sort();
 }
 
-// -----------------------------------------------------------------------------
-// DEFAULT EXPORT
-// -----------------------------------------------------------------------------
 const UnifiedContentFacade = {
-  // Synchronous
   getUnifiedContent,
-  
-  // Async
   getAllUnifiedContentSafe,
   getRecentUnifiedContentSafe,
   getUnifiedContentByTypeSafe,
   getUnifiedContentBySlugSafe,
   getAllTagsSafe,
-  getAllCategoriesSafe
+  getAllCategoriesSafe,
 };
 
 export default UnifiedContentFacade;

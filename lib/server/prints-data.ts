@@ -1,5 +1,5 @@
-// lib/server/prints-data.ts - SSOT ALIGNED
-// Prints under content/prints/* - COMPLETE ROBUST VERSION
+// lib/server/prints-data.ts - SSOT ALIGNED (ASYNC)
+import "server-only";
 
 import {
   getMdxCollectionMeta,
@@ -10,33 +10,21 @@ import {
 import type { Print, ContentEntry, ContentMeta } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeRequiredTier, normalizeUserTier } from "@/lib/access/tier-policy";
+import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
-export type PrintWithContent = Print & {
-  content: string;
-};
+export type PrintWithContent = Print & { content: string };
 
-// Extended MDX meta with print-specific fields
 type PrintishMdxMeta = MdxMeta & Partial<Print> & {
   publishDate?: string;
   releaseDate?: string;
   [key: string]: any;
 };
 
-type PrintishMdxDocument = MdxDocument & {
-  content: string;
-} & Partial<Print>;
-
-// ---------------------------------------------------------------------------
-// SAFE TYPE CONVERTERS (SSOT ALIGNED)
-// ---------------------------------------------------------------------------
+type PrintishMdxDocument = MdxDocument & { content: string } & Partial<Print>;
 
 function safeString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : undefined;
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
-
 function safeNumber(value: unknown): number | undefined {
   if (typeof value === "number") return value;
   if (typeof value === "string") {
@@ -45,262 +33,174 @@ function safeNumber(value: unknown): number | undefined {
   }
   return undefined;
 }
-
 function safeBoolean(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
     const lower = value.toLowerCase().trim();
-    if (lower === "true") return true;
-    if (lower === "false") return false;
-    if (lower === "yes") return true;
-    if (lower === "no") return false;
-    if (lower === "1") return true;
-    if (lower === "0") return false;
+    if (lower === "true" || lower === "yes" || lower === "1") return true;
+    if (lower === "false" || lower === "no" || lower === "0") return false;
   }
-  if (typeof value === "number") {
-    return value === 1;
-  }
+  if (typeof value === "number") return value === 1;
   return undefined;
 }
-
 function safeArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const filtered = value.filter((item) => typeof item === "string") as string[];
   return filtered.length > 0 ? filtered : undefined;
 }
-
 function safeStatus(
   value: unknown
 ): "draft" | "published" | "scheduled" | "archived" | undefined {
-  if (value === "draft" || value === "published" || value === "scheduled" || value === "archived") {
-    return value;
-  }
+  if (value === "draft" || value === "published" || value === "scheduled" || value === "archived") return value;
   return undefined;
 }
-
-/**
- * Safe access level converter - SSOT ALIGNED
- * Accepts legacy values and normalizes to AccessTier
- */
 function safeAccessLevel(value: unknown): AccessTier | undefined {
   if (!value) return undefined;
   return normalizeRequiredTier(value);
 }
-
-/**
- * Safely convert print type field
- */
-function safePrintType(
-  value: unknown
-): "digital" | "physical" | "limited" | "open" | undefined {
-  if (typeof value === "string") {
-    const lowerValue = value.toLowerCase().trim();
-    if (lowerValue === "digital") return "digital";
-    if (lowerValue === "physical") return "physical";
-    if (lowerValue === "limited") return "limited";
-    if (lowerValue === "open") return "open";
-  }
+function safePrintType(value: unknown): "digital" | "physical" | "limited" | "open" | undefined {
+  if (typeof value !== "string") return undefined;
+  const v = value.toLowerCase().trim();
+  if (v === "digital" || v === "physical" || v === "limited" || v === "open") return v as any;
   return undefined;
 }
-
-/**
- * Safely convert print status field
- */
-function safePrintStatus(
-  value: unknown
-): "available" | "sold-out" | "coming-soon" | "discontinued" | undefined {
-  if (typeof value === "string") {
-    const lowerValue = value.toLowerCase().trim();
-    if (lowerValue === "available") return "available";
-    if (lowerValue === "sold-out") return "sold-out";
-    if (lowerValue === "coming-soon") return "coming-soon";
-    if (lowerValue === "discontinued") return "discontinued";
-  }
+function safePrintStatus(value: unknown): "available" | "sold-out" | "coming-soon" | "discontinued" | undefined {
+  if (typeof value !== "string") return undefined;
+  const v = value.toLowerCase().trim();
+  if (v === "available" || v === "sold-out" || v === "coming-soon" || v === "discontinued") return v as any;
   return undefined;
 }
-
-// ---------------------------------------------------------------------------
-// MAIN CONVERSION FUNCTIONS
-// ---------------------------------------------------------------------------
 
 function fromMdxMeta(meta: MdxMeta): Print {
   const m = meta as PrintishMdxMeta;
-
-  // Handle different date fields
   const date = safeString(m.date) || safeString(m.publishDate) || safeString(m.releaseDate);
-  
-  // Ensure required fields have defaults
+
   const slug = safeString(m.slug) || "";
   const title = safeString(m.title) || "Untitled Print";
-  
-  if (!slug || !title) {
-    console.warn(`Print metadata missing slug or title: ${slug} - ${title}`);
-  }
 
   return {
-    // Core identifiers
     slug,
     title,
-
-    // Content fields
     description: safeString(m.description),
     excerpt: safeString(m.excerpt),
     subtitle: safeString(m.subtitle),
 
-    // Metadata
     date,
     author: safeString(m.author),
     category: safeString(m.category),
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
-    readTime: safeString(m.readTime) || safeNumber(m.readTime),
+    readTime: safeString((m as any).readTime) || safeNumber((m as any).readTime),
 
-    // Visual
-    coverImage: safeString(m.coverImage) || safeString(m.image),
+    coverImage: safeString(m.coverImage) || safeString((m as any).image),
 
-    // Print-specific fields
-    printType: safePrintType(m.printType) || "digital",
-    printStatus: safePrintStatus(m.printStatus) || "available",
-    price: safeNumber(m.price),
-    originalPrice: safeNumber(m.originalPrice),
-    currency: safeString(m.currency) || "USD",
-    dimensions: safeString(m.dimensions),
-    paperType: safeString(m.paperType),
-    printSize: safeString(m.printSize),
-    editionSize: safeNumber(m.editionSize),
-    editionNumber: safeNumber(m.editionNumber),
-    signature: safeBoolean(m.signature),
-    numbered: safeBoolean(m.numbered),
-    certificate: safeBoolean(m.certificate),
-    frameIncluded: safeBoolean(m.frameIncluded),
-    inStock: safeBoolean(m.inStock) || true,
-    stockQuantity: safeNumber(m.stockQuantity),
-    purchaseUrl: safeString(m.purchaseUrl),
-    maxPurchaseQuantity: safeNumber(m.maxPurchaseQuantity),
-    sale: safeBoolean(m.sale),
-    saleEndDate: safeString(m.saleEndDate),
-    lastModified: safeString(m.lastModified),
+    printType: safePrintType((m as any).printType) || "digital",
+    printStatus: safePrintStatus((m as any).printStatus) || "available",
+    price: safeNumber((m as any).price),
+    originalPrice: safeNumber((m as any).originalPrice),
+    currency: safeString((m as any).currency) || "USD",
+    dimensions: safeString((m as any).dimensions),
+    paperType: safeString((m as any).paperType),
+    printSize: safeString((m as any).printSize),
+    editionSize: safeNumber((m as any).editionSize),
+    editionNumber: safeNumber((m as any).editionNumber),
+    signature: safeBoolean((m as any).signature),
+    numbered: safeBoolean((m as any).numbered),
+    certificate: safeBoolean((m as any).certificate),
+    frameIncluded: safeBoolean((m as any).frameIncluded),
+    inStock: (safeBoolean((m as any).inStock) ?? true) as any,
+    stockQuantity: safeNumber((m as any).stockQuantity),
+    purchaseUrl: safeString((m as any).purchaseUrl),
+    maxPurchaseQuantity: safeNumber((m as any).maxPurchaseQuantity),
+    sale: safeBoolean((m as any).sale),
+    saleEndDate: safeString((m as any).saleEndDate),
+    lastModified: safeString((m as any).lastModified),
 
-    // State
     draft: safeBoolean(m.draft),
-    published: safeBoolean(m.published),
-    status: safeStatus(m.status),
+    published: m.published === undefined ? true : safeBoolean(m.published),
+    status: safeStatus((m as any).status),
 
-    // Access - SSOT ALIGNED
-    accessLevel: safeAccessLevel(m.accessLevel) || "public",
-    lockMessage: safeString(m.lockMessage),
+    accessLevel: safeAccessLevel((m as any).accessLevel) || "public",
+    lockMessage: safeString((m as any).lockMessage),
 
-    // System fields
-    _raw: m._raw,
-    _id: safeString(m._id),
-    url: safeString(m.url),
-    type: safeString(m.type) || "print",
+    _raw: (m as any)._raw,
+    _id: safeString((m as any)._id),
+    url: safeString((m as any).url),
+    type: safeString((m as any).type) || "print",
 
-    // Preserve any additional fields
     ...Object.fromEntries(
-      Object.entries(m)
-        .filter(([key]) => ![
-          'slug', 'title', 'description', 'excerpt', 'subtitle',
-          'date', 'author', 'category', 'tags', 'featured', 'readTime',
-          'coverImage', 'image', 'printType', 'printStatus', 'price',
-          'originalPrice', 'currency', 'dimensions', 'paperType',
-          'printSize', 'editionSize', 'editionNumber', 'signature',
-          'numbered', 'certificate', 'frameIncluded', 'inStock',
-          'stockQuantity', 'purchaseUrl', 'maxPurchaseQuantity', 'sale',
-          'saleEndDate', 'lastModified', 'draft', 'published', 'status',
-          'accessLevel', 'lockMessage', '_raw', '_id', 'url', 'type',
-          'publishDate', 'releaseDate'
-        ].includes(key))
-        .map(([key, value]) => [key, value])
+      Object.entries(m).filter(([key]) => ![
+        "slug","title","description","excerpt","subtitle",
+        "date","author","category","tags","featured","readTime",
+        "coverImage","image",
+        "printType","printStatus","price","originalPrice","currency",
+        "dimensions","paperType","printSize","editionSize","editionNumber",
+        "signature","numbered","certificate","frameIncluded","inStock","stockQuantity",
+        "purchaseUrl","maxPurchaseQuantity","sale","saleEndDate","lastModified",
+        "draft","published","status","accessLevel","lockMessage",
+        "_raw","_id","url","type","publishDate","releaseDate"
+      ].includes(key))
     ),
-  };
+  } as any;
 }
 
 function fromMdxDocument(doc: MdxDocument): PrintWithContent {
   const printDoc = doc as PrintishMdxDocument;
-  const { content, body, ...rest } = printDoc;
+  const { content, body, ...rest } = printDoc as any;
   const meta = fromMdxMeta(rest);
-  
-  return { 
-    ...meta, 
-    content: typeof content === "string" ? content : "",
-    body: body || undefined,
-  };
+  return { ...(meta as any), content: typeof content === "string" ? content : "", body: body || undefined };
 }
 
 export function printToContentMeta(print: Print): ContentMeta {
-  const { content, body, ...meta } = print;
-  return meta;
+  const { content, body, ...meta } = print as any;
+  return meta as any;
 }
-
 export function printToContentEntry(print: Print): ContentEntry {
   return {
-    slug: print.slug,
-    title: print.title,
-    date: print.date,
-    excerpt: print.excerpt,
-    description: print.description,
-    category: print.category,
-    tags: print.tags,
-    featured: print.featured,
-    readTime: print.readTime,
-    _raw: print._raw,
-    ...Object.fromEntries(
-      Object.entries(print)
-        .filter(([key]) => ![
-          'slug', 'title', 'date', 'excerpt', 'description', 'category',
-          'tags', 'featured', 'readTime', '_raw', 'content', 'body'
-        ].includes(key))
-    ),
-  };
+    slug: (print as any).slug,
+    title: (print as any).title,
+    date: (print as any).date,
+    excerpt: (print as any).excerpt,
+    description: (print as any).description,
+    category: (print as any).category,
+    tags: (print as any).tags,
+    featured: (print as any).featured,
+    readTime: (print as any).readTime,
+    _raw: (print as any)._raw,
+  } as any;
 }
 
-// ---------------------------------------------------------------------------
-// PUBLIC API FUNCTIONS
-// ---------------------------------------------------------------------------
+export function canAccessPrint(print: Print, userTier?: string | AccessTier | null): boolean {
+  const user = normalizeUserTier(userTier || "public");
+  const required = (print as any).accessLevel || "public";
+  return hasAccess(user, required);
+}
 
-export function getAllPrintsMeta(): Print[] {
-  try {
-    const metas = getMdxCollectionMeta("prints");
-    if (!metas || !Array.isArray(metas)) {
-      console.warn("No prints metadata found or metadata is not an array");
-      return [];
-    }
-    
-    const prints = metas.map((m) => fromMdxMeta(m));
-    
-    // Filter out invalid prints (missing required fields)
-    const validPrints = prints.filter(print => {
-      const isValid = print.slug && print.title;
-      if (!isValid) {
-        console.warn(`Invalid print skipped: ${print.slug || 'no-slug'} - ${print.title || 'no-title'}`);
-      }
-      return isValid;
-    });
-    
-    console.log(`Found ${validPrints.length} valid prints out of ${metas.length} total`);
-    return validPrints;
-  } catch (error) {
-    console.error("Error fetching all prints meta:", error);
+let _printsMetaPromise: Promise<Print[]> | null = null;
+async function loadPrintsMeta(): Promise<Print[]> {
+  if (_printsMetaPromise) return _printsMetaPromise;
+
+  _printsMetaPromise = (async () => {
+    const metas = await getMdxCollectionMeta("prints");
+    const prints = (metas || []).map((m) => fromMdxMeta(m));
+    return prints.filter((p: any) => p?.slug && p?.title);
+  })().catch((err) => {
+    console.error("Error fetching all prints meta:", err);
     return [];
-  }
+  });
+
+  return _printsMetaPromise;
+}
+
+export async function getAllPrintsMeta(): Promise<Print[]> {
+  return await loadPrintsMeta();
 }
 
 export async function getPrintBySlug(slug: string): Promise<PrintWithContent | null> {
   try {
-    if (!slug || typeof slug !== 'string') {
-      console.error("getPrintBySlug called with invalid slug:", slug);
-      return null;
-    }
-    
-    const doc = getMdxDocumentBySlug("prints", slug);
-    if (!doc) {
-      console.warn(`No print found for slug: ${slug}`);
-      return null;
-    }
-    
-    const resolvedDoc = await doc;
-    return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
+    const doc = await getMdxDocumentBySlug("prints", slug);
+    if (!doc) return null;
+    return fromMdxDocument(doc);
   } catch (error) {
     console.error(`Error fetching print by slug (${slug}):`, error);
     return null;
@@ -308,332 +208,123 @@ export async function getPrintBySlug(slug: string): Promise<PrintWithContent | n
 }
 
 export async function getAllPrints(): Promise<PrintWithContent[]> {
-  try {
-    const metas = getAllPrintsMeta();
-    if (metas.length === 0) return [];
-    
-    const printsWithContent: PrintWithContent[] = [];
-    
-    for (const meta of metas) {
-      const print = await getPrintBySlug(meta.slug);
-      if (print) {
-        printsWithContent.push(print);
-      } else {
-        console.warn(`Could not load content for print: ${meta.slug}`);
-      }
-    }
-    
-    return printsWithContent;
-  } catch (error) {
-    console.error("Error fetching all prints:", error);
-    return [];
+  const metas = await loadPrintsMeta();
+  const out: PrintWithContent[] = [];
+  for (const meta of metas) {
+    const p = await getPrintBySlug((meta as any).slug);
+    if (p) out.push(p);
   }
+  return out;
 }
 
-/**
- * Check if user can access a print
- */
-export function canAccessPrint(
-  print: Print,
-  userTier?: string | AccessTier | null
-): boolean {
-  const { hasAccess, normalizeUserTier } = require('@/lib/access/tier-policy');
+export async function getAccessiblePrints(userTier?: string | AccessTier | null): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
   const user = normalizeUserTier(userTier || "public");
-  const required = print.accessLevel || "public";
-  return hasAccess(user, required);
+  return prints.filter((p: any) => hasAccess(user, p.accessLevel || "public"));
 }
 
-/**
- * Get prints accessible to a user
- */
-export function getAccessiblePrints(userTier?: string | AccessTier | null): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    const { hasAccess, normalizeUserTier } = require('@/lib/access/tier-policy');
-    const user = normalizeUserTier(userTier || "public");
-    
-    return prints.filter(print => {
-      const required = print.accessLevel || "public";
-      return hasAccess(user, required);
-    });
-  } catch (error) {
-    console.error("Error getting accessible prints:", error);
-    return [];
-  }
+export async function getPrintsByCategory(category: string): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
+  const c = String(category || "").toLowerCase().trim();
+  return prints.filter((p: any) => String(p?.category || "").toLowerCase().trim() === c);
 }
 
-export function getPrintsByCategory(category: string): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    if (!category || typeof category !== 'string') return [];
-    
-    const normalizedCategory = category.toLowerCase().trim();
-    
-    return prints.filter(print => {
-      const printCategory = print.category?.toLowerCase().trim();
-      return printCategory === normalizedCategory;
-    });
-  } catch (error) {
-    console.error(`Error fetching prints by category (${category}):`, error);
-    return [];
-  }
+export async function getPrintsByTag(tag: string): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
+  const t = String(tag || "").toLowerCase().trim();
+  return prints.filter((p: any) => Array.isArray(p?.tags) && p.tags.some((x: any) => String(x).toLowerCase().trim() === t));
 }
 
-export function getPrintsByTag(tag: string): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    if (!tag || typeof tag !== 'string') return [];
-    
-    const normalizedTag = tag.toLowerCase().trim();
-    
-    return prints.filter(print => {
-      return print.tags?.some(t => t.toLowerCase().trim() === normalizedTag);
-    });
-  } catch (error) {
-    console.error(`Error fetching prints by tag (${tag}):`, error);
-    return [];
-  }
+export async function getFeaturedPrints(): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
+  return prints.filter((p: any) => p?.featured === true && p?.draft !== true);
 }
 
-export function getFeaturedPrints(): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    return prints.filter(print => print.featured === true);
-  } catch (error) {
-    console.error("Error fetching featured prints:", error);
-    return [];
-  }
+export async function getPublishedPrints(): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
+  return prints.filter((p: any) => p?.draft !== true && p?.status !== "draft" && (p?.published === true || p?.published === undefined || p?.status === "published"));
 }
 
-export function getPublishedPrints(): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    return prints.filter(print => 
-      print.draft !== true && 
-      print.status !== "draft" && 
-      (print.published === true || print.status === "published")
-    );
-  } catch (error) {
-    console.error("Error fetching published prints:", error);
-    return [];
-  }
+export async function getAvailablePrints(): Promise<Print[]> {
+  const prints = await getPublishedPrints();
+  return prints.filter((p: any) => p?.inStock === true || (typeof p?.stockQuantity === "number" && p.stockQuantity > 0));
 }
 
-export function getAvailablePrints(): Print[] {
-  try {
-    return getAllPrintsMeta()
-      .filter(p => 
-        !p.draft && 
-        (p.inStock === true || (p.stockQuantity !== undefined && p.stockQuantity > 0))
-      );
-  } catch (error) {
-    console.error("[prints-data] Error getting available prints:", error);
-    return [];
-  }
+export async function getPrintsByType(printType: string): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
+  const t = String(printType || "").toLowerCase().trim();
+  return prints.filter((p: any) => String(p?.printType || "").toLowerCase().trim() === t);
 }
 
-export function getPrintsByType(printType: string): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    if (!printType || typeof printType !== 'string') return [];
-    
-    const normalizedType = printType.toLowerCase().trim();
-    
-    return prints.filter(print => 
-      print.printType?.toLowerCase().trim() === normalizedType
-    );
-  } catch (error) {
-    console.error(`Error fetching prints by type (${printType}):`, error);
-    return [];
-  }
+export async function getPrintsByStatus(status: string): Promise<Print[]> {
+  const prints = await loadPrintsMeta();
+  const s = String(status || "").toLowerCase().trim();
+  return prints.filter((p: any) => String(p?.printStatus || "").toLowerCase().trim() === s);
 }
 
-export function getPrintsByStatus(status: string): Print[] {
-  try {
-    const prints = getAllPrintsMeta();
-    if (!status || typeof status !== 'string') return [];
-    
-    const normalizedStatus = status.toLowerCase().trim();
-    
-    return prints.filter(print => 
-      print.printStatus?.toLowerCase().trim() === normalizedStatus
-    );
-  } catch (error) {
-    console.error(`Error fetching prints by status (${status}):`, error);
-    return [];
-  }
+export async function getPrintsOnSale(): Promise<Print[]> {
+  const prints = await getAvailablePrints();
+  return prints.filter((p: any) => p?.sale === true);
 }
 
-export function getPrintsOnSale(): Print[] {
-  try {
-    const prints = getAvailablePrints();
-    return prints.filter(print => print.sale === true);
-  } catch (error) {
-    console.error("Error fetching prints on sale:", error);
-    return [];
-  }
+export async function searchPrints(query: string): Promise<Print[]> {
+  const prints = await getAvailablePrints();
+  const q = String(query || "").toLowerCase().trim();
+  if (!q) return prints;
+
+  return prints.filter((p: any) => {
+    const hay = [
+      p.title, p.subtitle, p.description, p.excerpt, p.author,
+      Array.isArray(p.tags) ? p.tags.join(" ") : "",
+      p.category, p.paperType, p.dimensions
+    ].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
 }
 
-export function searchPrints(query: string): Print[] {
-  try {
-    const prints = getAvailablePrints();
-    const normalizedQuery = query.toLowerCase().trim();
-    
-    if (!normalizedQuery) return prints;
-    
-    return prints.filter(print => {
-      // Search in title
-      if (print.title?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in subtitle
-      if (print.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in description
-      if (print.description?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in excerpt
-      if (print.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in author
-      if (print.author?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in tags
-      if (print.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
-      
-      // Search in category
-      if (print.category?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in paper type
-      if (print.paperType?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      // Search in dimensions
-      if (print.dimensions?.toLowerCase().includes(normalizedQuery)) return true;
-      
-      return false;
-    });
-  } catch (error) {
-    console.error(`Error searching prints (${query}):`, error);
-    return [];
-  }
+export async function getRecentPrints(limit?: number): Promise<Print[]> {
+  const prints = await getAvailablePrints();
+  const sorted = [...prints].sort((a: any, b: any) => {
+    const da = a?.date ? Date.parse(String(a.date)) : 0;
+    const db = b?.date ? Date.parse(String(b.date)) : 0;
+    return (Number.isFinite(db) ? db : 0) - (Number.isFinite(da) ? da : 0);
+  });
+  return typeof limit === "number" ? safeSlice(sorted, 0, limit) : sorted;
 }
 
-export function getRecentPrints(limit?: number): Print[] {
-  try {
-    const prints = getAvailablePrints();
-    
-    // Sort by date (newest first), then by title for same dates
-    const sorted = prints.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      
-      if (dateB !== dateA) return dateB - dateA;
-      
-      // Same date, sort alphabetically by title
-      return (a.title || '').localeCompare(b.title || '');
-    });
-    
-    return limit && limit > 0 ? safeSlice(sorted, 0, limit) : sorted;
-  } catch (error) {
-    console.error("Error fetching recent prints:", error);
-    return [];
-  }
+export async function getLimitedEditionPrints(): Promise<Print[]> {
+  const prints = await getAvailablePrints();
+  return prints.filter((p: any) => p?.printType === "limited" || p?.editionSize !== undefined);
+}
+export async function getDigitalPrints(): Promise<Print[]> {
+  const prints = await getAvailablePrints();
+  return prints.filter((p: any) => p?.printType === "digital");
+}
+export async function getPhysicalPrints(): Promise<Print[]> {
+  const prints = await getAvailablePrints();
+  return prints.filter((p: any) => p?.printType === "physical");
 }
 
-export function getLimitedEditionPrints(): Print[] {
-  try {
-    const prints = getAvailablePrints();
-    return prints.filter(print => 
-      print.printType === "limited" || 
-      print.editionSize !== undefined
-    );
-  } catch (error) {
-    console.error("Error fetching limited edition prints:", error);
-    return [];
-  }
+export async function getAllPrintCategories(): Promise<string[]> {
+  const prints = await loadPrintsMeta();
+  return [...new Set(prints.map((p: any) => p?.category).filter((x: any) => typeof x === "string" && x.trim()))].sort();
+}
+export async function getAllPrintTags(): Promise<string[]> {
+  const prints = await loadPrintsMeta();
+  const tags = new Set<string>();
+  prints.forEach((p: any) => (p?.tags || []).forEach((t: any) => typeof t === "string" && tags.add(t)));
+  return Array.from(tags).sort();
+}
+export async function getAllPrintAuthors(): Promise<string[]> {
+  const prints = await loadPrintsMeta();
+  return [...new Set(prints.map((p: any) => p?.author).filter((x: any) => typeof x === "string" && x.trim()))].sort();
+}
+export async function getAllPrintSlugs(): Promise<string[]> {
+  const prints = await loadPrintsMeta();
+  return prints.map((p: any) => p?.slug).filter(Boolean);
 }
 
-export function getDigitalPrints(): Print[] {
-  try {
-    const prints = getAvailablePrints();
-    return prints.filter(print => print.printType === "digital");
-  } catch (error) {
-    console.error("Error fetching digital prints:", error);
-    return [];
-  }
-}
-
-export function getPhysicalPrints(): Print[] {
-  try {
-    const prints = getAvailablePrints();
-    return prints.filter(print => print.printType === "physical");
-  } catch (error) {
-    console.error("Error fetching physical prints:", error);
-    return [];
-  }
-}
-
-export function getAllPrintCategories(): string[] {
-  try {
-    const prints = getAllPrintsMeta();
-    const categories = prints
-      .map(print => print.category)
-      .filter((category): category is string => 
-        typeof category === "string" && category.trim().length > 0
-      );
-    
-    // Remove duplicates and sort alphabetically
-    return [...new Set(categories)].sort();
-  } catch (error) {
-    console.error("Error fetching print categories:", error);
-    return [];
-  }
-}
-
-export function getAllPrintTags(): string[] {
-  try {
-    const prints = getAllPrintsMeta();
-    const allTags = prints
-      .flatMap(print => print.tags || [])
-      .filter((tag): tag is string => typeof tag === "string");
-    
-    // Remove duplicates and sort alphabetically
-    return [...new Set(allTags)].sort();
-  } catch (error) {
-    console.error("Error fetching print tags:", error);
-    return [];
-  }
-}
-
-export function getAllPrintAuthors(): string[] {
-  try {
-    const prints = getAllPrintsMeta();
-    const authors = prints
-      .map(print => print.author)
-      .filter((author): author is string => 
-        typeof author === "string" && author.trim().length > 0
-      );
-    
-    // Remove duplicates and sort alphabetically
-    return [...new Set(authors)].sort();
-  } catch (error) {
-    console.error("Error fetching print authors:", error);
-    return [];
-  }
-}
-
-export function getAllPrintSlugs(): string[] {
-  try {
-    const prints = getAllPrintsMeta();
-    return prints
-      .map(print => print.slug)
-      .filter((slug): slug is string => typeof slug === "string" && slug.length > 0);
-  } catch (error) {
-    console.error("Error fetching print slugs:", error);
-    return [];
-  }
-}
-
-export function getPrintStats(): {
+export async function getPrintStats(): Promise<{
   total: number;
   published: number;
   drafts: number;
@@ -645,72 +336,41 @@ export function getPrintStats(): {
   onSale: number;
   byCategory: Record<string, number>;
   byYear: Record<string, number>;
-} {
-  try {
-    const prints = getAllPrintsMeta();
-    const availablePrints = getAvailablePrints();
-    
-    const stats = {
-      total: prints.length,
-      published: prints.filter(p => p.published === true || p.status === "published").length,
-      drafts: prints.filter(p => p.draft === true || p.status === "draft").length,
-      featured: prints.filter(p => p.featured === true).length,
-      available: availablePrints.length,
-      digital: availablePrints.filter(p => p.printType === "digital").length,
-      physical: availablePrints.filter(p => p.printType === "physical").length,
-      limited: availablePrints.filter(p => p.printType === "limited").length,
-      onSale: availablePrints.filter(p => p.sale === true).length,
-      byCategory: {} as Record<string, number>,
-      byYear: {} as Record<string, number>,
-    };
-    
-    prints.forEach(print => {
-      // Count by category
-      if (print.category) {
-        stats.byCategory[print.category] = (stats.byCategory[print.category] || 0) + 1;
-      }
-      
-      // Count by year
-      if (print.date) {
-        const year = new Date(print.date).getFullYear().toString();
-        stats.byYear[year] = (stats.byYear[year] || 0) + 1;
-      }
-    });
-    
-    return stats;
-  } catch (error) {
-    console.error("Error fetching print stats:", error);
-    return {
-      total: 0,
-      published: 0,
-      drafts: 0,
-      featured: 0,
-      available: 0,
-      digital: 0,
-      physical: 0,
-      limited: 0,
-      onSale: 0,
-      byCategory: {},
-      byYear: {},
-    };
-  }
+}> {
+  const prints = await loadPrintsMeta();
+  const available = await getAvailablePrints();
+
+  const stats = {
+    total: prints.length,
+    published: prints.filter((p: any) => p?.published === true || p?.status === "published").length,
+    drafts: prints.filter((p: any) => p?.draft === true || p?.status === "draft").length,
+    featured: prints.filter((p: any) => p?.featured === true).length,
+    available: available.length,
+    digital: available.filter((p: any) => p?.printType === "digital").length,
+    physical: available.filter((p: any) => p?.printType === "physical").length,
+    limited: available.filter((p: any) => p?.printType === "limited").length,
+    onSale: available.filter((p: any) => p?.sale === true).length,
+    byCategory: {} as Record<string, number>,
+    byYear: {} as Record<string, number>,
+  };
+
+  prints.forEach((p: any) => {
+    if (p?.category) stats.byCategory[p.category] = (stats.byCategory[p.category] || 0) + 1;
+    if (p?.date) {
+      const y = new Date(p.date).getFullYear().toString();
+      stats.byYear[y] = (stats.byYear[y] || 0) + 1;
+    }
+  });
+
+  return stats;
 }
 
-// ---------------------------------------------------------------------------
-// DEFAULT EXPORT
-// ---------------------------------------------------------------------------
-
 const printsData = {
-  // Core functions
   getAllPrintsMeta,
   getPrintBySlug,
   getAllPrints,
-  
-  // Access control
   canAccessPrint,
   getAccessiblePrints,
-  
-  // Filter functions
   getPrintsByCategory,
   getPrintsByTag,
   getFeaturedPrints,
@@ -724,17 +384,11 @@ const printsData = {
   getLimitedEditionPrints,
   getDigitalPrints,
   getPhysicalPrints,
-  
-  // List functions
   getAllPrintCategories,
   getAllPrintTags,
   getAllPrintAuthors,
   getAllPrintSlugs,
-  
-  // Stats
   getPrintStats,
-  
-  // Utility functions
   printToContentMeta,
   printToContentEntry,
 };

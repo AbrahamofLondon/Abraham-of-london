@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/blog/index.tsx — ESSAYS ARCHIVE (Premium, scan-optimized + SmartCover: no-crop with blurred backdrop) */
+/* pages/blog/index.tsx — ESSAYS ARCHIVE (Premium, scan-optimized + SmartCover: no-crop with blurred backdrop)
+   ✅ FS-SSOT: reads content/blog via mdx-collections (NOT Contentlayer)
+*/
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -10,9 +12,9 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { Search, ArrowRight, Tag, Sparkles, Clock, RotateCcw } from "lucide-react";
 
-import { getPublishedPosts } from "@/lib/content/server";
-import { normalizeSlug, joinHref } from "@/lib/content/shared";
-import { resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
+import { joinHref, normalizeSlug } from "@/lib/content/shared";
+import { sanitizeData } from "@/lib/content/shared";
+import { getMdxCollectionMeta, type MdxMeta } from "@/lib/server/mdx-collections";
 
 type CoverAspect = "wide" | "book" | "square" | "standard" | "auto";
 type CoverFit = "cover" | "contain" | "smart";
@@ -50,8 +52,7 @@ type BlogIndexProps = {
   totalPosts: number;
 };
 
-const HEADER_HEIGHT = 80;
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
+const DEFAULT_COVER = "/assets/images/writing-desk.webp"; // ✅ you said this exists
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -89,6 +90,11 @@ function objectPositionFor(pos?: CoverPosition | null): string {
   return allowed.has(p) ? p : "center";
 }
 
+function normalizeFit(aspect?: CoverAspect | null, fit?: CoverFit | null): CoverFit {
+  if (fit === "cover" || fit === "contain" || fit === "smart") return fit;
+  return "smart";
+}
+
 /**
  * SmartCover:
  * - If fit === "cover" => classic crop (object-cover).
@@ -116,7 +122,6 @@ function SmartCover({
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
       <div className="relative w-full" style={{ aspectRatio: aspect }}>
-        {/* Backdrop layer (always cover) */}
         {!isCover && (
           <>
             <Image
@@ -128,10 +133,7 @@ function SmartCover({
               sizes={sizes}
               priority={priority}
             />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-black/55"
-            />
+            <div aria-hidden className="absolute inset-0 bg-black/55" />
             <div
               aria-hidden
               className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(245,158,11,0.10),transparent_55%)]"
@@ -139,25 +141,19 @@ function SmartCover({
           </>
         )}
 
-        {/* Foreground layer */}
         <Image
           src={src}
           alt={alt}
           fill
-          className={cx(
-            isCover ? "object-cover" : "object-contain",
-            "transition-transform duration-700"
-          )}
+          className={cx(isCover ? "object-cover" : "object-contain", "transition-transform duration-700")}
           style={{
             objectPosition: position,
-            // contain needs breathing room; cover does not
             padding: isCover ? undefined : "14px",
           }}
           sizes={sizes}
           priority={priority}
         />
 
-        {/* Premium vignette / legibility */}
         <div
           aria-hidden
           className={cx(
@@ -172,14 +168,30 @@ function SmartCover({
   );
 }
 
-function normalizeFit(aspect?: CoverAspect | null, fit?: CoverFit | null): CoverFit {
-  // If explicitly set, respect it.
-  if (fit === "cover" || fit === "contain" || fit === "smart") return fit;
+function toDisplayDate(dateLike: unknown): { date: string | null; iso: string | null } {
+  if (!dateLike) return { date: null, iso: null };
+  const d = new Date(String(dateLike));
+  if (!Number.isFinite(d.getTime())) return { date: null, iso: null };
+  return {
+    date: d.toLocaleDateString("en-GB"),
+    iso: d.toISOString(),
+  };
+}
 
-  // Default behavior: no-crop smart, but allow wide banners to be cover if you want.
-  // In practice, smart still looks excellent for wide too, so we default to smart.
-  // If you want wide to crop intentionally, set coverFit: cover in that post.
-  return "smart";
+function toReadTime(meta: any): string | null {
+  // support either readTime or readingTime from frontmatter/loader
+  const rt = meta?.readTime ?? meta?.readingTime;
+  if (typeof rt === "string" && rt.trim()) return rt.trim();
+  if (typeof rt === "number" && Number.isFinite(rt)) return `${rt} min read`;
+  return null;
+}
+
+function isDraftish(meta: any): boolean {
+  if (meta?.draft === true) return true;
+  if (meta?.published === false) return true;
+  const status = String(meta?.status || "").toLowerCase();
+  if (status === "draft") return true;
+  return false;
 }
 
 const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
@@ -316,7 +328,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                 {featured.map((post) => {
                   const src = post.coverImage || DEFAULT_COVER;
                   const aspect = aspectRatioFor(post.coverAspect || "wide");
-                  const fit = normalizeFit(post.coverAspect, post.coverFit) === "smart" ? "smart" : (post.coverFit || "smart");
+                  const fit = normalizeFit(post.coverAspect, post.coverFit);
                   const pos = objectPositionFor(post.coverPosition);
 
                   return (
@@ -330,7 +342,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                           src={src}
                           alt={post.title}
                           aspect={aspect}
-                          fit={fit as CoverFit}
+                          fit={fit}
                           position={pos}
                           sizes="(max-width: 768px) 100vw, 360px"
                           priority
@@ -621,29 +633,40 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   try {
-    const allPosts = getPublishedPosts();
+    // ✅ FS SSOT: content/blog
+    const metas = await getMdxCollectionMeta("blog");
 
-    const items: BlogPost[] = allPosts
-      .map((doc: any) => {
-        const raw = normalizeSlug(doc.slug || doc._raw?.flattenedPath || "");
-        const bareSlug = raw.replace(/^blog\//, "");
+    const items: BlogPost[] = (metas || [])
+      .filter((m: any) => !isDraftish(m))
+      .map((m: MdxMeta & any) => {
+        const rawSlug = normalizeSlug(m.slug || "");
+        const { date, iso } = toDisplayDate(m.date || m.updated);
+
+        const coverImage =
+          (typeof m.coverImage === "string" && m.coverImage.trim() ? m.coverImage.trim() : null) ||
+          (typeof m.image === "string" && m.image.trim() ? m.image.trim() : null) ||
+          DEFAULT_COVER;
+
+        const tags = Array.isArray(m.tags) ? (m.tags.filter((t: any) => typeof t === "string") as string[]) : [];
 
         return {
-          slug: bareSlug,
-          url: joinHref("blog", bareSlug),
-          title: doc.title || "Untitled Essay",
-          excerpt: doc.excerpt || doc.description || null,
-          date: doc.date ? new Date(doc.date).toLocaleDateString("en-GB") : null,
-          dateIso: doc.date ? new Date(doc.date).toISOString() : null,
-          readTime: doc.readTime || "5 min read",
-          coverImage: resolveDocCoverImage(doc),
-          tags: Array.isArray(doc.tags) ? doc.tags : [],
-          author: doc.author || "Abraham of London",
-          featured: !!doc.featured,
+          slug: rawSlug,
+          url: joinHref("blog", rawSlug),
+          title: (typeof m.title === "string" && m.title.trim()) ? m.title.trim() : "Untitled Essay",
+          excerpt:
+            (typeof (m.excerpt) === "string" && m.excerpt.trim() ? m.excerpt.trim() : null) ||
+            (typeof (m.description) === "string" && m.description.trim() ? m.description.trim() : null),
+          date,
+          dateIso: iso,
+          readTime: toReadTime(m) || "5 min read",
+          coverImage,
+          tags,
+          author: (typeof m.author === "string" && m.author.trim()) ? m.author.trim() : "Abraham of London",
+          featured: m.featured === true,
 
-          coverAspect: (doc.coverAspect || null) as CoverAspect | null,
-          coverFit: (doc.coverFit || null) as CoverFit | null,
-          coverPosition: (doc.coverPosition || null) as CoverPosition | null,
+          coverAspect: (m.coverAspect || null) as CoverAspect | null,
+          coverFit: (m.coverFit || null) as CoverFit | null,
+          coverPosition: (m.coverPosition || null) as CoverPosition | null,
         };
       })
       .sort((a, b) => (b.dateIso || "").localeCompare(a.dateIso || ""));

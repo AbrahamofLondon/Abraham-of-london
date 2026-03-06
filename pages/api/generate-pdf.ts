@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await logAuditEvent({
       actorType: "admin",
       actorId: auth.userId || "unknown_admin",
-      action: AUDIT_ACTIONS.WRITE,
+      action: AUDIT_ACTIONS.UPDATE,
       resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
       status: result.success ? "success" : "failed",
       ipAddress: ip,

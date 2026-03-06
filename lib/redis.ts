@@ -1,9 +1,13 @@
 // lib/redis.ts - ULTIMATE SINGLE SOURCE OF TRUTH (RECOVERY-READY)
-import Redis from 'ioredis';
+// ✅ Node/server only. Do NOT import this from middleware/edge.
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+import Redis from "ioredis";
+
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+
 // Determine if we are running in a CLI script or the Vault Master Audit
-const IS_SCRIPT_MODE = process.env.REDIS_DISABLED === 'true' || process.argv[1]?.includes('scripts/');
+const IS_SCRIPT_MODE =
+  process.env.REDIS_DISABLED === "true" || process.argv[1]?.includes("scripts/");
 
 let redisInstance: Redis | null = null;
 
@@ -12,74 +16,58 @@ let redisInstance: Redis | null = null;
  * Optimized for high-volume asset registration during Vault Sync.
  */
 function createRedisClient(): Redis {
-  console.log(`[Redis] Initializing ${IS_SCRIPT_MODE ? 'Script-Mode' : 'Standard'} connection`);
-  
+  console.log(
+    `[Redis] Initializing ${IS_SCRIPT_MODE ? "Script-Mode" : "Standard"} connection`
+  );
+
   const client = new Redis(REDIS_URL, {
-    // 🏛️ [RECOVERY LOGIC]: Allow more retries in scripts to handle the "Healing" phase load.
-    maxRetriesPerRequest: IS_SCRIPT_MODE ? 5 : 3, 
-    
+    // 🏛️ [RECOVERY LOGIC]
+    maxRetriesPerRequest: IS_SCRIPT_MODE ? 5 : 3,
+
     retryStrategy: (times) => {
-      // If we hit 10 attempts, the infrastructure is likely down.
       if (times > 10) {
-        console.error('[Redis] Max retries reached. Infrastructure unreachable.');
-        return null; 
+        console.error("[Redis] Max retries reached. Infrastructure unreachable.");
+        return null;
       }
-      // Exponential backoff: 100ms, 200ms, etc., capped at 3s.
       return Math.min(times * 100, 3000);
     },
-    
-    // 🏛️ [BUFFER MANAGEMENT]: Must be true to prevent "Stream isn't writeable" during 81+ asset syncs.
-    enableOfflineQueue: true, 
-    
+
+    // 🏛️ [BUFFER MANAGEMENT]
+    enableOfflineQueue: true,
+
     lazyConnect: true,
-    connectTimeout: 5000, // Increased for Windows/WSL environment latencies
-    
-    // 🏛️ [IO PROTECTION]: Removed the 1000ms cap. 
-    // Vault registration of complex metadata can exceed 1s on local hardware.
-    commandTimeout: undefined, 
-    
-    reconnectOnError: (err) => {
-      // Reconnect automatically if the cluster is in a READONLY state
-      return err.message.includes("READONLY");
-    }
+    connectTimeout: 5000,
+
+    // 🏛️ [IO PROTECTION]
+    commandTimeout: undefined,
+
+    reconnectOnError: (err) => err.message.includes("READONLY"),
   });
 
-  client.on('error', (err) => {
-    // Always log errors, but keep them concise
+  client.on("error", (err) => {
     console.error(`[Redis] ${err.message}`);
-    
-    // DO NOT nullify redisInstance on transient errors
-    // Let ioredis handle reconnection internally
-    // Only nullify on fatal conditions if absolutely necessary
   });
 
   return client;
 }
 
-/**
- * Returns the singleton Redis instance.
- */
+/** Returns the singleton Redis instance. */
 export function getRedis(): Redis {
-  if (!redisInstance) {
-    redisInstance = createRedisClient();
-  }
+  if (!redisInstance) redisInstance = createRedisClient();
   return redisInstance;
 }
 
-/**
- * Validates connection health with a timeout race.
- */
+/** Validates connection health with a timeout race. */
 export async function isRedisAvailable(): Promise<boolean> {
-  if (typeof window !== 'undefined') return false;
-  
+  if (typeof window !== "undefined") return false;
+
   try {
     const client = getRedis();
-    // Use a relaxed 3s timeout for Windows/Docker health checks
     const pingPromise = client.ping();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Health Check Timeout')), 3000)
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Health Check Timeout")), 3000)
     );
-    
+
     await Promise.race([pingPromise, timeoutPromise]);
     return true;
   } catch {
@@ -87,18 +75,16 @@ export async function isRedisAvailable(): Promise<boolean> {
   }
 }
 
-/**
- * Graceful shutdown for cleanup phases.
- */
+/** Graceful shutdown for cleanup phases. */
 export async function closeRedis(): Promise<void> {
-  if (redisInstance) {
-    try {
-      await redisInstance.quit();
-    } catch {
-      redisInstance.disconnect();
-    } finally {
-      redisInstance = null;
-    }
+  if (!redisInstance) return;
+
+  try {
+    await redisInstance.quit();
+  } catch {
+    redisInstance.disconnect();
+  } finally {
+    redisInstance = null;
   }
 }
 
@@ -108,7 +94,7 @@ const redisExports = {
   closeRedis,
   get client() {
     return getRedis();
-  }
+  },
 };
 
 export default redisExports;

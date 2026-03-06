@@ -1,9 +1,11 @@
 // lib/events.ts
-// Events data facade
+// Events data facade (MDX-backed)
 
-import { getAllEventsMeta, getEventBySlug as getEventBySlugServer } from "@/lib/server/events-data";
+import {
+  getAllEventsMeta,
+  getEventBySlug as getEventBySlugServer,
+} from "@/lib/server/events-data";
 import { safeSlice } from "@/lib/utils/safe";
-
 
 // Type definitions
 export type Event = any;
@@ -11,11 +13,11 @@ export type EventMeta = Event;
 export type EventFieldKey = keyof EventMeta;
 
 /**
- * Get all events
+ * Get all events (async)
  */
-export function getAllEvents(): EventMeta[] {
+export async function getAllEvents(): Promise<EventMeta[]> {
   try {
-    const events = getAllEventsMeta();
+    const events = await getAllEventsMeta();
     return Array.isArray(events) ? events : [];
   } catch {
     return [];
@@ -23,53 +25,56 @@ export function getAllEvents(): EventMeta[] {
 }
 
 /**
- * Get event by slug
+ * Get event by slug (async)
  */
-export function getEventBySlug(slug: string): Event | null {
+export async function getEventBySlug(slug: string): Promise<Event | null> {
   try {
-    return getEventBySlugServer(slug);
+    return await getEventBySlugServer(slug);
   } catch {
     return null;
   }
 }
 
 /**
- * Get event slugs
+ * Get event slugs (async)
  */
-export function getEventSlugs(): string[] {
-  const events = getAllEvents();
-  return events.map(e => e.slug).filter(Boolean);
+export async function getEventSlugs(): Promise<string[]> {
+  const events = await getAllEvents();
+  return events.map((e: any) => e?.slug).filter(Boolean);
 }
 
 /**
- * Get public events
+ * Get public events (async)
  */
-export function getPublicEvents(): EventMeta[] {
-  const events = getAllEvents();
-  return events.filter(event => {
-    const isDraft = event.draft === true;
-    const isNotPublished = event.published === false;
-    const isStatusDraft = event.status === 'draft';
+export async function getPublicEvents(): Promise<EventMeta[]> {
+  const events = await getAllEvents();
+  return events.filter((event: any) => {
+    const isDraft = event?.draft === true;
+    const isNotPublished = event?.published === false;
+    const isStatusDraft = event?.status === "draft";
     return !(isDraft || isNotPublished || isStatusDraft);
   });
 }
 
 /**
- * Get upcoming events
+ * Get upcoming events (async)
  */
-export function getUpcomingEvents(limit?: number): EventMeta[] {
-  const events = getPublicEvents();
-  const now = new Date();
-  const upcoming = events.filter(e => {
-    if (!e.eventDate) return false;
-    const eventDate = new Date(e.eventDate);
-    return eventDate >= now;
-  }).sort((a, b) => {
-    const dateA = new Date(a.eventDate || '').getTime();
-    const dateB = new Date(b.eventDate || '').getTime();
-    return dateA - dateB;
-  });
-  return limit ? safeSlice(upcoming, 0, limit) : upcoming;
+export async function getUpcomingEvents(limit?: number): Promise<EventMeta[]> {
+  const events = await getPublicEvents();
+  const now = Date.now();
+
+  const upcoming = events
+    .filter((e: any) => {
+      if (!e?.eventDate) return false;
+      const t = Date.parse(String(e.eventDate));
+      if (!Number.isFinite(t)) return false;
+      return t >= now;
+    })
+    .sort((a: any, b: any) => {
+      const ta = Date.parse(String(a?.eventDate || ""));
+      const tb = Date.parse(String(b?.eventDate || ""));
+      return (Number.isFinite(ta) ? ta : 0) - (Number.isFinite(tb) ? tb : 0);
+    });
+
+  return typeof limit === "number" ? safeSlice(upcoming, 0, limit) : upcoming;
 }
-
-

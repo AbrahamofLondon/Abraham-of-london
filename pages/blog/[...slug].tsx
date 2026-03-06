@@ -34,13 +34,37 @@ type BlogSlugProps = {
 
 const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
 
+function collapseSlashes(s: string): string {
+  return String(s || "").replace(/\\/g, "/").replace(/\/{2,}/g, "/");
+}
+
 function toBareBlogSlug(input: string) {
-  const n = normalizeSlug(input || "");
-  return n
-    .replace(/^blog\//i, "")
-    .replace(/^\/blog\//i, "")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "");
+  let s = collapseSlashes(String(input || "")).trim();
+  s = normalizeSlug(s);
+
+  // strip leading blog/ or posts/ repeatedly
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const lower = s.toLowerCase();
+    if (lower.startsWith("blog/")) {
+      s = normalizeSlug(s.slice("blog/".length));
+      changed = true;
+    } else if (lower.startsWith("posts/")) {
+      s = normalizeSlug(s.slice("posts/".length));
+      changed = true;
+    } else if (lower.startsWith("/blog/")) {
+      s = normalizeSlug(s.slice("/blog/".length));
+      changed = true;
+    } else if (lower.startsWith("/posts/")) {
+      s = normalizeSlug(s.slice("/posts/".length));
+      changed = true;
+    }
+  }
+
+  s = normalizeSlug(s);
+  if (!s || s.includes("..")) return "";
+  return s;
 }
 
 function extractCode(doc: any): string {
@@ -223,9 +247,7 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier }) => {
               <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">{title}</h1>
 
               {excerpt ? (
-                <p className="mt-4 text-sm md:text-base text-white/55 leading-relaxed max-w-2xl">
-                  {excerpt}
-                </p>
+                <p className="mt-4 text-sm md:text-base text-white/55 leading-relaxed max-w-2xl">{excerpt}</p>
               ) : null}
 
               <div className="mt-8 aol-hairline" />
@@ -265,9 +287,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .map((p: any) => {
       const raw = normalizeSlug(p.slug || p._raw?.flattenedPath || "");
       const bare = toBareBlogSlug(raw);
-      return { params: { slug: bare } };
+      return bare ? { params: { slug: bare } } : null;
     })
-    .filter((x: any) => x?.params?.slug);
+    .filter(Boolean) as Array<{ params: { slug: string } }>;
 
   return { paths, fallback: "blocking" };
 };
@@ -276,19 +298,21 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
   try {
     const param = String(params?.slug || "");
     const bare = toBareBlogSlug(param);
-    const want = `blog/${bare}`;
+    if (!bare) return { notFound: true };
+
+    const wantBlog = `blog/${bare}`;
+    const wantPosts = `posts/${bare}`;
 
     const posts = getPublishedPosts() || [];
     const doc =
-      posts.find((p: any) => normalizeSlug(p.slug || "") === want) ||
-      posts.find((p: any) => normalizeSlug(p._raw?.flattenedPath || "") === want);
+      posts.find((p: any) => normalizeSlug(p.slug || "") === wantBlog) ||
+      posts.find((p: any) => normalizeSlug(p._raw?.flattenedPath || "") === wantBlog) ||
+      posts.find((p: any) => normalizeSlug(p.slug || "") === wantPosts) ||
+      posts.find((p: any) => normalizeSlug(p._raw?.flattenedPath || "") === wantPosts);
 
     if (!doc || doc?.draft) return { notFound: true };
 
-    // ✅ SSOT required tier
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
-
-    // ✅ PUBLIC ALWAYS SHIPS CODE
     const code = requiredTier === "public" ? extractCode(doc) : "";
 
     return {
@@ -300,6 +324,7 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
       revalidate: 1800,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("[Blog] Error in getStaticProps:", error);
     return { notFound: true, revalidate: 60 };
   }

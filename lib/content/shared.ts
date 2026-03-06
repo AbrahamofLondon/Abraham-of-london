@@ -5,10 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AccessTier } from "@/lib/access/tier-policy";
-import {
-  normalizeRequiredTier,
-  requiredTierFromDoc,
-} from "@/lib/access/tier-policy";
+import { requiredTierFromDoc } from "@/lib/access/tier-policy";
 
 export type DocKind =
   | "blog"
@@ -73,6 +70,37 @@ export function stripCollectionPrefix(prefix: string, slug: string): string {
     if (s.toLowerCase() === p.toLowerCase()) return "";
     s = s.slice(p.length + 1);
     s = normalizeSlug(s);
+  }
+
+  return s;
+}
+
+/**
+ * stripAnyPrefix (small helper)
+ * Removes the first matching prefix from a list (repeatedly).
+ */
+function stripAnyPrefix(prefixes: string[], slug: string): string {
+  let s = normalizeSlug(slug);
+  let changed = true;
+
+  const ps = prefixes.map((p) => normalizeSlug(p)).filter(Boolean);
+
+  while (changed) {
+    changed = false;
+    for (const p of ps) {
+      const pl = p.toLowerCase();
+      const sl = s.toLowerCase();
+      if (sl === pl) {
+        s = "";
+        changed = true;
+        break;
+      }
+      if (sl.startsWith(pl + "/")) {
+        s = normalizeSlug(s.slice(p.length + 1));
+        changed = true;
+        break;
+      }
+    }
   }
 
   return s;
@@ -152,28 +180,20 @@ export function isPublished(doc: AnyDoc): boolean {
  * Uses tier-policy.ts for canonical mapping
  */
 export function getAccessLevel(doc: AnyDoc): AccessLevel {
-  // Use SSOT policy to get required tier
   return requiredTierFromDoc(doc);
 }
 
 /**
- * Legacy alias for backward compatibility
- * @deprecated Use getAccessLevel instead - returns SSOT AccessTier
+ * Legacy alias
  */
 export function getDocTier(doc: AnyDoc): AccessLevel {
   return getAccessLevel(doc);
 }
 
-/**
- * Check if document is public
- */
 export function isPublic(doc: AnyDoc): boolean {
   return getAccessLevel(doc) === "public";
 }
 
-/**
- * Check if document requires authentication
- */
 export function requiresAuth(doc: AnyDoc): boolean {
   return getAccessLevel(doc) !== "public";
 }
@@ -181,6 +201,7 @@ export function requiresAuth(doc: AnyDoc): boolean {
 export function getDocKind(doc: AnyDoc): DocKind {
   const t = String(doc?.type || "").toLowerCase();
 
+  // NOTE: your Contentlayer-helper uses "post"
   if (t.includes("post") || t.includes("blog")) return "blog";
   if (t.includes("book")) return "book";
   if (t.includes("canon")) return "canon";
@@ -192,7 +213,9 @@ export function getDocKind(doc: AnyDoc): DocKind {
   if (t.includes("strategy")) return "strategy";
 
   const slug = normalizeSlug(String(doc?.slug || doc?._raw?.flattenedPath || ""));
-  if (slug.startsWith("blog/")) return "blog";
+
+  // ✅ support both blog/ and posts/ (this is the missing piece)
+  if (slug.startsWith("blog/") || slug.startsWith("posts/")) return "blog";
   if (slug.startsWith("books/")) return "book";
   if (slug.startsWith("canon/")) return "canon";
   if (slug.startsWith("downloads/")) return "download";
@@ -218,13 +241,14 @@ export function getDocHref(doc: AnyDoc): string {
   }
 
   const kind = getDocKind(doc);
-
-  // Prefer slug; fallback to flattenedPath; then id
   const rawSlug = normalizeSlug(String(doc?.slug || doc?._raw?.flattenedPath || doc?._id || ""));
 
   switch (kind) {
-    case "blog":
-      return joinHref("blog", stripCollectionPrefix("blog", rawSlug));
+    case "blog": {
+      // ✅ CRITICAL: strip both blog/ and posts/
+      const bare = stripAnyPrefix(["blog", "posts"], rawSlug);
+      return joinHref("blog", bare);
+    }
     case "book":
       return joinHref("books", stripCollectionPrefix("books", rawSlug));
     case "canon":

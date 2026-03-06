@@ -1,19 +1,14 @@
 // lib/server/db.ts
+import "server-only";
 import { prisma } from "@/lib/prisma.server";
+import type { PrismaClient } from "@prisma/client";
 
-export async function withDb<T>(fn: () => Promise<T>): Promise<T> {
+export async function withDb<T>(fn: (db: PrismaClient) => Promise<T>): Promise<T> {
   try {
-    return await fn();
-  } catch (err) {
-    // you can add targeted error mapping here later (Prisma known codes)
-    throw err;
+    return await fn(prisma);
   } finally {
-    // In serverless, you generally do NOT want to disconnect on every request.
-    // But you *do* want the option in rare cases:
     if (process.env.PRISMA_FORCE_DISCONNECT === "true") {
-      await prisma.$disconnect().catch(() => null);
+      try { await prisma.$disconnect(); } catch {}
     }
   }
 }
-
-

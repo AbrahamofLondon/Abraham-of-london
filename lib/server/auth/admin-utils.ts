@@ -1,7 +1,14 @@
 // lib/server/auth/admin-utils.ts
+import "server-only";
+
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { authenticator } from "@otplib/preset-default";
+
 import { prisma } from "@/lib/prisma";
+import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
+import { normalizeUserTier, hasAccess as tierHasAccess } from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/tier-policy";
 
 export type AdminRole = "admin" | "superadmin" | "editor";
 
@@ -9,18 +16,25 @@ export type AdminAuthResult = {
   success: boolean;
   user?: {
     id: string;
-    username: string;
+    username: string; // email
     role: AdminRole;
     permissions: string[];
     mfaEnabled: boolean;
+    tier?: AccessTier;
   };
   error?: string;
   requiresMFA?: boolean;
+
+  // If requiresMFA=true, caller should prompt for TOTP and call verifyAdminTotp()
+  mfa?: {
+    method: "totp";
+    setupId: string;
+  };
 };
 
 type AdminJwtPayload = {
-  sub: string; // admin user id
-  username: string;
+  sub: string; // InnerCircleMember.id
+  username: string; // email
   role: AdminRole;
   permissions: string[];
   typ: "admin";
@@ -28,111 +42,173 @@ type AdminJwtPayload = {
   exp?: number;
 };
 
+const ADMIN_MIN_TIER: AccessTier = "architect";
+
 function getAdminJwtSecret(): string {
   const secret = process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET;
-  if (!secret) {
-    throw new Error("Missing ADMIN_JWT_SECRET (or NEXTAUTH_SECRET fallback).");
-  }
+  if (!secret) throw new Error("Missing ADMIN_JWT_SECRET (or NEXTAUTH_SECRET fallback).");
   return secret;
 }
 
 async function audit(event: string, meta: Record<string, unknown>) {
-  // If you don’t have an AuditLog model, either create it or replace this with console logging.
   try {
-    await prisma.auditLog.create({
-      data: {
-        event,
-        meta: JSON.stringify(meta),
-      },
+    await logAuditEvent({
+      actorType: "system",
+      action: event,
+      resourceType: AUDIT_CATEGORIES.ADMIN_ACTION,
+      resourceId: "admin-auth",
+      status: "success",
+      severity: "medium",
+      details: meta,
     });
   } catch {
-    // fail-closed on auth, but fail-open on logging
+    // fail-open
   }
 }
 
 /**
- * Verifies admin credentials against your DB.
- *
- * Expected Prisma model (example):
- * model AdminUser {
- *   id           String  @id @default(cuid())
- *   username     String  @unique
- *   passwordHash String
- *   role         String
- *   permissions  String[] // postgres
- *   mfaEnabled   Boolean @default(false)
- *   disabled     Boolean @default(false)
- * }
+ * ✅ Phase 1: Verify credentials + tier gate.
+ * ✅ If MFA is enabled+verified, return requiresMFA=true (do NOT issue admin token yet).
  */
-export async function verifyAdminCredentials(
-  username: string,
-  password: string
-): Promise<AdminAuthResult> {
+export async function verifyAdminCredentials(username: string, password: string): Promise<AdminAuthResult> {
   try {
-    const normalized = username.trim().toLowerCase();
+    const normalized = String(username || "").trim().toLowerCase();
     if (!normalized || !password) return { success: false, error: "Invalid credentials" };
 
-    const user = await prisma.adminUser.findUnique({
-      where: { username: normalized },
+    const passwordHash = process.env.ADMIN_PASSWORD_HASH || "";
+    if (!passwordHash) {
+      await audit(AUDIT_ACTIONS.LOGIN_FAILED, { username: normalized, reason: "ADMIN_PASSWORD_HASH_missing" });
+      return { success: false, error: "Admin authentication not configured" };
+    }
+
+    // Optional allowlist hardening
+    const allowRaw = String(process.env.ADMIN_ALLOWED_EMAILS || "").trim();
+    if (allowRaw) {
+      const allow = new Set(
+        allowRaw
+          .split(",")
+          .map((s) => s.trim().toLowerCase())
+          .filter(Boolean)
+      );
+      if (!allow.has(normalized)) {
+        await audit(AUDIT_ACTIONS.ACCESS_DENIED, { username: normalized, reason: "email_not_allowlisted" });
+        return { success: false, error: "Invalid credentials" };
+      }
+    }
+
+    const member = await prisma.innerCircleMember.findUnique({
+      where: { email: normalized },
       select: {
         id: true,
-        username: true,
+        email: true,
         role: true,
+        tier: true,
+        status: true,
         permissions: true,
-        mfaEnabled: true,
-        disabled: true,
-        passwordHash: true,
       },
     });
 
-    if (!user || user.disabled) {
-      await audit("admin_login_failed", { username: normalized, reason: "not_found_or_disabled" });
+    if (!member || String(member.status || "").toLowerCase() !== "active") {
+      await audit(AUDIT_ACTIONS.LOGIN_FAILED, { username: normalized, reason: "not_found_or_inactive" });
       return { success: false, error: "Invalid credentials" };
     }
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
+    const tier = normalizeUserTier((member.tier as any) ?? "public");
+    if (!tierHasAccess(tier, ADMIN_MIN_TIER)) {
+      await audit(AUDIT_ACTIONS.ACCESS_DENIED, { username: normalized, reason: "tier_insufficient", tier });
+      return { success: false, error: "Invalid credentials" };
+    }
+
+    const ok = await bcrypt.compare(password, passwordHash);
     if (!ok) {
-      await audit("admin_login_failed", { username: normalized, reason: "bad_password" });
+      await audit(AUDIT_ACTIONS.LOGIN_FAILED, { username: normalized, reason: "bad_password" });
       return { success: false, error: "Invalid credentials" };
     }
 
-    // If MFA is enabled, your login route should now challenge for OTP.
-    if (user.mfaEnabled) {
-      await audit("admin_login_mfa_required", { adminId: user.id, username: user.username });
+    // ✅ DB-backed MFA gate (schema exists)
+    const setup = await prisma.mfaSetup.findUnique({
+      where: { userId: member.id },
+      select: { id: true, enabled: true, totpVerified: true, methods: true },
+    });
+
+    const mfaEnabled = !!(setup?.enabled && setup?.totpVerified && Array.isArray(setup?.methods) && setup.methods.includes("totp"));
+
+    const role: AdminRole = String(member.role || "").toUpperCase() === "ADMIN" ? "superadmin" : "admin";
+
+    if (mfaEnabled) {
+      await audit("admin_login_mfa_required", { adminId: member.id, username: member.email, tier, role });
+
       return {
         success: false,
         requiresMFA: true,
         user: {
-          id: user.id,
-          username: user.username,
-          role: user.role as AdminRole,
-          permissions: user.permissions ?? [],
+          id: member.id,
+          username: member.email || normalized,
+          role,
+          permissions: (member.permissions as any) ?? [],
           mfaEnabled: true,
+          tier,
+        },
+        mfa: {
+          method: "totp",
+          setupId: setup!.id,
         },
       };
     }
 
-    await audit("admin_login_success", { adminId: user.id, username: user.username });
+    await audit(AUDIT_ACTIONS.LOGIN_SUCCESS, { adminId: member.id, username: member.email, tier, role });
 
     return {
       success: true,
       user: {
-        id: user.id,
-        username: user.username,
-        role: user.role as AdminRole,
-        permissions: user.permissions ?? [],
-        mfaEnabled: user.mfaEnabled,
+        id: member.id,
+        username: member.email || normalized,
+        role,
+        permissions: (member.permissions as any) ?? [],
+        mfaEnabled: false,
+        tier,
       },
     };
   } catch (err) {
-    await audit("admin_login_error", { error: String(err), username });
+    await audit(AUDIT_ACTIONS.API_ERROR, { error: String(err), username });
     return { success: false, error: "Authentication failed" };
   }
 }
 
 /**
+ * ✅ Phase 2: Verify TOTP code (only after verifyAdminCredentials returns requiresMFA=true)
+ */
+export async function verifyAdminTotp(input: { userId: string; code: string }): Promise<{ ok: boolean; error?: string }> {
+  const userId = String(input.userId || "").trim();
+  const code = String(input.code || "").trim();
+
+  if (!userId || !code) return { ok: false, error: "Missing userId or code" };
+  if (code.length > 12) return { ok: false, error: "Invalid code format" };
+
+  const setup = await prisma.mfaSetup.findUnique({
+    where: { userId },
+    select: { enabled: true, totpVerified: true, totpSecret: true, methods: true },
+  });
+
+  if (!setup?.enabled || !setup?.totpVerified || !setup?.totpSecret) {
+    return { ok: false, error: "MFA not configured" };
+  }
+
+  if (!Array.isArray(setup.methods) || !setup.methods.includes("totp")) {
+    return { ok: false, error: "TOTP not enabled" };
+  }
+
+  // TOTP verify (default otplib window is okay; if you want drift tolerance, set authenticator.options.window)
+  const ok = authenticator.verify({ token: code, secret: setup.totpSecret });
+
+  await audit(ok ? "admin_mfa_totp_verified" : "admin_mfa_totp_failed", { userId });
+
+  return ok ? { ok: true } : { ok: false, error: "Invalid code" };
+}
+
+/**
  * Issue an admin session token (JWT).
- * Store this in an httpOnly cookie from your API route.
+ * Only call this after MFA (if required) passes.
  */
 export function issueAdminSessionToken(input: {
   id: string;
@@ -150,21 +226,15 @@ export function issueAdminSessionToken(input: {
     typ: "admin",
   };
 
-  // 8h is a sane default for an admin console
   return jwt.sign(payload, secret, { expiresIn: "8h" });
 }
 
-/**
- * Verifies an admin session token (JWT).
- * Returns the embedded identity/permissions if valid, else null.
- */
-export async function verifyAdminSession(
-  sessionToken: string
-): Promise<{
+export async function verifyAdminSession(sessionToken: string): Promise<{
   id: string;
   username: string;
   role: AdminRole;
   permissions: string[];
+  tier?: AccessTier;
 } | null> {
   try {
     if (!sessionToken) return null;
@@ -174,19 +244,22 @@ export async function verifyAdminSession(
 
     if (!decoded || decoded.typ !== "admin" || !decoded.sub) return null;
 
-    // Optional hardening: confirm user still exists / not disabled (recommended)
-    const user = await prisma.adminUser.findUnique({
+    const member = await prisma.innerCircleMember.findUnique({
       where: { id: decoded.sub },
-      select: { id: true, username: true, role: true, permissions: true, disabled: true },
+      select: { id: true, email: true, status: true, tier: true },
     });
 
-    if (!user || user.disabled) return null;
+    if (!member || String(member.status || "").toLowerCase() !== "active") return null;
+
+    const tier = normalizeUserTier((member.tier as any) ?? "public");
+    if (!tierHasAccess(tier, ADMIN_MIN_TIER)) return null;
 
     return {
-      id: user.id,
-      username: user.username,
-      role: user.role as AdminRole,
-      permissions: user.permissions ?? [],
+      id: member.id,
+      username: member.email || decoded.username,
+      role: decoded.role,
+      permissions: decoded.permissions ?? [],
+      tier,
     };
   } catch {
     return null;

@@ -21,6 +21,23 @@ export type StrategicHealthReport = {
   }>;
 };
 
+// ---- Explicit result shapes (prevents implicit any) ----
+type PageViewBySlugRow = {
+  slug: string | null;
+  _count: { _all: number };
+};
+
+type PageViewBySlugMemberRow = {
+  slug: string | null;
+  memberId: string | null;
+  _count: { _all: number };
+};
+
+type AuditActionRow = {
+  action: string;
+  _count: { _all: number };
+};
+
 /**
  * INSTITUTIONAL HEALTH REPORT
  * - Uses only models that exist in your current Prisma schema:
@@ -36,10 +53,9 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
       keyCount,
       intakeCount,
       breachCount,
-      // PageView aggregates
-      viewsBySlug,
-      uniqueBySlugMember,
-      auditStats,
+      viewsBySlugRaw,
+      uniqueBySlugMemberRaw,
+      auditStatsRaw,
     ] = await Promise.all([
       // 1) Total active members
       prisma.innerCircleMember.count({
@@ -100,11 +116,17 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
       }),
     ]);
 
+    // ✅ Force stable typings (prevents implicit any in map callbacks)
+    const viewsBySlug = viewsBySlugRaw as unknown as PageViewBySlugRow[];
+    const uniqueBySlugMember = uniqueBySlugMemberRaw as unknown as PageViewBySlugMemberRow[];
+    const auditStats = auditStatsRaw as unknown as AuditActionRow[];
+
     // Build a map slug -> unique principals
     const uniqueMap = new Map<string, number>();
     for (const row of uniqueBySlugMember) {
       const slug = row.slug ?? "";
       if (!slug) continue;
+      // Each (slug, memberId) group row counts as 1 unique principal for that slug
       uniqueMap.set(slug, (uniqueMap.get(slug) ?? 0) + 1);
     }
 
@@ -115,7 +137,7 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
         recentIntakes: intakeCount,
         perimeterBreaches: breachCount,
       },
-      engagement: viewsBySlug.map((stat) => {
+      engagement: viewsBySlug.map((stat: PageViewBySlugRow) => {
         const slug = stat.slug ?? "unknown";
         return {
           shortSlug: slug,
@@ -123,7 +145,7 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
           uniquePrincipals: uniqueMap.get(slug) ?? 0,
         };
       }),
-      auditTrends: auditStats.map((stat) => ({
+      auditTrends: auditStats.map((stat: AuditActionRow) => ({
         action: stat.action,
         _count: stat._count._all,
       })),

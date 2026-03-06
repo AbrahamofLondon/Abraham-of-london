@@ -1,12 +1,10 @@
-// lib/server/cache.ts - ONLY cache functionality
-import type { RedisClient as RedisWrapperClient } from "@/lib/redis-enhanced";
+// lib/server/cache.ts - ONLY cache functionality (type-safe, wrapper-agnostic)
 
-// Cache configuration
-interface CacheOptions {
+type CacheOptions = {
   ttl?: number; // seconds
   namespace?: string;
   staleWhileRevalidate?: number; // seconds
-}
+};
 
 interface CacheEntry<T> {
   data: T;
@@ -16,13 +14,32 @@ interface CacheEntry<T> {
   lastModified?: string;
 }
 
-type RedisLike = Pick<
-  RedisWrapperClient,
-  "get" | "set" | "del" | "keys" | "mget"
-> & {
-  // optional methods depending on backend
+/**
+ * Minimal Redis surface we rely on (wrapper-agnostic).
+ * Supports:
+ * - Upstash style: set(key, value, { ex })
+ * - ioredis style: set(key, value, "EX", seconds)
+ */
+type RedisLike = {
+  get: (key: string) => Promise<string | null>;
+  set: (key: string, value: string, ...args: any[]) => Promise<any>;
+  del: (...keys: string[]) => Promise<number> | Promise<any>;
+  keys: (pattern: string) => Promise<string[]>;
+  mget?: (...keys: string[]) => Promise<(string | null)[]>;
   ping?: () => Promise<string>;
 };
+
+function nowMs() {
+  return Date.now();
+}
+
+function safeJsonParse<T>(raw: string): T | null {
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
 
 export class Cache<T = any> {
   private memoryCache = new Map<string, CacheEntry<T>>();
@@ -41,13 +58,31 @@ export class Cache<T = any> {
   }
 
   /**
-   * Get the redis wrapper (MemoryRedis fallback already handled inside)
+   * Get the redis wrapper (Memory fallback handled by "@/lib/redis" in your stack)
+   * IMPORTANT: This file stays pages-safe; dynamic import avoids hard coupling.
    */
   private async getRedis(): Promise<RedisLike | null> {
     try {
-      const { getRedis } = await import("@/lib/redis");
-      const redis = getRedis(); // returns wrapper (sync)
-      return redis as any;
+      // Your project uses "@/lib/redis" as the canonical resolver in several places.
+      // If it doesn't exist in some environments, we fail open to memory.
+      const mod = (await import("@/lib/redis")) as any;
+
+      // allow either:
+      // - export function getRedis(): RedisLike
+      // - default export { getRedis }
+      const getRedisFn = mod?.getRedis || mod?.default?.getRedis;
+      if (typeof getRedisFn !== "function") return null;
+
+      const redis = getRedisFn();
+      if (!redis) return null;
+
+      // duck-type validate
+      if (typeof redis.get !== "function" || typeof redis.set !== "function" || typeof redis.keys !== "function") {
+        return null;
+      }
+      if (typeof redis.del !== "function") return null;
+
+      return redis as RedisLike;
     } catch (e) {
       console.warn("[Cache] Redis wrapper not available:", e);
       return null;
@@ -56,25 +91,34 @@ export class Cache<T = any> {
 
   async get(key: string): Promise<T | null> {
     const cacheKey = this.generateKey(key);
-    const now = Date.now();
+    const now = nowMs();
 
     // 1) Memory
     const mem = this.memoryCache.get(cacheKey);
     if (mem && now < mem.expiresAt) return mem.data;
     if (mem && now >= mem.expiresAt) this.memoryCache.delete(cacheKey);
 
-    // 2) Redis wrapper (or memory redis behind the wrapper)
+    // 2) Redis
     try {
       const r = await this.getRedis();
-      if (r) {
-        const raw = await r.get(cacheKey);
-        if (raw) {
-          const entry = JSON.parse(raw) as CacheEntry<T>;
-          if (now < entry.expiresAt) {
-            this.memoryCache.set(cacheKey, entry);
-            return entry.data;
-          }
-        }
+      if (!r) return null;
+
+      const raw = await r.get(cacheKey);
+      if (!raw) return null;
+
+      const entry = safeJsonParse<CacheEntry<T>>(raw);
+      if (!entry) return null;
+
+      if (now < entry.expiresAt) {
+        this.memoryCache.set(cacheKey, entry);
+        return entry.data;
+      }
+
+      // expired -> cleanup best-effort
+      try {
+        await r.del(cacheKey);
+      } catch {
+        // ignore
       }
     } catch (e) {
       console.warn("[Cache] get failed:", e);
@@ -90,7 +134,7 @@ export class Cache<T = any> {
   ): Promise<void> {
     const cacheKey = this.generateKey(key);
     const ttl = options?.ttl ?? this.defaultTTL;
-    const now = Date.now();
+    const now = nowMs();
     const expiresAt = now + ttl * 1000;
 
     const entry: CacheEntry<T> = {
@@ -101,15 +145,25 @@ export class Cache<T = any> {
       lastModified: options?.lastModified,
     };
 
-    // Memory
+    // 1) Memory
     this.memoryCache.set(cacheKey, entry);
 
-    // Redis
+    // 2) Redis
     try {
       const r = await this.getRedis();
-      if (r) {
-        await r.set(cacheKey, JSON.stringify(entry), { EX: ttl } as any);
+      if (!r) return;
+
+      const payload = JSON.stringify(entry);
+
+      // Prefer Upstash style if supported: set(key, value, { ex })
+      try {
+        await r.set(cacheKey, payload, { ex: ttl });
+        return;
+      } catch {
+        // Fallback to ioredis style: set(key, value, "EX", seconds)
       }
+
+      await r.set(cacheKey, payload, "EX", ttl);
     } catch (e) {
       console.warn("[Cache] set failed:", e);
     }
@@ -121,7 +175,8 @@ export class Cache<T = any> {
 
     try {
       const r = await this.getRedis();
-      if (r) await r.del(cacheKey);
+      if (!r) return;
+      await r.del(cacheKey);
     } catch (e) {
       console.warn("[Cache] delete failed:", e);
     }
@@ -129,22 +184,30 @@ export class Cache<T = any> {
 
   async has(key: string): Promise<boolean> {
     const cacheKey = this.generateKey(key);
-    const now = Date.now();
+    const now = nowMs();
 
-    // Memory
+    // 1) Memory
     const mem = this.memoryCache.get(cacheKey);
     if (mem && now < mem.expiresAt) return true;
 
-    // Redis check without requiring EXISTS
+    // 2) Redis
     try {
       const r = await this.getRedis();
-      if (r) {
-        const raw = await r.get(cacheKey);
-        if (!raw) return false;
-        const entry = JSON.parse(raw) as CacheEntry<T>;
-        if (now < entry.expiresAt) return true;
-        // expired -> clean up best-effort
+      if (!r) return false;
+
+      const raw = await r.get(cacheKey);
+      if (!raw) return false;
+
+      const entry = safeJsonParse<CacheEntry<T>>(raw);
+      if (!entry) return false;
+
+      if (now < entry.expiresAt) return true;
+
+      // expired -> cleanup best-effort
+      try {
         await r.del(cacheKey);
+      } catch {
+        // ignore
       }
     } catch (e) {
       console.warn("[Cache] has failed:", e);
@@ -154,19 +217,25 @@ export class Cache<T = any> {
   }
 
   async clear(): Promise<void> {
-    // Memory
+    // 1) Memory (namespace-only)
     for (const k of [...this.memoryCache.keys()]) {
       if (k.startsWith(this.namespace + ":")) this.memoryCache.delete(k);
     }
 
-    // Redis
+    // 2) Redis (namespace-only)
     try {
       const r = await this.getRedis();
-      if (r) {
-        const keys = await r.keys(`${this.namespace}:*`);
-        if (keys?.length) {
-          // del expects single key in our wrapper; do sequential deletes
-          for (const k of keys) await r.del(k);
+      if (!r) return;
+
+      const keys = await r.keys(`${this.namespace}:*`);
+      if (!keys?.length) return;
+
+      // Wrapper del may accept spread or single; handle conservatively.
+      for (const k of keys) {
+        try {
+          await r.del(k);
+        } catch {
+          // ignore
         }
       }
     } catch (e) {
@@ -179,25 +248,25 @@ export class Cache<T = any> {
       memorySize: this.memoryCache.size,
       namespace: this.namespace,
       defaultTTL: this.defaultTTL,
+      staleWhileRevalidate: this.staleWhileRevalidate,
     };
   }
 
   async getWithRevalidation(key: string, fetcher: () => Promise<T>, options?: { ttl?: number }): Promise<T> {
-    const cached = await this.get(key);
-    const now = Date.now();
+    const cacheKey = this.generateKey(key);
+    const now = nowMs();
 
-    if (cached) {
-      const cacheKey = this.generateKey(key);
+    const cached = await this.get(key);
+    if (cached !== null) {
       const mem = this.memoryCache.get(cacheKey);
 
-      // If within stale-while-revalidate window, serve cached
+      // stale-while-revalidate window
       if (mem && now < mem.expiresAt + this.staleWhileRevalidate * 1000) {
-        // revalidate in background if already stale
-        if (now >= mem.expiresAt) this.revalidateInBackground(key, fetcher, options);
+        if (now >= mem.expiresAt) void this.revalidateInBackground(key, fetcher, options);
         return cached;
       }
 
-      // Outside SWR window -> fetch fresh
+      // outside SWR window -> fetch fresh
       const fresh = await fetcher();
       await this.set(key, fresh, options);
       return fresh;
@@ -217,47 +286,40 @@ export class Cache<T = any> {
     }
   }
 
-  // ==================== MISSING EXPORT FUNCTIONS ====================
+  // ==================== STATIC COMPAT FUNCTIONS ====================
   static async getCacheStats(): Promise<{
     memorySize: number;
     namespaces: string[];
     totalEntries: number;
   }> {
-    // This is a simplified implementation
+    // Minimal implementation; you can enhance with redis keyscan if needed.
     return {
       memorySize: 0,
-      namespaces: ['content', 'api', 'session'],
-      totalEntries: 0
+      namespaces: ["content", "api", "session"],
+      totalEntries: 0,
     };
   }
 
   static getCacheKey(baseKey: string, params: Record<string, string | number> = {}): string {
     const paramString = Object.entries(params)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
-      .join('&');
-    
+      .map(([k, v]) => `${k}=${v}`)
+      .join("&");
+
     return paramString ? `${baseKey}?${paramString}` : baseKey;
   }
 
   static async cacheResponse<T>(
     key: string,
     fetcher: () => Promise<T>,
-    options: {
-      ttl?: number;
-      tags?: string[];
-      revalidate?: number;
-    } = {}
+    options: { ttl?: number; tags?: string[]; revalidate?: number } = {}
   ): Promise<T> {
-    const cacheInstance = new Cache<T>({
-      namespace: 'api',
-      ttl: options.ttl || 300
-    });
-    
+    const cacheInstance = new Cache<T>({ namespace: "api", ttl: options.ttl || 300 });
     return cacheInstance.getWithRevalidation(key, fetcher, { ttl: options.ttl });
   }
 }
 
+// ==================== SINGLETONS + COMPAT EXPORTS ====================
 export const cache = new Cache();
 export function createCache<T = any>(options: CacheOptions = {}) {
   return new Cache<T>(options);
@@ -267,7 +329,7 @@ export const contentCache = createCache({ namespace: "content", ttl: 3600 });
 export const apiCache = createCache({ namespace: "api", ttl: 300 });
 export const sessionCache = createCache({ namespace: "session", ttl: 86400 });
 
-// Export the static methods as standalone functions for compatibility
+// Standalone exports (back-compat)
 export const getCacheStats = Cache.getCacheStats;
 export const getCacheKey = Cache.getCacheKey;
 export const cacheResponse = Cache.cacheResponse;

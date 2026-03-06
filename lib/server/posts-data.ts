@@ -1,5 +1,5 @@
-// lib/server/posts-data.ts - SSOT ALIGNED
-// Posts under content/posts/* - COMPLETE ROBUST VERSION
+// lib/server/posts-data.ts — SSOT ALIGNED (MDX: content/blog/*)
+import "server-only";
 
 import {
   getMdxCollectionMeta,
@@ -7,608 +7,166 @@ import {
   type MdxMeta,
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
-import type { Post, ContentEntry, ContentMeta } from "@/types/index";
-import { safeSlice } from "@/lib/utils/safe";
+
+import type { Post } from "@/types/index";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+import { safeSlice } from "@/lib/utils/safe";
 
-export type PostWithContent = Post & {
-  content: string;
-};
+export type PostWithContent = Post & { content: string };
 
-// Extended MDX meta with post-specific fields
-type PostishMdxMeta = MdxMeta & Partial<Post> & {
-  publishDate?: string;
-  releaseDate?: string;
-  [key: string]: any;
-};
-
-type PostishMdxDocument = MdxDocument & {
-  content: string;
-} & Partial<Post>;
-
-// ---------------------------------------------------------------------------
-// SAFE TYPE CONVERTERS (SSOT ALIGNED)
-// ---------------------------------------------------------------------------
-
-function safeString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : undefined;
+function s(v: unknown): string | undefined {
+  return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
-
-function safeNumber(value: unknown): number | undefined {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = parseInt(value, 10);
-    return Number.isNaN(parsed) ? undefined : parsed;
+function b(v: unknown): boolean | undefined {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v === 1;
+  if (typeof v === "string") {
+    const x = v.toLowerCase().trim();
+    if (["true", "yes", "1"].includes(x)) return true;
+    if (["false", "no", "0"].includes(x)) return false;
   }
   return undefined;
 }
-
-function safeBoolean(value: unknown): boolean | undefined {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "string") {
-    const lower = value.toLowerCase().trim();
-    if (lower === "true") return true;
-    if (lower === "false") return false;
-    if (lower === "yes") return true;
-    if (lower === "no") return false;
-    if (lower === "1") return true;
-    if (lower === "0") return false;
-  }
-  if (typeof value === "number") {
-    return value === 1;
+function n(v: unknown): number | undefined {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string") {
+    const x = parseInt(v, 10);
+    return Number.isFinite(x) ? x : undefined;
   }
   return undefined;
 }
-
-function safeArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const filtered = value.filter((item) => typeof item === "string") as string[];
-  return filtered.length > 0 ? filtered : undefined;
+function a(v: unknown): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const out = v.filter((x) => typeof x === "string") as string[];
+  return out.length ? out : undefined;
 }
-
-function safeStatus(
-  value: unknown
-): "draft" | "published" | "scheduled" | "archived" | undefined {
-  if (value === "draft" || value === "published" || value === "scheduled" || value === "archived") {
-    return value;
-  }
-  return undefined;
+function safeAccessLevel(v: unknown): AccessTier | undefined {
+  if (!v) return undefined;
+  return normalizeRequiredTier(v);
 }
-
-/**
- * Safe access level converter - SSOT ALIGNED
- */
-function safeAccessLevel(value: unknown): AccessTier | undefined {
-  if (!value) return undefined;
-  return normalizeRequiredTier(value);
-}
-
-// ---------------------------------------------------------------------------
-// MAIN CONVERSION FUNCTIONS
-// ---------------------------------------------------------------------------
 
 function fromMdxMeta(meta: MdxMeta): Post {
-  const m = meta as PostishMdxMeta;
+  const m: any = meta as any;
 
-  // Handle different date fields
-  const date = safeString(m.date) || safeString(m.publishDate) || safeString(m.releaseDate);
-  
-  // Ensure required fields have defaults
-  const slug = safeString(m.slug) || "";
-  const title = safeString(m.title) || "Untitled Post";
-  
-  if (!slug || !title) {
-    console.warn(`Post metadata missing slug or title: ${slug} - ${title}`);
-  }
+  const slug = s(m.slug) || "";
+  const title = s(m.title) || "Untitled Post";
 
   return {
-    // Core identifiers
     slug,
     title,
 
-    // Content fields
-    description: safeString(m.description),
-    excerpt: safeString(m.excerpt),
-    subtitle: safeString(m.subtitle),
+    description: s(m.description),
+    excerpt: s(m.excerpt) || s(m.description),
+    subtitle: s(m.subtitle),
 
-    // Metadata
-    date,
-    author: safeString(m.author),
-    category: safeString(m.category),
-    tags: safeArray(m.tags),
-    featured: safeBoolean(m.featured),
-    readTime: safeString(m.readTime) || safeNumber(m.readTime),
+    date: s(m.date),
+    author: s(m.author),
+    category: s(m.category),
+    tags: a(m.tags),
+    featured: b(m.featured),
+    readTime: s(m.readTime) || (n(m.readTime) as any) || (n(m.readingTime) as any),
 
-    // Visual
-    coverImage: safeString(m.coverImage) || safeString(m.image),
+    coverImage: s(m.coverImage) || s(m.image),
+    ogImage: s(m.ogImage),
 
-    // Post-specific fields
-    postType: safeString(m.postType) || "article",
-    series: safeString(m.series),
-    seriesOrder: safeNumber(m.seriesOrder),
-    updateDate: safeString(m.updateDate),
-    canonicalUrl: safeString(m.canonicalUrl),
-    metaTitle: safeString(m.metaTitle),
-    metaDescription: safeString(m.metaDescription),
-    keywords: safeArray(m.keywords),
-    lastModified: safeString(m.lastModified),
+    series: s(m.series),
+    seriesOrder: n(m.seriesOrder),
 
-    // State
-    draft: safeBoolean(m.draft),
-    published: safeBoolean(m.published),
-    status: safeStatus(m.status),
+    canonicalUrl: s(m.canonicalUrl),
+    metaTitle: s(m.metaTitle),
+    metaDescription: s(m.metaDescription),
+    keywords: a(m.keywords),
+    lastModified: s(m.lastModified),
 
-    // Access - SSOT ALIGNED
+    draft: b(m.draft),
+    published: m.published === undefined ? true : b(m.published),
+    status: s(m.status) as any,
+
     accessLevel: safeAccessLevel(m.accessLevel) || "public",
-    lockMessage: safeString(m.lockMessage),
+    lockMessage: s(m.lockMessage),
 
-    // System fields
     _raw: m._raw,
-    _id: safeString(m._id),
-    url: safeString(m.url),
-    type: safeString(m.type) || "post",
+    _id: s(m._id),
+    url: s(m.url),
 
-    // Preserve any additional fields
-    ...Object.fromEntries(
-      Object.entries(m)
-        .filter(([key]) => ![
-          'slug', 'title', 'description', 'excerpt', 'subtitle',
-          'date', 'author', 'category', 'tags', 'featured', 'readTime',
-          'coverImage', 'image', 'postType', 'series', 'seriesOrder',
-          'updateDate', 'canonicalUrl', 'metaTitle', 'metaDescription',
-          'keywords', 'lastModified', 'draft', 'published', 'status',
-          'accessLevel', 'lockMessage', '_raw', '_id', 'url', 'type',
-          'publishDate', 'releaseDate'
-        ].includes(key))
-        .map(([key, value]) => [key, value])
-    ),
-  };
+    type: "post",
+  } as any;
 }
 
 function fromMdxDocument(doc: MdxDocument): PostWithContent {
-  const postDoc = doc as PostishMdxDocument;
-  const { content, body, ...rest } = postDoc;
-  const meta = fromMdxMeta(rest);
-  
-  return { 
-    ...meta, 
-    content: typeof content === "string" ? content : "",
-    body: body || undefined,
-  };
-}
-
-export function postToContentMeta(post: Post): ContentMeta {
-  const { content, body, ...meta } = post;
-  return meta;
-}
-
-export function postToContentEntry(post: Post): ContentEntry {
+  const d: any = doc as any;
+  const meta = fromMdxMeta(d);
   return {
-    slug: post.slug,
-    title: post.title,
-    date: post.date,
-    excerpt: post.excerpt,
-    description: post.description,
-    category: post.category,
-    tags: post.tags,
-    featured: post.featured,
-    readTime: post.readTime,
-    _raw: post._raw,
-    ...Object.fromEntries(
-      Object.entries(post)
-        .filter(([key]) => ![
-          'slug', 'title', 'date', 'excerpt', 'description', 'category',
-          'tags', 'featured', 'readTime', '_raw', 'content', 'body'
-        ].includes(key))
-    ),
-  };
+    ...(meta as any),
+    content: typeof d.content === "string" ? d.content : "",
+    body: d.body || undefined,
+  } as any;
 }
 
-// ---------------------------------------------------------------------------
-// ACCESS CONTROL HELPERS
-// ---------------------------------------------------------------------------
-
-/**
- * Check if user can access a post
- */
-export function canAccessPost(
-  post: Post,
-  userTier?: string | AccessTier | null
-): boolean {
+// ACCESS
+export function canAccessPost(post: Post, userTier?: string | AccessTier | null): boolean {
   const user = normalizeUserTier(userTier || "public");
-  const required = post.accessLevel || "public";
+  const required = (post as any).accessLevel || "public";
   return hasAccess(user, required);
 }
 
-/**
- * Get posts accessible to a user
- */
-export function getAccessiblePosts(userTier?: string | AccessTier | null): Post[] {
-  try {
-    const posts = getAllPostsMeta();
-    const user = normalizeUserTier(userTier || "public");
-    
-    return posts.filter(post => {
-      const required = post.accessLevel || "public";
-      return hasAccess(user, required);
-    });
-  } catch (error) {
-    console.error("Error getting accessible posts:", error);
-    return [];
-  }
+export async function getAccessiblePosts(userTier?: string | AccessTier | null): Promise<Post[]> {
+  const all = await getAllPostsMeta();
+  const user = normalizeUserTier(userTier || "public");
+  return all.filter((p: any) => hasAccess(user, p?.accessLevel || "public"));
 }
 
-// ---------------------------------------------------------------------------
-// PUBLIC API FUNCTIONS
-// ---------------------------------------------------------------------------
-
-export function getAllPostsMeta(): Post[] {
+// PUBLIC
+export async function getAllPostsMeta(): Promise<Post[]> {
   try {
-    const metas = getMdxCollectionMeta("posts");
-    if (!metas || !Array.isArray(metas)) {
-      console.warn("No posts metadata found or metadata is not an array");
-      return [];
-    }
-    
-    const posts = metas.map((m) => fromMdxMeta(m));
-    
-    // Filter out invalid posts (missing required fields)
-    const validPosts = posts.filter(post => {
-      const isValid = post.slug && post.title;
-      if (!isValid) {
-        console.warn(`Invalid post skipped: ${post.slug || 'no-slug'} - ${post.title || 'no-title'}`);
-      }
-      return isValid;
-    });
-    
-    console.log(`Found ${validPosts.length} valid posts out of ${metas.length} total`);
-    return validPosts;
-  } catch (error) {
-    console.error("Error fetching all posts meta:", error);
+    // ✅ IMPORTANT: folder is content/blog (not content/posts)
+    const metas = await getMdxCollectionMeta("blog");
+    const posts = (metas || []).map(fromMdxMeta).filter((p: any) => p?.slug && p?.title);
+    return posts;
+  } catch (e) {
+    console.error("[posts-data] getAllPostsMeta failed:", e);
     return [];
   }
 }
 
 export async function getPostBySlug(slug: string): Promise<PostWithContent | null> {
   try {
-    if (!slug || typeof slug !== 'string') {
-      console.error("getPostBySlug called with invalid slug:", slug);
-      return null;
-    }
-    
-    const doc = getMdxDocumentBySlug("posts", slug);
-    if (!doc) {
-      console.warn(`No post found for slug: ${slug}`);
-      return null;
-    }
-    
-    const resolvedDoc = await doc;
-    return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
-  } catch (error) {
-    console.error(`Error fetching post by slug (${slug}):`, error);
+    const doc = await getMdxDocumentBySlug("blog", slug);
+    if (!doc) return null;
+    return fromMdxDocument(doc);
+  } catch (e) {
+    console.error(`[posts-data] getPostBySlug failed (${slug}):`, e);
     return null;
   }
 }
 
-export async function getAllPosts(): Promise<PostWithContent[]> {
-  try {
-    const metas = getAllPostsMeta();
-    if (metas.length === 0) return [];
-    
-    const postsWithContent: PostWithContent[] = [];
-    
-    for (const meta of metas) {
-      const post = await getPostBySlug(meta.slug);
-      if (post) {
-        postsWithContent.push(post);
-      } else {
-        console.warn(`Could not load content for post: ${meta.slug}`);
-      }
-    }
-    
-    return postsWithContent;
-  } catch (error) {
-    console.error("Error fetching all posts:", error);
-    return [];
-  }
+export async function getPublishedPosts(): Promise<Post[]> {
+  const all = await getAllPostsMeta();
+  return all.filter((p: any) => p?.draft !== true && p?.status !== "draft" && (p?.published !== false));
 }
 
-export function getPostsByCategory(category: string): Post[] {
-  try {
-    const posts = getAllPostsMeta();
-    if (!category || typeof category !== 'string') return [];
-    
-    const normalizedCategory = category.toLowerCase().trim();
-    
-    return posts.filter(post => {
-      const postCategory = post.category?.toLowerCase().trim();
-      return postCategory === normalizedCategory;
-    });
-  } catch (error) {
-    console.error(`Error fetching posts by category (${category}):`, error);
-    return [];
-  }
+export async function getFeaturedPosts(): Promise<Post[]> {
+  const all = await getPublishedPosts();
+  return all.filter((p: any) => p?.featured === true);
 }
 
-export function getPostsByTag(tag: string): Post[] {
-  try {
-    const posts = getAllPostsMeta();
-    if (!tag || typeof tag !== 'string') return [];
-    
-    const normalizedTag = tag.toLowerCase().trim();
-    
-    return posts.filter(post => {
-      return post.tags?.some(t => t.toLowerCase().trim() === normalizedTag);
-    });
-  } catch (error) {
-    console.error(`Error fetching posts by tag (${tag}):`, error);
-    return [];
-  }
+export async function getRecentPosts(limit = 20): Promise<Post[]> {
+  const all = await getPublishedPosts();
+  const sorted = [...all].sort((a: any, b: any) => {
+    const da = a?.date ? new Date(a.date).getTime() : 0;
+    const db = b?.date ? new Date(b.date).getTime() : 0;
+    return db - da;
+  });
+  return safeSlice(sorted, 0, limit);
 }
 
-export function getFeaturedPosts(): Post[] {
-  try {
-    const posts = getAllPostsMeta();
-    return posts.filter(post => post.featured === true);
-  } catch (error) {
-    console.error("Error fetching featured posts:", error);
-    return [];
-  }
-}
-
-export function getPublishedPosts(): Post[] {
-  try {
-    const posts = getAllPostsMeta();
-    return posts.filter(post => 
-      post.draft !== true && 
-      post.status !== "draft" && 
-      (post.published === true || post.status === "published")
-    );
-  } catch (error) {
-    console.error("Error fetching published posts:", error);
-    return [];
-  }
-}
-
-export function getPostsBySeries(series: string): Post[] {
-  try {
-    const posts = getAllPostsMeta();
-    if (!series || typeof series !== 'string') return [];
-    
-    const normalizedSeries = series.toLowerCase().trim();
-    
-    return posts
-      .filter(post => post.series?.toLowerCase().trim() === normalizedSeries)
-      .sort((a, b) => {
-        const orderA = a.seriesOrder || 999;
-        const orderB = b.seriesOrder || 999;
-        if (orderA !== orderB) return orderA - orderB;
-        
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateA - dateB;
-      });
-  } catch (error) {
-    console.error(`Error fetching posts by series (${series}):`, error);
-    return [];
-  }
-}
-
-export function searchPosts(query: string): Post[] {
-  try {
-    const posts = getPublishedPosts();
-    const normalizedQuery = query.toLowerCase().trim();
-    
-    if (!normalizedQuery) return posts;
-    
-    return posts.filter(post => {
-      if (post.title?.toLowerCase().includes(normalizedQuery)) return true;
-      if (post.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
-      if (post.description?.toLowerCase().includes(normalizedQuery)) return true;
-      if (post.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
-      if (post.author?.toLowerCase().includes(normalizedQuery)) return true;
-      if (post.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
-      if (post.category?.toLowerCase().includes(normalizedQuery)) return true;
-      if (post.series?.toLowerCase().includes(normalizedQuery)) return true;
-      return false;
-    });
-  } catch (error) {
-    console.error(`Error searching posts (${query}):`, error);
-    return [];
-  }
-}
-
-export function getRecentPosts(limit?: number): Post[] {
-  try {
-    const posts = getPublishedPosts();
-    
-    const sorted = posts.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      
-      if (dateB !== dateA) return dateB - dateA;
-      
-      return (a.title || '').localeCompare(b.title || '');
-    });
-    
-    return limit && limit > 0 ? safeSlice(sorted, 0, limit) : sorted;
-  } catch (error) {
-    console.error("Error fetching recent posts:", error);
-    return [];
-  }
-}
-
-export function getAllPostCategories(): string[] {
-  try {
-    const posts = getAllPostsMeta();
-    const categories = posts
-      .map(post => post.category)
-      .filter((category): category is string => 
-        typeof category === "string" && category.trim().length > 0
-      );
-    
-    return [...new Set(categories)].sort();
-  } catch (error) {
-    console.error("Error fetching post categories:", error);
-    return [];
-  }
-}
-
-export function getAllPostTags(): string[] {
-  try {
-    const posts = getAllPostsMeta();
-    const allTags = posts
-      .flatMap(post => post.tags || [])
-      .filter((tag): tag is string => typeof tag === "string");
-    
-    return [...new Set(allTags)].sort();
-  } catch (error) {
-    console.error("Error fetching post tags:", error);
-    return [];
-  }
-}
-
-export function getAllPostAuthors(): string[] {
-  try {
-    const posts = getAllPostsMeta();
-    const authors = posts
-      .map(post => post.author)
-      .filter((author): author is string => 
-        typeof author === "string" && author.trim().length > 0
-      );
-    
-    return [...new Set(authors)].sort();
-  } catch (error) {
-    console.error("Error fetching post authors:", error);
-    return [];
-  }
-}
-
-export function getAllPostSeries(): string[] {
-  try {
-    const posts = getAllPostsMeta();
-    const series = posts
-      .map(post => post.series)
-      .filter((series): series is string => 
-        typeof series === "string" && series.trim().length > 0
-      );
-    
-    return [...new Set(series)].sort();
-  } catch (error) {
-    console.error("Error fetching post series:", error);
-    return [];
-  }
-}
-
-export function getAllPostSlugs(): string[] {
-  try {
-    const posts = getAllPostsMeta();
-    return posts
-      .map(post => post.slug)
-      .filter((slug): slug is string => typeof slug === "string" && slug.length > 0);
-  } catch (error) {
-    console.error("Error fetching post slugs:", error);
-    return [];
-  }
-}
-
-export function getPostStats(): {
-  total: number;
-  published: number;
-  drafts: number;
-  featured: number;
-  byCategory: Record<string, number>;
-  byYear: Record<string, number>;
-  byAuthor: Record<string, number>;
-  byAccessLevel: Record<string, number>;
-} {
-  try {
-    const posts = getAllPostsMeta();
-    
-    const stats = {
-      total: posts.length,
-      published: posts.filter(p => p.published === true || p.status === "published").length,
-      drafts: posts.filter(p => p.draft === true || p.status === "draft").length,
-      featured: posts.filter(p => p.featured === true).length,
-      byCategory: {} as Record<string, number>,
-      byYear: {} as Record<string, number>,
-      byAuthor: {} as Record<string, number>,
-      byAccessLevel: {} as Record<string, number>,
-    };
-    
-    posts.forEach(post => {
-      if (post.category) {
-        stats.byCategory[post.category] = (stats.byCategory[post.category] || 0) + 1;
-      }
-      
-      if (post.date) {
-        const year = new Date(post.date).getFullYear().toString();
-        stats.byYear[year] = (stats.byYear[year] || 0) + 1;
-      }
-      
-      if (post.author) {
-        stats.byAuthor[post.author] = (stats.byAuthor[post.author] || 0) + 1;
-      }
-      
-      const accessLevel = post.accessLevel || "public";
-      stats.byAccessLevel[accessLevel] = (stats.byAccessLevel[accessLevel] || 0) + 1;
-    });
-    
-    return stats;
-  } catch (error) {
-    console.error("Error fetching post stats:", error);
-    return {
-      total: 0,
-      published: 0,
-      drafts: 0,
-      featured: 0,
-      byCategory: {},
-      byYear: {},
-      byAuthor: {},
-      byAccessLevel: {},
-    };
-  }
-}
-
-// ---------------------------------------------------------------------------
-// DEFAULT EXPORT
-// ---------------------------------------------------------------------------
-
-const postsData = {
-  // Core functions
+export default {
   getAllPostsMeta,
   getPostBySlug,
-  getAllPosts,
-  
-  // Access control
+  getPublishedPosts,
+  getFeaturedPosts,
+  getRecentPosts,
   canAccessPost,
   getAccessiblePosts,
-  
-  // Filter functions
-  getPostsByCategory,
-  getPostsByTag,
-  getFeaturedPosts,
-  getPublishedPosts,
-  getPostsBySeries,
-  searchPosts,
-  getRecentPosts,
-  
-  // List functions
-  getAllPostCategories,
-  getAllPostTags,
-  getAllPostAuthors,
-  getAllPostSeries,
-  getAllPostSlugs,
-  
-  // Stats
-  getPostStats,
-  
-  // Utility functions
-  postToContentMeta,
-  postToContentEntry,
 };
-
-export default postsData;

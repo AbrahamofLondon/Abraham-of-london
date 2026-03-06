@@ -1,10 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * lib/content/server.ts — SOVEREIGN SERVER-ONLY CONTENT ACCESS
- * Integrated with AES-256-GCM Decryption and NextAuth Session Verification.
- * ✅ BUILD-SAFE: Guards against auth calls during static generation
+ * lib/content/server.ts — SOVEREIGN SERVER-ONLY CONTENT ACCESS (SSOT)
+ *
+ * What this fixes:
+ * - Empty indexes (0 posts/downloads/strategies etc.) when helpers mismatch folder names.
+ * - Over-strict publish gating (requiring published === true).
+ * - Folder taxonomy reality:
+ *   content/blog, content/books, content/downloads, content/strategy, content/shorts, etc.
+ *
+ * Hard rules:
+ * - LIVE unless explicitly draft === true OR published === false.
+ * - Collections are resolved from the full doc registry, then optionally refined.
+ * - Keeps contentlayer compiled MDX code available for pages.
  */
+
+// 🚨 DEV ASSERT: Never silently render empty
+if (process.env.NODE_ENV === "development") {
+  // We need to dynamically import to avoid circular dependency
+  try {
+    const { getAllContentlayerDocs } = require("./server");
+    const n = getAllContentlayerDocs().length;
+    if (n === 0) {
+      // eslint-disable-next-line no-console
+      console.error("🚨 SSOT: Contentlayer registry resolved 0 docs. Loader is failing.");
+    }
+  } catch (e) {
+    // Ignore during initial load
+  }
+}
 
 import {
   isDraftContent,
@@ -13,17 +37,17 @@ import {
   toUiDoc as sharedToUiDoc,
   resolveDocCoverImage,
   resolveDocDownloadUrl,
-  normalizeSlug as sharedNormalizeSlug,
 } from "@/lib/content/shared";
 
 import { decryptDocument } from "@/lib/security";
 import { canAccessDoc } from "@/lib/content/access-engine";
 
-// Import all helpers from contentlayer-helper
 import {
   normalizeSlug as helperNormalizeSlug,
   sanitizeData as helperSanitizeData,
   getAllContentlayerDocs as helperGetAllContentlayerDocs,
+
+  // legacy helpers (may be empty / mismatched)
   getAllBooks as helperGetAllBooks,
   getAllCanons as helperGetAllCanons,
   getAllDownloads as helperGetAllDownloads,
@@ -33,31 +57,32 @@ import {
   getAllResources as helperGetAllResources,
   getAllStrategies as helperGetAllStrategies,
   getAllShorts as helperGetAllShorts,
+
   getDocBySlug as helperGetDocBySlug,
   getServerBookBySlug as helperGetServerBookBySlug,
   getServerCanonBySlug as helperGetServerCanonBySlug,
-  isPublished as helperIsPublished,
+
+  // keep for downstream
   getAccessLevel as helperGetAccessLevel,
   toUiDoc as helperToUiDoc,
   documentKinds,
   getCardProps,
 } from "@/lib/contentlayer-helper";
 
-// ------------------------------
-// 🔐 BUILD-TIME SAFETY GUARD
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  BUILD-TIME SAFETY GUARD
+----------------------------------------------------------------------------- */
 const IS_BUILD =
   process.env.NEXT_PHASE === "phase-production-build" ||
   process.env.NEXT_PHASE === "phase-export";
 
-// ------------------------------
-// DYNAMIC IMPORTS for auth (prevents client bundling)
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  Dynamic auth import (prevents client bundling)
+----------------------------------------------------------------------------- */
 async function getAuthSession() {
   if (IS_BUILD) return null;
-  
+
   try {
-    // Dynamic import to keep auth out of client bundles
     const { getAuthSession: getServerAuthSession } = await import("@/lib/auth/server");
     return await getServerAuthSession();
   } catch (error) {
@@ -66,10 +91,9 @@ async function getAuthSession() {
   }
 }
 
-// ------------------------------
-// TYPES — exported for downstream type re-exports (SSOT)
-// ------------------------------
-
+/* -----------------------------------------------------------------------------
+  TYPES (SSOT)
+----------------------------------------------------------------------------- */
 export type DocKind =
   | "post"
   | "short"
@@ -90,17 +114,22 @@ export type ContentDoc = {
   _id?: string;
   type?: string;
   kind?: string;
+
   title?: string;
   slug?: string;
   href?: string;
+
   draft?: boolean;
   published?: boolean;
+
   accessLevel?: string;
   tier?: string;
   classification?: string;
   requiresAuth?: boolean;
+
   body?: { raw?: string; code?: string };
   content?: string;
+
   metadata?: any;
   _raw?: {
     flattenedPath?: string;
@@ -109,12 +138,13 @@ export type ContentDoc = {
     sourceFileDir?: string;
     contentType?: string;
   };
+
   [key: string]: any;
 };
 
-// ------------------------------
-// Re-exports - EXPORT EVERYTHING THAT PAGES ARE TRYING TO IMPORT
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  Re-exports expected by pages/importers
+----------------------------------------------------------------------------- */
 export {
   isDraftContent,
   getDocHref,
@@ -122,151 +152,230 @@ export {
   resolveDocDownloadUrl,
 };
 
-// Export normalizeSlug and sanitizeData explicitly
 export const normalizeSlug = helperNormalizeSlug;
 export const sanitizeData = helperSanitizeData;
 
-// Export other utilities
-export const isPublished = helperIsPublished;
 export const getAccessLevel = helperGetAccessLevel;
 export const toUiDoc = helperToUiDoc;
 export const getDocKind = sharedGetDocKind;
 
 export { documentKinds, getCardProps };
 
-// ------------------------------
-// PRIMARY EXPORTS - Core document access functions
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  LIVE / PUBLISHED LOGIC (tolerant, SSOT)
+----------------------------------------------------------------------------- */
+function isLiveDoc(d: any): boolean {
+  if (!d) return false;
 
-/**
- * Get document by slug (primary export - used everywhere)
- */
-export function getDocumentBySlug(slug: string): any | null {
-  return helperGetDocBySlug(slug);
+  // explicit negatives only
+  if (d.draft === true) return false;
+  if (d.published === false) return false;
+
+  // everything else is live
+  return true;
 }
 
-/**
- * Alias for getDocumentBySlug (for backward compatibility)
- */
-export const getDocBySlug = getDocumentBySlug;
-
-/**
- * Get download document by slug - LEGACY SHIM
- * Used by downloads/dl routes and tokenStore.postgres.ts
- */
-export function getDownloadBySlug(slug: string): any | null {
-  const s = normalizeSlug(String(slug || ""));
-  
-  // Try downloads collection first
-  const downloads = getAllDownloads();
-  const download = downloads.find((d: any) => 
-    d.slug === s || d._raw?.flattenedPath?.includes(s)
-  );
-  
-  if (download) return download;
-  
-  // Fallback to generic document lookup
-  return getDocumentBySlug(s) || getDocumentBySlug(`downloads/${s}`);
+/* -----------------------------------------------------------------------------
+  SLUG NORMALISATION (folder-aware + safe)
+----------------------------------------------------------------------------- */
+function cleanPathish(input: unknown): string {
+  return String(input ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
 }
 
-// Export all contentlayer data accessors
-export const getContentlayerData = helperGetAllContentlayerDocs;
+function bareSectionSlug(section: string, input: unknown): string {
+  let s = cleanPathish(input);
+  if (!s || s.includes("..")) return "";
 
-// ------------------------------
-// Core data access functions
-// ------------------------------
-export function getAllContentlayerDocs() {
-  return helperGetAllContentlayerDocs();
+  const lower = () => s.toLowerCase();
+  const sec = String(section || "").toLowerCase();
+
+  // strip repeatedly
+  while (lower().startsWith(`${sec}/`)) s = s.slice(sec.length + 1);
+  while (lower().startsWith(`vault/${sec}/`)) s = s.slice(`vault/${sec}/`.length);
+  while (lower().startsWith(`content/${sec}/`)) s = s.slice(`content/${sec}/`.length);
+
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  if (!s || s.includes("..")) return "";
+
+  return s;
 }
 
-export function getAllBooks() {
-  return helperGetAllBooks();
+function matchesSlugVariants(section: string, doc: any, targetBare: string): boolean {
+  const a = bareSectionSlug(section, doc?.slug);
+  if (a && a === targetBare) return true;
+
+  const b = bareSectionSlug(section, doc?._raw?.flattenedPath);
+  if (b && b === targetBare) return true;
+
+  const c = bareSectionSlug(section, doc?._raw?.sourceFilePath);
+  if (c && c === targetBare) return true;
+
+  return false;
 }
 
-export function getAllCanons() {
-  return helperGetAllCanons();
+/* -----------------------------------------------------------------------------
+  CONTENTLAYER REGISTRY (single source)
+----------------------------------------------------------------------------- */
+export function getAllContentlayerDocs(): any[] {
+  const docs = helperGetAllContentlayerDocs() || [];
+  return Array.isArray(docs) ? docs : [];
 }
 
-export function getAllDownloads() {
-  return helperGetAllDownloads();
-}
-
-export function getAllPosts() {
-  return helperGetAllPosts();
-}
-
-export function getAllEvents() {
-  return helperGetAllEvents();
-}
-
-export function getAllPrints() {
-  return helperGetAllPrints();
-}
-
-export function getAllResources() {
-  return helperGetAllResources();
-}
-
-export function getAllShorts() {
-  return helperGetAllShorts();
-}
-
-export function getAllStrategies() {
-  return helperGetAllStrategies().filter(helperIsPublished);
-}
+export const getContentlayerData = getAllContentlayerDocs;
 
 export function isContentlayerLoaded(): boolean {
   const docs = getAllContentlayerDocs();
   return Array.isArray(docs) && docs.length > 0;
 }
 
-export function assertContentlayerHasDocs(): void {
-  if (!isContentlayerLoaded()) {
-    throw new Error("Build aborted: Contentlayer data is empty.");
+// ✅ DEV ASSERT: Never silently render empty
+if (process.env.NODE_ENV === "development") {
+  const n = getAllContentlayerDocs().length;
+  if (n === 0) {
+    // eslint-disable-next-line no-console
+    console.error("🚨 SSOT: Contentlayer registry resolved 0 docs. Loader is failing.");
   }
 }
 
-// ------------------------------
-// Collection Helpers (Published)
-// ------------------------------
-export const getShorts = () => getAllShorts().filter(helperIsPublished);
-export const getCanons = () => getAllCanons().filter(helperIsPublished);
-export const getBooks = () => getAllBooks().filter(helperIsPublished);
-export const getDownloads = () => getAllDownloads().filter(helperIsPublished);
-export const getPublishedPosts = () => getAllPosts().filter(helperIsPublished);
+/**
+ * Derive docs for a collection from the global registry.
+ * This avoids mismatches like:
+ * - "posts" helper but folder is "blog"
+ * - "strategies" helper but folder is "strategy"
+ */
+function deriveByFolderPrefix(prefixes: string[], docs?: any[]): any[] {
+  const all = docs || getAllContentlayerDocs();
+  const pfx = prefixes.map((p) => String(p).toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "") + "/");
+
+  return (all || []).filter((d: any) => {
+    if (!d) return false;
+    const fp = String(d?._raw?.flattenedPath || d?._raw?.sourceFilePath || "").toLowerCase();
+    if (!fp) return false;
+    return pfx.some((p) => fp.startsWith(p));
+  });
+}
+
+/* -----------------------------------------------------------------------------
+  Core collection getters (SSOT)
+----------------------------------------------------------------------------- */
+export function getAllBooks(): any[] {
+  const fromHelper = helperGetAllBooks?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["books"]);
+}
+
+export function getAllCanons(): any[] {
+  const fromHelper = helperGetAllCanons?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["canon", "vault/canon"]);
+}
+
+export function getAllDownloads(): any[] {
+  const fromHelper = helperGetAllDownloads?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["downloads", "vault/downloads"]);
+}
+
+export function getAllEvents(): any[] {
+  const fromHelper = helperGetAllEvents?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["events", "vault/events"]);
+}
+
+export function getAllPrints(): any[] {
+  const fromHelper = helperGetAllPrints?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["prints", "vault/prints"]);
+}
+
+export function getAllResources(): any[] {
+  const fromHelper = helperGetAllResources?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["resources", "vault/resources"]);
+}
+
+export function getAllShorts(): any[] {
+  const fromHelper = helperGetAllShorts?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+  return deriveByFolderPrefix(["shorts", "vault/shorts"]);
+}
+
+/**
+ * Blog posts live under content/blog (not content/posts).
+ * Some helpers call them "posts". We normalize here.
+ */
+export function getAllPosts(): any[] {
+  const fromHelper = helperGetAllPosts?.() || [];
+  if (Array.isArray(fromHelper) && fromHelper.length) return fromHelper;
+
+  // fallback to folder inference
+  return deriveByFolderPrefix(["blog", "posts", "vault/blog"]);
+}
+
+/**
+ * Strategies live under content/strategy (singular).
+ */
+export function getAllStrategies(): any[] {
+  const fromHelper = helperGetAllStrategies?.() || [];
+  const usable =
+    Array.isArray(fromHelper) && fromHelper.length
+      ? fromHelper
+      : deriveByFolderPrefix(["strategy", "strategies", "vault/strategy"]);
+
+  // Keep only live docs
+  return usable.filter(isLiveDoc);
+}
+
+/* -----------------------------------------------------------------------------
+  Published collection helpers (SSOT)
+----------------------------------------------------------------------------- */
+export const getShorts = () => getAllShorts().filter(isLiveDoc);
+export const getCanons = () => getAllCanons().filter(isLiveDoc);
+export const getBooks = () => getAllBooks().filter(isLiveDoc);
+export const getDownloads = () => getAllDownloads().filter(isLiveDoc);
+export const getPublishedPosts = () => getAllPosts().filter(isLiveDoc);
 export const getPublishedBooks = () => getBooks();
 
-// ------------------------------
-// 🔒 SLUG NORMALIZATION (SSOT)
-// ------------------------------
-function bareSectionSlug(section: string, input: any): string {
-  const s = String(input || "")
-    .trim()
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "");
-
-  const sectionRe = new RegExp(`^${section}\\/`, "i");
-  if (sectionRe.test(s)) return s.replace(sectionRe, "");
-
-  const n = helperNormalizeSlug(s).replace(/^\/+/, "").replace(/\/+$/, "");
-  return n.replace(sectionRe, "");
+/* -----------------------------------------------------------------------------
+  Primary doc access
+----------------------------------------------------------------------------- */
+export function getDocumentBySlug(slug: string): any | null {
+  return helperGetDocBySlug(slug);
 }
 
-function matchesSlugVariants(section: string, doc: any, targetBare: string): boolean {
-  const a = bareSectionSlug(section, doc?.slug);
-  const b = bareSectionSlug(section, doc?._raw?.flattenedPath);
-  const c = bareSectionSlug(section, doc?._raw?.sourceFilePath);
+export const getDocBySlug = getDocumentBySlug;
 
-  return a === targetBare || b === targetBare || c === targetBare;
+/**
+ * Legacy shim used by download token routes, etc.
+ */
+export function getDownloadBySlug(slug: string): any | null {
+  const s = normalizeSlug(String(slug || ""));
+
+  const downloads = getAllDownloads();
+  const download =
+    downloads.find(
+      (d: any) =>
+        bareSectionSlug("downloads", d?.slug) === bareSectionSlug("downloads", s) ||
+        String(d?._raw?.flattenedPath || "").includes(s)
+    ) || null;
+
+  if (download) return download;
+
+  return getDocumentBySlug(s) || getDocumentBySlug(`downloads/${s}`);
 }
 
-// ------------------------------
-// 🔐 SOVEREIGN DECRYPTION ENGINES (Build-Safe)
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  Secure processing / decryption (build-safe)
+----------------------------------------------------------------------------- */
 async function secureProcessDocument(doc: any): Promise<any | null> {
   if (!doc) return null;
 
-  // 🛡️ During build, skip auth checks
+  // During build: do not auth-gate, do not decrypt; just surface what exists.
   if (IS_BUILD) {
     return {
       ...doc,
@@ -276,7 +385,7 @@ async function secureProcessDocument(doc: any): Promise<any | null> {
     };
   }
 
-  // 1. Check if document is encrypted
+  // Read encryption metadata
   let meta: any = {};
   try {
     meta = typeof doc.metadata === "string" ? JSON.parse(doc.metadata) : doc.metadata || {};
@@ -287,12 +396,11 @@ async function secureProcessDocument(doc: any): Promise<any | null> {
   const encryptionData = meta;
   if (!encryptionData?.isEncrypted) return doc;
 
-  // 2. Get session and check clearance
+  // session + clearance
   const session = await getAuthSession();
   const userRole = (session?.user as any)?.tier || (session?.user as any)?.role || "public";
   const isAuthorized = canAccessDoc(doc, userRole);
 
-  // 3. Decrypt or redact
   if (isAuthorized) {
     try {
       const decryptedBody = decryptDocument(
@@ -325,9 +433,9 @@ async function secureProcessDocument(doc: any): Promise<any | null> {
   };
 }
 
-// ------------------------------
-// 🚀 SECURE LOOKUPS (Build-Safe)
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  Secure lookups by section (SSOT slug matching)
+----------------------------------------------------------------------------- */
 export async function getServerShortBySlug(slug: string) {
   const targetBare = bareSectionSlug("shorts", slug);
   const doc = getShorts().find((s: any) => matchesSlugVariants("shorts", s, targetBare)) || null;
@@ -344,9 +452,9 @@ export async function getServerBookBySlug(slug: string) {
   const targetBare = bareSectionSlug("books", slug);
 
   const helperDoc =
-    helperGetServerBookBySlug(targetBare) ||
-    helperGetServerBookBySlug(`books/${targetBare}`) ||
-    helperGetServerBookBySlug(`/books/${targetBare}`);
+    (await helperGetServerBookBySlug?.(targetBare)) ||
+    (await helperGetServerBookBySlug?.(`books/${targetBare}`)) ||
+    (await helperGetServerBookBySlug?.(`/books/${targetBare}`));
 
   if (helperDoc) return await secureProcessDocument(helperDoc);
 
@@ -358,9 +466,9 @@ export async function getServerCanonBySlug(slug: string) {
   const targetBare = bareSectionSlug("canon", slug);
 
   const helperDoc =
-    helperGetServerCanonBySlug(targetBare) ||
-    helperGetServerCanonBySlug(`canon/${targetBare}`) ||
-    helperGetServerCanonBySlug(`/canon/${targetBare}`);
+    (await helperGetServerCanonBySlug?.(targetBare)) ||
+    (await helperGetServerCanonBySlug?.(`canon/${targetBare}`)) ||
+    (await helperGetServerCanonBySlug?.(`/canon/${targetBare}`));
 
   return await secureProcessDocument(helperDoc);
 }
@@ -371,56 +479,37 @@ export async function getPostBySlug(slug: string): Promise<any | null> {
   return await secureProcessDocument(doc);
 }
 
-// ------------------------------
-// Unified combined document access (FIXED: tolerant publish logic)
-// ------------------------------
-function isLiveDoc(d: any): boolean {
-  // Treat as live unless explicitly draft or explicitly unpublished.
-  if (!d) return false;
-  if (d.draft === true) return false;
-  if (d.published === false) return false;
-  // If published is true or missing entirely, we treat it as live.
-  return true;
-}
-
+/* -----------------------------------------------------------------------------
+  Unified combined access (SSOT)
+----------------------------------------------------------------------------- */
 export function getAllCombinedDocs(): any[] {
-  const d = helperGetAllContentlayerDocs() || [];
+  const d = getAllContentlayerDocs() || [];
   const combined = [...d].filter(isLiveDoc);
   const sanitized = (helperSanitizeData(combined) || []) as any[];
-
-  if (process.env.NODE_ENV === "development" && !IS_BUILD) {
-    const requiredBriefs = ["institutional-governance"];
-    requiredBriefs.forEach((slug) => {
-      const found = sanitized.find(
-        (doc) => doc.slug === slug || String(doc._raw?.flattenedPath || "").includes(slug)
-      );
-      if (!found) {
-        console.error(`🚨 [Link-Integrity Alert]: Critical asset '${slug}' is missing.`);
-      } else {
-        console.log(`✅ [Vault Verified]: Asset '${slug}' is live.`);
-      }
-    });
-  }
-
   return sanitized;
 }
 
 export const getPublishedDocuments = () => getAllCombinedDocs();
 
-// ------------------------------
-// Misc collections
-// ------------------------------
+/* -----------------------------------------------------------------------------
+  Misc collections (folder inference)
+----------------------------------------------------------------------------- */
 export function getAllLexicons() {
   const docs = getAllCombinedDocs();
-  return docs.filter((d) => d.kind === "lexicon" || String(d._raw?.sourceFilePath || "").includes("lexicon/"));
+  return docs.filter((d) => {
+    const fp = String(d?._raw?.flattenedPath || "").toLowerCase();
+    const kind = String(d?.kind || d?.type || "").toLowerCase();
+    return kind === "lexicon" || fp.startsWith("lexicon/");
+  });
 }
 
 export function getAllBlogs() {
+  // semantic alias: blog is posts
   return getAllPosts();
 }
 
 export function getServerAllEvents() {
-  return getAllEvents().filter(helperIsPublished);
+  return getAllEvents().filter(isLiveDoc);
 }
 
 export function getServerEventBySlug(slug: string) {
@@ -433,14 +522,9 @@ export function getSecureDocument(id: string) {
   return null;
 }
 
-// ------------------------------
-// Published lookups by kind/type (SSOT helper for Search Index)
-// ------------------------------
-
-/**
- * Returns published docs filtered by a DocKind.
- * Supports both `doc.kind` and `doc.type` (mixed legacy + helper output).
- */
+/* -----------------------------------------------------------------------------
+  Published lookups by kind/type (SSOT helper for Search Index)
+----------------------------------------------------------------------------- */
 export function getPublishedDocumentsByType(kind: DocKind): ContentDoc[] {
   const k = String(kind || "").toLowerCase().trim() as DocKind;
   if (!k) return [];
@@ -452,11 +536,9 @@ export function getPublishedDocumentsByType(kind: DocKind): ContentDoc[] {
     const dt = String((d as any)?.type || "").toLowerCase();
     const fp = String((d as any)?._raw?.flattenedPath || "").toLowerCase();
 
-    // Primary: kind/type match
     if (dk === k || dt === k) return true;
 
-    // Secondary: folder inference (covers cases where kind/type missing)
-    // e.g. "shorts/..." => "short", "events/..." => "event"
+    // folder inference (covers mixed legacy + missing kind/type)
     if (k === "short" && fp.startsWith("shorts/")) return true;
     if (k === "event" && fp.startsWith("events/")) return true;
     if (k === "post" && (fp.startsWith("blog/") || fp.startsWith("posts/"))) return true;

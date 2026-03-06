@@ -1,75 +1,88 @@
-// pages/api/books/[slug].ts — SECURE VAULT PROXY (SSOT, Postgres sessions, public bypass)
-import type { NextApiRequest, NextApiResponse } from "next";
+/* app/books/[slug]/page.tsx — APP ROUTER: Book reader (SSOT safe) */
 
-import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeUserTier, normalizeRequiredTier, hasAccess, requiredTierFromDoc } from "@/lib/access/tier-policy";
+import * as React from "react";
+import BookSlugPage from "@/pages/books/[slug]";
+import { getPublishedBooks, sanitizeData } from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
+import { normalizeRequiredTier, requiredTierFromDoc } from "@/lib/access/tier-policy";
 
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
-
-import { normalizeSlug, getServerBookBySlug } from "@/lib/content/server";
-
-type ResponseData = {
-  ok: boolean;
-  reason?: string;
-  tier?: AccessTier;
-  requiredTier?: AccessTier;
-  bodyCode?: string;
-};
-
-function extractCode(doc: any): string {
-  return String(
-    doc?.body?.code ||
-      doc?.bodyCode ||
-      doc?.content ||
-      doc?.mdx ||
-      doc?.body?.raw ||
-      (typeof doc?.body === "string" ? doc.body : "") ||
-      ""
-  );
+function collapseSlashes(s: string): string {
+  return String(s || "").replace(/\\/g, "/").replace(/\/{2,}/g, "/");
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+/** Books SSOT slug normalizer (exact same as pages/books/[slug].tsx) */
+function booksBareSlug(input: unknown): string {
+  let s = String(input ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
+
+  if (!s || s.includes("..")) return "";
+
+  // Strip prefixes repeatedly
+  const stripOnce = (prefix: string) => {
+    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
+    if (s.toLowerCase().startsWith(p.toLowerCase())) {
+      s = s.slice(p.length);
+      s = s.replace(/^\/+/, "");
+      return true;
+    }
+    return false;
+  };
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    changed = stripOnce("content") || changed;
+    changed = stripOnce("vault") || changed;
+    changed = stripOnce("books") || changed;
   }
 
-  const slug = normalizeSlug(String(req.query.slug || ""));
-  if (!slug) return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  if (!s || s.includes("..")) return "";
+  return s;
+}
 
-  const doc: any = (await getServerBookBySlug(slug)) || (await getServerBookBySlug(`books/${slug}`));
-  if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "VOLUME_NOT_FOUND" });
+function extractBodyCode(doc: any): string {
+  return String(doc?.body?.code || doc?.bodyCode || "");
+}
+
+export default async function Page({ params }: { params: { slug: string } }) {
+  const param = String(params?.slug || "");
+  const bare = booksBareSlug(param);
+  if (!bare) {
+    // @ts-ignore - Return 404 page
+    return <BookSlugPage doc={{ title: "Not Found", draft: true }} code="" requiredTier="public" bareSlug="" />;
+  }
+
+  const books = getPublishedBooks() || [];
+  
+  // ✅ SSOT: Find by matching bare slug (same as pages/books/[slug].tsx)
+  const doc = books.find((d: any) => {
+    if (d?.draft) return false;
+    const fp = String(d?._raw?.flattenedPath || d?.slug || "");
+    const derived = booksBareSlug(fp);
+    return derived === bare;
+  }) || null;
+
+  if (!doc) {
+    // @ts-ignore - Return 404 page
+    return <BookSlugPage doc={{ title: "Not Found", draft: true }} code="" requiredTier="public" bareSlug="" />;
+  }
 
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
+  const code = requiredTier === "public" ? extractBodyCode(doc) : "";
 
-  // ✅ Public bypass
-  if (requiredTier === "public") {
-    return res.status(200).json({
-      ok: true,
-      tier: "public",
-      requiredTier: "public",
-      bodyCode: extractCode(doc),
-    });
-  }
-
-  // ✅ Gate: session cookie -> Postgres session context
-  const sessionId = readAccessCookie(req);
-  if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
-
-  const ctx = await getSessionContext(sessionId);
-  const sessionTierRaw = ctx?.tier ?? ctx?.member?.tier ?? null;
-  if (!sessionTierRaw) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
-
-  const userTier: AccessTier = normalizeUserTier(sessionTierRaw);
-
-  if (!hasAccess(userTier, requiredTier)) {
-    return res.status(403).json({ ok: false, reason: "INSUFFICIENT_CLEARANCE", tier: userTier, requiredTier });
-  }
-
-  return res.status(200).json({
-    ok: true,
-    tier: userTier,
-    requiredTier,
-    bodyCode: extractCode(doc),
+  const props = sanitizeData({ 
+    doc, 
+    code, 
+    requiredTier, 
+    bareSlug: bare 
   });
+
+  // Reuse your premium reader (zero design drift)
+  // @ts-ignore
+  return <BookSlugPage {...props} />;
 }

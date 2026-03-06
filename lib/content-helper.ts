@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * CONTENT HELPER with REAL ContentLayer data
- * Re-exports actual ContentLayer functions for both client and server
+ * CONTENT HELPER (single-source, zero duplicate exports)
+ * - Re-exports REAL ContentLayer data access
+ * - Re-exports client-safe utilities
+ * - Provides stable aliases your codebase expects
+ * - Provides ONE default export: ContentHelper
  */
 
-// Import REAL data access functions
+// ===================== REAL DATA ACCESS (ContentLayer) =====================
 import {
   getAllDocuments,
   getDocumentBySlug,
@@ -27,10 +30,10 @@ import {
   getPublishedStrategies,
   getPublishedCanons,
   getPublishedShorts,
-  coerceShortTheme
-} from './contentlayer/data';
+  coerceShortTheme,
+} from "./contentlayer/data";
 
-// Import client-safe utilities
+// ===================== CLIENT-SAFE UTILITIES =====================
 import {
   normalizeSlug,
   isDraftContent,
@@ -42,11 +45,88 @@ import {
   getDocKind,
   getDocHref,
   toUiDoc,
+  // aliases requested by older code
   getDocHref as getDocumentHref,
-  getDocKind as getDocumentKind
-} from './content/shared';
+  getDocKind as getDocumentKind,
+} from "./content/shared";
 
-// Re-export all client-safe functions
+// ===================== TYPES (flexible / non-breaking) =====================
+export type ContentDoc = any;
+export type DocKind = string;
+
+type Post = any;
+type Book = any;
+type Download = any;
+type Event = any;
+type Print = any;
+type Resource = any;
+type Strategy = any;
+type Canon = any;
+type Short = any;
+
+export type { Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short };
+
+// ===================== SMALL UI HELPERS (safe everywhere) =====================
+export function formatDocumentDate(dateString?: string): string {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(date);
+  } catch {
+    return String(dateString);
+  }
+}
+
+export function getReadingTime(content?: string): number {
+  if (!content) return 0;
+  const wordsPerMinute = 200;
+  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+  return Math.ceil(wordCount / wordsPerMinute);
+}
+
+export function getExcerpt(content: string, maxLength: number = 160): string {
+  if (!content) return "";
+
+  const plain = content
+    .replace(/[#*`\[\]]/g, "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\n+/g, " ")
+    .trim();
+
+  if (plain.length <= maxLength) return plain;
+  return plain.substring(0, maxLength).trim() + "…";
+}
+
+export function createDocumentUrl(slug: string, type?: string): string {
+  const normalized = normalizeSlug(slug);
+  if (!normalized) return "/";
+
+  switch (type) {
+    case "book":
+      return `/books/${normalized}`;
+    case "canon":
+      return `/canon/${normalized}`;
+    case "download":
+      return `/downloads/${normalized}`;
+    case "post":
+      return `/blog/${normalized}`;
+    case "print":
+      return `/prints/${normalized}`;
+    case "resource":
+      return `/resources/${normalized}`;
+    case "strategy":
+      return `/strategy/${normalized}`;
+    case "event":
+      return `/events/${normalized}`;
+    case "short":
+      return `/shorts/${normalized}`;
+    default:
+      return `/${normalized}`;
+  }
+}
+
+// ===================== CANONICAL EXPORTS (one time) =====================
+// Client-safe utilities
 export {
   normalizeSlug,
   isDraftContent,
@@ -59,95 +139,10 @@ export {
   getDocHref,
   toUiDoc,
   getDocumentHref,
-  getDocumentKind
+  getDocumentKind,
 };
 
-// Define generic types for flexibility
-export type ContentDoc = any;
-export type DocKind = string;
-
-// Import types from ContentLayer (if they exist, otherwise use fallback)
-// Try to import from the main contentlayer module
-type Post = any;
-type Book = any;
-type Download = any;
-type Event = any;
-type Print = any;
-type Resource = any;
-type Strategy = any;
-type Canon = any;
-type Short = any;
-
-// Export the types
-export type { Post, Book, Download, Event, Print, Resource, Strategy, Canon, Short };
-
-// Client-side only utilities (these are safe for both client and server)
-export function formatDocumentDate(dateString?: string): string {
-  if (!dateString) return '';
-  try {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date);
-  } catch {
-    return dateString;
-  }
-}
-
-export function getReadingTime(content?: string): number {
-  if (!content) return 0;
-  const wordsPerMinute = 200;
-  const wordCount = content.trim().split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
-}
-
-export function getExcerpt(content: string, maxLength: number = 160): string {
-  if (!content) return '';
-  
-  // Remove markdown and HTML tags
-  const plain = content
-    .replace(/[#*`\[\]]/g, '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/\n+/g, ' ')
-    .trim();
-  
-  if (plain.length <= maxLength) return plain;
-  
-  return plain.substring(0, maxLength).trim() + '…';
-}
-
-export function createDocumentUrl(slug: string, type?: string): string {
-  const normalized = normalizeSlug(slug);
-  if (!normalized) return '/';
-  
-  switch (type) {
-    case 'book':
-      return `/books/${normalized}`;
-    case 'canon':
-      return `/canon/${normalized}`;
-    case 'download':
-      return `/downloads/${normalized}`;
-    case 'post':
-      return `/blog/${normalized}`;
-    case 'print':
-      return `/prints/${normalized}`;
-    case 'resource':
-      return `/resources/${normalized}`;
-    case 'strategy':
-      return `/strategy/${normalized}`;
-    case 'event':
-      return `/events/${normalized}`;
-    case 'short':
-      return `/shorts/${normalized}`;
-    default:
-      return `/${normalized}`;
-  }
-}
-
-// ===== RE-EXPORT REAL CONTENTLAYER FUNCTIONS =====
-
+// Real contentlayer functions
 export {
   getAllDocuments,
   getDocumentBySlug,
@@ -169,14 +164,15 @@ export {
   getPublishedStrategies,
   getPublishedCanons,
   getPublishedShorts,
-  coerceShortTheme
+  coerceShortTheme,
 };
 
-// Alias functions for backward compatibility
+// ===================== ALIASES (back-compat) =====================
+// Old code expects these names:
 export const getDocBySlug = getDocumentBySlug;
 export const getPostBySlugWithContent = getPostBySlug;
 
-// Additional collection getters (aliases for consistency)
+// Collections (consistent names used across the project)
 export const getAllPosts = getPublishedPosts;
 export const getAllBooks = getPublishedBooks;
 export const getAllDownloads = getPublishedDownloads;
@@ -187,19 +183,21 @@ export const getAllStrategies = getPublishedStrategies;
 export const getAllCanons = getPublishedCanons;
 export const getAllShorts = getPublishedShorts;
 
-// --- SOVEREIGN SELECTOR BRIDGES (Fixes 21 Turbopack Errors) ---
+// Server selector bridges (keep the names stable)
 export const getServerAllBooks = getPublishedBooks;
 export const getServerAllCanons = getPublishedCanons;
 
 export function getServerBookBySlug(slug: string) {
-  return getPublishedBooks().find((b: any) => b.slug === slug || b.slugAsParams === slug);
+  const s = normalizeSlug(slug);
+  return getPublishedBooks().find((b: any) => normalizeSlug(b?.slug || b?.slugAsParams || "") === s) || null;
 }
 
 export function getServerCanonBySlug(slug: string) {
-  return getPublishedCanons().find((c: any) => c.slug === slug || c.slugAsParams === slug);
+  const s = normalizeSlug(slug);
+  return getPublishedCanons().find((c: any) => normalizeSlug(c?.slug || c?.slugAsParams || "") === s) || null;
 }
-// -------------------------------------------------------------
 
+// Misc “future buckets” (safe stubs)
 export const getAllArticles = (): any[] => [];
 export const getAllGuides = (): any[] => [];
 export const getAllTutorials = (): any[] => [];
@@ -215,10 +213,13 @@ export const getAllPodcasts = (): any[] => [];
 export const getAllVideos = (): any[] => [];
 export const getAllCourses = (): any[] => [];
 export const getAllLessons = (): any[] => [];
+
+// Old name your SEO/content tooling expects
 export const getAllContentlayerDocs = getAllDocuments;
 
-// For backward compatibility with old imports
+// ===================== SINGLE DEFAULT EXPORT (no duplicates) =====================
 export const ContentHelper = {
+  // utilities
   normalizeSlug,
   isDraftContent,
   isPublished,
@@ -229,12 +230,19 @@ export const ContentHelper = {
   getDocKind,
   getDocHref,
   toUiDoc,
+  getDocumentHref,
+  getDocumentKind,
+
+  // ui helpers
   formatDocumentDate,
   getReadingTime,
   getExcerpt,
   createDocumentUrl,
+
+  // contentlayer access
   getAllDocuments,
   getDocumentBySlug,
+  getDocBySlug,
   getPostBySlug,
   getBookBySlug,
   getDownloadBySlug,
@@ -244,6 +252,8 @@ export const ContentHelper = {
   getStrategyBySlug,
   getCanonBySlug,
   getShortBySlug,
+
+  // published collections
   getPublishedPosts,
   getPublishedBooks,
   getPublishedDownloads,
@@ -253,9 +263,29 @@ export const ContentHelper = {
   getPublishedStrategies,
   getPublishedCanons,
   getPublishedShorts,
-  getServerBookBySlug, // Added to helper object
-  getServerCanonBySlug  // Added to helper object
-};
 
-// Default export
+  // canonical “getAllX” names
+  getAllPosts,
+  getAllBooks,
+  getAllDownloads,
+  getAllEvents,
+  getAllPrints,
+  getAllResources,
+  getAllStrategies,
+  getAllCanons,
+  getAllShorts,
+
+  // themes / coercions
+  coerceShortTheme,
+
+  // bridges
+  getServerAllBooks,
+  getServerAllCanons,
+  getServerBookBySlug,
+  getServerCanonBySlug,
+
+  // misc
+  getAllContentlayerDocs,
+} as const;
+
 export default ContentHelper;

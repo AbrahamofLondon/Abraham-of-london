@@ -1,4 +1,6 @@
 // lib/server/resources-data.ts
+import "server-only";
+
 import {
   getMdxCollectionMeta,
   getMdxDocumentBySlug,
@@ -7,29 +9,16 @@ import {
 } from "@/lib/server/mdx-collections";
 import type { Resource } from "@/types/index";
 
-export type ResourceWithContent = Resource & {
-  content: string;
-};
+export type ResourceWithContent = Resource & { content: string };
 
 // Safe converters
 function safeString(value: any): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
-
 function safeArray(value: any): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return value.filter(item => typeof item === "string");
+  return value.filter((item) => typeof item === "string");
 }
-
-function _safeNumber(value: any): number | undefined { // Prefixed with underscore
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? undefined : parsed;
-  }
-  return undefined;
-}
-
 function safeBoolean(value: any): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
@@ -41,33 +30,26 @@ function safeBoolean(value: any): boolean {
 
 function fromMdxMeta(meta: MdxMeta): Resource {
   const m = meta as any;
-  
   const slug = safeString(m.slug) || safeString(m._raw?.flattenedPath) || "";
-  
+
   return {
-    // Required
     slug,
     title: safeString(m.title) || "Untitled Resource",
-    
-    // Content
+
     description: safeString(m.description) || safeString(m.excerpt),
     excerpt: safeString(m.excerpt) || safeString(m.description),
-    
-    // Metadata
+
     date: safeString(m.date),
     author: safeString(m.author),
     category: safeString(m.category),
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
-    
-    // Visual
+
     coverImage: safeString(m.coverImage) || safeString(m.image),
-    
-    // State
+
     draft: safeBoolean(m.draft),
-    published: safeBoolean(m.published),
-    
-    // Resource-specific
+    published: m.published === undefined ? true : safeBoolean(m.published),
+
     resourceType: safeString(m.resourceType) as any,
     applications: safeArray(m.applications),
     useCases: safeArray(m.useCases),
@@ -84,42 +66,36 @@ function fromMdxMeta(meta: MdxMeta): Resource {
     instructions: safeString(m.instructions),
     examples: safeArray(m.examples),
     tips: safeArray(m.tips),
-    
-    // System
+
     _raw: m._raw,
     url: safeString(m.url),
     type: "resource",
-  };
+  } as any;
 }
 
 function fromMdxDocument(doc: MdxDocument): ResourceWithContent {
   const { content, ...rest } = doc as any;
   const meta = fromMdxMeta(rest);
-  
-  return {
-    ...meta,
-    content: typeof content === "string" ? content : "",
-  };
+  return { ...(meta as any), content: typeof content === "string" ? content : "" };
 }
 
-export function getAllResourcesMeta(): Resource[] {
+export async function getAllResourcesMeta(): Promise<Resource[]> {
   try {
-    const metas = getMdxCollectionMeta("resources");
-    return metas.map(m => fromMdxMeta(m));
+    const metas = await getMdxCollectionMeta("resources");
+    return (metas || []).map((m) => fromMdxMeta(m));
   } catch (error) {
     console.error("[resources-data] Error getting all resources meta:", error);
     return [];
   }
 }
 
-export function getResourceBySlug(slug: string): ResourceWithContent | null {
+export async function getResourceBySlug(slug: string): Promise<ResourceWithContent | null> {
   try {
-    const doc = getMdxDocumentBySlug("resources", slug);
+    const doc = await getMdxDocumentBySlug("resources", slug);
     if (!doc) {
       console.warn(`[resources-data] Resource not found: ${slug}`);
       return null;
     }
-    
     return fromMdxDocument(doc);
   } catch (error) {
     console.error(`[resources-data] Error getting resource ${slug}:`, error);
@@ -127,27 +103,27 @@ export function getResourceBySlug(slug: string): ResourceWithContent | null {
   }
 }
 
-export function getResourcesByType(type: string): Resource[] {
+export async function getResourcesByType(type: string): Promise<Resource[]> {
   try {
-    return getAllResourcesMeta()
-      .filter(r => !r.draft && r.resourceType?.toLowerCase() === type.toLowerCase());
+    const all = await getAllResourcesMeta();
+    const target = String(type || "").toLowerCase().trim();
+    return all.filter((r: any) => !r?.draft && String(r?.resourceType || "").toLowerCase() === target);
   } catch (error) {
     console.error(`[resources-data] Error getting resources by type ${type}:`, error);
     return [];
   }
 }
 
-export function getFeaturedResources(): Resource[] {
+export async function getFeaturedResources(): Promise<Resource[]> {
   try {
-    return getAllResourcesMeta()
-      .filter(r => r.featured && !r.draft);
+    const all = await getAllResourcesMeta();
+    return all.filter((r: any) => r?.featured && !r?.draft);
   } catch (error) {
     console.error("[resources-data] Error getting featured resources:", error);
     return [];
   }
 }
 
-// Create named object for default export
 const resourcesDataApi = {
   getAllResourcesMeta,
   getResourceBySlug,

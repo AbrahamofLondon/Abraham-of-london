@@ -1,27 +1,69 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * lib/contentlayer/index.ts — COMPAT LAYER (SSOT)
+ * lib/contentlayer/index.ts — COMPAT LAYER (SSOT) [HARDENED]
  *
  * Goals:
  * - Stable import surface for the app
  * - No dependency on "@/contentlayer/generated/types"
  * - No assumption that contentlayer exports named TS types for each doc
+ * - Build-safe on Windows/CI when generated module is missing
  * - Avoid circular imports (never import from "@/lib/contentlayer" here)
  */
 
-import * as generated from "contentlayer/generated";
-
-// ✅ The only types we guarantee in this codebase:
 import type { ContentDoc, DocKind } from "@/lib/content/index";
 export type { ContentDoc, DocKind };
+
+type Generated = {
+  allDocuments?: any[];
+  allPosts?: any[];
+  allShorts?: any[];
+  allBooks?: any[];
+  allCanons?: any[];
+  allBriefs?: any[];
+  allDownloads?: any[];
+  allEvents?: any[];
+  allPrints?: any[];
+  allResources?: any[];
+  allStrategies?: any[];
+  allIntelligence?: any[];
+  allLexicons?: any[];
+};
+
+let _cache: Generated | null = null;
+
+function loadGenerated(): Generated {
+  if (_cache) return _cache;
+
+  // 1) Preferred virtual module (when available)
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    _cache = require("contentlayer/generated") as Generated;
+    return _cache;
+  } catch {
+    // continue
+  }
+
+  // 2) Fallback: local output path (contentlayer2 / Windows)
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    _cache = require("../../.contentlayer/generated") as Generated;
+    return _cache;
+  } catch (e) {
+    // Fail-soft: do not crash the app; return empty collections.
+    console.warn(
+      "⚠️ [CONTENTLAYER_COMPAT] Generated content missing. Run: pnpm content:build",
+      e
+    );
+    _cache = {};
+    return _cache;
+  }
+}
 
 // -----------------------------
 // Generated collections (safe)
 // -----------------------------
-// These exports are optional in generated output depending on your schema.
-// We expose them anyway (as arrays) so dependants won’t crash on import.
-const g: any = generated as any;
+const g: any = loadGenerated();
 
 export const allDocuments: any[] = Array.isArray(g.allDocuments) ? g.allDocuments : [];
 
@@ -95,14 +137,11 @@ export const findByFlattenedPath = (flattenedPath: string): ContentDoc | null =>
   if (!p) return null;
 
   const docs = getAllDocuments() as any[];
-  return (
-    docs.find((d) => String(d?._raw?.flattenedPath) === p) ?? null
-  ) as ContentDoc | null;
+  return (docs.find((d) => String(d?._raw?.flattenedPath) === p) ?? null) as ContentDoc | null;
 };
 
 // Default export (if anything imports default)
 const contentlayerApi = {
-  // collections
   allDocuments,
   allPosts,
   allShorts,
@@ -117,7 +156,6 @@ const contentlayerApi = {
   allIntelligence,
   allLexicons,
 
-  // getters/helpers
   getAllDocuments,
   isPost,
   isShort,

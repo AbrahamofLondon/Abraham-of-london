@@ -159,6 +159,7 @@ const PUBLIC_PREFIXES = [
   "/api/check-access",
   "/api/access-check",
   "/api/v2/access",
+  "/api/debug",
   "/_next",
   "/favicon.ico",
   "/robots.txt",

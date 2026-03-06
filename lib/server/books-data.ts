@@ -1,8 +1,14 @@
-// lib/server/books-data.ts - PRODUCTION-GRADE, NO ASSUMPTIONS
-import type { ContentDoc } from "@/lib/content";
-import { getPublishedBooks, normalizeSlug } from "@/lib/content";
-import { safeSlice } from "@/lib/utils/safe";
+// lib/server/books-data.ts — PRODUCTION-GRADE, NO ASSUMPTIONS
+import "server-only";
 
+import type { ContentDoc } from "@/lib/content-helper";
+import {
+  getAllBooks,
+  isPublished,
+  normalizeSlug,
+} from "@/lib/content-helper";
+
+import { safeSlice } from "@/lib/utils/safe";
 
 export type Book = ContentDoc & {
   normalizedReadTime: string;
@@ -45,36 +51,38 @@ function enhance(book: ContentDoc): Book {
 
 export function getAllBooksMeta(): Book[] {
   try {
-    return (getPublishedBooks() as ContentDoc[]).map(enhance);
+    const all = getAllBooks();
+    const published = Array.isArray(all) ? all.filter((b: any) => isPublished(b)) : [];
+    return published.map(enhance);
   } catch (err) {
-    console.error("getAllBooksMeta failed:", err);
+    console.error("[books-data] getAllBooksMeta failed:", err);
     return [];
   }
 }
 
 export function getBookBySlug(slug: string): Book | null {
   try {
-    const s = normalizeSlug(slug);
+    const s = normalizeSlug(String(slug || ""));
     if (!s) return null;
 
     const books = getAllBooksMeta();
     const found =
-      books.find((b) => normalizeSlug(b.slug ?? b?._raw?.flattenedPath ?? "") === s) ?? null;
+      books.find((b: any) => normalizeSlug(b.slug ?? b?._raw?.flattenedPath ?? "") === s) ?? null;
 
     return found;
   } catch (err) {
-    console.error("getBookBySlug failed:", err);
+    console.error("[books-data] getBookBySlug failed:", err);
     return null;
   }
 }
 
-export function getAllBooks(): Book[] {
+export function getAllBooksList(): Book[] {
   return getAllBooksMeta();
 }
 
 export function getBookSlugs(): string[] {
   return getAllBooksMeta()
-    .map((b) => safeString(b.slug) || safeString(b?._raw?.flattenedPath?.split("/").pop()))
+    .map((b: any) => safeString(b.slug) || safeString(b?._raw?.flattenedPath?.split("/").pop()))
     .filter(Boolean);
 }
 
@@ -93,28 +101,12 @@ export function getRecentBooks(count?: number): Book[] {
 }
 
 const booksDataApi = {
-
   getAllBooksMeta,
   getBookBySlug,
-  getAllBooks,
+  getAllBooksList,
   getBookSlugs,
   getFeaturedBooks,
   getRecentBooks,
-
-};
-
-
-
-
-
-const booksDataApi = {
-  getAllBooks,
-  getAllBooksMeta,
-  getBookBySlug,
-  getBookSlugs,
-  getFeaturedBooks,
-  getRecentBooks
 };
 
 export default booksDataApi;
-

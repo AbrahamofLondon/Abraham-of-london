@@ -30,7 +30,7 @@ const isDevelopment = () => process.env.NODE_ENV === "development";
 
 /**
  * Admin policy: minimum tier required for admin clearance.
- * Change here once. No other file should hardcode "admin".
+ * Single source of truth.
  */
 const ADMIN_MIN_TIER: AccessTier = "architect";
 
@@ -39,10 +39,11 @@ function getBearerToken(req: ExtendedRequest): string | null {
     const anyHeaders = (req as any)?.headers;
     if (!anyHeaders) return null;
 
+    // NextRequest uses headers.get(...)
     const auth =
       typeof anyHeaders.get === "function"
         ? String(anyHeaders.get("authorization") || "")
-        : String(anyHeaders.authorization || "");
+        : String((anyHeaders.authorization || anyHeaders.Authorization || "") as any);
 
     if (!auth) return null;
 
@@ -65,31 +66,51 @@ function timingSafeEqualString(a: string, b: string): boolean {
 
 /**
  * INSTITUTIONAL ADMIN VALIDATION
- * 1) DB session tier (cookie -> prisma.session -> member tier normalized)
- * 2) Bearer API key
- * 3) Dev fallback
+ * 1) DB session tier (cookie -> prisma.session -> prisma.innerCircleMember -> tier)
+ * 2) Bearer API key (timing-safe)
+ * 3) Dev fallback (only when ADMIN_API_KEY is not set)
  */
 export async function validateAdminAccess(req: ExtendedRequest): Promise<AdminAuthResult> {
-  const adminKey = process.env.ADMIN_API_KEY;
+  const adminKey = process.env.ADMIN_API_KEY || "";
 
   // 1) Session Check (Database-backed)
   const sessionToken = readAccessCookie(req as any);
   if (sessionToken) {
     try {
+      // IMPORTANT: do NOT use include here unless Session has a `member` relation in schema.
       const session = await prisma.session.findUnique({
         where: { sessionId: sessionToken },
-        include: { member: true },
+        select: {
+          sessionId: true,
+          memberId: true,
+          status: true,
+          expiresAt: true,
+          createdAt: true,
+        },
       });
 
-      if (session && session.expiresAt && session.expiresAt > new Date()) {
-        const tier = normalizeUserTier(session.member?.tier ?? "public");
-        if (tierHasAccess(tier, ADMIN_MIN_TIER)) {
-          return {
-            valid: true,
-            userId: session.memberId || undefined,
-            tier,
-            method: "session",
-          };
+      if (session) {
+        const active = String(session.status || "").toLowerCase() === "active";
+        const expOk = !!session.expiresAt && new Date(session.expiresAt).getTime() > Date.now();
+
+        if (active && expOk && session.memberId) {
+          const member = await prisma.innerCircleMember.findUnique({
+            where: { id: session.memberId },
+            select: { id: true, tier: true, status: true, role: true },
+          });
+
+          // Member must exist and be active
+          if (member && String(member.status || "").toLowerCase() === "active") {
+            const tier = normalizeUserTier((member.tier as any) ?? "public");
+            if (tierHasAccess(tier, ADMIN_MIN_TIER)) {
+              return {
+                valid: true,
+                userId: member.id,
+                tier,
+                method: "session",
+              };
+            }
+          }
         }
       }
     } catch (e) {
@@ -112,7 +133,7 @@ export async function validateAdminAccess(req: ExtendedRequest): Promise<AdminAu
     }
   }
 
-  // 3) Development Fallback
+  // 3) Development Fallback (only if you have not configured an admin key)
   if (isDevelopment() && !adminKey) {
     return { valid: true, method: "dev_mode" };
   }
@@ -122,6 +143,7 @@ export async function validateAdminAccess(req: ExtendedRequest): Promise<AdminAu
 
 /**
  * BRIDGE FOR gateway.ts: getAdminSession
+ * (keeps legacy shape stable)
  */
 export async function getAdminSession(req: any) {
   const result = await validateAdminAccess(req);
@@ -131,7 +153,7 @@ export async function getAdminSession(req: any) {
   return null;
 }
 
-// Lightweight format validators (not “security”, just hygiene)
+// Lightweight format validators (hygiene)
 export const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) ? { valid: true } : { valid: false, message: "Invalid email format" };

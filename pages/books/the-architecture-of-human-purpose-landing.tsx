@@ -7,8 +7,8 @@ import Image from "next/image";
 import Layout from "@/components/Layout";
 import { ArrowRight, BookOpen, Layers, Lock, ShieldCheck } from "lucide-react";
 
-// ✅ Add the missing import
 import { sanitizeData, isDraftContent } from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 type PreludeBook = {
   title: string;
@@ -26,6 +26,52 @@ type PurposeLandingProps = {
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 const canonicalPath = "/books/the-architecture-of-human-purpose-landing";
 const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+
+// ✅ your real repo path (based on your `ls content/books`)
+const PRELUDE_SOURCE_FILE = "content/books/the-architecture-of-human-purpose.mdx";
+
+// ✅ the canonical public reading route you want this landing to point to
+const PRELUDE_ROUTE = "/books/the-architecture-of-human-purpose";
+
+function collapseSlashes(s: string): string {
+  return String(s || "").replace(/\\/g, "/").replace(/\/{2,}/g, "/");
+}
+
+function toBareBooksSlug(input: unknown): string {
+  // Preserve nested slugs if any, normalize per segment
+  let s = collapseSlashes(String(input ?? "")).trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  if (!s || s.includes("..")) return "";
+
+  // Strip books/ prefixes repeatedly
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const lower = s.toLowerCase();
+    if (lower.startsWith("books/")) {
+      s = s.slice("books/".length).replace(/^\/+/, "");
+      changed = true;
+    }
+    if (lower.startsWith("vault/books/")) {
+      s = s.slice("vault/books/".length).replace(/^\/+/, "");
+      changed = true;
+    }
+  }
+
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (!s || s.includes("..")) return "";
+
+  const segs = s.split("/").filter(Boolean).map((x) => normalizeSlug(x));
+  return segs.filter(Boolean).join("/");
+}
+
+function looksLikePreludeDoc(d: any): boolean {
+  const fp = collapseSlashes(String(d?._raw?.sourceFilePath || d?._raw?.flattenedPath || ""));
+  if (fp && fp.endsWith(PRELUDE_SOURCE_FILE)) return true;
+
+  const slugish = collapseSlashes(String(d?.slug || d?._raw?.flattenedPath || ""));
+  const bare = toBareBooksSlug(slugish);
+  return bare === "the-architecture-of-human-purpose";
+}
 
 const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
   const title = book?.title || "The Architecture of Human Purpose";
@@ -77,26 +123,18 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
                   <span className="block text-amber-200">{title.split(" ").slice(3).join(" ")}</span>
                 </h1>
 
-                <p className="text-sm font-mono uppercase tracking-[0.28em] text-white/55">
-                  {subtitle}
-                </p>
+                <p className="text-sm font-mono uppercase tracking-[0.28em] text-white/55">{subtitle}</p>
 
-                <p className="max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
-                  {description}
-                </p>
+                <p className="max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">{description}</p>
 
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                  <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-amber-200/70">
-                    Excerpt
-                  </p>
-                  <p className="mt-3 text-base font-serif leading-relaxed text-white/85">
-                    {excerpt}
-                  </p>
+                  <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-amber-200/70">Excerpt</p>
+                  <p className="mt-3 text-base font-serif leading-relaxed text-white/85">{excerpt}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-4 pt-2">
                   <Link
-                    href="/books/the-architecture-of-human-purpose"
+                    href={book?.slug || PRELUDE_ROUTE}
                     className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-7 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-amber-400 transition-all"
                   >
                     <BookOpen className="h-4 w-4" />
@@ -153,21 +191,17 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
           </div>
         </section>
 
-        {/* CANON INTRO — real, not a “mini pill” */}
+        {/* CANON INTRO */}
         <section className="relative overflow-hidden">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/18 bg-amber-500/10 px-4 py-2">
                   <Layers className="h-4 w-4 text-amber-300" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200">
-                    The Canon
-                  </span>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200">The Canon</span>
                 </div>
 
-                <h2 className="font-serif text-3xl sm:text-4xl text-white/95">
-                  Not content. An operating library.
-                </h2>
+                <h2 className="font-serif text-3xl sm:text-4xl text-white/95">Not content. An operating library.</h2>
 
                 <p className="text-base leading-relaxed text-white/70">
                   Most platforms publish ideas. This platform publishes <span className="text-amber-200">systems</span>.
@@ -176,9 +210,8 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
                 </p>
 
                 <p className="text-base leading-relaxed text-white/60">
-                  The Prelude is the key. The Canon is the architecture.
-                  If you want a worldview that can hold pressure — family, leadership, governance, markets, culture —
-                  you don’t need more inspiration. You need structure.
+                  The Prelude is the key. The Canon is the architecture. If you want a worldview that can hold pressure —
+                  family, leadership, governance, markets, culture — you don’t need more inspiration. You need structure.
                 </p>
 
                 <div className="flex flex-wrap gap-3 pt-2">
@@ -236,7 +269,7 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <Link
-                    href="/books/the-architecture-of-human-purpose"
+                    href={book?.slug || PRELUDE_ROUTE}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-amber-400 transition-all"
                   >
                     Open the Prelude <ArrowRight className="h-4 w-4" />
@@ -256,16 +289,14 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
         {/* CTA */}
         <section className="border-t border-white/10 bg-gradient-to-r from-black via-slate-950 to-black py-14">
           <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <h3 className="font-serif text-2xl sm:text-3xl text-white/95">
-              Ready to read the Prelude?
-            </h3>
+            <h3 className="font-serif text-2xl sm:text-3xl text-white/95">Ready to read the Prelude?</h3>
             <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-white/60 leading-relaxed">
               Start with the doorway. Then track the Canon as new volumes, tools, and operating frameworks are released.
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
-                href="/books/the-architecture-of-human-purpose"
+                href={book?.slug || PRELUDE_ROUTE}
                 className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-black hover:bg-slate-100 transition-all"
               >
                 Read the Prelude <ArrowRight className="h-4 w-4" />
@@ -285,46 +316,59 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
   );
 };
 
-const PRELUDE_SOURCE_FILE = "content/books/the-architecture-of-human-purpose.mdx";
-
 export const getStaticProps: GetStaticProps<PurposeLandingProps> = async () => {
-  // fallback if content pipeline fails (never breaks deploy)
+  // Hard fallback: never breaks deploy
   let book: PreludeBook = {
     title: "The Architecture of Human Purpose",
     subtitle: "Prelude MiniBook - Limited Release Edition",
     description:
-      "A distilled, high-level preview of the forthcoming multi-volume Canon on purpose, civilisation, governance, spiritual alignment, and human destiny.",
+      "A limited-release Prelude Minibook introducing the Canon on purpose, civilisation, governance, spiritual alignment, and human destiny.",
     excerpt:
       "Human flourishing is not accidental. It is architectural. This Prelude introduces the foundational patterns that govern purpose, identity, civilisation and destiny.",
     coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
-    slug: "/books/the-architecture-of-human-purpose",
+    slug: PRELUDE_ROUTE,
   };
 
   try {
+    // Prefer the clean books collection accessor if available
     const mod: any = await import("@/lib/content/server");
-    const getAll = mod?.getAllContentlayerDocs;
 
-    if (typeof getAll === "function") {
-      const docs = (getAll() || []).filter((d: any) => !isDraftContent(d));
+    const getBooks =
+      typeof mod?.getPublishedBooks === "function"
+        ? mod.getPublishedBooks
+        : typeof mod?.getAllBooks === "function"
+        ? mod.getAllBooks
+        : null;
 
-      const prelude = docs.find((d: any) => {
-        const fp = String(d?._raw?.sourceFilePath || "").replace(/\\/g, "/");
-        const kind = String(d?.docKind || d?.type || d?.kind || "").toLowerCase();
-        return (kind === "book" || fp.includes("/content/books/")) && fp.endsWith(PRELUDE_SOURCE_FILE);
-      });
+    const getAllDocs = typeof mod?.getAllContentlayerDocs === "function" ? mod.getAllContentlayerDocs : null;
 
-      if (prelude) {
-        book = {
-          title: String(prelude?.title || book.title),
-          subtitle: (prelude?.subtitle ?? book.subtitle) as any,
-          description: (prelude?.description ?? book.description) as any,
-          excerpt: (prelude?.excerpt ?? prelude?.description ?? book.excerpt) as any,
-          coverImage: (prelude?.coverImage ?? book.coverImage) as any,
-          slug: (prelude?.slug ?? book.slug) as any,
-        };
-      }
+    const candidates: any[] = [];
+    if (getBooks) candidates.push(...(getBooks() || []));
+    if (getAllDocs) candidates.push(...(getAllDocs() || []));
+
+    const docs = candidates
+      .filter(Boolean)
+      .filter((d: any) => !isDraftContent(d));
+
+    const prelude = docs.find(looksLikePreludeDoc);
+
+    if (prelude) {
+      const rawSlugish = collapseSlashes(String(prelude?.slug || prelude?._raw?.flattenedPath || ""));
+      const bare = toBareBooksSlug(rawSlugish);
+
+      book = {
+        title: String(prelude?.title || book.title),
+        subtitle: (prelude?.subtitle ?? book.subtitle) as any,
+        description: (prelude?.description ?? book.description) as any,
+        excerpt: (prelude?.excerpt ?? prelude?.description ?? book.excerpt) as any,
+        coverImage: (prelude?.coverImage ?? book.coverImage) as any,
+        // Always point to the actual reader route (not whatever junk slug is stored)
+        slug: bare ? `/books/${bare}` : PRELUDE_ROUTE,
+      };
     }
   } catch (err) {
+    // non-fatal, keeps fallback
+    // eslint-disable-next-line no-console
     console.error("[PurposeLanding/getStaticProps] non-fatal:", err);
   }
 

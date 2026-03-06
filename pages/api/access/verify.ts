@@ -1,46 +1,65 @@
-// pages/api/access/verify.ts — CANONICAL SESSION VERIFICATION
+// pages/api/access/verify.ts — CANONICAL SESSION VERIFICATION (schema + TS safe)
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAccessCookie } from "@/lib/server/auth/cookies";
-import { verifySession, type Tier } from "@/lib/server/auth/tokenStore.postgres";
+import { getTokenStore } from "@/lib/server/access/tokenStore";
+import type { AccessTier } from "@/lib/access/tier-policy";
 
-type Data = 
-  | { ok: true; tier: Tier; sessionId: string }
+type Data =
+  | { ok: true; tier: AccessTier; sessionId: string }
   | { ok: false; reason: string };
 
-/**
- * Verification Handler
- * Validates the sessionId stored in the browser cookie.
- * Use this for client-side mounting checks and "Inner Circle" gated UI.
- */
+const COOKIE_NAME = "aol_access";
+
+function parseCookies(req: NextApiRequest): Record<string, string> {
+  const header = String(req.headers.cookie || "");
+  const out: Record<string, string> = {};
+  if (!header) return out;
+
+  header
+    .split(";")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((part) => {
+      const i = part.indexOf("=");
+      if (i < 0) return;
+      const k = part.slice(0, i).trim();
+      const v = part.slice(i + 1);
+      if (!k) return;
+      try {
+        out[k] = decodeURIComponent(v);
+      } catch {
+        out[k] = v;
+      }
+    });
+
+  return out;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
-  // 1) Method Gate
   if (req.method !== "GET" && req.method !== "POST") {
     return res.status(405).json({ ok: false, reason: "Method not allowed" });
   }
 
   try {
-    // 2) Extract Session ID from Cookies
-    const sessionId = getAccessCookie(req);
+    const cookies = parseCookies(req);
+    const sessionId = String(cookies[COOKIE_NAME] || "").trim();
 
     if (!sessionId) {
       return res.status(401).json({ ok: false, reason: "No active session found" });
     }
 
-    // 3) Validate Session against Postgres Store
-    // verifySession should check expiration and revocation status
-    const session = await verifySession(sessionId);
+    const store = await getTokenStore();
+    const session = await store.getSession(sessionId);
 
-    if (!session || !session.valid) {
+    if (!session) {
       return res.status(401).json({ ok: false, reason: "Session expired or revoked" });
     }
 
-    // 4) Return Tier and Confirmation
+    // store.getSession already enforces expiry in your postgres adapter
     return res.status(200).json({
       ok: true,
       tier: session.tier,
-      sessionId: sessionId // Re-confirming for client state
+      sessionId,
     });
-
   } catch (err) {
     console.error("[ACCESS_VERIFY_ERROR]", err);
     return res.status(500).json({ ok: false, reason: "Internal authentication error" });

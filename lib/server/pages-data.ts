@@ -1,5 +1,7 @@
-// lib/server/pages-data.ts - SSOT ALIGNED
-// Pages under content/pages/* - Using MDX collections
+// lib/server/pages-data.ts — SSOT ALIGNED (CLEAN REBUILD)
+// Pages under content/pages/* — MDX collections (async), Windows-safe, build-safe.
+
+import "server-only";
 
 import {
   getMdxCollectionMeta,
@@ -12,108 +14,88 @@ import { safeSlice } from "@/lib/utils/safe";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 
-export type PageWithContent = Page & {
-  content: string;
-};
+export type PageWithContent = Page & { content: string };
 
 // Extended MDX meta with page-specific fields
-type PageishMdxMeta = MdxMeta & Partial<Page> & {
-  publishDate?: string;
-  releaseDate?: string;
-  [key: string]: any;
-};
+type PageishMdxMeta = MdxMeta &
+  Partial<Page> & {
+    publishDate?: string;
+    releaseDate?: string;
+    [key: string]: any;
+  };
 
-type PageishMdxDocument = MdxDocument & {
-  content: string;
-} & Partial<Page>;
+type PageishMdxDocument = MdxDocument &
+  Partial<Page> & {
+    content?: string;
+    body?: any;
+  };
 
-// ---------------------------------------------------------------------------
-// SAFE TYPE CONVERTERS (SSOT ALIGNED)
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* SAFE CONVERTERS                                                            */
+/* -------------------------------------------------------------------------- */
 
 function safeString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : undefined;
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
-
 function safeNumber(value: unknown): number | undefined {
   if (typeof value === "number") return value;
   if (typeof value === "string") {
-    const parsed = parseInt(value, 10);
-    return Number.isNaN(parsed) ? undefined : parsed;
+    const n = parseInt(value, 10);
+    return Number.isNaN(n) ? undefined : n;
   }
   return undefined;
 }
-
 function safeBoolean(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
   if (typeof value === "string") {
-    const lower = value.toLowerCase().trim();
-    if (lower === "true") return true;
-    if (lower === "false") return false;
-    if (lower === "yes") return true;
-    if (lower === "no") return false;
-    if (lower === "1") return true;
-    if (lower === "0") return false;
-  }
-  if (typeof value === "number") {
-    return value === 1;
+    const s = value.toLowerCase().trim();
+    if (["true", "yes", "1"].includes(s)) return true;
+    if (["false", "no", "0"].includes(s)) return false;
   }
   return undefined;
 }
-
 function safeArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  const filtered = value.filter((item) => typeof item === "string") as string[];
-  return filtered.length > 0 ? filtered : undefined;
+  const out = value.filter((x) => typeof x === "string") as string[];
+  return out.length ? out : undefined;
 }
-
 function safeStatus(
   value: unknown
 ): "draft" | "published" | "scheduled" | "archived" | undefined {
-  if (value === "draft" || value === "published" || value === "scheduled" || value === "archived") {
-    return value;
-  }
-  return undefined;
+  return value === "draft" || value === "published" || value === "scheduled" || value === "archived"
+    ? value
+    : undefined;
 }
-
-/**
- * Safe access level converter - SSOT ALIGNED
- */
 function safeAccessLevel(value: unknown): AccessTier | undefined {
   if (!value) return undefined;
   return normalizeRequiredTier(value);
 }
-
 function safeLayout(
   value: unknown
 ): "narrow" | "default" | "wide" | "fullscreen" | undefined {
-  if (typeof value === "string") {
-    const lowerValue = value.toLowerCase().trim();
-    if (lowerValue === "narrow") return "narrow";
-    if (lowerValue === "default") return "default";
-    if (lowerValue === "wide") return "wide";
-    if (lowerValue === "fullscreen") return "fullscreen";
-  }
+  if (typeof value !== "string") return undefined;
+  const s = value.toLowerCase().trim();
+  if (s === "narrow" || s === "default" || s === "wide" || s === "fullscreen") return s;
   return undefined;
 }
+function safeTime(v: unknown): number {
+  if (!v) return 0;
+  const t = Date.parse(String(v));
+  return Number.isFinite(t) ? t : 0;
+}
 
-// ---------------------------------------------------------------------------
-// MAIN CONVERSION FUNCTIONS
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* MAPPERS                                                                    */
+/* -------------------------------------------------------------------------- */
 
 function fromMdxMeta(meta: MdxMeta): Page {
   const m = meta as PageishMdxMeta;
 
   const date = safeString(m.date) || safeString(m.publishDate) || safeString(m.releaseDate);
-  
+
   const slug = safeString(m.slug) || "";
   const title = safeString(m.title) || "Untitled Page";
-  
-  if (!slug || !title) {
-    console.warn(`Page metadata missing slug or title: ${slug} - ${title}`);
-  }
 
   return {
     slug,
@@ -126,433 +108,278 @@ function fromMdxMeta(meta: MdxMeta): Page {
     category: safeString(m.category),
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
-    readTime: safeString(m.readTime) || safeNumber(m.readTime),
-    coverImage: safeString(m.coverImage) || safeString(m.image),
-    pageType: safeString(m.pageType) || "page",
-    parentPage: safeString(m.parentPage),
-    order: safeNumber(m.order),
-    template: safeString(m.template),
-    layout: safeLayout(m.layout) || "default",
-    showInNav: safeBoolean(m.showInNav),
-    navOrder: safeNumber(m.navOrder),
-    navTitle: safeString(m.navTitle),
-    metaTitle: safeString(m.metaTitle),
-    metaDescription: safeString(m.metaDescription),
-    keywords: safeArray(m.keywords),
-    lastModified: safeString(m.lastModified),
-    draft: safeBoolean(m.draft),
-    published: safeBoolean(m.published),
-    status: safeStatus(m.status),
-    accessLevel: safeAccessLevel(m.accessLevel) || "public",
-    lockMessage: safeString(m.lockMessage),
-    _raw: m._raw,
-    _id: safeString(m._id),
-    url: safeString(m.url),
-    type: safeString(m.type) || "page",
-    ...Object.fromEntries(
-      Object.entries(m)
-        .filter(([key]) => ![
-          'slug', 'title', 'description', 'excerpt', 'subtitle',
-          'date', 'author', 'category', 'tags', 'featured', 'readTime',
-          'coverImage', 'image', 'pageType', 'parentPage', 'order',
-          'template', 'layout', 'showInNav', 'navOrder', 'navTitle',
-          'metaTitle', 'metaDescription', 'keywords', 'lastModified',
-          'draft', 'published', 'status', 'accessLevel', 'lockMessage',
-          '_raw', '_id', 'url', 'type', 'publishDate', 'releaseDate'
-        ].includes(key))
-        .map(([key, value]) => [key, value])
-    ),
-  };
+    readTime: safeString((m as any).readTime) || (safeNumber((m as any).readTime) as any),
+    coverImage: safeString((m as any).coverImage) || safeString((m as any).image),
+    pageType: safeString((m as any).pageType) || "page",
+    parentPage: safeString((m as any).parentPage),
+    order: safeNumber((m as any).order),
+    template: safeString((m as any).template),
+    layout: safeLayout((m as any).layout) || "default",
+    showInNav: safeBoolean((m as any).showInNav),
+    navOrder: safeNumber((m as any).navOrder),
+    navTitle: safeString((m as any).navTitle),
+    metaTitle: safeString((m as any).metaTitle),
+    metaDescription: safeString((m as any).metaDescription),
+    keywords: safeArray((m as any).keywords),
+    lastModified: safeString((m as any).lastModified),
+
+    draft: safeBoolean((m as any).draft),
+    // default: if undefined, treat as published (matches your other loaders)
+    published: (m as any).published === undefined ? true : safeBoolean((m as any).published),
+    status: safeStatus((m as any).status),
+
+    accessLevel: safeAccessLevel((m as any).accessLevel) || "public",
+    lockMessage: safeString((m as any).lockMessage),
+
+    _raw: (m as any)._raw,
+    _id: safeString((m as any)._id),
+    url: safeString((m as any).url),
+    type: safeString((m as any).type) || "page",
+  } as any;
 }
 
 function fromMdxDocument(doc: MdxDocument): PageWithContent {
-  const pageDoc = doc as PageishMdxDocument;
-  const { content, ...rest } = pageDoc;
-  const meta = fromMdxMeta(rest);
-  
-  return { 
-    ...meta, 
-    content: typeof content === "string" ? content : "",
-    body: pageDoc.body || undefined,
-  };
+  const d = doc as PageishMdxDocument;
+  const meta = fromMdxMeta(d as any);
+  return {
+    ...(meta as any),
+    content: typeof d.content === "string" ? d.content : "",
+    body: (d as any).body || undefined,
+  } as any;
 }
 
 export function pageToContentMeta(page: Page): ContentMeta {
-  const { content, body, ...meta } = page;
-  return meta;
+  const { content, body, ...meta } = page as any;
+  return meta as any;
 }
 
 export function pageToContentEntry(page: Page): ContentEntry {
+  const p: any = page as any;
   return {
-    slug: page.slug,
-    title: page.title,
-    date: page.date,
-    excerpt: page.excerpt,
-    description: page.description,
-    category: page.category,
-    tags: page.tags,
-    featured: page.featured,
-    readTime: page.readTime,
-    _raw: page._raw,
-    ...Object.fromEntries(
-      Object.entries(page)
-        .filter(([key]) => ![
-          'slug', 'title', 'date', 'excerpt', 'description', 'category',
-          'tags', 'featured', 'readTime', '_raw', 'content', 'body'
-        ].includes(key))
-    ),
-  };
+    slug: p.slug,
+    title: p.title,
+    date: p.date,
+    excerpt: p.excerpt,
+    description: p.description,
+    category: p.category,
+    tags: p.tags,
+    featured: p.featured,
+    readTime: p.readTime,
+    _raw: p._raw,
+  } as any;
 }
 
-// ---------------------------------------------------------------------------
-// ACCESS CONTROL HELPERS
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* CACHED META LOADER (SINGLE DECLARATION)                                    */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Check if user can access a page
- */
-export function canAccessPage(
-  page: Page,
-  userTier?: string | AccessTier | null
-): boolean {
+let _pagesMetaPromise: Promise<Page[]> | null = null;
+
+async function loadPagesMeta(): Promise<Page[]> {
+  if (_pagesMetaPromise) return _pagesMetaPromise;
+
+  _pagesMetaPromise = (async () => {
+    const metas = await getMdxCollectionMeta("pages");
+    const pages = (metas || []).map((m) => fromMdxMeta(m));
+
+    // filter invalid
+    return pages.filter((p: any) => Boolean(p?.slug && p?.title));
+  })().catch((err) => {
+    console.error("[pages-data] Failed to load pages meta:", err);
+    return [];
+  });
+
+  return _pagesMetaPromise;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ACCESS CONTROL                                                             */
+/* -------------------------------------------------------------------------- */
+
+export function canAccessPage(page: Page, userTier?: string | AccessTier | null): boolean {
   const user = normalizeUserTier(userTier || "public");
-  const required = page.accessLevel || "public";
+  const required = (page as any).accessLevel || "public";
   return hasAccess(user, required);
 }
 
-/**
- * Get pages accessible to a user
- */
-export function getAccessiblePages(userTier?: string | AccessTier | null): Page[] {
-  try {
-    const pages = getAllPagesMeta();
-    const user = normalizeUserTier(userTier || "public");
-    
-    return pages.filter(page => {
-      const required = page.accessLevel || "public";
-      return hasAccess(user, required);
-    });
-  } catch (error) {
-    console.error("Error getting accessible pages:", error);
-    return [];
-  }
+export async function getAccessiblePages(userTier?: string | AccessTier | null): Promise<Page[]> {
+  const pages = await loadPagesMeta();
+  const user = normalizeUserTier(userTier || "public");
+
+  return pages.filter((p: any) => hasAccess(user, p?.accessLevel || "public"));
 }
 
-// ---------------------------------------------------------------------------
-// PUBLIC API FUNCTIONS
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* PUBLIC API                                                                 */
+/* -------------------------------------------------------------------------- */
 
-export function getAllPagesMeta(): Page[] {
-  try {
-    const metas = getMdxCollectionMeta("pages");
-    if (!metas || !Array.isArray(metas)) {
-      console.warn("No pages metadata found or metadata is not an array");
-      return [];
-    }
-    
-    const pages = metas.map((m) => fromMdxMeta(m));
-    
-    const validPages = pages.filter(page => {
-      const isValid = page.slug && page.title;
-      if (!isValid) {
-        console.warn(`Invalid page skipped: ${page.slug || 'no-slug'} - ${page.title || 'no-title'}`);
-      }
-      return isValid;
-    });
-    
-    console.log(`Found ${validPages.length} valid pages out of ${metas.length} total`);
-    return validPages;
-  } catch (error) {
-    console.error("Error fetching all pages meta:", error);
-    return [];
-  }
+export async function getAllPagesMeta(): Promise<Page[]> {
+  return await loadPagesMeta();
 }
 
 export async function getPageBySlug(slug: string): Promise<PageWithContent | null> {
   try {
-    if (!slug || typeof slug !== 'string') {
-      console.error("getPageBySlug called with invalid slug:", slug);
-      return null;
-    }
-    
-    const doc = getMdxDocumentBySlug("pages", slug);
-    if (!doc) {
-      console.warn(`No page found for slug: ${slug}`);
-      return null;
-    }
-    
-    const resolvedDoc = await doc;
-    return resolvedDoc ? fromMdxDocument(resolvedDoc) : null;
-  } catch (error) {
-    console.error(`Error fetching page by slug (${slug}):`, error);
+    const s = safeString(slug);
+    if (!s) return null;
+
+    const doc = await getMdxDocumentBySlug("pages", s);
+    if (!doc) return null;
+
+    return fromMdxDocument(doc);
+  } catch (err) {
+    console.error(`[pages-data] getPageBySlug failed (${slug}):`, err);
     return null;
   }
 }
 
 export async function getAllPages(): Promise<PageWithContent[]> {
-  try {
-    const metas = getAllPagesMeta();
-    if (metas.length === 0) return [];
-    
-    const pagesWithContent: PageWithContent[] = [];
-    
-    for (const meta of metas) {
-      const page = await getPageBySlug(meta.slug);
-      if (page) {
-        pagesWithContent.push(page);
-      } else {
-        console.warn(`Could not load content for page: ${meta.slug}`);
-      }
-    }
-    
-    return pagesWithContent;
-  } catch (error) {
-    console.error("Error fetching all pages:", error);
-    return [];
+  const metas = await loadPagesMeta();
+  if (metas.length === 0) return [];
+
+  const out: PageWithContent[] = [];
+  for (const m of metas) {
+    const page = await getPageBySlug((m as any).slug);
+    if (page) out.push(page);
   }
+  return out;
 }
 
-export function getPagesByCategory(category: string): Page[] {
-  try {
-    const pages = getAllPagesMeta();
-    if (!category || typeof category !== 'string') return [];
-    
-    const normalizedCategory = category.toLowerCase().trim();
-    
-    return pages.filter(page => {
-      const pageCategory = page.category?.toLowerCase().trim();
-      return pageCategory === normalizedCategory;
+export async function getPagesByCategory(category: string): Promise<Page[]> {
+  const pages = await loadPagesMeta();
+  const c = (category || "").toLowerCase().trim();
+  if (!c) return [];
+  return pages.filter((p: any) => String(p?.category || "").toLowerCase().trim() === c);
+}
+
+export async function getPagesByTag(tag: string): Promise<Page[]> {
+  const pages = await loadPagesMeta();
+  const t = (tag || "").toLowerCase().trim();
+  if (!t) return [];
+  return pages.filter(
+    (p: any) => Array.isArray(p?.tags) && p.tags.some((x: any) => String(x).toLowerCase().trim() === t)
+  );
+}
+
+export async function getFeaturedPages(): Promise<Page[]> {
+  const pages = await loadPagesMeta();
+  return pages.filter((p: any) => p?.featured === true);
+}
+
+export async function getPublishedPages(): Promise<Page[]> {
+  const pages = await loadPagesMeta();
+  return pages.filter(
+    (p: any) =>
+      p?.draft !== true &&
+      p?.status !== "draft" &&
+      (p?.published === true || p?.published === undefined || p?.status === "published")
+  );
+}
+
+export async function getNavPages(): Promise<Page[]> {
+  const pages = await getPublishedPages();
+  return pages
+    .filter((p: any) => p?.showInNav !== false)
+    .sort((a: any, b: any) => {
+      const oa = a?.navOrder ?? 999;
+      const ob = b?.navOrder ?? 999;
+      if (oa !== ob) return oa - ob;
+      return String(a?.navTitle || a?.title || "").localeCompare(String(b?.navTitle || b?.title || ""));
     });
-  } catch (error) {
-    console.error(`Error fetching pages by category (${category}):`, error);
-    return [];
-  }
 }
 
-export function getPagesByTag(tag: string): Page[] {
-  try {
-    const pages = getAllPagesMeta();
-    if (!tag || typeof tag !== 'string') return [];
-    
-    const normalizedTag = tag.toLowerCase().trim();
-    
-    return pages.filter(page => {
-      return page.tags?.some(t => t.toLowerCase().trim() === normalizedTag);
+export async function getChildPages(parentSlug: string): Promise<Page[]> {
+  const pages = await getPublishedPages();
+  return pages
+    .filter((p: any) => p?.parentPage === parentSlug)
+    .sort((a: any, b: any) => {
+      const oa = a?.order ?? 999;
+      const ob = b?.order ?? 999;
+      if (oa !== ob) return oa - ob;
+      return String(a?.title || "").localeCompare(String(b?.title || ""));
     });
-  } catch (error) {
-    console.error(`Error fetching pages by tag (${tag}):`, error);
-    return [];
-  }
 }
 
-export function getFeaturedPages(): Page[] {
-  try {
-    const pages = getAllPagesMeta();
-    return pages.filter(page => page.featured === true);
-  } catch (error) {
-    console.error("Error fetching featured pages:", error);
-    return [];
-  }
+export async function getPagesByType(pageType: string): Promise<Page[]> {
+  const pages = await getPublishedPages();
+  const t = (pageType || "").toLowerCase().trim();
+  if (!t) return [];
+  return pages.filter((p: any) => String(p?.pageType || "").toLowerCase().trim() === t);
 }
 
-export function getPublishedPages(): Page[] {
-  try {
-    const pages = getAllPagesMeta();
-    return pages.filter(page => 
-      page.draft !== true && 
-      page.status !== "draft" && 
-      (page.published === true || page.status === "published")
-    );
-  } catch (error) {
-    console.error("Error fetching published pages:", error);
-    return [];
-  }
+export async function searchPages(query: string): Promise<Page[]> {
+  const pages = await getPublishedPages();
+  const q = (query || "").toLowerCase().trim();
+  if (!q) return pages;
+
+  return pages.filter((p: any) => {
+    const hay = [
+      p?.title,
+      p?.subtitle,
+      p?.description,
+      p?.excerpt,
+      Array.isArray(p?.tags) ? p.tags.join(" ") : "",
+      p?.category,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return hay.includes(q);
+  });
 }
 
-export function getNavPages(): Page[] {
-  try {
-    const pages = getPublishedPages();
-    return pages
-      .filter(page => page.showInNav !== false)
-      .sort((a, b) => {
-        const orderA = a.navOrder || 999;
-        const orderB = b.navOrder || 999;
-        if (orderA !== orderB) return orderA - orderB;
-        return (a.navTitle || a.title || '').localeCompare(b.navTitle || b.title || '');
-      });
-  } catch (error) {
-    console.error("Error fetching nav pages:", error);
-    return [];
-  }
+export async function getRecentPages(limit?: number): Promise<Page[]> {
+  const pages = await getPublishedPages();
+  const sorted = [...pages].sort((a: any, b: any) => safeTime(b?.date) - safeTime(a?.date));
+  return typeof limit === "number" && limit > 0 ? safeSlice(sorted, 0, limit) : sorted;
 }
 
-export function getChildPages(parentSlug: string): Page[] {
-  try {
-    const pages = getPublishedPages();
-    if (!parentSlug || typeof parentSlug !== 'string') return [];
-    
-    return pages
-      .filter(page => page.parentPage === parentSlug)
-      .sort((a, b) => {
-        const orderA = a.order || 999;
-        const orderB = b.order || 999;
-        if (orderA !== orderB) return orderA - orderB;
-        return (a.title || '').localeCompare(b.title || '');
-      });
-  } catch (error) {
-    console.error(`Error fetching child pages for ${parentSlug}:`, error);
-    return [];
-  }
+export async function getAllPageCategories(): Promise<string[]> {
+  const pages = await loadPagesMeta();
+  return [...new Set(pages.map((p: any) => p?.category).filter((c: any) => typeof c === "string" && c.trim()))].sort();
 }
 
-export function getPagesByType(pageType: string): Page[] {
-  try {
-    const pages = getPublishedPages();
-    if (!pageType || typeof pageType !== 'string') return [];
-    
-    const normalizedType = pageType.toLowerCase().trim();
-    
-    return pages.filter(page => 
-      page.pageType?.toLowerCase().trim() === normalizedType
-    );
-  } catch (error) {
-    console.error(`Error fetching pages by type (${pageType}):`, error);
-    return [];
-  }
+export async function getAllPageTags(): Promise<string[]> {
+  const pages = await loadPagesMeta();
+  const set = new Set<string>();
+  pages.forEach((p: any) => (p?.tags || []).forEach((t: any) => typeof t === "string" && set.add(t)));
+  return Array.from(set).sort();
 }
 
-export function searchPages(query: string): Page[] {
-  try {
-    const pages = getPublishedPages();
-    const normalizedQuery = query.toLowerCase().trim();
-    
-    if (!normalizedQuery) return pages;
-    
-    return pages.filter(page => {
-      if (page.title?.toLowerCase().includes(normalizedQuery)) return true;
-      if (page.subtitle?.toLowerCase().includes(normalizedQuery)) return true;
-      if (page.description?.toLowerCase().includes(normalizedQuery)) return true;
-      if (page.excerpt?.toLowerCase().includes(normalizedQuery)) return true;
-      if (page.tags?.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
-      if (page.category?.toLowerCase().includes(normalizedQuery)) return true;
-      return false;
-    });
-  } catch (error) {
-    console.error(`Error searching pages (${query}):`, error);
-    return [];
-  }
+export async function getAllPageAuthors(): Promise<string[]> {
+  const pages = await loadPagesMeta();
+  return [...new Set(pages.map((p: any) => p?.author).filter((a: any) => typeof a === "string" && a.trim()))].sort();
 }
 
-export function getRecentPages(limit?: number): Page[] {
-  try {
-    const pages = getPublishedPages();
-    
-    const sorted = pages.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      
-      if (dateB !== dateA) return dateB - dateA;
-      
-      return (a.title || '').localeCompare(b.title || '');
-    });
-    
-    return limit && limit > 0 ? safeSlice(sorted, 0, limit) : sorted;
-  } catch (error) {
-    console.error("Error fetching recent pages:", error);
-    return [];
-  }
+export async function getAllPageSlugs(): Promise<string[]> {
+  const pages = await loadPagesMeta();
+  return pages.map((p: any) => p?.slug).filter(Boolean);
 }
 
-export function getAllPageCategories(): string[] {
-  try {
-    const pages = getAllPagesMeta();
-    const categories = pages
-      .map(page => page.category)
-      .filter((category): category is string => 
-        typeof category === "string" && category.trim().length > 0
-      );
-    return [...new Set(categories)].sort();
-  } catch (error) {
-    console.error("Error fetching page categories:", error);
-    return [];
+export async function getHomePage(): Promise<PageWithContent | null> {
+  // Heuristics: known slugs first
+  const homeSlugs = ["home", "index", "welcome"];
+  for (const s of homeSlugs) {
+    const p = await getPageBySlug(s);
+    if (p) return p;
   }
+
+  const pages = await loadPagesMeta();
+  const tagged = pages.find(
+    (p: any) =>
+      p?.pageType === "home" ||
+      p?.template === "home" ||
+      (Array.isArray(p?.tags) && p.tags.includes("home"))
+  );
+  if (tagged) return await getPageBySlug((tagged as any).slug);
+
+  const published = await getPublishedPages();
+  if (published[0]) return await getPageBySlug((published[0] as any).slug);
+
+  return null;
 }
 
-export function getAllPageTags(): string[] {
-  try {
-    const pages = getAllPagesMeta();
-    const allTags = pages
-      .flatMap(page => page.tags || [])
-      .filter((tag): tag is string => typeof tag === "string");
-    return [...new Set(allTags)].sort();
-  } catch (error) {
-    console.error("Error fetching page tags:", error);
-    return [];
-  }
-}
-
-export function getAllPageAuthors(): string[] {
-  try {
-    const pages = getAllPagesMeta();
-    const authors = pages
-      .map(page => page.author)
-      .filter((author): author is string => 
-        typeof author === "string" && author.trim().length > 0
-      );
-    return [...new Set(authors)].sort();
-  } catch (error) {
-    console.error("Error fetching page authors:", error);
-    return [];
-  }
-}
-
-export function getAllPageSlugs(): string[] {
-  try {
-    const pages = getAllPagesMeta();
-    return pages
-      .map(page => page.slug)
-      .filter((slug): slug is string => typeof slug === "string" && slug.length > 0);
-  } catch (error) {
-    console.error("Error fetching page slugs:", error);
-    return [];
-  }
-}
-
-export function getHomePage(): PageWithContent | null {
-  try {
-    const homeSlugs = ["", "/", "home", "index", "welcome"];
-    
-    for (const slug of homeSlugs) {
-      const page = getPageBySlug(slug);
-      if (page) {
-        return page;
-      }
-    }
-    
-    const pages = getAllPagesMeta();
-    const homePage = pages.find(page => 
-      page.pageType === "home" || 
-      page.template === "home" ||
-      page.tags?.includes("home")
-    );
-    
-    if (homePage) {
-      return await getPageBySlug(homePage.slug);
-    }
-    
-    const publishedPages = getPublishedPages();
-    if (publishedPages.length > 0 && publishedPages[0]) {
-      return await getPageBySlug(publishedPages[0].slug);
-    }
-    
-    return null;
-  } catch (error) {
-    console.error("Error fetching home page:", error);
-    return null;
-  }
-}
-
-export function getPageStats(): {
+export async function getPageStats(): Promise<{
   total: number;
   published: number;
   drafts: number;
@@ -561,69 +388,48 @@ export function getPageStats(): {
   byType: Record<string, number>;
   byYear: Record<string, number>;
   byAccessLevel: Record<string, number>;
-} {
-  try {
-    const pages = getAllPagesMeta();
-    
-    const stats = {
-      total: pages.length,
-      published: pages.filter(p => p.published === true || p.status === "published").length,
-      drafts: pages.filter(p => p.draft === true || p.status === "draft").length,
-      featured: pages.filter(p => p.featured === true).length,
-      byCategory: {} as Record<string, number>,
-      byType: {} as Record<string, number>,
-      byYear: {} as Record<string, number>,
-      byAccessLevel: {} as Record<string, number>,
-    };
-    
-    pages.forEach(page => {
-      if (page.category) {
-        stats.byCategory[page.category] = (stats.byCategory[page.category] || 0) + 1;
-      }
-      
-      if (page.pageType) {
-        stats.byType[page.pageType] = (stats.byType[page.pageType] || 0) + 1;
-      }
-      
-      if (page.date) {
-        const year = new Date(page.date).getFullYear().toString();
-        stats.byYear[year] = (stats.byYear[year] || 0) + 1;
-      }
-      
-      const accessLevel = page.accessLevel || "public";
-      stats.byAccessLevel[accessLevel] = (stats.byAccessLevel[accessLevel] || 0) + 1;
-    });
-    
-    return stats;
-  } catch (error) {
-    console.error("Error fetching page stats:", error);
-    return {
-      total: 0,
-      published: 0,
-      drafts: 0,
-      featured: 0,
-      byCategory: {},
-      byType: {},
-      byYear: {},
-      byAccessLevel: {},
-    };
-  }
+}> {
+  const pages = await loadPagesMeta();
+
+  const stats = {
+    total: pages.length,
+    published: pages.filter((p: any) => p?.published === true || p?.status === "published").length,
+    drafts: pages.filter((p: any) => p?.draft === true || p?.status === "draft").length,
+    featured: pages.filter((p: any) => p?.featured === true).length,
+    byCategory: {} as Record<string, number>,
+    byType: {} as Record<string, number>,
+    byYear: {} as Record<string, number>,
+    byAccessLevel: {} as Record<string, number>,
+  };
+
+  pages.forEach((p: any) => {
+    if (p?.category) stats.byCategory[p.category] = (stats.byCategory[p.category] || 0) + 1;
+    if (p?.pageType) stats.byType[p.pageType] = (stats.byType[p.pageType] || 0) + 1;
+
+    const al = p?.accessLevel || "public";
+    stats.byAccessLevel[al] = (stats.byAccessLevel[al] || 0) + 1;
+
+    if (p?.date) {
+      const y = new Date(p.date).getFullYear().toString();
+      stats.byYear[y] = (stats.byYear[y] || 0) + 1;
+    }
+  });
+
+  return stats;
 }
 
-// ---------------------------------------------------------------------------
-// DEFAULT EXPORT
-// ---------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* DEFAULT EXPORT                                                             */
+/* -------------------------------------------------------------------------- */
 
 const pagesData = {
   getAllPagesMeta,
   getPageBySlug,
   getAllPages,
-  
-  // Access control
+
   canAccessPage,
   getAccessiblePages,
-  
-  // Filter functions
+
   getPagesByCategory,
   getPagesByTag,
   getFeaturedPages,
@@ -634,17 +440,14 @@ const pagesData = {
   searchPages,
   getRecentPages,
   getHomePage,
-  
-  // List functions
+
   getAllPageCategories,
   getAllPageTags,
   getAllPageAuthors,
   getAllPageSlugs,
-  
-  // Stats
+
   getPageStats,
-  
-  // Utility functions
+
   pageToContentMeta,
   pageToContentEntry,
 };

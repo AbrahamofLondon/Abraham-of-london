@@ -22,7 +22,7 @@ import Layout from "@/components/Layout";
 
 import { getPublishedDocuments } from "@/lib/content/server";
 import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
-import { getDocKind, getDocHref, resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
+import { getDocKind, getDocHref, resolveDocCoverImage, sanitizeData } from "@/lib/content/server";
 
 type Item = {
   key: string;
@@ -51,11 +51,17 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const items: Item[] = (docs as any[])
       .map((d: any) => {
         try {
+          const fp = String(d?._raw?.flattenedPath || d?.slug || "")
+            .replace(/\\/g, "/")
+            .replace(/^\/+/, "");
+          if (!fp) return null;
+
+          // ✅ This page is the /content router, so href MUST be /content/<flattenedPath>
+          const href = `/content/${fp}`.replace(/\/{2,}/g, "/");
+
           const kind = String(getDocKind(d) || "document");
-          const href = String(getDocHref(d) || "");
           const title = String(d?.title || "Untitled");
-          const slugish = String(d?.slug || d?._raw?.flattenedPath || href || title);
-          const key = String(d?._id || `${kind}:${slugish}`);
+          const key = String(d?._id || `${kind}:${fp}`);
 
           const dateIso = d?.date ? new Date(d.date).toISOString() : null;
           const dateStr = d?.date ? String(d.date) : null;
@@ -77,6 +83,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           return null;
         }
       })
+      // ✅ Now the filter will PASS
       .filter((x): x is Item => !!x && !!x.href && x.href.startsWith("/content/") && !!x.title)
       .sort((a, b) => {
         const aTime = a.dateIso ? Date.parse(a.dateIso) : 0;
@@ -86,7 +93,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
     return { props: sanitizeData({ items }), revalidate: 1800 };
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("[Content Index] getStaticProps error:", error);
     return { props: { items: [] }, revalidate: 1800 };
   }

@@ -7,7 +7,8 @@
  * ============================================================================ */
 
 import type { Metadata } from "next";
-import ContentHelper, { type ContentDoc, type DocKind } from "@/lib/content-helper";
+import * as ContentHelper from "@/lib/content-helper";
+import type { ContentDoc, DocKind } from "@/lib/content-helper";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */

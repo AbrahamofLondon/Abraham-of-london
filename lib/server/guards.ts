@@ -1,14 +1,17 @@
 // lib/server/guards.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import {
   rateLimit,
   getClientIp,
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
 } from "@/lib/server/rate-limit-unified";
-import type { RateLimitOptions } from "@/lib/server/rate-limit-unified";
+
 import { safeSlice } from "@/lib/utils/safe";
 
+// ✅ Local type: derive from your actual config object (stable, no export dependency)
+type RateLimitOptions = (typeof RATE_LIMIT_CONFIGS)[keyof typeof RATE_LIMIT_CONFIGS];
 
 type BlockPayload = {
   ok: false;
@@ -38,7 +41,7 @@ export async function guardRateLimit(
   const route = req.url || "/";
   const key = `${ip}:${route}:${keySuffix ?? "default"}`;
 
-  const result = await rateLimit(key, options);
+  const result = await rateLimit(key, options as any);
 
   const headers = createRateLimitHeaders(result as any);
   for (const [k, v] of Object.entries(headers)) res.setHeader(k, v as any);
@@ -73,7 +76,6 @@ export function withGuardRateLimit(
 }
 
 /**
- * ✅ required exports used by your API routes
  * requireRateLimit: alias wrapper around guardRateLimit
  */
 export async function requireRateLimit(
@@ -86,7 +88,6 @@ export async function requireRateLimit(
 }
 
 /**
- * ✅ required exports used by your admin routes
  * requireAdmin: minimal admin auth gate (header Bearer ADMIN_API_KEY).
  */
 export async function requireAdmin(req: NextApiRequest, res: NextApiResponse): Promise<boolean> {

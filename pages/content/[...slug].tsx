@@ -192,44 +192,56 @@ const ContentSlugPage: NextPage<Props> = ({ doc, initialLocked, requiredTier }) 
   );
 };
 
+// ✅ FIXED: Use flattenedPath for reliable paths
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = getPublishedDocuments() || [];
-  
-  const paths = docs
-    .filter((d: any) => d && d.slug)
+
+  const paths = (docs as any[])
     .map((d: any) => {
-      const slug = String(d.slug || "");
-      const cleanSlug = slug.replace(/^content\//, "").split("/").filter(Boolean);
-      return {
-        params: { slug: cleanSlug }
-      };
-    });
+      const fp = String(d?._raw?.flattenedPath || d?.slug || "")
+        .replace(/\\/g, "/")
+        .replace(/^\/+/, "")
+        .replace(/\/+$/, "");
+      if (!fp) return null;
+
+      // we want /content/<fp>, but router param is [...slug]
+      const cleanParts = fp.split("/").filter(Boolean);
+      return { params: { slug: cleanParts } };
+    })
+    .filter(Boolean) as Array<{ params: { slug: string[] } }>;
 
   return { paths, fallback: "blocking" };
 };
 
+// ✅ FIXED: More tolerant lookup
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slugParts = Array.isArray(params?.slug) ? params.slug : [params?.slug];
-  const incoming = slugParts.join("/");
-  const rawDoc = getDocBySlug(`content/${incoming}`) || getDocBySlug(incoming);
+  const incoming = slugParts.filter(Boolean).join("/").replace(/\\/g, "/");
+
+  if (!incoming) return { notFound: true, revalidate: 60 };
+
+  // ✅ Prefer flattenedPath; tolerate legacy content/<...>
+  const rawDoc =
+    getDocBySlug(incoming) ||
+    getDocBySlug(`content/${incoming}`) ||
+    getDocBySlug(incoming.replace(/^content\//, ""));
 
   if (!rawDoc || rawDoc.draft) return { notFound: true };
 
-  // ✅ FIX: Use normalizeRequired for content tiers
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(rawDoc));
   const initialLocked = requiredTier !== "public";
 
   const doc = {
     ...rawDoc,
     slug: incoming,
-    bodyCode: initialLocked ? "" : rawDoc.body?.code || "",
+    bodyCode: initialLocked ? "" : rawDoc.body?.code || rawDoc.bodyCode || "",
   };
 
   return {
-    props: sanitizeData({ 
-      doc, 
+    props: sanitizeData({
+      doc,
       initialLocked,
-      requiredTier
+      requiredTier,
     }),
     revalidate: 1800,
   };

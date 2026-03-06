@@ -211,10 +211,7 @@ export async function revokeKeyByHash(keyHash: string): Promise<Ok<{ revoked: tr
 export async function redeemAccessKey(
   rawKey: string,
   ctx?: { ipAddress?: string; userAgent?: string; source?: string }
-): Promise<
-  Ok<{ ok: true; sessionId: string; tier: AccessTier; memberId: string | null }> |
-  Ok<{ ok: false; reason: string }>
-> {
+): Promise<Ok<{ sessionId: string; tier: AccessTier; memberId: string | null }> | Fail> {
   const key = String(rawKey || "").trim();
   if (!key) return { ok: false, reason: "KEY_MISSING" };
 
@@ -223,13 +220,13 @@ export async function redeemAccessKey(
 
   const record = await prisma.innerCircleKey.findUnique({
     where: { keyHash },
-    include: { member: { select: { id: true, tier: true, status: true } } },
+    include: { member: { select: { id: true, tier: true, status: true, email: true } } },
   });
 
   if (!record) return { ok: false, reason: "KEY_NOT_FOUND" };
   if (String(record.status || "").toLowerCase() !== "active") return { ok: false, reason: "KEY_REVOKED" };
 
-  // ✅ Enforce key expiry
+  // Enforce key expiry
   const keyExp = record.expiresAt ? new Date(record.expiresAt) : null;
   if (!keyExp || keyExp.getTime() <= Date.now()) return { ok: false, reason: "KEY_EXPIRED" };
 
@@ -246,7 +243,7 @@ export async function redeemAccessKey(
 
   if (!minted.ok) return { ok: false, reason: minted.reason };
 
-  // ✅ Update lastUsedAt + telemetry into metadata (best-effort)
+  // Update lastUsedAt + telemetry into metadata (best-effort)
   try {
     const prevMeta =
       record.metadata && typeof record.metadata === "object" ? (record.metadata as Record<string, any>) : {};

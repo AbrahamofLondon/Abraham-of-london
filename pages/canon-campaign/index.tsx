@@ -1,201 +1,358 @@
-/* pages/canon-campaign/index.tsx — LONG-HORIZON BUILD (INTEGRITY MODE) */
+/* eslint-disable react/no-unescaped-entities */
+/* pages/canon/index.tsx — THE CANON ARCHIVE (SSOT, stable slugs) */
+
 import * as React from "react";
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { 
-  ArrowRight, 
-  BookOpen, 
-  Calendar, 
-  Crown, 
-  Sparkles, 
-  Users, 
-  Target, 
-  Shield, 
-  TrendingUp, 
-  CheckCircle, 
-  Award, 
-  ChevronRight, 
-  Heart, 
-  Map, 
-  Layers, 
-  Zap 
+import {
+  BookOpen,
+  Lock,
+  ChevronRight,
+  Target,
+  Building2,
+  Castle,
+  ScrollText,
+  Activity,
+  AlertCircle,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 import Layout from "@/components/Layout";
+import { getAllCanons, sanitizeData } from "@/lib/content/server";
+import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
-/**
- * STRATEGIC FIX: INTEGRITY MODE
- * All roadmap phases and material references are locked to verified vault paths.
- */
-const CanonCampaignPage: NextPage = () => {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.com";
+type AccessLevel = "public" | "inner-circle" | "private";
 
-  const phases = [
-    {
-      title: "Foundation",
-      description: "Core volumes establishing first principles of stewardship and authority.",
-      status: "Complete",
-      icon: <Shield className="h-6 w-6" />,
-      color: "from-blue-500/20 to-cyan-500/10",
-      items: ["Human Purpose Architecture", "Fatherhood Foundations", "Governance Doctrine"]
-    },
-    {
-      title: "Expansion",
-      description: "Practical implementation guides and strategic board toolkits.",
-      status: "In Progress",
-      icon: <Layers className="h-6 w-6" />,
-      color: "from-amber-500/20 to-orange-500/10",
-      items: ["Legacy Roadmap", "Decision Systems", "Household Charter"]
-    },
-    {
-      title: "Community",
-      description: "Live rooms, strategic salons, and cohort-based formation.",
-      status: "Planning",
-      icon: <Users className="h-6 w-6" />,
-      color: "from-emerald-500/20 to-green-500/10",
-      items: ["Strategy Salons", "Fatherhood Cohorts", "Leadership Rooms"]
+type CanonItem = {
+  title: string;
+  subtitle: string | null;
+  excerpt: string | null;
+  slug: string;
+  href: string;
+  accessLevel: AccessLevel;
+  coverImage: string | null;
+  dateISO: string | null;
+  readTime: string | null;
+  tags: string[];
+  category: string | null;
+  featured: boolean;
+  isTeachingEdition: boolean;
+  volumeNumber: number | null;
+  series: string;
+};
+
+type CanonSeries = {
+  volume: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<any>;
+  items: CanonItem[];
+  color: string;
+};
+
+type CanonIndexProps = {
+  items: CanonItem[];
+  counts: { total: number; public: number; inner: number; private: number };
+  series: CanonSeries[];
+  featuredItems: CanonItem[];
+  error?: string;
+};
+
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+
+function canonBareSlug(input: unknown): string {
+  let s = String(input ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
+
+  if (!s || s.includes("..")) return "";
+
+  const stripOnce = (prefix: string) => {
+    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
+    if (s.toLowerCase().startsWith(p.toLowerCase())) {
+      s = s.slice(p.length);
+      s = s.replace(/^\/+/, "");
+      return true;
     }
-  ];
+    return false;
+  };
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    changed = stripOnce("content") || changed;
+    changed = stripOnce("vault") || changed;
+    changed = stripOnce("canon") || changed;
+  }
+
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  if (!s || s.includes("..")) return "";
+  return s;
+}
+
+function accessTierToLevel(required: AccessTier): AccessLevel {
+  const r = tiers.normalizeRequired(required);
+  if (r === "public") return "public";
+  if (r === "member" || r === "verified") return "inner-circle";
+  return "private";
+}
+
+function extractVolumeNumber(title: string): number | null {
+  const romanMatch = title.match(/Volume[-\s]([IVXLCDM]+)/i);
+  if (romanMatch) {
+    const roman = romanMatch[1].toUpperCase();
+    const values: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+    let total = 0;
+    let prev = 0;
+    for (let i = roman.length - 1; i >= 0; i--) {
+      const cur = values[roman[i]];
+      total += cur < prev ? -cur : cur;
+      prev = cur;
+    }
+    return total;
+  }
+  const numMatch = title.match(/Volume[-\s](\d+)/i);
+  return numMatch ? parseInt(numMatch[1], 10) : null;
+}
+
+function extractSeries(title: string): string {
+  if (title.includes("Foundations")) return "Volume I";
+  if (title.includes("Governance")) return "Volume II";
+  if (title.includes("Civilisation")) return "Volume III";
+  return "General";
+}
+
+function safeHref(path: string): string {
+  const p = String(path || "/").replace(/\\/g, "/").replace(/\/{2,}/g, "/");
+  return p.startsWith("/") ? p : `/${p}`;
+}
+
+export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
+  try {
+    const rawDocs = getAllCanons() || [];
+
+    const seen = new Set<string>();
+
+    const items: CanonItem[] = rawDocs
+      .filter((d: any) => !d?.draft)
+      .map((doc: any) => {
+        const fp = String(doc?._raw?.flattenedPath || doc?.slug || "");
+        const bare = canonBareSlug(fp);
+        if (!bare) return null;
+
+        const title = String(doc?.title || "Untitled Volume");
+        const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+
+        const it: CanonItem = {
+          title,
+          subtitle: doc?.subtitle ? String(doc.subtitle) : null,
+          excerpt: (doc?.excerpt || doc?.description) ? String(doc.excerpt || doc.description) : null,
+          slug: bare,
+          href: safeHref(`/canon/${bare}`),
+          accessLevel: accessTierToLevel(requiredTier),
+          coverImage: doc?.coverImage ? String(doc.coverImage) : null,
+          dateISO: doc?.date ? new Date(doc.date).toISOString() : null,
+          readTime: doc?.readTime ? String(doc.readTime) : "10 min",
+          tags: Array.isArray(doc?.tags) ? doc.tags.filter(Boolean).map(String) : [],
+          category: doc?.category ? String(doc.category) : "General",
+          featured: Boolean(doc?.featured),
+          isTeachingEdition: title.toLowerCase().includes("teaching edition"),
+          volumeNumber: extractVolumeNumber(title),
+          series: String(doc?.series || extractSeries(title)),
+        };
+
+        if (seen.has(it.slug)) return null;
+        seen.add(it.slug);
+
+        return it;
+      })
+      .filter(Boolean) as CanonItem[];
+
+    const seriesMap = new Map<string, CanonSeries>();
+
+    items
+      .sort((a, b) => (a.volumeNumber || 99) - (b.volumeNumber || 99))
+      .forEach((item) => {
+        if (!seriesMap.has(item.series)) {
+          const seriesConfig: Record<string, { title: string; description: string; icon: any; color: string }> = {
+            "Volume I": {
+              title: "Foundations of Purpose",
+              description: "First principles: purpose, mandate, meaning, and moral architecture.",
+              icon: Target,
+              color: "from-amber-500/20 to-transparent",
+            },
+            "Volume II": {
+              title: "Governance & Formation",
+              description: "Rules, routines, and structures that survive pressure and personality.",
+              icon: Building2,
+              color: "from-blue-500/20 to-transparent",
+            },
+            "Volume III": {
+              title: "Civilisation & Legacy",
+              description: "Institutions, continuity, and generational systems.",
+              icon: Castle,
+              color: "from-purple-500/20 to-transparent",
+            },
+          };
+
+          const config = seriesConfig[item.series] || {
+            title: item.series,
+            description: "Canonical volumes",
+            icon: BookOpen,
+            color: "from-gray-500/20 to-transparent",
+          };
+
+          seriesMap.set(item.series, {
+            volume: item.series,
+            title: config.title,
+            description: config.description,
+            icon: config.icon,
+            items: [],
+            color: config.color,
+          });
+        }
+
+        seriesMap.get(item.series)!.items.push(item);
+      });
+
+    const series = Array.from(seriesMap.values()).filter((s) => s.items.length > 0);
+
+    const counts = items.reduce(
+      (acc, it) => {
+        acc.total++;
+        if (it.accessLevel === "public") acc.public++;
+        else if (it.accessLevel === "inner-circle") acc.inner++;
+        else acc.private++;
+        return acc;
+      },
+      { total: 0, public: 0, inner: 0, private: 0 }
+    );
+
+    return {
+      props: sanitizeData({
+        items,
+        counts,
+        series,
+        featuredItems: items.filter((i) => i.featured).slice(0, 6),
+      }),
+      revalidate: 60,
+    };
+  } catch (error) {
+    console.error("Canon Index Failure:", error);
+    return {
+      props: {
+        items: [],
+        counts: { total: 0, public: 0, inner: 0, private: 0 },
+        series: [],
+        featuredItems: [],
+        error: "Failed to load Canon documents",
+      },
+      revalidate: 60,
+    };
+  }
+};
+
+const Stat = ({ label, value, color }: { label: string; value: any; color: string }) => (
+  <div className="border-l border-white/10 pl-6">
+    <div className={`text-2xl font-light ${color}`}>{value}</div>
+    <div className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1">{label}</div>
+  </div>
+);
+
+const CanonIndexPage: NextPage<CanonIndexProps> = ({ items, counts, series, error }) => {
+  const latestUpdate =
+    items.length > 0
+      ? new Date(Math.max(...items.map((i) => new Date(i.dateISO || 0).getTime()))).toLocaleDateString("en-GB", {
+          month: "short",
+          year: "numeric",
+        })
+      : "Feb 2026";
 
   return (
-    <Layout
-      title="Canon Campaign"
-      description="The long-horizon build of applied wisdom for fathers, founders, and leaders."
-      className="bg-black min-h-screen"
-    >
-      <main className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black text-white">
-        
-        {/* HERO: LONG-HORIZON BUILD */}
-        <section className="relative overflow-hidden border-b border-white/10 pt-24 pb-16 lg:pt-32">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.1),transparent_70%)]" />
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
-                <Crown className="h-4 w-4 text-amber-400" />
-                <span className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400">Canon · The Build</span>
-              </div>
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                The Canon Campaign
-              </h1>
-              <p className="text-lg text-gray-300 mb-10 leading-relaxed">
-                A methodical architecture of applied wisdom for men carrying the weight of legacy. Not content—foundation.
-              </p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { label: "Volumes", icon: BookOpen, desc: "Long-form arguments." },
-                  { label: "Rooms", icon: Calendar, desc: "Private sessions." },
-                  { label: "Tools", icon: Target, desc: "Deployable assets." }
-                ].map((stat, i) => (
-                  <div key={i} className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-                    <stat.icon className="h-5 w-5 text-amber-500 mb-3" />
-                    <h4 className="text-sm font-bold uppercase tracking-widest mb-1">{stat.label}</h4>
-                    <p className="text-xs text-gray-500">{stat.desc}</p>
-                  </div>
-                ))}
-              </div>
+    <Layout title="The Canon">
+      <Head>
+        <link rel="canonical" href={`${SITE}/canon`} />
+      </Head>
+
+      <main className="min-h-screen bg-[#050505] text-white selection:bg-amber-500/30">
+        <section className="relative pt-32 pb-20 border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-8">
+            <div className="flex items-center gap-3 mb-8">
+              <Activity className="h-4 w-4 text-amber-500" />
+              <span className="text-[10px] uppercase tracking-[0.4em] text-amber-500 font-bold">Canonical Archive</span>
+            </div>
+
+            <h1 className="text-7xl md:text-9xl font-light tracking-tighter mb-12">
+              The <span className="italic font-serif text-amber-500">Canon.</span>
+            </h1>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-4xl">
+              <Stat label="Total Volumes" value={counts.total} color="text-white" />
+              <Stat label="Public Access" value={counts.public} color="text-white" />
+              <Stat label="Inner Circle" value={counts.inner} color="text-amber-500" />
+              <Stat label="Latest Update" value={latestUpdate} color="text-white" />
             </div>
           </div>
         </section>
 
-        {/* ROADMAP PHASES */}
-        <section className="py-20 border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">Building in Phases</h2>
-              <p className="text-gray-400 max-w-xl mx-auto">The Canon is built methodically. No shortcuts, just deliberate, institutional progress.</p>
+        <section className="max-w-7xl mx-auto px-8 py-24">
+          {error && (
+            <div className="mb-12 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 text-center">
+              <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-4" />
+              <p className="text-amber-200/70">{error}</p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8">
-              {phases.map((phase, i) => (
-                <div key={i} className="group rounded-3xl border border-white/10 bg-white/[0.02] p-8 hover:border-amber-500/30 transition-all flex flex-col h-full">
-                  <div className={`mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${phase.color} text-white`}>
-                    {phase.icon}
+          )}
+
+          {items.length === 0 ? (
+            <div className="py-20 text-center border border-dashed border-white/10 rounded-3xl">
+              <ScrollText className="h-12 w-12 text-zinc-800 mx-auto mb-4" />
+              <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">No volumes resolved in registry</p>
+              {process.env.NODE_ENV === "development" && (
+                <p className="mt-4 text-amber-500/50 text-xs font-mono">Check that canon documents exist in content/canon/</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-32">
+              {series.map((s) => (
+                <div key={s.volume} className="grid lg:grid-cols-3 gap-16 items-start">
+                  <div className="lg:sticky lg:top-32 space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest text-zinc-400">
+                      {s.volume}
+                    </div>
+                    <h2 className="text-4xl font-light tracking-tight">{s.title}</h2>
+                    <p className="text-zinc-500 leading-relaxed font-light">{s.description}</p>
                   </div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold">{phase.title}</h3>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">{phase.status}</span>
-                  </div>
-                  <p className="text-sm text-gray-400 mb-8 flex-grow leading-relaxed">{phase.description}</p>
-                  <ul className="space-y-3 pt-6 border-t border-white/5">
-                    {phase.items.map((item, idx) => (
-                      <li key={idx} className="flex items-center gap-3 text-xs text-gray-500 italic">
-                        <CheckCircle className="h-3 w-3 text-emerald-500/50" /> {item}
-                      </li>
+
+                  <div className="lg:col-span-2 grid gap-px bg-white/5 border border-white/5">
+                    {s.items.map((item) => (
+                      <Link
+                        key={item.slug}
+                        href={item.href}
+                        className="group relative p-10 bg-[#050505] hover:bg-zinc-900/40 transition-all duration-500"
+                      >
+                        <div className="flex justify-between items-start mb-6">
+                          <span className="text-[10px] font-mono text-zinc-600 uppercase">{item.readTime}</span>
+                          {item.accessLevel !== "public" && <Lock className="h-3 w-3 text-amber-600" />}
+                        </div>
+                        <h3 className="text-2xl font-medium mb-4 group-hover:text-amber-500 transition-colors">{item.title}</h3>
+                        <p className="text-zinc-500 text-sm line-clamp-2 font-light leading-relaxed">{item.excerpt}</p>
+                        <div className="mt-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                          View Analysis <ChevronRight className="h-3 w-3" />
+                        </div>
+                      </Link>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ACCESS POINTS */}
-        <section className="py-20 bg-black/50">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-3 gap-12">
-              <div className="lg:col-span-2">
-                <h2 className="font-serif text-3xl md:text-4xl font-bold mb-8">Campaign Entry Points</h2>
-                <div className="space-y-4">
-                  {[
-                    { title: "Human Purpose Architecture", kind: "Volume Zero", href: "/blog/ultimate-purpose-of-man", icon: Layers },
-                    { title: "The Canon Library", kind: "Full Collection", href: "/canon", icon: BookOpen },
-                    { title: "Chatham Rooms", kind: "Interactive", href: "/chatham-rooms", icon: Users }
-                  ].map((entry, i) => (
-                    <Link key={i} href={entry.href} className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-gold/50 transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className="rounded-xl bg-gold/10 p-3 text-gold"><entry.icon size={24} /></div>
-                        <div>
-                          <h3 className="font-serif text-xl font-semibold group-hover:text-gold transition-colors">{entry.title}</h3>
-                          <p className="text-xs text-gray-500 uppercase tracking-widest">{entry.kind}</p>
-                        </div>
-                      </div>
-                      <ArrowRight className="text-gray-600 group-hover:text-gold group-hover:translate-x-1 transition-all" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* SIDEBAR: INNER CIRCLE */}
-              <aside className="p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent">
-                <Crown className="h-8 w-8 text-amber-500 mb-6" />
-                <h3 className="font-serif text-2xl font-bold mb-4">Join the Inner Circle</h3>
-                <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-                  Some campaign materials remain restricted. Serious work requires a closed room and a verified mandate.
-                </p>
-                <div className="space-y-3">
-                  <Link href="/inner-circle" className="block w-full py-4 rounded-xl bg-amber-500 text-black text-center font-bold uppercase tracking-widest text-xs hover:bg-amber-400 transition-all">
-                    Request Access Key
-                  </Link>
-                  <Link href="/content" className="block w-full py-4 rounded-xl border border-white/20 text-white text-center font-bold uppercase tracking-widest text-xs hover:bg-white/5 transition-all">
-                    Browse the Vault
-                  </Link>
-                </div>
-              </aside>
-            </div>
-          </div>
-        </section>
-
-        {/* FINAL CTA */}
-        <section className="py-20 border-t border-white/10">
-          <div className="mx-auto max-w-4xl px-4 text-center">
-             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold mb-8">
-                <Award size={32} />
-             </div>
-             <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Join the Build</h2>
-             <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
-               The Canon is written with and for builders. Share your insights, test frameworks, and help shape the architecture that outlasts us all.
-             </p>
-             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/contact" className="rounded-xl bg-gold px-10 py-4 text-black font-bold uppercase tracking-widest hover:bg-gold/80 transition-all">Share Insight</Link>
-                <Link href="/canon" className="rounded-xl border border-white/20 px-10 py-4 text-white font-bold uppercase tracking-widest hover:bg-white/5 transition-all">Start Reading</Link>
-             </div>
-          </div>
+          )}
         </section>
       </main>
     </Layout>
   );
 };
 
-export default CanonCampaignPage;
+export default CanonIndexPage;

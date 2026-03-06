@@ -1,71 +1,153 @@
-// lib/audit.ts - Simplified version for rate-limit.ts import
-// This file bridges to the server audit module
+/* lib/audit.ts — RUNTIME-SAFE AUDIT BRIDGE (pages + edge compatible)
+   - Avoids TS "export doesn't exist" errors from dynamic imports
+   - Delegates to server audit ONLY in Node runtime (SSR/pages/api)
+   - Uses safe fallback for Edge/client/build-time paths
+*/
 
-/**
- * Simplified audit event interface for basic logging
- */
 export interface AuditEvent {
   actorType: "system" | "api" | "member" | "admin" | "cron" | "webhook";
   actorId?: string | null;
   actorEmail?: string | null;
   ipAddress?: string | null;
+
   action: string;
   resourceType: string;
   resourceId?: string | null;
+
   status: "success" | "failed" | "warning" | "pending";
   severity?: "low" | "medium" | "high" | "critical";
+
   userAgent?: string | null;
   requestId?: string | null;
   sessionId?: string | null;
+
   oldValue?: string | null;
   newValue?: string | null;
+
   metadata?: Record<string, any> | null;
   details?: Record<string, any> | null;
+
   durationMs?: number;
   errorMessage?: string | null;
 }
 
-/**
- * Simplified logAuditEvent function for client-side/edge usage
- * This is a stub that will defer to the server module when needed
- */
-export async function logAuditEvent(event: AuditEvent): Promise<any> {
-  // Handle different runtime environments
-  if (typeof window === 'undefined') {
-    // Server-side: Use the full audit implementation
-    try {
-      // Dynamically import the server module to prevent Edge runtime issues
-      const { logAuditEvent: serverLogAuditEvent } = await import('./server/audit');
-      return await serverLogAuditEvent(event);
-    } catch (error) {
-      // Fallback for build time or if server module fails
-      console.log('[AUDIT_FALLBACK]', {
-        timestamp: new Date().toISOString(),
-        ...event,
-        severity: event.severity || 'low',
-        _fallback: true
-      });
-      return { success: false, fallback: true };
-    }
-  } else {
-    // Client-side: Log to console (in development) or send to API
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[AUDIT_CLIENT]', event);
-    }
-    
-    // In production, you might want to send to an API endpoint
-    // For now, just return a mock response
-    return { 
-      success: true, 
-      clientSide: true,
-      message: 'Audit logged client-side'
-    };
-  }
+/* -----------------------------------------------------------------------------
+ * Runtime detection
+ * -------------------------------------------------------------------------- */
+
+function isBrowser(): boolean {
+  return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
-/**
- * Simplified helper for rate limiting specifically
- */
+function isEdgeRuntime(): boolean {
+  // Next exposes EdgeRuntime global in edge
+  return typeof (globalThis as any).EdgeRuntime === "string";
+}
+
+function isNodeRuntime(): boolean {
+  // Node has process. Edge often doesn't (or is shimmed inconsistently).
+  // Also guard against Edge explicitly.
+  return !isBrowser() && !isEdgeRuntime() && typeof process !== "undefined";
+}
+
+/* -----------------------------------------------------------------------------
+ * Public: logAuditEvent
+ * - Node (SSR/pages/api): delegates to lib/server/audit.ts
+ * - Edge/Client: safe fallback (console / optional API post)
+ * -------------------------------------------------------------------------- */
+
+export async function logAuditEvent(event: AuditEvent): Promise<any> {
+  // ✅ Node/server only: delegate to canonical server audit
+  if (isNodeRuntime()) {
+    try {
+      // IMPORTANT: do NOT destructure; keep module as any to avoid TS graph weirdness
+      const mod = (await import("./server/audit")) as any;
+
+      const fn = mod?.logAuditEvent || mod?.default?.logAuditEvent;
+      if (typeof fn !== "function") {
+        throw new Error("server audit module missing logAuditEvent export");
+      }
+
+      return await fn(event);
+    } catch (error) {
+      // Hard fallback: never break runtime paths
+      console.log("[AUDIT_FALLBACK_NODE]", {
+        timestamp: new Date().toISOString(),
+        ...event,
+        severity: event.severity || "low",
+        _fallback: true,
+        _error:
+          typeof process !== "undefined" && process.env?.NODE_ENV === "development"
+            ? String((error as any)?.message || error)
+            : undefined,
+      });
+      return { ok: false, fallback: true };
+    }
+  }
+
+  // ✅ Edge + Browser fallback (never import server module here)
+  if (
+    (typeof process !== "undefined" && process.env?.NODE_ENV === "development") ||
+    // Edge may not expose process reliably
+    (typeof process === "undefined")
+  ) {
+    // Keep logs shallow to avoid leaking large payloads
+    console.log("[AUDIT_NON_NODE]", {
+      action: event?.action,
+      resourceId: event?.resourceId,
+      status: event?.status,
+      severity: event?.severity,
+      _edge: isEdgeRuntime(),
+      _browser: isBrowser(),
+    });
+  }
+
+  // OPTIONAL: Edge/client can POST to your API route.
+  // Off by default. Turn on explicitly:
+  //   AUDIT_EDGE_POST_ENABLED="true"
+  // And set a base URL for Edge/serverless if needed:
+  //   NEXT_PUBLIC_SITE_URL="https://www.abrahamoflondon.org"
+  const postEnabled =
+    (typeof process !== "undefined" && process.env?.AUDIT_EDGE_POST_ENABLED === "true") || false;
+
+  if (postEnabled) {
+    try {
+      const base =
+        (typeof process !== "undefined" && (process.env?.NEXT_PUBLIC_SITE_URL || process.env?.NEXTAUTH_URL)) ||
+        "";
+
+      const url = base ? `${String(base).replace(/\/+$/, "")}/api/audit/log` : "/api/audit/log";
+
+      // Minimal payload: keep schema stable
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: event.action,
+          severity: event.severity || "low",
+          resourceId: event.resourceId || "unknown",
+          category: event.resourceType, // your app/api route supports category/subCategory/tags via metadata
+          details: event.details || event.metadata || undefined,
+          status: event.status,
+        }),
+      });
+
+      // Do not throw; audit must be fail-open
+      if (!res.ok) {
+        console.log("[AUDIT_EDGE_POST_FAILED]", { status: res.status });
+      }
+    } catch {
+      // swallow
+    }
+  }
+
+  return { ok: true, nonNode: true, edge: isEdgeRuntime(), browser: isBrowser() };
+}
+
+/* -----------------------------------------------------------------------------
+ * Helper: rate-limit events
+ * -------------------------------------------------------------------------- */
+
 export async function logRateLimitEvent(data: {
   ipAddress?: string;
   action: string;
@@ -76,34 +158,32 @@ export async function logRateLimitEvent(data: {
 }): Promise<void> {
   await logAuditEvent({
     actorType: "api",
-    ipAddress: data.ipAddress,
+    ipAddress: data.ipAddress || null,
     action: data.action,
     resourceType: "rate_limit",
     resourceId: data.resourceId || "api_endpoint",
     status: data.status,
-    severity: data.status === 'failed' ? 'high' : 'medium',
-    details: data.details,
-    errorMessage: data.errorMessage,
+    severity: data.status === "failed" ? "high" : "medium",
+    details: data.details || null,
+    errorMessage: data.errorMessage || null,
   });
 }
 
-/**
- * Quick audit helper for common cases
- */
+/* -----------------------------------------------------------------------------
+ * Convenience facade
+ * -------------------------------------------------------------------------- */
+
 export const audit = {
   log: logAuditEvent,
   rateLimit: logRateLimitEvent,
-  
-  // Simple sync version for critical paths where async isn't feasible
+
   logSync(event: AuditEvent) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[AUDIT_SYNC]', event);
+    // never block critical path; best-effort
+    if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+      console.log("[AUDIT_SYNC]", { action: event.action, resourceId: event.resourceId });
     }
-    // Fire and forget async version
-    logAuditEvent(event).catch(err => {
-      console.error('[AUDIT_ASYNC_ERROR]', err);
-    });
-  }
+    void logAuditEvent(event).catch(() => {});
+  },
 };
 
 export default audit;

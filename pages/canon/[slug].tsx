@@ -1,4 +1,6 @@
-// pages/canon/[slug].tsx — CORRECTED WITH SSOT TIER FUNCTIONS
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// pages/canon/[slug].tsx — CANON READER (SSOT, stable slug, tier-safe)
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -21,41 +23,75 @@ interface Props {
   requiredTier: AccessTier;
 }
 
-function toBareCanonSlug(input: string) {
-  const s = String(input || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
-  // strip canon/ and vault/canon/ repeatedly
-  let out = s;
-  while (out.toLowerCase().startsWith("canon/")) out = out.slice("canon/".length);
-  while (out.toLowerCase().startsWith("vault/canon/")) out = out.slice("vault/canon/".length);
-  return out.replace(/^\/+/, "");
+/** Canon SSOT slug normalizer:
+ * - keeps nested paths intact
+ * - strips only known prefixes
+ * - blocks traversal
+ */
+function canonBareSlug(input: unknown): string {
+  let s = String(input ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
+
+  if (!s || s.includes("..")) return "";
+
+  // Strip prefixes repeatedly
+  const stripOnce = (prefix: string) => {
+    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
+    if (s.toLowerCase().startsWith(p.toLowerCase())) {
+      s = s.slice(p.length);
+      s = s.replace(/^\/+/, "");
+      return true;
+    }
+    return false;
+  };
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    changed = stripOnce("content") || changed;
+    changed = stripOnce("vault") || changed;
+    changed = stripOnce("canon") || changed;
+  }
+
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  if (!s || s.includes("..")) return "";
+  return s;
+}
+
+function extractBodyCode(doc: any): string {
+  return String(doc?.body?.code || doc?.bodyCode || "");
 }
 
 const CanonSlugPage: NextPage<Props> = ({ doc, requiredTier }) => {
   const { data: session, status } = useSession();
 
-  const [activeCode, setActiveCode] = React.useState<string>(doc.bodyCode || "");
-  const [loadingContent, setLoadingContent] = React.useState(false);
-  const [unlockError, setUnlockError] = React.useState<string | null>(null);
-
-  // ✅ SSOT: Required tier normalized in REQUIRED context
   const required = tiers.normalizeRequired(requiredTier);
   const needsAuth = required !== "public";
 
-  // ✅ SSOT: User tier normalized in USER context
   const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
   const canRead = !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
 
-  const bareSlug = toBareCanonSlug(doc.slug || "");
+  // ✅ the canonical bare slug for this route + unlock
+  const bare = canonBareSlug(doc?._raw?.flattenedPath || doc?.slug || "");
+
+  const [activeCode, setActiveCode] = React.useState<string>(doc?.bodyCode || "");
+  const [loadingContent, setLoadingContent] = React.useState(false);
+  const [unlockError, setUnlockError] = React.useState<string | null>(null);
+
   const coverImage = doc.coverImage;
 
   const handleUnlock = async () => {
     if (!needsAuth) return;
-    if (!bareSlug) return;
+    if (!bare) return;
 
     setUnlockError(null);
     setLoadingContent(true);
     try {
-      const res = await fetch(`/api/canon/${encodeURIComponent(bareSlug)}`, { method: "GET" });
+      const res = await fetch(`/api/canon/${encodeURIComponent(bare)}`, { method: "GET" });
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok || !json?.ok) {
@@ -75,20 +111,16 @@ const CanonSlugPage: NextPage<Props> = ({ doc, requiredTier }) => {
     }
   };
 
-  // Only show auth loading for restricted content
   if (needsAuth && status === "loading") {
     return (
       <Layout title={doc.title}>
         <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">
-            Verifying clearance...
-          </div>
+          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
         </div>
       </Layout>
     );
   }
 
-  // Gate only when restricted and lacking access
   if (needsAuth && (!session?.user || !canRead)) {
     return (
       <Layout title={doc.title}>
@@ -100,8 +132,11 @@ const CanonSlugPage: NextPage<Props> = ({ doc, requiredTier }) => {
               <AccessGate
                 title={doc.title}
                 requiredTier={required}
-                onUnlocked={() => handleUnlock()}
-                message={doc.lockMessage || "This canon volume is restricted to members of the appropriate clearance level."}
+                onUnlocked={handleUnlock}
+                message={
+                  doc.lockMessage ||
+                  "This canon volume is restricted to members of the appropriate clearance level."
+                }
                 onGoToJoin={() => window.location.assign("/inner-circle")}
               />
               {unlockError ? (
@@ -116,7 +151,6 @@ const CanonSlugPage: NextPage<Props> = ({ doc, requiredTier }) => {
     );
   }
 
-  // Render content (public or authorized)
   return (
     <Layout title={doc.title} description={doc.description || ""}>
       <Head>
@@ -148,12 +182,13 @@ const CanonSlugPage: NextPage<Props> = ({ doc, requiredTier }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const canons = (getAllCanons() || []).filter((d: any) => !d.draft);
+  const canons = (getAllCanons() || []).filter((d: any) => !d?.draft);
 
   const paths = canons
     .map((d: any) => {
-      const raw = String(d.slug || d?._raw?.flattenedPath || "").replace(/^\/+/, "");
-      const bare = toBareCanonSlug(raw);
+      // ✅ SSOT: flattenedPath is the truth
+      const fp = String(d?._raw?.flattenedPath || d?.slug || "");
+      const bare = canonBareSlug(fp);
       if (!bare) return null;
       return { params: { slug: bare } };
     })
@@ -162,34 +197,32 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const bare = String(params?.slug || "").trim();
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const bare = canonBareSlug(params?.slug);
   if (!bare) return { notFound: true };
 
-  // Try all plausible lookups
+  // ✅ SSOT lookup order
   const rawDoc =
     getDocBySlug(`canon/${bare}`) ||
+    getDocBySlug(`content/canon/${bare}`) ||
     getDocBySlug(`vault/canon/${bare}`) ||
     getDocBySlug(bare);
 
-  if (!rawDoc || rawDoc.draft) return { notFound: true };
+  if (!rawDoc || rawDoc?.draft) return { notFound: true };
 
-  // ✅ SSOT: Use normalizeRequired for document's required tier
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(rawDoc));
   const locked = requiredTier !== "public";
 
   const doc = {
     ...rawDoc,
-    slug: bare, // keep bare for route + api fetch
-    bodyCode: locked ? "" : (rawDoc?.body?.code || rawDoc?.bodyCode || ""),
+    // keep the route’s bare slug stable
+    slug: bare,
+    bodyCode: locked ? "" : extractBodyCode(rawDoc),
     coverImage: resolveDocCoverImage(rawDoc),
   };
 
   return {
-    props: sanitizeData({
-      doc,
-      requiredTier,
-    }),
+    props: sanitizeData({ doc, requiredTier }),
     revalidate: 1800,
   };
 };

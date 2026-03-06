@@ -1,7 +1,6 @@
 /* ============================================================================
  * ENTERPRISE SEARCH INDEX SYSTEM
- * Version: 3.0.0
- * * Fully synchronized with ContentHelper v5.0.0
+ * Version: 3.0.1 (Hardened)
  * ============================================================================ */
 
 import {
@@ -9,22 +8,18 @@ import {
   documentKinds,
   getPublishedDocumentsByType,
   type ContentDoc,
-  type DocKind
+  type DocKind,
 } from "@/lib/content/server";
 import { absUrl } from "@/lib/siteConfig";
 import { safeSlice } from "@/lib/utils/safe";
 
-/* -------------------------------------------------------------------------- */
-/* 1. SEARCH INDEX SHAPE                                                      */
-/* -------------------------------------------------------------------------- */
-
 export interface SearchDoc {
-  type: string; 
+  type: string;
   slug: string;
-  href: string; 
-  url: string;  
+  href: string;
+  url: string;
   title: string;
-  date?: string | null; 
+  date?: string | null;
   excerpt?: string | null;
   tags?: string[];
   coverImage?: string | null;
@@ -33,89 +28,113 @@ export interface SearchDoc {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. UTILITIES                                                               */
+/* Utilities                                                                  */
 /* -------------------------------------------------------------------------- */
 
-function sortByDate<T extends { date?: string | null }>(docs: T[]): T[] {
-  return [...(docs || [])].sort((a, b) => {
-    const ta = a.date ? +new Date(a.date) : 0;
-    const tb = b.date ? +new Date(b.date) : 0;
-    return tb - ta;
-  });
+function toTime(date?: string | null): number {
+  if (!date) return 0;
+  const t = Date.parse(date);
+  return Number.isFinite(t) ? t : 0;
 }
 
-/**
- * Transforms any document from the 24 contexts into a searchable shape.
- * Uses getCardProps to resolve casing differences (readTime/readtime)
- * and positioning fields (coverFit).
- */
+function sortByDate<T extends { date?: string | null }>(docs: T[]): T[] {
+  return [...(docs || [])].sort((a, b) => toTime(b.date) - toTime(a.date));
+}
+
 function toSearchDoc(doc: ContentDoc): SearchDoc | null {
   if (!doc) return null;
 
   const props = getCardProps(doc);
-  
-  // Filter out any documents that failed to resolve correctly
-  if (props.slug === "unknown") return null;
+
+  // Hard guard: if helper can’t resolve, skip (prevents junk index)
+  const kind = String((props as any).kind || "").trim();
+  const slug = String((props as any).slug || "").trim();
+  const href = String((props as any).href || "").trim();
+
+  if (!kind || !slug || slug === "unknown" || !href || href === "/") return null;
 
   return {
-    type: props.kind,
-    slug: props.slug,
-    href: props.href,
-    url: absUrl(props.href),
-    title: props.title,
-    date: props.dateISO ?? null,
-    excerpt: props.description ?? null, // Uses the safe extraction from helper
-    tags: props.tags ?? [],
-    coverImage: props.coverImage ?? null,
-    coverAspect: props.coverAspect ?? null,
-    category: props.category ?? null,
+    type: kind,
+    slug,
+    href,
+    url: absUrl(href),
+    title: String((props as any).title || "Untitled"),
+    date: (props as any).dateISO ?? null,
+    excerpt: (props as any).description ?? null,
+    tags: Array.isArray((props as any).tags) ? (props as any).tags : [],
+    coverImage: (props as any).coverImage ?? null,
+    coverAspect: (props as any).coverAspect ?? null,
+    category: (props as any).category ?? null,
   };
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. AUTOMATED INDEX BUILDER                                                 */
+/* Builder + Lazy Singleton                                                   */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Iterates through all 24 document kinds defined in ContentHelper
- * and flattens them into a single sorted index.
- */
+function uniqueKinds(kinds: readonly any[]): DocKind[] {
+  const set = new Set<string>();
+  const out: DocKind[] = [];
+  for (const k of kinds || []) {
+    const kk = String(k || "").toLowerCase().trim() as DocKind;
+    if (!kk) continue;
+    if (set.has(kk)) continue;
+    set.add(kk);
+    out.push(kk);
+  }
+  return out;
+}
+
 export function buildSearchIndex(): SearchDoc[] {
-  // Use the master list of document kinds from the helper
-  const allKinds = documentKinds;
-  
+  const kinds = uniqueKinds(documentKinds as any);
+
   const allSearchDocs: SearchDoc[] = [];
 
-  allKinds.forEach((kind: DocKind) => {
+  for (const kind of kinds) {
     const docs = getPublishedDocumentsByType(kind);
-    docs.forEach(doc => {
-      const searchEntry = toSearchDoc(doc);
-      if (searchEntry) allSearchDocs.push(searchEntry);
-    });
-  });
+    for (const doc of docs) {
+      const entry = toSearchDoc(doc);
+      if (entry) allSearchDocs.push(entry);
+    }
+  }
 
   return sortByDate(allSearchDocs);
 }
 
-// Global Singleton for the Search Index
-export const searchIndex: SearchDoc[] = buildSearchIndex();
+// Cache in-module (works across imports in same runtime)
+let _indexCache: SearchDoc[] | null = null;
+
+export function getSearchIndex(): SearchDoc[] {
+  if (_indexCache) return _indexCache;
+
+  try {
+    _indexCache = buildSearchIndex();
+  } catch (e) {
+    // Fail-soft: return empty index rather than crashing server/build
+    console.warn("⚠️ [SEARCH_INDEX] Build failed; returning empty index.", e);
+    _indexCache = [];
+  }
+
+  return _indexCache;
+}
 
 /* -------------------------------------------------------------------------- */
-/* 4. QUERY ENGINE                                                            */
+/* Query Engine                                                               */
 /* -------------------------------------------------------------------------- */
 
 export function searchDocuments(query: string, limit: number = 20): SearchDoc[] {
-  const searchTerm = query.toLowerCase().trim();
-  
-  // Return recent content if no query provided
-  if (!searchTerm) return safeSlice(searchIndex, 0, limit);
+  const searchTerm = String(query || "").toLowerCase().trim();
 
-  const results = searchIndex.filter((doc) => {
+  const index = getSearchIndex();
+
+  if (!searchTerm) return safeSlice(index, 0, limit);
+
+  const results = index.filter((doc) => {
     const searchableText = [
-      doc.title, 
-      doc.excerpt ?? "", 
+      doc.title,
+      doc.excerpt ?? "",
       doc.category ?? "",
-      (doc.tags ?? []).join(" ")
+      (doc.tags ?? []).join(" "),
     ]
       .filter(Boolean)
       .join(" ")
