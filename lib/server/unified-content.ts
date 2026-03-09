@@ -1,17 +1,9 @@
 // lib/server/unified-content.ts
 // Server-side unified content system for Abraham of London
-// Synchronized with ContentHelper v5.2.0
+// Compile-safe: tolerates partial content registries
 
+import * as Content from "@/lib/content";
 import { safeSlice } from "@/lib/utils/safe";
-
-import {
-  getAllPosts, getAllBooks, getAllDownloads, getAllCanons, getAllShorts,
-  getAllEvents, getAllResources, getAllStrategies, getAllArticles,
-  getAllGuides, getAllTutorials, getAllCaseStudies, getAllWhitepapers,
-  getAllReports, getAllNewsletters, getAllSermons, getAllDevotionals,
-  getAllPrayers, getAllTestimonies, getAllPodcasts, getAllVideos,
-  getAllCourses, getAllLessons, getAllPrints
-} from "@/lib/content";
 
 /* -------------------------------------------------------------------------- */
 /* 1. TYPES & INTERFACES                                                      */
@@ -29,32 +21,46 @@ export interface BaseContent {
   draft?: boolean;
   published?: boolean;
   status?: string;
-  author?: string | { name: string; [key: string]: any } | null;
+  author?: string | { name: string; [key: string]: unknown } | null;
   category?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-// Exhaustive Union of all 24 types + 'page'
 export type ContentType =
-  | "post" | "book" | "download" | "canon" | "short" | "event"
-  | "resource" | "strategy" | "article" | "guide" | "tutorial"
-  | "caseStudy" | "whitepaper" | "report" | "newsletter" | "sermon"
-  | "devotional" | "prayer" | "testimony" | "podcast" | "video"
-  | "course" | "lesson" | "print" 
-  | "page"; // Legacy support
+  | "post"
+  | "book"
+  | "download"
+  | "canon"
+  | "short"
+  | "event"
+  | "resource"
+  | "strategy"
+  | "article"
+  | "guide"
+  | "tutorial"
+  | "caseStudy"
+  | "whitepaper"
+  | "report"
+  | "newsletter"
+  | "sermon"
+  | "devotional"
+  | "prayer"
+  | "testimony"
+  | "podcast"
+  | "video"
+  | "course"
+  | "lesson"
+  | "print"
+  | "page";
 
 export interface UnifiedContent extends BaseContent {
   id: string;
   type: ContentType;
   url: string;
-
-  // Standardization
   readTime?: string | number;
   accessLevel?: string;
   lockMessage?: string;
-
-  // Context-Specific Fields
-  volumeNumber?: string | number; // Canon
+  volumeNumber?: string | number;
   order?: number;
   resourceType?: string;
   applications?: string[];
@@ -66,45 +72,53 @@ export interface UnifiedContent extends BaseContent {
   format?: string;
   publisher?: string;
   pages?: number;
-  theme?: string; // Shorts
-  bibleVerse?: string; // Devotional
-  audioUrl?: string; // Podcast
-  videoUrl?: string; // Video
+  theme?: string;
+  bibleVerse?: string;
+  audioUrl?: string;
+  videoUrl?: string;
 }
+
+type RawContentItem = Record<string, unknown>;
+type LoaderFn = () => RawContentItem[] | Promise<RawContentItem[]> | undefined;
 
 /* -------------------------------------------------------------------------- */
 /* 2. HELPERS                                                                 */
 /* -------------------------------------------------------------------------- */
 
-function getAuthorName(item: any): string | undefined {
-  if (!item || !item.author) return undefined;
-  // Handle string author
-  if (typeof item.author === "string") return item.author;
-  // Handle object author
-  if (typeof item.author === "object" && !Array.isArray(item.author)) {
-    return item.author.name;
+function getAuthorName(item: RawContentItem): string | undefined {
+  const author = item.author;
+
+  if (!author) return undefined;
+
+  if (typeof author === "string") return author;
+
+  if (typeof author === "object" && !Array.isArray(author)) {
+    const maybeName = (author as { name?: unknown }).name;
+    return typeof maybeName === "string" ? maybeName : undefined;
   }
-  // Handle array of authors (return first)
-  if (Array.isArray(item.author) && item.author.length > 0) {
-    const first = item.author[0];
-    return typeof first === 'string' ? first : first.name;
+
+  if (Array.isArray(author) && author.length > 0) {
+    const first = author[0];
+    if (typeof first === "string") return first;
+    if (typeof first === "object" && first && "name" in first) {
+      const maybeName = (first as { name?: unknown }).name;
+      return typeof maybeName === "string" ? maybeName : undefined;
+    }
   }
+
   return undefined;
 }
 
-// Centralized URL Resolver
 export function getContentUrl(type: ContentType, slug: string): string {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<ContentType, string> = {
     post: "blog",
-    essay: "blog",
     book: "books",
     download: "downloads",
-    event: "events",
-    print: "prints",
-    resource: "resources",
     canon: "canon",
-    strategy: "strategies", // Pluralized for consistency
     short: "shorts",
+    event: "events",
+    resource: "resources",
+    strategy: "strategies",
     article: "articles",
     guide: "guides",
     tutorial: "tutorials",
@@ -120,72 +134,178 @@ export function getContentUrl(type: ContentType, slug: string): string {
     video: "videos",
     course: "courses",
     lesson: "lessons",
+    print: "prints",
     page: "",
   };
-  
-  const path = typeMap[type];
-  const basePath = path !== undefined ? path : type.toLowerCase() + "s";
+
+  const basePath = typeMap[type];
   return basePath ? `/${basePath}/${slug}` : `/${slug}`;
+}
+
+function resolveSlug(item: RawContentItem): string | null {
+  if (typeof item.slug === "string" && item.slug.trim()) {
+    return item.slug.replace(/^\/+/, "").replace(/^shorts\//, "");
+  }
+
+  const raw = item._raw;
+  if (typeof raw === "object" && raw && "flattenedPath" in raw) {
+    const flattenedPath = (raw as { flattenedPath?: unknown }).flattenedPath;
+    if (typeof flattenedPath === "string" && flattenedPath.trim()) {
+      const leaf = flattenedPath.split("/").pop();
+      return leaf || null;
+    }
+  }
+
+  return null;
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+}
+
+function getLoader(name: string): LoaderFn {
+  const maybeLoader = (Content as Record<string, unknown>)[name];
+  if (typeof maybeLoader === "function") {
+    return maybeLoader as LoaderFn;
+  }
+  return () => [];
 }
 
 async function safeLoadContent(
   label: string,
-  loader: () => any[] | Promise<any[]> | undefined,
-  type: ContentType,
+  loader: LoaderFn,
+  type: ContentType
 ): Promise<UnifiedContent[]> {
   try {
-    let result: any[] | undefined;
-    try {
-      const data = loader();
-      result = data instanceof Promise ? await data : data;
-    } catch (loaderError) {
-      console.warn(`[unified-content] Loader for ${label} failed:`, loaderError);
-      return [];
-    }
+    const loaded = loader();
+    const result = loaded instanceof Promise ? await loaded : loaded;
 
     if (!result || !Array.isArray(result)) return [];
 
     return result
-      .filter((item) => item && (item.slug || item._raw?.flattenedPath))
-      .map((item: any) => {
-        const slug = item.slug || item._raw?.flattenedPath.split('/').pop();
-        
+      .filter((item): item is RawContentItem => !!item && typeof item === "object")
+      .map((item) => {
+        const slug = resolveSlug(item);
+        if (!slug) return null;
+
         return {
           id: `${type}-${slug}`,
           type,
           slug,
-          title: item.title || "Untitled",
+          title: typeof item.title === "string" ? item.title : "Untitled",
           url: getContentUrl(type, slug),
 
-          excerpt: item.excerpt || item.description || item.socialCaption,
-          description: item.description,
-          date: item.date,
-          coverImage: item.coverImage || item.coverimage || item.image,
-          tags: Array.isArray(item.tags) ? item.tags : [],
+          excerpt:
+            typeof item.excerpt === "string"
+              ? item.excerpt
+              : typeof item.description === "string"
+              ? item.description
+              : typeof item.socialCaption === "string"
+              ? item.socialCaption
+              : undefined,
+
+          description: typeof item.description === "string" ? item.description : undefined,
+          date: typeof item.date === "string" ? item.date : undefined,
+          coverImage:
+            typeof item.coverImage === "string"
+              ? item.coverImage
+              : typeof item.coverimage === "string"
+              ? item.coverimage
+              : typeof item.image === "string"
+              ? item.image
+              : undefined,
+
+          tags: normalizeStringArray(item.tags),
           featured: Boolean(item.featured),
           draft: Boolean(item.draft),
           published: item.published !== false,
-          status: item.status || (item.draft ? "draft" : "published"),
+          status:
+            typeof item.status === "string"
+              ? item.status
+              : item.draft
+              ? "draft"
+              : "published",
+
           author: getAuthorName(item),
-          category: item.category,
+          category: typeof item.category === "string" ? item.category : undefined,
 
-          readTime: item.readTime || item.readtime || item.readingTime,
-          accessLevel: item.accessLevel,
-          lockMessage: item.lockMessage,
+          readTime:
+            typeof item.readTime === "string" || typeof item.readTime === "number"
+              ? item.readTime
+              : typeof item.readtime === "string" || typeof item.readtime === "number"
+              ? item.readtime
+              : typeof item.readingTime === "string" || typeof item.readingTime === "number"
+              ? item.readingTime
+              : undefined,
 
-          // Context-Specific Mapping
-          ...(type === "canon" ? { volumeNumber: item.volumeNumber, order: item.order } : {}),
-          ...(type === "download" ? { downloadFile: item.downloadFile, fileSize: item.fileSize } : {}),
-          ...(type === "event" ? { eventDate: item.eventDate, location: item.location } : {}),
-          ...(type === "short" ? { theme: item.theme } : {}),
-          ...(type === "devotional" ? { bibleVerse: item.bibleVerse } : {}),
-          ...(type === "book" ? { isbn: item.isbn, publisher: item.publisher } : {}),
-          ...(type === "video" ? { videoUrl: item.videoUrl } : {}),
-          ...(type === "podcast" ? { audioUrl: item.audioUrl } : {}),
-          
+          accessLevel:
+            typeof item.accessLevel === "string" ? item.accessLevel : undefined,
+          lockMessage:
+            typeof item.lockMessage === "string" ? item.lockMessage : undefined,
+
+          ...(type === "canon"
+            ? {
+                volumeNumber:
+                  typeof item.volumeNumber === "string" ||
+                  typeof item.volumeNumber === "number"
+                    ? item.volumeNumber
+                    : undefined,
+                order: typeof item.order === "number" ? item.order : undefined,
+              }
+            : {}),
+
+          ...(type === "download"
+            ? {
+                downloadFile:
+                  typeof item.downloadFile === "string" ? item.downloadFile : undefined,
+                fileSize: typeof item.fileSize === "string" ? item.fileSize : undefined,
+              }
+            : {}),
+
+          ...(type === "event"
+            ? {
+                eventDate: typeof item.eventDate === "string" ? item.eventDate : undefined,
+                location: typeof item.location === "string" ? item.location : undefined,
+              }
+            : {}),
+
+          ...(type === "short"
+            ? {
+                theme: typeof item.theme === "string" ? item.theme : undefined,
+              }
+            : {}),
+
+          ...(type === "devotional"
+            ? {
+                bibleVerse:
+                  typeof item.bibleVerse === "string" ? item.bibleVerse : undefined,
+              }
+            : {}),
+
+          ...(type === "book"
+            ? {
+                isbn: typeof item.isbn === "string" ? item.isbn : undefined,
+                publisher:
+                  typeof item.publisher === "string" ? item.publisher : undefined,
+              }
+            : {}),
+
+          ...(type === "video"
+            ? {
+                videoUrl: typeof item.videoUrl === "string" ? item.videoUrl : undefined,
+              }
+            : {}),
+
+          ...(type === "podcast"
+            ? {
+                audioUrl: typeof item.audioUrl === "string" ? item.audioUrl : undefined,
+              }
+            : {}),
+
           _raw: item,
         } as UnifiedContent;
-      });
+      })
+      .filter((item): item is UnifiedContent => item !== null);
   } catch (error) {
     console.error(`[unified-content] Error processing ${label}:`, error);
     return [];
@@ -193,59 +313,64 @@ async function safeLoadContent(
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. MAIN LOADERS (With Caching)                                             */
+/* 3. MAIN LOADERS (WITH CACHE)                                               */
 /* -------------------------------------------------------------------------- */
 
 let contentCache: UnifiedContent[] | null = null;
 
-export async function getAllUnifiedContent(forceRefresh = false): Promise<UnifiedContent[]> {
-  // Use cache if available (server-side optimization)
-  if (contentCache && !forceRefresh && process.env.NODE_ENV === 'production') {
+const CONTENT_LOADERS: Array<{
+  label: string;
+  exportName: string;
+  type: ContentType;
+}> = [
+  { label: "posts", exportName: "getAllPosts", type: "post" },
+  { label: "books", exportName: "getAllBooks", type: "book" },
+  { label: "downloads", exportName: "getAllDownloads", type: "download" },
+  { label: "canons", exportName: "getAllCanons", type: "canon" },
+  { label: "shorts", exportName: "getAllShorts", type: "short" },
+  { label: "events", exportName: "getAllEvents", type: "event" },
+  { label: "prints", exportName: "getAllPrints", type: "print" },
+  { label: "resources", exportName: "getAllResources", type: "resource" },
+  { label: "strategies", exportName: "getAllStrategies", type: "strategy" },
+  { label: "articles", exportName: "getAllArticles", type: "article" },
+  { label: "guides", exportName: "getAllGuides", type: "guide" },
+  { label: "tutorials", exportName: "getAllTutorials", type: "tutorial" },
+  { label: "caseStudies", exportName: "getAllCaseStudies", type: "caseStudy" },
+  { label: "whitepapers", exportName: "getAllWhitepapers", type: "whitepaper" },
+  { label: "reports", exportName: "getAllReports", type: "report" },
+  { label: "newsletters", exportName: "getAllNewsletters", type: "newsletter" },
+  { label: "sermons", exportName: "getAllSermons", type: "sermon" },
+  { label: "devotionals", exportName: "getAllDevotionals", type: "devotional" },
+  { label: "prayers", exportName: "getAllPrayers", type: "prayer" },
+  { label: "testimonies", exportName: "getAllTestimonies", type: "testimony" },
+  { label: "podcasts", exportName: "getAllPodcasts", type: "podcast" },
+  { label: "videos", exportName: "getAllVideos", type: "video" },
+  { label: "courses", exportName: "getAllCourses", type: "course" },
+  { label: "lessons", exportName: "getAllLessons", type: "lesson" },
+];
+
+export async function getAllUnifiedContent(
+  forceRefresh = false
+): Promise<UnifiedContent[]> {
+  if (contentCache && !forceRefresh && process.env.NODE_ENV === "production") {
     return contentCache;
   }
 
   try {
-    const loaders = [
-      { label: "posts", loader: getAllPosts, type: "post" as ContentType },
-      { label: "books", loader: getAllBooks, type: "book" as ContentType },
-      { label: "downloads", loader: getAllDownloads, type: "download" as ContentType },
-      { label: "canons", loader: getAllCanons, type: "canon" as ContentType },
-      { label: "shorts", loader: getAllShorts, type: "short" as ContentType },
-      { label: "events", loader: getAllEvents, type: "event" as ContentType },
-      { label: "prints", loader: getAllPrints, type: "print" as ContentType },
-      { label: "resources", loader: getAllResources, type: "resource" as ContentType },
-      { label: "strategies", loader: getAllStrategies, type: "strategy" as ContentType },
-      { label: "articles", loader: getAllArticles, type: "article" as ContentType },
-      { label: "guides", loader: getAllGuides, type: "guide" as ContentType },
-      { label: "tutorials", loader: getAllTutorials, type: "tutorial" as ContentType },
-      { label: "caseStudies", loader: getAllCaseStudies, type: "caseStudy" as ContentType },
-      { label: "whitepapers", loader: getAllWhitepapers, type: "whitepaper" as ContentType },
-      { label: "reports", loader: getAllReports, type: "report" as ContentType },
-      { label: "newsletters", loader: getAllNewsletters, type: "newsletter" as ContentType },
-      { label: "sermons", loader: getAllSermons, type: "sermon" as ContentType },
-      { label: "devotionals", loader: getAllDevotionals, type: "devotional" as ContentType },
-      { label: "prayers", loader: getAllPrayers, type: "prayer" as ContentType },
-      { label: "testimonies", loader: getAllTestimonies, type: "testimony" as ContentType },
-      { label: "podcasts", loader: getAllPodcasts, type: "podcast" as ContentType },
-      { label: "videos", loader: getAllVideos, type: "video" as ContentType },
-      { label: "courses", loader: getAllCourses, type: "course" as ContentType },
-      { label: "lessons", loader: getAllLessons, type: "lesson" as ContentType },
-    ];
-
     const results = await Promise.all(
-      loaders.map(({ label, loader, type }) => safeLoadContent(label, loader, type))
+      CONTENT_LOADERS.map(({ label, exportName, type }) =>
+        safeLoadContent(label, getLoader(exportName), type)
+      )
     );
 
     const allContent = results.flat();
 
-    // Sort by date descending
     allContent.sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
 
-    // Populate cache
     contentCache = allContent;
     return allContent;
   } catch (error) {
@@ -258,17 +383,23 @@ export async function getAllUnifiedContent(forceRefresh = false): Promise<Unifie
 /* 4. PUBLIC API                                                              */
 /* -------------------------------------------------------------------------- */
 
-export async function getUnifiedContentByType(type: ContentType): Promise<UnifiedContent[]> {
+export async function getUnifiedContentByType(
+  type: ContentType
+): Promise<UnifiedContent[]> {
   const all = await getAllUnifiedContent();
   return all.filter((item) => item.type === type);
 }
 
-export async function getUnifiedContentBySlug(slug: string, type?: ContentType): Promise<UnifiedContent | null> {
+export async function getUnifiedContentBySlug(
+  slug: string,
+  type?: ContentType
+): Promise<UnifiedContent | null> {
   const all = await getAllUnifiedContent();
   const found = all.find((item) => {
     const slugMatch = item.slug === slug;
     return type ? slugMatch && item.type === type : slugMatch;
   });
+
   return found || null;
 }
 
@@ -294,7 +425,9 @@ export interface ContentQuery {
   sortOrder?: "asc" | "desc";
 }
 
-export async function queryUnifiedContent(options: ContentQuery = {}): Promise<UnifiedContent[]> {
+export async function queryUnifiedContent(
+  options: ContentQuery = {}
+): Promise<UnifiedContent[]> {
   let content = await getPublishedUnifiedContent();
 
   if (options.type) {
@@ -303,8 +436,9 @@ export async function queryUnifiedContent(options: ContentQuery = {}): Promise<U
   }
 
   if (options.tag) {
+    const targetTag = options.tag.toLowerCase();
     content = content.filter((item) =>
-      item.tags?.some((tag) => tag.toLowerCase() === options.tag!.toLowerCase())
+      item.tags?.some((tag) => tag.toLowerCase() === targetTag)
     );
   }
 
@@ -312,21 +446,42 @@ export async function queryUnifiedContent(options: ContentQuery = {}): Promise<U
     content = content.filter((item) => item.featured === options.featured);
   }
 
+  if (options.author) {
+    const targetAuthor = options.author.toLowerCase();
+    content = content.filter(
+      (item) => typeof item.author === "string" && item.author.toLowerCase() === targetAuthor
+    );
+  }
+
+  if (options.year) {
+    content = content.filter((item) => getYearFromDate(item.date) === options.year);
+  }
+
   if (options.search) {
     const term = options.search.toLowerCase();
-    content = content.filter((item) =>
-      item.title.toLowerCase().includes(term) ||
-      item.excerpt?.toLowerCase().includes(term) ||
-      item.description?.toLowerCase().includes(term)
+    content = content.filter(
+      (item) =>
+        item.title.toLowerCase().includes(term) ||
+        item.excerpt?.toLowerCase().includes(term) ||
+        item.description?.toLowerCase().includes(term)
     );
   }
 
   content.sort((a, b) => {
     if (options.sortBy === "title") {
-      return options.sortOrder === "asc" 
-        ? a.title.localeCompare(b.title) 
+      return options.sortOrder === "asc"
+        ? a.title.localeCompare(b.title)
         : b.title.localeCompare(a.title);
     }
+
+    if (options.sortBy === "featured") {
+      const aFeatured = a.featured ? 1 : 0;
+      const bFeatured = b.featured ? 1 : 0;
+      return options.sortOrder === "asc"
+        ? aFeatured - bFeatured
+        : bFeatured - aFeatured;
+    }
+
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return options.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
@@ -337,7 +492,9 @@ export async function queryUnifiedContent(options: ContentQuery = {}): Promise<U
   return safeSlice(content, skip, skip + limit);
 }
 
-export async function searchUnifiedContent(query: string): Promise<UnifiedContent[]> {
+export async function searchUnifiedContent(
+  query: string
+): Promise<UnifiedContent[]> {
   return queryUnifiedContent({ search: query });
 }
 
@@ -354,9 +511,10 @@ export interface ContentStats {
 
 export function getYearFromDate(date?: string): string {
   if (!date) return "Undated";
+
   try {
     const year = new Date(date).getFullYear();
-    return isNaN(year) ? "Undated" : year.toString();
+    return Number.isNaN(year) ? "Undated" : year.toString();
   } catch {
     return "Undated";
   }
@@ -364,6 +522,7 @@ export function getYearFromDate(date?: string): string {
 
 export async function getContentStats(): Promise<ContentStats> {
   const all = await getAllUnifiedContent();
+
   const stats: ContentStats = {
     total: all.length,
     byType: {},
@@ -373,23 +532,24 @@ export async function getContentStats(): Promise<ContentStats> {
 
   all.forEach((item) => {
     stats.byType[item.type] = (stats.byType[item.type] || 0) + 1;
-    if (item.date) {
-      const year = getYearFromDate(item.date);
-      stats.byYear[year] = (stats.byYear[year] || 0) + 1;
-    }
-    if (item.featured) stats.featured++;
+
+    const year = getYearFromDate(item.date);
+    stats.byYear[year] = (stats.byYear[year] || 0) + 1;
+
+    if (item.featured) stats.featured += 1;
   });
 
   return stats;
 }
 
-export function formatReadTime(readTime?: string | number): string | undefined {
+export function formatReadTime(
+  readTime?: string | number
+): string | undefined {
   if (!readTime) return undefined;
   if (typeof readTime === "number") return `${readTime} min read`;
-  return String(readTime).includes("min") ? String(readTime) : `${readTime} min read`;
+  return readTime.includes("min") ? readTime : `${readTime} min read`;
 }
 
-// Default export object
 const unifiedContent = {
   getAllUnifiedContent,
   getUnifiedContentByType,

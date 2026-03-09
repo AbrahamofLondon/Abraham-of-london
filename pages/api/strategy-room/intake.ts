@@ -1,85 +1,57 @@
-/* pages/api/strategy-room/intake.ts — STRATEGIC INTAKE TERMINAL */
+/* pages/api/strategy-room/intake.ts — legacy adapter to canonical enrolment */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Resend } from "resend";
-import { 
-  evaluateIntake, 
-  notifyDiscord, 
-  computeScore, 
-  archiveIntake,
-  StrategyRoomIntakePayload,
-  StrategyRoomIntakeResult
-} from "@/lib/consulting/strategy-room";
+import {
+  normalizeCanonicalInput,
+  processStrategyRoomEnrolment,
+  type StrategyRoomApiResult,
+} from "@/lib/strategy-room/enrol-core";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getClientIp(req: NextApiRequest): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (Array.isArray(forwarded) && forwarded[0]) return String(forwarded[0]).trim();
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0].trim();
+  }
+  return String(req.socket?.remoteAddress || "");
+}
 
-/**
- * Institutional Intake Gateway
- * Processes stakeholder requests, evaluates strategic fit, and triggers 
- * the Directorate notification chain.
- */
 export default async function handler(
-  req: NextApiRequest, 
-  res: NextApiResponse<StrategyRoomIntakeResult>
+  req: NextApiRequest,
+  res: NextApiResponse<any>
 ) {
-  // 1. Protocol Validation
   if (req.method !== "POST") {
-    return res.status(405).json({ 
-      ok: false, 
-      status: "declined", 
-      message: "Direct POST access required for this terminal." 
+    return res.status(405).json({
+      ok: false,
+      status: "declined",
+      message: "Direct POST access required for this terminal.",
     });
   }
 
-  try {
-    const payload = req.body as StrategyRoomIntakePayload;
+  const input = normalizeCanonicalInput({
+    ...req.body,
+    source: req.body?.source || "strategy_room_intake_legacy",
+  });
 
-    // 2. Intelligence Evaluation
-    // Non-blocking logical checks (reCAPTCHA, field verification, etc.)
-    const evaluated = evaluateIntake(payload);
-    const scoreData = computeScore(payload);
+  const result = await processStrategyRoomEnrolment(input, {
+    ip: getClientIp(req),
+    userAgent: String(req.headers["user-agent"] || ""),
+  });
 
-    // 3. Conditional Execution Chain
-    // We only trigger expensive external IO if the initial evaluation passes
-    if (evaluated.ok && evaluated.status === "accepted") {
-      
-      // Parallel execution of institutional duties
-      const tasks = [
-        // a. Stakeholder Confirmation
-        resend.emails.send({
-          from: "Abraham of London <board@abrahamoflondon.org>",
-          to: [payload.contact.email],
-          subject: "Strategy Room: Enrolment Initialized",
-          text: `Protocol Update for ${payload.contact.fullName}: Your intake for "${payload.decision.statement}" has been accepted into the queue. Institutional review pending.`
-        }),
-        
-        // b. Directorate Notification (Discord)
-        notifyDiscord(payload, scoreData.total, evaluated.status),
-        
-        // c. Archival in the Sovereign Ledger (Postgres)
-        archiveIntake(payload, evaluated, scoreData.total)
-      ];
-
-      // Use allSettled to ensure failure in one (e.g., Discord) 
-      // doesn't prevent the archival or email from finishing.
-      Promise.allSettled(tasks).then((results) => {
-        results.forEach((result, index) => {
-          if (result.status === "rejected") {
-            console.error(`[INTAKE_TASK_FAILURE]: Task ${index} failed for ${payload.contact.email}:`, result.reason);
-          }
-        });
-      });
-    }
-
-    // 4. Immediate Return
-    // Returns the evaluation status to the UI immediately for client-side routing
-    return res.status(200).json(evaluated);
-
-  } catch (error) {
-    console.error("[INTAKE_CRITICAL_ERROR]:", error);
-    return res.status(500).json({ 
-      ok: false, 
-      status: "declined", 
-      message: "Internal system error during intake sequence." 
+  if (!result.ok) {
+    return res.status(result.statusCode).json({
+      ok: false,
+      status: "declined",
+      message: result.error,
+      details: result.details,
     });
   }
+
+  return res.status(200).json({
+    ok: true,
+    status: "accepted",
+    message: result.message,
+    referenceId: result.referenceId,
+    priorityStatus: result.priorityStatus || null,
+    warning: result.warning,
+  });
 }

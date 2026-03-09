@@ -29,33 +29,33 @@ export interface ContentBase {
   date?: string;
   author?: string;
   category?: string;
-  tags?: string[];
+  tags?: string | string[];
   featured?: boolean;
   readTime?: number | string;
   coverImage?: string;
   content?: string;
-  
+
   // Publication status (not access control)
   draft?: boolean;
   published?: boolean;
   status?: ContentStatus;
-  
+
   // ACCESS CONTROL - SSOT fields
   // These are the source-of-truth fields for access decisions
-  accessLevel?: string;      // Will be normalized via tier-policy
-  accessLevelSafe?: string;  // Optional alias used by pipeline
-  tier?: string;             // Legacy field - will be normalized
-  classification?: string;   // Legacy field - will be normalized
-  clearance?: string;        // Legacy field - will be normalized
-  requiresAuth?: boolean;    // Quick auth check (maps to non-public)
-  
+  accessLevel?: string;
+  accessLevelSafe?: string;
+  tier?: string;
+  classification?: string;
+  clearance?: string;
+  requiresAuth?: boolean;
+
   // Optional lock message for gated content
   lockMessage?: string;
-  
+
   // Contentlayer raw data
   _raw?: any;
   _id?: string;
-  
+
   // Allow additional fields
   [key: string]: any;
 }
@@ -64,11 +64,13 @@ export interface ContentBase {
  * Helper to get normalized access tier from any content object
  * Use this instead of directly accessing accessLevel
  */
-
 export function getContentAccessTier(content: ContentBase): AccessTier {
   return requiredTierFromDoc(content);
 }
 
+/**
+ * Get human-readable access level label
+ */
 export function getContentAccessLabel(content: ContentBase): string {
   return getTierLabel(getContentAccessTier(content));
 }
@@ -87,14 +89,6 @@ export function contentRequiresAuth(content: ContentBase): boolean {
   return getContentAccessTier(content) !== "public";
 }
 
-/**
- * Get human-readable access level label
- */
-export function getContentAccessLabel(content: ContentBase): string {
-  const { getTierLabel } = require('@/lib/access/tier-policy');
-  return getTierLabel(getContentAccessTier(content));
-}
-
 // ============================================================================
 // CONTENT TYPE SPECIFIC INTERFACES
 // All extend ContentBase with their specific fields
@@ -105,7 +99,7 @@ export function getContentAccessLabel(content: ContentBase): string {
  */
 export interface DownloadMeta extends ContentBase {
   downloadFile?: string;
-  fileSize?: string | number; // Can be string or number
+  fileSize?: string | number;
   downloadType?: string;
   version?: string;
 }
@@ -194,7 +188,7 @@ export interface Short extends ContentBase {
  */
 export interface Brief extends ContentBase {
   briefType?: string;
-  classification?: string; // Legacy - use accessLevel
+  classification?: string;
   references?: string[];
 }
 
@@ -212,39 +206,39 @@ export interface Framework extends ContentBase {
 // ============================================================================
 
 export function isDownload(content: ContentBase): content is Download {
-  return 'downloadFile' in content || 'downloadType' in content;
+  return "downloadFile" in content || "downloadType" in content;
 }
 
 export function isBook(content: ContentBase): content is Book {
-  return 'isbn' in content || 'pages' in content;
+  return "isbn" in content || "pages" in content;
 }
 
 export function isEvent(content: ContentBase): content is Event {
-  return 'eventDate' in content;
+  return "eventDate" in content;
 }
 
 export function isPage(content: ContentBase): content is Page {
-  return 'pageType' in content || 'showInNav' in content;
+  return "pageType" in content || "showInNav" in content;
 }
 
 export function isResource(content: ContentBase): content is Resource {
-  return 'resourceType' in content;
+  return "resourceType" in content;
 }
 
 export function isCanon(content: ContentBase): content is Canon {
-  return 'volumeNumber' in content || 'order' in content;
+  return "volumeNumber" in content || "order" in content;
 }
 
 export function isShort(content: ContentBase): content is Short {
-  return 'shortType' in content;
+  return "shortType" in content;
 }
 
 export function isBrief(content: ContentBase): content is Brief {
-  return 'briefType' in content;
+  return "briefType" in content;
 }
 
 export function isFramework(content: ContentBase): content is Framework {
-  return 'frameworkType' in content || 'components' in content;
+  return "frameworkType" in content || "components" in content;
 }
 
 // ============================================================================
@@ -257,8 +251,11 @@ export function isFramework(content: ContentBase): content is Framework {
 export function extractTags(content: ContentBase): string[] {
   if (!content.tags) return [];
   if (Array.isArray(content.tags)) return content.tags;
-  if (typeof content.tags === 'string') {
-    return content.tags.split(',').map(t => t.trim()).filter(Boolean);
+  if (typeof content.tags === "string") {
+    return content.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
   return [];
 }
@@ -267,22 +264,22 @@ export function extractTags(content: ContentBase): string[] {
  * Format read time consistently
  */
 export function formatReadTime(minutes: number | string): string {
-  if (typeof minutes === 'string') {
+  if (typeof minutes === "string") {
     const parsed = parseInt(minutes, 10);
     if (isNaN(parsed)) return minutes;
     minutes = parsed;
   }
-  
-  if (minutes < 1) return 'Less than a minute';
-  if (minutes === 1) return '1 minute';
+
+  if (minutes < 1) return "Less than a minute";
+  if (minutes === 1) return "1 minute";
   if (minutes < 60) return `${minutes} minutes`;
-  
+
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  
+
   if (remainingMinutes === 0) {
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+    return `${hours} ${hours === 1 ? "hour" : "hours"}`;
   }
-  
-  return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${remainingMinutes} min`;
+
+  return `${hours} ${hours === 1 ? "hour" : "hours"} ${remainingMinutes} min`;
 }

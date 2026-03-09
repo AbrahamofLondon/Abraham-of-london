@@ -159,12 +159,25 @@ function fp(doc: any): string {
   return lower(normalizeFlattenedPath(raw));
 }
 
+/**
+ * FIXED: Priority order for kind inference:
+ * 1) docKind (SSOT truth) — highest authority
+ * 2) kind/type fields (legacy)
+ * 3) Folder inference (always reliable)
+ */
 export function getDocKind(doc: any): DocKind {
-  const k = lower(doc?.kind || doc?.type || doc?.docKind);
-  const p = fp(doc);
+  // ✅ FIXED: docKind must win over everything else
+  const k = lower(doc?.docKind || doc?.kind || doc?.type);
+
+  // ✅ Explicit safeguard: lexicon is always lexicon
+  if (k === "lexicon") return "lexicon";
 
   if (k && (documentKinds as string[]).includes(k)) return k as DocKind;
 
+  // Folder inference (always reliable)
+  const p = fp(doc);
+
+  if (p.startsWith("lexicon/")) return "lexicon";
   if (p.startsWith("shorts/")) return "short";
   if (p.startsWith("briefs/")) return "brief";
   if (p.startsWith("canon/")) return "canon";
@@ -174,7 +187,6 @@ export function getDocKind(doc: any): DocKind {
   if (p.startsWith("prints/")) return "print";
   if (p.startsWith("resources/")) return "resource";
   if (p.startsWith("strategy/")) return "strategy";
-  if (p.startsWith("lexicon/")) return "lexicon";
   if (p.startsWith("vault/")) return "vault";
   if (p.startsWith("blog/") || p.startsWith("posts/")) return "post";
 

@@ -6,7 +6,7 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { ROLE_HIERARCHY } from "@/types/auth";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { readAccessCookie } from "@/lib/auth/edge/cookies";
 
 // ============================================================================
 // Edge-safe utility functions (no Node.js dependencies)
@@ -173,6 +173,14 @@ const PUBLIC_PREFIXES = [
   "/strategy-room",
   "/api/strategy-room/submit",
   "/api/strategy-room/analyze",
+  // ✅ New public routes
+  "/strategy",
+  "/consulting",
+  "/consulting/strategy-room",
+  "/speaking",
+  "/founders",
+  "/fatherhood",
+  "/leadership",
 ] as const;
 
 function isPublicPath(pathname: string): boolean {

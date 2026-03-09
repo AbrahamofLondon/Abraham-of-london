@@ -1,207 +1,143 @@
-// lib/database/models/User.ts — SSOT Tier Model (Mongoose)
-import mongoose, { Schema, type Model, type HydratedDocument } from "mongoose";
-import { v4 as uuidv4 } from "uuid";
+/* lib/database/models/User.ts — SSOT + TS-SAFE MONGOOSE USER MODEL */
+
+import mongoose, { Schema, type HydratedDocument, type Model } from "mongoose";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
-export type SubscriptionStatus = "active" | "canceled" | "expired" | "pending" | "trialing";
-
 export interface UserFields {
-  _id?: string;
   email: string;
   name?: string;
-  avatar?: string;
 
-  /**
-   * `tier` is the raw stored value (legacy tolerated).
-   * `normalizedTier` is the SSOT canonical tier used for logic & indexing.
-   */
-  tier: string;
-  normalizedTier: AccessTier;
+  tier: AccessTier | string;
+  normalizedTier?: AccessTier;
 
-  subscriptionStatus: SubscriptionStatus;
+  subscriptionStatus?:
+    | "active"
+    | "canceled"
+    | "expired"
+    | "pending"
+    | "trialing";
+
   subscriptionEndsAt?: Date;
-  stripePriceId?: string;
 
   preferences: {
-    emailNotifications: boolean;
-    pushNotifications: boolean;
-    defaultCategory?: string;
-    language: string;
-    timezone: string;
-    theme?: "light" | "dark" | "system";
+    emailNotifications?: boolean;
+    theme?: string;
+    language?: string;
+    [key: string]: unknown;
+  };
+
+  metadata: {
+    originalTier?: string;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    [key: string]: unknown;
   };
 
   statistics: {
     totalLogins: number;
-    lastLoginAt: Date;
+    lastLoginAt?: Date;
     totalContentAccessed: number;
     favoriteCategories: string[];
-    lastActiveAt?: Date;
   };
 
-  metadata: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    registrationSource?: string;
-    referralCode?: string;
-    originalTier?: string;
-    tierHistory?: Array<{
-      tier: string;
-      normalizedTier: AccessTier;
-      changedAt: Date;
-      reason?: string;
-    }>;
-  };
-
-  permissions?: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export type UserDoc = HydratedDocument<UserFields>;
 
+// Legacy compatibility alias
+export type IUser = UserDoc;
+export type IUserFields = UserFields;
+
+export interface UserModel extends Model<UserFields> {}
+
 const UserSchema = new Schema<UserFields>(
   {
-    _id: {
-      type: String,
-      default: () => `user_${uuidv4()}`,
-    },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
       lowercase: true,
       trim: true,
+      index: true,
     },
-    name: { type: String, trim: true },
-    avatar: { type: String },
+
+    name: {
+      type: String,
+      trim: true,
+    },
 
     tier: {
       type: String,
-      default: "public",
+      required: true,
+      default: "member",
+      set: function (this: any, value: unknown) {
+        const raw = String(value || "member");
+        this.normalizedTier = normalizeUserTier(raw);
+        if (!this.metadata || typeof this.metadata !== "object") {
+          this.metadata = {};
+        }
+        this.metadata.originalTier = raw;
+        return raw;
+      },
     },
 
     normalizedTier: {
       type: String,
-      enum: ["public", "member", "inner-circle", "client", "legacy", "architect", "owner"],
-      default: "public",
+      default: "member",
       index: true,
+      set: function (_this: any, value: unknown) {
+        return normalizeUserTier(value);
+      },
     },
 
     subscriptionStatus: {
       type: String,
-      enum: ["active", "canceled", "expired", "pending", "trialing"],
       default: "pending",
+      index: true,
     },
-    subscriptionEndsAt: { type: Date },
-    stripePriceId: { type: String },
+
+    subscriptionEndsAt: {
+      type: Date,
+    },
 
     preferences: {
       emailNotifications: { type: Boolean, default: true },
-      pushNotifications: { type: Boolean, default: true },
-      defaultCategory: String,
+      theme: { type: String, default: "dark" },
       language: { type: String, default: "en" },
-      timezone: { type: String, default: "UTC" },
-      theme: { type: String, enum: ["light", "dark", "system"], default: "system" },
+    },
+
+    metadata: {
+      originalTier: { type: String },
+      stripeCustomerId: { type: String },
+      stripeSubscriptionId: { type: String },
     },
 
     statistics: {
       totalLogins: { type: Number, default: 0 },
-      lastLoginAt: { type: Date, default: Date.now },
-      lastActiveAt: { type: Date },
+      lastLoginAt: { type: Date },
       totalContentAccessed: { type: Number, default: 0 },
       favoriteCategories: [{ type: String }],
     },
-
-    metadata: {
-      stripeCustomerId: String,
-      stripeSubscriptionId: String,
-      registrationSource: String,
-      referralCode: String,
-      originalTier: String,
-      tierHistory: [
-        {
-          tier: String,
-          normalizedTier: String,
-          changedAt: Date,
-          reason: String,
-        },
-      ],
-    },
-
-    permissions: [{ type: String }],
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
 
-// Indexes
 UserSchema.index({ email: 1 }, { unique: true });
-UserSchema.index({ normalizedTier: 1, subscriptionStatus: 1 });
-UserSchema.index({ tier: 1, subscriptionStatus: 1 });
-UserSchema.index({ "metadata.stripeCustomerId": 1 });
-UserSchema.index({ "statistics.lastActiveAt": -1 });
+UserSchema.index({ tier: 1 });
+UserSchema.index({ normalizedTier: 1 });
+UserSchema.index({ subscriptionStatus: 1 });
+UserSchema.index({ createdAt: -1 });
 
-// Virtual for active subscription
-UserSchema.virtual("hasActiveSubscription").get(function (this: UserDoc) {
-  return this.subscriptionStatus === "active" && (!this.subscriptionEndsAt || this.subscriptionEndsAt > new Date());
-});
+const MODEL_NAME = "User";
 
-// Virtual for access level (SSOT)
-UserSchema.virtual("accessLevel").get(function (this: UserDoc) {
-  return this.normalizedTier || normalizeUserTier(this.tier);
-});
-
-// Virtual label (keep simple; UI can also use tier-policy labels)
-UserSchema.virtual("tierLabel").get(function (this: UserDoc) {
-  const labels: Record<AccessTier, string> = {
-    public: "Public",
-    member: "Member",
-    "inner-circle": "Inner Circle",
-    client: "Client",
-    legacy: "Legacy",
-    architect: "Architect",
-    owner: "Owner",
-  };
-  return labels[this.normalizedTier] || String(this.normalizedTier);
-});
-
-// ✅ FIXED: Pre-save hook without `next` parameter (avoids TS overload confusion)
-UserSchema.pre("save", function (this: UserDoc) {
-  // No `next` param — avoids TS overload where `next` becomes SaveOptions
-  try {
-    if (this.isModified("tier") || !this.normalizedTier) {
-      const raw = String(this.tier ?? "public");
-      const normalized = normalizeUserTier(raw);
-
-      // preserve originalTier once
-      if (!this.metadata) this.metadata = {} as any;
-      if (!this.metadata.originalTier) this.metadata.originalTier = raw;
-
-      this.normalizedTier = normalized;
-
-      if (!this.metadata.tierHistory) this.metadata.tierHistory = [];
-      this.metadata.tierHistory.push({
-        tier: raw,
-        normalizedTier: normalized,
-        changedAt: new Date(),
-        reason: this.isNew ? "create" : "update",
-      });
-    }
-  } catch (e) {
-    // Throw to trigger mongoose error handling
-    throw e;
-  }
-});
-
-// ✅ FIXED: Create model with proper type assertion through 'unknown'
-const User = 
-  (mongoose.models.User as unknown as Model<UserFields>) ||
-  mongoose.model<UserFields>("User", UserSchema);
+const User =
+  (mongoose.models[MODEL_NAME] as UserModel) ||
+  mongoose.model<UserFields, UserModel>(MODEL_NAME, UserSchema);
 
 export default User;

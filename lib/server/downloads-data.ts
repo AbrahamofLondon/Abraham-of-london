@@ -16,6 +16,7 @@ export type DownloadWithContent = Download & { content: string };
 function s(v: unknown): string | undefined {
   return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
+
 function b(v: unknown): boolean | undefined {
   if (typeof v === "boolean") return v;
   if (typeof v === "number") return v === 1;
@@ -26,11 +27,13 @@ function b(v: unknown): boolean | undefined {
   }
   return undefined;
 }
+
 function a(v: unknown): string[] | undefined {
   if (!Array.isArray(v)) return undefined;
   const out = v.filter((x) => typeof x === "string") as string[];
   return out.length ? out : undefined;
 }
+
 function n(v: unknown): number | undefined {
   if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
   if (typeof v === "string") {
@@ -49,34 +52,26 @@ function fromMdxMeta(meta: MdxMeta): Download {
   return {
     slug,
     title,
-
     description: s(m.description),
     excerpt: s(m.excerpt) || s(m.description),
-
     date: s(m.date),
     author: s(m.author),
     category: s(m.category),
     tags: a(m.tags),
     featured: b(m.featured),
-
     coverImage: s(m.coverImage) || s(m.image),
-
     draft: b(m.draft),
     published: m.published === undefined ? true : b(m.published),
-
-    // common download fields found in your MDX
     fileName: s(m.fileName),
-    fileSize: s(m.fileSize) || (n(m.fileSize)?.toString()),
+    fileSize: s(m.fileSize) || n(m.fileSize)?.toString(),
     fileFormat: s(m.fileFormat),
     fileUrl: s(m.fileUrl),
     downloadUrl: s(m.downloadUrl),
     version: s(m.version),
     versionDate: s(m.versionDate),
-
     requirements: a(m.requirements),
     compatibility: a(m.compatibility),
     changelog: a(m.changelog),
-
     _raw: m._raw,
     url: s(m.url),
     type: "download",
@@ -86,6 +81,7 @@ function fromMdxMeta(meta: MdxMeta): Download {
 function fromMdxDocument(doc: MdxDocument): DownloadWithContent {
   const d: any = doc as any;
   const meta = fromMdxMeta(d);
+
   return {
     ...(meta as any),
     content: typeof d.content === "string" ? d.content : "",
@@ -96,14 +92,22 @@ function fromMdxDocument(doc: MdxDocument): DownloadWithContent {
 export async function getAllDownloadsMeta(): Promise<Download[]> {
   try {
     const metas = await getMdxCollectionMeta("downloads");
-    return (metas || []).map(fromMdxMeta).filter((x: any) => x?.slug && x?.title);
+    return (metas || [])
+      .map(fromMdxMeta)
+      .filter((x: any) => x?.slug && x?.title);
   } catch (e) {
     console.error("[downloads-data] getAllDownloadsMeta failed:", e);
     return [];
   }
 }
 
-export async function getDownloadBySlug(slug: string): Promise<DownloadWithContent | null> {
+export async function getMdxDownloadsMeta(): Promise<Download[]> {
+  return getAllDownloadsMeta();
+}
+
+export async function getDownloadBySlug(
+  slug: string
+): Promise<DownloadWithContent | null> {
   try {
     const doc = await getMdxDocumentBySlug("downloads", slug);
     if (!doc) return null;
@@ -114,14 +118,24 @@ export async function getDownloadBySlug(slug: string): Promise<DownloadWithConte
   }
 }
 
+export async function getMdxDownloadBySlug(
+  slug: string
+): Promise<DownloadWithContent | null> {
+  return getDownloadBySlug(slug);
+}
+
 export async function getPublishedDownloads(): Promise<Download[]> {
   const all = await getAllDownloadsMeta();
-  return all.filter((d: any) => d?.draft !== true && (d?.published !== false));
+  return all.filter((d: any) => d?.draft !== true && d?.published !== false);
 }
 
 export async function getFeaturedDownloads(): Promise<Download[]> {
   const all = await getPublishedDownloads();
   return all.filter((d: any) => d?.featured === true);
+}
+
+export async function getMdxFeaturedDownloads(): Promise<Download[]> {
+  return getFeaturedDownloads();
 }
 
 export async function getRecentDownloads(limit = 20): Promise<Download[]> {
@@ -136,8 +150,11 @@ export async function getRecentDownloads(limit = 20): Promise<Download[]> {
 
 export default {
   getAllDownloadsMeta,
+  getMdxDownloadsMeta,
   getDownloadBySlug,
+  getMdxDownloadBySlug,
   getPublishedDownloads,
   getFeaturedDownloads,
+  getMdxFeaturedDownloads,
   getRecentDownloads,
 };

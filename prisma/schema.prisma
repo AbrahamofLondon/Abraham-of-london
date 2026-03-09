@@ -510,31 +510,62 @@ model DownloadAuditEvent {
   id   String @id @default(cuid())
   slug String
 
+  // ---------------------------------------------------------------------------
+  // Relations
+  // ---------------------------------------------------------------------------
   printAssetId String?
   printAsset   PrintAsset? @relation("PrintDownloads", fields: [printAssetId], references: [id], onDelete: SetNull)
 
   memberId String?            @db.Uuid
   member   InnerCircleMember? @relation("MemberDownloads", fields: [memberId], references: [id], onDelete: SetNull)
 
+  // ---------------------------------------------------------------------------
+  // Identity / Attribution
+  // ---------------------------------------------------------------------------
+  email     String?
+  emailHash String?
   ipAddress String?
+  ipHash    String?
   userAgent String?
 
-  createdAt DateTime @default(now())
+  // ---------------------------------------------------------------------------
+  // Event Semantics
+  // ---------------------------------------------------------------------------
+  contentType String? @db.VarChar(64)
+  eventType   String? @db.VarChar(32)
+  success     Boolean @default(true)
 
-  // option-2 security fields (your DB has these)
-  contentType String?   @db.VarChar(64)
-  eventType   String?   @db.VarChar(32)
+  // ---------------------------------------------------------------------------
+  // File / Transport Diagnostics
+  // ---------------------------------------------------------------------------
   fileHash    String?   @db.VarChar(128)
+  fileSize    BigInt?
+  latencyMs   Int?
   processedAt DateTime?
-  success     Boolean   @default(true)
+
+  // ---------------------------------------------------------------------------
+  // Flexible metadata / extension point
+  // ---------------------------------------------------------------------------
+  metadata Json? @default("{}")
+
+  // ---------------------------------------------------------------------------
+  // Timestamps
+  // ---------------------------------------------------------------------------
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([memberId])
   @@index([printAssetId])
   @@index([createdAt])
+  @@index([updatedAt])
   @@index([eventType])
+  @@index([contentType])
   @@index([success])
   @@index([processedAt])
+  @@index([emailHash])
+  @@index([ipHash])
+  @@index([email])
   @@map("download_audit_events")
 }
 

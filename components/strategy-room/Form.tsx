@@ -1,50 +1,106 @@
-/* components/strategy-room/Form.tsx — HARRODS/McKINSEY GRADE (Institutional Luxury) */
+/* components/strategy-room/Form.tsx — HARRODS / McKINSEY GRADE (pipeline-aligned) */
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
-import { 
-  Send, 
-  ArrowRight, 
-  Loader2, 
-  Shield, 
-  Lock, 
-  Eye, 
+import { motion, type Transition } from "framer-motion";
+import {
+  ArrowRight,
+  Loader2,
+  Shield,
+  Lock,
+  Eye,
   Sparkles,
   CheckCircle2,
   FileSignature,
   Building2,
   Target,
-  Compass
+  Compass,
+  AlertTriangle,
 } from "lucide-react";
-import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
-/**
- * PERMANENT TS FIX:
- * Your installed Framer Motion type definitions reject `number[]` for `ease`.
- * TS infers `[0.16, 1, 0.3, 1]` as `number[]` unless we force the type.
- */
-const TRANSITION: import('framer-motion').Transition = {
-  duration: 0.6,
-  ease: [0.16, 1, 0.3, 1] as unknown as import('framer-motion').Transition['ease'],
+type SubmitState = "idle" | "success" | "error";
+
+type FormState = {
+  name: string;
+  email: string;
+  organisation: string;
+  intent: string;
 };
 
-const FormField = ({ 
-  icon: Icon, 
-  label, 
-  name, 
-  type = "text", 
+type ApiSuccess = {
+  ok: true;
+  message: string;
+  referenceId: string;
+  priorityStatus?: string | null;
+  warning?: string;
+};
+
+type ApiFailure = {
+  ok: false;
+  error: string;
+  details?: unknown;
+};
+
+const TRANSITION: Transition = {
+  duration: 0.6,
+  ease: [0.16, 1, 0.3, 1] as unknown as Transition["ease"],
+};
+
+function hasRecaptchaSiteKey(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY);
+}
+
+async function getSafeRecaptchaToken(action: string): Promise<string | null> {
+  if (!hasRecaptchaSiteKey()) return null;
+
+  try {
+    const mod = await import("@/lib/recaptchaClient");
+    if (typeof mod.getRecaptchaTokenSafe === "function") {
+      return await mod.getRecaptchaTokenSafe(action);
+    }
+    return null;
+  } catch (error) {
+    console.warn("[StrategyRoomForm] reCAPTCHA unavailable; continuing without token.", error);
+    return null;
+  }
+}
+
+function validateEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function validateForm(state: FormState): string | null {
+  if (!state.name.trim() || !state.email.trim() || !state.organisation.trim() || !state.intent.trim()) {
+    return "Incomplete institutional data.";
+  }
+
+  if (!validateEmail(state.email.trim())) {
+    return "A valid institutional email is required.";
+  }
+
+  if (state.intent.trim().length < 12) {
+    return "Strategic intent is too brief.";
+  }
+
+  return null;
+}
+
+const FormField = ({
+  icon: Icon,
+  label,
+  name,
+  type = "text",
   required = true,
   placeholder,
   rows,
   isTextarea = false,
   value,
-  onChange
-}: { 
-  icon: any; 
-  label: string; 
-  name: string; 
-  type?: string; 
+  onChange,
+}: {
+  icon: any;
+  label: string;
+  name: keyof FormState;
+  type?: string;
   required?: boolean;
   placeholder: string;
   rows?: number;
@@ -55,46 +111,46 @@ const FormField = ({
   const [focused, setFocused] = React.useState(false);
 
   return (
-    <motion.div 
+    <motion.div
       className="relative group"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className={`
-        absolute inset-0 rounded-2xl transition-all duration-500
-        ${focused 
-          ? 'bg-gradient-to-r from-amber-500/20 via-amber-400/10 to-amber-500/20 blur-xl' 
-          : 'bg-transparent'
-        }
-      `} />
-      
-      <div className={`
-        relative flex items-start gap-4 p-6 rounded-2xl border transition-all duration-500
-        ${focused 
-          ? 'border-amber-500/40 bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/5 shadow-[0_0_40px_-12px_rgba(245,158,11,0.3)]' 
-          : 'border-white/5 bg-black/40 hover:border-white/10 hover:bg-black/60'
-        }
-        backdrop-blur-sm
-      `}>
-        <div className={`
-          p-3 rounded-xl border transition-all duration-500
-          ${focused 
-            ? 'border-amber-500/30 bg-amber-500/10 text-amber-400' 
-            : 'border-white/5 bg-white/[0.02] text-zinc-600 group-hover:text-zinc-400'
-          }
-        `}>
+      <div
+        className={`absolute inset-0 rounded-2xl transition-all duration-500 ${
+          focused
+            ? "bg-gradient-to-r from-amber-500/20 via-amber-400/10 to-amber-500/20 blur-xl"
+            : "bg-transparent"
+        }`}
+      />
+
+      <div
+        className={`relative flex items-start gap-4 rounded-2xl border p-6 transition-all duration-500 backdrop-blur-sm ${
+          focused
+            ? "border-amber-500/40 bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/5 shadow-[0_0_40px_-12px_rgba(245,158,11,0.3)]"
+            : "border-white/5 bg-black/40 hover:border-white/10 hover:bg-black/60"
+        }`}
+      >
+        <div
+          className={`rounded-xl border p-3 transition-all duration-500 ${
+            focused
+              ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+              : "border-white/5 bg-white/[0.02] text-zinc-600 group-hover:text-zinc-400"
+          }`}
+        >
           <Icon size={18} />
         </div>
-        
+
         <div className="flex-1 space-y-2">
-          <label className={`
-            block text-[9px] font-mono uppercase tracking-[0.3em] transition-colors duration-500
-            ${focused ? 'text-amber-400' : 'text-zinc-600'}
-          `}>
+          <label
+            className={`block text-[9px] font-mono uppercase tracking-[0.3em] transition-colors duration-500 ${
+              focused ? "text-amber-400" : "text-zinc-600"
+            }`}
+          >
             {label}
           </label>
-          
+
           {isTextarea ? (
             <textarea
               name={name}
@@ -105,7 +161,7 @@ const FormField = ({
               onChange={onChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              className="w-full bg-transparent text-white text-sm font-light outline-none resize-none placeholder:text-zinc-800"
+              className="w-full resize-none bg-transparent text-sm font-light text-white outline-none placeholder:text-zinc-800"
             />
           ) : (
             <input
@@ -117,7 +173,7 @@ const FormField = ({
               onChange={onChange}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              className="w-full bg-transparent text-white text-sm font-light outline-none placeholder:text-zinc-800"
+              className="w-full bg-transparent text-sm font-light text-white outline-none placeholder:text-zinc-800"
             />
           )}
         </div>
@@ -128,42 +184,107 @@ const FormField = ({
 
 export default function StrategyRoomForm() {
   const [loading, setLoading] = React.useState(false);
-  const [submitted, setSubmitted] = React.useState(false);
-  const [formState, setFormState] = React.useState({
-    name: '',
-    email: '',
-    organisation: '',
-    intent: ''
+  const [submitState, setSubmitState] = React.useState<SubmitState>("idle");
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [successMessage, setSuccessMessage] = React.useState("");
+  const [warningMessage, setWarningMessage] = React.useState("");
+  const [referenceId, setReferenceId] = React.useState("");
+  const [formState, setFormState] = React.useState<FormState>({
+    name: "",
+    email: "",
+    organisation: "",
+    intent: "",
   });
 
+  const recaptchaEnabled = hasRecaptchaSiteKey();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
+  };
+
+  const resetMessages = () => {
+    setSubmitState("idle");
+    setErrorMessage("");
+    setSuccessMessage("");
+    setWarningMessage("");
+    setReferenceId("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    resetMessages();
+
+    const validationError = validateForm(formState);
+    if (validationError) {
+      setSubmitState("error");
+      setErrorMessage(validationError);
+      return;
+    }
+
     setLoading(true);
-    
+
     try {
-      const token = await getRecaptchaTokenSafe("strategy_room_intake");
+      const token = await getSafeRecaptchaToken("strategy_room_intake");
+
       const res = await fetch("/api/strategy-room/enrol", {
         method: "POST",
-        body: JSON.stringify({ ...formState, token }),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formState.name.trim(),
+          fullName: formState.name.trim(),
+          email: formState.email.trim(),
+          organisation: formState.organisation.trim(),
+          intent: formState.intent.trim(),
+          message: formState.intent.trim(),
+          source: "strategy_room_form",
+          token,
+          metadata: {
+            surface: "strategy_room_form",
+            organisation: formState.organisation.trim(),
+          },
+        }),
       });
 
-      if (res.ok) setSubmitted(true);
-    } catch (err) {
-      console.error("Submission error:", err);
+      const json = (await res.json().catch(() => ({}))) as ApiSuccess | ApiFailure;
+
+      if (!res.ok || !json || !("ok" in json) || !json.ok) {
+        setSubmitState("error");
+        setErrorMessage(
+          typeof (json as ApiFailure)?.error === "string"
+            ? (json as ApiFailure).error
+            : "Submission failed. Please try again."
+        );
+        return;
+      }
+
+      setSubmitState("success");
+      setSuccessMessage(
+        typeof json.message === "string"
+          ? json.message
+          : "Your inquiry has been received by the Directorate."
+      );
+      setReferenceId(json.referenceId || "");
+      setWarningMessage(json.warning || "");
+      setFormState({
+        name: "",
+        email: "",
+        organisation: "",
+        intent: "",
+      });
+      (e.currentTarget as HTMLFormElement).reset();
+    } catch (err: any) {
+      console.error("[StrategyRoomForm] Submission error:", err);
+      setSubmitState("error");
+      setErrorMessage(err?.message || "Submission failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (submitted) {
+  if (submitState === "success") {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -171,20 +292,19 @@ export default function StrategyRoomForm() {
         transition={TRANSITION}
         className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-black to-amber-500/5 p-12"
       >
-        {/* Background decoration */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(245,158,11,0.1),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(245,158,11,0.05),transparent_70%)]" />
-        
-        <div className="relative text-center space-y-8">
+
+        <div className="relative space-y-8 text-center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-flex p-4 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/30"
+            className="inline-flex rounded-full border border-amber-500/30 bg-gradient-to-br from-amber-500/20 to-amber-500/5 p-4"
           >
             <CheckCircle2 className="h-12 w-12 text-amber-400" />
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -192,11 +312,22 @@ export default function StrategyRoomForm() {
             className="space-y-4"
           >
             <h3 className="font-serif text-3xl text-white">Intelligence Request Logged</h3>
-            <p className="text-zinc-400 max-w-md mx-auto text-sm leading-relaxed">
-              Your inquiry has been received by the Directorate. A member of our strategic team will respond within 24-48 hours.
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-zinc-400">
+              {successMessage ||
+                "Your inquiry has been received by the Directorate. A member of our strategic team will respond within 24–48 hours."}
             </p>
+            {referenceId ? (
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber-400/80">
+                Reference: {referenceId}
+              </div>
+            ) : null}
+            {warningMessage ? (
+              <div className="mx-auto max-w-lg rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-left text-sm leading-relaxed text-amber-200/85">
+                {warningMessage}
+              </div>
+            ) : null}
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -204,10 +335,10 @@ export default function StrategyRoomForm() {
             className="flex items-center justify-center gap-8 pt-8 text-[10px] font-mono uppercase tracking-widest text-zinc-700"
           >
             <span className="flex items-center gap-2">
-              <Shield size={12} className="text-amber-500/50" /> AES-256
+              <Shield size={12} className="text-amber-500/50" /> Intake Logged
             </span>
             <span className="flex items-center gap-2">
-              <Lock size={12} className="text-amber-500/50" /> Zero-Knowledge
+              <Lock size={12} className="text-amber-500/50" /> Review Queued
             </span>
           </motion.div>
         </div>
@@ -222,35 +353,59 @@ export default function StrategyRoomForm() {
       transition={TRANSITION}
       className="relative"
     >
-      {/* Background layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/5 rounded-3xl blur-3xl" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(245,158,11,0.05),transparent_70%)] rounded-3xl" />
-      
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/5 blur-3xl" />
+      <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(ellipse_at_top_right,rgba(245,158,11,0.05),transparent_70%)]" />
+
       <form onSubmit={handleSubmit} className="relative space-y-6">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={TRANSITION}
           className="mb-12 text-center"
         >
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-amber-500/20 bg-amber-500/5 mb-6">
+          <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2">
             <Sparkles size={14} className="text-amber-400" />
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
               Institutional Intake
             </span>
           </div>
-          
-          <h2 className="font-serif text-4xl text-white mb-4 tracking-tight">
+
+          <h2 className="mb-4 font-serif text-4xl tracking-tight text-white">
             Strategic <span className="italic text-amber-400">Inquiry</span>
           </h2>
-          
-          <p className="text-zinc-500 text-sm max-w-lg mx-auto leading-relaxed">
+
+          <p className="mx-auto max-w-lg text-sm leading-relaxed text-zinc-500">
             Submit your institutional profile for preliminary assessment by the Directorate.
           </p>
         </motion.div>
 
-        {/* Form Fields */}
+        {!recaptchaEnabled ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200/80">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber-400">
+                Security Notice
+              </div>
+              <p className="mt-1 text-sm leading-relaxed">
+                reCAPTCHA is not configured in this environment. Submission will only proceed where
+                non-production bypass is enabled.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {submitState === "error" && errorMessage ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-300">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-400">
+                Submission Error
+              </div>
+              <p className="mt-1 text-sm leading-relaxed">{errorMessage}</p>
+            </div>
+          </div>
+        ) : null}
+
         <div className="space-y-4">
           <FormField
             icon={FileSignature}
@@ -292,7 +447,6 @@ export default function StrategyRoomForm() {
           />
         </div>
 
-        {/* Submit Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -302,7 +456,7 @@ export default function StrategyRoomForm() {
           <button
             type="submit"
             disabled={loading}
-            className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 p-[2px] hover:shadow-[0_0_40px_-8px_rgba(245,158,11,0.5)] transition-all duration-500"
+            className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 p-[2px] transition-all duration-500 hover:shadow-[0_0_40px_-8px_rgba(245,158,11,0.5)] disabled:cursor-not-allowed disabled:opacity-80"
           >
             <div className="relative flex items-center justify-center gap-4 rounded-2xl bg-black px-8 py-5 transition-all duration-500 group-hover:bg-transparent">
               {loading ? (
@@ -314,12 +468,12 @@ export default function StrategyRoomForm() {
                 </>
               ) : (
                 <>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white group-hover:text-black transition-colors">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white transition-colors group-hover:text-black">
                     Submit Strategic Inquiry
                   </span>
-                  <ArrowRight 
-                    size={16} 
-                    className="text-amber-400 group-hover:translate-x-2 group-hover:text-black transition-all duration-300" 
+                  <ArrowRight
+                    size={16}
+                    className="text-amber-400 transition-all duration-300 group-hover:translate-x-2 group-hover:text-black"
                   />
                 </>
               )}
@@ -327,7 +481,6 @@ export default function StrategyRoomForm() {
           </button>
         </motion.div>
 
-        {/* Security Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -335,11 +488,11 @@ export default function StrategyRoomForm() {
           className="flex items-center justify-center gap-6 pt-8 text-[9px] font-mono uppercase tracking-widest text-zinc-800"
         >
           <span className="flex items-center gap-2">
-            <Lock size={10} className="text-zinc-700" /> End-to-End Encrypted
+            <Lock size={10} className="text-zinc-700" /> Intake Secured
           </span>
-          <span className="w-px h-4 bg-zinc-800" />
+          <span className="h-4 w-px bg-zinc-800" />
           <span className="flex items-center gap-2">
-            <Eye size={10} className="text-zinc-700" /> Zero-Knowledge Proof
+            <Eye size={10} className="text-zinc-700" /> Directorate Reviewed
           </span>
         </motion.div>
       </form>

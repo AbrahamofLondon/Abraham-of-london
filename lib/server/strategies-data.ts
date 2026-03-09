@@ -1,5 +1,10 @@
 // lib/server/strategies-data.ts — SSOT ALIGNED (MDX: content/strategy/*)
-import "server-only";
+
+// ❌ DO NOT import "server-only" in pages-router.
+// ✅ Runtime guard instead (hard fail if a client bundle touches it)
+if (typeof window !== "undefined") {
+  throw new Error("lib/server/strategies-data.ts is server-only. Import it only inside getStaticProps/getServerSideProps/API routes.");
+}
 
 import {
   getMdxCollectionMeta,

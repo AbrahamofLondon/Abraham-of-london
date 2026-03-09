@@ -1,4 +1,4 @@
-// lib/utils/string.ts
+// lib/shared/strings.ts
 /**
  * Safe string utilities with no self-imports or infinite recursion.
  * ✅ Compliant with scripts/check-unsafe-strings.js (no .charAt(), no .slice()).
@@ -19,7 +19,7 @@ export function capitalize(v: unknown): string {
   if (!s) return "";
 
   // Use bracket indexing + substring (scanner allows substring)
-  const first = s.length > 0 ? s[0] : "";
+  const first = s.length > 0 ? s[0] ?? "" : "";
   const rest = s.substring(1);
   return first ? first.toUpperCase() + rest : s;
 }
@@ -34,7 +34,11 @@ export function safeCharAt(str: unknown, index: number): string {
 }
 
 // Safe slicing (for arrays) — no slice()
-export function safeArraySlice<T>(arr: T[] | null | undefined, start: number, end?: number): T[] {
+export function safeArraySlice<T>(
+  arr: T[] | null | undefined,
+  start: number,
+  end?: number
+): T[] {
   if (!Array.isArray(arr) || arr.length === 0) return [];
 
   const len = arr.length;
@@ -48,7 +52,14 @@ export function safeArraySlice<T>(arr: T[] | null | undefined, start: number, en
         : len;
 
   const out: T[] = [];
-  for (let i = s; i < e && i < len; i++) out.push(arr[i]);
+
+  for (let i = s; i < e && i < len; i++) {
+    if (i >= 0) {
+      const item = arr[i];
+      if (item !== undefined) out.push(item);
+    }
+  }
+
   return out;
 }
 
@@ -91,10 +102,12 @@ export function safeEquals(a: unknown, b: unknown, ignoreCase = false): boolean 
 // Format bytes to human readable size
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 Bytes";
+
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytes) / Math.log(k)));
   const val = bytes / Math.pow(k, i);
+
   return `${parseFloat(val.toFixed(2))} ${sizes[i]}`;
 }
 
@@ -116,7 +129,11 @@ export function safeJoin(array: unknown[], separator = ", "): string {
 }
 
 // Safe replace
-export function safeReplace(str: unknown, searchValue: string | RegExp, replaceValue: string): string {
+export function safeReplace(
+  str: unknown,
+  searchValue: string | RegExp,
+  replaceValue: string
+): string {
   const s = safeString(str);
   return s.replace(searchValue, replaceValue);
 }

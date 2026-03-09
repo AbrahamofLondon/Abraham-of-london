@@ -1,88 +1,119 @@
-/* app/books/[slug]/page.tsx — APP ROUTER: Book reader (SSOT safe) */
+// pages/api/books/[slug].ts — SSOT BOOK UNLOCK (Pages Router API, NO JSX)
+import type { NextApiRequest, NextApiResponse } from "next";
 
-import * as React from "react";
-import BookSlugPage from "@/pages/books/[slug]";
-import { getPublishedBooks, sanitizeData } from "@/lib/content/server";
-import { normalizeSlug } from "@/lib/content/shared";
-import { normalizeRequiredTier, requiredTierFromDoc } from "@/lib/access/tier-policy";
+import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
+import { getAccessCookie } from "@/lib/server/auth/cookies";
 
-function collapseSlashes(s: string): string {
-  return String(s || "").replace(/\\/g, "/").replace(/\/{2,}/g, "/");
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
+
+import { getPublishedBooks, getDocBySlug, normalizeSlug } from "@/lib/content/server";
+
+type ResponseData =
+  | { ok: true; tier: AccessTier; requiredTier: AccessTier; bodyCode: string; slugResolved: string }
+  | { ok: false; reason: string; tried?: string[] };
+
+function safeStr(v: unknown): string {
+  return typeof v === "string" ? v : v == null ? "" : String(v);
 }
 
-/** Books SSOT slug normalizer (exact same as pages/books/[slug].tsx) */
-function booksBareSlug(input: unknown): string {
-  let s = String(input ?? "")
+function cleanPathish(input: unknown): string {
+  return safeStr(input)
     .trim()
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
+}
 
+/** SSOT "books bare slug" normalizer (mirrors your reader logic) */
+function booksBareSlug(input: unknown): string {
+  let s = cleanPathish(input);
   if (!s || s.includes("..")) return "";
 
-  // Strip prefixes repeatedly
-  const stripOnce = (prefix: string) => {
-    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
-    if (s.toLowerCase().startsWith(p.toLowerCase())) {
-      s = s.slice(p.length);
-      s = s.replace(/^\/+/, "");
-      return true;
-    }
-    return false;
-  };
+  const lower = () => s.toLowerCase();
 
-  let changed = true;
-  while (changed) {
-    changed = false;
-    changed = stripOnce("content") || changed;
-    changed = stripOnce("vault") || changed;
-    changed = stripOnce("books") || changed;
-  }
+  // strip repeatedly
+  while (lower().startsWith("content/")) s = s.slice("content/".length);
+  while (lower().startsWith("vault/")) s = s.slice("vault/".length);
+  while (lower().startsWith("books/")) s = s.slice("books/".length);
 
-  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+  s = cleanPathish(s);
   if (!s || s.includes("..")) return "";
   return s;
 }
 
 function extractBodyCode(doc: any): string {
-  return String(doc?.body?.code || doc?.bodyCode || "");
+  return safeStr(doc?.body?.code || doc?.bodyCode || "");
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const param = String(params?.slug || "");
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
+  if (req.method !== "GET") return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+
+  const raw = req.query.slug;
+  const param = Array.isArray(raw) ? raw.join("/") : safeStr(raw);
   const bare = booksBareSlug(param);
-  if (!bare) {
-    // @ts-ignore - Return 404 page
-    return <BookSlugPage doc={{ title: "Not Found", draft: true }} code="" requiredTier="public" bareSlug="" />;
-  }
+  if (!bare) return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
 
-  const books = getPublishedBooks() || [];
-  
-  // ✅ SSOT: Find by matching bare slug (same as pages/books/[slug].tsx)
-  const doc = books.find((d: any) => {
-    if (d?.draft) return false;
-    const fp = String(d?._raw?.flattenedPath || d?.slug || "");
-    const derived = booksBareSlug(fp);
-    return derived === bare;
-  }) || null;
+  // Canonical tries (ordered)
+  const tries = [
+    `books/${bare}`,
+    `content/books/${bare}`,
+    bare,
+    normalizeSlug(bare),
+  ].map(cleanPathish);
 
+  // 1) Prefer registry-based lookup
+  let doc: any =
+    getDocBySlug(tries[0]) ||
+    getDocBySlug(tries[1]) ||
+    getDocBySlug(tries[2]) ||
+    getDocBySlug(tries[3]) ||
+    null;
+
+  // 2) Fallback: scan published books by matching bare slug
   if (!doc) {
-    // @ts-ignore - Return 404 page
-    return <BookSlugPage doc={{ title: "Not Found", draft: true }} code="" requiredTier="public" bareSlug="" />;
+    const books = getPublishedBooks() || [];
+    doc =
+      books.find((d: any) => {
+        if (!d || d.draft) return false;
+        const fp = safeStr(d?._raw?.flattenedPath || d?.slug || "");
+        return booksBareSlug(fp) === bare;
+      }) || null;
   }
 
-  const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
-  const code = requiredTier === "public" ? extractBodyCode(doc) : "";
+  if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried: tries });
 
-  const props = sanitizeData({ 
-    doc, 
-    code, 
-    requiredTier, 
-    bareSlug: bare 
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+
+  // ✅ Public bypass
+  if (requiredTier === "public") {
+    return res.status(200).json({
+      ok: true,
+      tier: "public",
+      requiredTier: "public",
+      bodyCode: extractBodyCode(doc),
+      slugResolved: booksBareSlug(doc?.slug || doc?._raw?.flattenedPath || bare),
+    });
+  }
+
+  // ✅ Session gate
+  const sessionId = getAccessCookie(req);
+  if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
+
+  const session = await verifySession(sessionId);
+  if (!session || !session.valid) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+
+  const userTier = tiers.normalizeUser(session.tier);
+  if (!tiers.hasAccess(userTier, requiredTier)) {
+    return res.status(403).json({ ok: false, reason: "INSUFFICIENT_CLEARANCE" });
+  }
+
+  return res.status(200).json({
+    ok: true,
+    tier: userTier,
+    requiredTier,
+    bodyCode: extractBodyCode(doc),
+    slugResolved: booksBareSlug(doc?.slug || doc?._raw?.flattenedPath || bare),
   });
-
-  // Reuse your premium reader (zero design drift)
-  // @ts-ignore
-  return <BookSlugPage {...props} />;
 }

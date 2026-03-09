@@ -1,9 +1,9 @@
-/* lib/redis-safe.ts — NODE ONLY (Upstash + memory fallback), build-safe */
+/* lib/redis-safe.ts — runtime-safe memory Redis shim */
 import "server-only";
 
 export type RedisStats = {
   available: boolean;
-  type: "upstash" | "memory";
+  type: "memory";
   runtime: "node";
   connectionStatus: "connected" | "disconnected" | "unknown";
   error?: string;
@@ -11,9 +11,9 @@ export type RedisStats = {
 
 export type SafeRedisClient = {
   get: (key: string) => Promise<string | null>;
-  set: (key: string, value: string, ...args: any[]) => Promise<any>;
+  set: (key: string, value: string, ...args: unknown[]) => Promise<"OK">;
   del: (...keys: string[]) => Promise<number>;
-  ping: () => Promise<any>;
+  ping: () => Promise<"PONG">;
   keys: (pattern: string) => Promise<string[]>;
   exists: (...keys: string[]) => Promise<number>;
   expire: (key: string, seconds: number) => Promise<number>;
@@ -28,10 +28,10 @@ export type SafeRedisClient = {
   lrange: (key: string, start: number, stop: number) => Promise<string[]>;
 };
 
-// -----------------------------------------------------------------------------
-// In-memory fallback
-// -----------------------------------------------------------------------------
-type MemRec = { v: string; exp?: number };
+type MemRec = {
+  v: string;
+  exp?: number;
+};
 
 const memory = new Map<string, MemRec>();
 const memoryHashes = new Map<string, Map<string, string>>();
@@ -41,47 +41,86 @@ function now(): number {
   return Date.now();
 }
 
-function memGet(key: string): string | null {
-  const rec = memory.get(key);
-  if (!rec) return null;
+function normalizeExpiry(rec: MemRec | undefined): MemRec | undefined {
+  if (!rec) return undefined;
+  if (typeof rec.exp === "number" && now() > rec.exp) return undefined;
+  return rec;
+}
 
-  if (typeof rec.exp === "number" && now() > rec.exp) {
+function memGet(key: string): string | null {
+  const rec = normalizeExpiry(memory.get(key));
+  if (!rec) {
     memory.delete(key);
     return null;
   }
-
   return rec.v;
 }
 
 function memSet(key: string, value: string, exSeconds?: number): void {
   if (typeof exSeconds === "number" && exSeconds > 0) {
-    memory.set(key, { v: value, exp: now() + exSeconds * 1000 });
+    memory.set(key, {
+      v: value,
+      exp: now() + exSeconds * 1000,
+    });
     return;
   }
+
   memory.set(key, { v: value });
 }
 
-const memoryClient: SafeRedisClient = {
-  get: async (k) => memGet(k),
+function matchPattern(key: string, pattern: string): boolean {
+  if (!pattern || pattern === "*") return true;
 
-  set: async (k, v, ...args) => {
-    if (args[0] === "EX") {
-      const seconds = Number(args[1] ?? 0);
-      memSet(k, String(v), seconds);
+  // very small glob support: prefix*, *suffix, exact
+  if (pattern.startsWith("*") && pattern.endsWith("*")) {
+    const part = pattern.slice(1, -1);
+    return key.includes(part);
+  }
+
+  if (pattern.startsWith("*")) {
+    const suffix = pattern.slice(1);
+    return key.endsWith(suffix);
+  }
+
+  if (pattern.endsWith("*")) {
+    const prefix = pattern.slice(0, -1);
+    return key.startsWith(prefix);
+  }
+
+  return key === pattern;
+}
+
+const memoryClient: SafeRedisClient = {
+  get: async (key) => memGet(key),
+
+  set: async (key, value, ...args) => {
+    const mode = args[0];
+    const ttl = args[1];
+
+    if (mode === "EX" && typeof ttl === "number") {
+      memSet(key, String(value), ttl);
       return "OK";
     }
 
-    memSet(k, String(v));
+    if (mode === "EX" && typeof ttl === "string") {
+      const parsed = Number(ttl);
+      memSet(key, String(value), Number.isFinite(parsed) ? parsed : undefined);
+      return "OK";
+    }
+
+    memSet(key, String(value));
     return "OK";
   },
 
   del: async (...keys) => {
     let count = 0;
 
-    for (const k of keys) {
-      if (memory.delete(k)) count += 1;
-      memoryHashes.delete(k);
-      memoryLists.delete(k);
+    for (const key of keys) {
+      const hadString = memory.delete(key);
+      const hadHash = memoryHashes.delete(key);
+      const hadList = memoryLists.delete(key);
+
+      if (hadString || hadHash || hadList) count += 1;
     }
 
     return count;
@@ -90,302 +129,181 @@ const memoryClient: SafeRedisClient = {
   ping: async () => "PONG",
 
   keys: async (pattern) => {
-    const all = new Set<string>([
+    const allKeys = new Set<string>([
       ...memory.keys(),
       ...memoryHashes.keys(),
       ...memoryLists.keys(),
     ]);
 
-    if (!pattern || pattern === "*") {
-      return Array.from(all);
+    const out: string[] = [];
+    for (const key of allKeys) {
+      // prune expired simple values
+      if (memory.has(key) && memGet(key) === null) continue;
+      if (matchPattern(key, pattern)) out.push(key);
     }
 
-    if (pattern.endsWith("*")) {
-      const prefix = pattern.slice(0, -1);
-      return Array.from(all).filter((k) => k.startsWith(prefix));
-    }
-
-    return all.has(pattern) ? [pattern] : [];
+    return out;
   },
 
   exists: async (...keys) => {
     let count = 0;
-    for (const k of keys) {
-      if (memGet(k) !== null) count += 1;
+
+    for (const key of keys) {
+      const stringExists = memGet(key) !== null;
+      const hashExists = memoryHashes.has(key);
+      const listExists = memoryLists.has(key);
+
+      if (stringExists || hashExists || listExists) count += 1;
     }
+
     return count;
   },
 
-  expire: async (k, seconds) => {
-    const value = memGet(k);
+  expire: async (key, seconds) => {
+    const value = memGet(key);
     if (value === null) return 0;
-    memSet(k, value, Number(seconds));
+
+    memSet(key, value, seconds);
     return 1;
   },
 
-  ttl: async (k) => {
-    const rec = memory.get(k);
+  ttl: async (key) => {
+    const rec = memory.get(key);
     if (!rec) return -2;
-    if (!rec.exp) return -1;
+    if (typeof rec.exp !== "number") return -1;
 
-    const ms = rec.exp - now();
-    return ms <= 0 ? -2 : Math.ceil(ms / 1000);
-  },
-
-  incr: async (k) => {
-    const current = parseInt(memGet(k) ?? "0", 10);
-    const next = current + 1;
-    memSet(k, String(next));
-    return next;
-  },
-
-  decr: async (k) => {
-    const current = parseInt(memGet(k) ?? "0", 10);
-    const next = current - 1;
-    memSet(k, String(next));
-    return next;
-  },
-
-  hget: async (k, f) => {
-    const h = memoryHashes.get(k);
-    if (!h) return null;
-    return h.get(f) ?? null;
-  },
-
-  hset: async (k, f, v) => {
-    let h = memoryHashes.get(k);
-    if (!h) {
-      h = new Map<string, string>();
-      memoryHashes.set(k, h);
+    const remaining = rec.exp - now();
+    if (remaining <= 0) {
+      memory.delete(key);
+      return -2;
     }
 
-    const existed = h.has(f);
-    h.set(f, String(v));
+    return Math.ceil(remaining / 1000);
+  },
+
+  incr: async (key) => {
+    const current = Number.parseInt(memGet(key) ?? "0", 10);
+    const next = Number.isFinite(current) ? current + 1 : 1;
+    memSet(key, String(next));
+    return next;
+  },
+
+  decr: async (key) => {
+    const current = Number.parseInt(memGet(key) ?? "0", 10);
+    const next = Number.isFinite(current) ? current - 1 : -1;
+    memSet(key, String(next));
+    return next;
+  },
+
+  hget: async (key, field) => {
+    const hash = memoryHashes.get(key);
+    if (!hash) return null;
+    return hash.get(field) ?? null;
+  },
+
+  hset: async (key, field, value) => {
+    let hash = memoryHashes.get(key);
+    if (!hash) {
+      hash = new Map<string, string>();
+      memoryHashes.set(key, hash);
+    }
+
+    const existed = hash.has(field);
+    hash.set(field, String(value));
     return existed ? 0 : 1;
   },
 
-  hgetall: async (k) => {
-    const h = memoryHashes.get(k);
-    if (!h) return {};
+  hgetall: async (key) => {
+    const hash = memoryHashes.get(key);
+    if (!hash) return {};
 
     const out: Record<string, string> = {};
-    for (const [kk, vv] of h.entries()) {
-      out[kk] = vv;
-    }
+    for (const [k, v] of hash.entries()) out[k] = v;
     return out;
   },
 
-  lpush: async (k, ...values) => {
-    const list = memoryLists.get(k) ?? [];
-    for (const v of values) {
-      list.unshift(String(v));
-    }
-    memoryLists.set(k, list);
+  lpush: async (key, ...values) => {
+    const list = memoryLists.get(key) ?? [];
+    for (const value of values) list.unshift(String(value));
+    memoryLists.set(key, list);
     return list.length;
   },
 
-  rpush: async (k, ...values) => {
-    const list = memoryLists.get(k) ?? [];
-    for (const v of values) {
-      list.push(String(v));
-    }
-    memoryLists.set(k, list);
+  rpush: async (key, ...values) => {
+    const list = memoryLists.get(key) ?? [];
+    for (const value of values) list.push(String(value));
+    memoryLists.set(key, list);
     return list.length;
   },
 
-  lrange: async (k, start, stop) => {
-    const list = memoryLists.get(k) ?? [];
-    if (!list.length) return [];
+  lrange: async (key, start, stop) => {
+    const list = memoryLists.get(key) ?? [];
+    if (list.length === 0) return [];
 
-    const s = Math.max(0, start);
-    const e = stop < 0 ? list.length - 1 : Math.min(list.length - 1, stop);
+    const normalizedStart = Math.max(0, start);
+    const normalizedStop =
+      stop < 0 ? list.length - 1 : Math.min(list.length - 1, stop);
 
-    if (s > e) return [];
-    return list.slice(s, e + 1);
+    if (normalizedStart > normalizedStop) return [];
+    return list.slice(normalizedStart, normalizedStop + 1);
   },
 };
 
-// -----------------------------------------------------------------------------
-// Upstash Node client
-// IMPORTANT:
-// - Use plain "@upstash/redis" in Node.
-// - DO NOT import this file from Edge runtime code.
-// -----------------------------------------------------------------------------
-let cached: { client: SafeRedisClient; type: RedisStats["type"] } | null = null;
+const cached = {
+  client: memoryClient as SafeRedisClient,
+  type: "memory" as const,
+};
 
-async function resolveClient(): Promise<{ client: SafeRedisClient; type: RedisStats["type"] }> {
-  if (cached) return cached;
-
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) {
-    cached = { client: memoryClient, type: "memory" };
-    return cached;
-  }
-
-  try {
-    const mod = await import("@upstash/redis");
-    const Redis = (mod as any).Redis;
-
-    if (!Redis) {
-      cached = { client: memoryClient, type: "memory" };
-      return cached;
-    }
-
-    const r = new Redis({ url, token });
-
-    const client: SafeRedisClient = {
-      get: async (k) => {
-        const v = await r.get(k);
-        return v === null ? null : String(v);
-      },
-
-      set: async (k, v, ...args) => {
-        if (args[0] === "EX") {
-          return r.set(k, v, { ex: Number(args[1]) });
-        }
-        return r.set(k, v);
-      },
-
-      del: async (...keys) => {
-        const results = await Promise.all(keys.map((k) => r.del(k)));
-        return results.reduce((acc: number, item: unknown) => acc + Number(item), 0);
-      },
-
-      ping: async () => r.ping(),
-
-      keys: async (pattern) => {
-        const result = await r.keys(pattern);
-        return Array.isArray(result) ? result.map(String) : [];
-      },
-
-      exists: async (...keys) => {
-        const result = await r.exists(...keys);
-        return Number(result);
-      },
-
-      expire: async (key, seconds) => {
-        const result = await r.expire(key, seconds);
-        return Number(result);
-      },
-
-      ttl: async (key) => {
-        const result = await r.ttl(key);
-        return Number(result);
-      },
-
-      incr: async (key) => {
-        const result = await r.incr(key);
-        return Number(result);
-      },
-
-      decr: async (key) => {
-        const result = await r.decr(key);
-        return Number(result);
-      },
-
-      hget: async (key, field) => {
-        const v = await r.hget(key, field);
-        return v === null ? null : String(v);
-      },
-
-      hset: async (key, field, value) => {
-        const result = await r.hset(key, field, value);
-        return Number(result);
-      },
-
-      hgetall: async (key) => {
-        const obj = await r.hgetall(key);
-        const out: Record<string, string> = {};
-
-        for (const [kk, vv] of Object.entries(obj ?? {})) {
-          out[String(kk)] = String(vv);
-        }
-
-        return out;
-      },
-
-      lpush: async (key, ...values) => {
-        const result = await r.lpush(key, ...values);
-        return Number(result);
-      },
-
-      rpush: async (key, ...values) => {
-        const result = await r.rpush(key, ...values);
-        return Number(result);
-      },
-
-      lrange: async (key, start, stop) => {
-        const result = await r.lrange(key, start, stop);
-        return Array.isArray(result) ? result.map(String) : [];
-      },
-    };
-
-    cached = { client, type: "upstash" };
-    return cached;
-  } catch {
-    cached = { client: memoryClient, type: "memory" };
-    return cached;
-  }
-}
-
-// -----------------------------------------------------------------------------
-// Public API
-// -----------------------------------------------------------------------------
 export async function getRedis(): Promise<SafeRedisClient> {
-  const resolved = await resolveClient();
-  return resolved.client;
+  return cached.client;
 }
 
 export async function safePing(): Promise<boolean> {
   try {
-    const r = await getRedis();
-    const res = await r.ping();
-    return res === "PONG" || res === "OK" || res === true;
+    const redis = await getRedis();
+    const result = await redis.ping();
+    return result === "PONG";
   } catch {
     return false;
   }
 }
 
 export async function getRedisStats(): Promise<RedisStats> {
-  const resolved = await resolveClient();
-  let connectionStatus: RedisStats["connectionStatus"] = "unknown";
-
   try {
-    const pong = await resolved.client.ping();
-    connectionStatus = pong ? "connected" : "disconnected";
-  } catch (e: any) {
-    connectionStatus = "disconnected";
+    const redis = await getRedis();
+    const pong = await redis.ping();
+
+    return {
+      available: pong === "PONG",
+      type: "memory",
+      runtime: "node",
+      connectionStatus: pong === "PONG" ? "connected" : "unknown",
+    };
+  } catch (error) {
     return {
       available: false,
-      type: resolved.type,
+      type: "memory",
       runtime: "node",
-      connectionStatus,
-      error: e?.message ? String(e.message) : "Redis ping failed",
+      connectionStatus: "disconnected",
+      error: error instanceof Error ? error.message : "Redis shim failed",
     };
   }
-
-  return {
-    available: connectionStatus === "connected" && resolved.type === "upstash",
-    type: resolved.type,
-    runtime: "node",
-    connectionStatus,
-  };
 }
 
 export async function safeGet(key: string): Promise<string | null> {
-  const r = await getRedis();
-  return r.get(key);
+  const redis = await getRedis();
+  return redis.get(key);
 }
 
 export async function safeSet(
   key: string,
   value: string,
   options?: { ex: number }
-): Promise<any> {
-  const r = await getRedis();
-  return options?.ex ? r.set(key, value, "EX", options.ex) : r.set(key, value);
+): Promise<"OK"> {
+  const redis = await getRedis();
+  return options?.ex
+    ? redis.set(key, value, "EX", options.ex)
+    : redis.set(key, value);
 }
 
 export default {

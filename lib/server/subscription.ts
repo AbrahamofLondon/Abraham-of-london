@@ -304,16 +304,21 @@ export async function bulkSubscribe(
     );
 
     results.forEach((result, index) => {
-      const originalEmail = batch[index];
-      if (result.ok) {
-        successful.push(originalEmail);
-      } else {
-        failed.push({
-          email: originalEmail,
-          error: result.error || result.message,
-        });
-      }
+  const originalEmail = batch[index];
+
+  if (typeof originalEmail !== "string") {
+    return;
+  }
+
+  if (result.ok) {
+    successful.push(originalEmail);
+  } else {
+    failed.push({
+      email: originalEmail,
+      error: result.error || result.message,
     });
+  }
+});
 
     // Small delay between batches to avoid any ESP-side throttling
     if (i + batchSize < emails.length) {

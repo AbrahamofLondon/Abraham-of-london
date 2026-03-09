@@ -1,176 +1,278 @@
 /* eslint-disable no-console */
 /**
  * lib/recaptchaServer.ts
- * Hardened server-side reCAPTCHA v3 verification.
- * Optimized for Abraham of London Strategic Infrastructure.
+ * PAGES/API SAFE SERVER-SIDE reCAPTCHA v3 VERIFICATION
  */
 
 export type RecaptchaVerificationResult = {
   success: boolean;
   score: number;
   action?: string;
-  timestamp?: string; // ISO timestamp of verification
-  errorCodes?: string[];
+  timestamp: string;
+  errorCodes: string[];
   raw?: unknown;
-  warning?: string; // Non-critical warnings
+  warning?: string;
 };
 
-// Environment variable validation
-const ENV_VARS = {
-  RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
-  RECAPTCHA_SECRET: process.env.RECAPTCHA_SECRET,
-  RECAPTCHA_MIN_SCORE: process.env.RECAPTCHA_MIN_SCORE,
-  ALLOW_RECAPTCHA_BYPASS: process.env.ALLOW_RECAPTCHA_BYPASS,
-  NODE_ENV: process.env.NODE_ENV,
-} as const;
-
-// Configuration constants
-const DEFAULT_MIN_SCORE = 0.5;
 const VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+const DEFAULT_MIN_SCORE = 0.5;
 const DEFAULT_TIMEOUT_MS = 3000;
 const MAX_TIMEOUT_MS = 10000;
 const RETRY_ATTEMPTS = 2;
-const RETRY_DELAY_MS = 100;
-const CACHE_TTL_MS = 60000;
-const MAX_CACHE_SIZE = 1000;
+const RETRY_DELAY_MS = 150;
 
-// Simple in-memory cache for development/staging
-const verificationCache = new Map<string, {
-  result: RecaptchaVerificationResult;
-  timestamp: number;
-}>();
-
-/**
- * 1. INTERNAL UTILITIES
- */
+function env(name: string): string | undefined {
+  const value = process.env[name];
+  return typeof value === "string" ? value.trim() : undefined;
+}
 
 function getSecret(): string | null {
-  const candidates = [ENV_VARS.RECAPTCHA_SECRET_KEY, ENV_VARS.RECAPTCHA_SECRET];
+  const candidates = [env("RECAPTCHA_SECRET_KEY"), env("RECAPTCHA_SECRET")];
+
   for (const candidate of candidates) {
-    if (typeof candidate === "string") {
-      const trimmed = candidate.trim();
-      if (trimmed.length >= 10 && trimmed.length <= 100) return trimmed;
+    if (candidate && candidate.length >= 10 && candidate.length <= 200) {
+      return candidate;
     }
   }
+
   return null;
 }
 
 function getMinScore(): number {
-  const raw = ENV_VARS.RECAPTCHA_MIN_SCORE;
+  const raw = env("RECAPTCHA_MIN_SCORE");
   if (!raw) return DEFAULT_MIN_SCORE;
+
   const n = Number(raw);
-  if (Number.isFinite(n) && n >= 0 && n <= 1) {
-    if (ENV_VARS.NODE_ENV === 'production' && n < 0.3) return 0.3;
-    return n;
-  }
-  return DEFAULT_MIN_SCORE;
+  if (!Number.isFinite(n) || n < 0 || n > 1) return DEFAULT_MIN_SCORE;
+
+  if (process.env.NODE_ENV === "production" && n < 0.3) return 0.3;
+  return n;
+}
+
+function isBypassAllowed(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    env("ALLOW_RECAPTCHA_BYPASS") === "true"
+  );
+}
+
+function isDevelopmentBypassToken(token: string): boolean {
+  return token === "development-bypass-token";
+}
+
+function clampTimeout(timeoutMs?: number): number {
+  const n = Number(timeoutMs);
+  if (!Number.isFinite(n) || n <= 0) return DEFAULT_TIMEOUT_MS;
+  return Math.min(Math.max(n, 500), MAX_TIMEOUT_MS);
 }
 
 function normalizeErrorCodes(value: unknown): string[] {
   if (!value) return [];
+
   if (Array.isArray(value)) {
-    return value.filter((x): x is string => typeof x === "string").map(c => c.toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+    return value
+      .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+      .map((x) => x.toLowerCase().replace(/[^a-z0-9_]/g, "_"));
   }
-  return typeof value === 'string' ? [value.toLowerCase()] : [];
+
+  if (typeof value === "string" && value.trim()) {
+    return [value.toLowerCase().replace(/[^a-z0-9_]/g, "_")];
+  }
+
+  return [];
 }
 
-async function makeVerificationRequest(secret: string, token: string, remoteIp?: string, timeoutMs: number = DEFAULT_TIMEOUT_MS) {
-  const params = new URLSearchParams({ secret, response: token.trim() });
-  if (remoteIp) params.set("remoteip", remoteIp);
+async function makeVerificationRequest(
+  secret: string,
+  token: string,
+  remoteIp?: string,
+  timeoutMs?: number
+): Promise<any> {
+  const params = new URLSearchParams({
+    secret,
+    response: token.trim(),
+  });
 
-  for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt++) {
+  if (remoteIp && remoteIp.trim()) {
+    params.set("remoteip", remoteIp.trim());
+  }
+
+  const effectiveTimeout = clampTimeout(timeoutMs);
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt += 1) {
     try {
-      if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS * attempt));
+      if (attempt > 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, RETRY_DELAY_MS * attempt)
+        );
+      }
+
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeoutMs);
+      const timer = setTimeout(() => controller.abort(), effectiveTimeout);
 
-      const response = await fetch(VERIFY_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Abraham-of-London/1.0" },
-        body: params.toString(),
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(VERIFY_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "Abraham-of-London/1.0",
+          },
+          body: params.toString(),
+          signal: controller.signal,
+        });
 
-      clearTimeout(id);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
-    } catch (e) {
-      if (attempt === RETRY_ATTEMPTS) throw e;
+        if (!response.ok) {
+          throw new Error(`HTTP_${response.status}`);
+        }
+
+        return await response.json();
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch (error) {
+      lastError = error;
     }
   }
+
+  throw lastError instanceof Error ? lastError : new Error("verification_failed");
 }
 
-/**
- * 2. CORE EXPORTS
- */
-
-/**
- * DETAILED VERIFIER: Returns full object with scores and logs.
- */
 export async function verifyRecaptchaDetailed(
   token: string,
   expectedAction?: string,
   remoteIp?: string,
-  timeoutMs: number = DEFAULT_TIMEOUT_MS,
-  bypassAllowed: boolean = ENV_VARS.NODE_ENV !== 'production' && ENV_VARS.ALLOW_RECAPTCHA_BYPASS === "true"
+  timeoutMs?: number
 ): Promise<RecaptchaVerificationResult> {
   const timestamp = new Date().toISOString();
-  
-  if (!token || token.length < 20) {
-    return { success: false, score: 0, action: expectedAction, timestamp, errorCodes: ["invalid_token"] };
+  const trimmedToken = String(token || "").trim();
+
+  if (isDevelopmentBypassToken(trimmedToken) && isBypassAllowed()) {
+    return {
+      success: true,
+      score: 1,
+      action: expectedAction,
+      timestamp,
+      errorCodes: [],
+      warning: "bypass_active_client_token",
+    };
+  }
+
+  if (!trimmedToken || trimmedToken.length < 20) {
+    return {
+      success: false,
+      score: 0,
+      action: expectedAction,
+      timestamp,
+      errorCodes: ["invalid_token"],
+    };
   }
 
   const secret = getSecret();
+
   if (!secret) {
-    if (bypassAllowed) return { success: true, score: 1, action: expectedAction, timestamp, warning: "bypass_active" };
-    return { success: false, score: 0, action: expectedAction, timestamp, errorCodes: ["missing_secret"] };
+    if (isBypassAllowed()) {
+      return {
+        success: true,
+        score: 1,
+        action: expectedAction,
+        timestamp,
+        errorCodes: [],
+        warning: "bypass_active_missing_secret",
+      };
+    }
+
+    return {
+      success: false,
+      score: 0,
+      action: expectedAction,
+      timestamp,
+      errorCodes: ["missing_secret"],
+    };
   }
 
   try {
-    const data = await makeVerificationRequest(secret, token, remoteIp, timeoutMs);
-    const result: RecaptchaVerificationResult = {
-      success: data.success && data.score >= getMinScore(),
-      score: data.score || 0,
-      action: data.action,
-      timestamp,
-      errorCodes: normalizeErrorCodes(data["error-codes"]),
-      raw: data
-    };
+    const data = await makeVerificationRequest(
+      secret,
+      trimmedToken,
+      remoteIp,
+      timeoutMs
+    );
+    const score = typeof data?.score === "number" ? data.score : 0;
+    const action = typeof data?.action === "string" ? data.action : undefined;
+    const errorCodes = normalizeErrorCodes(data?.["error-codes"]);
+    const minScore = getMinScore();
 
-    if (expectedAction && data.action && expectedAction !== data.action) {
-      result.success = false;
-      result.errorCodes?.push("action_mismatch");
+    let success = Boolean(data?.success) && score >= minScore;
+
+    if (expectedAction && action && expectedAction !== action) {
+      success = false;
+      errorCodes.push("action_mismatch");
     }
 
-    return result;
+    return {
+      success,
+      score,
+      action,
+      timestamp,
+      errorCodes,
+      raw: data,
+    };
   } catch (error) {
-    console.error("[reCAPTCHA] Critical failure:", error);
-    return { success: false, score: 0, timestamp, errorCodes: ["verification_exception"] };
+    console.error("[reCAPTCHA] Verification failure:", error);
+
+    if (isBypassAllowed()) {
+      return {
+        success: true,
+        score: 1,
+        action: expectedAction,
+        timestamp,
+        errorCodes: [],
+        warning: "bypass_active_verification_exception",
+      };
+    }
+
+    return {
+      success: false,
+      score: 0,
+      action: expectedAction,
+      timestamp,
+      errorCodes: ["verification_exception"],
+    };
   }
 }
 
-/**
- * SIMPLIFIED VERIFIER: Returns boolean for quick middleware checks.
- */
-export async function verifyRecaptcha(token: string, action?: string, ip?: string): Promise<boolean> {
-  const res = await verifyRecaptchaDetailed(token, action, ip);
-  return res.success;
+export async function verifyRecaptcha(
+  token: string,
+  action?: string,
+  ip?: string
+): Promise<boolean> {
+  const result = await verifyRecaptchaDetailed(token, action, ip);
+  return result.success;
 }
 
-/**
- * LEGACY WRAPPER: Matches the specific import expected by your strategy-room routes.
- */
-export async function verifyRecaptchaToken(token: string) {
-  return verifyRecaptcha(token);
+export async function verifyRecaptchaToken(
+  token: string,
+  action?: string,
+  ip?: string
+): Promise<boolean> {
+  return verifyRecaptcha(token, action, ip);
 }
 
-// 3. EXPORT API OBJECT
+export function validateRecaptchaConfig() {
+  return {
+    hasSecret: Boolean(getSecret()),
+    minScore: getMinScore(),
+    bypassAllowed: isBypassAllowed(),
+    environment: process.env.NODE_ENV || "development",
+  };
+}
+
 const recaptchaServerApi = {
   verifyRecaptchaDetailed,
   verifyRecaptcha,
   verifyRecaptchaToken,
-  validateRecaptchaConfig: () => ({ hasSecret: !!getSecret(), minScore: getMinScore() }),
-  clearCache: () => verificationCache.clear()
+  validateRecaptchaConfig,
 };
 
 export default recaptchaServerApi;

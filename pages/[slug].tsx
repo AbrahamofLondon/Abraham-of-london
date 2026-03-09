@@ -1,46 +1,72 @@
 /* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react"; // ✅ Add useSession
+import { useSession } from "next-auth/react";
 
-// ✅ REMOVED: next-mdx-remote imports (the source of your bundle bloat/errors)
-// ✅ ADDED: Your resilient Contentlayer2 renderer
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import Layout from "@/components/Layout";
-import AccessGate from "@/components/AccessGate"; // ✅ Add AccessGate
+import AccessGate from "@/components/AccessGate";
 
-import {
-  getAllCombinedDocs,
-  getDocBySlug,
-  normalizeSlug,
-  isDraftContent,
-  isPublished,
-} from "@/lib/content/server";
 import { getDocKind, sanitizeData } from "@/lib/content/shared";
-import tiers, { requiredTierFromDoc } from "@/lib/access/tiers"; // ✅ Add SSOT imports
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
-// -----------------------------
-// Routing Guardrails (Institutional Standard)
-// -----------------------------
+/* -----------------------------------------------------------------------------
+   Routing guardrails
+----------------------------------------------------------------------------- */
 function norm(input: string): string {
   return String(input || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
 }
 
 const RESERVED_ROOT = new Set<string>([
-  "admin", "api", "auth", "blog", "board", "books", "brands", "canon",
-  "canon-campaign", "chatham-rooms", "consulting", "content", "debug",
-  "downloads", "events", "fatherhood", "founders", "inner-circle",
-  "leadership", "prints", "private", "resources", "shorts", "speaking",
-  "strategy", "vault", "ventures", "about", "contact", "privacy",
-  "security", "terms", "subscribe", "newsletter", "cookies", "diagnostic",
-  "accessibility", "accessibility-statement", "works-in-progress", "404",
+  "admin",
+  "api",
+  "auth",
+  "blog",
+  "board",
+  "books",
+  "brands",
+  "canon",
+  "canon-campaign",
+  "chatham-rooms",
+  "consulting",
+  "content",
+  "debug",
+  "downloads",
+  "events",
+  "fatherhood",
+  "founders",
+  "inner-circle",
+  "leadership",
+  "prints",
+  "private",
+  "resources",
+  "shorts",
+  "speaking",
+  "strategy",
+  "vault",
+  "ventures",
+  "about",
+  "contact",
+  "privacy",
+  "security",
+  "terms",
+  "subscribe",
+  "newsletter",
+  "cookies",
+  "diagnostic",
+  "accessibility",
+  "accessibility-statement",
+  "works-in-progress",
+  "404",
 ]);
 
 function allowRootSlug(slug: string): boolean {
   const s = norm(slug).toLowerCase();
-  return !(!s || s.includes("/") || RESERVED_ROOT.has(s));
+  return !!s && !s.includes("/") && !RESERVED_ROOT.has(s);
 }
 
 interface Props {
@@ -50,18 +76,17 @@ interface Props {
     date: string | null;
     excerpt: string;
     readTime: string | null;
-    bodyCode: string; // ✅ The pre-compiled code from Contentlayer
+    bodyCode: string;
   } | null;
   canonicalUrl: string;
-  requiredTier: AccessTier; // ✅ Add required tier to props
+  requiredTier: AccessTier;
 }
 
 const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }) => {
-  const { data: session, status } = useSession(); // ✅ Add useSession
+  const { data: session, status } = useSession();
 
-  // ✅ Normalize at render boundary
   const required = tiers.normalize(requiredTier);
-  const user = tiers.normalize(session?.user?.tier ?? "public");
+  const user = tiers.normalize((session?.user as any)?.tier ?? "public");
 
   const needsAuth = required !== "public";
   const canAccess = tiers.hasAccess(user, required);
@@ -69,10 +94,10 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
   if (!doc) {
     return (
       <Layout title="404 | Abraham of London" description="Content not found" canonicalUrl={canonicalUrl}>
-        <div className="min-h-screen flex items-center justify-center bg-black">
-          <div className="text-center animate-aolFadeUp">
-            <h1 className="aol-editorial text-4xl mb-4">404</h1>
-            <p className="aol-micro text-white/30 uppercase tracking-widest">Asset Not Found</p>
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <div className="animate-aolFadeUp text-center">
+            <h1 className="aol-editorial mb-4 text-4xl">404</h1>
+            <p className="aol-micro uppercase tracking-widest text-white/30">Asset Not Found</p>
           </div>
         </div>
       </Layout>
@@ -82,8 +107,10 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
   if (status === "loading") {
     return (
       <Layout title={doc.title} description={doc.excerpt} canonicalUrl={canonicalUrl}>
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <div className="animate-pulse font-mono text-xs text-amber-500">
+            Verifying clearance...
+          </div>
         </div>
       </Layout>
     );
@@ -92,12 +119,14 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
   if (needsAuth && (!session?.user || !canAccess)) {
     return (
       <Layout title={doc.title} description={doc.excerpt} canonicalUrl={canonicalUrl}>
-        <div className="min-h-screen bg-black flex items-center justify-center px-6">
+        <div className="flex min-h-screen items-center justify-center bg-black px-6">
           <AccessGate
             title={doc.title}
             requiredTier={required}
             message="This content requires appropriate clearance."
-            onGoToJoin={() => window.location.href = "/inner-circle"}
+            onGoToJoin={() => {
+              window.location.href = "/inner-circle";
+            }}
           />
         </div>
       </Layout>
@@ -110,32 +139,40 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
       description={doc.excerpt}
       canonicalUrl={canonicalUrl}
     >
-      <article className="relative min-h-screen bg-black pt-24 pb-32">
-        <header className="mx-auto max-w-3xl px-6 text-center mb-16 animate-aolFadeUp">
-          <div className="mb-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60 border border-amber-500/20 px-4 py-1.5 rounded-full">
+      <Head>
+        <title>{doc.title} | Abraham of London</title>
+        {doc.excerpt ? <meta name="description" content={doc.excerpt} /> : null}
+        <meta
+          name="robots"
+          content={required === "public" ? "index, follow" : "noindex, nofollow"}
+        />
+      </Head>
+
+      <article className="relative min-h-screen bg-black pb-32 pt-24">
+        <header className="mx-auto mb-16 max-w-3xl animate-aolFadeUp px-6 text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60">
             {doc.kind} // {required === "public" ? "Public" : required}
           </div>
 
-          <h1 className="aol-editorial text-5xl md:text-7xl text-white tracking-tight mb-8">
+          <h1 className="aol-editorial mb-8 text-5xl tracking-tight text-white md:text-7xl">
             {doc.title}
           </h1>
 
-          <div className="flex justify-center items-center gap-6 font-mono text-[10px] uppercase text-white/30 tracking-widest border-y border-white/5 py-4">
+          <div className="flex items-center justify-center gap-6 border-y border-white/5 py-4 font-mono text-[10px] uppercase tracking-widest text-white/30">
             <span>{doc.date ?? "—"}</span>
-            <span className="h-1 w-1 bg-white/20 rounded-full" />
+            <span className="h-1 w-1 rounded-full bg-white/20" />
             <span>{doc.readTime || "5 MIN READ"}</span>
-            {required !== "public" && (
+            {required !== "public" ? (
               <>
-                <span className="h-1 w-1 bg-white/20 rounded-full" />
+                <span className="h-1 w-1 rounded-full bg-white/20" />
                 <span className="text-amber-500/60">{required}</span>
               </>
-            )}
+            ) : null}
           </div>
         </header>
 
         <div className="mx-auto max-w-2xl px-6">
           <div className="prose prose-invert max-w-none">
-            {/* ✅ Using the SafeMDXRenderer with pre-compiled code */}
             <SafeMDXRenderer code={doc.bodyCode} />
           </div>
         </div>
@@ -145,15 +182,27 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllCombinedDocs().filter((d) => !isDraftContent(d) && isPublished(d));
+  const {
+    getAllCombinedDocs,
+    normalizeSlug,
+    isDraftContent,
+    isPublished,
+  } = await import("@/lib/content/server");
+
+  const docs = (getAllCombinedDocs() || []).filter(
+    (d: any) => !isDraftContent(d) && isPublished(d)
+  );
+
   const seen = new Set<string>();
   const paths: Array<{ params: { slug: string } }> = [];
 
   for (const d of docs) {
-    const raw = normalizeSlug(d.slug || d?._raw?.flattenedPath || "");
+    const raw = normalizeSlug(d?.slug || d?._raw?.flattenedPath || "");
     const slug = norm(raw);
     const key = slug.toLowerCase();
+
     if (!slug || !allowRootSlug(slug) || seen.has(key)) continue;
+
     seen.add(key);
     paths.push({ params: { slug } });
   }
@@ -165,7 +214,16 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = norm(String(params?.slug || ""));
   const canonicalUrl = `/${slug}`;
 
-  if (!allowRootSlug(slug)) return { notFound: true, revalidate: 60 };
+  if (!allowRootSlug(slug)) {
+    return { notFound: true, revalidate: 60 };
+  }
+
+  const {
+    getDocBySlug,
+    normalizeSlug,
+    isDraftContent,
+    isPublished,
+  } = await import("@/lib/content/server");
 
   const needle = norm(normalizeSlug(slug));
   const rawDoc = getDocBySlug(needle);
@@ -174,24 +232,22 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true, revalidate: 60 };
   }
 
-  // ✅ Normalize required tier at data boundary
   const requiredTier = tiers.normalize(requiredTierFromDoc(rawDoc));
 
-  // ✅ Optimized: Sanitizing only what is necessary for the client
   const doc = sanitizeData({
-    title: rawDoc.title || "Untitled",
+    title: rawDoc?.title || "Untitled",
     kind: getDocKind(rawDoc) || "Content",
-    date: rawDoc.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
-    excerpt: rawDoc.excerpt || rawDoc.description || "",
-    readTime: rawDoc.readTime ?? null,
-    bodyCode: rawDoc.body.code, // ✅ Passing compiled code directly
+    date: rawDoc?.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
+    excerpt: rawDoc?.excerpt || rawDoc?.description || "",
+    readTime: rawDoc?.readTime ?? null,
+    bodyCode: String(rawDoc?.body?.code || ""),
   });
 
   return {
     props: {
       doc,
       canonicalUrl,
-      requiredTier, // ✅ Pass to props
+      requiredTier,
     },
     revalidate: 3600,
   };

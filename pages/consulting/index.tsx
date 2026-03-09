@@ -1,9 +1,11 @@
-// ============================================================================
-// FILE: pages/consulting/index.tsx
-// MVP CONSULTING — Advisory & Strategy (Integrity Mode)
-// ============================================================================
+/* ============================================================================
+   FILE: pages/consulting/index.tsx
+   CONSULTING — Advisory & Strategy (Institutional Grade, Pages Router Safe)
+============================================================================ */
 
 import * as React from "react";
+import type { NextPage } from "next";
+import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -18,7 +20,7 @@ import {
   Network,
   GraduationCap,
   Mic2,
-  BookOpen as BookOpenIcon,
+  Lock,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -26,8 +28,20 @@ import MandateStatement from "@/components/MandateStatement";
 import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
 
 type Pill = { icon: React.ComponentType<any>; title: string; desc: string };
-
 type Deliverable = { title: string; icon: React.ComponentType<any> };
+type Step = { step: string; desc: string };
+
+type Engagement = {
+  label: "Engagement";
+  title: string;
+  desc: string;
+  href: string;
+  tier: "public" | "inner-circle" | "private";
+  icon: React.ComponentType<any>;
+  bullets: string[];
+};
+
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
 const DOMAINS: Pill[] = [
   {
@@ -55,13 +69,57 @@ const DELIVERABLES: Deliverable[] = [
   { title: "Strategic focus", icon: TargetIcon },
 ];
 
-const HOW: Array<{ step: string; desc: string }> = [
-  { step: "Initial call", desc: "45 minutes to understand context, stakes, and fit." },
+const HOW: Step[] = [
+  { step: "Initial call", desc: "45 minutes to establish context, stakes, and fit." },
   { step: "Diagnostic", desc: "Define the real problem with evidence, constraints, and decision owners." },
-  { step: "Engagement", desc: "Scope, cadence, success measures — documented. No ambiguity." },
+  { step: "Engagement", desc: "Scope, cadence, outputs, success measures — documented. No ambiguity." },
 ];
 
-export default function ConsultingPage(): JSX.Element {
+const ENGAGEMENTS: Engagement[] = [
+  {
+    label: "Engagement",
+    title: "Strategy Room",
+    desc: "High-gravity decision environment for irreversible calls. Intake-first. Artifacts delivered.",
+    href: "/consulting/strategy-room",
+    tier: "inner-circle",
+    icon: ShieldCheck,
+    bullets: [
+      "Authority audit + decision gravity filter",
+      "Constraint-aware options + explicit trade-offs",
+      "Artifacts: memo, matrix, cadence, execution controls",
+    ],
+  },
+  {
+    label: "Engagement",
+    title: "Private Advisory",
+    desc: "Board-level counsel for founders, boards, and builders carrying consequence.",
+    href: "/contact?source=consulting&intent=consultation",
+    tier: "private",
+    icon: UsersIcon,
+    bullets: ["Governance + operating cadence", "Founder counsel under pressure", "Frontier-market execution strategy"],
+  },
+  {
+    label: "Engagement",
+    title: "Speaking",
+    desc: "Keynotes and closed-door sessions designed to move decisions, not generate applause.",
+    href: "/contact?intent=speaking-engagement",
+    tier: "public",
+    icon: Mic2,
+    bullets: ["Institutional governance", "Markets + civilisation", "Principle + execution discipline"],
+  },
+];
+
+function tierBadge(tier: Engagement["tier"]) {
+  if (tier === "public") {
+    return { label: "Public", className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-200/80" };
+  }
+  if (tier === "inner-circle") {
+    return { label: "Inner Circle", className: "border-amber-500/25 bg-amber-500/10 text-amber-200/80" };
+  }
+  return { label: "Private", className: "border-red-500/20 bg-red-500/10 text-red-200/80" };
+}
+
+const ConsultingPage: NextPage = () => {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -70,9 +128,16 @@ export default function ConsultingPage(): JSX.Element {
       description="Board-level strategic counsel rooted in conviction, documented method, and deployable frameworks."
       className="bg-black text-white"
     >
+      <Head>
+        <link rel="canonical" href={`${SITE}/consulting`} />
+      </Head>
+
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/10 bg-gradient-to-b from-black via-zinc-950 to-black pt-24 pb-16 lg:pt-32 lg:pb-24">
-        <div className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay bg-[radial-gradient(circle_at_20%_0%,rgba(245,158,11,0.16),transparent_55%)]" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay bg-[radial-gradient(circle_at_20%_0%,rgba(245,158,11,0.16),transparent_55%)]"
+        />
 
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <motion.header
@@ -82,13 +147,14 @@ export default function ConsultingPage(): JSX.Element {
             transition={reduceMotion ? { duration: 0.01 } : { duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
           >
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/80">Private advisory</p>
+
             <h1 className="mt-6 font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-              Strategy for those who{" "}
-              <span className="block text-amber-500/90">carry the weight.</span>
+              Strategy for those who <span className="block text-amber-500/90">carry the weight.</span>
             </h1>
+
             <p className="mt-7 text-lg leading-relaxed text-white/45 sm:text-xl">
-              I work with leaders who refuse to outsource responsibility — founders, boards, and builders navigating
-              high-stakes complexity.
+              Leaders who refuse to outsource responsibility: founders, boards, and builders navigating high-stakes
+              complexity.
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -99,6 +165,7 @@ export default function ConsultingPage(): JSX.Element {
                 Request consultation
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
+
               <Link
                 href="/resources/strategic-frameworks"
                 className="inline-flex items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 px-8 py-4 text-xs font-black uppercase tracking-widest text-amber-200 transition-colors hover:bg-amber-500/15"
@@ -125,8 +192,65 @@ export default function ConsultingPage(): JSX.Element {
         </div>
       </section>
 
+      {/* ENGAGEMENTS (Explicit) */}
+      <section className="bg-zinc-950 py-20 lg:py-28 border-t border-white/8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 max-w-2xl">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/80">Engagements</p>
+            <h2 className="mt-6 font-serif text-3xl font-semibold text-white sm:text-4xl">How you engage</h2>
+            <p className="mt-4 text-white/45">
+              Three lanes. Clear entry points. Documented outputs. No improvisation.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {ENGAGEMENTS.map((e) => {
+              const badge = tierBadge(e.tier);
+              return (
+                <div
+                  key={e.title}
+                  className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 hover:border-amber-500/25 transition-colors flex flex-col"
+                >
+                  <div className="flex items-center justify-between">
+                    <e.icon className="h-10 w-10 text-amber-500/80" />
+                    <span
+                      className={[
+                        "inline-flex items-center gap-2 rounded-full px-3 py-1 border text-[10px] font-mono uppercase tracking-[0.25em]",
+                        badge.className,
+                      ].join(" ")}
+                    >
+                      {e.tier !== "public" ? <Lock className="h-3 w-3" /> : null}
+                      {badge.label}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 font-serif text-2xl text-white/90">{e.title}</h3>
+                  <p className="mt-3 text-sm text-white/45 leading-relaxed">{e.desc}</p>
+
+                  <ul className="mt-6 space-y-2">
+                    {e.bullets.map((b) => (
+                      <li key={b} className="text-xs text-white/45 flex items-start gap-2">
+                        <ArrowRight className="mt-0.5 h-3 w-3 text-amber-500/60" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={e.href}
+                    className="mt-8 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-200 hover:text-amber-100"
+                  >
+                    Open <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* DOMAINS */}
-      <section className="relative bg-zinc-950 py-20 lg:py-28">
+      <section className="relative bg-black py-20 lg:py-28 border-t border-white/8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 max-w-2xl">
             <h2 className="font-serif text-3xl font-semibold text-white sm:text-4xl">Engagement domains</h2>
@@ -134,13 +258,15 @@ export default function ConsultingPage(): JSX.Element {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {DOMAINS.map((p, i) => (
+            {DOMAINS.map((p) => (
               <div
-                key={i}
-                className="group rounded-2xl border border-white/8 bg-white/[0.02] p-8 transition-all hover:border-amber-500/30"
+                key={p.title}
+                className="group rounded-2xl border border-white/10 bg-white/[0.02] p-8 transition-all hover:border-amber-500/30"
               >
                 <p.icon className="mb-6 h-10 w-10 text-amber-500/80" />
-                <h3 className="mb-3 font-serif text-xl font-semibold text-white group-hover:text-amber-200">{p.title}</h3>
+                <h3 className="mb-3 font-serif text-xl font-semibold text-white group-hover:text-amber-200">
+                  {p.title}
+                </h3>
                 <p className="text-sm leading-relaxed text-white/45">{p.desc}</p>
               </div>
             ))}
@@ -149,7 +275,7 @@ export default function ConsultingPage(): JSX.Element {
       </section>
 
       {/* DELIVERABLES */}
-      <section className="bg-black py-20 lg:py-24">
+      <section className="bg-zinc-950 py-20 lg:py-24 border-t border-white/8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 max-w-3xl">
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/80">Deliverables</p>
@@ -157,10 +283,10 @@ export default function ConsultingPage(): JSX.Element {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {DELIVERABLES.map((o, i) => (
+            {DELIVERABLES.map((o) => (
               <div
-                key={i}
-                className="rounded-3xl border border-white/10 bg-white/[0.02] p-6 text-center transition-all hover:border-amber-500/25"
+                key={o.title}
+                className="rounded-3xl border border-white/10 bg-black p-6 text-center transition-all hover:border-amber-500/25"
               >
                 <o.icon className="mx-auto mb-4 h-6 w-6 text-amber-500" />
                 <h3 className="font-serif text-sm font-semibold text-white">{o.title}</h3>
@@ -170,8 +296,8 @@ export default function ConsultingPage(): JSX.Element {
         </div>
       </section>
 
-      {/* SPEAKING */}
-      <section id="speaking" className="bg-zinc-950 py-20 lg:py-28 border-t border-white/8">
+      {/* SPEAKING (contextual block; still useful even if separate /speaking page exists) */}
+      <section id="speaking" className="bg-black py-20 lg:py-28 border-t border-white/8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-14 lg:grid-cols-2 lg:items-center">
             <div>
@@ -180,8 +306,8 @@ export default function ConsultingPage(): JSX.Element {
               </p>
               <h2 className="font-serif text-3xl font-semibold text-white sm:text-4xl mb-6">Speaking & discourse</h2>
               <p className="text-lg text-white/45 leading-relaxed mb-8">
-                I speak on institutional governance, frontier market architecture, and the intersection of principle and
-                profit — to catalyze action, not applause.
+                Governance, frontier market architecture, and principle under pressure — designed to move decisions, not
+                generate applause.
               </p>
 
               <div className="space-y-4">
@@ -190,8 +316,8 @@ export default function ConsultingPage(): JSX.Element {
                   "Private executive retreat facilitation",
                   "Strategic roundtables & panel discourse",
                   "Institutional guest lectures",
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 text-white/75">
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3 text-white/75">
                     <CheckCircle className="h-4 w-4 text-amber-500" />
                     <span className="text-sm font-medium">{item}</span>
                   </div>
@@ -200,7 +326,7 @@ export default function ConsultingPage(): JSX.Element {
             </div>
 
             <div className="relative">
-              <div className="rounded-2xl border border-white/10 bg-black p-8 lg:p-12">
+              <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8 lg:p-12">
                 <Mic2 className="mb-6 h-10 w-10 text-amber-500" />
                 <h3 className="font-serif text-2xl font-semibold text-white mb-4">Engage for speaking</h3>
                 <p className="text-white/45 text-sm mb-8 italic">
@@ -219,18 +345,16 @@ export default function ConsultingPage(): JSX.Element {
       </section>
 
       {/* HOW I WORK + FIT */}
-      <section className="bg-black py-20 lg:py-28 border-t border-amber-500/10">
+      <section className="bg-zinc-950 py-20 lg:py-28 border-t border-amber-500/10">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-14 lg:grid-cols-2">
             <div>
               <h2 className="font-serif text-3xl font-semibold text-white">How I work</h2>
-              <p className="mt-6 text-lg text-white/45">
-                Structured, documented, accountable — anchored in conviction.
-              </p>
+              <p className="mt-6 text-lg text-white/45">Structured, documented, accountable — anchored in conviction.</p>
 
               <div className="mt-10 space-y-8">
                 {HOW.map((s, i) => (
-                  <div key={i} className="flex gap-6">
+                  <div key={s.step} className="flex gap-6">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 font-mono text-sm font-bold text-amber-200">
                       {i + 1}
                     </div>
@@ -251,8 +375,8 @@ export default function ConsultingPage(): JSX.Element {
                   "You carry responsibility for other people’s livelihoods",
                   "You want strategy that respects both faith and data",
                   "You prefer documented decisions over vibes",
-                ].map((line, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-medium text-white/85">
+                ].map((line) => (
+                  <li key={line} className="flex items-center gap-3 text-sm font-medium text-white/85">
                     <div className="h-1.5 w-1.5 rounded-full bg-amber-500" /> {line}
                   </li>
                 ))}
@@ -279,20 +403,22 @@ export default function ConsultingPage(): JSX.Element {
         <div className="mx-auto max-w-6xl px-4 text-center">
           <div className="flex flex-col gap-3 sm:flex-row justify-center">
             <Link
-              href="/contact?source=consulting&intent=consultation"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/55 px-8 py-4 text-xs font-black uppercase tracking-widest text-amber-200 hover:bg-amber-500 hover:text-black transition-all"
-            >
-              Request consultation <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/canon/volume-i-foundations-of-purpose"
+              href="/consulting/strategy-room"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-8 py-4 text-xs font-black uppercase tracking-widest text-black hover:bg-amber-400 transition-all"
             >
-              Read Volume I preview <BookOpenIcon className="h-4 w-4" />
+              Enter Strategy Room <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/resources/strategic-frameworks"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/55 px-8 py-4 text-xs font-black uppercase tracking-widest text-amber-200 hover:bg-amber-500/10 transition-all"
+            >
+              Strategic Frameworks <Library className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </section>
     </Layout>
   );
-}
+};
+
+export default ConsultingPage;

@@ -1,13 +1,13 @@
 // lib/downloads.ts
-// Downloads data facade (MDX-backed)
+// Downloads data facade (MDX-backed, async-safe)
 
 import {
-  getMdxDownloadsMeta,
+  getAllDownloadsMeta,
   getMdxDownloadBySlug,
   getMdxFeaturedDownloads,
 } from "@/lib/server/downloads-data";
 
-// Type definitions (kept permissive to match your current codebase posture)
+// Type definitions kept permissive for compatibility
 export type Download = any;
 export type DownloadMeta = Download;
 export type DownloadFieldKey = keyof DownloadMeta;
@@ -17,7 +17,7 @@ export type DownloadFieldKey = keyof DownloadMeta;
  */
 export async function getAllDownloads(): Promise<DownloadMeta[]> {
   try {
-    const downloads = await getMdxDownloadsMeta();
+    const downloads = await getAllDownloadsMeta();
     return Array.isArray(downloads) ? downloads : [];
   } catch {
     return [];
@@ -40,7 +40,9 @@ export async function getDownloadBySlug(slug: string): Promise<Download | null> 
  */
 export async function getDownloadSlugs(): Promise<string[]> {
   const downloads = await getAllDownloads();
-  return downloads.map((d) => d?.slug).filter(Boolean);
+  return downloads
+    .map((d) => String(d?.slug || "").trim())
+    .filter(Boolean);
 }
 
 /**
@@ -48,10 +50,11 @@ export async function getDownloadSlugs(): Promise<string[]> {
  */
 export async function getPublicDownloads(): Promise<DownloadMeta[]> {
   const downloads = await getAllDownloads();
+
   return downloads.filter((download: any) => {
     const isDraft = download?.draft === true;
     const isNotPublished = download?.published === false;
-    const isStatusDraft = download?.status === "draft";
+    const isStatusDraft = String(download?.status || "").toLowerCase() === "draft";
     return !(isDraft || isNotPublished || isStatusDraft);
   });
 }

@@ -6,10 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData } from "@/lib/content/server";
-// ✅ Using centralized shared utilities for path integrity
-import { normalizeSlug, joinHref } from "@/lib/content/shared";
-import { safeSlice } from "@/lib/utils/safe";
+import { getAllResources, getDocHref, sanitizeData } from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
+import { resolveDocCoverImage } from "@/lib/content/client-utils";
 
 type ResourceMeta = {
   slug: string;
@@ -28,10 +27,6 @@ type Props = { resources: ResourceMeta[] };
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
-function resolveDocCoverImage(doc: any): string | null {
-  return doc?.coverImage || doc?.featuredImage || doc?.image || doc?.thumbnail || null;
-}
-
 function safeDateISO(d: any): string | null {
   const t = new Date(d ?? "").getTime();
   if (!Number.isFinite(t) || t <= 0) return null;
@@ -40,19 +35,17 @@ function safeDateISO(d: any): string | null {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
-    const data = getContentlayerData();
-    const docs = Array.isArray((data as any).allResources) ? (data as any).allResources : [];
+    const docs = (getAllResources() || []).filter((d: any) => !d?.draft);
 
     const resources: ResourceMeta[] = docs
       .map((r: any) => {
-        // ✅ STRATEGY: Normalize to bare slug by stripping 'resources/' prefix
-        const rawPath = r.slug || r._raw?.flattenedPath || "";
-        const bareSlug = normalizeSlug(rawPath).replace(/^resources\//, "");
-        const title = String(r?.title || "").trim();
+        const href = getDocHref(r); // ✅ canonical
+        const rawSlug = String(r?.slug || r?._raw?.flattenedPath || "");
+        const bareSlug = normalizeSlug(rawSlug).replace(/^resources\//, "");
 
         return {
           slug: bareSlug,
-          title: title || "Untitled Resource",
+          title: String(r?.title || "Untitled Resource").trim(),
           description: r?.description ?? r?.excerpt ?? null,
           subtitle: r?.subtitle ?? null,
           date: safeDateISO(r?.date),
@@ -60,18 +53,13 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           image: resolveDocCoverImage(r),
           tags: Array.isArray(r?.tags) ? r.tags.filter((x: any) => typeof x === "string" && x.trim()) : [],
           author: r?.author ?? null,
-          // ✅ FIX: Using joinHref to prevent /resources//resources/ junk
-          href: joinHref("resources", bareSlug),
+          href, // ✅ no more joinHref guessing
         };
       })
       .filter((x) => Boolean(x.slug) && Boolean(x.title) && x.title !== "Untitled Resource")
-      .sort((a, b) => {
-        const da = a.date ? new Date(a.date).getTime() : 0;
-        const db = b.date ? new Date(b.date).getTime() : 0;
-        return db - da;
-      });
+      .sort((a, b) => (Date.parse(b.date || "") || 0) - (Date.parse(a.date || "") || 0));
 
-    return { props: { resources }, revalidate: 1800 };
+    return { props: sanitizeData({ resources }), revalidate: 1800 };
   } catch (error) {
     console.error("[Resources] getStaticProps failed:", error);
     return { props: { resources: [] }, revalidate: 1800 };

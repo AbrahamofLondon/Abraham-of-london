@@ -1,64 +1,104 @@
 // lib/server/token-store.ts
-import type { RedisClientType } from "redis";
+import "server-only";
 
-let _redis: RedisClientType | null = null;
-let _redisConnecting: Promise<RedisClientType | null> | null = null;
+type MinimalRedisClient = {
+  connect: () => Promise<unknown>;
+  get: (key: string) => Promise<string | null>;
+  set: (
+    key: string,
+    value: string,
+    options?: { EX?: number }
+  ) => Promise<unknown>;
+  del: (key: string) => Promise<unknown>;
+  on: (event: "error", listener: (err: unknown) => void) => unknown;
+};
+
+let redisClient: MinimalRedisClient | null = null;
+let redisConnecting: Promise<MinimalRedisClient | null> | null = null;
 
 function getRedisUrl(): string | null {
   return process.env.REDIS_URL || process.env.INNER_CIRCLE_REDIS_URL || null;
 }
 
-async function getRedis(): Promise<RedisClientType | null> {
-  if (_redis) return _redis;
-  if (_redisConnecting) return _redisConnecting;
+async function getRedis(): Promise<MinimalRedisClient | null> {
+  if (redisClient) return redisClient;
+  if (redisConnecting) return redisConnecting;
 
-  _redisConnecting = (async () => {
+  redisConnecting = (async () => {
     const url = getRedisUrl();
     if (!url) return null;
 
     try {
-      const { createClient } = await import("redis");
-      const client = createClient({ url });
+      const mod = await import("redis");
+
+      // Intentionally cast through unknown so we depend only on the tiny surface we use.
+      const client = mod.createClient({ url }) as unknown as MinimalRedisClient;
 
       client.on("error", (err) => {
-        // keep log minimal in production
-        console.warn("[redis] client error", err?.message || err);
+        const message =
+          err instanceof Error ? err.message : String(err ?? "unknown error");
+        console.warn("[redis] client error", message);
       });
 
       await client.connect();
-      _redis = client;
-      return _redis;
-    } catch (e: any) {
-      console.warn("[redis] connect failed; redis disabled", e?.message || e);
-      _redis = null;
+      redisClient = client;
+      return redisClient;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : String(error ?? "unknown error");
+      console.warn("[redis] connect failed; redis disabled", message);
+      redisClient = null;
       return null;
     } finally {
-      _redisConnecting = null;
+      redisConnecting = null;
     }
   })();
 
-  return _redisConnecting;
+  return redisConnecting;
 }
 
 const PREFIX = "aol:";
 
 export type Tier = "public" | "inner-circle" | "private";
 
-export async function tokenStoreSet(key: string, value: any, ttlSeconds: number) {
+export async function tokenStoreSet<T>(
+  key: string,
+  value: T,
+  ttlSeconds: number
+): Promise<void> {
   const redis = await getRedis();
   if (!redis) return;
-  await redis.set(`${PREFIX}${key}`, JSON.stringify(value), { EX: ttlSeconds });
+
+  await redis.set(`${PREFIX}${key}`, JSON.stringify(value), {
+    EX: ttlSeconds,
+  });
 }
 
-export async function tokenStoreGet<T = any>(key: string): Promise<T | null> {
+export async function tokenStoreGet<T = unknown>(
+  key: string
+): Promise<T | null> {
   const redis = await getRedis();
   if (!redis) return null;
+
   const raw = await redis.get(`${PREFIX}${key}`);
-  return raw ? (JSON.parse(raw) as T) : null;
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
 }
 
-export async function tokenStoreDel(key: string) {
+export async function tokenStoreDel(key: string): Promise<void> {
   const redis = await getRedis();
   if (!redis) return;
+
   await redis.del(`${PREFIX}${key}`);
 }
+
+export default {
+  tokenStoreSet,
+  tokenStoreGet,
+  tokenStoreDel,
+};

@@ -10,13 +10,7 @@ import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer"; // ✅ Use SafeM
 import AccessGate from "@/components/AccessGate";
 import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
 
-import {
-  getAllCombinedDocs,
-  getDocBySlug,
-  normalizeSlug,
-  isDraftContent,
-  sanitizeData,
-} from "@/lib/content/server";
+// ✅ Only client-safe imports at top level
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -53,13 +47,16 @@ type ApiFail = {
   reason: string;
 };
 
+// ✅ FIXED: Strict resource detection (no lexicon leakage)
 function isResourceDoc(d: any): boolean {
-  const kind = String(d?.kind || d?.type || "").toLowerCase();
-  if (kind === "resource") return true;
+  const dk = String(d?.docKind || "").toLowerCase();
+  if (dk === "lexicon") return false; // hard block
 
-  const dir = String(d?._raw?.sourceFileDir || "").toLowerCase();
   const flat = String(d?._raw?.flattenedPath || "").toLowerCase();
-  return dir.includes("resources") || flat.startsWith("resources/");
+  if (flat.startsWith("resources/")) return true;
+
+  const kind = String(d?.kind || d?.type || "").toLowerCase();
+  return kind === "resource";
 }
 
 function stripMdxExt(s: string): string {
@@ -67,7 +64,7 @@ function stripMdxExt(s: string): string {
 }
 
 function stripResourcesPrefix(input: string): string {
-  const normalized = normalizeSlug(input).replace(/^resources\//, "");
+  const normalized = input.replace(/^resources\//, "");
   // ✅ Prevent path traversal
   if (normalized.includes('..') || normalized.includes('\\') || normalized.includes('//')) {
     return '';
@@ -75,7 +72,7 @@ function stripResourcesPrefix(input: string): string {
   return normalized;
 }
 
-function resourceSlugFromDoc(d: any): string {
+function resourceSlugFromDoc(d: any, normalizeSlug: (s: string) => string): string {
   const raw =
     normalizeSlug(String(d?.slug || "")) ||
     normalizeSlug(String(d?._raw?.flattenedPath || "")) ||
@@ -83,17 +80,6 @@ function resourceSlugFromDoc(d: any): string {
 
   const noExt = stripMdxExt(raw);
   return stripResourcesPrefix(noExt);
-}
-
-function getRawBody(d: any): string {
-  return (
-    d?.body?.raw ||
-    (typeof d?.bodyRaw === "string" ? d.bodyRaw : "") ||
-    (typeof d?.content === "string" ? d.content : "") ||
-    (typeof d?.body === "string" ? d.body : "") ||
-    (typeof d?.mdx === "string" ? d.mdx : "") ||
-    ""
-  );
 }
 
 // ✅ FIXED: Prevent conflicts with real routes under /resources
@@ -104,12 +90,15 @@ const RESERVED_RESOURCE_ROUTES = new Set<string>([
 ]);
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  // ✅ Dynamic import inside SSG function
+  const { getAllCombinedDocs, isDraftContent, normalizeSlug } = await import("@/lib/content/server");
+
   try {
     const docs = getAllCombinedDocs();
     const resources = docs.filter(isResourceDoc).filter((d: any) => !isDraftContent(d));
 
     const slugPaths = resources
-      .map(resourceSlugFromDoc)
+      .map((d) => resourceSlugFromDoc(d, normalizeSlug))
       .filter(Boolean)
       .map((p) => normalizeSlug(p));
 
@@ -131,6 +120,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
+  // ✅ Dynamic import inside SSG function
+  const { getDocBySlug, normalizeSlug, isDraftContent, sanitizeData } = await import("@/lib/content/server");
+
   const slugParam = ctx.params?.slug;
 
   const slugPath =
@@ -171,12 +163,12 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
   };
 
   return {
-    props: {
-      resource: sanitizeData(resource),
+    props: sanitizeData({
+      resource,
       locked,
       requiredTier,
       initialBodyCode,
-    },
+    }),
     revalidate: 3600,
   };
 };

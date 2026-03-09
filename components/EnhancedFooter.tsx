@@ -176,7 +176,8 @@ export default function EnhancedFooter(): React.ReactElement {
             </Link>
           </div>
 
-          <div className="lg:col-span-7 grid grid-cols-2 gap-10 sm:grid-cols-3">
+          {/* Updated: sm:grid-cols-3 → sm:grid-cols-4 for new column */}
+          <div className="lg:col-span-7 grid grid-cols-2 gap-10 sm:grid-cols-4">
             <div className="space-y-5">
               <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Registry</h4>
               <ul className="space-y-3 text-xs text-white/45">
@@ -195,6 +196,16 @@ export default function EnhancedFooter(): React.ReactElement {
                 <li><FooterLink href="/resources/surrender-framework">Surrender Framework</FooterLink></li>
                 <li><FooterLink href="/resources">Resources Index</FooterLink></li>
                 <li><FooterLink href="/vault">Vault</FooterLink></li>
+              </ul>
+            </div>
+
+            {/* ✅ New Engagements column */}
+            <div className="space-y-5">
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Engagements</h4>
+              <ul className="space-y-3 text-xs text-white/45">
+                <li><FooterLink href="/consulting">Consulting</FooterLink></li>
+                <li><FooterLink href="/consulting/strategy-room">Strategy Room</FooterLink></li>
+                <li><FooterLink href="/strategy">Strategy</FooterLink></li>
               </ul>
             </div>
 

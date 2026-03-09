@@ -194,7 +194,18 @@ function dayOfYear(d: Date): number {
 }
 
 function pick<T>(arr: readonly T[], seed: number): T {
-  return arr[seed % arr.length];
+  if (arr.length === 0) {
+    throw new Error("pick() received an empty array");
+  }
+
+  const index = Math.abs(seed) % arr.length;
+  const item = arr[index];
+
+  if (item === undefined) {
+    throw new Error("pick() computed an invalid array index");
+  }
+
+  return item;
 }
 
 export function computeWhisper(opts: {

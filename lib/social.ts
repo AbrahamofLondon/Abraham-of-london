@@ -1,5 +1,3 @@
-import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
-
 // lib/social.ts
 // Robust utilities for normalising social links coming from config or content.
 
@@ -37,6 +35,15 @@ interface RawSocialItem {
   name?: string;
   icon?: string;
   external?: boolean;
+}
+
+/** Minimal safe capitalize helper */
+function safeCapitalize(value: unknown): string {
+  const s = typeof value === "string" ? value.trim() : "";
+  if (!s) return "";
+  const first = s[0] ?? "";
+  const rest = s.substring(1);
+  return first ? first.toUpperCase() + rest : s;
 }
 
 /** Map aliases → canonical platform keys */
@@ -215,6 +222,7 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
 
   const seen = new Set<string>();
   const deduped: SocialLink[] = [];
+
   for (const s of out) {
     const key = `${s.kind ?? "unknown"}|${s.href}`;
     if (!seen.has(key)) {
@@ -222,6 +230,7 @@ export function sanitizeSocialLinks(input: unknown): SocialLink[] {
       deduped.push(s);
     }
   }
+
   return deduped;
 }
 
@@ -235,5 +244,3 @@ const socialApi = {
 };
 
 export default socialApi;
-
-

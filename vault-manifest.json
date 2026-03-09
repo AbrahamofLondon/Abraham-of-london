@@ -2149,7 +2149,13 @@
   },
   {
     "title": "Strategic Frameworks",
-    "slug": "/vault/resources/strategic-frameworks",
+    "slug": "/vault/resources/strategic-frameworks/index",
+    "category": "resources",
+    "type": "brief"
+  },
+  {
+    "title": "Strategic Frameworks v4",
+    "slug": "/vault/resources/strategic-frameworks/v4",
     "category": "resources",
     "type": "brief"
   },

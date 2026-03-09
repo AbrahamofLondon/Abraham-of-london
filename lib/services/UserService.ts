@@ -1,140 +1,155 @@
 // lib/services/UserService.ts - PRODUCTION READY with SSOT tiers
-import User, { IUser } from '@/lib/database/models/User';
-import { connectToDatabase } from '@/lib/database/connection';
-import { normalizeUserTier } from '@/lib/access/tiers';
+import User, { type IUser } from "@/lib/database/models/User";
+import { connectToDatabase } from "@/lib/database/connection";
 
-// Import SSOT tier types
-import type { AccessTier } from '@/lib/access/tiers';
+import type { AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier } from "@/lib/access/tier-policy";
 
-// Use SSOT-compatible tiers (mapped from database values)
-export type UserTier = 
-  | "public"      // Free/unauthenticated
-  | "member"       // Basic authenticated (was: free/basic)
-  | "inner-circle" // Premium content access (was: inner-circle/premium)
-  | "client"       // Paid client access (was: inner-circle-plus)
-  | "legacy"       // Long-term trusted (was: inner-circle-elite/enterprise)
-  | "architect"    // Strategic partner (was: founder/architect)
-  | "owner";       // Principal owner (was: admin/owner)
+export type UserTier = AccessTier;
 
 export interface CreateUserInput {
   email: string;
   name?: string;
-  tier?: UserTier;
-  subscriptionStatus?: 'active' | 'canceled' | 'expired' | 'pending' | 'trialing';
-  preferences?: Partial<IUser['preferences']>;
-  metadata?: Partial<IUser['metadata']>;
+  tier?: UserTier | string;
+  subscriptionStatus?: "active" | "canceled" | "expired" | "pending" | "trialing";
+  preferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateUserInput {
   name?: string;
-  tier?: UserTier;
+  tier?: UserTier | string;
   subscriptionStatus?: string;
   subscriptionEndsAt?: Date;
-  preferences?: Partial<IUser['preferences']>;
-  metadata?: Partial<IUser['metadata']>;
+  preferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
-// Mapping from database values to SSOT tiers
-const tierMapping: Record<string, UserTier> = {
-  // Legacy values -> SSOT
-  'free': 'member',
-  'basic': 'member',
-  'inner-circle': 'inner-circle',
-  'premium': 'inner-circle',
-  'inner-circle-plus': 'client',
-  'client': 'client',
-  'inner-circle-elite': 'legacy',
-  'enterprise': 'legacy',
-  'elite': 'legacy',
-  'founder': 'architect',
-  'architect': 'architect',
-  'admin': 'owner',
-  'owner': 'owner',
-  'private': 'client', // Map private to client tier
-  'restricted': 'client', // Map restricted to client tier
+const ACCESS_RANK: Record<UserTier, number> = {
+  public: 0,
+  member: 1,
+  "inner-circle": 2,
+  client: 3,
+  legacy: 4,
+  architect: 5,
+  owner: 6,
 };
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
+}
 
 export class UserService {
   static async create(userData: CreateUserInput): Promise<IUser> {
     await connectToDatabase();
-    
-    // Normalize tier if provided, otherwise default to 'member'
-    const normalizedTier = userData.tier 
-      ? tierMapping[userData.tier] || 'member'
-      : 'member';
-    
+
+    const normalizedTier = normalizeUserTier(userData.tier ?? "member");
+
     const user = new User({
-      ...userData,
-      tier: normalizedTier, // Store normalized tier
-      // Also store original for audit if needed
+      email: userData.email.toLowerCase().trim(),
+      name: userData.name,
+      tier: normalizedTier,
+      normalizedTier,
+      subscriptionStatus: userData.subscriptionStatus ?? "pending",
+      preferences: {
+        emailNotifications: true,
+        theme: "dark",
+        language: "en",
+        ...asRecord(userData.preferences),
+      },
       metadata: {
-        ...userData.metadata,
-        originalTier: userData.tier, // Keep original for reference
+        ...asRecord(userData.metadata),
+        originalTier:
+          typeof userData.tier === "string" ? userData.tier : normalizedTier,
       },
       statistics: {
         totalLogins: 0,
         lastLoginAt: new Date(),
         totalContentAccessed: 0,
-        favoriteCategories: []
-      }
+        favoriteCategories: [],
+      },
     });
 
     await user.save();
-    return user;
+    return user as IUser;
   }
 
   static async findById(id: string): Promise<IUser | null> {
     await connectToDatabase();
-    return User.findById(id).select('-metadata.stripeCustomerId -metadata.stripeSubscriptionId');
+    return (await User.findById(id).select(
+      "-metadata.stripeCustomerId -metadata.stripeSubscriptionId"
+    )) as IUser | null;
   }
 
   static async findByEmail(email: string): Promise<IUser | null> {
     await connectToDatabase();
-    return User.findOne({ email: email.toLowerCase() });
+    return (await User.findOne({
+      email: email.toLowerCase().trim(),
+    })) as IUser | null;
   }
 
   static async update(id: string, data: UpdateUserInput): Promise<IUser | null> {
     await connectToDatabase();
-    
-    // Normalize tier if provided
-    const updateData: any = { ...data, updatedAt: new Date() };
-    
+
+    const updateData: Record<string, unknown> = {
+      ...data,
+      updatedAt: new Date(),
+    };
+
     if (data.tier) {
-      updateData.tier = tierMapping[data.tier] || data.tier;
+      const normalizedTier = normalizeUserTier(data.tier);
+      updateData.tier = normalizedTier;
+      updateData.normalizedTier = normalizedTier;
+      updateData["metadata.originalTier"] =
+        typeof data.tier === "string" ? data.tier : normalizedTier;
     }
-    
-    return User.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-metadata.stripeCustomerId -metadata.stripeSubscriptionId');
+
+    if (data.preferences) {
+      updateData.preferences = asRecord(data.preferences);
+    }
+
+    if (data.metadata) {
+      updateData.metadata = asRecord(data.metadata);
+    }
+
+    return (await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-metadata.stripeCustomerId -metadata.stripeSubscriptionId")) as IUser | null;
   }
 
   static async updateLastLogin(id: string): Promise<IUser | null> {
     await connectToDatabase();
-    
-    return User.findByIdAndUpdate(
+
+    return (await User.findByIdAndUpdate(
       id,
       {
-        $inc: { 'statistics.totalLogins': 1 },
-        $set: { 'statistics.lastLoginAt': new Date() }
+        $inc: { "statistics.totalLogins": 1 },
+        $set: { "statistics.lastLoginAt": new Date() },
       },
       { new: true }
-    );
+    )) as IUser | null;
   }
 
-  static async incrementContentAccess(id: string, category?: string): Promise<IUser | null> {
+  static async incrementContentAccess(
+    id: string,
+    category?: string
+  ): Promise<IUser | null> {
     await connectToDatabase();
-    
-    const update: any = {
-      $inc: { 'statistics.totalContentAccessed': 1 }
+
+    const update: Record<string, unknown> = {
+      $inc: { "statistics.totalContentAccessed": 1 },
     };
 
     if (category) {
-      update.$addToSet = { 'statistics.favoriteCategories': category };
+      update.$addToSet = { "statistics.favoriteCategories": category };
     }
 
-    return User.findByIdAndUpdate(id, update, { new: true });
+    return (await User.findByIdAndUpdate(id, update, {
+      new: true,
+    })) as IUser | null;
   }
 
   static async getUserStats(id: string): Promise<{
@@ -147,152 +162,142 @@ export class UserService {
     accessLevel: string;
   }> {
     await connectToDatabase();
-    
-    const user = await User.findById(id).select('statistics tier subscriptionStatus createdAt metadata');
-    
+
+    const user = (await User.findById(id).select(
+      "statistics tier normalizedTier subscriptionStatus createdAt metadata"
+    )) as IUser | null;
+
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
-    // Get human-readable access level
-    const accessLevel = this.getAccessLevelLabel(user.tier as UserTier);
+    const tier = normalizeUserTier((user as any).normalizedTier ?? (user as any).tier);
+    const stats = (user as any).statistics ?? {};
 
     return {
-      totalLogins: user.statistics.totalLogins,
-      totalContentAccessed: user.statistics.totalContentAccessed,
-      favoriteCategories: user.statistics.favoriteCategories,
-      memberSince: user.createdAt,
-      subscriptionStatus: user.subscriptionStatus,
-      tier: user.tier as UserTier,
-      accessLevel,
+      totalLogins: Number(stats.totalLogins ?? 0),
+      totalContentAccessed: Number(stats.totalContentAccessed ?? 0),
+      favoriteCategories: Array.isArray(stats.favoriteCategories)
+        ? stats.favoriteCategories
+        : [],
+      memberSince: (user as any).createdAt,
+      subscriptionStatus: String((user as any).subscriptionStatus ?? "pending"),
+      tier,
+      accessLevel: this.getAccessLevelLabel(tier),
     };
   }
 
-  static async searchUsers(query: string, page = 1, limit = 20): Promise<{
+  static async searchUsers(
+    query: string,
+    page = 1,
+    limit = 20
+  ): Promise<{
     users: IUser[];
     total: number;
     page: number;
     totalPages: number;
   }> {
     await connectToDatabase();
-    
+
     const skip = (page - 1) * limit;
-    
-    const searchQuery = query ? {
-      $or: [
-        { email: { $regex: query, $options: 'i' } },
-        { name: { $regex: query, $options: 'i' } }
-      ]
-    } : {};
+
+    const searchQuery = query
+      ? {
+          $or: [
+            { email: { $regex: query, $options: "i" } },
+            { name: { $regex: query, $options: "i" } },
+          ],
+        }
+      : {};
 
     const [users, total] = await Promise.all([
       User.find(searchQuery)
-        .select('email name tier subscriptionStatus createdAt')
+        .select("email name tier normalizedTier subscriptionStatus createdAt")
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
-      User.countDocuments(searchQuery)
+      User.countDocuments(searchQuery),
     ]);
 
     return {
-      users,
+      users: users as IUser[],
       total,
       page,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   }
 
   static async getUsersByTier(tier: UserTier | string): Promise<IUser[]> {
     await connectToDatabase();
-    
-    // Handle both legacy and SSOT tier values
-    const normalizedTier = tierMapping[tier] || tier;
-    
-    return User.find({ 
-      $or: [
-        { tier: normalizedTier },
-        { tier: tier } // Also search for original value
-      ]
-    }).select('email name createdAt');
+
+    const normalizedTier = normalizeUserTier(tier);
+
+    return (await User.find({
+      $or: [{ tier: normalizedTier }, { normalizedTier }],
+    }).select("email name createdAt tier normalizedTier")) as IUser[];
   }
 
   static async deleteUser(id: string): Promise<boolean> {
     await connectToDatabase();
-    
+
     const result = await User.findByIdAndDelete(id);
     return !!result;
   }
 
   static async updateSubscription(
-    userId: string, 
+    userId: string,
     subscriptionData: {
       status: string;
       endsAt?: Date;
       stripeCustomerId?: string;
       stripeSubscriptionId?: string;
-      tier?: UserTier; // Add tier mapping from subscription
+      tier?: UserTier | string;
     }
   ): Promise<IUser | null> {
     await connectToDatabase();
-    
-    const updateData: any = {
+
+    const updateData: Record<string, unknown> = {
       subscriptionStatus: subscriptionData.status,
       subscriptionEndsAt: subscriptionData.endsAt,
-      'metadata.stripeCustomerId': subscriptionData.stripeCustomerId,
-      'metadata.stripeSubscriptionId': subscriptionData.stripeSubscriptionId,
+      "metadata.stripeCustomerId": subscriptionData.stripeCustomerId,
+      "metadata.stripeSubscriptionId": subscriptionData.stripeSubscriptionId,
     };
 
-    // Update tier based on subscription if provided
     if (subscriptionData.tier) {
-      updateData.tier = subscriptionData.tier;
+      const normalizedTier = normalizeUserTier(subscriptionData.tier);
+      updateData.tier = normalizedTier;
+      updateData.normalizedTier = normalizedTier;
+      updateData["metadata.originalTier"] =
+        typeof subscriptionData.tier === "string"
+          ? subscriptionData.tier
+          : normalizedTier;
     }
 
-    return User.findByIdAndUpdate(
-      userId,
-      updateData,
-      { new: true }
-    );
+    return (await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    })) as IUser | null;
   }
 
-  /**
-   * Get human-readable access level label
-   */
   static getAccessLevelLabel(tier: UserTier): string {
     const labels: Record<UserTier, string> = {
-      'public': 'Public Access',
-      'member': 'Member Access',
-      'inner-circle': 'Inner Circle Access',
-      'client': 'Client Access',
-      'legacy': 'Legacy Access',
-      'architect': 'Architect Access',
-      'owner': 'Owner Access',
+      public: "Public Access",
+      member: "Member Access",
+      "inner-circle": "Inner Circle Access",
+      client: "Client Access",
+      legacy: "Legacy Access",
+      architect: "Architect Access",
+      owner: "Owner Access",
     };
-    
-    return labels[tier] || 'Unknown Access';
+
+    return labels[tier] || "Unknown Access";
   }
 
-  /**
-   * Check if user has required tier access
-   */
   static hasAccess(userTier: UserTier, requiredTier: UserTier): boolean {
-    const rank: Record<UserTier, number> = {
-      'public': 0,
-      'member': 1,
-      'inner-circle': 2,
-      'client': 3,
-      'legacy': 4,
-      'architect': 5,
-      'owner': 6,
-    };
-    
-    return rank[userTier] >= rank[requiredTier];
+    return ACCESS_RANK[userTier] >= ACCESS_RANK[requiredTier];
   }
 
-  /**
-   * Migrate legacy tier to SSOT tier
-   */
   static migrateTier(legacyTier: string): UserTier {
-    return tierMapping[legacyTier.toLowerCase()] || 'member';
+    return normalizeUserTier(legacyTier);
   }
 }
 

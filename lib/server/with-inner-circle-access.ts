@@ -1,63 +1,70 @@
 // lib/server/with-inner-circle-access.ts
 /**
- * Inner circle access middleware with fallbacks
+ * Inner Circle access middleware with optional rate limiting.
+ * Pages API only.
  */
 
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
 
-// ==================== SAFE IMPORTS ====================
-let rateLimitModule: any = null;
+import {
+  RATE_LIMIT_CONFIGS,
+  withApiRateLimit,
+} from "@/lib/server/rate-limit-unified";
 
-try {
-  const mod = require('@/lib/server/rate-limit-unified');
-  rateLimitModule = mod;
-} catch (error) {
-  console.warn('[withInnerCircleAccess] rate-limit-unified not available');
+type ApiHandler = (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => Promise<void> | void;
+
+type Options = {
+  requireAuth?: boolean;
+  rateLimitConfig?: unknown;
+};
+
+function hasInnerCircleCookie(req: NextApiRequest): boolean {
+  return req.cookies?.innerCircleAccess === "true";
 }
 
-// ==================== MAIN MIDDLEWARE ====================
 export function withInnerCircleAccess(
-  handler: (req: NextApiRequest, res: NextApiResponse) => Promise<void> | void,
-  options: {
-    requireAuth?: boolean;
-    rateLimitConfig?: any;
-  } = {}
-) {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
+  handler: ApiHandler,
+  options: Options = {}
+): ApiHandler {
+  const { requireAuth = true, rateLimitConfig } = options;
+
+  const resolvedRateLimitConfig =
+  rateLimitConfig ??
+  (RATE_LIMIT_CONFIGS as Record<string, any>)["INNER_CIRCLE"] ??
+  null;
+
+  const protectedHandler: ApiHandler = async (
+    req: NextApiRequest,
+    res: NextApiResponse
+  ) => {
     try {
-      const { requireAuth = true } = options;
-      
-      // Check access cookie
-      const hasAccess = req.cookies?.innerCircleAccess === "true";
-      
-      if (requireAuth && !hasAccess) {
+      if (requireAuth && !hasInnerCircleCookie(req)) {
         res.status(403).json({
-          error: 'Access Denied',
-          message: 'Inner circle access required'
+          ok: false,
+          error: "Access Denied",
+          message: "Inner circle access required",
         });
         return;
       }
-      
-      // Apply rate limiting if mod is available
-      if (rateLimitModule?.withApiRateLimit) {
-        const rateLimitConfig = options.rateLimitConfig || rateLimitModule.RATE_LIMIT_CONFIGS?.INNER_CIRCLE;
-        if (rateLimitConfig) {
-          const rateLimitedHandler = rateLimitModule.withApiRateLimit(handler, rateLimitConfig);
-          return rateLimitedHandler(req, res);
-        }
-      }
-      
-      // Call handler without rate limiting
+
       await handler(req, res);
-      
     } catch (error) {
-      console.error('[withInnerCircleAccess] Error:', error);
+      console.error("[withInnerCircleAccess] Error:", error);
       res.status(500).json({
-        error: 'Internal Server Error'
+        ok: false,
+        error: "Internal Server Error",
       });
     }
   };
+
+  if (resolvedRateLimitConfig) {
+    return withApiRateLimit(protectedHandler, resolvedRateLimitConfig);
+  }
+
+  return protectedHandler;
 }
 
 export default withInnerCircleAccess;
-

@@ -2,23 +2,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { prisma } from "@/lib/prisma";
-import { redis } from "@/lib/redis";
-import { logError } from "@/lib/logger";
+import { getRedis } from "@/lib/redis";
+import { getAuditLogger } from "@/lib/audit/audit-logger";
+import type { AccessTier as DbAccessTier } from "@prisma/client";
+import {
+  normalizeRequiredTier,
+  type AccessTier as PolicyAccessTier,
+} from "@/lib/access/tier-policy";
 
 export interface VaultAsset {
   id: string;
   slug: string;
   title: string;
   type: string;
-  tier: string; // keep string to avoid coupling; map to AccessTier elsewhere if needed
+  tier: PolicyAccessTier;
   metadata: Record<string, any>;
   updatedAt?: string;
   createdAt?: string;
 }
 
 const CACHE_PREFIX = "vault:asset:";
-const CACHE_TTL_SECONDS = 60; // fast-moving registry; keep short
+const CACHE_TTL_SECONDS = 60;
 const CACHE_TTL_LIST_SECONDS = 45;
+
+async function auditVaultFailure(
+  action: string,
+  details: Record<string, unknown>
+) {
+  try {
+    await getAuditLogger().log({
+      action,
+      severity: "warning",
+      status: "failure",
+      category: "system",
+      resourceType: "VAULT_ASSET",
+      metadata: details,
+    });
+  } catch {
+    // fail-open
+  }
+}
 
 function safeJsonParse(input: unknown): any {
   if (input == null) return {};
@@ -39,9 +62,33 @@ function asString(input: unknown, fallback = ""): string {
   return String(input);
 }
 
-function normalizeTier(raw: unknown): string {
-  const s = asString(raw, "public").trim();
-  return s || "public";
+function toDbTier(raw: unknown): DbAccessTier {
+  const policyTier: PolicyAccessTier = normalizeRequiredTier(raw);
+
+  switch (policyTier) {
+    case "public":
+      return "public";
+    case "member":
+      return "member";
+    case "inner-circle":
+      return "inner_circle";
+    case "client":
+      return "client";
+    case "legacy":
+      return "legacy";
+    case "architect":
+      return "architect";
+    case "owner":
+      return "owner";
+    default:
+      return "public";
+  }
+}
+
+function fromDbTier(raw: unknown): PolicyAccessTier {
+  const s = String(raw ?? "").trim().toLowerCase();
+  if (s === "inner_circle") return "inner-circle";
+  return normalizeRequiredTier(s);
 }
 
 function mapDbAsset(asset: any): VaultAsset {
@@ -49,40 +96,58 @@ function mapDbAsset(asset: any): VaultAsset {
     id: asString(asset?.id),
     slug: asString(asset?.slug),
     title: asString(asset?.title, asString(asset?.slug, "Untitled")),
-    type: asString(asset?.type, "unknown"),
-    tier: normalizeTier(asset?.classification ?? asset?.tier ?? "public"),
+    type: asString(
+      asset?.type ?? asset?.contentType ?? asset?.kind ?? asset?.category,
+      "unknown"
+    ),
+    tier: fromDbTier(asset?.classification ?? asset?.tier ?? "public"),
     metadata: safeJsonParse(asset?.metadata),
-    updatedAt: asset?.updatedAt ? new Date(asset.updatedAt).toISOString() : undefined,
-    createdAt: asset?.createdAt ? new Date(asset.createdAt).toISOString() : undefined,
+    updatedAt: asset?.updatedAt
+      ? new Date(asset.updatedAt).toISOString()
+      : undefined,
+    createdAt: asset?.createdAt
+      ? new Date(asset.createdAt).toISOString()
+      : undefined,
   };
 }
 
 async function cacheGet<T>(key: string): Promise<T | null> {
   try {
-    if (!redis) return null;
-    const val = await (redis as any).get(key);
+    const redis = getRedis();
+    const val = await redis.get(key);
     if (!val) return null;
     return JSON.parse(val) as T;
-  } catch {
+  } catch (error) {
+    await auditVaultFailure("VAULT_CACHE_GET_FAILED", {
+      cacheKey: key,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }
 
 async function cacheSet(key: string, value: any, ttlSeconds: number) {
   try {
-    if (!redis) return;
-    await (redis as any).set(key, JSON.stringify(value), "EX", ttlSeconds);
-  } catch {
-    // cache is best-effort
+    const redis = getRedis();
+    await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);
+  } catch (error) {
+    await auditVaultFailure("VAULT_CACHE_SET_FAILED", {
+      cacheKey: key,
+      ttlSeconds,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
 async function cacheDel(key: string) {
   try {
-    if (!redis) return;
-    await (redis as any).del(key);
-  } catch {
-    // best-effort
+    const redis = getRedis();
+    await redis.del(key);
+  } catch (error) {
+    await auditVaultFailure("VAULT_CACHE_DELETE_FAILED", {
+      cacheKey: key,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -105,13 +170,18 @@ export async function getVaultAsset(slug: string): Promise<VaultAsset | null> {
     await cacheSet(cacheKey, mapped, CACHE_TTL_SECONDS);
     return mapped;
   } catch (error) {
-    logError("Failed to fetch vault asset", { slug: cleanSlug, error });
+    await auditVaultFailure("VAULT_FETCH_ASSET_FAILED", {
+      slug: cleanSlug,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }
 
-export async function getVaultAssetsByTier(tier: string): Promise<VaultAsset[]> {
-  const t = normalizeTier(tier);
+export async function getVaultAssetsByTier(
+  tier: string
+): Promise<VaultAsset[]> {
+  const t = toDbTier(tier);
 
   const cacheKey = `${CACHE_PREFIX}tier:${t}`;
   const cached = await cacheGet<VaultAsset[]>(cacheKey);
@@ -127,18 +197,23 @@ export async function getVaultAssetsByTier(tier: string): Promise<VaultAsset[]> 
     await cacheSet(cacheKey, mapped, CACHE_TTL_LIST_SECONDS);
     return mapped;
   } catch (error) {
-    logError("Failed to fetch vault assets by tier", { tier: t, error });
+    await auditVaultFailure("VAULT_FETCH_BY_TIER_FAILED", {
+      tier: t,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }
 
-export async function syncVaultAsset(slug: string, data: Partial<VaultAsset>) {
+export async function syncVaultAsset(
+  slug: string,
+  data: Partial<VaultAsset>
+) {
   const cleanSlug = asString(slug).trim();
   if (!cleanSlug) throw new Error("VAULT_SYNC_SLUG_REQUIRED");
 
   const title = asString(data.title, cleanSlug);
-  const type = asString(data.type, "unknown");
-  const tier = normalizeTier(data.tier ?? "public");
+  const tier = toDbTier(data.tier ?? "public");
   const metadataObj = data.metadata ?? {};
 
   try {
@@ -146,7 +221,6 @@ export async function syncVaultAsset(slug: string, data: Partial<VaultAsset>) {
       where: { slug: cleanSlug },
       update: {
         title,
-        type,
         classification: tier,
         metadata: JSON.stringify(metadataObj ?? {}),
         updatedAt: new Date(),
@@ -154,19 +228,21 @@ export async function syncVaultAsset(slug: string, data: Partial<VaultAsset>) {
       create: {
         slug: cleanSlug,
         title,
-        type,
         classification: tier,
         metadata: JSON.stringify(metadataObj ?? {}),
       },
     });
 
-    // bust caches
     await cacheDel(`${CACHE_PREFIX}${cleanSlug}`);
     await cacheDel(`${CACHE_PREFIX}tier:${tier}`);
 
     return record;
   } catch (error) {
-    logError("Failed to sync vault asset", { slug: cleanSlug, error });
+    await auditVaultFailure("VAULT_SYNC_ASSET_FAILED", {
+      slug: cleanSlug,
+      tier,
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
@@ -176,9 +252,10 @@ export async function deleteVaultAsset(slug: string) {
   if (!cleanSlug) throw new Error("VAULT_DELETE_SLUG_REQUIRED");
 
   try {
-    // get tier first for cache busting
-    const existing = await prisma.contentMetadata.findUnique({ where: { slug: cleanSlug } });
-    const tier = normalizeTier(existing?.classification ?? "public");
+    const existing = await prisma.contentMetadata.findUnique({
+      where: { slug: cleanSlug },
+    });
+    const tier = toDbTier(existing?.classification ?? "public");
 
     const deleted = await prisma.contentMetadata.delete({
       where: { slug: cleanSlug },
@@ -189,12 +266,18 @@ export async function deleteVaultAsset(slug: string) {
 
     return deleted;
   } catch (error) {
-    logError("Failed to delete vault asset", { slug: cleanSlug, error });
+    await auditVaultFailure("VAULT_DELETE_ASSET_FAILED", {
+      slug: cleanSlug,
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
 
-export async function getVaultStats() {
+export async function getVaultStats(): Promise<{
+  total: number;
+  byTier: Record<PolicyAccessTier, number>;
+}> {
   try {
     const total = await prisma.contentMetadata.count();
 
@@ -203,21 +286,48 @@ export async function getVaultStats() {
       _count: { _all: true },
     });
 
-    const mapped = byTier.reduce<Record<string, number>>((acc, row: any) => {
-      const k = normalizeTier(row.classification);
-      const n = typeof row?._count?._all === "number" ? row._count._all : 0;
-      acc[k] = n;
-      return acc;
-    }, {});
+    const base: Record<PolicyAccessTier, number> = {
+      public: 0,
+      member: 0,
+      "inner-circle": 0,
+      client: 0,
+      legacy: 0,
+      architect: 0,
+      owner: 0,
+    };
+
+    const mapped = byTier.reduce<Record<PolicyAccessTier, number>>(
+      (acc, row: any) => {
+        const k = fromDbTier(row.classification);
+        const n = typeof row?._count?._all === "number" ? row._count._all : 0;
+        acc[k] = n;
+        return acc;
+      },
+      base
+    );
 
     return { total, byTier: mapped };
   } catch (error) {
-    logError("Failed to get vault stats", { error });
-    return { total: 0, byTier: {} as Record<string, number> };
+    await auditVaultFailure("VAULT_STATS_FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    return {
+      total: 0,
+      byTier: {
+        public: 0,
+        member: 0,
+        "inner-circle": 0,
+        client: 0,
+        legacy: 0,
+        architect: 0,
+        owner: 0,
+      },
+    };
   }
 }
 
-export async function searchVault(query: string) {
+export async function searchVault(query: string): Promise<VaultAsset[]> {
   const q = asString(query).trim();
   if (!q) return [];
 
@@ -235,7 +345,10 @@ export async function searchVault(query: string) {
 
     return results.map(mapDbAsset);
   } catch (error) {
-    logError("Failed to search vault", { query: q, error });
+    await auditVaultFailure("VAULT_SEARCH_FAILED", {
+      query: q,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }

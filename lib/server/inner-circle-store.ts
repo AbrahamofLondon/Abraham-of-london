@@ -132,4 +132,4 @@ export default {
   getMembersByTier,
   memberHasAccess,
   updateMemberTier,
-};ss
+};

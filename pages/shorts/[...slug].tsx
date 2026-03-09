@@ -1,4 +1,4 @@
-/* pages/shorts/[...slug].tsx — Catch-all (supports nested slugs) */
+/* pages/shorts/[...slug].tsx — Catch-all (supports nested slugs, normalised) */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -17,24 +17,49 @@ function joinParamSlug(param: string | string[] | undefined): string {
   return Array.isArray(param) ? param.join("/") : String(param);
 }
 
+/**
+ * Normalise any short slug to the content-relative form expected by the loader.
+ *
+ * Examples:
+ *   "/shorts/when-x" -> "when-x"
+ *   "shorts/when-x"  -> "when-x"
+ *   "/when-x/"       -> "when-x"
+ *   "when-x"         -> "when-x"
+ */
+function normalizeShortSlug(input: string): string {
+  return String(input)
+    .trim()
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/^shorts\//, "");
+}
+
 const ShortsSlugPage: NextPage<Props> = ({ item }) => {
   const title = item?.title || "Short";
+  const canonicalSlug = normalizeShortSlug(item?.slug || "");
 
   return (
     <Layout title={title} description={item?.description || item?.excerpt || ""}>
       <Head>
-        <link rel="canonical" href={`https://www.abrahamoflondon.org/shorts/${item.slug}`} />
+        <link
+          rel="canonical"
+          href={`https://www.abrahamoflondon.org/shorts/${canonicalSlug}`}
+        />
       </Head>
 
       <main className="min-h-screen bg-black text-white">
         <div className="mx-auto max-w-3xl px-6 py-12">
-          <Link href="/shorts" className="text-xs font-mono uppercase tracking-widest text-amber-400/80 hover:text-amber-300">
+          <Link
+            href="/shorts"
+            className="text-xs font-mono uppercase tracking-widest text-amber-400/80 hover:text-amber-300"
+          >
             ← Back to Shorts
           </Link>
 
-          <h1 className="mt-6 text-4xl md:text-5xl font-serif font-bold tracking-tight">{title}</h1>
+          <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight md:text-5xl">
+            {title}
+          </h1>
 
-          <article className="prose prose-invert prose-lg max-w-none mt-12">
+          <article className="prose prose-invert prose-lg mt-12 max-w-none">
             {item?.bodyCode ? (
               <SafeMDXRenderer code={item.bodyCode} />
             ) : (
@@ -52,20 +77,25 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const slug = joinParamSlug(params?.slug as any).trim().replace(/^\/+|\/+$/g, "");
+  const rawSlug = joinParamSlug(params?.slug as string | string[] | undefined);
+  const slug = normalizeShortSlug(rawSlug);
+
   if (!slug) return { notFound: true };
 
-  // shorts live in content/shorts
   const doc = await getMdxDocumentBySlug("shorts", slug);
   if (!doc || (doc as any).draft === true) return { notFound: true };
 
   const item = {
     ...doc,
-    slug,
+    // Always expose the clean, route-safe slug to the page
+    slug: normalizeShortSlug((doc as any).slug || slug),
     bodyCode: (doc as any).body?.code ?? (doc as any).bodyCode ?? null,
   };
 
-  return { props: sanitizeData({ item }), revalidate: 1800 };
+  return {
+    props: sanitizeData({ item }),
+    revalidate: 1800,
+  };
 };
 
 export default ShortsSlugPage;

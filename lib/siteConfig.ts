@@ -246,11 +246,27 @@ export const getSocialUrl = (platform: any) => getSocialUrlFromConfig(platform);
 /* Central config export (legacy shape)                                        */
 /* -------------------------------------------------------------------------- */
 
+type ExtendedSiteConfig = LegacySiteConfig & {
+  siteName: string;
+  email: string;
+  social: typeof social;
+  socialLinks: LegacySocialLink[];
+  brand: typeof brand;
+  routes: typeof routes;
+  ventures: Venture[];
+  canonical: CanonicalSiteConfig;
+  getPageTitle: (pageTitle?: string) => string;
+  absUrl: (pathOrUrl: string) => string;
+  isExternalUrl: (url: string) => boolean;
+  formatPhoneNumber: (phone: string) => string;
+  navigation: typeof canonical.navigation;
+};
+
 /**
  * This is what older code expects: siteConfig.title, siteConfig.email, siteConfig.socialLinks, etc.
  * We populate it FROM canonical every time.
  */
-export const siteConfig = {
+export const siteConfig: ExtendedSiteConfig = {
   // legacy top-level
   title: brand.name,
   siteName: brand.name,
@@ -281,15 +297,6 @@ export const siteConfig = {
 
   // canonical raw config for power-users
   canonical,
-} satisfies LegacySiteConfig & {
-  siteName: string;
-  email: string;
-  social: typeof social;
-  socialLinks: LegacySocialLink[];
-  brand: typeof brand;
-  routes: typeof routes;
-  ventures: Venture[];
-  canonical: CanonicalSiteConfig;
 };
 
 /* -------------------------------------------------------------------------- */
