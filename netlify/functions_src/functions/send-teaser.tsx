@@ -1,5 +1,6 @@
-// netlify/functions/send-teaser.ts
-import type { Handler } from "@netlify/functions";
+// netlify/functions_src/functions/send-teaser.tsx
+
+import type { Handler } from "./_utils";
 import {
   ok,
   bad,
@@ -17,13 +18,16 @@ interface TeaserBody {
 
 export const handler: Handler = withSecurity(
   async (event) => {
-    const origin = event.headers.origin || event.headers.Origin || "*";
+    const originHeader = event.headers.origin ?? event.headers.Origin ?? "*";
+    const origin = Array.isArray(originHeader)
+      ? (originHeader[0] ?? "*")
+      : (originHeader || "*");
 
     if (event.httpMethod === "OPTIONS") {
       return {
         statusCode: 204,
         headers: {
-          "Access-Control-Allow-Origin": origin || "*",
+          "Access-Control-Allow-Origin": origin,
           "Access-Control-Allow-Methods": "POST,OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type,Authorization",
           "Access-Control-Max-Age": "86400",
@@ -41,14 +45,11 @@ export const handler: Handler = withSecurity(
       body: event.body || "",
     });
 
-    const email = (body.email || "").trim();
+    const email = String(body.email || "").trim();
     const teaserType = body.teaserType;
     const contentPreference = body.contentPreference || "pdf";
 
-    if (
-      !email ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return bad("Valid email is required", 400, origin);
     }
 
@@ -62,9 +63,6 @@ export const handler: Handler = withSecurity(
       contentPreference,
       timestamp: new Date().toISOString(),
     });
-
-    // TODO: integrate with your email/CRM / asset delivery system
-    // e.g. sendTeaserEmail(email, teaserType, contentPreference)
 
     return ok(
       "Teaser content scheduled for delivery",
@@ -84,4 +82,3 @@ export const handler: Handler = withSecurity(
     requireHoneypot: true,
   }
 );
-

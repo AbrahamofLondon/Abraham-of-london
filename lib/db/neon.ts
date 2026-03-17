@@ -4,36 +4,74 @@ import "server-only";
 import { neon, neonConfig, Pool, type PoolConfig } from "@neondatabase/serverless";
 import WebSocket from "ws";
 import { secrets } from "@/lib/server/secrets";
+import { shouldUseDatabase } from "@/lib/db/db-gate";
 
 /**
  * Institutional Database Client
  * - `sql` uses HTTP (best default for serverless + low cold start)
- * - `getPool()` provides WS pooling when you truly need it
+ * - `getPool()` provides WS pooling when truly needed
+ * - build-safe and skip-safe via db-gate
  */
 
-// Neon tuning (safe)
+const canUseDb = shouldUseDatabase();
+const databaseUrl = secrets.DATABASE_URL;
+
+// Neon tuning
 neonConfig.fetchConnectionCache = true;
 neonConfig.webSocketConstructor = WebSocket;
 
-if (!secrets.DATABASE_URL) {
-  throw new Error("[DATABASE] DATABASE_URL is required but missing from secrets");
+type SqlFn = ReturnType<typeof neon>;
+
+let pool: Pool | null = null;
+let cleanupRegistered = false;
+
+function createNoopSql(): SqlFn {
+  const noop = (async () => []) as unknown as SqlFn;
+  return new Proxy(noop, {
+    apply: async () => [],
+    get: () => undefined,
+  });
+}
+
+function assertDatabaseAvailable(context: string): void {
+  if (!canUseDb || !databaseUrl) {
+    throw new Error(`[DATABASE] Database unavailable for ${context}`);
+  }
 }
 
 /**
  * 1) Standard SQL Client (HTTP)
+ * Build-safe: falls back to a harmless no-op client when DB should not be used.
  */
-export const sql = neon(secrets.DATABASE_URL);
+export const sql: SqlFn =
+  canUseDb && databaseUrl ? neon(databaseUrl) : createNoopSql();
 
 /**
  * 2) Connection Pool (WebSockets)
  * Use sparingly; pooling is only worth it for heavier transactional workloads.
  */
-let pool: Pool | null = null;
+function registerCleanupHandlers(): void {
+  if (cleanupRegistered) return;
+  cleanupRegistered = true;
+
+  const cleanup = async () => {
+    try {
+      await closePool();
+    } finally {
+      process.exit(0);
+    }
+  };
+
+  process.once("SIGTERM", cleanup);
+  process.once("SIGINT", cleanup);
+}
 
 export function getPool(): Pool {
+  assertDatabaseAvailable("pool creation");
+
   if (!pool) {
     const poolConfig: PoolConfig = {
-      connectionString: secrets.DATABASE_URL,
+      connectionString: databaseUrl,
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
@@ -45,15 +83,9 @@ export function getPool(): Pool {
       console.error("[DATABASE] Unexpected pool error:", err);
     });
 
-    // Optional: Handle process termination gracefully
-    const cleanup = async () => {
-      await closePool();
-      process.exit(0);
-    };
-
-    process.once("SIGTERM", cleanup);
-    process.once("SIGINT", cleanup);
+    registerCleanupHandlers();
   }
+
   return pool;
 }
 
@@ -68,6 +100,8 @@ export interface BriefResult {
 }
 
 export async function queryBriefs(limit = 10): Promise<BriefResult[]> {
+  if (!canUseDb || !databaseUrl) return [];
+
   try {
     const safeLimit = Math.min(Math.max(1, limit), 100);
 
@@ -92,12 +126,16 @@ export async function queryBriefs(limit = 10): Promise<BriefResult[]> {
 }
 
 export async function checkDatabaseHealth(): Promise<boolean> {
+  if (!canUseDb || !databaseUrl) return false;
+
   try {
     const start = Date.now();
     const rows = (await sql`SELECT 1 as healthy`) as any[];
     const duration = Date.now() - start;
 
-    if (duration > 1000) console.warn(`[DATABASE] Slow health check: ${duration}ms`);
+    if (duration > 1000) {
+      console.warn(`[DATABASE] Slow health check: ${duration}ms`);
+    }
 
     return rows?.[0]?.healthy === 1;
   } catch (error) {
@@ -109,21 +147,24 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 /**
  * 4) Generic query helper with proper typing
  */
-export async function query<T = any>(
+export async function query<T = unknown>(
   strings: TemplateStringsArray,
   ...values: any[]
 ): Promise<T[]> {
+  assertDatabaseAvailable("query execution");
+
   try {
     const rows = (await sql(strings, ...values)) as any[];
     return rows as T[];
   } catch (error) {
     console.error("[DATABASE] Query failed:", error);
-    throw error; // Re-throw to let caller handle
+    throw error;
   }
 }
 
 export async function closePool(): Promise<void> {
   if (!pool) return;
+
   try {
     await pool.end();
   } catch (error) {

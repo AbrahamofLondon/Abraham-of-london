@@ -1,6 +1,4 @@
 /* lib/pdf/ultimate-purpose-of-man-pdf.tsx */
-/* eslint-disable jsx-a11y/alt-text */
-
 import React from "react";
 import {
   Document,
@@ -9,36 +7,165 @@ import {
   View,
   Image,
   StyleSheet,
-  // Note: Font is NOT imported or registered here to prevent errors
+  Svg,
+  Line,
+  Circle,
+  Rect,
+  PDFViewer,
 } from "@react-pdf/renderer";
 
+/**
+ * Register fonts once in app bootstrap.
+ * Do not register inside this file.
+ */
+
 const BRAND = {
-  bg: "#050609",
-  bg2: "#070812",
-  card: "#0b0c12",
-  border: "#1b2230",
-  ink: "#E5E7EB",
-  muted: "#9CA3AF",
-  faint: "#6B7280",
+  bg: "#040608",
+  bg2: "#0B0E14",
+  panel: "#0F141D",
+  panelSoft: "#141A24",
+  border: "#1E2633",
+  rule: "rgba(255,255,255,0.08)",
+  white: "#FAFBFC",
+  ink: "#E6EAF1",
+  muted: "#A1A9B8",
+  faint: "#6F7887",
   gold: "#D4AF37",
   gold2: "#FBBF24",
-  white: "#F9FAFB",
+  goldSoft: "rgba(251,191,36,0.08)",
+  goldLine: "rgba(251,191,36,0.28)",
+  red: "#F87171",
+  amber: "#F59E0B",
+  emerald: "#34D399",
+  navy: "#0c1730",
+  panelLight: "#1A212E",
+};
+
+const DEFAULT_DOC = {
+  id: "ultimate-purpose-of-man-editorial",
+  docId: "CB-ED-001",
+  version: "3.1.0",
+  title: "The Ultimate Purpose of Man",
+  subtitle: "Strategic Editorial — The Mandate of Alignment",
+  author: "Abraham of London",
+  category: "Flagship Editorial",
+  date: "February 2026",
+  classification: "PUBLIC",
+  readingTime: "30 minutes",
 };
 
 const styles = StyleSheet.create({
-  document: { backgroundColor: BRAND.bg },
+  document: {
+    backgroundColor: BRAND.bg,
+  },
 
-  // Standard inner pages
+  coverPage: {
+    padding: 0,
+    backgroundColor: BRAND.bg,
+  },
+
   page: {
-    paddingTop: 52,
-    paddingBottom: 62,
+    paddingTop: 54,
+    paddingBottom: 64,
     paddingHorizontal: 56,
     backgroundColor: BRAND.bg,
   },
 
-  // Top rail
+  coverImageWrap: {
+    width: "100%",
+    height: "100%",
+    position: "relative",
+  },
+
+  coverImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  coverOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.42)",
+  },
+
+  coverContent: {
+    position: "absolute",
+    top: 52,
+    left: 52,
+    right: 52,
+  },
+
+  coverTopMeta: {
+    fontFamily: "AoLSans",
+    fontSize: 8.5,
+    textTransform: "uppercase",
+    letterSpacing: 2.4,
+    color: BRAND.gold2,
+    marginBottom: 18,
+  },
+
+  coverTitleSmall: {
+    fontFamily: "AoLSerif",
+    fontSize: 26,
+    lineHeight: 1.05,
+    textAlign: "center",
+    color: "#F1E2BB",
+  },
+
+  coverTitleLarge: {
+    fontFamily: "AoLSerif",
+    fontSize: 58,
+    lineHeight: 0.96,
+    textAlign: "center",
+    color: "#F1E2BB",
+  },
+
+  coverSubtitle: {
+    marginTop: 28,
+    fontFamily: "AoLSerif",
+    fontSize: 16,
+    lineHeight: 1.42,
+    textAlign: "center",
+    fontStyle: "italic",
+    color: "#E6D8B5",
+  },
+
+  coverAuthor: {
+    marginTop: 30,
+    fontFamily: "AoLSerif",
+    fontSize: 18,
+    textAlign: "center",
+    color: "#EADDBE",
+  },
+
+  coverBottomMetaWrap: {
+    position: "absolute",
+    bottom: 36,
+    left: 52,
+    right: 52,
+    alignItems: "center",
+  },
+
+  coverRule: {
+    width: 180,
+    height: 1,
+    backgroundColor: "rgba(251,191,36,0.30)",
+    marginBottom: 12,
+  },
+
+  coverBottomMeta: {
+    fontFamily: "AoLMono",
+    fontSize: 8,
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.70)",
+  },
+
   topRail: {
-    marginBottom: 14,
+    marginBottom: 16,
     paddingBottom: 10,
     borderBottomWidth: 0.7,
     borderBottomColor: BRAND.border,
@@ -46,7 +173,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-end",
   },
-  railLeft: { flexDirection: "column" },
+
+  railLeft: {
+    flexDirection: "column",
+  },
+
   railEyebrow: {
     fontFamily: "AoLSans",
     fontSize: 8,
@@ -54,19 +185,20 @@ const styles = StyleSheet.create({
     letterSpacing: 2.2,
     color: BRAND.gold2,
   },
+
   railTitle: {
-    marginTop: 3,
+    marginTop: 4,
     fontFamily: "AoLSerif",
     fontSize: 11,
     color: BRAND.white,
   },
+
   railRight: {
     fontFamily: "AoLMono",
     fontSize: 8,
     color: BRAND.muted,
   },
 
-  // Footer
   footer: {
     position: "absolute",
     bottom: 28,
@@ -74,136 +206,127 @@ const styles = StyleSheet.create({
     right: 56,
     flexDirection: "row",
     justifyContent: "space-between",
-    fontFamily: "AoLSans",
-    fontSize: 9,
-    color: BRAND.muted,
     borderTopWidth: 0.6,
     borderTopColor: BRAND.border,
     paddingTop: 8,
   },
-  pageNumber: { fontFamily: "AoLMono" },
-  smallBrand: {
+
+  footerBrand: {
     fontFamily: "AoLSans",
+    fontSize: 8,
     textTransform: "uppercase",
     letterSpacing: 2,
-    fontSize: 8,
     color: "#C7CBD3",
   },
 
-  // Cover
-  coverPage: { padding: 0, backgroundColor: BRAND.bg },
-  coverImageWrapper: { width: "100%", height: "55%" },
-  coverImage: { width: "100%", height: "100%" },
-  coverOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    height: "55%",
-    backgroundColor: "rgba(0,0,0,0.25)",
-  },
-
-  coverContent: { paddingHorizontal: 56, paddingTop: 44 },
-  coverEyebrow: {
-    fontFamily: "AoLSans",
-    fontSize: 9,
-    textTransform: "uppercase",
-    letterSpacing: 2.6,
-    color: BRAND.gold2,
-    marginBottom: 12,
-  },
-  coverTitle: {
-    fontFamily: "AoLSerif",
-    fontSize: 32,
-    color: BRAND.white,
-    letterSpacing: 1,
-    marginBottom: 10,
-  },
-  coverSubtitle: {
-    fontFamily: "AoLSerif",
-    fontSize: 14,
-    color: BRAND.ink,
-    marginBottom: 18,
-  },
-  coverByline: {
-    fontFamily: "AoLSans",
-    fontSize: 11,
-    color: "#C7CBD3",
-    marginBottom: 18,
-  },
-  coverRule: {
-    height: 1,
-    width: 160,
-    backgroundColor: "rgba(212,175,55,0.45)",
-    marginBottom: 16,
-  },
-  coverTagline: {
-    fontFamily: "AoLSans",
-    fontSize: 10,
+  pageNumber: {
+    fontFamily: "AoLMono",
+    fontSize: 8.5,
     color: BRAND.muted,
-    lineHeight: 1.55,
-    maxWidth: "84%",
   },
 
-  // Typography
   h1: {
     fontFamily: "AoLSerif",
     fontSize: 22,
+    lineHeight: 1.18,
     color: BRAND.white,
-    marginBottom: 6,
+    marginBottom: 8,
   },
+
   h2: {
     fontFamily: "AoLSerif",
-    fontSize: 15,
+    fontSize: 15.5,
+    lineHeight: 1.24,
     color: BRAND.white,
     marginTop: 16,
     marginBottom: 6,
   },
+
   h3: {
-    fontFamily: "AoLSerif",
-    fontSize: 12.5,
-    color: BRAND.ink,
-    marginTop: 10,
-    marginBottom: 3,
-  },
-  bodyText: {
     fontFamily: "AoLSans",
-    fontSize: 10.3,
+    fontSize: 9.5,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: BRAND.gold2,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+
+  body: {
+    fontFamily: "AoLSans",
+    fontSize: 10.2,
     lineHeight: 1.62,
     color: BRAND.ink,
     marginBottom: 7,
   },
-  strong: {
+
+  bodyLarge: {
     fontFamily: "AoLSans",
-    fontSize: 10.3,
-    color: BRAND.white,
+    fontSize: 11,
+    lineHeight: 1.7,
+    color: BRAND.ink,
+    marginBottom: 8,
   },
 
-  // Blocks
+  strong: {
+    fontFamily: "AoLSans",
+    fontSize: 10.2,
+    color: BRAND.white,
+    fontWeight: 700,
+  },
+
   divider: {
     marginTop: 12,
     marginBottom: 12,
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: BRAND.rule,
+  },
+
+  goldRule: {
+    width: 80,
+    height: 2,
+    backgroundColor: BRAND.gold2,
+    marginTop: 8,
+    marginBottom: 16,
   },
 
   quoteBlock: {
     borderLeftWidth: 2,
     borderLeftColor: BRAND.gold2,
-    paddingLeft: 10,
-    marginTop: 10,
-    marginBottom: 10,
-    backgroundColor: "rgba(212,175,55,0.06)",
+    backgroundColor: "rgba(212,175,55,0.05)",
     paddingTop: 8,
     paddingBottom: 8,
+    paddingLeft: 12,
     paddingRight: 10,
+    marginTop: 10,
+    marginBottom: 10,
   },
+
   quoteText: {
     fontFamily: "AoLSerif",
     fontSize: 11,
-    color: BRAND.ink,
-    fontStyle: "italic",
     lineHeight: 1.45,
+    fontStyle: "italic",
+    color: BRAND.ink,
+  },
+
+  pullquote: {
+    marginVertical: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: BRAND.panelLight,
+    borderRadius: 4,
+    borderLeftWidth: 3,
+    borderLeftColor: BRAND.gold2,
+  },
+
+  pullquoteText: {
+    fontFamily: "AoLSerif",
+    fontSize: 12,
+    lineHeight: 1.5,
+    fontStyle: "italic",
+    color: BRAND.white,
+    textAlign: "center",
   },
 
   callout: {
@@ -211,10 +334,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 0.9,
     borderColor: "rgba(212,175,55,0.35)",
-    backgroundColor: "rgba(11,12,18,0.85)",
+    backgroundColor: "rgba(11,12,18,0.90)",
     borderRadius: 10,
     padding: 10,
   },
+
+  calloutWarning: {
+    borderColor: "rgba(248,113,113,0.35)",
+    backgroundColor: "rgba(248,113,113,0.06)",
+  },
+
   calloutLabel: {
     fontFamily: "AoLSans",
     fontSize: 8,
@@ -223,42 +352,305 @@ const styles = StyleSheet.create({
     color: BRAND.gold2,
     marginBottom: 6,
   },
+
+  calloutLabelWarning: {
+    color: BRAND.red,
+  },
+
   calloutText: {
     fontFamily: "AoLSans",
     fontSize: 10,
+    lineHeight: 1.56,
     color: BRAND.ink,
-    lineHeight: 1.55,
   },
 
-  bulletList: { marginVertical: 6, paddingLeft: 6 },
-  bulletItem: { flexDirection: "row", marginBottom: 3 },
-  bulletDot: { width: 10, fontSize: 10, color: BRAND.gold2 },
+  bulletItem: {
+    flexDirection: "row",
+    marginBottom: 4,
+  },
+
+  bulletDot: {
+    width: 10,
+    fontSize: 10,
+    color: BRAND.gold2,
+  },
+
   bulletText: {
     flex: 1,
     fontFamily: "AoLSans",
-    fontSize: 10.2,
+    fontSize: 10.1,
+    lineHeight: 1.56,
+    color: BRAND.ink,
+  },
+
+  tocPanel: {
+    marginTop: 14,
+    borderWidth: 0.8,
+    borderColor: BRAND.border,
+    backgroundColor: BRAND.panelSoft,
+    padding: 12,
+  },
+
+  tocRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+    borderBottomWidth: 0.5,
+    borderBottomColor: BRAND.border,
+  },
+
+  tocText: {
+    fontFamily: "AoLSans",
+    fontSize: 10,
+    color: BRAND.ink,
+  },
+
+  tocPage: {
+    fontFamily: "AoLMono",
+    fontSize: 9,
+    color: BRAND.gold2,
+  },
+
+  panel: {
+    marginTop: 12,
+    borderWidth: 0.8,
+    borderColor: BRAND.border,
+    backgroundColor: BRAND.panelSoft,
+    padding: 12,
+  },
+
+  panelLabel: {
+    fontFamily: "AoLSans",
+    fontSize: 8,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: BRAND.gold2,
+    marginBottom: 6,
+  },
+
+  panelText: {
+    fontFamily: "AoLSans",
+    fontSize: 9.5,
     lineHeight: 1.55,
     color: BRAND.ink,
   },
+
+  nodeLegendWrap: {
+    marginTop: 8,
+  },
+
+  nodeLegendRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+
+  nodeLegendItem: {
+    width: "24%",
+  },
+
+  nodeLegendTitle: {
+    fontFamily: "AoLMono",
+    fontSize: 8.2,
+    color: BRAND.gold2,
+    marginBottom: 2,
+  },
+
+  nodeLegendText: {
+    fontFamily: "AoLSans",
+    fontSize: 8.5,
+    lineHeight: 1.4,
+    color: BRAND.muted,
+  },
+
+  scoreGrid: {
+    marginTop: 10,
+  },
+
+  scoreCard: {
+    marginBottom: 10,
+    borderWidth: 0.8,
+    borderColor: BRAND.border,
+    backgroundColor: BRAND.panel,
+    padding: 10,
+  },
+
+  scoreHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+
+  scoreTitle: {
+    fontFamily: "AoLSans",
+    fontSize: 9.5,
+    textTransform: "uppercase",
+    letterSpacing: 1.6,
+    color: BRAND.white,
+  },
+
+  scoreValue: {
+    fontFamily: "AoLMono",
+    fontSize: 9,
+    color: BRAND.gold2,
+  },
+
+  scoreBarTrack: {
+    height: 6,
+    backgroundColor: BRAND.border,
+    marginBottom: 8,
+  },
+
+  scoreBarFillCritical: {
+    height: 6,
+    backgroundColor: BRAND.red,
+  },
+
+  scoreBarFillElevated: {
+    height: 6,
+    backgroundColor: BRAND.amber,
+  },
+
+  scoreBarFillModerate: {
+    height: 6,
+    backgroundColor: BRAND.gold2,
+  },
+
+  scoreBarFillLow: {
+    height: 6,
+    backgroundColor: BRAND.emerald,
+  },
+
+  scoreText: {
+    fontFamily: "AoLSans",
+    fontSize: 9.2,
+    lineHeight: 1.5,
+    color: BRAND.ink,
+  },
+
+  tableWrap: {
+    marginTop: 10,
+    borderWidth: 0.8,
+    borderColor: BRAND.border,
+  },
+
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 0.6,
+    borderBottomColor: BRAND.border,
+  },
+
+  tableHead: {
+    backgroundColor: BRAND.panelSoft,
+  },
+
+  tableCell: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+
+  tableWide: {
+    flex: 1.5,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+
+  tableHeadText: {
+    fontFamily: "AoLSans",
+    fontSize: 8,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    color: BRAND.gold2,
+  },
+
+  tableText: {
+    fontFamily: "AoLSans",
+    fontSize: 9.1,
+    lineHeight: 1.4,
+    color: BRAND.ink,
+  },
+
+  recordPanel: {
+    marginTop: 14,
+    borderWidth: 0.8,
+    borderColor: BRAND.border,
+    backgroundColor: BRAND.panelSoft,
+    padding: 10,
+  },
+
+  recordLabel: {
+    fontFamily: "AoLSans",
+    fontSize: 8,
+    color: BRAND.gold2,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+
+  recordText: {
+    fontFamily: "AoLMono",
+    fontSize: 8.1,
+    lineHeight: 1.48,
+    color: BRAND.muted,
+  },
+
+  tableRowLast: {
+    borderBottomWidth: 0,
+  },
+
+  openingPage: {
+    pageBreakAfter: "always",
+    minHeight: "100vh",
+    padding: 70,
+    backgroundColor: BRAND.bg,
+    justifyContent: "center",
+  },
+
+  openingText: {
+    fontFamily: "AoLSerif",
+    fontSize: 20,
+    lineHeight: 1.7,
+    color: BRAND.ink,
+    maxWidth: "75%",
+  },
+
+  openingLine: {
+    fontFamily: "AoLSerif",
+    fontSize: 22,
+    lineHeight: 1.8,
+    color: BRAND.white,
+    marginBottom: 16,
+  },
+
+  epilogue: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: BRAND.border,
+    fontStyle: "italic",
+    color: BRAND.muted,
+  },
 });
 
-function TopRail(props: { eyebrow: string; title: string }): JSX.Element {
-  const { eyebrow, title } = props;
+function TopRail(props: { eyebrow: string; title: string }) {
   return (
     <View style={styles.topRail} fixed>
       <View style={styles.railLeft}>
-        <Text style={styles.railEyebrow}>{eyebrow}</Text>
-        <Text style={styles.railTitle}>{title}</Text>
+        <Text style={styles.railEyebrow}>{props.eyebrow}</Text>
+        <Text style={styles.railTitle}>{props.title}</Text>
       </View>
-      <Text style={styles.railRight}>{`abrahamoflondon.org`}</Text>
+      <Text style={styles.railRight}>abrahamoflondon.org</Text>
     </View>
   );
 }
 
-function Footer(): JSX.Element {
+function Footer() {
   return (
     <View style={styles.footer} fixed>
-      <Text style={styles.smallBrand}>{`Abraham of London · Strategic Editorials`}</Text>
+      <Text style={styles.footerBrand}>
+        Abraham of London · Flagship Editorials
+      </Text>
       <Text
         style={styles.pageNumber}
         render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
@@ -267,253 +659,661 @@ function Footer(): JSX.Element {
   );
 }
 
-export type UltimatePurposeOfManPdfProps = {
-  coverImagePath: string;
-};
+function Callout(props: {
+  label: string;
+  children: React.ReactNode;
+  warning?: boolean;
+}) {
+  return (
+    <View 
+      style={
+        props.warning 
+          ? [styles.callout, styles.calloutWarning] 
+          : styles.callout
+      }
+    >
+      <Text
+        style={
+          props.warning 
+            ? [styles.calloutLabel, styles.calloutLabelWarning] 
+            : styles.calloutLabel
+        }
+      >
+        {props.label}
+      </Text>
+      <Text style={styles.calloutText}>{props.children}</Text>
+    </View>
+  );
+}
 
-export default function UltimatePurposeOfManPdf(
-  props: UltimatePurposeOfManPdfProps
-): JSX.Element {
-  const { coverImagePath } = props;
+function PullQuote(props: { text: string }) {
+  return (
+    <View style={styles.pullquote}>
+      <Text style={styles.pullquoteText}>“{props.text}”</Text>
+    </View>
+  );
+}
+
+function StrategicDiagramPageBlock() {
+  return (
+    <View style={styles.panel}>
+      <Text style={styles.panelLabel}>The Architecture of Human Purpose</Text>
+
+      <Svg width="100%" height="210" viewBox="0 0 500 210">
+        {/* Vertical connectors */}
+        <Line x1="160" y1="105" x2="160" y2="58" stroke={BRAND.goldLine} strokeWidth={1} />
+        <Line x1="250" y1="105" x2="250" y2="40" stroke={BRAND.goldLine} strokeWidth={1} />
+        <Line x1="340" y1="105" x2="340" y2="58" stroke={BRAND.goldLine} strokeWidth={1} />
+        
+        {/* Main horizontal line */}
+        <Line x1="70" y1="105" x2="430" y2="105" stroke={BRAND.gold} strokeWidth={1.5} />
+
+        {/* Nodes */}
+        <Circle cx="70" cy="105" r="12" fill={BRAND.gold2} stroke={BRAND.gold} strokeWidth={1} />
+        <Circle cx="160" cy="105" r="12" fill={BRAND.gold2} stroke={BRAND.gold} strokeWidth={1} />
+        <Circle cx="250" cy="105" r="12" fill={BRAND.gold2} stroke={BRAND.gold} strokeWidth={1} />
+        <Circle cx="340" cy="105" r="12" fill={BRAND.gold2} stroke={BRAND.gold} strokeWidth={1} />
+        <Circle cx="430" cy="105" r="12" fill={BRAND.gold2} stroke={BRAND.gold} strokeWidth={1} />
+
+        {/* Labels */}
+        <Text x="55" y="85" style={{ fill: BRAND.white, fontSize: 8 }}>IDENTITY</Text>
+        <Text x="145" y="85" style={{ fill: BRAND.white, fontSize: 8 }}>ASSIGNMENT</Text>
+        <Text x="235" y="85" style={{ fill: BRAND.white, fontSize: 8 }}>RESPONSIBILITY</Text>
+        <Text x="320" y="85" style={{ fill: BRAND.white, fontSize: 8 }}>CONTINUITY</Text>
+        
+        {/* Anchor box */}
+        <Rect x="130" y="20" width="60" height="24" stroke={BRAND.gold} fill="none" />
+        <Text x="140" y="35" style={{ fill: BRAND.gold, fontSize: 7 }}>ANCHOR</Text>
+        
+        {/* Wall box */}
+        <Rect x="310" y="20" width="60" height="24" stroke={BRAND.gold} fill="none" />
+        <Text x="320" y="35" style={{ fill: BRAND.gold, fontSize: 7 }}>THE WALL</Text>
+      </Svg>
+
+      <View style={styles.nodeLegendWrap}>
+        <View style={styles.nodeLegendRow}>
+          <View style={styles.nodeLegendItem}>
+            <Text style={styles.nodeLegendTitle}>01. ANCHOR</Text>
+            <Text style={styles.nodeLegendText}>Identity under authority.</Text>
+          </View>
+          <View style={styles.nodeLegendItem}>
+            <Text style={styles.nodeLegendTitle}>02. FRAMEWORK</Text>
+            <Text style={styles.nodeLegendText}>Assignment and work.</Text>
+          </View>
+          <View style={styles.nodeLegendItem}>
+            <Text style={styles.nodeLegendTitle}>03. WALL</Text>
+            <Text style={styles.nodeLegendText}>Governance and order.</Text>
+          </View>
+          <View style={styles.nodeLegendItem}>
+            <Text style={styles.nodeLegendTitle}>04. YIELD</Text>
+            <Text style={styles.nodeLegendText}>Continuity and legacy.</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function FailureScoreCard(props: {
+  title: string;
+  score: string;
+  fillWidth: string;
+  tone: "critical" | "elevated" | "moderate" | "low";
+  text: string;
+}) {
+  const fillStyle =
+    props.tone === "critical"
+      ? styles.scoreBarFillCritical
+      : props.tone === "elevated"
+        ? styles.scoreBarFillElevated
+        : props.tone === "moderate"
+          ? styles.scoreBarFillModerate
+          : styles.scoreBarFillLow;
 
   return (
-    <Document title="The Ultimate Purpose of Man — Strategic Editorial">
-      {/* COVER */}
+    <View style={styles.scoreCard}>
+      <View style={styles.scoreHeader}>
+        <Text style={styles.scoreTitle}>{props.title}</Text>
+        <Text style={styles.scoreValue}>{props.score}</Text>
+      </View>
+      <View style={styles.scoreBarTrack}>
+        <View style={[fillStyle, { width: props.fillWidth }]} />
+      </View>
+      <Text style={styles.scoreText}>{props.text}</Text>
+    </View>
+  );
+}
+
+function TranslationTable() {
+  const rows = [
+    ["Personal", "Character / Faith", "Daily craft", "Self-discipline", "Integrity over decades"],
+    ["Household", "Covenant", "Formation", "Protection / budget", "Intergenerational stability"],
+    ["Institution", "Values", "Mission", "Governance / KPIs", "Durable culture and output"],
+    ["Nation", "Identity story", "National work", "Rule of law", "Civilisational strength"],
+  ];
+
+  return (
+    <View style={styles.tableWrap}>
+      <View style={[styles.tableRow, styles.tableHead]}>
+        <View style={styles.tableCell}><Text style={styles.tableHeadText}>Jurisdiction</Text></View>
+        <View style={styles.tableCell}><Text style={styles.tableHeadText}>Identity</Text></View>
+        <View style={styles.tableCell}><Text style={styles.tableHeadText}>Assignment</Text></View>
+        <View style={styles.tableCell}><Text style={styles.tableHeadText}>Responsibility</Text></View>
+        <View style={styles.tableWide}><Text style={styles.tableHeadText}>Continuity</Text></View>
+      </View>
+      {rows.map((row, idx) => (
+        <View
+          key={`${row[0]}-${idx}`}
+          style={
+            idx === rows.length - 1 
+              ? [styles.tableRow, styles.tableRowLast] 
+              : styles.tableRow
+          }
+        >
+          <View style={styles.tableCell}><Text style={styles.tableText}>{row[0]}</Text></View>
+          <View style={styles.tableCell}><Text style={styles.tableText}>{row[1]}</Text></View>
+          <View style={styles.tableCell}><Text style={styles.tableText}>{row[2]}</Text></View>
+          <View style={styles.tableCell}><Text style={styles.tableText}>{row[3]}</Text></View>
+          <View style={styles.tableWide}><Text style={styles.tableText}>{row[4]}</Text></View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+export interface UltimatePurposeOfManPdfProps {
+  coverImagePath: string;
+  docId?: string;
+  version?: string;
+  date?: string;
+  classification?: string;
+  title?: string;
+  subtitle?: string;
+  author?: string;
+}
+
+export default function UltimatePurposeOfManPdf({
+  coverImagePath,
+  docId = DEFAULT_DOC.docId,
+  version = DEFAULT_DOC.version,
+  date = DEFAULT_DOC.date,
+  classification = DEFAULT_DOC.classification,
+  title = DEFAULT_DOC.title,
+  subtitle = DEFAULT_DOC.subtitle,
+  author = DEFAULT_DOC.author,
+}: UltimatePurposeOfManPdfProps) {
+  const docMeta = { docId, version, date, classification, title, subtitle, author };
+
+  return (
+    <Document
+      title={`${docMeta.title} — ${docMeta.subtitle}`}
+      author={docMeta.author}
+      subject="Flagship Editorial — Institutional Edition"
+      keywords="purpose, sovereignty, governance, theology, strategy, editorial"
+    >
+      {/* Cover Page */}
       <Page size="A4" style={styles.coverPage}>
-        <View style={styles.coverImageWrapper}>
+        <View style={styles.coverImageWrap}>
           <Image src={coverImagePath} style={styles.coverImage} />
           <View style={styles.coverOverlay} />
         </View>
 
         <View style={styles.coverContent}>
-          <Text style={styles.coverEyebrow}>
-            {`Strategic Editorial · Theology · Leadership · Purpose`}
+          <Text style={styles.coverTopMeta}>
+            Flagship Editorial · Canon Anchor · Theology · Strategy
           </Text>
-          <Text style={styles.coverTitle}>{`THE ULTIMATE PURPOSE OF MAN`}</Text>
+
+          <Text style={styles.coverTitleSmall}>THE</Text>
+          <Text style={styles.coverTitleLarge}>ULTIMATE</Text>
+          <Text style={styles.coverTitleLarge}>PURPOSE</Text>
+          <Text style={styles.coverTitleLarge}>OF MAN</Text>
+
           <Text style={styles.coverSubtitle}>
-            {`A Strategic Essay for an Age Searching for Itself`}
+            Strategic Editorial — The Mandate of Alignment
           </Text>
 
-          <Text style={styles.coverByline}>{`by Abraham of London`}</Text>
+          <Text style={styles.coverAuthor}>by {docMeta.author}</Text>
+        </View>
+
+        <View style={styles.coverBottomMetaWrap}>
           <View style={styles.coverRule} />
-
-          <Text style={styles.coverTagline}>
-            {`A definitive editorial examining how human purpose is structured, grounded, and lived — from Eden’s design to modern civilisation, leadership, and legacy.`}
+          <Text style={styles.coverBottomMeta}>
+            {docMeta.docId} · {docMeta.classification} · v{docMeta.version} · {docMeta.date}
           </Text>
         </View>
       </Page>
 
-      {/* PAGE 1 */}
+      {/* Opening Page */}
+      <Page size="A4" style={styles.openingPage}>
+        <Text style={styles.openingLine}>
+          A civilisation does not decay first in its markets, its politics, or its art.
+        </Text>
+        <Text style={styles.openingLine}>
+          It decays first in its definitions.
+        </Text>
+        <Text style={styles.openingLine}>
+          When man forgets what he is, he loses the grammar by which work, duty, order, and continuity can be judged.
+        </Text>
+        <Text style={[styles.openingLine, { color: BRAND.gold2, marginTop: 20 }]}>
+          Purpose then collapses into appetite, performance, and improvisation.
+        </Text>
+        <View style={styles.goldRule} />
+        <Text style={[styles.openingLine, { fontSize: 18, fontStyle: "italic", color: BRAND.muted }]}>
+          The central argument of this editorial is simple:
+        </Text>
+        <Text style={[styles.openingLine, { fontSize: 22, color: BRAND.white }]}>
+          purpose is not a feeling to be discovered, but an order to be inhabited.
+        </Text>
+      </Page>
+
+      {/* Table of Contents */}
       <Page size="A4" style={styles.page}>
-        <TopRail eyebrow="Editorial · Foundations" title="Purpose is not a sentiment" />
+        <TopRail eyebrow="Editorial · Reading Guide" title="Table of Contents" />
+        <View style={styles.goldRule} />
 
-        <Text style={styles.h1}>{`INTRODUCTION — PURPOSE IS NOT A SENTIMENT`}</Text>
-
-        <Text style={styles.bodyText}>
-          {`Purpose is not discovered by accident. It is not unlocked by slogans, or summoned by emotional intensity. Purpose is structure, not abstraction; order, not inspiration.`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`The modern world has mastered activity and forgotten meaning. It has perfected progress and lost direction. It has multiplied options and erased foundations.`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`This editorial is not a pep talk. It is a demonstration of how purpose actually functions in reality — historically, theologically, strategically.`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`Purpose is not something we chase. It is something we align with.`}
-        </Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.h2}>{`1. THE GARDEN — PURPOSE AS STRUCTURE, NOT MYTH`}</Text>
-
-        <View style={styles.quoteBlock}>
-          <Text style={styles.quoteText}>
-            {`“The Lord God took the man and put him in the garden to work it and keep it.” — Genesis 2:15`}
-          </Text>
-        </View>
-
-        <Text style={styles.bodyText}>
-          {`Eden was not a paradise escape; it was a deployment zone. Man was placed into order — with identity, work, boundaries, and presence.`}
-        </Text>
-
-        <View style={styles.bulletList}>
+        <View style={styles.tocPanel}>
           {[
-            { strong: "Placed —", text: " location as intentionality" },
-            { strong: "Given identity —", text: " Imago Dei" },
-            { strong: "Given work —", text: " cultivate, govern, develop" },
-            { strong: "Given boundaries —", text: " responsibility frames freedom" },
-            { strong: "Given presence —", text: " fellowship with God as operating environment" },
-          ].map((b) => (
-            <View key={b.strong} style={styles.bulletItem}>
-              <Text style={styles.bulletDot}>{`•`}</Text>
-              <Text style={styles.bulletText}>
-                <Text style={styles.strong}>{b.strong}</Text>
-                {b.text}
-              </Text>
+            ["Introduction: The Question Beneath All Questions", "1"],
+            ["I. The Crisis Beneath the Noise", "3"],
+            ["II. First Definitions", "5"],
+            ["III. The Sequence of Sovereignty", "7"],
+            ["IV. The Architecture of Purpose", "9"],
+            ["V. Failure Modes", "11"],
+            ["VI. Governance: The Wall", "14"],
+            ["VII. Purpose Under Pressure", "16"],
+            ["VIII. Translation Table: Theology to Operations", "18"],
+            ["IX. The Discipline of Alignment", "20"],
+            ["X. Continuity and Civilisation", "22"],
+            ["Epilogue: A Letter to the Reader", "24"],
+            ["Institutional Record", "25"],
+          ].map(([label, page]) => (
+            <View key={label} style={styles.tocRow}>
+              <Text style={styles.tocText}>{label}</Text>
+              <Text style={styles.tocPage}>{page}</Text>
             </View>
           ))}
         </View>
 
-        <View style={styles.callout}>
-          <Text style={styles.calloutLabel}>{`Operating sequence`}</Text>
-          <Text style={styles.calloutText}>
-            <Text style={styles.strong}>{`Identity → Assignment → Responsibility → Culture`}</Text>
-            {`\n`}
-            {`Purpose begins long before ambition enters the conversation. Eden is not nostalgia; it is design.`}
-          </Text>
-        </View>
-
+        <Text style={[styles.body, { marginTop: 20, color: BRAND.muted }]}>
+          Reading time: {DEFAULT_DOC.readingTime}
+        </Text>
         <Footer />
       </Page>
 
-      {/* PAGE 2 */}
+      {/* Introduction */}
       <Page size="A4" style={styles.page}>
-        <TopRail eyebrow="Editorial · Pattern recognition" title="Purpose under pressure" />
-
-        <Text style={styles.h2}>
-          {`2. ANCIENT LIVES — WHAT PURPOSE LOOKS LIKE UNDER PRESSURE`}
+        <TopRail eyebrow="Editorial · Orientation" title="Introduction" />
+        <Text style={styles.h1}>The Question Beneath All Questions</Text>
+        <Text style={styles.bodyLarge}>
+          Every serious man eventually reaches a point where the noise no longer satisfies him. Achievement may still impress others, busyness may still create momentum, and public language may still produce the appearance of direction, yet beneath all of it a deeper question refuses to go away:
         </Text>
-        <Text style={styles.bodyText}>
-          {`Scripture is not a collection of inspirational stories; it is the record of how purpose behaves under suffering, delay, power, loss, and restoration.`}
+        <Text style={[styles.bodyLarge, { color: BRAND.gold2, fontStyle: "italic", marginVertical: 10 }]}>
+          Why am I here? What is my life for? What makes a life rightly ordered rather than merely active?
         </Text>
-
-        <Text style={styles.h3}>{`Job — Integrity under suffering`}</Text>
-        <Text style={styles.bodyText}>
-          {`Purpose holds even when everything else collapses. Job dismantles the myth that purpose is proven only in success.`}
+        <Text style={styles.bodyLarge}>
+          These are not ornamental questions. They are foundational. They sit beneath ambition, beneath discipline, beneath career, beneath family, beneath legacy, and beneath even the language of faith itself.
         </Text>
-
-        <Text style={styles.h3}>{`Moses — Assignment after delay`}</Text>
-        <Text style={styles.bodyText}>
-          {`Delay is often formation. The man who fled in fear returned with clarity, authority, and mandate.`}
-        </Text>
-
-        <Text style={styles.h3}>{`Abraham — Direction through trust`}</Text>
-        <Text style={styles.bodyText}>
-          {`Called without a map, promised without timelines. Purpose is walked out step-by-step.`}
-        </Text>
-
-        <Text style={styles.h3}>{`David — Formation in hiddenness`}</Text>
-        <Text style={styles.bodyText}>
-          {`Before the throne, there was the field. Leadership was forged in worship and obedience long before coronation.`}
-        </Text>
-
-        <Text style={styles.h3}>{`Solomon — Discernment through wisdom`}</Text>
-        <Text style={styles.bodyText}>
-          {`Purpose without wisdom becomes vanity. Capacity without alignment leads to waste.`}
-        </Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.h2}>{`3. JESUS — THE BLUEPRINT FOR HUMAN FUNCTION`}</Text>
-        <Text style={styles.bodyText}>
-          {`Jesus does not only save mankind; He reveals mankind. He is the perfect expression of aligned identity, disciplined action, sacrificial leadership, and integrated purpose.`}
-        </Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.h2}>
-          {`4. WORLDVIEWS — ATTEMPTS TO REPLACE THE ORIGINAL DESIGN`}
-        </Text>
-        <Text style={styles.bodyText}>
-          {`Civilisations rise and fall on their answer to the question of human purpose.`}
-        </Text>
-
-        <View style={styles.bulletList}>
-          {[
-            { strong: "Hinduism —", text: " dissolution of self." },
-            { strong: "Buddhism —", text: " escape from desire." },
-            { strong: "Confucianism —", text: " order without a Father." },
-            { strong: "Islam —", text: " obedience without sonship." },
-            { strong: "Atheism —", text: " meaning manufactured from meaninglessness." },
-          ].map((b) => (
-            <View key={b.strong} style={styles.bulletItem}>
-              <Text style={styles.bulletDot}>{`•`}</Text>
-              <Text style={styles.bulletText}>
-                <Text style={styles.strong}>{b.strong}</Text>
-                {b.text}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.callout}>
-          <Text style={styles.calloutLabel}>{`The complete sequence`}</Text>
-          <Text style={styles.calloutText}>
-            <Text style={styles.strong}>{`Origin → Identity → Meaning → Morality → Destiny`}</Text>
-            {`\n`}
-            {`Alternatives can manufacture ethic or discipline — but not the full chain that sustains civilisation over time.`}
-          </Text>
-        </View>
-
+        <Callout label="Editorial Thesis">
+          Man is not self-originating, self-defining, or self-justifying. He exists within an order he did not author. His purpose therefore cannot be invented by appetite or discovered by interior mood alone.
+        </Callout>
         <Footer />
       </Page>
 
-      {/* PAGE 3 */}
+      {/* I. The Crisis Beneath the Noise */}
       <Page size="A4" style={styles.page}>
-        <TopRail eyebrow="Editorial · Civilisation" title="Purpose becomes public" />
+        <TopRail eyebrow="Part One · Diagnosis" title="The Crisis Beneath the Noise" />
+        <Text style={styles.h1}>I. The Crisis Beneath the Noise</Text>
+        <Text style={styles.body}>
+          The modern world speaks endlessly about purpose, yet rarely defines it with enough precision to govern life. In popular use, purpose has become a mixture of mood, ambition, self-expression, personal branding, and therapeutic aspiration. It is treated as something one "finds" by experimenting, curating, sampling, and waiting for emotional clarity. The result is not freedom. It is drift decorated as discovery.
+        </Text>
+        <Text style={styles.body}>
+          This confusion is not a minor philosophical inconvenience. It has institutional consequences. Households become unstable because duty is negotiated rather than assumed. Organisations become incoherent because mission is rewritten around personality. Nations become fragmented because shared order is replaced by private meaning.
+        </Text>
+        <Callout label="Editorial Premise">
+          The essential failure of the age is not merely moral weakness. It is conceptual looseness. Men cannot govern life well with words they have refused to define.
+        </Callout>
+        <Footer />
+      </Page>
 
-        <Text style={styles.h2}>{`5. WHY CHRISTIANITY BUILT THE MODERN WORLD`}</Text>
-        <Text style={styles.bodyText}>
-          {`Christianity did not merely inspire private faith; it reshaped civilisation. Much of what we call “modern” is the outworking of biblical ideas entering public life.`}
+      {/* II. First Definitions */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part One · Foundations" title="First Definitions" />
+        <Text style={styles.h1}>II. First Definitions</Text>
+        <Text style={styles.body}>
+          No structure can endure if its load-bearing words remain vague. The first task is therefore to define the central terms with enough discipline that they can withstand pressure.
         </Text>
 
-        <View style={styles.callout}>
-          <Text style={styles.calloutLabel}>{`Still the hidden engine`}</Text>
-          <Text style={styles.calloutText}>
-            {`Much of what the world now treats as “obvious” grew directly from Christian convictions about God, people, and order.`}
-          </Text>
-        </View>
-
-        {[
-          {
-            title: "Human Dignity — Imago Dei (Genesis 1:26–27)",
-            body:
-              "Every human carries divine worth regardless of status. This doctrine dismantled ancient hierarchies and seeded human rights reasoning.",
-          },
-          {
-            title: "Scientific Rationalism — A rational Creator, a rational universe",
-            body:
-              "Belief in an orderly God produced expectation of discoverable laws — a driver of the scientific revolution.",
-          },
-          {
-            title: "The Rule of Law — No one is above God",
-            body:
-              "Even kings answer to a higher authority — foundations for constitutional government.",
-          },
-          {
-            title: "Vocation — Work as stewardship",
-            body:
-              "The sacred–secular divide collapses: farmer, merchant, mother, statesman all serve through craft and responsibility.",
-          },
-        ].map((b) => (
-          <View key={b.title} style={{ marginTop: 8 }}>
-            <Text style={styles.h3}>{`• ${b.title}`}</Text>
-            <Text style={styles.bodyText}>{b.body}</Text>
+        <View style={styles.tableWrap}>
+          <View style={[styles.tableRow, styles.tableHead]}>
+            <View style={styles.tableCell}><Text style={styles.tableHeadText}>Term</Text></View>
+            <View style={styles.tableWide}><Text style={styles.tableHeadText}>Definition</Text></View>
           </View>
-        ))}
+          {[
+  ["Truth", "That which stands whether acknowledged or denied."],
+  ["Order", "The right arrangement of things according to their nature."],
+  ["Design", "The intended structure and function of a thing."],
+  ["Purpose", "The end for which a thing was formed."],
+  ["Wisdom", "The alignment of action with truth."],
+  ["Responsibility", "The obligation to preserve and administer what has been entrusted within the bounds of order."],
+  ["Governance", "The practical enforcement of order toward good ends."],
+  ["Continuity", "The durable transmission of ordered life beyond the moment, beyond the mood, and beyond the individual."],
+].map(([term, def], idx) => (
+  <View 
+    key={term} 
+    style={
+      idx === 7 
+        ? [styles.tableRow, styles.tableRowLast]  // ✅ FIXED: Use the predefined style
+        : styles.tableRow
+    }
+  >
+    <View style={styles.tableCell}>
+      <Text style={[styles.tableText, { color: BRAND.gold2 }]}>{term}</Text>
+    </View>
+    <View style={styles.tableWide}>
+      <Text style={styles.tableText}>{def}</Text>
+    </View>
+  </View>
+))}
+        </View>
 
-        <View style={styles.divider} />
+        <Callout label="Foundational Claim">
+          If you deny design, you do not become free. You become ungoverned.
+        </Callout>
+        <Footer />
+      </Page>
 
-        <Text style={styles.h2}>{`6. ECCLESIASTES — THE TWO-SENTENCE BLUEPRINT`}</Text>
-
-        <View style={styles.quoteBlock}>
-          <Text style={styles.quoteText}>
-            {`“Fear God and keep His commandments… this is the whole duty of man.” — Ecclesiastes 12:13`}
+      {/* III. The Sequence of Sovereignty */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Two · Architecture" title="The Sequence of Sovereignty" />
+        <Text style={styles.h1}>III. The Sequence of Sovereignty</Text>
+        <Text style={styles.bodyLarge}>
+          To lead effectively, one must understand the operating sequence of aligned life:
+        </Text>
+        <Text style={[styles.bodyLarge, { color: BRAND.gold2, textAlign: "center", marginVertical: 15 }]}>
+          IDENTITY → ASSIGNMENT → RESPONSIBILITY → CONTINUITY
+        </Text>
+        
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>
+            <Text style={styles.strong}>Identity</Text> answers what a man is, under whose authority, and by what standard.
+          </Text>
+        </View>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>
+            <Text style={styles.strong}>Assignment</Text> answers what work belongs to that identity.
+          </Text>
+        </View>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>
+            <Text style={styles.strong}>Responsibility</Text> answers what must be protected, governed, and enforced.
+          </Text>
+        </View>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>
+            <Text style={styles.strong}>Continuity</Text> answers what outlives the man because he governed rightly.
           </Text>
         </View>
 
-        <Text style={styles.bodyText}>
-          {`This is not fear as terror; it is fear as proper orientation — reality accepted, order respected, authority acknowledged.`}
+        <PullQuote text="Inversion is always costly. When continuity is pursued before responsibility, you build legacy-shaped fragility." />
+        <Footer />
+      </Page>
+
+      {/* IV. The Architecture of Purpose */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Two · Structure" title="The Architecture of Purpose" />
+        <Text style={styles.h1}>IV. The Architecture of Purpose</Text>
+        <Text style={styles.body}>
+          Purpose is often discussed as though it were a private sensation. In reality, it is architectural. It has layers, supports, thresholds, and load-bearing relations.
         </Text>
 
-        <View style={styles.divider} />
+        <StrategicDiagramPageBlock />
 
-        <Text style={styles.h2}>{`7. CONCLUSION — PURPOSE IS A MANDATE, NOT A MYSTERY`}</Text>
-        <Text style={styles.bodyText}>
-          {`You were not designed for drift. The purpose of man is not hidden: align with God’s order, embody His love, steward His world, build with clarity.`}
+        <Text style={styles.h2}>The Anchor</Text>
+        <Text style={styles.body}>
+          Purpose begins with an anchor: man is not self-originating, self-defining, or self-justifying. He exists within an order he did not create.
         </Text>
-        <Text style={[styles.bodyText, { color: BRAND.white }]}>
-          {`Fear God. Keep His commandments. Walk in love. Build with precision. Everything else is commentary.`}
+        <Footer />
+      </Page>
+
+      {/* V. Failure Modes */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Three · Diagnosis" title="Failure Modes" />
+        <Text style={styles.h1}>V. Failure Modes</Text>
+        <Text style={styles.body}>
+          When purpose collapses, it does not collapse randomly. It collapses along familiar lines.
+        </Text>
+
+        <View style={styles.scoreGrid}>
+          <FailureScoreCard
+            title="Mood Model"
+            score="Risk 82 / 100"
+            fillWidth="82%"
+            tone="critical"
+            text="Purpose becomes what one feels like doing. The result is oscillation, not continuity."
+          />
+          <FailureScoreCard
+            title="Applause Model"
+            score="Risk 76 / 100"
+            fillWidth="76%"
+            tone="elevated"
+            text="Purpose becomes performance. Significance is outsourced to spectators."
+          />
+          <FailureScoreCard
+            title="Freedom Model"
+            score="Risk 88 / 100"
+            fillWidth="88%"
+            tone="critical"
+            text="Purpose becomes self-definition. Autonomy without order decays into drift."
+          />
+          <FailureScoreCard
+            title="Utility Model"
+            score="Risk 71 / 100"
+            fillWidth="71%"
+            tone="elevated"
+            text="Purpose becomes productivity only. The soul becomes a machine."
+          />
+          <FailureScoreCard
+            title="Legacy Before Duty"
+            score="Risk 79 / 100"
+            fillWidth="79%"
+            tone="elevated"
+            text="Continuity is pursued before responsibility. The result is brand-shaped weakness."
+          />
+        </View>
+
+        <Callout label="Rule">
+          The more complex the arena, the more rigid the definitions must be.
+        </Callout>
+        <Footer />
+      </Page>
+
+      {/* VI. Governance: The Wall */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Four · Enforcement" title="Governance: The Wall" />
+        <Text style={styles.h1}>VI. Governance: The Wall</Text>
+        <Text style={styles.body}>
+          Responsibility is not a vibe. It is enforcement. Governance is the administration of order toward good.
+        </Text>
+
+        <View style={styles.panel}>
+          <Text style={styles.panelLabel}>Governance Checklist</Text>
+          {[
+            ["Standards:", "Do you have written standards or only preferences?"],
+            ["Enforcement:", "Do you enforce standards when it costs you?"],
+            ["Accountability:", "Is anyone allowed to challenge you with truth?"],
+            ["Boundaries:", "Do you protect the mission from emotional sabotage?"],
+            ["Consequences:", "Are there real consequences for drift?"],
+            ["Transmission:", "Are standards teachable, or trapped in one personality?"],
+            ["Review:", "Is there a rhythm of examination, correction, and reinforcement?"],
+          ].map(([label, value]) => (
+            <View key={label} style={styles.bulletItem}>
+              <Text style={styles.bulletDot}>•</Text>
+              <Text style={styles.bulletText}>
+                <Text style={styles.strong}>{label} </Text>
+                {value}
+              </Text>
+            </View>
+          ))}
+        </View>
+        <Footer />
+      </Page>
+
+      {/* VII. Purpose Under Pressure */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Four · Testing" title="Purpose Under Pressure" />
+        <Text style={styles.h1}>VII. Purpose Under Pressure</Text>
+        
+        <View style={styles.quoteBlock}>
+          <Text style={styles.quoteText}>
+            Purpose is not proven in seasons of applause. It is proven in silence, delay, and the heat of the forge.
+          </Text>
+        </View>
+
+        <Text style={styles.h3}>The Test of Delay</Text>
+        <Text style={styles.body}>
+          Delay is especially revealing. Men often assume delay means denial. Sometimes it does. But often delay means formation.
+        </Text>
+
+        <Text style={styles.h3}>The Test of Obscurity</Text>
+        <Text style={styles.body}>
+          Obscurity reveals whether a man works for reward or from nature. When no one is watching, what then?
+        </Text>
+
+        <Callout label="Drift Warning" warning>
+          If you avoid responsibility, pressure will force responsibility on you — usually through crisis.
+        </Callout>
+        <Footer />
+      </Page>
+
+      {/* VIII. Translation Table */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Five · Application" title="Theology to Operations" />
+        <Text style={styles.h1}>VIII. Translation Table: Theology to Operations</Text>
+        <Text style={styles.body}>
+          If truth is real, then its implications should scale from the soul to the institution.
+        </Text>
+
+        <TranslationTable />
+
+        <Callout label="Operational Summary">
+          Identity defines the standard. Assignment defines the work. Responsibility enforces the standard in the work. Continuity is the yield.
+        </Callout>
+        <Footer />
+      </Page>
+
+      {/* IX. The Discipline of Alignment */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Five · Practice" title="The Discipline of Alignment" />
+        <Text style={styles.h1}>IX. The Discipline of Alignment</Text>
+        <Text style={styles.body}>
+          If purpose is to become practice rather than poetry, it must enter rhythm. Alignment is not achieved by occasional inspiration.
+        </Text>
+
+        <Text style={styles.h3}>30-Day Alignment Protocol</Text>
+        
+        <Text style={styles.h2}>Week 1 — Definition</Text>
+        <Text style={styles.body}>Write non-negotiable definitions for truth, order, purpose, responsibility, governance, and continuity.</Text>
+        
+        <Text style={styles.h2}>Week 2 — Audit</Text>
+        <Text style={styles.body}>Identify the dominant drift pattern currently at work in your life or domain.</Text>
+        
+        <Text style={styles.h2}>Week 3 — Boundary</Text>
+        <Text style={styles.body}>Write the standards you have avoided writing. Define the consequences you have avoided defining.</Text>
+        
+        <Text style={styles.h2}>Week 4 — Continuity</Text>
+        <Text style={styles.body}>Design the habits, documentation, review loops, and teaching mechanisms by which alignment can outlive you.</Text>
+
+        <View style={styles.panel}>
+          <Text style={styles.panelLabel}>Exposing Question</Text>
+          <Text style={styles.panelText}>
+            If your private life were audited, would it support your public mission or sabotage it?
+          </Text>
+        </View>
+        <Footer />
+      </Page>
+
+      {/* X. Continuity and Civilisation */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Part Six · Legacy" title="Continuity and Civilisation" />
+        <Text style={styles.h1}>X. Continuity and Civilisation</Text>
+        <Text style={styles.body}>
+          The final test of purpose is not whether it feels meaningful in the moment, but whether it contributes to continuity worthy of transmission.
+        </Text>
+        <Text style={styles.body}>
+          A civilisation is not sustained by slogans about innovation, empowerment, or authenticity. It is sustained by rightly ordered men and women who know what is true, what is theirs to carry, what must be defended, and what must be passed on.
+        </Text>
+
+        <Text style={styles.h3}>Four Questions for Civilisational Audit</Text>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>Are our definitions stable? Or do they shift with preference and pressure?</Text>
+        </View>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>Is responsibility normal? Or is it resented and avoided?</Text>
+        </View>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>Is governance present? Or is order merely discussed but never enforced?</Text>
+        </View>
+        <View style={styles.bulletItem}>
+          <Text style={styles.bulletDot}>•</Text>
+          <Text style={styles.bulletText}>Is continuity visible? Or are we consuming inheritance while adding nothing?</Text>
+        </View>
+        <Footer />
+      </Page>
+
+      {/* Epilogue */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Conclusion" title="Epilogue" />
+        <Text style={styles.h1}>Epilogue: A Letter to the Reader</Text>
+        <Text style={styles.bodyLarge}>
+          You have read this far, which suggests you are not merely curious but serious. The argument of this editorial is not complex, but it is demanding.
+        </Text>
+        <Text style={styles.bodyLarge}>
+          It asks you to exchange the romance of self-discovery for the discipline of alignment. It asks you to let definitions govern decisions, to let identity anchor assignment, to let responsibility build walls, and to let walls yield continuity.
+        </Text>
+        <Text style={[styles.bodyLarge, { color: BRAND.gold2, marginTop: 20 }]}>
+          This is not a popular message. It will not sell out auditoriums or generate viral engagement. But it is true, and truth, unlike sentiment, can bear weight.
+        </Text>
+        <View style={styles.epilogue}>
+          <Text style={[styles.body, { fontStyle: "italic", color: BRAND.muted }]}>
+            The age does not need more men who talk about purpose. It needs men who inhabit it.
+          </Text>
+        </View>
+        <Footer />
+      </Page>
+
+      {/* Institutional Record */}
+      <Page size="A4" style={styles.page}>
+        <TopRail eyebrow="Appendix" title="Institutional Record" />
+        <Text style={styles.h1}>Institutional Record</Text>
+
+        <View style={styles.recordPanel}>
+          <Text style={styles.recordText}>
+            Document ID: {docMeta.docId}{"\n"}
+            Title: {docMeta.title}{"\n"}
+            Subtitle: {docMeta.subtitle}{"\n"}
+            Author: {docMeta.author}{"\n"}
+            Status: Canonical Orientation{"\n"}
+            Version: {docMeta.version}{"\n"}
+            Classification: {docMeta.classification}{"\n"}
+            Category: Theology / Strategy{"\n"}
+            Reading Time: {DEFAULT_DOC.readingTime}{"\n"}
+            Date: {docMeta.date}
+          </Text>
+        </View>
+
+        <Text style={styles.body}>
+          <Text style={styles.strong}>Function:</Text> Foundational orientation for reformers, builders, household governors, and institutional architects within the Abraham of London network.
+        </Text>
+
+        <Text style={[styles.body, { marginTop: 20, fontStyle: "italic", color: BRAND.gold2, textAlign: "center" }]}>
+          The task of leadership is not self-expression. It is alignment with truth.
         </Text>
 
         <Footer />
@@ -522,4 +1322,10 @@ export default function UltimatePurposeOfManPdf(
   );
 }
 
-
+export function UltimatePurposeOfManPreview(props: UltimatePurposeOfManPdfProps) {
+  return (
+    <PDFViewer width="100%" height="1000px" style={{ border: "none" }}>
+      <UltimatePurposeOfManPdf {...props} />
+    </PDFViewer>
+  );
+}

@@ -2,7 +2,8 @@
    - DO NOT import "server-only" here (pages router cannot handle it)
    - Enforce Node-only at runtime via guard
 */
-import { Prisma, type AuditSeverity } from "@prisma/client"; // Prisma as VALUE + type
+// lib/audit/audit-logger.ts — NODE-ONLY AUDIT LOGGER (pages/ compatible)
+import { Prisma, type AuditSeverity } from "@prisma/client";
 import { prisma as globalPrisma } from "@/lib/prisma";
 import { safeSlice } from "@/lib/utils/safe";
 
@@ -153,6 +154,12 @@ function toJson(value: unknown): JsonInput {
   return value as Prisma.InputJsonValue;
 }
 
+/**
+ * SYSTEM RESOLUTION:
+ * Added specific classification detection for the 2026 Tier set.
+ * This ensures that logs involving 'restricted' or 'top-secret' resources
+ * are clearly identified in the system audit trail.
+ */
 function toDbCreateInput(event: AuditEvent): Prisma.SystemAuditLogCreateInput {
   const environment = normalizeString(event.environment) || process.env.NODE_ENV || "development";
   const service = normalizeString(event.service) || "abrahamoflondon";
@@ -195,6 +202,8 @@ function toDbCreateInput(event: AuditEvent): Prisma.SystemAuditLogCreateInput {
     version,
     userAgentShort: userAgent ? safeSlice(userAgent, 0, 180) : undefined,
     at: nowIso(),
+    // Logic to flag clearance-level logs
+    isHighClearance: tagsArr.includes('top-secret') || tagsArr.includes('restricted')
   };
 
   const mergedMetadata: Record<string, unknown> = {
@@ -205,13 +214,11 @@ function toDbCreateInput(event: AuditEvent): Prisma.SystemAuditLogCreateInput {
   return {
     action: event.action,
     severity,
-
     actorId,
     actorEmail,
     resourceId,
     ipAddress,
     userAgent,
-
     actorType,
     status,
     resourceType,
@@ -223,7 +230,6 @@ function toDbCreateInput(event: AuditEvent): Prisma.SystemAuditLogCreateInput {
     category,
     subCategory,
     tags: toJson(tagsArr),
-
     metadata: toJson(mergedMetadata),
   };
 }
@@ -279,7 +285,10 @@ export class AuditLogger {
     const input = toDbCreateInput(event);
 
     if ((process.env.NODE_ENV || "development") !== "production") {
-      console.log(`🧾 [AUDIT:${String(input.severity).toUpperCase()}] ${input.action}`, {
+      // Enhanced console output for high-tier actions
+      const tierTag = event.tags?.includes('top-secret') ? ' [TOP-SECRET]' : 
+                     event.tags?.includes('restricted') ? ' [RESTRICTED]' : '';
+      console.log(`🧾 [AUDIT:${String(input.severity).toUpperCase()}]${tierTag} ${input.action}`, {
         actorEmail: input.actorEmail ?? undefined,
         actorId: input.actorId ?? undefined,
         actorType: (input as any).actorType ?? undefined,
@@ -289,8 +298,9 @@ export class AuditLogger {
       });
     }
 
-    // Immediate durability for high-signal
-    if (input.severity === "critical" || input.severity === "high") {
+    // Immediate durability for high-signal or Top Secret/Restricted logs
+    if (input.severity === "critical" || input.severity === "high" || 
+        event.tags?.includes('top-secret') || event.tags?.includes('restricted')) {
       return this.prisma.systemAuditLog.create({ data: input });
     }
 

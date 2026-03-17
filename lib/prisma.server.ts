@@ -1,32 +1,18 @@
 // lib/prisma.server.ts — SERVER-ONLY PRISMA BARREL (Node runtime)
 //
-// Exports required by App Router server actions/routes:
-// - prisma
-// - getPrisma
-// - safePrismaQuery
-// - checkDatabaseConnection
-//
-// Never import this from pages/** client bundles.
+// Single source of truth for App Router server actions/routes.
+// Delegates to the hardened Neon-backed server Prisma implementation.
 
 import "server-only";
 
-import { prisma, checkDatabaseConnection } from "@/lib/db/prisma";
+export {
+  prisma,
+  getPrisma,
+  safePrismaQuery,
+  checkDatabaseConnection,
+} from "@/lib/db/prisma";
 
-export { prisma, checkDatabaseConnection };
+export { default } from "@/lib/db/prisma";
 
-// Helper parity with prisma.pages.ts
-export const getPrisma = () => prisma;
-
-export async function safePrismaQuery<T>(query: () => Promise<T>): Promise<T | null> {
-  try {
-    return await query();
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("[VAULT_PRISMA_ERROR]:", error);
-    return null;
-  }
-}
-
-// Types (safe to export)
+export type PrismaClientType = import("@/lib/db/prisma").PrismaTransactionClient;
 export type { Prisma } from "@prisma/client";
-export type PrismaClientType = typeof prisma;

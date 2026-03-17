@@ -1,4 +1,4 @@
-/* pages/vault/briefs/index.tsx — VAULT BRIEFS INDEX (Premium, SSG, SSOT-safe) */
+/* pages/vault/briefs/index.tsx — VAULT BRIEFS INDEX (Permanent Shared Resolver) */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
@@ -6,17 +6,25 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Search, Shield, Lock, ArrowRight, Filter } from "lucide-react";
+import {
+  Search,
+  Shield,
+  Lock,
+  ArrowRight,
+  Filter,
+  Terminal,
+  Activity,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
-import AccessGate from "@/components/AccessGate";
-
-import { getPublishedDocuments, sanitizeData, normalizeSlug } from "@/lib/content/server";
+import * as ContentSource from "contentlayer/generated";
+import { normalizeSlug as normalizeContentSlug } from "@/lib/content/server";
+import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
 type BriefCard = {
-  slug: string; // brief-001-modern-household
-  href: string; // /vault/briefs/<slug>
+  slug: string;
+  href: string;
   title: string;
   series: string;
   abstract: string;
@@ -31,54 +39,86 @@ type BriefCard = {
 type Props = {
   items: BriefCard[];
   total: number;
-  requiredTier: AccessTier; // page-level gate (keep public)
+  requiredTier: AccessTier;
 };
 
-function normalizeBriefSlug(input: string): string {
-  if (!input) return "";
-  const s = normalizeSlug(String(input));
-  // Accept: "vault/briefs/brief-001-x" OR "content/vault/briefs/brief-001-x" OR file path
-  const cleaned = s.replace(/^content\//i, "");
-  const parts = cleaned.split("/").filter(Boolean);
-  const last = parts[parts.length - 1] || "";
-  return last.replace(/\.mdx$/i, "");
+function safeString(v: unknown): string {
+  return typeof v === "string" ? v : "";
 }
 
-function toBriefHref(slug: string) {
-  return `/vault/briefs/${slug}`;
+function safeArray<T = unknown>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
 }
 
-function getSeriesFromDoc(doc: any): string {
-  return String(doc?.series || doc?.category || doc?.section || doc?.group || "Vault Briefs").trim() || "Vault Briefs";
+function normalizeBriefSlug(input: unknown): string {
+  const raw = normalizeContentSlug(String(input || ""))
+    .replace(/^content\//i, "")
+    .replace(/^vault\/briefs\//i, "")
+    .replace(/^briefs\//i, "")
+    .replace(/\.(md|mdx)$/i, "")
+    .replace(/^\/+|\/+$/g, "");
+
+  const parts = raw.split("/").filter(Boolean);
+  return parts[parts.length - 1] || "";
 }
 
-function getAbstractFromDoc(doc: any): string {
-  return String(doc?.abstract || doc?.excerpt || doc?.description || "").trim();
+function getAllContentCandidates(): any[] {
+  const source = ContentSource as any;
+
+  return [
+    ...safeArray(source.allBriefs),
+    ...safeArray(source.allVaultBriefs),
+    ...safeArray(source.allDocuments),
+    ...safeArray(source.allResources),
+    ...safeArray(source.allPosts),
+    ...safeArray(source.allCanon),
+    ...safeArray(source.allDispatches),
+  ];
 }
 
-function getReadTimeFromDoc(doc: any): string | null {
-  const rt = doc?.readTime || doc?.readingTime || doc?.time || null;
-  const s = rt ? String(rt).trim() : "";
-  return s || null;
+function isBriefDoc(doc: any): boolean {
+  const flattened = safeString(doc?._raw?.flattenedPath).toLowerCase();
+  const slug = safeString(doc?.slug).toLowerCase();
+  const type = safeString(doc?.type || doc?._type).toLowerCase();
+  const kind = safeString(doc?.kind).toLowerCase();
+  const category = safeString(doc?.category).toLowerCase();
+  const series = safeString(doc?.series).toLowerCase();
+
+  return (
+    flattened.includes("vault/briefs/") ||
+    flattened.startsWith("briefs/") ||
+    flattened.includes("/briefs/") ||
+    slug.includes("vault/briefs/") ||
+    slug.startsWith("briefs/") ||
+    slug.includes("/briefs/") ||
+    type.includes("brief") ||
+    kind.includes("brief") ||
+    category.includes("brief") ||
+    series.includes("brief")
+  );
 }
 
-function safeTags(doc: any): string[] {
-  return Array.isArray(doc?.tags) ? doc.tags.map(String).filter(Boolean) : [];
-}
+function getCombinedBriefs(): any[] {
+  const seen = new Set<string>();
 
-function isVaultBrief(doc: any): boolean {
-  const fp = String(doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || doc?.slug || "").replace(/\\/g, "/").toLowerCase();
-  // Vault briefs live under: content/vault/briefs/...
-  return fp.includes("vault/briefs/") || fp.startsWith("vault/briefs/");
+  return getAllContentCandidates()
+    .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
+    .filter(isBriefDoc)
+    .filter((doc: any) => {
+      const key = safeString(doc?._id || doc?._raw?.flattenedPath || doc?.slug).toLowerCase();
+      if (!key) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const docs = (getPublishedDocuments() || []).filter((d: any) => !d?.draft);
+  const docs = getCombinedBriefs();
 
   const items: BriefCard[] = docs
-    .filter(isVaultBrief)
     .map((doc: any) => {
-      const rawSlug = doc?.slug || doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || "";
+      const rawSlug = doc?.slug || doc?._raw?.flattenedPath || "";
       const slugBare = normalizeBriefSlug(rawSlug);
       if (!slugBare) return null;
 
@@ -86,254 +126,224 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
       return {
         slug: slugBare,
-        href: toBriefHref(slugBare),
-        title: String(doc?.title || "Untitled Brief"),
-        series: getSeriesFromDoc(doc),
-        abstract: getAbstractFromDoc(doc),
+        href: `/vault/briefs/${slugBare}`,
+        title: safeString(doc?.title).trim() || "Untitled Brief",
+        series:
+          safeString(doc?.series).trim() ||
+          safeString(doc?.category).trim() ||
+          safeString(doc?.kind).trim() ||
+          "Vault Briefs",
+        abstract:
+          safeString(doc?.abstract).trim() ||
+          safeString(doc?.excerpt).trim() ||
+          safeString(doc?.summary).trim() ||
+          "Technical specification pending.",
         requiredTier: required,
         tierLabel: tiers.getLabel(required),
         volume: typeof doc?.volume === "number" ? doc.volume : null,
-        readTime: getReadTimeFromDoc(doc),
-        tags: safeTags(doc),
+        readTime: safeString(doc?.readTime).trim() || "5 min read",
+        tags: Array.isArray(doc?.tags) ? doc.tags.map(String) : [],
         publishedAt: doc?.date ? String(doc.date) : null,
       };
     })
-    .filter((x): x is BriefCard => !!x && !!x.slug);
-
-  // Keep index public; detail pages can gate.
-  const pageTier: AccessTier = "public";
+    .filter((x): x is BriefCard => Boolean(x));
 
   items.sort((a, b) => {
-    const da = a.publishedAt ? new Date(a.publishedAt).toISOString() : "";
-    const db = b.publishedAt ? new Date(b.publishedAt).toISOString() : "";
-    if (db !== da) return db.localeCompare(da);
-    return a.title.localeCompare(b.title);
+    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    return db - da;
   });
 
   return {
-    props: sanitizeData({
+    props: {
       items,
       total: items.length,
-      requiredTier: pageTier,
-    }),
+      requiredTier: "public",
+    },
     revalidate: 1800,
   };
 };
 
-const BriefsIndexPage: NextPage<Props> = ({ items, total, requiredTier }) => {
-  const { data: session, status } = useSession();
-
-  const required = tiers.normalizeRequired(requiredTier);
-  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
-
-  const needsAuth = required !== "public";
-  const canAccess = !needsAuth || (session?.user ? tiers.hasAccess(user, required) : false);
-
+const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
+  const { data: session } = useSession();
   const [q, setQ] = React.useState("");
   const [series, setSeries] = React.useState<string>("All");
 
+  const userTier = normalizeUserTier(
+    (((session?.user as any)?.tier || (session as any)?.aol?.tier || "public") as string)
+  );
+
   const seriesOptions = React.useMemo(() => {
     const set = new Set<string>(["All"]);
-    for (const it of items) set.add(it.series);
-    return Array.from(set.values());
+    items.forEach((it) => set.add(it.series));
+    return Array.from(set);
   }, [items]);
 
   const filtered = React.useMemo(() => {
     const qq = q.trim().toLowerCase();
+
     return items.filter((it) => {
       const sOk = series === "All" || it.series === series;
-      if (!sOk) return false;
-      if (!qq) return true;
-      return (
+      const qOk =
+        !qq ||
         it.title.toLowerCase().includes(qq) ||
         it.abstract.toLowerCase().includes(qq) ||
-        it.tags.some((t) => t.toLowerCase().includes(qq)) ||
-        it.slug.toLowerCase().includes(qq)
-      );
+        it.series.toLowerCase().includes(qq) ||
+        it.tags.some((t) => t.toLowerCase().includes(qq));
+
+      return sOk && qOk;
     });
   }, [items, q, series]);
 
-  if (needsAuth && status === "loading") {
-    return (
-      <Layout title="Vault Briefs">
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying access…</div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (needsAuth && (!session?.user || !canAccess)) {
-    return (
-      <Layout title="Vault Briefs">
-        <div className="min-h-screen bg-black flex items-center justify-center px-6">
-          <AccessGate
-            title="Vault Briefs"
-            requiredTier={required}
-            message="This index requires appropriate clearance."
-            onGoToJoin={() => window.location.assign("/inner-circle")}
-          />
-        </div>
-      </Layout>
-    );
-  }
-
   return (
-    <Layout title="Vault Briefs // Abraham of London" canonicalUrl="/vault/briefs" className="bg-black text-white" fullWidth headerTransparent={false}>
+    <Layout
+      title="Vault Briefs // Abraham of London"
+      className="min-h-screen bg-black text-white"
+    >
       <Head>
-        <title>Vault Briefs // Abraham of London</title>
-        <meta name="robots" content="index, follow" />
+        <title>Intelligence Registry // Abraham of London</title>
       </Head>
 
-      <section className="relative overflow-hidden border-b border-white/10">
-        <div aria-hidden className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.18),transparent_55%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_78%,rgba(245,158,11,0.12),transparent_60%)]" />
-          <div className="absolute inset-0 aol-grain opacity-[0.10]" />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-12 pt-14 pb-12">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2">
-                <Shield className="h-4 w-4 text-emerald-300/90" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-emerald-200/70">
-                  Vault Briefs • {total} assets
+      <section className="relative border-b border-white/5 pb-16 pt-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-12">
+          <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-end">
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <Terminal size={14} className="text-amber-500" />
+                <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em] text-white/40">
+                  Secure_Registry // {total}_Briefs_Loaded
                 </span>
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">
-                Intelligence Briefs Index
+              <h1 className="text-5xl font-serif italic tracking-tighter md:text-7xl">
+                The Briefing Portfolio
               </h1>
 
-              <p className="mt-3 max-w-2xl text-sm md:text-base text-white/55 leading-relaxed">
-                Technical briefs that turn manifesto-level vision into operational specification. Built for builders — not spectators.
+              <p className="max-w-xl border-l border-amber-500/40 pl-6 font-light italic text-white/40">
+                Technical intelligence converted from vision to operational spec.
+                Search the registry for authorized doctrine.
               </p>
-
-              <div className="mt-5 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-                  Signed: {String((session?.user as any)?.email || "guest")}
-                </span>
-                <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-                  Tier: {tiers.getLabel(user)}
-                </span>
-              </div>
             </div>
 
-            <div className="w-full max-w-xl">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                <div className="md:col-span-3 relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
-                  <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Search title, tags, slug…"
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 placeholder:text-white/20 outline-none focus:border-emerald-500/25 focus:bg-white/[0.05]"
-                  />
+            <div className="min-w-[280px] rounded-sm border border-white/10 bg-zinc-900/50 p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Activity size={12} className="text-emerald-500" />
+                  <span className="text-[8px] font-mono uppercase tracking-widest text-white/30">
+                    Network_Secure
+                  </span>
                 </div>
-
-                <div className="md:col-span-2 relative">
-                  <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
-                  <select
-                    value={series}
-                    onChange={(e) => setSeries(e.target.value)}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-9 text-sm text-white/85 outline-none focus:border-emerald-500/25 focus:bg-white/[0.05]"
-                  >
-                    {seriesOptions.map((s) => (
-                      <option key={s} value={s} className="bg-black">
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                  <div aria-hidden className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/30">
-                    ▾
-                  </div>
-                </div>
+                <span className="border border-amber-500/20 px-2 py-0.5 text-[8px] font-mono uppercase text-amber-500/50">
+                  Tier: {userTier}
+                </span>
               </div>
+              <p className="text-[10px] font-mono text-white/60">
+                ID: {String(session?.user?.email || "GUEST_L1")}
+              </p>
+            </div>
+          </div>
 
-              <div className="mt-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/30">
-                Showing {filtered.length} of {items.length}
-              </div>
+          <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-12">
+            <div className="relative md:col-span-8">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+                size={18}
+              />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Query registry (Title, Tags, Index)..."
+                className="w-full border border-white/10 bg-zinc-900/40 py-4 pl-12 pr-4 text-sm font-mono outline-none transition-all focus:border-amber-500/50"
+              />
+            </div>
+
+            <div className="relative md:col-span-4">
+              <Filter
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+                size={18}
+              />
+              <select
+                value={series}
+                onChange={(e) => setSeries(e.target.value)}
+                className="w-full appearance-none border border-white/10 bg-zinc-900/40 py-4 pl-12 pr-4 text-sm font-mono outline-none focus:border-amber-500/50"
+              >
+                {seriesOptions.map((s) => (
+                  <option key={s} value={s} className="bg-black">
+                    {s}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 lg:px-12 py-12">
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-12">
         {filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">No matches</div>
-            <div className="mt-3 text-white/70">Try a different keyword or clear the filter.</div>
+          <div className="rounded-sm border border-white/5 bg-zinc-950/40 px-8 py-16 text-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/28">
+              Registry returned zero dossiers
+            </p>
+            <p className="mx-auto mt-4 max-w-xl text-sm text-white/40">
+              Adjust your query or filter. The briefing registry is loaded, but
+              nothing matches the current selection.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filtered.map((b) => {
-              const isPublic = b.requiredTier === "public";
+          <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((brief) => {
+              const canOpen = hasAccess(userTier, brief.requiredTier);
+
               return (
                 <Link
-                  key={b.href}
-                  href={b.href}
-                  className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] hover:border-emerald-500/25 transition-colors"
+                  key={brief.slug}
+                  href={brief.href}
+                  className="group relative overflow-hidden bg-black p-8 transition-all hover:bg-zinc-900/40"
                 >
-                  <article className="p-6">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                          {b.series}
-                        </div>
-                        <h2 className="mt-2 font-serif text-2xl italic text-white/90 group-hover:text-emerald-100 transition-colors line-clamp-2">
-                          {b.title}
-                        </h2>
-                      </div>
+                  <div className="mb-12 flex items-start justify-between">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-amber-500">
+                      INDEX_{brief.slug.split("-")[1] || brief.slug.toUpperCase()}
+                    </span>
 
-                      <div className="shrink-0 flex flex-col items-end gap-2">
-                        <span
-                          className={[
-                            "inline-flex items-center gap-2 rounded-full px-3 py-1 border text-[10px] font-mono uppercase tracking-[0.25em]",
-                            isPublic
-                              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200/80"
-                              : "border-amber-500/25 bg-amber-500/10 text-amber-200/80",
-                          ].join(" ")}
-                        >
-                          {isPublic ? <Shield className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                          {b.tierLabel}
-                        </span>
-                        {b.readTime ? (
-                          <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/25">
-                            {b.readTime}
-                          </span>
-                        ) : null}
-                      </div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors group-hover:border-amber-500">
+                      {brief.requiredTier === "public" ? (
+                        <Shield size={12} className="text-emerald-500" />
+                      ) : (
+                        <Lock
+                          size={12}
+                          className={
+                            canOpen
+                              ? "text-emerald-500"
+                              : "text-white/20 group-hover:text-amber-500"
+                          }
+                        />
+                      )}
                     </div>
+                  </div>
 
-                    {b.abstract ? (
-                      <p className="mt-4 text-sm text-white/55 leading-relaxed line-clamp-3">{b.abstract}</p>
-                    ) : (
-                      <p className="mt-4 text-sm text-white/35 leading-relaxed line-clamp-3">
-                        Technical brief • operational specification • registry-backed.
-                      </p>
-                    )}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">
+                      {brief.series}
+                    </h4>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {(b.tags || []).slice(0, 4).map((t) => (
-                        <span
-                          key={t}
-                          className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 text-[9px] font-mono uppercase tracking-[0.25em] text-white/35"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
+                    <h3 className="font-serif text-xl italic leading-snug text-white transition-colors group-hover:text-amber-100">
+                      {brief.title}
+                    </h3>
 
-                    <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-                      <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/25">
-                        {b.slug}
-                      </span>
-                      <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-emerald-300/80 group-hover:text-emerald-200 transition-colors">
-                        Open <ArrowRight className="h-4 w-4" />
-                      </span>
-                    </div>
-                  </article>
+                    <p className="line-clamp-3 text-[11px] font-light italic leading-relaxed text-white/28">
+                      {brief.abstract}
+                    </p>
+                  </div>
+
+                  <div className="mt-12 flex items-center justify-between border-t border-white/5 pt-6">
+                    <span className="text-[8px] font-mono uppercase tracking-tighter text-white/24">
+                      {brief.readTime}
+                    </span>
+
+                    <span className="flex items-center gap-2 text-[8px] font-mono font-bold uppercase text-amber-500/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      Initialize <ArrowRight size={10} />
+                    </span>
+                  </div>
                 </Link>
               );
             })}

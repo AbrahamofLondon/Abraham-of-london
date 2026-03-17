@@ -7,16 +7,15 @@ import {
   BookOpen,
   Library,
   Building2,
-  Mail,
-  PenTool,
-  Vault,
   Bookmark,
   Layers,
   Shield,
   ChevronRight,
+  Terminal,
+  ShieldCheck,
+  Vault,
 } from "lucide-react";
 
-import SocialLinks, { SocialLinksCompact } from "@/components/SocialLinks";
 import PolicyFooter from "@/components/PolicyFooter";
 
 interface FooterCTAProps {
@@ -25,221 +24,270 @@ interface FooterCTAProps {
   label: string;
   icon: React.ReactNode;
   hint?: string;
+  tag: string;
 }
 
-function FooterCTA({ href, title, label, icon, hint }: FooterCTAProps) {
+type DirectoryLink = {
+  label: string;
+  href: string;
+};
+
+function FooterCTA({
+  href,
+  title,
+  label,
+  icon,
+  hint,
+  tag,
+}: FooterCTAProps) {
   return (
     <Link
       href={href}
-      className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-7 transition-all duration-500 hover:border-amber-500/25 hover:bg-amber-500/[0.06]"
+      className="group relative flex flex-col justify-between overflow-hidden border border-white/10 bg-zinc-900/20 p-6 transition-all duration-500 hover:border-amber-500/40"
     >
-      <div className="relative z-10 space-y-2">
-        <div className="text-[10px] font-mono font-semibold uppercase tracking-[0.35em] text-amber-200/60">
-          {label}
+      <div className="mb-8 flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="text-amber-500/60 transition-colors group-hover:text-amber-400">
+            {icon}
+          </div>
+          <div className="text-[9px] font-mono font-bold uppercase tracking-[0.4em] text-amber-500/70">
+            {label}
+          </div>
         </div>
-        <div className="font-serif text-lg text-white/90 group-hover:text-amber-100 transition-colors">
+
+        <div className="text-[8px] font-mono uppercase tracking-widest text-white/10 transition-colors group-hover:text-amber-500/40">
+          {tag}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="font-serif text-xl italic text-white transition-colors group-hover:text-amber-100">
           {title}
         </div>
+
         {hint ? (
-          <div className="text-[11px] leading-relaxed text-white/40 group-hover:text-white/50 transition-colors">
+          <div className="max-w-[220px] text-[11px] font-light leading-relaxed text-white/30 transition-colors group-hover:text-white/50">
             {hint}
           </div>
         ) : null}
       </div>
 
-      <div className="relative z-10 flex items-center gap-2 text-amber-200/50 group-hover:text-amber-200 transition-all">
-        <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-[0.3em]">Open</span>
-        <span className="transition-transform duration-500 group-hover:translate-x-0.5">{icon}</span>
+      <div className="mt-6 flex items-center gap-2 text-[8px] font-mono font-bold uppercase tracking-widest text-white/10 transition-all group-hover:text-amber-500/40">
+        <span>Initialize Access</span>
+        <ChevronRight size={10} />
       </div>
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_10%_20%,rgba(245,158,11,0.14),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_90%_80%,rgba(255,255,255,0.06),transparent_55%)]" />
-      </div>
+      <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500/30 transition-all duration-700 group-hover:w-full" />
     </Link>
   );
 }
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+function DirectoryColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: DirectoryLink[];
+}) {
   return (
-    <Link href={href} className="hover:text-amber-100 hover:underline transition-colors">
-      {children}
-    </Link>
+    <div className="space-y-6">
+      <h4 className="border-b border-white/5 pb-2 text-[10px] font-mono font-black uppercase tracking-[0.3em] text-white/20">
+        {title}
+      </h4>
+
+      <ul className="space-y-3">
+        {links.map((link) => (
+          <li key={`${title}-${link.href}`}>
+            <Link
+              href={link.href}
+              className="group flex items-center gap-2 text-[11px] font-medium tracking-wide text-white/40 transition-all hover:text-amber-200"
+            >
+              <div className="h-px w-0 bg-amber-500/50 transition-all group-hover:w-3" />
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 export default function EnhancedFooter(): React.ReactElement {
   const year = new Date().getFullYear();
 
+  const directory = {
+    Registry: [
+      { label: "Canon", href: "/canon" },
+      { label: "Books", href: "/books" },
+      { label: "Library", href: "/library" },
+      { label: "Essays", href: "/blog" },
+      { label: "Shorts", href: "/shorts" },
+      { label: "Content", href: "/content" },
+    ] as DirectoryLink[],
+    Architecture: [
+      { label: "Frameworks", href: "/resources/strategic-frameworks" },
+      { label: "Surrender", href: "/resources/surrender-framework" },
+      { label: "Vault", href: "/vault" },
+      { label: "Resources", href: "/resources" },
+    ] as DirectoryLink[],
+    Engagements: [
+      { label: "Consulting", href: "/consulting" },
+      { label: "Strategy Room", href: "/consulting/strategy-room" },
+      { label: "Advisory", href: "/consulting" },
+      { label: "Speaking", href: "/speaking" },
+    ] as DirectoryLink[],
+    Governance: [
+      { label: "About", href: "/about" },
+      { label: "Security", href: "/security" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+    ] as DirectoryLink[],
+  };
+
   return (
-    <footer className="relative overflow-hidden border-t border-white/5 bg-black pt-20 pb-12">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.055]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.65),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_70%,rgba(245,158,11,0.25),transparent_55%)]" />
+    <footer className="relative overflow-hidden border-t border-white/10 bg-black pb-8 pt-24">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]" />
       </div>
 
       <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-12">
-        {/* Primary pathways */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <FooterCTA href="/canon" title="The Canon" label="Doctrine" icon={<BookOpen size={18} />} />
-          <FooterCTA href="/books" title="Books" label="Works" icon={<Bookmark size={18} />} />
-          <FooterCTA href="/library" title="Library" label="Archive" icon={<Library size={18} />} />
-          <FooterCTA href="/ventures" title="Ventures" label="Execution" icon={<Building2 size={18} />} />
+        <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-4">
+          <FooterCTA
+            href="/canon"
+            title="The Canon"
+            label="Doctrine"
+            tag="DOC-V1"
+            icon={<BookOpen size={16} />}
+          />
+          <FooterCTA
+            href="/books"
+            title="Volumes"
+            label="Works"
+            tag="PUB-V2"
+            icon={<Bookmark size={16} />}
+          />
+          <FooterCTA
+            href="/library"
+            title="Library"
+            label="Archive"
+            tag="LIB-V3"
+            icon={<Library size={16} />}
+          />
+          <FooterCTA
+            href="/ventures"
+            title="Ventures"
+            label="Execution"
+            tag="OPS-V4"
+            icon={<Building2 size={16} />}
+          />
         </div>
 
-        {/* Frameworks (elevated) */}
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mt-px grid grid-cols-1 gap-px border-x border-b border-white/5 bg-white/5 md:grid-cols-3">
           <FooterCTA
             href="/resources/strategic-frameworks"
             title="Strategic Frameworks"
             label="Operating Systems"
-            icon={<Layers size={18} />}
-            hint="Board-grade models • decision rights • institutional resilience"
+            tag="SYS-F1"
+            hint="Board-grade models and institutional resilience rails."
+            icon={<Layers size={16} />}
           />
           <FooterCTA
             href="/resources/surrender-framework"
             title="Surrender Framework"
             label="Formation"
-            icon={<Shield size={18} />}
-            hint="Personal governance • alignment under pressure • weekly audit"
+            tag="FRM-S2"
+            hint="Alignment under pressure and personal governance."
+            icon={<Shield size={16} />}
           />
           <FooterCTA
             href="/vault"
-            title="Vault"
-            label="Resources"
-            icon={<Vault size={18} />}
-            hint="Toolkits • templates • premium briefs • downloads"
+            title="The Vault"
+            label="Intelligence"
+            tag="SEC-V3"
+            hint="Secure toolkits and premium intelligence dossiers."
+            icon={<Vault size={16} />}
           />
         </div>
 
-        {/* Secondary pathways */}
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FooterCTA href="/blog" title="Essays" label="Literary" icon={<PenTool size={18} />} />
-          <FooterCTA
-            href="/inner-circle"
-            title="Inner Circle"
-            label="Clearance"
-            icon={<ChevronRight size={18} />}
-            hint="Unlock restricted dossiers and private briefings"
-          />
-        </div>
-
-        {/* Social */}
-        <div className="mt-16 rounded-3xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-sm">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="mt-24 grid grid-cols-1 gap-16 border-t border-white/10 pt-16 lg:grid-cols-12">
+          <div className="space-y-10 lg:col-span-5">
             <div>
-              <div className="text-[9px] font-mono font-semibold uppercase tracking-[0.45em] text-amber-200/60">
-                Social
-              </div>
-              <h3 className="mt-3 font-serif text-2xl text-white/90 tracking-tight">Signal over noise.</h3>
-              <p className="mt-2 max-w-xl text-sm text-white/45 leading-relaxed">
-                Updates land where they matter: field notes, releases, and the occasional hard-edged clarity.
-              </p>
-            </div>
-
-            <div className="flex md:justify-end">
-              <SocialLinksCompact className="gap-4" iconSize="md" maxItems={10} />
-            </div>
-          </div>
-
-          <div className="mt-6 hidden md:block">
-            <SocialLinks className="gap-6" showIcons showLabels iconSize="sm" maxItems={10} />
-          </div>
-        </div>
-
-        {/* Main nav grid */}
-        <div className="mt-16 grid grid-cols-1 gap-14 lg:grid-cols-12">
-          <div className="lg:col-span-5 space-y-5">
-            <Link href="/" className="group inline-block">
-              <h2 className="font-serif text-4xl text-white/95 tracking-tight group-hover:text-amber-100 transition-colors">
+              <h2 className="font-serif text-4xl italic tracking-tight text-white">
                 Abraham of London
               </h2>
-              <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.4em] text-amber-200/55">
-                Portfolio · Doctrine · Operating Systems
-              </div>
-            </Link>
 
-            <p className="text-sm leading-relaxed text-white/45 max-w-md">
-              A home for institutional thinking: purpose, governance, cadence, and durable execution—expressed through
-              writing, tools, ventures, and private work.
+              <div className="mt-3 flex items-center gap-3">
+                <div className="h-px w-8 bg-amber-500/40" />
+                <span className="text-[9px] font-mono font-bold uppercase tracking-[0.5em] text-amber-500/60">
+                  Governance • Architecture • Execution
+                </span>
+              </div>
+            </div>
+
+            <p className="max-w-sm border-l border-white/10 pl-6 text-[12px] font-light italic leading-relaxed text-white/30">
+              A repository for institutional thinking: purposed governance,
+              high-cadence execution, and sovereign endurance. Access restricted
+              to authorized personnel.
             </p>
 
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-[10px] font-mono uppercase tracking-[0.3em] text-white/70 hover:text-white hover:border-amber-500/25 hover:bg-amber-500/10 transition-all"
+              className="inline-flex items-center gap-4 bg-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-black transition-all hover:bg-amber-500"
             >
-              <Mail className="h-4 w-4 text-amber-300/70" />
-              Inquiries <ArrowRight className="h-4 w-4" />
+              <Terminal size={14} />
+              Secure Inquiry
+              <ArrowRight size={14} />
             </Link>
           </div>
 
-          {/* Updated: sm:grid-cols-3 → sm:grid-cols-4 for new column */}
-          <div className="lg:col-span-7 grid grid-cols-2 gap-10 sm:grid-cols-4">
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Registry</h4>
-              <ul className="space-y-3 text-xs text-white/45">
-                <li><FooterLink href="/canon">Canon</FooterLink></li>
-                <li><FooterLink href="/books">Books</FooterLink></li>
-                <li><FooterLink href="/library">Library</FooterLink></li>
-                <li><FooterLink href="/blog">Essays</FooterLink></li>
-                <li><FooterLink href="/shorts">Shorts</FooterLink></li>
-              </ul>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4 lg:col-span-7">
+            <DirectoryColumn title="Registry" links={directory.Registry} />
+            <DirectoryColumn title="Architecture" links={directory.Architecture} />
+            <DirectoryColumn title="Engagements" links={directory.Engagements} />
+            <DirectoryColumn title="Governance" links={directory.Governance} />
+          </div>
+        </div>
+
+        <div className="mt-24 border-t border-white/5 pt-10">
+          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={14} className="text-amber-500/50" />
+                <span className="text-[9px] font-mono font-bold uppercase tracking-[0.3em] text-white/40">
+                  © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
+                </span>
+              </div>
+
+              <div className="hidden h-3 w-px bg-white/10 md:block" />
+
+              <div className="hidden items-center gap-4 md:flex">
+                <span className="text-[8px] font-mono uppercase tracking-[0.2em] text-white/20">
+                  Institutional Registry
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Frameworks</h4>
-              <ul className="space-y-3 text-xs text-white/45">
-                <li><FooterLink href="/resources/strategic-frameworks">Strategic Frameworks</FooterLink></li>
-                <li><FooterLink href="/resources/surrender-framework">Surrender Framework</FooterLink></li>
-                <li><FooterLink href="/resources">Resources Index</FooterLink></li>
-                <li><FooterLink href="/vault">Vault</FooterLink></li>
-              </ul>
-            </div>
-
-            {/* ✅ New Engagements column */}
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Engagements</h4>
-              <ul className="space-y-3 text-xs text-white/45">
-                <li><FooterLink href="/consulting">Consulting</FooterLink></li>
-                <li><FooterLink href="/consulting/strategy-room">Strategy Room</FooterLink></li>
-                <li><FooterLink href="/strategy">Strategy</FooterLink></li>
-              </ul>
-            </div>
-
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45">Company</h4>
-              <ul className="space-y-3 text-xs text-white/45">
-                <li><FooterLink href="/about">About</FooterLink></li>
-                <li><FooterLink href="/security">Security</FooterLink></li>
-                <li><FooterLink href="/contact">Contact</FooterLink></li>
-              </ul>
+            <div className="flex items-center gap-8">
+              {[
+                { label: "Privacy", href: "/privacy" },
+                { label: "Terms", href: "/terms" },
+                { label: "Security", href: "/security" },
+                { label: "Cookies", href: "/cookies" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-white/20 transition-colors hover:text-amber-500"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-16">
+        <div className="mt-12">
           <PolicyFooter isDark />
-        </div>
-
-        <div className="mt-12 border-t border-white/10 pt-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-            © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
-          </div>
-          <div className="flex items-center gap-6">
-            <FooterLink href="/privacy">
-              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35 hover:text-amber-100">
-                Privacy
-              </span>
-            </FooterLink>
-            <FooterLink href="/terms">
-              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35 hover:text-amber-100">
-                Terms
-              </span>
-            </FooterLink>
-          </div>
         </div>
       </div>
     </footer>

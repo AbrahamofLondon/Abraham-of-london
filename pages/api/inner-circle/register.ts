@@ -1,9 +1,13 @@
-/* pages/api/inner-circle/register.ts — STRATEGIC ENROLLMENT (SSOT) */
+// pages/api/inner-circle/register.ts — STRATEGIC ENROLLMENT (SSOT)
 import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  AccessTier as PrismaAccessTier,
+  KeyStatus as PrismaKeyStatus,
+} from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
-import type { AccessTier } from "@/lib/access/tier-policy";
+import type { AccessTier as PolicyAccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
@@ -16,8 +20,43 @@ function isEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
-  if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Method not allowed" });
+function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
+  switch (tier) {
+    case "inner-circle":
+      return PrismaAccessTier.inner_circle;
+    case "top-secret":
+      return PrismaAccessTier.top_secret;
+    case "public":
+      return PrismaAccessTier.public;
+    case "member":
+      return PrismaAccessTier.member;
+    case "client":
+      return PrismaAccessTier.client;
+    case "legacy":
+      return PrismaAccessTier.legacy;
+    case "architect":
+      return PrismaAccessTier.architect;
+    case "owner":
+      return PrismaAccessTier.owner;
+    default:
+      return PrismaAccessTier.member;
+  }
+}
+
+function buildEmailHash(email: string): string {
+  return crypto
+    .createHash("sha256")
+    .update(email.trim().toLowerCase())
+    .digest("hex");
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Ok | Fail>
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
+  }
 
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store, max-age=0");
@@ -25,39 +64,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const email = String(req.body?.email || "").trim().toLowerCase();
   const name = String(req.body?.name || "").trim();
 
-  if (!isEmail(email)) return res.status(400).json({ ok: false, error: "Invalid email" });
+  if (!isEmail(email)) {
+    return res.status(400).json({ ok: false, error: "Invalid email" });
+  }
 
-  // Default SSOT tier for new registrants (adjust policy here)
-  const requestedTier: AccessTier = normalizeUserTier(req.body?.tier ?? "member");
+  const requestedTier: PolicyAccessTier = normalizeUserTier(
+    req.body?.tier ?? "member"
+  );
+  const dbTier: PrismaAccessTier = toDbTier(requestedTier);
+  const emailHash = buildEmailHash(email);
 
   try {
-    // 1) Generate high-entropy key
-    const rawKey = `AL-${crypto.randomBytes(4).toString("hex")}-${crypto.randomBytes(4).toString("hex")}`.toUpperCase();
+    const rawKey = `AL-${crypto.randomBytes(4).toString("hex")}-${crypto
+      .randomBytes(4)
+      .toString("hex")}`.toUpperCase();
+
     const keyHash = hashAccessKey(rawKey);
 
-    // 2) Transactional provisioning
     const result = await prisma.$transaction(async (tx) => {
       const member = await tx.innerCircleMember.upsert({
         where: { email },
-        update: { name: name || undefined, tier: requestedTier },
-        create: {
-          email,
+        update: {
           name: name || null,
-          tier: requestedTier,
+          tier: dbTier,
+          emailHash,
+        },
+        create: {
+          id: crypto.randomUUID(),
+          email,
+          emailHash,
+          name: name || null,
+          tier: dbTier,
         },
       });
 
-      // Revoke any active keys
       await tx.innerCircleKey.updateMany({
-        where: { memberId: member.id, status: "active" },
-        data: { status: "revoked" },
+        where: { memberId: member.id, status: PrismaKeyStatus.active },
+        data: { status: PrismaKeyStatus.revoked },
       });
 
       await tx.innerCircleKey.create({
         data: {
           keyHash,
           memberId: member.id,
-          status: "active",
+          keyType: "access",
+          status: PrismaKeyStatus.active,
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         },
       });
@@ -65,9 +116,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return { member, rawKey };
     });
 
-    // 3) Dispatch activation link
-    const appUrl = String(process.env.NEXT_PUBLIC_APP_URL || "").trim();
-    const unlockUrl = `${appUrl}/inner-circle/unlock?key=${encodeURIComponent(result.rawKey)}`;
+    const appUrl = String(
+      process.env.NEXT_PUBLIC_APP_URL ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        "http://localhost:3000"
+    ).trim();
+
+    const unlockUrl = `${appUrl.replace(
+      /\/+$/,
+      ""
+    )}/inner-circle/unlock?key=${encodeURIComponent(result.rawKey)}`;
 
     await sendInnerCircleEmail(email, "Access Granted | Abraham of London", {
       name: name || "Principal",
@@ -75,7 +133,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       accessKey: result.rawKey,
       unlockUrl,
       mode: "register",
-      requestIp: String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown"),
+      requestIp: String(
+        req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown"
+      ),
     });
 
     return res.status(200).json({
@@ -85,6 +145,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
   } catch (error) {
     console.error("REGISTRATION_FAILURE:", error);
-    return res.status(500).json({ ok: false, error: "Institutional provisioning failed." });
+    return res
+      .status(500)
+      .json({ ok: false, error: "Institutional provisioning failed." });
   }
 }

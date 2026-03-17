@@ -229,10 +229,12 @@ const TIER_RANK: Record<AccessTier, number> = {
   public: 0,
   member: 1,
   "inner-circle": 2,
-  client: 3,
-  legacy: 4,
-  architect: 5,
-  owner: 6,
+  "restricted": 3,     // ✅ Add this line
+  client: 4,
+  legacy: 5,
+  architect: 6,
+  owner: 7,
+  "top-secret": 8,
 };
 
 export function getTierRank(tier: string | AccessTier): number {

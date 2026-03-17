@@ -1,11 +1,20 @@
+// pages/api/pdfs/[id]/metadata.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
+import type { Prisma } from "@prisma/client";
+
 import { authOptions } from "@/lib/auth/auth-options";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "PATCH") {
     res.setHeader("Allow", "PATCH");
@@ -22,8 +31,8 @@ export default async function handler(
     return res.status(400).json({ error: "Missing PDF ID" });
   }
 
-  const updates = req.body;
-  if (!updates || typeof updates !== "object") {
+  const updatesRaw: unknown = req.body;
+  if (!isRecord(updatesRaw)) {
     return res.status(400).json({ error: "Invalid metadata payload" });
   }
 
@@ -36,10 +45,10 @@ export default async function handler(
       return res.status(404).json({ error: "PDF not found in registry" });
     }
 
-    // Prepare update data
-    const currentMetadata = (record.metadata as Record<string, any>) || {};
+    const currentMetadata: JsonRecord = isRecord(record.metadata)
+      ? { ...record.metadata }
+      : {};
 
-    // Fields we allow to update (whitelist)
     const allowedFields = [
       "title",
       "description",
@@ -50,30 +59,43 @@ export default async function handler(
       "coverImage",
       "fileSize",
       "downloadCount",
-    ];
+    ] as const;
 
-    const newMetadata = { ...currentMetadata };
-    const topLevelUpdates: any = {};
+    const newMetadata: JsonRecord = { ...currentMetadata };
+    const topLevelUpdates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
-      if (field in updates) {
-        newMetadata[field] = updates[field];
-        // Also update top-level fields if they exist in the model
-        if (field === "title") topLevelUpdates.title = updates[field];
-        if (field === "description") topLevelUpdates.summary = updates[field];
+      if (Object.prototype.hasOwnProperty.call(updatesRaw, field)) {
+        const value = updatesRaw[field];
+        newMetadata[field] = value;
+
+        if (field === "title" && typeof value === "string") {
+          topLevelUpdates.title = value;
+        }
+
+        if (field === "description" && typeof value === "string") {
+          topLevelUpdates.summary = value;
+        }
+
+        if (field === "category" && typeof value === "string") {
+          topLevelUpdates.contentType = value;
+        }
       }
     }
 
-    // Update the database
     const updated = await prisma.contentMetadata.update({
       where: { slug: id },
       data: {
         ...topLevelUpdates,
-        metadata: newMetadata,
+        metadata: newMetadata as Prisma.InputJsonValue,
       },
     });
 
-    return res.status(200).json({ success: true, pdf: updated });
+    return res.status(200).json({
+      success: true,
+      pdf: updated,
+      slug: updated.slug,
+    });
   } catch (error) {
     console.error(`[PDF Metadata] Error for ${id}:`, error);
     return res.status(500).json({ error: "Internal server error" });

@@ -1,65 +1,45 @@
 "use client";
 
+/* pages/inner-circle/locked.tsx — MEMBER GATEWAY */
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Updated to next/navigation for Next 16/App Router consistency
-import { useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, ArrowLeft, ShieldAlert } from "lucide-react";
+import { fontConfig } from "@/lib/next-fonts";
+import Layout from "@/components/layout/Layout";
 
-import Layout from "@/components/Layout";
-
-/**
- * Sanitizes local paths to prevent open redirect vulnerabilities.
- * Ensures the path starts with / and strips recursive return parameters.
- */
 function sanitizeLocalPath(input: string | null, fallback: string) {
   if (!input) return fallback;
-
   let v = input;
-  try {
-    v = decodeURIComponent(v);
-  } catch {
-    // Fallback if decoding fails
-  }
-
+  try { v = decodeURIComponent(v); } catch { /* ignore */ }
   if (!v.startsWith("/")) return fallback;
-
   try {
-    // Use a dummy base to parse the URL parts safely
     const u = new URL(v, "http://local-check.internal");
     u.searchParams.delete("callbackUrl");
     u.searchParams.delete("returnTo");
     return `${u.pathname}${u.search}`;
-  } catch {
-    return v;
-  }
+  } catch { return v; }
 }
 
 const LockedPage: React.FC = () => {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
 
-  // 1. Extract and sanitize the target destination
   const returnTo = React.useMemo(() => {
     const target = searchParams.get("returnTo") || searchParams.get("callbackUrl");
     return sanitizeLocalPath(target, "/inner-circle/dashboard");
   }, [searchParams]);
 
-  // 2. Dynamic Login Routing
-  // Align with proxy.ts logic: determine if we should send them to Admin or Inner Circle login
   const joinHref = React.useMemo(() => {
     const isAdminTarget = returnTo.startsWith("/admin");
-    const loginBase = isAdminTarget ? "/admin/login" : "/inner-circle/login";
-    
+    const loginBase = isAdminTarget ? "/admin/login" : "/inner-circle";
     return `${loginBase}?returnTo=${encodeURIComponent(returnTo)}`;
   }, [returnTo]);
 
   return (
-    <Layout title="Access Restricted | Abraham of London">
-      <main className="flex min-h-screen items-center justify-center px-6 py-20 bg-black overflow-hidden relative">
-        {/* Background Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-4xl bg-gold/[0.02] rounded-full blur-[120px] pointer-events-none" />
+    <Layout title="Access Restricted | Abraham of London" noSidebar>
+      <main className={`flex min-h-screen items-center justify-center px-6 py-20 bg-black overflow-hidden relative ${fontConfig?.fontSans?.variable} ${fontConfig?.fontSerif?.variable}`}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-4xl bg-amber-500/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -73,10 +53,10 @@ const LockedPage: React.FC = () => {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="absolute inset-0 blur-3xl bg-gold/30 rounded-full"
+                className="absolute inset-0 blur-3xl bg-amber-500/20 rounded-full"
               />
-              <div className="relative rounded-full border border-gold/30 bg-black p-8 backdrop-blur-xl shadow-2xl shadow-gold/20">
-                <Lock className="h-12 w-12 text-gold" strokeWidth={1.2} />
+              <div className="relative rounded-full border border-amber-500/30 bg-black p-8 backdrop-blur-xl shadow-2xl">
+                <Lock className="h-12 w-12 text-amber-500" strokeWidth={1.2} />
               </div>
             </div>
           </div>
@@ -86,11 +66,11 @@ const LockedPage: React.FC = () => {
             Restricted Manuscript
           </div>
 
-          <h1 className="mt-4 mb-6 font-serif text-4xl font-bold text-white sm:text-5xl lg:text-6xl tracking-tight leading-tight">
-            Institutional Access <span className="italic text-gold">Required</span>
+          <h1 className="mt-4 mb-6 font-serif text-4xl font-bold text-white sm:text-5xl lg:text-6xl tracking-tighter leading-tight italic">
+            Clearance <span className="text-amber-500">Required.</span>
           </h1>
 
-          <p className="mb-12 text-zinc-500 text-base sm:text-lg leading-relaxed max-w-md mx-auto">
+          <p className="mb-12 text-zinc-500 text-lg leading-relaxed max-w-md mx-auto font-light italic">
             This specific brief is reserved for verified members of the{" "}
             <span className="text-white font-medium">Inner Circle</span>. Access is granted via invitation or
             verified institutional mandate.
@@ -99,26 +79,25 @@ const LockedPage: React.FC = () => {
           <div className="flex flex-col items-center gap-8">
             <Link
               href={joinHref}
-              className="group relative w-full sm:w-auto overflow-hidden rounded-xl bg-gold px-12 py-5 font-black text-black text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-white hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-gold/10"
+              className="group relative w-full sm:w-auto overflow-hidden rounded-sm bg-amber-500 px-12 py-5 font-black text-black text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-white"
             >
-              <span className="relative z-10">Unlock with Access Key</span>
-              <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              Unlock with Access Key
             </Link>
 
             <div className="flex flex-col sm:flex-row items-center gap-8">
               <Link
-                href="/canon"
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors group"
+                href="/inner-circle/dashboard"
+                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors"
               >
-                <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                Return to Public Library
+                <ArrowLeft size={14} />
+                Return to Registry
               </Link>
 
               <div className="hidden sm:block w-px h-4 bg-zinc-800" />
 
               <Link
                 href="/contact?intent=invitation-request"
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 hover:text-gold transition-colors"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/60 hover:text-amber-500 transition-colors"
               >
                 Request Invitation
               </Link>

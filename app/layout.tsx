@@ -1,62 +1,40 @@
-// app/layout.tsx — HARDENED + PERFORMANCE OPTIMIZED
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
+// app/layout.tsx — ROOT LAYOUT (App Router valid)
+import * as React from "react";
+import type { Metadata } from "next";
+import AppShell from "@/components/AppShell";
 
-// ✅ BRAND SYSTEM & REGISTRY STYLES
-import "@/styles/brand-system.css";
-
-// ✅ TYPOGRAPHY
-import { fontVariables, fontBodyClass } from "@/lib/next-fonts";
-
-// ✅ CLIENT SHELL (single boundary for providers + UI)
-import ClientShell from "./client-shell";
-
-export const viewport: Viewport = {
-  themeColor: "#000000",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-};
+const BASE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
+).replace(/\/+$/, "");
 
 export const metadata: Metadata = {
+  metadataBase: new URL(BASE_URL),
   title: {
+    default: "Abraham of London",
     template: "%s | Abraham of London",
-    default: "Abraham of London // Strategic Intelligence & Registry",
   },
   description:
-    "High-clearance strategic consulting, leadership frameworks, and executive intelligence dispatches.",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  // ✅ Performance: Preload critical assets
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-    apple: '/apple-touch-icon.png',
+    "Institutional strategy, governance discipline, and operator doctrine for serious builders.",
+  openGraph: {
+    title: "Abraham of London",
+    description:
+      "Institutional strategy, governance discipline, and operator doctrine for serious builders.",
+    images: ["/assets/images/social/og-image.jpg"],
+    url: BASE_URL,
+    siteName: "Abraham of London",
+    type: "website",
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html
-      lang="en-GB"
-      className={`${fontVariables} scroll-smooth`}
-      suppressHydrationWarning
-    >
-      <body
-        className={`${fontBodyClass} min-h-screen bg-black text-white antialiased selection:bg-amber-500/30 selection:text-black`}
-      >
-        <ClientShell>{children}</ClientShell>
+    <html lang="en" className="bg-black">
+      <body className="min-h-screen bg-black text-white selection:bg-amber-500/30">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

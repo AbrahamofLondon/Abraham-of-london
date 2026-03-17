@@ -1,247 +1,192 @@
-// pages/api/protected-content.ts — NODE-ONLY (Pages Router API)
-// Institutional-grade, but not stupid.
-// - No NextRequest (Edge) usage
-// - No Upstash / redis-safe import chain
-// - Deterministic in Windows + Netlify
-// - In-memory rate limiting (good enough for this endpoint)
+// pages/api/frameworks/surrender/[slug]/protected.ts
+// Protected framework retrieval endpoint using canonical Inner Circle middleware.
 
 import type { NextApiRequest, NextApiResponse } from "next";
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
 
-const INNER_CIRCLE_COOKIE_NAME = "innerCircleAccess";
+import { withInnerCircleAccess } from "@/lib/server/with-inner-circle-access";
 
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export interface InnerCircleAccess {
-  hasAccess: boolean;
-  reason?: "no_cookie" | "rate_limited";
-  rateLimit?: {
-    remaining: number;
-    limit: number;
-    resetTime: number;
-    retryAfterMs?: number;
+type ProtectedRequest = NextApiRequest & {
+  innerCircleAccess?: {
+    hasAccess: boolean;
+    tier: string;
+    userId: string | null;
+    sessionId: string | null;
   };
-  userData?: {
-    ip: string;
-    userAgent: string;
-    timestamp: number;
-  };
-}
-
-export interface AccessCheckOptions {
-  requireAuth?: boolean;
-  rateLimitConfig?: {
-    windowMs: number;
-    limit: number;
-    keyPrefix: string;
-  };
-  skipRateLimit?: boolean;
-}
-
-/* -------------------------------------------------------------------------- */
-/* SIMPLE IP + COOKIE HELPERS                                                 */
-/* -------------------------------------------------------------------------- */
-
-function getClientIp(req: NextApiRequest): string {
-  const forwarded = req.headers["x-forwarded-for"];
-  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-  const ip =
-    (raw || "").split(",")[0]?.trim() ||
-    (req.headers["x-real-ip"] as string) ||
-    req.socket?.remoteAddress ||
-    "unknown";
-  return ip;
-}
-
-function hasInnerCircleCookie(req: NextApiRequest): boolean {
-  // Next.js parses cookies into req.cookies in pages API routes
-  const v = req.cookies?.[INNER_CIRCLE_COOKIE_NAME];
-  return v === "true";
-}
-
-/* -------------------------------------------------------------------------- */
-/* IN-MEMORY RATE LIMITER (TOKEN BUCKET / WINDOW COUNTER)                     */
-/* -------------------------------------------------------------------------- */
-
-type Bucket = { resetTime: number; count: number };
-const memoryBuckets = new Map<string, Bucket>();
-
-function checkRateLimit(key: string, windowMs: number, limit: number) {
-  const now = Date.now();
-  const existing = memoryBuckets.get(key);
-
-  if (!existing || now >= existing.resetTime) {
-    const resetTime = now + windowMs;
-    const b: Bucket = { resetTime, count: 1 };
-    memoryBuckets.set(key, b);
-    return {
-      allowed: true,
-      remaining: Math.max(0, limit - 1),
-      limit,
-      resetTime,
-      retryAfterMs: 0,
-    };
-  }
-
-  if (existing.count >= limit) {
-    const retryAfterMs = Math.max(0, existing.resetTime - now);
-    return {
-      allowed: false,
-      remaining: 0,
-      limit,
-      resetTime: existing.resetTime,
-      retryAfterMs,
-    };
-  }
-
-  existing.count += 1;
-  memoryBuckets.set(key, existing);
-
-  return {
-    allowed: true,
-    remaining: Math.max(0, limit - existing.count),
-    limit,
-    resetTime: existing.resetTime,
-    retryAfterMs: 0,
-  };
-}
-
-function createRateLimitHeaders(rl: NonNullable<InnerCircleAccess["rateLimit"]>) {
-  // Standard-ish headers (fine for internal usage)
-  return {
-    "X-RateLimit-Limit": String(rl.limit),
-    "X-RateLimit-Remaining": String(rl.remaining),
-    "X-RateLimit-Reset": String(Math.floor(rl.resetTime / 1000)),
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* CORE ACCESS CHECK                                                          */
-/* -------------------------------------------------------------------------- */
-
-export async function getInnerCircleAccess(
-  req: NextApiRequest,
-  options: AccessCheckOptions = {}
-): Promise<InnerCircleAccess> {
-  const { requireAuth = true, rateLimitConfig, skipRateLimit = false } = options;
-
-  const ip = getClientIp(req);
-  const userAgent = String(req.headers["user-agent"] || "");
-
-  // ---- Rate limiting (optional) ----
-  if (!skipRateLimit) {
-    const cfg = rateLimitConfig || { windowMs: 60_000, limit: 30, keyPrefix: "protected_content" };
-    const key = `${cfg.keyPrefix}:${ip}`;
-
-    const rl = checkRateLimit(key, cfg.windowMs, cfg.limit);
-
-    if (!rl.allowed) {
-      return {
-        hasAccess: false,
-        reason: "rate_limited",
-        rateLimit: {
-          remaining: 0,
-          limit: rl.limit,
-          resetTime: rl.resetTime,
-          retryAfterMs: rl.retryAfterMs,
-        },
-        userData: { ip, userAgent, timestamp: Date.now() },
-      };
-    }
-  }
-
-  // ---- Auth check ----
-  const okCookie = hasInnerCircleCookie(req);
-  if (requireAuth && !okCookie) {
-    return {
-      hasAccess: false,
-      reason: "no_cookie",
-      userData: { ip, userAgent, timestamp: Date.now() },
-    };
-  }
-
-  return {
-    hasAccess: true,
-    userData: { ip, userAgent, timestamp: Date.now() },
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* WRAPPER                                                                     */
-/* -------------------------------------------------------------------------- */
-
-export function withInnerCircleAccess(
-  handler: (req: NextApiRequest, res: NextApiResponse) => Promise<void> | void,
-  options: AccessCheckOptions = {}
-) {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
-    const access = await getInnerCircleAccess(req, options);
-
-    // Attach for downstream
-    (req as any).innerCircleAccess = access;
-
-    // Rate limit headers if present
-    if (access.rateLimit) {
-      const headers = createRateLimitHeaders(access.rateLimit);
-      Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v));
-    }
-
-    if (!access.hasAccess) {
-      if (access.reason === "rate_limited") {
-        const retryAfter = Math.ceil(((access.rateLimit?.retryAfterMs || 60_000) / 1000));
-        res.setHeader("Retry-After", String(retryAfter));
-        return res.status(429).json({
-          error: "Too Many Requests",
-          reason: "rate_limited",
-          retryAfter,
-          resetAt: access.rateLimit?.resetTime,
-        });
-      }
-
-      return res.status(403).json({
-        error: "Access Denied",
-        reason: access.reason || "no_cookie",
-        message: "Inner Circle access required",
-      });
-    }
-
-    // Security headers
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader("X-Access-Level", "inner-circle");
-
-    return handler(req, res);
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/* DEFAULT HANDLER (EXAMPLE)                                                  */
-/* -------------------------------------------------------------------------- */
-
-const protectedContentHandler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const access = (req as any).innerCircleAccess as InnerCircleAccess | undefined;
-  const ip = access?.userData?.ip || "unknown";
-
-  return res.status(200).json({
-    success: true,
-    message: "Welcome to the Inner Circle",
-    accessedBy: ip,
-    accessedAt: new Date().toISOString(),
-    protectedContent: [
-      { id: 1, title: "Exclusive Strategy", content: "..." },
-      { id: 2, title: "Private Analysis", content: "..." },
-      { id: 3, title: "Member-only Resources", content: "..." },
-    ],
-  });
 };
 
-export default withInnerCircleAccess(protectedContentHandler, {
+type FrameworkPayload = {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  category?: string | null;
+  version?: string | null;
+  status?: string | null;
+  author?: string | null;
+  date?: string | null;
+  tier?: string | null;
+  tags: string[];
+  content: string;
+  sourcePath: string;
+};
+
+type SuccessResponse = {
+  success: true;
+  framework: FrameworkPayload;
+  access: {
+    tier: string;
+    userId: string | null;
+    sessionId: string | null;
+  };
+  retrievedAt: string;
+};
+
+type ErrorResponse = {
+  success: false;
+  error: string;
+  code:
+    | "METHOD_NOT_ALLOWED"
+    | "INVALID_SLUG"
+    | "NOT_FOUND"
+    | "READ_FAILED";
+};
+
+type ApiResponse = SuccessResponse | ErrorResponse;
+
+function safeStr(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function safeNullableStr(value: unknown): string | null {
+  const s = safeStr(value);
+  return s || null;
+}
+
+function safeTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.map(String).map((x) => x.trim()).filter(Boolean);
+}
+
+function firstQueryValue(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return safeStr(value[0]);
+  return safeStr(value);
+}
+
+function isSafeSlug(slug: string): boolean {
+  return /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/i.test(slug) && !slug.includes("..");
+}
+
+function abs(p: string): string {
+  return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
+}
+
+function candidatePaths(slug: string): string[] {
+  const normalized = slug.replace(/^\/+|\/+$/g, "");
+
+  return [
+    abs(`content/resources/surrender-framework/${normalized}.mdx`),
+    abs(`content/resources/surrender-framework/${normalized}.md`),
+    abs(`content/frameworks/surrender/${normalized}.mdx`),
+    abs(`content/frameworks/surrender/${normalized}.md`),
+    abs(`content/surrender/${normalized}.mdx`),
+    abs(`content/surrender/${normalized}.md`),
+  ];
+}
+
+function resolveFrameworkFile(slug: string): string | null {
+  for (const filePath of candidatePaths(slug)) {
+    if (fs.existsSync(filePath)) return filePath;
+  }
+  return null;
+}
+
+function buildFrameworkPayload(filePath: string, slug: string): FrameworkPayload {
+  const raw = fs.readFileSync(filePath, "utf8");
+  const parsed = matter(raw);
+  const data = parsed.data as Record<string, unknown>;
+  const content = parsed.content.trim();
+
+  return {
+    slug,
+    title: safeStr(data.title) || slug,
+    subtitle: safeNullableStr(data.subtitle),
+    description: safeNullableStr(data.description),
+    excerpt: safeNullableStr(data.excerpt),
+    category: safeNullableStr(data.category),
+    version: safeNullableStr(data.version),
+    status: safeNullableStr(data.status),
+    author: safeNullableStr(data.author),
+    date: safeNullableStr(data.date),
+    tier: safeNullableStr(data.tier),
+    tags: safeTags(data.tags),
+    content,
+    sourcePath: path.relative(process.cwd(), filePath).replace(/\\/g, "/"),
+  };
+}
+
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiResponse>,
+) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({
+      success: false,
+      error: "Method not allowed",
+      code: "METHOD_NOT_ALLOWED",
+    });
+  }
+
+  const slug = firstQueryValue(req.query.slug);
+
+  if (!slug || !isSafeSlug(slug)) {
+    return res.status(400).json({
+      success: false,
+      error: "A valid framework slug is required",
+      code: "INVALID_SLUG",
+    });
+  }
+
+  const filePath = resolveFrameworkFile(slug);
+
+  if (!filePath) {
+    return res.status(404).json({
+      success: false,
+      error: "Protected framework not found",
+      code: "NOT_FOUND",
+    });
+  }
+
+  try {
+    const framework = buildFrameworkPayload(filePath, slug);
+    const access = (req as ProtectedRequest).innerCircleAccess;
+
+    return res.status(200).json({
+      success: true,
+      framework,
+      access: {
+        tier: access?.tier ?? "public",
+        userId: access?.userId ?? null,
+        sessionId: access?.sessionId ?? null,
+      },
+      retrievedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("[SURRENDER_FRAMEWORK_PROTECTED_READ_ERROR]", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Failed to read protected framework",
+      code: "READ_FAILED",
+    });
+  }
+}
+
+export default withInnerCircleAccess(handler, {
   requireAuth: true,
-  rateLimitConfig: {
-    windowMs: 60_000,
-    limit: 30,
-    keyPrefix: "protected_content",
-  },
+  requiredTier: "inner-circle",
 });

@@ -1,13 +1,21 @@
-// pages/api/pdfs/list.ts - SSOT ALIGNED
+// pages/api/pdfs/list.ts — SSOT ALIGNED
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth/auth-options";
 import { getAllPDFItems } from "@/lib/pdf/registry";
-import type { PDFItem, PDFListResponse, DashboardStats } from "@/types/pdf-dashboard";
+import type {
+  PDFItem,
+  PDFListResponse,
+  DashboardStats,
+} from "@/types/pdf-dashboard";
 import type { PDFType } from "@/lib/pdf/types";
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+import {
+  normalizeRequiredTier,
+  normalizeUserTier,
+  hasAccess,
+} from "@/lib/access/tier-policy";
 
 function toInt(input: unknown, fallback: number): number {
   const n = typeof input === "string" ? parseInt(input, 10) : Number(input);
@@ -29,7 +37,10 @@ function canonicalizeWebPath(p: unknown): string {
   return v.replace(/\/{2,}/g, "/");
 }
 
-// Use AccessTier directly from SSOT
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 const DEFAULT_TIER: AccessTier = "public";
 
 const ALLOWED_TYPES: PDFType[] = [
@@ -55,16 +66,10 @@ const ALLOWED_TYPES: PDFType[] = [
   "other",
 ];
 
-/**
- * Normalize tier using SSOT
- */
 function normalizeTier(v: unknown): AccessTier {
   return normalizeRequiredTier(v);
 }
 
-/**
- * If registry gives you "pdf" (or anything unknown), map to "other"
- */
 function normalizeType(v: unknown): PDFType {
   const s = typeof v === "string" ? v.toLowerCase().trim() : "";
   if (!s) return "other";
@@ -98,7 +103,7 @@ function emptyResponse(page: number, limit: number): PDFListResponse {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<PDFListResponse | { error: string }>
+  res: NextApiResponse<PDFListResponse | { error: string }>,
 ) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
 
@@ -124,65 +129,61 @@ export default async function handler(
 
     const mapped: PDFItem[] = all.map((pdf: any) => {
       const exists = Boolean(pdf.existsOnDisk ?? pdf.exists ?? false);
-
-      // Make outputPath canonical and always set
       const outputPath = canonicalizeWebPath(pdf.outputPath || pdf.fileUrl || "");
-
-      // Keep fileUrl for compatibility, but never empty if outputPath exists
       const fileUrl = canonicalizeWebPath(pdf.fileUrl || outputPath);
-
-      // Normalize tier using SSOT
-      const tier = normalizeTier(pdf.tier);
-      
-      // Normalize type
+      const tier = normalizeTier(pdf.tier ?? DEFAULT_TIER);
       const type = normalizeType(pdf.type);
 
       return {
         id: String(pdf.id),
         title: String(pdf.title || pdf.id),
-
-        // Canon-required fields
         type,
         tier,
         outputPath,
-
-        // Dashboard/UI fields
-        description: String(pdf.description || pdf.excerpt || "Classification pending..."),
+        description: String(
+          pdf.description || pdf.excerpt || "Classification pending...",
+        ),
         category: String(pdf.category || "General Intelligence"),
-
         exists,
         isGenerating: Boolean(pdf.isGenerating ?? false),
         error: pdf.error ? String(pdf.error) : undefined,
-
         fileUrl,
         fileSize: String(pdf.fileSizeHuman || pdf.fileSize || "0 KB"),
-        lastGenerated: String(pdf.lastModifiedISO || pdf.lastModified || pdf.updatedAt || isoNow()),
-
+        lastGenerated: String(
+          pdf.lastModifiedISO || pdf.lastModified || pdf.updatedAt || isoNow(),
+        ),
         createdAt: String(pdf.createdAt || isoNow()),
         updatedAt: String(pdf.updatedAt || pdf.lastModifiedISO || isoNow()),
-
         tags: Array.isArray(pdf.tags) ? pdf.tags.map(String) : [],
         status: String(pdf.status || (exists ? "generated" : "pending")),
-        metadata: pdf.metadata && typeof pdf.metadata === "object" ? pdf.metadata : {},
-        downloadCount: Number.isFinite(Number(pdf.downloadCount)) ? Number(pdf.downloadCount) : 0,
+        metadata:
+          pdf.metadata && typeof pdf.metadata === "object" ? pdf.metadata : {},
+        downloadCount: Number.isFinite(Number(pdf.downloadCount))
+          ? Number(pdf.downloadCount)
+          : 0,
       } as PDFItem;
     });
 
-    // Filter by user access if needed
     const userTier = normalizeUserTier((session as any)?.aol?.tier || "public");
-    const accessiblePDFs = mapped.filter(pdf => 
-      hasAccess(userTier, pdf.tier)
-    );
+    const accessiblePDFs = mapped.filter((pdf) => hasAccess(userTier, pdf.tier));
 
     const start = (page - 1) * limit;
     const paginated = accessiblePDFs.slice(start, start + limit);
 
-    const categories = Array.from(new Set(mapped.map((p) => p.category).filter(Boolean)));
+    const categories: string[] = Array.from(
+      new Set(
+        mapped
+          .map((p) => p.category)
+          .filter(isNonEmptyString),
+      ),
+    );
 
     const stats: DashboardStats = {
       totalPDFs: mapped.length,
       availablePDFs: mapped.filter((p) => p.exists && !p.error).length,
-      missingPDFs: mapped.filter((p) => !p.exists && !p.error && !p.isGenerating).length,
+      missingPDFs: mapped.filter(
+        (p) => !p.exists && !p.error && !p.isGenerating,
+      ).length,
       categories,
       generated: mapped.filter((p) => p.exists && !p.error).length,
       errors: mapped.filter((p) => Boolean(p.error)).length,
@@ -202,6 +203,8 @@ export default async function handler(
     });
   } catch (error) {
     console.error("[PDF List API] Error:", error);
-    return res.status(500).json({ error: "Internal Server Error: Registry inaccessible" });
+    return res
+      .status(500)
+      .json({ error: "Internal Server Error: Registry inaccessible" });
   }
 }

@@ -1,19 +1,9 @@
 import React from 'react';
 import IQPDF from './IQPDF';
-
-interface PDF {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  type: string;
-  exists: boolean;
-  fileSize?: number;
-  outputPath: string;
-}
+import type { PDFItem } from '@/types/pdf-dashboard';
 
 interface PDFViewerPanelProps {
-  pdf: PDF | null;
+  pdf: PDFItem | null;
   isGenerating: boolean;
   onGeneratePDF: (id: string) => void;
   refreshKey: number;
@@ -39,6 +29,9 @@ const PDFViewerPanel: React.FC<PDFViewerPanelProps> = ({
     );
   }
 
+  const exists = pdf.exists === true;
+  const displayFileSize = pdf.fileSize ? parseFloat(pdf.fileSize) : null;
+
   return (
     <>
       <div className="mb-6 md:mb-8">
@@ -49,15 +42,15 @@ const PDFViewerPanel: React.FC<PDFViewerPanelProps> = ({
                 {pdf.title}
               </h2>
               <span className="text-[10px] px-2 py-1 rounded-full bg-gray-800 text-gray-300 uppercase font-bold">
-                {pdf.type}
+                {pdf.type || 'pdf'}
               </span>
             </div>
             <p className="text-sm text-gray-400 italic">
-              {pdf.description}
+              {pdf.description || 'No description available'}
             </p>
           </div>
           <div className="flex gap-3">
-            {!pdf.exists ? (
+            {!exists ? (
               <button
                 onClick={() => onGeneratePDF(pdf.id)}
                 disabled={isGenerating}
@@ -80,19 +73,19 @@ const PDFViewerPanel: React.FC<PDFViewerPanelProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
           <div className="p-3 rounded-lg bg-gray-900/30 border border-gray-800">
             <div className="text-[10px] text-gray-400 uppercase font-bold">Category</div>
-            <div className="text-sm text-white mt-1">{pdf.category}</div>
+            <div className="text-sm text-white mt-1">{pdf.category || 'Uncategorized'}</div>
           </div>
           <div className="p-3 rounded-lg bg-gray-900/30 border border-gray-800">
             <div className="text-[10px] text-gray-400 uppercase font-bold">Status</div>
-            <div className={`text-sm mt-1 ${pdf.exists ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {pdf.exists ? 'Available' : 'Not Generated'}
+            <div className={`text-sm mt-1 ${exists ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {exists ? 'Available' : 'Not Generated'}
             </div>
           </div>
-          {pdf.fileSize && (
+          {displayFileSize && (
             <div className="p-3 rounded-lg bg-gray-900/30 border border-gray-800">
               <div className="text-[10px] text-gray-400 uppercase font-bold">Size</div>
               <div className="text-sm text-white mt-1">
-                {(pdf.fileSize / 1024 / 1024).toFixed(2)} MB
+                {(displayFileSize / 1024 / 1024).toFixed(2)} MB
               </div>
             </div>
           )}
@@ -106,7 +99,7 @@ const PDFViewerPanel: React.FC<PDFViewerPanelProps> = ({
       </div>
       
       <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40 shadow-inner">
-        {pdf.exists ? (
+        {exists ? (
           <IQPDF
             key={`${pdf.id}-${refreshKey}`}
             src={`${pdf.outputPath}?v=${refreshKey}`}

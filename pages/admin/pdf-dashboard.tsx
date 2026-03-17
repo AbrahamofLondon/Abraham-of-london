@@ -1,17 +1,20 @@
-/* pages/admin/pdf-dashboard.tsx — PDF INTELLIGENCE ENGINE (INTEGRITY MODE) */
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import type { GetServerSideProps } from "next";
+import type { GetServerSideProps, NextPage } from "next";
+import { getSession } from "next-auth/react";
 
 import { withAdminAuth } from "@/lib/auth/withAdminAuth";
 import { usePDFDashboard } from "@/hooks/usePDFDashboard";
 import { useToast } from "@/hooks/useToast";
 import { getInstitutionalAnalyticsServer } from "@/lib/server/institutional-analytics";
+import type {
+  FilterState,
+  PDFItem,
+  DashboardStats as CanonicalDashboardStats,
+  AdminUser,
+} from "@/types/pdf-dashboard";
 
-// Core Dashboard Components
 import DashboardHeader from "@/components/DashboardHeader";
-import PDFListPanel from "@/components/PDFListPanel";
 import PDFViewerPanel from "@/components/PDFViewerPanel";
 import StatusMessage from "@/components/StatusMessage";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -20,18 +23,8 @@ import DashboardStats from "@/components/DashboardStats";
 import PDFQuickActions from "@/components/PDFQuickActions";
 import PDFActionsBar from "@/components/PDFActionsBar";
 import ErrorBoundary from "@/components/ErrorBoundary";
-
-// Specialized Data Visualization Modules
 import PDFDataDashboard from "@/components/dashboard/PDFDataDashboard";
 import LiveDataDashboard from "@/components/dashboard/LiveDataDashboard";
-
-type AdminUser = {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  permissions: string[];
-};
 
 type InstitutionalAnalyticsPayload = {
   rawPdfs: unknown[];
@@ -44,101 +37,162 @@ interface PDFDashboardProps {
   analyticsError: string | null;
 }
 
-export const getServerSideProps: GetServerSideProps = withAdminAuth(async () => {
+type HeaderStats = {
+  total: number;
+  available: number;
+  missing: number;
+};
+
+// Type for PDFActionsBar that matches exactly what the component needs
+type ActionsBarPDF = PDFItem & {
+  status: 'generated' | 'missing';
+};
+
+function extractPermissions(value: unknown): string[] {
+  if (!Array.isArray(value)) return ["pdf:edit", "pdf:delete"];
+  const out = value.map((p) => String(p)).filter(Boolean);
+  return out.length > 0 ? out : ["pdf:edit", "pdf:delete"];
+}
+
+function normalizeSortBy(value: string): FilterState["sortBy"] {
+  return value === "title" ||
+    value === "date" ||
+    value === "size" ||
+    value === "category"
+    ? value
+    : "date";
+}
+
+function transformStatsForDashboard(stats: CanonicalDashboardStats | undefined): HeaderStats {
+  return {
+    total: stats?.totalPDFs || 0,
+    available: stats?.availablePDFs || 0,
+    missing: stats?.missingPDFs || 0
+  };
+}
+
+// Convert PDFItem to ActionsBarPDF format - preserves all PDFItem properties
+function toActionsBarPDF(pdf: PDFItem | null): ActionsBarPDF | null {
+  if (!pdf) return null;
+  
+  return {
+    ...pdf,
+    status: pdf.exists ? "generated" : "missing"
+  };
+}
+
+export const getServerSideProps: GetServerSideProps<PDFDashboardProps> = async (context) => {
+  const session = await getSession(context);
+  const adminEmail = process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
+
+  if (!session || session.user?.email !== adminEmail) {
+    return { redirect: { destination: "/404", permanent: false } };
+  }
+
+  const sessionUser = session.user as any;
+
   try {
     const result = await getInstitutionalAnalyticsServer();
-
     return {
       props: {
-        initialAnalytics: result.success ? result.data : null,
+        user: {
+          id: String(sessionUser.id || "admin"),
+          email: String(session.user?.email || adminEmail),
+          name: String(sessionUser.name || "Administrator"),
+          role: String(sessionUser.role || "admin"),
+          permissions: extractPermissions(sessionUser.permissions),
+        },
+        initialAnalytics: result.success ? (result.data as InstitutionalAnalyticsPayload) : null,
         analyticsError: result.success ? null : result.error || "Analytics failed to load",
       },
     };
   } catch (e: any) {
-    console.error("[PDF_DASHBOARD_SSR_ANALYTICS_ERROR]:", e);
     return {
       props: {
+        user: {
+          id: String(sessionUser.id || "admin"),
+          email: String(session.user?.email || adminEmail),
+          name: String(sessionUser.name || "Administrator"),
+          role: String(sessionUser.role || "admin"),
+          permissions: extractPermissions(sessionUser.permissions),
+        },
         initialAnalytics: null,
-        analyticsError: typeof e?.message === "string" ? e.message : "Unknown SSR error",
+        analyticsError: e?.message || "Unknown SSR error",
       },
     };
   }
-});
+};
 
-const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, analyticsError }) => {
+const PDFDashboardPage: NextPage<PDFDashboardProps> = ({
+  user,
+  initialAnalytics,
+  analyticsError,
+}) => {
   const router = useRouter();
-  const { toast } = useToast();
-
-  const [viewMode, setViewMode] = useState<"list" | "grid" | "detail" | "live">("grid");
+  const toastApi = useToast();
+  const [panelMode, setPanelMode] = useState<"grid" | "live">("grid");
   const [selectedPDFs, setSelectedPDFs] = useState<Set<string>>(new Set());
-
-  const searchQuery = (router.query.search as string) || "";
-  const category = (router.query.category as string) || "all";
-  const sortBy = (router.query.sort as string) || "updatedAt";
-  const sortOrder = ((router.query.order as string) === "asc" ? "asc" : "desc") as "asc" | "desc";
 
   const {
     filteredPDFs,
     selectedPDF,
     isGenerating,
     generationStatus,
-    filters,
+    filterState,
     categories,
     stats,
     isLoading,
     error,
     setSelectedPDFId,
+    setViewMode,
+    setGenerationStatus,
+    refreshPDFList,
     generatePDF,
     generateAllPDFs,
-    refreshPDFList,
     updateFilter,
-    setGenerationStatus,
+    searchPDFs,
+    clearFilters,
     deletePDF,
     duplicatePDF,
     renamePDF,
-    searchPDFs,
-    sortPDFs,
-    clearFilters,
-    batchDelete,
   } = usePDFDashboard({
-    userId: user?.id || "anonymous",
-    initialFilters: {
-      search: searchQuery,
-      category,
-      sortBy,
-      sortOrder,
-      status: "all",
+    initialFilter: {
+      searchQuery: (router.query.search as string) || "",
+      selectedCategory: (router.query.category as string) || "all",
+      sortBy: normalizeSortBy((router.query.sort as string) || "date"),
+      sortOrder: (router.query.order as string) === "asc" ? "asc" : "desc",
+      statusFilter: "all",
     },
   });
 
-  // Server-side analytics warning surface
-  useEffect(() => {
-    if (analyticsError) toast.warning("Analytics Warning", analyticsError);
-  }, [analyticsError, toast]);
+  const actionsBarSelectedPDF = useMemo(() => toActionsBarPDF(selectedPDF), [selectedPDF]);
 
-  // Persist Filter State to URL (clean query — no undefined)
+  useEffect(() => {
+    if (analyticsError) toastApi.warning("Analytics Warning", analyticsError);
+    if (error) toastApi.error("Dashboard Error", error.message);
+  }, [analyticsError, error, toastApi]);
+
   useEffect(() => {
     const query: Record<string, string> = {};
-
-    if (filters.search) query.search = filters.search;
-    if (filters.category && filters.category !== "all") query.category = filters.category;
-    if (filters.sortBy && filters.sortBy !== "updatedAt") query.sort = filters.sortBy;
-    if (filters.sortOrder && filters.sortOrder !== "desc") query.order = filters.sortOrder;
-
-    if (router.query.live === "true") query.live = "true";
-
+    if (filterState.searchQuery) query.search = filterState.searchQuery;
+    if (filterState.selectedCategory && filterState.selectedCategory !== "all") {
+      query.category = filterState.selectedCategory;
+    }
+    if (filterState.sortBy && filterState.sortBy !== "date") query.sort = filterState.sortBy;
+    if (filterState.sortOrder && filterState.sortOrder !== "desc") query.order = filterState.sortOrder;
+    if (panelMode === "live") query.live = "true";
+    
     router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.search, filters.category, filters.sortBy, filters.sortOrder]);
+  }, [filterState, panelMode, router]);
 
   useEffect(() => {
-    if (error) toast.error("Dashboard Error", error.message);
-  }, [error, toast]);
+    setViewMode("grid");
+  }, [setViewMode]);
 
   const handleSelectPDF = (pdfId: string) => setSelectedPDFId(pdfId);
-
+  
   const togglePDFSelection = (pdfId: string) => {
-    setSelectedPDFs((prev) => {
+    setSelectedPDFs(prev => {
       const next = new Set(prev);
       next.has(pdfId) ? next.delete(pdfId) : next.add(pdfId);
       return next;
@@ -148,37 +202,23 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, ana
   const clearSelection = () => setSelectedPDFs(new Set());
 
   const handleBatchDelete = async () => {
-    if (selectedPDFs.size === 0) return;
-
-    if (confirm("Authorize destruction of " + selectedPDFs.size + " restricted volumes?")) {
+    if (!selectedPDFs.size) return;
+    if (confirm(`Authorize destruction of ${selectedPDFs.size} restricted volumes?`)) {
       try {
-        await batchDelete(Array.from(selectedPDFs));
+        await Promise.all(Array.from(selectedPDFs).map(deletePDF));
         clearSelection();
-        toast.success("Sequence Complete", selectedPDFs.size + " records purged.");
+        toastApi.success("Sequence Complete", `${selectedPDFs.size} records purged.`);
       } catch {
-        toast.error("Authority Rejected", "Batch deletion failed.");
+        toastApi.error("Authority Rejected", "Batch deletion failed.");
       }
     }
   };
 
-  const toggleLiveView = () => {
-    const newMode = viewMode === "live" ? "grid" : "live";
-    setViewMode(newMode);
-
-    const query: Record<string, string> = {};
-    if (filters.search) query.search = filters.search;
-    if (filters.category && filters.category !== "all") query.category = filters.category;
-    if (filters.sortBy && filters.sortBy !== "updatedAt") query.sort = filters.sortBy;
-    if (filters.sortOrder && filters.sortOrder !== "desc") query.order = filters.sortOrder;
-
-    if (newMode === "live") query.live = "true";
-
-    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
-  };
+  const toggleLiveView = () => setPanelMode(prev => prev === "live" ? "grid" : "live");
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-black">
         <LoadingSpinner message="Decrypting Vault Contents..." />
       </div>
     );
@@ -186,39 +226,42 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, ana
 
   return (
     <ErrorBoundary fallback={<DashboardError onRetry={refreshPDFList} />}>
-      <div className="min-h-screen bg-zinc-950 text-white selection:bg-gold/30">
-        <div className="max-w-[1600px] mx-auto p-6 md:p-10">
+      <div className="min-h-screen bg-zinc-950 text-white">
+        <div className="mx-auto max-w-[1600px] p-6 md:p-10">
           <DashboardHeader
-            title="Intelligence Pipeline"
-            subtitle="Abraham of London • Restricted Portfolio Management"
-            stats={stats}
+            title="Intelligence Registry"
+            subtitle="Restricted portfolio oversight and archival command"
+            stats={transformStatsForDashboard(stats)}
             user={user}
             onRefresh={refreshPDFList}
             onGenerateAll={generateAllPDFs}
             isGenerating={isGenerating}
-            additionalActions={
-              <button
-                onClick={toggleLiveView}
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
-                  viewMode === "live"
-                    ? "bg-gold border-gold text-black shadow-lg shadow-gold/20"
-                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
-                }`}
-              >
-                {viewMode === "live" ? "Exit Live Pulse" : "Initiate Live Pulse"}
-              </button>
-            }
           />
 
-          {generationStatus && <StatusMessage status={generationStatus} onDismiss={() => setGenerationStatus(null)} />}
+          <div className="mt-6">
+            <button
+              onClick={toggleLiveView}
+              className={`rounded-xl border px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+                panelMode === "live"
+                  ? "border-gold bg-gold text-black"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white"
+              }`}
+            >
+              {panelMode === "live" ? "Exit Live Pulse" : "Initiate Live Pulse"}
+            </button>
+          </div>
 
-          {viewMode === "live" ? (
-            <div className="space-y-8 animate-in fade-in duration-700">
+          {generationStatus && (
+            <StatusMessage status={generationStatus} onDismiss={() => setGenerationStatus(null)} />
+          )}
+
+          {panelMode === "live" ? (
+            <div className="mt-8 space-y-8">
               <LiveDataDashboard theme="dark" onPDFSelect={handleSelectPDF} />
               <div className="flex justify-center">
                 <button
                   onClick={toggleLiveView}
-                  className="px-8 py-4 bg-zinc-900 border border-white/5 hover:bg-zinc-800 text-zinc-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="rounded-xl border border-white/5 bg-zinc-900 px-8 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:bg-zinc-800 hover:text-white"
                 >
                   ← Return to Manuscript Registry
                 </button>
@@ -233,73 +276,141 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, ana
                 onBatchDelete={handleBatchDelete}
                 onClearSelection={clearSelection}
                 isGenerating={isGenerating}
-                additionalButtons={<div className="h-4 w-px bg-zinc-800 mx-2 hidden sm:block" />}
               />
 
-              <div className="mb-10">
+              <div className="mb-10 mt-8">
                 <PDFFilters
-                  searchQuery={filters.search}
-                  selectedCategory={filters.category}
-                  sortBy={filters.sortBy}
-                  sortOrder={filters.sortOrder}
+                  searchQuery={filterState.searchQuery}
+                  selectedCategory={filterState.selectedCategory}
+                  sortBy={filterState.sortBy}
+                  sortOrder={filterState.sortOrder}
                   categories={categories}
                   onSearchChange={searchPDFs}
-                  onCategoryChange={(value) => updateFilter({ category: value })}
-                  onSortChange={sortPDFs}
+                  onCategoryChange={(value) => updateFilter({ selectedCategory: value })}
+                  onSortChange={(value) => updateFilter({ sortBy: value as any })}
+                  onSortOrderChange={(value) => updateFilter({ sortOrder: value })}
                   onClearFilters={clearFilters}
                 />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                {/* Sidebar: Registry */}
+              <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
                 <div className="lg:col-span-4">
-                  <div className="rounded-[2rem] border border-white/5 bg-zinc-900/30 backdrop-blur-md p-8 sticky top-10">
-                    <div className="flex items-center justify-between mb-8">
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
-                        Indexed Manuscripts ({filteredPDFs.length})
-                      </h2>
+                  <div className="sticky top-10 rounded-[2rem] border border-white/5 bg-zinc-900/30 p-8 backdrop-blur-md">
+                    <h2 className="mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                      Indexed Manuscripts ({filteredPDFs.length})
+                    </h2>
+
+                    <div className="space-y-3">
+                      {filteredPDFs.map((pdf) => {
+                        const isActive = selectedPDF?.id === pdf.id;
+                        const isChecked = selectedPDFs.has(pdf.id);
+
+                        return (
+                          <div
+                            key={pdf.id}
+                            className={`rounded-2xl border p-4 transition-all ${
+                              isActive
+                                ? "border-gold/40 bg-gold/10"
+                                : "border-white/5 bg-black/20 hover:border-white/10"
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => togglePDFSelection(pdf.id)}
+                                className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSelectPDF(pdf.id)}
+                                className="min-w-0 flex-1 text-left"
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <p className="truncate text-sm font-semibold text-white">
+                                    {pdf.title}
+                                  </p>
+                                  <span
+                                    className={`rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${
+                                      pdf.exists
+                                        ? "bg-emerald-500/10 text-emerald-300"
+                                        : "bg-zinc-700/40 text-zinc-400"
+                                    }`}
+                                  >
+                                    {pdf.exists ? "ready" : "missing"}
+                                  </span>
+                                </div>
+                                <p className="mt-2 line-clamp-2 text-xs text-zinc-500">
+                                  {pdf.description || "No description available."}
+                                </p>
+                                <div className="mt-3 flex flex-wrap items-center gap-2 text-[9px] font-mono uppercase tracking-[0.16em] text-zinc-600">
+                                  <span>{pdf.category || "Uncategorized"}</span>
+                                  <span>•</span>
+                                  <span>{pdf.type}</span>
+                                </div>
+                              </button>
+                            </div>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <button
+                                onClick={() => generatePDF(pdf.id)}
+                                disabled={isGenerating}
+                                className="rounded-xl border border-white/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-300 hover:bg-white hover:text-black disabled:opacity-50"
+                              >
+                                Generate
+                              </button>
+                              <button
+                                onClick={() => duplicatePDF(pdf.id)}
+                                className="rounded-xl border border-white/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-300 hover:bg-white hover:text-black"
+                              >
+                                Duplicate
+                              </button>
+                              <button
+                                onClick={() => deletePDF(pdf.id)}
+                                className="rounded-xl border border-red-500/20 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-300 hover:bg-red-500/10"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
-                    <PDFListPanel
-                      pdfs={filteredPDFs}
-                      selectedPDFId={selectedPDF?.id || null}
-                      selectedPDFs={selectedPDFs}
-                      isGenerating={isGenerating}
-                      viewMode={viewMode}
-                      onSelectPDF={handleSelectPDF}
-                      onGeneratePDF={generatePDF}
-                      onToggleSelection={togglePDFSelection}
-                      onDeletePDF={deletePDF}
-                      onDuplicatePDF={duplicatePDF}
-                    />
-
-                    <div className="mt-8 pt-8 border-t border-white/5">
-                      <DashboardStats stats={stats} selectedCount={selectedPDFs.size} />
+                    <div className="mt-8 border-t border-white/5 pt-8">
+                      <DashboardStats
+                        stats={transformStatsForDashboard(stats)}
+                        selectedCount={selectedPDFs.size}
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Main: Viewer */}
                 <div className="lg:col-span-8">
-                  <div className="rounded-[2rem] border border-white/5 bg-zinc-900/20 backdrop-blur-sm p-2 md:p-10 min-h-[800px] flex flex-col">
-                    {selectedPDF && (
+                  <div className="flex min-h-[800px] flex-col rounded-[2rem] border border-white/5 bg-zinc-900/20 p-2 backdrop-blur-sm md:p-10">
+                    {actionsBarSelectedPDF && (
                       <PDFActionsBar
-                        pdf={selectedPDF}
+                        pdf={actionsBarSelectedPDF}
                         isGenerating={isGenerating}
-                        onGeneratePDF={() => generatePDF(selectedPDF.id)}
-                        onDeletePDF={() => deletePDF(selectedPDF.id)}
-                        onDuplicatePDF={() => duplicatePDF(selectedPDF.id)}
+                        onGeneratePDF={() => generatePDF(actionsBarSelectedPDF.id)}
+                        onDeletePDF={() => deletePDF(actionsBarSelectedPDF.id)}
+                        onDuplicatePDF={() => duplicatePDF(actionsBarSelectedPDF.id)}
                         onRenamePDF={() => {
-                          const newName = prompt("Enter Institutional Designation:", selectedPDF.title);
-                          if (newName) renamePDF(selectedPDF.id, newName);
+                          const newName = prompt("Enter Institutional Designation:", actionsBarSelectedPDF.title);
+                          if (newName) renamePDF(actionsBarSelectedPDF.id, newName);
                         }}
                         canEdit={!!user?.permissions?.includes("pdf:edit")}
                         canDelete={!!user?.permissions?.includes("pdf:delete")}
                       />
                     )}
 
-                    <div className="flex-grow mt-6">
-                      <PDFViewerPanel pdf={selectedPDF} isGenerating={isGenerating} onGeneratePDF={generatePDF} refreshKey={stats.totalPDFs} />
+                    <div className="mt-6 flex-grow">
+                      <PDFViewerPanel
+                        pdf={selectedPDF}
+                        isGenerating={isGenerating}
+                        onGeneratePDF={generatePDF}
+                        refreshKey={stats?.totalPDFs || 0}
+                      />
                     </div>
                   </div>
                 </div>
@@ -308,8 +419,13 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, ana
           )}
 
           <div className="mt-20 border-t border-white/5 pt-12">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] mb-8 text-zinc-600">Archival Analytics</h3>
-            <PDFDataDashboard initialAnalytics={initialAnalytics} theme="dark" onPDFSelect={handleSelectPDF} />
+            <h3 className="mb-8 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">
+              Archival Analytics
+            </h3>
+            <PDFDataDashboard
+              theme="dark"
+              onPDFSelect={handleSelectPDF}
+            />
           </div>
         </div>
       </div>
@@ -318,23 +434,21 @@ const PDFDashboard: React.FC<PDFDashboardProps> = ({ user, initialAnalytics, ana
 };
 
 const DashboardError: React.FC<{ onRetry: () => void }> = ({ onRetry }) => (
-  <div className="min-h-screen bg-black flex items-center justify-center p-8">
+  <div className="flex min-h-screen items-center justify-center bg-black p-8">
     <div className="max-w-md text-center">
-      <div className="text-gold text-4xl mb-6">!</div>
-      <h2 className="text-2xl font-serif font-bold text-white mb-4">Registry Desynchronized</h2>
-      <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-        The PDF Intelligence System encountered a structural error. Re-authentication may be required.
+      <div className="mb-6 text-4xl text-gold">!</div>
+      <h2 className="mb-4 font-serif text-2xl font-bold text-white">Registry Desynchronized</h2>
+      <p className="mb-8 text-sm leading-relaxed text-zinc-500">
+        The PDF Intelligence System encountered a structural error.
       </p>
-      <div className="flex gap-4 justify-center">
-        <button
-          onClick={onRetry}
-          className="px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all"
-        >
-          Re-Sync Registry
-        </button>
-      </div>
+      <button
+        onClick={onRetry}
+        className="rounded-xl bg-gold px-8 py-3 text-[10px] font-black uppercase tracking-widest text-black hover:bg-white"
+      >
+        Re-Sync Registry
+      </button>
     </div>
   </div>
 );
 
-export default withAdminAuth(PDFDashboard);
+export default withAdminAuth(PDFDashboardPage);

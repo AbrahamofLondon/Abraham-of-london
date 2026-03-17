@@ -1,77 +1,120 @@
-// lib/db/prisma.ts — BUILD-SAFE + NODE-ONLY + NEON ADAPTER
+// lib/db/prisma.ts — BUILD-SAFE + NODE-ONLY + NEON ADAPTER (HARDENED)
 import "server-only";
 
-import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import { neonConfig, Pool, type PoolConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import WebSocket from "ws";
+import { shouldUseDatabase } from "@/lib/db/db-gate";
 
-/**
- * 🏛️ [INSTITUTIONAL FIX]: 
- * We use 'any' for the type definition during the build phase to bypass 
- * the "@prisma/client has no exported member" crash.
- */
-type PrismaClientType = any; 
+type PrismaClientType = any;
+export type PrismaTransactionClient = any;
 
 const isEdge = process.env.NEXT_RUNTIME === "edge";
-const isBuild = process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD;
+const canUseDb = shouldUseDatabase();
+const DATABASE_URL = process.env.DATABASE_URL;
 
 if (isEdge) {
   throw new Error("[Prisma] Client cannot run on Edge. Use Node.js runtime.");
 }
 
-// Configure neon for Node.js environment
 neonConfig.webSocketConstructor = WebSocket;
 neonConfig.fetchConnectionCache = true;
 
-const DATABASE_URL = process.env.DATABASE_URL;
-
 declare global {
   // eslint-disable-next-line no-var
-  var __aol_prisma: any | undefined;
+  var __aol_prisma__: PrismaClientType | undefined;
 }
 
 function buildSafeProxy(): PrismaClientType {
-  return new Proxy({}, {
-    get: (_t, prop) => {
-      if (prop === "then" || prop === "catch") return undefined;
-      return async () => undefined;
-    }
-  });
+  return new Proxy(
+    {},
+    {
+      get: (_target, prop: string | symbol) => {
+        if (prop === "then" || prop === "catch" || prop === "finally") {
+          return undefined;
+        }
+
+        if (prop === "$disconnect" || prop === "$connect") {
+          return async () => undefined;
+        }
+
+        if (prop === "$transaction") {
+          return async (arg: unknown) => {
+            if (typeof arg === "function") {
+              return await arg(buildSafeProxy());
+            }
+            return Array.isArray(arg) ? [] : undefined;
+          };
+        }
+
+        if (
+          prop === "$queryRaw" ||
+          prop === "$executeRaw" ||
+          prop === "$queryRawUnsafe" ||
+          prop === "$executeRawUnsafe"
+        ) {
+          return async () => undefined;
+        }
+
+        return new Proxy(
+          {},
+          {
+            get: () => async () => undefined,
+          },
+        );
+      },
+    },
+  );
 }
 
 function createPrisma(): PrismaClientType {
-  if (isBuild) return buildSafeProxy();
+  if (!canUseDb) return buildSafeProxy();
   if (!DATABASE_URL) return buildSafeProxy();
 
   try {
-    // ✅ Fix: Create pool with proper typing
-    const poolConfig: PoolConfig = { connectionString: DATABASE_URL };
+    const poolConfig: PoolConfig = {
+      connectionString: DATABASE_URL,
+    };
+
     const pool = new Pool(poolConfig);
-    
-    // ✅ Fix: Cast pool to any to bypass type mismatch
     const adapter = new PrismaNeon(pool as any);
 
-    // 🏛️ Dynamic require prevents the build-time 'module not found' error
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { PrismaClient } = require("@prisma/client");
+
     return new PrismaClient({
       adapter,
-      log: ["error"],
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
     });
-  } catch (e) {
-    console.error("[Prisma] Runtime load failed:", e);
+  } catch (error) {
+    console.error("[Prisma] Runtime load failed:", error);
     return buildSafeProxy();
   }
 }
 
-export const prisma = globalThis.__aol_prisma ?? createPrisma();
+export const prisma: PrismaClientType =
+  globalThis.__aol_prisma__ ?? createPrisma();
 
 if (process.env.NODE_ENV !== "production") {
-  globalThis.__aol_prisma = prisma;
+  globalThis.__aol_prisma__ = prisma;
+}
+
+export const getPrisma = (): PrismaClientType => prisma;
+
+export async function safePrismaQuery<T>(
+  query: () => Promise<T>,
+): Promise<T | null> {
+  try {
+    return await query();
+  } catch (error) {
+    console.error("[PRISMA_DB_ERROR]:", error);
+    return null;
+  }
 }
 
 export async function checkDatabaseConnection(): Promise<boolean> {
-  if (isBuild) return false;
+  if (!canUseDb) return false;
+
   try {
     await prisma.$queryRaw`SELECT 1`;
     return true;
@@ -80,5 +123,4 @@ export async function checkDatabaseConnection(): Promise<boolean> {
   }
 }
 
-// 🏛️ Dynamic Transaction Type Recovery
-export type PrismaTransactionClient = any;
+export default prisma;

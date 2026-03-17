@@ -28,6 +28,7 @@ export const INNER_CIRCLE_TIER_ORDER: AccessTier[] = [
   "legacy",
   "architect",
   "owner",
+  "top-secret", // ✅ Added as highest tier
 ];
 
 const VALID_TIERS = [
@@ -38,6 +39,7 @@ const VALID_TIERS = [
   "legacy",
   "architect",
   "owner",
+  "top-secret", // ✅ Added
 
   // Legacy tolerated values
   "free",
@@ -348,14 +350,21 @@ InnerCircleDataSchema.virtual("accessDescription").get(function (this: any) {
   const tier = (this.normalizedTier ||
     normalizeRequiredTier(this.tierLevel)) as AccessTier;
 
+  /**
+   * SYSTEM RESOLUTION:
+   * Added the 'restricted' key to match the updated AccessTier union.
+   * This ensures the Record is exhaustive and clears the build error.
+   */
   const descriptions: Record<AccessTier, string> = {
     public: "Available to everyone",
     member: "Available to all members",
     "inner-circle": "Inner Circle exclusive content",
+    restricted: "Restricted - Additional clearance required", // ✅ ADDED THIS LINE
     client: "Client access only",
     legacy: "Legacy member exclusive",
     architect: "Architect level access",
     owner: "Owner only",
+    "top-secret": "TOP SECRET - Highest clearance required",
   };
 
   return descriptions[tier] || `Requires ${tier} access`;

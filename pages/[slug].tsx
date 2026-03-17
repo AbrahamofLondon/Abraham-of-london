@@ -11,8 +11,13 @@ import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 
 import { getDocKind, sanitizeData } from "@/lib/content/shared";
-import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
-import type { AccessTier } from "@/lib/access/tiers";
+import { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import {
+  normalizeRequiredTier,
+  normalizeUserTier,
+  hasAccess,
+} from "@/lib/access/tier-policy";
 
 /* -----------------------------------------------------------------------------
    Routing guardrails
@@ -82,22 +87,32 @@ interface Props {
   requiredTier: AccessTier;
 }
 
-const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }) => {
+const GenericContentPage: NextPage<Props> = ({
+  doc,
+  canonicalUrl,
+  requiredTier,
+}) => {
   const { data: session, status } = useSession();
 
-  const required = tiers.normalize(requiredTier);
-  const user = tiers.normalize((session?.user as any)?.tier ?? "public");
+  const required = normalizeRequiredTier(requiredTier);
+  const user = normalizeUserTier((session?.user as any)?.tier ?? "public");
 
   const needsAuth = required !== "public";
-  const canAccess = tiers.hasAccess(user, required);
+  const canAccess = hasAccess(user, required);
 
   if (!doc) {
     return (
-      <Layout title="404 | Abraham of London" description="Content not found" canonicalUrl={canonicalUrl}>
+      <Layout
+        title="404 | Abraham of London"
+        description="Content not found"
+        canonicalUrl={canonicalUrl}
+      >
         <div className="flex min-h-screen items-center justify-center bg-black">
           <div className="animate-aolFadeUp text-center">
             <h1 className="aol-editorial mb-4 text-4xl">404</h1>
-            <p className="aol-micro uppercase tracking-widest text-white/30">Asset Not Found</p>
+            <p className="aol-micro uppercase tracking-widest text-white/30">
+              Asset Not Found
+            </p>
           </div>
         </div>
       </Layout>
@@ -106,7 +121,11 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
 
   if (status === "loading") {
     return (
-      <Layout title={doc.title} description={doc.excerpt} canonicalUrl={canonicalUrl}>
+      <Layout
+        title={doc.title}
+        description={doc.excerpt}
+        canonicalUrl={canonicalUrl}
+      >
         <div className="flex min-h-screen items-center justify-center bg-black">
           <div className="animate-pulse font-mono text-xs text-amber-500">
             Verifying clearance...
@@ -118,7 +137,11 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
 
   if (needsAuth && (!session?.user || !canAccess)) {
     return (
-      <Layout title={doc.title} description={doc.excerpt} canonicalUrl={canonicalUrl}>
+      <Layout
+        title={doc.title}
+        description={doc.excerpt}
+        canonicalUrl={canonicalUrl}
+      >
         <div className="flex min-h-screen items-center justify-center bg-black px-6">
           <AccessGate
             title={doc.title}
@@ -141,7 +164,9 @@ const GenericContentPage: NextPage<Props> = ({ doc, canonicalUrl, requiredTier }
     >
       <Head>
         <title>{doc.title} | Abraham of London</title>
-        {doc.excerpt ? <meta name="description" content={doc.excerpt} /> : null}
+        {doc.excerpt ? (
+          <meta name="description" content={doc.excerpt} />
+        ) : null}
         <meta
           name="robots"
           content={required === "public" ? "index, follow" : "noindex, nofollow"}
@@ -232,12 +257,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true, revalidate: 60 };
   }
 
-  const requiredTier = tiers.normalize(requiredTierFromDoc(rawDoc));
+  const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
 
   const doc = sanitizeData({
     title: rawDoc?.title || "Untitled",
     kind: getDocKind(rawDoc) || "Content",
-    date: rawDoc?.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
+    date: rawDoc?.date
+      ? new Date(rawDoc.date).toLocaleDateString("en-GB")
+      : null,
     excerpt: rawDoc?.excerpt || rawDoc?.description || "",
     readTime: rawDoc?.readTime ?? null,
     bodyCode: String(rawDoc?.body?.code || ""),

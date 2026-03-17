@@ -1,17 +1,10 @@
 // scripts/pdf/render-print-route.ts
-// ABRAHAM OF LONDON — PRINT ROUTE CLI
-// ----------------------------------
-// Starts Next, prints /__pdf/<slug>, stops Next.
-// Usage:
-//   pnpm tsx scripts/pdf/render-print-route.ts --slug ultimate-purpose-of-man-editorial --out public/assets/downloads/ultimate-purpose-of-man-editorial.pdf --tier public
-// Optional:
-//   --port 4311
-//   --mode start|dev   (default: start)
-
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import http from "http";
+import { buildFingerprintProfile } from "../../lib/premium/fingerprint-profile";
+import { createWatermarkPayload } from "../../lib/premium/watermark";
 import { SecurePuppeteerPDFGenerator } from "./secure-puppeteer-generator";
 
 function argValue(key: string): string | undefined {
@@ -21,10 +14,6 @@ function argValue(key: string): string | undefined {
   const i = argv.indexOf(key);
   if (i >= 0 && argv[i + 1] && !argv[i + 1].startsWith("--")) return argv[i + 1];
   return undefined;
-}
-
-function hasFlag(key: string) {
-  return process.argv.slice(2).includes(key);
 }
 
 function abs(p: string) {
@@ -60,23 +49,47 @@ function killTree(child: any) {
   if (!child?.pid) return;
   try {
     if (process.platform === "win32") {
-      spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore", shell: true });
+      spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+        stdio: "ignore",
+        shell: true,
+      });
     } else {
       child.kill("SIGTERM");
     }
-  } catch {}
+  } catch {
+    // no-op
+  }
 }
 
 async function main() {
   const slug = argValue("--slug") || argValue("-s");
-  if (!slug) throw new Error(`Missing --slug. Example: --slug ultimate-purpose-of-man-editorial`);
+  if (!slug) {
+    throw new Error("Missing --slug. Example: --slug ultimate-purpose-of-man-editorial");
+  }
 
   const out = abs(argValue("--out") || `public/assets/downloads/${slug}.pdf`);
   const tier = argValue("--tier") || "public";
   const port = Number(argValue("--port") || "4311");
-  const mode = (argValue("--mode") || "start").toLowerCase(); // start | dev
+  const mode = (argValue("--mode") || "start").toLowerCase();
 
   const url = `http://127.0.0.1:${port}/__pdf/${encodeURIComponent(slug)}?tier=${encodeURIComponent(tier)}`;
+
+  const fingerprint = buildFingerprintProfile({
+    contentId: slug,
+    title: slug,
+    filename: path.basename(out),
+    mimeType: "application/pdf",
+    tier,
+    producer: "SecurePuppeteerPDFGenerator",
+    creator: "AoL Print Route Renderer",
+  });
+
+  const watermark = createWatermarkPayload({
+    contentId: slug,
+    tier,
+    briefTitle: slug,
+    fingerprint,
+  });
 
   console.log("\n============================================");
   console.log("🏛️  AoL PRINT ROUTE — PDF RENDER");
@@ -85,13 +98,12 @@ async function main() {
   console.log(`Tier: ${tier}`);
   console.log(`URL : ${url}`);
   console.log(`Out : ${out}`);
-  console.log(`Mode: next ${mode} -p ${port}`);
+  console.log(`WM  : ${watermark.watermarkId}`);
+  console.log(`FP  : ${fingerprint.profileId}`);
   console.log("============================================\n");
 
-  // Ensure output dir exists
   fs.mkdirSync(path.dirname(out), { recursive: true });
 
-  // Start Next
   const cmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
   const nextArgs =
     mode === "dev"
@@ -107,19 +119,19 @@ async function main() {
   });
 
   try {
-    // Wait for route
-    console.log(`⏳ Waiting for print route...`);
+    console.log("⏳ Waiting for print route...");
     const ready = await waitFor200(url, 90_000);
-    if (!ready) throw new Error(`Next did not become ready at ${url} within timeout.`);
+    if (!ready) {
+      throw new Error(`Next did not become ready at ${url} within timeout.`);
+    }
 
-    console.log(`✅ Route ready. Printing...`);
+    console.log("✅ Route ready. Printing...");
 
     const gen = new SecurePuppeteerPDFGenerator({
       timeout: 120_000,
       watchdogMs: 180_000,
       maxRetries: 2,
       headless: true,
-      // uses CHROME_PATH / PUPPETEER_EXECUTABLE_PATH if set
     });
 
     const result = await gen.generateFromRoute({
@@ -130,14 +142,17 @@ async function main() {
       watchdogMs: 180_000,
       blockExternalRequests: true,
       allowFileUrls: false,
-    });
+      documentTitle: `${slug} | ${watermark.footerText}`,
+    } as any);
 
     await gen.close().catch(() => {});
     console.log(`\n✅ PDF written: ${result.filePath}`);
     console.log(`   Size: ${(result.size / 1024).toFixed(1)} KB`);
     console.log(`   SHA:  ${result.sha256.slice(0, 16)}…`);
+    console.log(`   WM :  ${watermark.watermarkId}`);
+    console.log(`   FP :  ${fingerprint.profileId}`);
   } finally {
-    console.log(`\n▶ Stopping Next...`);
+    console.log("\n▶ Stopping Next...");
     killTree(server);
   }
 }

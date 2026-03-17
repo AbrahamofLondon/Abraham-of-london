@@ -1,4 +1,5 @@
 import React from 'react';
+import type { AdminUser } from '@/types/pdf-dashboard';
 
 interface DashboardHeaderProps {
   title: string;
@@ -8,6 +9,7 @@ interface DashboardHeaderProps {
     available: number;
     missing: number;
   };
+  user?: AdminUser;
   onRefresh: () => void;
   onGenerateAll: () => void;
   isGenerating: boolean;
@@ -17,6 +19,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   title,
   subtitle,
   stats,
+  user,
   onRefresh,
   onGenerateAll,
   isGenerating,
@@ -32,8 +35,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             {title} <span className="text-white/40">Dashboard</span>
           </h1>
           <p className="text-xs text-gray-500 mt-2 italic">
-            {stats.total} PDFs available • {stats.available} on filesystem
+            {stats.total} PDFs available • {stats.available} on filesystem • {stats.missing} missing
           </p>
+          {user && (
+            <p className="text-xs text-gray-600 mt-1">
+              Logged in as: {user.email} ({user.role})
+            </p>
+          )}
         </div>
         
         <div className="flex flex-wrap gap-3">

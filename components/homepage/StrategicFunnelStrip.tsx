@@ -27,111 +27,106 @@ const CARDS: readonly CardItem[] = [
     label: "Advisory & Strategy",
     kicker: "Direct Implementation",
     description:
-      "Board-level architecture for founders. We don't just advise; we build the operating logic required to survive growth and pressure.",
+      "Board-level architecture for founders. We build the operating logic required to survive growth and pressure.",
     Icon: Briefcase,
-    pillar: { icon: Wrench, name: "Tools", phase: "Phase 01" },
+    pillar: { icon: Wrench, name: "Tools", phase: "01" },
   },
   {
     href: "/chatham-rooms",
     label: "The Chatham Rooms",
     kicker: "Asymmetric Intelligence",
     description:
-      "Private, off-record sessions under strict protocol. A dedicated space for sharpening judgment away from the public eye.",
+      "Private, off-record sessions under strict protocol. A space for sharpening judgment away from the public eye.",
     Icon: Users,
-    pillar: { icon: ShieldCheck, name: "Rooms", phase: "Phase 02" },
+    pillar: { icon: ShieldCheck, name: "Rooms", phase: "02" },
   },
   {
     href: "/events",
     label: "Executive Salons",
     kicker: "Public Discourse",
     description:
-      "High-signal environments blending Scripture, history, and market reality. Strategy sessions for the serious operator.",
+      "High-signal environments blending Scripture and market reality. Strategy sessions for the serious operator.",
     Icon: CalendarDays,
-    pillar: { icon: ShieldCheck, name: "Rooms", phase: "Phase 03" },
+    pillar: { icon: ShieldCheck, name: "Rooms", phase: "03" },
   },
 ] as const;
 
 export default function StrategicFunnelStrip(): React.ReactElement {
   return (
-    <section className="relative overflow-hidden bg-black py-24 lg:py-32">
-      {/* Background Architecture */}
+    <section className="relative overflow-hidden bg-black py-16 lg:py-20">
+      {/* Background Architecture — Reduced blurs, sharper grid */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-grid-technical mask-radial-fade opacity-[0.10]" />
-        <div className="absolute left-1/2 top-[-260px] h-[720px] w-[980px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[180px]" />
-        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
+        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.02] mix-blend-overlay" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-16 flex flex-col items-center text-center">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/60">
-            The Operational Funnel
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
+        {/* Header — 80% Scale with increased letter-spacing */}
+        <div className="mb-12 flex flex-col items-start text-left border-l border-amber-500/30 pl-6">
+          <span className="text-[9px] font-bold uppercase tracking-[0.5em] text-amber-500/60">
+            System Sequence
           </span>
 
-          <h2 className="mt-7 font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-white tracking-tight leading-none">
-            Doctrine <ChevronRight className="inline h-8 w-8 text-white/10" />
-            Logic <ChevronRight className="inline h-8 w-8 text-white/10" />
-            Artifacts
+          <h2 className="mt-4 font-serif text-3xl md:text-4xl text-white tracking-tight leading-none italic">
+            Doctrine <ChevronRight className="inline h-5 w-5 text-white/10" /> Logic{" "}
+            <ChevronRight className="inline h-5 w-5 text-white/10" /> Artifacts
           </h2>
 
-          <p className="mt-7 max-w-2xl text-white/40 text-lg font-light leading-relaxed">
-            From the deep architecture of the <span className="text-white/80">Canon</span> to reproducible{" "}
-            <span className="text-white/80">Tools</span>, finally proven in the{" "}
-            <span className="text-white/80">Rooms</span>.
+          <p className="mt-4 max-w-xl text-white/30 text-sm font-light leading-relaxed">
+            From the architecture of the <span className="text-white/60">Canon</span> to reproducible{" "}
+            <span className="text-white/60">Tools</span>, proven in the{" "}
+            <span className="text-white/60">Rooms</span>.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        {/* Cards — Hard edges, metadata focus */}
+        <div className="grid gap-px bg-white/5 border border-white/5 md:grid-cols-3">
           {CARDS.map((card, index) => (
-            <Link key={card.href} href={card.href} className="group block h-full">
-              <div className="relative h-full rounded-3xl border border-white/10 bg-white/[0.02] p-8 transition-all duration-500 hover:bg-white/[0.04] hover:border-amber-500/20 hover:-translate-y-1">
-                {/* Phase line */}
-                <div className="mb-10 flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 transition-colors group-hover:text-amber-500/60">
-                    {card.pillar.phase} // {card.pillar.name} // 0{index + 1}
-                  </span>
+            <Link key={card.href} href={card.href} className="group block bg-black h-full">
+              <div className="relative h-full p-8 transition-colors duration-700 hover:bg-white/[0.03]">
+                {/* Metadata Row */}
+                <div className="mb-8 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-[1px] w-4 bg-amber-500/40" />
+                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-500 group-hover:text-amber-500/80 transition-colors">
+                      P-{card.pillar.phase} // {card.pillar.name}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono text-zinc-700">0{index + 1}</span>
                 </div>
 
                 <div className="mb-6">
-                  <card.Icon className="mb-4 h-6 w-6 text-white/40 transition-colors duration-500 group-hover:text-amber-400" />
-                  <h3 className="font-serif text-2xl font-medium text-white transition-all group-hover:text-amber-50">
+                  <h3 className="font-serif text-xl text-white italic transition-all group-hover:text-amber-50">
                     {card.label}
                   </h3>
-                  <p className="mt-2 text-[11px] font-black uppercase tracking-[0.28em] text-amber-500/60">
+                  <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.3em] text-amber-600/70">
                     {card.kicker}
                   </p>
                 </div>
 
-                <p className="mb-8 flex-1 text-sm leading-relaxed text-white/45 transition-colors group-hover:text-white/65">
+                <p className="mb-10 text-[13px] leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-300">
                   {card.description}
                 </p>
 
-                <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-6">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-amber-500/80">
-                    Explore Asset
+                <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/[0.03]">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors">
+                    Initialize Protocol
                   </span>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 transition-colors group-hover:border-amber-500/40">
-                    <ArrowRight className="h-4 w-4 text-white/20 transition-all group-hover:text-amber-400 group-hover:translate-x-0.5" />
-                  </div>
+                  <ArrowRight className="h-3 w-3 text-zinc-700 transition-all group-hover:text-amber-500 group-hover:translate-x-1" />
                 </div>
 
-                {/* Corner Accent */}
-                <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-0 transition-opacity group-hover:opacity-100">
-                  <div className="w-8 h-[1px] bg-amber-500/30" />
-                  <div className="absolute right-4 top-4 h-8 w-[1px] bg-amber-500/30" />
-                </div>
+                {/* Corner Accent — Sharp & Subtle */}
+                <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-transparent group-hover:border-amber-500/20 transition-all" />
               </div>
             </Link>
           ))}
         </div>
 
-        {/* Footer tick */}
-        <div className="mt-20 flex flex-col items-center gap-4">
-          <div className="h-px w-24 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-          <p className="text-[9px] font-black uppercase tracking-[0.5em] text-white/20">
-            System Verification: Operational
+        {/* Footer — Minimalist verification */}
+        <div className="mt-12 flex items-center gap-4">
+          <div className="h-px w-8 bg-amber-500/30" />
+          <p className="text-[8px] font-mono uppercase tracking-[0.6em] text-zinc-700">
+            Auth.State: Verified_Operational
           </p>
         </div>
       </div>

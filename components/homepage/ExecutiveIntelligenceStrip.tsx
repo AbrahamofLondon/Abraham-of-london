@@ -3,16 +3,16 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
-  PenTool,
   Workflow,
   Shield,
   Scale,
   Target,
   Activity,
   ChevronRight,
+  Monitor,
+  Terminal
 } from "lucide-react";
 
 type LooseShort = {
@@ -59,49 +59,38 @@ export default function ExecutiveIntelligenceStrip({
 }): React.ReactElement | null {
   const [sessionId, setSessionId] = useState<string>("");
 
-  // Always treat input as untrusted
-  const items: LooseShort[] = Array.isArray(shorts) ? shorts.slice(0, 6) : [];
+  const items: LooseShort[] = Array.isArray(shorts) ? shorts.slice(0, 5) : [];
 
   useEffect(() => {
     setSessionId(Math.random().toString(36).substring(7).toUpperCase());
   }, []);
 
-  // ✅ Strictly guarantee lead exists (fixes TS error)
   const lead = items.length > 0 ? items[0] : null;
   if (!lead) return null;
 
   const rest = items.slice(1);
 
   return (
-    <section className="relative bg-black py-24 lg:py-32 overflow-hidden">
-      {/* 1. Technical Background Architecture */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:80px_80px]" />
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* --- Header Section --- */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-20">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-6">
-              <Activity className="h-4 w-4 text-amber-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500/80">
-                Live Intelligence Feed
+    <section className="relative bg-black py-20 overflow-hidden border-t border-white/10">
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+        
+        {/* --- Institutional Header --- */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-16">
+          <div className="max-w-xl space-y-6">
+            <div className="flex items-center gap-3">
+              <Terminal className="h-4 w-4 text-amber-500" />
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-amber-500">
+                Intelligence Briefings
               </span>
             </div>
 
-            <h2 className="font-serif text-5xl md:text-6xl lg:text-7xl font-medium text-white tracking-tight leading-[0.95]">
-              Field notes <br />
-              <span className="text-white/20 italic">for deployment.</span>
+            <h2 className="font-serif text-4xl md:text-5xl text-white tracking-tight leading-none italic">
+              Field notes <span className="text-white/20 not-italic">for deployment.</span>
             </h2>
 
-            <div className="mt-10 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
               {rails.map((r) => (
-                <div
-                  key={r.label}
-                  className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/5 bg-white/[0.02] text-[10px] font-bold uppercase tracking-widest text-white/40"
-                >
+                <div key={r.label} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.2em] text-white/30">
                   <span className="text-amber-500/50">{r.icon}</span>
                   {r.label}
                 </div>
@@ -111,109 +100,86 @@ export default function ExecutiveIntelligenceStrip({
 
           <Link
             href={viewAllHref}
-            className="group inline-flex items-center gap-4 text-xs font-black uppercase tracking-[0.3em] text-amber-500 hover:text-white transition-colors"
+            className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors border-b border-white/10 pb-2"
           >
-            Full Archive <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            Archive Access <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        {/* --- Intelligence Grid --- */}
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* A. THE LEAD BRIEF (High Signal) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-7"
+        {/* --- The Briefing Grid --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 border border-white/10 bg-white/5">
+          
+          {/* THE LEAD BRIEF: Large-scale clarity */}
+          <Link 
+            href={getHref(lead)} 
+            className="lg:col-span-7 bg-black p-10 md:p-14 flex flex-col group relative border-r border-white/10 overflow-hidden"
           >
-            <Link href={getHref(lead)} className="group relative block h-full">
-              <div className="relative h-full flex flex-col p-10 md:p-12 rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent overflow-hidden transition-all duration-500 group-hover:border-amber-500/30">
-                {/* Meta Header */}
-                <div className="flex items-center justify-between mb-16">
-                  <div className="px-3 py-1 rounded border border-amber-500/20 bg-amber-500/5 text-[9px] font-mono text-amber-400">
-                    PRIORITY: HIGH // {lead.readTime || "5 MIN"}
-                  </div>
-                  <div className="text-[10px] font-mono text-white/20 uppercase tracking-tighter">
-                    {toDateLabel(lead.date)}
-                  </div>
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-24">
+                <div className="flex items-center gap-3 font-mono text-[9px] font-bold text-amber-500/60 uppercase tracking-widest">
+                  <Monitor size={14} />
+                  <span>Priority: High // {lead.readTime || "5 MIN"}</span>
                 </div>
-
-                <div className="mt-auto">
-                  <h3 className="font-serif text-4xl md:text-5xl font-medium text-white leading-tight mb-6 group-hover:text-amber-50 transition-colors">
-                    {lead.title || "Untitled"}
-                  </h3>
-                  <p className="text-lg font-light text-white/40 leading-relaxed max-w-xl group-hover:text-white/60 transition-colors">
-                    {lead.excerpt || lead.description || ""}
-                  </p>
-                </div>
-
-                {/* Footer Interaction */}
-                <div className="mt-12 pt-8 border-t border-white/5 flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/60 group-hover:text-amber-500">
-                    Initialize Briefing
-                  </span>
-                  <div className="h-10 w-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-amber-500/50 group-hover:bg-amber-500/10 transition-all">
-                    <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                </div>
-
-                {/* Aesthetic Layer */}
-                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 transition-opacity">
-                  <PenTool className="h-32 w-32 -rotate-12 text-amber-500" />
+                <div className="text-[10px] font-mono font-bold text-white/20 uppercase tracking-[0.2em]">
+                  {toDateLabel(lead.date)}
                 </div>
               </div>
-            </Link>
-          </motion.div>
 
-          {/* B. THE TRIAGE FEED (Sidebar) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
+              <div className="mt-auto space-y-6">
+                <h3 className="font-serif text-4xl text-white italic leading-tight group-hover:text-amber-50 transition-colors">
+                  {lead.title || "Untitled Intelligence"}
+                </h3>
+                <p className="text-sm leading-relaxed text-white/40 group-hover:text-white/60 transition-colors max-w-md font-light italic">
+                  {lead.excerpt || lead.description || ""}
+                </p>
+                <div className="pt-8 flex items-center gap-4">
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-500">Initialize Briefing</span>
+                  <div className="h-[1px] w-12 bg-amber-500/30 group-hover:w-20 transition-all" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* THE TRIAGE FEED: Ledger style */}
+          <div className="lg:col-span-5 flex flex-col divide-y divide-white/10 bg-black">
             {rest.map((s, idx) => (
-              <motion.div
-                key={`${getHref(s)}:${idx}`}
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <Link href={getHref(s)} className="group block">
-                  <div className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-300 hover:bg-white/[0.04] hover:border-white/20 flex items-start gap-6">
-                    <div className="flex-shrink-0 font-mono text-[10px] text-amber-500/40 group-hover:text-amber-500 pt-1">
-                      0{idx + 2}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+              <Link key={idx} href={getHref(s)} className="group block flex-1 transition-all hover:bg-white/[0.03]">
+                <div className="p-8 flex items-start justify-between gap-6">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[9px] font-mono font-bold text-amber-500/40">0{idx + 2}</span>
+                        <span className="text-[9px] font-mono font-bold text-white/20 uppercase tracking-widest">
                           {toDateLabel(s.date)}
                         </span>
-                        <div className="h-px flex-1 bg-white/5" />
-                      </div>
-                      <h4 className="text-lg font-bold text-white/80 group-hover:text-white truncate transition-colors">
-                        {s.title || "Untitled"}
-                      </h4>
-                      <p className="mt-1 text-xs text-white/30 line-clamp-1 group-hover:text-white/50 transition-colors">
-                        {s.excerpt || s.description || ""}
-                      </p>
                     </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity pt-4">
-                      <ChevronRight className="h-4 w-4 text-amber-500" />
-                    </div>
+                    <h4 className="text-lg font-serif text-white/80 group-hover:text-white transition-colors truncate italic">
+                      {s.title || "Untitled Brief"}
+                    </h4>
                   </div>
-                </Link>
-              </motion.div>
+                  <ChevronRight size={18} className="text-white/10 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+                </div>
+              </Link>
             ))}
+            
+            {/* View All Terminal Link */}
+            <Link href={viewAllHref} className="p-8 bg-zinc-900/30 group flex items-center justify-between hover:bg-amber-500/5 transition-colors">
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 group-hover:text-amber-500">Access Full Intelligence Registry</span>
+                <Activity size={16} className="text-white/10 group-hover:text-amber-500 animate-pulse" />
+            </Link>
           </div>
         </div>
 
-        {/* --- System Footer --- */}
-        <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[9px] font-mono text-white/20 uppercase tracking-[0.2em]">
-            End of Current Feed // Session ID: {sessionId || "SYNCHRONIZING..."}
-          </p>
+        {/* --- System Meta Data --- */}
+        <div className="mt-12 flex items-center justify-between border-t border-white/5 pt-8">
           <div className="flex items-center gap-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-500/50" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-white/40">
-              Uptime: 99.9%
-            </span>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              <span className="text-[9px] font-mono font-bold text-white/30 uppercase tracking-widest">Feed Status: Operational</span>
+            </div>
+            <span className="text-[9px] font-mono text-white/10 uppercase tracking-widest hidden md:inline">Session_{sessionId}</span>
+          </div>
+          <div className="text-[9px] font-mono font-bold text-white/20 uppercase tracking-[0.3em]">
+            Abraham of London • Intel Division
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
-// netlify/functions/ping.ts
-import type { Handler, HandlerResponse } from "@netlify/functions";
+// netlify/functions_src/functions/ping.ts
+
+import type { Handler, HandlerResponse } from "./_utils";
 import { ok, bad, handleOptions, readJson } from "./_utils";
 
 type PingBody = {
@@ -7,7 +8,11 @@ type PingBody = {
 };
 
 export const handler: Handler = async (event): Promise<HandlerResponse> => {
-  const origin = event.headers.origin || event.headers.Origin || "*";
+  const originHeader = event.headers.origin ?? event.headers.Origin ?? "*";
+  const origin = Array.isArray(originHeader)
+    ? (originHeader[0] ?? "*")
+    : (originHeader || "*");
+
   const timestamp = new Date().toISOString();
 
   if (event.httpMethod === "OPTIONS") {
@@ -47,4 +52,3 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
 
   return bad("Method Not Allowed", 405, origin);
 };
-

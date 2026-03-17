@@ -1,4 +1,4 @@
-/* pages/vault/briefs/[slug].tsx — COMPLETE FIXED VERSION */
+/* pages/vault/briefs/[slug].tsx — Dossier Rendering Engine (Permanent Shared Resolver) */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
@@ -6,464 +6,311 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useMDXComponent } from "next-contentlayer2/hooks";
+import {
+  ChevronLeft,
+  ShieldCheck,
+  Activity,
+  Terminal,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
-import BriefAlert from "@/components/BriefAlert";
 
-import { prisma } from "@/lib/prisma";
-import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
-import type { AccessTier } from "@/lib/access/tiers";
-import { allBriefs } from "@/lib/contentlayer";
+import Note from "@/components/mdx/Note";
+import BriefAlert from "@/components/mdx/BriefAlert";
+import DocumentFooter from "@/components/mdx/DocumentFooter";
+import DocumentHeader from "@/components/mdx/DocumentHeader";
+import Callout from "@/components/mdx/Callout";
+import Quote from "@/components/mdx/Quote";
+import DataTable from "@/components/mdx/DataTable";
 
-/**
- * Extract the bare slug from the full path
- * Example: "content/vault/briefs/brief-001-modern-household.mdx" -> "brief-001-modern-household"
- */
-function normalizeBriefSlug(input: string): string {
-  if (!input) return "";
-  
-  const fullPath = String(input).trim();
-  const fileName = fullPath.split(/[\\/]/).pop() || "";
-  const baseName = fileName.replace(/\.mdx$/i, "");
-  
-  return baseName;
+import prisma from "@/lib/prisma";
+import {
+  normalizeUserTier,
+  hasAccess,
+  requiredTierFromDoc,
+} from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import type { TierDirective } from "@/lib/resources/tier-metadata";
+import { normalizeSlug as normalizeContentSlug } from "@/lib/content/server";
+import * as ContentSource from "contentlayer/generated";
+
+function safeString(v: unknown): string {
+  return typeof v === "string" ? v : "";
 }
 
-/**
- * Create proper href for brief pages
- */
-function toVaultBriefHref(slug: string): string {
-  const cleanSlug = normalizeBriefSlug(slug);
-  return `/vault/briefs/${cleanSlug}`;
+function safeArray<T = unknown>(v: unknown): T[] {
+  return Array.isArray(v) ? (v as T[]) : [];
 }
 
-/**
- * Rewrite vault hrefs in MDX content
- */
-function rewriteVaultHref(hrefRaw: any): string {
-  const href = String(hrefRaw || "").trim();
-  if (!href) return href;
-  if (href.startsWith("#")) return href;
+function normalizeBriefSlug(input: unknown): string {
+  const raw = normalizeContentSlug(String(input || ""))
+    .replace(/^content\//i, "")
+    .replace(/^vault\/briefs\//i, "")
+    .replace(/^briefs\//i, "")
+    .replace(/\.(md|mdx)$/i, "")
+    .replace(/^\/+|\/+$/g, "");
 
-  // Handle full vault brief paths
-  if (href.includes("/vault/briefs/")) {
-    const parts = href.split("/vault/briefs/");
-    const slug = parts[1]?.split(/[?#]/)[0] || "";
-    return `/vault/briefs/${normalizeBriefSlug(slug)}`;
-  }
-
-  // Handle briefs paths
-  if (href.includes("/briefs/")) {
-    const parts = href.split("/briefs/");
-    const slug = parts[1]?.split(/[?#]/)[0] || "";
-    return `/vault/briefs/${normalizeBriefSlug(slug)}`;
-  }
-
-  // Handle relative brief links
-  if (href.startsWith("brief-") || href.includes("brief-")) {
-    return `/vault/briefs/${normalizeBriefSlug(href)}`;
-  }
-
-  return href;
+  const parts = raw.split("/").filter(Boolean);
+  return parts[parts.length - 1] || "";
 }
 
-// ✅ Define all MDX components that might be used in your briefs
-const mdxComponents = {
-  // Basic HTML elements with styling
-  h1: ({ children, ...props }: any) => (
-    <h1 className="text-3xl md:text-4xl font-serif text-white mt-8 mb-4" {...props}>
-      {children}
-    </h1>
-  ),
-  h2: ({ children, ...props }: any) => (
-    <h2 className="text-2xl md:text-3xl font-serif text-white/90 mt-6 mb-3" {...props}>
-      {children}
-    </h2>
-  ),
-  h3: ({ children, ...props }: any) => (
-    <h3 className="text-xl font-serif text-white/85 mt-5 mb-2" {...props}>
-      {children}
-    </h3>
-  ),
-  p: ({ children, ...props }: any) => (
-    <p className="text-white/70 leading-relaxed mb-4" {...props}>
-      {children}
-    </p>
-  ),
-  ul: ({ children, ...props }: any) => (
-    <ul className="list-disc list-inside text-white/70 space-y-2 mb-4" {...props}>
-      {children}
-    </ul>
-  ),
-  ol: ({ children, ...props }: any) => (
-    <ol className="list-decimal list-inside text-white/70 space-y-2 mb-4" {...props}>
-      {children}
-    </ol>
-  ),
-  li: ({ children, ...props }: any) => (
-    <li className="text-white/70" {...props}>
-      {children}
-    </li>
-  ),
-  blockquote: ({ children, ...props }: any) => (
-    <blockquote className="border-l-4 border-emerald-700/50 pl-4 italic text-white/60 my-4" {...props}>
-      {children}
-    </blockquote>
-  ),
-  hr: (props: any) => <hr className="my-8 border-t border-white/10" {...props} />,
-  
-  // ✅ BriefAlert component (imported)
-  BriefAlert: (props: any) => <BriefAlert {...props} />,
-  
-  // ✅ DataNode component (defined inline)
-  DataNode: ({ children, title, value, data, ...props }: any) => {
-    // Handle different prop patterns
-    const nodeTitle = title || props.label || "Data Node";
-    const nodeValue = value || data || children;
-    
-    return (
-      <div className="my-4 p-5 border border-emerald-800/30 bg-emerald-950/10 rounded-xl" {...props}>
-        {nodeTitle && (
-          <div className="text-emerald-400 font-mono text-xs uppercase tracking-wider mb-3 border-b border-emerald-800/30 pb-2">
-            {nodeTitle}
-          </div>
-        )}
-        <div className="text-white font-mono text-sm">
-          {typeof nodeValue === 'object' ? JSON.stringify(nodeValue, null, 2) : nodeValue}
-        </div>
-      </div>
-    );
-  },
-  
-  // ✅ Note component - FIXED to map MDX "tone" to BriefAlert "level"
-  Note: ({ children, title, tone, ...props }: any) => {
-    // Map MDX tone to BriefAlert level
-    const levelMap: Record<string, "info" | "warn" | "danger" | "success"> = {
-      info: "info",
-      note: "info",
-      tip: "success",
-      caution: "warn",
-      warning: "warn",
-      danger: "danger",
-      error: "danger",
-      success: "success",
-    };
-    
-    const level = levelMap[tone] || "info";
-    
-    return (
-      <BriefAlert level={level} title={title || "Note"}>
-        {children}
-      </BriefAlert>
-    );
-  },
-  
-  // ✅ Rule component
-  Rule: ({ children, label, status, ...props }: any) => (
-    <div className="my-8 relative" {...props}>
-      <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-emerald-800/30"></div>
-      </div>
-      <div className="relative flex justify-between items-center">
-        {label && (
-          <span className="bg-black pr-4 text-emerald-500 font-mono text-xs uppercase tracking-wider">
-            {label}
-          </span>
-        )}
-        {status && (
-          <span className="bg-black pl-4 text-white/30 font-mono text-[10px] uppercase tracking-widest">
-            {status}
-          </span>
-        )}
-      </div>
-      {children && <div className="mt-6">{children}</div>}
-    </div>
-  ),
-  
-  // ✅ Verse component
-  Verse: ({ children, ...props }: any) => (
-    <div className="italic text-white/70 border-l-2 border-emerald-700/50 pl-6 my-6 py-2 font-serif text-lg" {...props}>
-      {children}
-    </div>
-  ),
-  
-  // ✅ Table components
-  table: ({ children, ...props }: any) => (
-    <div className="overflow-x-auto my-6">
-      <table className="min-w-full border-collapse border border-white/10" {...props}>
-        {children}
-      </table>
-    </div>
-  ),
-  thead: ({ children, ...props }: any) => (
-    <thead className="bg-white/5" {...props}>
-      {children}
-    </thead>
-  ),
-  tbody: ({ children, ...props }: any) => <tbody {...props}>{children}</tbody>,
-  tr: ({ children, ...props }: any) => (
-    <tr className="border-b border-white/10 hover:bg-white/5" {...props}>
-      {children}
-    </tr>
-  ),
-  th: ({ children, ...props }: any) => (
-    <th className="px-4 py-3 text-left text-emerald-400 font-mono text-xs uppercase tracking-wider" {...props}>
-      {children}
-    </th>
-  ),
-  td: ({ children, ...props }: any) => (
-    <td className="px-4 py-3 text-white/70 text-sm" {...props}>
-      {children}
-    </td>
-  ),
-  
-  // ✅ Link handling
-  a: ({ href, children, className, ...props }: any) => {
-    const nextHref = rewriteVaultHref(href);
-    const isInternal = nextHref.startsWith("/") || nextHref.startsWith("#");
+function getAllContentCandidates(): any[] {
+  const source = ContentSource as any;
 
-    if (isInternal) {
-      return (
-        <Link
-          href={nextHref || "#"}
-          className={
-            className ||
-            "text-emerald-400 hover:text-emerald-300 underline underline-offset-4 transition-colors"
-          }
-          {...props}
-        >
-          {children}
-        </Link>
-      );
-    }
+  return [
+    ...safeArray(source.allBriefs),
+    ...safeArray(source.allVaultBriefs),
+    ...safeArray(source.allDocuments),
+    ...safeArray(source.allResources),
+    ...safeArray(source.allPosts),
+    ...safeArray(source.allCanon),
+    ...safeArray(source.allDispatches),
+  ];
+}
+
+function isBriefDoc(doc: any): boolean {
+  const flattened = safeString(doc?._raw?.flattenedPath).toLowerCase();
+  const slug = safeString(doc?.slug).toLowerCase();
+  const type = safeString(doc?.type || doc?._type).toLowerCase();
+  const kind = safeString(doc?.kind).toLowerCase();
+  const category = safeString(doc?.category).toLowerCase();
+  const series = safeString(doc?.series).toLowerCase();
+
+  return (
+    flattened.includes("vault/briefs/") ||
+    flattened.startsWith("briefs/") ||
+    flattened.includes("/briefs/") ||
+    slug.includes("vault/briefs/") ||
+    slug.startsWith("briefs/") ||
+    slug.includes("/briefs/") ||
+    type.includes("brief") ||
+    kind.includes("brief") ||
+    category.includes("brief") ||
+    series.includes("brief")
+  );
+}
+
+function getCombinedBriefs(): any[] {
+  const seen = new Set<string>();
+
+  return getAllContentCandidates()
+    .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
+    .filter(isBriefDoc)
+    .filter((doc: any) => {
+      const key = safeString(doc?._id || doc?._raw?.flattenedPath || doc?.slug).toLowerCase();
+      if (!key) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+const getMdxComponents = (directive?: TierDirective) => ({
+  h1: (p: any) => (
+    <h1 className="mb-6 mt-12 font-serif text-3xl italic text-white md:text-4xl" {...p} />
+  ),
+  h2: (p: any) => (
+    <h2 className="mb-4 mt-10 font-serif text-2xl text-white/90 md:text-3xl" {...p} />
+  ),
+  h3: (p: any) => (
+    <h3
+      className="mb-2 mt-8 font-mono text-xs uppercase tracking-[0.3em] text-amber-500/80"
+      {...p}
+    />
+  ),
+  p: (p: any) => (
+    <p className="mb-6 font-light leading-relaxed text-white/60" {...p} />
+  ),
+  ul: (p: any) => (
+    <ul
+      className="mb-6 list-none space-y-3 border-l border-white/10 pl-4"
+      {...p}
+    />
+  ),
+  li: (p: any) => (
+    <li
+      className="text-sm text-white/50 before:mr-3 before:content-['//'] before:text-amber-500/40"
+      {...p}
+    />
+  ),
+  a: ({ href, children, ...props }: any) => {
+    const rawHref = safeString(href);
+    const normalizedHref = rawHref.includes("brief-")
+      ? `/vault/briefs/${normalizeBriefSlug(rawHref)}`
+      : rawHref;
 
     return (
-      <a
-        href={nextHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={
-          className ||
-          "text-emerald-300 hover:text-emerald-200 underline underline-offset-4 transition-colors"
-        }
+      <Link
+        href={normalizedHref}
+        className="text-emerald-400 underline underline-offset-4 transition-colors hover:text-emerald-300"
         {...props}
       >
         {children}
-      </a>
+      </Link>
     );
   },
-};
 
-type BriefPageProps = {
-  brief: any;
-  recommendations: any[];
-  requiredTier: AccessTier;
-};
+  Note: (p: any) => <Note {...p} />,
+  BriefAlert: (p: any) => <BriefAlert {...p} />,
+  Callout: (p: any) => <Callout {...p} />,
+  Quote: (p: any) => <Quote {...p} />,
+  DataTable: (p: any) => <DataTable {...p} />,
+  DocumentHeader: (p: any) => <DocumentHeader {...p} />,
+  DocumentFooter: (p: any) => <DocumentFooter {...p} directive={directive} />,
+});
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = (allBriefs || [])
-    .filter((b: any) => !b?.draft)
-    .map((b: any) => {
-      const rawSlug = b.slug || b._raw?.flattenedPath || "";
-      const slug = normalizeBriefSlug(rawSlug);
-      
-      if (!slug) return null;
-      
-      return { params: { slug } };
-    })
-    .filter((p): p is { params: { slug: string } } => p !== null);
+  const combined = getCombinedBriefs();
+
+  const paths = combined
+    .map((b: any) => ({
+      params: { slug: normalizeBriefSlug(b?.slug || b?._raw?.flattenedPath) },
+    }))
+    .filter((p: any) => p.params.slug);
 
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps<BriefPageProps> = async ({ params }) => {
-  const slugParam = String(params?.slug || "").trim();
-  if (!slugParam) return { notFound: true };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slugParam = normalizeBriefSlug(params?.slug);
+  const combined = getCombinedBriefs();
 
-  // Find the document by matching the slug
-  const doc = (allBriefs || []).find((b: any) => {
-    const rawSlug = b.slug || b._raw?.flattenedPath || "";
-    const normalized = normalizeBriefSlug(rawSlug);
-    return normalized === slugParam;
-  });
+  const doc = combined.find(
+    (b: any) => normalizeBriefSlug(b?.slug || b?._raw?.flattenedPath) === slugParam
+  );
 
-  if (!doc || doc?.draft) return { notFound: true };
+  if (!doc) return { notFound: true };
 
-  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
-
-  // Try different slug formats for database lookup
-  const dbSlugVariants = [
-    `vault/briefs/${slugParam}`,
-    `briefs/${slugParam}`,
-    slugParam
-  ];
-
-  let vaultData = null;
-  for (const dbSlug of dbSlugVariants) {
-    vaultData = await prisma.contentMetadata.findUnique({
-      where: { slug: dbSlug },
-      include: { dependencies: { include: { targetBrief: true } } },
-    });
-    if (vaultData) break;
-  }
-
+  const requiredTier = requiredTierFromDoc(doc);
   let recommendations: any[] = [];
-  if (vaultData?.id) {
+
+  if (prisma) {
     try {
-      recommendations = await prisma.$queryRawUnsafe(
-        `
-        SELECT slug, title, "contentType",
-          1 - (embedding <=> (SELECT embedding FROM "ContentMetadata" WHERE id = $1)) as similarity
-        FROM "ContentMetadata"
-        WHERE id != $1 AND embedding IS NOT NULL
-        ORDER BY similarity DESC
-        LIMIT 3
-      `,
-        vaultData.id
-      );
-    } catch (error) {
-      console.error("Failed to fetch recommendations:", error);
+      const meta = await prisma.contentMetadata.findFirst({
+        where: { slug: slugParam },
+      });
+
+      if (meta?.id) {
+        recommendations = await prisma.$queryRawUnsafe(
+          `SELECT slug, title FROM "content_metadata" WHERE id != $1 AND embedding IS NOT NULL ORDER BY embedding <=> (SELECT embedding FROM "content_metadata" WHERE id = $1) LIMIT 3`,
+          meta.id
+        );
+      }
+    } catch {
+      // silent during SSG
     }
   }
 
   return {
     props: {
-      brief: { ...doc, vault: vaultData },
-      recommendations: JSON.parse(JSON.stringify(recommendations || [])),
+      brief: JSON.parse(JSON.stringify(doc)),
+      recommendations: JSON.parse(JSON.stringify(recommendations)),
       requiredTier,
     },
-    revalidate: 3600,
+    revalidate: 1800,
   };
 };
 
-const BriefPage: NextPage<BriefPageProps> = ({ brief, recommendations, requiredTier }) => {
+const BriefPage: NextPage<{
+  brief: any;
+  recommendations: any[];
+  requiredTier: AccessTier;
+}> = ({ brief, requiredTier }) => {
   const { data: session, status } = useSession();
+  const MDXContent = useMDXComponent(brief.body.code);
 
-  const required = tiers.normalizeRequired(requiredTier);
-  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
+  const userTier = normalizeUserTier(
+    (((session?.user as any)?.tier || (session as any)?.aol?.tier || "public") as string)
+  );
 
-  const needsAuth = required !== "public";
-  const canAccess = !needsAuth || (session?.user ? tiers.hasAccess(user, required) : false);
+  const canAccess = hasAccess(userTier, requiredTier);
+  const directive = (session?.user as any)?.directive;
 
-  const bodyCode = String(brief?.body?.code || brief?.bodyCode || "");
-  const MDXContent = useMDXComponent(bodyCode);
-
-  if (needsAuth && status === "loading") {
+  if (status === "loading") {
     return (
-      <Layout title={brief.title}>
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
-        </div>
-      </Layout>
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <Activity size={24} className="animate-pulse text-amber-500" />
+      </div>
     );
   }
 
-  if (needsAuth && (!session?.user || !canAccess)) {
+  if (!canAccess) {
     return (
-      <Layout title={brief.title}>
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center px-6">
-          <AccessGate
-            title={brief.title}
-            requiredTier={required}
-            message="This intelligence brief requires appropriate clearance."
-            onGoToJoin={() => (window.location.href = "/inner-circle")}
-          />
-        </div>
+      <Layout title="Restricted Access">
+        <AccessGate title={brief.title} requiredTier={requiredTier} />
       </Layout>
     );
   }
 
   return (
-    <Layout title={brief.title}>
-      <main className="min-h-screen bg-[#050505] pt-28 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <header className="mb-10 border-b border-emerald-900/20 pb-8">
-            <div className="flex flex-wrap items-center gap-3 text-emerald-600 font-mono text-[10px] uppercase tracking-widest mb-4">
-              <span>Classification: {String(brief.vault?.classification || required)}</span>
-              {required !== "public" && (
-                <span className="px-2 py-1 bg-emerald-900/20 border border-emerald-800/30 rounded">
-                  Required: {required}
-                </span>
-              )}
+    <Layout title={`${brief.title} // Briefing`} className="bg-black text-white">
+      <main className="mx-auto min-h-screen max-w-5xl px-6 pb-24 pt-32">
+        <div className="mb-16 flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-8 md:flex-row md:items-center">
+          <Link
+            href="/vault/briefs"
+            className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 transition-all hover:text-white"
+          >
+            <ChevronLeft size={12} /> Return to Index
+          </Link>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1">
+              <ShieldCheck size={10} className="text-emerald-500" />
+              <span className="font-mono text-[9px] uppercase tracking-widest text-emerald-500/80">
+                {requiredTier} Clearance
+              </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-serif italic text-white">{brief.title}</h1>
-          </header>
-
-          <article className="prose prose-invert prose-emerald max-w-none mb-16">
-            <MDXContent components={mdxComponents as any} />
-          </article>
-
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-10 border-t border-white/5 pt-10">
-            <div>
-              <h3 className="text-emerald-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-6">
-                Strategic Dependencies
-              </h3>
-              <div className="space-y-4">
-                {brief.vault?.dependencies?.length ? (
-                  brief.vault.dependencies.map((dep: any) => {
-                    const targetSlug = dep?.targetBrief?.slug || "";
-                    const cleanSlug = targetSlug.replace(/^vault\/briefs\//, "").replace(/^briefs\//, "");
-                    return (
-                      <Link
-                        key={targetSlug || dep?.id}
-                        href={toVaultBriefHref(cleanSlug)}
-                        className="block p-4 bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition-all rounded-xl"
-                      >
-                        <span className="text-zinc-200 text-sm">
-                          {dep?.targetBrief?.title || cleanSlug || "Dependency"}
-                        </span>
-                      </Link>
-                    );
-                  })
-                ) : (
-                  <div className="text-zinc-700 font-mono text-[9px] uppercase tracking-widest">
-                    No dependencies recorded.
-                  </div>
-                )}
-              </div>
+            <div className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-white/20 md:block">
+              REF_ID: {brief.slug?.toUpperCase() || "AOL_X"}
             </div>
+          </div>
+        </div>
 
-            <div>
-              <h3 className="text-emerald-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-6">
-                Semantic Discovery
-              </h3>
-              <div className="space-y-4">
-                {(recommendations || []).map((rec: any) => {
-                  const recSlug = String(rec.slug || "").replace(/^vault\/briefs\//, "").replace(/^briefs\//, "");
-                  return (
-                    <Link
-                      key={rec.slug}
-                      href={toVaultBriefHref(recSlug)}
-                      className="block p-4 bg-emerald-950/5 border border-emerald-900/20 hover:border-emerald-500/50 transition-all rounded-xl"
-                    >
-                      <span className="text-zinc-400 text-[9px] uppercase block mb-1">
-                        {String(rec.contentType || "Brief")}
-                      </span>
-                      <span className="text-zinc-200 text-sm">{String(rec.title || rec.slug)}</span>
-                    </Link>
-                  );
-                })}
-                {(!recommendations || recommendations.length === 0) && (
-                  <div className="text-zinc-700 font-mono text-[9px] uppercase tracking-widest">
-                    No recommendations available.
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
+        <header className="mb-20">
+          <div className="mb-6 flex items-center gap-3">
+            <Terminal size={14} className="text-amber-500" />
+            <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/40">
+              Intelligence Dossier
+            </span>
+          </div>
 
-          <div className="mt-14 flex items-center justify-between border-t border-white/5 pt-8">
-            <Link
-              href="/vault"
-              className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/45 hover:text-emerald-300 transition-colors"
-            >
-              ← Back to Vault
-            </Link>
+          <h1 className="mb-8 font-serif text-5xl italic leading-tight md:text-7xl">
+            {brief.title}
+          </h1>
 
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/25">
-              Abraham of London • Vault Briefs
-            </div>
+          {(brief.summary || brief.abstract || brief.excerpt) && (
+            <p className="max-w-3xl border-l-2 border-amber-500/20 pl-8 text-xl font-light italic leading-relaxed text-white/40">
+              {brief.summary || brief.abstract || brief.excerpt}
+            </p>
+          )}
+        </header>
+
+        <article
+          className="prose prose-invert prose-emerald max-w-none
+          prose-headings:font-serif prose-p:text-white/60 prose-strong:text-amber-500
+          prose-code:rounded prose-code:bg-emerald-500/5 prose-code:px-1 prose-code:text-emerald-400"
+        >
+          <MDXContent components={getMdxComponents(directive) as any} />
+        </article>
+
+        <div className="mt-24 flex flex-col gap-12 border-t border-white/5 pt-12 text-white/20 md:flex-row">
+          <div className="flex-1">
+            <h4 className="mb-4 text-[10px] font-mono uppercase tracking-widest text-white/40">
+              Metadata Verification
+            </h4>
+            <p className="font-mono text-[9px] leading-relaxed">
+              Source: {brief.series || "Abraham of London Intelligence"}
+              <br />
+              Protocol: Secure SSG Hydration
+              <br />
+              Timestamp: {new Date().toISOString()}
+            </p>
+          </div>
+          <div className="flex-1 text-right">
+            <span className="text-[8px] font-mono uppercase tracking-tighter opacity-30">
+              All Rights Reserved // Abraham of London // 2026
+            </span>
           </div>
         </div>
       </main>

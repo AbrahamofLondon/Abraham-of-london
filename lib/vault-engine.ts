@@ -62,6 +62,9 @@ function asString(input: unknown, fallback = ""): string {
   return String(input);
 }
 
+/**
+ * Maps Policy tiers (frontend/logic) to Database enums (Prisma)
+ */
 function toDbTier(raw: unknown): DbAccessTier {
   const policyTier: PolicyAccessTier = normalizeRequiredTier(raw);
 
@@ -72,6 +75,8 @@ function toDbTier(raw: unknown): DbAccessTier {
       return "member";
     case "inner-circle":
       return "inner_circle";
+    case "restricted": 
+      return "restricted";
     case "client":
       return "client";
     case "legacy":
@@ -80,14 +85,20 @@ function toDbTier(raw: unknown): DbAccessTier {
       return "architect";
     case "owner":
       return "owner";
+    case "top-secret":
+      return "top_secret";
     default:
       return "public";
   }
 }
 
+/**
+ * Maps Database enums (Prisma) back to Policy tiers (frontend/logic)
+ */
 function fromDbTier(raw: unknown): PolicyAccessTier {
   const s = String(raw ?? "").trim().toLowerCase();
   if (s === "inner_circle") return "inner-circle";
+  if (s === "top_secret") return "top-secret";
   return normalizeRequiredTier(s);
 }
 
@@ -290,10 +301,12 @@ export async function getVaultStats(): Promise<{
       public: 0,
       member: 0,
       "inner-circle": 0,
+      restricted: 0, 
       client: 0,
       legacy: 0,
       architect: 0,
       owner: 0,
+      "top-secret": 0,
     };
 
     const mapped = byTier.reduce<Record<PolicyAccessTier, number>>(
@@ -318,10 +331,12 @@ export async function getVaultStats(): Promise<{
         public: 0,
         member: 0,
         "inner-circle": 0,
+        restricted: 0, 
         client: 0,
         legacy: 0,
         architect: 0,
         owner: 0,
+        "top-secret": 0,
       },
     };
   }

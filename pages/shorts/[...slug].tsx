@@ -6,39 +6,54 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { getAllCombinedDocs, normalizeSlug } from "@/lib/content/server";
+import { cleanSlugForURL } from "@/lib/shorts/brand";
 
-import { sanitizeData } from "@/lib/content/server";
-import { getMdxDocumentBySlug } from "@/lib/server/mdx-collections";
-
-type Props = { item: any };
+type Props = {
+  item: {
+    title: string;
+    description: string;
+    excerpt?: string;
+    slug: string;
+    bodyCode: string | null;
+  };
+};
 
 function joinParamSlug(param: string | string[] | undefined): string {
   if (!param) return "";
   return Array.isArray(param) ? param.join("/") : String(param);
 }
 
-/**
- * Normalise any short slug to the content-relative form expected by the loader.
- *
- * Examples:
- *   "/shorts/when-x" -> "when-x"
- *   "shorts/when-x"  -> "when-x"
- *   "/when-x/"       -> "when-x"
- *   "when-x"         -> "when-x"
- */
-function normalizeShortSlug(input: string): string {
-  return String(input)
-    .trim()
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/^shorts\//, "");
+function safeStartsWith(v: unknown, prefix: string) {
+  return typeof v === "string" && v.startsWith(prefix);
+}
+
+function safeString(v: unknown) {
+  return typeof v === "string" ? v : "";
+}
+
+function toShortUrlSlug(input: unknown) {
+  return cleanSlugForURL(normalizeSlug(safeString(input)));
+}
+
+function toShortRouteParamSlug(input: unknown) {
+  return toShortUrlSlug(input).replace(/^shorts\//, "");
 }
 
 const ShortsSlugPage: NextPage<Props> = ({ item }) => {
   const title = item?.title || "Short";
-  const canonicalSlug = normalizeShortSlug(item?.slug || "");
+  const canonicalSlug = toShortRouteParamSlug(item?.slug || "");
 
   return (
-    <Layout title={title} description={item?.description || item?.excerpt || ""}>
+    <Layout
+      title={title}
+      description={item?.description || item?.excerpt || ""}
+      fullWidth
+      headerTransparent={false}
+      minimalHeader
+      showFooter={false}
+      enableVaultSearch={false}
+    >
       <Head>
         <link
           rel="canonical"
@@ -63,7 +78,12 @@ const ShortsSlugPage: NextPage<Props> = ({ item }) => {
             {item?.bodyCode ? (
               <SafeMDXRenderer code={item.bodyCode} />
             ) : (
-              <div className="text-white/70">Content not compiled. (bodyCode missing)</div>
+              <div className="space-y-2 text-white/70">
+                <div>Content not compiled. (bodyCode missing)</div>
+                <div className="text-xs font-mono text-white/40">
+                  slug: {item?.slug || "unknown"}
+                </div>
+              </div>
             )}
           </article>
         </div>
@@ -73,27 +93,55 @@ const ShortsSlugPage: NextPage<Props> = ({ item }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: "blocking" };
+  const allDocuments = getAllCombinedDocs() || [];
+  const shorts = allDocuments.filter(
+    (d: any) =>
+      safeStartsWith(d?.slug, "shorts/") ||
+      safeStartsWith(d?._raw?.flattenedPath, "shorts/")
+  );
+
+  const paths = shorts.map((s: any) => {
+    const raw = s?.slug || s?._raw?.flattenedPath || "";
+    const clean = toShortRouteParamSlug(raw);
+    const slugArray = clean.split("/").filter(Boolean);
+    return { params: { slug: slugArray } };
+  });
+
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const rawSlug = joinParamSlug(params?.slug as string | string[] | undefined);
-  const slug = normalizeShortSlug(rawSlug);
+  const rawParam = joinParamSlug(params?.slug);
+  const targetSlug = toShortRouteParamSlug(rawParam);
+  if (!targetSlug) return { notFound: true };
 
-  if (!slug) return { notFound: true };
+  const allDocuments = getAllCombinedDocs() || [];
+  const shorts = allDocuments.filter(
+    (d: any) =>
+      safeStartsWith(d?.slug, "shorts/") ||
+      safeStartsWith(d?._raw?.flattenedPath, "shorts/")
+  );
 
-  const doc = await getMdxDocumentBySlug("shorts", slug);
+  const doc = shorts.find((d: any) => {
+    const raw = d?.slug || d?._raw?.flattenedPath || "";
+    const clean = toShortRouteParamSlug(raw);
+    return clean === targetSlug;
+  });
+
   if (!doc || (doc as any).draft === true) return { notFound: true };
 
+  const bodyCode = (doc as any).body?.code ?? (doc as any).bodyCode ?? null;
+
   const item = {
-    ...doc,
-    // Always expose the clean, route-safe slug to the page
-    slug: normalizeShortSlug((doc as any).slug || slug),
-    bodyCode: (doc as any).body?.code ?? (doc as any).bodyCode ?? null,
+    title: doc?.title ?? "Short",
+    description: doc?.description ?? doc?.excerpt ?? "",
+    excerpt: doc?.excerpt ?? "",
+    slug: targetSlug,
+    bodyCode,
   };
 
   return {
-    props: sanitizeData({ item }),
+    props: { item },
     revalidate: 1800,
   };
 };

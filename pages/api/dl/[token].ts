@@ -1,22 +1,23 @@
-// pages/api/dl/[token].ts — SSOT Download Redemption (AccessTier)
+// pages/api/dl/[token].ts
 import type { NextApiRequest, NextApiResponse } from "next";
-
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeUserTier, normalizeRequiredTier, hasAccess } from "@/lib/access/tier-policy";
-
+import {
+  normalizeRequiredTier,
+  hasAccess,
+} from "@/lib/access/tier-policy";
 import {
   verifyDownloadToken,
   getUserTierFromCookies,
+  getTokenForensics,
 } from "@/lib/downloads/security";
-
 import { logDownloadEvent } from "@/lib/downloads/audit";
-import { safeSlice } from "@/lib/utils/safe";
-
 import {
   getDownloadBySlug,
   getDocumentBySlug,
   resolveDocDownloadUrl,
 } from "@/lib/content/server";
+import { getPremiumContentAsset } from "@/lib/premium/content-registry";
+import { incrementTokenUsage } from "@/lib/premium/download-token";
 
 function getIp(req: NextApiRequest): string {
   const xff = (req.headers["x-forwarded-for"] as string) || "";
@@ -24,8 +25,7 @@ function getIp(req: NextApiRequest): string {
 }
 
 function getUserTier(cookieHeader: string | undefined): AccessTier {
-  const raw = getUserTierFromCookies(cookieHeader);
-  return normalizeUserTier(raw);
+  return getUserTierFromCookies({ headers: { cookie: cookieHeader } });
 }
 
 function validateDownloadAccess(params: {
@@ -33,24 +33,30 @@ function validateDownloadAccess(params: {
   requiredTier: AccessTier;
 }): { allowed: boolean; reason?: string } {
   if (!hasAccess(params.userTier, params.requiredTier)) {
-    return { allowed: false, reason: `Insufficient tier: ${params.userTier} < ${params.requiredTier}` };
+    return {
+      allowed: false,
+      reason: `Insufficient tier: ${params.userTier} < ${params.requiredTier}`,
+    };
   }
+
   return { allowed: true };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const token = Array.isArray(req.query.token) ? req.query.token[0] : req.query.token;
-  if (!token) return res.status(400).json({ error: "Missing token" });
+  const token = Array.isArray(req.query.token)
+    ? req.query.token[0]
+    : req.query.token;
 
-  const secret = process.env.DOWNLOAD_SIGNING_SECRET;
-  if (!secret) {
-    console.error("[CRITICAL] DOWNLOAD_SIGNING_SECRET is undefined");
-    return res.status(500).json({ error: "Internal configuration error" });
+  if (!token) {
+    return res.status(400).json({ error: "Missing token" });
   }
 
   const ip = getIp(req);
@@ -58,10 +64,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const ref = String(req.headers.referer || "direct");
 
   try {
-    // 1) Verify token
-    const verification = verifyDownloadToken(token, secret);
+    const verification = verifyDownloadToken(
+      token,
+      "RESOURCE_CONTEXT_PLACEHOLDER",
+    );
 
-    if (!verification.valid) {
+    if (!verification.valid || !verification.payload) {
       await logDownloadEvent({
         eventType: "TOKEN_REJECTED",
         slug: verification.slug || "unknown",
@@ -72,17 +80,62 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         referrer: ref,
         note: verification.reason || "Token verification failed",
       });
+
       return res.status(403).json({ error: "Invalid or expired token" });
     }
 
-    // 2) Extract payload (normalize tiers)
     const slug = String(verification.slug || "").trim();
-    const requiredTier = normalizeRequiredTier(verification.requiredTier || "public");
+    const requiredTier = normalizeRequiredTier(
+      verification.requiredTier || "public",
+    );
     const userTier = getUserTier(req.headers.cookie);
+    const tokenId = verification.payload.tid;
+    const contentId = String(verification.payload.rid || "").trim();
 
-    if (!slug) return res.status(400).json({ error: "Invalid token payload" });
+    if (!slug || slug === "RESOURCE_CONTEXT_PLACEHOLDER") {
+      return res.status(400).json({ error: "Invalid token payload" });
+    }
 
-    // 3) Resolve document (download-first, then generic fallback)
+    // ✅ FIXED: Added await
+    const premiumAsset = contentId
+      ? await getPremiumContentAsset(contentId)
+      : null;
+
+    if (premiumAsset?.exists) {
+      const usageIncremented = await incrementTokenUsage(token);
+
+      if (!usageIncremented) {
+        await logDownloadEvent({
+          eventType: "TOKEN_EXHAUSTED",
+          slug,
+          requiredTier,
+          userTier,
+          ip,
+          userAgent: ua,
+          referrer: ref,
+          note: "Download allowance exhausted",
+          tokenId,
+        });
+
+        return res.status(403).json({ error: "Download allowance exhausted" });
+      }
+
+      const forensics = getTokenForensics(verification.payload.md || {});
+      const premiumUrl = `/api/premium/content/download/${encodeURIComponent(
+        contentId,
+      )}?token=${encodeURIComponent(token)}`;
+
+      res.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
+      res.setHeader("X-Download-ID", slug);
+      res.setHeader("X-Token-ID", tokenId);
+
+      if (forensics.watermarkId) {
+        res.setHeader("X-Watermark-ID", forensics.watermarkId);
+      }
+
+      return res.redirect(302, premiumUrl);
+    }
+
     const doc =
       (await getDownloadBySlug(slug)) ||
       (await getDocumentBySlug(slug)) ||
@@ -98,12 +151,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         userAgent: ua,
         referrer: ref,
         note: "Document not found",
+        tokenId,
       });
+
       return res.status(404).json({ error: "Document not found" });
     }
 
-    // 4) Resolve URL
     const url = resolveDocDownloadUrl(doc);
+
     if (!url) {
       await logDownloadEvent({
         eventType: "URL_RESOLVE_FAILED",
@@ -114,11 +169,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         userAgent: ua,
         referrer: ref,
         note: "Could not resolve download URL",
+        tokenId,
       });
+
       return res.status(500).json({ error: "Internal error resolving URL" });
     }
 
-    // 5) Enforce tier access at redemption time
     const accessCheck = validateDownloadAccess({ userTier, requiredTier });
 
     if (!accessCheck.allowed) {
@@ -131,12 +187,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         userAgent: ua,
         referrer: ref,
         note: accessCheck.reason || "Access denied",
+        tokenId,
       });
 
       return res.redirect(302, "/inner-circle?error=insufficient_tier");
     }
 
-    // 6) Success log + redirect
+    await incrementTokenUsage(token);
+
     await logDownloadEvent({
       eventType: "DOWNLOAD_GRANTED",
       slug,
@@ -148,39 +206,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tokenExp: verification.exp,
       downloadUrl: url,
       nonce: verification.nonce,
+      tokenId,
     });
 
     res.setHeader("Cache-Control", "no-store, max-age=0, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
     res.setHeader("X-Download-ID", slug);
+    res.setHeader("X-Token-ID", tokenId);
+
+    const forensics = getTokenForensics(verification.payload.md || {});
+    if (forensics.watermarkId) {
+      res.setHeader("X-Watermark-ID", forensics.watermarkId);
+    }
 
     return res.redirect(302, url);
   } catch (err) {
-    console.error(`[DOWNLOAD_SYSTEM_EXCEPTION] ${token}:`, err);
-
-    await logDownloadEvent({
-      eventType: "DOWNLOAD_ERROR",
-      slug: "unknown",
-      requiredTier: "unknown",
-      userTier: getUserTier(req.headers.cookie),
-      ip,
-      userAgent: ua,
-      referrer: ref,
-      note: `System error: ${err instanceof Error ? err.message : "Unknown error"}`,
-    });
-
-    return res.status(500).json({
-      error: "Internal server error",
-      reference: safeSlice(token, 0, 8),
-    });
+    console.error("[DOWNLOAD_SYSTEM_EXCEPTION]", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
 export const config = {
-  api: {
-    responseLimit: false,
-    bodyParser: false,
-  },
+  api: { responseLimit: false, bodyParser: false },
 };

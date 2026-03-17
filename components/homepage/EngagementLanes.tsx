@@ -1,157 +1,133 @@
-/* components/homepage/EngagementLanes.tsx — Compact + Embeddable (12/10) */
+/* components/homepage/EngagementLanes.tsx — Route-normalized, production-safe */
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ArrowUpRight, Globe, Lock, BookOpen, Landmark } from "lucide-react";
 
 type Lane = {
   key: "media" | "education" | "private" | "institutional";
   title: string;
   subtitle: string;
   href: string;
-  image: string;
-  logo: string;
   description: string;
+  icon: React.ElementType;
 };
 
 const LANES: Lane[] = [
   {
     key: "media",
-    title: "MEDIA",
-    subtitle: "Cultural signal",
+    title: "Media",
+    subtitle: "PUBLIC SIGNAL",
     href: "/media",
-    image: "/assets/images/logos/media.jpeg",
-    logo: "/assets/images/logos/media-logo.svg",
-    description: "Narrative intelligence",
+    icon: Globe,
+    description: "Commentary, interviews, and public-facing narrative built for clarity under scrutiny.",
   },
   {
     key: "education",
-    title: "EDUCATION",
-    subtitle: "Formation & research",
+    title: "Education",
+    subtitle: "FORMATION & RESEARCH",
     href: "/education-research",
-    image: "/assets/images/logos/education.jpeg",
-    logo: "/assets/images/logos/education-logo.svg",
-    description: "Knowledge transfer",
+    icon: BookOpen,
+    description: "Structured learning, disciplined inquiry, and research-led intellectual formation.",
   },
   {
     key: "private",
-    title: "PRIVATE",
-    subtitle: "Client work",
+    title: "Private",
+    subtitle: "SELECT CLIENT WORK",
     href: "/private-clients",
-    image: "/assets/images/logos/private-clients.jpeg",
-    logo: "/assets/images/logos/private-clients-logo.svg",
-    description: "Strategic advisory",
+    icon: Lock,
+    description: "Confidential advisory for principals, founders, and private strategic mandates.",
   },
   {
     key: "institutional",
-    title: "INSTITUTIONAL",
-    subtitle: "Governance & policy",
+    title: "Institutional",
+    subtitle: "GOVERNANCE & POLICY",
     href: "/institutional",
-    image: "/assets/images/logos/institution.jpeg",
-    logo: "/assets/images/logos/institution-logo.svg",
-    description: "System architecture",
+    icon: Landmark,
+    description: "Institution design, governance architecture, and organisational advisory.",
   },
 ];
 
 export default function EngagementLanes({
   compact = true,
 }: {
-  /** compact=true: designed to be embedded inside homepage Panel */
   compact?: boolean;
 }) {
   return (
-    <section className={compact ? "w-full" : "mx-auto max-w-7xl px-6 py-16 md:py-20"}>
-      {/* Header — smaller in compact mode */}
-      <div
-        className={[
-          "mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4",
-          compact ? "px-1" : "",
-        ].join(" ")}
-      >
-        <div className="max-w-2xl">
-          <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300/85">
-            Access portals
+    <section className="w-full bg-black text-white">
+      <div className={compact ? "p-1" : "mx-auto max-w-7xl px-6 py-20"}>
+        <div className="mb-12 flex flex-col items-start justify-between gap-8 border-b border-white/10 pb-10 md:flex-row md:items-end">
+          <div className="max-w-2xl">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.36em] text-amber-500">
+              Engagement
+            </span>
+            <h2 className="mt-4 font-serif text-4xl tracking-tight text-white md:text-5xl">
+              Modes of access.
+            </h2>
+            <p className="mt-6 max-w-lg text-sm leading-relaxed text-zinc-300">
+              Different mandates require different operating environments. Choose
+              the lane that matches the work.
+            </p>
           </div>
 
-          <h2 className={["mt-3 font-serif text-white leading-tight", compact ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"].join(" ")}>
-            Four modes of engagement.
-          </h2>
-
-          <p className={["mt-3 leading-relaxed text-white/70", compact ? "text-sm max-w-xl" : "text-base max-w-xl"].join(" ")}>
-            Media, education, private advisory, and institutional work — each with its own rhythm,
-            governance, and standards. Choose the aperture that fits.
-          </p>
-        </div>
-
-        <div className="hidden md:block w-px h-10 bg-white/10" />
-
-        <div className="text-right">
-          <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/55 mb-1 block">
-            Active portals
-          </span>
-          <span className={["font-light text-white/85", compact ? "text-xl" : "text-2xl"].join(" ")}>04</span>
-        </div>
-      </div>
-
-      {/* Grid — reduced height, tighter paddings */}
-      <div className={["grid grid-cols-1 md:grid-cols-2", compact ? "gap-3 md:gap-4" : "gap-4 md:gap-5"].join(" ")}>
-        {LANES.map((lane) => (
-          <Link
-            key={lane.key}
-            href={lane.href}
-            className="group relative overflow-hidden rounded-2xl border border-white/12 bg-zinc-900/55 hover:bg-zinc-900/75 transition-all duration-500"
-          >
-            {/* Background image */}
-            <div className="absolute inset-0 opacity-25 group-hover:opacity-35 transition-opacity duration-700">
-              <Image
-                src={lane.image}
-                alt=""
-                fill
-                className="object-cover"
-                priority={lane.key === "media"}
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/55 to-black/85" />
+          <div className="text-right">
+            <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-zinc-600">
+              Four active lanes
             </div>
+            <div className="flex justify-end gap-1">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-1 w-6 overflow-hidden rounded-full bg-amber-500/20 transition-all hover:scale-105"
+                >
+                  <div className="h-full w-full bg-amber-500/40" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-            {/* Content — shorter min-height */}
-            <div className={["relative flex flex-col justify-between", compact ? "p-5 md:p-6 min-h-[170px]" : "p-7 md:p-8 min-h-[220px]"].join(" ")}>
-              <div className="flex items-start justify-between">
-                <div className={["relative", compact ? "h-8 w-8" : "h-9 w-9"].join(" ")}>
-                  <Image
-                    src={lane.logo}
-                    alt=""
-                    fill
-                    className="object-contain opacity-90 group-hover:opacity-100 transition-opacity"
-                  />
+        <div className="grid grid-cols-1 gap-px border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
+          {LANES.map((lane, index) => (
+            <Link
+              key={lane.key}
+              href={lane.href}
+              className="group relative flex min-h-[320px] flex-col bg-black p-8 transition-all duration-500 hover:bg-zinc-950"
+            >
+              <div className="mb-12 flex items-start justify-between">
+                <div className="border border-white/5 bg-white/[0.02] p-3 transition-colors group-hover:border-amber-500/30">
+                  <lane.icon className="h-5 w-5 text-zinc-500 transition-colors group-hover:text-amber-500" />
                 </div>
 
-                <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-amber-300/70 group-hover:text-amber-300/90 transition-colors">
-                  {lane.subtitle}
-                </span>
+                <ArrowUpRight className="h-4 w-4 text-zinc-800 transition-all group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-amber-500" />
               </div>
 
               <div className="mt-auto">
-                <h3 className={["font-serif text-white/95 group-hover:text-white transition-colors", compact ? "text-xl md:text-2xl" : "text-2xl md:text-3xl"].join(" ")}>
+                <span className="mb-2 block font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-amber-500/60">
+                  {lane.subtitle}
+                </span>
+
+                <h3 className="font-serif text-3xl text-white transition-colors group-hover:text-amber-50">
                   {lane.title}
                 </h3>
 
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="h-px w-5 bg-amber-500/40 group-hover:w-7 transition-all duration-300" />
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/65 group-hover:text-amber-300/85 transition-colors">
-                    {lane.description}
-                  </span>
-                </div>
+                <div className="my-6 h-px w-8 bg-zinc-800 transition-all duration-700 group-hover:w-full group-hover:bg-amber-500/30" />
+
+                <p className="text-[13px] font-light leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-300">
+                  {lane.description}
+                </p>
               </div>
 
-              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300/85">
-                  Enter →
+              <div className="mt-8 flex items-center justify-between opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-amber-500 relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-amber-500 after:transition-all after:duration-300 group-hover:after:w-full">
+                  Open lane
+                </span>
+                <span className="font-mono text-[9px] text-zinc-700">
+                  P-0{index + 1}
                 </span>
               </div>
-            </div>
-
-            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/0 group-hover:ring-amber-500/20 transition-all duration-500" />
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

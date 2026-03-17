@@ -1,4 +1,4 @@
-// pages/inner-circle/admin.tsx — PREMIUM PRODUCTION (Router-Safe, Sovereign)
+/* pages/inner-circle/admin.tsx — PREMIUM PRODUCTION (Router-Safe, Sovereign) */
 'use client';
 
 import * as React from "react";
@@ -53,20 +53,15 @@ interface AdminProps {
 }
 
 const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
-  // ✅ Router-safe hooks
   const router = useClientRouter();
-  const query = useClientQuery();
-  const isReady = useClientIsReady();
-  
   const { hasClearance, isValidating } = useAccess();
-  
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // If already authorized, move them to their intelligence dashboard
+  // Redirect authorized users to the dashboard
   React.useEffect(() => {
     if (!mounted || !router) return;
     
@@ -76,7 +71,6 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
     }
   }, [mounted, router, hasClearance, isValidating, initialAccess]);
 
-  // ✅ Early return during SSR/prerender
   if (!router) {
     return (
       <Layout title="Inner Circle | Institutional Access">
@@ -94,7 +88,7 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
             <h1 className="text-2xl font-serif text-white mb-4">Vault Sync Error</h1>
             <p className="text-zinc-500 mb-8">{error}</p>
             <button
-              onClick={() => router.reload()}
+              onClick={() => window.location.reload()}
               className="bg-gold text-black px-8 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-white transition-all"
             >
               Recalibrate
@@ -112,7 +106,6 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-white selection:bg-gold/30">
-        {/* HERO SECTION */}
         <section className="relative pt-32 pb-20 px-6 overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-gold/10 to-transparent pointer-events-none" />
           
@@ -120,7 +113,6 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 backdrop-blur-sm mb-6"
             >
               <ShieldCheck size={14} className="text-gold" />
@@ -130,7 +122,7 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ delay: 0.1 }}
               className="font-serif text-5xl md:text-7xl mb-8 tracking-tight"
             >
               Elevate Your <span className="italic text-gold">Clearance</span>
@@ -139,7 +131,7 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ delay: 0.2 }}
               className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
             >
               The Inner Circle is a dedicated repository for high-fidelity intelligence, 
@@ -148,7 +140,6 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
           </div>
         </section>
 
-        {/* PRICING/TIERS SECTION */}
         <section className="px-6 pb-32">
           <div className="mx-auto max-w-7xl">
             <div className="grid md:grid-cols-3 gap-8">
@@ -157,7 +148,7 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
                   key={tier.name}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  transition={{ delay: i * 0.1 }}
                   className={`relative p-8 rounded-2xl border ${
                     tier.featured 
                       ? 'border-gold/50 bg-zinc-900/50 shadow-[0_0_50px_-12px_rgba(212,175,55,0.2)]' 
@@ -202,50 +193,31 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
           </div>
         </section>
 
-        {/* TRUST FEATURES */}
         <section className="border-t border-white/5 bg-zinc-950/30 py-24 px-6">
           <div className="mx-auto max-w-7xl grid md:grid-cols-3 gap-12">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col items-center text-center"
-            >
+            <div className="flex flex-col items-center text-center">
               <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold mb-6">
                 <Lock size={24} />
               </div>
               <h4 className="font-serif text-xl mb-3 text-white">Privacy First</h4>
               <p className="text-zinc-500 text-sm">Zero-knowledge identity verification. Your engagement remains your own.</p>
-            </motion.div>
+            </div>
             
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex flex-col items-center text-center"
-            >
+            <div className="flex flex-col items-center text-center">
               <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold mb-6">
                 <Zap size={24} />
               </div>
               <h4 className="font-serif text-xl mb-3 text-white">Instant Decryption</h4>
               <p className="text-zinc-500 text-sm">Once verified, the entire 75-brief portfolio is decrypted in your browser.</p>
-            </motion.div>
+            </div>
             
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-col items-center text-center"
-            >
+            <div className="flex flex-col items-center text-center">
               <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold mb-6">
                 <Globe size={24} />
               </div>
               <h4 className="font-serif text-xl mb-3 text-white">Global Access</h4>
               <p className="text-zinc-500 text-sm">Secure institutional access from any sector, any device, any time.</p>
-            </motion.div>
+            </div>
           </div>
         </section>
       </main>
@@ -265,18 +237,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const ctx = await getSessionContext(sessionId);
-    if (!ctx.session || !ctx.member) {
+    
+    // Check if context returned valid institutional identity
+    if (!ctx.ok || !ctx.valid) {
       return { props: { initialAccess: { hasAccess: false, tier: "public" } } };
     }
 
     const required = "inner-circle";
-    const hasAccess = tierAtLeast(ctx.tier as any, required);
+    const hasAccess = tierAtLeast(ctx.tier, required);
 
     return {
       props: {
         initialAccess: {
           hasAccess,
-          tier: ctx.tier
+          tier: ctx.tier || "public"
         }
       },
     };

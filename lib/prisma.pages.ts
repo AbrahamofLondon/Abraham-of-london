@@ -1,51 +1,70 @@
-// lib/prisma.pages.ts — PAGES ROUTER SAFE (no server-only)
+// lib/prisma.pages.ts — PAGES ROUTER SAFE PRISMA (SSR / API only)
 //
 // IMPORTANT:
-// - Pages Router cannot import `server-only`.
-// - This module is still SERVER-EXECUTED (SSR / API routes), but must be pages-safe.
-// - It must NOT re-export itself or other barrels (avoid circular exports).
+// - Safe for pages/** server execution (SSR / API routes).
+// - Must never be imported into client-side code.
+// - Do NOT add `server-only` here.
 
 import { PrismaClient } from "@prisma/client";
 
 declare global {
   // eslint-disable-next-line no-var
-  var __prisma_pages: PrismaClient | undefined;
+  var __prisma_pages__: PrismaClient | undefined;
 }
 
 if (typeof window !== "undefined") {
-  throw new Error("⛔ [VAULT]: Prisma detected on client side - check your imports");
+  throw new Error("⛔ Prisma client was imported into a browser bundle. Check your imports.");
+}
+
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    datasources: process.env.DATABASE_URL
+      ? { db: { url: process.env.DATABASE_URL } }
+      : undefined,
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["error", "warn"]
+        : ["error"],
+  });
 }
 
 export const prisma: PrismaClient =
-  global.__prisma_pages ??
-  new PrismaClient({
-    datasources: { db: { url: process.env.DATABASE_URL } },
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+  global.__prisma_pages__ ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") global.__prisma_pages = prisma;
+if (process.env.NODE_ENV !== "production") {
+  global.__prisma_pages__ = prisma;
+}
 
-export const getPrisma = () => prisma;
+export const getPrisma = (): PrismaClient => prisma;
 
-export async function safePrismaQuery<T>(query: () => Promise<T>): Promise<T | null> {
+export async function safePrismaQuery<T>(
+  query: () => Promise<T>,
+): Promise<T | null> {
   try {
     return await query();
   } catch (error) {
-    console.error("[VAULT_PRISMA_ERROR]:", error);
+    console.error("[PRISMA_PAGES_ERROR]", error);
     return null;
   }
 }
 
-/**
- * Helpers exposed for Pages Router usage
- */
-export async function getVaultStatus() {
+export async function checkDatabaseConnection(): Promise<{
+  online: boolean;
+  error: string | null;
+}> {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return { online: true, error: null as string | null };
-  } catch (e) {
-    return { online: false, error: e instanceof Error ? e.message : "UNKNOWN_ERROR" };
+    return { online: true, error: null };
+  } catch (error) {
+    return {
+      online: false,
+      error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+    };
   }
+}
+
+export async function getVaultStatus() {
+  return checkDatabaseConnection();
 }
 
 export async function getStrategicContext(slug: string) {
@@ -57,12 +76,13 @@ export async function getStrategicContext(slug: string) {
         dependents: { include: { sourceBrief: true } },
       },
     });
-  } catch (e) {
-    console.error("[VAULT_CONTEXT_ERROR]:", e);
+  } catch (error) {
+    console.error("[VAULT_CONTEXT_ERROR]", error);
     return null;
   }
 }
 
 export default prisma;
+
 export type { Prisma } from "@prisma/client";
 export type PrismaClientType = PrismaClient;

@@ -167,10 +167,6 @@ export class AuditService {
 
   /**
    * Increment asset engagement metrics in ContentMetadata.
-   *
-   * Current schema supports:
-   * - totalPrints
-   * - engagementScore
    */
   static async incrementAssetMetrics(slug: string) {
     try {
@@ -183,7 +179,7 @@ export class AuditService {
         create: {
           slug,
           title: "Auto-Generated Entry",
-          contentType: "Briefing",
+          contentType: "Brief" as any, 
           totalPrints: 1,
           engagementScore: 1,
         },

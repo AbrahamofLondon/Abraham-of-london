@@ -2,50 +2,71 @@
 import * as React from "react";
 import base from "@/components/mdx-components";
 
-type MDXComponentProps = {
+type MDXComponentProps = React.HTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
-  className?: string;
-  [key: string]: unknown;
 };
 
 type MDXComponent = React.ComponentType<MDXComponentProps>;
 type ComponentMap = Record<string, MDXComponent>;
 
-const MDXComponents: ComponentMap = base as ComponentMap;
+const BASE_COMPONENTS: ComponentMap = base as ComponentMap;
 
-export const getSafeComponents = (custom: ComponentMap = {}): ComponentMap => {
-  const map: ComponentMap = { ...MDXComponents };
+const REQUIRED_COMPONENTS = [
+  "BrandFrame",
+  "HeroEyebrow",
+  "ResourcesCTA",
+  "JsonLd",
+  "Caption",
+  "CTA",
+  "CTAGroup",
+  "BriefAlert",
+  "DocumentFooter",
+] as const;
 
-  // All components that need fallbacks
-  const required = [
-    "BrandFrame",
-    "HeroEyebrow",
-    "ResourcesCTA",
-    "JsonLd",
-    "Caption",
-    "CTA",
-    "CTAGroup",
-    "BriefAlert", // ✅ Added to prevent future build errors
-  ];
+function createFallbackComponent(name: string): MDXComponent {
+  const FallbackComponent = ({
+    children,
+    className,
+    ...rest
+  }: MDXComponentProps) => {
+    const safeClassName = typeof className === "string" ? className : "";
 
-  // Ensure all required components have fallbacks
-  for (const comp of required) {
-    if (!map[comp]) {
-      map[comp] = (props: MDXComponentProps) => {
-        const { children, className = "", ...rest } = props;
-        return (
-          <div
-            className={`mdx-fallback ${comp.toLowerCase()} ${className}`}
-            {...rest}
-          >
-            {children}
-          </div>
-        );
-      };
+    return (
+      <div
+        className={`mdx-fallback ${name.toLowerCase()} ${safeClassName}`.trim()}
+        {...rest}
+      >
+        {children}
+      </div>
+    );
+  };
+
+  FallbackComponent.displayName = `${name}Fallback`;
+  return FallbackComponent;
+}
+
+export const getSafeComponents = (
+  custom?: Partial<ComponentMap>,
+): ComponentMap => {
+  const map: ComponentMap = { ...BASE_COMPONENTS };
+
+  for (const name of REQUIRED_COMPONENTS) {
+    if (!map[name]) {
+      map[name] = createFallbackComponent(name);
     }
   }
 
-  return { ...map, ...custom };
+  if (custom) {
+    for (const [key, value] of Object.entries(custom)) {
+      if (value) {
+        map[key] = value as MDXComponent;
+      }
+    }
+  }
+
+  return map;
 };
+
+const MDXComponents = getSafeComponents();
 
 export default MDXComponents;

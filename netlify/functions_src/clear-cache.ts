@@ -1,10 +1,11 @@
-// netlify/functions/clear-cache.ts
-import type { Handler } from "@netlify/functions";
+// netlify/functions_src/clear-cache.ts
+
 import {
   ok,
   bad,
   readJson,
   withSecurity,
+  type Handler,
 } from "./_utils";
 
 type ClearCacheBody = {
@@ -13,13 +14,16 @@ type ClearCacheBody = {
 
 export const handler: Handler = withSecurity(
   async (event) => {
-    const origin = event.headers.origin || event.headers.Origin || "*";
+    const originHeader = event.headers.origin ?? event.headers.Origin ?? "*";
+    const origin = Array.isArray(originHeader)
+      ? (originHeader[0] ?? "*")
+      : (originHeader || "*");
 
     if (event.httpMethod === "OPTIONS") {
       return {
         statusCode: 204,
         headers: {
-          "Access-Control-Allow-Origin": origin || "*",
+          "Access-Control-Allow-Origin": origin,
           "Access-Control-Allow-Methods": "POST,OPTIONS",
           "Access-Control-Allow-Headers":
             "Content-Type,Authorization,X-Requested-With",
@@ -40,11 +44,7 @@ export const handler: Handler = withSecurity(
 
     const validSecret = process.env.CLEAR_CACHE_SECRET;
     if (!validSecret) {
-      return bad(
-        "Clear cache functionality not configured",
-        500,
-        origin
-      );
+      return bad("Clear cache functionality not configured", 500, origin);
     }
 
     if (!body.secret || body.secret !== validSecret) {
@@ -52,8 +52,6 @@ export const handler: Handler = withSecurity(
     }
 
     console.log("🧹 Cache clear requested at:", new Date().toISOString());
-
-    // Hook actual cache invalidation here (Redis/CDN/etc.)
 
     return ok(
       "Cache cleared successfully",
@@ -69,4 +67,3 @@ export const handler: Handler = withSecurity(
     requireHoneypot: true,
   }
 );
-

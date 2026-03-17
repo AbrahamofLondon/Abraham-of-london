@@ -2,19 +2,17 @@
 import * as React from "react";
 import type { NextPage, GetServerSideProps } from "next";
 import { getSession } from "next-auth/react";
-import { prisma } from "@/lib/db";
-import { auditLogger } from "@/lib/audit/audit-logger";
 import Layout from "@/components/Layout";
-import { motion } from "framer-motion";
+import { prisma } from "@/lib/db";
 
 interface AuditLogEntry {
   id: string;
   action: string;
-  actorEmail: string;
-  resourceName: string;
+  actorEmail: string | null;
+  resourceName: string | null;
   severity: string;
   createdAt: string;
-  metadata: string;
+  metadata?: unknown;
 }
 
 interface IntelligenceProps {
@@ -29,65 +27,85 @@ interface IntelligenceProps {
 const IntelligenceView: NextPage<IntelligenceProps> = ({ logs, stats }) => {
   return (
     <Layout title="Intelligence Command Center">
-      <main className="min-h-screen bg-[#020202] text-white pt-32 pb-20 px-8">
-        <div className="max-w-[1600px] mx-auto">
-          
-          {/* TOP METRICS BARS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <main className="min-h-screen bg-[#020202] px-8 pb-20 pt-32 text-white">
+        <div className="mx-auto max-w-[1600px]">
+          <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
               { label: "Total Asset Retrievals", value: stats.totalDownloads },
               { label: "Active VIPs (24h)", value: stats.activeUsers24h },
               { label: "High-Interest Brief", value: stats.topAsset },
             ].map((stat, i) => (
-              <div key={i} className="p-6 border border-white/5 bg-zinc-900/20 rounded-sm">
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">{stat.label}</p>
-                <p className="text-3xl font-light tracking-tighter text-[#D4AF37]">{stat.value}</p>
+              <div
+                key={i}
+                className="rounded-sm border border-white/5 bg-zinc-900/20 p-6"
+              >
+                <p className="mb-2 text-[10px] uppercase tracking-widest text-zinc-500">
+                  {stat.label}
+                </p>
+                <p className="text-3xl font-light tracking-tighter text-[#D4AF37]">
+                  {stat.value}
+                </p>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            
-            {/* REAL-TIME AUDIT STREAM */}
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
             <div className="lg:col-span-8">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-6 flex items-center gap-4">
+              <h3 className="mb-6 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
                 Real-Time Audit Stream <span className="h-px flex-1 bg-white/5" />
               </h3>
-              
+
               <div className="space-y-2">
                 {logs.map((log) => (
-                  <div key={log.id} className="flex items-center justify-between p-4 border border-white/5 bg-zinc-900/10 hover:bg-zinc-900/30 transition-colors group">
+                  <div
+                    key={log.id}
+                    className="group flex items-center justify-between border border-white/5 bg-zinc-900/10 p-4 transition-colors hover:bg-zinc-900/30"
+                  >
                     <div className="flex items-center gap-6">
-                      <span className={`w-1.5 h-1.5 rounded-full ${log.severity === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-[#D4AF37]'}`} />
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          log.severity === "critical"
+                            ? "animate-pulse bg-red-500"
+                            : "bg-[#D4AF37]"
+                        }`}
+                      />
                       <div>
-                        <p className="text-xs font-medium text-white group-hover:text-[#D4AF37] transition-colors">
-                          {log.actorEmail} <span className="text-zinc-500 font-light">— accessed —</span> {log.resourceName || log.action}
+                        <p className="text-xs font-medium text-white transition-colors group-hover:text-[#D4AF37]">
+                          {log.actorEmail || "Unknown actor"}{" "}
+                          <span className="font-light text-zinc-500">
+                            — accessed —
+                          </span>{" "}
+                          {log.resourceName || log.action}
                         </p>
-                        <p className="text-[9px] font-mono text-zinc-600 uppercase mt-1">
+                        <p className="mt-1 font-mono text-[9px] uppercase text-zinc-600">
                           {new Date(log.createdAt).toLocaleString()}
                         </p>
                       </div>
                     </div>
-                    <div className="text-[10px] font-mono text-zinc-700">{log.id.slice(-8)}</div>
+                    <div className="font-mono text-[10px] text-zinc-700">
+                      {log.id.slice(-8)}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* INTELLIGENCE HEAT MAP (Logic Placeholder) */}
             <div className="lg:col-span-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-6 flex items-center gap-4">
+              <h3 className="mb-6 flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
                 Security Posture <span className="h-px flex-1 bg-white/5" />
               </h3>
-              <div className="aspect-square border border-white/5 bg-zinc-900/20 p-8 flex flex-col justify-center items-center text-center">
-                <div className="w-24 h-24 border-2 border-[#D4AF37]/20 rounded-full flex items-center justify-center mb-6">
-                  <div className="w-16 h-16 border border-[#D4AF37] rounded-full animate-ping opacity-20" />
+              <div className="flex aspect-square flex-col items-center justify-center border border-white/5 bg-zinc-900/20 p-8 text-center">
+                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#D4AF37]/20">
+                  <div className="h-16 w-16 animate-ping rounded-full border border-[#D4AF37] opacity-20" />
                 </div>
-                <p className="text-xs font-light text-zinc-400">All Systems Operational</p>
-                <p className="text-[10px] text-zinc-600 mt-2 font-mono uppercase">Encryption: AES-256-GCM</p>
+                <p className="text-xs font-light text-zinc-400">
+                  All Systems Operational
+                </p>
+                <p className="mt-2 font-mono text-[10px] uppercase text-zinc-600">
+                  Encryption: AES-256-GCM
+                </p>
               </div>
             </div>
-
           </div>
         </div>
       </main>
@@ -95,42 +113,78 @@ const IntelligenceView: NextPage<IntelligenceProps> = ({ logs, stats }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps<IntelligenceProps> = async (
+  context
+) => {
   const session = await getSession(context);
-  const adminEmail = process.env.INITIAL_ADMIN_EMAIL || 'admin@abrahamoflondon.com';
+  const adminEmail =
+    process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
 
-  // Strict Authorization Check
   if (!session || session.user?.email !== adminEmail) {
     return { redirect: { destination: "/404", permanent: false } };
   }
 
-  // Use the AuditLogger Query method to get recent asset events
-  const logs = await prisma.systemAuditLog.findMany({
+  const db = prisma;
+
+  if (!db) {
+    return {
+      props: {
+        logs: [],
+        stats: {
+          totalDownloads: 0,
+          activeUsers24h: 0,
+          topAsset: "Unavailable",
+        },
+      },
+    };
+  }
+
+  const logsRaw = await db.systemAuditLog.findMany({
     where: {
-      action: { in: ['ASSET_RETRIEVAL_AUTHORIZED', 'AUTH_SIGNIN'] }
+      action: { in: ["ASSET_RETRIEVAL_AUTHORIZED", "AUTH_SIGNIN"] },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     take: 20,
   });
 
-  // Calculate high-level intelligence stats
-  const totalDownloads = await prisma.systemAuditLog.count({
-    where: { action: 'ASSET_RETRIEVAL_AUTHORIZED' }
+  const totalDownloads = await db.systemAuditLog.count({
+    where: { action: "ASSET_RETRIEVAL_AUTHORIZED" },
   });
 
-  const activeUsers24h = await prisma.innerCircleMember.count({
-    where: { lastLoginAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+  const activeUsers24h = await db.innerCircleMember.count({
+    where: {
+      lastSeenAt: {
+        gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      },
+    },
+  });
+
+  const logs: AuditLogEntry[] = logsRaw.map((log) => {
+    const logWithExtras = log as typeof log & {
+      resourceName?: string | null;
+      metadata?: unknown;
+    };
+
+    return {
+      id: String(log.id),
+      action: String(log.action),
+      actorEmail: log.actorEmail ?? null,
+      resourceName: logWithExtras.resourceName ?? null,
+      severity: String(log.severity),
+      createdAt: new Date(log.createdAt).toISOString(),
+      metadata: logWithExtras.metadata,
+    };
   });
 
   return {
     props: {
-      logs: JSON.parse(JSON.stringify(logs)),
+      logs,
       stats: {
         totalDownloads,
         activeUsers24h,
-        topAsset: "Legacy Architecture Canvas"
-      }
-    }
+        topAsset: "Legacy Architecture Canvas",
+      },
+    },
   };
 };
 

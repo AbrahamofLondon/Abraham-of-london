@@ -1,11 +1,33 @@
-// netlify/functions/_utils.ts
-import type {
-  Handler,
-  HandlerResponse,
-  HandlerEvent,
-  HandlerContext,
-} from "@netlify/functions";
+// netlify/functions_src/_utils.ts
+
 import { verifyRecaptchaDetailed } from "../../lib/recaptchaServer";
+
+/* ============================================================================
+   LOCAL NETLIFY-COMPAT TYPES
+   ============================================================================ */
+
+export type HandlerEvent = {
+  httpMethod: string;
+  headers: Record<string, string | string[] | undefined>;
+  body?: string | null;
+  rawUrl?: string;
+  path?: string;
+  queryStringParameters?: Record<string, string | undefined> | null;
+};
+
+export type HandlerContext = Record<string, unknown>;
+
+export type HandlerResponse = {
+  statusCode: number;
+  headers?: Record<string, string>;
+  body: string;
+  isBase64Encoded?: boolean;
+};
+
+export type Handler = (
+  event: HandlerEvent,
+  context: HandlerContext
+) => Promise<HandlerResponse> | HandlerResponse;
 
 /* ============================================================================
    SECURITY CONSTANTS & TYPES
@@ -18,9 +40,6 @@ export type GuardOptions = {
   expectedAction?: string;
   requireHoneypot?: boolean;
   honeypotFieldNames?: string[];
-  /**
-   * Optional timeout override for captcha verification (ms)
-   */
   recaptchaTimeoutMs?: number;
 };
 
@@ -31,11 +50,11 @@ interface ApiRequestBody {
 }
 
 /* ============================================================================
-   ORIGINS / BODY LIMITS (memoized)
+   ORIGINS / BODY LIMITS
    ============================================================================ */
 
-// Memoized allowed origins parsing
 let cachedAllowedOrigins: string[] | null = null;
+
 export function getAllowedOrigins(): string[] {
   if (!cachedAllowedOrigins) {
     cachedAllowedOrigins = (process.env.ALLOWED_ORIGINS || "*")
@@ -46,7 +65,6 @@ export function getAllowedOrigins(): string[] {
   return cachedAllowedOrigins;
 }
 
-// Max JSON body with better validation
 const MAX_BODY_BYTES = Math.max(
   0,
   Number(process.env.MAX_BODY_BYTES || 64 * 1024)
@@ -66,8 +84,9 @@ export function getClientIp(event: {
 
   const forwardedFor = headers["x-forwarded-for"];
   if (Array.isArray(forwardedFor)) return forwardedFor[0];
-  if (typeof forwardedFor === "string")
+  if (typeof forwardedFor === "string") {
     return forwardedFor.split(",")[0]?.trim();
+  }
 
   const realIp = headers["x-real-ip"];
   if (typeof realIp === "string") return realIp;
@@ -95,7 +114,12 @@ export function withSecurity(
     event: HandlerEvent,
     context: HandlerContext
   ): Promise<HandlerResponse> => {
-    const origin = event.headers.origin || (event.headers as any).Origin || "*";
+    const originHeader = event.headers.origin ?? event.headers.Origin ?? "*";
+
+    const origin = Array.isArray(originHeader)
+      ? (originHeader[0] ?? "*")
+      : (originHeader || "*");
+
     const allowedOrigins = getAllowedOrigins();
 
     if (event.httpMethod === "OPTIONS") {
@@ -110,16 +134,20 @@ export function withSecurity(
       return json({ ok: false, message: "Forbidden" }, 403, "null");
     }
 
-    // Honeypot (silent pass if bot filled it)
-    const contentType = (
-      event.headers["content-type"] ||
-      (event.headers as any)["Content-Type"] ||
-      ""
-    )
-      .toString()
-      .toLowerCase();
+    const contentTypeHeader =
+      event.headers["content-type"] ??
+      event.headers["Content-Type"] ??
+      "";
 
-    if (requireHoneypot && event.body && contentType.includes("application/json")) {
+    const contentType = Array.isArray(contentTypeHeader)
+      ? String(contentTypeHeader[0] ?? "").toLowerCase()
+      : String(contentTypeHeader).toLowerCase();
+
+    if (
+      requireHoneypot &&
+      event.body &&
+      contentType.includes("application/json")
+    ) {
       try {
         const body = JSON.parse(event.body) as Record<string, unknown>;
         for (const field of honeypotFieldNames) {
@@ -133,31 +161,33 @@ export function withSecurity(
       }
     }
 
-    // reCAPTCHA guard (canonical server helper)
     if (requireRecaptcha) {
       let token: string | undefined;
 
       if (event.body && contentType.includes("application/json")) {
         try {
           const body = JSON.parse(event.body) as ApiRequestBody;
-          const t = body.recaptchaToken || body.token;
-          token = typeof t === "string" ? t : undefined;
+          const candidate = body.recaptchaToken || body.token;
+          token = typeof candidate === "string" ? candidate : undefined;
         } catch {
           // continue to header check
         }
       }
 
       if (!token) {
-        const headerToken =
-          (event.headers["x-recaptcha-token"] as string | undefined) ||
-          ((event.headers as any)["X-recaptcha-Token"] as string | undefined) ||
-          ((event.headers as any)["X-Recaptcha-Token"] as string | undefined) ||
-          ((event.headers as any)["x-recaptcha-token"] as string | undefined);
+        const headerTokenRaw =
+          event.headers["x-recaptcha-token"] ??
+          event.headers["X-recaptcha-Token"] ??
+          event.headers["X-Recaptcha-Token"];
+
+        const headerToken = Array.isArray(headerTokenRaw)
+          ? headerTokenRaw[0]
+          : headerTokenRaw;
 
         token = typeof headerToken === "string" ? headerToken : undefined;
       }
 
-      if (!token || typeof token !== "string") {
+      if (!token) {
         return bad("Security verification required", 400, origin);
       }
 
@@ -168,13 +198,13 @@ export function withSecurity(
           token,
           expectedAction,
           clientIp,
-          typeof recaptchaTimeoutMs === "number" ? recaptchaTimeoutMs : undefined
+          typeof recaptchaTimeoutMs === "number"
+            ? recaptchaTimeoutMs
+            : undefined
         );
 
         if (!detailed.success) {
           if (process.env.NODE_ENV !== "production") {
-            // Keep logs lean + safe (no hostname/reasons fields expected)
-            // NOTE: do not log token.
             console.warn("[reCAPTCHA] failed", {
               expectedAction,
               clientIp,
@@ -199,7 +229,7 @@ export function withSecurity(
     }
 
     const result = await handler(event, context);
-    return result as HandlerResponse;
+    return result;
   };
 }
 
@@ -208,6 +238,7 @@ export function withSecurity(
    ============================================================================ */
 
 let cachedSiteUrl: string | null = null;
+
 export function getSiteUrl(): string {
   if (!cachedSiteUrl) {
     const raw =
@@ -226,14 +257,14 @@ export function getCorsOrigin(requestOrigin?: string): string {
   return allowedOrigins.includes(requestOrigin) ? requestOrigin : "null";
 }
 
-export function corsHeaders(origin = "*") {
+export function corsHeaders(origin = "*"): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "POST,OPTIONS,GET",
     "Access-Control-Allow-Headers":
       "Content-Type,Authorization,X-Requested-With,X-recaptcha-Token",
     "Access-Control-Max-Age": "86400",
-  } as const;
+  };
 }
 
 /* ============================================================================
@@ -283,7 +314,11 @@ export function methodNotAllowed(origin = "*"): HandlerResponse {
 }
 
 export function handleOptions(origin = "*"): HandlerResponse {
-  return { statusCode: 204, headers: { ...corsHeaders(origin) }, body: "" };
+  return {
+    statusCode: 204,
+    headers: { ...corsHeaders(origin) },
+    body: "",
+  };
 }
 
 /* ============================================================================
@@ -295,17 +330,16 @@ export async function readJson<T = Record<string, unknown>>(req: {
   body?: string | null;
 }): Promise<T> {
   const getHeader = (name: string) => {
-    const h = req.headers;
-    const val = h[name] ?? h[name.toLowerCase()];
-    return Array.isArray(val) ? val[0] : val || null;
+    const val = req.headers[name] ?? req.headers[name.toLowerCase()];
+    return Array.isArray(val) ? (val[0] ?? null) : (val ?? null);
   };
 
   const ct = getHeader("Content-Type") || "";
-  const isJson = !!ct && /^application\/json/i.test(ct);
+  const isJson = /^application\/json/i.test(ct);
 
   let raw = "";
   if (typeof req.body === "string") raw = req.body;
-  else if (req.body) raw = String(req.body);
+  else if (req.body != null) raw = String(req.body);
 
   if (!raw || !isJson) return {} as T;
 
@@ -359,4 +393,3 @@ export function validateRequiredFields(
   const missing = missingKeys(data, requiredFields);
   return { isValid: missing.length === 0, missing };
 }
-

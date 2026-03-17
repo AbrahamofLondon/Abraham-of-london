@@ -1,105 +1,185 @@
-/* pages/api/admin/onboard-principal.ts — SSOT ALIGNED */
+/* pages/api/admin/onboard-principal.ts — COMPILE-SAFE, SSOT + DB SCHEMA ALIGNED */
 import type { NextApiRequest, NextApiResponse } from "next";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { InquiryStatus } from "@prisma/client";
 import { generatePrincipalKey } from "@/lib/auth/key-generator";
 import { sendOnboardingWelcome } from "@/lib/intelligence/notification-delegate";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 
-import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeUserTier, hasAccess, getTierLabel } from "@/lib/access/tier-policy";
+import {
+  normalizeUserTier,
+  hasAccess,
+  getTierLabel,
+} from "@/lib/access/tier-policy";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // 1. Level 4 Authorization Check - using SSOT tiers
-  const session = await getServerSession(req, res, authOptions);
-  
-  // Extract user tier from session (normalized)
-  const userTier = normalizeUserTier(
-    (session?.user as any)?.tier ?? 
-    (session?.user as any)?.role ?? 
-    "public"
-  );
-  
-  // Only users with architect+ access can onboard principals
-  if (!hasAccess(userTier, "architect")) {
-    return res.status(403).json({ 
-      error: "Unauthorized Command Elevation. Requires Architect clearance." 
+type DbAccessTier =
+  | "public"
+  | "member"
+  | "inner_circle"
+  | "client"
+  | "legacy"
+  | "architect"
+  | "owner";
+
+type ApiResponse =
+  | {
+      ok: true;
+      memberId: string;
+      tier: string;
+    }
+  | {
+      ok?: false;
+      error: string;
+    };
+
+function toDbTier(input: unknown): DbAccessTier {
+  const normalized = normalizeUserTier(input);
+
+  switch (normalized) {
+    case "inner-circle":
+      return "inner_circle";
+    case "public":
+    case "member":
+    case "client":
+    case "legacy":
+    case "architect":
+    case "owner":
+      return normalized;
+    default:
+      return "public";
+  }
+}
+
+function getSessionActor(session: unknown): {
+  id: string;
+  email: string | null;
+  tier: string;
+} {
+  const user = (session as { user?: Record<string, unknown> } | null)?.user || {};
+
+  const id =
+    typeof user.id === "string" && user.id.trim() ? user.id.trim() : "system";
+
+  const email =
+    typeof user.email === "string" && user.email.trim()
+      ? user.email.trim()
+      : null;
+
+  const tier = normalizeUserTier(user.tier ?? user.role ?? "public");
+
+  return { id, email, tier };
+}
+
+function pickString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function createMemberId(): string {
+  return randomUUID();
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiResponse>
+) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({
+      error: "Method not allowed.",
     });
   }
 
-  const { inquiryId, assignedTier = "client" } = req.body; // Default to client instead of inner-circle-elite
+  const session = await getServerSession(req, res, authOptions);
+  const actor = getSessionActor(session);
 
-  // Normalize the assigned tier (handles legacy values)
+  if (!hasAccess(actor.tier, "architect")) {
+    return res.status(403).json({
+      error: "Unauthorized Command Elevation. Requires Architect clearance.",
+    });
+  }
+
+  const inquiryId = pickString(req.body?.inquiryId);
+  if (!inquiryId) {
+    return res.status(400).json({
+      error: "inquiryId is required.",
+    });
+  }
+
+  const assignedTier = req.body?.assignedTier ?? "client";
   const normalizedTier = normalizeUserTier(assignedTier);
+  const dbTier = toDbTier(assignedTier);
 
   try {
-    // 2. Retrieve Vetted Inquiry
-    const inquiry = await prisma.strategyInquiry.findUnique({ 
-      where: { id: inquiryId } 
+    const inquiry = await prisma.strategyInquiry.findUnique({
+      where: { id: inquiryId },
     });
-    
+
     if (!inquiry) {
       return res.status(404).json({ error: "Inquiry not found." });
     }
 
-    // 3. Atomic Transaction: Create Member & Generate Keys
     const result = await prisma.$transaction(async (tx) => {
-      // Create the Inner Circle Member with normalized tier
+      const memberId = createMemberId();
+
       const member = await tx.innerCircleMember.create({
         data: {
+          id: memberId,
           email: inquiry.email,
           name: inquiry.name,
           role: "MEMBER",
-          tier: normalizedTier, // Store normalized tier
+          tier: dbTier,
           status: "active",
-          emailHash: inquiry.email, // In production, use a proper hashing utility
-          metadata: {
-            originalTier: assignedTier, // Keep original for audit
-            onboardedBy: session.user.id,
-            onboardedAt: new Date().toISOString(),
-          },
-        }
+          emailHash: inquiry.email,
+        },
       });
 
-      // Generate the 256-bit Institutional Key
-      const keyData = await generatePrincipalKey(member.id, normalizedTier);
+      const keyData = await generatePrincipalKey(member.id);
 
-      // Update Inquiry Status
+      // ✅ This now works because ONBOARDED exists in the schema
       await tx.strategyInquiry.update({
         where: { id: inquiryId },
-        data: { 
-          status: "ONBOARDED", 
-          memberId: member.id 
-        }
+        data: {
+          status: InquiryStatus.ONBOARDED,
+          memberId: member.id,
+        },
+      });
+
+      await tx.systemAuditLog.create({
+        data: {
+          action: "PRINCIPAL_ONBOARDED",
+          severity: "high",
+          actorId: actor.id,
+          actorEmail: actor.email,
+          resourceId: member.id,
+          resourceType: "INNER_CIRCLE_MEMBER",
+          resourceName: inquiry.email,
+          status: "success",
+          category: "admin",
+          subCategory: "onboarding",
+          metadata: {
+            inquiryId,
+            originalTier: String(assignedTier),
+            normalizedTier,
+            dbTier,
+            tierLabel: getTierLabel(normalizedTier),
+            onboardedBy: actor.id,
+            onboardedAt: new Date().toISOString(),
+          },
+        },
       });
 
       return { member, keyData };
     });
 
-    // 4. Dispatch Secure Credentials via Delegate
     await sendOnboardingWelcome(result.member, result.keyData.rawKey);
 
-    // 5. Log System Event
-    await prisma.systemAuditLog.create({
-      data: {
-        action: "PRINCIPAL_ONBOARDED",
-        severity: "high",
-        actorId: session.user.id,
-        resourceId: result.member.id,
-        metadata: { 
-          tier: normalizedTier,
-          originalTier: assignedTier,
-          tierLabel: getTierLabel(normalizedTier),
-        }
-      }
-    });
-
-    return res.status(200).json({ 
-      ok: true, 
+    return res.status(200).json({
+      ok: true,
       memberId: result.member.id,
       tier: normalizedTier,
     });
-
   } catch (error) {
     console.error("[ONBOARDING_CRITICAL_FAILURE]:", error);
     return res.status(500).json({ error: "Transaction failed." });

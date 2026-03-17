@@ -1,6 +1,8 @@
--- enterprise_schema_upgrade (idempotent baseline)
+-- enterprise_schema_upgrade — REPLAY-SAFE / SHADOW-DB SAFE
 
+-- ---------------------------------------------------------------------------
 -- Enums
+-- ---------------------------------------------------------------------------
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname='api_key_status') THEN
     CREATE TYPE api_key_status AS ENUM ('active','revoked','expired');
@@ -41,8 +43,10 @@ DO $$ BEGIN
   END IF;
 END $$;
 
--- Tables (idempotent creates)
-CREATE TABLE IF NOT EXISTS organizations (
+-- ---------------------------------------------------------------------------
+-- Tables (base create)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.organizations (
   id TEXT PRIMARY KEY,
   slug TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
@@ -52,10 +56,10 @@ CREATE TABLE IF NOT EXISTS organizations (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS organization_members (
+CREATE TABLE IF NOT EXISTS public.organization_members (
   id TEXT PRIMARY KEY,
-  organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  member_id UUID NOT NULL REFERENCES inner_circle_members(id) ON DELETE CASCADE,
+  organization_id TEXT NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
+  member_id UUID NOT NULL REFERENCES public.inner_circle_members(id) ON DELETE CASCADE,
   role TEXT NOT NULL DEFAULT 'MEMBER',
   status TEXT NOT NULL DEFAULT 'active',
   permissions permission[] NOT NULL DEFAULT '{}'::permission[],
@@ -64,9 +68,9 @@ CREATE TABLE IF NOT EXISTS organization_members (
   UNIQUE (organization_id, member_id)
 );
 
-CREATE TABLE IF NOT EXISTS organization_invites (
+CREATE TABLE IF NOT EXISTS public.organization_invites (
   id TEXT PRIMARY KEY,
-  organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  organization_id TEXT NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   token_hash TEXT UNIQUE NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
@@ -77,11 +81,11 @@ CREATE TABLE IF NOT EXISTS organization_invites (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS security_logs (
+CREATE TABLE IF NOT EXISTS public.security_logs (
   id TEXT PRIMARY KEY,
   event security_event NOT NULL,
   severity TEXT NOT NULL DEFAULT 'info',
-  member_id UUID REFERENCES inner_circle_members(id) ON DELETE SET NULL,
+  member_id UUID REFERENCES public.inner_circle_members(id) ON DELETE SET NULL,
   action TEXT NOT NULL,
   details JSONB DEFAULT '{}'::jsonb,
   ip_address TEXT,
@@ -89,9 +93,9 @@ CREATE TABLE IF NOT EXISTS security_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS mfa_setups (
+CREATE TABLE IF NOT EXISTS public.mfa_setups (
   id TEXT PRIMARY KEY,
-  user_id UUID UNIQUE NOT NULL REFERENCES inner_circle_members(id) ON DELETE CASCADE,
+  user_id UUID UNIQUE NOT NULL REFERENCES public.inner_circle_members(id) ON DELETE CASCADE,
   enabled BOOLEAN NOT NULL DEFAULT false,
   methods mfa_method[] NOT NULL DEFAULT ARRAY['totp']::mfa_method[],
   totp_secret TEXT,
@@ -106,7 +110,7 @@ CREATE TABLE IF NOT EXISTS mfa_setups (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS webhook_endpoints (
+CREATE TABLE IF NOT EXISTS public.webhook_endpoints (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   url TEXT NOT NULL,
@@ -117,9 +121,9 @@ CREATE TABLE IF NOT EXISTS webhook_endpoints (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS webhook_deliveries (
+CREATE TABLE IF NOT EXISTS public.webhook_deliveries (
   id TEXT PRIMARY KEY,
-  endpoint_id TEXT NOT NULL REFERENCES webhook_endpoints(id) ON DELETE CASCADE,
+  endpoint_id TEXT NOT NULL REFERENCES public.webhook_endpoints(id) ON DELETE CASCADE,
   event_type TEXT NOT NULL,
   payload JSONB NOT NULL,
   status_code INT,
@@ -130,7 +134,7 @@ CREATE TABLE IF NOT EXISTS webhook_deliveries (
   delivered_at TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS jobs (
+CREATE TABLE IF NOT EXISTS public.jobs (
   id TEXT PRIMARY KEY,
   queue TEXT NOT NULL DEFAULT 'default',
   type TEXT NOT NULL,
@@ -146,51 +150,186 @@ CREATE TABLE IF NOT EXISTS jobs (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Column adds (idempotent)
-ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
+-- ---------------------------------------------------------------------------
+-- Column adds for partially existing tables
+-- ---------------------------------------------------------------------------
+ALTER TABLE public.admin_sessions
+  ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
 
-ALTER TABLE api_keys
+ALTER TABLE public.api_keys
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb,
-  ADD COLUMN IF NOT EXISTS scopes TEXT[] NOT NULL DEFAULT '{}'::text[],
-  ADD COLUMN IF NOT EXISTS status api_key_status NOT NULL DEFAULT 'active';
+  ADD COLUMN IF NOT EXISTS scopes TEXT[] DEFAULT '{}'::text[];
 
-ALTER TABLE api_logs
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'api_keys'
+      AND column_name = 'status'
+  ) THEN
+    ALTER TABLE public.api_keys
+      ADD COLUMN status api_key_status NOT NULL DEFAULT 'active';
+  END IF;
+END $$;
+
+ALTER TABLE public.inner_circle_members
+  ADD COLUMN IF NOT EXISTS permissions permission[] DEFAULT '{}'::permission[];
+
+ALTER TABLE public.jobs
+  ADD COLUMN IF NOT EXISTS queue TEXT DEFAULT 'default',
+  ADD COLUMN IF NOT EXISTS type TEXT,
+  ADD COLUMN IF NOT EXISTS payload JSONB DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'queued',
+  ADD COLUMN IF NOT EXISTS attempts INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS max_attempts INT DEFAULT 5,
+  ADD COLUMN IF NOT EXISTS run_after TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS locked_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS locked_by TEXT,
+  ADD COLUMN IF NOT EXISTS last_error TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+ALTER TABLE public.organization_invites
+  ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS accepted_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+ALTER TABLE public.organization_members
+  ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'MEMBER',
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS permissions permission[] DEFAULT '{}'::permission[],
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+ALTER TABLE public.security_logs
+  ADD COLUMN IF NOT EXISTS severity TEXT DEFAULT 'info',
+  ADD COLUMN IF NOT EXISTS details JSONB DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS ip_address TEXT,
+  ADD COLUMN IF NOT EXISTS user_agent TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+
+ALTER TABLE public.mfa_setups
+  ADD COLUMN IF NOT EXISTS enabled BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS methods mfa_method[] DEFAULT ARRAY['totp']::mfa_method[],
+  ADD COLUMN IF NOT EXISTS totp_secret TEXT,
+  ADD COLUMN IF NOT EXISTS totp_verified BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS backup_codes JSONB DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS phone_number TEXT,
+  ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS recovery_email TEXT,
+  ADD COLUMN IF NOT EXISTS last_used_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+ALTER TABLE public.webhook_endpoints
+  ADD COLUMN IF NOT EXISTS secret TEXT,
+  ADD COLUMN IF NOT EXISTS status webhook_status DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS event_types TEXT[] DEFAULT '{}'::text[],
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+ALTER TABLE public.webhook_deliveries
+  ADD COLUMN IF NOT EXISTS status_code INT,
+  ADD COLUMN IF NOT EXISTS ok BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS attempts INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_error TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ;
+
+-- ---------------------------------------------------------------------------
+-- Backfills before NOT NULL expectations / indexing
+-- ---------------------------------------------------------------------------
+UPDATE public.jobs
+SET run_after = now()
+WHERE run_after IS NULL;
+
+UPDATE public.jobs
+SET queue = 'default'
+WHERE queue IS NULL;
+
+UPDATE public.jobs
+SET status = 'queued'
+WHERE status IS NULL;
+
+UPDATE public.jobs
+SET attempts = 0
+WHERE attempts IS NULL;
+
+UPDATE public.jobs
+SET max_attempts = 5
+WHERE max_attempts IS NULL;
+
+UPDATE public.jobs
+SET payload = '{}'::jsonb
+WHERE payload IS NULL;
+
+UPDATE public.organization_invites
+SET metadata = '{}'::jsonb
+WHERE metadata IS NULL;
+
+UPDATE public.security_logs
+SET details = '{}'::jsonb
+WHERE details IS NULL;
+
+UPDATE public.mfa_setups
+SET backup_codes = '[]'::jsonb
+WHERE backup_codes IS NULL;
+
+UPDATE public.inner_circle_members
+SET permissions = '{}'::permission[]
+WHERE permissions IS NULL;
+
+UPDATE public.api_keys
+SET metadata = '{}'::jsonb
+WHERE metadata IS NULL;
+
+UPDATE public.api_keys
+SET scopes = '{}'::text[]
+WHERE scopes IS NULL;
+
+-- ---------------------------------------------------------------------------
+-- Defaults
+-- ---------------------------------------------------------------------------
+ALTER TABLE public.api_logs
   ALTER COLUMN metadata SET DEFAULT '{}'::jsonb;
 
-ALTER TABLE strategy_inquiries
+ALTER TABLE public.strategy_inquiries
   ALTER COLUMN metadata SET DEFAULT '{}'::jsonb;
 
-ALTER TABLE system_audit_logs
+ALTER TABLE public.system_audit_logs
   ALTER COLUMN metadata SET DEFAULT '{}'::jsonb;
 
-ALTER TABLE inner_circle_members
-  ADD COLUMN IF NOT EXISTS permissions permission[] NOT NULL DEFAULT '{}'::permission[];
+-- ---------------------------------------------------------------------------
+-- Indexes
+-- ---------------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS jobs_queue_idx ON public.jobs(queue);
+CREATE INDEX IF NOT EXISTS jobs_status_idx ON public.jobs(status);
+CREATE INDEX IF NOT EXISTS jobs_run_after_idx ON public.jobs(run_after);
 
--- Indexes (idempotent)
-CREATE INDEX IF NOT EXISTS jobs_queue_idx ON jobs(queue);
-CREATE INDEX IF NOT EXISTS jobs_status_idx ON jobs(status);
-CREATE INDEX IF NOT EXISTS jobs_run_after_idx ON jobs(run_after);
+CREATE INDEX IF NOT EXISTS mfa_setups_enabled_idx ON public.mfa_setups(enabled);
 
-CREATE INDEX IF NOT EXISTS mfa_setups_enabled_idx ON mfa_setups(enabled);
+CREATE INDEX IF NOT EXISTS organization_invites_email_idx ON public.organization_invites(email);
+CREATE INDEX IF NOT EXISTS organization_invites_expires_at_idx ON public.organization_invites(expires_at);
+CREATE INDEX IF NOT EXISTS organization_invites_org_id_idx ON public.organization_invites(organization_id);
 
-CREATE INDEX IF NOT EXISTS organization_invites_email_idx ON organization_invites(email);
-CREATE INDEX IF NOT EXISTS organization_invites_expires_at_idx ON organization_invites(expires_at);
-CREATE INDEX IF NOT EXISTS organization_invites_org_id_idx ON organization_invites(organization_id);
+CREATE INDEX IF NOT EXISTS organization_members_member_id_idx ON public.organization_members(member_id);
+CREATE INDEX IF NOT EXISTS organization_members_org_id_idx ON public.organization_members(organization_id);
 
-CREATE INDEX IF NOT EXISTS organization_members_member_id_idx ON organization_members(member_id);
-CREATE INDEX IF NOT EXISTS organization_members_org_id_idx ON organization_members(organization_id);
+CREATE INDEX IF NOT EXISTS organizations_status_idx ON public.organizations(status);
 
-CREATE INDEX IF NOT EXISTS organizations_status_idx ON organizations(status);
+CREATE INDEX IF NOT EXISTS security_logs_created_at_idx ON public.security_logs(created_at);
+CREATE INDEX IF NOT EXISTS security_logs_event_idx ON public.security_logs(event);
+CREATE INDEX IF NOT EXISTS security_logs_member_id_idx ON public.security_logs(member_id);
+CREATE INDEX IF NOT EXISTS security_logs_severity_idx ON public.security_logs(severity);
 
-CREATE INDEX IF NOT EXISTS security_logs_created_at_idx ON security_logs(created_at);
-CREATE INDEX IF NOT EXISTS security_logs_event_idx ON security_logs(event);
-CREATE INDEX IF NOT EXISTS security_logs_member_id_idx ON security_logs(member_id);
-CREATE INDEX IF NOT EXISTS security_logs_severity_idx ON security_logs(severity);
+CREATE INDEX IF NOT EXISTS webhook_deliveries_created_at_idx ON public.webhook_deliveries(created_at);
+CREATE INDEX IF NOT EXISTS webhook_deliveries_endpoint_id_idx ON public.webhook_deliveries(endpoint_id);
+CREATE INDEX IF NOT EXISTS webhook_deliveries_event_type_idx ON public.webhook_deliveries(event_type);
 
-CREATE INDEX IF NOT EXISTS webhook_deliveries_created_at_idx ON webhook_deliveries(created_at);
-CREATE INDEX IF NOT EXISTS webhook_deliveries_endpoint_id_idx ON webhook_deliveries(endpoint_id);
-CREATE INDEX IF NOT EXISTS webhook_deliveries_event_type_idx ON webhook_deliveries(event_type);
+CREATE INDEX IF NOT EXISTS webhook_endpoints_status_idx ON public.webhook_endpoints(status);
 
-CREATE INDEX IF NOT EXISTS webhook_endpoints_status_idx ON webhook_endpoints(status);
-
-CREATE INDEX IF NOT EXISTS api_keys_status_idx ON api_keys(status);
+CREATE INDEX IF NOT EXISTS api_keys_status_idx ON public.api_keys(status);

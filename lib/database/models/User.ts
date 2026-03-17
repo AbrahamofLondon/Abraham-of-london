@@ -29,6 +29,8 @@ export interface UserFields {
   };
 
   metadata: {
+    migration_tag?: string;
+    migration_2026_original?: string;
     originalTier?: string;
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
@@ -47,12 +49,21 @@ export interface UserFields {
 }
 
 export type UserDoc = HydratedDocument<UserFields>;
-
-// Legacy compatibility alias
 export type IUser = UserDoc;
 export type IUserFields = UserFields;
 
 export interface UserModel extends Model<UserFields> {}
+
+const VALID_TIERS = [
+  "public",
+  "member",
+  "inner-circle",
+  "client",
+  "legacy",
+  "architect",
+  "owner",
+  "top-secret",
+];
 
 const UserSchema = new Schema<UserFields>(
   {
@@ -62,7 +73,7 @@ const UserSchema = new Schema<UserFields>(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
+      // Removed index: true from here to resolve duplication
     },
 
     name: {
@@ -74,6 +85,7 @@ const UserSchema = new Schema<UserFields>(
       type: String,
       required: true,
       default: "member",
+      enum: VALID_TIERS,
       set: function (this: any, value: unknown) {
         const raw = String(value || "member");
         this.normalizedTier = normalizeUserTier(raw);
@@ -88,7 +100,8 @@ const UserSchema = new Schema<UserFields>(
     normalizedTier: {
       type: String,
       default: "member",
-      index: true,
+      enum: VALID_TIERS,
+      // Removed index: true from here to resolve duplication
       set: function (_this: any, value: unknown) {
         return normalizeUserTier(value);
       },
@@ -97,7 +110,7 @@ const UserSchema = new Schema<UserFields>(
     subscriptionStatus: {
       type: String,
       default: "pending",
-      index: true,
+      // Removed index: true from here to resolve duplication
     },
 
     subscriptionEndsAt: {
@@ -111,6 +124,8 @@ const UserSchema = new Schema<UserFields>(
     },
 
     metadata: {
+      migration_tag: { type: String },
+      migration_2026_original: { type: String },
       originalTier: { type: String },
       stripeCustomerId: { type: String },
       stripeSubscriptionId: { type: String },
@@ -128,6 +143,7 @@ const UserSchema = new Schema<UserFields>(
   }
 );
 
+// Explicitly defined indexes (This is the best practice)
 UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ tier: 1 });
 UserSchema.index({ normalizedTier: 1 });

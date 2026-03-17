@@ -98,26 +98,26 @@ model InnerCircleMember {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
+  passwordHash    String?      @map("password_hash")
   flags           String?      @map("flags")
   permissions     Permission[] @default([]) @map("permissions")
   emailHashPrefix String?      @map("email_hash_prefix")
   lastIp          String?      @map("last_ip")
 
-  // Relations (make Prisma Client usable)
-  adminSessions  AdminSession[]
-  orgMemberships OrganizationMember[]
-
-  sessions     Session[]
-  keys         InnerCircleKey[]
-  apiKeys      ApiKey[]
-  apiLogs      ApiLog[]
-  pageViews    PageView[]
-  securityLogs SecurityLog[]
-
+  // Relations
+  adminSessions   AdminSession[]
+  orgMemberships  OrganizationMember[]
+  sessions        Session[]
+  keys            InnerCircleKey[]
+  apiKeys         ApiKey[]
+  apiLogs         ApiLog[]
+  pageViews       PageView[]
+  securityLogs    SecurityLog[]
   annotations     PrivateAnnotation[]
   inquiries       StrategyInquiry[]
   strategyIntakes StrategyIntake[]
-  downloadEvents  DownloadAuditEvent[] @relation("MemberDownloads")
+  downloadEvents  DownloadAuditEvent[]   @relation("MemberDownloads")
+  premiumTokens   PremiumDownloadToken[]
 
   preferences UserPreference?
   MfaSetup    MfaSetup?
@@ -140,7 +140,7 @@ model ContentMetadata {
   id              String                 @id @default(cuid())
   slug            String                 @unique
   title           String
-  contentType     ContentType            @default(Briefing)
+  contentType     ContentType            @default(Briefs)
   classification  AccessTier             @default(client)
   summary         String?
   content         String?
@@ -153,11 +153,12 @@ model ContentMetadata {
   updatedAt       DateTime               @updatedAt
 
   canonEntries    CanonEntry[]
-  sourceRelations ContentRelation[]   @relation("SourceRelations")
-  targetRelations ContentRelation[]   @relation("TargetRelations")
+  sourceRelations ContentRelation[]      @relation("SourceRelations")
+  targetRelations ContentRelation[]      @relation("TargetRelations")
   annotations     PrivateAnnotation[]
-  dependencies    StrategicLink[]     @relation("SourceBrief")
-  dependents      StrategicLink[]     @relation("TargetBrief")
+  dependencies    StrategicLink[]        @relation("SourceBrief")
+  dependents      StrategicLink[]        @relation("TargetBrief")
+  premiumTokens   PremiumDownloadToken[] // ✅ Premium download tokens
 
   @@index([slug])
   @@index([classification])
@@ -389,6 +390,10 @@ model Session {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+  metadata  Json?   @default("{}")
+
   @@index([memberId])
   @@index([expiresAt])
   @@index([status])
@@ -440,6 +445,79 @@ model MfaSetup {
 
   @@index([enabled])
   @@map("mfa_setups")
+}
+
+/**
+ * ============================================================================
+ * PREMIUM DOWNLOAD TOKENS & ATTEMPTS
+ * ============================================================================
+ */
+
+model PremiumDownloadToken {
+  id           String    @id @default(cuid())
+  tokenId      String    @unique
+  contentId    String
+  userId       String?   @db.Uuid
+  sessionId    String?
+  tier         String?
+  issuedAt     DateTime  @default(now())
+  expiresAt    DateTime
+  maxDownloads Int       @default(1)
+  usedCount    Int       @default(0)
+  revokedAt    DateTime?
+  lastUsedAt   DateTime?
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user     InnerCircleMember?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  content  ContentMetadata?         @relation(fields: [contentId], references: [slug], onDelete: SetNull)
+  attempts PremiumDownloadAttempt[]
+
+  @@index([contentId])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@index([createdAt])
+  @@map("premium_download_tokens")
+}
+
+model PremiumDownloadAttempt {
+  id                 String   @id @default(cuid())
+  tokenId            String?
+  contentId          String
+  userId             String?
+  sessionId          String?
+  ipAddress          String?
+  ipHash             String?
+  userAgent          String?
+  referrer           String?
+  method             String?
+  success            Boolean
+  statusCode         Int
+  reason             String?
+  watermarkId        String?
+  sourceChecksum     String?
+  deliveredChecksum  String?
+  fileSize           Int?
+  pageCount          Int?
+  downloadDuration   Int?
+  userTier           String?
+  requiredTier       String?
+  requestFingerprint String?
+  createdAt          DateTime @default(now())
+
+  token PremiumDownloadToken? @relation(fields: [tokenId], references: [tokenId], onDelete: SetNull)
+
+  @@index([contentId])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([success])
+  @@index([tokenId])
+  @@index([requestFingerprint])
+  @@map("premium_download_attempts")
 }
 
 /**
@@ -510,47 +588,35 @@ model DownloadAuditEvent {
   id   String @id @default(cuid())
   slug String
 
-  // ---------------------------------------------------------------------------
   // Relations
-  // ---------------------------------------------------------------------------
   printAssetId String?
   printAsset   PrintAsset? @relation("PrintDownloads", fields: [printAssetId], references: [id], onDelete: SetNull)
 
   memberId String?            @db.Uuid
   member   InnerCircleMember? @relation("MemberDownloads", fields: [memberId], references: [id], onDelete: SetNull)
 
-  // ---------------------------------------------------------------------------
   // Identity / Attribution
-  // ---------------------------------------------------------------------------
   email     String?
   emailHash String?
   ipAddress String?
   ipHash    String?
   userAgent String?
 
-  // ---------------------------------------------------------------------------
   // Event Semantics
-  // ---------------------------------------------------------------------------
   contentType String? @db.VarChar(64)
   eventType   String? @db.VarChar(32)
   success     Boolean @default(true)
 
-  // ---------------------------------------------------------------------------
   // File / Transport Diagnostics
-  // ---------------------------------------------------------------------------
   fileHash    String?   @db.VarChar(128)
   fileSize    BigInt?
   latencyMs   Int?
   processedAt DateTime?
 
-  // ---------------------------------------------------------------------------
-  // Flexible metadata / extension point
-  // ---------------------------------------------------------------------------
+  // Flexible metadata
   metadata Json? @default("{}")
 
-  // ---------------------------------------------------------------------------
   // Timestamps
-  // ---------------------------------------------------------------------------
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -736,6 +802,27 @@ model AdminSession {
 
 /**
  * ============================================================================
+ * EVENT PRICING
+ * ============================================================================
+ */
+
+model EventPrice {
+  id        String   @id @default(cuid())
+  eventId   String
+  ticketId  String
+  price     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@unique([eventId, ticketId])
+  @@index([eventId])
+  @@index([ticketId])
+  @@map("event_prices")
+}
+
+/**
+ * ============================================================================
  * ENUMS
  * ============================================================================
  */
@@ -744,12 +831,12 @@ enum AccessTier {
   public
   member
   inner_circle
+  restricted
   client
   legacy
   architect
   owner
-
-  @@map("access_tier")
+  top_secret
 }
 
 enum MemberRole {
@@ -792,7 +879,7 @@ enum Permission {
 
 enum ContentType {
   Dossier
-  Briefing
+  Briefs
   Operational_Framework
   Lexicon
   Landing
@@ -822,6 +909,7 @@ enum InquiryStatus {
   APPROVED
   REJECTED
   CLOSED
+  ONBOARDED
 
   @@map("inquiry_status")
 }

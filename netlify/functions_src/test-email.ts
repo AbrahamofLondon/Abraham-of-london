@@ -1,17 +1,18 @@
-// netlify/functions/test-email.ts
+// netlify/functions_src/test-email.ts
+
 import type {
   Handler,
   HandlerEvent,
   HandlerContext,
   HandlerResponse,
-} from "@netlify/functions";
+} from "./_utils";
 
 // ---------------------------------------------------------------------------
 // Local helpers (inlined so we don't depend on ./_utils)
 // ---------------------------------------------------------------------------
 
 type JsonInput = {
-  headers: Record<string, string | undefined>;
+  headers: Record<string, string | string[] | undefined>;
   body: string;
 };
 
@@ -26,7 +27,12 @@ async function readJson<T = unknown>(input: JsonInput): Promise<T> {
   }
 }
 
-function buildCorsHeaders(origin: string) {
+function firstHeader(value?: string | string[]): string {
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+}
+
+function buildCorsHeaders(origin: string): Record<string, string> {
   return {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": origin || "*",
@@ -51,8 +57,8 @@ function ok(message: string, data: unknown, origin: string): HandlerResponse {
 
 function bad(
   message: string,
-  statusCode = 400,
-  origin: string,
+  statusCode: number,
+  origin: string
 ): HandlerResponse {
   return {
     statusCode,
@@ -64,7 +70,6 @@ function bad(
   };
 }
 
-// Email validation utility
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
@@ -78,15 +83,15 @@ type SecurityOptions = {
 function withSecurity(
   handler: (
     event: HandlerEvent,
-    context: HandlerContext,
+    context: HandlerContext
   ) => Promise<HandlerResponse>,
-  options: SecurityOptions = {},
+  options: SecurityOptions = {}
 ): Handler {
   return async (
     event: HandlerEvent,
-    context: HandlerContext,
+    context: HandlerContext
   ): Promise<HandlerResponse> => {
-    const origin = event.headers.origin || event.headers.Origin || "*";
+    const origin = firstHeader(event.headers.origin ?? event.headers.Origin) || "*";
 
     if (event.httpMethod === "OPTIONS") {
       return {
@@ -96,7 +101,6 @@ function withSecurity(
       };
     }
 
-    // Honeypot validation
     if (options.requireHoneypot && event.body) {
       try {
         const body = JSON.parse(event.body) as Record<string, unknown>;
@@ -105,12 +109,11 @@ function withSecurity(
         for (const field of honeypotFields) {
           const val = body[field];
           if (typeof val === "string" && val.trim().length > 0) {
-            // Pretend success but don't process - silent drop
             return ok("Success", {}, origin);
           }
         }
       } catch {
-        // If we can't parse body for honeypot, continue but be cautious
+        // continue
       }
     }
 
@@ -204,7 +207,7 @@ async function sendEmail(
   to: string,
   subject: string,
   html: string,
-  text: string,
+  text: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const emailService = process.env.EMAIL_SERVICE || "console";
@@ -237,9 +240,9 @@ async function sendEmail(
 export const handler: Handler = withSecurity(
   async (
     event: HandlerEvent,
-    _context: HandlerContext,
+    _context: HandlerContext
   ): Promise<HandlerResponse> => {
-    const origin = event.headers.origin || event.headers.Origin || "*";
+    const origin = firstHeader(event.headers.origin ?? event.headers.Origin) || "*";
 
     try {
       const body = await readJson<{
@@ -250,7 +253,7 @@ export const handler: Handler = withSecurity(
         text?: string;
         data?: Record<string, string>;
       }>({
-        headers: event.headers as Record<string, string | undefined>,
+        headers: event.headers,
         body: event.body || "",
       });
 
@@ -311,7 +314,7 @@ export const handler: Handler = withSecurity(
       }
 
       console.log(
-        `Email sent successfully to: ${body.to}, Template: ${templateName}, MessageID: ${result.messageId}`,
+        `Email sent successfully to: ${body.to}, Template: ${templateName}, MessageID: ${result.messageId}`
       );
 
       return ok(
@@ -323,7 +326,7 @@ export const handler: Handler = withSecurity(
           timestamp,
           environment,
         },
-        origin,
+        origin
       );
     } catch (err) {
       const message =
@@ -335,6 +338,5 @@ export const handler: Handler = withSecurity(
   {
     requireRecaptcha: false,
     requireHoneypot: true,
-  },
+  }
 );
-

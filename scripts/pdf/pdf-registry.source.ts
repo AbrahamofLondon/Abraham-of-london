@@ -682,7 +682,7 @@ export const EXISTING_PDFS: SourcePDFItem[] = [
     description: "Library version of ultimate purpose editorial",
   }),
 
-  // --- PUBLIC ASSETS RESOURCES DIRECTORY ---
+    // --- PUBLIC ASSETS RESOURCES DIRECTORY ---
   definePDF({
     id: "res-brotherhood-starter-kit",
     title: "Brotherhood Starter Kit (Resources)",
@@ -728,6 +728,99 @@ export const EXISTING_PDFS: SourcePDFItem[] = [
     outputPath: "/assets/downloads/public-assets/resources/pdfs/leadership-standards-blueprint.pdf",
     category: "leadership",
     description: "Blueprint for leadership standards development",
+    paper: "A4",
+  }),
+
+  // --- MARKET INTELLIGENCE: OPTION A (REPORT + DECK + APPENDIX) ---
+  definePDF({
+    id: "intel-2026-q1-report",
+    title: "Global Market Intelligence Report Q1 2026",
+    type: "brief",
+    tier: "architect",
+    outputPath: "/assets/downloads/reports/global-market-intelligence-report-q1-2026.pdf",
+    category: "market-intelligence",
+    description:
+      "Primary long-form institutional report for Q1 2026 covering global market movements, macro strain, capital flows, regional posture, and board-level strategic interpretation.",
+    tags: [
+      "global",
+      "exclusive",
+      "quarterly",
+      "forecast",
+      "market-intelligence",
+      "report",
+      "pdf",
+      "macro",
+      "capital-flows",
+      "institutional",
+    ],
+    format: "PDF",
+    requiresAuth: true,
+    version: "1.2.0",
+    author: "Abraham of London Intelligence",
+    createdAt: "2026-01-15",
+    updatedAt: "2026-03-16",
+    priority: 98,
+    preload: false,
+    paper: "A4",
+  }),
+  definePDF({
+    id: "intel-2026-q1-board-deck",
+    title: "Global Market Intelligence Q1 2026 — Board Briefing Deck",
+    type: "brief",
+    tier: "architect",
+    outputPath:
+      "/assets/downloads/reports/global-market-intelligence-report-q1-2026-board-briefing.pptx",
+    category: "market-intelligence",
+    description:
+      "Executive presentation companion for Q1 2026: a premium 16:9 board-format briefing deck for strategic operators and institutional leadership teams.",
+    tags: [
+      "global",
+      "exclusive",
+      "quarterly",
+      "forecast",
+      "board-briefing",
+      "deck",
+      "pptx",
+      "market-intelligence",
+      "macro",
+      "capital-flows",
+    ],
+    format: "POWERPOINT",
+    requiresAuth: true,
+    version: "1.2.0",
+    author: "Abraham of London Intelligence",
+    createdAt: "2026-01-15",
+    updatedAt: "2026-03-16",
+    priority: 97,
+    preload: false,
+  }),
+  definePDF({
+    id: "intel-2026-q1-appendix",
+    title: "Global Market Intelligence Report Q1 2026 — Appendix Volume",
+    type: "pack",
+    tier: "architect",
+    outputPath:
+      "/assets/downloads/reports/global-market-intelligence-report-q1-2026-appendix.pdf",
+    category: "market-intelligence",
+    description:
+      "Appendix volume for the Q1 2026 market intelligence cycle containing source notes, definitions, regional scorecards, and reference support material.",
+    tags: [
+      "appendix",
+      "source-notes",
+      "definitions",
+      "regional-scorecards",
+      "market-intelligence",
+      "institutional",
+      "pdf",
+    ],
+    format: "PDF",
+    requiresAuth: true,
+    version: "1.2.0",
+    author: "Abraham of London Intelligence",
+    createdAt: "2026-01-15",
+    updatedAt: "2026-03-16",
+    priority: 96,
+    preload: false,
     paper: "A4",
   }),
 
@@ -852,13 +945,11 @@ export const ALL_SOURCE_PDFS_DEDUPED: SourcePDFItem[] = (() => {
   const out: SourcePDFItem[] = [];
 
   for (const raw of ALL_SOURCE_PDFS) {
-    const x = raw; // already normalized by definePDF
+    const x = raw;
     const idKey = normStr(x.id).toLowerCase();
     const pathKey = normStr(x.outputPath).toLowerCase();
 
     if (!idKey || !pathKey) continue;
-
-    // If either id OR outputPath has been seen, skip.
     if (seenId.has(idKey) || seenPath.has(pathKey)) continue;
 
     seenId.add(idKey);

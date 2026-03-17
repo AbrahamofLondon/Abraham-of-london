@@ -1,7 +1,7 @@
 /* pages/api/assets/retrieve.ts — SECURE ASSET GATEKEEPER */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/prisma"; // ✅ Unified import with other working routes
 import { auditLogger } from "@/lib/audit/audit-logger";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -9,6 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // 1. Initial Identity Verification
   const session = await getSession({ req });
   const { slug } = req.body;
 
@@ -16,10 +17,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: "Unauthorized access" });
   }
 
+  // 2. Prisma Singleton Guard
+  // Ensures 'prisma' is not null before executing the query
+  if (!prisma) {
+    console.error("Database Connection Error: Prisma client not initialized.");
+    return res.status(500).json({ error: "Database connection failure" });
+  }
+
   try {
-    // 1. Locate the Brief in your 75-item Portfolio
+    // 3. Locate the Brief in your 75-item Portfolio
     const asset = await prisma.contentMetadata.findUnique({
-      where: { slug },
+      where: { slug: String(slug) },
     });
 
     if (!asset) {
@@ -35,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Asset not found" });
     }
 
-    // 2. Log Successful Authorization via your Tank-Logger
+    // 4. Log Successful Authorization via your Tank-Logger
     await auditLogger.log({
       action: "ASSET_RETRIEVAL_AUTHORIZED",
       actorEmail: session.user.email as string,
@@ -46,12 +54,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       status: "success",
       metadata: { 
         slug: asset.slug,
-        tier: asset.contentType // Or use your tier logic
+        tier: asset.contentType
       }
     });
 
-    // 3. Generate the Secure Path
-    // In production, this would be a Signed URL from AWS S3 or Google Cloud Storage
+    // 5. Generate the Secure Path
     const secureUrl = `${process.env.ASSET_STORAGE_URL}/${asset.slug}.pdf?token=${process.env.ASSET_SECRET}`;
 
     return res.status(200).json({ 

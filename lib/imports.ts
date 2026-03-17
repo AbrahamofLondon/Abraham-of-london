@@ -6,10 +6,10 @@
  */
 
 // 1. Core Config Imports
-import { 
-  siteConfig as _siteConfig, 
-  canonicalUrl as _canonicalUrl, 
-  authorImage as _authorImage 
+import {
+  siteConfig as _siteConfig,
+  canonicalUrl as _canonicalUrl,
+  authorImage as _authorImage,
 } from "@/config/site";
 
 // Re-export for external use
@@ -17,10 +17,29 @@ export const siteConfig = _siteConfig;
 export const canonicalUrl = _canonicalUrl;
 export const authorImage = _authorImage;
 
+/**
+ * Contact export for legacy consumers.
+ * Falls back safely if config shape varies.
+ */
+export const contact = {
+  email:
+    _siteConfig?.contact?.email ||
+    (_siteConfig as any)?.email ||
+    "info@abrahamoflondon.org",
+  phone: _siteConfig?.contact?.phone || "",
+  address:
+    _siteConfig?.contact?.address ||
+    _siteConfig?.contact?.location ||
+    "",
+};
+
 // 2. Utility & Helper Imports
-// Consolidated imports to prevent duplicate declaration errors
 import { getPageTitle as _getPageTitle } from "@/lib/utils/getPageTitle";
-import { absUrl as _absUrl, isInternalUrl, normalizePath } from "@/lib/utils/url-helpers";
+import {
+  absUrl as _absUrl,
+  isInternalUrl,
+  normalizePath,
+} from "@/lib/utils/url-helpers";
 
 export const getPageTitle = _getPageTitle;
 export const absUrl = _absUrl;
@@ -28,83 +47,114 @@ export { isInternalUrl, normalizePath };
 
 // 3. Validation & Contentlayer
 export * from "@/lib/input-validator";
-import { getContentlayerData, getPublishedDocuments } from "./contentlayer-compat";
+import { getContentlayerData } from "./contentlayer-compat";
 import { safeSlice } from "@/lib/utils/safe";
 
 export const contentlayerHelper = {
   getAllDocuments: () => getContentlayerData().allDocuments || [],
   getDocumentBySlug: (slug: string) => {
     const data = getContentlayerData();
-    return data.allDocuments?.find(doc => 
-      doc.slug === slug || 
-      doc._raw?.flattenedPath === slug
-    ) || null;
+    return (
+      data.allDocuments?.find(
+        (doc: any) => doc.slug === slug || doc._raw?.flattenedPath === slug
+      ) || null
+    );
   },
   getDocumentsByTag: (tag: string) => {
     const data = getContentlayerData();
-    return data.allDocuments?.filter((doc: any) => {
-      // Check doc.tags (frontmatter)
-      if (doc.tags?.includes(tag)) return true;
-      
-      // ✅ FIX: Check doc._raw?.sourceFileDir or flattenedPath for tag info
-      // _raw doesn't have tags, so we need to look elsewhere or skip
-      return false;
-    }) || [];
+    return (
+      data.allDocuments?.filter((doc: any) => {
+        if (doc.tags?.includes(tag)) return true;
+        return false;
+      }) || []
+    );
   },
   getDocumentsByCategory: (category: string) => {
     const data = getContentlayerData();
-    return data.allDocuments?.filter((doc: any) => 
-      doc.category === category
-    ) || [];
-  }
+    return (
+      data.allDocuments?.filter((doc: any) => doc.category === category) || []
+    );
+  },
 };
 
 // 4. IP & Security Utilities
 export function getClientIpFallback(req?: any): string {
-  if (typeof window !== 'undefined') return 'client-unknown';
-  if (req?.headers?.['x-forwarded-for']) {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (Array.isArray(forwarded)) return forwarded[0];
-    return forwarded.split(',')[0].trim();
+  if (typeof window !== "undefined") return "client-unknown";
+
+  const forwarded = req?.headers?.["x-forwarded-for"];
+
+  if (Array.isArray(forwarded)) {
+    return forwarded[0] || "server-unknown";
   }
-  return req?.socket?.remoteAddress || 'server-unknown';
+
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    const first = forwarded.split(",")[0];
+    return first ? first.trim() : "server-unknown";
+  }
+
+  return req?.socket?.remoteAddress || "server-unknown";
 }
 
 export function isValidIp(ip: string): boolean {
-  if (!ip || ip === 'unknown') return false;
-  const cleanIp = (ip.split(':')[0] || '').trim();
-  const ipv4Regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+  if (!ip || ip === "unknown") return false;
+
+  const cleanIp = String(ip).trim();
+
+  const ipv4Regex =
+    /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+
   if (ipv4Regex.test(cleanIp)) return true;
-  if (cleanIp.includes(':')) {
-    const parts = cleanIp.split(':');
-    return parts.length <= 8 && parts.every(part => part === '' || /^[0-9a-fA-F]{1,4}$/.test(part));
+
+  if (cleanIp.includes(":")) {
+    const parts = cleanIp.split(":");
+    return (
+      parts.length <= 8 &&
+      parts.every(
+        (part) => part === "" || /^[0-9a-fA-F]{1,4}$/.test(part)
+      )
+    );
   }
+
   return false;
 }
 
 export function anonymizeIp(ip: string): string {
-  if (!isValidIp(ip) || ip === 'unknown') return 'unknown';
-  const cleanIp = (ip.split(':')[0] || '').trim();
-  if (cleanIp.includes(':')) {
-    const parts = cleanIp.split(':');
-    return `${safeSlice(parts, 0, Math.min(2, parts.length)).join(':')}::`;
+  if (!isValidIp(ip) || ip === "unknown") return "unknown";
+
+  const cleanIp = String(ip).trim();
+
+  if (cleanIp.includes(":")) {
+    const parts = cleanIp.split(":");
+    return `${safeSlice(parts, 0, Math.min(2, parts.length)).join(":")}::`;
   }
-  const parts = cleanIp.split('.');
-  return parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}.0` : cleanIp;
+
+  const parts = cleanIp.split(".");
+  return parts.length === 4
+    ? `${parts[0]}.${parts[1]}.${parts[2]}.0`
+    : cleanIp;
 }
 
 // 5. Rate Limiting
 export const RATE_LIMIT_CONFIGS = {
   API_GENERAL: { limit: 100, windowMs: 60000 },
   AUTH: { limit: 10, windowMs: 60000 },
-  UPLOAD: { limit: 5, windowMs: 60000 }
+  UPLOAD: { limit: 5, windowMs: 60000 },
 };
 
-export async function rateLimit() { 
-  return { allowed: true, remaining: 100, retryAfterMs: 0, resetTime: Date.now() + 3600000, limit: 100, windowMs: 3600000 };
+export async function rateLimit() {
+  return {
+    allowed: true,
+    remaining: 100,
+    retryAfterMs: 0,
+    resetTime: Date.now() + 3600000,
+    limit: 100,
+    windowMs: 3600000,
+  };
 }
 
-export function createRateLimitHeaders() { return {}; }
+export function createRateLimitHeaders() {
+  return {};
+}
 
 // 6. Meta & OG Helpers
 export function getMetaDescription(customDescription?: string): string {
@@ -113,12 +163,13 @@ export function getMetaDescription(customDescription?: string): string {
 
 export function getOgImageUrl(path?: string): string {
   const baseUrl = _siteConfig.url;
-  const ogImage = _siteConfig.seo.openGraphImage || '/assets/images/social/og-image.jpg';
+  const ogImage =
+    _siteConfig.seo.openGraphImage || "/assets/images/social/og-image.jpg";
   return path ? `${baseUrl}${path}` : `${baseUrl}${ogImage}`;
 }
 
 export function getSocialUrl(platform: string): string | null {
-  const social = _siteConfig.socials.find(s => s.kind === platform);
+  const social = _siteConfig.socials.find((s: any) => s.kind === platform);
   return social?.href || null;
 }
 
@@ -127,9 +178,9 @@ export function checkImports() {
   return {
     ok: true,
     timestamp: new Date().toISOString(),
-    environment: typeof window !== 'undefined' ? 'client' : 'server',
+    environment: typeof window !== "undefined" ? "client" : "server",
     siteConfig: !!_siteConfig,
-    contentlayer: !!getContentlayerData
+    contentlayer: !!getContentlayerData,
   };
 }
 
@@ -138,6 +189,7 @@ const importsApi = {
   siteConfig: _siteConfig,
   canonicalUrl: _canonicalUrl,
   authorImage: _authorImage,
+  contact,
   getPageTitle: _getPageTitle,
   absUrl: _absUrl,
   contentlayerHelper,
@@ -150,7 +202,7 @@ const importsApi = {
   checkImports,
   getMetaDescription,
   getOgImageUrl,
-  getSocialUrl
+  getSocialUrl,
 };
 
 export default importsApi;

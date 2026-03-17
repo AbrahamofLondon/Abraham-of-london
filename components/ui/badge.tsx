@@ -34,6 +34,12 @@ const badgeVariants = cva(
           "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 focus-visible:ring-white/10 focus-visible:ring-offset-black",
         success:
           "border-emerald-500/25 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/15 focus-visible:ring-emerald-500/25 focus-visible:ring-offset-black",
+        
+        // --- Institutional Tier Variants ---
+        restricted:
+          "border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/15 focus-visible:ring-purple-500/30 focus-visible:ring-offset-black",
+        topsecret:
+          "border-red-900/50 bg-red-950 text-red-500 hover:bg-red-900/80 animate-pulse focus-visible:ring-red-500/30 focus-visible:ring-offset-black",
       },
       size: {
         sm: "px-2 py-0.5 text-[10px]",
@@ -51,17 +57,12 @@ const badgeVariants = cva(
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {
-  /**
-   * Render as a different element if needed (rare).
-   * Defaults to "span".
-   */
   asChild?: boolean;
 }
 
 /**
- * Badge — institutional tag component.
- * - Defaults to <span>
- * - forwardRef for component libraries + tooltips/popovers
+ * Badge — Institutional tag component.
+ * Fixed spread syntax for production build.
  */
 const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant, size, ...props }, ref) => {
@@ -69,7 +70,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
       <span
         ref={ref}
         className={cn(badgeVariants({ variant, size }), className)}
-        {...props}
+        {...props} 
       />
     );
   }

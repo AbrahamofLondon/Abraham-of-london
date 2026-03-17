@@ -1,11 +1,11 @@
 import * as React from "react";
-import { Calendar, Clock, User } from "lucide-react";
+import { Calendar, Clock, User, Shield } from "lucide-react";
 
 interface DocumentHeaderProps {
   title?: string;
   subtitle?: string;
-  description?: string;  // ADDED
-  classification?: string; // ADDED
+  description?: string;
+  classification?: string;
   date?: string;
   author?: string;
   readTime?: string;
@@ -15,51 +15,64 @@ interface DocumentHeaderProps {
 export default function DocumentHeader({
   title,
   subtitle,
-  description,  // ADDED
-  classification, // ADDED
+  description,
+  classification,
   date,
   author,
   readTime,
   className = "",
 }: DocumentHeaderProps) {
   return (
-    <header className={`mb-12 border-b border-white/10 pb-8 ${className}`}>
-      {/* Classification badge */}
+    <header className={`mb-16 border-b border-white/10 pb-12 ${className}`}>
+      {/* Classification badge: Elevated to feel like a security tag */}
       {classification && (
-        <div className="mb-4 flex items-center gap-3">
-          <span className="h-[1px] w-8 bg-amber-800/40" />
-          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-amber-600/70">
-            {classification}
-          </span>
+        <div className="mb-8 flex items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/5 border border-amber-500/20">
+             <Shield size={10} className="text-amber-500" />
+             <span className="font-mono text-[9px] font-black uppercase tracking-[0.4em] text-amber-500">
+               {classification}
+             </span>
+          </div>
+          <div className="h-px flex-1 bg-gradient-to-r from-amber-500/20 to-transparent" />
         </div>
       )}
       
       {title && (
-        <h1 className="font-serif text-4xl md:text-5xl text-white mb-4">
+        <h1 className="font-serif text-5xl md:text-6xl italic leading-tight text-white mb-6 tracking-tighter">
           {title}
         </h1>
       )}
+
       {subtitle && (
-        <p className="text-xl text-white/60 italic mb-6">{subtitle}</p>
+        <p className="text-xl md:text-2xl text-white/40 font-light italic mb-8 max-w-3xl leading-relaxed">
+          {subtitle}
+        </p>
       )}
+
       {description && (
-        <p className="text-base text-white/40 max-w-2xl mb-6 leading-relaxed">{description}</p>
+        <div className="relative pl-8 mb-10">
+          <div className="absolute left-0 top-0 bottom-0 w-px bg-amber-500/30" />
+          <p className="text-sm md:text-base text-white/60 max-w-2xl leading-relaxed italic">
+            {description}
+          </p>
+        </div>
       )}
+
       {(date || author || readTime) && (
-        <div className="flex flex-wrap gap-6 text-sm text-white/40 font-mono">
+        <div className="flex flex-wrap gap-8 pt-6 border-t border-white/5 text-[10px] text-white/30 font-mono uppercase tracking-widest">
           {date && (
-            <span className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" /> {date}
+            <span className="flex items-center gap-2 group hover:text-white transition-colors">
+              <Calendar className="h-3 w-3 text-amber-500/50" /> {date}
             </span>
           )}
           {author && (
-            <span className="flex items-center gap-2">
-              <User className="h-4 w-4" /> {author}
+            <span className="flex items-center gap-2 group hover:text-white transition-colors">
+              <User className="h-3 w-3 text-amber-500/50" /> {author}
             </span>
           )}
           {readTime && (
-            <span className="flex items-center gap-2">
-              <Clock className="h-4 w-4" /> {readTime}
+            <span className="flex items-center gap-2 group hover:text-white transition-colors">
+              <Clock className="h-3 w-3 text-amber-500/50" /> {readTime}
             </span>
           )}
         </div>

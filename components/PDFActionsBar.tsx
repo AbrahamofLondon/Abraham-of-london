@@ -1,8 +1,10 @@
-// components/PDFActionsBar.tsx
 import * as React from "react";
+import type { PDFItem } from "@/types/pdf-dashboard";
 
 export interface PDFActionsBarProps {
-  pdf: any;
+  pdf: PDFItem & {
+    status?: 'generated' | 'pending' | 'error' | 'missing';
+  };
   isGenerating: boolean;
   onGeneratePDF: () => void;
   onDeletePDF: () => void;
@@ -24,12 +26,31 @@ export const PDFActionsBar: React.FC<PDFActionsBarProps> = ({
 }) => {
   if (!pdf) return null;
 
-  const statusClass =
-    pdf.status === "generated"
-      ? "bg-green-500/20 text-green-400"
-      : pdf.status === "pending"
-        ? "bg-yellow-500/20 text-yellow-400"
-        : "bg-red-500/20 text-red-400";
+  const getStatusClass = () => {
+    if (pdf.status === "generated" || pdf.exists) {
+      return "bg-green-500/20 text-green-400";
+    } else if (pdf.status === "pending") {
+      return "bg-yellow-500/20 text-yellow-400";
+    } else {
+      return "bg-red-500/20 text-red-400";
+    }
+  };
+
+  const getStatusText = () => {
+    if (pdf.status === "generated" || pdf.exists) {
+      return "generated";
+    } else if (pdf.status === "pending") {
+      return "pending";
+    } else {
+      return "missing";
+    }
+  };
+
+  const statusClass = getStatusClass();
+  const statusText = getStatusText();
+
+  // fileSize is string | undefined from PDFItem
+  const displayFileSize = pdf.fileSize ? parseFloat(pdf.fileSize) : null;
 
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-700/50 bg-gray-800/30 p-4">
@@ -41,12 +62,12 @@ export const PDFActionsBar: React.FC<PDFActionsBarProps> = ({
             <span className="text-sm text-gray-400">{pdf.category}</span>
 
             <span className={`rounded-full px-2 py-1 text-xs ${statusClass}`}>
-              {pdf.status}
+              {statusText}
             </span>
 
-            {pdf.fileSize ? (
+            {displayFileSize ? (
               <span className="text-xs text-gray-500">
-                {(pdf.fileSize / 1024 / 1024).toFixed(2)} MB
+                {(displayFileSize / 1024 / 1024).toFixed(2)} MB
               </span>
             ) : null}
           </div>
@@ -54,7 +75,7 @@ export const PDFActionsBar: React.FC<PDFActionsBarProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        {pdf.status !== "generated" ? (
+        {(!pdf.exists || pdf.status !== "generated") ? (
           <button
             onClick={onGeneratePDF}
             disabled={isGenerating}

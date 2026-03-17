@@ -4,6 +4,7 @@
 // - Renders using scripts/pdf/templates/index.ts
 // - Writes output to registry outputPath (canonical)
 // - Updates public/assets/downloads/pdf-manifest.json (build-safe)
+// - Integrates with premium download token system for forensic watermarking
 //
 // IMPORTANT:
 // - Do NOT import this from Next.js runtime.
@@ -15,6 +16,7 @@ import crypto from "crypto";
 import { Command } from "commander";
 
 import { GENERATED_PDF_CONFIGS, type PDFRegistryEntry } from "../../lib/pdf/registry.static";
+import { createDownloadToken, getTokenForensics } from "../../lib/premium/download-token";
 
 import {
   renderAssetPDF,
@@ -39,6 +41,9 @@ program
   .option("--noManifest", "Do not update pdf-manifest.json", false)
   .option("--strictPdf", "Fail if generated output fails PDF integrity checks", true)
   .option("--minKb <n>", "Minimum acceptable PDF size KB (default 50)", "50")
+  .option("--watermark", "Generate forensic watermark token", true)
+  .option("--userId <id>", "User ID for watermark binding", null)
+  .option("--sessionId <id>", "Session ID for watermark binding", null)
   .option("--verbose", "Verbose logging", false);
 
 type ManifestFile = {
@@ -55,6 +60,8 @@ type ManifestFile = {
   format: string;
   lastModified: string;
   md5: string | null;
+  watermarkId?: string | null;
+  tokenId?: string | null;
 
   isFillable?: boolean;
   isInteractive?: boolean;
@@ -144,7 +151,14 @@ function toFsPath(outputPath: string, outputRoot: string): string {
 function readManifest(manifestPath: string): Manifest {
   try {
     if (!fs.existsSync(manifestPath)) {
-      return { generatedAt: new Date().toISOString(), total: 0, available: 0, byTier: {}, byCategory: {}, files: [] };
+      return { 
+        generatedAt: new Date().toISOString(), 
+        total: 0, 
+        available: 0, 
+        byTier: {}, 
+        byCategory: {}, 
+        files: [] 
+      };
     }
     const raw = fs.readFileSync(manifestPath, "utf8");
     const parsed = JSON.parse(raw);
@@ -158,7 +172,14 @@ function readManifest(manifestPath: string): Manifest {
       parsed.available = parsed.files.filter((f: any) => Boolean(f?.exists)).length;
     return parsed as Manifest;
   } catch {
-    return { generatedAt: new Date().toISOString(), total: 0, available: 0, byTier: {}, byCategory: {}, files: [] };
+    return { 
+      generatedAt: new Date().toISOString(), 
+      total: 0, 
+      available: 0, 
+      byTier: {}, 
+      byCategory: {}, 
+      files: [] 
+    };
   }
 }
 
@@ -207,6 +228,45 @@ function upsertManifestFile(manifest: Manifest, file: ManifestFile) {
   recomputeAggregates(manifest);
 }
 
+async function generateWatermarkToken(
+  asset: PDFRegistryEntry,
+  options: {
+    userId?: string | null;
+    sessionId?: string | null;
+    tier: Tier;
+  }
+): Promise<{ tokenId: string; watermarkId: string; expectedFooter: string } | null> {
+  try {
+    // Create a download token with 1-year expiry (for static assets)
+    const token = await createDownloadToken({
+      contentId: asset.id,
+      userId: options.userId,
+      sessionId: options.sessionId,
+      expiresIn: 365 * 24 * 60 * 60 * 1000, // 1 year
+      maxDownloads: 1000, // High limit for static assets
+      metadata: {
+        tier: options.tier,
+        assetType: asset.type,
+        generated: true,
+      },
+      pdfTitle: asset.title,
+      pdfCreator: "Abraham of London PDF Generator",
+      pdfProducer: "Abraham of London Institutional Pipeline",
+    });
+
+    const forensics = getTokenForensics(token.metadata);
+    
+    return {
+      tokenId: token.tokenId,
+      watermarkId: forensics.watermarkId || token.tokenId,
+      expectedFooter: forensics.expectedFooter || `Licensed copy | Content: ${asset.id} | Token: ${token.tokenId}`,
+    };
+  } catch (error) {
+    console.warn(`⚠️ Failed to generate watermark token: ${error}`);
+    return null;
+  }
+}
+
 async function main() {
   program.parse(process.argv);
   const opts = program.opts();
@@ -222,6 +282,9 @@ async function main() {
   const noManifest = Boolean(opts.noManifest);
   const strictPdf = Boolean(opts.strictPdf);
   const minKb = Math.max(1, Number(opts.minKb || 50));
+  const enableWatermark = Boolean(opts.watermark);
+  const userId = opts.userId ? String(opts.userId) : null;
+  const sessionId = opts.sessionId ? String(opts.sessionId) : null;
 
   const asset = findAsset(id);
   if (!asset) {
@@ -235,6 +298,17 @@ async function main() {
 
   ensureDir(outputRoot);
 
+  // Generate watermark token if requested
+  let watermarkInfo = null;
+  if (enableWatermark) {
+    watermarkInfo = await generateWatermarkToken(asset, { userId, sessionId, tier });
+    if (watermarkInfo && verbose) {
+      console.log(`🔐 Watermark generated:`);
+      console.log(`   - Token ID: ${watermarkInfo.tokenId}`);
+      console.log(`   - Watermark ID: ${watermarkInfo.watermarkId}`);
+    }
+  }
+
   if (verbose) {
     console.log("────────────────────────────────────────────────────────────────");
     console.log(`Generating:   ${asset.title}`);
@@ -245,6 +319,7 @@ async function main() {
     console.log(`Format:       ${format}`);
     console.log(`Interactive:  ${interactive}`);
     console.log(`Fillable:     ${fillable}`);
+    console.log(`Watermark:    ${enableWatermark ? `Yes (${watermarkInfo?.watermarkId})` : 'No'}`);
     console.log(`OutputRoot:   ${outputRoot}`);
     console.log(`OutputPath:   ${asset.outputPath}`);
     console.log("────────────────────────────────────────────────────────────────");
@@ -257,6 +332,10 @@ async function main() {
     interactive,
     fillable,
     enableAcroForm: interactive || fillable,
+    watermark: watermarkInfo ? {
+      text: watermarkInfo.expectedFooter,
+      id: watermarkInfo.watermarkId,
+    } : undefined,
   });
 
   const { pdfBytes, pageCount, warnings } = await renderAssetPDF(
@@ -273,6 +352,7 @@ async function main() {
       isFillable: Boolean((asset as any).isFillable),
       requiresAuth: Boolean((asset as any).requiresAuth),
       version: (asset as any).version || "1.0.0",
+      watermarkId: watermarkInfo?.watermarkId,
     },
     renderOpts,
   );
@@ -328,6 +408,8 @@ async function main() {
       format: "PDF",
       lastModified: new Date().toISOString(),
       md5: md5Bytes(pdfBytes),
+      watermarkId: watermarkInfo?.watermarkId,
+      tokenId: watermarkInfo?.tokenId,
 
       isFillable: Boolean(fillable),
       isInteractive: Boolean(interactive),

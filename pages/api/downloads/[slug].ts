@@ -1,8 +1,11 @@
 /* pages/api/downloads/[slug].ts — SECURE PRE-COMPILED GATE (SSOT ALIGNED) */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSessionTier } from "@/lib/server/auth/tokenStore.postgres";
+
+// ✅ FIXED: Standardized to Redis to match mdx.ts and ensure session consistency
+import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
 import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 import { getAllContentlayerDocs } from "@/lib/content/real";
+import { getTokenForensics } from "@/lib/premium/download-token";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { 
@@ -18,6 +21,9 @@ type Ok = {
   requiredTier: AccessTier;
   bodyCode: string;
   tierLabel?: string;
+  watermarkId?: string | null;
+  tokenId?: string | null;
+  forensicFooter?: string | null;
 };
 
 type Fail = { 
@@ -33,6 +39,47 @@ function mapToAccessTier(v: unknown): AccessTier {
   return normalizeRequiredTier(v);
 }
 
+function extractWatermarkFromDoc(doc: any): { 
+  watermarkId?: string | null; 
+  tokenId?: string | null;
+  forensicFooter?: string | null;
+} {
+  // Check if doc has embedded watermark metadata
+  const metadata = doc.metadata ?? doc.forensics ?? {};
+  
+  // Try to extract from various possible locations
+  const watermarkId = 
+    metadata.watermarkId ?? 
+    doc.watermarkId ?? 
+    null;
+    
+  const tokenId = 
+    metadata.tokenId ?? 
+    doc.tokenId ?? 
+    null;
+    
+  const forensicFooter = 
+    metadata.expectedFooter ?? 
+    doc.footer ?? 
+    null;
+
+  // If we have token metadata, try to get forensics
+  if (tokenId && !watermarkId) {
+    try {
+      const forensics = getTokenForensics(metadata);
+      return {
+        watermarkId: forensics.watermarkId,
+        tokenId,
+        forensicFooter: forensics.expectedFooter,
+      };
+    } catch {
+      // Silently continue
+    }
+  }
+
+  return { watermarkId, tokenId, forensicFooter };
+}
+
 export default async function handler(
   req: NextApiRequest, 
   res: NextApiResponse<Ok | Fail>
@@ -41,6 +88,7 @@ export default async function handler(
     return res.status(405).json({ ok: false, reason: "Method not allowed" });
   }
 
+  // Sanitize slug and remove download prefix for lookup
   const slug = String(req.query.slug ?? "")
     .replace(/^\/+|\/+$/g, "")
     .replace(/^downloads\//, "");
@@ -55,16 +103,20 @@ export default async function handler(
       return res.status(404).json({ ok: false, reason: "Manuscript not found" });
     }
 
-    // Determine required tier using SSOT
+    // Extract forensic data from document
+    const { watermarkId, tokenId, forensicFooter } = extractWatermarkFromDoc(doc);
+
+    // Determine required tier using Single Source of Truth
     const requiredTier = mapToAccessTier(
       doc.accessLevel ?? doc.tier ?? doc.classification ?? "member"
     );
 
     // 1. Authorization Protocol
     let sessionTier: AccessTier = "public";
+    let token = null;
     
     if (requiredTier !== "public") {
-      const token = getAccessTokenFromReq(req);
+      token = getAccessTokenFromReq(req);
       if (!token) {
         return res.status(401).json({ 
           ok: false, 
@@ -73,6 +125,7 @@ export default async function handler(
         });
       }
 
+      // Consistent with Redis session management
       const t = await getSessionTier(token);
       if (!t) {
         return res.status(401).json({ 
@@ -100,13 +153,24 @@ export default async function handler(
       : "no-store, private, max-age=0"
     );
 
-    // 3. Return Pre-compiled Payload
+    // Add forensic headers if available
+    if (watermarkId) {
+      res.setHeader("X-AOL-Watermark-Id", watermarkId);
+    }
+    if (tokenId) {
+      res.setHeader("X-AOL-Token-Id", tokenId);
+    }
+
+    // 3. Return Pre-compiled Payload with forensic data
     return res.status(200).json({ 
       ok: true, 
       tier: sessionTier, 
       requiredTier,
       bodyCode: doc.body?.code ?? "",
       tierLabel: getTierLabel(sessionTier),
+      watermarkId,
+      tokenId,
+      forensicFooter,
     });
     
   } catch (err) {

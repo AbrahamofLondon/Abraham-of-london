@@ -1,0 +1,97 @@
+// lib/editorial/catalogue.ts
+import type { PublicationRecord } from "./types";
+import { normalizeUserTier } from "@/lib/access/tier-policy";
+
+export const EDITORIAL_CATALOGUE: PublicationRecord[] = [
+  {
+    slug: "ultimate-purpose-of-man",
+    contentId: "CB-ED-001",
+    title: "The Ultimate Purpose of Man",
+    subtitle: "Strategic Editorial — The Mandate of Alignment",
+    description:
+      "A flagship editorial on human purpose, from Eden's design to modern civilisation—written for leaders who refuse to drift.",
+    author: "Abraham of London",
+    date: "2026-02-12",
+    version: "3.1.0",
+    status: "Canonical Orientation",
+    category: "Theology / Strategy",
+    readingTime: "30 minutes",
+    tier: "public",
+
+    coverImage: "/assets/images/books/ultimate-purpose-cover.jpg",
+    socialImage: "/assets/images/books/ultimate-purpose-social.jpg",
+
+    pdfPath: "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+    epubPath: "/assets/downloads/ultimate-purpose-of-man-editorial.epub",
+    previewPath: "/api/editorials/preview/ultimate-purpose-of-man-editorial",
+
+    previewEnabled: true,
+    epubEnabled: true,
+    printEnabled: false,
+    vaultEnabled: false,
+    innerCircleEnabled: false,
+
+    tags: [
+      "purpose",
+      "leadership",
+      "theology",
+      "strategy",
+      "governance",
+      "civilisation",
+    ],
+
+    citation: {
+      citationTitle:
+        "The Ultimate Purpose of Man: Strategic Editorial — The Mandate of Alignment",
+      citationAuthor: "Abraham of London",
+      citationPublisher: "Abraham of London",
+      citationYear: "2026",
+      canonicalUrl:
+        "https://www.abrahamoflondon.org/editorials/ultimate-purpose-of-man",
+      doi: "10.54210/aol.2026.001",
+    },
+  },
+];
+
+function normalizeTag(tag: string): string {
+  return tag.trim().toLowerCase();
+}
+
+function normalizePublicationTier(tier: string): string {
+  return normalizeUserTier(tier || "public");
+}
+
+export function getPublicationCatalogue(): PublicationRecord[] {
+  return EDITORIAL_CATALOGUE;
+}
+
+export function getPublicationBySlug(
+  slug: string,
+): PublicationRecord | undefined {
+  const normalized = String(slug || "").trim().toLowerCase();
+  return EDITORIAL_CATALOGUE.find(
+    (entry) => entry.slug.trim().toLowerCase() === normalized,
+  );
+}
+
+export function getPublicationsByTier(
+  tier: PublicationRecord["tier"],
+): PublicationRecord[] {
+  const normalized = normalizePublicationTier(tier);
+  return EDITORIAL_CATALOGUE.filter(
+    (entry) => normalizePublicationTier(entry.tier) === normalized,
+  );
+}
+
+export function getPublicPublications(): PublicationRecord[] {
+  return getPublicationsByTier("public");
+}
+
+export function getPublicationsWithTag(tag: string): PublicationRecord[] {
+  const normalized = normalizeTag(tag);
+  if (!normalized) return [];
+
+  return EDITORIAL_CATALOGUE.filter((entry) =>
+    entry.tags.some((entryTag) => normalizeTag(entryTag) === normalized),
+  );
+}

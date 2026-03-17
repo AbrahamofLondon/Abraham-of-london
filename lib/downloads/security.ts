@@ -1,11 +1,11 @@
-/* lib/downloads/security.ts — DOWNLOAD SECURITY (SSOT, STRICT TS, FORMAT-CONSISTENT) */
+/* lib/downloads/security.ts — DOWNLOAD SECURITY (SYNCHRONIZED) */
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier, normalizeRequiredTier, hasAccess } from "@/lib/access/tier-policy";
 import crypto from "crypto";
 
 export interface DownloadToken {
-  token: string; // signed payload token (colon-delimited)
+  token: string; // signed payload token (sig:tier:expiresAtMs:nonce)
   resourceId: string;
   userId?: string;
   tier: AccessTier;
@@ -29,25 +29,30 @@ const DEFAULT_POLICY: DownloadPolicy = {
   expirationSeconds: 3600, // 1 hour
 };
 
+/**
+ * Robust secret retrieval
+ */
 function getSecret(): string {
-  // fail-safe: keep build working, but you SHOULD set DOWNLOAD_SECRET in prod
-  return process.env.DOWNLOAD_SECRET || "default-secret";
+  const secret = process.env.DOWNLOAD_SECRET || process.env.DOWNLOAD_SIGNING_SECRET;
+  if (!secret && process.env.NODE_ENV === "production") {
+    throw new Error("[CRITICAL] Download security secret is missing in production.");
+  }
+  return secret || "default-secret-dev-only";
 }
 
 /**
  * Token format (colon-delimited):
- *   sig:tier:expiresAtMs:nonce
- *
- * Where:
- * - sig = HMAC-SHA256(payload) truncated (hex)
- * - payload = `${resourceId}:${tier}:${expiresAtMs}:${nonce}`
+ * sig:tier:expiresAtMs:nonce
  */
 function signPayload(payload: string): string {
-  return crypto.createHmac("sha256", getSecret()).update(payload).digest("hex").substring(0, 32);
+  return crypto
+    .createHmac("sha256", getSecret())
+    .update(payload)
+    .digest("hex")
+    .substring(0, 32);
 }
 
 function safeEqualHex(a: string, b: string): boolean {
-  // constant-time compare; length mismatch should fail safely
   const ba = Buffer.from(String(a), "hex");
   const bb = Buffer.from(String(b), "hex");
   if (ba.length !== bb.length) return false;
@@ -55,7 +60,7 @@ function safeEqualHex(a: string, b: string): boolean {
 }
 
 /**
- * Generate a secure download token
+ * Generate a secure download token for the Abraham of London protocol
  */
 export function generateDownloadToken(
   resourceId: string,
@@ -75,7 +80,6 @@ export function generateDownloadToken(
   const payload = `${resourceId}:${tier}:${expiresAtMs}:${nonce}`;
   const sig = signPayload(payload);
 
-  // final token is parseable by verifyDownloadToken()
   const token = `${sig}:${tier}:${expiresAtMs}:${nonce}`;
 
   return {
@@ -89,13 +93,21 @@ export function generateDownloadToken(
 }
 
 /**
- * Verify download token
+ * Verify download token with enhanced return type for API auditing
  */
 export function verifyDownloadToken(
   token: string,
   resourceId: string,
   requiredTier?: string | AccessTier
-): { valid: boolean; reason?: string } {
+): { 
+  valid: boolean; 
+  reason?: string; 
+  slug?: string; 
+  requiredTier?: string; 
+  exp?: number; 
+  nonce?: string;
+  payload?: any; // Add payload field for token data
+} {
   try {
     const parts = String(token || "").split(":");
     if (parts.length !== 4) {
@@ -103,50 +115,87 @@ export function verifyDownloadToken(
     }
 
     const [sig, tierRaw, expiresRaw, nonce] = parts;
-
-    if (!sig || !tierRaw || !expiresRaw || !nonce) {
-      return { valid: false, reason: "INVALID_TOKEN_FORMAT" };
-    }
-
     const expiresAtMs = Number(expiresRaw);
-    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= 0) {
-      return { valid: false, reason: "INVALID_EXPIRY" };
-    }
-    if (Date.now() > expiresAtMs) {
-      return { valid: false, reason: "TOKEN_EXPIRED" };
-    }
-
     const tier = normalizeUserTier(tierRaw);
 
-    // Verify signature (constant-time)
+    // Prepare context for the API logDownloadEvent even if valid is false
+    const payloadContext = {
+      slug: resourceId,
+      requiredTier: tierRaw,
+      exp: expiresAtMs,
+      nonce: nonce,
+      payload: { tid: nonce, rid: resourceId, tier: tierRaw, exp: expiresAtMs / 1000 },
+    };
+
+    if (!sig || !tierRaw || !expiresRaw || !nonce) {
+      return { valid: false, reason: "MALFORMED_COMPONENTS", ...payloadContext };
+    }
+
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= 0) {
+      return { valid: false, reason: "INVALID_EXPIRY_TIMESTAMP", ...payloadContext };
+    }
+
+    if (Date.now() > expiresAtMs) {
+      return { valid: false, reason: "TOKEN_EXPIRED", ...payloadContext };
+    }
+
+    // Verify HMAC Signature (Constant-Time)
     const payload = `${resourceId}:${tier}:${expiresAtMs}:${nonce}`;
     const expectedSig = signPayload(payload);
 
     if (!safeEqualHex(sig, expectedSig)) {
-      return { valid: false, reason: "INVALID_SIGNATURE" };
+      return { valid: false, reason: "INVALID_SIGNATURE", ...payloadContext };
     }
 
-    // Check tier requirement if specified
+    // Tier Authorization Check
     if (requiredTier) {
       const required = normalizeRequiredTier(requiredTier);
       if (!hasAccess(tier, required)) {
-        return { valid: false, reason: `INSUFFICIENT_TIER: ${tier} cannot access ${required}` };
+        return { valid: false, reason: "INSUFFICIENT_TIER_FOR_RESOURCE", ...payloadContext };
       }
     }
 
-    return { valid: true };
+    return { valid: true, ...payloadContext };
   } catch (error) {
-    console.error("[Download Security] Verification error:", error);
-    return { valid: false, reason: "VERIFICATION_FAILED" };
+    console.error("[Download Security] Critical Verification Failure:", error);
+    return { valid: false, reason: "VERIFICATION_EXCEPTION" };
   }
 }
 
-export function tierAtLeast(userTier: string | AccessTier | null | undefined, requiredTier: AccessTier): boolean {
-  return hasAccess(userTier, requiredTier);
+/**
+ * Extract forensic data from token metadata
+ * Provides backward compatibility for routes expecting premium token forensics
+ */
+export function getTokenForensics(
+  metadata: Record<string, unknown> | null | undefined,
+): {
+  watermarkId: string | null;
+  expectedFooter: string | null;
+  fingerprint: string | null;
+} {
+  const base = metadata ?? {};
+  const forensics =
+    base.forensics &&
+    typeof base.forensics === "object" &&
+    !Array.isArray(base.forensics)
+      ? (base.forensics as Record<string, unknown>)
+      : {};
+
+  return {
+    watermarkId:
+      typeof forensics.watermarkId === "string" ? forensics.watermarkId : null,
+    expectedFooter:
+      typeof forensics.expectedFooter === "string"
+        ? forensics.expectedFooter
+        : null,
+    fingerprint:
+      typeof forensics.fingerprint === "string" ? forensics.fingerprint : null,
+  };
 }
 
 /**
  * Extract user tier from cookies (SSOT)
+ * Expects NextApiRequest-like object: { headers: { cookie: string } }
  */
 export function getUserTierFromCookies(req: any): AccessTier {
   const cookieHeader = req?.headers?.cookie || "";
@@ -168,7 +217,14 @@ export function getUserTierFromCookies(req: any): AccessTier {
 }
 
 /**
- * Check if user can download resource
+ * Logic check for tier hierarchies
+ */
+export function tierAtLeast(userTier: string | AccessTier | null | undefined, requiredTier: AccessTier): boolean {
+  return hasAccess(userTier, requiredTier);
+}
+
+/**
+ * High-level check for download eligibility
  */
 export function canDownload(
   userTier: string | AccessTier | null | undefined,
@@ -184,18 +240,18 @@ export function canDownload(
 
   const allowedTiers = policy.allowedTiers ?? DEFAULT_POLICY.allowedTiers;
   if (!allowedTiers.includes(normalizedUser)) {
-    return { allowed: false, reason: `TIER_NOT_ALLOWED: ${normalizedUser} not in allowed tiers` };
+    return { allowed: false, reason: "TIER_NOT_IN_POLICY_WHITELIST" };
   }
 
   if (!hasAccess(normalizedUser, normalizedRequired)) {
-    return { allowed: false, reason: `INSUFFICIENT_TIER: ${normalizedUser} cannot access ${normalizedRequired}` };
+    return { allowed: false, reason: "INSUFFICIENT_ACCESS_LEVEL" };
   }
 
   return { allowed: true };
 }
 
 /**
- * Create signed download URL
+ * Formats a signed URL for redemption
  */
 export function createSignedDownloadUrl(
   baseUrl: string,
@@ -208,22 +264,10 @@ export function createSignedDownloadUrl(
   }
 ): string {
   const tok = generateDownloadToken(resourceId, userTier, options);
-
   const url = new URL(baseUrl);
   url.searchParams.set("token", tok.token);
   url.searchParams.set("expires", tok.expiresAt.getTime().toString());
   if (options?.userId) url.searchParams.set("uid", options.userId.substring(0, 8));
 
   return url.toString();
-}
-
-/**
- * Rate limiting key for downloads
- */
-export function getDownloadRateLimitKey(ip: string, userId?: string, resourceId?: string): string {
-  const parts: string[] = ["download"];
-  if (userId) parts.push(`user:${userId}`);
-  if (resourceId) parts.push(`res:${resourceId}`);
-  parts.push(`ip:${ip}`);
-  return parts.join(":");
 }

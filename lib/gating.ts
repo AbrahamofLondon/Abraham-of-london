@@ -39,11 +39,14 @@ export const TIER_NAME_MAP: Record<string, Tier> = {
   inner_circle: "inner-circle",
   ic: "inner-circle",
 
+  // Routes legacy restricted terms to the new dedicated 'restricted' tier
+  restricted: "restricted", 
+  confidential: "restricted",
+  protected: "restricted",
+  
   premium: "client",
   private: "client",
-  restricted: "client",
-  confidential: "client",
-  "inner-circle-plus": "inner-circle", // legacy mapped by SSOT anyway
+  "inner-circle-plus": "inner-circle",
 
   elite: "legacy",
   "inner-circle-elite": "legacy",
@@ -51,6 +54,15 @@ export const TIER_NAME_MAP: Record<string, Tier> = {
   founder: "architect",
   admin: "owner",
   owner: "owner",
+
+  // ✅ Add top-secret mappings
+  "top-secret": "top-secret",
+  topsecret: "top-secret",
+  top_secret: "top-secret",
+  tops: "top-secret",
+  tsc: "top-secret",
+  hardened: "top-secret",
+  sovereign: "top-secret",
 };
 
 export const resolveTierName = (displayName: string): Tier => {
@@ -62,17 +74,11 @@ export const resolveTierName = (displayName: string): Tier => {
 /* ACCESS CHECKERS                                                            */
 /* -------------------------------------------------------------------------- */
 
-// Back-compat: returns required tier from doc
 export const getRequiredTier = (doc: any): Tier => requiredTierFromDoc(doc);
-
-// Back-compat: normalizes any tier-ish string for “user context”
 export const normalizeTier = (tier: string | Tier): Tier => normalizeUserTier(tier);
-
-// Back-compat: allowed check
 export const isTierAllowed = (requiredTier: Tier, userTier: Tier): boolean =>
   hasAccess(userTier, requiredTier);
 
-// Back-compat: doc check
 export const canAccessDoc = (doc: any, userTier: Tier | string): boolean => {
   if (!doc) return false;
   if (isDraftDoc(doc)) return false;
@@ -92,11 +98,9 @@ export const canAccessByTier = (doc: any, userTier: Tier | string): boolean => {
 export const requiresInnerCircle = (doc: any): boolean => {
   if (!doc) return false;
   const required = requiredTierFromDoc(doc);
-  // “Requires inner-circle” means: required >= inner-circle
   return hasAccess(required, "inner-circle");
 };
 
-// Legacy cookie “innerCircleAccess=true” (keep, but don’t trust it as sole proof)
 export const hasInnerCircleAccess = (cookies: any): boolean => {
   try {
     return cookies?.get?.("innerCircleAccess")?.value === "true";
@@ -125,7 +129,6 @@ export const checkDocumentAccess = (
   const required = requiredTierFromDoc(doc);
   if (hasAccess(userTier, required)) return { allowed: true };
 
-  // Legacy cookie bypass only for “inner-circle-ish” content (not client+)
   if (requiresInnerCircle(doc) && !hasAccess(required, "client") && hasInnerCircleAccess(cookies)) {
     return { allowed: true };
   }
@@ -143,7 +146,8 @@ export const getAccessLevel = (doc: any) => {
     tier,
     requiresAuth: tier !== "public",
     requiresInnerCircle: hasAccess(tier, "inner-circle"),
-    requiresAdmin: hasAccess(tier, "architect"), // admin surfaces start at architect+
+    requiresAdmin: hasAccess(tier, "architect"),
+    requiresTopSecret: hasAccess(tier, "top-secret"),
   };
 };
 
@@ -151,8 +155,8 @@ export const getAccessRedirectUrl = (doc: any, returnTo?: string): string => {
   const tier = requiredTierFromDoc(doc);
   let path = `/membership?required=${tier}`;
 
-  // admin login for architect/owner
-  if (hasAccess(tier, "architect")) path = "/admin/login";
+  if (hasAccess(tier, "top-secret")) path = "/vault/unseal";
+  else if (hasAccess(tier, "architect")) path = "/admin/login";
   else if (hasAccess(tier, "inner-circle")) path = "/inner-circle/locked";
 
   if (returnTo) {
@@ -198,16 +202,22 @@ export const isSameOrHigherTier = (tier1: Tier | string, tier2: Tier | string): 
   return TIER_HIERARCHY[t1] >= TIER_HIERARCHY[t2];
 };
 
+/**
+ * SYSTEM RESOLUTION:
+ * Added 'restricted' to the Record to satisfy exhaustiveness check.
+ */
 export const getTierDescription = (tier: Tier | string): string => {
   const t = normalizeUserTier(tier);
   const descriptions: Record<Tier, string> = {
     public: "Public content accessible to all visitors",
     member: "Member-only content",
     "inner-circle": "Inner Circle membership content",
+    restricted: "Restricted content requiring elevated clearance", // ✅ FIXED
     client: "Client-tier content and resources",
     legacy: "Legacy-tier content and archives",
     architect: "Architect-tier administrative and privileged content",
     owner: "Owner-tier sovereign access",
+    "top-secret": "TOP SECRET - Highest clearance required for vault access",
   };
   return descriptions[t] || "Access level not defined";
 };
@@ -225,7 +235,6 @@ const Gating = {
   isPublicDoc,
   isDraftDoc,
   isPublishedDoc,
-
   canAccessByTier,
   requiresInnerCircle,
   hasInnerCircleAccess,
@@ -237,7 +246,6 @@ const Gating = {
   isHigherTier,
   isSameOrHigherTier,
   getTierDescription,
-
   TIER_HIERARCHY,
   TIER_NAME_MAP,
 };

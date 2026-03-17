@@ -12,9 +12,17 @@ const generator = new SecurePuppeteerPDFGenerator({
   maxRetries: 2,
 });
 
+function safeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function normalizeRelativeOutputPath(input: string): string {
+  return input.replace(/\\/g, "/").replace(/^\/+/, "");
+}
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -37,49 +45,55 @@ export default async function handler(
       return res.status(404).json({ error: "PDF not found" });
     }
 
-    // Check tier/access – if you have access control
-    // const userTier = (session.user as any)?.tier;
-    // if (pdf.tier && userTier !== pdf.tier) {
-    //   return res.status(403).json({ error: "Insufficient clearance" });
-    // }
+    const pdfId = safeString((pdf as { id?: unknown }).id, id);
+    const sourcePathAbs = safeString((pdf as { sourcePathAbs?: unknown }).sourcePathAbs);
+    const sourceKindRaw = safeString((pdf as { sourceKind?: unknown }).sourceKind, "mdx");
+    const title = safeString((pdf as { title?: unknown }).title, pdfId);
 
-    // Determine output path – use the same logic as your registry
-    const outputDir = path.join(process.cwd(), "public", "assets", "downloads");
-    const outputPath = path.join(outputDir, `${pdf.id}.pdf`);
+    if (!sourcePathAbs) {
+      return res.status(400).json({ error: "PDF source path is missing" });
+    }
 
-    // Ensure output directory exists
+    const sourceKind: "mdx" | "md" | "html" =
+      sourceKindRaw === "md" || sourceKindRaw === "html" ? sourceKindRaw : "mdx";
+
+    const outputPathWeb = safeString((pdf as { outputPathWeb?: unknown }).outputPathWeb);
+    const relativeOutputPath = normalizeRelativeOutputPath(
+      outputPathWeb || `assets/downloads/${pdfId}.pdf`,
+    );
+
+    const outputPath = path.join(process.cwd(), "public", relativeOutputPath);
+    const outputDir = path.dirname(outputPath);
+
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    // Generate the PDF
     await generator.generateFromSource({
-      sourceAbsPath: pdf.sourcePathAbs,
-      sourceKind: pdf.sourceKind as "mdx" | "md" | "html",
+      sourceAbsPath: sourcePathAbs,
+      sourceKind,
       outputAbsPath: outputPath,
-      quality: "premium", // or derive from request/user
+      quality: "premium",
       format: "A4",
-      title: pdf.title,
+      title,
     });
 
-    // After successful generation, update registry entry if needed
-    // (Your registry is static; this is just for response)
     const stats = fs.statSync(outputPath);
-    const fileSizeInKB = (stats.size / 1024).toFixed(1) + " KB";
+    const fileSizeInKB = `${(stats.size / 1024).toFixed(1)} KB`;
 
     return res.status(200).json({
       success: true,
-      filename: `${pdf.id}.pdf`,
-      fileUrl: `/assets/downloads/${pdf.id}.pdf`,
-      pdfId: pdf.id,
+      filename: path.basename(outputPath),
+      fileUrl: `/${relativeOutputPath.replace(/^\/+/, "")}`,
+      pdfId,
       generatedAt: new Date().toISOString(),
       fileSize: fileSizeInKB,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[PDF Generate] Error for ${id}:`, error);
     return res.status(500).json({
       success: false,
-      error: error.message || "Generation failed",
+      error: error instanceof Error ? error.message : "Generation failed",
     });
   }
 }

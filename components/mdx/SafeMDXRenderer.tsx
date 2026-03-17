@@ -4,11 +4,15 @@
 
 import * as React from "react";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import MDX_COMPONENTS from "@/components/mdx/MDXComponents";
+import MDX_COMPONENTS, { getSafeComponents } from "@/components/mdx/MDXComponents";
+import type { TierDirective } from "@/lib/resources/tier-metadata";
 
 interface SafeMDXRendererProps {
-  code: string;
+  code?: string | null;
   components?: Record<string, any>;
+  directive?: TierDirective;
+  debug?: boolean;
+  disableBaseComponents?: boolean;
 }
 
 type ErrorBoundaryProps = {
@@ -27,82 +31,113 @@ class MDXErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundary
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(err: any): ErrorBoundaryState {
+  static getDerivedStateFromError(err: unknown): ErrorBoundaryState {
     return {
       hasError: true,
-      message: err?.message ? String(err.message) : "MDX render error",
+      message:
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "MDX render error",
     };
   }
 
-  override componentDidCatch(err: any) {
+  override componentDidCatch(err: unknown) {
     if (process.env.NODE_ENV !== "production") {
       console.error("MDXErrorBoundary caught:", err);
     }
   }
 
   override render() {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback || (
-          <div className="p-10 rounded-3xl border border-white/10 bg-white/[0.02]">
-            <div className="aol-micro text-white/40">MDX RENDER FAILURE</div>
-            <div className="mt-3 text-white/70 text-sm leading-relaxed">
-              The document rendered with an invalid component or malformed MDX.
-            </div>
-            {process.env.NODE_ENV !== "production" && this.state.message ? (
-              <pre className="mt-4 text-xs text-white/55 overflow-auto border border-white/10 rounded-2xl p-4 bg-black/30">
-                {this.state.message}
-              </pre>
-            ) : null}
-          </div>
-        )
-      );
-    }
+    if (!this.state.hasError) return this.props.children;
 
-    return this.props.children;
+    return (
+      this.props.fallback ?? (
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-300/80">
+            MDX render failure
+          </div>
+          <p className="mt-3 text-sm text-white/70">
+            The MDX compiled, but rendering failed.
+          </p>
+          {process.env.NODE_ENV !== "production" && this.state.message ? (
+            <pre className="mt-4 overflow-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-white/60">
+              {this.state.message}
+            </pre>
+          ) : null}
+        </div>
+      )
+    );
   }
 }
 
-export default function SafeMDXRenderer({ code, components }: SafeMDXRendererProps) {
-  // Ensure `process` exists in the browser BEFORE evaluating Contentlayer output.
-  // Contentlayer-generated code may reference `process.env.NODE_ENV`.
-  const g = globalThis as any;
-  if (typeof window !== "undefined") {
-    g.process = g.process || { env: {} };
-    g.process.env = g.process.env || {};
-    g.process.env.NODE_ENV = g.process.env.NODE_ENV || "production";
-  }
-
-  const hasCode = typeof code === "string" && code.trim().length > 0;
-  const mdxCode = hasCode ? code : "export default function Empty(){ return null }";
-
-  // ✅ Hook must be unconditional (no conditional calls)
-  const Component = useMDXComponent(mdxCode);
-
-  const merged = React.useMemo(
-    () => ({
-      ...MDX_COMPONENTS,
-      ...(components || {}),
-    }),
-    [components]
-  );
-
-  if (!hasCode) {
-    return (
-      <div className="p-12 text-center border border-white/10 bg-white/[0.02] rounded-3xl">
-        <div className="w-5 h-5 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-        <p className="font-mono text-[10px] text-white/30 uppercase tracking-[0.2em]">
-          Loading document…
-        </p>
+function EmptyState() {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
+      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
+        MDX unavailable
       </div>
-    );
-  }
+      <p className="mt-3 text-sm text-white/60">
+        No compiled MDX body was provided.
+      </p>
+    </div>
+  );
+}
+
+export default function SafeMDXRenderer({
+  code,
+  components,
+  directive,
+  debug = false,
+  disableBaseComponents = false,
+}: SafeMDXRendererProps) {
+  const safeCode = typeof code === "string" ? code.trim() : "";
+  const hasCode = safeCode.length > 0;
+
+  const mdxSource = hasCode
+    ? safeCode
+    : "export default function MDXEmpty(){ return null; }";
+
+  const MDXContent = useMDXComponent(mdxSource);
+
+  const merged = React.useMemo(() => {
+    const base = disableBaseComponents
+      ? { ...(components || {}) }
+      : getSafeComponents((components || {}) as any);
+
+    if (base.DocumentFooter) {
+      const OriginalFooter = base.DocumentFooter;
+      base.DocumentFooter = (props: any) => (
+        <OriginalFooter {...props} directive={directive} />
+      );
+    }
+
+    return base;
+  }, [components, directive, disableBaseComponents]);
 
   return (
     <MDXErrorBoundary>
-      <div className="aol-mdx-content">
-        <Component components={merged} />
+      <div className="aol-mdx-content text-white">
+        {hasCode ? <MDXContent components={merged} /> : <EmptyState />}
       </div>
+
+      {(debug || process.env.NODE_ENV !== "production") && (
+        <details className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+          <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.25em] text-amber-300/85">
+            MDX debug
+          </summary>
+          <div className="mt-4 space-y-3 text-xs text-white/70">
+            <div>hasCode: {String(hasCode)}</div>
+            <div>code length: {safeCode.length}</div>
+            <div>disableBaseComponents: {String(disableBaseComponents)}</div>
+            <div>component keys: {Object.keys(merged).join(", ") || "(none)"}</div>
+            <pre className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] text-white/60">
+              {safeCode.slice(0, 1200)}
+            </pre>
+          </div>
+        </details>
+      )}
     </MDXErrorBoundary>
   );
 }

@@ -7,8 +7,20 @@ import type { PDFItem as CanonPDFItem } from "@/lib/pdf/types";
 // ------------------------------------------------------------
 export type ViewMode = "list" | "grid" | "detail";
 
+// so other components can import it directly.
+export type PDFType = CanonPDFItem['type'];
+
 // ✅ SINGLE SOURCE OF TRUTH
 export type PDFItem = CanonPDFItem;
+
+// AdminUser type
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  permissions: string[];
+}
 
 // Analytics specific types
 export type MetricType = "generations" | "views" | "downloads" | "errors" | "size" | "categories";
@@ -80,6 +92,48 @@ export interface DashboardStats {
   /** Adjusted to allow ISO strings from registry stats */
   newest?: string | PDFItem | null; 
   oldest?: string | PDFItem | null;
+}
+
+// Props for DashboardHeader component
+export interface DashboardHeaderProps {
+  title: string;
+  subtitle: string;
+  stats: {
+    total: number;
+    available: number;
+    missing: number;
+  };
+  user?: AdminUser;
+  onRefresh: () => void;
+  onGenerateAll: () => void;
+  isGenerating: boolean;
+}
+
+// Props for PDFActionsBar component
+export interface PDFActionsBarProps {
+  pdf: PDFItem & {
+    status?: 'generated' | 'pending' | 'error' | 'missing';
+    fileSize?: number;
+  };
+  isGenerating: boolean;
+  onGeneratePDF: () => void;
+  onDeletePDF: () => void;
+  onDuplicatePDF: () => void;
+  onRenamePDF: () => void;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
+// Props for PDFViewerPanel component
+export interface PDFViewerPanelProps {
+  pdf: (PDFItem & {
+    fileSize?: number;
+    outputPath: string;
+    status?: 'generated' | 'pending' | 'error' | 'missing';
+  }) | null;
+  isGenerating: boolean;
+  onGeneratePDF: (id: string) => void;
+  refreshKey: number;
 }
 
 // ------------------------------------------------------------

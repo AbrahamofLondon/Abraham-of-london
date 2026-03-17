@@ -1,10 +1,11 @@
-// netlify/functions/health-check.ts
+// netlify/functions_src/functions/health-check.ts
+
 import type {
   Handler,
   HandlerEvent,
   HandlerContext,
   HandlerResponse,
-} from "@netlify/functions";
+} from "../_utils";
 
 // ---------------------------------------------------------------------------
 // Types & Interfaces
@@ -78,12 +79,20 @@ const CONFIG: HealthCheckConfig = {
   allowedOrigins: (
     process.env.ALLOWED_ORIGINS ||
     "http://localhost:3000,http://localhost:8888"
-  ).split(","),
+  )
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
 };
 
 // ---------------------------------------------------------------------------
 // Utility Functions
 // ---------------------------------------------------------------------------
+
+function firstHeader(value?: string | string[]): string | undefined {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
 
 function getCorsHeaders(origin?: string) {
   const allowedOrigin = CONFIG.allowedOrigins.includes(origin || "")
@@ -143,7 +152,11 @@ function measureTime<T>(
 
 async function checkEnvironment(): Promise<BasicCheck> {
   const requiredEnvVars = ["NODE_ENV", "NEXT_PUBLIC_SITE_URL"];
-  const optionalEnvVars = ["RECAPTCHA_SECRET_KEY", "CLEAR_CACHE_SECRET", "RESEND_API_KEY"];
+  const optionalEnvVars = [
+    "RECAPTCHA_SECRET_KEY",
+    "CLEAR_CACHE_SECRET",
+    "RESEND_API_KEY",
+  ];
 
   const missingRequired = requiredEnvVars.filter((env) => !process.env[env]);
   const missingOptional = optionalEnvVars.filter((env) => !process.env[env]);
@@ -170,7 +183,7 @@ async function checkSystemResources(): Promise<BasicCheck> {
     const memoryUsage = process.memoryUsage();
     const total = Math.round(memoryUsage.heapTotal / 1024 / 1024);
     const used = Math.round(memoryUsage.heapUsed / 1024 / 1024);
-    const pct = (used / total) * 100;
+    const pct = total > 0 ? (used / total) * 100 : 0;
 
     if (pct > 90) {
       return {
@@ -206,10 +219,11 @@ async function checkFunctionConnectivity(): Promise<BasicCheck> {
   }
 }
 
-async function checkExternalDependencies(): Promise<Record<string, DependencyStatus>> {
+async function checkExternalDependencies(): Promise<
+  Record<string, DependencyStatus>
+> {
   const dependencies: Record<string, DependencyStatus> = {};
 
-  // reCAPTCHA
   try {
     const start = Date.now();
     const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
@@ -228,7 +242,6 @@ async function checkExternalDependencies(): Promise<Record<string, DependencySta
     };
   }
 
-  // Main website
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     try {
       const start = Date.now();
@@ -253,7 +266,7 @@ async function checkExternalDependencies(): Promise<Record<string, DependencySta
 }
 
 // ---------------------------------------------------------------------------
-// FIX — Flatten measureTime() results (resolves your TS error)
+// Helpers
 // ---------------------------------------------------------------------------
 
 function flattenCheck(
@@ -283,22 +296,29 @@ function flattenCheck(
 
 export const handler: Handler = async (
   event: HandlerEvent,
-  context: HandlerContext
+  _context: HandlerContext
 ): Promise<HandlerResponse> => {
-  const origin = event.headers.origin || event.headers.Origin;
+  const origin = firstHeader(event.headers.origin ?? event.headers.Origin);
   const requestStartTime = Date.now();
   const isDetailed = event.queryStringParameters?.detailed === "true";
-  const token = event.headers["x-health-check-token"] as string | undefined;
+  const token = firstHeader(event.headers["x-health-check-token"]);
 
   if (event.httpMethod === "OPTIONS") {
     return formatResponse(204, {}, origin);
   }
 
-  if (isDetailed && process.env.HEALTH_CHECK_TOKEN && token !== process.env.HEALTH_CHECK_TOKEN) {
+  if (
+    isDetailed &&
+    process.env.HEALTH_CHECK_TOKEN &&
+    token !== process.env.HEALTH_CHECK_TOKEN
+  ) {
     return formatResponse(401, { error: "Unauthorized" }, origin);
   }
 
   try {
+    const heapUsed = process.memoryUsage().heapUsed;
+    const heapTotal = process.memoryUsage().heapTotal;
+
     const overallStatus: HealthCheckResult = {
       status: "healthy",
       timestamp: new Date().toISOString(),
@@ -310,36 +330,35 @@ export const handler: Handler = async (
         nodeVersion: process.version,
         platform: process.platform,
         memory: {
-          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-          percentage: Math.round(
-            (process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100
-          ),
+          used: Math.round(heapUsed / 1024 / 1024),
+          total: Math.round(heapTotal / 1024 / 1024),
+          percentage: heapTotal > 0 ? Math.round((heapUsed / heapTotal) * 100) : 0,
         },
         uptime: Math.round(process.uptime()),
       },
       services: {},
     };
 
-    // Run checks simultaneously
     const checks = await Promise.allSettled([
       measureTime(checkEnvironment),
       measureTime(checkSystemResources),
       measureTime(checkFunctionConnectivity),
     ]);
 
-    // ----- FIXED ASSIGNMENTS -----
     overallStatus.checks.environment = flattenCheck(checks[0]);
     overallStatus.checks.system = flattenCheck(checks[1]);
     overallStatus.checks.connectivity = flattenCheck(checks[2]);
-    // -----------------------------
 
     if (CONFIG.checkDependencies && isDetailed) {
       overallStatus.dependencies = await checkExternalDependencies();
     }
 
-    const failed = Object.values(overallStatus.checks).filter((c) => c.status === "fail").length;
-    const warns = Object.values(overallStatus.checks).filter((c) => c.status === "warn").length;
+    const failed = Object.values(overallStatus.checks).filter(
+      (c) => c.status === "fail"
+    ).length;
+    const warns = Object.values(overallStatus.checks).filter(
+      (c) => c.status === "warn"
+    ).length;
 
     if (failed > 0) overallStatus.status = "unhealthy";
     else if (warns > 0) overallStatus.status = "degraded";
@@ -364,8 +383,8 @@ export const handler: Handler = async (
         process.env.NODE_ENV === "production"
           ? undefined
           : error instanceof Error
-          ? error.message
-          : "Unknown error",
+            ? error.message
+            : "Unknown error",
     };
 
     return formatResponse(503, errorResponse, origin, {
@@ -385,4 +404,3 @@ export const healthCheckComponents = {
   checkFunctionConnectivity,
   checkExternalDependencies,
 };
-

@@ -1,452 +1,189 @@
+/* components/TeaserRequest.tsx — FULL PRODUCTION VERSION */
 "use client";
+
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { getRecaptchaToken } from "@/lib/recaptchaClient";
+import { Loader2, CheckCircle2, AlertCircle, ShieldAlert, Share2, Twitter, Link as LinkIcon } from "lucide-react";
 
 interface TeaserRequestProps {
   className?: string;
   variant?: "default" | "minimal" | "featured";
 }
 
-interface TeaserFormData {
-  email: string;
-  name: string;
-  honeypot: string;
-  timestamp: string;
-  userAgent: string;
-}
+type RequestStatus = "idle" | "success" | "error" | "loading" | "rate-limited";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export default function TeaserRequest({
-  className = "",
-  variant = "default",
-}: TeaserRequestProps) {
+export default function TeaserRequest({ className = "", variant = "default" }: TeaserRequestProps) {
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [honeypot, setHoneypot] = React.useState("");
-  const [status, setStatus] = React.useState<
-    "idle" | "success" | "error" | "loading"
-  >("idle");
+  const [status, setStatus] = React.useState<RequestStatus>("idle");
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [copied, setCopied] = React.useState(false);
+  
   const [submitAttempts, setSubmitAttempts] = React.useState(0);
   const [lastSubmitTime, setLastSubmitTime] = React.useState<number>(0);
 
-  // Rate limiting: max 3 submissions per minute
-  const isRateLimited = React.useMemo(() => {
-    const now = Date.now();
-    return submitAttempts >= 3 && now - lastSubmitTime < 60000;
-  }, [submitAttempts, lastSubmitTime]);
+  const SHARE_URL = "https://abrahamoflondon.com/memoir";
+  const SHARE_TEXT = "Just requested the first intelligence briefing of 'Fathering Without Fear'. Access the teaser here:";
 
-  function validateForm(): string | null {
-    // Honeypot validation
-    if (honeypot.trim() !== "") {
-      console.warn("Teaser request honeypot triggered - possible bot");
-      return "Thank you! Check your email for the teaser.";
-    }
-
-    // Email validation
-    if (!email.trim()) {
-      return "Please enter your email address";
-    }
-
-    if (!EMAIL_RE.test(email.trim().toLowerCase())) {
-      return "Please enter a valid email address";
-    }
-
-    // Length validation
-    if (email.length > 254) {
-      return "Email address is too long";
-    }
-
-    if (name.length > 100) {
-      return "Name is too long";
-    }
-
-    // Rate limiting
-    if (isRateLimited) {
-      return "Too many attempts. Please try again in a minute.";
-    }
-
-    return null;
-  }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (status === "loading" || (submitAttempts >= 3 && Date.now() - lastSubmitTime < 60000)) {
+      setStatus("rate-limited");
+      return;
+    }
 
-    if (status === "loading") return;
-
-    // Form validation
-    const validationError = validateForm();
-    if (validationError) {
-      if (honeypot.trim() !== "") {
-        // Pretend success for bots
-        setStatus("success");
-        setEmail("");
-        setName("");
-        setHoneypot("");
-        setTimeout(() => setStatus("idle"), 5000);
-        return;
-      }
-      setStatus("error");
+    if (honeypot) {
+      setStatus("success");
       return;
     }
 
     setStatus("loading");
+    setErrorMessage("");
 
     try {
-      // reCAPTCHA v3 for teaser requests
-      const recaptchaToken = await Promise.race([
-        getRecaptchaToken("teaser_request"),
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-      ]);
+      const recaptchaToken = await getRecaptchaToken("teaser_request");
+      if (!recaptchaToken) throw new Error("SECURITY_SHIELD_ACTIVE");
 
-      if (!recaptchaToken) {
-        setStatus("error");
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          name: name.trim() || "Principal",
+          enquiryType: "Fathering Without Fear Teaser",
+          message: "Automated Teaser Request via Website Widget",
+          teaserOptIn: true,
+          newsletterOptIn: true,
+          gRecaptchaToken: recaptchaToken,
+        }),
+      });
+
+      if (res.status === 429) {
+        setStatus("rate-limited");
         return;
       }
 
-      const formData: TeaserFormData = {
-        email: email.trim().toLowerCase(),
-        name: name.trim(),
-        honeypot,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-      };
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const res = await fetch("/.netlify/functions/send-teaser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          recaptchaToken,
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Teaser API error ${res.status}:`, errorText);
-
-        if (res.status === 429) {
-          throw new Error("Too many requests");
-        } else if (res.status >= 500) {
-          throw new Error("Server error");
-        } else {
-          throw new Error("Request failed");
-        }
-      }
+      if (!res.ok) throw new Error("TRANSMISSION_FAILED");
 
       setStatus("success");
+      setSubmitAttempts(prev => prev + 1);
+      setLastSubmitTime(Date.now());
       setEmail("");
       setName("");
-      setHoneypot("");
-
-      // Update rate limiting
-      setSubmitAttempts((prev) => prev + 1);
-      setLastSubmitTime(Date.now());
-
-      // Reset form after success
-      setTimeout(() => setStatus("idle"), 5000);
-    } catch (error) {
-      console.error("Teaser request failed:", error);
+    } catch (error: any) {
       setStatus("error");
+      setErrorMessage(error.message === "SECURITY_SHIELD_ACTIVE" ? "Security check failed." : "Transmission failed.");
     }
   }
 
-  // Minimal variant for inline use
-  if (variant === "minimal") {
-    return (
-      <form
-        onSubmit={handleSubmit}
-        className={[
-          "flex flex-col gap-3 p-4 rounded-xl border border-gold/30 bg-charcoal/60 backdrop-blur-sm",
-          className,
-        ].join(" ")}
-        noValidate
-      >
-        {/* Honeypot */}
-        <div className="sr-only">
-          <label htmlFor="teaser-honeypot-minimal" className="sr-only">
-            Do not fill this field
-          </label>
-          <input
-            id="teaser-honeypot-minimal"
-            type="text"
-            name="honeypot"
-            value={honeypot}
-            onChange={(e) => setHoneypot(e.target.value)}
-            autoComplete="off"
-            tabIndex={-1}
-            className="hidden"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="teaser-email-minimal"
-            className="block text-sm font-semibold text-cream"
-          >
-            Get the FREE teaser
-          </label>
-          <input
-            id="teaser-email-minimal"
-            type="email"
-            placeholder="you@example.com"
-            required
-            className="w-full rounded-lg border border-gold/20 bg-charcoal/40 px-3 py-2 text-sm text-cream placeholder-gold/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={status === "loading" || isRateLimited}
-            maxLength={254}
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-lg bg-gradient-to-r from-gold to-amber-200 px-4 py-2 text-sm font-semibold text-charcoal transition-all hover:from-amber-200 hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal"
-          disabled={status === "loading" || isRateLimited}
+  // Common Share Component to avoid repetition
+  const ShareActions = () => (
+    <div className="space-y-3 pt-4 border-t border-white/5">
+      <p className="text-[10px] uppercase tracking-widest text-zinc-500 text-center">Advocate the Mission</p>
+      <div className="flex gap-2">
+        <button 
+          onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(SHARE_URL)}`, '_blank')}
+          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 py-2 text-[10px] text-white hover:bg-white/10 transition-all"
         >
-          {status === "loading"
-            ? "Sending..."
-            : isRateLimited
-              ? "Try Again Later"
-              : "Email me the teaser"}
+          <Twitter className="w-3 h-3" /> Twitter
         </button>
+        <button 
+          onClick={handleCopy}
+          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 py-2 text-[10px] text-white hover:bg-white/10 transition-all"
+        >
+          {copied ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <LinkIcon className="w-3 h-3" />}
+          {copied ? "Copied" : "Copy Link"}
+        </button>
+      </div>
+    </div>
+  );
 
-        {status === "success" && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-green-400"
+  // --- RENDER LOGIC ---
+  return (
+    <motion.div className={className} layout>
+      <AnimatePresence mode="wait">
+        {status !== "success" ? (
+          <motion.form 
+            key="form"
+            onSubmit={handleSubmit} 
+            exit={{ opacity: 0, y: -10 }}
+            className={variant === "featured" ? "space-y-4" : "flex flex-col gap-3"}
           >
-            Check your inbox-teaser sent!
-          </motion.p>
-        )}
-        {status === "error" && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-red-400"
-          >
-            {isRateLimited
-              ? "Too many attempts. Try again later."
-              : "Please check your email and try again."}
-          </motion.p>
-        )}
-      </form>
-    );
-  }
+            {variant === "featured" && (
+              <div className="text-center mb-6">
+                <h3 className="font-serif text-2xl font-bold text-white italic">
+                  Fathering <span className="text-amber-500">Without Fear</span>
+                </h3>
+                <p className="text-zinc-500 text-[10px] uppercase tracking-widest">Intelligence Briefing</p>
+              </div>
+            )}
 
-  // Featured variant for prominent placement
-  if (variant === "featured") {
-    return (
-      <motion.div
-        className={[
-          "rounded-2xl border border-gold/30 bg-gradient-to-br from-charcoal/80 to-charcoal/60 p-6 backdrop-blur-sm",
-          className,
-        ].join(" ")}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-      >
-        <div className="text-center mb-4">
-          <h3 className="font-serif text-xl font-semibold text-cream mb-2">
-            Fathering Without Fear - Teaser
-          </h3>
-          <p className="text-gold/70 text-sm">
-            Get the first chapter free. No spam, just wisdom.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {/* Honeypot */}
-          <div className="sr-only">
-            <label htmlFor="teaser-honeypot-featured" className="sr-only">
-              Do not fill this field
-            </label>
-            <input
-              id="teaser-honeypot-featured"
-              type="text"
-              name="honeypot"
-              value={honeypot}
-              onChange={(e) => setHoneypot(e.target.value)}
-              autoComplete="off"
-              tabIndex={-1}
-              className="hidden"
-            />
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label htmlFor="teaser-name-featured" className="sr-only">
-                Your Name
-              </label>
+            <input type="text" className="hidden" tabIndex={-1} value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+            
+            <div className={variant === "featured" ? "grid grid-cols-1 gap-4" : "flex flex-col gap-2"}>
+              {variant !== "minimal" && (
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  className="w-full rounded-xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:border-amber-500/50 outline-none transition-all"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={status === "loading"}
+                />
+              )}
               <input
-                id="teaser-name-featured"
-                type="text"
-                placeholder="Name (optional)"
-                className="w-full rounded-lg border border-gold/20 bg-charcoal/40 px-3 py-2 text-sm text-cream placeholder-gold/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={status === "loading" || isRateLimited}
-                maxLength={100}
-              />
-            </div>
-            <div>
-              <label htmlFor="teaser-email-featured" className="sr-only">
-                Your Email
-              </label>
-              <input
-                id="teaser-email-featured"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="Secure Email Address"
                 required
-                className="w-full rounded-lg border border-gold/20 bg-charcoal/40 px-3 py-2 text-sm text-cream placeholder-gold/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50"
+                className="w-full rounded-xl border border-white/5 bg-white/5 px-5 py-4 text-sm text-white focus:border-amber-500 outline-none transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={status === "loading" || isRateLimited}
-                maxLength={254}
+                disabled={status === "loading"}
               />
             </div>
-          </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-gold to-amber-200 px-6 py-3 font-semibold text-charcoal transition-all hover:from-amber-200 hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal"
-            disabled={status === "loading" || isRateLimited}
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="w-full rounded-xl bg-amber-500 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-black hover:bg-amber-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {status === "loading" ? <Loader2 className="animate-spin w-4 h-4" /> : "Access The Teaser"}
+            </button>
+          </motion.form>
+        ) : (
+          <motion.div 
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center space-y-4 py-4"
           >
-            {status === "loading"
-              ? "Sending..."
-              : isRateLimited
-                ? "Try Again Later"
-                : "Get Free Teaser"}
-          </button>
-        </form>
+            <div className="flex justify-center">
+              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            </div>
+            <h3 className="text-white font-serif text-lg">Transmission Established</h3>
+            <p className="text-zinc-400 text-xs">Briefing sent to your inbox.</p>
+            <ShareActions />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <div className="mt-4 text-center">
-          {status === "success" && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-green-400"
-            >
-              ✅ Check your inbox for the teaser!
-            </motion.p>
-          )}
-          {status === "error" && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-red-400"
-            >
-              ❌{" "}
-              {isRateLimited
-                ? "Too many attempts. Try again later."
-                : "Something went wrong. Please try again."}
-            </motion.p>
-          )}
-        </div>
-
-        <p className="mt-4 text-center text-xs text-gold/40">
-          Unsubscribe at any time. We respect your privacy.
-        </p>
-      </motion.div>
-    );
-  }
-
-  // Default variant
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className={[
-        "rounded-xl border border-gold/20 bg-charcoal/60 p-4 backdrop-blur-sm",
-        className,
-      ].join(" ")}
-      noValidate
-    >
-      {/* Honeypot */}
-      <div className="sr-only">
-        <label htmlFor="teaser-honeypot-default" className="sr-only">
-          Do not fill this field
-        </label>
-        <input
-          id="teaser-honeypot-default"
-          type="text"
-          name="honeypot"
-          value={honeypot}
-          onChange={(e) => setHoneypot(e.target.value)}
-          autoComplete="off"
-          tabIndex={-1}
-          className="hidden"
-        />
-      </div>
-
-      <div className="mb-3 font-semibold text-cream">
-        Get the FREE teaser by email
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
-          type="text"
-          placeholder="Name (optional)"
-          className="flex-1 rounded-lg border border-gold/20 bg-charcoal/40 px-3 py-2 text-sm text-cream placeholder-gold/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          disabled={status === "loading" || isRateLimited}
-          maxLength={100}
-        />
-        <input
-          type="email"
-          placeholder="you@example.com"
-          required
-          className="flex-1 rounded-lg border border-gold/20 bg-charcoal/40 px-3 py-2 text-sm text-cream placeholder-gold/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-50"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={status === "loading" || isRateLimited}
-          maxLength={254}
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-gradient-to-r from-gold to-amber-200 px-4 py-2 text-sm font-semibold text-charcoal transition-all hover:from-amber-200 hover:to-gold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal sm:whitespace-nowrap"
-          disabled={status === "loading" || isRateLimited}
-        >
-          {status === "loading"
-            ? "Sending..."
-            : isRateLimited
-              ? "Try Again Later"
-              : "Email me the teaser"}
-        </button>
-      </div>
-
-      {status === "success" && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-2 text-xs text-green-400"
-        >
-          Check your inbox-teaser sent!
-        </motion.p>
-      )}
-      {status === "error" && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-2 text-xs text-red-400"
-        >
-          {isRateLimited
-            ? "Too many attempts. Try again later."
-            : "Sorry-something went wrong. Please try again."}
-        </motion.p>
-      )}
-    </form>
+      {/* Status Alerts */}
+      <AnimatePresence>
+        {status === "rate-limited" && (
+          <p className="mt-4 text-center text-[10px] text-amber-500 uppercase tracking-widest">Wait 60s before retrying.</p>
+        )}
+        {status === "error" && (
+          <p className="mt-4 text-center text-[10px] text-red-500 uppercase tracking-widest">{errorMessage}</p>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
-

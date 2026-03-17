@@ -1,7 +1,8 @@
-// netlify/functions/contact.ts
-import type { Handler } from "@netlify/functions";
+// netlify/functions_src/contact.ts
+
 import { sendAppEmail } from "./_email";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
+import type { Handler } from "./_utils";
 
 /* =========================
    CONFIG
@@ -11,7 +12,6 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "*")
   .map((s) => s.trim())
   .filter(Boolean);
 
-// Optional legacy env (Netlify-function-only). If absent, we use canonical verifier.
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET?.trim();
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET?.trim();
 const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 64 * 1024);
@@ -19,9 +19,13 @@ const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 64 * 1024);
 /* =========================
    CORS / HEADERS
    ========================= */
-function getCorsOrigin(requestOrigin?: string): string {
-  if (!requestOrigin || ALLOWED_ORIGINS.includes("*")) return "*";
-  return ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : "null";
+function getCorsOrigin(requestOrigin?: string | string[]): string {
+  const origin = Array.isArray(requestOrigin)
+    ? requestOrigin[0]
+    : requestOrigin;
+
+  if (!origin || ALLOWED_ORIGINS.includes("*")) return "*";
+  return ALLOWED_ORIGINS.includes(origin) ? origin : "null";
 }
 
 function jsonHeaders(origin: string) {
@@ -39,8 +43,9 @@ function jsonHeaders(origin: string) {
 /* =========================
    UTILITIES
    ========================= */
-function isJsonContentType(ct?: string | null) {
-  return !!ct && /application\/json/i.test(ct);
+function isJsonContentType(ct?: string | string[] | null) {
+  const value = Array.isArray(ct) ? ct[0] : ct;
+  return !!value && /application\/json/i.test(value);
 }
 
 type JsonParseOk<T> = { ok: true; data: T };
@@ -55,7 +60,6 @@ function safeParseJson<T = unknown>(raw: string): JsonParseResult<T> {
   }
 }
 
-// ✅ Dedicated type guard: fixes TS union narrowing in strict builds
 function isParseFail<T>(r: JsonParseResult<T>): r is JsonParseFail {
   return r.ok === false;
 }
@@ -93,11 +97,13 @@ function validatePayload(p: ContactPayload) {
   const message = (p.message ?? "").toString().trim();
 
   if (!name) errors.push("name is required");
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.push("valid email is required");
+  }
   if (!subject) errors.push("subject is required");
-  if (!message || message.length < 10)
+  if (!message || message.length < 10) {
     errors.push("message must be at least 10 characters");
+  }
 
   if (p.honeypot && String(p.honeypot).trim() !== "") {
     errors.push("honeypot must be empty");
@@ -114,7 +120,6 @@ function validatePayload(p: ContactPayload) {
    BOT VERIFICATION
    ========================= */
 async function verifyRecaptchaLegacy(token: string, remoteIp?: string) {
-  // If legacy secret isn't present, do not block.
   if (!RECAPTCHA_SECRET) {
     return { ok: true, provider: "recaptcha", skipped: true as const };
   }
@@ -154,13 +159,17 @@ async function verifyRecaptchaLegacy(token: string, remoteIp?: string) {
 
     return { ok: true, provider: "recaptcha" as const };
   } catch {
-    return { ok: false, provider: "recaptcha" as const, reason: "network_error" };
+    return {
+      ok: false,
+      provider: "recaptcha" as const,
+      reason: "network_error",
+    };
   }
 }
 
 async function verifyRecaptchaCanonical(token: string, remoteIp?: string) {
-  // Canonical verifier uses RECAPTCHA_SECRET_KEY (shared with API routes).
   const detailed = await verifyRecaptchaDetailed(token, "contact", remoteIp);
+
   return detailed.success
     ? { ok: true, provider: "recaptcha" as const }
     : {
@@ -203,7 +212,11 @@ async function verifyTurnstile(token: string, remoteIp?: string) {
 
     return { ok: true, provider: "turnstile" as const };
   } catch {
-    return { ok: false, provider: "turnstile" as const, reason: "network_error" };
+    return {
+      ok: false,
+      provider: "turnstile" as const,
+      reason: "network_error",
+    };
   }
 }
 
@@ -211,7 +224,7 @@ async function verifyTurnstile(token: string, remoteIp?: string) {
    HANDLER
    ========================= */
 export const handler: Handler = async (event) => {
-  const origin = getCorsOrigin(event.headers.origin || event.headers.Origin);
+  const origin = getCorsOrigin(event.headers.origin ?? event.headers.Origin);
   const headers = jsonHeaders(origin);
 
   if (event.httpMethod === "OPTIONS") {
@@ -223,7 +236,8 @@ export const handler: Handler = async (event) => {
   }
 
   const contentType =
-    event.headers["content-type"] || event.headers["Content-Type"];
+    event.headers["content-type"] ?? event.headers["Content-Type"];
+
   if (!isJsonContentType(contentType)) {
     return fail(
       415,
@@ -244,7 +258,6 @@ export const handler: Handler = async (event) => {
 
   const parsed = safeParseJson<ContactPayload>(raw);
 
-  // ✅ TS-safe narrowing (no property access on union without guard)
   if (isParseFail(parsed)) {
     return fail(400, headers, parsed.error, "ERR_BAD_JSON");
   }
@@ -261,15 +274,18 @@ export const handler: Handler = async (event) => {
     );
   }
 
+  const forwardedFor =
+    event.headers["x-forwarded-for"] ?? event.headers["X-Forwarded-For"];
+
+  const forwardedForValue = Array.isArray(forwardedFor)
+    ? (forwardedFor[0] ?? "")
+    : (forwardedFor ?? "");
+
   const remoteIp =
-    (event.headers["x-forwarded-for"] ||
-      event.headers["X-Forwarded-For"] ||
-      "")
-      .toString()
+    String(forwardedForValue)
       .split(",")[0]
       ?.trim() || undefined;
 
-  // Bot checks: Turnstile preferred if present; else reCAPTCHA
   if (payload.turnstileToken) {
     const v = await verifyTurnstile(String(payload.turnstileToken), remoteIp);
     if (!v.ok && !("skipped" in v && v.skipped)) {
@@ -283,7 +299,6 @@ export const handler: Handler = async (event) => {
   } else if (payload.recaptchaToken) {
     const token = String(payload.recaptchaToken);
 
-    // If legacy secret exists, use it; otherwise use canonical verifier.
     const v = RECAPTCHA_SECRET
       ? await verifyRecaptchaLegacy(token, remoteIp)
       : await verifyRecaptchaCanonical(token, remoteIp);
@@ -298,7 +313,6 @@ export const handler: Handler = async (event) => {
     }
   }
 
-  // === Email / CRM wiring (best-effort) ===
   try {
     await sendAppEmail({
       subject: `[Contact] ${data.subject}`,
@@ -326,4 +340,3 @@ export const handler: Handler = async (event) => {
     }),
   };
 };
-

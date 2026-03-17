@@ -30,11 +30,9 @@ interface NewsletterResponseBody {
   requiresVerification?: boolean;
 }
 
-// Email validation
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-// Disposable email domains
 const DISPOSABLE_DOMAINS = [
   "tempmail.com",
   "guerrillamail.com",
@@ -46,20 +44,17 @@ const DISPOSABLE_DOMAINS = [
   "trashmail.com",
 ];
 
-// Security event logger
 function logSecurityEvent(
   event: string,
   details: Record<string, unknown>,
 ): void {
   const timestamp = new Date().toISOString();
-  // eslint-disable-next-line no-console
+
   console.log(`[NEWSLETTER_SECURITY] ${timestamp} - ${event}`, {
     ...details,
     ...(process.env.NODE_ENV === "production" && {
-      email: details.email
-        ? `${(details.email as string).substring(0, 3)}...`
-        : undefined,
-      ip: details.ip ? anonymizeIp(details.ip as string) : undefined,
+      email: details.email ? `${String(details.email).substring(0, 3)}...` : undefined,
+      ip: details.ip ? anonymizeIp(String(details.ip)) : undefined,
     }),
   });
 }
@@ -79,12 +74,19 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
     return { isValid: false, error: "Please enter a valid email address" };
   }
 
-  const domain = trimmedEmail.split("@")[1];
+  const parts = trimmedEmail.split("@");
+  const domain = parts.length > 1 ? parts[1] ?? "" : "";
+
+  if (!domain) {
+    return { isValid: false, error: "Please enter a valid email address" };
+  }
+
   if (DISPOSABLE_DOMAINS.some((d) => domain.includes(d))) {
     logSecurityEvent("Disposable email detected", {
       email: trimmedEmail,
       domain,
     });
+
     return { isValid: false, error: "Please use a permanent email address" };
   }
 
@@ -109,23 +111,21 @@ function validateName(name: string): { isValid: boolean; error?: string } {
   return { isValid: true };
 }
 
-// Mailchimp integration function
 async function subscribeToMailchimp(
   email: string,
   name?: string,
   tags: string[] = [],
 ): Promise<{ success: boolean; error?: string }> {
-  const API_KEY = process.env.MAILCHIMP_API_KEY;
-  const API_SERVER = process.env.MAILCHIMP_API_SERVER;
-  const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
+  const apiKey = process.env.MAILCHIMP_API_KEY;
+  const apiServer = process.env.MAILCHIMP_API_SERVER;
+  const audienceId = process.env.MAILCHIMP_AUDIENCE_ID;
 
-  if (!API_KEY || !API_SERVER || !AUDIENCE_ID) {
-    // eslint-disable-next-line no-console
+  if (!apiKey || !apiServer || !audienceId) {
     console.error("Mailchimp environment variables not configured");
     return { success: false, error: "Service configuration error" };
   }
 
-  const url = `https://${API_SERVER}.api.mailchimp.com/3.0/lists/${AUDIENCE_ID}/members`;
+  const url = `https://${apiServer}.api.mailchimp.com/3.0/lists/${audienceId}/members`;
 
   const data: Record<string, unknown> = {
     email_address: email,
@@ -142,12 +142,12 @@ async function subscribeToMailchimp(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `api_key ${API_KEY}`,
+        Authorization: `api_key ${apiKey}`,
       },
       body: JSON.stringify(data),
     });
 
-    if (response.status === 200) {
+    if (response.ok) {
       return { success: true };
     }
 
@@ -160,14 +160,12 @@ async function subscribeToMailchimp(
       };
     }
 
-    // eslint-disable-next-line no-console
     console.error("Mailchimp API error:", errorData);
     return {
       success: false,
       error: "Failed to subscribe. Please try again later.",
     };
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Mailchimp subscription error:", error);
     return {
       success: false,
@@ -176,7 +174,6 @@ async function subscribeToMailchimp(
   }
 }
 
-// Send notification to Abraham
 async function sendNotificationToAbraham(subscriberData: {
   email: string;
   name?: string;
@@ -197,9 +194,7 @@ async function sendNotificationToAbraham(subscriberData: {
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #2c5530;">New Newsletter Subscriber!</h2>
             <p><strong>Email:</strong> ${subscriberData.email}</p>
-            <p><strong>Name:</strong> ${
-              subscriberData.name || "Not provided"
-            }</p>
+            <p><strong>Name:</strong> ${subscriberData.name || "Not provided"}</p>
             <p><strong>Source:</strong> ${subscriberData.source}</p>
             <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
             <p style="color: #2c5530; font-weight: bold;">
@@ -210,7 +205,6 @@ async function sendNotificationToAbraham(subscriberData: {
       }),
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Failed to send notification to Abraham:", error);
   }
 }
@@ -219,7 +213,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<NewsletterResponseBody>,
 ): Promise<void> {
-  // Security headers
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
@@ -258,13 +251,12 @@ export default async function handler(
   const companyHoneypot = (body.company ?? "").trim();
   const websiteHoneypot = (body.website ?? "").trim();
   const recaptchaToken = (body.recaptchaToken ?? "").trim();
-  const source = body.source || "newsletter_api";
-  const userAgent = body.userAgent || req.headers["user-agent"] || "unknown";
+  const source = (body.source ?? "newsletter_api").trim() || "newsletter_api";
+  const userAgent = String(body.userAgent || req.headers["user-agent"] || "unknown");
 
   const ipAnalysis = getClientIpWithAnalysis(req);
   const ip = ipAnalysis.ip;
 
-  // Honeypots
   if (companyHoneypot || websiteHoneypot) {
     logSecurityEvent("Honeypot triggered", {
       ip,
@@ -280,32 +272,29 @@ export default async function handler(
     return;
   }
 
-  // Email validation
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
     res.status(400).json({
       ok: false,
-      error: emailValidation.error!,
+      error: emailValidation.error ?? "Invalid email address",
     });
     return;
   }
 
-  // Name validation
   const nameValidation = validateName(name);
   if (!nameValidation.isValid) {
     res.status(400).json({
       ok: false,
-      error: nameValidation.error!,
+      error: nameValidation.error ?? "Invalid name",
     });
     return;
   }
 
-  // 🔒 Shared per-IP rate limiting
-  const rlKey = getRateLimitKey(
-    req,
-    RATE_LIMIT_CONFIGS.NEWSLETTER_SUBSCRIBE.keyPrefix,
-  );
-  const rateLimitResult = rateLimit(rlKey, RATE_LIMIT_CONFIGS.NEWSLETTER_SUBSCRIBE);
+  const newsletterRateConfig =
+    RATE_LIMIT_CONFIGS.newsletter ?? RATE_LIMIT_CONFIGS.subscribe;
+
+  const rlKey = getRateLimitKey(req, "newsletter");
+  const rateLimitResult = rateLimit(rlKey, newsletterRateConfig);
 
   const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
   Object.entries(rateLimitHeaders).forEach(([key, value]) => {
@@ -317,7 +306,7 @@ export default async function handler(
       ip,
       email,
       remaining: rateLimitResult.remaining,
-      retryAfterMs: rateLimitResult.retryAfterMs,
+      resetSeconds: rateLimitResult.resetSeconds,
     });
 
     res.status(429).json({
@@ -327,7 +316,6 @@ export default async function handler(
     return;
   }
 
-  // reCAPTCHA verification (required)
   if (!recaptchaToken) {
     res.status(400).json({
       ok: false,
@@ -336,7 +324,7 @@ export default async function handler(
     return;
   }
 
-  let recaptchaResult;
+  let recaptchaResult: any; // Using any to handle varying return types from verifyRecaptcha
   try {
     recaptchaResult = await verifyRecaptcha(
       recaptchaToken,
@@ -344,12 +332,16 @@ export default async function handler(
       ip,
     );
 
-    if (!recaptchaResult.success) {
+    // Hardened check: handle both boolean and object returns
+    const isSuccess = typeof recaptchaResult === 'boolean' ? recaptchaResult : recaptchaResult?.success;
+    const score = typeof recaptchaResult === 'object' ? recaptchaResult?.score : undefined;
+
+    if (!isSuccess) {
       logSecurityEvent("reCAPTCHA failed", {
         ip,
         email,
-        score: recaptchaResult.score,
-        reasons: recaptchaResult.reasons,
+        score: score,
+        reasons: typeof recaptchaResult === 'object' ? recaptchaResult?.reasons : "unknown",
       });
 
       res.status(400).json({
@@ -359,16 +351,17 @@ export default async function handler(
       return;
     }
 
-    if (recaptchaResult.score < 0.3) {
+    if (score !== undefined && score < 0.3) {
       logSecurityEvent("Low reCAPTCHA score", {
         ip,
         email,
-        score: recaptchaResult.score,
-        action: recaptchaResult.action,
+        score: score,
+        action: recaptchaResult?.action,
       });
     }
   } catch (err) {
     const e = err as Error;
+
     logSecurityEvent("reCAPTCHA error", {
       ip,
       email,
@@ -388,9 +381,7 @@ export default async function handler(
     if (!mailchimpResult.success) {
       res.status(400).json({
         ok: false,
-        error:
-          mailchimpResult.error ||
-          "Failed to subscribe. Please try again.",
+        error: mailchimpResult.error || "Failed to subscribe. Please try again.",
       });
       return;
     }
@@ -406,12 +397,11 @@ export default async function handler(
       email: `${email.substring(0, 3)}...`,
       name: name ? `${name.substring(0, 1)}...` : "not provided",
       source,
-      recaptchaScore: recaptchaResult.score,
+      recaptchaScore: typeof recaptchaResult === 'object' ? recaptchaResult?.score : "N/A",
       userAgent: userAgent.substring(0, 100),
     });
 
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
       console.log("[NEWSLETTER] Subscription details:", {
         email,
         name: name || "not provided",
@@ -426,7 +416,6 @@ export default async function handler(
       message: "Awesome! You have successfully subscribed!",
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("[NEWSLETTER] Subscription error:", error);
 
     logSecurityEvent("Newsletter subscription failed", {
@@ -441,4 +430,3 @@ export default async function handler(
     });
   }
 }
-

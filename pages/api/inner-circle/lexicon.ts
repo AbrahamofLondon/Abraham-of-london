@@ -5,11 +5,18 @@ import { authOptions } from "@/lib/auth";
 import fs from 'fs';
 import path from 'path';
 
+// Legacy-safe type guard
+function hasAdminRole(session: any): boolean {
+  // Safely check role regardless of type augmentation
+  const role = session?.user?.role;
+  return typeof role === 'string' && role === 'ADMIN';
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
 
-  // 1. HARDENED AUTH CHECK
-  if (!session || session.user.role !== 'ADMIN') {
+  // 1. HARDENED AUTH CHECK - legacy-safe pattern
+  if (!session || !hasAdminRole(session)) {
     return res.status(403).json({ error: "Institutional Access Denied" });
   }
 
@@ -39,4 +46,6 @@ ${content}`;
       return res.status(500).json({ error: "Filesystem write failure" });
     }
   }
+
+  return res.status(405).json({ error: "Method not allowed" });
 }

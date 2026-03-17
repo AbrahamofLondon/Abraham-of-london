@@ -1,18 +1,18 @@
-// lib/prisma.ts — COMPAT BARREL (PAGES-SAFE DEFAULT)
+// lib/prisma.ts — PAGES-SAFE COMPAT BARREL
 //
-// IMPORTANT:
-// - This file MUST remain pages-safe because pages/** imports it.
-// - Do NOT add `import "server-only"` here.
-// - Server-only code should import from "@/lib/prisma.server" instead.
+// Use this from pages/** and legacy API routes.
+// Do NOT add `server-only` here.
 
 export {
   prisma,
   getPrisma,
   safePrismaQuery,
+  checkDatabaseConnection,
   getVaultStatus,
   getStrategicContext,
-  type PrismaClientType,
 } from "./prisma.pages";
 
 export type { Prisma } from "@prisma/client";
+export type { PrismaClientType } from "./prisma.pages";
+
 export { default } from "./prisma.pages";

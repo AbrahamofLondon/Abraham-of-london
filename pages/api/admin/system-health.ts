@@ -22,7 +22,7 @@ export default async function handler(req: NextRequest) {
     }
 
     // 2. GATHER SUBSYSTEM DATA 📡
-    // We use Promise.allSettled to ensure one failure doesn't crash the whole report
+    // Using a simple Promise.all (if one fails, it moves to catch block for high-integrity reporting)
     const [redisStats, rateLimiter, redisPing] = await Promise.all([
       getRedisStats(),
       getRateLimiterStats(),
@@ -30,9 +30,9 @@ export default async function handler(req: NextRequest) {
     ]);
 
     // 3. HARMONISE METRICS & SCORING 📊
-    // Bringing in the performance scoring logic from Version 1
+    // Corrected: using .totalKeys as defined in the rateLimiter type
     const cachePerformance = redisStats.available && redisPing ? 100 : 50;
-    const rateLimitPerformance = rateLimiter.memoryStoreSize < 5000 ? 100 : 60;
+    const rateLimitPerformance = rateLimiter.totalKeys < 5000 ? 100 : 60;
     
     const subsystems = {
       cache: {
@@ -41,7 +41,8 @@ export default async function handler(req: NextRequest) {
         performanceScore: cachePerformance
       },
       rateLimiter: {
-        status: rateLimiter.memoryStoreSize > 10000 ? "critical" : "healthy",
+        // Corrected: using .totalKeys for threshold check
+        status: rateLimiter.totalKeys > 10000 ? "critical" : "healthy",
         metrics: rateLimiter,
         performanceScore: rateLimitPerformance
       }
@@ -62,8 +63,8 @@ export default async function handler(req: NextRequest) {
       warnings: [] as string[]
     };
 
-    // Logic-based warnings from Version 2
-    if (!redisStats.available) report.warnings.push('Redis unreachable - falling back to memory');
+    // Logic-based warnings
+    if (!redisStats.available) report.warnings.push('Redis unreachable - falling back to local memory');
     if (avgScore < 70) report.warnings.push('System performance is suboptimal');
 
     return new Response(JSON.stringify(report, null, 2), {

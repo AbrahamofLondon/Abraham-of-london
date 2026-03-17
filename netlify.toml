@@ -21,11 +21,15 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# ✅ Custom functions: keep ONLY your small functions here (no SSR handler).
-# IMPORTANT: ensure netlify/functions_src/functions/___netlify-server-handler is DELETED.
+# ✅ Custom functions configuration
 [functions]
-  directory = "netlify/functions_src"
+  directory = "netlify/functions_src/functions"  # ✅ Fixed path
   node_bundler = "esbuild"
+
+# ✅ Scheduled function for token cleanup
+[[schedule]]
+  path = "/api/cleanup-download-tokens"  # This will call your function
+  schedule = "0 2 * * *"  # Daily at 2 AM
 
 [functions.emails]
   included_files = ["emails/**"]

@@ -12,6 +12,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ error: "Access Denied: Admin Clearance Required" });
   }
 
+  // ✅ CRITICAL FIX: Ensure prisma is not null before proceeding
+  if (!prisma) {
+    return res.status(500).json({ error: "Database Client not initialized" });
+  }
+
   try {
     // 2. Aggregate Data for the Template
     const now = new Date();
@@ -19,12 +24,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const [totalBriefs, retrievalCount, uniqueMembers, criticalLogs, topAsset] = await Promise.all([
       prisma.contentMetadata.count(),
-      prisma.systemAuditLog.count({ where: { action: 'ASSET_RETRIEVAL_AUTHORIZED', createdAt: { gte: sevenDaysAgo } } }),
-      prisma.innerCircleMember.count({ where: { lastLoginAt: { gte: sevenDaysAgo } } }),
-      prisma.systemAuditLog.count({ where: { severity: 'critical', createdAt: { gte: sevenDaysAgo } } }),
+      prisma.systemAuditLog.count({ 
+        where: { 
+          action: 'ASSET_RETRIEVAL_AUTHORIZED', 
+          createdAt: { gte: sevenDaysAgo } 
+        } 
+      }),
+      // ✅ Updated to 'lastSeenAt' to match your schema.prisma
+      prisma.innerCircleMember.count({ 
+        where: { 
+          lastSeenAt: { gte: sevenDaysAgo } 
+        } 
+      }),
+      prisma.systemAuditLog.count({ 
+        where: { 
+          severity: 'critical', 
+          createdAt: { gte: sevenDaysAgo } 
+        } 
+      }),
       prisma.systemAuditLog.groupBy({
         by: ['resourceName'],
-        where: { action: 'ASSET_RETRIEVAL_AUTHORIZED' },
+        where: { 
+          action: 'ASSET_RETRIEVAL_AUTHORIZED',
+          resourceName: { not: null }
+        },
         _count: { resourceName: true },
         orderBy: { _count: { resourceName: 'desc' } },
         take: 1
@@ -56,6 +79,7 @@ Status: GREEN | SECURITY: LEVEL 3 ACTIVE
     return res.status(200).send(report);
 
   } catch (error) {
+    console.error("[REPORT_GENERATION_ERROR]:", error);
     return res.status(500).json({ error: "Failed to generate intelligence report" });
   }
 }

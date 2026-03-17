@@ -6,9 +6,20 @@ import { getPDFById } from "@/lib/pdf/registry.static";
 import fs from "fs";
 import path from "path";
 
+function safeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function normalizePublicRelativePath(input: string): string {
+  const cleaned = input.replace(/\\/g, "/").trim();
+
+  // strip leading slash so path.join(process.cwd(), "public", relative) works correctly
+  return cleaned.replace(/^\/+/, "");
+}
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "DELETE") {
     res.setHeader("Allow", "DELETE");
@@ -31,16 +42,21 @@ export default async function handler(
       return res.status(404).json({ error: "PDF not found" });
     }
 
-    const filePath = path.join(process.cwd(), "public", pdf.outputPathWeb || `/assets/downloads/${pdf.id}.pdf`);
+    const outputPathWeb = safeString((pdf as { outputPathWeb?: unknown }).outputPathWeb);
+    const fallbackRelative = `assets/downloads/${safeString((pdf as { id?: unknown }).id, id)}.pdf`;
+    const relativePath = normalizePublicRelativePath(outputPathWeb || fallbackRelative);
+
+    const filePath = path.join(process.cwd(), "public", relativePath);
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    // Note: The registry is static; deletion only removes the file.
-    // If you have a dynamic registry, update it here.
-
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true,
+      deleted: fs.existsSync(filePath) ? false : true,
+      path: relativePath,
+    });
   } catch (error) {
     console.error(`[PDF Delete] Error for ${id}:`, error);
     return res.status(500).json({ error: "Internal server error" });

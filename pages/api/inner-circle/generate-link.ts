@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+import { normalizeUserTier } from "@/lib/access/tier-policy";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
@@ -27,8 +27,6 @@ function requireEnv(name: string): string {
 
 /**
  * HMAC signed URL params (tamper-evident).
- * You MUST validate this signature at the CDN/origin if you actually enforce it.
- * If you don't have a validating edge, consider returning a Netlify function URL instead.
  */
 function signParams(params: Record<string, string>, secret: string): string {
   const canonical = Object.keys(params)
@@ -55,51 +53,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   // 2) Resolve user tier from SSOT cookie -> DB session
   const sessionId = readAccessCookie(req);
   if (!sessionId) {
-    // best-effort audit
     try {
       await AuditService.recordSecurityEvent({
+        event: "login_failed",
         action: "unauthorized_access_attempt",
-        actorId: "unknown",
-        actorEmail: "unknown",
         severity: "high",
-        metadata: { briefId, note: "missing_session_cookie" },
+        memberId: "anonymous",
+        details: { briefId, note: "missing_session_cookie", ip: getClientIp(req) },
       });
     } catch {}
     return res.status(401).json({ ok: false, error: "Authentication required" });
   }
 
   const ctx = await getSessionContext(sessionId);
-  const userTier: AccessTier = normalizeUserTier(ctx.tier ?? ctx.member?.tier ?? "public");
+  const memberId = String(ctx.memberId || "unknown");
+  const memberEmail = String(ctx.email || "unknown");
+  const userTier: AccessTier = normalizeUserTier(ctx.tier || "public");
 
-  // 3) Gate using registry decision (single source)
+  // 3) Gate using registry decision
   const decision = getBriefAccessDecision(brief, userTier);
   if (!decision.ok) {
     try {
       await AuditService.recordSecurityEvent({
-        action: "unauthorized_access_attempt",
-        actorId: String(ctx.member?.id ?? ctx.member?.memberId ?? "unknown"),
-        actorEmail: String(ctx.member?.email ?? "unknown"),
-        severity: "high",
-        metadata: { briefId, userTier, requiredTier: decision.requiredTier, reason: decision.reason },
+        event: "admin_action",
+        action: "insufficient_clearance_attempt",
+        severity: "warning", // ✅ Fixed: changed from "medium" to "warning"
+        memberId: memberId,
+        details: { 
+          briefId, 
+          userTier, 
+          requiredTier: decision.requiredTier, 
+          reason: decision.reason 
+        },
       });
     } catch {}
     return res.status(403).json({ ok: false, error: "Insufficient clearance", requiredTier: decision.requiredTier });
   }
 
-  // 4) Construct signed delivery URL (60s expiry)
-  // Configure your delivery origin (CDN/origin endpoint that checks sig/exp)
+  // 4) Construct signed delivery URL
   const ORIGIN_BASE = process.env.INNER_CIRCLE_CDN_BASE?.trim() || "https://cdn.intelligence.aol";
   const SIGNING_SECRET = requireEnv("INNER_CIRCLE_LINK_HMAC_SECRET");
 
   const expires = String(Math.floor(Date.now() / 1000) + 60);
-  const aid = brief.id;
-
   const params = {
-    aid,
+    aid: brief.id,
     exp: expires,
-    // include tier + member to make signatures user-specific (optional)
     tier: userTier,
-    mid: String(ctx.member?.id ?? ctx.member?.memberId ?? "unknown"),
+    mid: memberId,
   };
 
   const sig = signParams(params, SIGNING_SECRET);
@@ -112,19 +112,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     `&mid=${encodeURIComponent(params.mid)}` +
     `&sig=${encodeURIComponent(sig)}`;
 
-  // 5) Audit download issuance (best-effort)
+  // 5) Audit download issuance
   try {
     await AuditService.recordDownload({
       briefId: brief.id,
-      memberId: String(ctx.member?.id ?? ctx.member?.memberId ?? "unknown"),
-      email: String(ctx.member?.email ?? "unknown"),
+      memberId: memberId,
+      email: memberEmail,
       ip: getClientIp(req),
       userAgent: String(req.headers["user-agent"] || "unknown"),
       success: true,
       latencyMs: Date.now() - startTime,
     });
-    await AuditService.incrementAssetMetrics(brief.id);
-  } catch {}
+    
+    if (AuditService.incrementAssetMetrics) {
+      await AuditService.incrementAssetMetrics(brief.id);
+    }
+  } catch (e) {
+    console.error("[AUDIT_FAILURE]", e);
+  }
 
   return res.status(200).json({
     ok: true,

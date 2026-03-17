@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* pages/directorate/dossier/[id].tsx
-   DIRECTORATE DOSSIER — pages-router safe, admin-gated, Prisma-safe
+   DIRECTORATE DOSSIER — hardened, pages-router safe, SSR admin-gated
 */
 
 import * as React from "react";
@@ -8,7 +8,6 @@ import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import { withUnifiedAuth } from "@/lib/auth/withUnifiedAuth";
 import {
   ArrowLeft,
   Terminal,
@@ -28,7 +27,7 @@ type DecisionRow = {
 type IntakePayload = {
   decisions?: DecisionRow[];
   riskProfile?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 interface DossierProps {
@@ -72,7 +71,7 @@ function getStatusTone(status: string): string {
     return "border-red-900 bg-red-900/10 text-red-400";
   }
 
-  return "border-zinc-800 text-zinc-500";
+  return "border-zinc-800 bg-zinc-900/20 text-zinc-500";
 }
 
 function getScoreTone(score: number): string {
@@ -81,23 +80,23 @@ function getScoreTone(score: number): string {
   return "text-zinc-500";
 }
 
-function coercePayload(input: any): IntakePayload {
+function coercePayload(input: unknown): IntakePayload {
   if (!input || typeof input !== "object" || Array.isArray(input)) return {};
   return input as IntakePayload;
 }
 
 function coerceDecisions(payload: IntakePayload): DecisionRow[] {
-  if (!Array.isArray(payload?.decisions)) return [];
+  if (!Array.isArray(payload.decisions)) return [];
 
   return payload.decisions.map((item: any, index: number) => ({
     label: String(item?.label || `Issue ${index + 1}`),
     reasoning: String(item?.reasoning || "No reasoning provided."),
-    weight: Number(item?.weight || 0),
+    weight: Number.isFinite(Number(item?.weight)) ? Number(item.weight) : 0,
   }));
 }
 
 const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
-  const payload = coercePayload(intake?.payload);
+  const payload = coercePayload(intake.payload);
   const decisions = coerceDecisions(payload);
 
   return (
@@ -109,7 +108,7 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
     >
       <main className="min-h-screen bg-[#050505]">
         <section className="relative overflow-hidden border-b border-zinc-900">
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 aol-vignette" />
             <div className="absolute inset-0 aol-grain opacity-[0.08]" />
             <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent" />
@@ -132,7 +131,7 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
                   </div>
 
                   <h1 className="mt-5 font-serif text-4xl tracking-tight text-white md:text-5xl">
-                    Dossier_{intake.id.substring(0, 8)}
+                    Dossier_{intake.id.slice(0, 8)}
                   </h1>
 
                   <p className="mt-3 text-sm uppercase tracking-[0.18em] text-zinc-500">
@@ -148,7 +147,9 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
               <div className="flex flex-wrap gap-3">
                 <div className="border border-zinc-800 bg-zinc-900 px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-zinc-300">
                   Gravity Score:{" "}
-                  <span className={getScoreTone(intake.score)}>{intake.score}/25</span>
+                  <span className={getScoreTone(intake.score)}>
+                    {intake.score}/25
+                  </span>
                 </div>
 
                 <div
@@ -175,48 +176,54 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
                 </div>
 
                 <div className="border border-zinc-800 bg-zinc-900/30 p-6">
-                  {decisions.length ? (
+                  {decisions.length > 0 ? (
                     <div className="space-y-6">
-                      {decisions.map((decision, idx) => (
-                        <div
-                          key={`${decision.label}-${idx}`}
-                          className="border-b border-zinc-800 pb-6 last:border-0 last:pb-0"
-                        >
-                          <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-500">
-                            Issue_{idx + 1}: {decision.label}
-                          </h2>
+                      {decisions.map((decision, idx) => {
+                        const safeWeight = Math.max(
+                          0,
+                          Math.min(5, Number(decision.weight || 0))
+                        );
+                        const width = `${(safeWeight / 5) * 100}%`;
 
-                          <p className="mb-4 font-sans text-sm leading-relaxed text-zinc-300">
-                            {decision.reasoning}
-                          </p>
+                        return (
+                          <div
+                            key={`${decision.label}-${idx}`}
+                            className="border-b border-zinc-800 pb-6 last:border-0 last:pb-0"
+                          >
+                            <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-500">
+                              Issue_{idx + 1}: {decision.label}
+                            </h2>
 
-                          <div className="flex items-center gap-4">
-                            <div className="h-1 flex-1 overflow-hidden rounded-full bg-zinc-800">
-                              <div
-                                className="h-full bg-amber-500"
-                                style={{
-                                  width: `${Math.max(
-                                    0,
-                                    Math.min(100, (Number(decision.weight || 0) / 5) * 100)
-                                  )}%`,
-                                }}
-                              />
+                            <p className="mb-4 text-sm leading-relaxed text-zinc-300">
+                              {decision.reasoning}
+                            </p>
+
+                            <div className="flex items-center gap-4">
+                              <div className="h-1 flex-1 overflow-hidden rounded-full bg-zinc-800">
+                                <div
+                                  className="h-full bg-amber-500"
+                                  style={{ width }}
+                                />
+                              </div>
+                              <span className="text-[11px] text-zinc-500">
+                                Weight: {safeWeight}/5
+                              </span>
                             </div>
-                            <span className="text-[11px] text-zinc-500">
-                              Weight: {Number(decision.weight || 0)}/5
-                            </span>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="py-10 text-center">
                       <ShieldCheck className="mx-auto h-6 w-6 text-zinc-700" />
-                      <h3 className="mt-4 text-base text-zinc-200">No structured decision logic found</h3>
+                      <h3 className="mt-4 text-base text-zinc-200">
+                        No structured decision logic found
+                      </h3>
                       <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-zinc-500">
-                        The dossier payload does not currently contain a usable decisions array.
-                        Either the intake was captured on an older schema, or the upstream logic
-                        engine did not emit structured trade-off data.
+                        The dossier payload does not currently contain a usable
+                        decisions array. Either the intake was captured on an
+                        older schema, or the upstream logic engine did not emit
+                        structured trade-off data.
                       </p>
                     </div>
                   )}
@@ -232,11 +239,15 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
                 </div>
 
                 <div className="max-h-[32rem] overflow-y-auto border border-zinc-800 bg-black p-4 font-mono leading-relaxed text-emerald-500/80">
-                  <div className="mb-2 text-zinc-700">// BEGIN RAW PAYLOAD DECODE</div>
+                  <div className="mb-2 text-zinc-700">
+                    // BEGIN RAW PAYLOAD DECODE
+                  </div>
                   <pre className="whitespace-pre-wrap break-words">
                     {JSON.stringify(payload, null, 2)}
                   </pre>
-                  <div className="mt-2 text-zinc-700">// END DECODE</div>
+                  <div className="mt-2 text-zinc-700">
+                    // END DECODE
+                  </div>
                 </div>
               </section>
             </div>
@@ -245,13 +256,15 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
               <div className="border border-zinc-800 bg-zinc-900/20 p-6">
                 <h2 className="mb-4 flex items-center gap-2 uppercase text-white">
                   <AlertTriangle size={14} className="text-amber-500" />
-                  <span className="text-[11px] tracking-[0.24em]">Assessment_Notes</span>
+                  <span className="text-[11px] tracking-[0.24em]">
+                    Assessment_Notes
+                  </span>
                 </h2>
 
                 <p className="mb-6 text-sm italic leading-relaxed text-zinc-500">
-                  The following parameters were calculated from the intake dossier and current
-                  review assumptions. Any score above 18 should be treated as mandatory
-                  Directorate attention.
+                  The following parameters were calculated from the intake
+                  dossier and current review assumptions. Any score above 18
+                  should be treated as mandatory Directorate attention.
                 </p>
 
                 <ul className="space-y-4 text-[11px] uppercase tracking-[0.14em]">
@@ -262,7 +275,7 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
                   <li className="flex justify-between border-b border-zinc-800 pb-2">
                     <span className="text-zinc-500">Risk_Appetite</span>
                     <span className="text-white">
-                      {String(payload?.riskProfile || "CALIBRATED")}
+                      {String(payload.riskProfile || "CALIBRATED")}
                     </span>
                   </li>
                   <li className="flex justify-between border-b border-zinc-800 pb-2">
@@ -271,7 +284,9 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
                   </li>
                   <li className="flex justify-between">
                     <span className="text-zinc-500">Review_Status</span>
-                    <span className="text-white">{toTitleCase(intake.status)}</span>
+                    <span className="text-white">
+                      {toTitleCase(intake.status)}
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -279,16 +294,18 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
               <div className="border border-zinc-800 bg-black p-6">
                 <h2 className="mb-4 flex items-center gap-2 uppercase text-white">
                   <Cpu size={14} className="text-zinc-500" />
-                  <span className="text-[11px] tracking-[0.24em]">Background_Tasks</span>
+                  <span className="text-[11px] tracking-[0.24em]">
+                    Background_Tasks
+                  </span>
                 </h2>
 
                 <div className="space-y-3 text-[11px] uppercase tracking-[0.14em]">
                   <div className="flex items-center gap-3">
-                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     <span>Encryption_Layer: Active</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     <span>Prisma_Sync: Complete</span>
                   </div>
                   <div className="flex items-center gap-3 text-zinc-700">
@@ -301,13 +318,15 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
               <div className="border border-zinc-800 bg-gradient-to-b from-zinc-950 to-black p-6">
                 <h2 className="mb-4 flex items-center gap-2 uppercase text-white">
                   <FileText size={14} className="text-zinc-500" />
-                  <span className="text-[11px] tracking-[0.24em]">Dossier_Controls</span>
+                  <span className="text-[11px] tracking-[0.24em]">
+                    Dossier_Controls
+                  </span>
                 </h2>
 
                 <div className="space-y-3 text-sm text-zinc-400">
                   <p>
-                    This surface is intended for scan speed, structured review, and direct access
-                    to underlying intake intelligence.
+                    This surface is intended for scan speed, structured review,
+                    and direct access to underlying intake intelligence.
                   </p>
                 </div>
 
@@ -329,11 +348,40 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<DossierProps> = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<DossierProps> = async (
+  ctx
+) => {
+  const { params, req, res } = ctx;
   const id = String(params?.id || "").trim();
+
   if (!id) return { notFound: true };
 
-  const [{ default: prisma }] = await Promise.all([import("@/lib/prisma")]);
+  const [{ getServerSession }, authModule, prismaModule] = await Promise.all([
+    import("next-auth/next"),
+    import("@/pages/api/auth/[...nextauth]"),
+    import("@/lib/prisma"),
+  ]);
+
+  const session = await getServerSession(req, res, authModule.authOptions);
+
+  const maybeUser = session?.user as { role?: string } | undefined;
+  const maybeTier = (session as any)?.aol?.tier as string | undefined;
+
+  const isAdmin =
+    maybeUser?.role === "ADMIN" ||
+    maybeUser?.role === "owner" ||
+    maybeTier === "owner";
+
+  if (!session || !isAdmin) {
+    return {
+      redirect: {
+        destination: "/auth/signin",
+        permanent: false,
+      },
+    };
+  }
+
+  const prisma = prismaModule.default ?? prismaModule.prisma;
 
   const rawIntake = await prisma.strategyRoomIntake.findUnique({
     where: { id },
@@ -353,12 +401,16 @@ export const getServerSideProps: GetServerSideProps<DossierProps> = async ({ par
   const intake = {
     id: String(rawIntake.id),
     fullName: String(rawIntake.fullName || "Unnamed Principal"),
-    organisation: String(rawIntake.organisation || "Unspecified Organisation"),
+    organisation: String(
+      rawIntake.organisation || "Unspecified Organisation"
+    ),
     score: Number(rawIntake.score || 0),
     status: String(rawIntake.status || "UNKNOWN"),
     createdAt: new Date(rawIntake.createdAt).toISOString(),
     payload:
-      rawIntake.payload && typeof rawIntake.payload === "object" && !Array.isArray(rawIntake.payload)
+      rawIntake.payload &&
+      typeof rawIntake.payload === "object" &&
+      !Array.isArray(rawIntake.payload)
         ? (rawIntake.payload as IntakePayload)
         : {},
   };
@@ -370,4 +422,4 @@ export const getServerSideProps: GetServerSideProps<DossierProps> = async ({ par
   };
 };
 
-export default withUnifiedAuth(DossierDetail, { requiredRole: "admin" });
+export default DossierDetail;

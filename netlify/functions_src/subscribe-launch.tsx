@@ -1,5 +1,6 @@
-// netlify/functions/subscribe-launch.ts
-import { Handler } from "@netlify/functions";
+// netlify/functions_src/subscribe-launch.ts
+import type { Handler } from "./_utils";
+
 
 interface LaunchSubscribeBody {
   email: string;

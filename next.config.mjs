@@ -15,11 +15,24 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
 
+  // ✅ Stable Production Tracing
+  outputFileTracingIncludes: {
+    "/api/assets/*": ["./vault/**/*"],
+    "/api/dl/*": ["./vault/**/*"],
+  },
+
+  // ✅ Force Prisma and Contentlayer to remain external
   serverExternalPackages: ["@prisma/client", "contentlayer2"],
 
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ["date-fns", "clsx", "tailwind-merge"],
+    optimizePackageImports: [
+      "date-fns", 
+      "clsx", 
+      "tailwind-merge", 
+      "framer-motion", 
+      "lucide-react"
+    ],
   },
 
   transpilePackages: ["framer-motion"],
@@ -41,8 +54,40 @@ const nextConfig = {
       "@": path.resolve(__dirname),
     };
 
+    // ✅ CRITICAL: Prevent webpack from trying to process files in private/vault
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: [
+        '**/private/**',
+        '**/vault/**',
+        '**/node_modules/**',
+        '**/.git/**',
+        '**/*.pptx',
+        '**/*.pdf',
+        '**/*.docx',
+        '**/*.xlsx',
+        '**/*.zip',
+      ],
+    };
+
+    // ✅ Handle binary files as assets
+    config.module.rules.push({
+      test: /\.(pdf|doc|docx|ppt|pptx|xls|xlsx|zip|mp4|webm|ogg|mp3|wav|flac|aac|woff2?|eot|ttf|otf)$/i,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/media/[name].[hash][ext]'
+      }
+    });
+
+    // ✅ Explicitly exclude private directory from being processed by loaders
+    config.module.rules.push({
+      test: /\.(js|jsx|ts|tsx|md|mdx)$/,
+      include: [path.resolve(__dirname, 'private')],
+      use: 'null-loader', // This loader does nothing
+    });
+
+    // Client-side polyfills for process/fs
     if (!isServer) {
-      // ✅ FIX: Use require with createRequire
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -59,6 +104,30 @@ const nextConfig = {
     }
 
     return config;
+  },
+
+  // ✅ Add headers to allow PDF access
+  async headers() {
+    return [
+      {
+        source: '/vault/downloads/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/static/media/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 

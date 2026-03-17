@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/index.tsx — GLORIOUS FINISH (12/10) — RENDERING GUARANTEED
-// Fixes: Events/Ventures not rendering (no gating, hardened dynamic imports, error boundary)
+// pages/index.tsx — HOMEPAGE (Institutional publishing platform, production-safe)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -18,6 +17,9 @@ import {
   Compass,
   Vault,
   AlertTriangle,
+  BookOpen,
+  ScrollText,
+  LibraryBig,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -27,7 +29,12 @@ import WhoIWorkWith from "@/components/WhoIWorkWith";
 import { CanonInstitutionalIntro, OperatorBriefing } from "@/components/homepage";
 import type { CanonPrelude } from "@/components/homepage/CanonInstitutionalIntro";
 
-import { joinHref, normalizeSlug, sanitizeData } from "@/lib/content/shared";
+import { joinHref, normalizeSlug } from "@/lib/content/shared";
+import { sanitizeData } from "@/lib/content/server";
+
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
 
 /* -----------------------------------------------------------------------------
   TYPES
@@ -54,9 +61,25 @@ export type EventItem = {
   status?: "open" | "limited" | "full" | "past" | null;
 };
 
+type PublicationItem = {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  author: string;
+  date?: string | null;
+  tier: string;
+  category?: string | null;
+  readingTime?: string | null;
+  documentId?: string | null;
+  href: string;
+  pdfHref: string;
+};
+
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
+  featuredPublications: PublicationItem[];
   events: EventItem[];
   canonPrelude: CanonPrelude;
   counts: {
@@ -65,12 +88,12 @@ type HomePageProps = {
     briefs: number;
     downloads: number;
     library: number;
+    publications: number;
   };
 };
 
 /* -----------------------------------------------------------------------------
   HARDENED DYNAMIC IMPORTS
-  - If any import fails, we render a clean fallback instead of “nothing”.
 ----------------------------------------------------------------------------- */
 const StrategicFunnelStrip = dynamic(
   () =>
@@ -91,15 +114,8 @@ const VaultTeaserRail = dynamic(
 const EventsSection = dynamic(
   () =>
     import("@/components/homepage/EventsSection").catch(() => ({
-      default: (p: any) => (
-        <InlineFail
-          label="Events module failed to load"
-          hint="Check components/homepage/EventsSection.tsx export and syntax."
-        />
-      ),
+      default: () => <InlineFail label="Events module failed to load" />,
     })),
-  // IMPORTANT: keep SSR off if you’re on Next 16 + pages router and any module is client-only.
-  // Rendering is still guaranteed by the fallback above.
   { ssr: false, loading: () => <SectionSkeleton label="Loading events…" /> }
 );
 
@@ -114,12 +130,7 @@ const ContentShowcase = dynamic(
 const VenturesSection = dynamic(
   () =>
     import("@/components/homepage/VenturesSection").catch(() => ({
-      default: () => (
-        <InlineFail
-          label="Ventures module failed to load"
-          hint="Check components/homepage/VenturesSection.tsx export and any browser-only code."
-        />
-      ),
+      default: () => <InlineFail label="Ventures module failed to load" />,
     })),
   { ssr: false, loading: () => <SectionSkeleton label="Loading ventures…" /> }
 );
@@ -133,7 +144,7 @@ const InstitutionalClose = dynamic(
 );
 
 /* -----------------------------------------------------------------------------
-  HOMEPAGE DESIGN SYSTEM (self-contained)
+  DESIGN SYSTEM COMPONENTS
 ----------------------------------------------------------------------------- */
 const Hairline = ({ soft = false }: { soft?: boolean }) => (
   <div
@@ -192,10 +203,8 @@ function Section({
       <div className="absolute inset-x-0 bottom-0">
         <Hairline soft />
       </div>
-
       <div className="absolute inset-0 aol-grain opacity-[0.06]" />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 md:py-18 lg:py-20">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8 lg:py-24">
         {cap ? <SectionCap label={cap} /> : null}
         {children}
       </div>
@@ -217,6 +226,7 @@ function HQHeader({
   icon?: React.ReactNode;
 }) {
   const isCenter = align === "center";
+
   return (
     <div className={["max-w-4xl", isCenter ? "mx-auto text-center" : ""].join(" ")}>
       <div className={["flex items-center gap-2", isCenter ? "justify-center" : ""].join(" ")}>
@@ -230,12 +240,12 @@ function HQHeader({
         </span>
       </div>
 
-      <h2 className="mt-5 font-serif text-3xl md:text-4xl lg:text-5xl leading-[1.05] text-white">
+      <h2 className="mt-5 font-serif text-3xl leading-[1.05] text-white md:text-4xl lg:text-5xl">
         {title}
       </h2>
 
       {description ? (
-        <p className="mt-4 text-base md:text-lg leading-relaxed text-white/75">
+        <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
           {description}
         </p>
       ) : null}
@@ -255,14 +265,15 @@ function ExecutiveRail({
   align?: "left" | "center";
 }) {
   const isCenter = align === "center";
+
   return (
     <div className={["mt-8", isCenter ? "flex justify-center" : ""].join(" ")}>
       <div className="inline-flex flex-wrap items-center gap-3 rounded-full border border-white/12 bg-white/[0.05] px-4 py-2 backdrop-blur-md">
         {items.map((it) => (
           <Link
-            key={it.href + it.label}
+            key={`${it.href}-${it.label}`}
             href={it.href}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.28em] text-white/75 hover:bg-black/45 hover:text-white transition"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.28em] text-white/75 transition hover:bg-black/45 hover:text-white"
           >
             {it.icon ? <span className="text-amber-300">{it.icon}</span> : null}
             {it.label}
@@ -283,19 +294,16 @@ function Panel({
   return (
     <div
       className={[
-        "rounded-[30px] border border-white/12 bg-white/[0.055]",
+        "rounded-[30px] border border-white/12 bg-white/[0.05]",
         "shadow-[0_35px_95px_-60px_rgba(0,0,0,0.95)]",
         className,
       ].join(" ")}
     >
-      <div className="relative rounded-[28px] border border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="absolute inset-x-0 top-0">
-          <Hairline soft />
-        </div>
+      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/42 backdrop-blur-md">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.04),transparent_55%)]" />
         {children}
-        <div className="absolute inset-x-0 bottom-0">
-          <Hairline soft />
-        </div>
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
     </div>
   );
@@ -304,7 +312,7 @@ function Panel({
 function Bridge({ text }: { text: string }) {
   return (
     <div className="bg-[#070707]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <div className="flex-1">
             <Hairline soft />
@@ -321,6 +329,63 @@ function Bridge({ text }: { text: string }) {
   );
 }
 
+function PublicationCard({ item }: { item: PublicationItem }) {
+  return (
+    <Panel>
+      <div className="p-6 md:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+            {item.category || "Editorial"}
+          </div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/45">
+            {item.tier}
+          </div>
+        </div>
+
+        <h3 className="mt-5 font-serif text-2xl leading-tight text-white">
+          {item.title}
+        </h3>
+
+        {item.subtitle ? (
+          <p className="mt-3 text-sm leading-relaxed text-white/60">
+            {item.subtitle}
+          </p>
+        ) : null}
+
+        {item.description ? (
+          <p className="mt-4 text-sm leading-relaxed text-white/70">
+            {item.description}
+          </p>
+        ) : null}
+
+        <div className="mt-5 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+          {item.readingTime ? <span>{item.readingTime}</span> : null}
+          {item.date ? <span>{item.date}</span> : null}
+          {item.documentId ? <span>{item.documentId}</span> : null}
+        </div>
+
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link
+            href={item.href}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
+          >
+            Open Page <ChevronRight className="h-4 w-4" />
+          </Link>
+
+          <a
+            href={item.pdfHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+          >
+            Open PDF <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
 /* -----------------------------------------------------------------------------
   FAILSAFE UI
 ----------------------------------------------------------------------------- */
@@ -328,13 +393,13 @@ function InlineFail({ label, hint }: { label: string; hint?: string }) {
   return (
     <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-6">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-300 mt-0.5" />
+        <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-300" />
         <div>
           <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/90">
             Module status
           </div>
-          <div className="mt-2 text-white font-serif text-xl">{label}</div>
-          {hint ? <div className="mt-2 text-white/70 text-sm">{hint}</div> : null}
+          <div className="mt-2 font-serif text-xl text-white">{label}</div>
+          {hint ? <div className="mt-2 text-sm text-white/70">{hint}</div> : null}
         </div>
       </div>
     </div>
@@ -346,40 +411,32 @@ class ModuleBoundary extends React.Component<
   { hasError: boolean }
 > {
   state = { hasError: false };
+
   static getDerivedStateFromError() {
     return { hasError: true };
   }
+
   componentDidCatch(err: any) {
-    // keep silent in UI; logged for dev
     // eslint-disable-next-line no-console
     console.error(`[Homepage/${this.props.label}]`, err);
   }
-  render() {
-    if (this.state.hasError) return <InlineFail label={`${this.props.label} crashed`} />;
-    return this.props.children as any;
-  }
-}
 
-/* -----------------------------------------------------------------------------
-  SKELETONS
------------------------------------------------------------------------------ */
-function SkeletonLine({ w = "w-3/4", amber = false }: { w?: string; amber?: boolean }) {
-  return <div className={["h-3 rounded", amber ? "bg-amber-500/20" : "bg-white/10", w].join(" ")} />;
+  render() {
+    if (this.state.hasError) {
+      return <InlineFail label={`${this.props.label} crashed`} />;
+    }
+    return this.props.children;
+  }
 }
 
 function SectionSkeleton({ label }: { label: string }) {
   return (
-    <div className="rounded-[30px] border border-white/12 bg-white/[0.055] p-10 animate-pulse">
+    <div className="animate-pulse rounded-[30px] border border-white/12 bg-white/[0.055] p-10">
       <div className="flex items-center justify-between gap-4">
         <div className="h-10 w-10 rounded-2xl bg-white/10" />
         <div className="h-6 w-28 rounded-full bg-white/10" />
       </div>
       <div className="mt-6 h-7 w-64 rounded bg-white/10" />
-      <div className="mt-4 space-y-2">
-        <SkeletonLine w="w-5/6" />
-        <SkeletonLine w="w-2/3" />
-        <SkeletonLine w="w-1/2" />
-      </div>
       <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.3em] text-white/55">
         {label}
       </div>
@@ -390,19 +447,13 @@ function SectionSkeleton({ label }: { label: string }) {
 function ContentShowcaseSkeleton() {
   return (
     <div className="rounded-[30px] border border-white/12 bg-white/[0.055] p-10">
-      <div className="h-5 w-28 rounded bg-white/10 animate-pulse" />
-      <div className="mt-4 h-7 w-56 rounded bg-white/10 animate-pulse" />
-      <div className="mt-2 h-4 w-full max-w-md rounded bg-white/10 animate-pulse" />
-      <div className="mt-8 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-white/12 bg-black/40 p-6 animate-pulse">
-            <div className="h-3 w-32 rounded bg-white/10" />
-            <div className="mt-4 h-5 w-5/6 rounded bg-white/10" />
-            <div className="mt-3 space-y-2">
-              <SkeletonLine w="w-5/6" />
-              <SkeletonLine w="w-2/3" />
-            </div>
-          </div>
+      <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
+      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-32 animate-pulse rounded-2xl border border-white/12 bg-black/40"
+          />
         ))}
       </div>
     </div>
@@ -410,13 +461,21 @@ function ContentShowcaseSkeleton() {
 }
 
 /* -----------------------------------------------------------------------------
-  HOMEPAGE
+  HOMEPAGE COMPONENT
 ----------------------------------------------------------------------------- */
 const HomePage: NextPage<HomePageProps> = ({
-  featuredShorts,
-  featuredBriefing,
-  events,
-  counts,
+  featuredShorts = [],
+  featuredBriefing = null,
+  featuredPublications = [],
+  events = [],
+  counts = {
+    shorts: 0,
+    canon: 0,
+    briefs: 0,
+    downloads: 0,
+    library: 0,
+    publications: 0,
+  },
   canonPrelude,
 }) => {
   const heroCounts = {
@@ -427,15 +486,30 @@ const HomePage: NextPage<HomePageProps> = ({
   };
 
   const actions = [
-    { href: "/canon", title: "Enter the Canon", description: "Doctrine, purpose, governance — compressed into one spine.", tag: "Primary" },
-    { href: "/vault", title: "Open the Vault", description: "Deployables: templates, packs, operating assets engineered for execution.", tag: "Deploy" },
-    { href: "/consulting/strategy-room", title: "Strategy Room", description: "For founders and leadership teams under pressure: architecture, cadence, decision rights.", tag: "Engage" },
+    {
+      href: "/canon",
+      title: "Enter the Canon",
+      description: "Doctrine, purpose, governance — compressed into one spine.",
+      tag: "Primary",
+    },
+    {
+      href: "/vault",
+      title: "Open the Vault",
+      description: "Deployables: templates, packs, operating assets engineered for execution.",
+      tag: "Deploy",
+    },
+    {
+      href: "/consulting/strategy-room",
+      title: "Strategy Room",
+      description: "For founders and leadership teams under pressure: architecture, cadence, decision rights.",
+      tag: "Engage",
+    },
   ];
 
   return (
     <Layout
       title="Abraham of London"
-      description="Institutional doctrine, disciplined strategy, and practical resources for builders."
+      description="Institutional doctrine, disciplined strategy, editorial canon, and deployable assets for builders."
       canonicalUrl="/"
       fullWidth
       headerTransparent
@@ -445,37 +519,35 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-home.jpg" />
       </Head>
 
-      <a
-        href="#prelude"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-black focus:px-4 focus:py-3 focus:text-[12px] focus:font-mono focus:uppercase focus:tracking-widest focus:text-amber-100 focus:ring-2 focus:ring-amber-500"
-      >
-        Skip to Prelude
-      </a>
-
-      {/* HERO */}
       <section className="relative bg-black">
         <CinematicHero
           counts={heroCounts}
-          onScroll={() => document.getElementById("prelude")?.scrollIntoView({ behavior: "smooth" })}
+          onScroll={() =>
+            document.getElementById("prelude")?.scrollIntoView({ behavior: "smooth" })
+          }
         />
       </section>
 
-      {/* PRELUDE */}
       <Section id="prelude" variant="surface" cap="Prelude — system spine">
         <AnchorOffset id="prelude" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Prelude"
             title="The spine of the entire system."
-            description="This is not a blog. It’s an institutional platform: doctrine → strategy → deployables."
+            description="This is not a blog. It is a disciplined platform: doctrine → editorial canon → strategy → deployables."
             icon={<Layers className="h-4 w-4" />}
           />
 
           <ExecutiveRail
             items={[
               { href: "/canon", label: "Canon", icon: <Compass className="h-3.5 w-3.5" /> },
+              { href: "/editorials", label: "Editorials", icon: <BookOpen className="h-3.5 w-3.5" /> },
               { href: "/vault", label: "Vault", icon: <Vault className="h-3.5 w-3.5" /> },
-              { href: "/library", label: "Library", icon: <Layers className="h-3.5 w-3.5" /> },
+              { href: "/library", label: "Library", icon: <LibraryBig className="h-3.5 w-3.5" /> },
             ]}
           />
 
@@ -503,31 +575,48 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="From doctrine → to credibility" />
 
-      {/* CREDIBILITY */}
       <Section id="proof" variant="surface" cap="Credibility — withstands scrutiny">
         <AnchorOffset id="proof" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Credibility"
             title="Why this holds under pressure."
-            description="If it can’t survive hostile cross-examination, it isn’t strategy — it’s theatre."
+            description="If it cannot survive hostile cross-examination, it is not strategy — it is theatre."
             icon={<ShieldCheck className="h-4 w-4" />}
           />
 
-          <div className="mt-10 grid lg:grid-cols-12 gap-8">
+          <div className="mt-10 grid gap-8 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <Panel>
                 <div className="p-6 md:p-10">
-                  <div className="grid md:grid-cols-3 gap-8">
+                  <div className="grid gap-8 md:grid-cols-3">
                     {[
-                      { n: "01", t: "Doctrine-backed", d: "Coherent worldview, moral frame, and decision logic designed to survive scrutiny." },
-                      { n: "02", t: "Systems-first", d: "Strategy as operating logic: cadence, controls, incentives, accountability loops." },
-                      { n: "03", t: "Indexed library", d: `A living archive: ${counts.library} registry items plus Canon, briefs, and deployables.` },
+                      {
+                        n: "01",
+                        t: "Doctrine-backed",
+                        d: "Coherent worldview, moral frame, and decision logic designed to survive scrutiny.",
+                      },
+                      {
+                        n: "02",
+                        t: "Systems-first",
+                        d: "Strategy as operating logic: cadence, controls, incentives, and accountability loops.",
+                      },
+                      {
+                        n: "03",
+                        t: "Indexed library",
+                        d: `A living platform: ${counts.library} registry items plus editorials, briefs, and deployables.`,
+                      },
                     ].map((x) => (
                       <div key={x.n} className="border-l border-amber-500/25 pl-5">
-                        <div className="text-[10px] font-mono tracking-[0.28em] text-amber-300/90">{x.n}</div>
-                        <div className="mt-2 text-white font-medium">{x.t}</div>
-                        <div className="mt-2 text-white/70 text-sm leading-relaxed">{x.d}</div>
+                        <div className="text-[10px] font-mono tracking-[0.28em] text-amber-300/90">
+                          {x.n}
+                        </div>
+                        <div className="mt-2 font-medium text-white">{x.t}</div>
+                        <div className="mt-2 text-sm leading-relaxed text-white/70">{x.d}</div>
                       </div>
                     ))}
                   </div>
@@ -544,8 +633,10 @@ const HomePage: NextPage<HomePageProps> = ({
 
                   {featuredBriefing ? (
                     <>
-                      <div className="mt-4 font-serif text-2xl text-white">{featuredBriefing.title}</div>
-                      <div className="mt-3 text-white/70 leading-relaxed">
+                      <div className="mt-4 font-serif text-2xl text-white">
+                        {featuredBriefing.title}
+                      </div>
+                      <div className="mt-3 leading-relaxed text-white/70">
                         {featuredBriefing.excerpt || "Operator-grade intelligence engineered for decisions."}
                       </div>
                       <div className="mt-6">
@@ -558,9 +649,8 @@ const HomePage: NextPage<HomePageProps> = ({
                       </div>
                     </>
                   ) : (
-                    <div className="mt-4 text-white/70 leading-relaxed">
-                      Mark a briefing as <span className="text-white">featured</span> and it will appear here as the
-                      on-deck operator card.
+                    <div className="mt-4 leading-relaxed text-white/70">
+                      No featured briefing available.
                     </div>
                   )}
                 </div>
@@ -570,16 +660,56 @@ const HomePage: NextPage<HomePageProps> = ({
         </motion.div>
       </Section>
 
-      <Bridge text="From credibility → to operators" />
+      {featuredPublications.length > 0 ? (
+        <>
+          <Bridge text="From credibility → to editorial canon" />
 
-      {/* WHO I WORK WITH */}
+          <Section id="publications" variant="default" cap="Editorial canon — flagship publications">
+            <AnchorOffset id="publications" />
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <HQHeader
+                eyebrow="Editorial Canon"
+                title="Books, flagship editorials, and institutional texts."
+                description="Publishing is now part of the operating system. These are not loose files. They are structured assets with canonical entry points."
+                icon={<ScrollText className="h-4 w-4" />}
+              />
+
+              <div className="mt-10 grid gap-6 lg:grid-cols-3">
+                {featuredPublications.slice(0, 3).map((item) => (
+                  <PublicationCard key={item.slug} item={item} />
+                ))}
+              </div>
+
+              <div className="mt-10 flex justify-center">
+                <Link
+                  href="/editorials"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
+                >
+                  Browse Publications <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </motion.div>
+          </Section>
+        </>
+      ) : null}
+
+      <Bridge text="From editorials → to operators" />
+
       <Section id="who" variant="default" cap="Operators — target audience">
         <AnchorOffset id="who" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Operators"
             title="Who this is built for."
-            description="Founders and leaders who prefer standards over slogans — and execution over performance."
+            description="Founders and leaders who prefer standards over slogans."
             icon={<Sparkles className="h-4 w-4" />}
           />
 
@@ -597,10 +727,13 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="From operators → to engagement lanes" />
 
-      {/* LANES */}
       <Section id="lanes" variant="surface" cap="Engagement — clean boundaries">
         <AnchorOffset id="lanes" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Engagement"
             title="Four lanes. No confusion."
@@ -622,24 +755,29 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="From lanes → to next actions" />
 
-      {/* PATHWAYS */}
       <Section id="pathways" variant="default" cap="Pathways — three moves">
         <AnchorOffset id="pathways" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Pathways"
             title="Three clean moves."
-            description="If you’re new: don’t wander. Pick a lane and move."
+            description="If you are new: do not wander. Pick a lane and move."
             icon={<ArrowRight className="h-4 w-4" />}
           />
 
-          <div className="mt-10 grid md:grid-cols-3 gap-6">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {actions.map((a) => (
               <Panel key={a.title}>
                 <div className="p-6 md:p-8">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">{a.tag}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+                    {a.tag}
+                  </div>
                   <div className="mt-4 font-serif text-2xl text-white">{a.title}</div>
-                  <div className="mt-3 text-white/70 leading-relaxed">{a.description}</div>
+                  <div className="mt-3 leading-relaxed text-white/70">{a.description}</div>
                   <div className="mt-6">
                     <Link
                       href={a.href}
@@ -652,29 +790,18 @@ const HomePage: NextPage<HomePageProps> = ({
               </Panel>
             ))}
           </div>
-
-          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { k: "Canon", v: counts.canon },
-              { k: "Briefs", v: counts.briefs },
-              { k: "Library", v: counts.library },
-              { k: "Dispatches", v: counts.shorts },
-            ].map((x) => (
-              <div key={x.k} className="rounded-2xl border border-white/12 bg-white/[0.055] p-5 text-center">
-                <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/65">{x.k}</div>
-                <div className="mt-2 font-serif text-3xl text-amber-300">{x.v}</div>
-              </div>
-            ))}
-          </div>
         </motion.div>
       </Section>
 
       <Bridge text="From actions → to events and assets" />
 
-      {/* EVENTS — ALWAYS RENDER (no gating) */}
       <Section id="events" variant="surface" cap="Events — live rooms">
         <AnchorOffset id="events" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Events"
             title="Salons, briefings, live rooms."
@@ -694,15 +821,18 @@ const HomePage: NextPage<HomePageProps> = ({
         </motion.div>
       </Section>
 
-      {/* VAULT */}
       <Section id="vault" variant="default" cap="Vault — deployables">
         <AnchorOffset id="vault" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Vault"
             title="Deployables for serious execution."
             description="Templates, packs, and operating assets engineered for reuse — not decoration."
-            icon={<Layers className="h-4 w-4" />}
+            icon={<Vault className="h-4 w-4" />}
           />
 
           <div className="mt-10">
@@ -717,71 +847,86 @@ const HomePage: NextPage<HomePageProps> = ({
         </motion.div>
       </Section>
 
-      <Bridge text="From deployables → to intelligence feed" />
+      {featuredBriefing ? (
+        <>
+          <Bridge text="From deployables → to intelligence feed" />
 
-      {/* FEATURED BRIEFING */}
-      {featuredBriefing && (
-        <Section id="briefing" variant="surface" cap="Briefing — operator intelligence">
-          <AnchorOffset id="briefing" />
-          <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <HQHeader
-              eyebrow="Briefing"
-              title="Operator-grade intelligence."
-              description="Focused transmission: clarity that survives hostile scrutiny."
-              icon={<ShieldCheck className="h-4 w-4" />}
-            />
+          <Section id="briefing" variant="surface" cap="Briefing — operator intelligence">
+            <AnchorOffset id="briefing" />
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <HQHeader
+                eyebrow="Briefing"
+                title="Operator-grade intelligence."
+                description="Focused transmission: clarity that survives hostile scrutiny."
+                icon={<ShieldCheck className="h-4 w-4" />}
+              />
 
-            <div className="mt-10">
-              <Panel>
-                <div className="p-6 md:p-10">
-                  <ModuleBoundary label="OperatorBriefing">
-                    <OperatorBriefing featured={featuredBriefing as any} />
-                  </ModuleBoundary>
-                </div>
-              </Panel>
-            </div>
-          </motion.div>
-        </Section>
-      )}
+              <div className="mt-10">
+                <Panel>
+                  <div className="p-6 md:p-10">
+                    <ModuleBoundary label="OperatorBriefing">
+                      <OperatorBriefing featured={featuredBriefing as any} />
+                    </ModuleBoundary>
+                  </div>
+                </Panel>
+              </div>
+            </motion.div>
+          </Section>
+        </>
+      ) : null}
 
-      {/* DISPATCHES */}
-      {featuredShorts.length > 0 && (
-        <Section id="dispatches" variant="default" cap="Dispatches — rapid intel">
-          <AnchorOffset id="dispatches" />
-          <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <HQHeader
-              eyebrow="Dispatches"
-              title="Short, sharp intelligence notes."
-              description="Engineered for retrieval and reuse — fast, crisp, disciplined."
-              icon={<Sparkles className="h-4 w-4" />}
-            />
+      {featuredShorts.length > 0 ? (
+        <>
+          <Bridge text="From intelligence → to dispatches" />
 
-            <div className="mt-10">
-              <Panel>
-                <div className="p-6 md:p-10">
-                  <ModuleBoundary label="ContentShowcase">
-                    <ContentShowcase
-                      items={featuredShorts as any}
-                      title="Dispatches"
-                      description="Short, sharp intelligence notes engineered for retrieval and reuse."
-                    />
-                  </ModuleBoundary>
-                </div>
-              </Panel>
-            </div>
-          </motion.div>
-        </Section>
-      )}
+          <Section id="dispatches" variant="default" cap="Dispatches — rapid intel">
+            <AnchorOffset id="dispatches" />
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <HQHeader
+                eyebrow="Dispatches"
+                title="Short, sharp intelligence notes."
+                description="Engineered for retrieval and reuse — fast, crisp, disciplined."
+                icon={<Sparkles className="h-4 w-4" />}
+              />
+
+              <div className="mt-10">
+                <Panel>
+                  <div className="p-6 md:p-10">
+                    <ModuleBoundary label="ContentShowcase">
+                      <ContentShowcase
+                        items={featuredShorts as any}
+                        title="Dispatches"
+                        description="Short, sharp intelligence notes engineered for retrieval and reuse."
+                      />
+                    </ModuleBoundary>
+                  </div>
+                </Panel>
+              </div>
+            </motion.div>
+          </Section>
+        </>
+      ) : null}
 
       <Bridge text="From content → to ventures" />
 
-      {/* VENTURES — ALWAYS RENDER (no gating) */}
       <Section id="ventures" variant="surface" cap="Ventures — institutions in motion">
         <AnchorOffset id="ventures" />
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <HQHeader
             eyebrow="Ventures"
-            title="Institutions don’t remain ideas."
+            title="Institutions do not remain ideas."
             description="The platform supports real work: ventures, systems, and deployable infrastructure."
             icon={<Layers className="h-4 w-4" />}
           />
@@ -798,9 +943,12 @@ const HomePage: NextPage<HomePageProps> = ({
         </motion.div>
       </Section>
 
-      {/* CLOSE */}
       <Section id="close" variant="default" cap="Close — institutional seal">
-        <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           <div className="mx-auto max-w-5xl">
             <Panel>
               <div className="p-6 md:p-10">
@@ -816,32 +964,40 @@ const HomePage: NextPage<HomePageProps> = ({
   );
 };
 
-/* ============================================================================
-  DATA FETCHING (same logic)
-============================================================================ */
-import fs from "fs";
-import path from "path";
-
+/* -----------------------------------------------------------------------------
+  DATA HELPERS
+----------------------------------------------------------------------------- */
 function safeString(v: unknown, fallback = ""): string {
   return typeof v === "string" && v.trim() ? v : fallback;
 }
+
 function safeDateISO(v: any): string | null {
   const s = typeof v === "string" ? v : null;
   if (!s) return null;
   const t = Date.parse(s);
   return Number.isFinite(t) ? new Date(t).toISOString() : null;
 }
+
 function kindLower(d: any): string {
   return String(d?.kind || d?.type || d?.docKind || "").toLowerCase();
 }
+
 function flattenedPath(d: any): string {
   return String(d?._raw?.flattenedPath || "").toLowerCase();
 }
+
 function computedSlug(d: any): string {
   return String(d?.slugComputed || d?.slug || d?._raw?.flattenedPath || "");
 }
+
 function pickBooleanFlag(d: any): boolean {
-  return Boolean(d?.featured === true || d?.isFeatured === true || d?.home === true || d?.showOnHome === true || d?.homepage === true);
+  return Boolean(
+    d?.featured === true ||
+      d?.isFeatured === true ||
+      d?.home === true ||
+      d?.showOnHome === true ||
+      d?.homepage === true
+  );
 }
 
 function toItem(d: any): FeaturedItem | null {
@@ -849,20 +1005,23 @@ function toItem(d: any): FeaturedItem | null {
   const fp = flattenedPath(d);
 
   const isShort = k === "short" || fp.startsWith("shorts/");
-  const isBrief = k === "brief" || fp.startsWith("briefs/");
+  const isBrief =
+    k === "brief" || fp.startsWith("briefs/") || fp.startsWith("vault/briefs/");
   const isPost = k === "post" || fp.startsWith("blog/") || fp.startsWith("posts/");
 
-  const collection = isShort ? "shorts" : isBrief ? "briefs" : isPost ? "blog" : null;
+  const collection = isShort ? "shorts" : isBrief ? "vault/briefs" : isPost ? "blog" : null;
   if (!collection) return null;
 
   const rawSlug = computedSlug(d);
   const bare = normalizeSlug(String(rawSlug))
     .replace(/^shorts\//, "")
     .replace(/^briefs\//, "")
+    .replace(/^vault\/briefs\//, "")
     .replace(/^blog\//, "")
     .replace(/^posts\//, "");
 
-  const href = joinHref(collection, bare);
+  const href =
+    collection === "vault/briefs" ? `/vault/briefs/${bare}` : joinHref(collection, bare);
 
   return {
     title: safeString(d?.title, "Untitled"),
@@ -884,8 +1043,13 @@ function deriveEventMode(d: any): EventItem["mode"] {
 
 function deriveEventStatus(date: string, explicit?: any): EventItem["status"] {
   const explicitRaw = String(explicit || "").toLowerCase();
-  if (explicitRaw === "open" || explicitRaw === "limited" || explicitRaw === "full" || explicitRaw === "past") {
-    return explicitRaw as any;
+  if (
+    explicitRaw === "open" ||
+    explicitRaw === "limited" ||
+    explicitRaw === "full" ||
+    explicitRaw === "past"
+  ) {
+    return explicitRaw as EventItem["status"];
   }
 
   const t = Date.parse(date);
@@ -893,7 +1057,16 @@ function deriveEventStatus(date: string, explicit?: any): EventItem["status"] {
 
   const now = new Date();
   const eventDay = new Date(t);
-  const endOfEventDay = new Date(eventDay.getFullYear(), eventDay.getMonth(), eventDay.getDate(), 23, 59, 59, 999);
+  const endOfEventDay = new Date(
+    eventDay.getFullYear(),
+    eventDay.getMonth(),
+    eventDay.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+
   return endOfEventDay.getTime() < now.getTime() ? "past" : "open";
 }
 
@@ -906,7 +1079,15 @@ function toEvent(d: any): EventItem | null {
   const rawSlug = computedSlug(d);
   const bare = normalizeSlug(String(rawSlug)).replace(/^events\//, "");
 
-  const date = d?.eventDate || d?.date || d?.startDate || d?.datetime || d?.start || d?.startsAt || null;
+  const date =
+    d?.eventDate ||
+    d?.date ||
+    d?.startDate ||
+    d?.datetime ||
+    d?.start ||
+    d?.startsAt ||
+    null;
+
   if (!date) return null;
 
   const mode = deriveEventMode(d);
@@ -955,6 +1136,7 @@ function collectAnyDocs(data: any): any[] {
     data?.allBriefs,
     data?.allCanon,
     data?.allDownloads,
+    data?.allBooks,
     data?.documents,
   ];
 
@@ -965,6 +1147,7 @@ function collectAnyDocs(data: any): any[] {
 
   const seen = new Set<string>();
   const out: any[] = [];
+
   for (const d of flat) {
     const key =
       String(d?._id || "") ||
@@ -991,13 +1174,71 @@ function shouldForceFallback(
 
 const PRELUDE_SOURCE_FP = "books/the-architecture-of-human-purpose";
 
+function readPrintSourcePublications(): PublicationItem[] {
+  const dir = path.join(process.cwd(), "scripts", "pdf", "print-sources");
+  if (!fs.existsSync(dir)) return [];
+
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".print.md"));
+
+  return files
+    .map((file) => {
+      const raw = fs.readFileSync(path.join(dir, file), "utf8");
+      const parsed = matter(raw);
+      const data = parsed.data as Record<string, unknown>;
+
+      const slug = file.replace(/\.print\.md$/i, "");
+      const title = safeString(data.title, slug);
+      const subtitle = safeString(data.subtitle) || null;
+      const description = safeString(data.description) || null;
+      const author = safeString(data.author, "Abraham of London");
+      const date = safeString(data.date) || null;
+      const tier = safeString(data.tier, "public");
+      const category = safeString(data.category) || "Editorial";
+      const readingTime =
+        safeString(data.readingTime) ||
+        safeString(data.readTime) ||
+        null;
+      const documentId = safeString(data.documentId) || null;
+
+      return {
+        slug,
+        title,
+        subtitle,
+        description,
+        author,
+        date,
+        tier,
+        category,
+        readingTime,
+        documentId,
+        href: `/editorials/${slug}`,
+        pdfHref: `/assets/downloads/${slug}.pdf`,
+      };
+    })
+    .sort((a, b) => {
+      const da = Date.parse(a.date || "") || 0;
+      const db = Date.parse(b.date || "") || 0;
+      return db - da;
+    });
+}
+
+/* -----------------------------------------------------------------------------
+  DATA FETCHING
+----------------------------------------------------------------------------- */
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
   let events: EventItem[] = [];
+  let featuredPublications: PublicationItem[] = readPrintSourcePublications();
 
-  const counts = { shorts: 0, canon: 0, briefs: 0, downloads: 0, library: 0 };
-  counts.library = readLibraryCount();
+  const counts = {
+    shorts: 0,
+    canon: 0,
+    briefs: 0,
+    downloads: 0,
+    library: readLibraryCount(),
+    publications: featuredPublications.length,
+  };
 
   let canonPrelude: CanonPrelude = {
     title: "The Architecture of Human Purpose",
@@ -1015,17 +1256,31 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const computeFromDocs = (docsIn: any[], dataForBooks?: any) => {
     const stableDocs = (docsIn || []).filter((d) => !isDraftLocal(d));
 
-    const shortsDocs = stableDocs.filter((d) => kindLower(d) === "short" || flattenedPath(d).startsWith("shorts/"));
-    const canonDocs = stableDocs.filter((d) => kindLower(d) === "canon" || flattenedPath(d).startsWith("canon/"));
-    const briefsDocs = stableDocs.filter((d) => kindLower(d) === "brief" || flattenedPath(d).startsWith("briefs/"));
-    const downloadsDocs = stableDocs.filter((d) => kindLower(d) === "download" || flattenedPath(d).startsWith("downloads/"));
+    const shortsDocs = stableDocs.filter(
+      (d) => kindLower(d) === "short" || flattenedPath(d).startsWith("shorts/")
+    );
+    const canonDocs = stableDocs.filter(
+      (d) => kindLower(d) === "canon" || flattenedPath(d).startsWith("canon/")
+    );
+    const briefsDocs = stableDocs.filter(
+      (d) =>
+        kindLower(d) === "brief" ||
+        flattenedPath(d).startsWith("briefs/") ||
+        flattenedPath(d).startsWith("vault/briefs/")
+    );
+    const downloadsDocs = stableDocs.filter(
+      (d) => kindLower(d) === "download" || flattenedPath(d).startsWith("downloads/")
+    );
 
     counts.shorts = shortsDocs.length;
     counts.canon = canonDocs.length;
     counts.briefs = briefsDocs.length;
     counts.downloads = downloadsDocs.length;
 
-    const books = Array.isArray((dataForBooks as any)?.allBooks) ? (dataForBooks as any).allBooks : [];
+    const books = Array.isArray((dataForBooks as any)?.allBooks)
+      ? (dataForBooks as any).allBooks
+      : [];
+
     const preludeBook = books.find((b: any) => {
       const fp = String(b?._raw?.flattenedPath || "");
       const slug = String(b?.slug || "");
@@ -1037,7 +1292,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
         title: safeString(preludeBook?.title, canonPrelude.title),
         subtitle: safeString(preludeBook?.subtitle, canonPrelude.subtitle),
         description: safeString(preludeBook?.description, canonPrelude.description),
-        excerpt: safeString(preludeBook?.excerpt || preludeBook?.description, canonPrelude.excerpt),
+        excerpt: safeString(
+          preludeBook?.excerpt || preludeBook?.description,
+          canonPrelude.excerpt
+        ),
         coverImage: safeString(preludeBook?.coverImage, canonPrelude.coverImage),
         href: "/books/the-architecture-of-human-purpose-landing",
         canonHref: "/canon",
@@ -1045,9 +1303,17 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       };
     }
 
-    const rawEvents = stableDocs.filter((d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/"));
-    events = rawEvents.map(toEvent).filter(Boolean) as EventItem[];
-    events = events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 6);
+    const rawEvents = stableDocs.filter(
+      (d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/")
+    );
+
+    events = rawEvents
+      .map(toEvent)
+      .filter(Boolean) as EventItem[];
+
+    events = events
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 6);
 
     const candidates = stableDocs.map(toItem).filter(Boolean) as FeaturedItem[];
     const featured = candidates.filter((x) => {
@@ -1055,7 +1321,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       return origin ? pickBooleanFlag(origin) : false;
     });
 
-    featuredBriefing = featured.find((x) => x.kind === "brief") || featured.find((x) => x.kind === "short") || null;
+    featuredBriefing =
+      featured.find((x) => x.kind === "brief") ||
+      featured.find((x) => x.kind === "short") ||
+      null;
 
     const featuredShortOnly = featured
       .filter((x) => x.kind === "short")
@@ -1066,7 +1335,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       featuredShortOnly.length > 0
         ? featuredShortOnly
         : (shortsDocs
-            .sort((a: any, b: any) => (Date.parse(b?.date || "") || 0) - (Date.parse(a?.date || "") || 0))
+            .sort(
+              (a: any, b: any) =>
+                (Date.parse(b?.date || "") || 0) - (Date.parse(a?.date || "") || 0)
+            )
             .slice(0, 8)
             .map(toItem)
             .filter(Boolean) as FeaturedItem[]);
@@ -1075,23 +1347,37 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   try {
     const mod: any = await import("@/lib/content/server");
     const getContentlayerData = mod?.getContentlayerData;
-    if (typeof getContentlayerData !== "function") throw new Error("getContentlayerData missing");
+
+    if (typeof getContentlayerData !== "function") {
+      throw new Error("getContentlayerData missing");
+    }
+
     const data = getContentlayerData();
     const docs = collectAnyDocs(data);
     computeFromDocs(docs, data);
-    if (shouldForceFallback(counts, docs.length)) throw new Error("FORCE_FALLBACK_TO_GENERATED");
+
+    if (shouldForceFallback(counts, docs.length)) {
+      throw new Error("FORCE_FALLBACK_TO_GENERATED");
+    }
   } catch {
     try {
       const gen: any = await import("contentlayer/generated");
       const docs = collectAnyDocs(gen);
       computeFromDocs(docs, gen);
     } catch {
-      // keep fallback props
+      // keep defaults
     }
   }
 
   return {
-    props: sanitizeData({ featuredShorts, featuredBriefing, events, counts, canonPrelude }),
+    props: sanitizeData({
+      featuredShorts,
+      featuredBriefing,
+      featuredPublications,
+      events,
+      counts,
+      canonPrelude,
+    }),
     revalidate: 3600,
   };
 };

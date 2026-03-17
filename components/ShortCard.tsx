@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/ShortCard.tsx — HOUSE TYPEFINISH + QUIET UTILITIES (12/10)
+// components/ShortCard.tsx
 
 import * as React from "react";
 import Link from "next/link";
@@ -16,15 +16,11 @@ type ShortCardModel = {
   intensity?: 1 | 2 | 3 | 4 | 5;
   lineage?: string | null;
   coverImage?: string | null;
-
-  /** Optional: your utilities layer (likes/saves/etc) */
   metrics?: {
     likes?: number;
     saves?: number;
-    views?: number; // can override views
+    views?: number;
   };
-
-  /** Optional: whether the viewer has liked/saved (for subtle state) */
   state?: {
     liked?: boolean;
     saved?: boolean;
@@ -34,6 +30,17 @@ type ShortCardModel = {
 function safeNumber(n: unknown, fallback = 0) {
   const x = typeof n === "number" ? n : Number(n);
   return Number.isFinite(x) ? x : fallback;
+}
+
+function safeString(v: unknown) {
+  return typeof v === "string" ? v : "";
+}
+
+function normalizeCardSlug(slug: unknown) {
+  return safeString(slug)
+    .trim()
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/^shorts\//, "");
 }
 
 function intensityLabel(i?: number) {
@@ -57,11 +64,12 @@ export default function ShortCard({
   short: ShortCardModel;
   onClick?: () => void;
 }) {
-  const href = `/shorts/${short.slug}`;
-  const hasCover = !!short.coverImage;
+  const routeSlug = normalizeCardSlug(short.slug);
+  const href = `/shorts/${routeSlug}`;
+  const hasCover = !!safeString(short.coverImage);
 
-  const tagA = (short.category || "Intel").toUpperCase();
-  const tagB = short.readTime || "2 min";
+  const tagA = safeString(short.category || "Intel").toUpperCase();
+  const tagB = safeString(short.readTime || "2 min");
   const power = intensityLabel(short.intensity);
 
   const likes = safeNumber(short.metrics?.likes, 0);
@@ -74,175 +82,113 @@ export default function ShortCard({
     <Link
       href={href}
       onClick={onClick}
-      className="group block no-underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 focus-visible:ring-offset-0"
+      className="group block no-underline hover:no-underline focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-500/20"
     >
-      <article
-        className={[
-          "relative overflow-hidden rounded-2xl",
-          "bg-black/70 backdrop-blur-md",
-          "border border-white/[0.06]",
-          "shadow-[0_18px_70px_-55px_rgba(0,0,0,0.85)]",
-          "transition-all duration-700",
-          "hover:-translate-y-[1px]",
-          "hover:border-amber-500/18",
-          "hover:shadow-[0_34px_120px_-70px_rgba(245,158,11,0.22)]",
-        ].join(" ")}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-[1px] rounded-2xl"
-          style={{
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.72), inset 0 0 0 1px rgba(255,255,255,0.02)",
-          }}
-        />
+      <article className="relative flex flex-col border-l border-white/[0.08] py-5 pl-6 transition-all duration-500 hover:border-amber-500/25 hover:pl-7">
 
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(1200px 380px at 20% 0%, rgba(245,158,11,0.06), transparent 55%), radial-gradient(900px 320px at 100% 10%, rgba(255,255,255,0.04), transparent 55%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.28) 55%, rgba(0,0,0,0.55))",
-          }}
-        />
+        {/* Elegant background treatment on hover */}
+        <div className="absolute inset-y-0 left-0 w-0 bg-gradient-to-r from-amber-500/[0.02] to-transparent opacity-0 transition-all duration-700 group-hover:w-full group-hover:opacity-100 pointer-events-none" />
 
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-soft-light"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")`,
-          }}
-        />
-
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-        >
-          <div className="absolute -inset-x-24 -top-24 h-52 rotate-12 bg-white/[0.05] blur-2xl" />
-        </div>
-
-        <div className="relative p-5">
-          {/* META ROW */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[10px] font-mono tracking-[0.22em] text-amber-300/60">
-                {tagA}
-              </span>
-              <span className="text-white/10 text-xs">•</span>
-              <span className="text-[10px] font-mono tracking-[0.18em] text-white/32">
-                {tagB}
-              </span>
-
-              <span className="ml-1 text-[9px] px-2 py-[2px] rounded-full border border-white/[0.08] bg-black/35 text-amber-200/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                {power}
-              </span>
-            </div>
-
-            <ArrowUpRight className="h-4 w-4 text-amber-700/40 group-hover:text-amber-300/85 transition-colors duration-300" />
-          </div>
-
-          {/* COVER */}
-          {hasCover && (
-            <div className="mt-4">
-              <div className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-black/40">
-                <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
-                  <Image
-                    src={short.coverImage as string}
-                    alt=""
-                    fill
-                    sizes="(max-width: 768px) 100vw, 520px"
-                    className="object-cover brightness-[0.90] saturate-[0.92] contrast-[1.02] group-hover:brightness-[0.98] group-hover:saturate-[0.98] transition-all duration-1000 group-hover:scale-[1.02]"
-                    priority={false}
-                  />
-                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/18 to-transparent" />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 opacity-35 mix-blend-screen"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.00) 36%, rgba(255,255,255,0.07) 68%, rgba(255,255,255,0.00) 100%)",
-                    }}
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 rounded-xl"
-                    style={{
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.65)",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TITLE */}
-          <h3
-            className={[
-              "mt-4 font-serif",
-              "text-[22px] md:text-[26px]",
-              "leading-[1.14] tracking-[-0.015em] antialiased",
-              "text-amber-50/95 group-hover:text-amber-50",
-              "no-underline decoration-transparent",
-            ].join(" ")}
-          >
-            {short.title}
-          </h3>
-
-          {/* EXCERPT */}
-          <p
-            className={[
-              "mt-2",
-              "text-[13px] leading-[1.55]",
-              "text-white/52 group-hover:text-white/58",
-              "transition-colors duration-700",
-              "line-clamp-2",
-              "no-underline decoration-transparent",
-            ].join(" ")}
-          >
-            {short.excerpt}
-          </p>
-
-          {/* UTILITIES (quiet) */}
-          {showUtilities && (
-            <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-white/[0.06] bg-black/35 px-4 py-3">
-              <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-[0.22em] text-white/40">
-                <span className="inline-flex items-center gap-2">
-                  <Eye className="h-3.5 w-3.5 text-white/25" />
-                  {formatCompact(views)}
-                </span>
-
-                <span className="inline-flex items-center gap-2">
-                  <Heart className={["h-3.5 w-3.5", short.state?.liked ? "text-amber-300/80" : "text-white/25"].join(" ")} />
-                  {formatCompact(likes)}
-                </span>
-
-                <span className="inline-flex items-center gap-2">
-                  <Bookmark className={["h-3.5 w-3.5", short.state?.saved ? "text-amber-300/80" : "text-white/25"].join(" ")} />
-                  {formatCompact(saves)}
-                </span>
-              </div>
-
-              <span className="text-[9px] font-mono tracking-[0.26em] text-white/22 group-hover:text-amber-300/60 transition-colors duration-700 uppercase">
-                open
-              </span>
-            </div>
-          )}
-
-          {/* FOOTER */}
-          <div className="mt-5 flex items-center justify-between pt-3 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-7 h-[1px] bg-gradient-to-r from-amber-600/45 to-transparent" />
-              <span className="text-[9px] font-mono tracking-[0.22em] text-white/26 uppercase truncate">
-                {short.lineage ? short.lineage.replace(/\s+/g, "·") : "ARCHIVE"}
-              </span>
-            </div>
-
-            <span className="text-[9px] font-mono tracking-[0.26em] text-white/22 group-hover:text-amber-300/65 transition-colors duration-700 uppercase">
-              indexed
+        {/* Meta row — same tokens as FeaturedNoteCard */}
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[9px] uppercase tracking-wider text-amber-300/60">
+              {tagA}
+            </span>
+            <span className="text-white/15">•</span>
+            <span className="font-mono text-[9px] text-white/30">
+              {tagB}
+            </span>
+            <span className="relative ml-1 font-mono text-[8px] uppercase tracking-[0.14em] text-white/20 before:absolute before:-inset-1 before:rounded-full before:bg-amber-500/5 before:opacity-0 before:transition-opacity group-hover:before:opacity-100">
+              {power}
             </span>
           </div>
+          <div className="relative">
+            <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-white/18 transition-all duration-500 group-hover:text-amber-300/60 group-hover:translate-x-px group-hover:-translate-y-px" />
+            {/* Subtle glow on arrow */}
+            <div className="absolute inset-0 blur-[2px] bg-amber-500/0 group-hover:bg-amber-500/20 rounded-full transition-all duration-700" />
+          </div>
         </div>
+
+        {/* Cover image — restrained, with elegant overlay */}
+        {hasCover && (
+          <div className="relative mt-4 overflow-hidden rounded-sm" style={{ aspectRatio: "16 / 9" }}>
+            <Image
+              src={short.coverImage as string}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="object-cover brightness-[0.75] saturate-[0.80] contrast-[1.03] transition-all duration-700 group-hover:brightness-[0.88] group-hover:scale-[1.02]"
+              priority={false}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+            />
+            {/* Thin border accent */}
+            <div className="absolute inset-0 border border-white/5 group-hover:border-amber-500/20 transition-colors duration-700" />
+            
+            {/* Subtle corner detail */}
+            <div className="absolute top-2 right-2 h-6 w-6 border-r border-t border-white/5 opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+          </div>
+        )}
+
+        {/* Title — with elegant underline on hover */}
+        <h3
+          className={[
+            hasCover ? "mt-4" : "mt-3",
+            "relative font-serif text-base leading-snug text-white/85",
+            "transition-colors duration-500 group-hover:text-white",
+          ].join(" ")}
+        >
+          {short.title}
+          <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-gradient-to-r from-amber-500/40 to-transparent transition-all duration-700 group-hover:w-8" />
+        </h3>
+
+        {/* Excerpt — matches featured card style */}
+        <p className="relative mt-2 line-clamp-2 text-sm leading-relaxed text-white/40 transition-colors duration-500 group-hover:text-white/52">
+          {short.excerpt}
+        </p>
+
+        {/* Utilities — toned to match the system */}
+        {showUtilities && (
+          <div className="relative mt-4 flex items-center gap-4 border-t border-white/[0.05] pt-3">
+            <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-white/28 transition-colors group-hover:text-white/35">
+              <Eye className="h-3 w-3 text-white/18 transition-colors group-hover:text-amber-300/40" />
+              {formatCompact(views)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-white/28 transition-colors group-hover:text-white/35">
+              <Heart
+                className={[
+                  "h-3 w-3 transition-colors",
+                  short.state?.liked ? "text-amber-300/60" : "text-white/18 group-hover:text-amber-300/30",
+                ].join(" ")}
+              />
+              {formatCompact(likes)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-white/28 transition-colors group-hover:text-white/35">
+              <Bookmark
+                className={[
+                  "h-3 w-3 transition-colors",
+                  short.state?.saved ? "text-amber-300/60" : "text-white/18 group-hover:text-amber-300/30",
+                ].join(" ")}
+              />
+              {formatCompact(saves)}
+            </span>
+          </div>
+        )}
+
+        {/* Lineage footer — with refined treatment */}
+        <div className={[showUtilities ? "mt-3" : "mt-4", "relative flex items-center gap-2"].join(" ")}>
+          <span className="h-px w-5 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent transition-all duration-700 group-hover:w-6 group-hover:from-amber-500/40" />
+          <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/18 transition-colors group-hover:text-white/25">
+            {short.lineage ? short.lineage.replace(/\s+/g, "·") : "Archive"}
+          </span>
+        </div>
+
+        {/* Subtle bottom edge treatment */}
+        <div className="absolute bottom-0 right-0 h-px w-0 bg-gradient-to-l from-amber-500/20 via-amber-500/10 to-transparent transition-all duration-1000 group-hover:w-12" />
+
       </article>
     </Link>
   );

@@ -3,13 +3,27 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 
+function firstCsvToken(value: string): string {
+  const first = value.split(",")[0] ?? "";
+  return first.trim();
+}
+
 function getClientIp(req: NextApiRequest): string {
   const xff = req.headers["x-forwarded-for"];
   const real = req.headers["x-real-ip"];
 
-  if (Array.isArray(xff) && xff[0]) return String(xff[0]).split(",")[0].trim();
-  if (typeof xff === "string" && xff) return xff.split(",")[0].trim();
-  if (typeof real === "string" && real) return real.trim();
+  if (Array.isArray(xff) && xff.length > 0) {
+    const first = xff[0] ?? "";
+    if (first) return firstCsvToken(String(first));
+  }
+
+  if (typeof xff === "string" && xff) {
+    return firstCsvToken(xff);
+  }
+
+  if (typeof real === "string" && real) {
+    return real.trim();
+  }
 
   return req.socket?.remoteAddress || "unknown";
 }
@@ -27,17 +41,23 @@ type Data =
   | { valid: true; tier: string }
   | { valid: false };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
-  if (req.method !== "POST") return res.status(405).end();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
+) {
+  if (req.method !== "POST") {
+    return res.status(405).end();
+  }
 
   const rawKey = String((req.body as any)?.key || "").trim();
-  if (!rawKey || rawKey.length > 4096) return res.status(200).json({ valid: false });
+  if (!rawKey || rawKey.length > 4096) {
+    return res.status(200).json({ valid: false });
+  }
 
   const ip = getClientIp(req);
   const ua = String(req.headers["user-agent"] || "").slice(0, 512);
 
   try {
-    // 1) Locate key by hashed key
     const keyHash = hashKey(rawKey);
 
     const keyRecord = await prisma.innerCircleKey.findUnique({
@@ -53,20 +73,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
 
     if (!keyRecord) return res.status(200).json({ valid: false });
-    if (String(keyRecord.status).toLowerCase() !== "active") return res.status(200).json({ valid: false });
-    if (keyRecord.expiresAt && keyRecord.expiresAt < new Date()) return res.status(200).json({ valid: false });
+    if (String(keyRecord.status).toLowerCase() !== "active") {
+      return res.status(200).json({ valid: false });
+    }
+    if (keyRecord.expiresAt && keyRecord.expiresAt < new Date()) {
+      return res.status(200).json({ valid: false });
+    }
 
-    // 2) Fetch member tier (no relation needed)
     const member = await prisma.innerCircleMember.findUnique({
       where: { id: keyRecord.memberId },
       select: { tier: true, status: true },
     });
 
     if (!member) return res.status(200).json({ valid: false });
-    if (String(member.status).toLowerCase() !== "active") return res.status(200).json({ valid: false });
+    if (String(member.status).toLowerCase() !== "active") {
+      return res.status(200).json({ valid: false });
+    }
 
-    // 3) Update usage telemetry (schema-safe: store in metadata)
-    const prevMeta = (keyRecord.metadata ?? {}) as any;
+    const prevMeta = (keyRecord.metadata ?? {}) as Record<string, unknown>;
     const unlocks = Number(prevMeta?.unlocks || 0);
 
     await prisma.innerCircleKey.update({

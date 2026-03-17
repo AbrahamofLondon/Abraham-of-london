@@ -1,14 +1,17 @@
+"use client";
+
 // hooks/useAuth.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
+import type { Session } from 'next-auth';
 import type { AoLTier } from '@/types/next-auth';
 
-// No need to redeclare module here - it's already in types/next-auth.d.ts
-
-interface AuthContextType {
-  user: any | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
+/**
+ * LOCAL TYPE OVERRIDE
+ * Ensures the 'aol' property is recognized on the Session object
+ * during strict build-time type checking.
+ */
+interface ExtendedSession extends Session {
   aol?: {
     tier: AoLTier;
     innerCircleAccess: boolean;
@@ -18,6 +21,13 @@ interface AuthContextType {
     emailHash?: string | null;
     flags?: string[];
   };
+}
+
+interface AuthContextType {
+  user: any | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  aol?: ExtendedSession['aol'];
   tier: AoLTier;
   innerCircleAccess: boolean;
   isInternal: boolean;
@@ -35,7 +45,10 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { data: session, status } = useSession();
+  // Explicitly cast the session to our ExtendedSession
+  const { data, status } = useSession();
+  const session = data as ExtendedSession | null;
+  
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,7 +57,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [status]);
 
-  // Session type now includes aol from the central type definition
+  /**
+   * Institutional Claims Mapping
+   * Local interface override ensures session.aol is accessible.
+   */
   const aolClaims = session?.aol;
 
   const contextValue: AuthContextType = {
@@ -81,7 +97,8 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper hooks
+// --- Strategic Helper Hooks ---
+
 export const useTier = (): AoLTier => {
   const { tier } = useAuth();
   return tier;

@@ -1,4 +1,4 @@
-/* lib/intelligence/repository.ts — Intelligence Repository (Enum-correct) */
+/* lib/intelligence/repository.ts — Intelligence Repository (Schema-Aligned) */
 import "server-only";
 
 import { prisma } from "@/lib/prisma.server";
@@ -10,18 +10,11 @@ export type LatestIntelligenceItem = {
   title: string;
   contentType: ContentType;
   createdAt: Date;
-  metadata: unknown;
+  metadata: any; 
 };
 
 /**
- * Retrieves the latest intelligence briefs for dashboards.
- *
- * Schema truth:
- * ContentType enum = Dossier | Briefing | Operational_Framework | Lexicon | Landing
- *
- * Default behavior:
- * - Treat "intelligence briefs" as ContentType.Briefing
- * - Optionally include Dossier by setting includeDossiers=true
+ * Retrieves the latest intelligence assets.
  */
 export async function getLatestIntelligence(
   limit: number = 3,
@@ -30,23 +23,33 @@ export async function getLatestIntelligence(
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(50, limit)) : 3;
   const includeDossiers = Boolean(opts?.includeDossiers);
 
+  // ALIGNED WITH SCHEMA: Both cases now use Briefs to match the Prisma Client
   const contentTypes: ContentType[] = includeDossiers
-    ? [ContentType.Briefing, ContentType.Dossier]
-    : [ContentType.Briefing];
+    ? [ContentType.Briefs, ContentType.Dossier]
+    : [ContentType.Briefs];
 
-  return await prisma.contentMetadata.findMany({
-    where: { contentType: { in: contentTypes } },
-    take: safeLimit,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      contentType: true,
-      createdAt: true,
-      metadata: true,
-    },
-  });
+  try {
+    const results = await prisma.contentMetadata.findMany({
+      where: { 
+        contentType: { in: contentTypes } 
+      },
+      take: safeLimit,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        contentType: true,
+        createdAt: true,
+        metadata: true,
+      },
+    });
+
+    return results as LatestIntelligenceItem[];
+  } catch (error) {
+    console.error("[REPOSITORY ERROR]: Failed to fetch intelligence assets:", error);
+    return [];
+  }
 }
 
 export type IntelligenceAccessLogInput = {
@@ -58,7 +61,7 @@ export type IntelligenceAccessLogInput = {
 };
 
 /**
- * Records a secure download event in DownloadAuditEvent.
+ * Records a secure audit trail of access/downloads.
  */
 export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
   const slug = String(data.slug || "").trim();
@@ -78,9 +81,10 @@ export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
       email,
       ipAddress,
       userAgent,
-      eventType: "DOWNLOAD_AUTHORIZATION",
+      eventType: "INTEL_ACCESS",
       success: true,
       processedAt: new Date(),
-    } as any,
+      metadata: { source: "web_vault" }
+    },
   });
 }

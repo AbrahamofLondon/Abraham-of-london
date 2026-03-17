@@ -1,30 +1,26 @@
-/* components/Layout.tsx — PRODUCTION GRADE */
 import * as React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+
 import Header from "@/components/Header";
-// 🏛️ Import the component correctly
 import EnhancedFooter from "@/components/EnhancedFooter";
 
-// ✅ FIXED: Dynamic import with error handling - removed suspense option
 const VaultSearchOverlay = dynamic(
-  () => import("./VaultSearchOverlay").catch(err => {
-    console.error("Failed to load VaultSearchOverlay:", err);
-    return { default: () => null };
-  }),
-  { 
-    ssr: false, 
-    loading: () => null
-    // ❌ suspense: false removed - not available in Pages Router
+  () =>
+    import("@/components/VaultSearchOverlay").catch((err) => {
+      console.error("Failed to load VaultSearchOverlay:", err);
+      return { default: () => null };
+    }),
+  {
+    ssr: false,
+    loading: () => null,
   }
 );
 
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
-// 🏛️ FIXED: Header height reduced to match actual header size (h-16/py-3 = ~64-72px)
-const HEADER_HEIGHT_PX = 72;
-
-const IS_BUILD =
-  process.env.NEXT_PHASE === "phase-production-build" || process.env.NEXT_PHASE === "phase-export";
+const BASE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
+).replace(/\/+$/, "");
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -38,6 +34,8 @@ type LayoutProps = {
   fullWidth?: boolean;
   headerTransparent?: boolean;
   structuredData?: any;
+  showFooter?: boolean;
+  enableVaultSearch?: boolean;
 };
 
 function toAbsoluteUrl(pathOrUrl: string): string {
@@ -45,15 +43,6 @@ function toAbsoluteUrl(pathOrUrl: string): string {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
   const clean = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
   return `${BASE_URL}${clean}`;
-}
-
-function getClientPathname(): string {
-  if (typeof window === "undefined") return "/";
-  try {
-    return (window.location.pathname || "/").split("#")[0] || "/";
-  } catch {
-    return "/";
-  }
 }
 
 export default function Layout({
@@ -68,47 +57,59 @@ export default function Layout({
   fullWidth = false,
   headerTransparent = false,
   structuredData,
+  showFooter = true,
+  enableVaultSearch,
 }: LayoutProps) {
-  const serverCanonicalAbs = toAbsoluteUrl(canonicalUrl ? canonicalUrl : "/");
-  const [canonicalAbs, setCanonicalAbs] = React.useState<string>(serverCanonicalAbs);
+  const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (canonicalUrl) return;
-    const p = getClientPathname();
-    setCanonicalAbs(toAbsoluteUrl(p));
-  }, [canonicalUrl]);
+  const canonicalAbs = React.useMemo(() => {
+    if (canonicalUrl) return toAbsoluteUrl(canonicalUrl);
+    return toAbsoluteUrl(router.asPath.split("#")[0] || "/");
+  }, [canonicalUrl, router.asPath]);
+
+  const shouldEnableVaultSearch =
+    typeof enableVaultSearch === "boolean"
+      ? enableVaultSearch
+      : router.pathname.startsWith("/vault") ||
+        router.pathname.startsWith("/inner-circle") ||
+        router.pathname.startsWith("/resources");
 
   React.useEffect(() => {
-    if (IS_BUILD || typeof window === "undefined") return;
+    if (!shouldEnableVaultSearch) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setIsSearchOpen(true);
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [shouldEnableVaultSearch]);
 
   const ogImageAbs = toAbsoluteUrl(ogImage);
 
   return (
     <>
       <Head>
+        <title>{title}</title>
         <meta name="description" content={description} />
         {keywords ? <meta name="keywords" content={keywords} /> : null}
         <link rel="canonical" href={canonicalAbs} />
+
         <meta property="og:type" content={ogType} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImageAbs} />
         <meta property="og:url" content={canonicalAbs} />
+
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={ogImageAbs} />
+
         {structuredData ? (
           <script
             type="application/ld+json"
@@ -119,27 +120,27 @@ export default function Layout({
 
       <Header transparent={headerTransparent} />
 
-      {/* 🏛️ FIXED: Conditional padding based on header transparency */}
       <main
         className={[
-          "min-h-screen w-full max-w-full overflow-x-hidden",
-          headerTransparent ? "" : "pt-[72px]", // Using exact value to match HEADER_HEIGHT_PX
-          fullWidth ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10",
+          "w-full max-w-full overflow-x-hidden bg-black text-white",
+          // If the header is NOT transparent, we add padding to avoid clipping content.
+          // If it IS transparent (like on the Home page), we set pt-0 so the Hero bleeds to the top.
+          headerTransparent ? "pt-0" : "pt-[84px]",
+          fullWidth ? "" : "mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8",
           className,
         ].join(" ")}
       >
         {children}
       </main>
 
-      {/* 🏛️ FIXED: Using the imported name EnhancedFooter */}
-      <EnhancedFooter />
+      {showFooter ? <EnhancedFooter /> : null}
 
-      {!IS_BUILD && (
-        <VaultSearchOverlay 
-          isOpen={isSearchOpen} 
-          onClose={() => setIsSearchOpen(false)} 
+      {shouldEnableVaultSearch ? (
+        <VaultSearchOverlay
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
         />
-      )}
+      ) : null}
     </>
   );
 }

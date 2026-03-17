@@ -1,4 +1,4 @@
-/* lib/resources/tier-metadata.ts — SSOT ALIGNED (NO UNDEFINED) */
+/* lib/resources/tier-metadata.ts — SSOT ALIGNED (LOGIC GAP CLOSED) */
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier, getTierLabel } from "@/lib/access/tier-policy";
@@ -8,7 +8,7 @@ export interface TierDirective {
   tier: AccessTier;
 
   /** Original display value for UI (e.g., "Board", "Founder") */
-  displayTier?: string;
+  displayTier: string;
 
   mandate: string;
   focusNodes: string[];
@@ -16,10 +16,10 @@ export interface TierDirective {
 }
 
 /**
- * Display tiers (your domain language)
- * Keep this list closed so TS can never return "undefined" for mappings.
+ * Display tiers (domain language)
+ * Strictly typed to prevent undefined mappings.
  */
-type DisplayTier =
+export type DisplayTier =
   | "Board"
   | "Founder"
   | "Household"
@@ -29,7 +29,7 @@ type DisplayTier =
 
 /**
  * Strict mapping: DisplayTier -> AccessTier
- * ✅ No undefined possible.
+ * ✅ Maintains the 1-to-Many relationship (Tiers can have multiple Roles)
  */
 const tierMapping: Record<DisplayTier, AccessTier> = {
   Board: "architect",
@@ -40,11 +40,13 @@ const tierMapping: Record<DisplayTier, AccessTier> = {
   Principal: "owner",
 };
 
-/** Small helper: normalize + guarantee a valid AccessTier */
+/**
+ * Internal helper: Hardened normalization to guarantee a valid AccessTier
+ */
 function normalizeTier(tier: AccessTier | string | undefined | null): AccessTier {
-  // normalizeRequiredTier should return AccessTier, but we still harden it.
-  const normalized = normalizeRequiredTier((tier ?? "public") as any);
-  return (normalized ?? "public") as AccessTier;
+  const raw = typeof tier === "string" ? tier : "public";
+  const normalized = normalizeRequiredTier(raw);
+  return (normalized || "public") as AccessTier;
 }
 
 /**
@@ -101,21 +103,36 @@ export const TIER_DIRECTIVES: Record<DisplayTier, TierDirective> = {
 };
 
 /**
- * Get directive by SSOT tier (e.g., "member", "client", "architect", etc.)
- * Returns the first directive that maps to that AccessTier.
+ * Get directive by SSOT tier (e.g., "architect").
+ * @param tier - The system AccessTier
+ * @param preferredDisplay - Optional role (e.g., "Founder") to resolve many-to-one conflicts.
  */
-export function getDirectiveByTier(tier: AccessTier | string): TierDirective | undefined {
+export function getDirectiveByTier(
+  tier: AccessTier | string,
+  preferredDisplay?: string
+): TierDirective | undefined {
   const normalized = normalizeTier(tier);
-  return Object.values(TIER_DIRECTIVES).find((d) => d.tier === normalized);
+  const allDirectives = Object.values(TIER_DIRECTIVES);
+
+  // 1. If we have a preference (from user profile/role), try to find that specific match first.
+  if (preferredDisplay) {
+    const specificMatch = allDirectives.find(
+      (d) => d.displayTier.toLowerCase() === preferredDisplay.toLowerCase() && d.tier === normalized
+    );
+    if (specificMatch) return specificMatch;
+  }
+
+  // 2. Fallback: Return the first directive that matches the system tier.
+  return allDirectives.find((d) => d.tier === normalized);
 }
 
 /**
  * Get the label shown in UI for a tier.
- * If a directive exists, use its displayTier; otherwise fallback to tier-policy label.
+ * Prioritizes the specific metadata label over the generic policy label.
  */
-export function getDirectiveLabel(tier: AccessTier | string): string {
+export function getDirectiveLabel(tier: AccessTier | string, preferredDisplay?: string): string {
   const normalized = normalizeTier(tier);
-  const directive = getDirectiveByTier(normalized);
+  const directive = getDirectiveByTier(normalized, preferredDisplay);
   return directive?.displayTier || getTierLabel(normalized);
 }
 

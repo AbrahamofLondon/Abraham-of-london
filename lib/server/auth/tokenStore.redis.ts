@@ -1,19 +1,59 @@
-/* lib/server/auth/tokenStore.redis.ts - FIXED with SSOT */
+/* lib/server/auth/tokenStore.redis.ts - FINAL SSOT ALIGNED */
 import { Redis } from '@upstash/redis';
 import { type AccessTier, normalizeUserTier } from "@/lib/access/tier-policy";
 
 const redis = Redis.fromEnv();
 
 /**
+ * FIXED: Added verifySession to satisfy lib/inner-circle/access.server.ts
+ * Bridges raw Redis data into the authentication clearance logic.
+ */
+export async function verifySession(token: string): Promise<{
+  ok: boolean;
+  valid: boolean;
+  tier: AccessTier;
+  reason?: string;
+  expiresAt?: string;
+}> {
+  try {
+    const [tier, userData] = await Promise.all([
+      redis.get<string>(`session:${token}:tier`),
+      redis.get<any>(`session:${token}:user`),
+    ]);
+
+    if (!tier) {
+      return { 
+        ok: true, 
+        valid: false, 
+        tier: "public", 
+        reason: "SESSION_NOT_FOUND" 
+      };
+    }
+
+    return {
+      ok: true,
+      valid: true,
+      tier: normalizeUserTier(tier),
+      expiresAt: userData?.expiresAt || new Date(Date.now() + 86400000).toISOString()
+    };
+  } catch (error) {
+    console.error("[tokenStore] verifySession critical failure:", error);
+    return { 
+      ok: false, 
+      valid: false, 
+      tier: "public", 
+      reason: "INTERNAL_REDIS_ERROR" 
+    };
+  }
+}
+
+/**
  * Checks the session tier stored in Redis.
- * Returns normalized AccessTier or null
  */
 export async function getSessionTier(token: string): Promise<AccessTier | null> {
   try {
     const tier = await redis.get<string>(`session:${token}:tier`);
     if (!tier) return null;
-    
-    // Normalize any legacy value to SSOT
     return normalizeUserTier(tier);
   } catch (error) {
     console.error("[tokenStore] Error getting session tier:", error);
@@ -30,11 +70,9 @@ export async function setSessionTier(
   expirySeconds: number = 7 * 24 * 60 * 60 // 7 days default
 ): Promise<void> {
   try {
-    // Normalize before storing (optional - could store raw for backward compat)
     const normalized = normalizeUserTier(tier);
     await redis.setex(`session:${token}:tier`, expirySeconds, normalized);
     
-    // Also store metadata
     await redis.setex(`session:${token}:metadata`, expirySeconds, {
       storedAt: new Date().toISOString(),
       originalTier: tier,
@@ -52,35 +90,9 @@ export async function revokeSession(token: string): Promise<void> {
   try {
     await redis.del(`session:${token}:tier`);
     await redis.del(`session:${token}:metadata`);
+    await redis.del(`session:${token}:user`);
   } catch (error) {
     console.error("[tokenStore] Error revoking session:", error);
-  }
-}
-
-/**
- * Marks a specific access key as revoked.
- */
-export async function revokeKey(keyHash: string, reason: string): Promise<void> {
-  try {
-    await redis.set(`revoked_key:${keyHash}`, {
-      revokedAt: new Date().toISOString(),
-      reason
-    });
-  } catch (error) {
-    console.error("[tokenStore] Error revoking key:", error);
-  }
-}
-
-/**
- * Check if a key is revoked
- */
-export async function isKeyRevoked(keyHash: string): Promise<boolean> {
-  try {
-    const revoked = await redis.get(`revoked_key:${keyHash}`);
-    return !!revoked;
-  } catch (error) {
-    console.error("[tokenStore] Error checking revoked key:", error);
-    return false;
   }
 }
 
@@ -134,4 +146,14 @@ export async function getSessionUser(token: string): Promise<{
     console.error("[tokenStore] Error getting session user:", error);
     return null;
   }
+}
+
+// Maintenance Exports
+export async function revokeKey(keyHash: string, reason: string): Promise<void> {
+  await redis.set(`revoked_key:${keyHash}`, { revokedAt: new Date().toISOString(), reason });
+}
+
+export async function isKeyRevoked(keyHash: string): Promise<boolean> {
+  const revoked = await redis.get(`revoked_key:${keyHash}`);
+  return !!revoked;
 }

@@ -1,4 +1,4 @@
-// pages/api/blog/[slug].ts — SECURE ESSAY PROXY (SSOT, Postgres sessions, public bypass)
+/* pages/api/blog/[slug].ts — SECURE ESSAY PROXY (SSOT, Postgres sessions, public bypass) */
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
@@ -76,8 +76,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
 
   const ctx = await getSessionContext(sessionId);
-  const sessionTierRaw = ctx?.tier ?? ctx?.member?.tier ?? null;
-  if (!sessionTierRaw) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+
+  // ✅ FIXED: ctx.tier is the top-level property in SessionContext
+  // No need for ctx.member.tier as it doesn't exist in our SSOT
+  const sessionTierRaw = ctx?.tier ?? null;
+  
+  if (!ctx.ok || !ctx.valid || !sessionTierRaw) {
+    return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+  }
 
   const userTier: AccessTier = normalizeUserTier(sessionTierRaw);
 

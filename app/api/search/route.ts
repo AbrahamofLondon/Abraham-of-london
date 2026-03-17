@@ -2,32 +2,52 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions, AoLClaims } from "@/lib/auth";
+import { Session } from "next-auth";
+
+/**
+ * LOCAL TYPE OVERRIDE
+ * Forces the compiler to recognize the institutional 'aol' property 
+ * regardless of global declaration merging failures.
+ */
+interface ExtendedSession extends Session {
+  aol?: AoLClaims;
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: Request) {
   try {
     // 1. Institutional Security Gate
-    const session = await getServerSession(authOptions);
-    if (!session?.aol?.innerCircleAccess && (session as any)?.role !== "admin") {
-      return NextResponse.json({ error: "Clearance Level Insufficient" }, { status: 403 });
+    // Cast the session to our extended interface to clear the build error
+    const session = (await getServerSession(authOptions)) as ExtendedSession | null;
+
+    // Check clearance via custom 'aol' property or administrative role
+    const hasAccess = 
+      session?.aol?.innerCircleAccess || 
+      (session?.user as any)?.role === "owner" || 
+      (session?.user as any)?.role === "admin";
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: "Clearance Level Insufficient" },
+        { status: 403 }
+      );
     }
 
     const { query, limit = 5 } = await req.json();
     if (!query) return NextResponse.json({ error: "Query Required" }, { status: 400 });
 
-    // 2. Generate Query Vector with Safety Guard
+    // 2. Generate Query Vector
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
     });
 
-    // TypeScript Fix: Ensure data[0] exists before accessing embedding
     const firstEmbedding = embeddingResponse.data?.[0]?.embedding;
     
     if (!firstEmbedding) {
-      throw new Error("Neural Engine failed to generate vector for this query.");
+      throw new Error("Neural Engine failed to generate vector.");
     }
 
     const vector = `[${firstEmbedding.join(",")}]`;
@@ -58,7 +78,7 @@ export async function POST(req: Request) {
       count: results.length, 
       results: results.map(r => ({
         ...r,
-        dependencies: r.dependencies || [] // Handle null results from json_agg
+        dependencies: r.dependencies || []
       })) 
     });
 

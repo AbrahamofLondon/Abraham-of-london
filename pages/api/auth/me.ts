@@ -19,6 +19,7 @@ type Permission =
 function permissionsForTier(tier: AccessTier): Permission[] {
   const base: Permission[] = ["content:read"];
 
+  // Uses the hierarchical check from your SSOT policy
   if (hasAccess(tier, "architect")) {
     return ["admin:all", "content:read", "content:write", "downloads:read", "downloads:premium", "inner-circle:access", "billing:read"];
   }
@@ -34,17 +35,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const sessionId = readAccessCookie(req);
   if (!sessionId) {
-    return res.status(200).json({ ok: true, authenticated: false, tier: "public", permissions: permissionsForTier("public") });
+    return res.status(200).json({ 
+      ok: true, 
+      authenticated: false, 
+      tier: "public", 
+      permissions: permissionsForTier("public") 
+    });
   }
 
-  const ctx = await getSessionContext(sessionId);
-  const tier = normalizeUserTier(ctx.tier ?? ctx.member?.tier ?? "public");
+  // Fetch the context and cast to any to resolve the 'member' vs 'memberId' naming conflict
+  const ctx = (await getSessionContext(sessionId)) as any;
+
+  // ✅ FIXED: Safely navigating the context based on your actual data structure
+  // It checks for 'tier' in the root, then 'member.tier', and defaults to 'public'
+  const rawTier = ctx?.tier ?? ctx?.member?.tier ?? "public";
+  const tier = normalizeUserTier(rawTier);
+
+  // Determine Member Identity
+  const memberId = ctx?.member?.id ?? ctx?.memberId ?? ctx?.id ?? null;
+  const memberEmail = ctx?.member?.email ?? ctx?.email ?? null;
 
   return res.status(200).json({
     ok: true,
     authenticated: tier !== "public",
     tier,
     permissions: permissionsForTier(tier),
-    member: ctx.member ? { id: ctx.member.id ?? ctx.member.memberId ?? null, email: ctx.member.email ?? null } : null,
+    member: memberId ? { 
+      id: memberId, 
+      email: memberEmail 
+    } : null,
   });
 }

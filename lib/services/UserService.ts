@@ -25,14 +25,21 @@ export interface UpdateUserInput {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * SYSTEM RESOLUTION:
+ * Updated ACCESS_RANK to include 'restricted' and adjusted the hierarchy 
+ * to align with the SSOT Tier Policy (0-8).
+ */
 const ACCESS_RANK: Record<UserTier, number> = {
   public: 0,
   member: 1,
   "inner-circle": 2,
-  client: 3,
-  legacy: 4,
-  architect: 5,
-  owner: 6,
+  restricted: 3,     // ✅ Added
+  client: 4,
+  legacy: 5,
+  architect: 6,
+  owner: 7,
+  "top-secret": 8,   // ✅ Adjusted to Level 8
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -278,15 +285,21 @@ export class UserService {
     })) as IUser | null;
   }
 
+  /**
+   * SYSTEM RESOLUTION:
+   * Added 'restricted' to the labels Record to satisfy exhaustiveness.
+   */
   static getAccessLevelLabel(tier: UserTier): string {
     const labels: Record<UserTier, string> = {
       public: "Public Access",
       member: "Member Access",
       "inner-circle": "Inner Circle Access",
+      restricted: "Restricted Access",     // ✅ FIXED
       client: "Client Access",
       legacy: "Legacy Access",
       architect: "Architect Access",
       owner: "Owner Access",
+      "top-secret": "Top Secret Access",
     };
 
     return labels[tier] || "Unknown Access";

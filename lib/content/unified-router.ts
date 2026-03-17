@@ -1,15 +1,17 @@
-// lib/content/unified-router.ts — PRODUCTION-HARDENED (Zero-Leak Mapping)
+/* lib/content/unified-router.ts — PRODUCTION-HARDENED (Zero-Leak Mapping) */
 import {
   allPosts,
   allShorts,
   allDownloads,
 } from "@/lib/contentlayer";
 
-// Minimal structural typing (avoids import-type breakage if Contentlayer changes)
+// ✅ ENHANCED: Added status flags to the base type to satisfy TS across the app
 type BaseDoc = {
   type: string;
   slug?: string;
   _raw: { flattenedPath: string };
+  draft?: boolean;      // Added to prevent build failures
+  published?: boolean;  // Added for logic consistency
 };
 
 export type UnifiedDoc = BaseDoc;
@@ -35,9 +37,6 @@ const ROUTE_CONFIG: Record<string, RouteMap> = {
 // Normalizer: tolerate unexpected doc.type values
 function resolveRoute(docType: string): RouteMap | null {
   if (ROUTE_CONFIG[docType]) return ROUTE_CONFIG[docType];
-
-  // fallback heuristics (flattenedPath based)
-  // (keeps you live even if doc.type naming changes)
   return null;
 }
 

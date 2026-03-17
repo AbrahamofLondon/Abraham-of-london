@@ -1,6 +1,6 @@
 // pages/api/health.ts - Production Health Check with Monitoring
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getRedis } from '@/lib/redis'; // Changed from getRedisClient to getRedis
+import { getRedis } from '@/lib/redis';
 
 // Types for health check responses
 type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
@@ -52,17 +52,16 @@ type HealthResponse = {
 // Cache health check results for 30 seconds
 let cachedHealthCheck: HealthResponse | null = null;
 let lastCheckTime = 0;
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 30000;
 
 // Rate limiting for health checks
 const healthCheckCounts = new Map<string, { count: number; lastReset: number }>();
 const MAX_CHECKS_PER_MINUTE = 60;
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_WINDOW = 60000;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const clientIp = req.headers['x-forwarded-for']?.[0] || req.socket.remoteAddress || 'unknown';
   
-  // Apply rate limiting
   if (!checkRateLimit(clientIp)) {
     return res.status(429).json({
       status: 'unhealthy',
@@ -72,18 +71,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Check for cache
     const now = Date.now();
     if (cachedHealthCheck && (now - lastCheckTime) < CACHE_DURATION) {
-      // Add cache indicator
       cachedHealthCheck.metadata.cached = true;
       cachedHealthCheck.metadata.cacheAge = now - lastCheckTime;
       return respondWithHealth(res, cachedHealthCheck);
     }
 
-    // Run health checks in parallel
     const startTime = Date.now();
     
+    // ✅ Parallel Execution of all checks
     const [
       apiStatus,
       dbStatus,
@@ -98,13 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const latency = Date.now() - startTime;
 
-    // Determine overall status
-    const serviceStatuses = [
-      apiStatus,
-      dbStatus,
-      redisStatus,
-      contentlayerStatus,
-    ];
+    const serviceStatuses = [apiStatus, dbStatus, redisStatus, contentlayerStatus];
 
     const isDegraded = serviceStatuses.some(
       s => s.status === 'fulfilled' && s.value.status === 'degraded'
@@ -119,7 +110,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ? 'degraded' 
         : 'healthy';
 
-    // Build response
     const healthResponse: HealthResponse = {
       status: overallStatus,
       timestamp: new Date().toISOString(),
@@ -151,7 +141,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     };
 
-    // Cache the response
     cachedHealthCheck = healthResponse;
     lastCheckTime = now;
 
@@ -159,7 +148,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('Health check failed:', error);
-    
     return res.status(500).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -169,154 +157,98 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// Helper functions
+// --- HELPER FUNCTIONS ---
+
 function respondWithHealth(res: NextApiResponse, health: HealthResponse) {
-  // Set appropriate status code
   const statusCode = health.status === 'healthy' ? 200 : 
                      health.status === 'degraded' ? 206 : 503;
 
-  // Security headers
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
   res.setHeader('X-Health-Check', 'true');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  
-  // Add monitoring headers
   res.setHeader('X-Response-Time', health.metadata.responseTime?.toString() || '0');
   res.setHeader('X-Service-Status', health.status);
-  res.setHeader('X-Environment', health.environment);
 
-  // Return response
   return res.status(statusCode).json(health);
 }
 
 function checkRateLimit(clientIp: string): boolean {
   const now = Date.now();
   const clientData = healthCheckCounts.get(clientIp);
-
   if (!clientData || (now - clientData.lastReset) > RATE_LIMIT_WINDOW) {
     healthCheckCounts.set(clientIp, { count: 1, lastReset: now });
     return true;
   }
-
-  if (clientData.count >= MAX_CHECKS_PER_MINUTE) {
-    return false;
-  }
-
+  if (clientData.count >= MAX_CHECKS_PER_MINUTE) return false;
   clientData.count++;
   return true;
 }
 
 async function checkApiStatus(): Promise<ServiceStatus> {
   const start = Date.now();
-  
-  try {
-    // Simple self-check
-    await Promise.resolve();
-    
-    return {
-      status: 'healthy',
-      latency: Date.now() - start,
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      message: 'API self-check failed',
-      latency: Date.now() - start,
-    };
-  }
+  return { status: 'healthy', latency: Date.now() - start };
 }
 
 async function checkDatabaseConnection(): Promise<ServiceStatus> {
   const start = Date.now();
-  
   try {
-    // Try dynamic import
     const dbModule = await import('@/lib/db');
-    const checkFn = dbModule.checkDatabaseConnection || (() => Promise.resolve({ connected: false, type: 'memory' }));
+    const checkFn = dbModule.checkDatabaseConnection || (() => Promise.resolve({ connected: false }));
     const result = await checkFn();
-    
     return {
       status: result.connected ? 'healthy' : 'degraded',
       message: result.connected ? undefined : `Database: ${result.error || 'Not connected'}`,
       latency: Date.now() - start,
     };
   } catch (error) {
-    return {
-      status: 'degraded', // Not unhealthy because app can run without DB
-      message: 'Database check module not available',
-      latency: Date.now() - start,
-    };
+    return { status: 'degraded', message: 'Database check unavailable', latency: Date.now() - start };
   }
 }
 
 async function checkRedisConnection(): Promise<ServiceStatus> {
   const start = Date.now();
-  
   try {
     const redis = await getRedis();
+    if (!redis) return { status: 'degraded', message: 'Redis not configured', latency: Date.now() - start };
+    await redis.ping();
+    return { status: 'healthy', latency: Date.now() - start };
+  } catch (error) {
+    return { status: 'unhealthy', message: 'Redis connection failed', latency: Date.now() - start };
+  }
+}
+
+/**
+ * ✅ CHECK CONTENTLAYER STATUS
+ * Verifies that the generated content manifest is present and contains documents.
+ */
+async function checkContentlayerStatus(): Promise<ServiceStatus> {
+  const start = Date.now();
+  try {
+    // Dynamically import the generated manifest
+    const { allDocuments } = await import('.contentlayer/generated');
     
-    if (!redis) {
+    if (!allDocuments || allDocuments.length === 0) {
       return {
         status: 'degraded',
-        message: 'Redis not configured',
+        message: 'Contentlayer: No documents found in manifest',
         latency: Date.now() - start,
       };
     }
 
-    await redis.ping();
-    
     return {
       status: 'healthy',
+      message: `Contentlayer: ${allDocuments.length} documents verified`,
       latency: Date.now() - start,
     };
   } catch (error) {
     return {
       status: 'unhealthy',
-      message: 'Redis connection failed',
+      message: 'Contentlayer: Manifest missing or inaccessible',
       latency: Date.now() - start,
     };
   }
 }
 
-// Optional: Liveness and readiness endpoints
 export const config = {
-  runtime: 'nodejs', // Use Node.js runtime for health checks
-  api: {
-    responseLimit: false,
-    bodyParser: false,
-  },
+  runtime: 'nodejs',
+  api: { responseLimit: false, bodyParser: false },
 };
-
-// Separate liveness endpoint (simple)
-export async function livenessHandler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader('Cache-Control', 'no-cache');
-  res.status(200).json({
-    status: 'alive',
-    timestamp: new Date().toISOString(),
-  });
-}
-
-// Separate readiness endpoint (checks dependencies)
-export async function readinessHandler(req: NextApiRequest, res: NextApiResponse) {
-  const [dbReady, redisReady] = await Promise.allSettled([
-    checkDatabaseConnection(),
-    checkRedisConnection(),
-  ]);
-
-  const isReady = dbReady.status === 'fulfilled' && redisReady.status === 'fulfilled';
-
-  res.setHeader('Cache-Control', 'no-cache');
-  res.status(isReady ? 200 : 503).json({
-    status: isReady ? 'ready' : 'not ready',
-    timestamp: new Date().toISOString(),
-    checks: {
-      database: dbReady.status === 'fulfilled' ? 'ready' : 'not ready',
-      redis: redisReady.status === 'fulfilled' ? 'ready' : 'not ready',
-    },
-  });
-}

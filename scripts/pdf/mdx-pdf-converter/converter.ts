@@ -1,8 +1,10 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { PDFDocument, rgb, PDFPage } from "pdf-lib";
+import { PDFDocument, rgb, PDFPage, degrees } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
+import { buildFingerprintProfile } from "../../../lib/premium/fingerprint-profile";
+import { createWatermarkPayload } from "../../../lib/premium/watermark";
 
 import {
   type DocumentRegistryEntry,
@@ -14,7 +16,7 @@ import {
 } from "./config";
 
 // -----------------------------------------------------------------------------
-// BRAND TOKENS (AoL)
+// BRAND
 // -----------------------------------------------------------------------------
 
 const BRAND = {
@@ -34,17 +36,17 @@ const BRAND = {
 };
 
 // -----------------------------------------------------------------------------
-// Page formats (points)
+// PAGE FORMATS
 // -----------------------------------------------------------------------------
 
 function pageSize(format: PaperFormat): { w: number; h: number } {
   if (format === "A3") return { w: 841.89, h: 1190.55 };
   if (format === "Letter") return { w: 612, h: 792 };
-  return { w: 595.28, h: 841.89 }; // A4
+  return { w: 595.28, h: 841.89 };
 }
 
 // -----------------------------------------------------------------------------
-// Fonts (hard requirement)
+// FONTS
 // -----------------------------------------------------------------------------
 
 type EmbeddedFonts = {
@@ -59,9 +61,7 @@ function fontBytes(rel: string) {
   const abs = path.join(process.cwd(), "scripts", "pdf", "fonts", rel);
   if (!fs.existsSync(abs)) {
     throw new Error(
-      `Missing font: ${abs}\n` +
-        `Add fonts under scripts/pdf/fonts/:\n` +
-        `- PlayfairDisplay-Regular.ttf\n- PlayfairDisplay-Bold.ttf\n- NotoSans-Regular.ttf\n- NotoSans-Bold.ttf\n- JetBrainsMono-Regular.ttf (recommended)\n`,
+      `Missing font: ${abs}\nAdd fonts under scripts/pdf/fonts/.`,
     );
   }
   return fs.readFileSync(abs);
@@ -70,25 +70,27 @@ function fontBytes(rel: string) {
 async function embedFonts(pdfDoc: PDFDocument): Promise<EmbeddedFonts> {
   pdfDoc.registerFontkit(fontkit);
 
-  const playfairR = fontBytes("PlayfairDisplay-Regular.ttf");
-  const playfairB = fontBytes("PlayfairDisplay-Bold.ttf");
-  const notoR = fontBytes("NotoSans-Regular.ttf");
-  const notoB = fontBytes("NotoSans-Bold.ttf");
-
-  // Optional mono; hard-fail if missing because code blocks look cheap without mono.
-  const monoR = fontBytes("JetBrainsMono-Regular.ttf");
-
-  const heading = await pdfDoc.embedFont(playfairR, { subset: true });
-  const headingBold = await pdfDoc.embedFont(playfairB, { subset: true });
-  const body = await pdfDoc.embedFont(notoR, { subset: true });
-  const bodyBold = await pdfDoc.embedFont(notoB, { subset: true });
-  const mono = await pdfDoc.embedFont(monoR, { subset: true });
+  const heading = await pdfDoc.embedFont(fontBytes("PlayfairDisplay-Regular.ttf"), {
+    subset: true,
+  });
+  const headingBold = await pdfDoc.embedFont(fontBytes("PlayfairDisplay-Bold.ttf"), {
+    subset: true,
+  });
+  const body = await pdfDoc.embedFont(fontBytes("NotoSans-Regular.ttf"), {
+    subset: true,
+  });
+  const bodyBold = await pdfDoc.embedFont(fontBytes("NotoSans-Bold.ttf"), {
+    subset: true,
+  });
+  const mono = await pdfDoc.embedFont(fontBytes("JetBrainsMono-Regular.ttf"), {
+    subset: true,
+  });
 
   return { heading, headingBold, body, bodyBold, mono };
 }
 
 // -----------------------------------------------------------------------------
-// MDX -> “printable” text normalization (safer)
+// MDX NORMALIZATION
 // -----------------------------------------------------------------------------
 
 function stripFrontmatter(raw: string) {
@@ -96,37 +98,21 @@ function stripFrontmatter(raw: string) {
   return { data: (data || {}) as Record<string, any>, content: String(content || "") };
 }
 
-/**
- * Remove only what *must* be removed for a print doc:
- * - import/export lines
- * - JSX tags (best effort) WITHOUT deleting paragraphs around them
- * - MDX expressions { ... } best effort, but avoid deleting common JSON-like blocks by limiting to single-line braces
- */
 function normalizeMdxToPrintable(md: string): string {
   let s = String(md || "");
 
-  // Remove import/export lines (whole line)
   s = s.replace(/^\s*(import|export)\s+.+$/gm, "");
-
-  // Remove MDX JSX fragments safely
-  // 1) self-closing tags
   s = s.replace(/<[^>\n]+\/>\s*/g, "");
-  // 2) Component blocks (capitalized)
   s = s.replace(/<([A-Z][A-Za-z0-9]*)\b[^>]*>[\s\S]*?<\/\1>\s*/g, "");
-  // 3) HTML blocks (lowercase) — keep very small inline tags by targeting multi-line blocks
   s = s.replace(/<([a-z][a-z0-9-]*)\b[^>]*>[\s\S]*?<\/\1>\s*/g, "");
-
-  // Remove MDX expressions: conservative (single-line only), avoids nuking big braces sections
   s = s.replace(/\{[^\n\r]*?\}\s*/g, "");
-
-  // Replace multiple blank lines
   s = s.replace(/\n{3,}/g, "\n\n");
 
   return s.trim();
 }
 
 // -----------------------------------------------------------------------------
-// Layout metrics
+// LAYOUT
 // -----------------------------------------------------------------------------
 
 type Layout = {
@@ -196,31 +182,36 @@ function layoutFor(format: PaperFormat, quality: Quality): Layout {
 }
 
 // -----------------------------------------------------------------------------
-// Text wrapping
+// TEXT WRAP
 // -----------------------------------------------------------------------------
 
 function wrapText(args: { text: string; font: any; fontSize: number; maxWidth: number }): string[] {
   const { text, font, fontSize, maxWidth } = args;
-  const words = String(text || "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  const words = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
+
   const lines: string[] = [];
   let line = "";
 
   for (const w of words) {
     const trial = line ? `${line} ${w}` : w;
-    const width = font.widthOfTextAtSize(trial, fontSize);
-    if (width <= maxWidth) {
+    if (font.widthOfTextAtSize(trial, fontSize) <= maxWidth) {
       line = trial;
-      continue;
+    } else {
+      if (line) lines.push(line);
+      line = w;
     }
-    if (line) lines.push(line);
-    line = w;
   }
+
   if (line) lines.push(line);
   return lines.length ? lines : [""];
 }
 
 // -----------------------------------------------------------------------------
-// Markdown-ish block parsing
+// BLOCK PARSER
 // -----------------------------------------------------------------------------
 
 type Block =
@@ -255,7 +246,6 @@ function parseBlocks(md: string): Block[] {
   for (const raw of lines) {
     const line = raw ?? "";
 
-    // fenced code
     if (/^\s*```/.test(line)) {
       if (!inCode) {
         flushPara();
@@ -272,19 +262,33 @@ function parseBlocks(md: string): Block[] {
       continue;
     }
 
-    // headings
     const h1 = line.match(/^\s*#\s+(.+)\s*$/);
     const h2 = line.match(/^\s*##\s+(.+)\s*$/);
     const h3 = line.match(/^\s*###\s+(.+)\s*$/);
-    if (h1) { flushPara(); blocks.push({ kind: "h1", text: h1[1].trim() }); continue; }
-    if (h2) { flushPara(); blocks.push({ kind: "h2", text: h2[1].trim() }); continue; }
-    if (h3) { flushPara(); blocks.push({ kind: "h3", text: h3[1].trim() }); continue; }
 
-    // quote
+    if (h1) {
+      flushPara();
+      blocks.push({ kind: "h1", text: h1[1].trim() });
+      continue;
+    }
+    if (h2) {
+      flushPara();
+      blocks.push({ kind: "h2", text: h2[1].trim() });
+      continue;
+    }
+    if (h3) {
+      flushPara();
+      blocks.push({ kind: "h3", text: h3[1].trim() });
+      continue;
+    }
+
     const q = line.match(/^\s*>\s?(.+)\s*$/);
-    if (q) { flushPara(); blocks.push({ kind: "quote", text: q[1].trim() }); continue; }
+    if (q) {
+      flushPara();
+      blocks.push({ kind: "quote", text: q[1].trim() });
+      continue;
+    }
 
-    // list
     const li = line.match(/^(\s*)([-*]|\d+\.)\s+(.+)\s*$/);
     if (li) {
       flushPara();
@@ -294,10 +298,11 @@ function parseBlocks(md: string): Block[] {
       continue;
     }
 
-    // blank line separates paragraphs
-    if (!line.trim()) { flushPara(); continue; }
+    if (!line.trim()) {
+      flushPara();
+      continue;
+    }
 
-    // inline markdown cleanup (light)
     const cleaned = line
       .replace(/`([^`]+)`/g, "$1")
       .replace(/\*\*([^*]+)\*\*/g, "$1")
@@ -315,7 +320,7 @@ function parseBlocks(md: string): Block[] {
 }
 
 // -----------------------------------------------------------------------------
-// Header / footer
+// HEADERS / FOOTERS
 // -----------------------------------------------------------------------------
 
 function drawHeaderFooter(args: {
@@ -328,8 +333,9 @@ function drawHeaderFooter(args: {
   tier: string;
   quality: Quality;
   pageNum: number;
+  footerText: string;
 }) {
-  const { page, w, h, layout, fonts, title, tier, quality, pageNum } = args;
+  const { page, w, h, layout, fonts, title, tier, quality, pageNum, footerText } = args;
 
   const leftX = layout.marginX;
   const rightX = w - layout.marginX;
@@ -351,12 +357,15 @@ function drawHeaderFooter(args: {
     color: BRAND.colors.slate,
   });
 
-  const t = String(title || "").trim();
+  let shown = String(title || "").trim();
   const maxTitleWidth = (rightX - leftX) * 0.62;
-
-  let shown = t;
-  while (shown.length > 6 && fonts.body.widthOfTextAtSize(shown, layout.small) > maxTitleWidth) shown = shown.slice(0, -1);
-  if (shown !== t) shown = shown.replace(/\s+$/, "") + "…";
+  while (
+    shown.length > 6 &&
+    fonts.body.widthOfTextAtSize(shown, layout.small) > maxTitleWidth
+  ) {
+    shown = shown.slice(0, -1);
+  }
+  if (shown !== title) shown = `${shown.replace(/\s+$/, "")}…`;
 
   const titleWidth = fonts.body.widthOfTextAtSize(shown, layout.small);
   page.drawText(shown, {
@@ -393,18 +402,29 @@ function drawHeaderFooter(args: {
     font: fonts.body,
     color: BRAND.colors.faint,
   });
+
+  page.drawText(String(footerText || "").slice(0, 120), {
+    x: leftX,
+    y: footerY - 12,
+    size: 6.5,
+    font: fonts.body,
+    color: BRAND.colors.faint,
+  });
 }
 
-// -----------------------------------------------------------------------------
-// Watermark (non-free)
-// -----------------------------------------------------------------------------
-
-function maybeWatermark(args: { page: PDFPage; w: number; h: number; fonts: EmbeddedFonts; tier: string }) {
-  const { page, w, h, fonts, tier } = args;
+function maybeWatermark(args: {
+  page: PDFPage;
+  w: number;
+  h: number;
+  fonts: EmbeddedFonts;
+  tier: string;
+  watermarkText: string;
+}) {
+  const { page, w, h, fonts, tier, watermarkText } = args;
   if (!tier || tier === "free") return;
 
-  const text = `ABRAHAM OF LONDON • ${tier.toUpperCase()}`;
-  const size = 30;
+  const text = watermarkText;
+  const size = 24;
   const tw = fonts.heading.widthOfTextAtSize(text, size);
 
   page.drawText(text, {
@@ -413,13 +433,13 @@ function maybeWatermark(args: { page: PDFPage; w: number; h: number; fonts: Embe
     size,
     font: fonts.heading,
     color: BRAND.colors.watermark,
-    rotate: { type: "degrees", angle: 25 },
+    rotate: degrees(25),
     opacity: 0.22,
   });
 }
 
 // -----------------------------------------------------------------------------
-// Cover page
+// COVER
 // -----------------------------------------------------------------------------
 
 function drawCover(args: {
@@ -430,25 +450,21 @@ function drawCover(args: {
   meta: { title: string; subtitle?: string; description?: string; category?: string };
   tier: string;
   quality: Quality;
+  footerText: string;
+  watermarkText: string;
 }) {
-  const { pdfDoc, format, layout, fonts, meta, tier, quality } = args;
+  const { pdfDoc, format, layout, fonts, meta, tier, quality, footerText, watermarkText } = args;
   const { w, h } = pageSize(format);
 
   const page = pdfDoc.addPage([w, h]);
   page.drawRectangle({ x: 0, y: 0, width: w, height: h, color: BRAND.colors.paper });
-
   page.drawRectangle({ x: 0, y: h - 18, width: w, height: 18, color: BRAND.colors.gold });
 
   const x = layout.marginX;
-  const titleY = h - layout.marginTop - 90;
+  let y = h - layout.marginTop - 90;
 
-  const title = String(meta.title || "Document").trim();
-  const subtitle = String(meta.subtitle || "").trim();
-  const desc = String(meta.description || "").trim();
-  const category = String(meta.category || "").trim();
-
-  if (category) {
-    page.drawText(category.toUpperCase(), {
+  if (meta.category) {
+    page.drawText(meta.category.toUpperCase(), {
       x,
       y: h - layout.marginTop - 40,
       size: layout.small,
@@ -458,13 +474,12 @@ function drawCover(args: {
   }
 
   const titleLines = wrapText({
-    text: title,
+    text: meta.title,
     font: fonts.headingBold,
     fontSize: layout.heading1 + 8,
     maxWidth: w - layout.marginX * 2,
   });
 
-  let y = titleY;
   for (const line of titleLines.slice(0, 4)) {
     page.drawText(line, {
       x,
@@ -476,25 +491,42 @@ function drawCover(args: {
     y -= (layout.heading1 + 10) * 1.15;
   }
 
-  if (subtitle) {
+  if (meta.subtitle) {
     y -= 12;
     const subLines = wrapText({
-      text: subtitle,
+      text: meta.subtitle,
       font: fonts.body,
       fontSize: layout.body + 1.5,
       maxWidth: w - layout.marginX * 2,
     });
     for (const line of subLines.slice(0, 3)) {
-      page.drawText(line, { x, y, size: layout.body + 1.5, font: fonts.body, color: BRAND.colors.slate });
+      page.drawText(line, {
+        x,
+        y,
+        size: layout.body + 1.5,
+        font: fonts.body,
+        color: BRAND.colors.slate,
+      });
       y -= (layout.body + 1.5) * layout.lineHeight;
     }
   }
 
-  if (desc) {
+  if (meta.description) {
     y -= 10;
-    const dLines = wrapText({ text: desc, font: fonts.body, fontSize: layout.body, maxWidth: w - layout.marginX * 2 });
+    const dLines = wrapText({
+      text: meta.description,
+      font: fonts.body,
+      fontSize: layout.body,
+      maxWidth: w - layout.marginX * 2,
+    });
     for (const line of dLines.slice(0, 6)) {
-      page.drawText(line, { x, y, size: layout.body, font: fonts.body, color: BRAND.colors.faint });
+      page.drawText(line, {
+        x,
+        y,
+        size: layout.body,
+        font: fonts.body,
+        color: BRAND.colors.faint,
+      });
       y -= layout.body * layout.lineHeight;
     }
   }
@@ -502,9 +534,15 @@ function drawCover(args: {
   const badge = `${tier.toUpperCase()} • ${quality.toUpperCase()}`;
   const badgeSize = layout.small + 1;
   const badgeW = fonts.bodyBold.widthOfTextAtSize(badge, badgeSize) + 20;
-  const badgeH = 22;
 
-  page.drawRectangle({ x, y: layout.marginBottom + 36, width: badgeW, height: badgeH, color: BRAND.colors.charcoal });
+  page.drawRectangle({
+    x,
+    y: layout.marginBottom + 36,
+    width: badgeW,
+    height: 22,
+    color: BRAND.colors.charcoal,
+  });
+
   page.drawText(badge, {
     x: x + 10,
     y: layout.marginBottom + 42,
@@ -521,19 +559,25 @@ function drawCover(args: {
     color: BRAND.colors.faint,
   });
 
-  maybeWatermark({ page, w, h, fonts, tier });
+  page.drawText(footerText.slice(0, 120), {
+    x,
+    y: layout.marginBottom - 14,
+    size: 6.5,
+    font: fonts.body,
+    color: BRAND.colors.faint,
+  });
 
+  maybeWatermark({ page, w, h, fonts, tier, watermarkText });
   return page;
 }
 
 // -----------------------------------------------------------------------------
-// Integrity helpers (no stubs)
+// INTEGRITY
 // -----------------------------------------------------------------------------
 
 function isPdfHeaderBytes(bytes: Uint8Array) {
   if (!bytes || bytes.length < 4) return false;
-  const head = Buffer.from(bytes.slice(0, 4)).toString("utf8");
-  return head === "%PDF";
+  return Buffer.from(bytes.slice(0, 4)).toString("utf8") === "%PDF";
 }
 
 function atomicWrite(absPath: string, bytes: Uint8Array) {
@@ -544,13 +588,11 @@ function atomicWrite(absPath: string, bytes: Uint8Array) {
 }
 
 function minBytesForTier(tierSlug: string) {
-  // keep soft: real PDFs can be small; stubs are tiny
-  if (tierSlug === "free") return 8000;
-  return 9000;
+  return tierSlug === "free" ? 8000 : 9000;
 }
 
 // -----------------------------------------------------------------------------
-// Main converter
+// MAIN
 // -----------------------------------------------------------------------------
 
 type ConvertResult = {
@@ -574,7 +616,13 @@ export class MdxToPdfConverter {
   private stats: Stats;
 
   constructor() {
-    this.stats = { processed: 0, errors: 0, warnings: 0, errorMessages: [], warningMessages: [] };
+    this.stats = {
+      processed: 0,
+      errors: 0,
+      warnings: 0,
+      errorMessages: [],
+      warningMessages: [],
+    };
   }
 
   getStats() {
@@ -588,8 +636,13 @@ export class MdxToPdfConverter {
     quality: Quality,
   ): Promise<ConvertResult> {
     try {
-      const absMdx = path.isAbsolute(doc.mdxPath) ? doc.mdxPath : path.join(process.cwd(), doc.mdxPath);
-      if (!fs.existsSync(absMdx)) throw new Error(`MDX source missing: ${absMdx}`);
+      const absMdx = path.isAbsolute(doc.mdxPath)
+        ? doc.mdxPath
+        : path.join(process.cwd(), doc.mdxPath);
+
+      if (!fs.existsSync(absMdx)) {
+        throw new Error(`MDX source missing: ${absMdx}`);
+      }
 
       const raw = fs.readFileSync(absMdx, "utf-8");
       const { data: fm, content: mdxBody } = stripFrontmatter(raw);
@@ -610,6 +663,23 @@ export class MdxToPdfConverter {
       });
       const outAbs = repoAbsFromPublic(outPublic);
 
+      const fingerprint = buildFingerprintProfile({
+        contentId: doc.pdfName,
+        title,
+        filename: path.basename(outAbs),
+        mimeType: "application/pdf",
+        tier: tier.slug,
+        producer: "pdf-lib",
+        creator: BRAND.product,
+      });
+
+      const watermark = createWatermarkPayload({
+        contentId: doc.pdfName,
+        tier: tier.slug,
+        briefTitle: title,
+        fingerprint,
+      });
+
       const pdfDoc = await PDFDocument.create();
       const fonts = await embedFonts(pdfDoc);
 
@@ -617,15 +687,30 @@ export class MdxToPdfConverter {
       pdfDoc.setAuthor(BRAND.author);
       pdfDoc.setCreator(BRAND.product);
       pdfDoc.setProducer("pdf-lib");
-      if (description) pdfDoc.setSubject(description);
+      pdfDoc.setSubject(watermark.footerText);
+      pdfDoc.setKeywords([
+        doc.pdfName,
+        tier.slug,
+        quality,
+        watermark.watermarkId,
+        fingerprint.profileId,
+      ]);
 
       const lay = layoutFor(format, quality);
       const { w, h } = pageSize(format);
 
-      // Cover first
-      drawCover({ pdfDoc, format, layout: lay, fonts, meta: { title, subtitle, description, category }, tier: tier.slug, quality });
+      drawCover({
+        pdfDoc,
+        format,
+        layout: lay,
+        fonts,
+        meta: { title, subtitle, description, category },
+        tier: tier.slug,
+        quality,
+        footerText: watermark.footerText,
+        watermarkText: `ABRAHAM OF LONDON • ${watermark.watermarkId}`,
+      });
 
-      // Content pages
       let pageNum = 1;
       let page = pdfDoc.addPage([w, h]);
       pageNum++;
@@ -636,8 +721,26 @@ export class MdxToPdfConverter {
       const contentW = rightX - leftX;
 
       const finalizePage = (p: PDFPage, num: number) => {
-        drawHeaderFooter({ page: p, w, h, layout: lay, fonts, title, tier: tier.slug, quality, pageNum: num });
-        maybeWatermark({ page: p, w, h, fonts, tier: tier.slug });
+        drawHeaderFooter({
+          page: p,
+          w,
+          h,
+          layout: lay,
+          fonts,
+          title,
+          tier: tier.slug,
+          quality,
+          pageNum: num,
+          footerText: watermark.footerText,
+        });
+        maybeWatermark({
+          page: p,
+          w,
+          h,
+          fonts,
+          tier: tier.slug,
+          watermarkText: `ABRAHAM OF LONDON • ${watermark.watermarkId}`,
+        });
       };
 
       const newPage = () => {
@@ -652,17 +755,32 @@ export class MdxToPdfConverter {
         if (cursorY - needed < bottomLimit) newPage();
       };
 
-      // opener rule
       ensureSpace(40);
-      page.drawLine({ start: { x: leftX, y: cursorY }, end: { x: rightX, y: cursorY }, thickness: 2, color: BRAND.colors.rule });
+      page.drawLine({
+        start: { x: leftX, y: cursorY },
+        end: { x: rightX, y: cursorY },
+        thickness: 2,
+        color: BRAND.colors.rule,
+      });
       cursorY -= 18;
 
       for (const b of blocks) {
         if (b.kind === "h1") {
           ensureSpace(44);
-          const lines = wrapText({ text: b.text, font: fonts.headingBold, fontSize: lay.heading1, maxWidth: contentW });
+          const lines = wrapText({
+            text: b.text,
+            font: fonts.headingBold,
+            fontSize: lay.heading1,
+            maxWidth: contentW,
+          });
           for (const ln of lines) {
-            page.drawText(ln, { x: leftX, y: cursorY, size: lay.heading1, font: fonts.headingBold, color: BRAND.colors.charcoal });
+            page.drawText(ln, {
+              x: leftX,
+              y: cursorY,
+              size: lay.heading1,
+              font: fonts.headingBold,
+              color: BRAND.colors.charcoal,
+            });
             cursorY -= lay.heading1 * 1.15;
           }
           cursorY -= lay.blockGap;
@@ -671,9 +789,20 @@ export class MdxToPdfConverter {
 
         if (b.kind === "h2") {
           ensureSpace(36);
-          const lines = wrapText({ text: b.text, font: fonts.headingBold, fontSize: lay.heading2, maxWidth: contentW });
+          const lines = wrapText({
+            text: b.text,
+            font: fonts.headingBold,
+            fontSize: lay.heading2,
+            maxWidth: contentW,
+          });
           for (const ln of lines) {
-            page.drawText(ln, { x: leftX, y: cursorY, size: lay.heading2, font: fonts.headingBold, color: BRAND.colors.charcoal });
+            page.drawText(ln, {
+              x: leftX,
+              y: cursorY,
+              size: lay.heading2,
+              font: fonts.headingBold,
+              color: BRAND.colors.charcoal,
+            });
             cursorY -= lay.heading2 * 1.2;
           }
           cursorY -= lay.blockGap;
@@ -682,9 +811,20 @@ export class MdxToPdfConverter {
 
         if (b.kind === "h3") {
           ensureSpace(28);
-          const lines = wrapText({ text: b.text, font: fonts.bodyBold, fontSize: lay.heading3, maxWidth: contentW });
+          const lines = wrapText({
+            text: b.text,
+            font: fonts.bodyBold,
+            fontSize: lay.heading3,
+            maxWidth: contentW,
+          });
           for (const ln of lines) {
-            page.drawText(ln, { x: leftX, y: cursorY, size: lay.heading3, font: fonts.bodyBold, color: BRAND.colors.slate });
+            page.drawText(ln, {
+              x: leftX,
+              y: cursorY,
+              size: lay.heading3,
+              font: fonts.bodyBold,
+              color: BRAND.colors.slate,
+            });
             cursorY -= lay.heading3 * 1.22;
           }
           cursorY -= lay.paragraphGap;
@@ -695,17 +835,31 @@ export class MdxToPdfConverter {
           ensureSpace(52);
           const quoteX = leftX + 14;
           const quoteW = contentW - 14;
-
-          // calculate quote height roughly for box sizing
-          const qLines = wrapText({ text: b.text, font: fonts.body, fontSize: lay.body, maxWidth: quoteW });
+          const qLines = wrapText({
+            text: b.text,
+            font: fonts.body,
+            fontSize: lay.body,
+            maxWidth: quoteW,
+          });
           const qH = qLines.length * lay.body * lay.lineHeight + 12;
 
-          // left gold rule sized to content
-          page.drawRectangle({ x: leftX, y: cursorY - qH + 6, width: 3, height: qH, color: BRAND.colors.gold });
+          page.drawRectangle({
+            x: leftX,
+            y: cursorY - qH + 6,
+            width: 3,
+            height: qH,
+            color: BRAND.colors.gold,
+          });
 
           for (const ln of qLines) {
             ensureSpace(lay.body * lay.lineHeight + 2);
-            page.drawText(ln, { x: quoteX, y: cursorY, size: lay.body, font: fonts.body, color: BRAND.colors.slate });
+            page.drawText(ln, {
+              x: quoteX,
+              y: cursorY,
+              size: lay.body,
+              font: fonts.body,
+              color: BRAND.colors.slate,
+            });
             cursorY -= lay.body * lay.lineHeight;
           }
           cursorY -= lay.blockGap;
@@ -718,14 +872,31 @@ export class MdxToPdfConverter {
           const textX = bulletX + 14;
           const maxW = contentW - indent - 14;
 
-          const lines = wrapText({ text: b.text, font: fonts.body, fontSize: lay.body, maxWidth: maxW });
+          const lines = wrapText({
+            text: b.text,
+            font: fonts.body,
+            fontSize: lay.body,
+            maxWidth: maxW,
+          });
 
           ensureSpace(lay.body * lay.lineHeight + 2);
-          page.drawText("•", { x: bulletX, y: cursorY, size: lay.body + 2, font: fonts.bodyBold, color: BRAND.colors.gold });
+          page.drawText("•", {
+            x: bulletX,
+            y: cursorY,
+            size: lay.body + 2,
+            font: fonts.bodyBold,
+            color: BRAND.colors.gold,
+          });
 
           for (const ln of lines) {
             ensureSpace(lay.body * lay.lineHeight + 2);
-            page.drawText(ln, { x: textX, y: cursorY, size: lay.body, font: fonts.body, color: BRAND.colors.charcoal });
+            page.drawText(ln, {
+              x: textX,
+              y: cursorY,
+              size: lay.body,
+              font: fonts.body,
+              color: BRAND.colors.charcoal,
+            });
             cursorY -= lay.body * lay.lineHeight;
           }
           cursorY -= 6;
@@ -737,11 +908,9 @@ export class MdxToPdfConverter {
           const codeLines = String(b.text || "").split("\n").slice(0, 160);
           const boxPad = 12;
           const lineH = codeSize * 1.35;
-
-          const maxLines = 28; // keeps aesthetic consistent
-          const visible = codeLines.slice(0, maxLines);
-
+          const visible = codeLines.slice(0, 28);
           const neededH = 18 + visible.length * lineH + 16;
+
           ensureSpace(neededH + 10);
 
           const boxTop = cursorY + 8;
@@ -775,16 +944,26 @@ export class MdxToPdfConverter {
           continue;
         }
 
-        // paragraph
         if (b.kind === "p") {
-          const lines = wrapText({ text: b.text, font: fonts.body, fontSize: lay.body, maxWidth: contentW });
+          const lines = wrapText({
+            text: b.text,
+            font: fonts.body,
+            fontSize: lay.body,
+            maxWidth: contentW,
+          });
+
           for (const ln of lines) {
             ensureSpace(lay.body * lay.lineHeight + 2);
-            page.drawText(ln, { x: leftX, y: cursorY, size: lay.body, font: fonts.body, color: BRAND.colors.charcoal });
+            page.drawText(ln, {
+              x: leftX,
+              y: cursorY,
+              size: lay.body,
+              font: fonts.body,
+              color: BRAND.colors.charcoal,
+            });
             cursorY -= lay.body * lay.lineHeight;
           }
           cursorY -= lay.paragraphGap;
-          continue;
         }
       }
 
@@ -792,15 +971,24 @@ export class MdxToPdfConverter {
 
       const bytes = await pdfDoc.save();
 
-      // Hard integrity
-      const minBytes = minBytesForTier(tier.slug);
-      if (bytes.length < minBytes) throw new Error(`Generated PDF too small (${bytes.length} bytes) for ${doc.pdfName}`);
-      if (!isPdfHeaderBytes(bytes)) throw new Error(`Generated PDF missing %PDF header for ${doc.pdfName}`);
+      if (bytes.length < minBytesForTier(tier.slug)) {
+        throw new Error(`Generated PDF too small (${bytes.length} bytes) for ${doc.pdfName}`);
+      }
+
+      if (!isPdfHeaderBytes(bytes)) {
+        throw new Error(`Generated PDF missing %PDF header for ${doc.pdfName}`);
+      }
 
       atomicWrite(outAbs, bytes);
 
       this.stats.processed++;
-      return { success: true, outputPublicPath: outPublic, outputAbsPath: outAbs, bytes: bytes.length, pageCount: pdfDoc.getPageCount() };
+      return {
+        success: true,
+        outputPublicPath: outPublic,
+        outputAbsPath: outAbs,
+        bytes: bytes.length,
+        pageCount: pdfDoc.getPageCount(),
+      };
     } catch (e: any) {
       this.stats.errors++;
       const msg = e?.message || String(e);

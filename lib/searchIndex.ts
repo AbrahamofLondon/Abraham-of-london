@@ -46,7 +46,6 @@ function toSearchDoc(doc: ContentDoc): SearchDoc | null {
 
   const props = getCardProps(doc);
 
-  // Hard guard: if helper can’t resolve, skip (prevents junk index)
   const kind = String((props as any).kind || "").trim();
   const slug = String((props as any).slug || "").trim();
   const href = String((props as any).href || "").trim();
@@ -87,7 +86,6 @@ function uniqueKinds(kinds: readonly any[]): DocKind[] {
 
 export function buildSearchIndex(): SearchDoc[] {
   const kinds = uniqueKinds(documentKinds as any);
-
   const allSearchDocs: SearchDoc[] = [];
 
   for (const kind of kinds) {
@@ -101,7 +99,6 @@ export function buildSearchIndex(): SearchDoc[] {
   return sortByDate(allSearchDocs);
 }
 
-// Cache in-module (works across imports in same runtime)
 let _indexCache: SearchDoc[] | null = null;
 
 export function getSearchIndex(): SearchDoc[] {
@@ -110,7 +107,6 @@ export function getSearchIndex(): SearchDoc[] {
   try {
     _indexCache = buildSearchIndex();
   } catch (e) {
-    // Fail-soft: return empty index rather than crashing server/build
     console.warn("⚠️ [SEARCH_INDEX] Build failed; returning empty index.", e);
     _indexCache = [];
   }
@@ -124,7 +120,6 @@ export function getSearchIndex(): SearchDoc[] {
 
 export function searchDocuments(query: string, limit: number = 20): SearchDoc[] {
   const searchTerm = String(query || "").toLowerCase().trim();
-
   const index = getSearchIndex();
 
   if (!searchTerm) return safeSlice(index, 0, limit);

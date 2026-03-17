@@ -3,13 +3,18 @@ import * as React from "react";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { siteConfig } from "@/lib/imports"; // FIXED: Only import what's needed
+import { siteConfig, contact } from "@/lib/imports";
 
 const AccessibilityPage: NextPage = () => {
   const lastUpdated = React.useMemo(
     () => new Date().toLocaleDateString("en-GB"),
     []
   );
+
+  const contactEmail =
+    contact?.email ||
+    (siteConfig as { email?: string })?.email ||
+    "info@abrahamoflondon.org";
 
   return (
     <Layout title="Accessibility Statement">
@@ -30,7 +35,6 @@ const AccessibilityPage: NextPage = () => {
             </p>
           </header>
 
-          {/* 1. Commitment */}
           <section className="space-y-3">
             <h2 className="font-serif text-xl font-semibold text-cream">
               1. Our commitment
@@ -45,7 +49,6 @@ const AccessibilityPage: NextPage = () => {
             </p>
           </section>
 
-          {/* 2. Measures */}
           <section className="space-y-3">
             <h2 className="font-serif text-xl font-semibold text-cream">
               2. Measures we take
@@ -64,7 +67,6 @@ const AccessibilityPage: NextPage = () => {
             </ul>
           </section>
 
-          {/* 3. Third-party content */}
           <section className="space-y-3">
             <h2 className="font-serif text-xl font-semibold text-cream">
               3. Third-party content and services
@@ -85,7 +87,6 @@ const AccessibilityPage: NextPage = () => {
             </p>
           </section>
 
-          {/* 4. Known limitations */}
           <section className="space-y-3">
             <h2 className="font-serif text-xl font-semibold text-cream">
               4. Known limitations
@@ -111,7 +112,6 @@ const AccessibilityPage: NextPage = () => {
             </p>
           </section>
 
-          {/* 5. Feedback */}
           <section className="space-y-3">
             <h2 className="font-serif text-xl font-semibold text-cream">
               5. Feedback and contact
@@ -125,10 +125,10 @@ const AccessibilityPage: NextPage = () => {
             <p className="text-sm text-gray-200">
               Email:{" "}
               <a
-                href={`mailto:${siteConfig.email}`}
+                href={`mailto:${contactEmail}`}
                 className="text-softGold underline underline-offset-2 hover:text-amber-200"
               >
-                {siteConfig.email}
+                {contactEmail}
               </a>
             </p>
           </section>

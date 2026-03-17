@@ -1,11 +1,14 @@
-// scripts/pdf/generate-interactive-pdf.ts - ENHANCED WITH LIBREOFFICE SUPPORT
+// scripts/pdf/generate-interactive-pdf.ts
 import fs from "fs/promises";
+import fsSync from "fs";
 import path from "path";
-import { PDFDocument, StandardFonts, rgb, PDFPage } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, PDFPage, degrees } from "pdf-lib";
 import { fileURLToPath } from "url";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { PDF_CONFIG, type BuildTier, type Quality, type Format } from "./constants.js";
+import { buildFingerprintProfile } from "../../lib/premium/fingerprint-profile";
+import { createWatermarkPayload } from "../../lib/premium/watermark";
 
 const __filename = fileURLToPath(import.meta.url);
 const execAsync = promisify(exec);
@@ -34,29 +37,39 @@ interface GenerationResult {
     format: Format;
     quality: Quality;
     generatedAt: string;
-    method: 'pdf-lib' | 'libreoffice';
+    method: "pdf-lib" | "libreoffice";
+    watermarkId?: string | null;
+    fingerprint?: string | null;
   };
 }
 
 interface LibreOfficeOptions {
   enabled: boolean;
   path?: string;
-  timeout?: number; // ms
+  timeout?: number;
   verbose?: boolean;
 }
+
+type ForensicEnvelope = {
+  watermarkId: string;
+  footerText: string;
+  tokenLine: string;
+  compactMarker: string;
+  fingerprintId: string;
+};
 
 function pageSize(format: Format): { width: number; height: number } {
   const sizes = {
     A4: { width: 595.28, height: 841.89 },
     Letter: { width: 612, height: 792 },
-    A3: { width: 841.89, height: 1190.55 }
+    A3: { width: 841.89, height: 1190.55 },
   };
   return sizes[format] || sizes.A4;
 }
 
 function normalizeFormat(s: string): Format {
   const v = String(s || "").trim().toUpperCase();
-  return (v === "A4" || v === "LETTER" || v === "A3") ? v as Format : "A4";
+  return v === "A4" || v === "LETTER" || v === "A3" ? (v as Format) : "A4";
 }
 
 function tierColor(tier: BuildTier): [number, number, number] {
@@ -64,32 +77,39 @@ function tierColor(tier: BuildTier): [number, number, number] {
     free: [0.3, 0.3, 0.3] as [number, number, number],
     member: [0.1, 0.4, 0.7] as [number, number, number],
     architect: [0.8, 0.6, 0.2] as [number, number, number],
-    'inner-circle': [0.6, 0.3, 0.9] as [number, number, number]
+    "inner-circle": [0.6, 0.3, 0.9] as [number, number, number],
   };
   return colors[tier] || colors.architect;
 }
 
-// LibreOffice utility class
+function fileExists(absPath: string): boolean {
+  try {
+    fsSync.accessSync(absPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 class LibreOfficeHelper {
-  static async isAvailable(customPath?: string): Promise<{ available: boolean; path?: string; version?: string }> {
+  static async isAvailable(
+    customPath?: string,
+  ): Promise<{ available: boolean; path?: string; version?: string }> {
     try {
-      const command = process.platform === 'win32' 
-        ? `${customPath || 'soffice'} --version`
-        : `${customPath || 'libreoffice'} --version`;
-      
+      const binary =
+        customPath || (process.platform === "win32" ? "soffice" : "libreoffice");
+      const command = `"${binary}" --version`;
       const { stdout, stderr } = await execAsync(command, { timeout: 5000 });
-      
-      if (stderr && !stderr.includes('Warning')) {
+
+      if (stderr && !stderr.includes("Warning")) {
         console.warn(`LibreOffice warning: ${stderr}`);
       }
-      
+
       const versionMatch = stdout.match(/(\d+\.\d+\.\d+)/);
-      const version = versionMatch ? versionMatch[1] : 'unknown';
-      
-      console.log(`✅ LibreOffice detected: ${version}`);
-      return { available: true, path: customPath || 'libreoffice', version };
-    } catch (error) {
-      console.log(`⚠️ LibreOffice not available: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const version = versionMatch ? versionMatch[1] : "unknown";
+
+      return { available: true, path: binary, version };
+    } catch {
       return { available: false };
     }
   }
@@ -101,17 +121,19 @@ class LibreOfficeHelper {
       libreOfficePath?: string;
       timeout?: number;
       verbose?: boolean;
-    } = {}
+    } = {},
   ): Promise<boolean> {
     try {
-      // Check if template exists
-      if (!fs.access(odtTemplatePath).then(() => true).catch(() => false)) {
+      if (!fileExists(odtTemplatePath)) {
         throw new Error(`ODT template not found: ${odtTemplatePath}`);
       }
 
-      const cmd = process.platform === 'win32'
-        ? `"${options.libreOfficePath || 'soffice'}" --headless --convert-to pdf --outdir "${path.dirname(outputPdfPath)}" "${odtTemplatePath}"`
-        : `${options.libreOfficePath || 'libreoffice'} --headless --convert-to pdf --outdir "${path.dirname(outputPdfPath)}" "${odtTemplatePath}"`;
+      const binary =
+        options.libreOfficePath ||
+        (process.platform === "win32" ? "soffice" : "libreoffice");
+
+      const outDir = path.dirname(outputPdfPath);
+      const cmd = `"${binary}" --headless --convert-to pdf --outdir "${outDir}" "${odtTemplatePath}"`;
 
       if (options.verbose) {
         console.log(`Running LibreOffice command: ${cmd}`);
@@ -119,157 +141,217 @@ class LibreOfficeHelper {
 
       const { stdout, stderr } = await execAsync(cmd, {
         timeout: options.timeout || 30000,
-        maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+        maxBuffer: 10 * 1024 * 1024,
       });
 
       if (options.verbose) {
-        if (stdout) console.log(`LibreOffice stdout: ${stdout}`);
-        if (stderr && !stderr.includes('Info')) console.warn(`LibreOffice stderr: ${stderr}`);
+        if (stdout) console.log(stdout);
+        if (stderr && !stderr.includes("Info")) console.warn(stderr);
       }
 
-      // Check if PDF was created
-      const expectedPdfPath = outputPdfPath.replace(/\.odt$/, '.pdf');
-      const exists = await fs.access(expectedPdfPath).then(() => true).catch(() => false);
-      
-      if (exists) {
-        // Rename to desired output path if needed
-        if (expectedPdfPath !== outputPdfPath) {
-          await fs.rename(expectedPdfPath, outputPdfPath);
-        }
-        console.log(`✅ LibreOffice generated PDF: ${path.basename(outputPdfPath)}`);
-        return true;
-      } else {
-        throw new Error('PDF not generated by LibreOffice');
+      const convertedName = `${path.basename(
+        odtTemplatePath,
+        path.extname(odtTemplatePath),
+      )}.pdf`;
+      const generatedPdfPath = path.join(outDir, convertedName);
+
+      if (!fileExists(generatedPdfPath)) {
+        throw new Error("PDF not generated by LibreOffice");
       }
+
+      if (generatedPdfPath !== outputPdfPath) {
+        if (fileExists(outputPdfPath)) {
+          await fs.unlink(outputPdfPath).catch(() => {});
+        }
+        await fs.rename(generatedPdfPath, outputPdfPath);
+      }
+
+      return true;
     } catch (error) {
-      console.error(`❌ LibreOffice conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(
+        `❌ LibreOffice conversion failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
       return false;
     }
   }
 }
 
-// Simple console logger
 const logger = {
   info: (msg: string) => console.log(`📄 ${msg}`),
   success: (msg: string) => console.log(`✅ ${msg}`),
   error: (msg: string) => console.error(`❌ ${msg}`),
-  warn: (msg: string) => console.warn(`⚠️ ${msg}`)
+  warn: (msg: string) => console.warn(`⚠️ ${msg}`),
 };
 
 class InteractivePDFGenerator {
   private config: InteractivePDFConfig;
   private libreOfficeOptions: LibreOfficeOptions;
-  
+
   constructor(config: InteractivePDFConfig) {
     this.config = {
       includeInstructions: true,
       watermarked: true,
-      version: '1.0.0',
+      version: "1.0.0",
       useLibreOffice: false,
-      ...config
+      ...config,
     };
-    
+
     this.libreOfficeOptions = {
       enabled: this.config.useLibreOffice || false,
       path: this.config.libreOfficePath,
       timeout: 30000,
-      verbose: process.env.NODE_ENV === 'development'
+      verbose: process.env.NODE_ENV === "development",
+    };
+  }
+
+  private buildForensics(fileName: string): ForensicEnvelope {
+    const metadata = this.config.metadata ?? {};
+    const contentId =
+      typeof metadata.contentId === "string" && metadata.contentId.trim()
+        ? metadata.contentId
+        : `interactive:${this.config.format}:${this.config.quality}:${this.config.tier}`;
+
+    const tokenId =
+      typeof metadata.tokenId === "string" && metadata.tokenId.trim()
+        ? metadata.tokenId
+        : null;
+
+    const userId =
+      typeof metadata.userId === "string" && metadata.userId.trim()
+        ? metadata.userId
+        : null;
+
+    const sessionId =
+      typeof metadata.sessionId === "string" && metadata.sessionId.trim()
+        ? metadata.sessionId
+        : null;
+
+    const title = "Legacy Architecture Canvas";
+
+    const fingerprint = buildFingerprintProfile({
+      contentId,
+      title,
+      filename: fileName,
+      mimeType: "application/pdf",
+      tier: this.config.tier,
+      userId,
+      sessionId,
+      producer: "Abraham of London Interactive PDF Engine",
+      creator: `Interactive PDF Generator v${this.config.version || "1.0.0"}`,
+    });
+
+    const watermark = createWatermarkPayload({
+      contentId,
+      tokenId,
+      userId,
+      sessionId,
+      tier: this.config.tier,
+      briefTitle: title,
+      fingerprint,
+      footerText:
+        typeof metadata.expectedFooter === "string" && metadata.expectedFooter.trim()
+          ? metadata.expectedFooter
+          : null,
+      watermarkId:
+        typeof metadata.watermarkId === "string" && metadata.watermarkId.trim()
+          ? metadata.watermarkId
+          : null,
+    });
+
+    return {
+      watermarkId: watermark.watermarkId,
+      footerText: watermark.footerText,
+      tokenLine: watermark.tokenLine,
+      compactMarker: watermark.compactMarker,
+      fingerprintId: fingerprint.profileId,
     };
   }
 
   async generate(): Promise<GenerationResult> {
     const startTime = Date.now();
-    
+
     try {
-      const { format, quality, tier, outputDir, includeInstructions, watermarked, version, metadata } = this.config;
-      const displayTier = PDF_CONFIG.tiers[tier].display;
-      
-      logger.info(`Generating interactive ${format} PDF (${quality} quality, ${tier} tier)...`);
-      
-      // Check LibreOffice availability if enabled
+      logger.info(
+        `Generating interactive ${this.config.format} PDF (${this.config.quality}, ${this.config.tier})...`,
+      );
+
       let useLibreOffice = this.libreOfficeOptions.enabled;
       if (useLibreOffice) {
         const loCheck = await LibreOfficeHelper.isAvailable(this.libreOfficeOptions.path);
         if (!loCheck.available) {
-          logger.warn('LibreOffice not available, falling back to pdf-lib');
+          logger.warn("LibreOffice not available, falling back to pdf-lib");
           useLibreOffice = false;
         } else {
-          logger.info(`Using LibreOffice ${loCheck.version} for PDF generation`);
+          logger.info(`Using LibreOffice ${loCheck.version}`);
         }
       }
-      
-      let result: GenerationResult;
-      
-      if (useLibreOffice) {
-        result = await this.generateWithLibreOffice(startTime);
-      } else {
-        result = await this.generateWithPdfLib(startTime);
-      }
-      
-      return result;
-      
+
+      return useLibreOffice
+        ? this.generateWithLibreOffice(startTime)
+        : this.generateWithPdfLib(startTime);
     } catch (error: any) {
       logger.error(`Generation failed: ${error.message}`);
-      return {
-        success: false,
-        error: error.message
-      };
+      return { success: false, error: error.message };
     }
   }
 
   private async generateWithPdfLib(startTime: number): Promise<GenerationResult> {
-    const { format, quality, tier, outputDir, includeInstructions, watermarked, version, metadata } = this.config;
+    const { format, quality, tier, outputDir, includeInstructions, watermarked, version, metadata } =
+      this.config;
+
     const displayTier = PDF_CONFIG.tiers[tier].display;
-    
-    // Create PDF document
-    const pdfDoc = await PDFDocument.create();
-    
-    // Set comprehensive metadata
-    this.setDocumentMetadata(pdfDoc, format, displayTier, quality, version);
-    
-    // Add page
-    const { width, height } = pageSize(format);
-    const page = pdfDoc.addPage([width, height]);
-    
-    // Embed fonts
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    
-    // Draw document
-    this.drawDocument(pdfDoc, page, {
-      width, height, format, tier, quality, displayTier,
-      helvetica, helveticaBold,
-      includeInstructions, watermarked, metadata
-    });
-    
-    // Create form
-    const form = pdfDoc.getForm();
-    const fieldCount = this.addInteractiveFields(form, page, {
-      width, height, tier, helvetica
-    });
-    
-    // Update field appearances
-    form.updateFieldAppearances(helvetica);
-    
-    // Save PDF
-    const pdfBytes = await pdfDoc.save();
-    
-    // Ensure output directory exists
-    await fs.mkdir(outputDir, { recursive: true });
-    
-    // Generate filename
     const fileName = `legacy-architecture-canvas-${format.toLowerCase()}-${quality}-${tier}-interactive.pdf`;
     const filePath = path.join(outputDir, fileName);
-    
-    // Write file
+    const forensic = this.buildForensics(fileName);
+
+    const pdfDoc = await PDFDocument.create();
+    this.setDocumentMetadata(pdfDoc, format, displayTier, quality, version || "1.0.0", forensic);
+
+    const { width, height } = pageSize(format);
+    const page = pdfDoc.addPage([width, height]);
+
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    this.drawDocument(pdfDoc, page, {
+      width,
+      height,
+      format,
+      tier,
+      quality,
+      displayTier,
+      helvetica,
+      helveticaBold,
+      includeInstructions,
+      watermarked,
+      metadata,
+      forensic,
+    });
+
+    const form = pdfDoc.getForm();
+    const fieldCount = this.addInteractiveFields(form, page, {
+      width,
+      height,
+      tier,
+      helvetica,
+      forensic,
+    });
+
+    form.updateFieldAppearances(helvetica);
+
+    const pdfBytes = await pdfDoc.save();
+    await fs.mkdir(outputDir, { recursive: true });
     await fs.writeFile(filePath, pdfBytes);
-    
-    // Get file stats
+
     const stats = await fs.stat(filePath);
     const duration = Date.now() - startTime;
-    
-    logger.success(`Generated with pdf-lib: ${fileName} (${(stats.size / 1024).toFixed(1)} KB, ${duration}ms)`);
-    
+
+    logger.success(
+      `Generated with pdf-lib: ${fileName} (${(stats.size / 1024).toFixed(1)} KB, ${duration}ms)`,
+    );
+
     return {
       success: true,
       filePath,
@@ -280,73 +362,85 @@ class InteractivePDFGenerator {
         format,
         quality,
         generatedAt: new Date().toISOString(),
-        method: 'pdf-lib'
-      }
+        method: "pdf-lib",
+        watermarkId: forensic.watermarkId,
+        fingerprint: forensic.fingerprintId,
+      },
     };
   }
 
   private async generateWithLibreOffice(startTime: number): Promise<GenerationResult> {
-    const { format, quality, tier, outputDir, version, metadata } = this.config;
-    const displayTier = PDF_CONFIG.tiers[tier].display;
-    
-    // Check for ODT template
-    const templateDir = path.join(process.cwd(), 'templates', 'interactive-pdfs');
+    const { format, quality, tier, outputDir } = this.config;
+    const templateDir = path.join(process.cwd(), "templates", "interactive-pdfs");
     const templateName = `legacy-architecture-canvas-${format.toLowerCase()}-${tier}.odt`;
     const templatePath = path.join(templateDir, templateName);
-    
-    // Fallback to default template if specific one doesn't exist
-    const defaultTemplatePath = path.join(templateDir, 'legacy-architecture-canvas-template.odt');
-    
+    const defaultTemplatePath = path.join(
+      templateDir,
+      "legacy-architecture-canvas-template.odt",
+    );
+
     let odtTemplatePath = templatePath;
-    if (!(await fs.access(templatePath).then(() => true).catch(() => false))) {
-      if (await fs.access(defaultTemplatePath).then(() => true).catch(() => false)) {
-        logger.warn(`Specific template not found, using default: ${path.basename(defaultTemplatePath)}`);
+    if (!fileExists(templatePath)) {
+      if (fileExists(defaultTemplatePath)) {
+        logger.warn(
+          `Specific template not found, using default: ${path.basename(defaultTemplatePath)}`,
+        );
         odtTemplatePath = defaultTemplatePath;
       } else {
-        throw new Error(`No ODT template found. Expected at: ${templatePath} or ${defaultTemplatePath}`);
+        throw new Error(`No ODT template found at ${templatePath} or ${defaultTemplatePath}`);
       }
     }
-    
-    // Ensure output directory exists
+
     await fs.mkdir(outputDir, { recursive: true });
-    
-    // Generate filename
+
     const fileName = `legacy-architecture-canvas-${format.toLowerCase()}-${quality}-${tier}-interactive-libreoffice.pdf`;
     const filePath = path.join(outputDir, fileName);
-    
-    // Generate PDF using LibreOffice
-    const success = await LibreOfficeHelper.generatePDFFromODT(
-      odtTemplatePath,
-      filePath,
-      {
-        libreOfficePath: this.libreOfficeOptions.path,
-        timeout: this.libreOfficeOptions.timeout,
-        verbose: this.libreOfficeOptions.verbose
-      }
-    );
-    
+    const forensic = this.buildForensics(fileName);
+
+    const success = await LibreOfficeHelper.generatePDFFromODT(odtTemplatePath, filePath, {
+      libreOfficePath: this.libreOfficeOptions.path,
+      timeout: this.libreOfficeOptions.timeout,
+      verbose: this.libreOfficeOptions.verbose,
+    });
+
     if (!success) {
-      throw new Error('LibreOffice PDF generation failed');
+      throw new Error("LibreOffice PDF generation failed");
     }
-    
-    // Get file stats
+
+    const bytes = await fs.readFile(filePath);
+    const pdfDoc = await PDFDocument.load(bytes);
+    this.setDocumentMetadata(
+      pdfDoc,
+      format,
+      PDF_CONFIG.tiers[tier].display,
+      quality,
+      this.config.version || "1.0.0",
+      forensic,
+    );
+    const saved = await pdfDoc.save();
+    await fs.writeFile(filePath, saved);
+
     const stats = await fs.stat(filePath);
     const duration = Date.now() - startTime;
-    
-    logger.success(`Generated with LibreOffice: ${fileName} (${(stats.size / 1024).toFixed(1)} KB, ${duration}ms)`);
-    
+
+    logger.success(
+      `Generated with LibreOffice: ${fileName} (${(stats.size / 1024).toFixed(1)} KB, ${duration}ms)`,
+    );
+
     return {
       success: true,
       filePath,
       size: stats.size,
       metadata: {
-        fieldCount: 0, // Unknown for LibreOffice-generated PDFs
+        fieldCount: 0,
         tier,
         format,
         quality,
         generatedAt: new Date().toISOString(),
-        method: 'libreoffice'
-      }
+        method: "libreoffice",
+        watermarkId: forensic.watermarkId,
+        fingerprint: forensic.fingerprintId,
+      },
     };
   }
 
@@ -355,20 +449,31 @@ class InteractivePDFGenerator {
     format: Format,
     displayTier: string,
     quality: Quality,
-    version: string
+    version: string,
+    forensic: ForensicEnvelope,
   ) {
     pdfDoc.setTitle(`Legacy Architecture Canvas - Interactive ${format} Edition`);
     pdfDoc.setAuthor("Abraham of London");
-    pdfDoc.setSubject("Interactive Legacy Canvas Framework");
-    pdfDoc.setKeywords(["legacy", "architecture", "canvas", "interactive", "framework", quality, displayTier]);
-    pdfDoc.setProducer("Abraham of London Interactive PDF Engine v2.0");
+    pdfDoc.setSubject(forensic.footerText);
+    pdfDoc.setKeywords([
+      "legacy",
+      "architecture",
+      "canvas",
+      "interactive",
+      "framework",
+      quality,
+      displayTier,
+      forensic.watermarkId,
+      forensic.fingerprintId,
+    ]);
+    pdfDoc.setProducer("Abraham of London Interactive PDF Engine v2.1");
     pdfDoc.setCreator(`Interactive PDF Generator v${version}`);
     pdfDoc.setCreationDate(new Date());
     pdfDoc.setModificationDate(new Date());
   }
 
   private drawDocument(
-    pdfDoc: PDFDocument,
+    _pdfDoc: PDFDocument,
     page: PDFPage,
     options: {
       width: number;
@@ -382,31 +487,45 @@ class InteractivePDFGenerator {
       includeInstructions?: boolean;
       watermarked?: boolean;
       metadata?: Record<string, any>;
-    }
+      forensic: ForensicEnvelope;
+    },
   ) {
-    const { 
-      width, height, format, tier, quality, displayTier,
-      helvetica, helveticaBold,
-      includeInstructions, watermarked, metadata
+    const {
+      width,
+      height,
+      tier,
+      quality,
+      displayTier,
+      helvetica,
+      helveticaBold,
+      includeInstructions,
+      watermarked,
+      metadata,
+      forensic,
     } = options;
-    
+
     const tierColorRGB = tierColor(tier);
-    
-    // Watermark for premium tiers
-    if (watermarked && (tier === 'architect' || tier === 'inner-circle')) {
-      this.drawWatermark(page, width, height, displayTier, helveticaBold, tierColorRGB);
+
+    if (watermarked && (tier === "architect" || tier === "inner-circle")) {
+      this.drawWatermark(
+        page,
+        width,
+        height,
+        `${displayTier.toUpperCase()} • ${forensic.watermarkId}`,
+        helveticaBold,
+        tierColorRGB,
+      );
     }
-    
-    // Header section
+
     page.drawRectangle({
       x: 0,
       y: height - 100,
       width,
       height: 100,
       color: rgb(...tierColorRGB),
-      opacity: 0.1
+      opacity: 0.1,
     });
-    
+
     page.drawText("LEGACY ARCHITECTURE CANVAS", {
       x: 50,
       y: height - 60,
@@ -414,7 +533,7 @@ class InteractivePDFGenerator {
       font: helveticaBold,
       color: rgb(0.1, 0.1, 0.3),
     });
-    
+
     page.drawText("Interactive Premium Edition", {
       x: 50,
       y: height - 90,
@@ -422,16 +541,18 @@ class InteractivePDFGenerator {
       font: helvetica,
       color: rgb(0.3, 0.3, 0.5),
     });
-    
-    // Info box
-    page.drawText(`${format} Format • ${displayTier} Tier • ${quality.toUpperCase()} Quality`, {
-      x: 50,
-      y: height - 120,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.5, 0.5, 0.5),
-    });
-    
+
+    page.drawText(
+      `${displayTier} • ${quality.toUpperCase()} • WM ${forensic.watermarkId}`,
+      {
+        x: 50,
+        y: height - 120,
+        size: 10,
+        font: helvetica,
+        color: rgb(0.5, 0.5, 0.5),
+      },
+    );
+
     if (metadata?.version) {
       page.drawText(`Version ${metadata.version}`, {
         x: width - 100,
@@ -441,13 +562,11 @@ class InteractivePDFGenerator {
         color: rgb(0.5, 0.5, 0.5),
       });
     }
-    
-    // Footer instructions
+
     if (includeInstructions) {
       this.drawInstructions(page, width, height, helvetica);
     }
-    
-    // Copyright
+
     page.drawText(`© ${new Date().getFullYear()} Abraham of London`, {
       x: width - 150,
       y: 30,
@@ -455,37 +574,44 @@ class InteractivePDFGenerator {
       font: helvetica,
       color: rgb(0.7, 0.7, 0.7),
     });
+
+    const footer = forensic.footerText.slice(0, 140);
+    page.drawText(footer, {
+      x: 50,
+      y: 14,
+      size: 6.5,
+      font: helvetica,
+      color: rgb(0.55, 0.55, 0.55),
+    });
   }
 
   private drawWatermark(
     page: PDFPage,
     width: number,
     height: number,
-    displayTier: string,
+    watermarkText: string,
     font: any,
-    tierColorRGB: [number, number, number]
+    tierColorRGB: [number, number, number],
   ) {
-    // Tier watermark
-    page.drawText(displayTier.toUpperCase(), {
-      x: width / 2 - 100,
+    page.drawText(watermarkText, {
+      x: width / 2 - 140,
       y: height / 2,
-      size: 48,
-      font: font,
+      size: 36,
+      font,
       color: rgb(...tierColorRGB),
       opacity: 0.03,
-      rotate: { type: 'degrees', angle: 45 }
+      rotate: degrees(45),
     });
-    
-    // Confidential stamp for inner-circle
-    if (displayTier.toLowerCase().includes('inner')) {
+
+    if (watermarkText.toLowerCase().includes("inner")) {
       page.drawText("CONFIDENTIAL", {
         x: width - 180,
         y: 100,
         size: 18,
-        font: font,
+        font,
         color: rgb(0.9, 0.1, 0.1),
         opacity: 0.1,
-        rotate: { type: 'degrees', angle: -30 }
+        rotate: degrees(-30),
       });
     }
   }
@@ -495,16 +621,16 @@ class InteractivePDFGenerator {
       "This is an interactive PDF. Click any field and type to fill it out.",
       "Save your filled PDF to keep your legacy canvas updated.",
       "Use Adobe Acrobat Reader for best interactive experience.",
-      "Fields are automatically saved when you save the document."
+      "Fields are automatically saved when you save the document.",
     ];
-    
+
     let yPos = 80;
     instructions.forEach((instruction, index) => {
       page.drawText(`${index + 1}. ${instruction}`, {
         x: 50,
         y: yPos,
         size: 9,
-        font: font,
+        font,
         color: rgb(0.4, 0.4, 0.4),
       });
       yPos -= 16;
@@ -519,41 +645,23 @@ class InteractivePDFGenerator {
       height: number;
       tier: BuildTier;
       helvetica: any;
-    }
+      forensic: ForensicEnvelope;
+    },
   ): number {
-    const { width, height, tier, helvetica } = options;
+    const { width, height, helvetica, forensic } = options;
     let fieldCount = 0;
-    
-    // Define canvas sections
+
     const sections = [
-      { 
-        title: "SOVEREIGN THESIS", 
-        yTop: height - 190,
-        fieldCount: 3
-      },
-      { 
-        title: "CAPITAL MATRIX", 
-        yTop: height - 340,
-        fieldCount: 3
-      },
-      { 
-        title: "INSTITUTIONS", 
-        yTop: height - 490,
-        fieldCount: 3
-      },
-      { 
-        title: "GUARDRAILS", 
-        yTop: height - 640,
-        fieldCount: 3
-      }
+      { title: "SOVEREIGN THESIS", yTop: height - 190, fieldCount: 3 },
+      { title: "CAPITAL MATRIX", yTop: height - 340, fieldCount: 3 },
+      { title: "INSTITUTIONS", yTop: height - 490, fieldCount: 3 },
+      { title: "GUARDRAILS", yTop: height - 640, fieldCount: 3 },
     ];
-    
+
     const fieldWidth = width - 100;
     const fieldHeight = 26;
-    
-    // Draw sections and add fields
+
     sections.forEach((section, sectionIndex) => {
-      // Draw section title
       page.drawText(section.title, {
         x: 50,
         y: section.yTop,
@@ -561,12 +669,10 @@ class InteractivePDFGenerator {
         font: helvetica,
         color: rgb(0.2, 0.2, 0.4),
       });
-      
-      // Add fields for this section
+
       for (let i = 0; i < section.fieldCount; i++) {
-        const y = section.yTop - 32 - (i * 40);
-        
-        // Draw field background
+        const y = section.yTop - 32 - i * 40;
+
         page.drawRectangle({
           x: 50,
           y,
@@ -575,11 +681,10 @@ class InteractivePDFGenerator {
           borderColor: rgb(0.82, 0.82, 0.82),
           borderWidth: 1,
         });
-        
-        // Create interactive field
+
         const fieldName = `s${sectionIndex + 1}_field_${i + 1}`;
         const textField = form.createTextField(fieldName);
-        
+
         textField.setText("");
         textField.addToPage(page, {
           x: 52,
@@ -587,14 +692,12 @@ class InteractivePDFGenerator {
           width: fieldWidth - 4,
           height: fieldHeight - 4,
         });
-        
+
         textField.setFontSize(10);
-        
         fieldCount++;
       }
     });
-    
-    // Add footer instructions
+
     page.drawText("This is an interactive PDF. Click any field and type to fill it out.", {
       x: 50,
       y: 52,
@@ -602,79 +705,76 @@ class InteractivePDFGenerator {
       font: helvetica,
       color: rgb(0.5, 0.5, 0.5),
     });
-    
-    page.drawText("Save your filled PDF to keep your legacy canvas updated.", {
+
+    page.drawText(`WM ${forensic.watermarkId} • FP ${forensic.fingerprintId}`, {
       x: 50,
       y: 34,
-      size: 10,
+      size: 8,
       font: helvetica,
       color: rgb(0.5, 0.5, 0.5),
     });
-    
+
     return fieldCount;
   }
 
-  // Static method for batch generation with fallback
-  static async generateBatch(configs: InteractivePDFConfig[]): Promise<Array<{
-    config: InteractivePDFConfig;
-    result: GenerationResult;
-  }>> {
+  static async generateBatch(
+    configs: InteractivePDFConfig[],
+  ): Promise<Array<{ config: InteractivePDFConfig; result: GenerationResult }>> {
     console.log(`🔄 Starting batch generation of ${configs.length} interactive PDFs`);
-    
-    // Check LibreOffice availability once
+
     const loCheck = await LibreOfficeHelper.isAvailable();
-    
-    const results = [];
+    const results: Array<{ config: InteractivePDFConfig; result: GenerationResult }> = [];
+
     for (const config of configs) {
       try {
-        // If LibreOffice is requested but not available, fall back to pdf-lib
         const finalConfig = { ...config };
         if (config.useLibreOffice && !loCheck.available) {
-          console.warn(`⚠️ LibreOffice not available for ${config.format} ${config.tier}, falling back to pdf-lib`);
+          console.warn(
+            `⚠️ LibreOffice not available for ${config.format} ${config.tier}, falling back to pdf-lib`,
+          );
           finalConfig.useLibreOffice = false;
         }
-        
+
         const generator = new InteractivePDFGenerator(finalConfig);
         const result = await generator.generate();
         results.push({ config, result });
-        
-        // Small delay to prevent resource contention
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         console.error(`❌ Failed to generate PDF for ${config.format} ${config.tier}:`, error);
         results.push({
           config,
           result: {
             success: false,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          }
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
         });
       }
     }
-    
-    const successCount = results.filter(r => r.result.success).length;
+
+    const successCount = results.filter((r) => r.result.success).length;
     const methodBreakdown = {
-      libreoffice: results.filter(r => r.result.metadata?.method === 'libreoffice').length,
-      'pdf-lib': results.filter(r => r.result.metadata?.method === 'pdf-lib').length
+      libreoffice: results.filter((r) => r.result.metadata?.method === "libreoffice").length,
+      "pdf-lib": results.filter((r) => r.result.metadata?.method === "pdf-lib").length,
     };
-    
+
     console.log(`📊 Batch complete: ${successCount}/${configs.length} succeeded`);
-    console.log(`🛠️  Methods: LibreOffice ${methodBreakdown.libreoffice}, pdf-lib ${methodBreakdown['pdf-lib']}`);
-    
+    console.log(
+      `🛠️ Methods: LibreOffice ${methodBreakdown.libreoffice}, pdf-lib ${methodBreakdown["pdf-lib"]}`,
+    );
+
     return results;
   }
 }
 
-// Backward compatible function
 async function generateInteractivePDF(
-  format: Format, 
-  quality: Quality, 
-  tier: BuildTier, 
+  format: Format,
+  quality: Quality,
+  tier: BuildTier,
   outputDir: string,
   options?: {
     useLibreOffice?: boolean;
     libreOfficePath?: string;
-  }
+  },
 ): Promise<GenerationResult> {
   const generator = new InteractivePDFGenerator({
     format,
@@ -682,181 +782,113 @@ async function generateInteractivePDF(
     tier,
     outputDir,
     useLibreOffice: options?.useLibreOffice,
-    libreOfficePath: options?.libreOfficePath
+    libreOfficePath: options?.libreOfficePath,
   });
-  
-  return await generator.generate();
+
+  return generator.generate();
 }
 
-// Check LibreOffice availability helper
-async function checkLibreOfficeInstallation(customPath?: string): Promise<{
+async function checkLibreOfficeInstallation(
+  customPath?: string,
+): Promise<{
   available: boolean;
   path?: string;
   version?: string;
   recommendedPath?: string;
 }> {
   const check = await LibreOfficeHelper.isAvailable(customPath);
-  
+
   if (!check.available) {
-    // Suggest common installation paths
-    const suggestions = [];
-    
-    if (process.platform === 'win32') {
-      suggestions.push(
-        'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
-        'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe'
-      );
-    } else if (process.platform === 'darwin') {
-      suggestions.push(
-        '/Applications/LibreOffice.app/Contents/MacOS/soffice',
-        '/usr/local/bin/libreoffice'
-      );
-    } else {
-      suggestions.push(
-        '/usr/bin/libreoffice',
-        '/usr/local/bin/libreoffice',
-        '/snap/bin/libreoffice'
-      );
-    }
-    
+    const suggestions =
+      process.platform === "win32"
+        ? [
+            "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+            "C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe",
+          ]
+        : process.platform === "darwin"
+          ? [
+              "/Applications/LibreOffice.app/Contents/MacOS/soffice",
+              "/usr/local/bin/libreoffice",
+            ]
+          : ["/usr/bin/libreoffice", "/usr/local/bin/libreoffice", "/snap/bin/libreoffice"];
+
     return {
       available: false,
-      recommendedPath: suggestions.find(p => {
-        try {
-          fs.accessSync(p);
-          return true;
-        } catch {
-          return false;
-        }
-      })
+      recommendedPath: suggestions.find((p) => fileExists(p)),
     };
   }
-  
+
   return check;
 }
 
-// HELP FUNCTION - Show help message
 function showHelp() {
   console.log(`
 🚀 Interactive PDF Generator
-=============================
 
 Usage:
   node scripts/pdf/generate-interactive-pdf.ts [options]
-  npm run pdf:generate:interactive -- [options]
 
 Options:
-  --formats <list>          Comma-separated formats (A4,Letter,A3) [default: A4,Letter]
-  --quality <value>         Quality level (standard,premium) [default: premium]
-  --tier <value>            Tier (free,member,architect,inner-circle) [default: architect]
-  --output-dir <path>       Output directory [default: ./public/assets/downloads]
-  --version <value>         Version number [default: 1.0.0]
-  
-  --use-libreoffice         Use LibreOffice for generation (if available)
+  --formats <list>          Comma-separated formats (A4,Letter,A3)
+  --quality <value>         Quality level (standard,premium)
+  --tier <value>            Tier (free,member,architect,inner-circle)
+  --output-dir <path>       Output directory
+  --version <value>         Version number
+  --use-libreoffice         Use LibreOffice if available
   --libreoffice-path <path> Custom LibreOffice executable path
-  --no-instructions         Don't include instructions in PDF
-  --no-watermark            Don't add watermark
-  
-  --check-libreoffice       Only check LibreOffice availability
-  --help, -h                Show this help message
-
-Examples:
-  # Basic generation with pdf-lib
-  node scripts/pdf/generate-interactive-pdf.ts --formats A4,Letter --quality premium
-  
-  # With LibreOffice (if installed)
-  node scripts/pdf/generate-interactive-pdf.ts --use-libreoffice --formats A4
-  
-  # Check LibreOffice installation
-  node scripts/pdf/generate-interactive-pdf.ts --check-libreoffice
-  
-  # Custom output directory
-  node scripts/pdf/generate-interactive-pdf.ts --output-dir ./dist/downloads
-  
-  # Specific tier and quality
-  node scripts/pdf/generate-interactive-pdf.ts --tier inner-circle --quality premium
-
-Environment Variables:
-  NODE_ENV=development      Enable verbose logging
-  LIBREOFFICE_PATH=/path    Set default LibreOffice path
+  --no-instructions         Omit instructions
+  --no-watermark            Omit watermark
+  --check-libreoffice       Check LibreOffice only
+  --help, -h                Show help
 `);
 }
 
-// Main CLI function
 async function main() {
   const args = process.argv.slice(2);
-  
-  // Handle --help flag
-  if (args.includes('--help') || args.includes('-h')) {
+
+  if (args.includes("--help") || args.includes("-h")) {
     showHelp();
     return;
   }
-  
-  // Handle --check-libreoffice flag
-  if (args.includes('--check-libreoffice')) {
-    console.log('🔍 Checking LibreOffice installation...');
+
+  if (args.includes("--check-libreoffice")) {
     const check = await checkLibreOfficeInstallation();
-    
     if (check.available) {
-      console.log(`✅ LibreOffice is available:`);
-      console.log(`   Path: ${check.path}`);
-      console.log(`   Version: ${check.version}`);
-      console.log(`\n💡 Use with: --use-libreoffice`);
-      if (check.path !== 'libreoffice' && check.path !== 'soffice') {
-        console.log(`   Or specify path: --libreoffice-path "${check.path}"`);
-      }
+      console.log(`✅ LibreOffice available: ${check.path} (${check.version})`);
     } else {
-      console.log(`❌ LibreOffice is not available.`);
+      console.log(`❌ LibreOffice not available.`);
       if (check.recommendedPath) {
-        console.log(`💡 Try installing at: ${check.recommendedPath}`);
+        console.log(`Suggested path: ${check.recommendedPath}`);
       }
-      console.log(`\n📦 PDF generation will use built-in pdf-lib engine.`);
     }
     return;
   }
-  
+
   const getArg = (key: string, defaultValue?: string) => {
     const i = args.indexOf(key);
     return i >= 0 && i + 1 < args.length ? args[i + 1] : defaultValue;
   };
-  
+
   const hasFlag = (flag: string) => args.includes(flag);
-  
+
   const formatsRaw = getArg("--formats", "A4,Letter");
   const quality = (getArg("--quality", "premium") || "premium") as Quality;
   const tier = (getArg("--tier", "architect") || "architect") as BuildTier;
-  const outputDir = getArg("--output-dir", "./public/assets/downloads");
-  const version = getArg("--version", "1.0.0");
+  const outputDir = getArg("--output-dir", "./public/assets/downloads") || "./public/assets/downloads";
+  const version = getArg("--version", "1.0.0") || "1.0.0";
   const libreOfficePath = getArg("--libreoffice-path");
   const useLibreOffice = hasFlag("--use-libreoffice");
-  
-  const formats: Format[] = formatsRaw
+
+  const formats: Format[] = String(formatsRaw)
     .split(",")
     .map(normalizeFormat)
     .filter((v, i, a) => a.indexOf(v) === i);
-  
+
   await fs.mkdir(outputDir, { recursive: true });
-  
-  console.log("🚀 Generating Interactive PDFs...");
-  
-  // Check LibreOffice if requested
-  if (useLibreOffice) {
-    const loCheck = await checkLibreOfficeInstallation(libreOfficePath);
-    if (!loCheck.available) {
-      console.warn(`⚠️ LibreOffice not available at specified path`);
-      if (loCheck.recommendedPath) {
-        console.log(`💡 Try using: --libreoffice-path "${loCheck.recommendedPath}"`);
-      }
-      console.log(`📦 Falling back to built-in PDF generation`);
-    } else {
-      console.log(`✅ Using LibreOffice ${loCheck.version}`);
-    }
-  }
-  
-  // Generate each format
-  const results = [];
+
+  const results: GenerationResult[] = [];
   for (const format of formats) {
-    const config: InteractivePDFConfig = {
+    const generator = new InteractivePDFGenerator({
       format,
       quality,
       tier,
@@ -864,39 +896,21 @@ async function main() {
       includeInstructions: !hasFlag("--no-instructions"),
       watermarked: !hasFlag("--no-watermark"),
       version,
-      useLibreOffice: useLibreOffice,
-      libreOfficePath: libreOfficePath
-    };
-    
-    const generator = new InteractivePDFGenerator(config);
-    const result = await generator.generate();
-    results.push(result);
+      useLibreOffice,
+      libreOfficePath,
+    });
+
+    results.push(await generator.generate());
   }
-  
-  // Summary
-  const successCount = results.filter(r => r.success).length;
-  if (successCount === results.length) {
-    console.log("\n✅ All interactive PDFs generated successfully!");
-  } else {
-    console.log(`\n⚠️  Generated ${successCount}/${results.length} PDFs successfully`);
-    const errors = results.filter(r => !r.success).map(r => r.error);
-    if (errors.length > 0) {
-      console.log("Errors:", errors);
-    }
-  }
-  
-  // Show method breakdown
-  const methodBreakdown = {
-    libreoffice: results.filter(r => r.metadata?.method === 'libreoffice').length,
-    'pdf-lib': results.filter(r => r.metadata?.method === 'pdf-lib').length
-  };
-  
-  console.log(`\n🛠️  Generation methods:`);
-  console.log(`   LibreOffice: ${methodBreakdown.libreoffice}`);
-  console.log(`   PDF-lib: ${methodBreakdown['pdf-lib']}`);
+
+  const successCount = results.filter((r) => r.success).length;
+  console.log(
+    successCount === results.length
+      ? "\n✅ All interactive PDFs generated successfully!"
+      : `\n⚠️ Generated ${successCount}/${results.length} PDFs successfully`,
+  );
 }
 
-// ESM-safe entry detection
 const invokedAsScript = (() => {
   const argv1 = process.argv[1] ? path.resolve(process.argv[1]) : "";
   return argv1 === path.resolve(__filename);
@@ -909,13 +923,12 @@ if (invokedAsScript) {
   });
 }
 
-// Export for use in other modules
 export default InteractivePDFGenerator;
-export { 
-  generateInteractivePDF, 
+export {
+  generateInteractivePDF,
   checkLibreOfficeInstallation,
   LibreOfficeHelper,
-  type InteractivePDFConfig, 
+  type InteractivePDFConfig,
   type GenerationResult,
-  type LibreOfficeOptions
+  type LibreOfficeOptions,
 };

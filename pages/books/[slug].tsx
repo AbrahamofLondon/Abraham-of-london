@@ -1,18 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* pages/books/[slug].tsx — BOOK READER (SSG, SSOT slugs, tier-safe, pages-router safe) */
-
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
-
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import DirectorateOversight from "@/components/content/DirectorateOversight";
-
 import { joinHref } from "@/lib/content/shared";
 import { sanitizeData, resolveDocCoverImage } from "@/lib/content/client-utils";
-
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
   normalizeUserTier,
@@ -36,9 +32,7 @@ function booksBareSlug(input: unknown): string {
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
-
   if (!s || s.includes("..")) return "";
-
   const stripOnce = (prefix: string) => {
     const normalized = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
     if (s.toLowerCase().startsWith(normalized.toLowerCase())) {
@@ -47,7 +41,6 @@ function booksBareSlug(input: unknown): string {
     }
     return false;
   };
-
   let changed = true;
   while (changed) {
     changed = false;
@@ -55,10 +48,8 @@ function booksBareSlug(input: unknown): string {
     changed = stripOnce("vault") || changed;
     changed = stripOnce("books") || changed;
   }
-
   s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
   if (!s || s.includes("..")) return "";
-
   return s;
 }
 
@@ -87,7 +78,6 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
   const userTier = normalizeUserTier(
     (session?.user as any)?.tier ?? (session?.user as any)?.role ?? "public"
   );
-
   const needsAuth = required !== "public";
   const canRead = !needsAuth || (!!session?.user && hasAccess(userTier, required));
 
@@ -97,21 +87,17 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
 
   const handleUnlock = React.useCallback(async () => {
     if (!needsAuth || !bareSlug) return;
-
     setUnlockError(null);
     setLoadingContent(true);
-
     try {
       const res = await fetch(`/api/books/${encodeURIComponent(bareSlug)}`, {
         method: "GET",
       });
       const json = await res.json().catch(() => ({}));
-
       if (!res.ok || !json?.ok) {
         setUnlockError(json?.reason || "UNLOCK_FAILED");
         return;
       }
-
       if (typeof json?.bodyCode === "string" && json.bodyCode.trim()) {
         setActiveCode(json.bodyCode);
       } else {
@@ -150,7 +136,6 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
                 window.location.href = "/inner-circle";
               }}
             />
-
             {unlockError ? (
               <div className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-red-400/90">
                 {unlockError}
@@ -204,9 +189,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { getPublishedBooks } = await import("@/lib/content/server");
-
   const books = getPublishedBooks() || [];
-
   const paths = books
     .filter((b: any) => !b?.draft)
     .map((b: any) => {
@@ -225,7 +208,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     if (!bare) return { notFound: true };
 
     const { getPublishedBooks } = await import("@/lib/content/server");
-
     const rawDoc =
       getPublishedBooks().find((d: any) => {
         const fp = String(d?._raw?.flattenedPath || d?.slug || "");
@@ -255,7 +237,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       revalidate: 1800,
     };
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("[Books] Error in getStaticProps:", error);
     return { notFound: true, revalidate: 60 };
   }

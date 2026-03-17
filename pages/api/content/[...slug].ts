@@ -2,8 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getDocBySlug, normalizeSlug } from "@/lib/content/server";
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
-import { getAccessCookie } from "@/lib/server/auth/cookies";
-import tiers, { requiredTierFromDoc } from "@/lib/access/tiers"; // ✅ Import SSOT helpers
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers"; 
 import type { AccessTier } from "@/lib/access/tiers";
 
 type ResponseData = {
@@ -18,7 +18,7 @@ type ResponseData = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
   if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
   }
 
   // 1. Slug Extraction
@@ -27,13 +27,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const targetSlug = normalizeSlug(slug);
 
   // 2. Document Retrieval
+  // TypeScript safety: Ensure getDocBySlug receives a string
   const doc: any = getDocBySlug(`content/${targetSlug}`) || getDocBySlug(targetSlug);
   if (!doc || doc.draft) {
-    return res.status(404).json({ error: "Manuscript Not Found" });
+    return res.status(404).json({ ok: false, error: "Manuscript Not Found" });
   }
 
   // ✅ SSOT: Use requiredTierFromDoc to ensure consistent policy
-  const requiredTier = tiers.normalize(requiredTierFromDoc(doc));
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
 
   // ✅ Public content bypass - return immediately without session
   if (requiredTier === "public") {
@@ -48,23 +49,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
   }
 
-  // 3. Authorization Protocol (only for non-public)
-  let userTier: AccessTier = "public";
-  
-  const sessionId = getAccessCookie(req);
+  // 3. Authorization Protocol (Restricted Content)
+  const sessionId = readAccessCookie(req);
   if (!sessionId) {
-    return res.status(401).json({ error: "Clearance Required" });
+    return res.status(401).json({ ok: false, error: "Clearance Required" });
   }
 
   const session = await verifySession(sessionId);
   if (!session || !session.valid) {
-    return res.status(401).json({ error: "Session Invalid" });
+    return res.status(401).json({ ok: false, error: "Session Invalid" });
   }
 
-  userTier = tiers.normalize(session.tier);
+  // ✅ SSOT: Flattened session access (session.tier)
+  const userTier: AccessTier = tiers.normalizeUser(session.tier);
 
   if (!tiers.hasAccess(userTier, requiredTier)) {
-    return res.status(403).json({ error: "Insufficient Institutional Tier" });
+    return res.status(403).json({ ok: false, error: "Insufficient Institutional Tier" });
   }
 
   // 4. Return Pre-compiled Payload

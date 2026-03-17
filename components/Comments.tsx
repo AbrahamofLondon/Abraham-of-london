@@ -1,3 +1,4 @@
+// components/comments/UtterancesComments.tsx
 "use client";
 
 import * as React from "react";
@@ -7,41 +8,31 @@ import {
   MessageCircle,
   AlertCircle,
   CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 
 type IssueTerm = "pathname" | "url" | "title" | "og:title" | (string & {});
 
-type CommentsProps = {
-  /** The GitHub repository path for Utterances comments, e.g., "owner/repo". */
+interface CommentsProps {
   repo?: string;
-  /** Determines how the GitHub issue is linked, e.g., "pathname" (default) or "title". */
   issueTerm?: IssueTerm;
-  /** Optional GitHub Issues label to apply to new comments/issues. */
   label?: string;
-  /** If true, theme syncs dynamically using the <html class="dark"> marker. */
   useClassDarkMode?: boolean;
-  /** Margin for lazy-mounting the comments iframe (Intersection Observer rootMargin). */
   rootMargin?: string;
-  /** Threshold for lazy-mounting (Intersection Observer threshold). */
   threshold?: number;
   className?: string;
-  /** Maximum time to wait before declaring comment load failure (ms). Default 10000. */
   timeoutMs?: number;
-  /** Polling frequency for checking if the iframe has rendered (ms). Default 250. */
   pollMs?: number;
-  /** Enable retry functionality for failed loads */
   enableRetry?: boolean;
-  /** Custom placeholder while loading */
   placeholder?: React.ReactNode;
-};
+  showSuccessIndicator?: boolean;
+  onLoad?: () => void;
+  onError?: (error: string) => void;
+}
 
 const UTTERANCES_ORIGIN = "https://utteranc.es";
 const IFRAME_SELECTOR = "iframe.utterances-frame";
-
-// Allow override via environment variable, defaulting to the specified repository.
-const DEFAULT_REPO =
-  (process.env.NEXT_PUBLIC_UTTERANCES_REPO as string | undefined) ??
-  "AbrahamofLondon/abrahamoflondon-comments";
+const DEFAULT_REPO = process.env.NEXT_PUBLIC_UTTERANCES_REPO ?? "AbrahamofLondon/abrahamoflondon-comments";
 
 export default function Comments({
   repo = DEFAULT_REPO,
@@ -50,320 +41,283 @@ export default function Comments({
   useClassDarkMode = true,
   rootMargin = "200px",
   threshold = 0.1,
-  className,
-  timeoutMs = 10_000,
+  className = "",
+  timeoutMs = 10000,
   pollMs = 250,
   enableRetry = true,
   placeholder,
+  showSuccessIndicator = true,
+  onLoad,
+  onError,
 }: CommentsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [readyToMount, setReadyToMount] = React.useState(false);
-  const [retryCount, setRetryCount] = React.useState(0);
-  const [success, setSuccess] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [state, setState] = React.useState<{
+    status: 'idle' | 'loading' | 'success' | 'error' | 'timeout';
+    errorMessage: string | null;
+    retryCount: number;
+  }>({
+    status: 'idle',
+    errorMessage: null,
+    retryCount: 0,
+  });
+  
+  const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
+  
+  // ✅ FIXED: Initialize refs with undefined
+  const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
+  const pollRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
-  // Create a stable key for the current page that includes query params
+  // Create a stable key for the current page
   const pageKey = React.useMemo(() => {
     return searchParams.toString() ? `${pathname}?${searchParams}` : pathname;
   }, [pathname, searchParams]);
 
-  // Validate repo format upfront to fail fast.
+  // Validate repo format
   const isRepoValid = React.useMemo(() => /^[^/]+\/[^/]+$/.test(repo), [repo]);
 
-  /** Computes the initial theme setting for the Utterances script tag. */
-  const computeInitialTheme = React.useCallback((): string => {
-    if (typeof document === "undefined") return "preferred-color-scheme";
-
-    if (useClassDarkMode) {
-      const isDark = document.documentElement.classList.contains("dark");
-      return isDark ? "github-dark" : "github-light";
-    }
-    return "preferred-color-scheme";
+  // Detect theme
+  React.useEffect(() => {
+    if (!useClassDarkMode) return;
+    
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'dark' : 'light');
+    };
+    
+    checkTheme();
+    
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
   }, [useClassDarkMode]);
 
-  /** Posts a theme update message directly to the Utterances iframe. */
-  const postThemeToIframe = React.useCallback((theme: string) => {
-    try {
-      const frame =
-        containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
-      frame?.contentWindow?.postMessage(
-        { type: "set-theme", theme },
-        UTTERANCES_ORIGIN
-      );
-    } catch {
-      // Ignore errors if the iframe is not fully ready.
+  // Clean up timers
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  const clearTimers = React.useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = undefined;
+    }
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = undefined;
     }
   }, []);
 
-  /** Retry loading comments */
-  const handleRetry = React.useCallback(() => {
-    setError(null);
-    setLoading(true);
-    setRetryCount((prev) => prev + 1);
-    // Force remount by resetting readyToMount
-    setReadyToMount(false);
-    setTimeout(() => setReadyToMount(true), 100);
-  }, []);
+  const handleError = React.useCallback((message: string) => {
+    setState(prev => ({ ...prev, status: 'error', errorMessage: message }));
+    clearTimers();
+    onError?.(message);
+  }, [clearTimers, onError]);
 
-  /** Dynamically mounts the Utterances script into the host element. */
-  const mountUtterances = React.useCallback(
-    (host: HTMLDivElement | null | undefined) => {
-      if (!host) return () => {};
+  const mountUtterances = React.useCallback(() => {
+    if (!containerRef.current) return;
 
-      // Check repo validity before attempting to mount
-      if (!isRepoValid) {
-        setError(
-          'Invalid "repo" format. Use "owner/repo", e.g. "AbrahamofLondon/abrahamoflondon-comments".'
-        );
-        setLoading(false);
-        return () => {};
+    if (!isRepoValid) {
+      handleError('Invalid repository format. Use "owner/repo", e.g., "user/repo".');
+      return;
+    }
+
+    // Clean container
+    const container = containerRef.current;
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    setState(prev => ({ ...prev, status: 'loading', errorMessage: null }));
+
+    const script = document.createElement("script");
+    script.src = `${UTTERANCES_ORIGIN}/client.js`;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.setAttribute("repo", repo);
+    script.setAttribute("issue-term", issueTerm);
+    if (label?.trim()) script.setAttribute("label", label.trim());
+    script.setAttribute("theme", theme === 'dark' ? "github-dark" : "github-light");
+
+    const onScriptError = () => {
+      handleError('Failed to load comment system. Please check your connection.');
+    };
+
+    script.addEventListener("error", onScriptError);
+    container.appendChild(script);
+
+    // Set timeout
+    if (timeoutMs > 0) {
+      timeoutRef.current = setTimeout(() => {
+        if (state.status === 'loading') {
+          handleError('Comments are taking longer than expected to load.');
+        }
+      }, timeoutMs);
+    }
+
+    // Poll for iframe
+    pollRef.current = setInterval(() => {
+      const hasFrame = container.querySelector(IFRAME_SELECTOR);
+      if (hasFrame) {
+        clearTimers();
+        setState(prev => ({ ...prev, status: 'success' }));
+        onLoad?.();
       }
+    }, pollMs);
 
-      // Ensure container is clean before appending script
-      while (host.firstChild) host.removeChild(host.firstChild);
+    // Return cleanup function
+    return () => {
+      script.removeEventListener("error", onScriptError);
+      clearTimers();
+    };
+  }, [repo, issueTerm, label, theme, isRepoValid, timeoutMs, pollMs, state.status, handleError, clearTimers, onLoad]);
 
-      setLoading(true);
-      setError(null);
-      setSuccess(false);
-
-      const script = document.createElement("script");
-      script.src = `${UTTERANCES_ORIGIN}/client.js`;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.setAttribute("repo", repo);
-      script.setAttribute("issue-term", issueTerm);
-      if (label?.trim()) script.setAttribute("label", label.trim());
-      script.setAttribute("theme", computeInitialTheme());
-
-      // Error handling for script loading failure
-      const onError = () => {
-        setError(
-          "Comments failed to load. Ensure the repo exists (public), Issues are enabled, and the Utterances app has access."
-        );
-        setLoading(false);
-        setSuccess(false);
-      };
-
-      script.addEventListener("error", onError);
-      host.appendChild(script);
-
-      // Polling to detect successful iframe load
-      const pollId = window.setInterval(
-        () => {
-          const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
-          if (hasFrame) {
-            window.clearInterval(pollId);
-            setLoading(false);
-            setSuccess(true);
-            setError(null);
-          }
-        },
-        Math.max(50, pollMs)
-      );
-
-      // Timeout to declare load failure if iframe never appears
-      const timeoutId = window.setTimeout(
-        () => {
-          const hasFrame = !!host.querySelector(IFRAME_SELECTOR);
-          if (!hasFrame) onError();
-        },
-        Math.max(1000, timeoutMs)
-      );
-
-      // Cleanup function to stop timers and remove event listeners
-      return () => {
-        script.removeEventListener("error", onError);
-        window.clearInterval(pollId);
-        window.clearTimeout(timeoutId);
-      };
-    },
-    [
-      repo,
-      issueTerm,
-      label,
-      computeInitialTheme,
-      isRepoValid,
-      pollMs,
-      timeoutMs,
-      retryCount, // Include retryCount to trigger remount on retry
-    ]
-  );
-
-  // Lazy loading logic (Intersection Observer)
+  // Lazy loading with Intersection Observer
   React.useEffect(() => {
-    if (typeof window === "undefined" || readyToMount) return;
+    if (typeof window === "undefined" || state.status !== 'idle') return;
 
     const host = containerRef.current;
     if (!host) return;
 
-    // Check if already in view (for pages that load quickly)
     const rect = host.getBoundingClientRect();
     const inView = rect.top < window.innerHeight && rect.bottom >= 0;
+    
     if (inView) {
-      setReadyToMount(true);
+      setState(prev => ({ ...prev, status: 'loading' }));
       return;
     }
 
-    // Set up Intersection Observer for lazy loading
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          setReadyToMount(true);
+          setState(prev => ({ ...prev, status: 'loading' }));
           io.disconnect();
         }
       },
       { root: null, rootMargin, threshold }
     );
+    
     io.observe(host);
     return () => io.disconnect();
-  }, [readyToMount, rootMargin, threshold]);
+  }, [state.status, rootMargin, threshold]);
 
-  // Mount/Remount logic
+  // Mount comments when status becomes 'loading' or on retry
   React.useEffect(() => {
-    if (!readyToMount) return;
-    const host = containerRef.current;
-    const cleanup = mountUtterances(host);
-    return () => {
-      cleanup?.();
-      if (host) while (host.firstChild) host.removeChild(host.firstChild);
-    };
-  }, [readyToMount, mountUtterances, pageKey]); // Use pageKey instead of router.asPath
+    if (state.status !== 'loading') return;
+    
+    const cleanup = mountUtterances();
+    return cleanup;
+  }, [state.status, mountUtterances, pageKey, state.retryCount]);
 
-  // Dynamic theme syncing
+  // Theme sync
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (state.status !== 'success') return;
+    
+    const frame = containerRef.current?.querySelector<HTMLIFrameElement>(IFRAME_SELECTOR);
+    const utterancesTheme = theme === 'dark' ? "github-dark" : "github-light";
+    
+    frame?.contentWindow?.postMessage(
+      { type: "set-theme", theme: utterancesTheme },
+      UTTERANCES_ORIGIN
+    );
+  }, [theme, state.status]);
 
-    let mqCleanup: (() => void) | null = null;
-    let classObserver: MutationObserver | null = null;
-    let raf = 0;
+  const handleRetry = React.useCallback(() => {
+    clearTimers();
+    setState(prev => ({
+      status: 'loading',
+      errorMessage: null,
+      retryCount: prev.retryCount + 1,
+    }));
+  }, [clearTimers]);
 
-    const scheduleThemeUpdate = (isDark: boolean) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        postThemeToIframe(isDark ? "github-dark" : "github-light");
-      });
-    };
-
-    if (useClassDarkMode) {
-      classObserver = new MutationObserver(() => {
-        const isDark = document.documentElement.classList.contains("dark");
-        scheduleThemeUpdate(isDark);
-      });
-      classObserver.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["class"],
-      });
-      scheduleThemeUpdate(document.documentElement.classList.contains("dark"));
-    } else if (window.matchMedia) {
-      const mql = window.matchMedia("(prefers-color-scheme: dark)");
-      const onChange = () => scheduleThemeUpdate(mql.matches);
-
-      mql.addEventListener?.("change", onChange);
-
-      if (
-        "addListener" in mql &&
-        typeof (mql as { addListener?: unknown }).addListener === "function"
-      ) {
-        (
-          mql as {
-            addListener: (
-              callback: (this: MediaQueryList, ev: MediaQueryListEvent) => void
-            ) => void;
-          }
-        ).addListener(onChange);
-      }
-
-      mqCleanup = () => {
-        mql.removeEventListener?.("change", onChange);
-        if (
-          "removeListener" in mql &&
-          typeof (mql as { removeListener?: unknown }).removeListener ===
-            "function"
-        ) {
-          (
-            mql as {
-              removeListener: (
-                callback: (
-                  this: MediaQueryList,
-                  ev: MediaQueryListEvent
-                ) => void
-              ) => void;
-            }
-          ).removeListener(onChange);
-        }
-      };
-
-      scheduleThemeUpdate(mql.matches);
-    }
-
-    return () => {
-      classObserver?.disconnect();
-      mqCleanup?.();
-      cancelAnimationFrame(raf);
-    };
-  }, [useClassDarkMode, postThemeToIframe]);
-
-  // Default placeholder component
   const defaultPlaceholder = (
-    <div className="flex items-center justify-center py-12">
-      <div className="flex items-center space-x-3 text-aol-muted">
-        <RefreshCw className="h-5 w-5 animate-spin" />
-        <span className="text-sm font-medium">Loading comments...</span>
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="relative">
+        <RefreshCw className="h-8 w-8 animate-spin text-amber-500" />
+        <div className="absolute inset-0 animate-pulse rounded-full bg-amber-500/5" />
       </div>
+      <p className="mt-4 font-medium text-gray-700 dark:text-gray-300">
+        Loading community discussion...
+      </p>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Join the conversation using GitHub issues
+      </p>
     </div>
   );
 
   return (
     <section
       aria-labelledby="comments-title"
-      className={[
-        "mt-16 rounded-lg border border-aol-border bg-white dark:bg-aol-dark dark:border-aol-dark-border",
-        "shadow-sm transition-all duration-200",
-        className || "",
-      ]
-        .join(" ")
-        .trim()}
+      className={`
+        mt-16 overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-sm
+        dark:border-gray-800 dark:bg-gray-900/50
+        transition-all duration-200
+        ${className}
+      `}
     >
-      <div className="px-6 py-4 border-b border-aol-border dark:border-aol-dark-border">
-        <h2
-          id="comments-title"
-          className="text-lg font-semibold text-aol-text dark:text-aol-dark-text flex items-center gap-2"
-        >
-          <MessageCircle className="h-5 w-5" />
-          Comments
-        </h2>
-        <p className="text-sm text-aol-muted mt-1">
-          Join the discussion using GitHub issues
-        </p>
+      {/* Header */}
+      <div className="border-b border-gray-200 px-6 py-5 dark:border-gray-800">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2
+              id="comments-title"
+              className="flex items-center gap-2 font-serif text-xl font-semibold text-gray-900 dark:text-gray-100"
+            >
+              <MessageCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              Discussion
+            </h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Join the conversation using GitHub Issues
+            </p>
+          </div>
+          {state.status === 'success' && showSuccessIndicator && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              <CheckCircle className="h-3.5 w-3.5" />
+              Live
+            </span>
+          )}
+        </div>
       </div>
 
+      {/* Comments Container */}
       <div
-        key={pageKey}
+        key={`${pageKey}-${state.retryCount}`}
         ref={containerRef}
-        className="min-h-[200px] transition-opacity duration-300"
+        className="min-h-[250px] transition-opacity duration-300"
+        aria-live="polite"
       />
 
       {/* Loading State */}
-      {loading && !error && (
-        <div className="px-6 py-8">{placeholder || defaultPlaceholder}</div>
+      {state.status === 'loading' && (
+        <div className="px-6 py-8">
+          {placeholder || defaultPlaceholder}
+        </div>
       )}
 
       {/* Error State */}
-      {error && (
-        <div className="px-6 py-8 text-center">
-          <div className="max-w-md mx-auto">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-aol-text dark:text-aol-dark-text mb-2">
-              Unable to load comments
+      {(state.status === 'error' || state.status === 'timeout') && (
+        <div className="px-6 py-12 text-center">
+          <div className="mx-auto max-w-md">
+            <div className="inline-flex items-center justify-center rounded-full bg-red-100 p-3 dark:bg-red-900/30">
+              <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+              {state.status === 'timeout' ? 'Loading Timeout' : 'Unable to Load Comments'}
             </h3>
-            <p className="text-aol-muted text-sm mb-4">{error}</p>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {state.errorMessage || 'There was a problem loading the discussion.'}
+            </p>
             {enableRetry && (
               <button
                 onClick={handleRetry}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-aol-primary text-white rounded-md hover:bg-aol-primary-dark transition-colors text-sm font-medium"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:bg-amber-500 dark:hover:bg-amber-600"
               >
                 <RefreshCw className="h-4 w-4" />
                 Try Again
@@ -373,25 +327,27 @@ export default function Comments({
         </div>
       )}
 
-      {/* Success State Indicator */}
-      {success && !loading && (
-        <div className="px-6 py-3 bg-green-50 dark:bg-green-900/20 border-t border-green-200 dark:border-green-800">
-          <div className="flex items-center gap-2 text-green-700 dark:text-green-400 text-sm">
-            <CheckCircle className="h-4 w-4" />
-            Comments loaded successfully
-          </div>
+      {/* Success State - Hidden but accessible */}
+      {state.status === 'success' && (
+        <div className="sr-only" role="status">
+          Comments loaded successfully
         </div>
       )}
 
+      {/* NoScript Fallback */}
       <noscript>
-        <div className="px-6 py-4 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800">
-          <p className="text-amber-800 dark:text-amber-400 text-sm flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            Comments require JavaScript. Please enable it to view and post.
-          </p>
+        <div className="border-t border-amber-200 bg-amber-50 px-6 py-4 dark:border-amber-800 dark:bg-amber-900/20">
+          <div className="flex items-start gap-3 text-amber-800 dark:text-amber-300">
+            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium">JavaScript Required</p>
+              <p className="mt-1 opacity-90">
+                Comments require JavaScript to load. Please enable it in your browser settings to join the discussion.
+              </p>
+            </div>
+          </div>
         </div>
       </noscript>
     </section>
   );
 }
-

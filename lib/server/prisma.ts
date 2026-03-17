@@ -1,20 +1,18 @@
-// lib/server/prisma.ts — HARDENED SINGLETON
-import { PrismaClient } from "@prisma/client";
+// lib/server/prisma.ts — LEGACY COMPATIBILITY RE-EXPORT
+//
+// Old server imports may still point here.
+// Keep this file thin so the project has one actual Prisma singleton path.
 
-/**
- * INSTITUTIONAL PRISMA WRAPPER
- * * Prevents multiple instances of Prisma Client in development (Hot Reload) 
- * and optimizes connection pooling in Serverless (Netlify/Neon).
- */
+export {
+  prisma,
+  getPrisma,
+  safePrismaQuery,
+  checkDatabaseConnection,
+  getVaultStatus,
+  getStrategicContext,
+} from "@/lib/prisma.pages";
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+export type { Prisma } from "@prisma/client";
+export type { PrismaClientType } from "@/lib/prisma.pages";
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  });
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-export default prisma;
+export { default } from "@/lib/prisma.pages";

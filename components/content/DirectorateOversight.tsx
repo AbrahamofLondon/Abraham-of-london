@@ -2,7 +2,6 @@
 /* components/content/DirectorateOversight.tsx
    INSTITUTIONAL READER SHELL — premium longform surface for essays, books, volumes, dossiers.
 */
-
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,10 +16,10 @@ import {
   FileText,
   Library,
 } from "lucide-react";
-
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { getTierLabel } from "@/lib/access/tier-policy";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import { SafeTableOfContents } from "@/components/mdx/TableOfContents";
 
 type DirectorateKind = "essay" | "book" | "volume" | "document";
 
@@ -61,7 +60,6 @@ function normalizeReadTime(value?: string | number | null): string | null {
 
 function getResolvedCategory(kind: DirectorateKind, category?: string): string {
   if (category && String(category).trim()) return String(category).trim();
-
   switch (kind) {
     case "book":
       return "Book";
@@ -111,6 +109,7 @@ export default function DirectorateOversight({
 
   return (
     <>
+      {/* Hero / Metadata Section */}
       <section className="relative overflow-hidden border-b border-white/10 bg-black">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 aol-vignette" />
@@ -136,14 +135,12 @@ export default function DirectorateOversight({
                   {getTierLabel(requiredTier)}
                 </span>
               ) : null}
-
               {resolvedReadTime ? (
                 <span className="inline-flex items-center gap-2">
                   <Clock3 className="h-3.5 w-3.5" />
                   {resolvedReadTime}
                 </span>
               ) : null}
-
               {childrenTopRight}
             </div>
           </div>
@@ -181,13 +178,10 @@ export default function DirectorateOversight({
                 <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
                   {resolvedCategory}
                 </span>
-
                 <span className="h-1 w-1 rounded-full bg-white/20" />
-
                 <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
                   {formatDate(date)}
                 </span>
-
                 {tags?.[0] ? (
                   <>
                     <span className="h-1 w-1 rounded-full bg-white/20" />
@@ -216,6 +210,7 @@ export default function DirectorateOversight({
               ) : null}
 
               <div className="mt-8 aol-hairline" />
+
               <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.35em] text-white/30">
                 {imprint}
               </div>
@@ -224,32 +219,51 @@ export default function DirectorateOversight({
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-4xl px-6 py-14 lg:px-10">
-        <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_24px_90px_rgba(0,0,0,0.26)] md:p-10">
-          {unlockError ? (
-            <div className="mb-6 flex items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{unlockError}</span>
+      {/* Main Content + TOC Layout */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 py-14 lg:px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Content Column */}
+          <div className="lg:col-span-9 order-2 lg:order-1">
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_24px_90px_rgba(0,0,0,0.26)] md:p-10">
+              {unlockError ? (
+                <div className="mb-6 flex items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{unlockError}</span>
+                </div>
+              ) : null}
+
+              {loading ? (
+                <div className="flex items-center justify-center py-14">
+                  <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+                </div>
+              ) : hasContent ? (
+                <div className="prose-hardened aol-mdx-content">
+                  <SafeMDXRenderer code={activeCode} />
+                </div>
+              ) : (
+                <div className="py-10 text-center text-white/55">
+                  <EmptyStateIcon kind={kind} />
+                  <div>{emptyLabel}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-10 aol-hairline" />
+
+            <div className="mt-8 text-center">
+              <div className="aol-micro text-white/35">{imprint}</div>
+            </div>
+          </div>
+
+          {/* TOC Sidebar – sticky on desktop */}
+          {hasContent && !loading && !unlockError ? (
+            <div className="lg:col-span-3 order-1 lg:order-2 lg:sticky lg:top-24 h-fit">
+              <SafeTableOfContents
+                delayMs={400}
+                className="lg:-mr-4" // slight negative margin to align better
+              />
             </div>
           ) : null}
-
-          {loading ? (
-            <div className="flex items-center justify-center py-14">
-              <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
-            </div>
-          ) : hasContent ? (
-            <SafeMDXRenderer code={activeCode} />
-          ) : (
-            <div className="py-10 text-center text-white/55">
-              <EmptyStateIcon kind={kind} />
-              <div>{emptyLabel}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-10 aol-hairline" />
-        <div className="mt-8 text-center">
-          <div className="aol-micro text-white/35">{imprint}</div>
         </div>
       </section>
     </>

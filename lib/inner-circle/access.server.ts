@@ -1,7 +1,8 @@
-// lib/inner-circle/access.server.ts — Session-backed (tokenStore SSOT), Next-agnostic
+/* lib/inner-circle/access.server.ts — Standardized Redis Access (SSOT) */
 
 import tiers, { type AccessTier } from "@/lib/access/tiers";
-import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
+// ✅ FIXED: Changed from .postgres to .redis to ensure session consistency
+import { verifySession } from "@/lib/server/auth/tokenStore.redis";
 
 export type InnerCircleAccessReason =
   | "no_request"
@@ -77,7 +78,7 @@ export async function getInnerCircleAccess(
   requiredTierMaybe?: AccessTier
 ): Promise<InnerCircleAccess> {
   try {
-    // params-mode
+    // 1. Params-only mode (checking permissions without a request)
     if (
       reqOrParams &&
       typeof reqOrParams === "object" &&
@@ -95,12 +96,14 @@ export async function getInnerCircleAccess(
         : { hasAccess: false, reason: "insufficient_tier", tier: userTier };
     }
 
+    // 2. Request-based mode (Standard API/Page lookup)
     const requiredTier = tiers.normalizeRequired(requiredTierMaybe ?? "member");
     if (requiredTier === "public") return { hasAccess: true, reason: "no_request", tier: "public" };
 
     const sessionId = extractSessionIdFromReq(reqOrParams as RequestLike);
     if (!sessionId) return { hasAccess: false, reason: "requires_auth", tier: "public" };
 
+    // Standardized Redis Verification
     const v = await verifySession(sessionId);
 
     if (!v.ok) return { hasAccess: false, reason: "internal_error", tier: "public" };
@@ -112,22 +115,16 @@ export async function getInnerCircleAccess(
     }
 
     return { hasAccess: true, reason: "no_request", tier: userTier, sessionId, expiresAt: v.expiresAt };
-  } catch {
+  } catch (error) {
+    console.error("[ACCESS_SERVER] Critical error:", error);
     return { hasAccess: false, reason: "internal_error", tier: "public" };
   }
 }
 
-/**
- * Normalize any input to a valid AccessTier
- * Used by admin API routes
- */
 export function normalizeTier(input: unknown): AccessTier {
   return tiers.normalizeUser(input);
 }
 
-/**
- * Check if a user tier has access to a required tier
- */
 export function hasTierAccess(userTier: AccessTier, requiredTier: AccessTier): boolean {
   return tiers.hasAccess(userTier, requiredTier);
 }

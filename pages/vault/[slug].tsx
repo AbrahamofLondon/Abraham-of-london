@@ -1,163 +1,94 @@
-/* pages/vault/briefs/[slug].tsx — BRIEF READER (canonical route that matches your MDX links) */
+/* pages/vault/[slug].tsx — REFINED & ROBUST */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
-
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 
-import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
-import { allBriefs } from "@/lib/contentlayer";
-import { normalizeSlug } from "@/lib/content/shared";
+import { normalizeUserTier, hasAccess, requiredTierFromDoc } from "@/lib/access/tier-policy";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import type { TierDirective } from "@/lib/resources/tier-metadata";
 
-type Props = {
-  brief: any;
-  requiredTier: AccessTier;
-  bodyCode: string; // compiled MDX code (public ships at build time)
-};
+// DEFENSIVE IMPORT
+import * as ContentSource from "contentlayer/generated";
 
-function toBareBriefSlug(input: string) {
-  const n = normalizeSlug(input || "");
-  return n
-    .replace(/^vault\/briefs\//i, "")
-    .replace(/^\/vault\/briefs\//i, "")
-    .replace(/^briefs\//i, "")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "");
+function toBareSlug(input: string) {
+  return input.split('/').pop()?.replace(/\.(md|mdx)$/i, "") || "";
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = (allBriefs || [])
-    .filter((b: any) => !b?.draft)
-    .map((b: any) => ({ params: { slug: toBareBriefSlug(b.slug || b._raw?.flattenedPath || "") } }))
-    .filter((x: any) => x?.params?.slug);
+  const allBriefs = (ContentSource as any).allBriefs || [];
+  const paths = allBriefs
+    .filter((b: any) => !b.draft)
+    .map((b: any) => ({ params: { slug: toBareSlug(b.slug || b._raw.flattenedPath) } }));
 
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const param = String(params?.slug || "");
-  const bare = toBareBriefSlug(param);
-  if (!bare) return { notFound: true };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const slugParam = String(params?.slug || "");
+  const allBriefs = (ContentSource as any).allBriefs || [];
+  const doc = allBriefs.find((b: any) => toBareSlug(b.slug || b._raw.flattenedPath) === slugParam);
 
-  const wantA = `vault/briefs/${bare}`;
-  const wantB = `briefs/${bare}`;
-
-  const doc =
-    (allBriefs || []).find((b: any) => normalizeSlug(b.slug || "") === normalizeSlug(wantA)) ||
-    (allBriefs || []).find((b: any) => normalizeSlug(b._raw?.flattenedPath || "") === normalizeSlug(wantA)) ||
-    (allBriefs || []).find((b: any) => normalizeSlug(b.slug || "") === normalizeSlug(wantB)) ||
-    (allBriefs || []).find((b: any) => normalizeSlug(b._raw?.flattenedPath || "") === normalizeSlug(wantB)) ||
-    (allBriefs || []).find((b: any) => toBareBriefSlug(b.slug || b._raw?.flattenedPath || "") === bare);
-
-  if (!doc || doc?.draft) return { notFound: true };
-
-  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
-  const locked = requiredTier !== "public";
-
-  const bodyCode = locked ? "" : String(doc?.body?.code || doc?.bodyCode || "");
+  if (!doc) return { notFound: true };
 
   return {
     props: {
-      brief: { ...doc, slug: `/vault/briefs/${bare}` },
-      requiredTier,
-      bodyCode,
+      brief: JSON.parse(JSON.stringify(doc)),
+      requiredTier: requiredTierFromDoc(doc),
     },
     revalidate: 1800,
   };
 };
 
-const BriefSlugPage: NextPage<Props> = ({ brief, requiredTier, bodyCode }) => {
+const VaultSlugPage: NextPage<{ brief: any; requiredTier: AccessTier }> = ({ brief, requiredTier }) => {
   const { data: session, status } = useSession();
+  
+  // ✅ Extraction of Governance Data
+  const userTier = normalizeUserTier((session?.user as any)?.tier);
+  const directive = (session?.user as any)?.directive as TierDirective | undefined;
+  const canRead = hasAccess(userTier, requiredTier);
 
-  const required = tiers.normalizeRequired(requiredTier);
-  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
-
-  const needsAuth = required !== "public";
-  const canRead = !needsAuth || (session?.user ? tiers.hasAccess(user, required) : false);
-
-  // Public: always render (no auth waiting)
-  if (needsAuth && status === "loading") {
+  if (status === "loading") return <div className="min-h-screen bg-black" />;
+  
+  if (!canRead) {
     return (
-      <Layout title={brief?.title || "Brief"}>
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance…</div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (needsAuth && (!session?.user || !canRead)) {
-    return (
-      <Layout title={brief?.title || "Brief"}>
-        <div className="min-h-screen bg-black flex items-center justify-center px-6">
-          <AccessGate
-            title={brief?.title || "Intelligence Brief"}
-            requiredTier={required}
-            message="This intelligence brief requires appropriate clearance."
-            onGoToJoin={() => window.location.assign("/inner-circle")}
-          />
-        </div>
+      <Layout title="Restricted">
+        <AccessGate title={brief.title} requiredTier={requiredTier} />
       </Layout>
     );
   }
 
   return (
-    <Layout title={`${brief?.title || "Brief"} // Vault`} canonicalUrl={`/vault/briefs/${toBareBriefSlug(brief?.slug || "")}`} className="bg-black text-white" fullWidth headerTransparent={false}>
-      <Head>
-        <title>{brief?.title || "Brief"} // Vault</title>
-        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
-      </Head>
-
-      <main className="min-h-screen bg-[#050505] pt-28 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between gap-4 mb-10">
-            <Link
-              href="/vault/briefs"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 hover:bg-white/[0.05] transition-colors"
-            >
-              <span className="aol-micro text-white/55">Back to Briefs</span>
-            </Link>
-
-            {required !== "public" ? (
-              <span className="inline-flex items-center gap-2 px-3 py-1 border border-amber-500/30 bg-amber-500/10 rounded-full text-amber-200/80 text-[10px] font-mono uppercase tracking-[0.25em]">
-                <Lock className="h-3 w-3" />
-                {tiers.getLabel(required)}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-2 px-3 py-1 border border-emerald-500/20 bg-emerald-500/10 rounded-full text-emerald-200/80 text-[10px] font-mono uppercase tracking-[0.25em]">
-                <ShieldCheck className="h-3 w-3" />
-                Public
-              </span>
-            )}
+    <Layout title={`${brief.title} // Vault`} className="bg-black text-white">
+      <main className="min-h-screen pt-28 pb-20 px-6 max-w-4xl mx-auto">
+        <header className="mb-10 border-b border-white/10 pb-8">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-emerald-500/60">
+              Institutional Intel // {requiredTier}
+            </span>
           </div>
+          <h1 className="text-4xl md:text-6xl font-serif italic text-white/95 leading-tight">
+            {brief.title}
+          </h1>
+        </header>
 
-          <header className="mb-10 border-b border-white/10 pb-8">
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-              Vault Brief • {String(brief?.series || brief?.category || "Briefing")}
-            </div>
-            <h1 className="mt-4 text-4xl md:text-5xl font-serif italic text-white/95">
-              {brief?.title || "Untitled Brief"}
-            </h1>
-            {brief?.excerpt || brief?.description ? (
-              <p className="mt-4 text-sm md:text-base text-white/55 leading-relaxed">
-                {String(brief?.excerpt || brief?.description)}
-              </p>
-            ) : null}
-          </header>
-
-          <section className="rounded-[28px] border border-white/10 bg-white/[0.02] p-7 md:p-10">
-            <SafeMDXRenderer code={needsAuth ? String(brief?.body?.code || brief?.bodyCode || "") : bodyCode} />
-          </section>
-        </div>
+        {/* ✅ The Container for the content */}
+        <section className="rounded-[28px] border border-white/5 bg-white/[0.005] p-7 md:p-12 shadow-2xl">
+          <article className="prose prose-invert prose-emerald max-w-none">
+            {/* ✅ We pass the directive here so components inside SafeMDXRenderer can use it */}
+            <SafeMDXRenderer 
+              code={brief.body.code} 
+              directive={directive} 
+            />
+          </article>
+        </section>
       </main>
     </Layout>
   );
 };
 
-export default BriefSlugPage;
+export default VaultSlugPage;

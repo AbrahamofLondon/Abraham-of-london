@@ -1,36 +1,35 @@
 // types/next-auth.d.ts
-import NextAuth, { DefaultSession } from "next-auth";
-import { JWT as DefaultJWT } from "next-auth/jwt";
-import type { AoLTier } from "@/types/next-auth";
-
-type AoLClaims = {
-  tier: AoLTier;
-  innerCircleAccess: boolean;
-  isInternal: boolean;
-  allowPrivate: boolean;
-  memberId: string | null;
-  emailHash: string | null;
-  flags: string[];
-};
+import type { DefaultSession, DefaultUser } from "next-auth";
+import type { AccessTier } from "@/lib/access/tier-policy";
+import type { AoLClaims } from "@/types/auth";
 
 declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      role: string;
-    } & DefaultSession["user"];
-    aol: AoLClaims;
+  interface User extends DefaultUser {
+    id?: string;
+    role?: string;
+    tier?: AccessTier;
+    aol?: AoLClaims;
   }
 
-  interface User {
-    role?: string;
+  interface Session {
+    id?: string;
+    tier?: AccessTier;
+    aol?: AoLClaims;
+    user?: DefaultSession["user"] & {
+      id?: string;
+      role?: string;
+      tier?: AccessTier;
+    };
   }
 }
 
 declare module "next-auth/jwt" {
-  interface JWT extends DefaultJWT {
+  interface JWT {
     id?: string;
     role?: string;
+    tier?: AccessTier;
     aol?: AoLClaims;
   }
 }
+
+export {};

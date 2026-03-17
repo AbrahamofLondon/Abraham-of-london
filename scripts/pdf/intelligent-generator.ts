@@ -1,19 +1,10 @@
-// scripts/pdf/intelligent-generator.ts
-/* scripts/pdf/intelligent-generator.ts — INVENTORY-FIRST SYNC (NO PLACEHOLDERS)
- * ----------------------------------------------------------------------------
- * Purpose:
- * - Reconcile sources (lib/pdf + content/downloads) into public/assets/downloads
- * - Deterministic paths: /assets/downloads/{lib-pdf|content-downloads}/<id>.pdf
- * - Never generate placeholders.
- *
- * This script does NOT render MDX/Office -> PDF.
- * That is handled by unified generator / converters.
- */
-
+/* scripts/pdf/intelligent-generator.ts — INVENTORY-FIRST SYNC & GENERATOR */
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
+/** * Strategic Result Types 
+ */
 type SourceKind = "pdf";
 
 export type SyncResult = {
@@ -27,6 +18,15 @@ export type SyncResult = {
   error?: string;
 };
 
+export type GenerationResult = {
+  success: boolean;
+  id: string;
+  filename?: string;
+  outputPath?: string;
+  timeMs?: number;
+  error?: string;
+};
+
 type Options = {
   libPdfDir: string;
   contentDownloadsDir: string;
@@ -35,6 +35,7 @@ type Options = {
   dryRun: boolean;
 };
 
+/** Utilities */
 function root() {
   return process.cwd();
 }
@@ -111,7 +112,6 @@ function pickSources(opts: Options): { id: string; abs: string; bucket: "lib-pdf
   const libPdfs = walkPdfs(opts.libPdfDir);
   const contentPdfs = walkPdfs(opts.contentDownloadsDir);
 
-  // prefer lib/pdf if duplicate id exists
   const map = new Map<string, { abs: string; bucket: "lib-pdf" | "content-downloads" }>();
 
   const ingest = (abs: string) => {
@@ -122,7 +122,6 @@ function pickSources(opts: Options): { id: string; abs: string; bucket: "lib-pdf
       map.set(id, { abs, bucket });
       return;
     }
-    // precedence: lib-pdf > content-downloads
     if (current.bucket !== "lib-pdf" && bucket === "lib-pdf") {
       map.set(id, { abs, bucket });
     }
@@ -134,6 +133,9 @@ function pickSources(opts: Options): { id: string; abs: string; bucket: "lib-pdf
   return Array.from(map.entries()).map(([id, v]) => ({ id, abs: v.abs, bucket: v.bucket }));
 }
 
+/**
+ * Syncs static PDFs from source directories to the public assets folder.
+ */
 export async function syncAll(options?: Partial<Options>): Promise<SyncResult[]> {
   const opts = { ...defaults(), ...(options || {}) };
   ensureDir(opts.publicDownloadsDir);
@@ -197,7 +199,25 @@ export async function syncAll(options?: Partial<Options>): Promise<SyncResult[]>
   return results;
 }
 
-// CLI
+/**
+ * ✅ Institutional PDF Generator Entrypoint
+ * This resolves the "Property 'success' does not exist on type 'void'" build error.
+ */
+export async function generateOnePdfById(id: string): Promise<GenerationResult> {
+  const start = Date.now();
+  
+  // Logic Implementation: 
+  // Currently throws a structured error until the registry-driven rendering is wired.
+  // This allows the API to catch the error and log it via the Audit system properly.
+  return {
+    success: false,
+    id,
+    timeMs: Date.now() - start,
+    error: `Target ID "${id}" is not currently wired to the registry rendering engine.`
+  };
+}
+
+/** CLI Execution */
 if (require.main === module) {
   const overwrite = process.argv.includes("--overwrite");
   const dryRun = process.argv.includes("--dry-run");
@@ -213,13 +233,4 @@ if (require.main === module) {
       console.error("❌ Sync failed:", e);
       process.exit(1);
     });
-}
-
-export async function generateOnePdfById(id: string) {
-  // TODO: wire to your actual registry-driven generator.
-  // This placeholder prevents build breakage and gives a clean error at runtime.
-  throw new Error(
-    `generateOnePdfById is not wired yet. Requested id="${id}". ` +
-    `Implement this by calling your registry generator (generate-from-registry.ts / renderAssetPDF).`
-  );
 }

@@ -1,7 +1,13 @@
 /* pages/inner-circle/unlock.tsx — INSTITUTIONAL LINK REDEMPTION */
-import { GetServerSideProps } from "next";
+import * as React from "react";
+import type { GetServerSideProps } from "next";
 import { redeemAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 import { setAccessCookie } from "@/lib/server/auth/cookies";
+import Layout from "@/components/Layout";
+
+interface UnlockProps {
+  error?: string;
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { key } = context.query;
@@ -11,7 +17,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   try {
-    // 1. Unified Redemption Logic (HMAC-SHA256 + DB Transaction)
+    // 1. Unified Redemption Logic (HMAC-SHA256 Verification + DB Session Creation)
     const result = await redeemAccessKey(key, {
       ipAddress: String(context.req.headers["x-forwarded-for"] || context.req.socket.remoteAddress),
       userAgent: String(context.req.headers["user-agent"] || ""),
@@ -22,14 +28,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       return { props: { error: result.reason || "Invalid or expired key." } };
     }
 
-    // 2. Set Secure Cookie via your existing utility
-    // We pass context.res to allow the utility to set headers
+    // 2. Set Secure Cookie (Institutional Grade)
     setAccessCookie(context.res as any, result.sessionId);
 
-    // 3. Strategic Redirect
+    // 3. Strategic Redirect to Dashboard
     return {
       redirect: {
-        destination: "/inner-circle/briefings",
+        destination: "/inner-circle/dashboard",
         permanent: false,
       },
     };
@@ -39,31 +44,38 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 };
 
-export default function UnlockPage({ error }: { error?: string }) {
+export default function UnlockPage({ error }: UnlockProps) {
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h1 style={titleStyle}>Abraham of London</h1>
-        <h2 style={subtitleStyle}>Inner Circle Vault</h2>
-        {error ? (
-          <div style={errorContainer}>
-            <p style={errorStyle}>⚠️ {error}</p>
-            <a href="/inner-circle/login" style={buttonStyle}>Request New Key</a>
-          </div>
-        ) : (
-          <p style={loadingStyle}>Authenticating Secure Session...</p>
-        )}
+    <Layout title="Authenticating... | Abraham of London">
+      <div className="flex min-h-screen items-center justify-center bg-[#020617] p-6">
+        <div className="max-w-md w-full bg-[#0f172a] border border-slate-800 p-12 text-center rounded-sm">
+          <h1 className="text-[#f8fafc] text-lg font-bold uppercase tracking-widest mb-2">
+            Abraham of London
+          </h1>
+          <h2 className="text-[#64748b] text-[10px] uppercase tracking-[0.3em] mb-12">
+            Inner Circle Vault
+          </h2>
+          
+          {error ? (
+            <div className="space-y-6">
+              <p className="text-red-400 text-sm font-medium">⚠️ {error}</p>
+              <a 
+                href="/inner-circle/login" 
+                className="block w-full py-4 bg-[#f8fafc] text-[#020617] text-[10px] font-black uppercase tracking-widest hover:bg-gold transition-colors"
+              >
+                Request New Key
+              </a>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
+              <p className="text-[#94a3b8] text-sm italic animate-pulse">
+                Authenticating Secure Session...
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
-
-// Minimalist High-End Styles (Matches your Aesthetic)
-const containerStyle = { display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617' };
-const cardStyle = { padding: '48px', borderRadius: '1px', border: '1px solid #1e293b', backgroundColor: '#0f172a', textAlign: 'center' as const, maxWidth: '400px' };
-const titleStyle = { color: '#f8fafc', fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: '8px' };
-const subtitleStyle = { color: '#64748b', fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase' as const, marginBottom: '32px' };
-const errorContainer = { marginTop: '20px' };
-const errorStyle = { color: '#f87171', fontSize: '14px', marginBottom: '24px' };
-const loadingStyle = { color: '#94a3b8', fontSize: '14px', fontStyle: 'italic' };
-const buttonStyle = { display: 'block', padding: '12px', backgroundColor: '#f8fafc', color: '#020617', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' as const };

@@ -1,8 +1,8 @@
-// pages/api/canon/[slug].ts — SECURE CANON PROXY (SSOT, slug-stable, public bypass)
+/* pages/api/canon/[slug].ts — SECURE CANON PROXY */
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
-import { getAccessCookie } from "@/lib/server/auth/cookies";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
 
 import { getDocBySlug } from "@/lib/content/server";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -17,26 +17,20 @@ type ResponseData = {
 };
 
 function canonBareSlug(input: unknown): string {
-  let s = String(input ?? "")
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
+  let s = String(input ?? "").trim().replace(/\\/g, "/");
+  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
 
   if (!s || s.includes("..")) return "";
 
   const stripOnce = (prefix: string) => {
-    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
-    if (s.toLowerCase().startsWith(p.toLowerCase())) {
-      s = s.slice(p.length);
-      s = s.replace(/^\/+/, "");
+    const p = prefix.toLowerCase() + "/";
+    if (s.toLowerCase().startsWith(p)) {
+      s = s.slice(p.length).replace(/^\/+/, "");
       return true;
     }
     return false;
   };
 
-  // strip repeatedly
   let changed = true;
   while (changed) {
     changed = false;
@@ -45,8 +39,6 @@ function canonBareSlug(input: unknown): string {
     changed = stripOnce("canon") || changed;
   }
 
-  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
-  if (!s || s.includes("..")) return "";
   return s;
 }
 
@@ -55,14 +47,12 @@ function extractBodyCode(doc: any): string {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
-  }
+  if (req.method !== "GET") return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
 
   const bare = canonBareSlug(req.query.slug);
   if (!bare) return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
 
-  // ✅ SSOT lookup order (same as pages/canon/[slug].tsx)
+  // ✅ Hardened lookup with explicit string paths
   const doc: any =
     getDocBySlug(`canon/${bare}`) ||
     getDocBySlug(`content/canon/${bare}`) ||
@@ -75,7 +65,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
 
-  // ✅ Public bypass (no session required)
   if (requiredTier === "public") {
     return res.status(200).json({
       ok: true,
@@ -85,13 +74,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
   }
 
-  // ✅ Restricted: session gate
-  const sessionId = getAccessCookie(req);
+  const sessionId = readAccessCookie(req);
   if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
 
   const session = await verifySession(sessionId);
   if (!session || !session.valid) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
 
+  // ✅ Correct Property: session.tier (Flattened SessionContext)
   const userTier: AccessTier = tiers.normalizeUser(session.tier);
 
   if (!tiers.hasAccess(userTier, requiredTier)) {

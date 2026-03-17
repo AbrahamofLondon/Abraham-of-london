@@ -1,7 +1,8 @@
 // lib/auth.ts — SINGLE SOURCE OF TRUTH (JWT + Session) — ENTERPRISE SSOT
-import type { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions, Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getServerSession } from "next-auth/next";
+import { JWT } from "next-auth/jwt";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
@@ -44,27 +45,17 @@ const BASE_CLAIMS: AoLClaims = {
   flags: [],
 };
 
-/**
- * Compute access flags from tier and internal status
- */
 function computeAccess(tier: AccessTier, isInternal: boolean) {
   const innerCircleAccess = hasAccess(tier, "inner-circle");
   const allowPrivate = isInternal || hasAccess(tier, "architect");
   return { innerCircleAccess, allowPrivate };
 }
 
-/**
- * Normalize member tier using SSOT
- */
 function normalizeMemberTier(dbTier: unknown, flags: string[]): AccessTier {
   if (hasInternalFlag(flags)) return "owner";
   return normalizeUserTier(dbTier as any);
 }
 
-/**
- * Decide whether a string role should escalate to owner.
- * This is ONLY for legacy “role” values that might show up in tokens.
- */
 function roleMapsToOwner(role: string): boolean {
   const k = String(role || "").trim().toLowerCase();
   if (!k) return false;
@@ -81,10 +72,6 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims
   const normalizedEmail = email.trim().toLowerCase();
   const hashedEmail = sha256Hex(normalizedEmail);
 
-  // IMPORTANT:
-  // Your current SSOT schema (as pasted) does NOT include `flags` on InnerCircleMember.
-  // So this select is intentionally minimal and ALWAYS compile-safe.
-  // If you add `flags` to the schema later, you can safely extend this select.
   const member = await safePrismaQuery(() =>
     prisma.innerCircleMember.findFirst({
       where: {
@@ -96,7 +83,6 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims
         tier: true,
         emailHash: true,
         email: true,
-        // flags: true, // ✅ only enable AFTER adding `flags` to schema.prisma
       },
     }),
   );
@@ -110,11 +96,7 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims
     return { ...BASE_CLAIMS, emailHash: hashedEmail, memberId: member.id };
   }
 
-  // If schema does not have flags, treat as empty.
-  // If you later add it, you can replace with:
-  // const flags = safeParseFlags((member as any).flags);
   const flags = safeParseFlags((member as any)?.flags);
-
   const isInternal = hasInternalFlag(flags);
   const tier: AccessTier = normalizeMemberTier((member as any).tier, flags);
   const { innerCircleAccess, allowPrivate } = computeAccess(tier, isInternal);
@@ -160,7 +142,7 @@ export const authOptions: NextAuthOptions = {
             email: ADMIN_EMAIL,
             name: "Vault Administrator",
             role: "owner",
-          };
+          } as User;
         }
 
         return null;
@@ -177,19 +159,27 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
+      /**
+       * SYSTEM BYPASS: 
+       * Next-Auth's 'user' object in the JWT callback defaults to a union
+       * that excludes custom properties. We cast to 'any' here specifically
+       * to extract the institutional role during the initial sign-in event.
+       */
       if (user) {
-        (token as any).id = (user as any).id;
-        (token as any).role = (user as any).role || "public";
-        token.email = (user as any).email || token.email;
+        const u = user as any;
+        token.id = u.id;
+        token.role = u.role || "public";
+        token.email = u.email || token.email;
       }
 
-      const role = String((token as any).role || "public").trim();
+      // 1. Resolve institutional context
+      const role = String(token.role || "public").trim();
       const email = typeof token.email === "string" ? token.email : undefined;
 
       const resolved = await resolveAoLClaimsByEmail(email);
-
       const roleTier = normalizeUserTier(role);
 
+      // 2. Elevation Logic
       const shouldElevateToOwner =
         roleMapsToOwner(role) ||
         hasAccess(roleTier, "architect") ||
@@ -206,27 +196,28 @@ export const authOptions: NextAuthOptions = {
             emailHash: resolved.emailHash ?? (email ? sha256Hex(email) : null),
             flags: Array.from(new Set([...(resolved.flags ?? []), "admin", "internal"])),
           }
-        : resolved;
+        : (resolved as AoLClaims);
 
+      // 3. Update Token with local interface bypass
       (token as any).aol = aol;
-
-      (token as any).id = String((token as any).id || token.sub || "");
-      (token as any).role = aol.tier;
-      (token as any).tierLevel = TIER_HIERARCHY[aol.tier];
+      token.id = String(token.id || token.sub || "");
+      token.role = aol.tier;
 
       return token;
     },
 
     async session({ session, token }) {
-      const aol = ((token as any).aol as AoLClaims | undefined) ?? BASE_CLAIMS;
+      // Use cast to bypass the 'Session' interface restriction in production
+      const t = token as any;
+      const aol = (t.aol as AoLClaims) ?? BASE_CLAIMS;
 
       if (session.user) {
-        (session.user as any).id = String((token as any).id || "");
-        (session.user as any).tier = aol.tier;
-        (session.user as any).tierLabel = getTierLabel(aol.tier);
-        (session.user as any).tierLevel = TIER_HIERARCHY[aol.tier];
-        (session.user as any).role = aol.tier;
-        (session.user as any).flags = aol.flags ?? [];
+        const sUser = session.user as any;
+        sUser.id = String(t.id || "");
+        sUser.role = aol.tier;
+        sUser.tier = aol.tier;
+        sUser.tierLabel = getTierLabel(aol.tier);
+        sUser.flags = aol.flags ?? [];
       }
 
       (session as any).aol = aol;
@@ -241,13 +232,18 @@ export const authOptions: NextAuthOptions = {
    Server Session Helpers (SSOT)
 ============================================================================ */
 
+/**
+ * Retrieves the session from the server context.
+ * Casts to any to ensure 'aol' claims are accessible in the production runner.
+ */
 export async function getAuthSession() {
-  return getServerSession(authOptions);
+  return await getServerSession(authOptions) as any;
 }
 
 export async function getCurrentUserTier(): Promise<AccessTier> {
   const session = await getAuthSession();
-  return ((session as any)?.aol?.tier as AccessTier) || "public";
+  // Safe access via any-cast from getAuthSession
+  return session?.aol?.tier || "public";
 }
 
 export async function getCurrentUserTierLevel(): Promise<number> {
@@ -261,17 +257,27 @@ export async function currentUserHasAccess(requiredTier: AccessTier | string): P
   return hasAccess(userTier, required);
 }
 
+/**
+ * Resolves a tier from various session-like objects.
+ * Hardened against the missing 'aol' property in strict environments.
+ */
 export function resolveTierFromSessionLike(session: any): AccessTier {
-  const rawTier = session?.user?.tier ?? session?.user?.role ?? session?.tier ?? session?.role ?? "public";
+  const rawTier = 
+    session?.aol?.tier ?? 
+    session?.user?.tier ?? 
+    session?.user?.role ?? 
+    session?.role ?? 
+    "public";
 
-  const flags: string[] = Array.isArray(session?.user?.flags)
-    ? session.user.flags.map(String)
-    : Array.isArray(session?.flags)
-    ? session.flags.map(String)
-    : [];
+  const flags: string[] = session?.aol?.flags ?? session?.user?.flags ?? [];
 
-  const INTERNAL_MARKERS = new Set(["admin", "internal", "staff", "director", "root", "superadmin", "private_access"]);
-  if (flags.some((f) => INTERNAL_MARKERS.has(String(f).toLowerCase()))) return "owner";
+  const INTERNAL_MARKERS = new Set([
+    "admin", "internal", "staff", "director", "root", "superadmin", "private_access"
+  ]);
+
+  if (flags.some((f) => INTERNAL_MARKERS.has(String(f).toLowerCase()))) {
+    return "owner";
+  }
 
   return normalizeUserTier(rawTier);
 }

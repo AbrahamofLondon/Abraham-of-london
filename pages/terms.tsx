@@ -39,8 +39,8 @@ const TermsPage: NextPage = () => {
           <section className="space-y-4">
             <h2 className="font-serif text-2xl text-white italic">1. Intellectual Property</h2>
             <p className="text-sm text-zinc-300 font-light leading-relaxed">
-              All content, including the 75 intelligence briefs, editorial dispatches, and 
-              governance frameworks, are the exclusive property of Abraham of London. 
+              All content, including but not limited to the intelligence briefs, editorial dispatches, and 
+              governance frameworks, they are the exclusive property of Abraham of London. 
               Unauthorised distribution or reproduction is strictly prohibited.
             </p>
           </section>

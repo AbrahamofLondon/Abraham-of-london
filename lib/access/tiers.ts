@@ -1,4 +1,4 @@
-// lib/access/tiers.ts — SSOT WRAPPER (import policy only)
+// lib/access/tiers.ts — SSOT WRAPPER (policy + vault path policy)
 
 export {
   TIER_ORDER,
@@ -12,8 +12,9 @@ export {
   hasAccess,
   getTierLabel,
   requiredTierFromDoc,
-  requiredTierFromVaultPath,
 } from "@/lib/access/tier-policy";
+
+export { requiredTierFromVaultPath } from "@/lib/access/vault-policy";
 
 import {
   TIER_ORDER,

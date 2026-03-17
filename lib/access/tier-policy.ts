@@ -5,10 +5,12 @@ export const TIER_ORDER = [
   "public",
   "member",
   "inner-circle",
+  "restricted",
   "client",
   "legacy",
   "architect",
   "owner",
+  "top-secret",
 ] as const;
 
 export type AccessTier = (typeof TIER_ORDER)[number];
@@ -17,44 +19,46 @@ export const TIER_HIERARCHY: Record<AccessTier, number> = {
   public: 0,
   member: 1,
   "inner-circle": 2,
-  client: 3,
-  legacy: 4,
-  architect: 5,
-  owner: 6,
+  restricted: 3,
+  client: 4,
+  legacy: 5,
+  architect: 6,
+  owner: 7,
+  "top-secret": 8,
 };
 
 export const TIER_LABELS: Record<AccessTier, string> = {
   public: "Public",
   member: "Member",
   "inner-circle": "Inner Circle",
+  restricted: "Restricted",
   client: "Client",
   legacy: "Legacy",
   architect: "Architect",
   owner: "Owner",
+  "top-secret": "Top Secret",
 };
 
 /**
  * ONE alias map to rule them all.
  * - keys MUST be lowercase
  * - values MUST be AccessTier
- *
- * RULE: a key can appear only once. No duplicates.
  */
 export const TIER_ALIASES: Record<string, AccessTier> = {
-  // ── public
+  // public
   public: "public",
   open: "public",
   free: "public",
   guest: "public",
   unclassified: "public",
 
-  // ── member
+  // member
   member: "member",
   members: "member",
   basic: "member",
   standard: "member",
 
-  // ── inner circle
+  // inner-circle
   "inner-circle": "inner-circle",
   innercircle: "inner-circle",
   inner_circle: "inner-circle",
@@ -64,54 +68,69 @@ export const TIER_ALIASES: Record<string, AccessTier> = {
   verification: "inner-circle",
   "verified-member": "inner-circle",
 
-  // ── client (paid/private/restricted)
+  // restricted
+  restricted: "restricted",
+  classified: "restricted",
+  confidential: "restricted",
+  sensitive: "restricted",
+  "need-to-know": "restricted",
+  compartmentalized: "restricted",
+
+  // client
   client: "client",
   "inner-circle-plus": "client",
   "inner-circle-pro": "client",
   plus: "client",
   paid: "client",
   private: "client",
-  restricted: "client",
 
-  // ── legacy
+  // legacy
   legacy: "legacy",
   elite: "legacy",
   enterprise: "legacy",
   secret: "legacy",
   "inner-circle-elite": "legacy",
 
-  // ── architect
+  // architect
   architect: "architect",
   founder: "architect",
   partner: "architect",
   director: "architect",
-  confidential: "architect",
+  editor: "architect",
 
-  // ── owner
+  // owner
   owner: "owner",
   admin: "owner",
   root: "owner",
   superadmin: "owner",
   sovereign: "owner",
   hardened: "owner",
-  ts: "owner",
-  "top-secret": "owner",
-  "top secret": "owner",
+
+  // top-secret
+  "top-secret": "top-secret",
+  "top secret": "top-secret",
+  "top_secret": "top-secret",
+  topsecret: "top-secret",
+  tops: "top-secret",
+  tsc: "top-secret",
+  ts: "top-secret",
 };
 
-function assertNoDuplicateAliasKeys() {
-  // Dev-time sanity check: ensures no accidental dupes via merges/edits
-  // (JS objects can’t have duplicates at runtime, but TS error happens before that.
-  //  This is here mainly as a policy reminder and for future refactors.)
+type TierDocLike = {
+  accessLevelSafe?: unknown;
+  accessLevel?: unknown;
+  tier?: unknown;
+  requiresAuth?: unknown;
+  classification?: unknown;
+  clearance?: unknown;
+};
+
+function assertNoDuplicateAliasKeys(): void {
   if (process.env.NODE_ENV === "production") return;
-  // nothing to do: duplicates would already be prevented by TS parsing
 }
 
 assertNoDuplicateAliasKeys();
 
-/**
- * Helpers
- */
 export function toKey(input: unknown): string {
   return String(input ?? "").trim().toLowerCase();
 }
@@ -161,7 +180,7 @@ export function getTierLabel(tier: unknown): string {
   return TIER_LABELS[normalizeRequiredTier(tier)];
 }
 
-export function requiredTierFromDoc(doc: any): AccessTier {
+export function requiredTierFromDoc(doc: TierDocLike | null | undefined): AccessTier {
   if (!doc) return "public";
 
   const accessLevel = doc.accessLevelSafe ?? doc.accessLevel ?? "";
@@ -174,7 +193,8 @@ export function requiredTierFromDoc(doc: any): AccessTier {
   if (doc.tier) return normalizeRequiredTier(doc.tier);
 
   if (doc.requiresAuth === true) {
-    const hinted = doc.tier ?? doc.accessLevel ?? doc.classification ?? doc.clearance;
+    const hinted =
+      doc.tier ?? doc.accessLevel ?? doc.classification ?? doc.clearance;
     return hinted ? normalizeRequiredTier(hinted) : "client";
   }
 
@@ -194,10 +214,12 @@ export function requiredTierFromDoc(doc: any): AccessTier {
 export function requiredTierFromVaultPath(vaultPath: string): AccessTier {
   const p = String(vaultPath || "").replace(/\\/g, "/").toLowerCase();
 
+  if (p.includes("/top-secret/")) return "top-secret";
   if (p.includes("/owner/")) return "owner";
   if (p.includes("/architect/")) return "architect";
   if (p.includes("/legacy/")) return "legacy";
   if (p.includes("/client/")) return "client";
+  if (p.includes("/restricted/")) return "restricted";
   if (p.includes("/inner-circle/")) return "inner-circle";
   if (p.includes("/member/")) return "member";
   if (p.includes("/public-teasers/")) return "public";
