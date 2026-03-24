@@ -1,115 +1,148 @@
-/* pages/api/keys/verify.ts */
+/* pages/api/system/maintenance.ts — AUTOMATED LOG RETENTION & OPTIMIZATION */
 import type { NextApiRequest, NextApiResponse } from "next";
-import crypto from "crypto";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/server/prisma";
+import { logAuditEvent } from "@/lib/server/audit";
 
-function firstCsvToken(value: string): string {
-  const first = value.split(",")[0] ?? "";
-  return first.trim();
+type MaintenanceResponse =
+  | {
+      success: true;
+      message: string;
+      prunedRows: number;
+      retentionDays: number;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+const DEFAULT_RETENTION_DAYS = 90;
+
+function parseRetentionDays(input: unknown): number {
+  const n = Number(input);
+  if (!Number.isFinite(n)) return DEFAULT_RETENTION_DAYS;
+  return Math.max(30, Math.min(3650, Math.floor(n)));
 }
 
-function getClientIp(req: NextApiRequest): string {
-  const xff = req.headers["x-forwarded-for"];
-  const real = req.headers["x-real-ip"];
-
-  if (Array.isArray(xff) && xff.length > 0) {
-    const first = xff[0] ?? "";
-    if (first) return firstCsvToken(String(first));
-  }
-
-  if (typeof xff === "string" && xff) {
-    return firstCsvToken(xff);
-  }
-
-  if (typeof real === "string" && real) {
-    return real.trim();
-  }
-
-  return req.socket?.remoteAddress || "unknown";
+function getBearerToken(req: NextApiRequest): string {
+  const authHeader = req.headers.authorization;
+  if (typeof authHeader !== "string") return "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() || "";
 }
-
-/**
- * Hash the presented key so DB only stores hashes.
- * ✅ If your DB already stores SHA-256 hex, keep this.
- * If you used a different hash scheme previously, change here ONCE.
- */
-function hashKey(presented: string): string {
-  return crypto.createHash("sha256").update(presented, "utf8").digest("hex");
-}
-
-type Data =
-  | { valid: true; tier: string }
-  | { valid: false };
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<MaintenanceResponse>,
 ) {
-  if (req.method !== "POST") {
-    return res.status(405).end();
+  if (req.method !== "POST" && req.method !== "GET") {
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({
+      success: false,
+      error: "METHOD_NOT_ALLOWED",
+    });
   }
 
-  const rawKey = String((req.body as any)?.key || "").trim();
-  if (!rawKey || rawKey.length > 4096) {
-    return res.status(200).json({ valid: false });
+  const bearer = getBearerToken(req);
+  const secret = String(process.env.CRON_SECRET_KEY || "").trim();
+
+  if (!secret || bearer !== secret) {
+    return res.status(401).json({
+      success: false,
+      error: "UNAUTHORIZED_MAINTENANCE_REQUEST",
+    });
   }
 
-  const ip = getClientIp(req);
-  const ua = String(req.headers["user-agent"] || "").slice(0, 512);
+  const retentionDays = parseRetentionDays(
+    req.method === "POST" ? req.body?.retentionDays : req.query.retentionDays,
+  );
 
   try {
-    const keyHash = hashKey(rawKey);
+    const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
 
-    const keyRecord = await prisma.innerCircleKey.findUnique({
-      where: { keyHash },
-      select: {
-        id: true,
-        status: true,
-        expiresAt: true,
-        memberId: true,
-        lastUsedAt: true,
-        metadata: true,
-      },
-    });
+    // Prune only low-value audit/security/api logs.
+    // Keep high/critical records and anything recent.
+    const [systemAuditDelete, securityLogDelete, apiLogDelete, rateLimitLogDelete] =
+      await prisma.$transaction([
+        prisma.systemAuditLog.deleteMany({
+          where: {
+            createdAt: { lt: cutoff },
+            severity: { in: ["info", "warning"] },
+          },
+        }),
+        prisma.securityLog.deleteMany({
+          where: {
+            createdAt: { lt: cutoff },
+            severity: { in: ["info", "warning"] },
+          },
+        }),
+        prisma.apiLog.deleteMany({
+          where: {
+            createdAt: { lt: cutoff },
+          },
+        }),
+        prisma.rateLimitLog.deleteMany({
+          where: {
+            createdAt: { lt: cutoff },
+          },
+        }),
+      ]);
 
-    if (!keyRecord) return res.status(200).json({ valid: false });
-    if (String(keyRecord.status).toLowerCase() !== "active") {
-      return res.status(200).json({ valid: false });
-    }
-    if (keyRecord.expiresAt && keyRecord.expiresAt < new Date()) {
-      return res.status(200).json({ valid: false });
-    }
+    const prunedRows =
+      systemAuditDelete.count +
+      securityLogDelete.count +
+      apiLogDelete.count +
+      rateLimitLogDelete.count;
 
-    const member = await prisma.innerCircleMember.findUnique({
-      where: { id: keyRecord.memberId },
-      select: { tier: true, status: true },
-    });
-
-    if (!member) return res.status(200).json({ valid: false });
-    if (String(member.status).toLowerCase() !== "active") {
-      return res.status(200).json({ valid: false });
-    }
-
-    const prevMeta = (keyRecord.metadata ?? {}) as Record<string, unknown>;
-    const unlocks = Number(prevMeta?.unlocks || 0);
-
-    await prisma.innerCircleKey.update({
-      where: { id: keyRecord.id },
-      data: {
-        lastUsedAt: new Date(),
-        metadata: {
-          ...(typeof prevMeta === "object" && prevMeta ? prevMeta : {}),
-          unlocks: unlocks + 1,
-          lastIp: ip,
-          lastUserAgent: ua,
-          lastUsedAtIso: new Date().toISOString(),
+    await logAuditEvent({
+      actorType: "cron",
+      action: "SYSTEM_MAINTENANCE_CLEANUP",
+      resourceType: "system",
+      resourceId: "audit-retention",
+      status: "success",
+      severity: "low",
+      details: {
+        prunedRows,
+        retentionDays,
+        cutoffIso: cutoff.toISOString(),
+        deleted: {
+          systemAuditLogs: systemAuditDelete.count,
+          securityLogs: securityLogDelete.count,
+          apiLogs: apiLogDelete.count,
+          rateLimitLogs: rateLimitLogDelete.count,
         },
       },
     });
 
-    return res.status(200).json({ valid: true, tier: String(member.tier) });
+    return res.status(200).json({
+      success: true,
+      message: `System optimized. ${prunedRows} stale logs removed.`,
+      prunedRows,
+      retentionDays,
+    });
   } catch (error) {
-    console.error("[KEY_VERIFY_ERROR]", error);
-    return res.status(500).json({ valid: false });
+    console.error("[SYSTEM_MAINTENANCE_FAILURE]", error);
+
+    try {
+      await logAuditEvent({
+        actorType: "cron",
+        action: "SYSTEM_MAINTENANCE_CLEANUP",
+        resourceType: "system",
+        resourceId: "audit-retention",
+        status: "failed",
+        severity: "high",
+        details: {
+          retentionDays,
+          error:
+            error instanceof Error ? error.message : "Unknown maintenance failure",
+        },
+      });
+    } catch {
+      // Never let audit failure hide the real failure.
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: "MAINTENANCE_CYCLE_FAILED",
+    });
   }
 }

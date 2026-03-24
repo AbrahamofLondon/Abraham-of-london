@@ -12,7 +12,9 @@ type AnomalyResult =
   | { status: "LOCKED"; count: number }
   | { status: "SKIPPED"; count: number };
 
-export async function detectAnomalousActivity(memberId: string): Promise<AnomalyResult> {
+export async function detectAnomalousActivity(
+  memberId: string,
+): Promise<AnomalyResult> {
   const safeMemberId = String(memberId || "").trim();
   if (!safeMemberId) {
     return { status: "SKIPPED", count: 0 };
@@ -20,18 +22,16 @@ export async function detectAnomalousActivity(memberId: string): Promise<Anomaly
 
   const lookback = new Date(Date.now() - TIME_WINDOW_MINUTES * 60 * 1000);
 
-  // Count only successful exports
-  const recentExports = await prisma.downloadAuditEvent.count({
+  const recentDownloads = await prisma.downloadAuditEvent.count({
     where: {
       memberId: safeMemberId,
-      eventType: "EXPORT",
       success: true,
       createdAt: { gte: lookback },
     },
   });
 
-  if (recentExports < VELOCITY_LIMIT) {
-    return { status: "SAFE", count: recentExports };
+  if (recentDownloads < VELOCITY_LIMIT) {
+    return { status: "SAFE", count: recentDownloads };
   }
 
   const outcome = await prisma.$transaction(async (tx) => {
@@ -47,16 +47,30 @@ export async function detectAnomalousActivity(memberId: string): Promise<Anomaly
     });
 
     if (!member) {
-      return { changed: false as const, notify: false as const, member: null as any, revoked: 0 };
+      return {
+        changed: false as const,
+        notify: false as const,
+        member: null as null,
+        revoked: 0,
+      };
     }
 
     if (member.role === "ADMIN") {
-      return { changed: false as const, notify: false as const, member, revoked: 0 };
+      return {
+        changed: false as const,
+        notify: false as const,
+        member,
+        revoked: 0,
+      };
     }
 
-    // Only act on active accounts; paused/disabled/etc are already constrained
     if (member.status !== "active") {
-      return { changed: false as const, notify: false as const, member, revoked: 0 };
+      return {
+        changed: false as const,
+        notify: false as const,
+        member,
+        revoked: 0,
+      };
     }
 
     const updated = await tx.innerCircleMember.update({
@@ -69,34 +83,32 @@ export async function detectAnomalousActivity(memberId: string): Promise<Anomaly
       data: {
         status: "revoked",
         revokedAt: new Date(),
-        revokedReason: "VELOCITY_EXCEEDED_EXPORT",
+        revokedReason: "VELOCITY_EXCEEDED_DOWNLOAD_ACTIVITY",
       },
     });
 
     await logSystemAudit(tx, {
       action: "SECURITY_AUTO_LOCK",
       severity: "critical",
-
       actorType: "system",
       actorId: null,
       actorEmail: "system",
-
       resourceType: "InnerCircleMember",
       resourceId: safeMemberId,
       resourceName: member.email ?? null,
-
       status: "success",
       category: "security",
       subCategory: "anomaly_velocity",
-      tags: ["velocity", "export", "auto_pause", "keys_revoked"],
-
+      tags: ["velocity", "download", "auto_pause", "keys_revoked"],
       metadata: {
-        exports: recentExports,
+        downloads: recentDownloads,
         window: `${TIME_WINDOW_MINUTES}m`,
-        rule: `EXPORT(success=true) >= ${VELOCITY_LIMIT}`,
+        rule: `successful_downloads >= ${VELOCITY_LIMIT}`,
         lookbackIso: lookback.toISOString(),
         revokedKeys: revoked.count,
-        memberLastSeenAtIso: member.lastSeenAt ? new Date(member.lastSeenAt).toISOString() : null,
+        memberLastSeenAtIso: member.lastSeenAt
+          ? new Date(member.lastSeenAt).toISOString()
+          : null,
       },
     });
 
@@ -112,11 +124,14 @@ export async function detectAnomalousActivity(memberId: string): Promise<Anomaly
     try {
       await notifyPrincipalOfSecurityAction(outcome.member, "PAUSE_VELOCITY");
     } catch (e) {
-      console.error("[SECURITY_NOTIFY_FAILED]", { memberId: safeMemberId, error: e });
+      console.error("[SECURITY_NOTIFY_FAILED]", {
+        memberId: safeMemberId,
+        error: e,
+      });
     }
   }
 
-  return { status: "LOCKED", count: recentExports };
+  return { status: "LOCKED", count: recentDownloads };
 }
 
 export default detectAnomalousActivity;

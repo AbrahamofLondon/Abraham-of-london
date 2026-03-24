@@ -1,192 +1,161 @@
-// components/ThemeToggle.tsx
 "use client";
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Sparkles } from "lucide-react";
-
 import { useTheme } from "@/lib/ThemeContext";
 
-interface ThemeToggleProps {
+type ThemeToggleProps = {
   className?: string;
   size?: "sm" | "md" | "lg";
-}
+};
 
-// Move constants outside component to prevent recreation
 const SIZE_CLASSES = {
-  sm: "w-12 h-6",
-  md: "w-16 h-8",
-  lg: "w-20 h-10",
+  sm: "h-6 w-12",
+  md: "h-8 w-16",
+  lg: "h-10 w-20",
+} as const;
+
+const THUMB_CLASSES = {
+  sm: "h-4 w-4",
+  md: "h-6 w-6",
+  lg: "h-8 w-8",
 } as const;
 
 const ICON_SIZES = {
-  sm: 12,
-  md: 16,
-  lg: 20,
+  sm: 10,
+  md: 14,
+  lg: 18,
 } as const;
 
-const THUMB_POSITIONS = {
-  sm: { light: 26, dark: 2 },
-  md: { light: 34, dark: 4 },
-  lg: { light: 42, dark: 6 },
+const THUMB_X = {
+  sm: { dark: 2, light: 26 },
+  md: { dark: 4, light: 34 },
+  lg: { dark: 6, light: 42 },
 } as const;
 
 export default function ThemeToggle({
   className = "",
   size = "md",
-}: ThemeToggleProps): JSX.Element {
+}: ThemeToggleProps): React.ReactElement {
   const { resolvedTheme, setTheme } = useTheme();
-  const [isHovered, setIsHovered] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
 
-  // Avoid hydration mismatch by waiting for client
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
-  const toggleTheme = React.useCallback(() => {
+  const handleToggle = React.useCallback(() => {
     setTheme(isDark ? "light" : "dark");
   }, [isDark, setTheme]);
 
-  // Don't render until mounted to avoid hydration mismatch
   if (!mounted) {
     return (
-      <div 
-        className={`${SIZE_CLASSES[size]} rounded-full border-2 border-softGold/30 bg-charcoal/80 ${className}`}
+      <div
         aria-hidden="true"
+        className={[
+          "rounded-full border border-amber-400/25 bg-black/70",
+          SIZE_CLASSES[size],
+          className,
+        ].join(" ")}
       />
     );
   }
 
   return (
     <motion.button
-      className={`
-        relative ${SIZE_CLASSES[size]} rounded-full border-2 border-softGold/30 
-        bg-gradient-to-br from-charcoal/80 to-charcoal shadow-lg 
-        backdrop-blur-sm transition-all duration-500 
-        hover:border-softGold/60 hover:shadow-xl
-        focus:outline-none focus:ring-2 focus:ring-softGold/50 focus:ring-offset-2 focus:ring-offset-charcoal
-        ${className}
-      `}
-      onClick={toggleTheme}
+      type="button"
+      onClick={handleToggle}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.96 }}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      type="button"
+      className={[
+        "relative overflow-hidden rounded-full border border-amber-400/25",
+        "bg-gradient-to-br from-zinc-900 to-black shadow-[0_8px_24px_rgba(0,0,0,0.35)]",
+        "backdrop-blur-sm transition-all duration-300",
+        "hover:border-amber-300/45",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+        SIZE_CLASSES[size],
+        className,
+      ].join(" ")}
     >
-      {/* Background gradient */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-softGold/10 via-transparent to-softGold/5 opacity-0 transition-opacity duration-500 hover:opacity-100" />
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 via-transparent to-amber-200/5 opacity-0 transition-opacity duration-300 hover:opacity-100" />
 
-      {/* Track */}
       <div className="relative h-full w-full overflow-hidden rounded-full">
-        {/* Animated background particles */}
-        <AnimatePresence>
-          {isHovered && (
-            <React.Fragment>
-              <motion.div
-                className="absolute top-1 left-2 h-1 w-1 rounded-full bg-softGold"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.1 }}
-              />
-              <motion.div
-                className="absolute bottom-2 right-4 h-0.5 w-0.5 rounded-full bg-softGold"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.2 }}
-              />
-            </React.Fragment>
-          )}
-        </AnimatePresence>
-
-        {/* Thumb */}
-        <motion.div
-          className={`
-            absolute top-1/2 -translate-y-1/2
-            flex items-center justify-center
-            rounded-full bg-gradient-to-br from-softGold to-amber-200
-            shadow-lg
-            ${size === "sm" ? "h-4 w-4" : size === "md" ? "h-6 w-6" : "h-8 w-8"}
-          `}
-          initial={false}
-          animate={{
-            x: isDark ? THUMB_POSITIONS[size].dark : THUMB_POSITIONS[size].light,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: 30,
-          }}
-        >
-          {/* Sparkle effect */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Sparkles
-                  size={ICON_SIZES[size] - 8}
-                  className="text-charcoal/80"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Sun/Moon Icons */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isDark ? "moon" : "sun"}
-              initial={{ scale: 0, rotate: -90 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0, rotate: 90 }}
-              transition={{ duration: 0.2 }}
-              className="absolute"
-            >
-              {isDark ? (
-                <Moon
-                  size={ICON_SIZES[size] - 4}
-                  className="text-charcoal"
-                  fill="currentColor"
-                />
-              ) : (
-                <Sun size={ICON_SIZES[size] - 4} className="text-charcoal" />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Background stars for dark mode */}
         <AnimatePresence>
           {isDark && (
             <motion.div
+              key="stars"
               className="absolute inset-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="absolute top-1 left-4 h-0.5 w-0.5 rounded-full bg-softGold/60" />
-              <div className="absolute top-3 right-2 h-0.5 w-0.5 rounded-full bg-softGold/40" />
-              <div className="absolute bottom-2 left-6 h-0.5 w-0.5 rounded-full bg-softGold/50" />
+              <div className="absolute left-4 top-1 h-0.5 w-0.5 rounded-full bg-amber-200/70" />
+              <div className="absolute bottom-2 left-6 h-0.5 w-0.5 rounded-full bg-amber-200/50" />
+              <div className="absolute right-3 top-3 h-0.5 w-0.5 rounded-full bg-amber-200/60" />
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
 
-      {/* Hover glow effect */}
-      <motion.div
-        className="absolute inset-0 rounded-full bg-softGold/20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
-      />
+        <motion.div
+          initial={false}
+          animate={{
+            x: isDark ? THUMB_X[size].dark : THUMB_X[size].light,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 32,
+          }}
+          className={[
+            "absolute top-1/2 -translate-y-1/2 rounded-full",
+            "flex items-center justify-center",
+            "bg-gradient-to-br from-amber-300 to-amber-500 text-black",
+            "shadow-[0_4px_14px_rgba(245,158,11,0.35)]",
+            THUMB_CLASSES[size],
+          ].join(" ")}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={isDark ? "moon" : "sun"}
+              initial={{ opacity: 0, rotate: -90, scale: 0.75 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.75 }}
+              transition={{ duration: 0.18 }}
+              className="absolute"
+            >
+              {isDark ? (
+                <Moon
+                  size={ICON_SIZES[size]}
+                  className="text-black"
+                  fill="currentColor"
+                />
+              ) : (
+                <Sun size={ICON_SIZES[size]} className="text-black" />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0, rotate: -120 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                exit={{ opacity: 0, scale: 0, rotate: 120 }}
+                transition={{ duration: 0.2 }}
+                className="absolute"
+              >
+                <Sparkles size={Math.max(8, ICON_SIZES[size] - 4)} className="text-black/80" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
     </motion.button>
   );
 }

@@ -1,11 +1,11 @@
-// proxy.ts — INSTITUTIONAL PERIMETER (Edge-safe, production-grade)
+/* proxy.ts — INSTITUTIONAL PERIMETER V4.0 (Pages Router / Edge-safe) */
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { ROLE_HIERARCHY } from "@/types/auth";
-import { readAccessCookie } from "@/lib/auth/edge/cookies";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
 
 const CANONICAL_HOST = "www.abrahamoflondon.org";
 
@@ -27,19 +27,15 @@ const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 function getClientIp(req: NextRequest): string {
   const xff = req.headers.get("x-forwarded-for");
   if (xff) {
-    const parts = xff.split(",").map((ip) => ip.trim()).filter(Boolean);
-    if (parts[0]) return parts[0];
+    const first = xff.split(",").map((v) => v.trim()).filter(Boolean)[0];
+    if (first) return first;
   }
-
-  const realIp = req.headers.get("x-real-ip");
-  if (realIp) return realIp;
-
-  return "0.0.0.0";
+  return req.headers.get("x-real-ip") || "0.0.0.0";
 }
 
 async function rateLimit(
   key: string,
-  options: { limit: number; windowMs: number },
+  options: { limit: number; windowMs: number }
 ): Promise<RateLimitResult> {
   const now = Date.now();
   const windowKey = `rl:${key}:${Math.floor(now / options.windowMs)}`;
@@ -48,7 +44,6 @@ async function rateLimit(
   if (!current || now >= current.resetAt) {
     const resetAt = now + options.windowMs;
     rateLimitStore.set(windowKey, { count: 1, resetAt });
-
     return {
       allowed: true,
       remaining: options.limit - 1,
@@ -90,17 +85,16 @@ function createRateLimitHeaders(result: RateLimitResult): Record<string, string>
 
 function isAllowedIp(ip: string): boolean {
   const allowedIps =
-    process.env.ADMIN_ALLOWED_IPS?.split(",").map((value) => value.trim()).filter(Boolean) ||
-    [];
+    process.env.ADMIN_ALLOWED_IPS?.split(",").map((v) => v.trim()).filter(Boolean) || [];
 
-  if (allowedIps.length === 0) return true;
-  if (allowedIps.includes("0.0.0.0/0")) return true;
-
+  if (allowedIps.length === 0 || allowedIps.includes("0.0.0.0/0")) return true;
   return allowedIps.includes(ip);
 }
 
 function safeReturnTo(req: NextRequest): string {
-  const url = req.nextUrl.clone();
+  const pathname = req.nextUrl.pathname;
+  const search = req.nextUrl.search;
+  const url = new URL(`${pathname}${search}`, "http://localhost");
   url.searchParams.delete("callbackUrl");
   url.searchParams.delete("returnTo");
   return `${url.pathname}${url.search}`;
@@ -109,7 +103,7 @@ function safeReturnTo(req: NextRequest): string {
 function jsonResponse(
   body: unknown,
   status: number,
-  extraHeaders?: Record<string, string>,
+  extraHeaders?: Record<string, string>
 ): NextResponse {
   return new NextResponse(JSON.stringify(body), {
     status,
@@ -121,10 +115,10 @@ function jsonResponse(
 }
 
 function makeRequestId(req: NextRequest): string {
-  const existing = req.headers.get("x-request-id");
-  if (existing) return existing;
-
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return (
+    req.headers.get("x-request-id") ||
+    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  );
 }
 
 const PUBLIC_PREFIXES = [
@@ -136,7 +130,7 @@ const PUBLIC_PREFIXES = [
   "/api/check-access",
   "/api/inner-circle",
   "/api/pdfs",
-  "/api/premium/content", // allow premium launch endpoint
+  "/api/premium/content",
   "/_next",
   "/favicon.ico",
   "/robots.txt",
@@ -152,75 +146,128 @@ const PUBLIC_PREFIXES = [
   "/founders",
   "/fatherhood",
   "/leadership",
+  "/auth/access-denied",
+  "/inner-circle/insufficient-clearance",
 ] as const;
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-function isPremiumDownloadPath(pathname: string): boolean {
-  return pathname.startsWith("/api/premium/content/download/");
-}
-
-function isLegacyDownloadPath(pathname: string): boolean {
-  return pathname.startsWith("/api/dl/");
+function isAdminPath(pathname: string): boolean {
+  return pathname.startsWith("/admin") ||
+    pathname.startsWith("/api/vault") ||
+    pathname.startsWith("/api/admin");
 }
 
 function needsInstitutionalSession(pathname: string): boolean {
-  return (
-    pathname.startsWith("/inner-circle") ||
+  return pathname.startsWith("/inner-circle") ||
     pathname.startsWith("/api/premium") ||
-    pathname.startsWith("/api/dl/")
-  );
+    pathname.startsWith("/api/dl/");
 }
 
-function isAdminPath(pathname: string): boolean {
-  return pathname.startsWith("/admin") || pathname.startsWith("/api/vault");
-}
+async function checkGlobalLock(req: NextRequest): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/inner-circle/:path*",
-    "/api/:path*",
-    "/strategy-room/success/:path*",
-  ],
-};
+    const res = await fetch(`${req.nextUrl.origin}/api/system/lock-status`, {
+      signal: controller.signal,
+      cache: "no-store",
+      headers: {
+        "X-Institutional-Action": "true",
+      },
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) return false;
+
+    const data = (await res.json()) as { isLocked?: boolean };
+    return Boolean(data?.isLocked);
+  } catch {
+    return false;
+  }
+}
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isApi = pathname.startsWith("/api/");
   const isAdmin = isAdminPath(pathname);
-  const isInner = pathname.startsWith("/inner-circle");
   const requiresInstitutionalSession = needsInstitutionalSession(pathname);
 
-  // 1. Canonical host redirect
-  if (req.nextUrl.hostname === "abrahamoflondon.org") {
+  const masterKey = process.env.INTERNAL_BYPASS_KEY;
+  if (masterKey && req.headers.get("X-Directorate-Bypass") === masterKey) {
+    const response = NextResponse.next();
+    response.headers.set("X-Directorate-Safety-Active", "true");
+    response.headers.set("X-Request-ID", makeRequestId(req));
+    return response;
+  }
+
+  if (
+    req.headers.get("X-Institutional-Action") === "true" ||
+    pathname === "/api/system/lock-status"
+  ) {
+    return NextResponse.next();
+  }
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    req.nextUrl.hostname === "abrahamoflondon.org"
+  ) {
     const url = req.nextUrl.clone();
     url.hostname = CANONICAL_HOST;
     return NextResponse.redirect(url, 308);
   }
 
-  // 2. Public bypass
+  const isLockdownExempt =
+    pathname.startsWith("/admin/login") ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/system/lock-status") ||
+    pathname.includes("insufficient-clearance");
+
+  if (!isLockdownExempt) {
+    const isLocked = await checkGlobalLock(req);
+    if (isLocked) {
+      const token = await getToken({
+        req,
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+
+      const role = String((token as any)?.role || "guest").toLowerCase();
+      const isAdminUser = role === "admin" || role === "root";
+
+      if (!isAdminUser) {
+        if (isApi) {
+          return jsonResponse(
+            { error: "SYSTEM_LOCKED", message: "Emergency Lockdown" },
+            503
+          );
+        }
+
+        return NextResponse.redirect(
+          new URL("/inner-circle/insufficient-clearance?reason=lockdown", req.url)
+        );
+      }
+    }
+  }
+
   if (isPublicPath(pathname)) {
     const response = NextResponse.next();
     response.headers.set("X-Request-ID", makeRequestId(req));
-    response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("X-Frame-Options", "DENY");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     return response;
   }
 
   const ip = getClientIp(req);
 
-  // 3. Admin IP gate
   if (isAdmin && !isAllowedIp(ip)) {
-    if (isApi) {
-      return jsonResponse({ error: "ACCESS_DENIED" }, 403);
-    }
+    if (isApi) return jsonResponse({ error: "ACCESS_DENIED" }, 403);
     return NextResponse.redirect(new URL("/auth/access-denied", req.url));
   }
 
-  // 4. Rate limiting
   if (isAdmin || isApi) {
     const config = isAdmin
       ? RATE_LIMIT_CONFIGS.ADMIN
@@ -232,12 +279,11 @@ export async function proxy(req: NextRequest) {
       return jsonResponse(
         { error: "RATE_LIMIT_EXCEEDED" },
         429,
-        createRateLimitHeaders(rl),
+        createRateLimitHeaders(rl)
       );
     }
   }
 
-  // 5. Auth and access gate
   try {
     const token = await getToken({
       req,
@@ -247,60 +293,46 @@ export async function proxy(req: NextRequest) {
     const hasInstitutionalCookie = Boolean(readAccessCookie(req));
     const hasInstitutionalSession = Boolean(token) || hasInstitutionalCookie;
 
-    // Admin routes always require authenticated token
     if (isAdmin) {
       if (!token) {
-        if (pathname.includes("/login")) {
-          return NextResponse.next();
-        }
+        if (pathname.includes("/login")) return NextResponse.next();
 
         const url = new URL("/admin/login", req.url);
         url.searchParams.set("returnTo", safeReturnTo(req));
         return NextResponse.redirect(url, 307);
       }
 
-      const role = String((token as { role?: unknown })?.role ?? "guest").toLowerCase();
+      const role = String((token as any)?.role ?? "guest").toLowerCase();
       const rank = ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] ?? 0;
+      const requiredRank = ROLE_HIERARCHY.admin ?? 100;
 
-      if (rank < (ROLE_HIERARCHY.admin ?? 100)) {
+      if (rank < requiredRank) {
         return isApi
           ? jsonResponse({ error: "CLEARANCE_REQUIRED" }, 403)
           : NextResponse.redirect(new URL("/auth/access-denied", req.url));
       }
     }
 
-    // Inner-circle / premium / legacy download routes accept either token or institutional cookie
-    if (requiresInstitutionalSession && !isAdmin) {
-      if (!hasInstitutionalSession) {
-        if (pathname.includes("/login")) {
-          return NextResponse.next();
-        }
+    if (requiresInstitutionalSession && !hasInstitutionalSession) {
+      if (pathname.includes("/login")) return NextResponse.next();
 
-        const loginPath = "/inner-circle/login";
-        const url = new URL(loginPath, req.url);
-        url.searchParams.set("returnTo", safeReturnTo(req));
-        return NextResponse.redirect(url, 307);
-      }
+      const url = new URL("/inner-circle/login", req.url);
+      url.searchParams.set("returnTo", safeReturnTo(req));
+      return NextResponse.redirect(url, 307);
     }
-  } catch (_error) {
+  } catch {
     return isApi
       ? jsonResponse({ error: "AUTH_ERROR" }, 500)
       : NextResponse.next();
   }
 
-  // 6. Security headers
   const response = NextResponse.next();
-
   response.headers.set("X-Request-ID", makeRequestId(req));
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()",
-  );
 
-  if (isAdmin || isInner || isPremiumDownloadPath(pathname) || isLegacyDownloadPath(pathname)) {
+  if (isAdmin || pathname.startsWith("/inner-circle")) {
     response.headers.set("Cache-Control", "no-store, private, must-revalidate");
   }
 

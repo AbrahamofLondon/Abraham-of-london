@@ -5,25 +5,28 @@ import fs from "fs";
 import crypto from "crypto";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
+import {
+  DownloadContentType,
+  DownloadDeliveryMode,
+  DownloadEventType,
+} from "@prisma/client";
 
 import { authOptions } from "@/lib/auth";
-import type { AccessContext, AccessControlledDocument } from "@/lib/access/logic";
+import type {
+  AccessContext,
+  AccessControlledDocument,
+  ContentTier,
+} from "@/lib/access/logic";
 import { checkDocumentAccess } from "@/lib/access/logic";
 import { FRAMEWORKS } from "@/lib/resources/strategic-frameworks";
 import { prisma } from "@/lib/server/prisma";
 
-// ----------------------------------------------------------------------------
-// Config & Constants
-// ----------------------------------------------------------------------------
 const PRIVATE_PDF_ROOT = path.join(
   process.cwd(),
   "private_storage",
   "frameworks",
   "frameworks",
 );
-
-const CONTENT_TYPE = "framework";
-const EVENT_TYPE = "preview";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 10;
@@ -80,9 +83,6 @@ const ERROR_CODES = {
   },
 } as const;
 
-// ----------------------------------------------------------------------------
-// Utilities
-// ----------------------------------------------------------------------------
 function sha256Hex(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
@@ -103,11 +103,9 @@ function getClientIp(req: NextApiRequest): string | undefined {
 
   for (const header of headersToCheck) {
     const value = req.headers[header];
-
     if (typeof value === "string" && value.trim()) {
       return value.split(",")[0]?.trim() || undefined;
     }
-
     if (Array.isArray(value)) {
       const first = value[0];
       if (typeof first === "string" && first.trim()) {
@@ -115,38 +113,27 @@ function getClientIp(req: NextApiRequest): string | undefined {
       }
     }
   }
-
   return req.socket?.remoteAddress || undefined;
 }
 
 function cleanExpiredRateLimits(): void {
   const now = Date.now();
   for (const [key, record] of rateLimitStore.entries()) {
-    if (record.resetTime <= now) {
-      rateLimitStore.delete(key);
-    }
+    if (record.resetTime <= now) rateLimitStore.delete(key);
   }
 }
 
 function checkRateLimit(ip: string, memberId?: string): boolean {
   cleanExpiredRateLimits();
-
   const now = Date.now();
   const key = memberId ? `member:${memberId}` : `ip:${ip}`;
   const record = rateLimitStore.get(key);
 
   if (!record || record.resetTime <= now) {
-    rateLimitStore.set(key, {
-      count: 1,
-      resetTime: now + RATE_LIMIT_WINDOW_MS,
-    });
+    rateLimitStore.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
     return true;
   }
-
-  if (record.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
-
+  if (record.count >= RATE_LIMIT_MAX) return false;
   record.count += 1;
   rateLimitStore.set(key, record);
   return true;
@@ -159,13 +146,11 @@ function fileNameForSlug(slug: string): string {
 async function getPdfBuffer(slug: string): Promise<Buffer> {
   const key = `pdf:${slug}`;
   const filePath = path.join(PRIVATE_PDF_ROOT, fileNameForSlug(slug));
-
   const inFlight = activeRequests.get(key);
   if (inFlight) return inFlight;
 
   const readPromise = fs.promises.readFile(filePath);
   activeRequests.set(key, readPromise);
-
   try {
     return await readPromise;
   } finally {
@@ -176,6 +161,7 @@ async function getPdfBuffer(slug: string): Promise<Buffer> {
 type ResolvedAccessContext = AccessContext & {
   memberId?: string | null;
   emailHash?: string | null;
+  email?: string | null;
   isValidSession: boolean;
 };
 
@@ -184,7 +170,6 @@ async function resolveAccessContext(
   res: NextApiResponse,
 ): Promise<ResolvedAccessContext> {
   const session = await getServerSession(req, res, authOptions);
-
   const baseContext: ResolvedAccessContext = {
     tier: "public",
     innerCircleAccess: false,
@@ -193,13 +178,13 @@ async function resolveAccessContext(
     returnTo: req.headers.referer || req.headers.origin || "/",
     memberId: null,
     emailHash: null,
+    email: null,
     isValidSession: false,
   };
 
   if (!session) return baseContext;
-
   const aol = (session as { aol?: Partial<ResolvedAccessContext> }).aol;
-
+  const user = (session as { user?: { email?: string | null } }).user;
   return {
     tier: aol?.tier ?? "public",
     innerCircleAccess: Boolean(aol?.innerCircleAccess),
@@ -208,29 +193,61 @@ async function resolveAccessContext(
     returnTo: req.headers.referer || "/",
     memberId: aol?.memberId ?? null,
     emailHash: aol?.emailHash ?? null,
+    email: user?.email ?? null,
     isValidSession: true,
   };
+}
+
+function normalizeFrameworkTiers(input: unknown): ContentTier[] {
+  const allowed = new Set<ContentTier>([
+    "public",
+    "member",
+    "inner-circle",
+    "client",
+    "legacy",
+    "architect",
+    "owner",
+    "all",
+  ]);
+  if (!Array.isArray(input) || input.length === 0) return ["public"];
+  const normalized = input
+    .map((v) => String(v).trim().toLowerCase())
+    .map((v) => (v === "inner_circle" ? "inner-circle" : v))
+    .filter((v): v is ContentTier => allowed.has(v as ContentTier));
+  return normalized.length > 0 ? Array.from(new Set(normalized)) : ["public"];
 }
 
 function resolveFrameworkDoc(slug: string): AccessControlledDocument | null {
   const fw = FRAMEWORKS.find((f: any) => f.slug === slug);
   if (!fw) return null;
-
   return {
     slug: fw.slug,
     title: fw.title,
-    tier: fw.tier ?? ["public"],
+    tier: normalizeFrameworkTiers(fw.tier),
     requiresInnerCircle: true,
     previewOnly: true,
   };
 }
 
-// ----------------------------------------------------------------------------
-// Audit Logging
-// ----------------------------------------------------------------------------
+async function bumpFrameworkMetrics(slug: string) {
+  try {
+    await prisma.framework.updateMany({
+      where: { slug },
+      data: {
+        downloadCount: { increment: 1 },
+        lastDownloadedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error("[FRAMEWORK_METRIC_BUMP_FAILED]", error);
+  }
+}
+
 async function writeAudit(params: {
   req: NextApiRequest;
   slug: string;
+  frameworkId?: string | null;
+  title?: string | null;
   statusCode: number;
   success: boolean;
   latencyMs: number;
@@ -243,12 +260,10 @@ async function writeAudit(params: {
 }) {
   const ip = getClientIp(params.req);
   const ipHash = ip ? sha256Hex(ip) : undefined;
-
   const userAgent =
     typeof params.req.headers["user-agent"] === "string"
       ? params.req.headers["user-agent"]
       : undefined;
-
   const referrer =
     typeof params.req.headers.referer === "string"
       ? params.req.headers.referer
@@ -258,23 +273,36 @@ async function writeAudit(params: {
     await prisma.downloadAuditEvent.create({
       data: {
         slug: params.slug,
-        contentType: CONTENT_TYPE,
-        eventType: EVENT_TYPE,
+        title: params.title ?? undefined,
+        contentType: DownloadContentType.FRAMEWORK,
+        eventType:
+          params.success ? DownloadEventType.DOWNLOAD : DownloadEventType.PREVIEW,
+        deliveryMode: DownloadDeliveryMode.INLINE,
+
+        frameworkId: params.frameworkId ?? undefined,
         memberId: params.ctx.memberId ?? undefined,
-        fileName: params.fileName,
-        fileSize: params.fileSize,
-        fileHash: params.fileHash,
+        email: params.ctx.email ?? undefined,
         emailHash: params.ctx.emailHash ?? undefined,
+
         userAgent,
         ipAddress: ip,
         ipHash,
         referrer,
+
+        success: params.success,
         statusCode: params.statusCode,
         latencyMs: params.latencyMs,
-        success: params.success,
-        errorCode: params.errorCode,
-        errorDetail: params.errorDetail,
         processedAt: new Date(),
+
+        fileName: params.fileName ?? undefined,
+        fileSize: params.fileSize ?? undefined,
+        fileHash: params.fileHash ?? undefined,
+        errorCode: params.errorCode ?? undefined,
+        errorDetail: params.errorDetail ?? undefined,
+
+        metadata: {
+          route: "pages/api/private/frameworks/[slug]",
+        },
       },
     });
   } catch (error) {
@@ -282,41 +310,6 @@ async function writeAudit(params: {
   }
 }
 
-async function bumpContentMetadata(slug: string) {
-  try {
-    const now = new Date();
-
-    await prisma.contentMetadata.upsert({
-      where: { slug },
-      create: {
-        slug,
-        title: slug,
-        contentType: CONTENT_TYPE,
-        totalDownloads: 1,
-        uniqueDownloaders: 0,
-        lastDownloadAt: now,
-        viewCount: 0,
-        shareCount: 0,
-        likeCount: 0,
-        commentCount: 0,
-        rating: 0,
-        tags: JSON.stringify(["private", "framework"]),
-        metadata: JSON.stringify({}),
-      },
-      update: {
-        totalDownloads: { increment: 1 },
-        lastDownloadAt: now,
-        updatedAt: now,
-      },
-    });
-  } catch (error) {
-    console.error("[PRIVATE_FRAMEWORK_METADATA_BUMP_FAILED]", error);
-  }
-}
-
-// ----------------------------------------------------------------------------
-// Main Handler
-// ----------------------------------------------------------------------------
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const start = Date.now();
 
@@ -327,6 +320,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       errorCode: string;
       errorDetail?: string;
       slug?: string;
+      frameworkId?: string | null;
+      title?: string | null;
       ctx?: ResolvedAccessContext;
     },
   ) => {
@@ -335,12 +330,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const ctx = opts.ctx || (await resolveAccessContext(req, res));
 
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
-
     await writeAudit({
       req,
       slug,
+      frameworkId: opts.frameworkId,
+      title: opts.title,
       statusCode,
       success: false,
       latencyMs,
@@ -348,7 +342,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       errorDetail: opts.errorDetail || String(payload.error || payload.reason || ""),
       ctx,
     });
-
     return res.status(statusCode).json(payload);
   };
 
@@ -363,17 +356,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const rawSlug = getQuerySlug(req.query.slug);
-
     try {
       slugSchema.parse(rawSlug);
     } catch {
       return deny(
         400,
         { ok: false, error: ERROR_CODES.INVALID_SLUG.message },
-        {
-          errorCode: ERROR_CODES.INVALID_SLUG.code,
-          slug: rawSlug,
-        },
+        { errorCode: ERROR_CODES.INVALID_SLUG.code, slug: rawSlug },
       );
     }
 
@@ -381,35 +370,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const ip = getClientIp(req) || "unknown";
     const ctx = await resolveAccessContext(req, res);
 
-    if (!checkRateLimit(ip)) {
+    if (!checkRateLimit(ip) || (ctx.memberId && !checkRateLimit(ip, ctx.memberId))) {
       return deny(
         429,
-        {
-          ok: false,
-          error: ERROR_CODES.RATE_LIMITED.message,
-          retryAfter: 60,
-        },
-        {
-          errorCode: ERROR_CODES.RATE_LIMITED.code,
-          slug,
-          ctx,
-        },
-      );
-    }
-
-    if (ctx.memberId && !checkRateLimit(ip, ctx.memberId)) {
-      return deny(
-        429,
-        {
-          ok: false,
-          error: ERROR_CODES.RATE_LIMITED.message,
-          retryAfter: 60,
-        },
-        {
-          errorCode: ERROR_CODES.RATE_LIMITED.code,
-          slug,
-          ctx,
-        },
+        { ok: false, error: ERROR_CODES.RATE_LIMITED.message, retryAfter: 60 },
+        { errorCode: ERROR_CODES.RATE_LIMITED.code, slug, ctx },
       );
     }
 
@@ -418,17 +383,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return deny(
         404,
         { ok: false, error: ERROR_CODES.NOT_FOUND.message },
-        {
-          errorCode: ERROR_CODES.NOT_FOUND.code,
-          slug,
-          ctx,
-        },
+        { errorCode: ERROR_CODES.NOT_FOUND.code, slug, ctx },
       );
     }
 
+    const framework = await prisma.framework.findUnique({
+      where: { slug },
+      select: { id: true, slug: true, title: true, tier: true },
+    });
+
     const docTiers = Array.isArray(doc.tier) ? doc.tier : ["public"];
-    const isPrivateDoc =
-      docTiers.includes("private") || docTiers.includes("restricted");
+    const isPrivateDoc = docTiers.includes("client") || docTiers.includes("legacy");
 
     if (!isPrivateDoc) {
       return deny(
@@ -437,6 +402,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         {
           errorCode: ERROR_CODES.NOT_PRIVATE.code,
           slug,
+          frameworkId: framework?.id ?? null,
+          title: framework?.title ?? doc.title ?? null,
           ctx,
         },
       );
@@ -457,6 +424,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           errorCode: ERROR_CODES.ACCESS_DENIED.code,
           errorDetail: decision.reason,
           slug,
+          frameworkId: framework?.id ?? null,
+          title: framework?.title ?? doc.title ?? null,
           ctx,
         },
       );
@@ -465,52 +434,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let pdfBuffer: Buffer;
     try {
       pdfBuffer = await getPdfBuffer(slug);
-    } catch (error: unknown) {
-      const code =
-        (error as NodeJS.ErrnoException)?.code === "ENOENT"
-          ? ERROR_CODES.PDF_MISSING.code
-          : ERROR_CODES.SERVER_ERROR.code;
-
-      const message =
-        (error as NodeJS.ErrnoException)?.code === "ENOENT"
-          ? ERROR_CODES.PDF_MISSING.message
-          : ERROR_CODES.SERVER_ERROR.message;
-
+    } catch (error: any) {
+      const isMissing = error?.code === "ENOENT";
       return deny(
-        code === ERROR_CODES.PDF_MISSING.code ? 404 : 500,
-        { ok: false, error: message },
+        isMissing ? 404 : 500,
         {
-          errorCode: code,
-          errorDetail:
-            code === ERROR_CODES.PDF_MISSING.code ? "PDF file missing on disk" : "File read error",
+          ok: false,
+          error: isMissing
+            ? ERROR_CODES.PDF_MISSING.message
+            : ERROR_CODES.SERVER_ERROR.message,
+        },
+        {
+          errorCode: isMissing
+            ? ERROR_CODES.PDF_MISSING.code
+            : ERROR_CODES.SERVER_ERROR.code,
+          errorDetail: isMissing ? "PDF file missing" : "Read error",
           slug,
+          frameworkId: framework?.id ?? null,
+          title: framework?.title ?? doc.title ?? null,
           ctx,
         },
       );
     }
 
-    const fileHash = crypto.createHash("sha256").update(pdfBuffer).digest("hex");
     const fileName = fileNameForSlug(slug);
     const latencyMs = Date.now() - start;
+    const fileHash = sha256Hex(pdfBuffer.toString("base64"));
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="${fileName}"`);
     res.setHeader("Content-Length", String(pdfBuffer.length));
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
 
-    res.setHeader(
-      "Cache-Control",
-      "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
-    );
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("Referrer-Policy", "no-referrer");
-    res.setHeader("X-Frame-Options", "SAMEORIGIN");
-
-    Promise.allSettled([
+    void Promise.allSettled([
       writeAudit({
         req,
         slug,
+        frameworkId: framework?.id ?? null,
+        title: framework?.title ?? doc.title ?? null,
         statusCode: 200,
         success: true,
         latencyMs,
@@ -519,24 +480,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         fileHash,
         ctx,
       }),
-      bumpContentMetadata(slug),
+      bumpFrameworkMetrics(slug),
     ]).catch(console.error);
 
-    res.status(200).send(pdfBuffer);
-  } catch (err: unknown) {
-    console.error("[PRIVATE_FRAMEWORK_UNEXPECTED_ERROR]", err);
-
-    const errorDetail =
-      process.env.NODE_ENV === "development" && err instanceof Error
-        ? err.message
-        : undefined;
-
+    return res.status(200).send(pdfBuffer);
+  } catch {
     return deny(
       500,
       { ok: false, error: ERROR_CODES.SERVER_ERROR.message },
       {
         errorCode: ERROR_CODES.SERVER_ERROR.code,
-        errorDetail,
         slug: getQuerySlug(req.query.slug) || "unknown",
       },
     );
@@ -544,8 +497,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 export const config = {
-  api: {
-    responseLimit: false,
-    bodyParser: false,
-  },
+  api: { responseLimit: false, bodyParser: false },
 };

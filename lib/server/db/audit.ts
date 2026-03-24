@@ -1,74 +1,75 @@
-/* lib/server/db/audit.ts — SYSTEMATIC DATABASE INTERFACE */
-import "server-only";
+/* lib/server/db/audit.ts — FULLY SYNCHRONIZED WITH DISC SCHEMA */
+// REMOVED: import "server-only"; (Incompatible with Pages Router)
 
 import { prisma } from "@/lib/prisma.server";
+import type { AuditSeverity, Prisma } from "@prisma/client";
 
 export interface AuditLogInput {
   action: string;
-  userId?: string | null;
-  userEmail?: string | null;
-  briefId?: string | null;
-  ip?: string | null;
+  severity?: "info" | "warning" | "high" | "critical";
+  actorId?: string | null;
+  actorEmail?: string | null;
+  actorType?: string;
+  resourceId?: string | null;
+  resourceType?: string | null;
+  resourceName?: string | null;
+  status?: string;
+  ipAddress?: string | null;
   userAgent?: string | null;
-  severity?: "info" | "warning" | "critical";
-  // Optional metadata payload (doesn't break callers if unused)
-  details?: Record<string, any> | null;
+  sessionId?: string | null;
+  requestId?: string | null;
+  durationMs?: number | null;
+  category?: string | null;
+  subCategory?: string | null;
+  errorMessage?: string | null;
+  metadata?: Record<string, any> | null;
+  tags?: any[] | null;
 }
 
-type Severity = "low" | "medium" | "high";
-
-/**
- * Map old severity words to the system log's severity scale.
- * (Keeps callers stable, keeps DB consistent.)
- */
-function toDbSeverity(s?: AuditLogInput["severity"]): Severity {
-  if (s === "critical") return "high";
-  if (s === "warning") return "medium";
-  return "low";
+function toDbSeverity(s?: string): AuditSeverity {
+  switch (s) {
+    case "critical": return "critical";
+    case "high": return "high";
+    case "warning": return "warning";
+    default: return "info";
+  }
 }
 
 export const auditLogger = {
-  /**
-   * Commits an immutable record of a security/intelligence event to Postgres.
-   * Fail-soft: never throws to avoid cascading failures.
-   */
   async log(input: AuditLogInput) {
+    // Ensure this code never runs on the client-side
+    if (typeof window !== "undefined") {
+      console.error("auditLogger.log called on the client. Execution blocked.");
+      return null;
+    }
+
     try {
       return await prisma.systemAuditLog.create({
         data: {
-          actorType: "user",
           action: input.action,
-
-          // Align with existing schema you've used elsewhere
-          userId: input.userId ?? null,
-          userEmail: input.userEmail ?? null,
-
-          // If your schema doesn't have these fields, delete them here
-          resourceType: "intelligence",
-          resourceId: input.briefId ?? null,
-
-          ipAddress: input.ip ?? null,
-          userAgent: input.userAgent ?? null,
-
-          status: "success",
           severity: toDbSeverity(input.severity),
-
-          details: input.details ?? undefined,
+          actorId: input.actorId ?? null,
+          actorEmail: input.actorEmail ?? null,
+          actorType: input.actorType ?? "system",
+          resourceId: input.resourceId ?? null,
+          resourceType: input.resourceType ?? null,
+          resourceName: input.resourceName ?? null,
+          status: input.status ?? "success",
+          ipAddress: input.ipAddress ?? null,
+          userAgent: input.userAgent ?? null,
+          sessionId: input.sessionId ?? null,
+          requestId: input.requestId ?? null,
+          durationMs: input.durationMs ?? null,
+          category: input.category ?? null,
+          subCategory: input.subCategory ?? null,
+          errorMessage: input.errorMessage ?? null,
+          metadata: (input.metadata as Prisma.InputJsonValue) ?? {},
+          tags: (input.tags as Prisma.InputJsonValue) ?? [],
         },
       });
     } catch (error) {
-      console.error("[AUDIT_CRITICAL_FAILURE]", error);
+      console.error("[AUDIT_LOG_PERSISTENCE_FAILURE]", error);
       return null;
     }
-  },
-
-  /**
-   * Retrieves latest logs for the Audit Dashboard.
-   */
-  async getLatestLogs(limit = 50) {
-    return await prisma.systemAuditLog.findMany({
-      take: limit,
-      orderBy: { createdAt: "desc" },
-    });
-  },
+  }
 };

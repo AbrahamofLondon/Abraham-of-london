@@ -1,5 +1,4 @@
 /* pages/api/private/vault/[...path].ts — SECURE VAULT STREAM (Node runtime) */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
@@ -44,10 +43,16 @@ function safeResolveVaultPath(parts: string[]): string | null {
   }
 
   const joined = path.join(VAULT_ROOT, ...clean);
-  const normalizedRoot = path.normalize(VAULT_ROOT + path.sep);
-  const normalizedJoined = path.normalize(joined);
+  const normalizedRoot = path.resolve(VAULT_ROOT);
+  const normalizedJoined = path.resolve(joined);
 
-  if (!normalizedJoined.startsWith(normalizedRoot)) return null;
+  if (
+    normalizedJoined !== normalizedRoot &&
+    !normalizedJoined.startsWith(normalizedRoot + path.sep)
+  ) {
+    return null;
+  }
+
   return normalizedJoined;
 }
 
@@ -65,7 +70,10 @@ function firstHeaderValue(value: string | string[] | undefined): string | null {
   return null;
 }
 
-function parseRange(rangeHeader: string | null, size: number): { start: number; end: number } | null {
+function parseRange(
+  rangeHeader: string | null,
+  size: number,
+): { start: number; end: number } | null {
   if (!rangeHeader) return null;
 
   const m = rangeHeader.match(/^bytes=(\d*)-(\d*)$/i);
@@ -74,18 +82,16 @@ function parseRange(rangeHeader: string | null, size: number): { start: number; 
   const startStr = m[1];
   const endStr = m[2];
 
-  let start = startStr ? parseInt(startStr, 10) : NaN;
-  let end = endStr ? parseInt(endStr, 10) : NaN;
+  let start = startStr ? parseInt(startStr, 10) : Number.NaN;
+  let end = endStr ? parseInt(endStr, 10) : Number.NaN;
 
   if (Number.isNaN(start) && !Number.isNaN(end)) {
     const last = end;
     if (last <= 0) return null;
     start = Math.max(0, size - last);
     end = size - 1;
-  } else {
-    if (!Number.isNaN(start) && Number.isNaN(end)) {
-      end = size - 1;
-    }
+  } else if (!Number.isNaN(start) && Number.isNaN(end)) {
+    end = size - 1;
   }
 
   if (Number.isNaN(start) || Number.isNaN(end)) return null;
@@ -96,7 +102,20 @@ function parseRange(rangeHeader: string | null, size: number): { start: number; 
   return { start, end };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+function safeAttachmentName(filePath: string): string {
+  return path.basename(filePath).replace(/["\r\n]/g, "_");
+}
+
+type InnerCircleAccessResult = {
+  hasAccess?: boolean;
+  reason?: string;
+  tier?: unknown;
+};
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+): Promise<void> {
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("Allow", "GET, HEAD");
     res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
@@ -132,7 +151,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const requiredTier = tiers.normalizeRequired(requiredTierFromVaultPath(filePath));
 
   if (requiredTier !== "public") {
-    const auth = await getInnerCircleAccess(req);
+    const auth = (await getInnerCircleAccess(req)) as InnerCircleAccessResult | null;
 
     if (!auth?.hasAccess) {
       res.status(401).json({
@@ -143,7 +162,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    const userTier = tiers.normalizeUser((auth as any)?.tier ?? "public");
+    const userTier = tiers.normalizeUser(auth.tier ?? "public");
     if (!tiers.hasAccess(userTier, requiredTier)) {
       res.status(403).json({
         ok: false,
@@ -156,6 +175,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const ct = contentTypeFor(filePath);
   const etag = weakEtag(stat);
+  const filename = safeAttachmentName(filePath);
 
   res.setHeader("Content-Type", ct);
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -165,7 +185,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const inline = isPreviewInline(ct);
   res.setHeader(
     "Content-Disposition",
-    `${inline ? "inline" : "attachment"}; filename="${path.basename(filePath)}"`,
+    `${inline ? "inline" : "attachment"}; filename="${filename}"`,
   );
 
   const ifNoneMatch = firstHeaderValue(req.headers["if-none-match"]);
@@ -182,7 +202,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const rangeHeader = firstHeaderValue(req.headers.range);
+  const hasRangeHeader = Boolean(rangeHeader);
   const range = parseRange(rangeHeader, stat.size);
+
+  if (hasRangeHeader && !range) {
+    res.statusCode = 416;
+    res.setHeader("Content-Range", `bytes */${stat.size}`);
+    res.end();
+    return;
+  }
 
   if (range) {
     const { start, end } = range;

@@ -2,6 +2,10 @@
   "name": "abraham-of-london",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "clean": "rimraf .next .contentlayer node_modules/.cache .cache",
     "dev": "pnpm mdx:gate && pnpm pdf:registry:build && contentlayer2 build && next dev --webpack",
@@ -22,6 +26,8 @@
     "build:safe": "pnpm vault:fix && pnpm fix:encoding && pnpm content:validate && pnpm build",
     "build:fast": "tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "build:verbose": "cross-env DEBUG=* pnpm build",
+    "test:perimeter": "bash ./scripts/perimeter-check.sh",
+    "audit:check": "tsc --noEmit ./lib/audit/audit-logger.ts ./lib/inner-circle/exports.server.ts ./lib/server/cron.ts",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "postbuild": "next-sitemap --config next-sitemap.config.js",
     "prebuild:ci": "pnpm vault:fix && pnpm fix:yaml && pnpm fix:windows && pnpm vault:ready",
@@ -76,6 +82,9 @@
     "vault:deploy": "pnpm vault:audit && pnpm vault:sync && next build",
     "vault:ready": "pnpm contentlayer:safe && pnpm vault:audit && pnpm vault:glossary && pnpm vault:check && pnpm vault:manifest",
     "vault:dry": "node scripts/vault-repair-dry.mjs",
+    "vault:sign": "tsx scripts/sign-vault.ts",
+    "vault:generate": "tsx --env-file=.env.local scripts/batch-gen.ts",
+    "vault:build": "pnpm vault:generate",
     "assets:optimize": "node scripts/optimize-assets.js",
     "assets:enterprise": "tsx scripts/enterprise-asset-optimizer.ts",
     "assets:enterprise:production": "cross-env NODE_ENV=production tsx scripts/enterprise-asset-optimizer.ts --quality=premium",
@@ -232,7 +241,6 @@
     "cmdk": "^1.1.1",
     "color": "^5.0.3",
     "concurrently": "^9.2.1",
-    "contentlayer": "^0.3.4",
     "cookie": "^1.1.1",
     "crypto-browserify": "^3.3.0",
     "date-fns": "^4.1.0",
@@ -259,11 +267,9 @@
     "micro": "^10.0.1",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.1",
-    "next": "^16.1.6",
+    "next": "^16.2.1",
     "next-auth": "4.24.13",
-    "next-contentlayer": "^0.3.4",
     "next-contentlayer2": "^0.5.8",
-    "next-mdx-remote": "^6.0.0",
     "next-seo": "^7.1.0",
     "next-themes": "^0.4.6",
     "next-video": "^0.0.1",
@@ -272,9 +278,10 @@
     "openai": "^6.22.0",
     "os-browserify": "^0.3.0",
     "p-limit": "^7.3.0",
+    "papaparse": "^5.5.3",
     "path-browserify": "^1.0.1",
-    "postcss": "^8.5.6",
     "prettier": "^3.8.1",
+    "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-dropzone": "^14.4.1",
@@ -310,7 +317,6 @@
     "superjson": "^2.2.6",
     "swr": "^2.4.0",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.18",
     "tailwindcss-animate": "^1.0.7",
     "toml": "^3.0.0",
     "ts-morph": "^27.0.2",
@@ -321,7 +327,8 @@
     "uuid": "^13.0.0",
     "ws": "^8.19.0",
     "xml2js": "^0.6.2",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@mdx-js/esbuild": "3",
@@ -333,7 +340,6 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/line-clamp": "^0.4.4",
-    "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
     "@types/algoliasearch": "^4.0.4",
     "@types/argon2": "^0.15.4",
@@ -352,7 +358,9 @@
     "@types/mongoose": "^5.11.97",
     "@types/node": "^25.3.0",
     "@types/nodemailer": "^7.0.9",
+    "@types/papaparse": "^5.5.2",
     "@types/pg": "^8.16.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-syntax-highlighter": "^15.5.13",
@@ -363,7 +371,7 @@
     "@vscode/ripgrep": "^1.17.0",
     "archiver": "^7.0.1",
     "audit-ci": "^7.1.0",
-    "autoprefixer": "^10.4.24",
+    "autoprefixer": "^10.4.20",
     "babel-jest": "^30.2.0",
     "contentlayer2": "^0.5.8",
     "critters": "^0.0.25",
@@ -386,14 +394,16 @@
     "js-yaml": "^4.1.1",
     "micromark": "4.0.2",
     "micromark-extension-mdx-jsx": "3",
-    "netlify-cli": "^23.15.1",
+    "netlify-cli": "^24.4.1",
     "next-sitemap": "4.2.3",
     "null-loader": "^4.0.1",
     "pdf-lib": "^1.17.1",
     "pg": "^8.18.0",
+    "postcss": "^8.4.49",
     "prisma": "6.6.0",
     "puppeteer": "^24.37.2",
     "puppeteer-core": "^24.37.2",
+    "tailwindcss": "3.4.17",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "webpack-bundle-analyzer": "^5.2.0"
@@ -420,7 +430,15 @@
       "minimatch": ">=10.2.1",
       "bn.js": ">=5.2.3",
       "semver": ">=7.6.3",
-      "path-to-regexp": ">=6.3.0"
+      "path-to-regexp": ">=6.3.0",
+      "next-contentlayer>next": "$next",
+      "next-contentlayer2>next": "$next"
+    },
+    "peerDependencyRules": {
+      "allowAny": [
+        "react",
+        "react-dom"
+      ]
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
@@ -459,5 +477,5 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
+  "packageManager": "pnpm@10.32.1"
 }

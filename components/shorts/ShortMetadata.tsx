@@ -1,129 +1,94 @@
-import React from 'react';
+"use client";
 
-interface MetadataItem {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}
+import React from "react";
+import { Calendar, Clock, Tag } from "lucide-react";
 
 interface ShortMetadataProps {
-  metadata: MetadataItem[];
-  productionDate: string;
-  language: string;
-  resolution: string;
-  transcriptAvailable: boolean;
-  captionsAvailable: boolean;
+  date?: string;
+  readingTime?: string;
+  tags?: string[];
+  className?: string;
 }
 
-const ShortMetadata: React.FC<ShortMetadataProps> = ({
-  metadata,
-  productionDate,
-  language,
-  resolution,
-  transcriptAvailable,
-  captionsAvailable,
-}) => {
+function formatDate(date?: string): string {
+  if (!date) return "";
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  return parsed.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export default function ShortMetadata({
+  date,
+  readingTime,
+  tags = [],
+  className = "",
+}: ShortMetadataProps) {
+  const safeTags = Array.isArray(tags) ? tags.filter(Boolean) : [];
+
+  if (!date && !readingTime && safeTags.length === 0) return null;
+
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Video Details</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {metadata.map((item, index) => (
-          <div key={index} className="flex items-start space-x-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              {item.icon}
+    <div
+      className={[
+        "relative overflow-hidden rounded-2xl border px-4 py-3",
+        "border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))]",
+        "backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)]",
+        className,
+      ].join(" ")}
+      aria-label="Short metadata"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/45 to-transparent" />
+
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
+        {date && (
+          <div className="flex items-center gap-2 text-white/58">
+            <Calendar className="h-3.5 w-3.5 text-[#C9A96A]/85" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
+              Published
+            </span>
+            <time
+              dateTime={date}
+              className="text-xs font-medium tracking-[0.02em] text-white/72"
+            >
+              {formatDate(date)}
+            </time>
+          </div>
+        )}
+
+        {readingTime && (
+          <div className="flex items-center gap-2 text-white/58">
+            <Clock className="h-3.5 w-3.5 text-[#C9A96A]/85" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34">
+              Read
+            </span>
+            <span className="text-xs font-medium tracking-[0.02em] text-white/72">
+              {readingTime}
+            </span>
+          </div>
+        )}
+
+        {safeTags.length > 0 && (
+          <div className="flex items-start gap-2">
+            <Tag className="mt-[2px] h-3.5 w-3.5 text-[#C9A96A]/75" />
+            <div className="flex flex-wrap gap-2">
+              {safeTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-white/56 transition-all duration-200 hover:border-[#C9A96A]/25 hover:bg-[#C9A96A]/8 hover:text-white/78"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
-            <div>
-              <p className="text-sm text-gray-500">{item.label}</p>
-              <p className="text-lg font-semibold text-gray-900">{item.value}</p>
-            </div>
           </div>
-        ))}
-      </div>
-      
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Technical Information</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-            <CalendarIcon className="w-6 h-6 text-gray-500 mb-2" />
-            <span className="text-sm text-gray-600">Produced</span>
-            <span className="font-semibold">{productionDate}</span>
-          </div>
-          
-          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-            <LanguageIcon className="w-6 h-6 text-gray-500 mb-2" />
-            <span className="text-sm text-gray-600">Language</span>
-            <span className="font-semibold">{language}</span>
-          </div>
-          
-          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-            <ResolutionIcon className="w-6 h-6 text-gray-500 mb-2" />
-            <span className="text-sm text-gray-600">Resolution</span>
-            <span className="font-semibold">{resolution}</span>
-          </div>
-          
-          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-            <AccessibilityIcon className="w-6 h-6 text-gray-500 mb-2" />
-            <span className="text-sm text-gray-600">Accessibility</span>
-            <div className="flex space-x-2 mt-1">
-              {transcriptAvailable && (
-                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Transcript</span>
-              )}
-              {captionsAvailable && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">CC</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-        <div className="flex items-start space-x-3">
-          <InfoIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-blue-800 mb-1">Accessibility Note</p>
-            <p className="text-sm text-blue-700">
-              This video includes {transcriptAvailable ? 'a transcript' : ''}
-              {transcriptAvailable && captionsAvailable ? ' and ' : ''}
-              {captionsAvailable ? 'closed captions' : ''} 
-              {!transcriptAvailable && !captionsAvailable ? 'no accessibility features' : ''}
-              . We're committed to making all our content accessible.
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
-};
-
-const CalendarIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00 -2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
-const LanguageIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-  </svg>
-);
-
-const ResolutionIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-);
-
-const AccessibilityIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>
-);
-
-const InfoIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 01118 0z" />
-  </svg>
-);
-
-export default ShortMetadata;
+}

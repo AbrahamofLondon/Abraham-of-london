@@ -2,12 +2,18 @@
 import * as React from "react";
 import clsx from "clsx";
 
-type CalloutType = "info" | "note" | "success" | "warning" | "danger";
+type CanonicalCalloutType = "info" | "note" | "success" | "warning" | "danger";
 
-const TOKENS: Record<
-  CalloutType,
-  { ring: string; bg: string; title: string; accent: string; icon: string; body: string }
-> = {
+type CalloutTone = {
+  ring: string;
+  bg: string;
+  title: string;
+  accent: string;
+  icon: string;
+  body: string;
+};
+
+const TOKENS: Record<CanonicalCalloutType, CalloutTone> = {
   info: {
     ring: "border-white/10",
     bg: "bg-gradient-to-b from-white/[0.06] to-black/[0.40]",
@@ -50,18 +56,41 @@ const TOKENS: Record<
   },
 };
 
+const TYPE_ALIASES: Record<string, CanonicalCalloutType> = {
+  info: "info",
+  note: "note",
+  success: "success",
+  warning: "warning",
+  danger: "danger",
+
+  insight: "info",
+  scripture: "warning",
+  prophetic: "warning",
+  framework: "info",
+  hope: "success",
+  question: "info",
+  grace: "success",
+  error: "danger",
+};
+
+function resolveType(type?: string): CanonicalCalloutType {
+  if (!type) return "info";
+  return TYPE_ALIASES[type] || "info";
+}
+
 export default function Callout({
   type = "info",
   title,
   children,
   className,
 }: {
-  type?: CalloutType;
+  type?: string;
   title?: string;
   children: React.ReactNode;
   className?: string;
 }) {
-  const t = TOKENS[type];
+  const safeType = resolveType(type);
+  const t = TOKENS[safeType];
 
   return (
     <aside
@@ -79,12 +108,16 @@ export default function Callout({
 
       <div className="mb-4 flex items-center gap-3">
         <span className={clsx("h-2.5 w-2.5 rounded-full", t.icon)} />
-        <div className={clsx("text-[11px] font-mono font-bold uppercase tracking-[0.28em]", t.accent)}>
-          {title ?? type}
+        <div
+          className={clsx(
+            "text-[11px] font-mono font-bold uppercase tracking-[0.28em]",
+            t.accent
+          )}
+        >
+          {title ?? safeType}
         </div>
       </div>
 
-      {/* IMPORTANT: do NOT wrap children in a nested `.prose` that can create nested <p> */}
       <div
         className={clsx(
           "text-[15px] leading-[1.9]",
@@ -93,7 +126,6 @@ export default function Callout({
           "[&_strong]:text-white [&_em]:text-white/90",
           "[&_hr]:border-white/10",
           "[&_code]:text-[#E6C77A] [&_code]:bg-white/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded",
-          // If markdown produces <p>, ensure it doesn't inherit weird margins
           "[&_p]:my-4 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0"
         )}
       >

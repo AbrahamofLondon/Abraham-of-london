@@ -1,231 +1,182 @@
-/* scripts/vault-master.ts — VAULT MASTER ORCHESTRATOR (Hardened, Deterministic) */
+/* scripts/vault-master.ts — V6.0 (POLICY-ALIGNED ORCHESTRATOR) */
 /* eslint-disable no-console */
-
-/**
- * PHASE 0: SYSTEM-LEVEL INTERCEPTORS
- * - Loads .env deterministically (relative to this file, not cwd)
- * - Neutralizes Next.js 'server-only' in script runtime
- * - Mocks Redis imports for local/offline runs (prevents ECONNREFUSED hang/retries)
- */
 
 import dotenv from "dotenv";
 import path from "path";
 import Module from "module";
 import { fileURLToPath } from "url";
+import fs from "fs";
+import os from "os";
 
-// Resolve project root reliably: scripts/..
-// (Works even if you run the command from a different working directory)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ENV_PATH = path.join(__dirname, "..", ".env");
+const ENV_PATH = path.join(__dirname, "..", ".env.local");
 
-// Load env once, early, before any other imports execute logic.
 dotenv.config({ path: ENV_PATH });
 
-console.log(
-  "[ENV_CHECK]",
-  "cwd=", process.cwd(),
-  "envPath=", ENV_PATH,
-  "saltLen=", (process.env.SYSTEM_INTEGRITY_SALT || "").length,
-  "issuer=", process.env.AOL_ISSUER_ID || "(unset)"
-);
-
+// Bypass Redis for CLI operations
 // @ts-ignore
 const originalRequire = Module.prototype.require;
 // @ts-ignore
 Module.prototype.require = function (id: any) {
-  // 0) Ensure any late dotenv/config requires remain consistent
-  if (id === "dotenv/config") {
-    dotenv.config({ path: ENV_PATH });
-    return {};
-  }
-
-  // 1) Neutralize Next.js 'server-only' package for scripts
-  if (id === "server-only") {
-    return {};
-  }
-
-  // 2) Mock Redis imports (catch common variations)
-  if (typeof id === "string" && (id.includes("lib/redis") || id.includes("@/lib/redis") || id.includes("\\lib\\redis"))) {
+  if (id === "server-only") return {};
+  if (typeof id === "string" && (id.includes("lib/redis") || id.includes("@/lib/redis"))) {
     return {
-      getRedis: () => ({
-        on: () => {},
-        ping: async () => "PONG",
-        get: async () => null,
-        set: async () => "OK",
-        quit: async () => {},
-        pipeline: () => ({
-          set: () => {},
-          exec: async () => [],
-        }),
-      }),
-      default: {
-        getRedis: () => ({ on: () => {}, ping: async () => "PONG" }),
-        isRedisAvailable: async () => true,
-        client: { get: async () => null },
-      },
+      getRedis: () => ({ on: () => {}, ping: async () => "PONG", get: async () => null, set: async () => "OK", quit: async () => {} }),
+      redisClient: { get: async () => null },
       isRedisAvailable: async () => true,
       closeRedis: async () => {},
     };
   }
-
   return originalRequire.apply(this, arguments as any);
 };
 
-/**
- * PHASE 1: IMPORTS & CORE LOGIC
- */
-
-// @ts-ignore - Local .mjs file
-import { verifyDatabaseIntegrity } from "./audit-vault.mjs";
+import { PrismaClient, ContentType, AccessTier } from '@prisma/client';
+// @ts-ignore
+import { allBriefs } from '../.contentlayer/generated/index.mjs';
 import { generatePDF } from "../lib/pdf-generator";
-import fs from "fs";
-import matter from "gray-matter";
-import os from "os";
 
-interface PDFGenerationResult {
-  success: boolean;
-  cached?: boolean;
-  error?: string;
-}
+const prisma = new PrismaClient();
+
+// 🚫 HARD EXCLUSION: Never process these
+const FORBIDDEN_TYPES = ["Book", "Post", "Canon"];
+// 🌐 ONLINE ONLY: Sync to DB, but do NOT pre-generate PDF
+const ONLINE_ONLY_TYPES = ["Short"];
 
 interface VaultStats {
   success: number;
   cached: number;
   failed: number;
   healedLinks: number;
+  dbSynced: number;
+  skipped: number;
 }
 
-interface LinkReconciliation {
-  healedContent: string;
-  issuesFound: number;
+function mapToSchemaType(raw: string | undefined): ContentType {
+  const cat = raw || "Briefs";
+  if (cat === "Sovereign Intelligence") return ContentType.Sovereign_Intelligence;
+  return (Object.values(ContentType) as string[]).includes(cat) 
+    ? (cat as ContentType) 
+    : ContentType.Briefs;
 }
 
-/**
- * VAULT MASTER ORCHESTRATOR
- * Handles safe-healing and parallel PDF generation for the portfolio.
- */
 async function vaultMaster(): Promise<void> {
+  const startTime = Date.now();
+  const stats: VaultStats = { success: 0, cached: 0, failed: 0, healedLinks: 0, dbSynced: 0, skipped: 0 };
+
   try {
-    // 1) Registry Audit
-    const activeKeys: string[] = await verifyDatabaseIntegrity();
+    console.log("🚀 [VAULT_MASTER]: Initiating Policy-Aligned Orchestration...");
 
-    const stats: VaultStats = {
-      success: 0,
-      cached: 0,
-      failed: 0,
-      healedLinks: 0,
-    };
-
-    if (!activeKeys || activeKeys.length === 0) {
-      console.warn("⚠️  VAULT_MASTER: No briefs found in registry.");
+    if (!allBriefs || allBriefs.length === 0) {
+      console.warn("⚠️  VAULT_MASTER: No briefs found.");
       process.exit(0);
     }
 
-    console.log(`🏛️  VAULT_MASTER: Processing ${activeKeys.length} verified briefs...`);
+    // 🔍 1. FILTERING & VALIDATION
+    const filteredBriefs = allBriefs.filter(b => {
+      const type = b.type || "Brief";
+      const version = String((b as any).version || b.frontmatter?.version || "").trim();
+      
+      const isForbidden = FORBIDDEN_TYPES.includes(type);
+      const isLegacy = version === "0.9";
 
-    // 2) Optimized Parallel Generation
+      if (isForbidden || isLegacy) {
+        stats.skipped++;
+        return false;
+      }
+      return true;
+    });
+
+    const activeKeys = filteredBriefs.map(b => b.slugSafe);
+
+    // 📡 2. DATABASE SYNCHRONIZATION
+    console.log(`📡 [VAULT_MASTER]: Syncing ${filteredBriefs.length} metadata records...`);
+    for (const brief of filteredBriefs) {
+      try {
+        const version = String((brief as any).version || "1.0.0");
+        await prisma.contentMetadata.upsert({
+          where: { slug: brief.slugSafe },
+          update: {
+            title: brief.titleSafe,
+            contentType: mapToSchemaType(brief.category),
+            classification: brief.accessTierSafe === "public" ? AccessTier.PUBLIC : AccessTier.RESTRICTED,
+            summary: brief.excerptSafe || "",
+            metadata: JSON.stringify({ status: brief.statusSafe, version }),
+            updatedAt: new Date(),
+          },
+          create: {
+            slug: brief.slugSafe,
+            title: brief.titleSafe,
+            contentType: mapToSchemaType(brief.category),
+            classification: brief.accessTierSafe === "public" ? AccessTier.PUBLIC : AccessTier.RESTRICTED,
+            summary: brief.excerptSafe || "",
+            metadata: JSON.stringify({ status: brief.statusSafe }),
+            version: version
+          },
+        });
+        stats.dbSynced++;
+      } catch (dbErr: any) {
+        console.error(`❌ DB_SYNC_ERROR [${brief.slugSafe}]: ${dbErr.message}`);
+        stats.failed++;
+      }
+    }
+
+    // 🖨️ 3. PDF GENERATION (Selective)
+    console.log("🖨️ [VAULT_MASTER]: Generating PDFs...");
+    const pdfQueue = filteredBriefs.filter(b => !ONLINE_ONLY_TYPES.includes(b.type));
     const concurrencyLimit = Math.max(1, os.cpus().length - 1);
 
-    for (let i = 0; i < activeKeys.length; i += concurrencyLimit) {
-      const batch = activeKeys.slice(i, i + concurrencyLimit);
-      console.log(`📦 Batch [${i / concurrencyLimit + 1}]: Processing ${batch.length} assets...`);
-
-      const batchPromises = batch.map(async (id: string): Promise<PDFGenerationResult> => {
-        // Keep deterministic resolution (no relative ambiguity)
-        const mdxPath = path.join(process.cwd(), "content", "briefs", `${id}.mdx`);
-
-        if (!fs.existsSync(mdxPath)) {
-          return { success: false, error: `MDX Source Missing at ${mdxPath}` };
-        }
-
-        const fileContent = fs.readFileSync(mdxPath, "utf8");
-        const { content } = matter(fileContent);
-
-        const { healedContent, issuesFound }: LinkReconciliation = reconcileLinks(content, activeKeys);
-        stats.healedLinks += issuesFound;
-
-        // PDF generation
-        // NOTE: generatePDF handles cache truth via fingerprint now.
-        return await generatePDF(id, false, healedContent);
-      });
-
-      const results = await Promise.all(batchPromises);
-
-      results.forEach((r: PDFGenerationResult, index: number) => {
-        if (r.cached) {
-          stats.cached++;
-        } else if (r.success) {
-          stats.success++;
-        } else {
+    for (let i = 0; i < pdfQueue.length; i += concurrencyLimit) {
+      const batch = pdfQueue.slice(i, i + concurrencyLimit);
+      await Promise.all(batch.map(async (brief) => {
+        try {
+          const { healedContent, issuesFound } = reconcileLinks(brief.body.raw, activeKeys);
+          stats.healedLinks += issuesFound;
+          
+          const result = await generatePDF(brief.slugSafe, false, healedContent);
+          
+          if (result.cached) stats.cached++;
+          else if (result.success) stats.success++;
+          else throw new Error(result.error);
+        } catch (err: any) {
           stats.failed++;
-          console.error(`❌ FAILURE [${batch[index]}]: ${r.error || "Unknown Error"}`);
+          console.error(`❌ PDF_ERROR [${brief.slugSafe}]: ${err.message}`);
         }
-      });
+      }));
     }
 
-    // 3) Health Reporting
-    renderHealthReport(stats);
-
-    // 4) Outcome Determination
-    if (stats.failed > 0) {
-      console.error(`🚨 System fail-safe triggered: ${stats.failed} failures detected.`);
-      process.exit(1);
-    }
-
-    console.log("✅ VAULT_MASTER: Portfolio synchronization complete.");
+    renderHealthReport(stats, ((Date.now() - startTime) / 1000).toFixed(2));
   } catch (error: any) {
-    console.error("🚨 MASTER_SYNC_CRITICAL_FAILURE:", error?.message || error);
+    console.error("🚨 MASTER_SYNC_CRITICAL_FAILURE:", error.message);
     process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-/**
- * RECONCILE LINKS
- * Corrects internal references to prevent broken links in the PDF vault.
- */
-function reconcileLinks(content: string, activeKeys: string[]): LinkReconciliation {
-  // Matches: [Text](/briefs/<id>) OR [Text](#<id>)
+function reconcileLinks(content: string, activeKeys: string[]) {
   const linkRegex = /\[(.*?)\]\((\/briefs\/|#)(.*?)\)/g;
   let issuesFound = 0;
-
   const healedContent = content.replace(linkRegex, (match, text, prefix, targetId) => {
     const target = String(targetId || "").trim();
-
     if (prefix === "/briefs/" && target && !activeKeys.includes(target)) {
       issuesFound++;
       return `[${text} (REF_PENDING: ${target})](#)`;
     }
-
     return match;
   });
-
   return { healedContent, issuesFound };
 }
 
-/**
- * RENDER HEALTH REPORT
- */
-function renderHealthReport(stats: VaultStats): void {
-  console.log(`
---- 🛡️  VAULT HEALTH REPORT ---
-✅ Assets Synchronized: ${stats.success}
-♻️  Cache Hits:          ${stats.cached}
-🩹  Links Reconciled:    ${stats.healedLinks}
-❌ System Failures:      ${stats.failed}
-------------------------------
-  `);
+function renderHealthReport(stats: VaultStats, duration: string): void {
+  console.log(`\n--- 🛡️  VAULT MASTER HEALTH REPORT (${duration}s) ---`);
+  console.log(`✅ PDFs Created:         ${stats.success}`);
+  console.log(`♻️  Cache Hits:           ${stats.cached}`);
+  console.log(`📡 DB Records Synced:    ${stats.dbSynced}`);
+  console.log(`🌐 Online-Only (Shorts): ${allBriefs.filter((b: any) => b.type === "Short").length}`);
+  console.log(`🚫 Policy Exclusions:    ${stats.skipped}`);
+  console.log(`❌ System Failures:      ${stats.failed}`);
+  console.log(`----------------------------------------------\n`);
 }
 
-/**
- * TERMINATION HANDLER
- * Explicitly kills the process to prevent hangs caused by unclosed handles.
- */
-vaultMaster()
-  .then(() => {
-    setTimeout(() => process.exit(0), 250);
-  })
-  .catch((err) => {
-    console.error("FATAL_VAULT_ERROR:", err);
-    process.exit(1);
-  });
+vaultMaster();

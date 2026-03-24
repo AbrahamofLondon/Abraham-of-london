@@ -9,7 +9,7 @@ import {
   Wrench,
   ShieldCheck,
   ChevronRight,
-  LucideIcon,
+  type LucideIcon,
 } from "lucide-react";
 
 type CardItem = {
@@ -18,7 +18,11 @@ type CardItem = {
   kicker: string;
   description: string;
   Icon: LucideIcon;
-  pillar: { icon: LucideIcon; name: string; phase: string };
+  pillar: {
+    icon: LucideIcon;
+    name: string;
+    phase: string;
+  };
 };
 
 const CARDS: readonly CardItem[] = [
@@ -53,76 +57,95 @@ const CARDS: readonly CardItem[] = [
 
 export default function StrategicFunnelStrip(): React.ReactElement {
   return (
-    <section className="relative overflow-hidden bg-black py-16 lg:py-20">
-      {/* Background Architecture — Reduced blurs, sharper grid */}
+    <section
+      data-probe="funnel-strip-v3"
+      className="relative overflow-hidden bg-black py-16 lg:py-20"
+    >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
-        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.02] mix-blend-overlay" />
+        <div className="absolute inset-0 aol-grain opacity-[0.02]" />
       </div>
 
       <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
-        {/* Header — 80% Scale with increased letter-spacing */}
-        <div className="mb-12 flex flex-col items-start text-left border-l border-amber-500/30 pl-6">
+        <div className="mb-12 border-l border-amber-500/30 pl-6">
           <span className="text-[9px] font-bold uppercase tracking-[0.5em] text-amber-500/60">
             System Sequence
           </span>
 
-          <h2 className="mt-4 font-serif text-3xl md:text-4xl text-white tracking-tight leading-none italic">
-            Doctrine <ChevronRight className="inline h-5 w-5 text-white/10" /> Logic{" "}
-            <ChevronRight className="inline h-5 w-5 text-white/10" /> Artifacts
+          <h2 className="mt-4 font-serif text-3xl italic leading-none tracking-tight text-white md:text-4xl">
+            Doctrine{" "}
+            <ChevronRight className="inline h-5 w-5 text-white/10" />
+            {" "}Logic{" "}
+            <ChevronRight className="inline h-5 w-5 text-white/10" />
+            {" "}Artifacts
           </h2>
 
-          <p className="mt-4 max-w-xl text-white/30 text-sm font-light leading-relaxed">
-            From the architecture of the <span className="text-white/60">Canon</span> to reproducible{" "}
-            <span className="text-white/60">Tools</span>, proven in the{" "}
+          <p className="mt-4 max-w-xl text-sm font-light leading-relaxed text-white/30">
+            From the architecture of the <span className="text-white/60">Canon</span> to
+            reproducible <span className="text-white/60">Tools</span>, proven in the{" "}
             <span className="text-white/60">Rooms</span>.
           </p>
         </div>
 
-        {/* Cards — Hard edges, metadata focus */}
-        <div className="grid gap-px bg-white/5 border border-white/5 md:grid-cols-3">
-          {CARDS.map((card, index) => (
-            <Link key={card.href} href={card.href} className="group block bg-black h-full">
-              <div className="relative h-full p-8 transition-colors duration-700 hover:bg-white/[0.03]">
-                {/* Metadata Row */}
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-[1px] w-4 bg-amber-500/40" />
-                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-500 group-hover:text-amber-500/80 transition-colors">
-                      P-{card.pillar.phase} // {card.pillar.name}
-                    </span>
+        <div className="grid gap-px border border-white/5 bg-white/5 md:grid-cols-3">
+          {CARDS.map((card, index) => {
+            const PillarIcon = card.pillar.icon;
+            const CardIcon = card.Icon;
+
+            return (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="group block h-full bg-black"
+              >
+                <div className="relative flex h-full flex-col p-8 transition-colors duration-700 hover:bg-white/[0.03]">
+                  <div className="mb-8 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-px w-4 bg-amber-500/40" />
+                      <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-amber-500/80">
+                        P-{card.pillar.phase} // {card.pillar.name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <PillarIcon className="h-3.5 w-3.5 text-zinc-600 transition-colors group-hover:text-amber-500/70" />
+                      <span className="text-[9px] font-mono text-zinc-700">
+                        0{index + 1}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[9px] font-mono text-zinc-700">0{index + 1}</span>
-                </div>
 
-                <div className="mb-6">
-                  <h3 className="font-serif text-xl text-white italic transition-all group-hover:text-amber-50">
-                    {card.label}
-                  </h3>
-                  <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.3em] text-amber-600/70">
-                    {card.kicker}
+                  <div className="mb-6">
+                    <div className="mb-3 flex items-center gap-3">
+                      <CardIcon className="h-4 w-4 text-amber-500/70 transition-colors group-hover:text-amber-400" />
+                      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-amber-600/70">
+                        {card.kicker}
+                      </p>
+                    </div>
+
+                    <h3 className="font-serif text-xl italic text-white transition-all group-hover:text-amber-50">
+                      {card.label}
+                    </h3>
+                  </div>
+
+                  <p className="mb-10 text-[13px] leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-300">
+                    {card.description}
                   </p>
+
+                  <div className="mt-auto flex items-center justify-between border-t border-white/[0.03] pt-6">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 transition-colors group-hover:text-white">
+                      Initialize Protocol
+                    </span>
+                    <ArrowRight className="h-3 w-3 text-zinc-700 transition-all group-hover:translate-x-1 group-hover:text-amber-500" />
+                  </div>
+
+                  <div className="absolute right-0 top-0 h-4 w-4 border-r border-t border-transparent transition-all group-hover:border-amber-500/20" />
                 </div>
-
-                <p className="mb-10 text-[13px] leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-300">
-                  {card.description}
-                </p>
-
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/[0.03]">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors">
-                    Initialize Protocol
-                  </span>
-                  <ArrowRight className="h-3 w-3 text-zinc-700 transition-all group-hover:text-amber-500 group-hover:translate-x-1" />
-                </div>
-
-                {/* Corner Accent — Sharp & Subtle */}
-                <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-transparent group-hover:border-amber-500/20 transition-all" />
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Footer — Minimalist verification */}
         <div className="mt-12 flex items-center gap-4">
           <div className="h-px w-8 bg-amber-500/30" />
           <p className="text-[8px] font-mono uppercase tracking-[0.6em] text-zinc-700">

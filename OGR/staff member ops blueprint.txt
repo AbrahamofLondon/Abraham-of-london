@@ -1,0 +1,68 @@
+This **Operational Blueprint** serves as the primary onboarding document for the Strategic Consultants and Internal Staff who will manage the **Enterprise Alignment Engine (OGR-Core)**. It defines the lifecycle of an audit and the specific protocols for client onboarding.
+
+---
+
+## 🏛️ Enterprise Alignment Engine: Operational Manual
+
+### 1. Executive Summary
+The Enterprise Alignment Engine is a high-precision diagnostic tool designed to measure the **Resonance** between an organization's strategic intent and its operational reality. By calculating the **Organizational Growth & Resilience (OGR)** score, we provide clients with a data-driven roadmap to eliminate "Strategic Drift."
+
+### 2. The Core OGR Lifecycle
+Every client engagement follows a 5-stage protocol within the system:
+
+| Phase | Action | System Module |
+| :--- | :--- | :--- |
+| **I. Provisioning** | Create the legal and digital entity for the client. | `/admin/organisations/new` |
+| **II. Initialization** | Define the audit scope (Campaign) and target population. | `/admin/organisations/[id]/campaigns/new` |
+| **III. Collection** | Individual "Ground Truth" data gathering via unique tokens. | `/audit/[token]` |
+| **IV. Synthesis** | Aggregating raw answers into strategic intelligence. | `SnapshotGenerator` Logic |
+| **V. Intelligence** | Reviewing Gaps, Dissonance, and Team alignment. | `/admin/organisations/[id]` |
+
+---
+
+### 3. Staff Onboarding: Managing the System
+
+#### **A. Provisioning a New Client**
+When onboarding a new organization, staff must ensure:
+* **Slug Integrity:** The URL slug should be the client’s legal name in lowercase (e.g., `sovereign-analytics`). The system handles this automatically, but double-check for "ID collisions."
+* **Metadata Accuracy:** Ensure "Sector" and "Region" are accurate, as these are used for future cross-client benchmarking.
+
+#### **B. Deploying a Campaign**
+A Campaign is a "Point-in-Time" audit. 
+* **Participant Selection:** Avoid "Sample Bias." Ensure the email list includes both Executive Leadership and Front-line Operations to accurately measure the **Leadership Gap**.
+* **Temporal Bounds:** Standard audits should remain "Open" for 10–14 business days.
+
+---
+
+### 4. Client Onboarding: Preparing the Client
+
+When a staff member prepares a client for an OGR audit, the following script/protocol must be used to ensure high response rates:
+
+> **The "Ground Truth" Protocol:**
+> "We are not measuring individual performance; we are measuring system resonance. Your answers are anonymized and synthesized to identify where the organization's structure is helping or hindering your work. For the OGR curve to be accurate, we require radical candor."
+
+#### **Client Checklist for Launch:**
+1.  **Whitelisting:** Ensure the client's IT department whitelists the email domain used for invite tokens.
+2.  **Internal Memo:** A "Launch Message" from the CEO/Executive sponsor should precede the system invites to validate the audit's importance.
+3.  **Team Mapping:** Confirm that the "Team Names" provided in the participant list match the client's internal nomenclature (e.g., "North American Sales" vs "Global Revenue Team").
+
+---
+
+### 5. Interpreting the Intelligence (The Dashboard)
+
+Once the **Snapshot Generator** is triggered, staff will present the findings to the client using these three primary indicators:
+
+1.  **Alignment Score (%):** The overall health of the OGR curve.
+    * **>85%:** Optimized. Low "Internal Tax."
+    * **70-84%:** Aligned but susceptible to friction.
+    * **<50%:** Fragmented. High risk of strategic failure.
+2.  **Leadership Gap:** The delta between what the C-Suite believes is happening and what the teams report. A gap of **>15%** indicates a failure in communication or middle-management translation.
+3.  **Fragility Signal:** High fragility in specific domains (e.g., "Resource Flow") suggests that while the organization looks healthy, it is brittle and likely to fail under stress.
+
+---
+
+### 6. Technical Troubleshooting
+* **Token Expiry:** If a participant loses their link, staff can find their unique token in the `CampaignParticipant` database table or resend the invite.
+* **Missing Teams:** If a team doesn't appear in the dashboard, check if any participants from that team have completed the assessment. Snapshots only generate for teams with at least 1 respondent.
+
+---

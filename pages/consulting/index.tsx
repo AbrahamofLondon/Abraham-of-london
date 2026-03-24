@@ -1,6 +1,6 @@
 /* ============================================================================
    FILE: pages/consulting/index.tsx
-   CONSULTING — Advisory & Strategy (Adult / Private Mandate Edition)
+   CONSULTING — Advisory & Strategy
 ============================================================================ */
 
 import * as React from "react";
@@ -20,14 +20,16 @@ import {
   Award,
   Compass,
   Scale,
-  Clock,
   Key,
   Eye,
   Crown,
   Building2,
   Activity,
-  Lock,
   Briefcase,
+  FileText,
+  Gavel,
+  Radar,
+  Layers,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -43,7 +45,7 @@ type Engagement = {
   title: string;
   desc: string;
   href: string;
-  tier: "public" | "inner-circle" | "private";
+  tier: "diagnostic" | "private" | "public";
   icon: React.ComponentType<any>;
   bullets: string[];
 };
@@ -61,7 +63,7 @@ const DOMAINS: Pill[] = [
   {
     icon: TargetIcon,
     title: "Founder advisory",
-    desc: "Confidential counsel for scale, crisis, and high-stakes trade-offs.",
+    desc: "Confidential counsel for scale, inflection points, and high-stakes trade-offs.",
   },
   {
     icon: Globe,
@@ -71,86 +73,91 @@ const DOMAINS: Pill[] = [
 ];
 
 const DELIVERABLES: Deliverable[] = [
-  { title: "Risk containment", icon: ShieldCheck },
-  { title: "Legitimacy", icon: Award },
-  { title: "Execution cadence", icon: Workflow },
-  { title: "Alignment", icon: Scale },
-  { title: "Strategic focus", icon: TargetIcon },
-  { title: "Decision memo", icon: Briefcase },
+  { title: "Clearer decision pathways", icon: Gavel },
+  { title: "Documented strategic logic", icon: FileText },
+  { title: "Reduced execution drift", icon: Radar },
+  { title: "Governance and cadence", icon: Workflow },
+  { title: "Leadership alignment", icon: Scale },
+  { title: "Next-step architecture", icon: Briefcase },
 ];
 
 const HOW: Step[] = [
-  { step: "Initial call", desc: "45 minutes to establish context, stakes, and fit." },
   {
     step: "Diagnostic",
-    desc: "Define the real problem with evidence, constraints, and decision owners.",
+    desc: "Where appropriate, the work begins with a structured reading of the real problem before counsel is applied.",
   },
   {
-    step: "Engagement",
-    desc: "Scope, cadence, outputs, success measures — documented. No ambiguity.",
+    step: "Decision environment",
+    desc: "Context, trade-offs, decision owners, and execution realities are brought into one disciplined frame.",
+  },
+  {
+    step: "Documented output",
+    desc: "The engagement produces clear recommendations, explicit logic, and next-step control points.",
   },
 ];
 
 const ENGAGEMENTS: Engagement[] = [
   {
     label: "Engagement",
+    title: "Diagnostics First",
+    desc: "A structured reading before advisory begins, where clarity is still more valuable than speed.",
+    href: "/diagnostics",
+    tier: "diagnostic",
+    icon: Activity,
+    bullets: [
+      "Pressure, drift, and misalignment surfaced",
+      "Fit established before escalation",
+      "Correction priority clarified",
+    ],
+  },
+  {
+    label: "Engagement",
     title: "Strategy Room",
-    desc: "High-gravity decision environment for irreversible calls. Intake-first. Artifacts delivered.",
+    desc: "A controlled decision environment for founders, boards, and institutions facing high-consequence choices.",
     href: "/consulting/strategy-room",
-    tier: "inner-circle",
+    tier: "private",
     icon: ShieldCheck,
     bullets: [
-      "Authority audit + decision gravity filter",
       "Constraint-aware options + explicit trade-offs",
-      "Artifacts: memo, matrix, cadence, execution controls",
+      "Artifacts: memo, matrix, cadence, controls",
+      "Designed for irreversible decisions",
     ],
   },
   {
     label: "Engagement",
     title: "Private Advisory",
-    desc: "Board-level counsel for founders, boards, and builders carrying consequence.",
+    desc: "Ongoing strategic counsel for leaders operating under sustained complexity, scrutiny, or consequence.",
     href: "/contact?source=consulting&intent=consultation",
     tier: "private",
-    icon: UsersIcon,
+    icon: Crown,
     bullets: [
-      "Governance + operating cadence",
+      "Governance and operating cadence",
       "Founder counsel under pressure",
-      "Frontier-market execution strategy",
-    ],
-  },
-  {
-    label: "Engagement",
-    title: "Speaking",
-    desc: "Keynotes and closed-door sessions designed to move decisions, not generate applause.",
-    href: "/contact?intent=speaking-engagement",
-    tier: "public",
-    icon: Mic2,
-    bullets: [
-      "Institutional governance",
-      "Markets + civilisation",
-      "Principle + execution discipline",
+      "Strategic oversight and alignment",
     ],
   },
 ];
 
 function tierBadge(tier: Engagement["tier"]) {
-  if (tier === "public") {
+  if (tier === "diagnostic") {
     return {
-      label: "Public",
+      label: "Diagnostic",
       className:
         "border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-200/80",
     };
   }
-  if (tier === "inner-circle") {
+
+  if (tier === "public") {
     return {
-      label: "Inner Circle",
+      label: "Public",
       className:
-        "border-amber-500/25 bg-amber-500/[0.07] text-amber-200/80",
+        "border-slate-500/20 bg-slate-500/[0.06] text-slate-200/80",
     };
   }
+
   return {
     label: "Private",
-    className: "border-red-500/20 bg-red-500/[0.06] text-red-200/80",
+    className: "border-amber-500/25 bg-amber-500/[0.07] text-amber-200/80",
   };
 }
 
@@ -181,7 +188,7 @@ function RailDivider() {
   return (
     <div className="my-20 flex items-center gap-3">
       <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-      <Crown className="h-3.5 w-3.5 text-amber-500/36" />
+      <Compass className="h-3.5 w-3.5 text-amber-500/36" />
       <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
     </div>
   );
@@ -210,7 +217,7 @@ const ConsultingPage: NextPage = () => {
   return (
     <Layout
       title="Advisory & Strategy"
-      description="Board-level strategic counsel rooted in conviction, documented method, and deployable frameworks."
+      description="Strategic counsel for leaders under consequence."
       className="bg-black text-white"
     >
       <Head>
@@ -230,7 +237,7 @@ const ConsultingPage: NextPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8 }}
                 >
-                  <RailLabel>Private Advisory</RailLabel>
+                  <RailLabel>Advisory</RailLabel>
                 </motion.div>
 
                 <motion.h1
@@ -239,9 +246,9 @@ const ConsultingPage: NextPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.95, delay: 0.08 }}
                 >
-                  Strategy for those
+                  Strategic counsel
                   <span className="mt-3 block text-white/56">
-                    who carry the weight
+                    for leaders under consequence
                   </span>
                 </motion.h1>
 
@@ -251,29 +258,40 @@ const ConsultingPage: NextPage = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.9, delay: 0.18 }}
                 >
-                  Leaders who refuse to outsource responsibility: founders,
-                  boards, and builders navigating high-stakes complexity.
+                  For founders, boards, and institutions facing decisions that
+                  carry operational, financial, and reputational weight.
+                </motion.p>
+
+                <motion.p
+                  className="mt-6 max-w-2xl text-[1.02rem] leading-relaxed text-white/44"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.9, delay: 0.24 }}
+                >
+                  This is not general advice. It is structured thinking applied to
+                  real situations, with documented reasoning, trade-offs, and
+                  execution pathways.
                 </motion.p>
 
                 <motion.div
                   className="mt-12 flex flex-wrap gap-4"
                   initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.85, delay: 0.26 }}
+                  transition={{ duration: 0.85, delay: 0.3 }}
                 >
                   <Link
-                    href="/contact?source=consulting&intent=consultation"
+                    href="/consulting/strategy-room"
                     className="group inline-flex items-center justify-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
                   >
-                    <span>Request consultation</span>
+                    <span>Enter strategy room</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
 
                   <Link
-                    href="/resources/strategic-frameworks"
+                    href="/diagnostics"
                     className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/78 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
                   >
-                    <span>View frameworks</span>
+                    <span>Start with diagnostics</span>
                     <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </motion.div>
@@ -282,7 +300,7 @@ const ConsultingPage: NextPage = () => {
                   className="mt-12 flex flex-wrap items-center gap-5"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.9, delay: 0.34 }}
+                  transition={{ duration: 0.9, delay: 0.38 }}
                 >
                   <div className="inline-flex items-center gap-2">
                     <Key className="h-3.5 w-3.5 text-amber-500/38" />
@@ -303,7 +321,7 @@ const ConsultingPage: NextPage = () => {
                   className="mt-12 h-px w-40 bg-gradient-to-r from-amber-500/30 to-transparent"
                   initial={{ scaleX: 0, opacity: 0 }}
                   animate={{ scaleX: 1, opacity: 1 }}
-                  transition={{ duration: 1.1, delay: 0.42 }}
+                  transition={{ duration: 1.1, delay: 0.46 }}
                   style={{ transformOrigin: "left" }}
                 />
               </div>
@@ -315,14 +333,6 @@ const ConsultingPage: NextPage = () => {
                 transition={{ duration: 0.9, delay: 0.18 }}
               >
                 <div className="border border-white/[0.07] bg-white/[0.02] p-8 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-[1px]"
-                    style={{
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.45)",
-                    }}
-                  />
                   <div className="relative">
                     <div className="mb-8 flex items-center justify-between">
                       <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
@@ -332,17 +342,17 @@ const ConsultingPage: NextPage = () => {
                     </div>
 
                     <div className="grid grid-cols-3 gap-6 border-y border-white/6 py-6">
-                      <MetricTile label="Since" value="2018" />
                       <MetricTile label="Mode" value="Private" />
-                      <MetricTile label="Bias" value="Documented" />
+                      <MetricTile label="Bias" value="Structured" />
+                      <MetricTile label="Output" value="Documented" />
                     </div>
 
                     <div className="mt-8 space-y-4">
                       {[
-                        "Board strategy and operating cadence",
-                        "Founder counsel under pressure",
-                        "Frontier-market execution strategy",
-                        "Decision architecture under scrutiny",
+                        "Clearer decision pathways",
+                        "Documented strategic logic",
+                        "Reduced execution drift",
+                        "Governance and cadence under pressure",
                       ].map((line) => (
                         <div key={line} className="flex items-center gap-3">
                           <CheckCircle className="h-4 w-4 text-amber-400/70" />
@@ -376,13 +386,13 @@ const ConsultingPage: NextPage = () => {
         <section className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Engagements</RailLabel>
+              <RailLabel>Engagement</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                How you engage
+                Three engagement paths. Clear scope. Documented outputs.
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/48">
-                Three lanes. Clear entry points. Documented outputs. No
-                improvisation.
+                The work is structured to establish fit before pressure, complexity,
+                and consequence are mishandled.
               </p>
             </div>
 
@@ -400,15 +410,6 @@ const ConsultingPage: NextPage = () => {
                     transition={{ delay: index * 0.08, duration: 0.65 }}
                     viewport={{ once: true }}
                   >
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0"
-                      style={{
-                        background:
-                          "radial-gradient(600px 180px at 0% 0%, rgba(245,158,11,0.05), transparent 55%), linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.14))",
-                      }}
-                    />
-
                     <div className="relative">
                       <div className="mb-8 flex items-start justify-between gap-4">
                         <Icon className="h-7 w-7 text-amber-400/60 transition-colors duration-300 group-hover:text-amber-300" />
@@ -444,7 +445,7 @@ const ConsultingPage: NextPage = () => {
                           href={e.href}
                           className="group/link inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
                         >
-                          <span>Open engagement</span>
+                          <span>Open pathway</span>
                           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-1" />
                         </Link>
 
@@ -500,9 +501,9 @@ const ConsultingPage: NextPage = () => {
               </div>
 
               <div>
-                <RailLabel>Deliverables</RailLabel>
+                <RailLabel>Outputs</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  What leaders actually pay for
+                  What the work produces
                 </h2>
 
                 <div className="mt-10 grid grid-cols-2 gap-4">
@@ -544,7 +545,7 @@ const ConsultingPage: NextPage = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.65 }}
               >
-                <RailLabel>Keynotes</RailLabel>
+                <RailLabel>Speaking</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
                   Speaking & discourse
                 </h2>
@@ -586,9 +587,9 @@ const ConsultingPage: NextPage = () => {
                   <h3 className="font-serif text-2xl text-white">
                     Engage for speaking
                   </h3>
-                  <p className="mt-4 text-sm italic leading-relaxed text-white/44">
-                    Thought leadership is secondary to structural clarity. The
-                    work is to move decisions.
+                  <p className="mt-4 text-sm leading-relaxed text-white/44">
+                    The objective is not noise. It is clearer thinking, sharper language,
+                    and stronger institutional judgement.
                   </p>
 
                   <Link
@@ -620,10 +621,10 @@ const ConsultingPage: NextPage = () => {
               >
                 <RailLabel>Method</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  How I work
+                  How the work proceeds
                 </h2>
                 <p className="mt-4 text-lg text-white/48">
-                  Structured, documented, accountable — anchored in conviction.
+                  Structured, documented, accountable.
                 </p>
 
                 <div className="mt-10 space-y-10">
@@ -659,14 +660,14 @@ const ConsultingPage: NextPage = () => {
                 <div className="border border-amber-500/16 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-8">
                   <Compass className="mb-6 h-9 w-9 text-amber-400/55" />
                   <h3 className="font-serif text-2xl text-white">
-                    Is this for you?
+                    Who this is for
                   </h3>
 
                   <ul className="mt-8 space-y-5">
                     {[
-                      "You carry responsibility for other people's livelihoods",
-                      "You want strategy that respects both faith and data",
-                      "You prefer documented decisions over vibes",
+                      "Founders carrying responsibility for people, capital, and direction",
+                      "Boards requiring structure stronger than personality",
+                      "Leadership teams needing clearer judgement under pressure",
                     ].map((line) => (
                       <li key={line} className="flex items-center gap-4">
                         <CheckCircle className="h-4 w-4 text-amber-400/72" />
@@ -712,29 +713,29 @@ const ConsultingPage: NextPage = () => {
               <Activity className="mx-auto mb-6 h-6 w-6 text-amber-500/30" />
 
               <h2 className="font-serif text-4xl text-white md:text-5xl">
-                Ready to work?
+                When the decision matters, structure matters
               </h2>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg text-white/50">
-                For principals, boards, and institutions prepared for structured
-                thinking.
+                Engage for diagnostic clarity, a structured decision environment,
+                or ongoing strategic counsel.
               </p>
 
               <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
                 <Link
-                  href="/consulting/strategy-room"
-                  className="group inline-flex items-center justify-center gap-3 bg-white px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
+                  href="/diagnostics"
+                  className="group inline-flex items-center justify-center gap-3 border border-white/10 px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
                 >
-                  <span>Enter Strategy Room</span>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <span>Start with diagnostics</span>
+                  <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
                 </Link>
 
                 <Link
-                  href="/resources/strategic-frameworks"
-                  className="group inline-flex items-center justify-center gap-3 border border-white/10 px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
+                  href="/consulting/strategy-room"
+                  className="group inline-flex items-center justify-center gap-3 bg-white px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
                 >
-                  <span>Strategic Frameworks</span>
-                  <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
+                  <span>Enter strategy room</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
 

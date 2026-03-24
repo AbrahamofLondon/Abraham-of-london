@@ -60,7 +60,7 @@ export default function OperatorBriefing({
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-grid-technical mask-radial-fade opacity-[0.10]" />
         <div className="absolute left-1/2 top-[-260px] h-[720px] w-[980px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[180px]" />
-        <div className="absolute inset-0 bg-[url('/assets/images/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        <div className="absolute inset-0 aol-grain opacity-[0.03]" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

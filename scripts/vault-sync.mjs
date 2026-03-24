@@ -1,49 +1,157 @@
-/* scripts/vault-sync.mjs - INSTITUTIONAL SINGLETON ALIGNED */
+/* scripts/vault-sync.mjs — INSTITUTIONAL SINGLETON ALIGNED (SCHEMA-CORRECT) */
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-// Import the singleton instance directly from your lib
-import { prisma } from '../lib/prisma.ts';
+import { PrismaClient, ContentType, AccessTier } from "@prisma/client";
 
-const CONTENT_PATH = path.join(process.cwd(), "content", "briefs");
+const prisma = new PrismaClient();
 
-/** --- MAPPING HELPERS --- */
-function mapContentType(rawFolder) {
-  const typeMap = {
-    'briefs': 'Briefing',
-    'dossiers': 'Dossier',
-    'strategy': 'Operational_Framework',
-    'lexicon': 'Lexicon',
-    'landing': 'Landing'
-  };
-  return typeMap[rawFolder.toLowerCase()] || 'Briefing';
+const CONTENT_ROOT = path.join(process.cwd(), "content");
+const CONTENT_PATH = path.join(CONTENT_ROOT, "briefs");
+
+/* -------------------------------------------------------------------------- */
+/* HELPERS                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function safeString(value, fallback = "") {
+  return typeof value === "string" ? value : fallback;
 }
 
-function mapClassification(tier) {
-  const t = String(tier || "").toUpperCase();
-  if (t === 'PRIVATE' || t === 'INNER-CIRCLE' || t === 'RESTRICTED') return 'RESTRICTED';
-  return 'PUBLIC';
+function normalizeSlug(value) {
+  return safeString(value)
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/\.mdx?$/i, "");
+}
+
+function normalizeToken(value) {
+  return safeString(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function mapContentType(rawFolder, data = {}, slug = "") {
+  const folder = normalizeToken(rawFolder);
+  const category = normalizeToken(data.category);
+  const title = safeString(data.title).toLowerCase();
+  const description = safeString(data.description).toLowerCase();
+  const excerpt = safeString(data.excerpt).toLowerCase();
+  const format = normalizeToken(data.format);
+  const haystack = `${folder} ${category} ${title} ${description} ${excerpt} ${format} ${slug}`.toLowerCase();
+
+  if (haystack.includes("lexicon")) return ContentType.Lexicon;
+  if (haystack.includes("landing")) return ContentType.Landing;
+
+  if (
+    haystack.includes("framework") ||
+    haystack.includes("governance") ||
+    haystack.includes("rule_of_life") ||
+    haystack.includes("rule-of-life") ||
+    haystack.includes("operational")
+  ) {
+    return ContentType.Operational_Framework;
+  }
+
+  if (haystack.includes("leadership")) return ContentType.Leadership;
+  if (haystack.includes("strategy")) return ContentType.Strategy;
+  if (haystack.includes("audit")) return ContentType.Audit;
+  if (haystack.includes("research")) return ContentType.Research;
+
+  if (
+    haystack.includes("sovereign_intelligence") ||
+    haystack.includes("sovereign intelligence") ||
+    haystack.includes("si-")
+  ) {
+    return ContentType.Sovereign_Intelligence;
+  }
+
+  if (
+    folder === "dossiers" ||
+    haystack.includes("dossier") ||
+    haystack.includes("intelligence_brief") ||
+    haystack.includes("intelligence brief")
+  ) {
+    return ContentType.Dossier;
+  }
+
+  return ContentType.Briefs;
+}
+
+function mapClassification(tierLike) {
+  const t = normalizeToken(tierLike);
+
+  if (!t) return AccessTier.public;
+
+  const aliases = {
+    public: AccessTier.public,
+    member: AccessTier.member,
+    inner_circle: AccessTier.inner_circle,
+    innercircle: AccessTier.inner_circle,
+    restricted: AccessTier.restricted,
+    client: AccessTier.client,
+    legacy: AccessTier.legacy,
+    architect: AccessTier.architect,
+    owner: AccessTier.owner,
+    top_secret: AccessTier.top_secret,
+    topsecret: AccessTier.top_secret,
+
+    // legacy / human input aliases
+    private: AccessTier.restricted,
+    internal: AccessTier.restricted,
+    protected: AccessTier.restricted,
+  };
+
+  return aliases[t] || AccessTier.public;
 }
 
 function getFiles(dir) {
   let results = [];
+
   if (!fs.existsSync(dir)) return results;
+
   const list = fs.readdirSync(dir);
-  for (let file of list) {
+
+  for (const file of list) {
     const fullPath = path.resolve(dir, file);
     const stat = fs.statSync(fullPath);
-    if (stat && stat.isDirectory()) {
+
+    if (stat.isDirectory()) {
       results = results.concat(getFiles(fullPath));
     } else if (fullPath.endsWith(".mdx") || fullPath.endsWith(".md")) {
       results.push(fullPath);
     }
   }
+
   return results;
 }
 
-/** --- EXECUTION ENGINE --- */
+function buildSummary(data, content) {
+  const explicit = safeString(data.description) || safeString(data.excerpt);
+  if (explicit) return explicit;
+
+  const compact = safeString(content)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return compact.slice(0, 280);
+}
+
+function buildMetadata(frontmatter, extra = {}) {
+  return {
+    ...(frontmatter && typeof frontmatter === "object" ? frontmatter : {}),
+    ...extra,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* EXECUTION                                                                  */
+/* -------------------------------------------------------------------------- */
+
 async function masterSync() {
   console.log("🚀 [VAULT SYNC]: Synchronizing via Institutional Proxy...");
+  console.log("[VAULT_SYNC_FILE]", import.meta.url);
 
   try {
     const mdxFiles = getFiles(CONTENT_PATH);
@@ -52,45 +160,69 @@ async function masterSync() {
     const operations = mdxFiles.map((file) => {
       const fileContent = fs.readFileSync(file, "utf8");
       const { data, content } = matter(fileContent);
-      
-      const relativePath = path.relative(path.join(process.cwd(), "content"), file);
-      const rawType = relativePath.split(path.sep)[0]; 
-      const slug = relativePath.replace(/\\/g, '/').replace(/\.mdx?$/, '');
-      
+
+      const relativePath = path.relative(CONTENT_ROOT, file);
+      const normalizedRelativePath = normalizeSlug(relativePath);
+      const rawFolder = normalizedRelativePath.split("/")[0] || "briefs";
+
+      const slug = normalizedRelativePath;
+      const title = safeString(data.title) || path.basename(file, path.extname(file));
+      const contentType = mapContentType(rawFolder, data, slug);
+      const classification = mapClassification(data.tier || data.accessLevel || data.classification);
+      const summary = buildSummary(data, content);
+      const version = safeString(data.version, "1.0.0") || "1.0.0";
+
+      const metadata = buildMetadata(data, {
+        lastSync: new Date().toISOString(),
+        sourceFile: normalizedRelativePath,
+      });
+
+      console.log("[VAULT_SYNC_TYPE]", {
+        slug,
+        contentType,
+        classification,
+        category: data.category,
+        title,
+      });
+
       return prisma.contentMetadata.upsert({
         where: { slug },
         update: {
-          title: data.title || path.basename(file, ".mdx"),
-          contentType: mapContentType(rawType),
-          classification: mapClassification(data.tier || data.accessLevel),
-          summary: data.description || data.excerpt || "",
-          content: content.slice(0, 5000), 
-          metadata: data,
+          title,
+          contentType,
+          classification,
+          summary,
+          content: content.slice(0, 5000),
+          metadata,
           updatedAt: new Date(),
         },
         create: {
           slug,
-          title: data.title || path.basename(file, ".mdx"),
-          contentType: mapContentType(rawType),
-          classification: mapClassification(data.tier || data.accessLevel),
-          summary: data.description || data.excerpt || "",
+          title,
+          contentType,
+          classification,
+          summary,
           content: content.slice(0, 5000),
-          metadata: data,
-          version: data.version || "1.0.0"
+          metadata,
+          version,
         },
       });
     });
 
     const results = await prisma.$transaction(operations);
-    console.log(`✅ [SUCCESS]: ${results.length} assets synchronized with the 718-asset vault.`);
 
+    console.log(`✅ [SUCCESS]: ${results.length} assets synchronized with the vault.`);
   } catch (error) {
-    console.error("❌ [CRITICAL FAILURE]: Sync aborted.", error.message);
+    console.error("❌ [CRITICAL FAILURE]: Sync aborted.");
+    console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   } finally {
-    // We disconnect here because this is a standalone script
     await prisma.$disconnect();
   }
 }
 
-masterSync();
+masterSync().catch(async (error) => {
+  console.error("❌ [UNHANDLED FAILURE]:", error instanceof Error ? error.message : String(error));
+  await prisma.$disconnect();
+  process.exit(1);
+});

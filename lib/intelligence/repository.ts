@@ -2,7 +2,12 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma.server";
-import { ContentType } from "@prisma/client";
+import {
+  ContentType,
+  DownloadContentType,
+  DownloadDeliveryMode,
+  DownloadEventType,
+} from "@prisma/client";
 
 export type LatestIntelligenceItem = {
   id: string;
@@ -10,28 +15,24 @@ export type LatestIntelligenceItem = {
   title: string;
   contentType: ContentType;
   createdAt: Date;
-  metadata: any; 
+  metadata: unknown;
 };
 
-/**
- * Retrieves the latest intelligence assets.
- */
 export async function getLatestIntelligence(
-  limit: number = 3,
-  opts?: { includeDossiers?: boolean }
+  limit = 3,
+  opts?: { includeDossiers?: boolean },
 ): Promise<LatestIntelligenceItem[]> {
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(50, limit)) : 3;
   const includeDossiers = Boolean(opts?.includeDossiers);
 
-  // ALIGNED WITH SCHEMA: Both cases now use Briefs to match the Prisma Client
   const contentTypes: ContentType[] = includeDossiers
     ? [ContentType.Briefs, ContentType.Dossier]
     : [ContentType.Briefs];
 
   try {
     const results = await prisma.contentMetadata.findMany({
-      where: { 
-        contentType: { in: contentTypes } 
+      where: {
+        contentType: { in: contentTypes },
       },
       take: safeLimit,
       orderBy: { createdAt: "desc" },
@@ -60,9 +61,6 @@ export type IntelligenceAccessLogInput = {
   userAgent: string;
 };
 
-/**
- * Records a secure audit trail of access/downloads.
- */
 export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
   const slug = String(data.slug || "").trim();
   const memberId = String(data.memberId || "").trim();
@@ -74,17 +72,35 @@ export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
     throw new Error("logIntelligenceAccess: slug, memberId, and email are required.");
   }
 
+  const content = await prisma.contentMetadata.findUnique({
+    where: { slug },
+    select: { id: true, slug: true, title: true, contentType: true },
+  });
+
   return await prisma.downloadAuditEvent.create({
     data: {
       slug,
+      title: content?.title ?? undefined,
+      contentType:
+        content?.contentType === ContentType.Dossier
+          ? DownloadContentType.DOSSIER
+          : DownloadContentType.BRIEF,
+      eventType: DownloadEventType.VIEW,
+      deliveryMode: DownloadDeliveryMode.INLINE,
+
+      contentId: content?.id ?? undefined,
       memberId,
       email,
+
       ipAddress,
       userAgent,
-      eventType: "INTEL_ACCESS",
+
       success: true,
+      statusCode: 200,
+      latencyMs: 0,
       processedAt: new Date(),
-      metadata: { source: "web_vault" }
+
+      metadata: { source: "web_vault" },
     },
   });
 }

@@ -1,12 +1,58 @@
 /* pages/board/intelligence.tsx */
-import { GetServerSideProps, NextPage } from 'next';
-import Layout from '@/components/Layout';
-import { getStrategicHealthReport, StrategicHealthReport } from '@/lib/server/analytics';
-import { validateAdminAccess } from '@/lib/server/validation';
-import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from '@/lib/server/audit';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { ShieldAlert, Users, Zap, TrendingUp, Lock, Activity, Download, Eye } from 'lucide-react';
-import prisma from '@/lib/prisma';
+import type { GetServerSideProps, NextPage } from "next";
+import Layout from "@/components/Layout";
+import { validateAdminAccess } from "@/lib/server/validation";
+import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  ShieldAlert,
+  Users,
+  Zap,
+  TrendingUp,
+  Lock,
+  Activity,
+  Download,
+  Eye,
+} from "lucide-react";
+import prisma from "@/lib/prisma";
+
+type EngagementRow = {
+  shortSlug: string;
+  viewCount: number;
+};
+
+type AuditTrendRow = {
+  action: string;
+  _count: number;
+};
+
+type ContentEngagementRow = {
+  name: string;
+  value: number;
+  downloads: number;
+};
+
+type StrategicHealthReport = {
+  summary: {
+    totalMembers: number;
+    activeKeys: number;
+    recentIntakes: number;
+    recentDownloads: number;
+    perimeterBreaches: number;
+  };
+  engagement: EngagementRow[];
+  auditTrends: AuditTrendRow[];
+  contentEngagement: ContentEngagementRow[];
+};
 
 interface Props {
   report: StrategicHealthReport | null;
@@ -17,105 +63,102 @@ interface Props {
   };
 }
 
-// Analytics helper functions using your Prisma models
-async function getAnalyticsData() {
+async function getAnalyticsData(): Promise<StrategicHealthReport | null> {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Fetch data in parallel for performance
     const [
       totalMembers,
       activeKeys,
       recentIntakes,
       recentDownloads,
-      engagementData,
+      pageViewRows,
       auditData,
-      // FIX: Use correct model names from your schema
-      contentMetadata
+      contentMetadata,
+      recentRateLimitBlocks,
     ] = await Promise.all([
-      // Total members
       prisma.innerCircleMember.count(),
-      
-      // Active keys (not expired, not revoked)
+
       prisma.innerCircleKey.count({
         where: {
-          status: 'active',
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: new Date() } }
-          ],
-          revokedAt: null
-        }
+          status: "active",
+          expiresAt: { gt: new Date() },
+          revokedAt: null,
+        },
       }),
-      
-      // Recent intakes (last 30 days)
-      prisma.strategyRoomIntake.count({
+
+      prisma.strategyIntake.count({
         where: {
-          createdAt: { gte: thirtyDaysAgo }
-        }
+          createdAt: { gte: thirtyDaysAgo },
+        },
       }),
-      
-      // Recent downloads (last 30 days)
+
       prisma.downloadAuditEvent.count({
         where: {
           createdAt: { gte: thirtyDaysAgo },
-          success: true
-        }
+          success: true,
+        },
       }),
-      
-      // Engagement data from short interactions
-      prisma.shortInteraction.groupBy({
-        by: ['shortSlug'],
-        _sum: { id: true }, // Using id as proxy for count
+
+      prisma.pageView.groupBy({
+        by: ["slug"],
+        _count: { slug: true },
         where: {
-          createdAt: { gte: thirtyDaysAgo },
-          action: 'view'
+          viewedAt: { gte: thirtyDaysAgo },
+          slug: { not: null },
         },
         orderBy: {
-          _sum: { id: 'desc' }
+          _count: { slug: "desc" },
         },
-        take: 10
+        take: 10,
       }),
-      
-      // Audit trends
+
       prisma.systemAuditLog.groupBy({
-        by: ['action'],
-        _count: { id: true },
+        by: ["action"],
+        _count: { action: true },
         where: {
           createdAt: { gte: thirtyDaysAgo },
-          severity: { in: ['medium', 'high'] }
+          severity: { in: ["warning", "high", "critical"] },
         },
         orderBy: {
-          _count: { id: 'desc' }
+          _count: { action: "desc" },
         },
-        take: 8
+        take: 8,
       }),
-      
-      // Top content by views
+
       prisma.contentMetadata.findMany({
-        orderBy: { viewCount: 'desc' },
-        take: 5
-      })
+        orderBy: { viewCount: "desc" },
+        take: 5,
+        select: {
+          slug: true,
+          viewCount: true,
+          downloadCount: true,
+        },
+      }),
+
+      prisma.rateLimitLog.count({
+        where: {
+          createdAt: { gte: thirtyDaysAgo },
+          allowed: false,
+        },
+      }),
     ]);
 
-    // Transform engagement data
-    const engagement = engagementData.map(item => ({
-      shortSlug: item.shortSlug,
-      viewCount: item._sum.id || 0
+    const engagement: EngagementRow[] = pageViewRows.map((item) => ({
+      shortSlug: item.slug || "unknown",
+      viewCount: item._count.slug,
     }));
 
-    // Transform audit trends
-    const auditTrends = auditData.map(item => ({
+    const auditTrends: AuditTrendRow[] = auditData.map((item) => ({
       action: item.action,
-      _count: item._count.id
+      _count: item._count.action,
     }));
 
-    // Transform content data
-    const contentEngagement = contentMetadata.map(item => ({
+    const contentEngagement: ContentEngagementRow[] = contentMetadata.map((item) => ({
       name: item.slug,
       value: item.viewCount,
-      downloads: item.totalDownloads
+      downloads: item.downloadCount,
     }));
 
     return {
@@ -124,19 +167,14 @@ async function getAnalyticsData() {
         activeKeys,
         recentIntakes,
         recentDownloads,
-        perimeterBreaches: 0, // You'll need to define what constitutes a breach
+        perimeterBreaches: recentRateLimitBlocks,
       },
       engagement,
       auditTrends,
       contentEngagement,
-      rawStats: {
-        engagementData,
-        auditData,
-        contentMetadata
-      }
     };
   } catch (error) {
-    console.error('Analytics data fetch error:', error);
+    console.error("Analytics data fetch error:", error);
     return null;
   }
 }
@@ -144,124 +182,116 @@ async function getAnalyticsData() {
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const { req } = context;
   const startTime = Date.now();
-  
-  // Get client IP for audit logging
+
   const getClientIp = () => {
-    const forwarded = req.headers['x-forwarded-for'];
-    const realIp = req.headers['x-real-ip'];
-    return Array.isArray(forwarded) ? forwarded[0] : 
-           typeof forwarded === 'string' ? forwarded.split(',')[0] :
-           typeof realIp === 'string' ? realIp :
-           req.socket?.remoteAddress || 'unknown';
+    const forwarded = req.headers["x-forwarded-for"];
+    const realIp = req.headers["x-real-ip"];
+    return Array.isArray(forwarded)
+      ? forwarded[0]
+      : typeof forwarded === "string"
+        ? forwarded.split(",")[0]
+        : typeof realIp === "string"
+          ? realIp
+          : req.socket?.remoteAddress || "unknown";
   };
 
   const clientIp = getClientIp();
-  const userAgent = req.headers['user-agent'] || 'unknown';
-  
+  const userAgent = req.headers["user-agent"] || "unknown";
+
   try {
-    // 1. Verify Admin Authentication
     const auth = await validateAdminAccess(req as any);
-    
+
     if (!auth.valid) {
-      // Log unauthorized access attempt
       await logAuditEvent({
-        actorType: 'member',
-        actorId: 'anonymous',
+        actorType: "member",
+        actorId: "anonymous",
         ipAddress: clientIp,
         action: AUDIT_ACTIONS.ACCESS_DENIED,
         resourceType: AUDIT_CATEGORIES.ADMIN_ACTION,
-        resourceId: 'board-intelligence',
-        status: 'failed',
-        severity: 'high',
+        resourceId: "board-intelligence",
+        status: "failed",
+        severity: "high",
         details: {
           userAgent,
-          attemptedPath: '/board/intelligence',
-          reason: auth.reason || 'insufficient_privileges'
-        }
+          attemptedPath: "/board/intelligence",
+          reason: auth.reason || "insufficient_privileges",
+        },
       });
-      
-      // Return 404 instead of 403 to hide existence of the page
-      return {
-        notFound: true,
-      };
+
+      return { notFound: true };
     }
 
-    // 2. Fetch the report - USING OUR NEW HELPER FUNCTION
     const report = await getAnalyticsData();
     const fetchDuration = Date.now() - startTime;
 
-    // 3. Log successful access
     await logAuditEvent({
-      actorType: 'admin',
+      actorType: "admin",
       actorId: auth.userId,
       actorEmail: (auth as any).email,
       ipAddress: clientIp,
       action: AUDIT_ACTIONS.READ,
       resourceType: AUDIT_CATEGORIES.ADMIN_ACTION,
-      resourceId: 'board-intelligence',
-      status: 'success',
+      resourceId: "board-intelligence",
+      status: "success",
       details: {
         userAgent,
         fetchDuration,
         reportDataPoints: {
           members: report?.summary?.totalMembers || 0,
           keys: report?.summary?.activeKeys || 0,
-          intakes: report?.summary?.recentIntakes || 0
-        }
-      }
+          intakes: report?.summary?.recentIntakes || 0,
+        },
+      },
     });
 
-    // 4. Return the data with sanitization
     return {
       props: {
         report: report ? JSON.parse(JSON.stringify(report)) : null,
         sessionInfo: {
           email: (auth as any).email,
-          lastActivity: new Date().toISOString()
-        }
+          lastActivity: new Date().toISOString(),
+        },
       },
     };
-
   } catch (_error) {
     const error = _error as Error;
     const errorDuration = Date.now() - startTime;
-    
-    // Log the error without exposing details
+
     await logAuditEvent({
-      actorType: 'system',
+      actorType: "system",
       ipAddress: clientIp,
       action: AUDIT_ACTIONS.API_ERROR,
       resourceType: AUDIT_CATEGORIES.SYSTEM_OPERATION,
-      resourceId: 'board-intelligence',
-      status: 'failed',
-      severity: 'high',
+      resourceId: "board-intelligence",
+      status: "failed",
+      severity: "high",
       details: {
         userAgent,
         errorDuration,
         errorType: error.name,
-        ...(process.env.NODE_ENV === 'development' && { errorMessage: error.message })
-      }
+        ...(process.env.NODE_ENV === "development" && { errorMessage: error.message }),
+      },
     });
 
-    // Return generic error to user
     return {
       props: {
         report: null,
-        error: process.env.NODE_ENV === 'development' ? error.message : 'Unable to load report'
+        error:
+          process.env.NODE_ENV === "development"
+            ? error.message
+            : "Unable to load report",
       },
     };
   }
 };
 
 const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
-  // Chart colors
   const CHART_COLORS = {
-    primary: '#D4AF37',
-    secondary: '#3B82F6',
-    success: '#10B981',
-    warning: '#F59E0B',
-    danger: '#EF4444',
-    neutral: '#6B7280'
+    primary: "#D4AF37",
+    secondary: "#3B82F6",
+    success: "#10B981",
+    warning: "#F59E0B",
+    danger: "#EF4444",
   };
 
   const BAR_COLORS = [
@@ -275,13 +305,15 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
   if (error) {
     return (
       <Layout title="Strategic Intelligence">
-        <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center max-w-md mx-auto">
-              <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-white mb-2">System Error</h2>
-              <p className="text-gray-400 mb-4">Unable to load strategic intelligence report</p>
-              <p className="text-sm text-gray-500 font-mono p-3 bg-black/30 rounded border border-red-500/20">
+        <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-4 text-white md:p-8">
+          <div className="flex h-64 items-center justify-center">
+            <div className="mx-auto max-w-md text-center">
+              <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-red-500" />
+              <h2 className="mb-2 text-xl font-bold text-white">System Error</h2>
+              <p className="mb-4 text-gray-400">
+                Unable to load strategic intelligence report
+              </p>
+              <p className="rounded border border-red-500/20 bg-black/30 p-3 font-mono text-sm text-gray-500">
                 {error}
               </p>
             </div>
@@ -294,12 +326,12 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
   if (!report) {
     return (
       <Layout title="Strategic Intelligence">
-        <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
-          <div className="flex items-center justify-center h-64">
+        <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-4 text-white md:p-8">
+          <div className="flex h-64 items-center justify-center">
             <div className="text-center">
-              <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+              <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-amber-500" />
               <p className="text-gray-400">Strategic health report unavailable</p>
-              <p className="text-sm text-gray-500 mt-2">Please try again later</p>
+              <p className="mt-2 text-sm text-gray-500">Please try again later</p>
             </div>
           </div>
         </main>
@@ -309,96 +341,107 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
 
   const { summary, engagement, auditTrends, contentEngagement } = report;
 
-  // Calculate trends
-  const keyRatio = summary.totalMembers > 0 
-    ? summary.activeKeys / summary.totalMembers 
-    : 0;
-  
+  const keyRatio =
+    summary.totalMembers > 0 ? summary.activeKeys / summary.totalMembers : 0;
+
   const trend = {
     members: summary.totalMembers > 100 ? "high" : "normal",
     keys: keyRatio < 0.3 ? "low" : keyRatio > 0.8 ? "high" : "normal",
-    intakes: summary.recentIntakes > 20 ? "high" : summary.recentIntakes < 5 ? "low" : "normal",
-    breaches: summary.perimeterBreaches > 0 ? "critical" : "normal"
+    intakes:
+      summary.recentIntakes > 20
+        ? "high"
+        : summary.recentIntakes < 5
+          ? "low"
+          : "normal",
+    breaches: summary.perimeterBreaches > 0 ? "critical" : "normal",
   };
 
   return (
     <Layout title="Strategic Intelligence">
-      <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
-        {/* Security Header */}
-        <div className="max-w-7xl mx-auto mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl">
+      <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-4 text-white md:p-8">
+        <div className="mx-auto mb-8 max-w-7xl">
+          <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-amber-600/5 p-4 md:flex-row md:items-center">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <Lock className="w-5 h-5 text-amber-500" />
+              <div className="rounded-lg bg-amber-500/20 p-2">
+                <Lock className="h-5 w-5 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-bold text-amber-500 uppercase tracking-wider">CLASSIFIED ACCESS</p>
-                <p className="text-xs text-gray-400">Strategic Intelligence • Level 3 Clearance Required</p>
+                <p className="text-sm font-bold uppercase tracking-wider text-amber-500">
+                  CLASSIFIED ACCESS
+                </p>
+                <p className="text-xs text-gray-400">
+                  Strategic Intelligence • Level 3 Clearance Required
+                </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs text-gray-400 uppercase font-bold">Last Updated</p>
-              <p className="text-sm font-mono">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-xs font-bold uppercase text-gray-400">
+                Last Updated
+              </p>
+              <p className="font-mono text-sm">
+                {new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Header */}
-        <header className="max-w-7xl mx-auto mb-12">
+        <header className="mx-auto mb-12 max-w-7xl">
           <div className="mb-2">
-            <p className="text-amber-500 text-[10px] font-black uppercase tracking-[0.4em] italic">
+            <p className="text-[10px] font-black uppercase italic tracking-[0.4em] text-amber-500">
               Institutional Oversight
             </p>
           </div>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h1 className="text-3xl md:text-4xl font-serif italic font-bold text-white">
+              <h1 className="font-serif text-3xl font-bold italic text-white md:text-4xl">
                 Strategic <span className="text-white/30">Intelligence Report</span>
               </h1>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="mt-2 text-sm text-gray-500">
                 Comprehensive analytics and security insights for Abraham of London
               </p>
             </div>
             <div className="text-sm text-gray-400">
-              <span className="font-mono bg-black/30 px-3 py-1.5 rounded-lg border border-white/10">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'short', 
-                  month: 'short', 
-                  day: 'numeric',
-                  year: 'numeric'
+              <span className="rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 font-mono">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
                 })}
               </span>
             </div>
           </div>
         </header>
 
-        {/* SUMMARY GRID */}
-        <div className="max-w-7xl mx-auto mb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard 
-              title="Principals" 
-              value={summary.totalMembers} 
+        <div className="mx-auto mb-12 max-w-7xl">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="Principals"
+              value={summary.totalMembers}
               icon={<Users className="text-blue-400" />}
               trend={trend.members}
               subtitle="Total members"
             />
-            <StatCard 
-              title="Active Keys" 
-              value={summary.activeKeys} 
+            <StatCard
+              title="Active Keys"
+              value={summary.activeKeys}
               icon={<Zap className="text-amber-400" />}
               trend={trend.keys}
               subtitle={`${keyRatio > 0 ? Math.round(keyRatio * 100) : 0}% coverage`}
             />
-            <StatCard 
-              title="30d Intakes" 
-              value={summary.recentIntakes} 
+            <StatCard
+              title="30d Intakes"
+              value={summary.recentIntakes}
               icon={<TrendingUp className="text-emerald-400" />}
               trend={trend.intakes}
               subtitle="Strategic applications"
             />
-            <StatCard 
-              title="Downloads" 
-              value={summary.recentDownloads} 
+            <StatCard
+              title="Downloads"
+              value={summary.recentDownloads}
               icon={<Download className="text-purple-400" />}
               trend="normal"
               subtitle="Last 30 days"
@@ -406,18 +449,16 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
           </div>
         </div>
 
-        {/* CHARTS SECTION */}
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6 mb-12">
-          {/* Engagement Chart */}
-          <section className="bg-black/40 border border-white/10 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-6">
+        <div className="mx-auto mb-12 grid max-w-7xl gap-6 lg:grid-cols-2">
+          <section className="rounded-xl border border-white/10 bg-black/40 p-5">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-amber-500" />
+                <Activity className="h-5 w-5 text-amber-500" />
                 <h2 className="text-sm font-black uppercase tracking-widest text-gray-400">
                   Content Engagement
                 </h2>
               </div>
-              <span className="text-xs font-mono bg-amber-500/10 text-amber-500 px-2 py-1 rounded">
+              <span className="rounded bg-amber-500/10 px-2 py-1 font-mono text-xs text-amber-500">
                 {engagement.length} assets
               </span>
             </div>
@@ -425,29 +466,33 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
               {engagement.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={engagement}>
-                    <XAxis 
-                      dataKey="shortSlug" 
+                    <XAxis
+                      dataKey="shortSlug"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                      tick={{ fill: "#9CA3AF", fontSize: 11 }}
                       angle={-45}
                       textAnchor="end"
                       height={60}
                     />
-                    <Tooltip 
-                      cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                      contentStyle={{ 
-                        backgroundColor: '#111827', 
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        backdropFilter: 'blur(10px)'
+                    <Tooltip
+                      cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
+                      contentStyle={{
+                        backgroundColor: "#111827",
+                        border: "1px solid #374151",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        backdropFilter: "blur(10px)",
                       }}
-                      labelStyle={{ color: '#9CA3AF', fontSize: '12px', marginBottom: '4px' }}
-                      formatter={(value: number) => [`${value} views`, 'Views']}
+                      labelStyle={{
+                        color: "#9CA3AF",
+                        fontSize: "12px",
+                        marginBottom: "4px",
+                      }}
+                      formatter={(value: number) => [`${value} views`, "Views"]}
                     />
-                    <Bar 
-                      dataKey="viewCount" 
+                    <Bar
+                      dataKey="viewCount"
                       fill={CHART_COLORS.primary}
                       radius={[4, 4, 0, 0]}
                       maxBarSize={40}
@@ -455,25 +500,24 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                  <Activity className="w-12 h-12 mb-3 opacity-20" />
+                <div className="flex h-full flex-col items-center justify-center text-gray-500">
+                  <Activity className="mb-3 h-12 w-12 opacity-20" />
                   <p>No engagement data available</p>
-                  <p className="text-xs mt-1">Content views will appear here</p>
+                  <p className="mt-1 text-xs">Content views will appear here</p>
                 </div>
               )}
             </div>
           </section>
 
-          {/* Content Distribution Pie Chart */}
-          <section className="bg-black/40 border border-white/10 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-6">
+          <section className="rounded-xl border border-white/10 bg-black/40 p-5">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Eye className="w-5 h-5 text-blue-500" />
+                <Eye className="h-5 w-5 text-blue-500" />
                 <h2 className="text-sm font-black uppercase tracking-widest text-gray-400">
                   Content Distribution
                 </h2>
               </div>
-              <span className="text-xs font-mono bg-blue-500/10 text-blue-500 px-2 py-1 rounded">
+              <span className="rounded bg-blue-500/10 px-2 py-1 font-mono text-xs text-blue-500">
                 {contentEngagement.length} items
               </span>
             </div>
@@ -486,68 +530,70 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
-                      fill="#8884d8"
                       dataKey="value"
                     >
                       {contentEngagement.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={BAR_COLORS[index % BAR_COLORS.length]}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      formatter={(value: number) => [`${value} views`, 'Views']}
-                      contentStyle={{ 
-                        backgroundColor: '#111827', 
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        backdropFilter: 'blur(10px)'
+                    <Tooltip
+                      formatter={(value: number) => [`${value} views`, "Views"]}
+                      contentStyle={{
+                        backgroundColor: "#111827",
+                        border: "1px solid #374151",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        backdropFilter: "blur(10px)",
                       }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                  <Eye className="w-12 h-12 mb-3 opacity-20" />
+                <div className="flex h-full flex-col items-center justify-center text-gray-500">
+                  <Eye className="mb-3 h-12 w-12 opacity-20" />
                   <p>No content data available</p>
-                  <p className="text-xs mt-1">Content metadata will appear here</p>
+                  <p className="mt-1 text-xs">Content metadata will appear here</p>
                 </div>
               )}
             </div>
           </section>
         </div>
 
-        {/* AUDIT TRENDS & SECURITY */}
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6 mb-12">
-          {/* Audit Trends */}
-          <section className="bg-black/40 border border-white/10 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-6">
+        <div className="mx-auto mb-12 grid max-w-7xl gap-6 lg:grid-cols-2">
+          <section className="rounded-xl border border-white/10 bg-black/40 p-5">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-red-400" />
+                <ShieldAlert className="h-5 w-5 text-red-400" />
                 <h2 className="text-sm font-black uppercase tracking-widest text-gray-400">
                   Security Audit Distribution
                 </h2>
               </div>
-              <span className="text-xs font-mono bg-red-500/10 text-red-500 px-2 py-1 rounded">
+              <span className="rounded bg-red-500/10 px-2 py-1 font-mono text-xs text-red-500">
                 {auditTrends.length} audit types
               </span>
             </div>
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+            <div className="max-h-[300px] space-y-3 overflow-y-auto pr-2">
               {auditTrends.length > 0 ? (
                 auditTrends.map((trend, index) => (
-                  <div 
-                    key={`${trend.action}-${index}`} 
-                    className="group flex items-center justify-between p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 transition-all"
+                  <div
+                    key={`${trend.action}-${index}`}
+                    className="group flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] p-3 transition-all hover:border-white/10 hover:bg-white/[0.04]"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                      <span className="text-sm font-medium text-gray-300 truncate max-w-[180px]">
-                        {trend.action.replace(/_/g, ' ')}
+                      <div className="h-2 w-2 rounded-full bg-red-500" />
+                      <span className="max-w-[180px] truncate text-sm font-medium text-gray-300">
+                        {trend.action.replace(/_/g, " ")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-lg">
+                      <span className="text-lg font-bold text-white">
                         {trend._count}
                       </span>
                       <span className="text-xs text-gray-500">audits</span>
@@ -555,76 +601,89 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-10">
-                  <ShieldAlert className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                <div className="py-10 text-center">
+                  <ShieldAlert className="mx-auto mb-3 h-10 w-10 text-gray-600" />
                   <p className="text-gray-500">No audit data available</p>
-                  <p className="text-xs text-gray-600 mt-1">Security audits will appear here</p>
+                  <p className="mt-1 text-xs text-gray-600">
+                    Security audits will appear here
+                  </p>
                 </div>
               )}
             </div>
           </section>
 
-          {/* Security Recommendations */}
-          <section className="bg-black/40 border border-white/10 rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <Lock className="w-5 h-5 text-amber-500" />
+          <section className="rounded-xl border border-white/10 bg-black/40 p-5">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="rounded-lg bg-amber-500/20 p-2">
+                <Lock className="h-5 w-5 text-amber-500" />
               </div>
               <div>
                 <h2 className="text-sm font-black uppercase tracking-widest text-amber-500">
                   Security Recommendations
                 </h2>
-                <p className="text-xs text-gray-500 mt-1">Based on current system metrics</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Based on current system metrics
+                </p>
               </div>
             </div>
             <div className="space-y-4">
-              <SecurityRecommendation 
+              <SecurityRecommendation
                 title="Key Distribution"
-                status={trend.keys === "low" ? "warning" : trend.keys === "high" ? "warning" : "ok"}
-                message={trend.keys === "low" 
-                  ? "Low key coverage. Consider issuing more keys to active members."
-                  : trend.keys === "high" 
-                  ? "High key coverage. Monitor for unauthorized access."
-                  : "Key distribution is within optimal range."
+                status={
+                  trend.keys === "low"
+                    ? "warning"
+                    : trend.keys === "high"
+                      ? "warning"
+                      : "ok"
+                }
+                message={
+                  trend.keys === "low"
+                    ? "Low key coverage. Consider issuing more keys to active members."
+                    : trend.keys === "high"
+                      ? "High key coverage. Monitor for unauthorized access."
+                      : "Key distribution is within optimal range."
                 }
               />
-              <SecurityRecommendation 
+              <SecurityRecommendation
                 title="Engagement Levels"
                 status={engagement.length === 0 ? "warning" : "ok"}
-                message={engagement.length === 0
-                  ? "No engagement data. Consider promoting content or checking tracking."
-                  : "Content engagement is being tracked normally."
+                message={
+                  engagement.length === 0
+                    ? "No engagement data. Consider promoting content or checking tracking."
+                    : "Content engagement is being tracked normally."
                 }
               />
-              <SecurityRecommendation 
+              <SecurityRecommendation
                 title="Audit Coverage"
                 status={auditTrends.length === 0 ? "warning" : "ok"}
-                message={auditTrends.length === 0
-                  ? "No security audits recorded. Verify audit logging is enabled."
-                  : "Security audit system is operational."
+                message={
+                  auditTrends.length === 0
+                    ? "No security audits recorded. Verify audit logging is enabled."
+                    : "Security audit system is operational."
                 }
               />
             </div>
           </section>
         </div>
 
-        {/* FOOTER */}
-        <footer className="max-w-7xl mx-auto mt-8 pt-6 border-t border-white/10">
-          <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
+        <footer className="mx-auto mt-8 max-w-7xl border-t border-white/10 pt-6">
+          <div className="flex flex-col items-center justify-between text-xs text-gray-600 md:flex-row">
             <div className="mb-3 md:mb-0">
-              <p className="mb-1">Abraham of London • Strategic Intelligence Dashboard v3.0</p>
+              <p className="mb-1">
+                Abraham of London • Strategic Intelligence Dashboard v3.0
+              </p>
               <p className="text-[10px] text-gray-700">
                 This report contains sensitive operational data. Do not distribute.
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
                 <span>System: Operational</span>
               </div>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
-                className="text-xs text-amber-500 hover:text-amber-400 transition hover:underline"
+                className="text-xs text-amber-500 transition hover:text-amber-400 hover:underline"
               >
                 Refresh Report
               </button>
@@ -636,94 +695,120 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
   );
 };
 
-// Stat Card Component
-function StatCard({ title, value, icon, trend, subtitle }: { 
-  title: string; 
-  value: number; 
+function StatCard({
+  title,
+  value,
+  icon,
+  trend,
+  subtitle,
+}: {
+  title: string;
+  value: number;
   icon: React.ReactNode;
-  trend: 'normal' | 'high' | 'low' | 'critical';
+  trend: "normal" | "high" | "low" | "critical";
   subtitle?: string;
 }) {
   const trendConfig = {
-    normal: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-    high: { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-    low: { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-    critical: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' }
-  };
+    normal: {
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+    },
+    high: {
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/20",
+    },
+    low: {
+      color: "text-blue-400",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/20",
+    },
+    critical: {
+      color: "text-red-400",
+      bg: "bg-red-500/10",
+      border: "border-red-500/20",
+    },
+  } as const;
 
   const config = trendConfig[trend];
 
   return (
-    <div className={`${config.bg} ${config.border} border p-5 rounded-xl transition-all duration-300 hover:scale-[1.02]`}>
-      <div className="flex justify-between items-start mb-3">
+    <div
+      className={`${config.bg} ${config.border} rounded-xl border p-5 transition-all duration-300 hover:scale-[1.02]`}
+    >
+      <div className="mb-3 flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">
+          <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-gray-500">
             {title}
           </p>
-          {subtitle && (
-            <p className="text-xs text-gray-400">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
         </div>
-        <div className="p-2 rounded-lg bg-black/20">
-          {icon}
-        </div>
+        <div className="rounded-lg bg-black/20 p-2">{icon}</div>
       </div>
       <div className="flex items-end justify-between">
-        <p className={`text-3xl font-mono font-bold ${config.color}`}>
+        <p className={`font-mono text-3xl font-bold ${config.color}`}>
           {value.toLocaleString()}
         </p>
-        <span className={`text-xs font-bold px-2 py-1 rounded ${config.bg}`}>
+        <span className={`rounded px-2 py-1 text-xs font-bold ${config.bg}`}>
           {trend.toUpperCase()}
         </span>
       </div>
-      <div className="mt-3 h-1.5 w-full bg-black/30 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-gradient-to-r from-current to-current/50 rounded-full transition-all duration-700"
-          style={{ width: `${Math.min(value / (trend === 'critical' ? 5 : 10), 100)}%` }}
+      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/30">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-current to-current/50 transition-all duration-700"
+          style={{
+            width: `${Math.min(value / (trend === "critical" ? 5 : 10), 100)}%`,
+          }}
         />
       </div>
     </div>
   );
 }
 
-// Security Recommendation Component
-function SecurityRecommendation({ title, status, message }: { 
-  title: string; 
-  status: 'ok' | 'warning' | 'critical';
+function SecurityRecommendation({
+  title,
+  status,
+  message,
+}: {
+  title: string;
+  status: "ok" | "warning" | "critical";
   message: string;
 }) {
   const statusConfig = {
-    ok: { 
-      icon: '✅', 
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/20'
+    ok: {
+      icon: "✅",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
     },
-    warning: { 
-      icon: '⚠️', 
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10',
-      border: 'border-amber-500/20'
+    warning: {
+      icon: "⚠️",
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/20",
     },
-    critical: { 
-      icon: '🚨', 
-      color: 'text-red-400',
-      bg: 'bg-red-500/10',
-      border: 'border-red-500/20'
-    }
-  };
+    critical: {
+      icon: "🚨",
+      color: "text-red-400",
+      bg: "bg-red-500/10",
+      border: "border-red-500/20",
+    },
+  } as const;
 
   const config = statusConfig[status];
 
   return (
-    <div className={`${config.bg} ${config.border} border p-4 rounded-lg transition-all hover:scale-[1.01]`}>
+    <div
+      className={`${config.bg} ${config.border} rounded-lg border p-4 transition-all hover:scale-[1.01]`}
+    >
       <div className="flex items-start gap-3">
         <span className="text-lg">{config.icon}</span>
         <div>
-          <p className={`text-xs font-bold uppercase tracking-wider ${config.color} mb-1`}>
+          <p className={`mb-1 text-xs font-bold uppercase tracking-wider ${config.color}`}>
             {title}
           </p>
-          <p className="text-sm text-gray-300 leading-relaxed">{message}</p>
+          <p className="text-sm leading-relaxed text-gray-300">{message}</p>
         </div>
       </div>
     </div>

@@ -4,51 +4,34 @@
 import { revalidatePath } from 'next/cache';
 import { getPrisma } from '@/lib/prisma.server';
 import { getAllPDFItemsNode } from '@/lib/pdf/registry';
-
-// ✅ IMPORTANT: use Prisma enum (underscore values)
+import { normalizeRequiredTier } from '@/lib/access/tier-policy';
 import type { AccessTier as PrismaAccessTier } from '@prisma/client';
 
-/**
- * Institutional Sync: Reconciles File System PDF registry with PostgreSQL ContentMetadata
- * - Server-only
- * - Chunked transactions to avoid huge $transaction payloads
- * - Writes Prisma enum AccessTier (underscored) to ContentMetadata.classification
- * - Stores metadata as Json object (not string)
- */
+const toPrismaAccessTier = (tier: string): PrismaAccessTier => {
+  const normalized = normalizeRequiredTier(tier);
+  
+  // Use type assertion with runtime check
+  const validTiers: string[] = [
+    'public', 'member', 'inner_circle', 'restricted',
+    'client', 'legacy', 'architect', 'owner', 'top_secret'
+  ];
+  
+  if (validTiers.includes(normalized)) {
+    return normalized as PrismaAccessTier;
+  }
+  
+  return 'public' as PrismaAccessTier;
+};
+
 export async function syncVaultRegistry() {
   try {
     const prisma = await getPrisma();
-    if (!prisma) throw new Error('Database connection unavailable (DATABASE_URL not configured).');
+    if (!prisma) throw new Error('Database connection unavailable.');
 
     const fsItems = await getAllPDFItemsNode({ includeMissing: true });
     console.log(`[SYNC_START]: Processing ${fsItems.length} portfolio items.`);
 
     const now = new Date();
-
-    /**
-     * Normalize any incoming tier-ish value into Prisma AccessTier enum values.
-     * Prisma enum values: public | member | inner_circle | client | legacy | architect | owner
-     */
-    const normalizeTierToPrismaAccessTier = (tier: unknown): PrismaAccessTier => {
-      const t = String(tier ?? 'public').trim().toLowerCase();
-
-      // Common aliases / legacy
-      if (t === 'free' || t === 'public') return 'public';
-      if (t === 'member') return 'member';
-
-      // Hyphen vs underscore (app vs prisma)
-      if (t === 'inner-circle' || t === 'innercircle' || t === 'inner_circle') return 'inner_circle';
-
-      if (t === 'client') return 'client';
-      if (t === 'legacy') return 'legacy';
-      if (t === 'architect') return 'architect';
-      if (t === 'owner' || t === 'admin' || t === 'internal' || t === 'root') return 'owner';
-
-      // ✅ No "verified" exists in your schema → never emit it
-      // Anything unknown becomes public to avoid poisoning classification
-      return 'public';
-    };
-
     const CHUNK = 50;
     let upserted = 0;
 
@@ -56,9 +39,8 @@ export async function syncVaultRegistry() {
       const batch = fsItems.slice(i, i + CHUNK);
 
       const ops = batch.map((item: any) => {
-        const classification = normalizeTierToPrismaAccessTier(item.tier ?? item.accessLevel);
+        const classification = toPrismaAccessTier(item.tier ?? item.accessLevel);
 
-        // Json field in Prisma → pass an object (NOT JSON.stringify)
         const metadata = {
           version: String(item.version || '1.0.0'),
           existsOnDisk: Boolean(item.existsOnDisk),
@@ -73,21 +55,13 @@ export async function syncVaultRegistry() {
           where: { slug: String(item.id) },
           update: {
             title: String(item.title || item.id),
-            // ⚠️ Your schema has ContentType enum for contentType, but your existing code uses `type`.
-            // If your ContentMetadata really has no `type` field, remove the next line.
-            // If you intended `contentType`, map it properly here.
-            // type: String(item.type || 'brief'),
-
-            classification, // ✅ Prisma enum AccessTier
+            classification,
             updatedAt: now,
             metadata,
           },
           create: {
             slug: String(item.id),
             title: String(item.title || item.id),
-
-            // type: String(item.type || 'brief'),
-
             classification,
             createdAt: now,
             updatedAt: now,

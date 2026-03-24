@@ -13,11 +13,11 @@ export const revalidate = 0;
 import fs from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
+import React from "react";
 import "@/app/__pdf/print.css";
 
-// MDX RSC renderer
-import { MDXRemote } from "next-mdx-remote/rsc";
-import React from "react";
+// Use the MDX components from your contentlayer setup
+import { useMDXComponent } from "next-contentlayer2/hooks";
 
 type Frontmatter = {
   type?: string;
@@ -60,10 +60,6 @@ function tierAccent(tierRaw?: string) {
 async function tryLoadFromContentlayer(slug: string): Promise<LoadedDoc | null> {
   try {
     const mod: any = await import("contentlayer/generated");
-    // Common patterns in Contentlayer:
-    // - allDownloads
-    // - allDocs
-    // - allDocuments
     const candidates: any[] =
       mod?.allDownloads ||
       mod?.allDownload ||
@@ -80,7 +76,6 @@ async function tryLoadFromContentlayer(slug: string): Promise<LoadedDoc | null> 
 
     if (!hit) return null;
 
-    // Contentlayer often exposes body as .body.raw or .body.code
     const raw = hit?.body?.raw || hit?.body || hit?.raw || "";
     const fm: Frontmatter = {
       title: hit?.title,
@@ -97,10 +92,8 @@ async function tryLoadFromContentlayer(slug: string): Promise<LoadedDoc | null> 
       docKind: hit?.docKind,
     };
 
-    // If raw is empty, we can’t trust this route; fallback to FS.
     if (!raw || typeof raw !== "string") return null;
 
-    // If raw contains full MDX with frontmatter stripped already, fine.
     return { fm, content: raw, sourcePath: hit?._raw?.sourceFilePath };
   } catch {
     return null;
@@ -108,23 +101,17 @@ async function tryLoadFromContentlayer(slug: string): Promise<LoadedDoc | null> 
 }
 
 async function tryLoadFromFilesystem(slug: string): Promise<LoadedDoc | null> {
-  // Search these likely roots
   const roots = [
     path.join(process.cwd(), "content", "downloads"),
     path.join(process.cwd(), "content"),
   ];
 
-  // Common patterns:
-  // content/downloads/<slug>.mdx
-  // content/downloads/<slug>.md
-  // content/<type>/<slug>.mdx
   const candidates: string[] = [];
   for (const r of roots) {
     candidates.push(path.join(r, `${slug}.mdx`));
     candidates.push(path.join(r, `${slug}.md`));
   }
 
-  // Also search recursively if direct hit fails (costly but acceptable for print route)
   async function walk(dir: string, out: string[]) {
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -136,7 +123,6 @@ async function tryLoadFromFilesystem(slug: string): Promise<LoadedDoc | null> {
     } catch {}
   }
 
-  // First: direct candidates
   for (const p of candidates) {
     try {
       const raw = await fs.readFile(p, "utf8");
@@ -145,7 +131,6 @@ async function tryLoadFromFilesystem(slug: string): Promise<LoadedDoc | null> {
     } catch {}
   }
 
-  // Second: recursive search
   for (const r of roots) {
     const found: string[] = [];
     await walk(r, found);
@@ -164,11 +149,9 @@ async function tryLoadFromFilesystem(slug: string): Promise<LoadedDoc | null> {
 async function loadDoc(slug: string): Promise<LoadedDoc> {
   const s = normalizeSlug(slug);
 
-  // 1) Contentlayer
   const cl = await tryLoadFromContentlayer(s);
   if (cl) return cl;
 
-  // 2) Filesystem
   const fsDoc = await tryLoadFromFilesystem(s);
   if (fsDoc) return fsDoc;
 
@@ -177,8 +160,6 @@ async function loadDoc(slug: string): Promise<LoadedDoc> {
 
 // --- Component map (REAL MDX React) ---
 async function getMdxComponents() {
-  // Use your real components if available.
-  // If import fails, fallback to print-safe stubs (still renders, doesn’t crash).
   const fallback = {
     DownloadCard: (props: any) => (
       <div style={{ border: "1px solid rgba(2,6,23,0.12)", padding: 12, borderRadius: 10, margin: "14pt 0" }}>
@@ -214,7 +195,6 @@ async function getMdxComponents() {
   try {
     const DownloadCardMod: any = await import("@/components/mdx/DownloadCard");
     const CalloutMod: any = await import("@/components/Callout");
-    // Note may live in different places; try a couple
     let NoteComp: any = null;
     try {
       const NoteMod: any = await import("@/components/mdx/Note");
@@ -232,12 +212,20 @@ async function getMdxComponents() {
       DownloadCard: DownloadCardMod?.default || DownloadCardMod?.DownloadCard || fallback.DownloadCard,
       Callout: CalloutMod?.default || CalloutMod?.Callout || fallback.Callout,
       Note: NoteComp || fallback.Note,
-
-      // Optional: if you use other MDX components, add them here.
     };
   } catch {
     return fallback;
   }
+}
+
+// This is a Server Component - we can't use hooks directly
+// Instead, we'll create a client component wrapper for the MDX content
+async function MDXContent({ code, components }: { code: string; components: any }) {
+  // For server components, we need a different approach
+  // Let's use a dynamic import of the client component
+  const { default: ClientMDXRenderer } = await import("@/components/mdx/ClientMDXRenderer");
+  
+  return <ClientMDXRenderer code={code} components={components} />;
 }
 
 export default async function PDFPrintPage({ params, searchParams }: any) {
@@ -252,7 +240,6 @@ export default async function PDFPrintPage({ params, searchParams }: any) {
   const author = String(fm.author || "Abraham of London").trim();
   const date = String(fm.date || "").trim();
 
-  // Tier signal from query OR frontmatter
   const tier = String(searchParams?.tier || fm.tier || fm.accessLevel || "free");
   const accent = tierAccent(tier);
 
@@ -278,9 +265,9 @@ export default async function PDFPrintPage({ params, searchParams }: any) {
 
       <div data-aol="page-break" />
 
-      {/* Prose */}
+      {/* Prose - Render MDX content */}
       <main data-aol="prose">
-        <MDXRemote source={doc.content} components={components as any} />
+        <MDXContent code={doc.content} components={components} />
       </main>
     </div>
   );

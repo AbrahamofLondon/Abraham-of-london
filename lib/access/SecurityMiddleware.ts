@@ -1,55 +1,55 @@
+/* lib/access/SecurityMiddleware.ts — Security Logic Layer */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { tiers } from "@/lib/access/tiers";
 import { requiredTierFromVaultPath } from "@/lib/access/tier-policy";
 
-/**
- * LOCAL TYPE OVERRIDE
- * Explicitly define the JWT shape for the Edge runtime to prevent
- * the "Property 'tier' does not exist on type '{}'" error.
- */
-interface ExtendedJWT {
-  aol?: {
-    tier: string;
-    innerCircleAccess: boolean;
-    [key: string]: any;
-  };
-  [key: string]: any;
-}
-
-export async function vaultSecurityMiddleware(req: NextRequest) {
+export async function securityMiddlewareLogic(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Only intercept vault or protected asset paths
-  if (!pathname.startsWith("/vault") && !pathname.startsWith("/api/vault")) {
-    return NextResponse.next();
-  }
-
-  // 1. Determine Required Clearance from Path SSOT
+  // 1. Determine Required Clearance
   const requiredTier = requiredTierFromVaultPath(pathname);
+  if (requiredTier === "public") return NextResponse.next();
 
-  // Public assets bypass the check
-  if (requiredTier === "public") {
-    return NextResponse.next();
-  }
-
-  // 2. Retrieve Institutional JWT with Local Type Assertion
-  const token = (await getToken({ 
+  // 2. Auth Check
+  const token = await getToken({ 
     req, 
     secret: process.env.NEXTAUTH_SECRET 
-  })) as ExtendedJWT | null;
+  }) as any;
 
-  // 3. Evaluate Access
-  // Using the asserted type, token.aol.tier is now safe to access
   const userTier = token?.aol?.tier || "public";
   const canAccess = tiers.hasAccess(userTier, requiredTier);
 
   if (!canAccess) {
-    // Redirect to login or insufficient clearance page
+    /**
+     * FIX: Robust IP Extraction
+     * Property 'ip' does not exist on type 'NextRequest' in some strict TS configs.
+     * We pull from headers first (standard for Vercel/Proxies), then fallback.
+     */
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const clientIp = forwardedFor 
+      ? forwardedFor.split(",")[0] 
+      : (req as any).ip || "unknown";
+
+    // Log attempt for high-level monitoring (Middleware side)
+    console.warn(`[SECURITY_ALERT] Unauthorized access attempt by ${clientIp} at ${pathname}`);
+
     const url = req.nextUrl.clone();
-    url.pathname = token ? "/inner-circle/insufficient-clearance" : "/inner-circle/admin/login";
+    
+    // Determine redirect destination
+    if (!token) {
+      url.pathname = "/inner-circle/admin/login";
+    } else {
+      url.pathname = "/inner-circle/insufficient-clearance";
+    }
+
+    // Pass context to the landing page so it can perform a Prisma Audit Write
     url.searchParams.set("callbackUrl", pathname);
+    url.searchParams.set("audit_denied", "true");
+    url.searchParams.set("source_ip", clientIp);
+    url.searchParams.set("required_tier", requiredTier);
+
     return NextResponse.redirect(url);
   }
 

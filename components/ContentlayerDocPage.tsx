@@ -10,19 +10,22 @@ import { createSeededSafeMdxComponents } from "@/lib/mdx/safe-components";
 
 // Pages Router compatible MDXRemote
 import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { useMDXComponent } from "next-contentlayer2/hooks";
 
 // Icons
 import { BookOpen } from "lucide-react";
 
-// Motion components (client‑only) – all default exports
+// Motion components (client-only) – all default exports
 const MotionNav = dynamic(() => import("./_motion/MotionNav"), {
   ssr: false,
-  loading: () => <div className="h-14 w-full bg-black/60 backdrop-blur-sm border-b border-white/10" />
+  loading: () => (
+    <div className="h-14 w-full border-b border-white/10 bg-black/60 backdrop-blur-sm" />
+  ),
 });
 
 const MotionHeader = dynamic(() => import("./_motion/MotionHeader"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full bg-white/5 animate-pulse rounded-2xl" />
+  loading: () => <div className="h-64 w-full animate-pulse rounded-2xl bg-white/5" />,
 });
 
 // Enhanced components – named exports
@@ -49,11 +52,16 @@ type ContentlayerDoc = {
   author?: string | null;
   type?: string | null;
   featured?: boolean | null;
+  body?: {
+    raw?: string | null;
+    code?: string | null;
+  } | null;
+  content?: string | null;
 };
 
 type Props = {
   doc: ContentlayerDoc;
-  source: MDXRemoteSerializeResult;
+  source?: MDXRemoteSerializeResult;
   canonicalPath: string;
   backHref?: string;
   label?: string;
@@ -62,26 +70,45 @@ type Props = {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
+function ContentlayerBodyRenderer({
+  code,
+  components,
+}: {
+  code: string;
+  components: Record<string, React.ComponentType<any>>;
+}) {
+  const Component = useMDXComponent(code);
+  return <Component components={components} />;
+}
+
 export default function ContentlayerDocPage({
   doc,
   source,
   canonicalPath,
   backHref = "/content",
   label = "Reading Room",
-  mdxRaw = "",
+  mdxRaw,
 }: Props) {
   const [viewCount, setViewCount] = React.useState<number | null>(null);
   const [isShareTooltipVisible, setIsShareTooltipVisible] = React.useState(false);
   const [isBookmarked, setIsBookmarked] = React.useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
+  const effectiveMdxRaw =
+    mdxRaw ?? doc?.body?.raw ?? doc?.content ?? "";
+
+  const contentlayerCode =
+    typeof doc?.body?.code === "string" && doc.body.code.trim().length > 0
+      ? doc.body.code
+      : null;
+
   // SEED + PROXY: Guaranteed no missing component errors
   const safeComponents = React.useMemo(
     () =>
-      createSeededSafeMdxComponents(mdxComponents, mdxRaw, {
+      createSeededSafeMdxComponents(mdxComponents, effectiveMdxRaw, {
         warnOnFallback: process.env.NODE_ENV === "development",
       }),
-    [mdxRaw]
+    [effectiveMdxRaw]
   );
 
   const title = doc?.title || "Untitled Volume";
@@ -101,6 +128,7 @@ export default function ContentlayerDocPage({
   }, [canonicalPath, doc?.slug]);
 
   const toggleBookmark = () => {
+    if (typeof window === "undefined") return;
     setIsBookmarked((v) => {
       window.localStorage.setItem(
         `aol_bookmark_${doc?.slug || canonicalPath}`,
@@ -110,9 +138,8 @@ export default function ContentlayerDocPage({
     });
   };
 
-  // Helper to convert null to undefined for props that don't accept null
   const nullToUndefined = <T,>(value: T | null | undefined): T | undefined =>
-    value === null ? undefined : value;
+    value == null ? undefined : value;
 
   return (
     <Layout title={title} description={description} ogImage={doc?.coverImage || ""}>
@@ -126,9 +153,11 @@ export default function ContentlayerDocPage({
           backHref={backHref}
           label={label}
           onShare={async () => {
+            if (typeof navigator === "undefined") return;
+
             if (navigator.share) {
               await navigator.share({ title, url: canonicalUrl });
-            } else {
+            } else if (navigator.clipboard?.writeText) {
               await navigator.clipboard.writeText(canonicalUrl);
               setIsShareTooltipVisible(true);
               setTimeout(() => setIsShareTooltipVisible(false), 2000);
@@ -158,35 +187,47 @@ export default function ContentlayerDocPage({
               />
 
               <div className="relative" ref={contentRef}>
-                {/* Type assertion to satisfy SafeTableOfContents expected ref type */}
                 <SafeTableOfContents
                   contentRef={contentRef as React.RefObject<HTMLElement>}
                   className="mb-8"
                 />
-                <div className="prose prose-invert prose-gold max-w-none prose-p:text-gray-300 prose-p:text-lg">
-                  {/* Using safeComponents from the seed+proxy utility */}
-                  <MDXRemote {...source} components={safeComponents as any} />
+
+                <div className="prose prose-invert prose-gold max-w-none prose-p:text-lg prose-p:text-gray-300">
+                  {source ? (
+                    <MDXRemote {...source} components={safeComponents as any} />
+                  ) : contentlayerCode ? (
+                    <ContentlayerBodyRenderer
+                      code={contentlayerCode}
+                      components={safeComponents as Record<string, React.ComponentType<any>>}
+                    />
+                  ) : effectiveMdxRaw ? (
+                    <pre className="whitespace-pre-wrap text-sm text-gray-300">
+                      {effectiveMdxRaw}
+                    </pre>
+                  ) : (
+                    <p className="text-gray-400">No content available.</p>
+                  )}
                 </div>
               </div>
 
               <footer className="mt-24 border-t border-white/10 pt-12 text-center">
-                <p className="font-serif text-2xl italic text-white mb-2">
+                <p className="mb-2 font-serif text-2xl italic text-white">
                   &quot;Architecture is destiny, made visible.&quot;
                 </p>
-                <SimpleReadTime content={mdxRaw} />
+                <SimpleReadTime content={effectiveMdxRaw} />
               </footer>
             </div>
 
             <aside className="lg:col-span-4">
               <div className="sticky top-24 space-y-8">
                 <div className="rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-white mb-4">
+                  <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-white">
                     Intelligence Stats
                   </h3>
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-gold w-1/4" />
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full w-1/4 bg-gold" />
                   </div>
-                  <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-tighter">
+                  <p className="mt-2 text-[10px] uppercase tracking-tighter text-gray-500">
                     Reading Progress
                   </p>
                 </div>
@@ -194,7 +235,7 @@ export default function ContentlayerDocPage({
                 <div className="rounded-2xl border border-white/10 bg-black/50 p-6">
                   <Link
                     href={backHref}
-                    className="flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors"
+                    className="flex items-center gap-2 text-sm text-amber-400 transition-colors hover:text-amber-300"
                   >
                     <BookOpen className="h-4 w-4" /> Back to {label}
                   </Link>

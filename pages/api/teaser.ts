@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
-  verifyRecaptcha,
+  verifyRecaptchaDetailed, // ✅ Changed to Detailed version
 } from "@/lib/recaptchaServer";
 import {
   rateLimit,
   createRateLimitHeaders,
   RATE_LIMIT_CONFIGS,
-} from "@/lib/server/rateLimit";
+} from "@/lib/server/rate-limit-unified";
 import {
   getClientIpWithAnalysis,
   getRateLimitKey,
@@ -15,7 +15,7 @@ import {
 
 // Email validation with comprehensive checks
 const EMAIL_REGEX =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zAZ0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // Disposable email domains
 const DISPOSABLE_DOMAINS = [
@@ -59,7 +59,6 @@ function logSecurityEvent(
   // eslint-disable-next-line no-console
   console.log(`[SECURITY] ${timestamp} - ${event}`, {
     ...details,
-    // Don't log sensitive data in production
     ...(process.env.NODE_ENV === "production" && {
       email: details.email
         ? `${(details.email as string).substring(0, 3)}...`
@@ -67,6 +66,18 @@ function logSecurityEvent(
       ip: details.ip ? anonymizeIp(details.ip as string) : undefined,
     }),
   });
+}
+
+function extractEmailDomain(email: string): string | null {
+  const trimmedEmail = email.trim().toLowerCase();
+  const atIndex = trimmedEmail.lastIndexOf("@");
+
+  if (atIndex <= 0 || atIndex >= trimmedEmail.length - 1) {
+    return null;
+  }
+
+  const domain = trimmedEmail.slice(atIndex + 1).trim();
+  return domain || null;
 }
 
 function validateEmail(email: string): { isValid: boolean; error?: string } {
@@ -86,10 +97,18 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
     return { isValid: false, error: "Please enter a valid email address" };
   }
 
+  // Domain extraction
+  const domain = extractEmailDomain(trimmedEmail);
+  if (!domain) {
+    return { isValid: false, error: "Please enter a valid email address" };
+  }
+
   // Disposable email detection
-  const domain = trimmedEmail.split("@")[1];
   if (DISPOSABLE_DOMAINS.some((d) => domain.includes(d))) {
-    logSecurityEvent("Disposable email detected", { email: trimmedEmail, domain });
+    logSecurityEvent("Disposable email detected", {
+      email: trimmedEmail,
+      domain,
+    });
     return { isValid: false, error: "Please use a permanent email address" };
   }
 
@@ -104,7 +123,7 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
 }
 
 function validateName(name: string): { isValid: boolean; error?: string } {
-  if (!name) return { isValid: true }; // Name is optional
+  if (!name) return { isValid: true };
 
   const trimmedName = name.trim();
 
@@ -112,10 +131,9 @@ function validateName(name: string): { isValid: boolean; error?: string } {
     return { isValid: false, error: "Name is too long" };
   }
 
-  // Check for suspicious patterns (excessive special characters, etc.)
   const suspiciousPatterns = [
-    /[<>{}[\]]/, // HTML/script tags
-    /(.)\1{10,}/, // Repeated characters
+    /[<>{}[\]]/,
+    /(.)\1{10,}/,
   ];
 
   if (suspiciousPatterns.some((pattern) => pattern.test(trimmedName))) {
@@ -129,7 +147,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<TeaserResponse>,
 ): Promise<void> {
-  // Set security headers
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
@@ -143,7 +160,6 @@ export default async function handler(
     return;
   }
 
-  // Validate Content-Type
   const contentType = req.headers["content-type"];
   if (!contentType || !contentType.includes("application/json")) {
     res.status(400).json({
@@ -175,7 +191,6 @@ export default async function handler(
   const ipAnalysis = getClientIpWithAnalysis(req);
   const ip = ipAnalysis.ip;
 
-  // Enhanced honeypot detection
   if (honeypot || confirmEmailHoneypot) {
     logSecurityEvent("Honeypot triggered", {
       ip,
@@ -184,7 +199,6 @@ export default async function handler(
       confirmEmailHoneypot,
     });
 
-    // Return success to confuse bots
     res.status(200).json({
       ok: true,
       message: "Teaser sent. Please check your inbox.",
@@ -192,7 +206,6 @@ export default async function handler(
     return;
   }
 
-  // Email validation
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
     res.status(400).json({
@@ -203,7 +216,6 @@ export default async function handler(
     return;
   }
 
-  // Name validation
   const nameValidation = validateName(name);
   if (!nameValidation.isValid) {
     res.status(400).json({
@@ -214,17 +226,14 @@ export default async function handler(
     return;
   }
 
-  // 🔒 Enhanced rate limiting
-  const rateLimitKey = getRateLimitKey(
-    req,
-    RATE_LIMIT_CONFIGS.TEASER_REQUEST.keyPrefix,
-  );
-  const rateLimitResult = rateLimit(
+  const rateLimitKey = getRateLimitKey(req, "teaser");
+  
+  // The unified rateLimit expects (id, config)
+  const rateLimitResult = await rateLimit(
     rateLimitKey,
-    RATE_LIMIT_CONFIGS.TEASER_REQUEST,
+    RATE_LIMIT_CONFIGS.CONTACT, // Using CONTACT config for teaser (5 per hour)
   );
 
-  // Add rate limit headers to response
   const rateLimitHeaders = createRateLimitHeaders(rateLimitResult);
   Object.entries(rateLimitHeaders).forEach(([key, value]) => {
     res.setHeader(key, value);
@@ -246,7 +255,6 @@ export default async function handler(
     return;
   }
 
-  // 🔒 reCAPTCHA verification
   if (!recaptchaToken) {
     res.status(400).json({
       ok: false,
@@ -258,7 +266,8 @@ export default async function handler(
 
   let recaptchaResult;
   try {
-    recaptchaResult = await verifyRecaptcha(
+    // ✅ Use verifyRecaptchaDetailed to get the full result object
+    recaptchaResult = await verifyRecaptchaDetailed(
       recaptchaToken,
       "teaser_request",
       ip,
@@ -269,7 +278,7 @@ export default async function handler(
         ip,
         email,
         score: recaptchaResult.score,
-        reasons: recaptchaResult.reasons,
+        errorCodes: recaptchaResult.errorCodes,
       });
 
       res.status(400).json({
@@ -280,7 +289,6 @@ export default async function handler(
       return;
     }
 
-    // Additional score threshold check
     if (recaptchaResult.score < 0.3) {
       logSecurityEvent("Low reCAPTCHA score", {
         ip,
@@ -288,7 +296,6 @@ export default async function handler(
         score: recaptchaResult.score,
         action: recaptchaResult.action,
       });
-      // For now we allow but we have telemetry if abuse grows
     }
   } catch (error) {
     const recaptchaError = error as Error;
@@ -308,17 +315,13 @@ export default async function handler(
   }
 
   try {
-    // TODO: Implement actual email sending with Resend/Mail provider
-    // await sendTeaserEmail({ email, name, source });
-
-    // Log successful request
     logSecurityEvent("Teaser request successful", {
       ip: anonymizeIp(ip),
       email: `${email.substring(0, 3)}...`,
       name: name ? `${name.substring(0, 1)}...` : "not provided",
       source,
       recaptchaScore: recaptchaResult.score,
-      userAgent: userAgent.substring(0, 100), // Limit length
+      userAgent: String(userAgent).substring(0, 100),
     });
 
     if (process.env.NODE_ENV !== "production") {
@@ -332,6 +335,9 @@ export default async function handler(
         recaptchaScore: recaptchaResult.score,
       });
     }
+
+    // Here you would actually send the email
+    // await sendTeaserEmail({ email, name, source });
 
     res.status(200).json({
       ok: true,
@@ -357,7 +363,5 @@ export default async function handler(
 
 // Health check endpoint (optional)
 export function isTeaserApiHealthy(): boolean {
-  // Add any health checks needed (database, email service, etc.)
   return true;
 }
-

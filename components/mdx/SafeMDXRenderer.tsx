@@ -4,8 +4,11 @@
 
 import * as React from "react";
 import { useMDXComponent } from "next-contentlayer2/hooks";
-import MDX_COMPONENTS, { getSafeComponents } from "@/components/mdx/MDXComponents";
+import { getSafeComponents } from "@/components/mdx/MDXComponents";
 import type { TierDirective } from "@/lib/resources/tier-metadata";
+
+// Safe check for development mode that won't crash the browser
+const IS_DEV = typeof process !== 'undefined' ? process.env.NODE_ENV !== "production" : false;
 
 interface SafeMDXRendererProps {
   code?: string | null;
@@ -25,10 +28,15 @@ type ErrorBoundaryState = {
   message?: string;
 };
 
-class MDXErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+const STABLE_EMPTY_MDX_CODE = "function MDXContent(){return null} return { default: MDXContent };";
+
+class MDXErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, message: undefined };
   }
 
   static getDerivedStateFromError(err: unknown): ErrorBoundaryState {
@@ -38,14 +46,14 @@ class MDXErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundary
         err instanceof Error
           ? err.message
           : typeof err === "string"
-          ? err
-          : "MDX render error",
+            ? err
+            : "MDX render error",
     };
   }
 
   override componentDidCatch(err: unknown) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("MDXErrorBoundary caught:", err);
+    if (IS_DEV) {
+      console.error("[SafeMDXRenderer] MDXErrorBoundary caught:", err);
     }
   }
 
@@ -59,9 +67,9 @@ class MDXErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundary
             MDX render failure
           </div>
           <p className="mt-3 text-sm text-white/70">
-            The MDX compiled, but rendering failed.
+            The MDX compiled, but rendering failed at runtime.
           </p>
-          {process.env.NODE_ENV !== "production" && this.state.message ? (
+          {IS_DEV && this.state.message ? (
             <pre className="mt-4 overflow-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-white/60">
               {this.state.message}
             </pre>
@@ -85,6 +93,30 @@ function EmptyState() {
   );
 }
 
+function InvalidComponentState({
+  debug,
+  code,
+}: {
+  debug?: boolean;
+  code: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
+      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-300/80">
+        MDX hydration failure
+      </div>
+      <p className="mt-3 text-sm text-white/70">
+        The compiled MDX did not return a valid component.
+      </p>
+      {(debug || IS_DEV) && (
+        <pre className="mt-4 max-h-72 overflow-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-white/60">
+          {code.slice(0, 1200)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 export default function SafeMDXRenderer({
   code,
   components,
@@ -92,37 +124,58 @@ export default function SafeMDXRenderer({
   debug = false,
   disableBaseComponents = false,
 }: SafeMDXRendererProps) {
-  const safeCode = typeof code === "string" ? code.trim() : "";
+  // Defensive check: If some compiled MDX tries to access 'process', 
+  // we provide a tiny polyfill on the window if it's missing during the render phase.
+  if (typeof window !== "undefined" && typeof (window as any).process === "undefined") {
+    (window as any).process = { env: { NODE_ENV: IS_DEV ? "development" : "production" } };
+  }
+
+  const safeCode = React.useMemo(() => {
+    return typeof code === "string" ? code.trim() : "";
+  }, [code]);
+
   const hasCode = safeCode.length > 0;
 
-  const mdxSource = hasCode
-    ? safeCode
-    : "export default function MDXEmpty(){ return null; }";
-
-  const MDXContent = useMDXComponent(mdxSource);
+  const stableDirective = React.useMemo(() => directive ?? undefined, [directive]);
 
   const merged = React.useMemo(() => {
+    const incoming = components ?? {};
     const base = disableBaseComponents
-      ? { ...(components || {}) }
-      : getSafeComponents((components || {}) as any);
+      ? { ...incoming }
+      : getSafeComponents(incoming as Record<string, any>);
 
-    if (base.DocumentFooter) {
-      const OriginalFooter = base.DocumentFooter;
-      base.DocumentFooter = (props: any) => (
-        <OriginalFooter {...props} directive={directive} />
-      );
+    const nextMap: Record<string, any> = { ...base };
+
+    if (nextMap.DocumentFooter) {
+      const OriginalFooter = nextMap.DocumentFooter;
+      nextMap.DocumentFooter = function DocumentFooterWithDirective(props: any) {
+        return <OriginalFooter {...props} directive={stableDirective} />;
+      };
     }
 
-    return base;
-  }, [components, directive, disableBaseComponents]);
+    return nextMap;
+  }, [components, disableBaseComponents, stableDirective]);
+
+  const mdxCodeForHook = hasCode ? safeCode : STABLE_EMPTY_MDX_CODE;
+  
+  // The error is thrown here because useMDXComponent executes the code string
+  const MDXContent = useMDXComponent(mdxCodeForHook);
+
+  if (!hasCode) {
+    return <EmptyState />;
+  }
+
+  if (typeof MDXContent !== "function") {
+    return <InvalidComponentState debug={debug} code={safeCode} />;
+  }
 
   return (
     <MDXErrorBoundary>
       <div className="aol-mdx-content text-white">
-        {hasCode ? <MDXContent components={merged} /> : <EmptyState />}
+        <MDXContent components={merged} />
       </div>
 
-      {(debug || process.env.NODE_ENV !== "production") && (
+      {(debug || IS_DEV) && (
         <details className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
           <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.25em] text-amber-300/85">
             MDX debug

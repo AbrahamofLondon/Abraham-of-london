@@ -1,5 +1,6 @@
-// lib/access/tiers.ts — SSOT WRAPPER (policy + vault path policy)
+/* lib/access/tiers.ts — SSOT WRAPPER (V1.2) */
 
+// 1. Export the named functions for modern imports
 export {
   TIER_ORDER,
   TIER_LABELS,
@@ -16,6 +17,7 @@ export {
 
 export { requiredTierFromVaultPath } from "@/lib/access/vault-policy";
 
+// 2. Import for the default object creation
 import {
   TIER_ORDER,
   TIER_LABELS,
@@ -26,15 +28,17 @@ import {
   requiredTierFromDoc,
 } from "@/lib/access/tier-policy";
 
-// Backward-compatible object API used across your app
+// 3. Backward-compatible object API (Crucial for fixing the 100+ flagged files)
 export const tiers = {
   order: TIER_ORDER,
   labels: TIER_LABELS,
+  // These specific mappings fix the "Property does not exist" errors
   normalizeUser: normalizeUserTier,
   normalizeRequired: normalizeRequiredTier,
-  hasAccess,
+  hasAccess: hasAccess,
   getLabel: getTierLabel,
   fromDoc: requiredTierFromDoc,
 };
 
+// Satisfies: import tiers from "@/lib/access/tiers"
 export default tiers;

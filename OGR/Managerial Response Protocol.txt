@@ -1,0 +1,37 @@
+This **Managerial Response Protocol** is designed for the high-pressure moment when a Team Lead first opens their dashboard and sees a **"CRITICAL"** or **"FRACTURED"** status. 
+
+It prevents the most common leadership failure: **Defensive Reactivity.** Instead, it pivots the manager toward **Data-Driven Neutrality**.
+
+---
+
+## 🛡️ Sovereign Managerial One-Pager: Handling Fractured Status
+**Subject:** Tactical Response to Low Resonance / High Dissonance
+
+### 1. The Golden Rule: "Data is a Mirror, Not a Judgment"
+When a domain (e.g., *Operational Velocity*) shows a **CRITICAL** status, it does not mean you are failing. It means the **Institutional Baseline** has drifted. Your job is not to defend the score, but to **compress the variance**.
+
+### 2. Immediate 24-Hour Protocol
+If you receive a **FRACTURED** notification, execute these three steps:
+* **Step A: Analyze the Effort Index ($E_m$):** Check if the dissonance is "Quiet Dissent" (Low score, Low variance) or "Active Friction" (Medium score, High variance).
+* **Step B: Select a High-Decay Script:** Go to the **Institutional Library**. Find a script specifically for that domain that has a proven **Friction Decay Rate** of >15%.
+* **Step C: Schedule the "Alignment Sync":** Do not call it a "Performance Review." Call it a **"Telemetry Calibration."**
+
+### 3. The "Calibration" Script Structure
+Use this 3-part verbal framework during your team sync:
+1.  **Acknowledge the Signal:** *"Our internal telemetry shows a high variance in our 'Strategic Alignment' domain. This means we aren't all seeing the same map."*
+2.  **Invite the Friction:** *"The data suggests we have a diversity of perspective here. I want to surface the conflicting views today so we can move back to a STABLE state."*
+3.  **Commit to the Pivot:** *"Based on this, we are adjusting our [Process/Tool/Goal] starting Monday. We will measure the 'Decay' in this friction next Sunday."*
+
+### 4. What to Avoid (The "Fracture" Traps)
+* **❌ Hunting for Names:** Never ask "Who gave this low score?" This destroys the **Anonymity Guarantee** and spikes future variance.
+* **❌ Dismissing the Sample:** Even if the N-count is low, if the **DRI** is above 60%, the signal is statistically valid. Trust the math.
+* **❌ Over-Correcting:** Don't change five things. Change **one** specific operational lever and wait for the next **Institutional Snapshot** to see the impact.
+
+---
+
+### Managerial Support Note:
+If the **Standard Error** remains high for two consecutive snapshots, escalate to your Director. This indicates a "Systemic Blockage" that requires a higher-level **Value Recovery Audit**.
+
+---
+
+**This concludes the Sovereign Deployment Package.**

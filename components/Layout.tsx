@@ -1,17 +1,21 @@
+/* components/Layout.tsx — stable Pages Router frame */
+
 import * as React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import clsx, { type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 import Header from "@/components/Header";
 import EnhancedFooter from "@/components/EnhancedFooter";
 
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 const VaultSearchOverlay = dynamic(
-  () =>
-    import("@/components/VaultSearchOverlay").catch((err) => {
-      console.error("Failed to load VaultSearchOverlay:", err);
-      return { default: () => null };
-    }),
+  () => import("@/components/VaultSearchOverlay").then((m) => m.default),
   {
     ssr: false,
     loading: () => null,
@@ -33,7 +37,7 @@ type LayoutProps = {
   className?: string;
   fullWidth?: boolean;
   headerTransparent?: boolean;
-  structuredData?: any;
+  structuredData?: unknown;
   showFooter?: boolean;
   enableVaultSearch?: boolean;
 };
@@ -41,8 +45,7 @@ type LayoutProps = {
 function toAbsoluteUrl(pathOrUrl: string): string {
   if (!pathOrUrl) return BASE_URL;
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-  const clean = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
-  return `${BASE_URL}${clean}`;
+  return `${BASE_URL}${pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`}`;
 }
 
 export default function Layout({
@@ -53,7 +56,7 @@ export default function Layout({
   ogImage = "/assets/images/social/og-image.jpg",
   canonicalUrl,
   ogType = "website",
-  className = "",
+  className,
   fullWidth = false,
   headerTransparent = false,
   structuredData,
@@ -65,8 +68,11 @@ export default function Layout({
 
   const canonicalAbs = React.useMemo(() => {
     if (canonicalUrl) return toAbsoluteUrl(canonicalUrl);
-    return toAbsoluteUrl(router.asPath.split("#")[0] || "/");
+    const path = (router.asPath || "/").split("#")[0] || "/";
+    return toAbsoluteUrl(path);
   }, [canonicalUrl, router.asPath]);
+
+  const ogImageAbs = React.useMemo(() => toAbsoluteUrl(ogImage), [ogImage]);
 
   const shouldEnableVaultSearch =
     typeof enableVaultSearch === "boolean"
@@ -78,18 +84,16 @@ export default function Layout({
   React.useEffect(() => {
     if (!shouldEnableVaultSearch) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
         setIsSearchOpen(true);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [shouldEnableVaultSearch]);
-
-  const ogImageAbs = toAbsoluteUrl(ogImage);
 
   return (
     <>
@@ -118,29 +122,31 @@ export default function Layout({
         ) : null}
       </Head>
 
-      <Header transparent={headerTransparent} />
+      <div className="relative min-h-screen bg-[#050505] text-white">
+        <Header transparent={headerTransparent} />
 
-      <main
-        className={[
-          "w-full max-w-full overflow-x-hidden bg-black text-white",
-          // If the header is NOT transparent, we add padding to avoid clipping content.
-          // If it IS transparent (like on the Home page), we set pt-0 so the Hero bleeds to the top.
-          headerTransparent ? "pt-0" : "pt-[84px]",
-          fullWidth ? "" : "mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8",
-          className,
-        ].join(" ")}
-      >
-        {children}
-      </main>
+        <main
+          className={cn(
+            "relative w-full overflow-x-clip bg-[#050505] text-white antialiased",
+            headerTransparent ? "pt-0" : "pt-[84px]",
+            fullWidth
+              ? "min-h-screen"
+              : "mx-auto min-h-screen max-w-7xl px-6 py-12 lg:px-12 lg:py-20",
+            className
+          )}
+        >
+          {children}
+        </main>
 
-      {showFooter ? <EnhancedFooter /> : null}
+        {showFooter ? <EnhancedFooter /> : null}
 
-      {shouldEnableVaultSearch ? (
-        <VaultSearchOverlay
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-        />
-      ) : null}
+        {shouldEnableVaultSearch ? (
+          <VaultSearchOverlay
+            isOpen={isSearchOpen}
+            onClose={() => setIsSearchOpen(false)}
+          />
+        ) : null}
+      </div>
     </>
   );
 }

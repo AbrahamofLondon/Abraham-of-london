@@ -2,21 +2,22 @@
 
 import React from "react";
 import { GetStaticProps, GetStaticPaths } from "next";
-import { useMDXComponent } from "next-contentlayer/hooks"; 
+import dynamic from "next/dynamic";
 import { allBriefs } from "contentlayer/generated";
 import Layout from "@/components/layout/Layout";
 import { ShieldCheck, Lock } from "lucide-react";
 
-// Types for the Brief
+const ClientMDXRenderer = dynamic(
+  () => import("@/components/mdx/ClientMDXRenderer"),
+  { ssr: false, loading: () => <div className="animate-pulse p-8 text-center">Loading content...</div> }
+);
+
 interface BriefProps {
   brief: any;
   isAuthorized: boolean;
 }
 
 export default function BriefPage({ brief, isAuthorized }: BriefProps) {
-  // Hook up the MDX component safely
-  const MDXContent = useMDXComponent(brief?.body?.code || "");
-
   if (!brief) return null;
 
   return (
@@ -28,7 +29,7 @@ export default function BriefPage({ brief, isAuthorized }: BriefProps) {
               <ShieldCheck size={12} /> Institutional Intelligence
             </span>
             <span className="text-gray-300 text-[10px] font-mono uppercase tracking-widest">
-              Ref: {brief._id.slice(0, 8)}
+              Ref: {brief._id?.slice(0, 8) || "N/A"}
             </span>
           </div>
           
@@ -41,7 +42,7 @@ export default function BriefPage({ brief, isAuthorized }: BriefProps) {
         </header>
 
         <div className="prose prose-blue max-w-none prose-headings:font-serif prose-headings:italic prose-p:text-gray-600 prose-p:leading-relaxed">
-          <MDXContent />
+          <ClientMDXRenderer code={brief.body?.code || ""} components={{}} />
         </div>
 
         <footer className="mt-20 pt-10 border-t border-gray-100">
@@ -59,7 +60,7 @@ export default function BriefPage({ brief, isAuthorized }: BriefProps) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = allBriefs.map((brief) => ({
-    params: { slug: brief.slug || brief._raw.flattenedPath },
+    params: { slug: brief.slug || brief._raw?.flattenedPath || "" },
   }));
 
   return {
@@ -70,7 +71,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const brief = allBriefs.find(
-    (b) => (b.slug || b._raw.flattenedPath) === params?.slug
+    (b) => (b.slug || b._raw?.flattenedPath) === params?.slug
   );
 
   if (!brief) {
@@ -79,8 +80,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: {
-      brief,
-      isAuthorized: true, // Authorization logic handled via Middleware/Wrappers
+      brief: JSON.parse(JSON.stringify(brief)),
+      isAuthorized: true,
     },
   };
 };

@@ -1,12 +1,9 @@
-// lib/downloads/audit.ts — INSTITUTIONAL DOWNLOAD AUDITING
+/* lib/downloads/audit.ts — INSTITUTIONAL DOWNLOAD AUDIT SINK */
+
 import fs from "fs";
 import path from "path";
 
-/**
- * AuditEventType: Expanded to match all states in the [token].ts handler
- */
-
-export type AuditEventType = 
+export type AuditEventType =
   | "TOKEN_ISSUED"
   | "TOKEN_VERIFIED"
   | "TOKEN_REJECTED"
@@ -29,48 +26,47 @@ export type AuditEvent = {
   userAgent: string | null;
   referrer: string | null;
   tokenExp?: number;
-  downloadUrl?: string; // Track the destination for granted downloads
-  nonce?: string;      // Track the specific token instance
+  downloadUrl?: string;
+  nonce?: string;
   note?: string;
   ts?: string;
-  // Add missing fields used in [token].ts
-  tokenId?: string;     // Track the token identifier
-  watermarkId?: string; // Track watermark for premium content
+  tokenId?: string;
+  watermarkId?: string;
 };
 
 const outDir = path.join(process.cwd(), ".reports");
 const outFile = path.join(outDir, "download-audit.jsonl");
 
-/**
- * logDownloadEvent: Records transmission attempts to a JSONL log for security review.
- * Designed with a "Soft-Fail" protocol to ensure UX is never interrupted by IO errors.
- */
-export async function logDownloadEvent(e: AuditEvent): Promise<void> {
-  // Ensure we are in a Node environment with filesystem access
+function safeLine(event: AuditEvent): string {
+  return JSON.stringify({
+    ...event,
+    ts: event.ts || new Date().toISOString(),
+  }) + "\n";
+}
+
+function ensureAuditDir(): void {
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+}
+
+export async function logDownloadEvent(event: AuditEvent): Promise<void> {
   if (typeof window !== "undefined") return;
 
   try {
-    const payload = {
-      ...e,
-      ts: e.ts || new Date().toISOString(),
-    };
+    ensureAuditDir();
+    fs.appendFileSync(outFile, safeLine(event), { encoding: "utf8" });
 
-    const row = JSON.stringify(payload) + "\n";
-
-    // Standard local logging
-    if (!fs.existsSync(outDir)) {
-      fs.mkdirSync(outDir, { recursive: true });
-    }
-    
-    fs.appendFileSync(outFile, row, { encoding: "utf8" });
-
-    // Console-log for Vercel/Cloud observability (Optional but recommended)
     if (process.env.NODE_ENV === "production") {
-      console.log(`[AUDIT][${payload.eventType}] ${payload.slug} | Tier: ${payload.userTier} | IP: ${payload.ip}`);
+      console.log(
+        `[DOWNLOAD_AUDIT][${event.eventType}] slug=${event.slug} userTier=${event.userTier} required=${event.requiredTier} ip=${event.ip}`,
+      );
     }
-    
   } catch (err) {
-    // Soft-fail: Auditing is secondary to site availability.
-    console.warn("[AUDIT_FAILURE] Could not write to audit log:", err);
+    console.warn("[DOWNLOAD_AUDIT_FAILURE]", err);
   }
 }
+
+export default {
+  logDownloadEvent,
+};

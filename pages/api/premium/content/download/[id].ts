@@ -7,10 +7,9 @@ import {
   incrementTokenUsage,
   doesTokenMatchBinding,
 } from "@/lib/premium/download-token";
-import {
-  withApiRateLimit,
-  RATE_LIMIT_CONFIGS,
-} from "@/lib/server/rate-limit-unified";
+
+import { withApiRateLimit } from "@/lib/server/rate-limit-unified";
+
 import {
   getClientIp,
   getUserAgent,
@@ -47,6 +46,10 @@ type Classification =
   | "OWNER"
   | "PRINCIPAL";
 
+type ErrorResponse = {
+  error: string;
+};
+
 function safeStr(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -73,10 +76,14 @@ function safeAttachmentFilename(filename: string): string {
   return clean || "download.bin";
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ErrorResponse | Buffer>,
+): Promise<void> {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).end();
+    res.status(405).end();
+    return;
   }
 
   const id = getQueryString(req.query.id);
@@ -98,7 +105,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       reason: "Institutional parameters missing",
     });
 
-    return res.status(400).json({ error: "Institutional parameters missing" });
+    res.status(400).json({ error: "Institutional parameters missing" });
+    return;
   }
 
   const report = getPremiumContentById(id);
@@ -116,7 +124,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       reason: "Protected asset not found",
     });
 
-    return res.status(404).json({ error: "Protected asset not found" });
+    res.status(404).json({ error: "Protected asset not found" });
+    return;
   }
 
   const verified = await verifyDownloadToken(token, id);
@@ -136,9 +145,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       reason: verified.reason || "Access token invalid or expired",
     });
 
-    return res.status(401).json({
+    res.status(401).json({
       error: verified.reason || "Access token invalid or expired",
     });
+    return;
   }
 
   const binding = await getCurrentAccessBinding(req, res);
@@ -163,7 +173,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       reason: "Session binding mismatch",
     });
 
-    return res.status(403).json({ error: "Session binding mismatch" });
+    res.status(403).json({ error: "Session binding mismatch" });
+    return;
   }
 
   const usageIncremented = await incrementTokenUsage(token);
@@ -183,7 +194,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       reason: "Download allowance exhausted",
     });
 
-    return res.status(401).json({ error: "Download allowance exhausted" });
+    res.status(401).json({ error: "Download allowance exhausted" });
+    return;
   }
 
   const userTier =
@@ -360,7 +372,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     res.setHeader("Content-Length", String(markedBuffer.length));
-    return res.status(200).send(markedBuffer);
+    res.status(200).send(markedBuffer);
+    return;
   } catch (error) {
     console.error("[DOWNLOAD_STREAM_ERROR]", error);
 
@@ -380,8 +393,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       requiredTier,
     });
 
-    return res.status(500).json({ error: "Failed to stream asset" });
+    res.status(500).json({ error: "Failed to stream asset" });
   }
 }
 
-export default withApiRateLimit(handler, RATE_LIMIT_CONFIGS.DOWNLOADS);
+export default withApiRateLimit(handler, { key: "DOWNLOAD" });

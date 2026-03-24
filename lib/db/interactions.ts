@@ -1,4 +1,4 @@
-/* lib/db/interactions.ts — Unified Interaction Engine (Build-safe, Schema-safe) */
+/* lib/db/interactions.ts — Unified Interaction Engine (build-safe, tx-safe) */
 /* eslint-disable no-console */
 
 import "server-only";
@@ -6,7 +6,10 @@ import { prisma } from "@/lib/prisma.server";
 
 export type InteractionAction = "like" | "save";
 
-export type InteractionCounts = { likes: number; saves: number };
+export type InteractionCounts = {
+  likes: number;
+  saves: number;
+};
 
 export type InteractionStats = InteractionCounts & {
   userLiked: boolean;
@@ -14,7 +17,6 @@ export type InteractionStats = InteractionCounts & {
   deletedAt?: string | null;
 };
 
-// Add UserInteractionState type
 export type UserInteractionState = {
   slug: string;
   actorId: string;
@@ -23,105 +25,200 @@ export type UserInteractionState = {
   updatedAt?: Date;
 };
 
+type InteractionRow = {
+  id?: string;
+  action?: string;
+  updatedAt?: Date;
+};
+
+type GroupedRow = {
+  action?: string;
+  _count?: number | { action?: number } | Record<string, unknown>;
+  count?: number;
+  [key: string]: any;
+};
+
+// Adjusted to be compatible with Prisma's internal generated types
+type InteractionModel = {
+  groupBy: (args: any) => Promise<any[]>;
+  findMany: (args: {
+    where?: Record<string, unknown>;
+    select?: Record<string, boolean>;
+  }) => Promise<InteractionRow[]>;
+  findFirst: (args: {
+    where?: Record<string, unknown>;
+    select?: Record<string, boolean>;
+  }) => Promise<InteractionRow | null>;
+  create: (args: {
+    data: Record<string, unknown>;
+  }) => Promise<unknown>;
+  delete: (args: {
+    where: Record<string, unknown>;
+  }) => Promise<unknown>;
+};
+
+// Use 'any' to allow the Prisma Client (which has specific Enums) 
+// to be assigned to this interface.
+type InteractionClientLike = any;
+
+type ModelCandidate = {
+  model: InteractionModel;
+  fields: {
+    slugField: "shortSlug";
+    actorField: "actorId";
+    actionField: "action";
+  };
+};
+
+// ----------------------------------------------------------------------------
+// Helpers
+// ----------------------------------------------------------------------------
+
+function safeNumber(value: unknown, fallback = 0): number {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
 function cleanSlug(v: unknown): string {
-  return String(v ?? "").trim();
+  return safeString(v).trim().toLowerCase();
 }
 
 function cleanActor(v: unknown): string {
-  return String(v ?? "").trim();
+  return safeString(v).trim();
 }
 
 function cleanAction(v: unknown): InteractionAction | null {
-  const a = String(v ?? "").trim().toLowerCase();
-  if (a === "like" || a === "save") return a;
-  return null;
+  const a = safeString(v).trim().toLowerCase();
+  return a === "like" || a === "save" ? a : null;
 }
 
-/**
- * Choose model + field mapping.
- * Priority:
- * 1) AssetInteraction (member/email-based, durable)
- * 2) ShortInteraction (session-based fallback)
- */
-function getModel(client: any) {
-  const hasAsset = Boolean(client?.assetInteraction);
-  const hasShort = Boolean(client?.shortInteraction);
-
-  if (hasAsset) {
-    return {
-      model: client.assetInteraction,
-      fields: {
-        slugField: "slug",
-        actorField: "memberId", // actorId must be memberId/emailHash depending on your app policy
-        actionField: "action",
-      },
-    };
-  }
-
-  if (hasShort) {
-    return {
-      model: client.shortInteraction,
-      fields: {
-        slugField: "shortSlug",
-        actorField: "sessionId",
-        actionField: "action",
-      },
-    };
-  }
-
-  return null;
-}
-
-function extractCount(row: any, actionField: string): number {
-  const c = row?._count;
-  if (typeof c === "number") return c;
-  if (c && typeof c === "object") {
-    const v = (c as any)[actionField];
-    if (typeof v === "number") return v;
-  }
-  return 0;
-}
-
-/**
- * Normalize overloaded hasUserInteracted arguments.
- *
- * Supports BOTH:
- * - hasUserInteracted(slug, action, actorId)    ✅ preferred
- * - hasUserInteracted(slug, actorId, action)    🧯 legacy safety
- */
 function normalizeHasArgs(
   slug: unknown,
   a2: unknown,
-  a3: unknown
+  a3: unknown,
 ): { slug: string; action: InteractionAction | null; actor: string } {
   const s = cleanSlug(slug);
   const action2 = cleanAction(a2);
   const action3 = cleanAction(a3);
 
-  // Preferred: (slug, action, actor)
   if (action2) {
     return { slug: s, action: action2, actor: cleanActor(a3) };
   }
-
-  // Legacy: (slug, actor, action)
   if (action3) {
     return { slug: s, action: action3, actor: cleanActor(a2) };
   }
-
-  // Nothing valid
   return { slug: s, action: null, actor: cleanActor(a3) || cleanActor(a2) };
 }
 
-/**
- * Toggle an interaction atomically.
- * actorId is either:
- * - memberId/emailHash (AssetInteraction)
- * - sessionId (ShortInteraction)
- */
+function getModel(client: InteractionClientLike | null | undefined): ModelCandidate | null {
+  // Use bracket notation to avoid direct property access issues on 'any'
+  const model = client?.shortInteraction;
+  if (!model) return null;
+
+  if (
+    typeof model.groupBy !== "function" ||
+    typeof model.findMany !== "function" ||
+    typeof model.findFirst !== "function" ||
+    typeof model.create !== "function" ||
+    typeof model.delete !== "function"
+  ) {
+    return null;
+  }
+
+  return {
+    model,
+    fields: {
+      slugField: "shortSlug",
+      actorField: "actorId",
+      actionField: "action",
+    },
+  };
+}
+
+function extractCount(row: GroupedRow | undefined, actionField: string): number {
+  if (!row || typeof row !== "object") return 0;
+
+  if (typeof row._count === "number") {
+    return safeNumber(row._count, 0);
+  }
+  if (row._count && typeof row._count === "object") {
+    const nested = (row._count as Record<string, unknown>)[actionField];
+    if (nested != null) return safeNumber(nested, 0);
+  }
+  if (row.count != null) {
+    return safeNumber(row.count, 0);
+  }
+  return 0;
+}
+
+// ----------------------------------------------------------------------------
+// Core Logic
+// ----------------------------------------------------------------------------
+
+async function getStatsForActor(
+  client: InteractionClientLike,
+  slug: string,
+  actor: string,
+): Promise<InteractionStats> {
+  const mapping = getModel(client);
+  if (!mapping) {
+    return { likes: 0, saves: 0, userLiked: false, userSaved: false };
+  }
+
+  const { model, fields } = mapping;
+  const whereBase: Record<string, unknown> = { [fields.slugField]: slug };
+  const whereUser: Record<string, unknown> = { [fields.slugField]: slug, [fields.actorField]: actor };
+
+  try {
+    const [groupedRaw, userRowsRaw] = await Promise.all([
+      model.groupBy({
+        by: [fields.actionField],
+        where: whereBase,
+        _count: { [fields.actionField]: true },
+      }),
+      model.findMany({
+        where: whereUser,
+        select: { [fields.actionField]: true, updatedAt: true },
+      }),
+    ]);
+
+    const grouped = Array.isArray(groupedRaw) ? groupedRaw : [];
+    const userRows = Array.isArray(userRowsRaw) ? userRowsRaw : [];
+
+    const likes = extractCount(
+      grouped.find((g) => cleanAction(g?.[fields.actionField]) === "like"),
+      fields.actionField,
+    );
+
+    const saves = extractCount(
+      grouped.find((g) => cleanAction(g?.[fields.actionField]) === "save"),
+      fields.actionField,
+    );
+
+    const actions = userRows
+      .map((r) => cleanAction(r?.[fields.actionField as keyof InteractionRow]))
+      .filter((a): a is InteractionAction => a === "like" || a === "save");
+
+    return {
+      likes,
+      saves,
+      userLiked: actions.includes("like"),
+      userSaved: actions.includes("save"),
+    };
+  } catch (error) {
+    console.error("[INTERACTIONS_STATS_ERROR]", error);
+    return { likes: 0, saves: 0, userLiked: false, userSaved: false };
+  }
+}
+
 export async function toggleInteraction(
   slug: string,
   action: InteractionAction,
-  actorId: string
+  actorId: string,
 ): Promise<InteractionStats> {
   const s = cleanSlug(slug);
   const a = cleanAction(action);
@@ -131,127 +228,118 @@ export async function toggleInteraction(
     return { likes: 0, saves: 0, userLiked: false, userSaved: false };
   }
 
-  const mapping = getModel(prisma);
-  if (!mapping) {
-    console.warn("[INTERACTIONS] No interaction model found on Prisma client.");
-    return { likes: 0, saves: 0, userLiked: false, userSaved: false };
-  }
+  return prisma.$transaction(async (tx) => {
+    const txClient = tx as InteractionClientLike;
+    const txMapping = getModel(txClient);
 
-  const { fields } = mapping;
-
-  const whereBase: Record<string, any> = { [fields.slugField]: s };
-  const whereUser: Record<string, any> = { [fields.slugField]: s, [fields.actorField]: actor };
-
-  return prisma.$transaction(async (tx: any) => {
-    const txMapping = getModel(tx);
-    if (!txMapping) return { likes: 0, saves: 0, userLiked: false, userSaved: false };
-
-    const txModel = txMapping.model;
-    const f = txMapping.fields;
-
-    // 1) Toggle
-    const existing = await txModel.findFirst({
-      where: { ...whereUser, [f.actionField]: a },
-      select: { id: true },
-    });
-
-    let deletedAt: string | null = null;
-
-    if (existing?.id) {
-      await txModel.delete({ where: { id: existing.id } });
-      deletedAt = new Date().toISOString();
-    } else {
-      // createdAt is optional in Prisma if it has default(now()); safe either way
-      await txModel.create({
-        data: {
-          ...whereUser,
-          [f.actionField]: a,
-        },
-      });
+    if (!txMapping) {
+      return { likes: 0, saves: 0, userLiked: false, userSaved: false };
     }
 
-    // 2) Counts
-    const grouped = await txModel.groupBy({
-      by: [f.actionField],
-      where: whereBase,
-      _count: { [f.actionField]: true } as any,
-    });
+    const { model, fields } = txMapping;
+    const whereAction = {
+      [fields.slugField]: s,
+      [fields.actorField]: actor,
+      [fields.actionField]: a,
+    };
 
-    const likes = extractCount(grouped.find((g: any) => g[f.actionField] === "like"), f.actionField);
-    const saves = extractCount(grouped.find((g: any) => g[f.actionField] === "save"), f.actionField);
+    try {
+      const existing = await model.findFirst({
+        where: whereAction,
+        select: { id: true },
+      });
 
-    // 3) User state
-    const userRows = await txModel.findMany({
-      where: whereUser,
-      select: { [f.actionField]: true },
-    });
+      let deletedAt: string | null = null;
 
-    const actions = (userRows as any[]).map((r) => r[f.actionField]);
-    const userLiked = actions.includes("like");
-    const userSaved = actions.includes("save");
+      if (existing?.id) {
+        await model.delete({ where: { id: existing.id } });
+        deletedAt = new Date().toISOString();
+      } else {
+        await model.create({
+          data: {
+            [fields.slugField]: s,
+            [fields.actorField]: actor,
+            [fields.actionField]: a,
+          },
+        });
+      }
 
-    return { likes, saves, userLiked, userSaved, deletedAt };
+      const stats = await getStatsForActor(txClient, s, actor);
+      return { ...stats, deletedAt };
+    } catch (error) {
+      console.error("[INTERACTIONS_TOGGLE_ERROR]", error);
+      return { likes: 0, saves: 0, userLiked: false, userSaved: false };
+    }
   });
 }
 
-/**
- * getInteractionCounts(slug, actorId?)
- * Returns aggregate counts and (optionally) user state if actorId provided.
- */
-export async function getInteractionCounts(slug: string, actorId?: string): Promise<InteractionStats> {
+export async function setInteractionState(
+  slug: string,
+  action: InteractionAction,
+  actorId: string,
+  desired: boolean,
+): Promise<InteractionStats> {
   const s = cleanSlug(slug);
-  const actor = actorId ? cleanActor(actorId) : "";
+  const a = cleanAction(action);
+  const actor = cleanActor(actorId);
 
-  if (!s) return { likes: 0, saves: 0, userLiked: false, userSaved: false };
-
-  const mapping = getModel(prisma);
-  if (!mapping) return { likes: 0, saves: 0, userLiked: false, userSaved: false };
-
-  const { model, fields } = mapping;
-
-  const whereBase: Record<string, any> = { [fields.slugField]: s };
-  const whereUser: Record<string, any> = actor ? { [fields.slugField]: s, [fields.actorField]: actor } : {};
-
-  try {
-    const [grouped, userRows] = await Promise.all([
-      model.groupBy({
-        by: [fields.actionField],
-        where: whereBase,
-        _count: { [fields.actionField]: true } as any,
-      }),
-      actor
-        ? model.findMany({
-            where: whereUser,
-            select: { [fields.actionField]: true },
-          })
-        : Promise.resolve([]),
-    ]);
-
-    const likes = extractCount(grouped.find((g: any) => g[fields.actionField] === "like"), fields.actionField);
-    const saves = extractCount(grouped.find((g: any) => g[fields.actionField] === "save"), fields.actionField);
-
-    const actions = (userRows as any[]).map((r) => r[fields.actionField]);
-    const userLiked = actions.includes("like");
-    const userSaved = actions.includes("save");
-
-    return { likes, saves, userLiked, userSaved };
-  } catch (e) {
-    console.error("[INTERACTIONS_COUNTS_ERROR]:", e);
+  if (!s || !a || !actor) {
     return { likes: 0, saves: 0, userLiked: false, userSaved: false };
   }
+
+  return prisma.$transaction(async (tx) => {
+    const txClient = tx as InteractionClientLike;
+    const txMapping = getModel(txClient);
+
+    if (!txMapping) return { likes: 0, saves: 0, userLiked: false, userSaved: false };
+
+    const { model, fields } = txMapping;
+    const whereAction = {
+      [fields.slugField]: s,
+      [fields.actorField]: actor,
+      [fields.actionField]: a,
+    };
+
+    try {
+      const existing = await model.findFirst({ where: whereAction, select: { id: true } });
+
+      if (desired) {
+        if (!existing?.id) {
+          await model.create({
+            data: {
+              [fields.slugField]: s,
+              [fields.actorField]: actor,
+              [fields.actionField]: a,
+            },
+          });
+        }
+      } else if (existing?.id) {
+        await model.delete({ where: { id: existing.id } });
+      }
+
+      return await getStatsForActor(txClient, s, actor);
+    } catch (error) {
+      console.error("[INTERACTIONS_SET_STATE_ERROR]", error);
+      return { likes: 0, saves: 0, userLiked: false, userSaved: false };
+    }
+  });
 }
 
-/**
- * hasUserInteracted — schema-safe boolean check.
- *
- * ✅ Accepts BOTH argument orders:
- * - (slug, action, actorId) preferred
- * - (slug, actorId, action) legacy-safe
- */
+export async function getInteractionCounts(
+  slug: string,
+  actorId?: string,
+): Promise<InteractionStats> {
+  const s = cleanSlug(slug);
+  const actor = actorId ? cleanActor(actorId) : "";
+  if (!s) return { likes: 0, saves: 0, userLiked: false, userSaved: false };
+
+  return getStatsForActor(prisma, s, actor);
+}
+
 export async function hasUserInteracted(
   slug: string,
   a2: InteractionAction | string,
-  a3: string
+  a3: string,
 ): Promise<boolean> {
   const normalized = normalizeHasArgs(slug, a2, a3);
   const s = normalized.slug;
@@ -264,7 +352,6 @@ export async function hasUserInteracted(
   if (!mapping) return false;
 
   const { model, fields } = mapping;
-
   try {
     const row = await model.findFirst({
       where: {
@@ -274,18 +361,16 @@ export async function hasUserInteracted(
       },
       select: { id: true },
     });
-
     return Boolean(row?.id);
-  } catch (e) {
-    console.error("[INTERACTIONS_HAS_ERROR]:", e);
+  } catch (error) {
+    console.error("[INTERACTIONS_HAS_ERROR]", error);
     return false;
   }
 }
 
-// Optional: Helper function to get full user state for a specific slug and actor
 export async function getUserInteractionState(
   slug: string,
-  actorId: string
+  actorId: string,
 ): Promise<UserInteractionState | null> {
   const s = cleanSlug(slug);
   const actor = cleanActor(actorId);
@@ -298,7 +383,7 @@ export async function getUserInteractionState(
   const { model, fields } = mapping;
 
   try {
-    const userRows = await model.findMany({
+    const userRowsRaw = await model.findMany({
       where: {
         [fields.slugField]: s,
         [fields.actorField]: actor,
@@ -306,8 +391,11 @@ export async function getUserInteractionState(
       select: { [fields.actionField]: true, updatedAt: true },
     });
 
-    const actions = userRows.map((r: any) => r[fields.actionField]);
-    
+    const userRows = Array.isArray(userRowsRaw) ? userRowsRaw : [];
+    const actions = userRows
+      .map((r) => cleanAction(r?.[fields.actionField as keyof InteractionRow]))
+      .filter((a): a is InteractionAction => a === "like" || a === "save");
+
     return {
       slug: s,
       actorId: actor,
@@ -315,8 +403,8 @@ export async function getUserInteractionState(
       saved: actions.includes("save"),
       updatedAt: userRows[0]?.updatedAt,
     };
-  } catch (e) {
-    console.error("[INTERACTIONS_STATE_ERROR]:", e);
+  } catch (error) {
+    console.error("[INTERACTIONS_STATE_ERROR]", error);
     return null;
   }
 }

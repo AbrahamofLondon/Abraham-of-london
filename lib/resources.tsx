@@ -1,5 +1,4 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import { serialize } from "next-mdx-remote/serialize";
 import ContentlayerDocPage from "@/components/ContentlayerDocPage";
 import {
   getAllContentlayerDocs,
@@ -9,30 +8,30 @@ import {
   normalizeSlug,
 } from "@/lib/content";
 
-type Props = { 
-  doc: any; 
+type Props = {
+  doc: any;
   canonicalPath: string;
-  source: any;
+  mdxRaw?: string;
 };
 
-// Helper function to extract slug from document
 function getDocSlug(doc: any): string {
-  // Try different possible slug locations
-  return doc?.slug || 
-         doc?._raw?.flattenedPath || 
-         doc?.slugComputed || 
-         doc?.id || 
-         "";
+  return (
+    doc?.slug ||
+    doc?._raw?.flattenedPath ||
+    doc?.slugComputed ||
+    doc?.id ||
+    ""
+  );
 }
 
-const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath, source }) => {
+const ResourceSlugPage: NextPage<Props> = ({ doc, canonicalPath, mdxRaw }) => {
   return (
     <ContentlayerDocPage
       doc={doc}
       canonicalPath={canonicalPath}
       backHref="/resources"
       label="Resources"
-      source={source}
+      mdxRaw={mdxRaw}
     />
   );
 };
@@ -44,7 +43,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .filter((d) => getDocKind(d) === "resource")
       .map((d) => getDocHref(d))
       .filter((href) => href.startsWith("/resources/"))
-      .map((href) => ({ params: { slug: [href.replace("/resources/", "")] } }));
+      .map((href) => ({
+        params: { slug: [href.replace("/resources/", "")] },
+      }));
 
     return { paths, fallback: false };
   } catch (error) {
@@ -56,41 +57,30 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   try {
     const arr = (params as any)?.slug;
-    const slug = Array.isArray(arr) ? String(arr[arr.length - 1] ?? "").trim() : "";
+    const slug =
+      Array.isArray(arr) ? String(arr[arr.length - 1] ?? "").trim() : "";
+
     if (!slug) return { notFound: true };
 
     const doc =
       getAllContentlayerDocs()
         .filter((d) => !isDraft(d))
         .find((d) => {
-          // Check if kind matches
           if (getDocKind(d) !== "resource") return false;
-          
-          // Get the document's slug and normalize it
+
           const docSlug = getDocSlug(d);
           const normalizedDocSlug = normalizeSlug(docSlug);
-          
-          // Compare with the requested slug
+
           return normalizedDocSlug === slug;
         }) ?? null;
 
     if (!doc) return { notFound: true };
 
-    // Extract content from doc
-    const content = doc.body?.raw || doc.body?.code || doc.content || "";
-    
-    // Serialize MDX content
-    const source = await serialize(content, {
-      mdxOptions: {
-        development: process.env.NODE_ENV === "development",
-      },
-    });
-
     return {
-      props: { 
-        doc, 
+      props: {
+        doc,
         canonicalPath: getDocHref(doc),
-        source,
+        mdxRaw: doc?.body?.raw ?? doc?.content ?? "",
       },
       revalidate: 3600,
     };

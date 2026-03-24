@@ -1,5 +1,4 @@
-// ./pages/api/analytics/downloads/summary.ts - FINAL COMPILE FIX
-import { safeSlice, safeDateSlice } from "@/lib/utils/safe";
+// pages/api/analytics/downloads/summary.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { isRateLimited } from "@/lib/server/rate-limit-unified";
@@ -7,9 +6,6 @@ import { validateAdminAccess } from "@/lib/server/validation";
 import { cacheResponse, getCacheKey } from "@/lib/server/cache";
 import { logAuditEvent } from "@/lib/audit";
 
-// ---------------------------
-// Types
-// ---------------------------
 type DownloadSummary = {
   slug: string;
   contentType: string;
@@ -45,7 +41,6 @@ type AnalyticsResponse = {
   meta: {
     generatedAt: string;
     cacheKey?: string;
-    cacheHit?: boolean;
     query: {
       since: string;
       until: string;
@@ -67,7 +62,10 @@ const PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 1000;
 const CACHE_TTL = 60;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<AnalyticsResponse | { ok: false; error: string }>,
+) {
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
 
@@ -103,21 +101,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           byContentType,
           byEventType,
           byTier,
-          byCountry,
           dailyTrends,
           totalCount,
         ] = await Promise.all([
-          getSummaryStats(since, until),
-          getTopContent(since, until, page, limit),
-          getGroupedCounts(since, until, "contentType"),
-          getGroupedCounts(since, until, "eventType"),
-          getGroupedCounts(since, until, "tier"),
-          getGroupedCounts(since, until, "countryCode"),
-          getDailyTrends(since, until),
-          getTotalContentCount(since, until),
+          getSummaryStats(since, until, filters),
+          getTopContent(since, until, filters, page, limit),
+          getGroupedCounts(since, until, filters, "contentType"),
+          getGroupedCounts(since, until, filters, "eventType"),
+          getTierCounts(since, until, filters),
+          getDailyTrends(since, until, filters),
+          getTotalContentCount(since, until, filters),
         ]);
 
-        const enrichedTopContent = await enrichContentBreakdowns(since, until, topContent);
+        const enrichedTopContent = await enrichContentBreakdowns(
+          since,
+          until,
+          filters,
+          topContent,
+        );
 
         return {
           ok: true,
@@ -127,13 +128,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             byContentType,
             byEventType,
             byTier,
-            byCountry,
+            byCountry: {},
             dailyTrends,
           },
           meta: {
             generatedAt: timestamp,
             cacheKey,
-            query: { since: since.toISOString(), until: until.toISOString(), days, filters },
+            query: {
+              since: since.toISOString(),
+              until: until.toISOString(),
+              days,
+              filters,
+            },
             pagination: {
               page,
               limit,
@@ -143,7 +149,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         };
       },
-      { ttl: CACHE_TTL }
+      { ttl: CACHE_TTL },
     );
 
     await logAuditEvent({
@@ -157,59 +163,87 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.setHeader("X-Response-Time", `${Date.now() - startTime}ms`);
     return res.status(200).json(result);
-
-  } catch (error: any) {
+  } catch (error) {
     console.error("Analytics API Error:", error);
     return res.status(500).json({ ok: false, error: "Internal Server Error" });
   }
 }
 
-// --- HELPERS ---
-
-function validateQuery(query: any) {
+function validateQuery(query: Record<string, unknown>) {
   const days = Math.min(MAX_DAYS, Math.max(1, Number(query.days) || DEFAULT_DAYS));
-  const until = query.until ? new Date(query.until) : new Date();
-  const since = query.since ? new Date(query.since) : new Date(until.getTime() - days * 86400000);
-  
+  const until = query.until ? new Date(String(query.until)) : new Date();
+  const since = query.since
+    ? new Date(String(query.since))
+    : new Date(until.getTime() - days * 86400000);
+
   const filters: Record<string, string[]> = {};
-  if (query.contentType) filters.contentType = Array.isArray(query.contentType) ? query.contentType : [query.contentType];
-  
-  return { 
-    since, 
-    until, 
-    days, 
-    filters, 
-    page: Math.max(1, Number(query.page) || 1), 
-    limit: Math.min(MAX_PAGE_SIZE, Number(query.limit) || PAGE_SIZE) 
+  if (query.contentType) {
+    filters.contentType = Array.isArray(query.contentType)
+      ? query.contentType.map(String)
+      : [String(query.contentType)];
+  }
+  if (query.eventType) {
+    filters.eventType = Array.isArray(query.eventType)
+      ? query.eventType.map(String)
+      : [String(query.eventType)];
+  }
+
+  return {
+    since,
+    until,
+    days,
+    filters,
+    page: Math.max(1, Number(query.page) || 1),
+    limit: Math.min(MAX_PAGE_SIZE, Number(query.limit) || PAGE_SIZE),
   };
 }
 
-function toIsoDate(v: any): string {
-  const d = new Date(v);
+function toIsoDate(v: unknown): string {
+  const d = new Date(String(v));
   const iso = d.toISOString();
-  return iso.split('T')[0] || iso.slice(0, 10);
+  return iso.split("T")[0] || iso.slice(0, 10);
 }
 
-// --- DATA ACCESS ---
+function buildWhere(since: Date, until: Date, filters: Record<string, string[]>) {
+  const where: Record<string, unknown> = {
+    createdAt: { gte: since, lte: until },
+  };
 
-async function getSummaryStats(since: Date, until: Date) {
-  // ✅ FIXED: Using createdAt instead of created_at based on Type Error
-  const where = { createdAt: { gte: since, lte: until } };
-  const [total, success, size] = await Promise.all([
+  if (filters.contentType?.length) {
+    where.contentType = { in: filters.contentType };
+  }
+  if (filters.eventType?.length) {
+    where.eventType = { in: filters.eventType };
+  }
+
+  return where;
+}
+
+async function getSummaryStats(
+  since: Date,
+  until: Date,
+  filters: Record<string, string[]>,
+) {
+  const where = buildWhere(since, until, filters);
+
+  const [total, success, size, uniqueContent, uniqueUsers] = await Promise.all([
     prisma.downloadAuditEvent.count({ where }),
     prisma.downloadAuditEvent.count({ where: { ...where, success: true } }),
     prisma.downloadAuditEvent.aggregate({ where, _sum: { fileSize: true } }),
+    prisma.downloadAuditEvent.groupBy({ by: ["slug"], where }),
+    prisma.downloadAuditEvent.groupBy({
+      by: ["emailHash"],
+      where: { ...where, emailHash: { not: null } },
+    }),
   ]);
 
-  const uniqueContent = await prisma.downloadAuditEvent.groupBy({ by: ['slug'], where });
-  const uniqueUsers = await prisma.downloadAuditEvent.groupBy({ by: ['emailHash'], where });
-
-  const byPeriod = await prisma.$queryRaw`
-    SELECT DATE(created_at) as date, COUNT(*) as count 
-    FROM download_audit_events 
-    WHERE created_at BETWEEN ${since} AND ${until} 
-    GROUP BY DATE(created_at) ORDER BY date ASC
-  ` as any[];
+  const byPeriod = (await prisma.$queryRaw`
+    SELECT DATE(created_at) as date, COUNT(*) as count
+    FROM download_audit_events
+    WHERE created_at BETWEEN ${since} AND ${until}
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+  `) as Array<{ date: Date; count: bigint | number }>;
 
   return {
     totalDownloads: total,
@@ -217,30 +251,58 @@ async function getSummaryStats(since: Date, until: Date) {
     uniqueUsers: uniqueUsers.length,
     totalSize: size._sum.fileSize?.toString() || "0",
     avgSuccessRate: total > 0 ? (success / total) * 100 : 0,
-    byPeriod: byPeriod.map(r => ({ date: toIsoDate(r.date), count: Number(r.count) })),
+    byPeriod: byPeriod.map((r) => ({
+      date: toIsoDate(r.date),
+      count: Number(r.count),
+    })),
   };
 }
 
-async function getTopContent(since: Date, until: Date, page: number, limit: number): Promise<DownloadSummary[]> {
+async function getTopContent(
+  since: Date,
+  until: Date,
+  filters: Record<string, string[]>,
+  page: number,
+  limit: number,
+): Promise<DownloadSummary[]> {
   const offset = (page - 1) * limit;
-  const rows = await prisma.$queryRaw`
-    SELECT slug, 
-           COALESCE(content_type, 'unknown') as content_type, 
-           COALESCE(event_type, 'download') as event_type, 
-           COUNT(*) as count, 
-           COUNT(DISTINCT email_hash) as unique_users,
-           MAX(created_at) as last_download, 
-           SUM(COALESCE(file_size, 0)) as total_size, 
-           AVG(latency_ms) as avg_latency,
-           (SUM(CASE WHEN success = true THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as success_rate
-    FROM download_audit_events 
+  const rows = (await prisma.$queryRaw`
+    SELECT
+      slug,
+      COALESCE(content_type::text, 'OTHER') as content_type,
+      COALESCE(event_type::text, 'PREVIEW') as event_type,
+      COUNT(*) as count,
+      COUNT(DISTINCT email_hash) as unique_users,
+      MAX(created_at) as last_download,
+      COALESCE(SUM(file_size), 0) as total_size,
+      AVG(latency_ms) as avg_latency,
+      (SUM(CASE WHEN success = true THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as success_rate
+    FROM download_audit_events
     WHERE created_at BETWEEN ${since} AND ${until}
-    GROUP BY slug, content_type, event_type 
-    ORDER BY count DESC 
+    GROUP BY slug, content_type, event_type
+    ORDER BY count DESC
     LIMIT ${limit} OFFSET ${offset}
-  ` as any[];
+  `) as Array<{
+    slug: string;
+    content_type: string;
+    event_type: string;
+    count: bigint | number;
+    unique_users: bigint | number;
+    last_download: Date | null;
+    total_size: bigint | number | null;
+    avg_latency: number | null;
+    success_rate: number | null;
+  }>;
 
-  return rows.map(r => ({
+  const filtered = rows.filter((row) => {
+    const contentTypePass =
+      !filters.contentType?.length || filters.contentType.includes(row.content_type);
+    const eventTypePass =
+      !filters.eventType?.length || filters.eventType.includes(row.event_type);
+    return contentTypePass && eventTypePass;
+  });
+
+  return filtered.map((r) => ({
     slug: r.slug,
     contentType: r.content_type,
     eventType: r.event_type,
@@ -248,61 +310,131 @@ async function getTopContent(since: Date, until: Date, page: number, limit: numb
     uniqueUsers: Number(r.unique_users),
     lastDownload: r.last_download ? new Date(r.last_download).toISOString() : null,
     totalSize: r.total_size?.toString() || "0",
-    avgLatency: r.avg_latency ? Number(r.avg_latency) : null,
-    successRate: r.success_rate ? Number(r.success_rate) : 0,
+    avgLatency: typeof r.avg_latency === "number" ? Number(r.avg_latency) : null,
+    successRate: typeof r.success_rate === "number" ? Number(r.success_rate) : 0,
   }));
 }
 
-async function getGroupedCounts(since: Date, until: Date, column: string) {
-  const res = await (prisma.downloadAuditEvent as any).groupBy({
-    by: [column],
-    where: { createdAt: { gte: since, lte: until }, [column]: { not: null } },
-    _count: true
-  });
-  return Object.fromEntries(res.map((r: any) => [r[column], r._count]));
-}
-
-async function getDailyTrends(since: Date, until: Date) {
-  const rows = await prisma.$queryRaw`
-    SELECT DATE(created_at) as date, COUNT(*) as downloads, COUNT(DISTINCT email_hash) as users
-    FROM download_audit_events WHERE created_at BETWEEN ${since} AND ${until}
-    GROUP BY DATE(created_at) ORDER BY date ASC
-  ` as any[];
-  return rows.map(r => ({ date: toIsoDate(r.date), downloads: Number(r.downloads), users: Number(r.users) }));
-}
-
-async function getTotalContentCount(since: Date, until: Date) {
+async function getGroupedCounts(
+  since: Date,
+  until: Date,
+  filters: Record<string, string[]>,
+  column: "contentType" | "eventType",
+) {
+  const where = buildWhere(since, until, filters);
   const res = await prisma.downloadAuditEvent.groupBy({
-    by: ['slug'],
-    where: { createdAt: { gte: since, lte: until } }
+    by: [column],
+    where,
+    _count: { _all: true },
+  });
+
+  return Object.fromEntries(res.map((r) => [String(r[column]), r._count._all]));
+}
+
+async function getTierCounts(
+  since: Date,
+  until: Date,
+  filters: Record<string, string[]>,
+) {
+  const where = buildWhere(since, until, filters);
+
+  const rows = await prisma.downloadAuditEvent.findMany({
+    where: {
+      ...where,
+      memberId: { not: null },
+    },
+    select: {
+      member: {
+        select: {
+          tier: true,
+        },
+      },
+    },
+  });
+
+  const out: Record<string, number> = {};
+  for (const row of rows) {
+    const tier = row.member?.tier ? String(row.member.tier) : "unknown";
+    out[tier] = (out[tier] || 0) + 1;
+  }
+  return out;
+}
+
+async function getDailyTrends(
+  since: Date,
+  until: Date,
+  _filters: Record<string, string[]>,
+) {
+  const rows = (await prisma.$queryRaw`
+    SELECT
+      DATE(created_at) as date,
+      COUNT(*) as downloads,
+      COUNT(DISTINCT email_hash) as users
+    FROM download_audit_events
+    WHERE created_at BETWEEN ${since} AND ${until}
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+  `) as Array<{ date: Date; downloads: bigint | number; users: bigint | number }>;
+
+  return rows.map((r) => ({
+    date: toIsoDate(r.date),
+    downloads: Number(r.downloads),
+    users: Number(r.users),
+  }));
+}
+
+async function getTotalContentCount(
+  since: Date,
+  until: Date,
+  filters: Record<string, string[]>,
+) {
+  const where = buildWhere(since, until, filters);
+  const res = await prisma.downloadAuditEvent.groupBy({
+    by: ["slug"],
+    where,
   });
   return res.length;
 }
 
-async function enrichContentBreakdowns(since: Date, until: Date, top: DownloadSummary[]) {
+async function enrichContentBreakdowns(
+  since: Date,
+  until: Date,
+  filters: Record<string, string[]>,
+  top: DownloadSummary[],
+) {
   if (!top.length) return [];
-  const slugs = top.map(t => t.slug);
-  const [tiers, countries] = await Promise.all([
-    (prisma.downloadAuditEvent as any).groupBy({
-      by: ['slug', 'tier'],
-      where: { createdAt: { gte: since, lte: until }, slug: { in: slugs }, tier: { not: null } },
-      _count: true
-    }),
-    (prisma.downloadAuditEvent as any).groupBy({
-      by: ['slug', 'countryCode'],
-      where: { createdAt: { gte: since, lte: until }, slug: { in: slugs }, countryCode: { not: null } },
-      _count: true
-    })
-  ]);
 
-  return top.map(t => {
-    const tResults = (tiers as any[]).filter(r => r.slug === t.slug);
-    const cResults = (countries as any[]).filter(r => r.slug === t.slug);
-    
+  const slugs = top.map((t) => t.slug);
+
+  const rows = await prisma.downloadAuditEvent.findMany({
+    where: {
+      ...buildWhere(since, until, filters),
+      slug: { in: slugs },
+      memberId: { not: null },
+    },
+    select: {
+      slug: true,
+      member: {
+        select: {
+          tier: true,
+        },
+      },
+    },
+  });
+
+  return top.map((t) => {
+    const forSlug = rows.filter((r) => r.slug === t.slug);
+    const byTier: Record<string, number> = {};
+
+    for (const row of forSlug) {
+      const tier = row.member?.tier ? String(row.member.tier) : "unknown";
+      byTier[tier] = (byTier[tier] || 0) + 1;
+    }
+
     return {
       ...t,
-      byTier: Object.fromEntries(tResults.map(r => [r.tier, r._count])),
-      byCountry: Object.fromEntries(cResults.map(r => [r.countryCode, r._count]))
+      byTier,
+      byCountry: {},
     };
   });
 }

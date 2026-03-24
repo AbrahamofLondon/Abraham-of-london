@@ -1,5 +1,5 @@
-/* pages/vault/briefs/index.tsx — VAULT BRIEFS INDEX (Permanent Shared Resolver) */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// pages/vault/briefs/index.tsx — VAULT BRIEFS INDEX (SSOT aligned)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -17,10 +17,21 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import * as ContentSource from "contentlayer/generated";
-import { normalizeSlug as normalizeContentSlug } from "@/lib/content/server";
-import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
-import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
+
+import {
+  getAllCombinedDocs,
+  normalizeSlug as normalizeContentSlug,
+  sanitizeData,
+} from "@/lib/content/server";
+
+import type { AccessTier } from "@/lib/access/tier-policy";
+import {
+  normalizeUserTier,
+  normalizeRequiredTier,
+  hasAccess,
+  requiredTierFromDoc,
+  getTierLabel,
+} from "@/lib/access/tier-policy";
 
 type BriefCard = {
   slug: string;
@@ -39,73 +50,112 @@ type BriefCard = {
 type Props = {
   items: BriefCard[];
   total: number;
-  requiredTier: AccessTier;
 };
 
 function safeString(v: unknown): string {
-  return typeof v === "string" ? v : "";
+  if (typeof v === "string") return v;
+  if (v == null) return "";
+  return String(v);
 }
 
-function safeArray<T = unknown>(v: unknown): T[] {
-  return Array.isArray(v) ? (v as T[]) : [];
+function cleanPathish(input: unknown): string {
+  return safeString(input)
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
+}
+
+function stripPrefixOnce(source: string, prefix: string): string {
+  const normalizedPrefix = `${prefix.toLowerCase()}/`;
+  if (source.toLowerCase().startsWith(normalizedPrefix)) {
+    return source.slice(normalizedPrefix.length).replace(/^\/+/, "");
+  }
+  return source;
 }
 
 function normalizeBriefSlug(input: unknown): string {
-  const raw = normalizeContentSlug(String(input || ""))
-    .replace(/^content\//i, "")
-    .replace(/^vault\/briefs\//i, "")
-    .replace(/^briefs\//i, "")
-    .replace(/\.(md|mdx)$/i, "")
-    .replace(/^\/+|\/+$/g, "");
+  let s = cleanPathish(
+    normalizeContentSlug(safeString(input))
+      .replace(/\.(md|mdx)$/i, "")
+      .replace(/^content\//i, "")
+      .replace(/^vault\//i, "")
+      .replace(/^briefs\//i, ""),
+  );
 
-  const parts = raw.split("/").filter(Boolean);
+  if (!s || s.includes("..")) return "";
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+
+    const nextA = stripPrefixOnce(s, "content");
+    if (nextA !== s) {
+      s = nextA;
+      changed = true;
+    }
+
+    const nextB = stripPrefixOnce(s, "vault");
+    if (nextB !== s) {
+      s = nextB;
+      changed = true;
+    }
+
+    const nextC = stripPrefixOnce(s, "briefs");
+    if (nextC !== s) {
+      s = nextC;
+      changed = true;
+    }
+  }
+
+  s = cleanPathish(s);
+  if (!s || s.includes("..")) return "";
+
+  const parts = s.split("/").filter(Boolean);
   return parts[parts.length - 1] || "";
 }
 
-function getAllContentCandidates(): any[] {
-  const source = ContentSource as any;
-
-  return [
-    ...safeArray(source.allBriefs),
-    ...safeArray(source.allVaultBriefs),
-    ...safeArray(source.allDocuments),
-    ...safeArray(source.allResources),
-    ...safeArray(source.allPosts),
-    ...safeArray(source.allCanon),
-    ...safeArray(source.allDispatches),
-  ];
-}
-
 function isBriefDoc(doc: any): boolean {
-  const flattened = safeString(doc?._raw?.flattenedPath).toLowerCase();
-  const slug = safeString(doc?.slug).toLowerCase();
+  if (!doc) return false;
+
+  const docKind = safeString(doc?.docKind).toLowerCase();
   const type = safeString(doc?.type || doc?._type).toLowerCase();
   const kind = safeString(doc?.kind).toLowerCase();
   const category = safeString(doc?.category).toLowerCase();
   const series = safeString(doc?.series).toLowerCase();
+  const flattened = safeString(doc?._raw?.flattenedPath).toLowerCase();
+  const sourceFilePath = safeString(doc?._raw?.sourceFilePath).toLowerCase();
+  const slug = safeString(doc?.slug).toLowerCase();
 
   return (
-    flattened.includes("vault/briefs/") ||
-    flattened.startsWith("briefs/") ||
-    flattened.includes("/briefs/") ||
-    slug.includes("vault/briefs/") ||
-    slug.startsWith("briefs/") ||
-    slug.includes("/briefs/") ||
+    docKind === "brief" ||
     type.includes("brief") ||
     kind.includes("brief") ||
     category.includes("brief") ||
-    series.includes("brief")
+    series.includes("brief") ||
+    flattened.startsWith("briefs/") ||
+    flattened.startsWith("content/briefs/") ||
+    flattened.startsWith("vault/briefs/") ||
+    sourceFilePath.startsWith("briefs/") ||
+    sourceFilePath.startsWith("content/briefs/") ||
+    sourceFilePath.startsWith("vault/briefs/") ||
+    slug.startsWith("briefs/") ||
+    slug.startsWith("vault/briefs/")
   );
 }
 
 function getCombinedBriefs(): any[] {
   const seen = new Set<string>();
 
-  return getAllContentCandidates()
+  return (getAllCombinedDocs() || [])
     .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
     .filter(isBriefDoc)
     .filter((doc: any) => {
-      const key = safeString(doc?._id || doc?._raw?.flattenedPath || doc?.slug).toLowerCase();
+      const key = safeString(
+        doc?._id || doc?._raw?.flattenedPath || doc?.slug,
+      ).toLowerCase();
+
       if (!key) return false;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -122,7 +172,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       const slugBare = normalizeBriefSlug(rawSlug);
       if (!slugBare) return null;
 
-      const required = tiers.normalizeRequired(requiredTierFromDoc(doc));
+      const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
 
       return {
         slug: slugBare,
@@ -138,62 +188,63 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           safeString(doc?.excerpt).trim() ||
           safeString(doc?.summary).trim() ||
           "Technical specification pending.",
-        requiredTier: required,
-        tierLabel: tiers.getLabel(required),
+        requiredTier,
+        tierLabel: getTierLabel(requiredTier),
         volume: typeof doc?.volume === "number" ? doc.volume : null,
         readTime: safeString(doc?.readTime).trim() || "5 min read",
         tags: Array.isArray(doc?.tags) ? doc.tags.map(String) : [],
         publishedAt: doc?.date ? String(doc.date) : null,
       };
     })
-    .filter((x): x is BriefCard => Boolean(x));
+    .filter((item): item is BriefCard => Boolean(item));
 
   items.sort((a, b) => {
-    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-    return db - da;
+    const timeA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const timeB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return timeB - timeA;
   });
 
   return {
-    props: {
+    props: sanitizeData({
       items,
       total: items.length,
-      requiredTier: "public",
-    },
+    }),
     revalidate: 1800,
   };
 };
 
 const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
   const { data: session } = useSession();
-  const [q, setQ] = React.useState("");
+  const [query, setQuery] = React.useState("");
   const [series, setSeries] = React.useState<string>("All");
 
   const userTier = normalizeUserTier(
-    (((session?.user as any)?.tier || (session as any)?.aol?.tier || "public") as string)
+    (session?.user as any)?.tier ??
+      (session as any)?.aol?.tier ??
+      "public",
   );
 
   const seriesOptions = React.useMemo(() => {
-    const set = new Set<string>(["All"]);
-    items.forEach((it) => set.add(it.series));
-    return Array.from(set);
+    const values = new Set<string>(["All"]);
+    items.forEach((item) => values.add(item.series));
+    return Array.from(values);
   }, [items]);
 
   const filtered = React.useMemo(() => {
-    const qq = q.trim().toLowerCase();
+    const q = query.trim().toLowerCase();
 
-    return items.filter((it) => {
-      const sOk = series === "All" || it.series === series;
-      const qOk =
-        !qq ||
-        it.title.toLowerCase().includes(qq) ||
-        it.abstract.toLowerCase().includes(qq) ||
-        it.series.toLowerCase().includes(qq) ||
-        it.tags.some((t) => t.toLowerCase().includes(qq));
+    return items.filter((item) => {
+      const seriesOk = series === "All" || item.series === series;
+      const queryOk =
+        !q ||
+        item.title.toLowerCase().includes(q) ||
+        item.abstract.toLowerCase().includes(q) ||
+        item.series.toLowerCase().includes(q) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(q));
 
-      return sOk && qOk;
+      return seriesOk && queryOk;
     });
-  }, [items, q, series]);
+  }, [items, query, series]);
 
   return (
     <Layout
@@ -202,6 +253,10 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
     >
       <Head>
         <title>Intelligence Registry // Abraham of London</title>
+        <meta
+          name="description"
+          content="Strategic briefings, dossiers, and institutional intelligence."
+        />
       </Head>
 
       <section className="relative border-b border-white/5 pb-16 pt-32">
@@ -220,7 +275,7 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
               </h1>
 
               <p className="max-w-xl border-l border-amber-500/40 pl-6 font-light italic text-white/40">
-                Technical intelligence converted from vision to operational spec.
+                Technical intelligence converted from vision to operational specification.
                 Search the registry for authorized doctrine.
               </p>
             </div>
@@ -233,12 +288,14 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
                     Network_Secure
                   </span>
                 </div>
+
                 <span className="border border-amber-500/20 px-2 py-0.5 text-[8px] font-mono uppercase text-amber-500/50">
                   Tier: {userTier}
                 </span>
               </div>
+
               <p className="text-[10px] font-mono text-white/60">
-                ID: {String(session?.user?.email || "GUEST_L1")}
+                ID: {safeString(session?.user?.email || "GUEST_L1")}
               </p>
             </div>
           </div>
@@ -250,9 +307,9 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
                 size={18}
               />
               <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Query registry (Title, Tags, Index)..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Query registry (title, tags, index)..."
                 className="w-full border border-white/10 bg-zinc-900/40 py-4 pl-12 pr-4 text-sm font-mono outline-none transition-all focus:border-amber-500/50"
               />
             </div>
@@ -267,9 +324,9 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
                 onChange={(e) => setSeries(e.target.value)}
                 className="w-full appearance-none border border-white/10 bg-zinc-900/40 py-4 pl-12 pr-4 text-sm font-mono outline-none focus:border-amber-500/50"
               >
-                {seriesOptions.map((s) => (
-                  <option key={s} value={s} className="bg-black">
-                    {s}
+                {seriesOptions.map((entry) => (
+                  <option key={entry} value={entry} className="bg-black">
+                    {entry}
                   </option>
                 ))}
               </select>
@@ -293,6 +350,7 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
           <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((brief) => {
               const canOpen = hasAccess(userTier, brief.requiredTier);
+              const isPublic = brief.requiredTier === "public";
 
               return (
                 <Link
@@ -305,19 +363,25 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
                       INDEX_{brief.slug.split("-")[1] || brief.slug.toUpperCase()}
                     </span>
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors group-hover:border-amber-500">
-                      {brief.requiredTier === "public" ? (
-                        <Shield size={12} className="text-emerald-500" />
-                      ) : (
-                        <Lock
-                          size={12}
-                          className={
-                            canOpen
-                              ? "text-emerald-500"
-                              : "text-white/20 group-hover:text-amber-500"
-                          }
-                        />
-                      )}
+                    <div className="flex items-center gap-2">
+                      <span className="hidden text-[8px] font-mono uppercase tracking-widest text-white/25 md:inline">
+                        {brief.tierLabel}
+                      </span>
+
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors group-hover:border-amber-500">
+                        {isPublic ? (
+                          <Shield size={12} className="text-emerald-500" />
+                        ) : (
+                          <Lock
+                            size={12}
+                            className={
+                              canOpen
+                                ? "text-emerald-500"
+                                : "text-white/20 group-hover:text-amber-500"
+                            }
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -333,6 +397,17 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
                     <p className="line-clamp-3 text-[11px] font-light italic leading-relaxed text-white/28">
                       {brief.abstract}
                     </p>
+                  </div>
+
+                  <div className="mt-8 flex flex-wrap gap-2">
+                    {brief.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={`${brief.slug}-${tag}`}
+                        className="rounded-full border border-white/10 px-2 py-1 text-[8px] font-mono uppercase tracking-wider text-white/35"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
 
                   <div className="mt-12 flex items-center justify-between border-t border-white/5 pt-6">

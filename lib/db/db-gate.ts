@@ -3,7 +3,7 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 /**
  * Determines whether database access should be attempted in the current environment.
- * Prevents build-time or explicitly disabled environments from touching the database.
+ * Intended to block build-time access and allow explicit overrides when needed.
  */
 export function shouldUseDatabase(): boolean {
   const forceDb =
@@ -12,27 +12,23 @@ export function shouldUseDatabase(): boolean {
   const skipDb =
     process.env.SKIP_DB === "1" || process.env.SKIP_DB === "true";
 
+  const isProdBuild = process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD;
+  const hasDatabaseUrl = Boolean(process.env.DATABASE_URL?.trim());
+  const isCi = process.env.CI === "true";
+  const isTest =
+    process.env.NODE_ENV === "test" ||
+    process.env.VITEST === "true" ||
+    process.env.JEST_WORKER_ID != null;
+
   if (forceDb) return true;
+  if (skipDb) return false;
 
-  // Next.js production build phase
-  if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) {
-    return false;
-  }
+  if (!hasDatabaseUrl) return false;
+  if (isProdBuild) return false;
 
-  // Manual override for build workers / deployments
-  if (skipDb) {
-    return false;
-  }
-
-  // No connection string available
-  if (!process.env.DATABASE_URL?.trim()) {
-    return false;
-  }
-
-  // CI commonly should not touch DB unless explicitly forced
-  if (process.env.CI === "true") {
-    return false;
-  }
+  // In CI, default to off unless explicitly forced.
+  // But allow tests to opt in through FORCE_DB.
+  if (isCi && !isTest) return false;
 
   return true;
 }

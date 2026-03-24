@@ -20,6 +20,8 @@ type Err = {
   requiredTier?: string;
 };
 
+type TierDocLike = Parameters<typeof requiredTierFromDoc>[0];
+
 function normalizeParamSlug(input: unknown): string {
   const s = String(input ?? "")
     .trim()
@@ -27,15 +29,37 @@ function normalizeParamSlug(input: unknown): string {
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
+
   if (!s || s.includes("..")) return "";
   return s.split("/").filter(Boolean).pop() || "";
 }
 
-function getBodyCode(doc: any): string {
-  return String(doc?.body?.code || doc?.bodyCode || "");
+function getBodyCode(doc: unknown): string {
+  const d = doc as { body?: { code?: unknown }; bodyCode?: unknown };
+  return String(d?.body?.code || d?.bodyCode || "");
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Err>) {
+function toTierDocLike(doc: unknown): TierDocLike {
+  const d = doc as {
+    tier?: unknown;
+    accessTier?: unknown;
+    metadata?: { tier?: unknown; accessTier?: unknown } | null;
+  };
+
+  return {
+    tier:
+      d?.tier ??
+      d?.accessTier ??
+      d?.metadata?.tier ??
+      d?.metadata?.accessTier ??
+      "public",
+  } as TierDocLike;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Ok | Err>,
+) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
@@ -47,29 +71,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (!slug) return res.status(400).json({ ok: false, reason: "BAD_SLUG" });
 
   const doc = getDocBySlug(`shorts/${slug}`) || getDocBySlug(slug);
-  if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
+  if (!doc || (doc as { draft?: boolean }).draft) {
+    return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
+  }
 
-  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(toTierDocLike(doc)));
   const isPublic = requiredTier === "public";
 
   if (isPublic) {
     const bodyCode = getBodyCode(doc);
-    if (!bodyCode) return res.status(200).json({ ok: false, reason: "NO_BODY_CODE", requiredTier });
-    return res.status(200).json({ ok: true, requiredTier, tier: "public", bodyCode });
+    if (!bodyCode) {
+      return res.status(200).json({ ok: false, reason: "NO_BODY_CODE", requiredTier });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      requiredTier,
+      tier: "public",
+      bodyCode,
+    });
   }
 
   const auth = await getInnerCircleAccess(req);
   if (!auth?.hasAccess) {
-    return res.status(401).json({ ok: false, reason: auth?.reason || "REQUIRES_AUTH", requiredTier });
+    return res.status(401).json({
+      ok: false,
+      reason: auth?.reason || "REQUIRES_AUTH",
+      requiredTier,
+    });
   }
 
-  const userTier = tiers.normalizeUser((auth as any)?.tier ?? "public");
+  const userTier = tiers.normalizeUser((auth as { tier?: unknown })?.tier ?? "public");
   if (!tiers.hasAccess(userTier, requiredTier)) {
-    return res.status(403).json({ ok: false, reason: "INSUFFICIENT_TIER", requiredTier });
+    return res.status(403).json({
+      ok: false,
+      reason: "INSUFFICIENT_TIER",
+      requiredTier,
+    });
   }
 
   const bodyCode = getBodyCode(doc);
-  if (!bodyCode) return res.status(200).json({ ok: false, reason: "NO_BODY_CODE", requiredTier });
+  if (!bodyCode) {
+    return res.status(200).json({ ok: false, reason: "NO_BODY_CODE", requiredTier });
+  }
 
   return res.status(200).json({
     ok: true,

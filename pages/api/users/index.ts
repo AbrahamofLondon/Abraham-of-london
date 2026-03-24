@@ -1,126 +1,244 @@
-// pages/api/users/index.ts - UPDATED WITH CORRECT IMPORTS
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { withApiRateLimit, RATE_LIMIT_CONFIGS } from '@/lib/server/rate-limit-unified';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/options'; // ✅ Your file exists at lib/auth/options.ts
+// pages/api/users/index.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
 
-// Type for our user data
+import { withApiRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/server/rate-limit-unified";
+import { authOptions } from "@/lib/auth/options";
+import { prisma } from "@/lib/prisma.server";
+
 interface User {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   role?: string;
   createdAt?: string;
 }
 
-// Handler function
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+type UsersApiSuccess = {
+  success: true;
+  data: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  meta: {
+    timestamp: string;
+    endpoint: string;
+    source: string;
+    authenticated: boolean;
+    user?: string | null;
+    model?: string;
+  };
+};
+
+type UsersApiError = {
+  success: false;
+  error: string;
+  message?: string;
+  allowed?: string[];
+};
+
+type UsersApiResponse = UsersApiSuccess | UsersApiError;
+
+type PrismaLikeDelegate = {
+  count: (args?: Record<string, unknown>) => Promise<number>;
+  findMany: (args?: Record<string, unknown>) => Promise<unknown[]>;
+};
+
+type UserDelegateResolution = {
+  delegate: PrismaLikeDelegate | null;
+  modelName: string | null;
+};
+
+function toPositiveInt(value: unknown, fallback: number): number {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function asString(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function toIsoString(value: unknown): string | undefined {
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "string" && value.trim()) return value;
+  return undefined;
+}
+
+function pickFirstString(obj: Record<string, unknown>, keys: string[]): string {
+  for (const key of keys) {
+    const value = obj[key];
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return "";
+}
+
+function pickId(obj: Record<string, unknown>): string | number {
+  const id = obj.id ?? obj.userId ?? obj.uuid ?? obj._id ?? "";
+  if (typeof id === "string" || typeof id === "number") return id;
+  return "";
+}
+
+function detectUserDelegate(prismaClient: unknown): UserDelegateResolution {
+  const prismaRecord = prismaClient as Record<string, unknown>;
+
+  const candidates = [
+    "user",
+    "User",
+    "appUser",
+    "AppUser",
+    "users",
+    "Users",
+    "member",
+    "Member",
+    "accountUser",
+    "AccountUser",
+  ];
+
+  for (const modelName of candidates) {
+    const candidate = prismaRecord[modelName];
+    if (
+      candidate &&
+      typeof candidate === "object" &&
+      typeof (candidate as PrismaLikeDelegate).count === "function" &&
+      typeof (candidate as PrismaLikeDelegate).findMany === "function"
+    ) {
+      return {
+        delegate: candidate as PrismaLikeDelegate,
+        modelName,
+      };
+    }
+  }
+
+  return {
+    delegate: null,
+    modelName: null,
+  };
+}
+
+function normalizeDbUser(row: unknown): User {
+  const obj = (row && typeof row === "object" ? row : {}) as Record<string, unknown>;
+
+  const email = pickFirstString(obj, ["email", "emailAddress", "username", "login"]);
+  const firstName = pickFirstString(obj, ["firstName", "givenName"]);
+  const lastName = pickFirstString(obj, ["lastName", "familyName"]);
+  const fullName = pickFirstString(obj, ["name", "fullName", "displayName"]);
+
+  let name = fullName;
+  if (!name) {
+    name = [firstName, lastName].filter(Boolean).join(" ").trim();
+  }
+  if (!name) {
+    name = email || "Unknown User";
+  }
+
+  const role = pickFirstString(obj, ["role", "userRole", "accessRole"]) || "user";
+
+  return {
+    id: pickId(obj),
+    name,
+    email,
+    role,
+    createdAt: toIsoString(
+      obj.createdAt ??
+        obj.created_at ??
+        obj.updatedAt ??
+        obj.updated_at,
+    ),
+  };
+}
+
+function buildSearchWhere(search: string): Record<string, unknown> {
+  if (!search) return {};
+
+  return {
+    OR: [
+      { name: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+      { fullName: { contains: search, mode: "insensitive" } },
+      { displayName: { contains: search, mode: "insensitive" } },
+      { username: { contains: search, mode: "insensitive" } },
+    ],
+  };
+}
+
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<UsersApiResponse>,
+): Promise<void> {
   try {
-    // ✅ CORRECT: Use getServerSession with your authOptions
-    const session = await getServerSession(req, res, authOptions);
-    
-    // Method guard
-    if (req.method !== 'GET') {
-      res.setHeader('Allow', ['GET']);
-      return res.status(405).json({
+    if (req.method !== "GET") {
+      res.setHeader("Allow", ["GET"]);
+      res.status(405).json({
         success: false,
-        error: 'Method not allowed',
-        allowed: ['GET'],
+        error: "Method not allowed",
+        allowed: ["GET"],
       });
+      return;
     }
 
-    // Parse query parameters
-    const { page = '1', limit = '10', search = '' } = req.query;
-    const pageNum = parseInt(page as string) || 1;
-    const limitNum = parseInt(limit as string) || 10;
-    
-    // Check authentication for private data
+    const session = await getServerSession(req, res, authOptions);
+
     if (!session) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
-        error: 'Unauthorized',
-        message: 'Authentication required',
+        error: "Unauthorized",
+        message: "Authentication required",
       });
+      return;
     }
-    
-    // Calculate pagination values
-    const startIndex = (pageNum - 1) * limitNum;
-    
-    // Try to fetch from database first
-    let users: User[] = [];
+
+    const pageNum = toPositiveInt(req.query.page, 1);
+    const limitNum = clamp(toPositiveInt(req.query.limit, 10), 1, 100);
+    const search = asString(req.query.search).trim();
+    const skip = (pageNum - 1) * limitNum;
+
+    const { delegate, modelName } = detectUserDelegate(prisma);
+
+    if (!delegate || !modelName) {
+      res.status(500).json({
+        success: false,
+        error: "User model not available",
+        message: "No user-like Prisma model found on the generated client",
+      });
+      return;
+    }
+
+    const where = buildSearchWhere(search);
+
     let totalUsers = 0;
-    
+    let dbUsers: unknown[] = [];
+
     try {
-      // Use your Prisma instance
-      const { prisma } = await import('@/lib/prisma');
-      
-      // Build query
-      const where: any = {};
-      if (search) {
-        where.OR = [
-          { name: { contains: search as string, mode: 'insensitive' } },
-          { email: { contains: search as string, mode: 'insensitive' } },
-        ];
-      }
-      
-      // Get total count
-      totalUsers = await prisma.user.count({ where });
-      
-      // Fetch paginated users
-      const dbUsers = await prisma.user.findMany({
+      totalUsers = await delegate.count({ where });
+
+      dbUsers = await delegate.findMany({
         where,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: 'desc' },
-        skip: startIndex,
+        orderBy: { createdAt: "desc" },
+        skip,
         take: limitNum,
       });
-      
-      // Transform to interface
-      users = dbUsers.map(user => ({
-        id: user.id,
-        name: user.name || '',
-        email: user.email,
-        role: user.role || 'user',
-        createdAt: user.createdAt.toISOString(),
-      }));
-      
     } catch (dbError) {
-      console.warn('Database fetch failed, using mock data:', dbError);
-      
-      // Fallback mock data
-      users = [
-        { 
-          id: 1, 
-          name: 'John Doe', 
-          email: 'john@example.com',
-          role: 'admin',
-          createdAt: new Date().toISOString(),
-        },
-        { 
-          id: 2, 
-          name: 'Jane Smith', 
-          email: 'jane@example.com',
-          role: 'user',
-          createdAt: new Date().toISOString(),
-        },
-        { 
-          id: 3, 
-          name: 'Bob Johnson', 
-          email: 'bob@example.com',
-          role: 'user',
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      totalUsers = users.length;
+      console.error("[/api/users] Database query failed:", dbError);
+
+      res.status(500).json({
+        success: false,
+        error: "Failed to fetch users",
+        message: dbError instanceof Error ? dbError.message : "Database query failed",
+      });
+      return;
     }
-    
-    // Successful response
+
+    const users = Array.isArray(dbUsers) ? dbUsers.map(normalizeDbUser) : [];
+
     res.status(200).json({
       success: true,
       data: users,
@@ -128,31 +246,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         page: pageNum,
         limit: limitNum,
         total: totalUsers,
-        totalPages: Math.ceil(totalUsers / limitNum),
-        hasNextPage: (pageNum * limitNum) < totalUsers,
+        totalPages: Math.max(1, Math.ceil(totalUsers / limitNum)),
+        hasNextPage: pageNum * limitNum < totalUsers,
         hasPrevPage: pageNum > 1,
       },
       meta: {
         timestamp: new Date().toISOString(),
-        endpoint: '/api/users',
-        source: 'pages-router',
+        endpoint: "/api/users",
+        source: "pages-router",
         authenticated: true,
-        user: session.user?.email,
+        user: session.user?.email ?? null,
+        model: modelName,
       },
     });
-    
   } catch (error) {
-    console.error('Users API error:', error);
-    
-    // Error response
+    console.error("[/api/users] API error:", error);
+
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch users',
-      message: error instanceof Error ? error.message : 'Unknown error',
+      error: "Failed to fetch users",
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }
 
-// Export with rate limiting
-// If withApiRateLimit doesn't work, use this alternative:
 export default withApiRateLimit(handler, RATE_LIMIT_CONFIGS.authenticated);

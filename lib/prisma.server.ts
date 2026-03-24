@@ -1,9 +1,8 @@
-// lib/prisma.server.ts — SERVER-ONLY PRISMA BARREL (Node runtime)
+// lib/prisma.server.ts — SERVER-SIDE PRISMA BARREL
 //
-// Single source of truth for App Router server actions/routes.
-// Delegates to the hardened Neon-backed server Prisma implementation.
-
-import "server-only";
+// Single source of truth for database access.
+// Directives like "server-only" are removed to support the Pages Router 
+// while keeping DB logic isolated from the client bundle.
 
 export {
   prisma,

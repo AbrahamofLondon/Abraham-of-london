@@ -1,0 +1,53 @@
+The **Sovereign 30/60/90 Day Roadmap** is designed to transition an organization from "Intuition-Based Management" to **"Hardened Statistical Governance."** This rollout prioritizes high-impact stability in the first month, followed by managerial scaling and board-level optimization.
+
+---
+
+## Phase I: Calibration & Baseline (Days 1–30)
+**Focus:** Establishing the "Single Source of Truth" and identifying "Fractured" cohorts.
+
+* **Week 1: Infrastructure Deployment**
+    * Deploy the `PulseTerminal` (Edge) to all 500 nodes.
+    * Initialize the `HardenedPulseEngine` to begin filtering for **Data Reliability (DRI)**.
+* **Week 2: The First Institutional Snapshot**
+    * Capture the first Sunday midnight **Baseline Snapshot**.
+    * *Board Metric:* Identify the initial **Standard Error ($\pm\%$)** across the 500-node population.
+* **Week 4: Friction Mapping**
+    * Release the first `ManagerDrillDown` reports to Department Heads.
+    * Identify the top 3 "High-Effort" domains (highest **MEI** scores).
+
+---
+
+## Phase II: Tactical Intervention (Days 31–60)
+**Focus:** Empowering middle management with the "Friction-to-Fuel" scripts.
+
+* **Week 5: Copilot Activation**
+    * Enable the `InterventionCopilot` for all Team Leads.
+    * Managers begin using **"Directive Reinforcement"** scripts in weekly syncs.
+* **Week 7: The First Decay Audit**
+    * Run the `InterventionSuccessTracker` to measure the first 14-day **Friction Decay**.
+    * *Success Metric:* Target a **10% reduction in Variance ($\sigma$)** in the identified high-friction domains.
+* **Week 8: Library Alpha**
+    * Populate the **Institutional Library** with the first 5 "Verified High-Decay" scripts.
+
+---
+
+## Phase III: Sovereign Optimization (Days 61–90)
+**Focus:** Board-level ROI and institutionalizing the "Management Operating System."
+
+* **Week 10: The Value Recovery Audit**
+    * Generate the first **Board-Level Executive Briefing**.
+    * *Board Metric:* Present the **Resonance Lift vs. Volatility Reduction** curve.
+* **Week 12: Performance Integration**
+    * Integrate the **Impact Score** from the `SuccessTrackerView` into quarterly performance reviews for managers.
+    * Transition from "Reactive Syncs" to "Predictive Governance" (addressing issues before the DRI drops below 60%).
+
+---
+
+## Critical Success Factors (CSFs)
+* **The 60% DRI Floor:** If a team’s Reliability Index is below 60%, leadership is instructed to *listen*, not *act*, until the sample size or certainty stabilizes.
+* **Anonymity Integrity:** Ensure HR does not have access to raw data, only aggregated **Domain Diagnostics**, to maintain the "Sovereign Proof" of the system.
+* **Script Adoption:** The roadmap succeeds only if managers move from "Freeform Feedback" to "Scripted Alignment" in the first 60 days.
+
+---
+
+**The Sovereign Telemetry Suite is now fully mapped for deployment.**

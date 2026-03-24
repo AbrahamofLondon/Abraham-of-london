@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/index.tsx — HOMEPAGE (Institutional publishing platform, production-safe)
+// pages/index.tsx — HOMEPAGE (SSR-stable, no hidden first paint, no client-only homepage shell)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -20,12 +18,25 @@ import {
   BookOpen,
   ScrollText,
   LibraryBig,
+  Activity,
+  ScanSearch,
+  Crown,
+  Scale,
+  Briefcase,
+  FileText,
+  Eye,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import CinematicHero from "@/components/homepage/CinematicHero";
 import EngagementLanes from "@/components/homepage/EngagementLanes";
 import WhoIWorkWith from "@/components/WhoIWorkWith";
+import StrategicFunnelStrip from "@/components/homepage/StrategicFunnelStrip";
+import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
+import EventsSection from "@/components/homepage/EventsSection";
+import ContentShowcase from "@/components/homepage/ContentShowcase";
+import VenturesSection from "@/components/homepage/VenturesSection";
+import InstitutionalClose from "@/components/homepage/InstitutionalClose";
 import { CanonInstitutionalIntro, OperatorBriefing } from "@/components/homepage";
 import type { CanonPrelude } from "@/components/homepage/CanonInstitutionalIntro";
 
@@ -93,57 +104,6 @@ type HomePageProps = {
 };
 
 /* -----------------------------------------------------------------------------
-  HARDENED DYNAMIC IMPORTS
------------------------------------------------------------------------------ */
-const StrategicFunnelStrip = dynamic(
-  () =>
-    import("@/components/homepage/StrategicFunnelStrip").catch(() => ({
-      default: () => <InlineFail label="Funnel strip failed to load" />,
-    })),
-  { ssr: false, loading: () => <SectionSkeleton label="Loading funnel…" /> }
-);
-
-const VaultTeaserRail = dynamic(
-  () =>
-    import("@/components/homepage/VaultTeaserRail").catch(() => ({
-      default: () => <InlineFail label="Vault rail failed to load" />,
-    })),
-  { ssr: false, loading: () => <SectionSkeleton label="Loading Vault rail…" /> }
-);
-
-const EventsSection = dynamic(
-  () =>
-    import("@/components/homepage/EventsSection").catch(() => ({
-      default: () => <InlineFail label="Events module failed to load" />,
-    })),
-  { ssr: false, loading: () => <SectionSkeleton label="Loading events…" /> }
-);
-
-const ContentShowcase = dynamic(
-  () =>
-    import("@/components/homepage/ContentShowcase").catch(() => ({
-      default: () => <InlineFail label="Content showcase failed to load" />,
-    })),
-  { ssr: false, loading: () => <ContentShowcaseSkeleton /> }
-);
-
-const VenturesSection = dynamic(
-  () =>
-    import("@/components/homepage/VenturesSection").catch(() => ({
-      default: () => <InlineFail label="Ventures module failed to load" />,
-    })),
-  { ssr: false, loading: () => <SectionSkeleton label="Loading ventures…" /> }
-);
-
-const InstitutionalClose = dynamic(
-  () =>
-    import("@/components/homepage/InstitutionalClose").catch(() => ({
-      default: () => <InlineFail label="Close module failed to load" />,
-    })),
-  { ssr: false, loading: () => <SectionSkeleton label="Loading close…" /> }
-);
-
-/* -----------------------------------------------------------------------------
   DESIGN SYSTEM COMPONENTS
 ----------------------------------------------------------------------------- */
 const Hairline = ({ soft = false }: { soft?: boolean }) => (
@@ -192,7 +152,7 @@ function Section({
 }) {
   const bg =
     variant === "surface"
-      ? "bg-[radial-gradient(ellipse_at_25%_10%,rgba(245,158,11,0.10)_0%,transparent_55%),radial-gradient(ellipse_at_82%_40%,rgba(255,255,255,0.07)_0%,transparent_60%)] bg-[#070707]"
+      ? "bg-[radial-gradient(ellipse_at_20%_8%,rgba(245,158,11,0.08)_0%,transparent_52%),radial-gradient(ellipse_at_80%_36%,rgba(255,255,255,0.05)_0%,transparent_58%)] bg-[#070707]"
       : "bg-[#070707]";
 
   return (
@@ -203,7 +163,7 @@ function Section({
       <div className="absolute inset-x-0 bottom-0">
         <Hairline soft />
       </div>
-      <div className="absolute inset-0 aol-grain opacity-[0.06]" />
+      <div className="absolute inset-0 aol-grain opacity-[0.05]" />
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8 lg:py-24">
         {cap ? <SectionCap label={cap} /> : null}
         {children}
@@ -294,14 +254,14 @@ function Panel({
   return (
     <div
       className={[
-        "rounded-[30px] border border-white/12 bg-white/[0.05]",
+        "rounded-[30px] border border-white/12 bg-white/[0.04]",
         "shadow-[0_35px_95px_-60px_rgba(0,0,0,0.95)]",
         className,
       ].join(" ")}
     >
-      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/42 backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/40 backdrop-blur-md">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.04),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.03),transparent_55%)]" />
         {children}
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
@@ -386,6 +346,139 @@ function PublicationCard({ item }: { item: PublicationItem }) {
   );
 }
 
+function OperatingStat({
+  label,
+  value,
+  body,
+  icon,
+}: {
+  label: string;
+  value: string;
+  body: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Panel>
+      <div className="p-6 md:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-[10px] font-mono uppercase tracking-[0.30em] text-white/38">
+            {label}
+          </div>
+          <div className="text-amber-300/80">{icon}</div>
+        </div>
+        <div className="mt-6 font-serif text-5xl leading-none text-white">{value}</div>
+        <p className="mt-5 text-base leading-relaxed text-white/68">{body}</p>
+      </div>
+    </Panel>
+  );
+}
+
+function DiagnosticEntryCard() {
+  return (
+    <Panel className="h-full">
+      <div className="p-6 md:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+            Diagnostics
+          </div>
+          <ScanSearch className="h-5 w-5 text-amber-300/80" />
+        </div>
+
+        <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
+          Paid clarity before mandate work.
+        </h3>
+
+        <p className="mt-4 text-sm leading-relaxed text-white/70">
+          Not every serious problem should begin with a call. Some should begin
+          with a disciplined reading of reality.
+        </p>
+
+        <div className="mt-6 space-y-3">
+          {[
+            "Quick Diagnostic — individual signal",
+            "Team Alignment — execution and coherence reading",
+            "Enterprise Diagnostic — structural interpretation under pressure",
+          ].map((line) => (
+            <div key={line} className="flex items-start gap-3 text-sm text-white/58">
+              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
+              <span>{line}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/diagnostics"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+          >
+            Enter Diagnostics <ChevronRight className="h-4 w-4" />
+          </Link>
+
+          <Link
+            href="/purpose-alignment"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
+          >
+            Run Instrument <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function AdvisoryPathCard() {
+  return (
+    <Panel className="h-full">
+      <div className="p-6 md:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+            Advisory
+          </div>
+          <Briefcase className="h-5 w-5 text-amber-300/80" />
+        </div>
+
+        <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
+          Private work begins where consequence hardens.
+        </h3>
+
+        <p className="mt-4 text-sm leading-relaxed text-white/70">
+          Strategy Room and private advisory remain selective. Diagnostics improve
+          fit before private work is accepted.
+        </p>
+
+        <div className="mt-6 space-y-3">
+          {[
+            "Board-grade decision environments",
+            "Founder advisory under pressure",
+            "Structured artifacts, not decorative advice",
+          ].map((line) => (
+            <div key={line} className="flex items-start gap-3 text-sm text-white/58">
+              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
+              <span>{line}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/consulting"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
+          >
+            Advisory Page <ChevronRight className="h-4 w-4" />
+          </Link>
+
+          <Link
+            href="/consulting/strategy-room"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+          >
+            Enter Strategy Room <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
 /* -----------------------------------------------------------------------------
   FAILSAFE UI
 ----------------------------------------------------------------------------- */
@@ -417,7 +510,6 @@ class ModuleBoundary extends React.Component<
   }
 
   componentDidCatch(err: any) {
-    // eslint-disable-next-line no-console
     console.error(`[Homepage/${this.props.label}]`, err);
   }
 
@@ -489,32 +581,36 @@ const HomePage: NextPage<HomePageProps> = ({
     {
       href: "/canon",
       title: "Enter the Canon",
-      description: "Doctrine, purpose, governance — compressed into one spine.",
+      description:
+        "Doctrine, purpose, governance, and civilisation arranged as one coherent spine.",
       tag: "Primary",
     },
     {
-      href: "/vault",
-      title: "Open the Vault",
-      description: "Deployables: templates, packs, operating assets engineered for execution.",
-      tag: "Deploy",
+      href: "/diagnostics",
+      title: "Run Diagnostics",
+      description:
+        "Paid clarity for individuals, teams, and institutions before advisory escalation.",
+      tag: "Diagnostic",
     },
     {
       href: "/consulting/strategy-room",
-      title: "Strategy Room",
-      description: "For founders and leadership teams under pressure: architecture, cadence, decision rights.",
-      tag: "Engage",
+      title: "Enter Strategy Room",
+      description:
+        "For high-consequence decisions requiring documented thinking, trade-offs, and control.",
+      tag: "Private",
     },
   ];
 
   return (
     <Layout
       title="Abraham of London"
-      description="Institutional doctrine, disciplined strategy, editorial canon, and deployable assets for builders."
+      description="Institutional doctrine, diagnostics, disciplined strategy, editorial canon, and deployable assets for builders."
       canonicalUrl="/"
       fullWidth
       headerTransparent
     >
-      <Head>
+
+   <Head>
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/assets/images/social/og-home.jpg" />
       </Head>
@@ -528,171 +624,239 @@ const HomePage: NextPage<HomePageProps> = ({
         />
       </section>
 
-      <Section id="prelude" variant="surface" cap="Prelude — system spine">
+      <Section id="prelude" variant="surface" cap="Prelude — doctrinal gateway">
         <AnchorOffset id="prelude" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Prelude"
-            title="The spine of the entire system."
-            description="This is not a blog. It is a disciplined platform: doctrine → editorial canon → strategy → deployables."
-            icon={<Layers className="h-4 w-4" />}
+
+        <HQHeader
+          eyebrow="Prelude"
+          title="The gateway to the whole system."
+          description="Not a blog. Not a personality platform. Doctrine, diagnostics, strategy, deployables, and private mandate work arranged as one disciplined architecture."
+          icon={<Layers className="h-4 w-4" />}
+        />
+
+        <ExecutiveRail
+          items={[
+            { href: "/canon", label: "Canon", icon: <Compass className="h-3.5 w-3.5" /> },
+            { href: "/editorials", label: "Editorials", icon: <BookOpen className="h-3.5 w-3.5" /> },
+            { href: "/vault", label: "Vault", icon: <Vault className="h-3.5 w-3.5" /> },
+            { href: "/diagnostics", label: "Diagnostics", icon: <ScanSearch className="h-3.5 w-3.5" /> },
+            { href: "/consulting", label: "Advisory", icon: <Briefcase className="h-3.5 w-3.5" /> },
+          ]}
+        />
+
+        <div className="mt-10">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="CanonIntro">
+                <CanonInstitutionalIntro prelude={canonPrelude} />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          <OperatingStat
+            label="Registry"
+            value={String(counts.library)}
+            body="Indexed assets, frameworks, texts, and strategic material across the platform."
+            icon={<LibraryBig className="h-5 w-5" />}
           />
-
-          <ExecutiveRail
-            items={[
-              { href: "/canon", label: "Canon", icon: <Compass className="h-3.5 w-3.5" /> },
-              { href: "/editorials", label: "Editorials", icon: <BookOpen className="h-3.5 w-3.5" /> },
-              { href: "/vault", label: "Vault", icon: <Vault className="h-3.5 w-3.5" /> },
-              { href: "/library", label: "Library", icon: <LibraryBig className="h-3.5 w-3.5" /> },
-            ]}
+          <OperatingStat
+            label="Editorial Spine"
+            value={String(counts.publications)}
+            body="Flagship publications and printed assets treated as institutional property, not loose posts."
+            icon={<ScrollText className="h-5 w-5" />}
           />
+          <OperatingStat
+            label="Deployables"
+            value={String(counts.downloads)}
+            body="Execution-grade assets, templates, and controlled operating resources."
+            icon={<Vault className="h-5 w-5" />}
+          />
+        </div>
 
-          <div className="mt-10">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="CanonIntro">
-                  <CanonInstitutionalIntro prelude={canonPrelude} />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-
-          <div className="mt-10">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="FunnelStrip">
-                  <StrategicFunnelStrip />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <div className="mt-10">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="FunnelStrip">
+                <StrategicFunnelStrip />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
 
       <Bridge text="From doctrine → to credibility" />
 
       <Section id="proof" variant="surface" cap="Credibility — withstands scrutiny">
         <AnchorOffset id="proof" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Credibility"
-            title="Why this holds under pressure."
-            description="If it cannot survive hostile cross-examination, it is not strategy — it is theatre."
-            icon={<ShieldCheck className="h-4 w-4" />}
-          />
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-7">
-              <Panel>
-                <div className="p-6 md:p-10">
-                  <div className="grid gap-8 md:grid-cols-3">
-                    {[
-                      {
-                        n: "01",
-                        t: "Doctrine-backed",
-                        d: "Coherent worldview, moral frame, and decision logic designed to survive scrutiny.",
-                      },
-                      {
-                        n: "02",
-                        t: "Systems-first",
-                        d: "Strategy as operating logic: cadence, controls, incentives, and accountability loops.",
-                      },
-                      {
-                        n: "03",
-                        t: "Indexed library",
-                        d: `A living platform: ${counts.library} registry items plus editorials, briefs, and deployables.`,
-                      },
-                    ].map((x) => (
-                      <div key={x.n} className="border-l border-amber-500/25 pl-5">
-                        <div className="text-[10px] font-mono tracking-[0.28em] text-amber-300/90">
-                          {x.n}
-                        </div>
-                        <div className="mt-2 font-medium text-white">{x.t}</div>
-                        <div className="mt-2 text-sm leading-relaxed text-white/70">{x.d}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Panel>
-            </div>
+        <HQHeader
+          eyebrow="Credibility"
+          title="This system is designed to survive hostile scrutiny."
+          description="If it cannot survive cross-examination, pressure, and consequence, it is not strategy. It is theatre."
+          icon={<ShieldCheck className="h-4 w-4" />}
+        />
 
-            <div className="lg:col-span-5">
-              <Panel>
-                <div className="p-6 md:p-10">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-white/65">
-                    Operator Spotlight
-                  </div>
-
-                  {featuredBriefing ? (
-                    <>
-                      <div className="mt-4 font-serif text-2xl text-white">
-                        {featuredBriefing.title}
+        <div className="mt-10 grid gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <Panel>
+              <div className="p-6 md:p-10">
+                <div className="grid gap-8 md:grid-cols-3">
+                  {[
+                    {
+                      n: "01",
+                      t: "Doctrine-backed",
+                      d: "A coherent worldview, moral frame, and decision logic designed to hold under pressure.",
+                    },
+                    {
+                      n: "02",
+                      t: "Commercially structured",
+                      d: "Content is public signal. Diagnostics are paid clarity. Advisory is selective mandate work.",
+                    },
+                    {
+                      n: "03",
+                      t: "System-first",
+                      d: "A living platform: doctrine, diagnostics, editorial property, deployables, and controlled engagement paths.",
+                    },
+                  ].map((x) => (
+                    <div key={x.n} className="border-l border-amber-500/25 pl-5">
+                      <div className="text-[10px] font-mono tracking-[0.28em] text-amber-300/90">
+                        {x.n}
                       </div>
-                      <div className="mt-3 leading-relaxed text-white/70">
-                        {featuredBriefing.excerpt || "Operator-grade intelligence engineered for decisions."}
-                      </div>
-                      <div className="mt-6">
-                        <Link
-                          href={featuredBriefing.href}
-                          className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-300 hover:bg-amber-500/20"
-                        >
-                          Open Briefing <ChevronRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="mt-4 leading-relaxed text-white/70">
-                      No featured briefing available.
+                      <div className="mt-2 font-medium text-white">{x.t}</div>
+                      <div className="mt-2 text-sm leading-relaxed text-white/70">{x.d}</div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </Panel>
-            </div>
+              </div>
+            </Panel>
           </div>
-        </motion.div>
+
+          <div className="lg:col-span-5">
+            <Panel>
+              <div className="p-6 md:p-10">
+                <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-white/65">
+                  Operator Spotlight
+                </div>
+
+                {featuredBriefing ? (
+                  <>
+                    <div className="mt-4 font-serif text-2xl text-white">
+                      {featuredBriefing.title}
+                    </div>
+                    <div className="mt-3 leading-relaxed text-white/70">
+                      {featuredBriefing.excerpt || "Operator-grade intelligence engineered for decisions."}
+                    </div>
+                    <div className="mt-6">
+                      <Link
+                        href={featuredBriefing.href}
+                        className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-300 hover:bg-amber-500/20"
+                      >
+                        Open Briefing <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-4 leading-relaxed text-white/70">
+                    No featured briefing available.
+                  </div>
+                )}
+              </div>
+            </Panel>
+          </div>
+        </div>
+      </Section>
+
+      <Bridge text="From credibility → to diagnostics" />
+
+      <Section id="diagnostics" variant="default" cap="Diagnostics — paid clarity">
+        <AnchorOffset id="diagnostics" />
+
+        <HQHeader
+          eyebrow="Diagnostics"
+          title="A paid entry layer for serious operators."
+          description="Not every issue warrants immediate advisory. Some require a disciplined reading of drift, weakness, misalignment, and correction priority."
+          icon={<Activity className="h-4 w-4" />}
+        />
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <DiagnosticEntryCard />
+          <AdvisoryPathCard />
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              icon: <ScanSearch className="h-4 w-4" />,
+              title: "Quick Diagnostic",
+              body: "Fast signal for individuals or small-team clarity.",
+            },
+            {
+              icon: <Scale className="h-4 w-4" />,
+              title: "Strategic Diagnostic",
+              body: "Deeper interpretation where correction priority matters more than raw scoring.",
+            },
+            {
+              icon: <Crown className="h-4 w-4" />,
+              title: "Diagnostic + Advisory",
+              body: "For decisions with politics, execution risk, and consequence.",
+            },
+          ].map((item) => (
+            <Panel key={item.title}>
+              <div className="p-6">
+                <div className="flex items-center gap-2 text-amber-300/90">
+                  {item.icon}
+                  <div className="text-[10px] font-mono uppercase tracking-[0.30em]">
+                    {item.title}
+                  </div>
+                </div>
+                <div className="mt-4 text-sm leading-relaxed text-white/68">
+                  {item.body}
+                </div>
+              </div>
+            </Panel>
+          ))}
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <Link
+            href="/diagnostics"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-300 hover:bg-amber-500/18"
+          >
+            Enter Diagnostics <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
       </Section>
 
       {featuredPublications.length > 0 ? (
         <>
-          <Bridge text="From credibility → to editorial canon" />
+          <Bridge text="From diagnostics → to editorial canon" />
 
-          <Section id="publications" variant="default" cap="Editorial canon — flagship publications">
+          <Section id="publications" variant="surface" cap="Editorial canon — flagship publications">
             <AnchorOffset id="publications" />
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <HQHeader
-                eyebrow="Editorial Canon"
-                title="Books, flagship editorials, and institutional texts."
-                description="Publishing is now part of the operating system. These are not loose files. They are structured assets with canonical entry points."
-                icon={<ScrollText className="h-4 w-4" />}
-              />
 
-              <div className="mt-10 grid gap-6 lg:grid-cols-3">
-                {featuredPublications.slice(0, 3).map((item) => (
-                  <PublicationCard key={item.slug} item={item} />
-                ))}
-              </div>
+            <HQHeader
+              eyebrow="Editorial Canon"
+              title="Books, flagship editorials, and institutional texts."
+              description="Publishing is not filler here. It is part of the operating system and part of the doctrine-bearing architecture of the brand."
+              icon={<ScrollText className="h-4 w-4" />}
+            />
 
-              <div className="mt-10 flex justify-center">
-                <Link
-                  href="/editorials"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
-                >
-                  Browse Publications <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </motion.div>
+            <div className="mt-10 grid gap-6 lg:grid-cols-3">
+              {featuredPublications.slice(0, 3).map((item) => (
+                <PublicationCard key={item.slug} item={item} />
+              ))}
+            </div>
+
+            <div className="mt-10 flex justify-center">
+              <Link
+                href="/editorials"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
+              >
+                Browse Publications <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
           </Section>
         </>
       ) : null}
@@ -701,150 +865,125 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Section id="who" variant="default" cap="Operators — target audience">
         <AnchorOffset id="who" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Operators"
-            title="Who this is built for."
-            description="Founders and leaders who prefer standards over slogans."
-            icon={<Sparkles className="h-4 w-4" />}
-          />
 
-          <div className="mt-10">
-            <Panel>
-              <div className="p-4 md:p-6">
-                <ModuleBoundary label="WhoIWorkWith">
-                  <WhoIWorkWith />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <HQHeader
+          eyebrow="Operators"
+          title="Built for people carrying responsibility, not spectators collecting inspiration."
+          description="Founders, boards, leadership teams, and builders who prefer standards over slogans."
+          icon={<Sparkles className="h-4 w-4" />}
+        />
+
+        <div className="mt-10">
+          <Panel>
+            <div className="p-4 md:p-6">
+              <ModuleBoundary label="WhoIWorkWith">
+                <WhoIWorkWith />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
 
       <Bridge text="From operators → to engagement lanes" />
 
-      <Section id="lanes" variant="surface" cap="Engagement — clean boundaries">
+      <Section id="lanes" variant="surface" cap="Engagement — clean commercial boundaries">
         <AnchorOffset id="lanes" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Engagement"
-            title="Four lanes. No confusion."
-            description="Public signals stay public. Private work stays private. The architecture scales without leaking."
-            icon={<Layers className="h-4 w-4" />}
-          />
 
-          <div className="mt-10">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="EngagementLanes">
-                  <EngagementLanes />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <HQHeader
+          eyebrow="Engagement"
+          title="Public signal. Paid diagnostics. Private mandate work."
+          description="Clean boundaries protect trust, pricing, and seriousness. No confusion. No leakage."
+          icon={<Layers className="h-4 w-4" />}
+        />
+
+        <div className="mt-10">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="EngagementLanes">
+                <EngagementLanes />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
 
       <Bridge text="From lanes → to next actions" />
 
-      <Section id="pathways" variant="default" cap="Pathways — three moves">
+      <Section id="pathways" variant="default" cap="Pathways — three clean moves">
         <AnchorOffset id="pathways" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Pathways"
-            title="Three clean moves."
-            description="If you are new: do not wander. Pick a lane and move."
-            icon={<ArrowRight className="h-4 w-4" />}
-          />
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {actions.map((a) => (
-              <Panel key={a.title}>
-                <div className="p-6 md:p-8">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-                    {a.tag}
-                  </div>
-                  <div className="mt-4 font-serif text-2xl text-white">{a.title}</div>
-                  <div className="mt-3 leading-relaxed text-white/70">{a.description}</div>
-                  <div className="mt-6">
-                    <Link
-                      href={a.href}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
-                    >
-                      Enter <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </div>
+        <HQHeader
+          eyebrow="Pathways"
+          title="Three clear moves. No wandering."
+          description="The architecture now tells the user what to do next."
+          icon={<ArrowRight className="h-4 w-4" />}
+        />
+
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {actions.map((a) => (
+            <Panel key={a.title}>
+              <div className="p-6 md:p-8">
+                <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+                  {a.tag}
                 </div>
-              </Panel>
-            ))}
-          </div>
-        </motion.div>
+                <div className="mt-4 font-serif text-2xl text-white">{a.title}</div>
+                <div className="mt-3 leading-relaxed text-white/70">{a.description}</div>
+                <div className="mt-6">
+                  <Link
+                    href={a.href}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
+                  >
+                    Enter <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </Panel>
+          ))}
+        </div>
       </Section>
 
       <Bridge text="From actions → to events and assets" />
 
       <Section id="events" variant="surface" cap="Events — live rooms">
         <AnchorOffset id="events" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Events"
-            title="Salons, briefings, live rooms."
-            description="Where doctrine meets operators. Built for clarity, not crowd-pleasing."
-            icon={<CalendarDays className="h-4 w-4" />}
-          />
 
-          <div className="mt-10">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="EventsSection">
-                  <EventsSection events={events as any} />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <HQHeader
+          eyebrow="Events"
+          title="Salons, briefings, and live rooms."
+          description="Where doctrine meets operators and ideas are tested in live environments."
+          icon={<CalendarDays className="h-4 w-4" />}
+        />
+
+        <div className="mt-10">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="EventsSection">
+                <EventsSection events={events as any} />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
 
       <Section id="vault" variant="default" cap="Vault — deployables">
         <AnchorOffset id="vault" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Vault"
-            title="Deployables for serious execution."
-            description="Templates, packs, and operating assets engineered for reuse — not decoration."
-            icon={<Vault className="h-4 w-4" />}
-          />
 
-          <div className="mt-10">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="VaultTeaserRail">
-                  <VaultTeaserRail />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <HQHeader
+          eyebrow="Vault"
+          title="Deployables for actual execution."
+          description="Templates, packs, frameworks, and operating assets engineered for reuse, not decoration."
+          icon={<Vault className="h-4 w-4" />}
+        />
+
+        <div className="mt-10">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="VaultTeaserRail">
+                <VaultTeaserRail />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
 
       {featuredBriefing ? (
@@ -853,28 +992,23 @@ const HomePage: NextPage<HomePageProps> = ({
 
           <Section id="briefing" variant="surface" cap="Briefing — operator intelligence">
             <AnchorOffset id="briefing" />
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <HQHeader
-                eyebrow="Briefing"
-                title="Operator-grade intelligence."
-                description="Focused transmission: clarity that survives hostile scrutiny."
-                icon={<ShieldCheck className="h-4 w-4" />}
-              />
 
-              <div className="mt-10">
-                <Panel>
-                  <div className="p-6 md:p-10">
-                    <ModuleBoundary label="OperatorBriefing">
-                      <OperatorBriefing featured={featuredBriefing as any} />
-                    </ModuleBoundary>
-                  </div>
-                </Panel>
-              </div>
-            </motion.div>
+            <HQHeader
+              eyebrow="Briefing"
+              title="Operator-grade intelligence."
+              description="Focused transmission: clarity that survives hostile scrutiny."
+              icon={<FileText className="h-4 w-4" />}
+            />
+
+            <div className="mt-10">
+              <Panel>
+                <div className="p-6 md:p-10">
+                  <ModuleBoundary label="OperatorBriefing">
+                    <OperatorBriefing featured={featuredBriefing as any} />
+                  </ModuleBoundary>
+                </div>
+              </Panel>
+            </div>
           </Section>
         </>
       ) : null}
@@ -885,32 +1019,27 @@ const HomePage: NextPage<HomePageProps> = ({
 
           <Section id="dispatches" variant="default" cap="Dispatches — rapid intel">
             <AnchorOffset id="dispatches" />
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <HQHeader
-                eyebrow="Dispatches"
-                title="Short, sharp intelligence notes."
-                description="Engineered for retrieval and reuse — fast, crisp, disciplined."
-                icon={<Sparkles className="h-4 w-4" />}
-              />
 
-              <div className="mt-10">
-                <Panel>
-                  <div className="p-6 md:p-10">
-                    <ModuleBoundary label="ContentShowcase">
-                      <ContentShowcase
-                        items={featuredShorts as any}
-                        title="Dispatches"
-                        description="Short, sharp intelligence notes engineered for retrieval and reuse."
-                      />
-                    </ModuleBoundary>
-                  </div>
-                </Panel>
-              </div>
-            </motion.div>
+            <HQHeader
+              eyebrow="Dispatches"
+              title="Short, sharp intelligence notes."
+              description="Engineered for retrieval and reuse — fast, crisp, disciplined."
+              icon={<Eye className="h-4 w-4" />}
+            />
+
+            <div className="mt-10">
+              <Panel>
+                <div className="p-6 md:p-10">
+                  <ModuleBoundary label="ContentShowcase">
+                    <ContentShowcase
+                      items={featuredShorts as any}
+                      title="Dispatches"
+                      description="Short, sharp intelligence notes engineered for retrieval and reuse."
+                    />
+                  </ModuleBoundary>
+                </div>
+              </Panel>
+            </div>
           </Section>
         </>
       ) : null}
@@ -919,46 +1048,35 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Section id="ventures" variant="surface" cap="Ventures — institutions in motion">
         <AnchorOffset id="ventures" />
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <HQHeader
-            eyebrow="Ventures"
-            title="Institutions do not remain ideas."
-            description="The platform supports real work: ventures, systems, and deployable infrastructure."
-            icon={<Layers className="h-4 w-4" />}
-          />
 
-          <div className="mt-10">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="VenturesSection">
-                  <VenturesSection />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <HQHeader
+          eyebrow="Ventures"
+          title="Institutions do not remain ideas."
+          description="The platform supports real ventures, systems, and infrastructure designed to move in the world."
+          icon={<Layers className="h-4 w-4" />}
+        />
+
+        <div className="mt-10">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="VenturesSection">
+                <VenturesSection />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
 
       <Section id="close" variant="default" cap="Close — institutional seal">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <div className="mx-auto max-w-5xl">
-            <Panel>
-              <div className="p-6 md:p-10">
-                <ModuleBoundary label="InstitutionalClose">
-                  <InstitutionalClose />
-                </ModuleBoundary>
-              </div>
-            </Panel>
-          </div>
-        </motion.div>
+        <div className="mx-auto max-w-5xl">
+          <Panel>
+            <div className="p-6 md:p-10">
+              <ModuleBoundary label="InstitutionalClose">
+                <InstitutionalClose />
+              </ModuleBoundary>
+            </div>
+          </Panel>
+        </div>
       </Section>
     </Layout>
   );
@@ -1242,11 +1360,11 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   let canonPrelude: CanonPrelude = {
     title: "The Architecture of Human Purpose",
-    subtitle: "Prelude MiniBook - Limited Release Edition",
+    subtitle: "Prelude MiniBook — Gateway to the Canon",
     description:
-      "A distilled, high-level preview of the forthcoming multi-volume Canon on purpose, civilisation, governance, spiritual alignment, and human destiny.",
+      "A strategic introduction to the forthcoming multi-volume Canon on purpose, civilisation, identity, governance and destiny.",
     excerpt:
-      "Human flourishing is not accidental. It is architectural. This Prelude introduces the foundational patterns that govern purpose, identity, civilisation and destiny.",
+      "Human flourishing is not accidental. It is architectural. This Prelude reveals the structural laws that govern human purpose and civilisational rise.",
     coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
     href: "/books/the-architecture-of-human-purpose-landing",
     canonHref: "/canon",
@@ -1296,7 +1414,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
           preludeBook?.excerpt || preludeBook?.description,
           canonPrelude.excerpt
         ),
-        coverImage: safeString(preludeBook?.coverImage, canonPrelude.coverImage),
+        coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
         href: "/books/the-architecture-of-human-purpose-landing",
         canonHref: "/canon",
         ctaLabel: "Open the Prelude MiniBook",

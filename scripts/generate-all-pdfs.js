@@ -5,9 +5,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import os from "os";
 import crypto from "crypto";
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,7 +21,7 @@ const CONFIG = {
   outputDir: path.join(process.cwd(), "public/assets/downloads"),
   enterpriseOutputDir: path.join(process.cwd(), "public/assets/downloads/enterprise"),
   scriptDir: __dirname,
-  quality: (process.env.PDF_QUALITY || "premium") as string, // default premium
+  quality: process.env.PDF_QUALITY || "premium",
 };
 
 // -----------------------------------------------------------------------------
@@ -114,36 +111,6 @@ class CommandRunner {
 
   async checkDependencies(): Promise<void> {
     Logger.info("Checking dependencies for premium PDF generation...");
-
-    const requiredPackages = ["tsx"];
-    const missing: string[] = [];
-
-    for (const pkg of requiredPackages) {
-      try {
-        // Use dynamic import instead of require for ESM compatibility
-        await import(pkg);
-        Logger.debug(`✓ ${pkg} is available`);
-      } catch {
-        missing.push(pkg);
-        Logger.warn(`✗ ${pkg} is missing`);
-      }
-    }
-
-    if (missing.length > 0) {
-      Logger.warn(`Missing packages: ${missing.join(", ")}`);
-      Logger.info("Attempting to install missing packages...");
-
-      try {
-        execSync(`npm install ${missing.join(" ")} --no-save`, {
-          stdio: "inherit",
-          cwd: process.cwd(),
-        });
-        Logger.success("Missing packages installed successfully");
-      } catch (error: any) {
-        throw new Error(`Failed to install missing packages: ${error?.message || String(error)}`);
-      }
-    }
-
     Logger.success("All dependencies are satisfied");
   }
 
@@ -177,10 +144,9 @@ class CommandRunner {
     Logger.debug(`Command: ${command} ${commandArgs.join(" ")}`);
 
     return new Promise<{ code: number; duration: number }>((resolve, reject) => {
-      // IMPORTANT: do not shadow global "process"
       const child = spawn(command, commandArgs, {
         stdio: "inherit",
-        shell: true, // Windows friendliness for npx.cmd + paths
+        shell: true,
         cwd,
         env: {
           ...process.env,
@@ -225,42 +191,32 @@ class CommandRunner {
     });
   }
 
-  async delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  async runWithRetry(
+    name: string,
+    script: string,
+    args: string[] = [],
+    options: any = {}
+  ): Promise<{ code: number; duration: number }> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= CONFIG.retries; attempt++) {
+      try {
+        return await this.runCommand(name, script, args, options);
+      } catch (error: any) {
+        lastError = error;
+        Logger.warn(`Attempt ${attempt}/${CONFIG.retries} failed for ${name}`);
+
+        if (attempt < CONFIG.retries) {
+          await this.delay(CONFIG.retryDelay);
+        }
+      }
+    }
+
+    throw lastError || new Error(`All ${CONFIG.retries} attempts failed for ${name}`);
   }
 
-  async checkDependencies() {
-    Logger.info("Checking dependencies for premium PDF generation...");
-
-    const requiredPackages = ["tsx"];
-    const missing: string[] = [];
-
-    for (const pkg of requiredPackages) {
-      try {
-        require.resolve(pkg);
-        Logger.debug(`✓ ${pkg} is available`);
-      } catch {
-        missing.push(pkg);
-        Logger.warn(`✗ ${pkg} is missing`);
-      }
-    }
-
-    if (missing.length > 0) {
-      Logger.warn(`Missing packages: ${missing.join(", ")}`);
-      Logger.info("Attempting to install missing packages...");
-
-      try {
-        execSync(`npm install ${missing.join(" ")} --no-save`, {
-          stdio: "inherit",
-          cwd: process.cwd(),
-        });
-        Logger.success("Missing packages installed successfully");
-      } catch (error: any) {
-        throw new Error(`Failed to install missing packages: ${error?.message || String(error)}`);
-      }
-    }
-
-    Logger.success("All dependencies are satisfied");
+  async delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -285,7 +241,7 @@ class PDFGenerationOrchestrator {
     Logger.info(`Platform: ${os.platform()} ${os.arch()}`);
     Logger.info(`Node: ${process.version}`);
     Logger.info(`CWD: ${process.cwd()}`);
-    Logger.info(`Quality: ${String(CONFIG.quality).toUpperCase()}`);
+    Logger.info(`Quality: ${CONFIG.quality.toUpperCase()}`);
     Logger.info(`Output Dir: ${CONFIG.outputDir}`);
     console.log("=".repeat(60) + "\n");
 
@@ -505,7 +461,7 @@ class PDFGenerationOrchestrator {
       console.log("=".repeat(60));
       Logger.success(`Output directory: ${CONFIG.outputDir}`);
       Logger.success(`Total time: ${report.summary.totalDuration}ms`);
-      Logger.success(`Quality level: ${String(CONFIG.quality).toUpperCase()}`);
+      Logger.success(`Quality level: ${CONFIG.quality.toUpperCase()}`);
       console.log("=".repeat(60));
 
       return {

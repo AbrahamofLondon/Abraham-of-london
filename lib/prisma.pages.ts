@@ -1,11 +1,6 @@
 // lib/prisma.pages.ts — PAGES ROUTER SAFE PRISMA (SSR / API only)
-//
-// IMPORTANT:
-// - Safe for pages/** server execution (SSR / API routes).
-// - Must never be imported into client-side code.
-// - Do NOT add `server-only` here.
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -23,28 +18,50 @@ function createPrismaClient(): PrismaClient {
       : undefined,
     log:
       process.env.NODE_ENV === "development"
-        ? ["error", "warn"]
+        ? ["warn", "error"]
         : ["error"],
   });
 }
 
-export const prisma: PrismaClient =
-  global.__prisma_pages__ ?? createPrismaClient();
+const prismaClient = global.__prisma_pages__ ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
-  global.__prisma_pages__ = prisma;
+  global.__prisma_pages__ = prismaClient;
 }
 
+export const prisma: PrismaClient = prismaClient;
 export const getPrisma = (): PrismaClient => prisma;
 
+/**
+ * Safe query helper:
+ * retries once on transient closed/connection issues, then rethrows.
+ * Do not silently null out genuine application errors.
+ */
 export async function safePrismaQuery<T>(
-  query: () => Promise<T>,
-): Promise<T | null> {
+  query: (client: PrismaClient) => Promise<T>
+): Promise<T> {
   try {
-    return await query();
+    return await query(prisma);
   } catch (error) {
-    console.error("[PRISMA_PAGES_ERROR]", error);
-    return null;
+    const message = error instanceof Error ? error.message : String(error);
+    const shouldRetry =
+      /closed/i.test(message) ||
+      /connection/i.test(message) ||
+      /Can't reach database server/i.test(message) ||
+      /Server has closed the connection/i.test(message);
+
+    if (!shouldRetry) {
+      throw error;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[PRISMA_RETRY] attempting one reconnect after transient failure");
+    }
+
+    await prisma.$disconnect().catch(() => {});
+    await prisma.$connect();
+
+    return await query(prisma);
   }
 }
 
@@ -68,21 +85,18 @@ export async function getVaultStatus() {
 }
 
 export async function getStrategicContext(slug: string) {
-  try {
-    return await prisma.contentMetadata.findUnique({
+  return safePrismaQuery((client) =>
+    client.contentMetadata.findUnique({
       where: { slug },
       include: {
         dependencies: { include: { targetBrief: true } },
         dependents: { include: { sourceBrief: true } },
       },
-    });
-  } catch (error) {
-    console.error("[VAULT_CONTEXT_ERROR]", error);
-    return null;
-  }
+    })
+  );
 }
 
 export default prisma;
 
-export type { Prisma } from "@prisma/client";
+export type { Prisma };
 export type PrismaClientType = PrismaClient;

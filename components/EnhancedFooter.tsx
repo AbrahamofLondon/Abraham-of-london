@@ -43,7 +43,7 @@ function FooterCTA({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col justify-between overflow-hidden border border-white/10 bg-zinc-900/20 p-6 transition-all duration-500 hover:border-amber-500/40"
+      className="group relative flex min-h-[200px] flex-col justify-between overflow-hidden border border-white/10 bg-zinc-900/20 p-6 transition-all duration-500 hover:border-amber-500/40 hover:bg-zinc-900/30"
     >
       <div className="mb-8 flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -66,7 +66,7 @@ function FooterCTA({
         </div>
 
         {hint ? (
-          <div className="max-w-[220px] text-[11px] font-light leading-relaxed text-white/30 transition-colors group-hover:text-white/50">
+          <div className="max-w-[240px] text-[11px] font-light leading-relaxed text-white/30 transition-colors group-hover:text-white/50">
             {hint}
           </div>
         ) : null}
@@ -77,7 +77,7 @@ function FooterCTA({
         <ChevronRight size={10} />
       </div>
 
-      <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-amber-500/30 transition-all duration-700 group-hover:w-full" />
+      <div className="absolute bottom-0 left-0 h-px w-0 bg-amber-500/30 transition-all duration-700 group-hover:w-full" />
     </Link>
   );
 }
@@ -96,8 +96,8 @@ function DirectoryColumn({
       </h4>
 
       <ul className="space-y-3">
-        {links.map((link) => (
-          <li key={`${title}-${link.href}`}>
+        {links.map((link, index) => (
+          <li key={`${title}-${link.label}-${link.href}-${index}`}>
             <Link
               href={link.href}
               className="group flex items-center gap-2 text-[11px] font-medium tracking-wide text-white/40 transition-all hover:text-amber-200"
@@ -133,8 +133,8 @@ export default function EnhancedFooter(): React.ReactElement {
     Engagements: [
       { label: "Consulting", href: "/consulting" },
       { label: "Strategy Room", href: "/consulting/strategy-room" },
-      { label: "Advisory", href: "/consulting" },
       { label: "Speaking", href: "/speaking" },
+      { label: "Contact", href: "/contact" },
     ] as DirectoryLink[],
     Governance: [
       { label: "About", href: "/about" },
@@ -143,6 +143,13 @@ export default function EnhancedFooter(): React.ReactElement {
       { label: "Terms", href: "/terms" },
     ] as DirectoryLink[],
   };
+
+  const policyLinks = [
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
+    { label: "Security", href: "/security" },
+    { label: "Cookies", href: "/cookies" },
+  ] as const;
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-black pb-8 pt-24">
@@ -188,7 +195,7 @@ export default function EnhancedFooter(): React.ReactElement {
             title="Strategic Frameworks"
             label="Operating Systems"
             tag="SYS-F1"
-            hint="Board-grade models and institutional resilience rails."
+            hint="Board-grade models, institutional structure, and resilience logic."
             icon={<Layers size={16} />}
           />
           <FooterCTA
@@ -196,7 +203,7 @@ export default function EnhancedFooter(): React.ReactElement {
             title="Surrender Framework"
             label="Formation"
             tag="FRM-S2"
-            hint="Alignment under pressure and personal governance."
+            hint="Personal order, alignment under pressure, and disciplined correction."
             icon={<Shield size={16} />}
           />
           <FooterCTA
@@ -204,7 +211,7 @@ export default function EnhancedFooter(): React.ReactElement {
             title="The Vault"
             label="Intelligence"
             tag="SEC-V3"
-            hint="Secure toolkits and premium intelligence dossiers."
+            hint="Controlled assets, premium resources, and execution-grade material."
             icon={<Vault size={16} />}
           />
         </div>
@@ -225,9 +232,9 @@ export default function EnhancedFooter(): React.ReactElement {
             </div>
 
             <p className="max-w-sm border-l border-white/10 pl-6 text-[12px] font-light italic leading-relaxed text-white/30">
-              A repository for institutional thinking: purposed governance,
-              high-cadence execution, and sovereign endurance. Access restricted
-              to authorized personnel.
+              A platform for disciplined thinking: doctrine, systems, and strategic
+              execution arranged for leaders, builders, and institutions that
+              intend to endure.
             </p>
 
             <Link
@@ -268,14 +275,9 @@ export default function EnhancedFooter(): React.ReactElement {
             </div>
 
             <div className="flex items-center gap-8">
-              {[
-                { label: "Privacy", href: "/privacy" },
-                { label: "Terms", href: "/terms" },
-                { label: "Security", href: "/security" },
-                { label: "Cookies", href: "/cookies" },
-              ].map((item) => (
+              {policyLinks.map((item, index) => (
                 <Link
-                  key={item.href}
+                  key={`${item.label}-${item.href}-${index}`}
                   href={item.href}
                   className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-white/20 transition-colors hover:text-amber-500"
                 >

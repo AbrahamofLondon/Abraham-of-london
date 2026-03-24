@@ -1,92 +1,72 @@
-// pages/api/shorts/[slug]/like.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getClientIp, rateLimit } from "@/lib/server/rateLimit";
-import { toggleInteraction } from "@/lib/db/interactions";
-import { getOrSetSessionId, getSlugParam } from "@/lib/session";
 
-interface SuccessResponse {
-  likes: number;
-  saves: number;
-  userLiked: boolean;
-  userSaved: boolean;
-  message: string;
-}
+import { setInteractionState } from "@/lib/db/interactions";
+import { getOrSetSessionId } from "@/lib/session";
 
-interface ErrorResponse {
-  error: string;
-  message?: string;
+import {
+  rateLimit,
+  RATE_LIMIT_CONFIGS,
+  getRateLimitKey,
+  createRateLimitHeaders,
+} from "@/lib/server/rateLimit";
+
+type Response =
+  | {
+      slug: string;
+      likes: number;
+      saves: number;
+      userLiked: boolean;
+      userSaved: boolean;
+      _ts: number;
+    }
+  | { error: string };
+
+function cleanSlug(value: unknown): string {
+  return String(value ?? "").trim().toLowerCase();
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SuccessResponse | ErrorResponse>
+  res: NextApiResponse<Response>,
 ) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Allow", "POST,DELETE,OPTIONS");
-    return res.status(204).end();
+  if (req.method !== "POST" && req.method !== "DELETE") {
+    res.setHeader("Allow", "POST, DELETE");
+    return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
   }
 
-  if (!["POST", "DELETE"].includes(req.method || "")) {
-    res.setHeader("Allow", "POST,DELETE,OPTIONS");
-    return res.status(405).json({
-      error: "Method Restriction",
-      message: "System requires POST to like or DELETE to unlike.",
-    });
-  }
-
-  const slug = getSlugParam(req);
+  const slug = cleanSlug(req.query.slug);
   if (!slug) {
-    return res.status(400).json({
-      error: "Request Malformed",
-      message: "Identifier (slug) is required for interaction.",
-    });
+    return res.status(400).json({ error: "ID_REQUIRED" });
   }
 
-  const ip = getClientIp(req);
-  const rl = rateLimit({ key: `shorts_like:${ip}`, limit: 30, windowMs: 60_000 });
+  const key = getRateLimitKey(req, "shorts_like");
+  const rl = rateLimit(key, RATE_LIMIT_CONFIGS.shortsInteractions);
 
-  res.setHeader("X-RateLimit-Limit", "30");
-  res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
-  res.setHeader("X-RateLimit-Reset", String(rl.resetAt));
+  const headers = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(headers)) {
+    res.setHeader(k, v);
+  }
 
   if (!rl.ok) {
-    return res.status(429).json({
-      error: "Too many requests",
-      message: "Interaction limit reached. Please wait.",
-    });
+    return res.status(429).json({ error: "THROTTLED" });
   }
 
   const sessionId = getOrSetSessionId(req, res);
+  const desired = req.method === "POST";
 
-  try {
-    // POST likes, DELETE unlikes — toggleInteraction already toggles.
-    // If you want strict POST=ensure-like and DELETE=ensure-unlike, say so and I’ll harden it.
-    const stats = await toggleInteraction(slug, "like", sessionId);
+  const stats = await setInteractionState(slug, "like", sessionId, desired);
 
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
 
-    const message = stats.userLiked ? "Interaction recorded." : "Interaction removed.";
-
-    return res.status(200).json({
-      likes: stats.likes || 0,
-      saves: stats.saves || 0,
-      userLiked: !!stats.userLiked,
-      userSaved: !!stats.userSaved,
-      message,
-    });
-  } catch (error: any) {
-    console.error(`[System Exception] Interaction failure for ${slug}:`, error);
-    return res.status(500).json({
-      error: "Vault Write Failure",
-      message: "Failed to record interaction. Please try again shortly.",
-    });
-  }
+  return res.status(200).json({
+    slug,
+    likes: stats.likes,
+    saves: stats.saves,
+    userLiked: stats.userLiked,
+    userSaved: stats.userSaved,
+    _ts: Date.now(),
+  });
 }
-
-export const config = {
-  api: {
-    bodyParser: { sizeLimit: "1kb" },
-  },
-};

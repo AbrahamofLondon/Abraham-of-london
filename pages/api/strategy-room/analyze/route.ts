@@ -1,65 +1,100 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma";
+
+type StrategyPayload = Record<string, unknown>;
+
+type AnalyzeResponse =
+  | {
+      success: true;
+      score: number;
+    }
+  | {
+      error: string;
+    };
+
+function toSafeObject(value: unknown): StrategyPayload {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as StrategyPayload)
+    : {};
+}
+
+function toJsonValue(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value ?? {})) as Prisma.InputJsonValue;
+}
 
 /**
  * STRATEGY ANALYSIS ENGINE
  * Process raw intake data to calculate institutional gravity and readiness.
  */
-export async function POST(req: Request) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<AnalyzeResponse>,
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
-    const { intakeId, payload } = await req.json();
+    const body = req.body ?? {};
+    const intakeId = String(body?.intakeId || "").trim();
+    const payload = toSafeObject(body?.payload);
 
     if (!intakeId) {
-      return NextResponse.json({ error: "Intake ID required for analysis" }, { status: 400 });
+      return res
+        .status(400)
+        .json({ error: "Intake ID required for analysis" });
     }
 
-    // 1. Retrieve the fresh intake record
     const intake = await prisma.strategyIntake.findUnique({
-      where: { id: intakeId }
+      where: { id: intakeId },
+      select: {
+        id: true,
+        payload: true,
+      },
     });
 
     if (!intake) {
-      return NextResponse.json({ error: "Record not found" }, { status: 404 });
+      return res.status(404).json({ error: "Record not found" });
     }
 
-    // 2. Strategic Calculation Logic
-    // We calculate a score based on dependency and volatility
-    let score = 50; // Base score (0-100 scale)
+    let score = 50;
 
-    // Dependency Adjustments
-    if (payload.dependencyLevel === 'low') score += 20; // High Autonomy
-    if (payload.dependencyLevel === 'high') score -= 15; // High Risk
+    if (payload.dependencyLevel === "low") score += 20;
+    if (payload.dependencyLevel === "high") score -= 15;
 
-    // Volatility Adjustments
-    if (payload.volatility === 'stable') score += 10;
-    if (payload.volatility === 'extreme') score -= 25;
+    if (payload.volatility === "stable") score += 10;
+    if (payload.volatility === "extreme") score -= 25;
 
-    // Constrain score between 0 and 100
     const finalScore = Math.min(Math.max(score, 0), 100);
 
-    // 3. Update the record with the results
+    const existingPayload = toSafeObject(intake.payload);
+
+    const mergedPayload: StrategyPayload = {
+      ...existingPayload,
+      ...payload,
+      calculatedAt: new Date().toISOString(),
+      analysisVersion: "2.1.0-alpha",
+    };
+
     await prisma.strategyIntake.update({
       where: { id: intakeId },
       data: {
         readinessScore: finalScore,
-        // Optionally store the detailed breakdown in the JSON metadata
-        payload: {
-          ...(payload as object),
-          calculatedAt: new Date().toISOString(),
-          analysisVersion: "2.1.0-alpha"
-        }
-      }
+        payload: toJsonValue(mergedPayload),
+      },
     });
 
-    console.log(`🛡️ [STRATEGY_ANALYSIS]: Score ${finalScore} generated for Intake ${intakeId}`);
+    console.log(
+      `[STRATEGY_ANALYSIS] Score ${finalScore} generated for Intake ${intakeId}`,
+    );
 
-    return NextResponse.json({ 
-      success: true, 
-      score: finalScore 
+    return res.status(200).json({
+      success: true,
+      score: finalScore,
     });
-
   } catch (error) {
-    console.error("❌ [ANALYSIS_ENGINE_ERROR]:", error);
-    return NextResponse.json({ error: "Analysis engine failure" }, { status: 500 });
+    console.error("[ANALYSIS_ENGINE_ERROR]:", error);
+    return res.status(500).json({ error: "Analysis engine failure" });
   }
 }

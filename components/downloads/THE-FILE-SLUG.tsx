@@ -1,4 +1,4 @@
-// content/downloads/THE-FILE-SLUG.tsx - FIXED VERSION
+/* content/downloads/the-file-slug.tsx — ALIGNED VERSION */
 import * as React from "react";
 import BrandFrame from "@/components/print/BrandFrame";
 
@@ -10,12 +10,10 @@ export type DownloadMetadata = {
   title: string;
   slug: string;
   type: "Download";
-
   date?: string;
   updated?: string;
   author?: string;
   authorTitle?: string;
-
   subtitle?: string;
   description?: string;
   canonicalUrl?: string;
@@ -23,22 +21,17 @@ export type DownloadMetadata = {
   ogDescription?: string;
   socialCaption?: string;
   language?: string;
-
   readTime?: string;
   readingTime?: string;
   featured?: boolean;
-
   coverImage?: string;
   coverAspect?: "wide" | "book" | "square";
   coverFit?: "cover" | "contain";
   coverPosition?: "top" | "center" | "bottom";
-
   category?: string;
   tags?: string[];
-
   tier?: DownloadTier;
   requiresAuth?: boolean;
-
   format?: DownloadFormat;
   formats?: PaperFormat[];
   fileUrl?: string;
@@ -50,16 +43,13 @@ export const metadata: DownloadMetadata = {
   title: "The Correct Title for This Download",
   slug: "the-file-slug",
   type: "Download",
-
   date: "2025-10-21",
   author: "Abraham of London",
   authorTitle: "Founder • Strategist",
   subtitle: "A concise description of the download.",
-  description: "One-line summary of what this asset does and who it is for. Keep it crisp and benefits-led.",
-
+  description: "One-line summary of what this asset does and who it is for.",
   category: "Frameworks",
   tags: ["legacy", "governance", "strategy"],
-
   tier: "public",
   requiresAuth: false,
   format: "PDF",
@@ -67,25 +57,25 @@ export const metadata: DownloadMetadata = {
   fileUrl: "/assets/downloads/the-file-slug.pdf",
   fileSize: "0 B",
   version: "1.0.0",
-
   canonicalUrl: "/downloads/the-file-slug",
   ogTitle: "The Correct Title for This Download",
   ogDescription: "A concise, benefits-led summary for sharing.",
-  socialCaption: "Short share caption. Strong, clean, no waffle.",
+  socialCaption: "Short share caption.",
   language: "en-GB",
-
   coverAspect: "wide",
   coverFit: "cover",
   coverPosition: "center",
 };
 
 const DownloadTemplate: React.FC = () => {
-  // Build props object with only defined values
-  const brandFrameProps = {
-    title: metadata.title,
-    subtitle: metadata.subtitle || "", // Required prop with fallback
-    pageSize: "A4" as const,
-    children: (
+  return (
+    <BrandFrame 
+      title={metadata.title} 
+      subtitle={metadata.subtitle || ""} 
+      pageSize="A4"
+      author={metadata.author}
+      date={metadata.date}
+    >
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold">{metadata.title}</h1>
 
@@ -99,19 +89,8 @@ const DownloadTemplate: React.FC = () => {
           This is the content of the download. Replace with your real material.
         </p>
       </div>
-    )
-  };
-
-  // Only add optional props when they have values
-  if (metadata.author !== undefined) {
-    (brandFrameProps as any).author = metadata.author;
-  }
-  
-  if (metadata.date !== undefined) {
-    (brandFrameProps as any).date = metadata.date;
-  }
-
-  return <BrandFrame {...brandFrameProps} />;
+    </BrandFrame>
+  );
 };
 
 export default DownloadTemplate;

@@ -1,24 +1,1448 @@
 {
-  "ranAt": "2026-03-02T13:52:50.036Z",
-  "platform": "win32 x64",
-  "node": "v20.20.0",
-  "quality": "premium",
-  "concurrency": 1,
-  "steps": [
+  "generatedAt": "2026-03-21T19:49:32.129Z",
+  "totals": {
+    "allDocs": 602,
+    "queued": 183,
+    "restored": 182,
+    "failed": 1,
+    "skipped": 236,
+    "deduped": 183
+  },
+  "skipped": [
     {
-      "name": "Generate PDFs (unified)",
-      "ok": true,
-      "ms": 67430
+      "id": "architecture-of-ascension",
+      "slug": "architecture-of-ascension",
+      "type": "Book",
+      "reason": "forbidden-type"
     },
     {
-      "name": "Build registry (inventory-first)",
-      "ok": true,
-      "ms": 1023
+      "id": "/books/fathering-without-fear",
+      "slug": "fathering-without-fear",
+      "type": "Book",
+      "reason": "forbidden-type"
     },
     {
-      "name": "Validate SSOT assets",
-      "ok": true,
-      "ms": 1322
+      "id": "/books/the-architecture-of-human-purpose",
+      "slug": "the-architecture-of-human-purpose",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/books/the-builders-catechism",
+      "slug": "the-builders-catechism",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/books/the-fiction-adaptation",
+      "slug": "the-fiction-adaptation",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "canon/builders-catechism",
+      "slug": "builders-catechism",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/canon-campaign",
+      "slug": "canon-campaign",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/canon-introduction-letter",
+      "slug": "canon-introduction-letter",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/canon-master-index-preview",
+      "slug": "canon-master-index-preview",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-i-foundations-of-purpose",
+      "slug": "volume-i-foundations-of-purpose",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-i-teaching-edition",
+      "slug": "volume-i-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-ii-governance-and-formation",
+      "slug": "volume-ii-governance-and-formation",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-ii-teaching-edition",
+      "slug": "volume-ii-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-iii-teaching-edition",
+      "slug": "volume-iii-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-iv-teaching-edition",
+      "slug": "volume-iv-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-x-filename",
+      "slug": "volume-x-filename",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-x-the-arc-of-future-civilisation",
+      "slug": "volume-x-the-arc-of-future-civilisation",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "christianity-not-extremism",
+      "slug": "christianity-not-extremism",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "fathering-principles",
+      "slug": "fathering-principles",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "fathering-without-fear-teaser",
+      "slug": "fathering-without-fear-teaser",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "fathering-without-fear",
+      "slug": "fathering-without-fear",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "in-my-fathers-house",
+      "slug": "in-my-fathers-house",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "kingdom-strategies-for-a-loving-legacy",
+      "slug": "kingdom-strategies-for-a-loving-legacy",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "leadership-begins-at-home",
+      "slug": "leadership-begins-at-home",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "lessons-from-noah",
+      "slug": "lessons-from-noah",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "out-of-context-truth",
+      "slug": "out-of-context-truth",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "principles-for-my-son",
+      "slug": "principles-for-my-son",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "purpose-is-the-anchor",
+      "slug": "purpose-is-the-anchor",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "reclaiming-the-narrative",
+      "slug": "reclaiming-the-narrative",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "surrender-not-submission",
+      "slug": "surrender-not-submission",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "surrender-framework/surrender-operational-framework",
+      "slug": "surrender-framework/surrender-operational-framework",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "the-brotherhood-code",
+      "slug": "the-brotherhood-code",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "ultimate-purpose-of-man",
+      "slug": "ultimate-purpose-of-man",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "when-gods-sovereignty-collides-with-our-pain",
+      "slug": "when-gods-sovereignty-collides-with-our-pain",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "when-the-foundation-is-destroyed",
+      "slug": "when-the-foundation-is-destroyed",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "when-the-system-breaks-you",
+      "slug": "when-the-system-breaks-you",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/shorts/busy-is-not-the-same-as-anchored",
+      "slug": "busy-is-not-the-same-as-anchored",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/freedom-begins-where-ego-ends",
+      "slug": "freedom-begins-where-ego-ends",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/institutional-sovereignty",
+      "slug": "institutional-sovereignty",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/pleasure-is-loud-purpose-is-quiet",
+      "slug": "pleasure-is-loud-purpose-is-quiet",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/the-cost-of-refusing-formation",
+      "slug": "the-cost-of-refusing-formation",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/this-is-not-a-comfort-platform",
+      "slug": "this-is-not-a-comfort-platform",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-a-single-yes-changes-everything",
+      "slug": "when-a-single-yes-changes-everything",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-all-you-can-do-is-breathe",
+      "slug": "when-all-you-can-do-is-breathe",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-avoidance-becomes-your-personality",
+      "slug": "when-avoidance-becomes-your-personality",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-busyness-becomes-your-brand",
+      "slug": "when-busyness-becomes-your-brand",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-comfort-becomes-your-cage",
+      "slug": "when-comfort-becomes-your-cage",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-conflict-feels-like-betrayal",
+      "slug": "when-conflict-feels-like-betrayal",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-doctrine-feels-safer-than-god",
+      "slug": "when-doctrine-feels-safer-than-god",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-every-promotion-feels-hollow",
+      "slug": "when-every-promotion-feels-hollow",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-grace-finds-you-in-the-mess",
+      "slug": "when-grace-finds-you-in-the-mess",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-hope-feels-reckless",
+      "slug": "when-hope-feels-reckless",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-kindness-feels-like-rebellion",
+      "slug": "when-kindness-feels-like-rebellion",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-later-became-never",
+      "slug": "when-later-became-never",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-numbness-feels-safer-than-joy",
+      "slug": "when-numbness-feels-safer-than-joy",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-productivity-becomes-punishment",
+      "slug": "when-productivity-becomes-punishment",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-rest-starts-to-feel-dangerous",
+      "slug": "when-rest-starts-to-feel-dangerous",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-argue-with-god-in-your-head",
+      "slug": "when-you-argue-with-god-in-your-head",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-cant-stop-overthinking",
+      "slug": "when-you-cant-stop-overthinking",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
+      "slug": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-dont-know-what-you-want-anymore",
+      "slug": "when-you-dont-know-what-you-want-anymore",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-dont-trust-your-own-decisions",
+      "slug": "when-you-dont-trust-your-own-decisions",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-fear-being-wrong-about-god",
+      "slug": "when-you-fear-being-wrong-about-god",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-fear-success-more-than-failure",
+      "slug": "when-you-fear-success-more-than-failure",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-feel-like-god-is-delaying-you",
+      "slug": "when-you-feel-like-god-is-delaying-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-feel-too-busy-to-care",
+      "slug": "when-you-feel-too-busy-to-care",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-finally-let-yourself-cry",
+      "slug": "when-you-finally-let-yourself-cry",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-give-more-than-you-get",
+      "slug": "when-you-give-more-than-you-get",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-keep-blaming-your-childhood",
+      "slug": "when-you-keep-blaming-your-childhood",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-keep-choosing-people-who-cant-choose-you",
+      "slug": "when-you-keep-choosing-people-who-cant-choose-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-keep-confusing-niceness-with-goodness",
+      "slug": "when-you-keep-confusing-niceness-with-goodness",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-miss-who-you-used-to-be",
+      "slug": "when-you-miss-who-you-used-to-be",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-mistake-familiarity-for-loyalty",
+      "slug": "when-you-mistake-familiarity-for-loyalty",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-need-god-to-interrupt-you",
+      "slug": "when-you-need-god-to-interrupt-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-no-longer-recognise-your-own-voice",
+      "slug": "when-you-no-longer-recognise-your-own-voice",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-outgrow-your-circle",
+      "slug": "when-you-outgrow-your-circle",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-realise-prayer-is-war",
+      "slug": "when-you-realise-prayer-is-war",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-realise-you-were-the-problem",
+      "slug": "when-you-realise-you-were-the-problem",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-realise-youre-not-behind",
+      "slug": "when-you-realise-youre-not-behind",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-stop-waiting-for-permission",
+      "slug": "when-you-stop-waiting-for-permission",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-want-to-quit-but-cant",
+      "slug": "when-you-want-to-quit-but-cant",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-calendar-is-full-but-your-life-is-empty",
+      "slug": "when-your-calendar-is-full-but-your-life-is-empty",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-calling-stops-being-cute",
+      "slug": "when-your-calling-stops-being-cute",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-character-is-leaking",
+      "slug": "when-your-character-is-leaking",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-confidence-feels-manufactured",
+      "slug": "when-your-confidence-feels-manufactured",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-convictions-feel-like-costumes",
+      "slug": "when-your-convictions-feel-like-costumes",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-dreams-feel-too-heavy",
+      "slug": "when-your-dreams-feel-too-heavy",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-excuses-become-your-identity",
+      "slug": "when-your-excuses-become-your-identity",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-faith-feels-numb",
+      "slug": "when-your-faith-feels-numb",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-hustle-has-no-soul",
+      "slug": "when-your-hustle-has-no-soul",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-legacy-terrifies-you",
+      "slug": "when-your-legacy-terrifies-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-silence-says-too-much",
+      "slug": "when-your-silence-says-too-much",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-standards-keep-you-lonely",
+      "slug": "when-your-standards-keep-you-lonely",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-vision-outgrows-your-environment",
+      "slug": "when-your-vision-outgrows-your-environment",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-work-becomes-your-hiding-place",
+      "slug": "when-your-work-becomes-your-hiding-place",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-addicted-to-distraction",
+      "slug": "when-youre-addicted-to-distraction",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-afraid-of-your-own-potential",
+      "slug": "when-youre-afraid-of-your-own-potential",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-afraid-to-be-radical",
+      "slug": "when-youre-afraid-to-be-radical",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-always-the-strong-one",
+      "slug": "when-youre-always-the-strong-one",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-attracted-to-potential-not-reality",
+      "slug": "when-youre-attracted-to-potential-not-reality",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-building-someone-elses-legacy",
+      "slug": "when-youre-building-someone-elses-legacy",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-done-fixing-adults",
+      "slug": "when-youre-done-fixing-adults",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-exhausted-but-still-available",
+      "slug": "when-youre-exhausted-but-still-available",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-keeping-faith-out-of-habit",
+      "slug": "when-youre-keeping-faith-out-of-habit",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-living-for-weekends",
+      "slug": "when-youre-living-for-weekends",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-loved-without-earning-it",
+      "slug": "when-youre-loved-without-earning-it",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-measuring-everything-but-meaning",
+      "slug": "when-youre-measuring-everything-but-meaning",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-not-lazy-youre-undisciplined",
+      "slug": "when-youre-not-lazy-youre-undisciplined",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-preparing-for-rooms-you-havent-entered",
+      "slug": "when-youre-preparing-for-rooms-you-havent-entered",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-productive-but-not-present",
+      "slug": "when-youre-productive-but-not-present",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-scared-to-start-over",
+      "slug": "when-youre-scared-to-start-over",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-the-only-one-doing-the-work",
+      "slug": "when-youre-the-only-one-doing-the-work",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-tired-of-being-the-bigger-person",
+      "slug": "when-youre-tired-of-being-the-bigger-person",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-tired-of-starting-over",
+      "slug": "when-youre-tired-of-starting-over",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-winning-at-work-but-losing-yourself",
+      "slug": "when-youre-winning-at-work-but-losing-yourself",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youve-become-chronically-online",
+      "slug": "when-youve-become-chronically-online",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youve-worshipped-the-wrong-metrics",
+      "slug": "when-youve-worshipped-the-wrong-metrics",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/you-were-built-to-carry-weight",
+      "slug": "you-were-built-to-carry-weight",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "architecture-of-ascension",
+      "slug": "architecture-of-ascension",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/books/fathering-without-fear",
+      "slug": "fathering-without-fear",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/books/the-architecture-of-human-purpose",
+      "slug": "the-architecture-of-human-purpose",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/books/the-builders-catechism",
+      "slug": "the-builders-catechism",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/books/the-fiction-adaptation",
+      "slug": "the-fiction-adaptation",
+      "type": "Book",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "canon/builders-catechism",
+      "slug": "builders-catechism",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/canon-campaign",
+      "slug": "canon-campaign",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/canon-introduction-letter",
+      "slug": "canon-introduction-letter",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/canon-master-index-preview",
+      "slug": "canon-master-index-preview",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-i-foundations-of-purpose",
+      "slug": "volume-i-foundations-of-purpose",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-i-teaching-edition",
+      "slug": "volume-i-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-ii-governance-and-formation",
+      "slug": "volume-ii-governance-and-formation",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-ii-teaching-edition",
+      "slug": "volume-ii-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-iii-teaching-edition",
+      "slug": "volume-iii-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-iv-teaching-edition",
+      "slug": "volume-iv-teaching-edition",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-x-filename",
+      "slug": "volume-x-filename",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/canon/volume-x-the-arc-of-future-civilisation",
+      "slug": "volume-x-the-arc-of-future-civilisation",
+      "type": "Canon",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "christianity-not-extremism",
+      "slug": "christianity-not-extremism",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "fathering-principles",
+      "slug": "fathering-principles",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "fathering-without-fear-teaser",
+      "slug": "fathering-without-fear-teaser",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "fathering-without-fear",
+      "slug": "fathering-without-fear",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "in-my-fathers-house",
+      "slug": "in-my-fathers-house",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "kingdom-strategies-for-a-loving-legacy",
+      "slug": "kingdom-strategies-for-a-loving-legacy",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "leadership-begins-at-home",
+      "slug": "leadership-begins-at-home",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "lessons-from-noah",
+      "slug": "lessons-from-noah",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "out-of-context-truth",
+      "slug": "out-of-context-truth",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "principles-for-my-son",
+      "slug": "principles-for-my-son",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "purpose-is-the-anchor",
+      "slug": "purpose-is-the-anchor",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "reclaiming-the-narrative",
+      "slug": "reclaiming-the-narrative",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "surrender-not-submission",
+      "slug": "surrender-not-submission",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "surrender-framework/surrender-operational-framework",
+      "slug": "surrender-framework/surrender-operational-framework",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "the-brotherhood-code",
+      "slug": "the-brotherhood-code",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "ultimate-purpose-of-man",
+      "slug": "ultimate-purpose-of-man",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "when-gods-sovereignty-collides-with-our-pain",
+      "slug": "when-gods-sovereignty-collides-with-our-pain",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "when-the-foundation-is-destroyed",
+      "slug": "when-the-foundation-is-destroyed",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "when-the-system-breaks-you",
+      "slug": "when-the-system-breaks-you",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "/shorts/busy-is-not-the-same-as-anchored",
+      "slug": "busy-is-not-the-same-as-anchored",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/freedom-begins-where-ego-ends",
+      "slug": "freedom-begins-where-ego-ends",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/institutional-sovereignty",
+      "slug": "institutional-sovereignty",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/pleasure-is-loud-purpose-is-quiet",
+      "slug": "pleasure-is-loud-purpose-is-quiet",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/the-cost-of-refusing-formation",
+      "slug": "the-cost-of-refusing-formation",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/this-is-not-a-comfort-platform",
+      "slug": "this-is-not-a-comfort-platform",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-a-single-yes-changes-everything",
+      "slug": "when-a-single-yes-changes-everything",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-all-you-can-do-is-breathe",
+      "slug": "when-all-you-can-do-is-breathe",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-avoidance-becomes-your-personality",
+      "slug": "when-avoidance-becomes-your-personality",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-busyness-becomes-your-brand",
+      "slug": "when-busyness-becomes-your-brand",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-comfort-becomes-your-cage",
+      "slug": "when-comfort-becomes-your-cage",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-conflict-feels-like-betrayal",
+      "slug": "when-conflict-feels-like-betrayal",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-doctrine-feels-safer-than-god",
+      "slug": "when-doctrine-feels-safer-than-god",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-every-promotion-feels-hollow",
+      "slug": "when-every-promotion-feels-hollow",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-grace-finds-you-in-the-mess",
+      "slug": "when-grace-finds-you-in-the-mess",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-hope-feels-reckless",
+      "slug": "when-hope-feels-reckless",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-kindness-feels-like-rebellion",
+      "slug": "when-kindness-feels-like-rebellion",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-later-became-never",
+      "slug": "when-later-became-never",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-numbness-feels-safer-than-joy",
+      "slug": "when-numbness-feels-safer-than-joy",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-productivity-becomes-punishment",
+      "slug": "when-productivity-becomes-punishment",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-rest-starts-to-feel-dangerous",
+      "slug": "when-rest-starts-to-feel-dangerous",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-argue-with-god-in-your-head",
+      "slug": "when-you-argue-with-god-in-your-head",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-cant-stop-overthinking",
+      "slug": "when-you-cant-stop-overthinking",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-cant-tell-if-youre-growing-or-drifting",
+      "slug": "when-you-cant-tell-if-youre-growing-or-drifting",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-dont-know-what-you-want-anymore",
+      "slug": "when-you-dont-know-what-you-want-anymore",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-dont-trust-your-own-decisions",
+      "slug": "when-you-dont-trust-your-own-decisions",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-fear-being-wrong-about-god",
+      "slug": "when-you-fear-being-wrong-about-god",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-fear-success-more-than-failure",
+      "slug": "when-you-fear-success-more-than-failure",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-feel-like-god-is-delaying-you",
+      "slug": "when-you-feel-like-god-is-delaying-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-feel-too-busy-to-care",
+      "slug": "when-you-feel-too-busy-to-care",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-finally-let-yourself-cry",
+      "slug": "when-you-finally-let-yourself-cry",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-give-more-than-you-get",
+      "slug": "when-you-give-more-than-you-get",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-keep-blaming-your-childhood",
+      "slug": "when-you-keep-blaming-your-childhood",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-keep-choosing-people-who-cant-choose-you",
+      "slug": "when-you-keep-choosing-people-who-cant-choose-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-keep-confusing-niceness-with-goodness",
+      "slug": "when-you-keep-confusing-niceness-with-goodness",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-miss-who-you-used-to-be",
+      "slug": "when-you-miss-who-you-used-to-be",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-mistake-familiarity-for-loyalty",
+      "slug": "when-you-mistake-familiarity-for-loyalty",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-need-god-to-interrupt-you",
+      "slug": "when-you-need-god-to-interrupt-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-no-longer-recognise-your-own-voice",
+      "slug": "when-you-no-longer-recognise-your-own-voice",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-outgrow-your-circle",
+      "slug": "when-you-outgrow-your-circle",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-realise-prayer-is-war",
+      "slug": "when-you-realise-prayer-is-war",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-realise-you-were-the-problem",
+      "slug": "when-you-realise-you-were-the-problem",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-realise-youre-not-behind",
+      "slug": "when-you-realise-youre-not-behind",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-stop-waiting-for-permission",
+      "slug": "when-you-stop-waiting-for-permission",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-you-want-to-quit-but-cant",
+      "slug": "when-you-want-to-quit-but-cant",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-calendar-is-full-but-your-life-is-empty",
+      "slug": "when-your-calendar-is-full-but-your-life-is-empty",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-calling-stops-being-cute",
+      "slug": "when-your-calling-stops-being-cute",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-character-is-leaking",
+      "slug": "when-your-character-is-leaking",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-confidence-feels-manufactured",
+      "slug": "when-your-confidence-feels-manufactured",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-convictions-feel-like-costumes",
+      "slug": "when-your-convictions-feel-like-costumes",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-dreams-feel-too-heavy",
+      "slug": "when-your-dreams-feel-too-heavy",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-excuses-become-your-identity",
+      "slug": "when-your-excuses-become-your-identity",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-faith-feels-numb",
+      "slug": "when-your-faith-feels-numb",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-hustle-has-no-soul",
+      "slug": "when-your-hustle-has-no-soul",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-legacy-terrifies-you",
+      "slug": "when-your-legacy-terrifies-you",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-silence-says-too-much",
+      "slug": "when-your-silence-says-too-much",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-standards-keep-you-lonely",
+      "slug": "when-your-standards-keep-you-lonely",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-vision-outgrows-your-environment",
+      "slug": "when-your-vision-outgrows-your-environment",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-your-work-becomes-your-hiding-place",
+      "slug": "when-your-work-becomes-your-hiding-place",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-addicted-to-distraction",
+      "slug": "when-youre-addicted-to-distraction",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-afraid-of-your-own-potential",
+      "slug": "when-youre-afraid-of-your-own-potential",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-afraid-to-be-radical",
+      "slug": "when-youre-afraid-to-be-radical",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-always-the-strong-one",
+      "slug": "when-youre-always-the-strong-one",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-attracted-to-potential-not-reality",
+      "slug": "when-youre-attracted-to-potential-not-reality",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-building-someone-elses-legacy",
+      "slug": "when-youre-building-someone-elses-legacy",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-done-fixing-adults",
+      "slug": "when-youre-done-fixing-adults",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-exhausted-but-still-available",
+      "slug": "when-youre-exhausted-but-still-available",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-keeping-faith-out-of-habit",
+      "slug": "when-youre-keeping-faith-out-of-habit",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-living-for-weekends",
+      "slug": "when-youre-living-for-weekends",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-loved-without-earning-it",
+      "slug": "when-youre-loved-without-earning-it",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-measuring-everything-but-meaning",
+      "slug": "when-youre-measuring-everything-but-meaning",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-not-lazy-youre-undisciplined",
+      "slug": "when-youre-not-lazy-youre-undisciplined",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-preparing-for-rooms-you-havent-entered",
+      "slug": "when-youre-preparing-for-rooms-you-havent-entered",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-productive-but-not-present",
+      "slug": "when-youre-productive-but-not-present",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-scared-to-start-over",
+      "slug": "when-youre-scared-to-start-over",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-the-only-one-doing-the-work",
+      "slug": "when-youre-the-only-one-doing-the-work",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-tired-of-being-the-bigger-person",
+      "slug": "when-youre-tired-of-being-the-bigger-person",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-tired-of-starting-over",
+      "slug": "when-youre-tired-of-starting-over",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youre-winning-at-work-but-losing-yourself",
+      "slug": "when-youre-winning-at-work-but-losing-yourself",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youve-become-chronically-online",
+      "slug": "when-youve-become-chronically-online",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/when-youve-worshipped-the-wrong-metrics",
+      "slug": "when-youve-worshipped-the-wrong-metrics",
+      "type": "Short",
+      "reason": "online-only"
+    },
+    {
+      "id": "/shorts/you-were-built-to-carry-weight",
+      "slug": "you-were-built-to-carry-weight",
+      "type": "Short",
+      "reason": "online-only"
     }
-  ]
+  ],
+  "failures": [
+    {
+      "id": "FAM-TPL-002",
+      "slug": "canon-household-charter-template",
+      "type": "Resource",
+      "reason": "unsupported number: -2.203643948769682e+22"
+    }
+  ],
+  "restoredByType": {
+    "Brief": 94,
+    "Intelligence": 12,
+    "Download": 29,
+    "Event": 2,
+    "Print": 6,
+    "Lexicon": 17,
+    "Resource": 19,
+    "Strategy": 2,
+    "Vault": 1
+  }
 }

@@ -1,93 +1,72 @@
-// pages/api/shorts/[slug]/save.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { checkRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/rate-limit";
-import { toggleInteraction } from "@/lib/db/interactions";
-import { getOrSetSessionId, getSlugParam } from "@/lib/session";
 
-interface SuccessResponse {
-  likes: number;
-  saves: number;
-  userLiked: boolean;
-  userSaved: boolean;
-  message: string;
-}
+import { setInteractionState } from "@/lib/db/interactions";
+import { getOrSetSessionId } from "@/lib/session";
 
-interface ErrorResponse {
-  error: string;
-  message?: string;
+import {
+  rateLimit,
+  RATE_LIMIT_CONFIGS,
+  getRateLimitKey,
+  createRateLimitHeaders,
+} from "@/lib/server/rateLimit";
+
+type Response =
+  | {
+      slug: string;
+      likes: number;
+      saves: number;
+      userLiked: boolean;
+      userSaved: boolean;
+      _ts: number;
+    }
+  | { error: string };
+
+function cleanSlug(value: unknown): string {
+  return String(value ?? "").trim().toLowerCase();
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SuccessResponse | ErrorResponse>
+  res: NextApiResponse<Response>,
 ) {
-  if (req.method === "OPTIONS") {
-    res.setHeader("Allow", "POST,DELETE,OPTIONS");
-    return res.status(204).end();
+  if (req.method !== "POST" && req.method !== "DELETE") {
+    res.setHeader("Allow", "POST, DELETE");
+    return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
   }
 
-  if (!["POST", "DELETE"].includes(req.method || "")) {
-    res.setHeader("Allow", "POST,DELETE,OPTIONS");
-    return res.status(405).json({
-      error: "Method Restriction",
-      message: "System requires POST to save or DELETE to unsave.",
-    });
-  }
-
-  const slug = getSlugParam(req);
+  const slug = cleanSlug(req.query.slug);
   if (!slug) {
-    return res.status(400).json({
-      error: "Request Malformed",
-      message: "Identifier (slug) is required for bookmarking.",
-    });
+    return res.status(400).json({ error: "ID_REQUIRED" });
   }
 
-  try {
-    const rl = await checkRateLimit(req, res, RATE_LIMIT_CONFIGS.SHORTS_INTERACTIONS);
+  const key = getRateLimitKey(req, "shorts_save");
+  const rl = rateLimit(key, RATE_LIMIT_CONFIGS.shortsSave);
 
-    if (rl.headers) {
-      Object.entries(rl.headers).forEach(([k, v]) => res.setHeader(k, v));
-    }
+  const headers = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(headers)) {
+    res.setHeader(k, v);
+  }
 
-    if (!rl.allowed) {
-      return res.status(429).json({
-        error: "Throttling Active",
-        message: "Interaction limit reached. Please wait.",
-      });
-    }
-  } catch {
-    console.warn("[System Warning] Rate limiting subsystem silent.");
+  if (!rl.ok) {
+    return res.status(429).json({ error: "THROTTLED" });
   }
 
   const sessionId = getOrSetSessionId(req, res);
+  const desired = req.method === "POST";
 
-  try {
-    const stats = await toggleInteraction(slug, "save", sessionId);
+  const stats = await setInteractionState(slug, "save", sessionId, desired);
 
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
 
-    const message = stats.userSaved ? "Short bookmarked." : "Bookmark removed.";
-
-    return res.status(200).json({
-      likes: stats.likes || 0,
-      saves: stats.saves || 0,
-      userLiked: !!stats.userLiked,
-      userSaved: !!stats.userSaved,
-      message,
-    });
-  } catch (error: any) {
-    console.error(`[System Exception] Bookmark failure for ${slug}:`, error);
-    return res.status(500).json({
-      error: "Vault Write Failure",
-      message: "Failed to record bookmark. Please try again shortly.",
-    });
-  }
+  return res.status(200).json({
+    slug,
+    likes: stats.likes,
+    saves: stats.saves,
+    userLiked: stats.userLiked,
+    userSaved: stats.userSaved,
+    _ts: Date.now(),
+  });
 }
-
-export const config = {
-  api: {
-    bodyParser: { sizeLimit: "1kb" },
-  },
-};

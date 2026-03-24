@@ -1,8 +1,9 @@
-// lib/pdf/registry.ts — PDF Registry Facade (SSOT Aligned, Compile-Safe)
+// lib/pdf/registry.ts — PDF Registry Facade (SSOT Aligned, Compile-Safe, Path-Hardenened)
 // -----------------------------------------------------------------------------
 // Provides:
 //  - Backward-compatible exports for legacy imports
 //  - Extra helper functions for UI / dashboards
+//  - Path Normalization to prevent filesystem target errors
 //
 // HARD RULE:
 //  - Do NOT import+re-export the same type names in this file.
@@ -28,13 +29,21 @@ export {
   getStaticAllPDFs as getAllPDFs,
   getStaticGetPDFById as getPDFById,
   getStaticGetAllPDFItemsNode as getAllPDFItemsNode,
-  getStaticGetRegistryStats as getRegistryStats,
+  // FIXED: Pointing to the correct aliased import variable
+  getStaticGetRegistryStats as getRegistryStats, 
 };
 
 // -----------------------------------------------------------------------------
 // Re-export SSOT types (types ONLY)
 // -----------------------------------------------------------------------------
-export type { PDFRegistryEntry, PDFType, PDFFormat, PaperFormat, GeneratedPDFId, NodePDFItem } from "./registry.static";
+export type { 
+  PDFRegistryEntry, 
+  PDFType, 
+  PDFFormat, 
+  PaperFormat, 
+  GeneratedPDFId, 
+  NodePDFItem 
+} from "./registry.static";
 
 // -----------------------------------------------------------------------------
 // Local helper types (safe extensions)
@@ -56,8 +65,22 @@ export type PDFWithNormalizedTier = import("./registry.static").PDFRegistryEntry
 };
 
 // -----------------------------------------------------------------------------
-// Helpers
+// Core Normalization Helpers
 // -----------------------------------------------------------------------------
+
+/**
+ * Ensures paths use forward slashes and have no leading double-slashes.
+ * Fixes the "C:\Abraham-of-london..." literal path leak by sanitizing input.
+ */
+function normalizePublicPath(p: unknown): string {
+  const s = String(p ?? "").trim();
+  if (!s) return "";
+  return s
+    .replace(/\\/g, "/")       // Convert Windows backslashes to forward slashes
+    .replace(/^\/+/, "/")      // Ensure exactly one leading slash
+    .replace(/\/+/g, "/");     // Remove any double internal slashes
+}
+
 function normalizeTierValue(v: unknown): string {
   const s = String(v ?? "public").trim().toLowerCase();
   if (s === "free") return "public"; // migration compatibility
@@ -80,11 +103,17 @@ function formatFileSize(bytes: number): string {
 // -----------------------------------------------------------------------------
 // Public helper APIs (UI / dashboards)
 // -----------------------------------------------------------------------------
+
 export function getAllPDFsWithNormalizedTier(): PDFWithNormalizedTier[] {
   const all = getStaticAllPDFs();
   return all.map((pdf) => {
     const tierValue = normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public");
-    return { ...pdf, normalizedTier: tierValue, requiresAuth: tierValue !== "public" };
+    return { 
+      ...pdf, 
+      outputPath: normalizePublicPath(pdf.outputPath),
+      normalizedTier: tierValue, 
+      requiresAuth: tierValue !== "public" 
+    };
   });
 }
 
@@ -92,7 +121,12 @@ export function getPDFByIdWithNormalizedTier(id: string): PDFWithNormalizedTier 
   const pdf = getStaticGetPDFById(id);
   if (!pdf) return undefined;
   const tierValue = normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public");
-  return { ...pdf, normalizedTier: tierValue, requiresAuth: tierValue !== "public" };
+  return { 
+    ...pdf, 
+    outputPath: normalizePublicPath(pdf.outputPath),
+    normalizedTier: tierValue, 
+    requiresAuth: tierValue !== "public" 
+  };
 }
 
 export function getAllPDFItems(options?: { includeMissing?: boolean }): PDFItem[] {
@@ -113,6 +147,7 @@ export function getAllPDFItems(options?: { includeMissing?: boolean }): PDFItem[
 
     return {
       ...pdf,
+      outputPath: normalizePublicPath(pdf.outputPath),
       existsOnDisk: exists,
       fileSizeHuman: sizeBytes ? formatFileSize(sizeBytes) : "0 B",
       lastModifiedISO,
@@ -166,6 +201,14 @@ export function getPDFsByTier(tier: string): import("./registry.static").PDFRegi
   const all = getStaticAllPDFs();
   const target = normalizeTierValue(tier);
   return all.filter((pdf) => normalizeTierValue((pdf as any).tier ?? (pdf as any).accessLevel ?? "public") === target);
+}
+
+/**
+ * Returns all IDs for the batch processor.
+ * Aliased for the vault-manifest-gen script.
+ */
+export function getAllBriefIds(): string[] {
+  return Object.keys(GENERATED_PDF_CONFIGS);
 }
 
 // -----------------------------------------------------------------------------

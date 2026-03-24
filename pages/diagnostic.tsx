@@ -1,78 +1,107 @@
-// pages/diagnostic.tsx
+/* ============================================================================
+   FILE: pages/diagnostic.tsx
+   CSS & ENVIRONMENT DIAGNOSTIC TOOL
+============================================================================ */
+
+import React, { useEffect, useState } from "react";
+import Head from "next/head";
+
 export default function Diagnostic() {
+  const [cssVars, setCssVars] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    // Check computed styles on mount
+    const rootStyles = getComputedStyle(document.documentElement);
+    const varsToCheck = [
+      "--color-background",
+      "--color-primary",
+      "--font-family-sans",
+    ];
+
+    const results = varsToCheck.map((v) => ({
+      label: v,
+      value: rootStyles.getPropertyValue(v).trim() || "NOT FOUND",
+    }));
+
+    setCssVars(results);
+    
+    console.log("CSS Diagnostic Results:", results);
+  }, []);
+
   return (
-    <html>
-      <head>
-        <title>CSS Diagnostic</title>
+    <div className="min-h-screen bg-[#050608] text-[#f4f1ea] p-8 font-sans">
+      <Head>
+        <title>CSS Diagnostic Tool</title>
         <style>{`
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { 
-            font-family: system-ui, -apple-system, sans-serif;
-            padding: 2rem;
-            background: #050608;
-            color: #f4f1ea;
-          }
-          .test-box { 
+          .test-box-internal { 
             background: #d6b26a; 
             color: #15171c; 
-            padding: 1rem; 
-            margin: 1rem 0;
+            padding: 1.5rem; 
+            margin: 1.5rem 0;
             border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           }
         `}</style>
-      </head>
-      <body>
-        <h1>🎨 CSS Diagnostic Tool</h1>
-        
-        <div class="test-box">
-          <h2>Test 1: Inline Styles</h2>
-          <p>This box uses inline CSS. If it's gold, inline CSS works.</p>
-        </div>
-        
-        <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-          <h2 className="text-xl font-bold text-white mb-2">Test 2: Tailwind Classes</h2>
-          <p className="text-slate-300">
-            This uses Tailwind classes. If styled, Tailwind is working.
+      </Head>
+
+      <main className="max-w-3xl mx-auto">
+        <header className="mb-10 border-b border-white/10 pb-6">
+          <h1 className="text-4xl font-serif text-white">🎨 CSS Diagnostic</h1>
+          <p className="text-white/40 mt-2 font-mono text-sm uppercase tracking-widest">
+            Environment Verification Tool
           </p>
-          <button className="mt-3 px-4 py-2 bg-amber-500 text-slate-950 font-semibold rounded hover:bg-amber-400">
-            Tailwind Button
-          </button>
-        </div>
-        
-        <div style={{marginTop: '2rem', padding: '1rem', background: '#1a1b1e', borderRadius: '8px'}}>
-          <h3 style={{color: '#d6b26a', marginBottom: '0.5rem'}}>CSS Variables Check:</h3>
-          <div id="css-vars" style={{fontFamily: 'monospace', fontSize: '0.9rem'}}>
-            {/* This will be populated by JavaScript */}
+        </header>
+
+        {/* Test 1: Internal Style Tag */}
+        <section className="mb-8">
+          <div className="test-box-internal">
+            <h2 className="text-xl font-bold mb-1">Test 1: Internal Styles</h2>
+            <p className="opacity-90">
+              If this box is <strong>Gold (#d6b26a)</strong>, internal scoped styles are functioning.
+            </p>
           </div>
-        </div>
-        
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener('DOMContentLoaded', function() {
-              const rootStyles = getComputedStyle(document.documentElement);
-              const vars = [
-                '--color-background',
-                '--color-primary',
-                '--font-family-sans'
-              ];
-              
-              const output = vars.map(v => {
-                const value = rootStyles.getPropertyValue(v).trim();
-                return \`<div><strong>\${v}:</strong> <span style="color: #d6b26a">\${value || 'NOT FOUND'}</span></div>\`;
-              }).join('');
-              
-              document.getElementById('css-vars').innerHTML = output;
-              
-              // Log to console
-              console.log('CSS Variables:', {
-                background: rootStyles.getPropertyValue('--color-background').trim(),
-                primary: rootStyles.getPropertyValue('--color-primary').trim(),
-                font: rootStyles.getPropertyValue('--font-family-sans').trim()
-              });
-            });
-          `
-        }} />
-      </body>
-    </html>
+        </section>
+
+        {/* Test 2: Tailwind Classes */}
+        <section className="mb-8">
+          <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-2">Test 2: Tailwind CSS</h2>
+            <p className="text-slate-300 mb-4">
+              If this box is <strong>Slate Blue</strong> and the button below is <strong>Amber</strong>, Tailwind is compiled and active.
+            </p>
+            <button className="px-6 py-2.5 bg-amber-500 text-slate-950 font-bold rounded shadow-lg hover:bg-amber-400 transition-colors">
+              Tailwind Active
+            </button>
+          </div>
+        </section>
+
+        {/* Test 3: CSS Variables */}
+        <section className="bg-[#1a1b1e] p-6 rounded-lg border border-white/5">
+          <h3 className="text-amber-400 font-mono text-xs uppercase tracking-[0.2em] mb-4">
+            Global CSS Variables Check
+          </h3>
+          <div className="space-y-3">
+            {cssVars.length > 0 ? (
+              cssVars.map((v) => (
+                <div key={v.label} className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <code className="text-white/60 text-sm">{v.label}:</code>
+                  <span className={`font-mono text-sm ${v.value === 'NOT FOUND' ? 'text-red-400' : 'text-amber-200'}`}>
+                    {v.value}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-white/20 text-sm italic">Scanning environment...</p>
+            )}
+          </div>
+        </section>
+
+        <footer className="mt-12 pt-6 border-t border-white/5 text-center">
+          <p className="text-white/20 text-xs font-mono uppercase tracking-widest">
+            End of Diagnostic
+          </p>
+        </footer>
+      </main>
+    </div>
   );
 }

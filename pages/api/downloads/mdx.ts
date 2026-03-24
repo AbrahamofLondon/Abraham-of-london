@@ -1,85 +1,102 @@
-/* pages/api/downloads/mdx.ts — RAW MDX GATE (FIXED) */
+/* pages/api/downloads/mdx.ts — RAW MDX GATE (SSOT, Pages Router) */
+
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
 import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 import { getTokenForensics } from "@/lib/premium/download-token";
 
-// IMPORTANT: Use the SERVER compat module (Node runtime).
-import { 
+import {
   normalizeSlug,
   getDocumentBySlug,
   isDraftContent,
 } from "@/lib/content/server";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { 
-  normalizeRequiredTier, 
-  normalizeUserTier, 
+import {
+  normalizeRequiredTier,
+  normalizeUserTier,
   hasAccess,
   getTierLabel,
 } from "@/lib/access/tier-policy";
 
-type Ok = {
+type OkResponse = {
   ok: true;
   tier: AccessTier;
   requiredTier: AccessTier;
   mdx: string;
-  tierLabel?: string;
+  tierLabel: string;
   watermarkId?: string | null;
   tokenId?: string | null;
   forensicFooter?: string | null;
 };
 
-type Fail = {
+type FailResponse = {
   ok: false;
   reason: string;
   requiredTier?: AccessTier;
 };
 
-/**
- * Map any input to SSOT AccessTier
- */
-function mapToAccessTier(v: unknown): AccessTier {
-  return normalizeRequiredTier(v);
+type ResponseData = OkResponse | FailResponse;
+
+function safeStr(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+  return String(value);
 }
 
-function stripDownloadsPrefix(input: string): string {
-  return normalizeSlug(input).replace(/^downloads\//, "");
+function cleanPathish(input: unknown): string {
+  return safeStr(input)
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/");
 }
 
-function rawMdxFromDoc(doc: any): string {
-  if (typeof doc?.body?.raw === "string") return doc.body.raw;
-  if (typeof doc?.body === "string") return doc.body;
-  if (typeof doc?.content === "string") return doc.content;
+function stripDownloadsPrefix(input: unknown): string {
+  let s = cleanPathish(normalizeSlug(safeStr(input)));
+  if (!s) return "";
+
+  const lower = s.toLowerCase();
+  if (lower.startsWith("downloads/")) {
+    s = s.slice("downloads/".length).replace(/^\/+/, "");
+  }
+
+  s = cleanPathish(s);
+  return s.includes("..") ? "" : s;
+}
+
+function rawMdxFromDoc(doc: unknown): string {
+  const value = doc as {
+    body?: { raw?: unknown } | unknown;
+    content?: unknown;
+    mdx?: unknown;
+  } | null;
+
+  if (typeof value?.body === "object" && value?.body && "raw" in value.body) {
+    const raw = (value.body as { raw?: unknown }).raw;
+    if (typeof raw === "string") return raw;
+  }
+
+  if (typeof value?.body === "string") return value.body;
+  if (typeof value?.content === "string") return value.content;
+  if (typeof value?.mdx === "string") return value.mdx;
+
   return "";
 }
 
-function extractWatermarkFromDoc(doc: any): { 
-  watermarkId?: string | null; 
+function extractWatermarkFromDoc(doc: any): {
+  watermarkId?: string | null;
   tokenId?: string | null;
   forensicFooter?: string | null;
 } {
-  // Check if doc has embedded watermark metadata
-  const metadata = doc.metadata ?? doc.forensics ?? {};
-  
-  // Try to extract from various possible locations
-  const watermarkId = 
-    metadata.watermarkId ?? 
-    doc.watermarkId ?? 
-    null;
-    
-  const tokenId = 
-    metadata.tokenId ?? 
-    doc.tokenId ?? 
-    null;
-    
-  const forensicFooter = 
-    metadata.expectedFooter ?? 
-    doc.footer ?? 
-    null;
+  const metadata = doc?.metadata ?? doc?.forensics ?? {};
 
-  // If we have token metadata, try to get forensics
+  const watermarkId = metadata?.watermarkId ?? doc?.watermarkId ?? null;
+  const tokenId = metadata?.tokenId ?? doc?.tokenId ?? null;
+  const forensicFooter = metadata?.expectedFooter ?? doc?.footer ?? null;
+
   if (tokenId && !watermarkId) {
     try {
       const forensics = getTokenForensics(metadata);
@@ -89,43 +106,80 @@ function extractWatermarkFromDoc(doc: any): {
         forensicFooter: forensics.expectedFooter,
       };
     } catch {
-      // Silently continue
+      return {
+        watermarkId: null,
+        tokenId,
+        forensicFooter,
+      };
     }
   }
 
-  return { watermarkId, tokenId, forensicFooter };
+  return {
+    watermarkId,
+    tokenId,
+    forensicFooter,
+  };
+}
+
+function resolveDownloadDoc(slug: string): any | null {
+  const tryDirect = cleanPathish(slug);
+  const tryPrefixed = cleanPathish(`downloads/${slug}`);
+
+  return getDocumentBySlug(tryDirect) || getDocumentBySlug(tryPrefixed) || null;
+}
+
+function requiredTierFromDownloadDoc(doc: any): AccessTier {
+  return normalizeRequiredTier(
+    doc?.accessLevelSafe ??
+      doc?.accessLevel ??
+      doc?.tier ??
+      doc?.classification ??
+      doc?.clearance ??
+      "member",
+  );
 }
 
 export default async function handler(
-  req: NextApiRequest, 
-  res: NextApiResponse<Ok | Fail>
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>,
 ) {
   if (req.method !== "GET") {
-    return res.status(405).json({ ok: false, reason: "Method not allowed" });
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({
+      ok: false,
+      reason: "METHOD_NOT_ALLOWED",
+    });
   }
 
-  const slug = stripDownloadsPrefix(String(req.query.slug ?? ""));
+  const slug = stripDownloadsPrefix(req.query.slug);
   if (!slug) {
-    return res.status(400).json({ ok: false, reason: "Missing slug" });
+    return res.status(400).json({
+      ok: false,
+      reason: "SLUG_MISSING",
+    });
   }
 
   try {
-    // ✅ FIXED: Removed second argument to match function signature
-    // Lookup order: direct slug, then prefixed slug.
-    const doc = 
-      (await getDocumentBySlug(slug)) || 
-      (await getDocumentBySlug(`downloads/${slug}`));
+    const doc = resolveDownloadDoc(slug);
 
     if (!doc || isDraftContent(doc)) {
-      return res.status(404).json({ ok: false, reason: "Not found" });
+      return res.status(404).json({
+        ok: false,
+        reason: "NOT_FOUND",
+      });
     }
 
-    // Extract forensic data from document
-    const { watermarkId, tokenId, forensicFooter } = extractWatermarkFromDoc(doc);
+    const requiredTier = requiredTierFromDownloadDoc(doc);
+    const mdx = rawMdxFromDoc(doc);
 
-    const requiredTier = mapToAccessTier(
-      doc.accessLevel ?? doc.tier ?? doc.classification ?? "member"
-    );
+    if (!mdx) {
+      return res.status(500).json({
+        ok: false,
+        reason: "INVALID_DOCUMENT_FORMAT",
+      });
+    }
+
+    const { watermarkId, tokenId, forensicFooter } = extractWatermarkFromDoc(doc);
 
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Vary", "Cookie");
@@ -133,30 +187,22 @@ export default async function handler(
       "Cache-Control",
       requiredTier === "public"
         ? "public, s-maxage=300, stale-while-revalidate=600"
-        : "no-store, no-cache, must-revalidate, private"
+        : "no-store, no-cache, must-revalidate, private",
     );
 
-    // Add forensic headers if available
     if (watermarkId) {
       res.setHeader("X-AOL-Watermark-Id", watermarkId);
     }
+
     if (tokenId) {
       res.setHeader("X-AOL-Token-Id", tokenId);
-    }
-
-    const mdx = rawMdxFromDoc(doc);
-    if (!mdx) {
-      return res.status(500).json({ 
-        ok: false, 
-        reason: "Invalid document format" 
-      });
     }
 
     if (requiredTier === "public") {
       return res.status(200).json({
         ok: true,
         tier: "public",
-        requiredTier,
+        requiredTier: "public",
         mdx,
         tierLabel: getTierLabel("public"),
         watermarkId,
@@ -165,50 +211,57 @@ export default async function handler(
       });
     }
 
-    const token = getAccessTokenFromReq(req);
-    if (!token) {
-      return res.status(401).json({ 
-        ok: false, 
-        reason: "Access required",
+    const accessToken = getAccessTokenFromReq(req);
+    if (!accessToken) {
+      return res.status(401).json({
+        ok: false,
+        reason: "ACCESS_REQUIRED",
         requiredTier,
       });
     }
 
-    const sessionTierRaw = await getSessionTier(token);
+    const sessionTierRaw = await getSessionTier(accessToken);
     if (!sessionTierRaw) {
-      return res.status(401).json({ 
-        ok: false, 
-        reason: "Session expired",
+      return res.status(401).json({
+        ok: false,
+        reason: "SESSION_EXPIRED",
         requiredTier,
       });
     }
 
-    const sessionTier = normalizeUserTier(sessionTierRaw);
-    
-    if (!hasAccess(sessionTier, requiredTier)) {
-      return res.status(403).json({ 
-        ok: false, 
-        reason: `Insufficient access - requires ${getTierLabel(requiredTier)}`,
+    const userTier = normalizeUserTier(sessionTierRaw);
+
+    if (!hasAccess(userTier, requiredTier)) {
+      return res.status(403).json({
+        ok: false,
+        reason: "INSUFFICIENT_ACCESS",
         requiredTier,
       });
     }
 
     return res.status(200).json({
       ok: true,
-      tier: sessionTier,
+      tier: userTier,
       requiredTier,
       mdx,
-      tierLabel: getTierLabel(sessionTier),
+      tierLabel: getTierLabel(userTier),
       watermarkId,
       tokenId,
       forensicFooter,
     });
-    
-  } catch (err) {
-    console.error("[API_DOWNLOADS_MDX_ERROR]", err);
-    return res.status(500).json({ 
-      ok: false, 
-      reason: "Server error" 
+  } catch (error) {
+    console.error("[API_DOWNLOADS_MDX_ERROR]", error);
+
+    return res.status(500).json({
+      ok: false,
+      reason: "SERVER_ERROR",
     });
   }
 }
+
+export const config = {
+  api: {
+    responseLimit: false,
+    bodyParser: false,
+  },
+};

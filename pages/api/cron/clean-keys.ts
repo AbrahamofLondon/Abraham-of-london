@@ -1,11 +1,11 @@
-/* pages/api/cron/clean-keys.ts — SYNCHRONIZED V5 */
+/* pages/api/cron/clean-keys.ts — SYNCHRONIZED MAINTENANCE */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma.server";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // 1. GATEKEEPING: Verify Secret Token (System-to-System Auth)
+  // 1. GATEKEEPING: Verify Secret Token
   const authHeader = req.headers.authorization;
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ success: false, message: "Unauthorized Elevation." });
   }
 
@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() - 180);
 
-    // 2. TRANSACTIONAL HYGIENE: Atomic cleanup of the Intelligence Registry
+    // 2. TRANSACTIONAL HYGIENE: Atomic cleanup
     const result = await prisma.$transaction([
       // Revoke Expired Keys
       prisma.innerCircleKey.updateMany({
@@ -43,18 +43,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }),
     ]);
 
-    // 3. ENHANCED AUDIT LOG: Direct feed to Command Wall Heatmap
+    // 3. ENHANCED AUDIT LOG: Schema-Aligned Field Mapping
     await prisma.systemAuditLog.create({
       data: {
         action: "MAINTENANCE_CLEANUP",
         severity: "info",
-        actorType: "SYSTEM",
+        actorType: "system", // Schema uses lowercase 'system' default
         resourceType: "ACCESS_KEYS",
-        status: "SUCCESS",
-        metadata: { 
+        status: "success",
+        metadata: { // FIXED: matching Prisma Schema field name
           expiredCount: result[0].count, 
           staleCount: result[1].count,
-          threshold: "180_DAYS"
+          threshold: "180_DAYS",
+          timestamp: new Date().toISOString()
         }
       }
     });

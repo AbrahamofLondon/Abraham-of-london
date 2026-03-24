@@ -1,10 +1,9 @@
 // components/MDXRenderer.tsx
-// Safe MDX renderer wrapper for next-mdx-remote v5.
-// Server component by default; accepts serialized MDX and component map.
+// Safe MDX renderer wrapper using next-contentlayer2.
+// Server component by default; accepts MDX source string.
 
 import React from "react";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import type { MDXRemoteProps } from "next-mdx-remote/rsc";
+import { useMDXComponent } from "next-contentlayer2/hooks";
 
 export type MDXComponent = React.ComponentType<Record<string, unknown>>;
 
@@ -13,13 +12,13 @@ const defaultComponents = {
   // Example shortcodes:
   // h2: (props) => <h2 className="font-serif text-2xl mt-8 mb-4" {...props} />,
   // Note: keep empty by default to avoid surprising overrides.
-} as const satisfies MDXRemoteProps['components'];
+} as const;
 
 export interface MDXRendererProps {
-  /** The MDX source string (use next-mdx-remote/serialize for older API). */
+  /** The MDX source string */
   source: string;
   /** Optional component override map (merged over defaults). */
-  components?: MDXRemoteProps['components'];
+  components?: Record<string, React.ComponentType<any>>;
   /** Optional className for a wrapping element. */
   className?: string;
   /** If true, wraps content in an article.prose block for typography. */
@@ -37,6 +36,8 @@ export default function MDXRenderer({
   className,
   prose = false,
 }: MDXRendererProps) {
+  const MDXContent = useMDXComponent(source);
+
   if (!source) {
     return (
       <div className={className}>
@@ -45,13 +46,13 @@ export default function MDXRenderer({
     );
   }
 
-  // Merge components with type assertion
+  // Merge components
   const merged = {
     ...defaultComponents,
     ...(components || {})
-  } as MDXRemoteProps['components'];
+  };
 
-  const content = <MDXRemote source={source} components={merged} />;
+  const content = MDXContent ? <MDXContent components={merged} /> : null;
 
   if (prose) {
     return (

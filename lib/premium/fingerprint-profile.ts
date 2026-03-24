@@ -1,4 +1,4 @@
-// lib/premium/fingerprint-profile.ts
+/* lib/premium/fingerprint-profile.ts — INSTITUTIONAL FORENSIC STANDARDS */
 import crypto from "crypto";
 
 export type FingerprintProfile = {
@@ -15,10 +15,7 @@ export type FingerprintProfile = {
   creator?: string | null;
   issuedAt: string;
 
-  /**
-   * Transitional compatibility aliases.
-   * Keep these while the estate is being migrated.
-   */
+  /** Transitional compatibility aliases */
   watermarkId: string;
   traceId: string;
 
@@ -41,13 +38,6 @@ export type BuildFingerprintProfileParams = {
   producer?: string | null;
   creator?: string | null;
   issuedAt?: Date | string | null;
-
-  /**
-   * Optional compatibility inputs.
-   * tokenId can meaningfully influence contextual tracing.
-   * classification is accepted for compatibility/logical grouping,
-   * but tier remains the canonical fingerprint access field.
-   */
   tokenId?: string | null;
   classification?: string | null;
 };
@@ -64,8 +54,12 @@ function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+/**
+ * BANDS FILE SIZE
+ * Prevents minor byte-drift (due to metadata shifts) from invalidating the stable fingerprint.
+ */
 function bandFileSize(size: number | null): string {
-  if (size === null) return "unknown";
+  if (size === null || size < 0) return "unknown";
   if (size < 50_000) return "<50kb";
   if (size < 250_000) return "50-250kb";
   if (size < 1_000_000) return "250kb-1mb";
@@ -90,19 +84,24 @@ export function buildFingerprintProfile(
   const tokenId = normalizeString(params.tokenId);
   const classification = normalizeString(params.classification);
 
+  // DETERMINISTIC ISSUANCE:
+  // If no date is provided, we use the current hour to maintain cache stability 
+  // during batch runs of vault-master.ts
+  const now = new Date();
   const issuedAtDate =
     params.issuedAt instanceof Date
       ? params.issuedAt
       : typeof params.issuedAt === "string" && params.issuedAt.trim()
         ? new Date(params.issuedAt)
-        : new Date();
+        : now;
 
   const issuedAt = Number.isNaN(issuedAtDate.getTime())
-    ? new Date().toISOString()
+    ? now.toISOString()
     : issuedAtDate.toISOString();
 
   const fileBand = bandFileSize(fileSize);
 
+  // 1. STABLE HASH: Immutable document traits
   const stableHash = sha256(
     JSON.stringify({
       contentId,
@@ -115,6 +114,8 @@ export function buildFingerprintProfile(
     }),
   );
 
+  // 2. CONTEXTUAL HASH: Traceable event traits
+  // Sliced to minutes (0, 16) to allow for re-tries within the same session
   const contextualHash = sha256(
     JSON.stringify({
       contentId,
@@ -123,19 +124,12 @@ export function buildFingerprintProfile(
       tokenId,
       tier,
       classification,
-      issuedAt: issuedAt.slice(0, 19),
+      issuedAt: issuedAt.slice(0, 16), // YYYY-MM-DDTHH:mm
     }),
   );
 
-  const profileId = sha256(`${stableHash}|${contextualHash}`).slice(0, 24);
-
-  /**
-   * Compatibility aliases for legacy callers.
-   * - watermarkId = durable short forensic id
-   * - traceId = contextual trace token
-   */
-  const watermarkId = profileId;
-  const traceId = contextualHash.slice(0, 24);
+  // 3. PROFILE ID: The forensic master token
+  const profileId = sha256(`${stableHash}|${contextualHash}`).slice(0, 24).toUpperCase();
 
   return {
     profileId,
@@ -150,8 +144,8 @@ export function buildFingerprintProfile(
     producer,
     creator,
     issuedAt,
-    watermarkId,
-    traceId,
+    watermarkId: profileId,
+    traceId: contextualHash.slice(0, 24).toUpperCase(),
     components: {
       stableHash,
       contextualHash,
@@ -165,7 +159,6 @@ export function fingerprintSimilarity(
   b: FingerprintProfile | null | undefined,
 ): number {
   if (!a || !b) return 0;
-
   let score = 0;
 
   if (a.profileId === b.profileId) score += 40;

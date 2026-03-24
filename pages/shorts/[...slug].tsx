@@ -1,4 +1,5 @@
-/* pages/shorts/[...slug].tsx — Catch-all (supports nested slugs, normalised) */
+/* pages/shorts/[...slug].tsx — SHORTS DETAIL (DIRECT GENERATED MATCH) */
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -6,142 +7,651 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
-import { getAllCombinedDocs, normalizeSlug } from "@/lib/content/server";
-import { cleanSlugForURL } from "@/lib/shorts/brand";
+import { getAllShorts } from "@/lib/content/server";
+
+import ShortHero from "@/components/shorts/ShortHero";
+import ShortMetadata from "@/components/shorts/ShortMetadata";
+import ShortActions from "@/components/shorts/ShortActions";
+import ShortNavigation from "@/components/shorts/ShortNavigation";
+import ShortShare from "@/components/shorts/ShortShare";
+import RelatedShorts from "@/components/shorts/RelatedShorts";
+import ShortComments from "@/components/shorts/ShortComments";
+
+type RawShortLike = {
+  title?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  summary?: string | null;
+  slug?: string | null;
+  slugSafe?: string | null;
+  hrefSafe?: string | null;
+  slugComputed?: string | null;
+  date?: string | null;
+  tags?: string[] | null;
+  readingTime?: string | null;
+  readTimeSafe?: string | null;
+  coverImage?: string | null;
+  image?: string | null;
+  draft?: boolean | null;
+  published?: boolean | null;
+  type?: string | null;
+  kind?: string | null;
+  docKind?: string | null;
+  _type?: string | null;
+  content?: string | null;
+  mdx?: string | null;
+  body?: {
+    code?: string | null;
+    raw?: string | null;
+  } | null;
+  bodyCode?: string | null;
+  _raw?: {
+    flattenedPath?: string | null;
+    sourceFilePath?: string | null;
+    sourceFileName?: string | null;
+  } | null;
+};
+
+type ShortLinkItem = {
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+};
+
+type PageItem = {
+  title: string;
+  description: string;
+  excerpt: string;
+  slug: string;
+  bodyCode: string | null;
+  date: string | null;
+  tags: string[];
+  readingTime: string | null;
+  coverImage: string | null;
+};
 
 type Props = {
-  item: {
-    title: string;
-    description: string;
-    excerpt?: string;
-    slug: string;
-    bodyCode: string | null;
-  };
+  item: PageItem;
+  relatedShorts: ShortLinkItem[];
+  prevShort: ShortLinkItem | null;
+  nextShort: ShortLinkItem | null;
 };
+
+type InteractionState = {
+  likes: number;
+  saves: number;
+  userLiked: boolean;
+  userSaved: boolean;
+  shares: number;
+  loaded: boolean;
+};
+
+type InteractionApiResponse = {
+  slug?: string;
+  likes?: number;
+  saves?: number;
+  userLiked?: boolean;
+  userSaved?: boolean;
+};
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+
+const EMPTY_ITEM: PageItem = {
+  title: "Short",
+  description: "",
+  excerpt: "",
+  slug: "",
+  bodyCode: null,
+  date: null,
+  tags: [],
+  readingTime: null,
+  coverImage: null,
+};
+
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value : value == null ? "" : String(value);
+}
+
+function safeArray<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizePathish(input: unknown): string {
+  return safeString(input)
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/")
+    .replace(/\.(md|mdx)$/i, "");
+}
 
 function joinParamSlug(param: string | string[] | undefined): string {
   if (!param) return "";
-  return Array.isArray(param) ? param.join("/") : String(param);
+  return Array.isArray(param) ? param.join("/") : safeString(param);
 }
 
-function safeStartsWith(v: unknown, prefix: string) {
-  return typeof v === "string" && v.startsWith(prefix);
+function stripPrefixOnce(source: string, prefix: string): string {
+  const normalizedPrefix = `${prefix.toLowerCase()}/`;
+  if (source.toLowerCase().startsWith(normalizedPrefix)) {
+    return source.slice(normalizedPrefix.length).replace(/^\/+/, "");
+  }
+  return source;
 }
 
-function safeString(v: unknown) {
-  return typeof v === "string" ? v : "";
+function toShortRouteSlug(input: unknown): string {
+  let s = normalizePathish(input);
+  if (!s || s.includes("..")) return "";
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+
+    const nextA = stripPrefixOnce(s, "content");
+    if (nextA !== s) {
+      s = nextA;
+      changed = true;
+    }
+
+    const nextB = stripPrefixOnce(s, "vault");
+    if (nextB !== s) {
+      s = nextB;
+      changed = true;
+    }
+
+    const nextC = stripPrefixOnce(s, "shorts");
+    if (nextC !== s) {
+      s = nextC;
+      changed = true;
+    }
+  }
+
+  s = normalizePathish(s);
+  return !s || s.includes("..") ? "" : s;
 }
 
-function toShortUrlSlug(input: unknown) {
-  return cleanSlugForURL(normalizeSlug(safeString(input)));
+function getRawDocSlug(doc: RawShortLike): string {
+  return (
+    safeString(doc?.slugSafe) ||
+    safeString(doc?.slugComputed) ||
+    safeString(doc?.slug) ||
+    safeString(doc?.hrefSafe) ||
+    safeString(doc?._raw?.flattenedPath) ||
+    safeString(doc?._raw?.sourceFilePath)
+  );
 }
 
-function toShortRouteParamSlug(input: unknown) {
-  return toShortUrlSlug(input).replace(/^shorts\//, "");
+function getCandidateSlugs(doc: RawShortLike): string[] {
+  const rawValues = [
+    safeString(doc?.slugSafe),
+    safeString(doc?.slugComputed),
+    safeString(doc?.slug),
+    safeString(doc?.hrefSafe),
+    safeString(doc?._raw?.flattenedPath),
+    safeString(doc?._raw?.sourceFilePath),
+    safeString(doc?._raw?.sourceFileName),
+  ].filter(Boolean);
+
+  const out = new Set<string>();
+
+  for (const value of rawValues) {
+    const normalized = normalizePathish(value);
+    if (!normalized) continue;
+
+    out.add(normalized);
+    out.add(toShortRouteSlug(normalized));
+
+    const withoutShorts = stripPrefixOnce(normalized, "shorts");
+    if (withoutShorts && withoutShorts !== normalized) {
+      out.add(withoutShorts);
+      out.add(toShortRouteSlug(withoutShorts));
+    }
+
+    const basename = normalized.split("/").filter(Boolean).pop() || "";
+    if (basename) {
+      out.add(normalizePathish(basename));
+      out.add(toShortRouteSlug(basename));
+    }
+  }
+
+  return [...out].filter(Boolean);
 }
 
-const ShortsSlugPage: NextPage<Props> = ({ item }) => {
-  const title = item?.title || "Short";
-  const canonicalSlug = toShortRouteParamSlug(item?.slug || "");
+function isMatchingShort(doc: RawShortLike, targetSlug: string): boolean {
+  const normalizedTarget = normalizePathish(targetSlug);
+  const routeTarget = toShortRouteSlug(targetSlug);
+
+  return getCandidateSlugs(doc).some((candidate) => {
+    const normalizedCandidate = normalizePathish(candidate);
+    const routeCandidate = toShortRouteSlug(candidate);
+
+    return (
+      normalizedCandidate === normalizedTarget ||
+      normalizedCandidate === `shorts/${routeTarget}` ||
+      normalizedCandidate === `/shorts/${routeTarget}`.replace(/^\/+/, "") ||
+      routeCandidate === routeTarget
+    );
+  });
+}
+
+function extractShortBodyCode(doc: RawShortLike): string | null {
+  const compiled =
+    safeString(doc?.body?.code).trim() ||
+    safeString(doc?.bodyCode).trim();
+
+  return compiled || null;
+}
+
+function toAbsoluteUrl(input: string | null | undefined): string | undefined {
+  const raw = safeString(input).trim();
+  if (!raw) return undefined;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `${SITE_URL}${raw.startsWith("/") ? raw : `/${raw}`}`;
+}
+
+function formatHumanDate(date?: string | null): string | undefined {
+  const raw = safeString(date);
+  if (!raw) return undefined;
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+
+  return parsed.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function buildShortApiPath(slug: string, suffix?: string): string {
+  const encoded = normalizePathish(slug)
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+
+  return suffix ? `/api/shorts/${encoded}/${suffix}` : `/api/shorts/${encoded}`;
+}
+
+function sortShorts(docs: RawShortLike[]): RawShortLike[] {
+  return [...docs].sort((a, b) => {
+    const aTime = safeString(a?.date) ? new Date(safeString(a.date)).getTime() : 0;
+    const bTime = safeString(b?.date) ? new Date(safeString(b.date)).getTime() : 0;
+
+    if (aTime !== bTime) return bTime - aTime;
+
+    const aSlug = toShortRouteSlug(getRawDocSlug(a));
+    const bSlug = toShortRouteSlug(getRawDocSlug(b));
+    return aSlug.localeCompare(bSlug);
+  });
+}
+
+function toShortLinkItem(doc: RawShortLike | null | undefined): ShortLinkItem | null {
+  if (!doc) return null;
+
+  const slug = toShortRouteSlug(getRawDocSlug(doc));
+  if (!slug) return null;
+
+  return {
+    title: safeString(doc.title).trim() || `[Untitled: ${slug}]`,
+    slug,
+    excerpt: safeString(doc.excerpt || doc.summary || doc.description) || null,
+  };
+}
+
+function toPageItem(doc: RawShortLike): PageItem {
+  const slug = toShortRouteSlug(getRawDocSlug(doc));
+
+  return {
+    title: safeString(doc.title).trim() || `[Untitled: ${slug || "unknown"}]`,
+    description: safeString(doc.description || doc.excerpt || doc.summary).trim(),
+    excerpt: safeString(doc.excerpt || doc.summary || doc.description).trim(),
+    slug,
+    bodyCode: extractShortBodyCode(doc),
+    date: safeString(doc.date) || null,
+    tags: safeArray(doc.tags).map((tag) => safeString(tag)).filter(Boolean),
+    readingTime:
+      safeString(doc.readingTime) ||
+      safeString(doc.readTimeSafe) ||
+      null,
+    coverImage: safeString(doc.coverImage || doc.image) || null,
+  };
+}
+
+const ShortsSlugPage: NextPage<Props> = ({
+  item = EMPTY_ITEM,
+  relatedShorts = [],
+  prevShort = null,
+  nextShort = null,
+}) => {
+  const safeItem = item || EMPTY_ITEM;
+
+  const title = safeItem.title || "Short";
+  const description = safeItem.description || safeItem.excerpt || "";
+  const canonicalSlug = toShortRouteSlug(safeItem.slug);
+  const canonicalUrl = canonicalSlug
+    ? `${SITE_URL}/shorts/${canonicalSlug}`
+    : `${SITE_URL}/shorts`;
+
+  const absoluteCoverImage = toAbsoluteUrl(safeItem.coverImage);
+  const formattedDate = React.useMemo(
+    () => formatHumanDate(safeItem.date),
+    [safeItem.date],
+  );
+
+  const [interactions, setInteractions] = React.useState<InteractionState>({
+    likes: 0,
+    saves: 0,
+    userLiked: false,
+    userSaved: false,
+    shares: 0,
+    loaded: false,
+  });
+
+  const [interactionPending, setInteractionPending] = React.useState({
+    like: false,
+    save: false,
+  });
+
+  const fetchInteractions = React.useCallback(async () => {
+    if (!canonicalSlug) return;
+
+    try {
+      const response = await fetch(buildShortApiPath(canonicalSlug, "interactions"), {
+        method: "GET",
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+
+      if (!response.ok) return;
+
+      const data = (await response.json()) as InteractionApiResponse;
+
+      setInteractions((prev) => ({
+        ...prev,
+        likes: typeof data.likes === "number" ? data.likes : 0,
+        saves: typeof data.saves === "number" ? data.saves : 0,
+        userLiked: Boolean(data.userLiked),
+        userSaved: Boolean(data.userSaved),
+        loaded: true,
+      }));
+    } catch {
+      // fail-open
+    }
+  }, [canonicalSlug]);
+
+  React.useEffect(() => {
+    void fetchInteractions();
+  }, [fetchInteractions]);
+
+  const applyInteractionResponse = React.useCallback(
+    async (kind: "like" | "save") => {
+      if (!canonicalSlug) return;
+
+      const currentlyActive =
+        kind === "like" ? interactions.userLiked : interactions.userSaved;
+
+      setInteractionPending((prev) => ({ ...prev, [kind]: true }));
+
+      try {
+        const response = await fetch(buildShortApiPath(canonicalSlug, kind), {
+          method: currentlyActive ? "DELETE" : "POST",
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
+
+        if (!response.ok) return;
+
+        const data = (await response.json()) as InteractionApiResponse;
+
+        setInteractions((prev) => ({
+          ...prev,
+          likes: typeof data.likes === "number" ? data.likes : prev.likes,
+          saves: typeof data.saves === "number" ? data.saves : prev.saves,
+          userLiked:
+            typeof data.userLiked === "boolean" ? data.userLiked : prev.userLiked,
+          userSaved:
+            typeof data.userSaved === "boolean" ? data.userSaved : prev.userSaved,
+          loaded: true,
+        }));
+      } catch {
+        // fail-open
+      } finally {
+        setInteractionPending((prev) => ({ ...prev, [kind]: false }));
+      }
+    },
+    [canonicalSlug, interactions.userLiked, interactions.userSaved],
+  );
+
+  const handleNativeShare = React.useCallback(async () => {
+    try {
+      if (typeof navigator !== "undefined" && navigator.share && canonicalSlug) {
+        await navigator.share({
+          title,
+          text: description,
+          url: canonicalUrl,
+        });
+
+        setInteractions((prev) => ({ ...prev, shares: prev.shares + 1 }));
+        return;
+      }
+
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(canonicalUrl);
+        setInteractions((prev) => ({ ...prev, shares: prev.shares + 1 }));
+      }
+    } catch {
+      // fail-open
+    }
+  }, [canonicalSlug, canonicalUrl, description, title]);
+
+  const handleBackToTop = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <Layout
-      title={title}
-      description={item?.description || item?.excerpt || ""}
+      title={`${title} | Abraham of London`}
+      description={description}
       fullWidth
       headerTransparent={false}
       minimalHeader
-      showFooter={false}
+      showFooter
       enableVaultSearch={false}
     >
       <Head>
-        <link
-          rel="canonical"
-          href={`https://www.abrahamoflondon.org/shorts/${canonicalSlug}`}
-        />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        {absoluteCoverImage ? <meta property="og:image" content={absoluteCoverImage} /> : null}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        {absoluteCoverImage ? <meta name="twitter:image" content={absoluteCoverImage} /> : null}
       </Head>
 
-      <main className="min-h-screen bg-black text-white">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+      <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white">
+        <div className="mx-auto max-w-3xl px-6 pt-6">
           <Link
             href="/shorts"
-            className="text-xs font-mono uppercase tracking-widest text-amber-400/80 hover:text-amber-300"
+            className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-white/30 transition-colors hover:text-white/50"
           >
-            ← Back to Shorts
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </Link>
-
-          <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight md:text-5xl">
-            {title}
-          </h1>
-
-          <article className="prose prose-invert prose-lg mt-12 max-w-none">
-            {item?.bodyCode ? (
-              <SafeMDXRenderer code={item.bodyCode} />
-            ) : (
-              <div className="space-y-2 text-white/70">
-                <div>Content not compiled. (bodyCode missing)</div>
-                <div className="text-xs font-mono text-white/40">
-                  slug: {item?.slug || "unknown"}
-                </div>
-              </div>
-            )}
-          </article>
         </div>
+
+        <ShortHero
+          title={title}
+          excerpt={safeItem.excerpt}
+          coverImage={safeItem.coverImage || undefined}
+        />
+
+        <div className="relative z-10 mx-auto -mt-6 max-w-3xl px-6">
+          <ShortMetadata
+            date={formattedDate}
+            readingTime={safeItem.readingTime || undefined}
+            tags={safeItem.tags}
+          />
+        </div>
+
+        <article className="mx-auto max-w-3xl px-6 py-8">
+          {safeItem.bodyCode ? (
+            <SafeMDXRenderer code={safeItem.bodyCode} />
+          ) : (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center font-mono text-sm text-red-200">
+              No compiled MDX body found for slug: {safeItem.slug || "(empty)"}
+            </div>
+          )}
+
+          <div className="mt-8 border-t border-white/5 pt-6">
+            <ShortActions
+              shortId={canonicalSlug}
+              likes={interactions.likes}
+              isLiked={interactions.userLiked}
+              saves={interactions.saves}
+              isSaved={interactions.userSaved}
+              shares={interactions.shares}
+              onLike={() => {
+                if (interactionPending.like || !canonicalSlug) return;
+                void applyInteractionResponse("like");
+              }}
+              onSave={() => {
+                if (interactionPending.save || !canonicalSlug) return;
+                void applyInteractionResponse("save");
+              }}
+              onShare={() => {
+                void handleNativeShare();
+              }}
+            />
+          </div>
+
+          <div className="mt-4">
+            <ShortShare url={canonicalUrl} title={title} />
+          </div>
+        </article>
+
+        {prevShort || nextShort ? (
+          <>
+            <div className="mx-auto max-w-3xl px-6">
+              <div className="h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+            </div>
+
+            <div className="mx-auto max-w-3xl px-6 py-8">
+              <ShortNavigation prevSlug={prevShort?.slug} nextSlug={nextShort?.slug} />
+            </div>
+          </>
+        ) : null}
+
+        {relatedShorts.length > 0 ? (
+          <div className="border-t border-white/5 bg-black/30">
+            <div className="mx-auto max-w-6xl px-6 py-12">
+              <h2 className="mb-8 text-center font-serif text-xl text-white/40">
+                More Shorts
+              </h2>
+              <RelatedShorts shorts={relatedShorts} />
+            </div>
+          </div>
+        ) : null}
+
+        <div id="comments" className="scroll-mt-16 border-t border-white/5 bg-black/30">
+          <div className="mx-auto max-w-3xl px-6 py-12">
+            <ShortComments shortId={canonicalSlug} />
+          </div>
+        </div>
+
+        <button
+          onClick={handleBackToTop}
+          className="fixed bottom-6 right-6 rounded-full border border-white/10 bg-white/5 p-2 opacity-50 backdrop-blur-sm transition-all hover:bg-white/10 hover:opacity-100"
+          aria-label="Back to top"
+        >
+          <svg className="h-4 w-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7 7 7" />
+          </svg>
+        </button>
       </main>
     </Layout>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const allDocuments = getAllCombinedDocs() || [];
-  const shorts = allDocuments.filter(
-    (d: any) =>
-      safeStartsWith(d?.slug, "shorts/") ||
-      safeStartsWith(d?._raw?.flattenedPath, "shorts/")
-  );
+  const allShorts = safeArray(getAllShorts()) as RawShortLike[];
+  const shorts = sortShorts(allShorts.filter((doc) => doc.draft !== true));
 
-  const paths = shorts.map((s: any) => {
-    const raw = s?.slug || s?._raw?.flattenedPath || "";
-    const clean = toShortRouteParamSlug(raw);
-    const slugArray = clean.split("/").filter(Boolean);
-    return { params: { slug: slugArray } };
-  });
+  const paths = shorts
+    .map((doc) => {
+      const slug = toShortRouteSlug(getRawDocSlug(doc));
+      if (!slug) return null;
 
-  return { paths, fallback: "blocking" };
+      const parts = slug.split("/").filter(Boolean);
+      if (!parts.length) return null;
+
+      return { params: { slug: parts } };
+    })
+    .filter(Boolean) as Array<{ params: { slug: string[] } }>;
+
+  return {
+    paths,
+    fallback: "blocking",
+  };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const rawParam = joinParamSlug(params?.slug);
-  const targetSlug = toShortRouteParamSlug(rawParam);
-  if (!targetSlug) return { notFound: true };
+  const targetSlug = toShortRouteSlug(rawParam);
 
-  const allDocuments = getAllCombinedDocs() || [];
-  const shorts = allDocuments.filter(
-    (d: any) =>
-      safeStartsWith(d?.slug, "shorts/") ||
-      safeStartsWith(d?._raw?.flattenedPath, "shorts/")
+  if (!targetSlug) {
+    return { notFound: true };
+  }
+
+  const allShorts = sortShorts(
+    (safeArray(getAllShorts()) as RawShortLike[]).filter((doc) => doc.draft !== true),
   );
 
-  const doc = shorts.find((d: any) => {
-    const raw = d?.slug || d?._raw?.flattenedPath || "";
-    const clean = toShortRouteParamSlug(raw);
-    return clean === targetSlug;
-  });
+  const doc = allShorts.find((candidate) => isMatchingShort(candidate, targetSlug)) || null;
 
-  if (!doc || (doc as any).draft === true) return { notFound: true };
+  if (!doc) {
+    console.log("[shorts:getStaticProps] no match", {
+      targetSlug,
+      sample: allShorts.slice(0, 10).map((d) => ({
+        title: d.title,
+        candidates: getCandidateSlugs(d),
+      })),
+    });
+    return { notFound: true };
+  }
 
-  const bodyCode = (doc as any).body?.code ?? (doc as any).bodyCode ?? null;
+  const currentIndex = allShorts.findIndex((candidate) => isMatchingShort(candidate, targetSlug));
 
-  const item = {
-    title: doc?.title ?? "Short",
-    description: doc?.description ?? doc?.excerpt ?? "",
-    excerpt: doc?.excerpt ?? "",
-    slug: targetSlug,
-    bodyCode,
-  };
+  const prevDoc =
+    currentIndex >= 0 && currentIndex < allShorts.length - 1
+      ? allShorts[currentIndex + 1]
+      : null;
+
+  const nextDoc =
+    currentIndex > 0
+      ? allShorts[currentIndex - 1]
+      : null;
+
+  const relatedShorts = allShorts
+    .filter((candidate) => !isMatchingShort(candidate, targetSlug))
+    .slice(0, 3)
+    .map((candidate) => toShortLinkItem(candidate))
+    .filter(Boolean) as ShortLinkItem[];
 
   return {
-    props: { item },
+    props: {
+      item: toPageItem(doc),
+      relatedShorts,
+      prevShort: toShortLinkItem(prevDoc),
+      nextShort: toShortLinkItem(nextDoc),
+    },
     revalidate: 1800,
   };
 };

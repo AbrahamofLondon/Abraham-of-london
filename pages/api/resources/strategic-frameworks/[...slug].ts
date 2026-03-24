@@ -8,8 +8,20 @@ import { getAccessCookie } from "@/lib/server/auth/cookies";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
-type Ok = { ok: true; tier: AccessTier; requiredTier: AccessTier; bodyCode: string; slugResolved: string };
-type Fail = { ok: false; reason: string; tried?: string[] };
+type Ok = {
+  ok: true;
+  tier: AccessTier;
+  requiredTier: AccessTier;
+  bodyCode: string;
+  slugResolved: string;
+};
+
+type Fail = {
+  ok: false;
+  reason: string;
+  tried?: string[];
+};
+
 type ResponseData = Ok | Fail;
 
 function norm(input: unknown): string {
@@ -27,7 +39,6 @@ function pick(req: NextApiRequest): string {
   return norm(joined);
 }
 
-// Tight resource detection (prevents lexicon bleed)
 function isResourceDoc(d: any): boolean {
   if (!d) return false;
 
@@ -42,44 +53,50 @@ function isResourceDoc(d: any): boolean {
   return fp.startsWith("resources/") || fp.startsWith("content/resources/");
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
-  if (req.method !== "GET") return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+function firstDocBySlug(
+  getDocBySlug: (slug: string) => any,
+  candidates: string[],
+): any | null {
+  for (const candidate of candidates) {
+    const doc = getDocBySlug(candidate);
+    if (doc) return doc;
+  }
+  return null;
+}
 
-  const tail = pick(req); // e.g. "v4" or "v4/landing"
-  if (!tail) return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>,
+) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+  }
 
-  // ✅ This endpoint is strictly under resources/strategic-frameworks/*
-  // So we always resolve as that nested resource.
+  const tail = pick(req);
+  if (!tail) {
+    return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
+  }
+
   const canonical = `resources/strategic-frameworks/${tail}`;
   const canonicalContent = `content/resources/strategic-frameworks/${tail}`;
 
-  // Avoid weird double-prefix inputs
   const cleanedTail = tail.replace(/^strategic-frameworks\//i, "");
   const altA = `resources/strategic-frameworks/${cleanedTail}`;
   const altB = `content/resources/strategic-frameworks/${cleanedTail}`;
 
-  // Also accept full incoming if caller passes "resources/..." by mistake
   const altC = tail.startsWith("resources/") ? tail : `resources/${tail}`;
   const altD = tail.startsWith("content/resources/") ? tail : `content/resources/${tail}`;
 
   const tries = [canonical, canonicalContent, altA, altB, altC, altD].map(norm);
 
-  // ✅ Server-only import is safe in API route.
   const { getDocBySlug, getAllContentlayerDocs } = await import("@/lib/content/server");
 
-  let doc: any =
-    getDocBySlug(tries[0]) ||
-    getDocBySlug(tries[1]) ||
-    getDocBySlug(tries[2]) ||
-    getDocBySlug(tries[3]) ||
-    getDocBySlug(tries[4]) ||
-    getDocBySlug(tries[5]) ||
-    null;
+  let doc: any = firstDocBySlug(getDocBySlug, tries);
 
-  // registry scan fallback (handles your mixed slug forms)
   if (!doc) {
     const all = getAllContentlayerDocs?.() || [];
     const wanted = tries.map((t) => t.toLowerCase());
+
     doc =
       all.find((d: any) => {
         const a = norm(d?.slug).toLowerCase();
@@ -89,27 +106,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       }) || null;
   }
 
-  if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried: tries });
-  if (!isResourceDoc(doc)) return res.status(404).json({ ok: false, reason: "NOT_A_RESOURCE", tried: tries });
+  if (!doc || doc.draft) {
+    return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried: tries });
+  }
+
+  if (!isResourceDoc(doc)) {
+    return res.status(404).json({ ok: false, reason: "NOT_A_RESOURCE", tried: tries });
+  }
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
 
-  // public bypass
   if (requiredTier === "public") {
     return res.status(200).json({
       ok: true,
       tier: "public",
       requiredTier: "public",
       bodyCode: doc.body?.code || doc.bodyCode || "",
-      slugResolved: norm(String(doc?.slug || doc?._raw?.flattenedPath || tries[0])),
+      slugResolved: norm(String(doc?.slug || doc?._raw?.flattenedPath || tries[0] || tail)),
     });
   }
 
   const sessionId = getAccessCookie(req);
-  if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
+  if (!sessionId) {
+    return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
+  }
 
   const session = await verifySession(sessionId);
-  if (!session || !session.valid) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+  if (!session || !session.valid) {
+    return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+  }
 
   const userTier = tiers.normalizeUser(session.tier);
   if (!tiers.hasAccess(userTier, requiredTier)) {
@@ -121,6 +146,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     tier: userTier,
     requiredTier,
     bodyCode: doc.body?.code || doc.bodyCode || "",
-    slugResolved: norm(String(doc?.slug || doc?._raw?.flattenedPath || tries[0])),
+    slugResolved: norm(String(doc?.slug || doc?._raw?.flattenedPath || tries[0] || tail)),
   });
 }

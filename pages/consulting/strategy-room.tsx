@@ -1,6 +1,6 @@
 /* ============================================================================
    FILE: pages/consulting/strategy-room.tsx
-   STRATEGY ROOM — Adult / Boardroom Edition
+   STRATEGY ROOM — Institutional Private Chamber
 ============================================================================ */
 
 import * as React from "react";
@@ -15,7 +15,6 @@ import {
   Users,
   Shield,
   Target,
-  Clock,
   FileText,
   Eye,
   Key,
@@ -26,6 +25,13 @@ import {
   CheckCircle2,
   ScrollText,
   Briefcase,
+  ScanSearch,
+  Scale,
+  AlertTriangle,
+  ChevronRight,
+  Building2,
+  Workflow,
+  BadgeCheck,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -40,8 +46,8 @@ const StrategyRoomForm = dynamic(() => import("@/components/strategy-room/Form")
   loading: () => (
     <div className="border border-white/[0.08] bg-white/[0.02] p-12 text-center">
       <div className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/58">
-        <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50 animate-pulse" />
-        Loading secure form
+        <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400/50" />
+        Loading secure intake
       </div>
     </div>
   ),
@@ -54,7 +60,7 @@ const ArtifactGrid = dynamic(
     loading: () => (
       <div className="border border-white/[0.08] bg-white/[0.02] p-12 text-center">
         <div className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/58">
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50 animate-pulse" />
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400/50" />
           Decrypting artifacts
         </div>
       </div>
@@ -63,6 +69,79 @@ const ArtifactGrid = dynamic(
 );
 
 type Props = {};
+
+type PressureSignal = {
+  icon: React.ComponentType<any>;
+  title: string;
+  desc: string;
+};
+
+type Deliverable = {
+  icon: React.ComponentType<any>;
+  title: string;
+  desc: string;
+};
+
+type AdmissionRule = {
+  title: string;
+  desc: string;
+};
+
+const PRESSURE_SIGNALS: PressureSignal[] = [
+  {
+    icon: Gavel,
+    title: "Irreversible decisions",
+    desc: "The wrong move will be expensive in credibility, cash, authority, or timing.",
+  },
+  {
+    icon: Users,
+    title: "Human consequence",
+    desc: "Your decision affects staff, stakeholders, family systems, or institutional trust.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Complexity under pressure",
+    desc: "There are too many moving parts for instinct-only thinking to remain safe.",
+  },
+];
+
+const DELIVERABLES: Deliverable[] = [
+  {
+    icon: FileText,
+    title: "Decision memo",
+    desc: "The issue reframed properly, with options, trade-offs, and a recommended line.",
+  },
+  {
+    icon: Scale,
+    title: "Trade-off map",
+    desc: "What each path costs, what it protects, and what it exposes.",
+  },
+  {
+    icon: Workflow,
+    title: "Execution cadence",
+    desc: "Next moves, control rhythm, owner map, and stabilising sequence.",
+  },
+  {
+    icon: Shield,
+    title: "Risk posture",
+    desc: "What must be contained first so the problem does not compound.",
+  },
+];
+
+const ADMISSION_RULES: AdmissionRule[] = [
+  {
+    title: "This room is not for vague curiosity.",
+    desc: "It exists for live decisions with consequence, not for collecting interesting conversations.",
+  },
+  {
+    title: "Not every issue belongs here.",
+    desc: "Some cases should begin with diagnostics. Strategy Room is for gravity, not just importance.",
+  },
+  {
+    title: "The value is in disciplined judgment.",
+    desc: "You are not paying for noise, performance, or brainstorming theatre. You are paying for a stronger decision posture.",
+  },
+];
 
 function AmbientField() {
   return (
@@ -114,6 +193,46 @@ function MetricTile({
   );
 }
 
+function PressureCard({
+  icon: Icon,
+  title,
+  desc,
+}: PressureSignal) {
+  return (
+    <article className="border border-white/[0.06] bg-white/[0.02] p-6 transition-colors duration-300 hover:border-white/[0.12] hover:bg-white/[0.03]">
+      <Icon className="h-5 w-5 text-amber-300/65" />
+      <h3 className="mt-5 font-serif text-xl text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-white/46">{desc}</p>
+    </article>
+  );
+}
+
+function DeliverableCard({
+  icon: Icon,
+  title,
+  desc,
+}: Deliverable) {
+  return (
+    <article className="border border-white/[0.06] bg-white/[0.02] p-6 transition-colors duration-300 hover:border-white/[0.12] hover:bg-white/[0.03]">
+      <Icon className="h-5 w-5 text-amber-300/65" />
+      <h3 className="mt-5 font-serif text-xl text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-white/46">{desc}</p>
+    </article>
+  );
+}
+
+function AdmissionCard({
+  title,
+  desc,
+}: AdmissionRule) {
+  return (
+    <div className="border-b border-white/6 pb-6 last:border-b-0 last:pb-0">
+      <h3 className="font-serif text-xl text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-white/46">{desc}</p>
+    </div>
+  );
+}
+
 const StrategyRoomPage: NextPage<Props> = () => {
   const reduceMotion = useReducedMotion();
 
@@ -147,13 +266,13 @@ const StrategyRoomPage: NextPage<Props> = () => {
       <>
         <Head>
           <title>Strategy Room | Abraham of London</title>
-          <meta name="description" content="Board-grade decision environment" />
+          <meta name="description" content="Private strategy chamber for decision-heavy situations." />
           <meta name="robots" content="noindex, nofollow" />
         </Head>
         <div className="flex min-h-screen items-center justify-center bg-black text-white">
           <div className="border border-white/[0.08] bg-white/[0.02] p-8">
             <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/58">
-              <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50 animate-pulse" />
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400/50" />
               Initializing Strategy Room
             </div>
           </div>
@@ -165,14 +284,14 @@ const StrategyRoomPage: NextPage<Props> = () => {
   return (
     <Layout
       title="Strategy Room"
-      description="Board-grade decision environment powered by the Canon."
+      description="A private chamber for high-consequence decisions requiring structured judgment, documented trade-offs, and execution-grade outputs."
       className="bg-black text-white"
     >
       <Head>
         <title>Strategy Room | Abraham of London</title>
         <meta
           name="description"
-          content="Board-grade decision environment powered by the Canon, Strategic Frameworks, and institutional decision discipline."
+          content="A private strategy chamber for founders, boards, and institutional builders carrying decision pressure."
         />
         <link rel="canonical" href={`${SITE}/consulting/strategy-room`} />
         <meta name="robots" content="noindex, nofollow" />
@@ -191,17 +310,17 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8 }}
                 >
-                  <RailLabel>Board-grade decision environment</RailLabel>
+                  <RailLabel>Private strategy chamber</RailLabel>
                 </motion.div>
 
                 <motion.h1
-                  className="mt-8 max-w-[9ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.7rem]"
+                  className="mt-8 max-w-[10ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.7rem]"
                   initial={{ opacity: 0, y: reduceMotion ? 0 : 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.95, delay: 0.08 }}
                 >
-                  Strategy
-                  <span className="mt-3 block text-white/58">Room</span>
+                  For decisions
+                  <span className="mt-3 block text-white/58">you cannot afford to get wrong</span>
                 </motion.h1>
 
                 <motion.p
@@ -210,8 +329,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.9, delay: 0.18 }}
                 >
-                  A structured environment for leaders facing irreversible
-                  decisions.
+                  Strategy Room sits above diagnostics and below nothing else.
                 </motion.p>
 
                 <motion.p
@@ -220,9 +338,9 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.9, delay: 0.26 }}
                 >
-                  Intake first. Decision gravity assessed. Artifacts delivered.
-                  Built for founders, boards, and institutional builders who
-                  cannot afford soft thinking.
+                  This is the private chamber for founders, boards, and institutional
+                  builders facing irreversible calls, internal friction, strategic
+                  pressure, or decisions with real downstream consequence.
                 </motion.p>
 
                 <motion.div
@@ -236,16 +354,16 @@ const StrategyRoomPage: NextPage<Props> = () => {
                     onClick={() => setShowForm(true)}
                     className="group inline-flex items-center justify-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
                   >
-                    <span>Begin intake process</span>
+                    <span>Begin intake</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </button>
 
                   <Link
-                    href="/resources/strategic-frameworks"
+                    href="/diagnostics"
                     className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/78 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
                   >
-                    <span>Strategic Frameworks</span>
-                    <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
+                    <span>Start with diagnostics</span>
+                    <ChevronRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </motion.div>
 
@@ -257,7 +375,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 >
                   {checking ? (
                     <div className="inline-flex items-center gap-3 border border-white/[0.08] bg-white/[0.02] px-5 py-3">
-                      <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50 animate-pulse" />
+                      <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400/50" />
                       <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/36">
                         Verifying credentials
                       </span>
@@ -273,7 +391,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                     <div className="inline-flex items-center gap-3 border border-white/[0.08] bg-white/[0.02] px-5 py-3">
                       <Lock className="h-4 w-4 text-amber-400/40" />
                       <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/36">
-                        Artifacts restricted to Inner Circle
+                        Artifact access restricted to Inner Circle
                       </span>
                     </div>
                   )}
@@ -308,7 +426,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                       <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
                         Room profile
                       </span>
-                      <Gavel className="h-4 w-4 text-amber-300/42" />
+                      <Building2 className="h-4 w-4 text-amber-300/42" />
                     </div>
 
                     <div className="grid grid-cols-3 gap-6 border-y border-white/6 py-6">
@@ -321,8 +439,8 @@ const StrategyRoomPage: NextPage<Props> = () => {
                       {[
                         "Authority audit before advice",
                         "Constraint-aware options and trade-offs",
-                        "Decision memo, matrix, cadence, controls",
-                        "Structured guidance under pressure",
+                        "No brainstorm theatre",
+                        "Structured artifacts for real execution",
                       ].map((line) => (
                         <div key={line} className="flex items-center gap-3">
                           <CheckCircle2 className="h-4 w-4 text-amber-300/70" />
@@ -333,6 +451,28 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   </div>
                 </div>
               </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* PRESSURE SIGNALS */}
+        <section className="relative py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-14">
+              <RailLabel>Decision pressure</RailLabel>
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
+                When this room is the right room
+              </h2>
+              <p className="mt-4 max-w-3xl text-lg text-white/48">
+                Strategy Room is appropriate when the decision cannot safely be
+                handled by instinct, casual counsel, or loose internal alignment.
+              </p>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              {PRESSURE_SIGNALS.map((item) => (
+                <PressureCard key={item.title} {...item} />
+              ))}
             </div>
           </div>
         </section>
@@ -350,7 +490,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 <div className="mb-8 flex items-center gap-3">
                   <ScrollText className="h-4 w-4 text-amber-400/48" />
                   <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-amber-300/62">
-                    Confidential Intake
+                    Confidential intake
                   </span>
                 </div>
                 <StrategyRoomForm />
@@ -363,16 +503,38 @@ const StrategyRoomPage: NextPage<Props> = () => {
           <SectionDivider />
         </div>
 
-        {/* ARTIFACTS */}
+        {/* DELIVERABLES */}
         <section className="relative py-16">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-12">
+              <RailLabel>Outputs</RailLabel>
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
+                What leaves the room
+              </h2>
+              <p className="mt-4 max-w-2xl text-lg text-white/48">
+                Materials built to move a real decision, not to decorate one.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {DELIVERABLES.map((item) => (
+                <DeliverableCard key={item.title} {...item} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ARTIFACTS */}
+        <section className="relative py-8">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-12">
               <RailLabel>Artifacts</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                Decision-grade outputs
+                Decision-grade supporting material
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/48">
-                Materials built for action, not ceremony.
+                The room draws from the Canon, the frameworks library, and the
+                controlled advisory stack behind the public-facing platform.
               </p>
             </div>
 
@@ -380,7 +542,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
           </div>
         </section>
 
-        {/* ACCESS + PROCESS */}
+        {/* ACCESS + ADMISSION */}
         <section className="relative border-t border-white/5 py-24">
           <div className="absolute inset-0 bg-gradient-to-b from-amber-400/[0.03] to-transparent" />
 
@@ -394,24 +556,23 @@ const StrategyRoomPage: NextPage<Props> = () => {
               >
                 <RailLabel>Access</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  Access the materials
+                  Who gets what
                 </h2>
                 <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/48">
-                  The Strategy Room draws from the Canon and the Strategic
-                  Frameworks library. Inner Circle members receive full artifact
-                  access.
+                  The chamber is private. Artifact access is more private still.
+                  That asymmetry is deliberate.
                 </p>
 
                 <div className="mt-10 border border-amber-400/16 bg-gradient-to-br from-amber-400/[0.04] to-transparent p-7">
                   <div className="mb-4 flex items-center gap-3">
                     <Key className="h-4 w-4 text-amber-300/58" />
                     <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-amber-300/58">
-                      Membership Gate
+                      Membership gate
                     </span>
                   </div>
                   <p className="text-sm leading-relaxed text-white/48">
                     Full artifact access is reserved for Inner Circle members.
-                    That boundary is deliberate.
+                    Access control is part of the value discipline, not an afterthought.
                   </p>
 
                   <Link
@@ -419,7 +580,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                     className="group mt-8 inline-flex w-full items-center justify-between border border-amber-400/24 bg-amber-400/[0.05] px-6 py-5 transition-colors hover:border-amber-400/55 hover:bg-amber-400/[0.08]"
                   >
                     <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-200/82">
-                      Unlock Inner Circle Access
+                      Unlock Inner Circle access
                     </span>
                     <Lock className="h-4 w-4 text-amber-300/46 transition-transform group-hover:translate-x-1 group-hover:text-amber-200" />
                   </Link>
@@ -432,70 +593,62 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.65 }}
               >
-                <RailLabel>Process</RailLabel>
+                <RailLabel>Admission logic</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  What happens next
+                  What this room is not
                 </h2>
 
                 <div className="mt-10 space-y-8">
-                  {[
-                    {
-                      icon: FileText,
-                      title: "Intake review",
-                      desc: "Forty-eight hour review of your submission. No automated theatre.",
-                    },
-                    {
-                      icon: Users,
-                      title: "Decision call",
-                      desc: "Structured call: options, risk, trade-offs, next moves.",
-                    },
-                    {
-                      icon: Target,
-                      title: "Artifacts delivered",
-                      desc: "Board-grade outputs: memo, matrix, cadence, controls.",
-                    },
-                  ].map((item, i) => {
-                    const Icon = item.icon;
-                    return (
-                      <motion.div
-                        key={item.title}
-                        className="flex gap-5 border-b border-white/6 pb-7 last:border-b-0"
-                        initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08, duration: 0.5 }}
-                        viewport={{ once: true }}
-                      >
-                        <div className="mt-1 flex h-11 w-11 items-center justify-center border border-white/[0.08] bg-white/[0.02]">
-                          <Icon className="h-5 w-5 text-amber-300/62" />
-                        </div>
-                        <div>
-                          <h3 className="font-serif text-lg text-white">
-                            {item.title}
-                          </h3>
-                          <p className="mt-2 text-sm text-white/42">
-                            {item.desc}
-                          </p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                  {ADMISSION_RULES.map((item) => (
+                    <AdmissionCard key={item.title} {...item} />
+                  ))}
                 </div>
 
                 <div className="mt-10 border border-white/[0.06] bg-white/[0.02] p-6">
                   <div className="flex items-start gap-4">
-                    <Shield className="mt-0.5 h-5 w-5 text-amber-300/58" />
+                    <BadgeCheck className="mt-0.5 h-5 w-5 text-amber-300/58" />
                     <div>
                       <p className="text-sm font-medium text-white/76">
-                        Designed for:
+                        Best use case
                       </p>
                       <p className="mt-1 text-sm text-white/42">
-                        Founders, executives, and institutional builders facing
-                        irreversible decisions.
+                        A live issue with timing pressure, competing priorities,
+                        real downside, and the need for disciplined judgment.
                       </p>
                     </div>
                   </div>
                 </div>
               </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* DIAGNOSTICS BRIDGE */}
+        <section className="relative border-t border-white/5 py-20">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="border border-white/[0.06] bg-white/[0.02] p-8 md:p-10">
+              <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                <div className="max-w-3xl">
+                  <RailLabel>Not ready for the chamber?</RailLabel>
+                  <h2 className="mt-6 font-serif text-3xl text-white md:text-4xl">
+                    Start with diagnostics.
+                  </h2>
+                  <p className="mt-4 text-base leading-relaxed text-white/48">
+                    When the issue needs a serious reading but not yet a private
+                    mandate, diagnostics provide the paid clarity layer that sharpens
+                    fit before escalation.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/diagnostics"
+                    className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+                  >
+                    Enter diagnostics <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -518,27 +671,37 @@ const StrategyRoomPage: NextPage<Props> = () => {
               </div>
 
               <h2 className="font-serif text-4xl text-white md:text-5xl">
-                Ready to decide?
+                Ready to move the decision properly?
               </h2>
 
               <p className="mx-auto mt-6 max-w-xl text-lg text-white/50">
-                For principals, boards, and institutions prepared for structured
-                thinking.
+                Enter the chamber if the issue carries real weight. Start with
+                diagnostics if it still needs a clearer reading first.
               </p>
 
-              <button
-                type="button"
-                onClick={() => setShowForm(true)}
-                className="group mt-10 inline-flex items-center justify-center gap-3 bg-white px-12 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
-              >
-                <span>Begin intake process</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className="group inline-flex items-center justify-center gap-3 bg-white px-12 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
+                >
+                  <span>Begin intake</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </button>
+
+                <Link
+                  href="/diagnostics"
+                  className="group inline-flex items-center justify-center gap-3 border border-white/10 px-12 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
+                >
+                  <span>Start with diagnostics</span>
+                  <ChevronRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
+                </Link>
+              </div>
 
               <div className="mt-16 inline-flex items-center gap-2">
                 <Feather className="h-3 w-3 text-amber-300/20" />
                 <span className="font-mono text-[6px] uppercase tracking-[0.4em] text-white/10">
-                  Strategy Room • Eyes Only
+                  Strategy Room • Private Chamber
                 </span>
                 <Feather className="h-3 w-3 text-amber-300/20" />
               </div>

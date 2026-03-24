@@ -1,4 +1,6 @@
-/* components/Header.tsx — route-safe, App Router + Pages Router compatible */
+/* components/Header.tsx — stable, no useRouter, pages/app safe */
+"use client";
+
 import * as React from "react";
 import Link from "next/link";
 import { Menu, X, Command, ChevronRight } from "lucide-react";
@@ -12,13 +14,13 @@ const NAV_ITEMS = [
   { href: "/canon", label: "Canon", sub: "Doctrine & Method" },
   { href: "/books", label: "Books", sub: "Long-form Works" },
   { href: "/blog", label: "Essays", sub: "Ideas & Commentary" },
-  { href: "/library", label: "Library", sub: "Knowledge Shelf" }, // restored original Library
-  { href: "/artifacts", label: "Artifacts", sub: "Premium Editions" }, // new premium shelf
+  { href: "/library", label: "Library", sub: "Knowledge Shelf" },
+  { href: "/artifacts", label: "Artifacts", sub: "Premium Editions" },
   { href: "/vault/briefs", label: "Briefs", sub: "Operational Intelligence" },
   { href: "/ventures", label: "Ventures", sub: "Execution Arms" },
   { href: "/shorts", label: "Shorts", sub: "Short-form Signal" },
   { href: "/vault", label: "Vault", sub: "Secure Repository" },
-];
+] as const;
 
 function normalizePath(path: string): string {
   if (!path) return "/";
@@ -41,134 +43,119 @@ export default function Header({
 }: HeaderProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
-  const [isReady, setIsReady] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState("/");
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const updatePath = () => {
-      setCurrentPath(normalizePath(window.location.pathname));
-      setIsReady(true);
-    };
+    const syncPath = () => setCurrentPath(normalizePath(window.location.pathname));
+    syncPath();
 
-    updatePath();
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
 
     const originalPushState = window.history.pushState;
     const originalReplaceState = window.history.replaceState;
 
     const patchedPushState: History["pushState"] = function (...args) {
-      originalPushState.apply(window.history, args);
-      updatePath();
+      const result = originalPushState.apply(window.history, args);
+      syncPath();
+      return result;
     };
 
     const patchedReplaceState: History["replaceState"] = function (...args) {
-      originalReplaceState.apply(window.history, args);
-      updatePath();
+      const result = originalReplaceState.apply(window.history, args);
+      syncPath();
+      return result;
     };
 
     window.history.pushState = patchedPushState;
     window.history.replaceState = patchedReplaceState;
-
-    window.addEventListener("popstate", updatePath);
-    window.addEventListener("hashchange", updatePath);
+    window.addEventListener("popstate", syncPath);
+    window.addEventListener("hashchange", syncPath);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.history.pushState = originalPushState;
       window.history.replaceState = originalReplaceState;
-      window.removeEventListener("popstate", updatePath);
-      window.removeEventListener("hashchange", updatePath);
+      window.removeEventListener("popstate", syncPath);
+      window.removeEventListener("hashchange", syncPath);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
-    };
-
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, []);
+    setIsOpen(false);
+  }, [currentPath]);
 
   React.useEffect(() => {
     if (typeof document === "undefined") return;
-
-    document.body.style.overflow = isOpen ? "hidden" : "";
+    const original = document.body.style.overflow;
+    document.body.style.overflow = isOpen ? "hidden" : original || "";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = original;
     };
   }, [isOpen]);
 
-  React.useEffect(() => {
-    if (!isReady) return;
-    setIsOpen(false);
-  }, [currentPath, isReady]);
-
   const shellClass =
     scrolled || isOpen || !transparent
-      ? "border-b border-white/10 bg-black/86 py-4 backdrop-blur-xl"
+      ? "border-b border-white/8 bg-black/72 py-4 backdrop-blur-xl"
       : "bg-transparent py-5";
 
   return (
     <>
-      <nav
+      <header
         className={`fixed left-0 right-0 top-0 z-[100] w-full transition-all duration-500 ${shellClass}`}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 lg:px-12">
           <Link href="/" className="group flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center border border-white/10 bg-white shadow-[0_10px_30px_rgba(255,255,255,0.08)]">
-              <Command size={22} className="text-black" />
+            <div className="flex h-12 w-12 items-center justify-center border border-white/12 bg-white/95 shadow-[0_8px_24px_rgba(255,255,255,0.06)]">
+              <Command size={21} className="text-black/90" />
             </div>
 
             <div className="flex flex-col">
-              <span className="text-[12px] font-black uppercase tracking-[0.34em] text-white">
+              <span className="text-[12px] font-black uppercase tracking-[0.32em] text-white/94">
                 Abraham of London
               </span>
-              <span className="hidden text-[9px] font-mono uppercase tracking-[0.24em] text-white/36 md:block">
+              <span className="hidden text-[9px] font-mono uppercase tracking-[0.24em] text-white/30 md:block">
                 Strategy • Canon • Library
               </span>
             </div>
           </Link>
 
           <div className="flex items-center gap-4 md:gap-6">
-            {!minimal && isReady ? (
-              <div className="hidden items-center gap-6 md:flex">
-                {NAV_ITEMS.slice(0, 8).map((item) => {
+            {!minimal ? (
+              <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
+                {NAV_ITEMS.slice(0, 8).map((item, idx) => {
                   const active = isActivePath(currentPath, item.href);
 
                   return (
                     <Link
-                      key={item.href}
+                      key={`desktop-nav-${idx}-${item.href}`}
                       href={item.href}
                       className={[
-                        "text-[10px] font-mono uppercase tracking-[0.22em] transition-colors",
+                        "text-[10px] font-mono uppercase tracking-[0.22em] transition-colors duration-300",
                         active
-                          ? "text-amber-400"
-                          : "text-white/62 hover:text-white",
+                          ? "text-amber-300"
+                          : "text-white/48 hover:text-white/78",
                       ].join(" ")}
                     >
                       {item.label}
                     </Link>
                   );
                 })}
-              </div>
+              </nav>
             ) : null}
 
             <Link
               href="/artifacts"
-              className="hidden rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/90 transition-all hover:border-amber-400/35 hover:bg-amber-500/15 hover:text-amber-200 md:inline-flex"
+              className="hidden rounded-full border border-amber-500/18 bg-amber-500/9 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/85 transition-all duration-300 hover:border-amber-400/30 hover:bg-amber-500/14 hover:text-amber-200 md:inline-flex"
             >
               Artifacts
             </Link>
@@ -176,17 +163,19 @@ export default function Header({
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
-              className="border border-white/12 bg-white/[0.04] p-3 text-white transition-all hover:bg-white hover:text-black"
+              className="border border-white/10 bg-white/[0.03] p-3 text-white/88 transition-all duration-300 hover:bg-white hover:text-black"
               aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
+              aria-controls="site-mobile-menu"
             >
               {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
-      </nav>
+      </header>
 
       <div
+        id="site-mobile-menu"
         className={[
           "fixed inset-0 z-[110] bg-black/98 transition-all duration-500 ease-out",
           isOpen
@@ -211,13 +200,13 @@ export default function Header({
             </button>
           </div>
 
-          <div className="flex flex-col gap-5 md:gap-6">
+          <nav className="flex flex-col gap-5 md:gap-6" aria-label="Mobile">
             {NAV_ITEMS.map((item, idx) => {
-              const active = isReady ? isActivePath(currentPath, item.href) : false;
+              const active = isActivePath(currentPath, item.href);
 
               return (
                 <Link
-                  key={item.href}
+                  key={`mobile-nav-${idx}-${item.href}`}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className="group flex items-end justify-between border-b border-white/5 pb-5 md:pb-6"
@@ -255,7 +244,7 @@ export default function Header({
                 </Link>
               );
             })}
-          </div>
+          </nav>
         </div>
       </div>
     </>

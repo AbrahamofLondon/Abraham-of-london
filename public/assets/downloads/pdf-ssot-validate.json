@@ -1,41 +1,2571 @@
 {
-  "generatedAt": "2026-03-02T16:18:00.723Z",
-  "policy": {
+  "generatedAt": "2026-03-22T20:00:16.542Z",
+  "settings": {
     "requirePdfHeader": true,
-    "minKbStandardPdf": 12,
-    "minKbFillablePdf": 8,
-    "warnKbSmallPdf": 50,
-    "minKbZip": 12,
     "requireZipHeader": true,
+    "minPdfKBStandard": 12,
+    "minPdfKBFillable": 8,
+    "warnPdfKB": 50,
+    "minZipKB": 12,
     "allowSmallZip": false,
-    "outAuditAbs": "C:\\Abraham-of-london\\public\\assets\\downloads\\pdf-ssot-validate.json",
-    "printLimit": 40
+    "renderSanity": true
   },
-  "totals": {
-    "registryRecords": 194,
-    "ok": 194,
+  "summary": {
+    "total": 256,
+    "ok": 256,
+    "warnings": 253,
     "failed": 0,
-    "warnings": 3
+    "missing": 0,
+    "invalid": 0
   },
   "failures": [],
   "warnings": [
     {
-      "id": "decision-matrix-scorecard-fillable",
-      "path": "/assets/downloads/lib-pdf/decision-matrix-scorecard-fillable.pdf",
-      "warn": "SMALL_PDF_36KB",
-      "sizeKb": 36
+      "id": "legacy-architecture-canvas",
+      "outputPath": "/assets/downloads/legacy-architecture-canvas.pdf",
+      "code": "SMALL_PDF_40KB"
     },
     {
-      "id": "legacy-canvas-fillable",
-      "path": "/assets/downloads/lib-pdf/legacy-canvas-fillable.pdf",
-      "warn": "SMALL_PDF_11KB",
-      "sizeKb": 11
+      "id": "abraham-vault-pack",
+      "outputPath": "/assets/downloads/abraham-vault-pack.pdf",
+      "code": "SMALL_PDF_15KB"
     },
     {
-      "id": "purpose-pyramid-worksheet-fillable",
-      "path": "/assets/downloads/lib-pdf/purpose-pyramid-worksheet-fillable.pdf",
-      "warn": "SMALL_PDF_20KB",
-      "sizeKb": 20
+      "id": "audit-of-ease",
+      "outputPath": "/assets/downloads/audit-of-ease.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "board-decision-log-template",
+      "outputPath": "/assets/downloads/board-decision-log-template.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "board-investor-onepager",
+      "outputPath": "/assets/downloads/board-investor-onepager.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "brief-001-modern-household",
+      "outputPath": "/assets/downloads/brief-001-modern-household.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "brief-002-economic-fortress",
+      "outputPath": "/assets/downloads/brief-002-economic-fortress.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "brief-003-education-of-heirs",
+      "outputPath": "/assets/downloads/brief-003-education-of-heirs.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "brief-004-parallel-estate",
+      "outputPath": "/assets/downloads/brief-004-parallel-estate.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "brief-006-sisterhood-and-hearth",
+      "outputPath": "/assets/downloads/brief-006-sisterhood-and-hearth.pdf",
+      "code": "SMALL_PDF_26KB"
+    },
+    {
+      "id": "brief-007-covenantal-oath",
+      "outputPath": "/assets/downloads/brief-007-covenantal-oath.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "brief-008-ledger-of-legacy",
+      "outputPath": "/assets/downloads/brief-008-ledger-of-legacy.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "brief-009-sovereignty-of-time",
+      "outputPath": "/assets/downloads/brief-009-sovereignty-of-time.pdf",
+      "code": "SMALL_PDF_26KB"
+    },
+    {
+      "id": "brief-011-geography-of-estate",
+      "outputPath": "/assets/downloads/brief-011-geography-of-estate.pdf",
+      "code": "SMALL_PDF_26KB"
+    },
+    {
+      "id": "brief-012-aesthetics-of-order",
+      "outputPath": "/assets/downloads/brief-012-aesthetics-of-order.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "brotherhood-covenant",
+      "outputPath": "/assets/downloads/brotherhood-covenant.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "brotherhood-leader-guide",
+      "outputPath": "/assets/downloads/brotherhood-leader-guide.pdf",
+      "code": "SMALL_PDF_21KB"
+    },
+    {
+      "id": "brotherhood-starter-kit",
+      "outputPath": "/assets/downloads/brotherhood-starter-kit.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "brotherhood",
+      "outputPath": "/assets/downloads/brotherhood.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "canon-builders-rule-of-life",
+      "outputPath": "/assets/downloads/canon-builders-rule-of-life.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "canon-campaign",
+      "outputPath": "/assets/downloads/canon-campaign.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "canon-council-table-agenda",
+      "outputPath": "/assets/downloads/canon-council-table-agenda.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "canon-household-charter",
+      "outputPath": "/assets/downloads/canon-household-charter.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "canon-reading-plan-year-one",
+      "outputPath": "/assets/downloads/canon-reading-plan-year-one.pdf",
+      "code": "SMALL_PDF_20KB"
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "outputPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "code": "SMALL_PDF_29KB"
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "outputPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "code": "SMALL_PDF_21KB"
+    },
+    {
+      "id": "cb-conviction-vs-coercion",
+      "outputPath": "/assets/downloads/CB-CONVICTION-VS-COERCION.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "cb-fr-001",
+      "outputPath": "/assets/downloads/CB-FR-001.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-004",
+      "outputPath": "/assets/downloads/CB-FR-004.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-007",
+      "outputPath": "/assets/downloads/CB-FR-007.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-010",
+      "outputPath": "/assets/downloads/CB-FR-010.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-013",
+      "outputPath": "/assets/downloads/CB-FR-013.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-016",
+      "outputPath": "/assets/downloads/CB-FR-016.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-019",
+      "outputPath": "/assets/downloads/CB-FR-019.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-022",
+      "outputPath": "/assets/downloads/CB-FR-022.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-025",
+      "outputPath": "/assets/downloads/CB-FR-025.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-028",
+      "outputPath": "/assets/downloads/CB-FR-028.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-031",
+      "outputPath": "/assets/downloads/CB-FR-031.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-034",
+      "outputPath": "/assets/downloads/CB-FR-034.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-037",
+      "outputPath": "/assets/downloads/CB-FR-037.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-040",
+      "outputPath": "/assets/downloads/CB-FR-040.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-043",
+      "outputPath": "/assets/downloads/CB-FR-043.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-046",
+      "outputPath": "/assets/downloads/CB-FR-046.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-049",
+      "outputPath": "/assets/downloads/CB-FR-049.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-052",
+      "outputPath": "/assets/downloads/CB-FR-052.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-055",
+      "outputPath": "/assets/downloads/CB-FR-055.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-058",
+      "outputPath": "/assets/downloads/CB-FR-058.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-061",
+      "outputPath": "/assets/downloads/CB-FR-061.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-064",
+      "outputPath": "/assets/downloads/CB-FR-064.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-067",
+      "outputPath": "/assets/downloads/CB-FR-067.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-070",
+      "outputPath": "/assets/downloads/CB-FR-070.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-fr-073",
+      "outputPath": "/assets/downloads/CB-FR-073.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-frontier-resilience-01",
+      "outputPath": "/assets/downloads/CB-FRONTIER-RESILIENCE-01.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "cb-ia-003",
+      "outputPath": "/assets/downloads/CB-IA-003.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-006",
+      "outputPath": "/assets/downloads/CB-IA-006.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-009",
+      "outputPath": "/assets/downloads/CB-IA-009.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-012",
+      "outputPath": "/assets/downloads/CB-IA-012.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-015",
+      "outputPath": "/assets/downloads/CB-IA-015.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-018",
+      "outputPath": "/assets/downloads/CB-IA-018.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-021",
+      "outputPath": "/assets/downloads/CB-IA-021.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-024",
+      "outputPath": "/assets/downloads/CB-IA-024.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-027",
+      "outputPath": "/assets/downloads/CB-IA-027.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-030",
+      "outputPath": "/assets/downloads/CB-IA-030.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-033",
+      "outputPath": "/assets/downloads/CB-IA-033.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-036",
+      "outputPath": "/assets/downloads/CB-IA-036.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-039",
+      "outputPath": "/assets/downloads/CB-IA-039.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-042",
+      "outputPath": "/assets/downloads/CB-IA-042.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-045",
+      "outputPath": "/assets/downloads/CB-IA-045.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-048",
+      "outputPath": "/assets/downloads/CB-IA-048.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-051",
+      "outputPath": "/assets/downloads/CB-IA-051.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-054",
+      "outputPath": "/assets/downloads/CB-IA-054.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-057",
+      "outputPath": "/assets/downloads/CB-IA-057.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-060",
+      "outputPath": "/assets/downloads/CB-IA-060.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-063",
+      "outputPath": "/assets/downloads/CB-IA-063.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-066",
+      "outputPath": "/assets/downloads/CB-IA-066.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-069",
+      "outputPath": "/assets/downloads/CB-IA-069.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-072",
+      "outputPath": "/assets/downloads/CB-IA-072.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-ia-075",
+      "outputPath": "/assets/downloads/CB-IA-075.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-002",
+      "outputPath": "/assets/downloads/CB-SI-002.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-005",
+      "outputPath": "/assets/downloads/CB-SI-005.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-008",
+      "outputPath": "/assets/downloads/CB-SI-008.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-011",
+      "outputPath": "/assets/downloads/CB-SI-011.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-014",
+      "outputPath": "/assets/downloads/CB-SI-014.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-017",
+      "outputPath": "/assets/downloads/CB-SI-017.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-020",
+      "outputPath": "/assets/downloads/CB-SI-020.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-023",
+      "outputPath": "/assets/downloads/CB-SI-023.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-026",
+      "outputPath": "/assets/downloads/CB-SI-026.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-029",
+      "outputPath": "/assets/downloads/CB-SI-029.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-032",
+      "outputPath": "/assets/downloads/CB-SI-032.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-035",
+      "outputPath": "/assets/downloads/CB-SI-035.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-038",
+      "outputPath": "/assets/downloads/CB-SI-038.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-041",
+      "outputPath": "/assets/downloads/CB-SI-041.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-044",
+      "outputPath": "/assets/downloads/CB-SI-044.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-047",
+      "outputPath": "/assets/downloads/CB-SI-047.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-050",
+      "outputPath": "/assets/downloads/CB-SI-050.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-053",
+      "outputPath": "/assets/downloads/CB-SI-053.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-056",
+      "outputPath": "/assets/downloads/CB-SI-056.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-059",
+      "outputPath": "/assets/downloads/CB-SI-059.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-062",
+      "outputPath": "/assets/downloads/CB-SI-062.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-065",
+      "outputPath": "/assets/downloads/CB-SI-065.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-068",
+      "outputPath": "/assets/downloads/CB-SI-068.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-071",
+      "outputPath": "/assets/downloads/CB-SI-071.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "cb-si-074",
+      "outputPath": "/assets/downloads/CB-SI-074.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "communication-script-bpf",
+      "outputPath": "/assets/downloads/communication-script-bpf.pdf",
+      "code": "SMALL_PDF_20KB"
+    },
+    {
+      "id": "conviction-vs-coercion",
+      "outputPath": "/assets/downloads/conviction-vs-coercion.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "covenant",
+      "outputPath": "/assets/downloads/covenant.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "decision-log-template",
+      "outputPath": "/assets/downloads/decision-log-template.pdf",
+      "code": "SMALL_PDF_14KB"
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "outputPath": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "destiny-mapping-worksheet",
+      "outputPath": "/assets/downloads/destiny-mapping-worksheet.pdf",
+      "code": "SMALL_PDF_20KB"
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "outputPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "outputPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
+      "code": "SMALL_PDF_20KB"
+    },
+    {
+      "id": "family-altar-liturgy",
+      "outputPath": "/assets/downloads/family-altar-liturgy.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "family",
+      "outputPath": "/assets/downloads/family.pdf",
+      "code": "SMALL_PDF_24KB"
+    },
+    {
+      "id": "fatherhood-impact-framework",
+      "outputPath": "/assets/downloads/fatherhood-impact-framework.pdf",
+      "code": "SMALL_PDF_41KB"
+    },
+    {
+      "id": "fatherhood-standards-card",
+      "outputPath": "/assets/downloads/fatherhood-standards-card.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "father",
+      "outputPath": "/assets/downloads/father.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "founders-salon",
+      "outputPath": "/assets/downloads/founders-salon.pdf",
+      "code": "SMALL_PDF_14KB"
+    },
+    {
+      "id": "fr-001",
+      "outputPath": "/assets/downloads/fr-001.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-004",
+      "outputPath": "/assets/downloads/fr-004.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-007",
+      "outputPath": "/assets/downloads/fr-007.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-010",
+      "outputPath": "/assets/downloads/fr-010.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-013",
+      "outputPath": "/assets/downloads/fr-013.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-016",
+      "outputPath": "/assets/downloads/fr-016.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-019",
+      "outputPath": "/assets/downloads/fr-019.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-022",
+      "outputPath": "/assets/downloads/fr-022.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-025",
+      "outputPath": "/assets/downloads/fr-025.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-028",
+      "outputPath": "/assets/downloads/fr-028.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-031",
+      "outputPath": "/assets/downloads/fr-031.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-034",
+      "outputPath": "/assets/downloads/fr-034.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-037",
+      "outputPath": "/assets/downloads/fr-037.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-040",
+      "outputPath": "/assets/downloads/fr-040.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-043",
+      "outputPath": "/assets/downloads/fr-043.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-046",
+      "outputPath": "/assets/downloads/fr-046.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-049",
+      "outputPath": "/assets/downloads/fr-049.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-052",
+      "outputPath": "/assets/downloads/fr-052.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-055",
+      "outputPath": "/assets/downloads/fr-055.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-058",
+      "outputPath": "/assets/downloads/fr-058.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-061",
+      "outputPath": "/assets/downloads/fr-061.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-064",
+      "outputPath": "/assets/downloads/fr-064.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-067",
+      "outputPath": "/assets/downloads/fr-067.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-070",
+      "outputPath": "/assets/downloads/fr-070.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "fr-073",
+      "outputPath": "/assets/downloads/fr-073.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "frontier-resilience-01",
+      "outputPath": "/assets/downloads/frontier-resilience-01.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "getting-started",
+      "outputPath": "/assets/downloads/getting-started.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "governance-diagnostic-toolkit",
+      "outputPath": "/assets/downloads/governance-diagnostic-toolkit.pdf",
+      "code": "SMALL_PDF_16KB"
+    },
+    {
+      "id": "governance",
+      "outputPath": "/assets/downloads/governance.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "ia-003",
+      "outputPath": "/assets/downloads/ia-003.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-006",
+      "outputPath": "/assets/downloads/ia-006.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-009",
+      "outputPath": "/assets/downloads/ia-009.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-012",
+      "outputPath": "/assets/downloads/ia-012.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-015",
+      "outputPath": "/assets/downloads/ia-015.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-018",
+      "outputPath": "/assets/downloads/ia-018.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-021",
+      "outputPath": "/assets/downloads/ia-021.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-024",
+      "outputPath": "/assets/downloads/ia-024.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-027",
+      "outputPath": "/assets/downloads/ia-027.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-030",
+      "outputPath": "/assets/downloads/ia-030.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-033",
+      "outputPath": "/assets/downloads/ia-033.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-036",
+      "outputPath": "/assets/downloads/ia-036.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-039",
+      "outputPath": "/assets/downloads/ia-039.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-042",
+      "outputPath": "/assets/downloads/ia-042.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-045",
+      "outputPath": "/assets/downloads/ia-045.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-048",
+      "outputPath": "/assets/downloads/ia-048.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-051",
+      "outputPath": "/assets/downloads/ia-051.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-054",
+      "outputPath": "/assets/downloads/ia-054.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-057",
+      "outputPath": "/assets/downloads/ia-057.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-060",
+      "outputPath": "/assets/downloads/ia-060.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-063",
+      "outputPath": "/assets/downloads/ia-063.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-066",
+      "outputPath": "/assets/downloads/ia-066.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-069",
+      "outputPath": "/assets/downloads/ia-069.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-072",
+      "outputPath": "/assets/downloads/ia-072.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "ia-075",
+      "outputPath": "/assets/downloads/ia-075.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "identity",
+      "outputPath": "/assets/downloads/identity.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "institutional-governance",
+      "outputPath": "/assets/downloads/institutional-governance.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "institutional-integrity-audit",
+      "outputPath": "/assets/downloads/institutional-integrity-audit.pdf",
+      "code": "SMALL_PDF_16KB"
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "outputPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "leadership-playbook",
+      "outputPath": "/assets/downloads/leadership-playbook.pdf",
+      "code": "SMALL_PDF_14KB"
+    },
+    {
+      "id": "leadership-standards-blueprint",
+      "outputPath": "/assets/downloads/leadership-standards-blueprint.pdf",
+      "code": "SMALL_PDF_36KB"
+    },
+    {
+      "id": "leadership-workshop",
+      "outputPath": "/assets/downloads/leadership-workshop.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "leadership",
+      "outputPath": "/assets/downloads/leadership.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "legacy-canvas",
+      "outputPath": "/assets/downloads/legacy-canvas.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "clarity",
+      "outputPath": "/assets/downloads/lexicon/clarity.pdf",
+      "code": "SMALL_PDF_26KB"
+    },
+    {
+      "id": "integrity",
+      "outputPath": "/assets/downloads/lexicon/integrity.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "legacy",
+      "outputPath": "/assets/downloads/lexicon/legacy.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "sovereignty",
+      "outputPath": "/assets/downloads/lexicon/sovereignty.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "strategic-autonomy",
+      "outputPath": "/assets/downloads/lexicon/strategic-autonomy.pdf",
+      "code": "SMALL_PDF_23KB"
+    },
+    {
+      "id": "strategy",
+      "outputPath": "/assets/downloads/lexicon/strategy.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "surrender",
+      "outputPath": "/assets/downloads/lexicon/surrender.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "outputPath": "/assets/downloads/mentorship-starter-kit.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "multi-generational-legacy-ledger",
+      "outputPath": "/assets/downloads/multi-generational-legacy-ledger.pdf",
+      "code": "SMALL_PDF_35KB"
+    },
+    {
+      "id": "operating-cadence-pack",
+      "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
+      "code": "SMALL_PDF_14KB"
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "outputPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "principles-for-my-son",
+      "outputPath": "/assets/downloads/principles-for-my-son.pdf",
+      "code": "SMALL_PDF_23KB"
+    },
+    {
+      "id": "principles-of-surrender",
+      "outputPath": "/assets/downloads/principles-of-surrender.pdf",
+      "code": "SMALL_PDF_29KB"
+    },
+    {
+      "id": "purpose-alignment-checklist",
+      "outputPath": "/assets/downloads/purpose-alignment-checklist.pdf",
+      "code": "SMALL_PDF_19KB"
+    },
+    {
+      "id": "purpose-alignment",
+      "outputPath": "/assets/downloads/purpose-alignment.pdf",
+      "code": "SMALL_PDF_22KB"
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "outputPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
+      "code": "SMALL_PDF_20KB"
+    },
+    {
+      "id": "purpose",
+      "outputPath": "/assets/downloads/purpose.pdf",
+      "code": "SMALL_PDF_23KB"
+    },
+    {
+      "id": "responsibility",
+      "outputPath": "/assets/downloads/responsibility.pdf",
+      "code": "SMALL_PDF_23KB"
+    },
+    {
+      "id": "rise-decay-index",
+      "outputPath": "/assets/downloads/rise-decay-index.pdf",
+      "code": "SMALL_PDF_26KB"
+    },
+    {
+      "id": "sample-strategy",
+      "outputPath": "/assets/downloads/sample-strategy.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "scripture-track-john14",
+      "outputPath": "/assets/downloads/scripture-track-john14.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "si-002",
+      "outputPath": "/assets/downloads/si-002.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-005",
+      "outputPath": "/assets/downloads/si-005.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-008",
+      "outputPath": "/assets/downloads/si-008.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-011",
+      "outputPath": "/assets/downloads/si-011.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-014",
+      "outputPath": "/assets/downloads/si-014.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-017",
+      "outputPath": "/assets/downloads/si-017.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-020",
+      "outputPath": "/assets/downloads/si-020.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-023",
+      "outputPath": "/assets/downloads/si-023.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-026",
+      "outputPath": "/assets/downloads/si-026.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-029",
+      "outputPath": "/assets/downloads/si-029.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-032",
+      "outputPath": "/assets/downloads/si-032.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-035",
+      "outputPath": "/assets/downloads/si-035.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-038",
+      "outputPath": "/assets/downloads/si-038.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-041",
+      "outputPath": "/assets/downloads/si-041.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-044",
+      "outputPath": "/assets/downloads/si-044.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-047",
+      "outputPath": "/assets/downloads/si-047.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-050",
+      "outputPath": "/assets/downloads/si-050.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-053",
+      "outputPath": "/assets/downloads/si-053.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-056",
+      "outputPath": "/assets/downloads/si-056.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-059",
+      "outputPath": "/assets/downloads/si-059.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-062",
+      "outputPath": "/assets/downloads/si-062.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-065",
+      "outputPath": "/assets/downloads/si-065.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-068",
+      "outputPath": "/assets/downloads/si-068.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-071",
+      "outputPath": "/assets/downloads/si-071.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "si-074",
+      "outputPath": "/assets/downloads/si-074.pdf",
+      "code": "SMALL_PDF_13KB"
+    },
+    {
+      "id": "sisterhood",
+      "outputPath": "/assets/downloads/sisterhood.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "standards-brief",
+      "outputPath": "/assets/downloads/standards-brief.pdf",
+      "code": "SMALL_PDF_14KB"
+    },
+    {
+      "id": "strategic-autonomy-001",
+      "outputPath": "/assets/downloads/strategic-autonomy-001.pdf",
+      "code": "SMALL_PDF_28KB"
+    },
+    {
+      "id": "strategic-autonomy-002",
+      "outputPath": "/assets/downloads/strategic-autonomy-002.pdf",
+      "code": "SMALL_PDF_46KB"
+    },
+    {
+      "id": "strategic-autonomy-003",
+      "outputPath": "/assets/downloads/strategic-autonomy-003.pdf",
+      "code": "SMALL_PDF_42KB"
+    },
+    {
+      "id": "strategic-autonomy-004",
+      "outputPath": "/assets/downloads/strategic-autonomy-004.pdf",
+      "code": "SMALL_PDF_41KB"
+    },
+    {
+      "id": "strategic-autonomy-005",
+      "outputPath": "/assets/downloads/strategic-autonomy-005.pdf",
+      "code": "SMALL_PDF_45KB"
+    },
+    {
+      "id": "strategic-autonomy-006",
+      "outputPath": "/assets/downloads/strategic-autonomy-006.pdf",
+      "code": "SMALL_PDF_41KB"
+    },
+    {
+      "id": "strategic-autonomy-007",
+      "outputPath": "/assets/downloads/strategic-autonomy-007.pdf",
+      "code": "SMALL_PDF_48KB"
+    },
+    {
+      "id": "strategic-autonomy-008",
+      "outputPath": "/assets/downloads/strategic-autonomy-008.pdf",
+      "code": "SMALL_PDF_42KB"
+    },
+    {
+      "id": "strategic-autonomy-009",
+      "outputPath": "/assets/downloads/strategic-autonomy-009.pdf",
+      "code": "SMALL_PDF_46KB"
+    },
+    {
+      "id": "strategic-autonomy-010",
+      "outputPath": "/assets/downloads/strategic-autonomy-010.pdf",
+      "code": "SMALL_PDF_41KB"
+    },
+    {
+      "id": "strategic-autonomy-011",
+      "outputPath": "/assets/downloads/strategic-autonomy-011.pdf",
+      "code": "SMALL_PDF_44KB"
+    },
+    {
+      "id": "strategic-autonomy-012",
+      "outputPath": "/assets/downloads/strategic-autonomy-012.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "strategic-frameworks",
+      "outputPath": "/assets/downloads/strategic-frameworks.pdf",
+      "code": "SMALL_PDF_23KB"
+    },
+    {
+      "id": "extremism-shield",
+      "outputPath": "/assets/downloads/strategy/extremism-shield.pdf",
+      "code": "SMALL_PDF_25KB"
+    },
+    {
+      "id": "strategy-room-intake",
+      "outputPath": "/assets/downloads/strategy-room-intake.pdf",
+      "code": "SMALL_PDF_28KB"
+    },
+    {
+      "id": "surrender-operational-framework",
+      "outputPath": "/assets/downloads/surrender-operational-framework.pdf",
+      "code": "SMALL_PDF_29KB"
+    },
+    {
+      "id": "the-builders-catechism-founders-illuminated-edition-xl",
+      "outputPath": "/assets/downloads/the-builders-catechism-founders-illuminated-edition-xl.pdf",
+      "code": "SMALL_PDF_38KB"
+    },
+    {
+      "id": "the-builders-catechism-founders-illuminated-edition",
+      "outputPath": "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+      "code": "SMALL_PDF_38KB"
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "outputPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "code": "SMALL_PDF_36KB"
+    },
+    {
+      "id": "v4",
+      "outputPath": "/assets/downloads/v4.pdf",
+      "code": "SMALL_PDF_40KB"
+    },
+    {
+      "id": "vault-index",
+      "outputPath": "/assets/downloads/vault-index.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "vault",
+      "outputPath": "/assets/downloads/vault.pdf",
+      "code": "SMALL_PDF_18KB"
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "outputPath": "/assets/downloads/weekly-operating-rhythm.pdf",
+      "code": "SMALL_PDF_15KB"
+    },
+    {
+      "id": "brief-010-geometry-of-inner-circle",
+      "outputPath": "/assets/downloads/brief-010-geometry-of-inner-circle.pdf",
+      "code": "SMALL_PDF_26KB"
+    },
+    {
+      "id": "brief-005-brotherhood-protocol",
+      "outputPath": "/assets/downloads/brief-005-brotherhood-protocol.pdf",
+      "code": "SMALL_PDF_25KB"
+    }
+  ],
+  "ok": [
+    {
+      "id": "legacy-architecture-canvas",
+      "outputPath": "/assets/downloads/legacy-architecture-canvas.pdf",
+      "bytes": 40483
+    },
+    {
+      "id": "abraham-vault-pack",
+      "outputPath": "/assets/downloads/abraham-vault-pack.pdf",
+      "bytes": 15011
+    },
+    {
+      "id": "audit-of-ease",
+      "outputPath": "/assets/downloads/audit-of-ease.pdf",
+      "bytes": 19530
+    },
+    {
+      "id": "board-decision-log-template",
+      "outputPath": "/assets/downloads/board-decision-log-template.pdf",
+      "bytes": 14973
+    },
+    {
+      "id": "board-investor-onepager",
+      "outputPath": "/assets/downloads/board-investor-onepager.pdf",
+      "bytes": 14914
+    },
+    {
+      "id": "brief-001-modern-household",
+      "outputPath": "/assets/downloads/brief-001-modern-household.pdf",
+      "bytes": 25817
+    },
+    {
+      "id": "brief-002-economic-fortress",
+      "outputPath": "/assets/downloads/brief-002-economic-fortress.pdf",
+      "bytes": 25973
+    },
+    {
+      "id": "brief-003-education-of-heirs",
+      "outputPath": "/assets/downloads/brief-003-education-of-heirs.pdf",
+      "bytes": 22758
+    },
+    {
+      "id": "brief-004-parallel-estate",
+      "outputPath": "/assets/downloads/brief-004-parallel-estate.pdf",
+      "bytes": 26067
+    },
+    {
+      "id": "brief-006-sisterhood-and-hearth",
+      "outputPath": "/assets/downloads/brief-006-sisterhood-and-hearth.pdf",
+      "bytes": 26311
+    },
+    {
+      "id": "brief-007-covenantal-oath",
+      "outputPath": "/assets/downloads/brief-007-covenantal-oath.pdf",
+      "bytes": 25912
+    },
+    {
+      "id": "brief-008-ledger-of-legacy",
+      "outputPath": "/assets/downloads/brief-008-ledger-of-legacy.pdf",
+      "bytes": 26080
+    },
+    {
+      "id": "brief-009-sovereignty-of-time",
+      "outputPath": "/assets/downloads/brief-009-sovereignty-of-time.pdf",
+      "bytes": 26239
+    },
+    {
+      "id": "brief-011-geography-of-estate",
+      "outputPath": "/assets/downloads/brief-011-geography-of-estate.pdf",
+      "bytes": 26305
+    },
+    {
+      "id": "brief-012-aesthetics-of-order",
+      "outputPath": "/assets/downloads/brief-012-aesthetics-of-order.pdf",
+      "bytes": 26046
+    },
+    {
+      "id": "brotherhood-covenant",
+      "outputPath": "/assets/downloads/brotherhood-covenant.pdf",
+      "bytes": 19624
+    },
+    {
+      "id": "brotherhood-leader-guide",
+      "outputPath": "/assets/downloads/brotherhood-leader-guide.pdf",
+      "bytes": 21546
+    },
+    {
+      "id": "brotherhood-starter-kit",
+      "outputPath": "/assets/downloads/brotherhood-starter-kit.pdf",
+      "bytes": 19485
+    },
+    {
+      "id": "brotherhood",
+      "outputPath": "/assets/downloads/brotherhood.pdf",
+      "bytes": 19114
+    },
+    {
+      "id": "canon-builders-rule-of-life",
+      "outputPath": "/assets/downloads/canon-builders-rule-of-life.pdf",
+      "bytes": 19197
+    },
+    {
+      "id": "canon-campaign",
+      "outputPath": "/assets/downloads/canon-campaign.pdf",
+      "bytes": 18829
+    },
+    {
+      "id": "canon-council-table-agenda",
+      "outputPath": "/assets/downloads/canon-council-table-agenda.pdf",
+      "bytes": 19662
+    },
+    {
+      "id": "canon-household-charter-template",
+      "outputPath": "/assets/downloads/canon-household-charter-template.pdf",
+      "bytes": 54025
+    },
+    {
+      "id": "canon-household-charter",
+      "outputPath": "/assets/downloads/canon-household-charter.pdf",
+      "bytes": 19796
+    },
+    {
+      "id": "canon-reading-plan-year-one",
+      "outputPath": "/assets/downloads/canon-reading-plan-year-one.pdf",
+      "bytes": 20878
+    },
+    {
+      "id": "canon-volume-iv-diagnostic-toolkit",
+      "outputPath": "/assets/downloads/canon-volume-iv-diagnostic-toolkit.pdf",
+      "bytes": 29961
+    },
+    {
+      "id": "canon-volume-v-governance-diagnostic-toolkit",
+      "outputPath": "/assets/downloads/canon-volume-v-governance-diagnostic-toolkit.pdf",
+      "bytes": 21923
+    },
+    {
+      "id": "cb-conviction-vs-coercion",
+      "outputPath": "/assets/downloads/CB-CONVICTION-VS-COERCION.pdf",
+      "bytes": 18465
+    },
+    {
+      "id": "cb-fr-001",
+      "outputPath": "/assets/downloads/CB-FR-001.pdf",
+      "bytes": 13315
+    },
+    {
+      "id": "cb-fr-004",
+      "outputPath": "/assets/downloads/CB-FR-004.pdf",
+      "bytes": 13333
+    },
+    {
+      "id": "cb-fr-007",
+      "outputPath": "/assets/downloads/CB-FR-007.pdf",
+      "bytes": 13357
+    },
+    {
+      "id": "cb-fr-010",
+      "outputPath": "/assets/downloads/CB-FR-010.pdf",
+      "bytes": 13345
+    },
+    {
+      "id": "cb-fr-013",
+      "outputPath": "/assets/downloads/CB-FR-013.pdf",
+      "bytes": 13331
+    },
+    {
+      "id": "cb-fr-016",
+      "outputPath": "/assets/downloads/CB-FR-016.pdf",
+      "bytes": 13366
+    },
+    {
+      "id": "cb-fr-019",
+      "outputPath": "/assets/downloads/CB-FR-019.pdf",
+      "bytes": 13317
+    },
+    {
+      "id": "cb-fr-022",
+      "outputPath": "/assets/downloads/CB-FR-022.pdf",
+      "bytes": 13367
+    },
+    {
+      "id": "cb-fr-025",
+      "outputPath": "/assets/downloads/CB-FR-025.pdf",
+      "bytes": 13354
+    },
+    {
+      "id": "cb-fr-028",
+      "outputPath": "/assets/downloads/CB-FR-028.pdf",
+      "bytes": 13325
+    },
+    {
+      "id": "cb-fr-031",
+      "outputPath": "/assets/downloads/CB-FR-031.pdf",
+      "bytes": 13364
+    },
+    {
+      "id": "cb-fr-034",
+      "outputPath": "/assets/downloads/CB-FR-034.pdf",
+      "bytes": 13317
+    },
+    {
+      "id": "cb-fr-037",
+      "outputPath": "/assets/downloads/CB-FR-037.pdf",
+      "bytes": 13330
+    },
+    {
+      "id": "cb-fr-040",
+      "outputPath": "/assets/downloads/CB-FR-040.pdf",
+      "bytes": 13317
+    },
+    {
+      "id": "cb-fr-043",
+      "outputPath": "/assets/downloads/CB-FR-043.pdf",
+      "bytes": 13304
+    },
+    {
+      "id": "cb-fr-046",
+      "outputPath": "/assets/downloads/CB-FR-046.pdf",
+      "bytes": 13314
+    },
+    {
+      "id": "cb-fr-049",
+      "outputPath": "/assets/downloads/CB-FR-049.pdf",
+      "bytes": 13346
+    },
+    {
+      "id": "cb-fr-052",
+      "outputPath": "/assets/downloads/CB-FR-052.pdf",
+      "bytes": 13343
+    },
+    {
+      "id": "cb-fr-055",
+      "outputPath": "/assets/downloads/CB-FR-055.pdf",
+      "bytes": 13337
+    },
+    {
+      "id": "cb-fr-058",
+      "outputPath": "/assets/downloads/CB-FR-058.pdf",
+      "bytes": 13408
+    },
+    {
+      "id": "cb-fr-061",
+      "outputPath": "/assets/downloads/CB-FR-061.pdf",
+      "bytes": 13363
+    },
+    {
+      "id": "cb-fr-064",
+      "outputPath": "/assets/downloads/CB-FR-064.pdf",
+      "bytes": 13356
+    },
+    {
+      "id": "cb-fr-067",
+      "outputPath": "/assets/downloads/CB-FR-067.pdf",
+      "bytes": 13296
+    },
+    {
+      "id": "cb-fr-070",
+      "outputPath": "/assets/downloads/CB-FR-070.pdf",
+      "bytes": 13262
+    },
+    {
+      "id": "cb-fr-073",
+      "outputPath": "/assets/downloads/CB-FR-073.pdf",
+      "bytes": 13355
+    },
+    {
+      "id": "cb-frontier-resilience-01",
+      "outputPath": "/assets/downloads/CB-FRONTIER-RESILIENCE-01.pdf",
+      "bytes": 17946
+    },
+    {
+      "id": "cb-ia-003",
+      "outputPath": "/assets/downloads/CB-IA-003.pdf",
+      "bytes": 13365
+    },
+    {
+      "id": "cb-ia-006",
+      "outputPath": "/assets/downloads/CB-IA-006.pdf",
+      "bytes": 13333
+    },
+    {
+      "id": "cb-ia-009",
+      "outputPath": "/assets/downloads/CB-IA-009.pdf",
+      "bytes": 13275
+    },
+    {
+      "id": "cb-ia-012",
+      "outputPath": "/assets/downloads/CB-IA-012.pdf",
+      "bytes": 13293
+    },
+    {
+      "id": "cb-ia-015",
+      "outputPath": "/assets/downloads/CB-IA-015.pdf",
+      "bytes": 13333
+    },
+    {
+      "id": "cb-ia-018",
+      "outputPath": "/assets/downloads/CB-IA-018.pdf",
+      "bytes": 13288
+    },
+    {
+      "id": "cb-ia-021",
+      "outputPath": "/assets/downloads/CB-IA-021.pdf",
+      "bytes": 13288
+    },
+    {
+      "id": "cb-ia-024",
+      "outputPath": "/assets/downloads/CB-IA-024.pdf",
+      "bytes": 13303
+    },
+    {
+      "id": "cb-ia-027",
+      "outputPath": "/assets/downloads/CB-IA-027.pdf",
+      "bytes": 13328
+    },
+    {
+      "id": "cb-ia-030",
+      "outputPath": "/assets/downloads/CB-IA-030.pdf",
+      "bytes": 13326
+    },
+    {
+      "id": "cb-ia-033",
+      "outputPath": "/assets/downloads/CB-IA-033.pdf",
+      "bytes": 13298
+    },
+    {
+      "id": "cb-ia-036",
+      "outputPath": "/assets/downloads/CB-IA-036.pdf",
+      "bytes": 13329
+    },
+    {
+      "id": "cb-ia-039",
+      "outputPath": "/assets/downloads/CB-IA-039.pdf",
+      "bytes": 13302
+    },
+    {
+      "id": "cb-ia-042",
+      "outputPath": "/assets/downloads/CB-IA-042.pdf",
+      "bytes": 13277
+    },
+    {
+      "id": "cb-ia-045",
+      "outputPath": "/assets/downloads/CB-IA-045.pdf",
+      "bytes": 13300
+    },
+    {
+      "id": "cb-ia-048",
+      "outputPath": "/assets/downloads/CB-IA-048.pdf",
+      "bytes": 13290
+    },
+    {
+      "id": "cb-ia-051",
+      "outputPath": "/assets/downloads/CB-IA-051.pdf",
+      "bytes": 13311
+    },
+    {
+      "id": "cb-ia-054",
+      "outputPath": "/assets/downloads/CB-IA-054.pdf",
+      "bytes": 13321
+    },
+    {
+      "id": "cb-ia-057",
+      "outputPath": "/assets/downloads/CB-IA-057.pdf",
+      "bytes": 13244
+    },
+    {
+      "id": "cb-ia-060",
+      "outputPath": "/assets/downloads/CB-IA-060.pdf",
+      "bytes": 13388
+    },
+    {
+      "id": "cb-ia-063",
+      "outputPath": "/assets/downloads/CB-IA-063.pdf",
+      "bytes": 13342
+    },
+    {
+      "id": "cb-ia-066",
+      "outputPath": "/assets/downloads/CB-IA-066.pdf",
+      "bytes": 13299
+    },
+    {
+      "id": "cb-ia-069",
+      "outputPath": "/assets/downloads/CB-IA-069.pdf",
+      "bytes": 13312
+    },
+    {
+      "id": "cb-ia-072",
+      "outputPath": "/assets/downloads/CB-IA-072.pdf",
+      "bytes": 13370
+    },
+    {
+      "id": "cb-ia-075",
+      "outputPath": "/assets/downloads/CB-IA-075.pdf",
+      "bytes": 13341
+    },
+    {
+      "id": "cb-si-002",
+      "outputPath": "/assets/downloads/CB-SI-002.pdf",
+      "bytes": 13376
+    },
+    {
+      "id": "cb-si-005",
+      "outputPath": "/assets/downloads/CB-SI-005.pdf",
+      "bytes": 13326
+    },
+    {
+      "id": "cb-si-008",
+      "outputPath": "/assets/downloads/CB-SI-008.pdf",
+      "bytes": 13296
+    },
+    {
+      "id": "cb-si-011",
+      "outputPath": "/assets/downloads/CB-SI-011.pdf",
+      "bytes": 13340
+    },
+    {
+      "id": "cb-si-014",
+      "outputPath": "/assets/downloads/CB-SI-014.pdf",
+      "bytes": 13374
+    },
+    {
+      "id": "cb-si-017",
+      "outputPath": "/assets/downloads/CB-SI-017.pdf",
+      "bytes": 13382
+    },
+    {
+      "id": "cb-si-020",
+      "outputPath": "/assets/downloads/CB-SI-020.pdf",
+      "bytes": 13340
+    },
+    {
+      "id": "cb-si-023",
+      "outputPath": "/assets/downloads/CB-SI-023.pdf",
+      "bytes": 13326
+    },
+    {
+      "id": "cb-si-026",
+      "outputPath": "/assets/downloads/CB-SI-026.pdf",
+      "bytes": 13384
+    },
+    {
+      "id": "cb-si-029",
+      "outputPath": "/assets/downloads/CB-SI-029.pdf",
+      "bytes": 13382
+    },
+    {
+      "id": "cb-si-032",
+      "outputPath": "/assets/downloads/CB-SI-032.pdf",
+      "bytes": 13344
+    },
+    {
+      "id": "cb-si-035",
+      "outputPath": "/assets/downloads/CB-SI-035.pdf",
+      "bytes": 13372
+    },
+    {
+      "id": "cb-si-038",
+      "outputPath": "/assets/downloads/CB-SI-038.pdf",
+      "bytes": 13409
+    },
+    {
+      "id": "cb-si-041",
+      "outputPath": "/assets/downloads/CB-SI-041.pdf",
+      "bytes": 13336
+    },
+    {
+      "id": "cb-si-044",
+      "outputPath": "/assets/downloads/CB-SI-044.pdf",
+      "bytes": 13283
+    },
+    {
+      "id": "cb-si-047",
+      "outputPath": "/assets/downloads/CB-SI-047.pdf",
+      "bytes": 13340
+    },
+    {
+      "id": "cb-si-050",
+      "outputPath": "/assets/downloads/CB-SI-050.pdf",
+      "bytes": 13412
+    },
+    {
+      "id": "cb-si-053",
+      "outputPath": "/assets/downloads/CB-SI-053.pdf",
+      "bytes": 13379
+    },
+    {
+      "id": "cb-si-056",
+      "outputPath": "/assets/downloads/CB-SI-056.pdf",
+      "bytes": 13331
+    },
+    {
+      "id": "cb-si-059",
+      "outputPath": "/assets/downloads/CB-SI-059.pdf",
+      "bytes": 13324
+    },
+    {
+      "id": "cb-si-062",
+      "outputPath": "/assets/downloads/CB-SI-062.pdf",
+      "bytes": 13333
+    },
+    {
+      "id": "cb-si-065",
+      "outputPath": "/assets/downloads/CB-SI-065.pdf",
+      "bytes": 13342
+    },
+    {
+      "id": "cb-si-068",
+      "outputPath": "/assets/downloads/CB-SI-068.pdf",
+      "bytes": 13351
+    },
+    {
+      "id": "cb-si-071",
+      "outputPath": "/assets/downloads/CB-SI-071.pdf",
+      "bytes": 13344
+    },
+    {
+      "id": "cb-si-074",
+      "outputPath": "/assets/downloads/CB-SI-074.pdf",
+      "bytes": 13358
+    },
+    {
+      "id": "communication-script-bpf",
+      "outputPath": "/assets/downloads/communication-script-bpf.pdf",
+      "bytes": 20740
+    },
+    {
+      "id": "conviction-vs-coercion",
+      "outputPath": "/assets/downloads/conviction-vs-coercion.pdf",
+      "bytes": 15036
+    },
+    {
+      "id": "covenant",
+      "outputPath": "/assets/downloads/covenant.pdf",
+      "bytes": 18960
+    },
+    {
+      "id": "decision-log-template",
+      "outputPath": "/assets/downloads/decision-log-template.pdf",
+      "bytes": 14233
+    },
+    {
+      "id": "decision-matrix-scorecard",
+      "outputPath": "/assets/downloads/decision-matrix-scorecard.pdf",
+      "bytes": 15147
+    },
+    {
+      "id": "destiny-mapping-worksheet",
+      "outputPath": "/assets/downloads/destiny-mapping-worksheet.pdf",
+      "bytes": 20502
+    },
+    {
+      "id": "entrepreneur-operating-pack",
+      "outputPath": "/assets/downloads/entrepreneur-operating-pack.pdf",
+      "bytes": 15791
+    },
+    {
+      "id": "entrepreneur-survival-checklist",
+      "outputPath": "/assets/downloads/entrepreneur-survival-checklist.pdf",
+      "bytes": 20742
+    },
+    {
+      "id": "family-altar-liturgy",
+      "outputPath": "/assets/downloads/family-altar-liturgy.pdf",
+      "bytes": 19941
+    },
+    {
+      "id": "family-court-practical-pack",
+      "outputPath": "/assets/downloads/family-court-practical-pack.pdf",
+      "bytes": 53093
+    },
+    {
+      "id": "family",
+      "outputPath": "/assets/downloads/family.pdf",
+      "bytes": 24103
+    },
+    {
+      "id": "fatherhood-impact-framework",
+      "outputPath": "/assets/downloads/fatherhood-impact-framework.pdf",
+      "bytes": 41967
+    },
+    {
+      "id": "fatherhood-standards-card",
+      "outputPath": "/assets/downloads/fatherhood-standards-card.pdf",
+      "bytes": 14978
+    },
+    {
+      "id": "father",
+      "outputPath": "/assets/downloads/father.pdf",
+      "bytes": 18231
+    },
+    {
+      "id": "founders-salon",
+      "outputPath": "/assets/downloads/founders-salon.pdf",
+      "bytes": 14728
+    },
+    {
+      "id": "fr-001",
+      "outputPath": "/assets/downloads/fr-001.pdf",
+      "bytes": 13709
+    },
+    {
+      "id": "fr-004",
+      "outputPath": "/assets/downloads/fr-004.pdf",
+      "bytes": 13676
+    },
+    {
+      "id": "fr-007",
+      "outputPath": "/assets/downloads/fr-007.pdf",
+      "bytes": 13678
+    },
+    {
+      "id": "fr-010",
+      "outputPath": "/assets/downloads/fr-010.pdf",
+      "bytes": 13649
+    },
+    {
+      "id": "fr-013",
+      "outputPath": "/assets/downloads/fr-013.pdf",
+      "bytes": 13607
+    },
+    {
+      "id": "fr-016",
+      "outputPath": "/assets/downloads/fr-016.pdf",
+      "bytes": 13665
+    },
+    {
+      "id": "fr-019",
+      "outputPath": "/assets/downloads/fr-019.pdf",
+      "bytes": 13700
+    },
+    {
+      "id": "fr-022",
+      "outputPath": "/assets/downloads/fr-022.pdf",
+      "bytes": 13606
+    },
+    {
+      "id": "fr-025",
+      "outputPath": "/assets/downloads/fr-025.pdf",
+      "bytes": 13773
+    },
+    {
+      "id": "fr-028",
+      "outputPath": "/assets/downloads/fr-028.pdf",
+      "bytes": 13710
+    },
+    {
+      "id": "fr-031",
+      "outputPath": "/assets/downloads/fr-031.pdf",
+      "bytes": 13678
+    },
+    {
+      "id": "fr-034",
+      "outputPath": "/assets/downloads/fr-034.pdf",
+      "bytes": 13670
+    },
+    {
+      "id": "fr-037",
+      "outputPath": "/assets/downloads/fr-037.pdf",
+      "bytes": 13731
+    },
+    {
+      "id": "fr-040",
+      "outputPath": "/assets/downloads/fr-040.pdf",
+      "bytes": 13671
+    },
+    {
+      "id": "fr-043",
+      "outputPath": "/assets/downloads/fr-043.pdf",
+      "bytes": 13730
+    },
+    {
+      "id": "fr-046",
+      "outputPath": "/assets/downloads/fr-046.pdf",
+      "bytes": 13683
+    },
+    {
+      "id": "fr-049",
+      "outputPath": "/assets/downloads/fr-049.pdf",
+      "bytes": 13726
+    },
+    {
+      "id": "fr-052",
+      "outputPath": "/assets/downloads/fr-052.pdf",
+      "bytes": 13648
+    },
+    {
+      "id": "fr-055",
+      "outputPath": "/assets/downloads/fr-055.pdf",
+      "bytes": 13654
+    },
+    {
+      "id": "fr-058",
+      "outputPath": "/assets/downloads/fr-058.pdf",
+      "bytes": 13706
+    },
+    {
+      "id": "fr-061",
+      "outputPath": "/assets/downloads/fr-061.pdf",
+      "bytes": 13710
+    },
+    {
+      "id": "fr-064",
+      "outputPath": "/assets/downloads/fr-064.pdf",
+      "bytes": 13656
+    },
+    {
+      "id": "fr-067",
+      "outputPath": "/assets/downloads/fr-067.pdf",
+      "bytes": 13682
+    },
+    {
+      "id": "fr-070",
+      "outputPath": "/assets/downloads/fr-070.pdf",
+      "bytes": 13746
+    },
+    {
+      "id": "fr-073",
+      "outputPath": "/assets/downloads/fr-073.pdf",
+      "bytes": 13691
+    },
+    {
+      "id": "frontier-resilience-01",
+      "outputPath": "/assets/downloads/frontier-resilience-01.pdf",
+      "bytes": 15835
+    },
+    {
+      "id": "getting-started",
+      "outputPath": "/assets/downloads/getting-started.pdf",
+      "bytes": 15051
+    },
+    {
+      "id": "governance-diagnostic-toolkit",
+      "outputPath": "/assets/downloads/governance-diagnostic-toolkit.pdf",
+      "bytes": 16141
+    },
+    {
+      "id": "governance",
+      "outputPath": "/assets/downloads/governance.pdf",
+      "bytes": 19287
+    },
+    {
+      "id": "ia-003",
+      "outputPath": "/assets/downloads/ia-003.pdf",
+      "bytes": 13633
+    },
+    {
+      "id": "ia-006",
+      "outputPath": "/assets/downloads/ia-006.pdf",
+      "bytes": 13597
+    },
+    {
+      "id": "ia-009",
+      "outputPath": "/assets/downloads/ia-009.pdf",
+      "bytes": 13611
+    },
+    {
+      "id": "ia-012",
+      "outputPath": "/assets/downloads/ia-012.pdf",
+      "bytes": 13618
+    },
+    {
+      "id": "ia-015",
+      "outputPath": "/assets/downloads/ia-015.pdf",
+      "bytes": 13620
+    },
+    {
+      "id": "ia-018",
+      "outputPath": "/assets/downloads/ia-018.pdf",
+      "bytes": 13662
+    },
+    {
+      "id": "ia-021",
+      "outputPath": "/assets/downloads/ia-021.pdf",
+      "bytes": 13600
+    },
+    {
+      "id": "ia-024",
+      "outputPath": "/assets/downloads/ia-024.pdf",
+      "bytes": 13641
+    },
+    {
+      "id": "ia-027",
+      "outputPath": "/assets/downloads/ia-027.pdf",
+      "bytes": 13675
+    },
+    {
+      "id": "ia-030",
+      "outputPath": "/assets/downloads/ia-030.pdf",
+      "bytes": 13636
+    },
+    {
+      "id": "ia-033",
+      "outputPath": "/assets/downloads/ia-033.pdf",
+      "bytes": 13644
+    },
+    {
+      "id": "ia-036",
+      "outputPath": "/assets/downloads/ia-036.pdf",
+      "bytes": 13681
+    },
+    {
+      "id": "ia-039",
+      "outputPath": "/assets/downloads/ia-039.pdf",
+      "bytes": 13666
+    },
+    {
+      "id": "ia-042",
+      "outputPath": "/assets/downloads/ia-042.pdf",
+      "bytes": 13675
+    },
+    {
+      "id": "ia-045",
+      "outputPath": "/assets/downloads/ia-045.pdf",
+      "bytes": 13668
+    },
+    {
+      "id": "ia-048",
+      "outputPath": "/assets/downloads/ia-048.pdf",
+      "bytes": 13639
+    },
+    {
+      "id": "ia-051",
+      "outputPath": "/assets/downloads/ia-051.pdf",
+      "bytes": 13647
+    },
+    {
+      "id": "ia-054",
+      "outputPath": "/assets/downloads/ia-054.pdf",
+      "bytes": 13674
+    },
+    {
+      "id": "ia-057",
+      "outputPath": "/assets/downloads/ia-057.pdf",
+      "bytes": 13633
+    },
+    {
+      "id": "ia-060",
+      "outputPath": "/assets/downloads/ia-060.pdf",
+      "bytes": 13675
+    },
+    {
+      "id": "ia-063",
+      "outputPath": "/assets/downloads/ia-063.pdf",
+      "bytes": 13647
+    },
+    {
+      "id": "ia-066",
+      "outputPath": "/assets/downloads/ia-066.pdf",
+      "bytes": 13590
+    },
+    {
+      "id": "ia-069",
+      "outputPath": "/assets/downloads/ia-069.pdf",
+      "bytes": 13618
+    },
+    {
+      "id": "ia-072",
+      "outputPath": "/assets/downloads/ia-072.pdf",
+      "bytes": 13595
+    },
+    {
+      "id": "ia-075",
+      "outputPath": "/assets/downloads/ia-075.pdf",
+      "bytes": 13606
+    },
+    {
+      "id": "identity",
+      "outputPath": "/assets/downloads/identity.pdf",
+      "bytes": 19126
+    },
+    {
+      "id": "institutional-governance",
+      "outputPath": "/assets/downloads/institutional-governance.pdf",
+      "bytes": 19704
+    },
+    {
+      "id": "institutional-health-scorecard",
+      "outputPath": "/assets/downloads/institutional-health-scorecard.pdf",
+      "bytes": 58418
+    },
+    {
+      "id": "institutional-integrity-audit",
+      "outputPath": "/assets/downloads/institutional-integrity-audit.pdf",
+      "bytes": 16120
+    },
+    {
+      "id": "leaders-cue-card-two-up",
+      "outputPath": "/assets/downloads/leaders-cue-card-two-up.pdf",
+      "bytes": 15427
+    },
+    {
+      "id": "leadership-playbook",
+      "outputPath": "/assets/downloads/leadership-playbook.pdf",
+      "bytes": 14694
+    },
+    {
+      "id": "leadership-standards-blueprint",
+      "outputPath": "/assets/downloads/leadership-standards-blueprint.pdf",
+      "bytes": 36495
+    },
+    {
+      "id": "leadership-workshop",
+      "outputPath": "/assets/downloads/leadership-workshop.pdf",
+      "bytes": 15391
+    },
+    {
+      "id": "leadership",
+      "outputPath": "/assets/downloads/leadership.pdf",
+      "bytes": 19042
+    },
+    {
+      "id": "legacy-canvas",
+      "outputPath": "/assets/downloads/legacy-canvas.pdf",
+      "bytes": 19737
+    },
+    {
+      "id": "clarity",
+      "outputPath": "/assets/downloads/lexicon/clarity.pdf",
+      "bytes": 26699
+    },
+    {
+      "id": "integrity",
+      "outputPath": "/assets/downloads/lexicon/integrity.pdf",
+      "bytes": 22291
+    },
+    {
+      "id": "legacy",
+      "outputPath": "/assets/downloads/lexicon/legacy.pdf",
+      "bytes": 22171
+    },
+    {
+      "id": "sovereignty",
+      "outputPath": "/assets/downloads/lexicon/sovereignty.pdf",
+      "bytes": 22249
+    },
+    {
+      "id": "strategic-autonomy",
+      "outputPath": "/assets/downloads/lexicon/strategic-autonomy.pdf",
+      "bytes": 23359
+    },
+    {
+      "id": "strategy",
+      "outputPath": "/assets/downloads/lexicon/strategy.pdf",
+      "bytes": 23026
+    },
+    {
+      "id": "surrender",
+      "outputPath": "/assets/downloads/lexicon/surrender.pdf",
+      "bytes": 22240
+    },
+    {
+      "id": "mentorship-starter-kit",
+      "outputPath": "/assets/downloads/mentorship-starter-kit.pdf",
+      "bytes": 15011
+    },
+    {
+      "id": "multi-generational-legacy-ledger",
+      "outputPath": "/assets/downloads/multi-generational-legacy-ledger.pdf",
+      "bytes": 36259
+    },
+    {
+      "id": "operating-cadence-pack",
+      "outputPath": "/assets/downloads/operating-cadence-pack.pdf",
+      "bytes": 14500
+    },
+    {
+      "id": "principles-for-my-son-cue-card",
+      "outputPath": "/assets/downloads/principles-for-my-son-cue-card.pdf",
+      "bytes": 15635
+    },
+    {
+      "id": "principles-for-my-son",
+      "outputPath": "/assets/downloads/principles-for-my-son.pdf",
+      "bytes": 23742
+    },
+    {
+      "id": "principles-of-surrender",
+      "outputPath": "/assets/downloads/principles-of-surrender.pdf",
+      "bytes": 29953
+    },
+    {
+      "id": "purpose-alignment-checklist",
+      "outputPath": "/assets/downloads/purpose-alignment-checklist.pdf",
+      "bytes": 19878
+    },
+    {
+      "id": "purpose-alignment",
+      "outputPath": "/assets/downloads/purpose-alignment.pdf",
+      "bytes": 22702
+    },
+    {
+      "id": "purpose-pyramid-worksheet",
+      "outputPath": "/assets/downloads/purpose-pyramid-worksheet.pdf",
+      "bytes": 19992
+    },
+    {
+      "id": "purpose",
+      "outputPath": "/assets/downloads/purpose.pdf",
+      "bytes": 23161
+    },
+    {
+      "id": "responsibility",
+      "outputPath": "/assets/downloads/responsibility.pdf",
+      "bytes": 23822
+    },
+    {
+      "id": "rise-decay-index",
+      "outputPath": "/assets/downloads/rise-decay-index.pdf",
+      "bytes": 26211
+    },
+    {
+      "id": "sample-strategy",
+      "outputPath": "/assets/downloads/sample-strategy.pdf",
+      "bytes": 18572
+    },
+    {
+      "id": "scripture-track-john14",
+      "outputPath": "/assets/downloads/scripture-track-john14.pdf",
+      "bytes": 25482
+    },
+    {
+      "id": "si-002",
+      "outputPath": "/assets/downloads/si-002.pdf",
+      "bytes": 13602
+    },
+    {
+      "id": "si-005",
+      "outputPath": "/assets/downloads/si-005.pdf",
+      "bytes": 13592
+    },
+    {
+      "id": "si-008",
+      "outputPath": "/assets/downloads/si-008.pdf",
+      "bytes": 13659
+    },
+    {
+      "id": "si-011",
+      "outputPath": "/assets/downloads/si-011.pdf",
+      "bytes": 13712
+    },
+    {
+      "id": "si-014",
+      "outputPath": "/assets/downloads/si-014.pdf",
+      "bytes": 13655
+    },
+    {
+      "id": "si-017",
+      "outputPath": "/assets/downloads/si-017.pdf",
+      "bytes": 13737
+    },
+    {
+      "id": "si-020",
+      "outputPath": "/assets/downloads/si-020.pdf",
+      "bytes": 13717
+    },
+    {
+      "id": "si-023",
+      "outputPath": "/assets/downloads/si-023.pdf",
+      "bytes": 13686
+    },
+    {
+      "id": "si-026",
+      "outputPath": "/assets/downloads/si-026.pdf",
+      "bytes": 13685
+    },
+    {
+      "id": "si-029",
+      "outputPath": "/assets/downloads/si-029.pdf",
+      "bytes": 13653
+    },
+    {
+      "id": "si-032",
+      "outputPath": "/assets/downloads/si-032.pdf",
+      "bytes": 13668
+    },
+    {
+      "id": "si-035",
+      "outputPath": "/assets/downloads/si-035.pdf",
+      "bytes": 13660
+    },
+    {
+      "id": "si-038",
+      "outputPath": "/assets/downloads/si-038.pdf",
+      "bytes": 13615
+    },
+    {
+      "id": "si-041",
+      "outputPath": "/assets/downloads/si-041.pdf",
+      "bytes": 13606
+    },
+    {
+      "id": "si-044",
+      "outputPath": "/assets/downloads/si-044.pdf",
+      "bytes": 13633
+    },
+    {
+      "id": "si-047",
+      "outputPath": "/assets/downloads/si-047.pdf",
+      "bytes": 13650
+    },
+    {
+      "id": "si-050",
+      "outputPath": "/assets/downloads/si-050.pdf",
+      "bytes": 13698
+    },
+    {
+      "id": "si-053",
+      "outputPath": "/assets/downloads/si-053.pdf",
+      "bytes": 13709
+    },
+    {
+      "id": "si-056",
+      "outputPath": "/assets/downloads/si-056.pdf",
+      "bytes": 13701
+    },
+    {
+      "id": "si-059",
+      "outputPath": "/assets/downloads/si-059.pdf",
+      "bytes": 13636
+    },
+    {
+      "id": "si-062",
+      "outputPath": "/assets/downloads/si-062.pdf",
+      "bytes": 13692
+    },
+    {
+      "id": "si-065",
+      "outputPath": "/assets/downloads/si-065.pdf",
+      "bytes": 13611
+    },
+    {
+      "id": "si-068",
+      "outputPath": "/assets/downloads/si-068.pdf",
+      "bytes": 13629
+    },
+    {
+      "id": "si-071",
+      "outputPath": "/assets/downloads/si-071.pdf",
+      "bytes": 13659
+    },
+    {
+      "id": "si-074",
+      "outputPath": "/assets/downloads/si-074.pdf",
+      "bytes": 13637
+    },
+    {
+      "id": "sisterhood",
+      "outputPath": "/assets/downloads/sisterhood.pdf",
+      "bytes": 18453
+    },
+    {
+      "id": "standards-brief",
+      "outputPath": "/assets/downloads/standards-brief.pdf",
+      "bytes": 14172
+    },
+    {
+      "id": "strategic-autonomy-001",
+      "outputPath": "/assets/downloads/strategic-autonomy-001.pdf",
+      "bytes": 28684
+    },
+    {
+      "id": "strategic-autonomy-002",
+      "outputPath": "/assets/downloads/strategic-autonomy-002.pdf",
+      "bytes": 47498
+    },
+    {
+      "id": "strategic-autonomy-003",
+      "outputPath": "/assets/downloads/strategic-autonomy-003.pdf",
+      "bytes": 42780
+    },
+    {
+      "id": "strategic-autonomy-004",
+      "outputPath": "/assets/downloads/strategic-autonomy-004.pdf",
+      "bytes": 41815
+    },
+    {
+      "id": "strategic-autonomy-005",
+      "outputPath": "/assets/downloads/strategic-autonomy-005.pdf",
+      "bytes": 46419
+    },
+    {
+      "id": "strategic-autonomy-006",
+      "outputPath": "/assets/downloads/strategic-autonomy-006.pdf",
+      "bytes": 42035
+    },
+    {
+      "id": "strategic-autonomy-007",
+      "outputPath": "/assets/downloads/strategic-autonomy-007.pdf",
+      "bytes": 49651
+    },
+    {
+      "id": "strategic-autonomy-008",
+      "outputPath": "/assets/downloads/strategic-autonomy-008.pdf",
+      "bytes": 42944
+    },
+    {
+      "id": "strategic-autonomy-009",
+      "outputPath": "/assets/downloads/strategic-autonomy-009.pdf",
+      "bytes": 47032
+    },
+    {
+      "id": "strategic-autonomy-010",
+      "outputPath": "/assets/downloads/strategic-autonomy-010.pdf",
+      "bytes": 41524
+    },
+    {
+      "id": "strategic-autonomy-011",
+      "outputPath": "/assets/downloads/strategic-autonomy-011.pdf",
+      "bytes": 45244
+    },
+    {
+      "id": "strategic-autonomy-012",
+      "outputPath": "/assets/downloads/strategic-autonomy-012.pdf",
+      "bytes": 25339
+    },
+    {
+      "id": "strategic-frameworks",
+      "outputPath": "/assets/downloads/strategic-frameworks.pdf",
+      "bytes": 23922
+    },
+    {
+      "id": "extremism-shield",
+      "outputPath": "/assets/downloads/strategy/extremism-shield.pdf",
+      "bytes": 25527
+    },
+    {
+      "id": "strategy-room-intake",
+      "outputPath": "/assets/downloads/strategy-room-intake.pdf",
+      "bytes": 28374
+    },
+    {
+      "id": "surrender-operational-framework",
+      "outputPath": "/assets/downloads/surrender-operational-framework.pdf",
+      "bytes": 29586
+    },
+    {
+      "id": "the-builders-catechism-founders-illuminated-edition-xl",
+      "outputPath": "/assets/downloads/the-builders-catechism-founders-illuminated-edition-xl.pdf",
+      "bytes": 38605
+    },
+    {
+      "id": "the-builders-catechism-founders-illuminated-edition",
+      "outputPath": "/assets/downloads/the-builders-catechism-founders-illuminated-edition.pdf",
+      "bytes": 38546
+    },
+    {
+      "id": "ultimate-purpose-of-man-editorial",
+      "outputPath": "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
+      "bytes": 36549
+    },
+    {
+      "id": "v4",
+      "outputPath": "/assets/downloads/v4.pdf",
+      "bytes": 40844
+    },
+    {
+      "id": "vault-index",
+      "outputPath": "/assets/downloads/vault-index.pdf",
+      "bytes": 18450
+    },
+    {
+      "id": "vault",
+      "outputPath": "/assets/downloads/vault.pdf",
+      "bytes": 18828
+    },
+    {
+      "id": "weekly-operating-rhythm",
+      "outputPath": "/assets/downloads/weekly-operating-rhythm.pdf",
+      "bytes": 15103
+    },
+    {
+      "id": "brief-010-geometry-of-inner-circle",
+      "outputPath": "/assets/downloads/brief-010-geometry-of-inner-circle.pdf",
+      "bytes": 26472
+    },
+    {
+      "id": "brief-005-brotherhood-protocol",
+      "outputPath": "/assets/downloads/brief-005-brotherhood-protocol.pdf",
+      "bytes": 26048
     }
   ]
 }

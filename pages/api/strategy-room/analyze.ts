@@ -1,70 +1,160 @@
 /* pages/api/strategy-room/analyze.ts */
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
+import { StrategyIntakeStatus } from "@prisma/client";
 
-/**
- * INSTITUTIONAL SCORING LOGIC
- * S = (D * 1.5) + (V * 1.2) + (C * 1.0)
- * Max Score: 25 (High Gravity threshold: 18)
- */
+type AnalyzeResponse =
+  | {
+      success: true;
+      score: number;
+      status: StrategyIntakeStatus;
+    }
+  | {
+      error: string;
+    };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+type StrategyPayload = Record<string, unknown>;
 
-  const { intakeId, payload } = req.body;
+const ANALYSIS_VERSION = "gravity-v1";
+const ANALYZED_BY = "system:strategy-room-analyze";
 
-  if (!intakeId || !payload) {
-    return res.status(400).json({ error: 'Missing required dossier identifiers.' });
+function toJsonValue(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value ?? {})) as Prisma.InputJsonValue;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<AnalyzeResponse>,
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { intakeId, payload } = req.body ?? {};
+
+  if (
+    !intakeId ||
+    !payload ||
+    typeof payload !== "object" ||
+    Array.isArray(payload)
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Missing required dossier identifiers." });
   }
 
   try {
-    // 1. Calculate the Gravity Score
-    const score = calculateInstitutionalGravity(payload);
-    
-    // 2. Determine Status (Auto-accepting if below critical risk, else pending)
-    const status = score >= 22 ? "PENDING_DIRECTORATE_REVIEW" : "ACCEPTED";
+    const incomingPayload = payload as StrategyPayload;
 
-    // 3. Update the Ledger
-    const updatedIntake = await prisma.strategyRoomIntake.update({
-      where: { id: intakeId },
-      data: {
-        score: Math.min(score, 25), // Cap at 25
-        status,
-        payload: payload, // Store the final processed JSON
+    const score = calculateInstitutionalGravity(incomingPayload);
+    const cappedScore = Math.min(score, 25);
+
+    const status =
+      cappedScore >= 22
+        ? StrategyIntakeStatus.PENDING_DIRECTORATE_REVIEW
+        : StrategyIntakeStatus.ACCEPTED;
+
+    const existing = await prisma.strategyIntake.findUnique({
+      where: { id: String(intakeId) },
+      select: {
+        id: true,
+        payload: true,
+        dependencyLevel: true,
+        volatility: true,
+        readinessScore: true,
       },
     });
 
-    return res.status(200).json({ 
-      success: true, 
-      score: updatedIntake.score, 
-      status: updatedIntake.status 
+    if (!existing) {
+      return res.status(404).json({ error: "Strategy intake not found." });
+    }
+
+    const existingPayload =
+      existing.payload &&
+      typeof existing.payload === "object" &&
+      !Array.isArray(existing.payload)
+        ? (existing.payload as StrategyPayload)
+        : {};
+
+    const analyzedAt = new Date();
+
+    const mergedPayload: StrategyPayload = {
+      ...existingPayload,
+      ...incomingPayload,
+    };
+
+    const analysisNotes = {
+      model: ANALYSIS_VERSION,
+      analyzedAt: analyzedAt.toISOString(),
+      inputs: {
+        dependencyLevel:
+          typeof incomingPayload.dependencyLevel === "string"
+            ? incomingPayload.dependencyLevel
+            : existing.dependencyLevel,
+        volatility:
+          typeof incomingPayload.volatility === "string"
+            ? incomingPayload.volatility
+            : existing.volatility,
+        readinessScore:
+          typeof incomingPayload.readinessScore === "number"
+            ? incomingPayload.readinessScore
+            : existing.readinessScore,
+      },
+      thresholds: {
+        acceptedMax: 21,
+        directorateReviewMin: 22,
+        scoreCap: 25,
+      },
+    };
+
+    await prisma.strategyIntake.update({
+      where: { id: String(intakeId) },
+      data: {
+        payload: toJsonValue(mergedPayload),
+        score: cappedScore,
+        status,
+        analyzedAt,
+        analyzedBy: ANALYZED_BY,
+        analysisVersion: ANALYSIS_VERSION,
+        analysisNotes: toJsonValue(analysisNotes),
+      },
     });
 
+    return res.status(200).json({
+      success: true,
+      score: cappedScore,
+      status,
+    });
   } catch (error) {
-    console.error('Scoring Engine Failure:', error);
-    return res.status(500).json({ error: 'Internal scoring failure.' });
+    console.error("[STRATEGY_ROOM_SCORING_FAILURE]", error);
+    return res.status(500).json({ error: "Internal scoring failure." });
   }
 }
 
-function calculateInstitutionalGravity(payload: any): number {
+/**
+ * INSTITUTIONAL SCORING LOGIC
+ * Max Score: 25
+ */
+function calculateInstitutionalGravity(payload: StrategyPayload): number {
   let score = 0;
 
-  // Pillar 1: External Dependency (Max 10)
-  // Logic: Are they reliant on a single external node?
-  if (payload.dependencyLevel === 'high') score += 10;
-  else if (payload.dependencyLevel === 'medium') score += 5;
+  if (payload.dependencyLevel === "high") score += 10;
+  else if (payload.dependencyLevel === "medium") score += 5;
 
-  // Pillar 2: Market Volatility (Max 8)
-  // Logic: Is the sector undergoing a structural pivot?
-  const volatilityMap: Record<string, number> = { 'extreme': 8, 'high': 6, 'stable': 2 };
-  score += volatilityMap[payload.volatility] || 0;
+  const volatilityMap: Record<string, number> = {
+    extreme: 8,
+    high: 6,
+    stable: 2,
+  };
 
-  // Pillar 3: Tactical Readiness (Max 7)
-  // Logic: Inverse relationship - lower readiness = higher gravity/need
-  const readiness = payload.readinessScore || 5; // Default to mid
-  score += (7 - readiness);
+  score += volatilityMap[String(payload.volatility || "")] || 0;
+
+  const readinessRaw =
+    typeof payload.readinessScore === "number" ? payload.readinessScore : 5;
+
+  const readiness = Math.max(0, Math.min(7, readinessRaw));
+  score += 7 - readiness;
 
   return score;
 }

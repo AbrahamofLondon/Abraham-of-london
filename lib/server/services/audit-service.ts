@@ -1,96 +1,151 @@
 /* lib/server/services/audit-service.ts — SYSTEMATIC INTEGRITY RECORDER */
 import { createHash } from "crypto";
-import { Prisma } from "@prisma/client";
+import {
+  Prisma,
+  DownloadContentType,
+  DownloadDeliveryMode,
+  DownloadEventType,
+  ContentType,
+  type AuditSeverity,
+  type SecurityEvent,
+} from "@prisma/client";
 import { prisma } from "@/lib/server/prisma";
 
-/**
- * Converts arbitrary values into Prisma-safe JSON input.
- * This strips undefined and normalizes unsupported values.
- */
 function toJsonValue(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value ?? {})) as Prisma.InputJsonValue;
 }
 
-/**
- * AuditService
- * Writes structured events using only fields that exist in the current Prisma schema.
- */
+function cleanString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function cleanOptionalString(value: unknown): string | undefined {
+  const s = cleanString(value);
+  return s || undefined;
+}
+
+function safeLatency(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? Math.floor(value)
+    : 0;
+}
+
+function safeBigInt(value: unknown): bigint | undefined {
+  return typeof value === "bigint" ? value : undefined;
+}
+
 export class AuditService {
   private static hash(value: string): string {
     return createHash("sha256").update(String(value)).digest("hex");
   }
 
-  /**
-   * Records a retrieval event in DownloadAuditEvent.
-   */
   static async recordDownload(params: {
-    briefId: string;
+    slug: string;
+    title?: string;
+
+    contentType: DownloadContentType;
+    eventType?: DownloadEventType;
+    deliveryMode?: DownloadDeliveryMode;
+
+    contentId?: string;
+    frameworkId?: string;
+    printAssetId?: string;
+
     memberId?: string;
     email?: string;
+
     ip?: string;
     userAgent?: string;
+    referrer?: string;
+    requestId?: string;
+    sessionId?: string;
+
     success: boolean;
+    statusCode?: number;
     latencyMs?: number;
+
+    fileName?: string;
     fileSize?: bigint;
-    printAssetId?: string;
     fileHash?: string;
-    contentType?: string;
-    eventType?: string;
+    sourceChecksum?: string;
+    deliveredChecksum?: string;
+    watermarkId?: string;
+
+    errorCode?: string;
+    errorDetail?: string;
+
     metadata?: Record<string, unknown>;
   }) {
     try {
+      const slug = cleanString(params.slug);
+      if (!slug) {
+        throw new Error("recordDownload requires a non-empty slug");
+      }
+
+      const email = cleanOptionalString(params.email);
+      const ip = cleanOptionalString(params.ip);
+
       return await prisma.downloadAuditEvent.create({
         data: {
-          slug: params.briefId,
-          printAssetId: params.printAssetId,
-          memberId: params.memberId,
-          email: params.email,
-          emailHash: params.email ? this.hash(params.email) : undefined,
-          ipAddress: params.ip,
-          ipHash: params.ip ? this.hash(params.ip) : undefined,
-          userAgent: params.userAgent,
-          success: params.success,
-          latencyMs: params.latencyMs,
-          fileSize: params.fileSize,
-          fileHash: params.fileHash,
-          contentType: params.contentType ?? "intelligence_brief",
-          eventType: params.eventType ?? "secure_retrieval",
+          slug,
+          title: cleanOptionalString(params.title),
+
+          contentType: params.contentType,
+          eventType: params.eventType ?? DownloadEventType.PREVIEW,
+          deliveryMode: params.deliveryMode ?? DownloadDeliveryMode.DIRECT,
+
+          contentId: cleanOptionalString(params.contentId),
+          frameworkId: cleanOptionalString(params.frameworkId),
+          printAssetId: cleanOptionalString(params.printAssetId),
+
+          memberId: cleanOptionalString(params.memberId),
+          email,
+          emailHash: email ? this.hash(email) : undefined,
+
+          userAgent: cleanOptionalString(params.userAgent),
+          ipAddress: ip,
+          ipHash: ip ? this.hash(ip) : undefined,
+          referrer: cleanOptionalString(params.referrer),
+          requestId: cleanOptionalString(params.requestId),
+          sessionId: cleanOptionalString(params.sessionId),
+
+          success: Boolean(params.success),
+          statusCode:
+            typeof params.statusCode === "number" && Number.isFinite(params.statusCode)
+              ? Math.floor(params.statusCode)
+              : undefined,
+          latencyMs: safeLatency(params.latencyMs),
           processedAt: new Date(),
+
+          fileName: cleanOptionalString(params.fileName),
+          fileSize: safeBigInt(params.fileSize),
+          fileHash: cleanOptionalString(params.fileHash),
+          sourceChecksum: cleanOptionalString(params.sourceChecksum),
+          deliveredChecksum: cleanOptionalString(params.deliveredChecksum),
+          watermarkId: cleanOptionalString(params.watermarkId),
+
+          errorCode: cleanOptionalString(params.errorCode),
+          errorDetail: cleanOptionalString(params.errorDetail),
+
           metadata: toJsonValue(params.metadata),
         },
       });
     } catch (error) {
       console.error(
         "[CRITICAL_AUDIT_FAILURE] Could not record download event:",
-        error
+        error,
       );
       return null;
     }
   }
 
-  /**
-   * Records a security event in SecurityLog.
-   */
   static async recordSecurityEvent(params: {
-    event:
-      | "login_success"
-      | "login_failed"
-      | "logout"
-      | "session_revoked"
-      | "session_expired"
-      | "mfa_challenge_created"
-      | "mfa_verified"
-      | "mfa_failed"
-      | "mfa_max_attempts"
-      | "key_redeemed"
-      | "key_revoked"
-      | "key_expired"
-      | "admin_action";
+    event: SecurityEvent;
     action: string;
     memberId?: string;
     ip?: string;
     userAgent?: string;
-    severity: "info" | "warning" | "high" | "critical";
+    severity: AuditSeverity;
     details?: Record<string, unknown>;
   }) {
     try {
@@ -98,11 +153,11 @@ export class AuditService {
         data: {
           event: params.event,
           severity: params.severity,
-          memberId: params.memberId,
-          action: params.action,
+          memberId: cleanOptionalString(params.memberId),
+          action: cleanString(params.action),
           details: toJsonValue(params.details),
-          ipAddress: params.ip,
-          userAgent: params.userAgent,
+          ipAddress: cleanOptionalString(params.ip),
+          userAgent: cleanOptionalString(params.userAgent),
         },
       });
     } catch (error) {
@@ -111,12 +166,9 @@ export class AuditService {
     }
   }
 
-  /**
-   * Records a generic system event in SystemAuditLog.
-   */
   static async recordSystemEvent(params: {
     action: string;
-    severity?: "info" | "warning" | "high" | "critical";
+    severity?: AuditSeverity;
     actorId?: string;
     actorEmail?: string;
     resourceId?: string;
@@ -138,24 +190,27 @@ export class AuditService {
     try {
       return await prisma.systemAuditLog.create({
         data: {
-          action: params.action,
+          action: cleanString(params.action),
           severity: params.severity ?? "info",
-          actorId: params.actorId,
-          actorEmail: params.actorEmail,
-          resourceId: params.resourceId,
-          ipAddress: params.ip,
-          userAgent: params.userAgent,
+          actorId: cleanOptionalString(params.actorId),
+          actorEmail: cleanOptionalString(params.actorEmail),
+          resourceId: cleanOptionalString(params.resourceId),
+          ipAddress: cleanOptionalString(params.ip),
+          userAgent: cleanOptionalString(params.userAgent),
           metadata: toJsonValue(params.metadata),
-          actorType: params.actorType ?? "system",
-          status: params.status ?? "success",
-          resourceType: params.resourceType,
-          resourceName: params.resourceName,
-          requestId: params.requestId,
-          sessionId: params.sessionId,
-          durationMs: params.durationMs,
-          errorMessage: params.errorMessage,
-          category: params.category,
-          subCategory: params.subCategory,
+          actorType: cleanOptionalString(params.actorType) ?? "system",
+          status: cleanOptionalString(params.status) ?? "success",
+          resourceType: cleanOptionalString(params.resourceType),
+          resourceName: cleanOptionalString(params.resourceName),
+          requestId: cleanOptionalString(params.requestId),
+          sessionId: cleanOptionalString(params.sessionId),
+          durationMs:
+            typeof params.durationMs === "number" && Number.isFinite(params.durationMs)
+              ? Math.floor(params.durationMs)
+              : undefined,
+          errorMessage: cleanOptionalString(params.errorMessage),
+          category: cleanOptionalString(params.category),
+          subCategory: cleanOptionalString(params.subCategory),
           tags: toJsonValue(params.tags ?? []),
         },
       });
@@ -165,23 +220,29 @@ export class AuditService {
     }
   }
 
-  /**
-   * Increment asset engagement metrics in ContentMetadata.
-   */
   static async incrementAssetMetrics(slug: string) {
     try {
+      const cleanSlug = cleanString(slug);
+      if (!cleanSlug) {
+        throw new Error("incrementAssetMetrics requires a non-empty slug");
+      }
+
       return await prisma.contentMetadata.upsert({
-        where: { slug },
+        where: { slug: cleanSlug },
         update: {
           totalPrints: { increment: 1 },
           engagementScore: { increment: 1 },
+          lastDownloadedAt: new Date(),
+          downloadCount: { increment: 1 },
         },
         create: {
-          slug,
+          slug: cleanSlug,
           title: "Auto-Generated Entry",
-          contentType: "Brief" as any, 
+          contentType: ContentType.Briefs,
           totalPrints: 1,
           engagementScore: 1,
+          downloadCount: 1,
+          lastDownloadedAt: new Date(),
         },
       });
     } catch (error) {

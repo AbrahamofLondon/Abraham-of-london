@@ -1,8 +1,11 @@
-/* components/BriefAccessGuard.tsx — BULLETPROOF (PUBLIC NEVER BLOCKS) */
 "use client";
 
 import * as React from "react";
-import tiers, { type AccessTier } from "@/lib/access/tiers";
+import { 
+  type AccessTier, 
+  normalizeRequiredTier, 
+  getTierLabel 
+} from "@/lib/access/tier-policy";
 import { useFortifiedAccess } from "@/hooks/useFortifiedAccess";
 
 interface GuardProps {
@@ -22,8 +25,8 @@ interface GuardProps {
 }
 
 export function BriefAccessGuard({ children, requiredTier, initialAccess }: GuardProps) {
-  // ✅ REQUIRED tier normalization (doc context): unknown -> PUBLIC (no accidental paywall)
-  const required = tiers.normalizeRequired(requiredTier);
+  // ✅ REQUIRED tier normalization: Uses the direct functional export
+  const required = normalizeRequiredTier(requiredTier);
 
   // ✅ Hard rule: public content never blocked by network state.
   if (required === "public") {
@@ -87,7 +90,7 @@ export function BriefAccessGuard({ children, requiredTier, initialAccess }: Guar
         <p className="text-zinc-500 text-sm mb-8">
           This brief requires{" "}
           <span className="text-amber-600/80 font-mono uppercase">
-            {tiers.getLabel(required)}
+            {getTierLabel(required)}
           </span>{" "}
           level clearance.
         </p>
@@ -97,11 +100,6 @@ export function BriefAccessGuard({ children, requiredTier, initialAccess }: Guar
         >
           Upgrade Clearance
         </a>
-
-        {/* Optional: display reason if you want (safe) */}
-        {/* <div className="mt-6 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-          Reason: {access?.reason || "requires_auth"}
-        </div> */}
       </div>
     );
   }

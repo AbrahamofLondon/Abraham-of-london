@@ -1,0 +1,60 @@
+To ensure your staff can effectively onboard clients and maximize the success of the OGR (Organizational Growth & Resilience) audits, here is the **CEO Launch Memo Template**. 
+
+Staff should provide this to the client's Executive Sponsor (CEO, COO, or HR Director) at least **48 hours before** the system sends out the unique invite tokens.
+
+---
+
+## 📩 Client Template: CEO Launch Memo
+**Subject:** Building Our Resilience: The [Organisation Name] Alignment Audit
+
+**Team,**
+
+To ensure that [Organisation Name] is built to scale and remain resilient in an increasingly complex market, we are partnering with **Sovereign Analytics** to conduct an **Organizational Growth & Resilience (OGR) Audit**.
+
+**Why now?**
+Strategy only works if the entire organization is "resonant"—meaning our intent as leaders matches your daily operational reality. This audit is not a performance review of individuals; it is a stress test of our internal systems, communication, and resource flow.
+
+**What to expect:**
+1.  **The Invite:** In the next 48 hours, you will receive a unique, encrypted link from the **Enterprise Alignment Engine**.
+2.  **The Assessment:** It takes approximately 10–15 minutes. There are no "right" answers—only your **Ground Truth**.
+3.  **Anonymity:** Your individual responses are strictly confidential. Data is synthesized into high-level "Snapshots" to show us where our collective friction points are.
+
+**Our Commitment:**
+We aren't doing this to collect data; we are doing this to take action. Once the audit is closed, the leadership team will review the **Leadership Gap** and **Fragility Signals** to identify exactly where we need to clear roadblocks so you can do your best work.
+
+Please complete your assessment by **[Insert Date]**.
+
+**Onward,**
+
+[CEO Name/Executive Sponsor]
+[Organisation Name]
+
+---
+
+## 📋 Staff Checklist: The "Pre-Flight" Briefing
+Before the memo above is sent, staff must confirm these three technical and psychological "Pre-Flight" items with the client:
+
+### 1. Technical Whitelisting
+Confirm with the client's IT lead that emails from `noreply@yourdomain.com` (or your sending service) will not be flagged as spam or "External."
+> **Staff Note:** If the first 50 tokens go to junk mail, the OGR curve will be skewed by low participation.
+
+### 2. Psychological Safety Assurance
+Clients often fear that "Inaccurate" answers will lead to restructuring or firing. 
+* **The Message:** Staff must emphasize to the client lead that the **"Dissonance Area"** (the gap between teams) is the most valuable data point. We want to see the gaps so we can bridge them, not punish those who report them.
+
+### 3. "The Executive Anchor"
+Ensure the CEO or a high-ranking Executive is included in the participant list. 
+* **The Reason:** Without the Executive's "Intent" data, the system cannot calculate the **Leadership Gap**. The audit loses 50% of its strategic value if the leadership doesn't participate.
+
+---
+
+## 🚀 Final Onboarding Handover
+You now have the full technical and operational stack:
+* **Database & Repository:** Hardened Prisma layer for OGR data.
+* **Logic & Schemas:** Zod-validated alignment and scoring logic.
+* **Admin UI:** Provisioning and Campaign Management tools.
+* **Public UI:** The high-stakes "Ground Truth" assessment interface.
+* **Documentation:** Staff Manual and Client Onboarding templates.
+
+**Next Step:**
+Would you like me to generate a **Sample Data Script** that populates a test organization with "Fragmented" data so your staff can practice presenting a "High Fragility" dashboard to a mock client?

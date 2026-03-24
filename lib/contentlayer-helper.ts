@@ -5,6 +5,7 @@
  * - No require("contentlayer/generated") in ESM runtime (Next 16 can run without require)
  * - Deterministic on Windows + Linux
  * - Always returns docs when .contentlayer/generated/<Type>/_index.json exists
+ * - Every document exposes canonical slug fields: collectionSlug, urlSlug, href
  *
  * IMPORTANT:
  * - Server-only module. Do not import from client components.
@@ -15,6 +16,13 @@ import path from "path";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier } from "@/lib/access/tier-policy";
+import { 
+  buildCanonicalSlugFields, 
+  inferCollectionFromDoc,
+  normalizePath,
+  stripContentPrefix,
+  type CanonicalSlugFields 
+} from "./content/canonical";
 
 export type DocKind =
   | "post"
@@ -37,9 +45,14 @@ export type ContentDoc = {
   _id?: string;
   type?: string;
   kind?: string;
+  docKind?: string;
   title?: string;
   slug?: string;
+  slugComputed?: string;
   href?: string;
+  collection?: string;
+  collectionSlug?: string;
+  urlSlug?: string;
   draft?: boolean;
   published?: boolean;
   accessLevel?: string;
@@ -51,9 +64,22 @@ export type ContentDoc = {
   content?: string;
   excerpt?: string;
   description?: string;
+  summary?: string;
   tags?: any[];
   category?: string;
   date?: string;
+  eventDate?: string;
+  startDate?: string;
+  datetime?: string;
+  startsAt?: string;
+  coverImage?: string;
+  image?: string;
+  heroImage?: string;
+  ogImage?: string;
+  coverAspect?: string;
+  imageAspect?: string;
+  aspect?: string;
+  theme?: string;
   metadata?: any;
   _raw?: {
     flattenedPath?: string;
@@ -123,20 +149,12 @@ export function sanitizeData<T>(v: T): T {
 }
 
 export function normalizeSlug(input: string): string {
-  return safeString(input, "")
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
+  return normalizePath(input);
 }
 
 /** tolerate content/<collection>/... */
 function normalizeFlattenedPath(input: string): string {
-  let s = normalizeSlug(input);
-  if (!s) return "";
-  if (s.toLowerCase().startsWith("content/")) s = s.slice("content/".length);
-  return normalizeSlug(s);
+  return stripContentPrefix(normalizePath(input));
 }
 
 export function isPublished(doc: any): boolean {
@@ -160,16 +178,16 @@ function fp(doc: any): string {
 }
 
 /**
- * FIXED: Priority order for kind inference:
+ * Priority order for kind inference:
  * 1) docKind (SSOT truth) — highest authority
  * 2) kind/type fields (legacy)
  * 3) Folder inference (always reliable)
  */
 export function getDocKind(doc: any): DocKind {
-  // ✅ FIXED: docKind must win over everything else
+  // docKind must win over everything else
   const k = lower(doc?.docKind || doc?.kind || doc?.type);
 
-  // ✅ Explicit safeguard: lexicon is always lexicon
+  // Explicit safeguard: lexicon is always lexicon
   if (k === "lexicon") return "lexicon";
 
   if (k && (documentKinds as string[]).includes(k)) return k as DocKind;
@@ -303,6 +321,41 @@ function loadAllFromGeneratedIndexes(): any[] {
   return buckets;
 }
 
+/**
+ * Enrich a document with canonical slug fields
+ * This is called once per document at the adapter level
+ */
+export function enrichWithCanonicalSlugs(doc: any): any {
+  if (!doc) return doc;
+  
+  // Skip if already enriched with valid slugs
+  if (doc.collectionSlug && doc.urlSlug && doc.href) {
+    return doc;
+  }
+
+  const collection = inferCollectionFromDoc(doc);
+  if (!collection) return doc;
+
+  // Try different sources for the raw slug
+  const rawSlug = 
+    doc.slugComputed ||
+    doc.slug ||
+    doc._raw?.flattenedPath ||
+    doc._raw?.sourceFilePath ||
+    "";
+
+  const canonical = buildCanonicalSlugFields(collection, rawSlug);
+  if (!canonical) return doc;
+
+  return {
+    ...doc,
+    collection: canonical.collection,
+    collectionSlug: canonical.collectionSlug,
+    urlSlug: canonical.urlSlug,
+    href: canonical.href,
+  };
+}
+
 export function getAllContentlayerDocs(): any[] {
   if (!isServerRuntime()) {
     throw new Error("lib/contentlayer-helper.ts is server-only but was imported in a client bundle.");
@@ -311,7 +364,7 @@ export function getAllContentlayerDocs(): any[] {
 
   const docs = loadAllFromGeneratedIndexes();
 
-  // de-dupe
+  // de-dupe and enrich with canonical slugs
   const seen = new Set<string>();
   const out: any[] = [];
   for (const doc of docs) {
@@ -324,7 +377,7 @@ export function getAllContentlayerDocs(): any[] {
     const stable = key || JSON.stringify(doc);
     if (!seen.has(stable)) {
       seen.add(stable);
-      out.push(doc);
+      out.push(enrichWithCanonicalSlugs(doc));
     }
   }
 
@@ -333,10 +386,13 @@ export function getAllContentlayerDocs(): any[] {
 }
 
 function matchesSlug(doc: any, normalized: string): boolean {
-  const a = normalizeFlattenedPath(safeString(doc?.slug));
-  const b = normalizeFlattenedPath(safeString(doc?._raw?.flattenedPath));
-  const c = normalizeFlattenedPath(safeString(doc?._raw?.sourceFilePath));
-  return a === normalized || b === normalized || c === normalized;
+  // Use canonical fields for matching
+  return (
+    doc.collectionSlug === normalized ||
+    doc.urlSlug === normalized ||
+    doc.href === `/${normalized}` ||
+    doc.href === normalized
+  );
 }
 
 export function getDocBySlug(slug: string): any | null {
@@ -361,70 +417,106 @@ export const getAllPrints = () => byKind("print");
 export const getAllResources = () => byKind("resource");
 export const getAllStrategies = () => byKind("strategy");
 export const getAllShorts = () => byKind("short");
+export const getAllBriefs = () => byKind("brief");
 export const getAllLexicon = () => byKind("lexicon");
 export const getAllVault = () => byKind("vault");
 
-/* BY-SLUG LOOKUPS (names server.ts expects) */
+/* BY-SLUG LOOKUPS using canonical fields */
 function getByCollectionSlug(collection: string, slug: string): any | null {
   const s = normalizeSlug(String(slug || ""));
   if (!s) return null;
-  return getDocBySlug(`${collection}/${s}`) || getDocBySlug(s) || getDocBySlug(`content/${collection}/${s}`) || null;
+  
+  const docs = getAllContentlayerDocs();
+  const collectionSlug = `${collection}/${s}`;
+  
+  return docs.find(d => d.collectionSlug === collectionSlug) || null;
 }
 
 export function getPostBySlug(slug: string) {
   return getByCollectionSlug("blog", slug) || getByCollectionSlug("posts", slug);
 }
+
 export function getBookBySlug(slug: string) {
   return getByCollectionSlug("books", slug);
 }
+
 export function getDownloadBySlug(slug: string) {
   return getByCollectionSlug("downloads", slug);
 }
+
 export function getResourceBySlug(slug: string) {
   return getByCollectionSlug("resources", slug);
 }
+
 export function getEventBySlug(slug: string) {
   return getByCollectionSlug("events", slug);
 }
+
 export function getPrintBySlug(slug: string) {
   return getByCollectionSlug("prints", slug);
 }
+
 export function getStrategyBySlug(slug: string) {
   return getByCollectionSlug("strategy", slug) || getByCollectionSlug("strategies", slug);
 }
+
 export function getCanonBySlug(slug: string) {
   return getByCollectionSlug("canon", slug) || getByCollectionSlug("canons", slug);
 }
+
+export function getBriefBySlug(slug: string) {
+  return getByCollectionSlug("briefs", slug);
+}
+
+/**
+ * Get a short document by slug using canonical fields
+ * No more slug guessing or path manipulation
+ */
 export function getShortBySlug(slug: string) {
-  return getByCollectionSlug("shorts", slug);
+  const input = normalizeSlug(String(slug || ""));
+  if (!input) return null;
+
+  const shorts = getAllShorts(); // Already enriched with canonical fields
+  
+  // Match against canonical fields only
+  return (
+    shorts.find(d => d.collectionSlug === `shorts/${input}`) ||
+    shorts.find(d => d.urlSlug === input) ||
+    shorts.find(d => d.href === `/shorts/${input}`) ||
+    null
+  );
 }
 
 export function getServerBookBySlug(slug: string) {
   return getBookBySlug(slug);
 }
+
 export function getServerCanonBySlug(slug: string) {
   return getCanonBySlug(slug);
 }
 
-/* getCardProps */
+/* getCardProps using canonical fields */
 export function getCardProps(doc: any): CardProps {
-  const kind = getDocKind(doc);
-  const title = safeString(doc?.title, "Untitled");
-  const description = safeString(doc?.excerpt || doc?.description || doc?.summary || "", "") || null;
+  // Ensure doc has canonical slugs
+  const enriched = enrichWithCanonicalSlugs(doc);
+  
+  const kind = getDocKind(enriched);
+  const title = safeString(enriched?.title, "Untitled");
+  const description = safeString(enriched?.excerpt || enriched?.description || enriched?.summary || "", "") || null;
 
-  const rawSlug = computeRawSlug(doc);
-  const slug = computeBareSlug(kind, rawSlug) || "unknown";
-  const href = slug !== "unknown" ? buildHref(kind, slug) : "/";
+  // Use canonical fields directly - no manipulation needed
+  const slug = enriched.urlSlug || "unknown";
+  const href = enriched.href || buildHref(kind, slug);
 
-  const dateISO = safeISO(doc?.date || doc?.eventDate || doc?.startDate || doc?.datetime || doc?.startsAt) ?? null;
-  const tags = safeArray(doc?.tags);
+  const dateISO = safeISO(enriched?.date || enriched?.eventDate || enriched?.startDate || enriched?.datetime || enriched?.startsAt) ?? null;
+  const tags = safeArray(enriched?.tags);
 
-  const coverImage = safeString(doc?.coverImage || doc?.image || doc?.heroImage || doc?.ogImage || "", "") || null;
-  const coverAspect = safeString(doc?.coverAspect || doc?.imageAspect || doc?.aspect || "", "") || null;
-  const category = safeString(doc?.category || doc?.theme || doc?.tag || "", "") || null;
+  const coverImage = safeString(enriched?.coverImage || enriched?.image || enriched?.heroImage || enriched?.ogImage || "", "") || null;
+  const coverAspect = safeString(enriched?.coverAspect || enriched?.imageAspect || enriched?.aspect || "", "") || null;
+  const category = safeString(enriched?.category || enriched?.theme || enriched?.tag || "", "") || null;
 
-  const tier = getAccessLevel(doc);
-  const published = isPublished(doc);
+  const tier = getAccessLevel(enriched);
+  const published = isPublished(enriched);
 
   return { kind, slug, href, title, description, dateISO, tags, coverImage, coverAspect, category, tier, published };
 }

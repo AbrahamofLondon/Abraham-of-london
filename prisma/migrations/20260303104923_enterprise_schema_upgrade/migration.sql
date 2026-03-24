@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS public.jobs (
 );
 
 -- ---------------------------------------------------------------------------
--- Column adds for partially existing tables
+-- Column adds for partially existing tables (REPLAY-SAFE)
 -- ---------------------------------------------------------------------------
 ALTER TABLE public.admin_sessions
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
@@ -190,7 +190,12 @@ ALTER TABLE public.jobs
   ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now(),
   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
+-- ✅ FIXED: organization_invites now includes ALL core columns
 ALTER TABLE public.organization_invites
+  ADD COLUMN IF NOT EXISTS organization_id TEXT,
+  ADD COLUMN IF NOT EXISTS email TEXT,
+  ADD COLUMN IF NOT EXISTS token_hash TEXT,
+  ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb,
   ADD COLUMN IF NOT EXISTS accepted_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMPTZ,
@@ -270,6 +275,11 @@ WHERE payload IS NULL;
 UPDATE public.organization_invites
 SET metadata = '{}'::jsonb
 WHERE metadata IS NULL;
+
+-- ✅ ADDED: Backfill for expires_at to ensure no NULLs before indexing
+UPDATE public.organization_invites
+SET expires_at = now() + interval '7 days'
+WHERE expires_at IS NULL;
 
 UPDATE public.security_logs
 SET details = '{}'::jsonb

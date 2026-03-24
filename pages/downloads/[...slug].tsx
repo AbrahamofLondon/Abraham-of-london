@@ -1,6 +1,6 @@
 /* pages/downloads/[...slug].tsx — INSTITUTIONAL DOWNLOAD DETAIL (SSOT, SAFE UNLOCK)
    - Supports nested slugs (catch-all)
-   - Uses filesystem MDX (mdx-collections) + next-mdx-remote compile
+   - Uses filesystem MDX (mdx-collections) + next-contentlayer2
    - Preserves your premium UI structure
 */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -21,6 +21,7 @@ import {
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
+import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer"; // ✅ Use SafeMDXRenderer instead
 import mdxComponents from "@/components/mdx-components";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -29,16 +30,14 @@ import { sanitizeData } from "@/lib/content/shared";
 
 import { getMdxDocumentBySlug, type MdxDocument } from "@/lib/server/mdx-collections";
 
-// next-mdx-remote (Pages Router)
-import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
+// ✅ No more next-mdx-remote imports
 
 type Props = {
   download: any;
   isPublic: boolean;
   requiredTier: AccessTier;
   slug: string;
-  mdxSource: MDXRemoteSerializeResult | null;
+  bodyCode: string | null; // ✅ Changed from mdxSource to bodyCode
 };
 
 function joinParamSlug(input: unknown): string {
@@ -70,22 +69,17 @@ function normalizeDownloadUrl(url: unknown): string | null {
   return u.startsWith("/") ? u : `/${u}`;
 }
 
-async function compileMdx(content: string): Promise<MDXRemoteSerializeResult> {
-  // You can add remark/rehype plugins later if you want.
-  return serialize(content, {
-    mdxOptions: {
-      remarkPlugins: [],
-      rehypePlugins: [],
-      format: "mdx",
-    },
-  });
-}
-
-const DownloadSlugPage: NextPage<Props> = ({ download, isPublic, requiredTier, mdxSource, slug }) => {
+const DownloadSlugPage: NextPage<Props> = ({ 
+  download, 
+  isPublic, 
+  requiredTier, 
+  bodyCode, 
+  slug 
+}) => {
   const { data: session, status } = useSession();
-  const [source, setSource] = React.useState<MDXRemoteSerializeResult | null>(mdxSource);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [unlockedContent, setUnlockedContent] = React.useState<string | null>(null);
 
   const required = tiers.normalizeRequired(requiredTier);
   const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
@@ -103,8 +97,6 @@ const DownloadSlugPage: NextPage<Props> = ({ download, isPublic, requiredTier, m
     setError(null);
 
     try {
-      // ✅ Use the existing MDX API endpoint pattern (query-based) to avoid catch-all API work.
-      // If you already have a different endpoint, change only this URL.
       const res = await fetch(`/api/downloads/mdx?slug=${encodeURIComponent(slug)}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -112,7 +104,6 @@ const DownloadSlugPage: NextPage<Props> = ({ download, isPublic, requiredTier, m
 
       const json = await res.json().catch(() => ({}));
 
-      // Expecting: { ok: true, content: string, meta: {...} } OR { ok: true, body: string }
       if (!res.ok || !json?.ok) {
         setError(json?.reason || json?.error?.message || "UNLOCK_FAILED");
         return;
@@ -124,14 +115,8 @@ const DownloadSlugPage: NextPage<Props> = ({ download, isPublic, requiredTier, m
         return;
       }
 
-      // Server already returned raw MDX => compile in browser? NO.
-      // ✅ Compile on server? Better. But if this endpoint returns raw MDX only,
-      // we can still compile client-side as a fallback using a dynamic import.
-      // To keep it stable, we’ll just re-fetch a server-rendered page (hard refresh)
-      // OR we can add a compiled payload later.
-      //
-      // For now: safest UX is: navigate to same URL (SSR will serve content)
-      window.location.reload();
+      // Store the unlocked content
+      setUnlockedContent(mdx);
     } catch {
       setError("UNLOCK_NETWORK_FAILURE");
     } finally {
@@ -177,6 +162,9 @@ const DownloadSlugPage: NextPage<Props> = ({ download, isPublic, requiredTier, m
       </Layout>
     );
   }
+
+  // Determine which content to show
+  const contentToRender = unlockedContent || (isPublic ? bodyCode : null);
 
   return (
     <Layout title={download?.title || "Download"}>
@@ -240,13 +228,15 @@ const DownloadSlugPage: NextPage<Props> = ({ download, isPublic, requiredTier, m
                   </div>
                 )}
 
-                {source ? (
+                {contentToRender ? (
                   <article className="prose prose-invert prose-amber max-w-none">
-                    <MDXRemote {...source} components={mdxComponents as any} />
+                    <SafeMDXRenderer code={contentToRender} />
                   </article>
                 ) : (
                   <div className="text-zinc-400 text-sm">
-                    No content available.
+                    {needsAuth && !unlockedContent 
+                      ? "This content requires authentication. Please unlock to view."
+                      : "No content available."}
                   </div>
                 )}
               </section>
@@ -300,7 +290,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const slug = safeSlug((params as any)?.slug);
   if (!slug) return { notFound: true };
 
-  // ✅ Reads from content/downloads/** via your filesystem loader
+  // Reads from content/downloads/** via your filesystem loader
   const doc: MdxDocument | null = await getMdxDocumentBySlug("downloads", slug);
   if (!doc) return { notFound: true };
 
@@ -311,8 +301,8 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc as any));
   const isPublic = requiredTier === "public";
 
-  // ✅ Compile raw MDX -> renderable payload for pages router
-  const mdxSource = isPublic ? await compileMdx(String((doc as any).content || "")) : null;
+  // ✅ Get raw MDX content instead of compiling with next-mdx-remote
+  const bodyCode = isPublic ? String((doc as any).content || "") : null;
 
   // Shape compatible with your UI expectations
   const download = {
@@ -330,7 +320,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       isPublic,
       requiredTier,
       slug,
-      mdxSource,
+      bodyCode, // ✅ Now passing raw MDX content
     }),
   };
 };

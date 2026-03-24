@@ -1,94 +1,342 @@
+/* app/api/download/[token]/route.ts — STRICT-TYPED MASTER VAULT */
 import { NextRequest, NextResponse } from "next/server";
-import { 
-  verifyDownloadToken, 
-  incrementTokenUsage, 
-  doesTokenMatchBinding 
-} from "@/lib/premium/download-token";
-import { prisma } from "@/lib/prisma";
+import React from "react";
+import { renderToStream } from "@react-pdf/renderer";
 import { getServerSession } from "next-auth";
-// Import your auth options to get the current user
-// import { authOptions } from "@/lib/auth"; 
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { token: string } }
-) {
+import { getPDFById } from "@/lib/pdf/registry";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import {
+  verifyDownloadToken,
+  incrementTokenUsage,
+  doesTokenMatchBinding,
+} from "@/lib/premium/download-token";
+import { generateForensicPayload } from "@/lib/intelligence/forensic-mapping";
+import { registerFonts } from "@/lib/pdf/register-fonts";
+import InstitutionalBriefDocument from "@/lib/pdf/templates/InstitutionalBriefDocument";
+import type { AccessTier } from "@/lib/access/tier-policy";
+
+/**
+ * Warm-start font registration
+ */
+registerFonts();
+
+type RouteContext = {
+  params: {
+    token: string;
+  };
+};
+
+type SessionUserShape = {
+  id?: string | null;
+  role?: string | null;
+  tier?: AccessTier | null;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+};
+
+type PdfRegistryItem = {
+  id?: string;
+  slug: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  summary?: string;
+  content?: string;
+};
+
+type ForensicMetadata = {
+  aol?: {
+    traceId?: string;
+    sig?: string;
+  };
+};
+
+type ForensicPayloadLike = {
+  metadata?: ForensicMetadata;
+};
+
+function sanitizeContent(raw: string): string {
+  if (!raw) return "";
+
+  return raw
+    .replace(/import\s+[\s\S]*?from\s+['"].*?['"];?/g, "")
+    .replace(/export\s+default\s+[\s\S]*$/g, "")
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/[#*`]/g, "")
+    .trim();
+}
+
+function getClientIp(req: NextRequest): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const first = forwardedFor.split(",")[0]?.trim();
+    if (first) return first;
+  }
+
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+
+  return "127.0.0.1";
+}
+
+function getSessionCookie(req: NextRequest): string {
+  return (
+    req.cookies.get("next-auth.session-token")?.value ||
+    req.cookies.get("__Secure-next-auth.session-token")?.value ||
+    "no-session"
+  );
+}
+
+function extractTokenId(token: string): string {
+  if (!token) return "unknown-token";
+  if (!token.includes(".")) return token;
+
+  const parts = token.split(".");
+  return parts[1] || parts[0] || "unknown-token";
+}
+
+function asPdfRegistryItem(value: unknown): PdfRegistryItem | null {
+  if (!value || typeof value !== "object") return null;
+
+  const obj = value as Record<string, unknown>;
+  const slug = typeof obj.slug === "string" ? obj.slug : "";
+
+  if (!slug) return null;
+
+  return {
+    id: typeof obj.id === "string" ? obj.id : undefined,
+    slug,
+    title: typeof obj.title === "string" ? obj.title : undefined,
+    subtitle: typeof obj.subtitle === "string" ? obj.subtitle : undefined,
+    description: typeof obj.description === "string" ? obj.description : undefined,
+    summary: typeof obj.summary === "string" ? obj.summary : undefined,
+    content: typeof obj.content === "string" ? obj.content : undefined,
+  };
+}
+
+function getForensicTraceId(forensic: unknown): string {
+  const typed = forensic as ForensicPayloadLike | null | undefined;
+  return typed?.metadata?.aol?.traceId || "UNTRACED";
+}
+
+function getForensicSignature(forensic: unknown): string {
+  const typed = forensic as ForensicPayloadLike | null | undefined;
+  return typed?.metadata?.aol?.sig || "UNSIGNED";
+}
+
+export async function GET(req: NextRequest, { params }: RouteContext) {
   const token = params.token;
   const { searchParams } = new URL(req.url);
   const contentId = searchParams.get("rid") || undefined;
 
-  // 1. Get client metadata for auditing
-  const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+  const ip = getClientIp(req);
   const userAgent = req.headers.get("user-agent") || "unknown";
-  
-  // 2. Identity Binding (Match against session or user)
-  // Note: Replace with your actual session retrieval logic
-  // const session = await getServerSession(authOptions);
-  const userId = null; // session?.user?.id
-  const sessionId = req.cookies.get("next-auth.session-token")?.value || null;
 
-  // 3. Verify Token
-  const result = await verifyDownloadToken(token, contentId);
+  const session = await getServerSession(authOptions);
+  const sessionUser = session?.user as SessionUserShape | undefined;
 
-  if (!result.valid || !result.payload || !result.token) {
-    await logAttempt(token, contentId, userId, sessionId, ip, userAgent, false, 403, result.reason);
-    return NextResponse.json({ error: result.reason || "Unauthorized" }, { status: 403 });
+  const userId = sessionUser?.id ?? null;
+  const userTier: AccessTier | "public" = sessionUser?.tier ?? "public";
+  const sessionId = getSessionCookie(req);
+
+  const tokenCheck = await verifyDownloadToken(token, contentId);
+
+  if (!tokenCheck.valid || !tokenCheck.payload) {
+    await logAttempt({
+      token,
+      contentId,
+      userId,
+      sessionId,
+      ip,
+      ua: userAgent,
+      success: false,
+      statusCode: 403,
+      reason: tokenCheck.reason || "Unauthorized",
+    });
+
+    return NextResponse.json(
+      { error: tokenCheck.reason || "Unauthorized" },
+      { status: 403 }
+    );
   }
 
-  // 4. Check Binding (Security: Prevent token sharing)
-  const isMatch = doesTokenMatchBinding(result.payload, { userId, sessionId });
-  if (!isMatch) {
-    await logAttempt(token, contentId, userId, sessionId, ip, userAgent, false, 403, "Binding mismatch");
-    return NextResponse.json({ error: "Token not valid for this session" }, { status: 403 });
+  const bindingMatches = doesTokenMatchBinding(tokenCheck.payload, {
+    userId,
+    sessionId,
+  });
+
+  if (!bindingMatches) {
+    await logAttempt({
+      token,
+      contentId,
+      userId,
+      sessionId,
+      ip,
+      ua: userAgent,
+      success: false,
+      statusCode: 403,
+      reason: "Binding mismatch",
+    });
+
+    return NextResponse.json(
+      { error: "Access restricted to original session" },
+      { status: 403 }
+    );
   }
 
-  // 5. Increment Usage
-  const incremented = await incrementTokenUsage(token);
-  if (!incremented) {
-    return NextResponse.json({ error: "Failed to process download count" }, { status: 500 });
+  if (!contentId) {
+    await logAttempt({
+      token,
+      contentId,
+      userId,
+      sessionId,
+      ip,
+      ua: userAgent,
+      success: false,
+      statusCode: 400,
+      reason: "Missing content identifier",
+    });
+
+    return NextResponse.json(
+      { error: "Missing content identifier" },
+      { status: 400 }
+    );
   }
 
-  // 6. Log Success
-  await logAttempt(token, contentId, userId, sessionId, ip, userAgent, true, 200);
+  const pdfConfigRaw = getPDFById(contentId);
+  const pdfConfig = asPdfRegistryItem(pdfConfigRaw);
 
-  // 7. Stream File
-  // In a real scenario, you would fetch the file path from your ContentMetadata
-  // or a private bucket using the rid (contentId).
+  if (!pdfConfig) {
+    await logAttempt({
+      token,
+      contentId,
+      userId,
+      sessionId,
+      ip,
+      ua: userAgent,
+      success: false,
+      statusCode: 404,
+      reason: "Asset missing from vault registry",
+    });
+
+    return NextResponse.json(
+      { error: "Asset missing from vault registry" },
+      { status: 404 }
+    );
+  }
+
+  const dbEntry = await prisma.contentMetadata.findUnique({
+    where: { slug: pdfConfig.slug },
+    select: {
+      content: true,
+      summary: true,
+    },
+  });
+
+  const rawContent = dbEntry?.content || pdfConfig.content || "";
+  const rawSummary =
+    dbEntry?.summary || pdfConfig.description || pdfConfig.summary || "";
+
+  const forensic = generateForensicPayload(pdfConfigRaw, {
+    userId: userId || "anonymous",
+    userTier,
+    sessionId,
+    ipAddress: ip,
+  });
+
+  await incrementTokenUsage(token);
+
+  const traceId = getForensicTraceId(forensic);
+
+  await logAttempt({
+    token,
+    contentId,
+    userId,
+    sessionId,
+    ip,
+    ua: userAgent,
+    success: true,
+    statusCode: 200,
+    reason: `Trace: ${traceId}`,
+  });
+
   try {
-    const fileUrl = `https://your-private-storage.com/briefs/${result.token.contentId}.pdf`;
-    
-    // Example: Redirecting to a signed URL or streaming directly
-    // return NextResponse.redirect(signedS3Url);
-    
-    return NextResponse.json({ 
-      message: "Download authorized", 
-      downloadUrl: fileUrl, // Ideally a short-lived signed URL
-      expiresAt: result.token.expiresAt 
+    const documentElement = React.createElement(InstitutionalBriefDocument, {
+      config: {
+        ...pdfConfig,
+        subtitle: pdfConfig.subtitle || rawSummary.substring(0, 120),
+        signAs: "The Architect",
+      },
+      content: sanitizeContent(rawContent),
+      summaryText: sanitizeContent(rawSummary),
+      watermark: forensic,
+    });
+
+    const stream = await renderToStream(documentElement);
+    const signature = getForensicSignature(forensic);
+    const filename = `${pdfConfig.slug || "brief"}-${traceId}.pdf`;
+
+    return new NextResponse(stream as BodyInit, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "no-store, max-age=0",
+        "X-Trace-ID": traceId,
+        "X-Forensic-Signature": signature,
+      },
     });
   } catch (error) {
-    console.error("STREAM_ERROR", error);
-    return NextResponse.json({ error: "File delivery failed" }, { status: 500 });
+    console.error("INSTITUTIONAL_STREAM_ERROR", error);
+
+    await logAttempt({
+      token,
+      contentId,
+      userId,
+      sessionId,
+      ip,
+      ua: userAgent,
+      success: false,
+      statusCode: 500,
+      reason: "Document generation failed",
+    });
+
+    return NextResponse.json(
+      { error: "Document generation failed" },
+      { status: 500 }
+    );
   }
 }
 
-/**
- * Helper to log attempts to the PremiumDownloadAttempt table
- */
-async function logAttempt(
-  token: string,
-  contentId: string | undefined,
-  userId: string | null,
-  sessionId: string | null,
-  ip: string,
-  ua: string,
-  success: boolean,
-  statusCode: number,
-  reason?: string
-) {
+type LogAttemptArgs = {
+  token: string;
+  contentId?: string;
+  userId: string | null;
+  sessionId: string | null;
+  ip: string;
+  ua: string;
+  success: boolean;
+  statusCode: number;
+  reason?: string;
+};
+
+async function logAttempt({
+  token,
+  contentId,
+  userId,
+  sessionId,
+  ip,
+  ua,
+  success,
+  statusCode,
+  reason,
+}: LogAttemptArgs): Promise<void> {
   try {
     await prisma.premiumDownloadAttempt.create({
       data: {
-        tokenId: token.split(".")[1] ? token : undefined, // Store raw or extract tid
+        tokenId: extractTokenId(token),
         contentId: contentId || "unknown",
         userId,
         sessionId,
@@ -96,10 +344,10 @@ async function logAttempt(
         userAgent: ua,
         success,
         statusCode,
-        reason,
+        reason: reason || (success ? "Success" : "Unknown failure"),
       },
     });
-  } catch (e) {
-    console.error("AUDIT_LOG_FAILURE", e);
+  } catch (error) {
+    console.error("AUDIT_LOG_FAILURE", error);
   }
 }

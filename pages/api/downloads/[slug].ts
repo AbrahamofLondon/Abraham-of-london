@@ -1,183 +1,193 @@
-/* pages/api/downloads/[slug].ts — SECURE PRE-COMPILED GATE (SSOT ALIGNED) */
+/* pages/api/downloads/[slug].ts — LEGACY COMPAT DOWNLOAD PAYLOAD ADAPTER
+   Purpose:
+   - preserve old callers hitting /api/downloads/[slug]
+   - delegate lookup to canonical registry
+   - keep response shape stable for UI consumers
+*/
+
 import type { NextApiRequest, NextApiResponse } from "next";
 
-// ✅ FIXED: Standardized to Redis to match mdx.ts and ensure session consistency
-import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
-import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
-import { getAllContentlayerDocs } from "@/lib/content/real";
-import { getTokenForensics } from "@/lib/premium/download-token";
-
 import type { AccessTier } from "@/lib/access/tier-policy";
-import { 
-  normalizeRequiredTier, 
-  normalizeUserTier, 
+import {
+  normalizeUserTier,
   hasAccess,
   getTierLabel,
 } from "@/lib/access/tier-policy";
 
-type Ok = { 
-  ok: true; 
-  tier: AccessTier; 
+import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
+import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
+
+import {
+  resolveDownloadAsset,
+} from "@/lib/downloads/asset-registry";
+import {
+  createDownloadGrantToken,
+  getTokenForensics,
+} from "@/lib/downloads/security";
+
+type Ok = {
+  ok: true;
+  tier: AccessTier;
   requiredTier: AccessTier;
   bodyCode: string;
   tierLabel?: string;
   watermarkId?: string | null;
   tokenId?: string | null;
   forensicFooter?: string | null;
+  downloadUrl?: string | null;
+  slug?: string;
+  title?: string;
+  contentType?: string;
 };
 
-type Fail = { 
-  ok: false; 
+type Fail = {
+  ok: false;
   reason: string;
   requiredTier?: AccessTier;
 };
 
-/**
- * Map any input to SSOT AccessTier
- */
-function mapToAccessTier(v: unknown): AccessTier {
-  return normalizeRequiredTier(v);
+function safeTrim(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
 }
 
-function extractWatermarkFromDoc(doc: any): { 
-  watermarkId?: string | null; 
-  tokenId?: string | null;
-  forensicFooter?: string | null;
-} {
-  // Check if doc has embedded watermark metadata
-  const metadata = doc.metadata ?? doc.forensics ?? {};
-  
-  // Try to extract from various possible locations
-  const watermarkId = 
-    metadata.watermarkId ?? 
-    doc.watermarkId ?? 
-    null;
-    
-  const tokenId = 
-    metadata.tokenId ?? 
-    doc.tokenId ?? 
-    null;
-    
-  const forensicFooter = 
-    metadata.expectedFooter ?? 
-    doc.footer ?? 
-    null;
+function normalizeLegacySlug(input: unknown): string {
+  return String(input ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/^downloads\//i, "")
+    .replace(/\/{2,}/g, "/");
+}
 
-  // If we have token metadata, try to get forensics
-  if (tokenId && !watermarkId) {
-    try {
-      const forensics = getTokenForensics(metadata);
-      return {
-        watermarkId: forensics.watermarkId,
-        tokenId,
-        forensicFooter: forensics.expectedFooter,
-      };
-    } catch {
-      // Silently continue
-    }
-  }
-
-  return { watermarkId, tokenId, forensicFooter };
+function extractBodyCode(value: unknown): string {
+  return typeof value === "string" ? value : "";
 }
 
 export default async function handler(
-  req: NextApiRequest, 
-  res: NextApiResponse<Ok | Fail>
+  req: NextApiRequest,
+  res: NextApiResponse<Ok | Fail>,
 ) {
   if (req.method !== "GET") {
-    return res.status(405).json({ ok: false, reason: "Method not allowed" });
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({
+      ok: false,
+      reason: "METHOD_NOT_ALLOWED",
+    });
   }
 
-  // Sanitize slug and remove download prefix for lookup
-  const slug = String(req.query.slug ?? "")
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/^downloads\//, "");
-  
-  try {
-    const allDocs = getAllContentlayerDocs();
-    const doc = allDocs.find((d: any) => 
-      d.slug?.endsWith(slug) || d._raw?.flattenedPath?.endsWith(slug)
-    );
-
-    if (!doc || doc.draft) {
-      return res.status(404).json({ ok: false, reason: "Manuscript not found" });
-    }
-
-    // Extract forensic data from document
-    const { watermarkId, tokenId, forensicFooter } = extractWatermarkFromDoc(doc);
-
-    // Determine required tier using Single Source of Truth
-    const requiredTier = mapToAccessTier(
-      doc.accessLevel ?? doc.tier ?? doc.classification ?? "member"
-    );
-
-    // 1. Authorization Protocol
-    let sessionTier: AccessTier = "public";
-    let token = null;
-    
-    if (requiredTier !== "public") {
-      token = getAccessTokenFromReq(req);
-      if (!token) {
-        return res.status(401).json({ 
-          ok: false, 
-          reason: "Authentication required",
-          requiredTier,
-        });
-      }
-
-      // Consistent with Redis session management
-      const t = await getSessionTier(token);
-      if (!t) {
-        return res.status(401).json({ 
-          ok: false, 
-          reason: "Session expired",
-          requiredTier,
-        });
-      }
-
-      sessionTier = normalizeUserTier(t);
-      
-      if (!hasAccess(sessionTier, requiredTier)) {
-        return res.status(403).json({ 
-          ok: false, 
-          reason: `Insufficient clearance - requires ${getTierLabel(requiredTier)} access`,
-          requiredTier,
-        });
-      }
-    }
-
-    // 2. Tactical Headers
-    res.setHeader("Vary", "Cookie");
-    res.setHeader("Cache-Control", requiredTier === "public" 
-      ? "public, s-maxage=3600, stale-while-revalidate=600" 
-      : "no-store, private, max-age=0"
-    );
-
-    // Add forensic headers if available
-    if (watermarkId) {
-      res.setHeader("X-AOL-Watermark-Id", watermarkId);
-    }
-    if (tokenId) {
-      res.setHeader("X-AOL-Token-Id", tokenId);
-    }
-
-    // 3. Return Pre-compiled Payload with forensic data
-    return res.status(200).json({ 
-      ok: true, 
-      tier: sessionTier, 
-      requiredTier,
-      bodyCode: doc.body?.code ?? "",
-      tierLabel: getTierLabel(sessionTier),
-      watermarkId,
-      tokenId,
-      forensicFooter,
+  const slug = normalizeLegacySlug(req.query.slug);
+  if (!slug) {
+    return res.status(400).json({
+      ok: false,
+      reason: "BAD_SLUG",
     });
-    
+  }
+
+  try {
+    // Legacy endpoint defaults to the "downloads" asset family.
+    const asset = await resolveDownloadAsset({
+      contentType: "downloads",
+      slug,
+    });
+
+    if (!asset) {
+      return res.status(404).json({
+        ok: false,
+        reason: "NOT_FOUND",
+      });
+    }
+
+    const requiredTier = asset.requiredTier;
+    let sessionTier: AccessTier = "public";
+
+    if (requiredTier !== "public") {
+      const accessToken = getAccessTokenFromReq(req);
+
+      if (!accessToken) {
+        return res.status(401).json({
+          ok: false,
+          reason: "AUTHENTICATION_REQUIRED",
+          requiredTier,
+        });
+      }
+
+      const rawTier = await getSessionTier(accessToken);
+      if (!rawTier) {
+        return res.status(401).json({
+          ok: false,
+          reason: "SESSION_EXPIRED",
+          requiredTier,
+        });
+      }
+
+      sessionTier = normalizeUserTier(rawTier);
+
+      if (!hasAccess(sessionTier, requiredTier)) {
+        return res.status(403).json({
+          ok: false,
+          reason: "INSUFFICIENT_TIER",
+          requiredTier,
+        });
+      }
+    }
+
+    const issued = await createDownloadGrantToken({
+      slug: asset.slug,
+      contentType: asset.contentType,
+      requiredTier: asset.requiredTier,
+      userTier: sessionTier,
+      contentId: asset.premiumContentId || asset.id,
+      expiresInMs: asset.isPublic ? 5 * 60 * 1000 : 24 * 60 * 60 * 1000,
+      maxDownloads: asset.maxDownloads ?? (asset.isPublic ? 100 : 3),
+      metadata: {
+        title: asset.title,
+        legacyEndpoint: "/api/downloads/[slug]",
+        watermarkRequired: asset.watermarkRequired,
+      },
+    }).catch((error) => {
+      console.error("[API_DOWNLOADS_TOKEN_ERROR]", error);
+      return null;
+    });
+
+    const forensics = getTokenForensics(issued?.metadata);
+
+    res.setHeader("Vary", "Cookie");
+    res.setHeader(
+      "Cache-Control",
+      requiredTier === "public"
+        ? "public, s-maxage=3600, stale-while-revalidate=600"
+        : "no-store, private, max-age=0",
+    );
+
+    if (forensics.watermarkId) {
+      res.setHeader("X-AOL-Watermark-Id", forensics.watermarkId);
+    }
+    if (issued?.tokenId) {
+      res.setHeader("X-AOL-Token-Id", issued.tokenId);
+    }
+
+    return res.status(200).json({
+      ok: true,
+      tier: sessionTier,
+      requiredTier,
+      bodyCode: extractBodyCode(asset.bodyCode),
+      tierLabel: getTierLabel(sessionTier),
+      watermarkId: forensics.watermarkId,
+      tokenId: issued?.tokenId ?? null,
+      forensicFooter: forensics.expectedFooter,
+      downloadUrl: issued?.token
+        ? `/api/dl/${encodeURIComponent(issued.token)}`
+        : null,
+      slug: asset.slug,
+      title: asset.title,
+      contentType: asset.contentType,
+    });
   } catch (err) {
     console.error("[API_DOWNLOADS_ERROR]", err);
-    return res.status(500).json({ 
-      ok: false, 
-      reason: "Internal system error" 
+    return res.status(500).json({
+      ok: false,
+      reason: "INTERNAL_SYSTEM_ERROR",
     });
   }
 }

@@ -2,13 +2,27 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { getAccessCookie } from "@/lib/server/auth/cookies";
-import { getDocBySlug, getAllContentlayerDocs, normalizeSlug } from "@/lib/content/server";
+import {
+  getDocBySlug,
+  getAllContentlayerDocs,
+  normalizeSlug,
+} from "@/lib/content/server";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
 type ResponseData =
-  | { ok: true; tier: AccessTier; requiredTier: AccessTier; bodyCode: string; slugResolved: string }
-  | { ok: false; reason: string; tried?: string[] };
+  | {
+      ok: true;
+      tier: AccessTier;
+      requiredTier: AccessTier;
+      bodyCode: string;
+      slugResolved: string;
+    }
+  | {
+      ok: false;
+      reason: string;
+      tried?: string[];
+    };
 
 function pickSlug(req: NextApiRequest): string {
   const raw = req.query.slug;
@@ -19,7 +33,6 @@ function pickSlug(req: NextApiRequest): string {
 function isResourceDoc(d: any): boolean {
   if (!d) return false;
 
-  // Prefer docKind (your SSOT indicator) over type.
   const docKind = String(d?.docKind || "").toLowerCase();
   if (docKind === "resource") return true;
 
@@ -36,7 +49,6 @@ function normalizePathish(s: string): string {
     .replace(/\/{2,}/g, "/");
 }
 
-// Fallback matcher when slugs are messy (your repo has both /slug and slug forms)
 function findByRegistryScan(wanted: string): any | null {
   const w = normalizePathish(wanted);
   if (!w) return null;
@@ -51,7 +63,6 @@ function findByRegistryScan(wanted: string): any | null {
       const c = normalizePathish(String(d?._raw?.sourceFilePath || ""));
       const hay = [a, b, c].filter(Boolean).map((x) => x.toLowerCase());
 
-      // match exact OR match after stripping leading "content/"
       return (
         hay.includes(lowerW) ||
         hay.includes(`content/${lowerW}`) ||
@@ -63,13 +74,27 @@ function findByRegistryScan(wanted: string): any | null {
   );
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
-  if (req.method !== "GET") return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+function firstDocBySlug(candidates: string[]): any | null {
+  for (const candidate of candidates) {
+    const doc = getDocBySlug(candidate);
+    if (doc) return doc;
+  }
+  return null;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>,
+) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+  }
 
   const slug = pickSlug(req);
-  if (!slug) return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
+  if (!slug) {
+    return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
+  }
 
-  // Canonical tries (ordered)
   const tries = [
     `resources/${slug}`,
     `content/resources/${slug}`,
@@ -78,15 +103,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     `resources/${slug.replace(/^resources\//, "")}`,
   ].map(normalizePathish);
 
-  let doc: any =
-    getDocBySlug(tries[0]) ||
-    getDocBySlug(tries[1]) ||
-    getDocBySlug(tries[2]) ||
-    getDocBySlug(tries[3]) ||
-    getDocBySlug(tries[4]) ||
-    null;
+  let doc: any = firstDocBySlug(tries);
 
-  // Last resort: scan registry
   if (!doc) {
     for (const t of tries) {
       doc = findByRegistryScan(t);
@@ -94,27 +112,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
   }
 
-  if (!doc || doc.draft) return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried: tries });
-  if (!isResourceDoc(doc)) return res.status(404).json({ ok: false, reason: "NOT_A_RESOURCE", tried: tries });
+  if (!doc || doc.draft) {
+    return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried: tries });
+  }
+
+  if (!isResourceDoc(doc)) {
+    return res.status(404).json({ ok: false, reason: "NOT_A_RESOURCE", tried: tries });
+  }
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
 
-  // Public bypass
   if (requiredTier === "public") {
     return res.status(200).json({
       ok: true,
       tier: "public",
       requiredTier: "public",
       bodyCode: doc.body?.code || doc.bodyCode || "",
-      slugResolved: normalizePathish(String(doc?.slug || doc?._raw?.flattenedPath || slug)),
+      slugResolved: normalizePathish(
+        String(doc?.slug || doc?._raw?.flattenedPath || slug),
+      ),
     });
   }
 
   const sessionId = getAccessCookie(req);
-  if (!sessionId) return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
+  if (!sessionId) {
+    return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
+  }
 
   const session = await verifySession(sessionId);
-  if (!session || !session.valid) return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+  if (!session || !session.valid) {
+    return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
+  }
 
   const userTier = tiers.normalizeUser(session.tier);
   if (!tiers.hasAccess(userTier, requiredTier)) {
@@ -126,6 +154,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     tier: userTier,
     requiredTier,
     bodyCode: doc.body?.code || doc.bodyCode || "",
-    slugResolved: normalizePathish(String(doc?.slug || doc?._raw?.flattenedPath || slug)),
+    slugResolved: normalizePathish(
+      String(doc?.slug || doc?._raw?.flattenedPath || slug),
+    ),
   });
 }

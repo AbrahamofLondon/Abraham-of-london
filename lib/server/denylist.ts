@@ -1,17 +1,16 @@
-/* lib/server/denylist.ts — Compliance denylist (AuditLog-backed) + compat signature */
+/* lib/server/denylist.ts — Production Security */
 import "server-only";
-
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma.server";
+import type { AuditSeverity } from "@prisma/client";
 
-const PEPPER =
-  process.env.DENYLIST_PEPPER ||
-  process.env.CRON_SECRET ||
-  process.env.NEXTAUTH_SECRET ||
-  "aol-denylist-pepper";
+const PEPPER = process.env.DENYLIST_PEPPER || "aol-denylist-pepper";
 
 export type DenySeverity = "low" | "medium" | "high" | "critical";
 
+/**
+ * Normalizes IP addresses for consistent hashing and lookups.
+ */
 export function normalizeIp(ip: string): string {
   return String(ip || "")
     .trim()
@@ -19,29 +18,34 @@ export function normalizeIp(ip: string): string {
     .replace(/^\:\:ffff\:/, "");
 }
 
+/**
+ * Generates a HMAC hash of the IP for privacy-safe storage comparisons.
+ */
 export function hashIp(ip: string): string {
   const norm = normalizeIp(ip);
   return crypto.createHmac("sha256", PEPPER).update(norm).digest("hex");
 }
 
-function toDbSeverity(sev: DenySeverity): "low" | "medium" | "high" {
-  if (sev === "critical") return "high";
-  if (sev === "high") return "high";
-  if (sev === "medium") return "medium";
-  return "low";
+/**
+ * Maps local severity logic to Prisma AuditSeverity Enum.
+ */
+function toDbSeverity(sev: DenySeverity): AuditSeverity {
+  switch (sev) {
+    case "critical": return "critical";
+    case "high": return "high";
+    case "medium": return "warning";
+    default: return "info";
+  }
 }
 
 /**
- * COMPAT SIGNATURE:
- * denyIp(ip, reason, severity)
- *
- * Persists deny decision in systemAuditLog (no schema changes required).
+ * Records a denylist entry in the SystemAuditLog.
  */
 export async function denyIp(
-  ip: string,
-  reason = "SECURITY_POLICY",
+  ip: string, 
+  reason = "SECURITY_POLICY", 
   severity: DenySeverity = "high"
-): Promise<void> {
+) {
   const norm = normalizeIp(ip);
   if (!norm || norm === "unknown") return;
 
@@ -53,54 +57,52 @@ export async function denyIp(
       action: "IP_DENYLISTED",
       resourceType: "security",
       resourceId: "denylist",
-      status: "warning",
       severity: toDbSeverity(severity),
-      ipAddress: norm, // store raw ip (optional; remove if you prefer hash-only)
-      details: {
-        ipHash,
-        reason,
-        severity,
-        source: "security-monitor",
-        // Optional future TTL support:
-        // expiresAt: null,
+      ipAddress: norm,
+      // FIXED: Changed 'details' to 'metadata' to match your Prisma schema
+      metadata: { 
+        reason, 
+        severity, 
+        ipHash 
       },
+      status: "warning"
     },
   });
 }
 
+/**
+ * Checks if an IP is currently restricted.
+ */
 export async function isIpDenied(ip: string): Promise<boolean> {
   const norm = normalizeIp(ip);
   if (!norm || norm === "unknown") return false;
 
   const ipHash = hashIp(norm);
 
-  // Find latest deny record for this ipHash
   const row = await prisma.systemAuditLog.findFirst({
-    where: {
-      action: "IP_DENYLISTED",
-      // If you store ipAddress, use it; hash is in details:
-      // ipAddress: norm,
+    where: { 
+      action: "IP_DENYLISTED", 
+      ipAddress: norm 
     },
     orderBy: { createdAt: "desc" },
-    select: {
-      createdAt: true,
-      details: true,
-    },
+    select: { metadata: true },
   });
 
   if (!row) return false;
 
-  // Ensure it matches this IP hash (details is typically Json)
-  const details: any = row.details ?? {};
-  if (details.ipHash !== ipHash) return false;
+  const metadata: any = row.metadata ?? {};
+  // Verify hash integrity
+  if (metadata.ipHash !== ipHash) return false;
 
-  // Optional expiry support (if you later include expiresAt in details)
-  const expiresAt = details.expiresAt ? Date.parse(String(details.expiresAt)) : NaN;
+  const expiresAt = metadata.expiresAt ? Date.parse(String(metadata.expiresAt)) : NaN;
   if (Number.isFinite(expiresAt) && expiresAt <= Date.now()) return false;
 
   return true;
 }
 
+/**
+ * Logs an attempt by a denylisted IP to access the system.
+ */
 export async function recordDenylistHit(ip: string): Promise<void> {
   const norm = normalizeIp(ip);
   if (!norm || norm === "unknown") return;
@@ -114,9 +116,9 @@ export async function recordDenylistHit(ip: string): Promise<void> {
       resourceType: "security",
       resourceId: "denylist",
       status: "warning",
-      severity: "medium",
+      severity: "warning", 
       ipAddress: norm,
-      details: { ipHash },
+      metadata: { ipHash }, // FIXED: details -> metadata
     },
   });
 }

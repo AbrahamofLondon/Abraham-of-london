@@ -1,64 +1,90 @@
-import React from 'react';
-import { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { MDXRemote } from 'next-mdx-remote';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Check, Info, AlertCircle } from 'lucide-react';
+"use client";
 
-// Custom MDX components with proper typing
+import React from "react";
+import { useMDXComponent } from "next-contentlayer2/hooks";
+import { motion, AnimatePresence } from "framer-motion";
+import { Copy, Check, Info, AlertCircle, FileText } from "lucide-react";
+
 const mdxComponents = {
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1 className="text-3xl md:text-4xl font-serif italic text-stone-900 mb-6" {...props} />
+    <h1
+      className="mt-12 mb-5 font-serif text-3xl leading-tight tracking-[-0.03em] text-stone-950 md:text-4xl"
+      {...props}
+    />
   ),
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 className="text-2xl md:text-3xl font-serif italic text-stone-800 mt-12 mb-4" {...props} />
+    <h2
+      className="mt-14 mb-4 border-t border-stone-200/80 pt-8 font-serif text-2xl leading-tight tracking-[-0.02em] text-stone-900 md:text-3xl"
+      {...props}
+    />
   ),
   h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3 className="text-xl md:text-2xl font-serif text-stone-800 mt-8 mb-3" {...props} />
+    <h3
+      className="mt-10 mb-3 font-sans text-lg font-semibold uppercase tracking-[0.08em] text-stone-800 md:text-xl"
+      {...props}
+    />
   ),
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p className="text-stone-600 text-lg leading-relaxed mb-6 font-light" {...props} />
+    <p className="mb-6 text-[1.02rem] leading-8 text-stone-700 md:text-lg" {...props} />
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc list-inside space-y-2 mb-6 text-stone-600" {...props} />
+    <ul className="mb-6 list-disc space-y-2 pl-6 text-stone-700 marker:text-amber-600" {...props} />
   ),
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal list-inside space-y-2 mb-6 text-stone-600" {...props} />
+    <ol className="mb-6 list-decimal space-y-2 pl-6 text-stone-700 marker:text-amber-700" {...props} />
   ),
   li: (props: React.HTMLAttributes<HTMLLIElement>) => (
-    <li className="text-stone-600 font-light" {...props} />
+    <li className="leading-8" {...props} />
   ),
   blockquote: (props: React.HTMLAttributes<HTMLElement>) => (
-    <blockquote className="border-l-4 border-amber-500 pl-6 italic text-stone-700 my-8" {...props} />
+    <blockquote
+      className="my-10 rounded-r-2xl border-l-[3px] border-amber-600 bg-gradient-to-r from-amber-50 to-transparent px-6 py-4 font-serif text-xl italic leading-9 text-stone-800"
+      {...props}
+    />
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a className="text-amber-600 hover:text-amber-700 underline underline-offset-4 transition-colors" {...props} />
+    <a
+      className="font-medium text-amber-700 underline decoration-amber-400/60 underline-offset-4 transition-colors hover:text-amber-800"
+      {...props}
+    />
+  ),
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong className="font-semibold text-stone-900" {...props} />
   ),
   code: (props: React.HTMLAttributes<HTMLElement>) => (
-    <code className="bg-stone-100 px-1.5 py-0.5 rounded text-sm font-mono text-stone-800" {...props} />
+    <code
+      className="rounded-md border border-stone-200 bg-stone-100 px-1.5 py-0.5 font-mono text-[0.92em] text-stone-900"
+      {...props}
+    />
   ),
   pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre className="bg-stone-900 text-stone-100 p-4 rounded-lg overflow-x-auto mb-6" {...props} />
+    <pre
+      className="mb-8 overflow-x-auto rounded-2xl border border-stone-800 bg-stone-950 p-5 text-sm text-stone-100 shadow-[0_18px_50px_-30px_rgba(0,0,0,0.45)]"
+      {...props}
+    />
+  ),
+  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
+    <hr className="my-10 border-none border-t border-stone-200" {...props} />
   ),
 };
 
 interface ShortContentProps {
-  content: MDXRemoteSerializeResult;
+  code: string;
   transcript?: string | null;
   components?: Record<string, React.ComponentType<any>>;
   onTranscriptCopy?: () => void;
   className?: string;
 }
 
-const ShortContent: React.FC<ShortContentProps> = ({ 
-  content, 
-  transcript, 
+const ShortContent: React.FC<ShortContentProps> = ({
+  code,
+  transcript,
   components = {},
   onTranscriptCopy,
   className = "",
 }) => {
   const [copied, setCopied] = React.useState(false);
-  
-  // Merge default components with custom components
+
   const mergedComponents = React.useMemo(
     () => ({
       ...mdxComponents,
@@ -67,149 +93,134 @@ const ShortContent: React.FC<ShortContentProps> = ({
     [components]
   );
 
+  const MDXContent = useMDXComponent(code);
+
   const handleCopyTranscript = React.useCallback(async () => {
     if (!transcript) return;
-    
+
     try {
       await navigator.clipboard.writeText(transcript);
       setCopied(true);
       onTranscriptCopy?.();
-      
-      // Reset after 2 seconds
-      setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => setCopied(false), 1800);
     } catch (error) {
-      console.error('Failed to copy transcript:', error);
+      console.error("Failed to copy transcript:", error);
     }
   }, [transcript, onTranscriptCopy]);
 
+  const transcriptWordCount = React.useMemo(
+    () => (transcript ? transcript.trim().split(/\s+/).filter(Boolean).length : 0),
+    [transcript]
+  );
+
   return (
     <div className={`space-y-12 ${className}`}>
-      {/* Main content with premium styling */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
+      {/* Main reading panel */}
+      <motion.section
+        initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-        className="bg-gradient-to-br from-white to-stone-50 rounded-3xl shadow-sm border border-stone-200/50 p-8 md:p-12"
+        className="relative overflow-hidden rounded-[2rem] border border-stone-200/70 bg-[linear-gradient(180deg,#ffffff_0%,#fcfbf8_100%)] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.18)]"
       >
-        <article className="prose prose-stone prose-lg max-w-none prose-headings:font-serif prose-headings:italic prose-p:font-light prose-p:leading-relaxed prose-strong:text-amber-700 prose-strong:font-medium">
-          <MDXRemote {...content} components={mergedComponents} />
-        </article>
-      </motion.div>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/35 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.06),transparent_38%)]" />
 
-      {/* Transcript section with animation */}
+        <div className="relative px-6 py-8 md:px-10 md:py-10 lg:px-14 lg:py-12">
+          <div className="mb-8 flex items-center gap-3">
+            <div className="h-px w-10 bg-gradient-to-r from-amber-500/70 to-amber-500/10" />
+            <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-stone-500">
+              Reading Room
+            </span>
+          </div>
+
+          <article className="prose prose-stone max-w-none prose-p:my-0 prose-headings:scroll-mt-28">
+            {MDXContent ? <MDXContent components={mergedComponents} /> : null}
+          </article>
+        </div>
+      </motion.section>
+
+      {/* Transcript */}
       <AnimatePresence>
-        {transcript && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+        {transcript ? (
+          <motion.section
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-            className="bg-gradient-to-br from-stone-50 to-white rounded-3xl border border-stone-200/50 p-8 md:p-10"
+            exit={{ opacity: 0, y: -18 }}
+            transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
+            className="overflow-hidden rounded-[2rem] border border-stone-200/70 bg-[linear-gradient(180deg,#fafaf9_0%,#ffffff_100%)] shadow-[0_26px_70px_-42px_rgba(0,0,0,0.14)]"
           >
-            {/* Header with copy button */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <div>
-                <h3 className="font-serif text-2xl italic text-stone-900 mb-2">
-                  Video Transcript
-                </h3>
-                <p className="text-sm text-stone-500 font-light">
-                  Complete transcript of the briefing
-                </p>
-              </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleCopyTranscript}
-                className={`
-                  inline-flex items-center gap-2 px-5 py-2.5 rounded-full
-                  font-mono text-xs uppercase tracking-wider transition-all
-                  ${copied 
-                    ? 'bg-emerald-500 text-white' 
-                    : 'bg-stone-900 text-stone-100 hover:bg-stone-800'
-                  }
-                `}
-                aria-label={copied ? 'Copied!' : 'Copy transcript'}
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4" />
-                    <span>Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </motion.button>
-            </div>
+            <div className="border-b border-stone-200/80 px-6 py-5 md:px-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-amber-700" />
+                    <h3 className="font-serif text-2xl text-stone-950">Transcript</h3>
+                  </div>
+                  <p className="mt-1 text-sm text-stone-500">
+                    Full transcript for study, reuse, and quotation.
+                  </p>
+                </div>
 
-            {/* Transcript content */}
-            <div className="bg-white rounded-2xl border border-stone-200/60 p-6 md:p-8">
-              <div className="prose prose-stone max-w-none">
-                {transcript.split('\n').map((paragraph, index) => {
-                  // Skip empty paragraphs
-                  if (!paragraph.trim()) return null;
-                  
-                  return (
-                    <motion.p
-                      key={index}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.02 }}
-                      className="text-stone-700 leading-relaxed mb-6 font-light"
-                    >
-                      {paragraph}
-                    </motion.p>
-                  );
-                })}
+                <button
+                  onClick={handleCopyTranscript}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-mono uppercase tracking-[0.22em] transition-all ${
+                    copied
+                      ? "bg-emerald-600 text-white"
+                      : "border border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50"
+                  }`}
+                  aria-label={copied ? "Transcript copied" : "Copy transcript"}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
               </div>
             </div>
-            
-            {/* Disclaimer with icon */}
-            <div className="mt-6 flex items-start gap-3 text-sm text-stone-500 bg-stone-100/50 p-4 rounded-xl">
-              <Info className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-              <span className="font-light leading-relaxed">
-                This transcript was automatically generated and may contain minor inaccuracies. 
-                Please refer to the original audio for precise content.
-              </span>
-            </div>
 
-            {/* Word count indicator (subtle premium touch) */}
-            <div className="mt-4 text-right">
-              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-wider">
-                {transcript.split(/\s+/).length} words • {transcript.length} characters
-              </span>
+            <div className="px-6 py-6 md:px-8 md:py-8">
+              <div className="rounded-[1.5rem] border border-stone-200 bg-white px-5 py-6 md:px-7 md:py-7">
+                {transcript
+                  .split("\n")
+                  .map((paragraph, index) =>
+                    paragraph.trim() ? (
+                      <motion.p
+                        key={index}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: Math.min(index * 0.015, 0.2) }}
+                        className="mb-5 text-[1rem] leading-8 text-stone-700 last:mb-0"
+                      >
+                        {paragraph}
+                      </motion.p>
+                    ) : null
+                  )}
+              </div>
+
+              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-stone-200/80 bg-stone-50 px-4 py-4 text-sm text-stone-600">
+                <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                <span className="leading-6">
+                  This transcript may include minor automated transcription errors. Verify sensitive quotations against the original media before formal use.
+                </span>
+              </div>
+
+              <div className="mt-4 text-right">
+                <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-stone-400">
+                  {transcriptWordCount} words
+                </span>
+              </div>
             </div>
-          </motion.div>
+          </motion.section>
+        ) : (
+          <motion.section
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="rounded-[2rem] border border-dashed border-stone-300 bg-stone-50/70 px-8 py-12 text-center"
+          >
+            <AlertCircle className="mx-auto mb-4 h-8 w-8 text-stone-400" />
+            <p className="text-stone-500">No transcript is available for this short.</p>
+          </motion.section>
         )}
       </AnimatePresence>
-
-      {/* Empty state with proper typing */}
-      {!transcript && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-stone-50/50 rounded-3xl border border-stone-200/30 p-12 text-center"
-        >
-          <AlertCircle className="h-8 w-8 text-stone-400 mx-auto mb-4" />
-          <p className="text-stone-500 font-light">
-            No transcript available for this briefing.
-          </p>
-        </motion.div>
-      )}
     </div>
-  );
-};
-
-// Type guard for MDXRemoteSerializeResult
-export const isMDXContent = (content: unknown): content is MDXRemoteSerializeResult => {
-  return (
-    typeof content === 'object' &&
-    content !== null &&
-    'compiledSource' in content &&
-    'frontmatter' in content
   );
 };
 

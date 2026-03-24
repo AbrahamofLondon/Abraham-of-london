@@ -1,15 +1,20 @@
+/* pages/api/subscribe.ts — ROBUST SUBSCRIPTION ENDPOINT */
+
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import {
   subscribe,
   type SubscriptionResult,
   type SubscriptionPreferences,
 } from "@/lib/server/subscription";
 import { verifyRecaptcha } from "@/lib/recaptchaServer";
+
 import {
   rateLimit,
   RATE_LIMIT_CONFIGS,
   createRateLimitHeaders,
-} from "@/lib/server/rateLimit";
+} from "@/lib/server/rate-limit-unified";
+
 import {
   getClientIpWithAnalysis,
   anonymizeIp,
@@ -22,8 +27,8 @@ interface SubscribeRequestBody {
   metadata?: Record<string, unknown>;
   tags?: string[];
   referrer?: string;
-  website?: string;        // Honeypot
-  confirm_email?: string;  // Honeypot
+  website?: string;
+  confirm_email?: string;
   recaptchaToken?: string;
   source?: string;
   userAgent?: string;
@@ -36,6 +41,12 @@ interface SubscribeResponseBody {
   error?: string;
   status?: number;
 }
+
+type RecaptchaVerificationResult = {
+  success: boolean;
+  score: number;
+  reasons: string[];
+};
 
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -56,6 +67,51 @@ function validateEmail(email: string): { isValid: boolean; error?: string } {
   }
 
   return { isValid: true };
+}
+
+function normalizeRecaptchaResult(value: unknown): RecaptchaVerificationResult {
+  // Case 1: verifyRecaptcha returns boolean
+  if (typeof value === "boolean") {
+    return {
+      success: value,
+      score: value ? 1 : 0,
+      reasons: value ? [] : ["verification_failed"],
+    };
+  }
+
+  // Case 2: verifyRecaptcha returns structured object
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+
+    const success =
+      typeof obj.success === "boolean"
+        ? obj.success
+        : typeof obj.ok === "boolean"
+          ? obj.ok
+          : false;
+
+    const score =
+      typeof obj.score === "number" && Number.isFinite(obj.score)
+        ? obj.score
+        : success
+          ? 1
+          : 0;
+
+    const reasons = Array.isArray(obj.reasons)
+      ? obj.reasons.map((r) => String(r))
+      : Array.isArray(obj["error-codes"])
+        ? (obj["error-codes"] as unknown[]).map((r) => String(r))
+        : [];
+
+    return { success, score, reasons };
+  }
+
+  // Case 3: anything else
+  return {
+    success: false,
+    score: 0,
+    reasons: ["invalid_recaptcha_response_shape"],
+  };
 }
 
 async function subscribeHandler(
@@ -83,12 +139,11 @@ async function subscribeHandler(
       source = "unknown",
       userAgent,
       timestamp,
-    } = req.body as SubscribeRequestBody;
+    } = (req.body || {}) as SubscribeRequestBody;
 
-    // Honeypots - silently pretend success
+    // Honeypots — smile and wave.
     if (website && website.trim() !== "") {
-      // eslint-disable-next-line no-console
-      console.warn("Honeypot field 'website' triggered", { email, website });
+      console.warn("Honeypot field 'website' triggered", { email });
       return res.status(200).json({
         ok: true,
         message: "You have been subscribed successfully!",
@@ -96,49 +151,40 @@ async function subscribeHandler(
     }
 
     if (confirm_email && confirm_email.trim() !== "") {
-      // eslint-disable-next-line no-console
-      console.warn("Honeypot field 'confirm_email' triggered", {
-        email,
-        confirm_email,
-      });
+      console.warn("Honeypot field 'confirm_email' triggered", { email });
       return res.status(200).json({
         ok: true,
         message: "You have been subscribed successfully!",
       });
     }
 
-    // Email validation
     const emailValidation = validateEmail(email || "");
     if (!emailValidation.isValid) {
       return res.status(400).json({
         ok: false,
-        message: emailValidation.error!,
+        message: emailValidation.error || "Invalid email",
         error: "INVALID_EMAIL",
       });
     }
 
-    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanEmail = String(email || "").trim().toLowerCase();
 
-    // IP analysis
     const ipInfo = getClientIpWithAnalysis(req);
     const clientIp = ipInfo.ip;
 
-    // 🔒 Shared per-IP rate limiting (generic API profile)
-    const rlKey = getRateLimitKey(
-      req,
-      RATE_LIMIT_CONFIGS.API_GENERAL.keyPrefix,
-    );
-    const rl = rateLimit(rlKey, RATE_LIMIT_CONFIGS.API_GENERAL);
+    const rlKey = getRateLimitKey(req, RATE_LIMIT_CONFIGS.API_GENERAL.keyPrefix);
+    const rl = await rateLimit(rlKey, RATE_LIMIT_CONFIGS.API_GENERAL);
+
     const rlHeaders = createRateLimitHeaders(rl);
     Object.entries(rlHeaders).forEach(([k, v]) => res.setHeader(k, v));
 
     if (!rl.allowed) {
-      // eslint-disable-next-line no-console
       console.warn("Subscribe API rate limit exceeded", {
         email: cleanEmail,
         ip: anonymizeIp(clientIp),
         remaining: rl.remaining,
       });
+
       return res.status(429).json({
         ok: false,
         message: "Too many subscription attempts. Please try again later.",
@@ -146,7 +192,6 @@ async function subscribeHandler(
       });
     }
 
-    // reCAPTCHA verification
     if (!recaptchaToken) {
       return res.status(400).json({
         ok: false,
@@ -155,20 +200,24 @@ async function subscribeHandler(
       });
     }
 
-    let recaptchaResult;
+    let recaptchaResult: RecaptchaVerificationResult;
+
     try {
-      recaptchaResult = await verifyRecaptcha(
+      const rawRecaptchaResult = await verifyRecaptcha(
         recaptchaToken,
         "generic_subscribe",
         clientIp,
       );
+
+      recaptchaResult = normalizeRecaptchaResult(rawRecaptchaResult);
+
       if (!recaptchaResult.success) {
-        // eslint-disable-next-line no-console
         console.warn("reCAPTCHA verification failed", {
           email: cleanEmail,
           score: recaptchaResult.score,
           reasons: recaptchaResult.reasons,
         });
+
         return res.status(400).json({
           ok: false,
           message: "Security verification failed. Please try again.",
@@ -177,7 +226,6 @@ async function subscribeHandler(
       }
 
       if (recaptchaResult.score < 0.3) {
-        // eslint-disable-next-line no-console
         console.warn("Low reCAPTCHA score", {
           email: cleanEmail,
           score: recaptchaResult.score,
@@ -185,8 +233,8 @@ async function subscribeHandler(
         });
       }
     } catch (recaptchaError) {
-      // eslint-disable-next-line no-console
       console.error("reCAPTCHA verification error:", recaptchaError);
+
       return res.status(400).json({
         ok: false,
         message: "Security check failed. Please refresh and try again.",
@@ -200,16 +248,18 @@ async function subscribeHandler(
         ...metadata,
         source: source || "api",
         ip: anonymizeIp(clientIp),
-        userAgent: userAgent || req.headers["user-agent"],
+        userAgent: userAgent || req.headers["user-agent"] || "unknown",
         timestamp: timestamp || new Date().toISOString(),
         recaptchaScore: recaptchaResult.score,
+        recaptchaReasons: recaptchaResult.reasons,
       },
       tags: tags || ["api-subscriber"],
       referrer:
-        referrer || (req.headers.referer as string | undefined) || "direct",
+        referrer ||
+        (typeof req.headers.referer === "string" ? req.headers.referer : undefined) ||
+        "direct",
     });
 
-    // eslint-disable-next-line no-console
     console.info("Subscription completed", {
       email: cleanEmail,
       source,
@@ -226,7 +276,6 @@ async function subscribeHandler(
       status: statusCode,
     });
   } catch (error: unknown) {
-    // eslint-disable-next-line no-console
     console.error("Subscription API error:", error);
 
     return res.status(500).json({
@@ -238,4 +287,3 @@ async function subscribeHandler(
 }
 
 export default subscribeHandler;
-

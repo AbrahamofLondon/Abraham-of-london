@@ -1,27 +1,38 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/_app.tsx
+/* ============================================================================
+   FILE: pages/_app.tsx
+   STATUS: SSR-stable global app shell
+   PRINCIPLES:
+   - Single render path for server and client
+   - No mounted-gating of the app shell
+   - Theme script injected in Head for pre-hydration theme sync
+   - Providers remain mounted consistently
+   - Optional PDF dashboard provider added deterministically by route
+============================================================================ */
 
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import Script from "next/script";
-import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import React, { ReactElement, ReactNode, useMemo } from "react";
 import { useRouter } from "next/router";
 import { SessionProvider } from "next-auth/react";
-
-import "@/styles/tailwind.css";
-
 import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
+
+import "@/styles/globals.css";
+import { ThemeScript, ThemeProvider } from "@/lib/ThemeContext";
+import { AuthProvider } from "@/hooks/useAuth";
+import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";
+import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
+import { PDFDashboardProvider } from "@/contexts/PDFDashboardContext";
 
 const aolSans = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-family-sans",
   display: "swap",
 });
 
 const aolMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-family-mono",
   display: "swap",
 });
 
@@ -29,52 +40,26 @@ const aolSerif = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
-  variable: "--font-serif",
+  variable: "--font-family-serif",
   display: "swap",
 });
 
-const fontVariables = `${aolSans.variable} ${aolMono.variable} ${aolSerif.variable}`;
-const fontBodyClass = aolSans.className;
-
-const ThemeProvider = dynamic(
-  () => import("@/lib/ThemeContext").then((m) => m.ThemeProvider),
-  { ssr: false }
-);
-
-const AuthProvider = dynamic(
-  () => import("@/hooks/useAuth").then((m) => m.AuthProvider),
-  { ssr: false }
-);
-
-const InnerCircleProvider = dynamic(
-  () => import("@/lib/inner-circle/InnerCircleContext").then((m) => m.InnerCircleProvider),
-  { ssr: false }
-);
-
-const AnalyticsProvider = dynamic(
-  () => import("@/contexts/AnalyticsContext").then((m) => m.AnalyticsProvider),
-  { ssr: false }
-);
-
-const PDFDashboardProvider = dynamic(
-  () => import("@/contexts/PDFDashboardContext").then((m) => m.PDFDashboardProvider),
-  { ssr: false }
-);
+type ProviderComposerProps = {
+  children: ReactNode;
+  session?: AppProps["pageProps"] extends { session?: infer S } ? S : unknown;
+  enablePdfDashboard: boolean;
+};
 
 function AppProviders({
   children,
   session,
   enablePdfDashboard,
-}: {
-  children: React.ReactNode;
-  session: any;
-  enablePdfDashboard: boolean;
-}) {
-  const content = enablePdfDashboard ? (
-    <PDFDashboardProvider>{children}</PDFDashboardProvider>
-  ) : (
-    <>{children}</>
-  );
+}: ProviderComposerProps): React.ReactElement {
+  let content = children;
+
+  if (enablePdfDashboard) {
+    content = <PDFDashboardProvider>{content}</PDFDashboardProvider>;
+  }
 
   return (
     <SessionProvider session={session}>
@@ -91,24 +76,20 @@ function AppProviders({
 
 export default function MyApp({
   Component,
-  pageProps: { session, ...pageProps },
-}: AppProps) {
+  pageProps,
+}: AppProps): React.ReactElement {
   const router = useRouter();
   const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => setIsClient(true), []);
+  const session = (pageProps as { session?: unknown }).session;
 
   const enablePdfDashboard = useMemo(() => {
-    const path = router.pathname || "";
-
-    return (
-      path.startsWith("/vault") ||
-      path.startsWith("/inner-circle") ||
-      path.startsWith("/admin") ||
-      path.startsWith("/pdf-dashboard")
-    );
+    const guardedPaths = ["/vault", "/inner-circle", "/admin", "/pdf-dashboard"];
+    return guardedPaths.some((path) => router.pathname.startsWith(path));
   }, [router.pathname]);
+
+  const getLayout =
+    (Component as { getLayout?: (page: ReactElement) => ReactNode }).getLayout ??
+    ((page: ReactElement) => page);
 
   return (
     <>
@@ -117,9 +98,10 @@ export default function MyApp({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        <ThemeScript />
       </Head>
 
-      {isClient && GA_ID ? (
+      {GA_ID ? (
         <>
           <Script
             strategy="afterInteractive"
@@ -131,22 +113,37 @@ export default function MyApp({
             dangerouslySetInnerHTML={{
               __html: `
                 window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
+                function gtag(){window.dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${GA_ID}');
+                gtag('config', '${GA_ID}', {
+                  page_path: window.location.pathname,
+                  transport_type: 'beacon'
+                });
               `,
             }}
           />
         </>
       ) : null}
 
-      <AppProviders session={session} enablePdfDashboard={enablePdfDashboard}>
-        <div
-          className={`min-h-screen w-full bg-black text-cream ${fontVariables} ${fontBodyClass}`}
+      <div
+        className={[
+          aolSans.variable,
+          aolMono.variable,
+          aolSerif.variable,
+          "min-h-screen",
+          "bg-[#050505]",
+          "font-sans",
+          "text-white",
+          "antialiased",
+        ].join(" ")}
+      >
+        <AppProviders
+          session={session}
+          enablePdfDashboard={enablePdfDashboard}
         >
-          <Component {...pageProps} />
-        </div>
-      </AppProviders>
+          {getLayout(<Component {...pageProps} />)}
+        </AppProviders>
+      </div>
     </>
   );
 }

@@ -1,83 +1,130 @@
 /* pages/api/strategy-room/export/[slug].ts */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
+import {
+  DownloadContentType,
+  DownloadDeliveryMode,
+  DownloadEventType,
+} from "@prisma/client";
 import { authOptions } from "@/lib/auth/auth-options";
-
-// ✅ Pages API route must use pages-safe Prisma (NO server-only)
 import { prisma } from "@/lib/prisma.pages";
-
-// ✅ Premium watermark (brand-equity)
 import {
   generateDossierSignature,
   getWatermarkPayload,
 } from "@/lib/intelligence/watermark-delegate";
 
+function firstCsvValue(value: string): string {
+  const first = value.split(",")[0];
+  return String(first || "").trim();
+}
+
 function getClientIp(req: NextApiRequest): string {
   const xff = req.headers["x-forwarded-for"];
-  if (typeof xff === "string" && xff.length) return xff.split(",")[0].trim();
-  if (Array.isArray(xff) && xff[0]) return String(xff[0]).split(",")[0].trim();
+
+  if (typeof xff === "string" && xff.trim()) {
+    return firstCsvValue(xff) || "UNKNOWN";
+  }
+
+  if (Array.isArray(xff) && xff[0]) {
+    return firstCsvValue(String(xff[0])) || "UNKNOWN";
+  }
+
   return String(req.socket.remoteAddress || "UNKNOWN");
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const { slug } = req.query;
 
-  // 1) IDENTITY VERIFICATION
   const session = await getServerSession(req, res, authOptions);
   if (!session || !(session as any).aol?.innerCircleAccess) {
-    return res.status(403).json({ error: "Access Denied: Institutional Authorization Required." });
+    return res
+      .status(403)
+      .json({ error: "Access Denied: Institutional Authorization Required." });
   }
 
   const slugStr = String(slug || "").trim();
-  if (!slugStr) return res.status(400).json({ error: "Missing slug." });
+  if (!slugStr) {
+    return res.status(400).json({ error: "Missing slug." });
+  }
 
   try {
-    // 2) CONTENT RETRIEVAL
     const brief = await prisma.contentMetadata.findUnique({
       where: { slug: slugStr },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        content: true,
+        contentType: true,
+        classification: true,
+        totalPrints: true,
+      },
     });
 
-    if (!brief) return res.status(404).json({ error: "Intelligence Brief not found." });
+    if (!brief) {
+      return res.status(404).json({ error: "Intelligence Brief not found." });
+    }
 
-    // 3) CRYPTOGRAPHIC SIGNING (premium forensic watermark)
-    const memberId = String((session as any).user?.id || "UNKNOWN_MEMBER");
+    const memberId = String((session as any).aol?.memberId || "");
     const memberName = String((session as any).user?.name || "Principal");
+    const memberEmail = String((session as any).user?.email || "");
 
-    const sigObj = generateDossierSignature(memberId, String(brief.id), {
-      brand: process.env.AOL_BRAND_NAME || "Abraham of London",
-    });
+    const sigObj = generateDossierSignature(
+      memberId || "UNKNOWN_MEMBER",
+      String(brief.id),
+      {
+        brand: process.env.AOL_BRAND_NAME || "Abraham of London",
+      },
+    );
 
     const classification =
-      String((brief as any).classification || "PUBLIC").toUpperCase() === "PRIVATE"
+      String(brief.classification || "public").toUpperCase() === "PRIVATE"
         ? "PRINCIPAL"
         : "MEMBER";
 
     const watermark = getWatermarkPayload({
       signature: sigObj,
       classification: classification as any,
-      context: { briefTitle: String(brief.title || ""), route: `/strategy-room/export/${brief.slug}` },
+      context: {
+        briefTitle: String(brief.title || ""),
+        route: `/strategy-room/export/${brief.slug}`,
+      },
     });
 
-    // 4) TRANSACTIONAL AUDIT
     const ip = getClientIp(req);
     const ua = String(req.headers["user-agent"] || "UNKNOWN");
+
+    const contentType =
+      String(brief.contentType) === "Dossier"
+        ? DownloadContentType.DOSSIER
+        : DownloadContentType.BRIEF;
 
     await prisma.$transaction([
       prisma.downloadAuditEvent.create({
         data: {
           slug: String(brief.slug),
-          memberId,
-          contentType: String((brief as any).contentType || "unknown"),
-          eventType: "EXPORT",
+          title: String(brief.title),
+          contentType,
+          eventType: DownloadEventType.DOWNLOAD,
+          deliveryMode: DownloadDeliveryMode.API,
+
+          contentId: String(brief.id),
+          memberId: memberId || undefined,
+          email: memberEmail || undefined,
+
           success: true,
+          statusCode: 200,
+          latencyMs: 0,
           processedAt: new Date(),
+
           ipAddress: ip,
           userAgent: ua,
-
-          // Primary trace marker
+          watermarkId: sigObj.traceId,
           fileHash: sigObj.sig,
 
-          // Rich forensic payload
           metadata: {
             traceId: sigObj.traceId,
             issuedAt: sigObj.issuedAt,
@@ -85,25 +132,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             issuer: sigObj.issuer,
             proof: sigObj.proof,
             watermark: watermark.visibleFooter,
+            exportRoute: "pages/api/strategy-room/export/[slug]",
           },
-        } as any,
+        },
       }),
       prisma.contentMetadata.update({
         where: { id: String(brief.id) },
-        data: { totalPrints: { increment: 1 } } as any,
+        data: {
+          totalPrints: { increment: 1 },
+          downloadCount: { increment: 1 },
+          lastDownloadedAt: new Date(),
+        },
       }),
     ]);
 
-    // 5) RETURN ENVELOPE
-    // (If you later wire PDF streaming here, pass `watermark` into generatePDF and return the file.)
     return res.status(200).json({
       ok: true,
       intel: {
         id: brief.id,
         slug: brief.slug,
         title: brief.title,
-        content: (brief as any).content ?? null,
-        classification: (brief as any).classification ?? null,
+        content: brief.content ?? null,
+        classification: brief.classification ?? null,
       },
       security: {
         sig: sigObj.sig,
