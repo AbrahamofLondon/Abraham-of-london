@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/vault/briefs/index.tsx — VAULT BRIEFS INDEX (SSOT aligned)
+// pages/vault/briefs/index.tsx — VAULT BRIEFS INDEX (PAGES-ROUTER SAFE)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -17,12 +17,6 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-
-import {
-  getAllCombinedDocs,
-  normalizeSlug as normalizeContentSlug,
-  sanitizeData,
-} from "@/lib/content/server";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
@@ -58,6 +52,20 @@ function safeString(v: unknown): string {
   return String(v);
 }
 
+function sanitizeData<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function normalizePathLocal(input: unknown): string {
+  return safeString(input)
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\/{2,}/g, "/")
+    .toLowerCase();
+}
+
 function cleanPathish(input: unknown): string {
   return safeString(input)
     .trim()
@@ -77,11 +85,15 @@ function stripPrefixOnce(source: string, prefix: string): string {
 
 function normalizeBriefSlug(input: unknown): string {
   let s = cleanPathish(
-    normalizeContentSlug(safeString(input))
+    safeString(input)
       .replace(/\.(md|mdx)$/i, "")
       .replace(/^content\//i, "")
       .replace(/^vault\//i, "")
-      .replace(/^briefs\//i, ""),
+      .replace(/^briefs\//i, "")
+      .replace(/\\/g, "/")
+      .replace(/^\/+/, "")
+      .replace(/\/+$/, "")
+      .replace(/\/{2,}/g, "/"),
   );
 
   if (!s || s.includes("..")) return "";
@@ -124,9 +136,12 @@ function isBriefDoc(doc: any): boolean {
   const kind = safeString(doc?.kind).toLowerCase();
   const category = safeString(doc?.category).toLowerCase();
   const series = safeString(doc?.series).toLowerCase();
-  const flattened = safeString(doc?._raw?.flattenedPath).toLowerCase();
-  const sourceFilePath = safeString(doc?._raw?.sourceFilePath).toLowerCase();
-  const slug = safeString(doc?.slug).toLowerCase();
+  const flattened = normalizePathLocal(doc?._raw?.flattenedPath);
+  const sourceFilePath = normalizePathLocal(doc?._raw?.sourceFilePath);
+  const slug = normalizePathLocal(doc?.slug);
+  const collectionSlug = normalizePathLocal(doc?.collectionSlug);
+  const href = normalizePathLocal(doc?.href);
+  const collection = normalizePathLocal(doc?.collection);
 
   return (
     docKind === "brief" ||
@@ -134,6 +149,7 @@ function isBriefDoc(doc: any): boolean {
     kind.includes("brief") ||
     category.includes("brief") ||
     series.includes("brief") ||
+    collection === "briefs" ||
     flattened.startsWith("briefs/") ||
     flattened.startsWith("content/briefs/") ||
     flattened.startsWith("vault/briefs/") ||
@@ -141,21 +157,41 @@ function isBriefDoc(doc: any): boolean {
     sourceFilePath.startsWith("content/briefs/") ||
     sourceFilePath.startsWith("vault/briefs/") ||
     slug.startsWith("briefs/") ||
-    slug.startsWith("vault/briefs/")
+    slug.startsWith("vault/briefs/") ||
+    collectionSlug.startsWith("briefs/") ||
+    href.startsWith("briefs/") ||
+    href.startsWith("vault/briefs/") ||
+    href.startsWith("/briefs/") ||
+    href.startsWith("/vault/briefs/")
   );
 }
 
-function getCombinedBriefs(): any[] {
+function getDocKey(doc: any): string {
+  return safeString(
+    doc?._id ||
+      doc?.collectionSlug ||
+      doc?.urlSlug ||
+      doc?._raw?.flattenedPath ||
+      doc?._raw?.sourceFilePath ||
+      doc?.slug ||
+      doc?.href,
+  ).toLowerCase();
+}
+
+function buildBriefHref(doc: any, slugBare: string): string {
+  const explicitHref = safeString(doc?.href).trim();
+  if (explicitHref.startsWith("/vault/briefs/")) return explicitHref;
+  return `/vault/briefs/${slugBare}`;
+}
+
+function getCombinedBriefs(docs: any[]): any[] {
   const seen = new Set<string>();
 
-  return (getAllCombinedDocs() || [])
+  return (docs || [])
     .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
     .filter(isBriefDoc)
     .filter((doc: any) => {
-      const key = safeString(
-        doc?._id || doc?._raw?.flattenedPath || doc?.slug,
-      ).toLowerCase();
-
+      const key = getDocKey(doc);
       if (!key) return false;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -164,11 +200,20 @@ function getCombinedBriefs(): any[] {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const docs = getCombinedBriefs();
+  const content = await import("@/lib/content/server");
+  const allDocs = await content.getAllCombinedDocs();
+  const docs = getCombinedBriefs(allDocs);
 
   const items: BriefCard[] = docs
     .map((doc: any) => {
-      const rawSlug = doc?.slug || doc?._raw?.flattenedPath || "";
+      const rawSlug =
+        doc?.urlSlug ||
+        doc?.collectionSlug ||
+        doc?.slug ||
+        doc?._raw?.flattenedPath ||
+        doc?._raw?.sourceFilePath ||
+        "";
+
       const slugBare = normalizeBriefSlug(rawSlug);
       if (!slugBare) return null;
 
@@ -176,7 +221,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
       return {
         slug: slugBare,
-        href: `/vault/briefs/${slugBare}`,
+        href: buildBriefHref(doc, slugBare),
         title: safeString(doc?.title).trim() || "Untitled Brief",
         series:
           safeString(doc?.series).trim() ||
@@ -187,6 +232,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           safeString(doc?.abstract).trim() ||
           safeString(doc?.excerpt).trim() ||
           safeString(doc?.summary).trim() ||
+          safeString(doc?.description).trim() ||
           "Technical specification pending.",
         requiredTier,
         tierLabel: getTierLabel(requiredTier),

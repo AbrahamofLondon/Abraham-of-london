@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/library/[slug].tsx — LIBRARY DETAIL (SSG, SSOT, no URL leakage)
+/* pages/library/[slug].tsx — LIBRARY DETAIL (SSG, SSOT, no URL leakage) */
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -35,7 +34,7 @@ type PdfAsset = {
 type Props = {
   asset: PdfAsset;
   requiredTier: AccessTier;
-  resolvedUrl: string | null; // public => real URL, restricted => /api/library/<routeSlug>
+  resolvedUrl: string | null; // public => real URL, restricted => /api/library/<secureKey>
   routeSlug: string; // /library/[routeSlug]
 };
 
@@ -169,9 +168,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const requiredTier = tiers.normalizeRequired(asset.accessLevel ?? asset.tier ?? (asset.public ? "public" : "member"));
   const isPublic = requiredTier === "public";
 
+  // ✅ FIXED: Use full normalized slug for secure API key
+  const secureKey = encodeURIComponent(normalizeSlug(asset.slug));
   const resolvedUrl = isPublic
     ? resolvePublicAssetUrl(asset)
-    : `/api/library/${encodeURIComponent(routeSlug)}`;
+    : `/api/library/${secureKey}`;
 
   const safeAsset: PdfAsset = isPublic
     ? asset

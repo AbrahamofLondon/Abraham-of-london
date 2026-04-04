@@ -1,7 +1,13 @@
-/* lib/strategy-room/enrol-core.ts — SSOT intake pipeline */
+/* lib/strategy-room/enrol-core.ts — SSOT intake pipeline + consulting evaluation wiring */
 import { prisma } from "@/lib/prisma";
 import { verifyRecaptchaDetailed } from "@/lib/recaptchaServer";
 import { vetStrategyInquiry } from "@/lib/intelligence/vetting-engine";
+import {
+  archiveIntake,
+  evaluateIntake,
+  notifyDiscord,
+  type StrategyRoomIntakePayload,
+} from "@/lib/consulting/strategy-room";
 import { Prisma } from "@prisma/client";
 
 export type StrategyRoomCanonicalInput = {
@@ -53,13 +59,43 @@ function bypassAllowed(): boolean {
   );
 }
 
+function metadataObject(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return value as Record<string, unknown>;
+}
+
+function metadataString(
+  metadata: Record<string, unknown>,
+  key: string,
+  fallback = "",
+): string {
+  return normalizeString(metadata[key] ?? fallback);
+}
+
+function metadataStringArray(
+  metadata: Record<string, unknown>,
+  key: string,
+): string[] {
+  const value = metadata[key];
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => normalizeString(item)).filter(Boolean);
+}
+
+function normalizeSource(
+  source: string | undefined,
+): "web" | "inner-circle" | "referral" {
+  const value = normalizeString(source).toLowerCase();
+
+  if (value.includes("inner")) return "inner-circle";
+  if (value.includes("referral")) return "referral";
+  return "web";
+}
+
 /**
  * Nested Prisma JSON value.
- * Important: nested object properties may be null, but top-level InputJsonValue may not be.
+ * Nested object properties may be null, but top-level InputJsonValue may not be.
  */
-function toPrismaJsonNested(
-  value: unknown
-): Prisma.InputJsonValue | null {
+function toPrismaJsonNested(value: unknown): Prisma.InputJsonValue | null {
   if (value === null || value === undefined) return null;
 
   if (
@@ -133,6 +169,112 @@ async function writeAuditSafe(data: {
   }
 }
 
+function buildConsultingPayload(
+  input: StrategyRoomCanonicalInput,
+  ctx: StrategyRoomRequestContext,
+): StrategyRoomIntakePayload {
+  const metadata = metadataObject(input.metadata);
+  const nowIso = new Date().toISOString();
+
+  const role = metadataString(metadata, "role", "Unspecified");
+  const mandate = metadataString(
+    metadata,
+    "mandate",
+    `Review strategic intent for ${normalizeString(input.organisation || "institutional inquiry")}.`,
+  );
+
+  const hasAuthorityRaw = metadataString(metadata, "hasAuthority");
+  const hasAuthority: StrategyRoomIntakePayload["authority"]["hasAuthority"] =
+    hasAuthorityRaw === "Yes, fully" ||
+    hasAuthorityRaw === "Yes, with board approval" ||
+    hasAuthorityRaw === "No"
+      ? hasAuthorityRaw
+      : role && role.toLowerCase() !== "unknown"
+        ? "Yes, with board approval"
+        : "No";
+
+  const stuckReasons = metadataStringArray(metadata, "stuckReasons");
+  const costOfDelay = metadataStringArray(metadata, "costOfDelay");
+
+  const readyForUnpleasantDecisionRaw = metadataString(
+    metadata,
+    "readyForUnpleasantDecision",
+  );
+  const readyForUnpleasantDecision: StrategyRoomIntakePayload["readiness"]["readyForUnpleasantDecision"] =
+    readyForUnpleasantDecisionRaw === "No" ? "No" : "Yes";
+
+  const willingAccountabilityRaw = metadataString(
+    metadata,
+    "willingAccountability",
+  );
+  const willingAccountability: StrategyRoomIntakePayload["readiness"]["willingAccountability"] =
+    willingAccountabilityRaw === "No" ? "No" : "Yes";
+
+  return {
+    meta: {
+      source: normalizeSource(input.source),
+      page: metadataString(metadata, "page", "strategy_room_enrolment"),
+      submittedAtIso: nowIso,
+    },
+    contact: {
+      fullName: normalizeString(input.name),
+      email: normalizeEmail(input.email),
+      organisation: normalizeString(input.organisation || "Unknown"),
+    },
+    authority: {
+      role,
+      hasAuthority,
+      mandate,
+    },
+    decision: {
+      statement: normalizeString(input.intent),
+      type: metadataString(metadata, "decisionType", "general"),
+      stuckReasons,
+    },
+    constraints: {
+      nonRemovableConstraints:
+        metadataString(metadata, "nonRemovableConstraints") || null,
+      avoidedTradeOff: metadataString(
+        metadata,
+        "avoidedTradeOff",
+        "Not fully articulated in canonical intake.",
+      ),
+      unacceptableOutcome: metadataString(
+        metadata,
+        "unacceptableOutcome",
+        "Loss of strategic traction or continued uncertainty.",
+      ),
+    },
+    timeCost: {
+      costOfDelay,
+      affected: metadataString(
+        metadata,
+        "affected",
+        normalizeString(input.organisation || "organisation"),
+      ),
+      breaksFirst: metadataString(
+        metadata,
+        "breaksFirst",
+        "Decision quality and execution confidence.",
+      ),
+    },
+    readiness: {
+      readyForUnpleasantDecision,
+      willingAccountability,
+      whyNow: metadataString(
+        metadata,
+        "whyNow",
+        normalizeString(input.intent),
+      ),
+    },
+    declarationAccepted:
+      metadata.hasOwnProperty("declarationAccepted")
+        ? Boolean(metadata.declarationAccepted)
+        : true,
+    recaptchaToken: normalizeString(input.token || ""),
+  };
+}
+
 export function normalizeCanonicalInput(body: any): StrategyRoomCanonicalInput {
   const name = normalizeString(body?.name || body?.fullName);
   const email = normalizeEmail(body?.email || body?.contact?.email);
@@ -140,7 +282,7 @@ export function normalizeCanonicalInput(body: any): StrategyRoomCanonicalInput {
     body?.intent ||
       body?.message ||
       body?.decision?.statement ||
-      body?.decisionStatement
+      body?.decisionStatement,
   );
   const token = normalizeString(body?.token || null) || null;
   const source = normalizeString(body?.source || "strategy_room");
@@ -149,7 +291,7 @@ export function normalizeCanonicalInput(body: any): StrategyRoomCanonicalInput {
       body?.organisation ||
         body?.company ||
         body?.contact?.organisation ||
-        null
+        null,
     ) || null;
 
   return {
@@ -170,7 +312,7 @@ export function normalizeCanonicalInput(body: any): StrategyRoomCanonicalInput {
 
 export async function processStrategyRoomEnrolment(
   input: StrategyRoomCanonicalInput,
-  ctx: StrategyRoomRequestContext = {}
+  ctx: StrategyRoomRequestContext = {},
 ): Promise<StrategyRoomApiResult> {
   const name = normalizeString(input.name);
   const email = normalizeEmail(input.email);
@@ -180,6 +322,7 @@ export async function processStrategyRoomEnrolment(
   const organisation = normalizeString(input.organisation || "") || null;
   const ip = normalizeString(ctx.ip || "");
   const userAgent = normalizeString(ctx.userAgent || "");
+  const metadata = metadataObject(input.metadata);
 
   if (!name || !email || !intent) {
     return {
@@ -212,14 +355,14 @@ export async function processStrategyRoomEnrolment(
     const verification = await verifyRecaptchaDetailed(
       token,
       "artifact_access_request",
-      ip
+      ip,
     );
 
     if (!verification.success) {
       const retryVerification = await verifyRecaptchaDetailed(
         token,
         "strategy_room_intake",
-        ip
+        ip,
       );
 
       if (!retryVerification.success) {
@@ -265,21 +408,46 @@ export async function processStrategyRoomEnrolment(
   }
 
   try {
+    const consultingPayload = buildConsultingPayload(
+      {
+        ...input,
+        name,
+        email,
+        intent,
+        organisation,
+        source,
+        metadata,
+      },
+      ctx,
+    );
+
+    const consultingEvaluation = evaluateIntake(consultingPayload);
+
+    const initialMetadata = {
+      ip,
+      userAgent,
+      timestamp: new Date().toISOString(),
+      source,
+      organisation,
+      recaptchaWarning: recaptchaWarning ?? null,
+      ...metadata,
+      consultingEvaluation: {
+        outcome: consultingEvaluation.result.status,
+        message: consultingEvaluation.result.message,
+        nextUrl: consultingEvaluation.result.ok
+          ? consultingEvaluation.result.nextUrl
+          : null,
+        score: consultingEvaluation.score,
+      },
+    };
+
     const entry = await prisma.strategyInquiry.create({
       data: {
         name,
         email,
         intent,
         status: "PENDING",
-        metadata: toPrismaJsonObject({
-          ip,
-          userAgent,
-          timestamp: new Date().toISOString(),
-          source,
-          organisation,
-          recaptchaWarning: recaptchaWarning ?? null,
-          ...(input.metadata || {}),
-        }),
+        metadata: toPrismaJsonObject(initialMetadata),
       },
     });
 
@@ -291,9 +459,50 @@ export async function processStrategyRoomEnrolment(
       console.error("[STRATEGY_ROOM_VETTING_ERROR]:", error);
     }
 
+    await Promise.allSettled([
+      archiveIntake(consultingPayload, consultingEvaluation),
+      notifyDiscord(consultingPayload, consultingEvaluation),
+    ]);
+
+    const mergedMetadata = {
+      ...initialMetadata,
+      vetting: vettedEntry
+        ? {
+            status: vettedEntry.status ?? null,
+            score: vettedEntry.score ?? null,
+            priorityStatus: vettedEntry.status ?? null,
+          }
+        : null,
+    };
+
+    try {
+      await prisma.strategyInquiry.update({
+        where: { id: entry.id },
+        data: {
+          metadata: toPrismaJsonObject(mergedMetadata),
+        },
+      });
+    } catch (updateError) {
+      console.error("[STRATEGY_ROOM_METADATA_UPDATE_ERROR]:", updateError);
+    }
+
+    const combinedWarning = [
+      recaptchaWarning,
+      consultingEvaluation.result.ok
+        ? null
+        : "intake_signal_requires_strengthening",
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
     await writeAuditSafe({
       action: "INTAKE_INITIALIZED",
-      severity: vettedEntry?.status === "PRIORITY" ? "info" : "low",
+      severity:
+        vettedEntry?.status === "PRIORITY"
+          ? "info"
+          : consultingEvaluation.result.ok
+            ? "low"
+            : "medium",
       actorEmail: email,
       resourceType: "STRATEGY_INQUIRY",
       resourceId: entry.id,
@@ -303,15 +512,20 @@ export async function processStrategyRoomEnrolment(
         organisation,
         priorityStatus: vettedEntry?.status || null,
         recaptchaWarning: recaptchaWarning ?? null,
+        consultingOutcome: consultingEvaluation.result.status,
+        consultingScore: consultingEvaluation.score.total,
+        consultingThreshold: consultingEvaluation.score.threshold,
       },
     });
 
     return {
       ok: true,
-      message: "Institutional sequence initialized.",
+      message: consultingEvaluation.result.ok
+        ? "Institutional sequence initialized."
+        : "Institutional sequence initialized. Additional clarification will strengthen routing.",
       referenceId: entry.id,
       priorityStatus: vettedEntry?.status || null,
-      warning: recaptchaWarning,
+      warning: combinedWarning || undefined,
     };
   } catch (error) {
     console.error("[STRATEGY_ROOM_ENROL_ERROR]:", error);

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/shorts/index.tsx — SHORTS CHAMBER (MASTERPIECE, HARDENED, CANONICALIZED)
+// pages/shorts/index.tsx — SHORTS CHAMBER (FULL REWRITE, QUIET LUXURY / EXPENSIVE HERO)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -13,10 +13,6 @@ import {
   Sparkles,
   ArrowUpRight,
   ChevronRight,
-  BookOpen,
-  Library,
-  FolderKanban,
-  ScrollText,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -98,20 +94,7 @@ type ShortsIndexProps = {
 };
 
 /* -----------------------------------------------------------------------------
-  CONSTANTS
------------------------------------------------------------------------------ */
-const HERO_LINKS = [
-  { href: "/canon", label: "Canon", icon: BookOpen },
-  { href: "/books", label: "Books", icon: ScrollText },
-  { href: "/editorials", label: "Editorials", icon: Library },
-  { href: "/library", label: "Library", icon: Library },
-  { href: "/artifacts", label: "Artifacts", icon: FolderKanban },
-  { href: "/vault/briefs", label: "Briefs", icon: ScrollText },
-  { href: "/ventures", label: "Ventures", icon: FolderKanban },
-] as const;
-
-/* -----------------------------------------------------------------------------
-  UTILITIES
+  SAFETY + NORMALIZATION
 ----------------------------------------------------------------------------- */
 function safeString(v: unknown): string {
   return typeof v === "string" ? v : "";
@@ -191,6 +174,9 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
     safeString(doc.description).trim() ||
     "";
 
+  const intensityRaw = safeNumber(doc.intensity, 3);
+  const intensity = clamp(intensityRaw, 1, 5) as 1 | 2 | 3 | 4 | 5;
+
   return {
     id: safeString(doc._id) || `short-${slug}`,
     title,
@@ -209,124 +195,78 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
     views: safeNumber(doc.views, 0),
     likes: safeNumber(doc.likes, 0),
     saves: safeNumber(doc.saves, 0),
-    intensity: clamp(safeNumber(doc.intensity, 3), 1, 5) as 1 | 2 | 3 | 4 | 5,
+    intensity,
     lineage: safeString(doc.lineage).trim() || null,
     date: safeString(doc.date).trim() || null,
   };
 }
 
 /* -----------------------------------------------------------------------------
-  VISUAL PRIMITIVES
+  DESIGN HELPERS
 ----------------------------------------------------------------------------- */
-function Hairline({
-  soft = false,
-  gold = false,
-}: {
-  soft?: boolean;
-  gold?: boolean;
-}) {
-  const cls = gold
-    ? "bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
-    : soft
-      ? "bg-gradient-to-r from-transparent via-white/10 to-transparent"
-      : "bg-gradient-to-r from-transparent via-white/16 to-transparent";
-
-  return <div className={`h-px w-full ${cls}`} />;
-}
-
-function Panel({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function Hairline({ soft = false }: { soft?: boolean }) {
   return (
     <div
       className={[
-        "relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(8,8,9,0.9)_0%,rgba(3,3,4,0.98)_100%)]",
-        "shadow-[0_24px_70px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl",
-        className,
+        "h-px w-full",
+        soft
+          ? "bg-gradient-to-r from-transparent via-white/[0.07] to-transparent"
+          : "bg-gradient-to-r from-transparent via-[#C9A96A]/30 to-transparent",
       ].join(" ")}
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.03),transparent_55%)]" />
-      {children}
-    </div>
+    />
   );
 }
 
 /* -----------------------------------------------------------------------------
-  HERO — BACKDROP
+  HERO BACKDROP — QUIET LUXURY / GALLERY DARK
 ----------------------------------------------------------------------------- */
-function VelvetBackdrop() {
+function LuxuryBackdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden select-none">
       <div className="absolute inset-0 bg-[#020202]" />
 
-      {/* Primary amber atmosphere — broad, not obvious */}
-      <div className="absolute left-[-18%] top-[-8%] h-[540px] w-[780px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(184,155,110,0.12)_0%,rgba(184,155,110,0.06)_24%,rgba(184,155,110,0.02)_48%,transparent_72%)] blur-[90px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.01)_0%,rgba(255,255,255,0.00)_18%,rgba(0,0,0,0.00)_58%,rgba(0,0,0,0.22)_100%)]" />
 
-      {/* Secondary buried warmth */}
-      <div className="absolute left-[26%] bottom-[-24%] h-[280px] w-[520px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(184,155,110,0.06)_0%,rgba(184,155,110,0.025)_42%,transparent_75%)] blur-[110px]" />
+      <div className="absolute left-[-10%] top-[-12%] h-[580px] w-[980px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(201,169,106,0.08)_0%,rgba(201,169,106,0.035)_24%,rgba(201,169,106,0.012)_46%,transparent_72%)] blur-[120px]" />
+      <div className="absolute right-[-4%] top-[8%] h-[460px] w-[460px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.012)_28%,transparent_72%)] blur-[120px]" />
+      <div className="absolute bottom-[-26%] left-[16%] h-[340px] w-[680px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(201,169,106,0.028)_0%,rgba(201,169,106,0.01)_36%,transparent_74%)] blur-[120px]" />
 
-      {/* Cold balance on far right */}
-      <div className="absolute right-[-6%] top-[10%] h-[360px] w-[420px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.028)_0%,rgba(255,255,255,0.014)_35%,transparent_72%)] blur-[120px]" />
+      <div className="absolute inset-y-0 left-[8%] hidden w-px bg-gradient-to-b from-transparent via-white/[0.045] to-transparent xl:block" />
+      <div className="absolute inset-y-0 right-[8%] hidden w-px bg-gradient-to-b from-transparent via-white/[0.035] to-transparent xl:block" />
+      <div className="absolute inset-x-0 top-[28%] h-px bg-gradient-to-r from-transparent via-white/[0.035] to-transparent" />
+      <div className="absolute inset-x-0 bottom-[18%] h-px bg-gradient-to-r from-transparent via-white/[0.02] to-transparent" />
 
-      {/* Central void for “silent throne” feel */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_24%,rgba(0,0,0,0.18)_48%,rgba(0,0,0,0.58)_78%,rgba(0,0,0,0.88)_100%)]" />
+      <div className="absolute right-[12%] top-[16%] h-[280px] w-[420px] rounded-[38px] border border-white/[0.05]" />
+      <div className="absolute right-[14%] top-[19%] h-[220px] w-[350px] rounded-[30px] border border-white/[0.035]" />
+      <div className="absolute right-[16%] top-[22%] h-[160px] w-[280px] rounded-[24px] border border-white/[0.03]" />
 
-      {/* Very faint architectural verticals */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, transparent 0%, transparent 7.8%, rgba(255,255,255,0.03) 7.95%, transparent 8.1%, transparent 16.2%, rgba(255,255,255,0.018) 16.35%, transparent 16.5%, transparent 100%)",
-          backgroundSize: "340px 100%",
+            "linear-gradient(to right, rgba(255,255,255,0.06) 0.5px, transparent 0.5px), linear-gradient(to bottom, rgba(255,255,255,0.05) 0.5px, transparent 0.5px)",
+          backgroundSize: "120px 120px",
         }}
       />
 
-      {/* Micro-star dust */}
       <div
-        className="absolute inset-0 opacity-[0.09]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage:
-            "radial-gradient(rgba(255,255,255,0.82) 0.38px, transparent 0.88px)",
-          backgroundSize: "27px 27px",
+            "radial-gradient(rgba(255,255,255,0.35) 0.4px, transparent 0.9px)",
+          backgroundSize: "26px 26px",
         }}
       />
 
-      {/* Smaller subliminal dust */}
-      <div
-        className="absolute inset-0 opacity-[0.028]"
-        style={{
-          backgroundImage:
-            "radial-gradient(rgba(255,255,255,0.9) 0.2px, transparent 0.68px)",
-          backgroundSize: "13px 13px",
-        }}
-      />
+      <div className="absolute inset-0 aol-grain opacity-[0.012]" />
 
-      {/* Long spectral trace — almost invisible */}
-      <div className="absolute left-[10%] top-[22%] h-px w-[34%] rotate-[18deg] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent blur-[0.3px]" />
-
-      {/* Soft veil to kill harshness */}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.50)_0%,rgba(0,0,0,0.18)_22%,rgba(0,0,0,0.10)_48%,rgba(0,0,0,0.22)_72%,rgba(0,0,0,0.56)_100%)]" />
-
-      {/* Grain */}
-      <div className="absolute inset-0 aol-grain opacity-[0.025]" />
-
-      {/* Edge control */}
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/78 via-black/26 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black via-black/34 to-transparent" />
-
-      {/* Bottom hairline */}
-      <div className="absolute inset-x-0 bottom-0 h-px bg-white/[0.06]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_40%,rgba(0,0,0,0.1)_66%,rgba(0,0,0,0.26)_100%)]" />
     </div>
   );
 }
 
 /* -----------------------------------------------------------------------------
-  HERO
+  HERO ELEMENTS
 ----------------------------------------------------------------------------- */
 function EliteStatsRibbon({
   streak,
@@ -342,7 +282,7 @@ function EliteStatsRibbon({
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.82, delay: 0.05, ease: [0.19, 1, 0.22, 1] }}
-      className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.016] px-5 py-2.5 backdrop-blur-xl"
+      className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.09] bg-white/[0.02] px-5 py-2.5 backdrop-blur-xl"
     >
       <span className="text-[8px] font-mono uppercase tracking-[0.28em] text-white/36">
         Indexed
@@ -373,21 +313,21 @@ function WhisperPill({ text, rare }: { text: string; rare: boolean }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.28, ease: [0.19, 1, 0.22, 1] }}
+      transition={{ duration: 0.8, delay: 0.26, ease: [0.19, 1, 0.22, 1] }}
       className={[
         "inline-flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur-md",
         rare
-          ? "border border-amber-500/14 bg-amber-500/[0.03]"
-          : "border border-white/[0.06] bg-white/[0.015]",
+          ? "border border-amber-500/18 bg-amber-500/[0.045]"
+          : "border border-white/[0.07] bg-white/[0.02]",
       ].join(" ")}
     >
       <Sparkles
-        className={`h-3 w-3 ${rare ? "text-amber-400/58" : "text-white/16"}`}
+        className={`h-3 w-3 ${rare ? "text-amber-400/56" : "text-white/20"}`}
         strokeWidth={1.5}
       />
       <span
         className={`text-[10px] ${
-          rare ? "text-amber-300/68" : "text-white/38"
+          rare ? "text-amber-300/66" : "text-white/40"
         }`}
       >
         {text}
@@ -396,47 +336,57 @@ function WhisperPill({ text, rare }: { text: string; rare: boolean }) {
   );
 }
 
-function HeroPageLinks() {
-  return (
-    <div className="mt-10">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-5">
-          <Hairline soft />
-        </div>
+function PremiumFeatureRail({ featured }: { featured: FeaturedItem[] }) {
+  const items = featured.slice(0, 3);
 
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-          {HERO_LINKS.map((link, i) => (
-            <React.Fragment key={link.href}>
-              <Link
-                href={link.href}
-                className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/34 transition-colors duration-500 hover:text-amber-300/76"
-              >
-                {link.label}
-              </Link>
-              {i < HERO_LINKS.length - 1 ? (
-                <span className="text-[9px] text-white/14">•</span>
-              ) : null}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+  if (!items.length) return null;
 
-function HeroActionRail() {
   return (
-    <div className="mt-8 flex justify-center">
-      <div className="inline-flex items-center gap-4 rounded-full border border-white/[0.10] bg-white/[0.026] px-5 py-2.5 shadow-[0_8px_20px_rgba(0,0,0,0.16)] backdrop-blur-lg">
-        <span className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/68">
-          Built to survive scrutiny
-        </span>
-        <span className="h-3 w-px bg-gradient-to-b from-transparent via-amber-500/45 to-transparent" />
-        <span className="text-[9px] font-mono uppercase tracking-[0.28em] text-amber-300/82">
-          Designed to ship
-        </span>
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.95, delay: 0.22, ease: [0.19, 1, 0.22, 1] }}
+      className="relative mt-12 overflow-hidden rounded-[28px] border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,106,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.025),transparent_18%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/30 to-transparent" />
+
+      <div className="relative grid grid-cols-1 divide-y divide-white/[0.06] md:grid-cols-3 md:divide-x md:divide-y-0">
+        {items.map((item) => (
+          <Link
+            key={item.id}
+            href={item.href}
+            className="group px-6 py-5 transition-colors duration-500 hover:bg-white/[0.02]"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="mb-2 flex items-center gap-2.5">
+                  <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#D8B97F]">
+                    {item.category}
+                  </span>
+                  <span className="text-white/[0.12]">•</span>
+                  <span className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/30">
+                    {item.readTime}
+                  </span>
+                </div>
+
+                <h3 className="line-clamp-2 font-serif text-[1.12rem] leading-[1.2] tracking-[-0.02em] text-white/88 transition-colors duration-500 group-hover:text-white">
+                  {item.title}
+                </h3>
+
+                <p className="mt-2 line-clamp-2 text-[13px] leading-6 text-white/42 transition-colors duration-500 group-hover:text-white/56">
+                  {item.excerpt}
+                </p>
+              </div>
+
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.02] text-white/24 transition-all duration-500 group-hover:border-[#C9A96A]/24 group-hover:bg-[#C9A96A]/[0.05] group-hover:text-[#D8B97F]">
+                <ChevronRight className="h-4 w-4" />
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -446,21 +396,22 @@ function ShortsHeroChamber({
   visits,
   whisper,
   isRareWhisper,
+  featured,
 }: {
   streak: number;
   totalCount: number;
   visits: number;
   whisper: string;
   isRareWhisper: boolean;
+  featured: FeaturedItem[];
 }) {
   return (
     <section className="relative overflow-hidden border-b border-white/[0.05] bg-black">
-      <div className="relative min-h-[390px] md:min-h-[430px] lg:min-h-[470px]">
-        <VelvetBackdrop />
+      <div className="relative min-h-[520px] sm:min-h-[560px] md:min-h-[620px] lg:min-h-[680px]">
+        <LuxuryBackdrop />
 
-        <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col px-6 sm:px-8 lg:px-10">
-          {/* More space from transparent header */}
-          <div className="flex justify-center pt-14 md:pt-16 lg:pt-18">
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col px-6 sm:px-8 lg:px-10">
+          <div className="pt-[112px] sm:pt-[118px] md:pt-[126px] lg:pt-[136px]">
             <EliteStatsRibbon
               streak={streak}
               totalCount={totalCount}
@@ -468,22 +419,38 @@ function ShortsHeroChamber({
             />
           </div>
 
-          <div className="flex flex-1 items-center justify-center">
-            <div className="mx-auto max-w-3xl -translate-y-1 text-center md:-translate-y-2">
+          <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center py-10">
+            <div className="max-w-3xl">
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.72,
+                  delay: 0.08,
+                  ease: [0.19, 1, 0.22, 1],
+                }}
+                className="mb-6 flex items-center gap-3"
+              >
+                <span className="h-px w-10 bg-gradient-to-r from-[#C9A96A]/55 to-transparent" />
+                <span className="text-[9px] font-mono uppercase tracking-[0.34em] text-white/34">
+                  Brief signals. Lasting weight.
+                </span>
+              </motion.div>
+
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.9,
+                  duration: 0.92,
                   delay: 0.1,
                   ease: [0.19, 1, 0.22, 1],
                 }}
                 className="font-serif font-light text-white"
                 style={{
-                  fontSize: "clamp(4rem, 7vw, 6.2rem)",
+                  fontSize: "clamp(4rem, 7.4vw, 6.9rem)",
                   lineHeight: 0.9,
-                  letterSpacing: "-0.075em",
-                  textShadow: "0 14px 32px rgba(0,0,0,0.24)",
+                  letterSpacing: "-0.078em",
+                  textShadow: "0 14px 34px rgba(0,0,0,0.28)",
                 }}
               >
                 Shorts
@@ -493,28 +460,32 @@ function ShortsHeroChamber({
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.85,
-                  delay: 0.2,
+                  duration: 0.84,
+                  delay: 0.18,
                   ease: [0.19, 1, 0.22, 1],
                 }}
-                className="mx-auto mt-5 max-w-xl text-white/72"
+                className="mt-5 max-w-2xl text-white/68"
                 style={{
-                  fontSize: "clamp(1rem, 1.1vw, 1.08rem)",
-                  lineHeight: 1.7,
+                  fontSize: "clamp(1rem, 1.2vw, 1.12rem)",
+                  lineHeight: 1.72,
                 }}
               >
-                Small doses. Clear signal.
+                Thought distilled to its sharpest edge. Small doses of signal for
+                people who want clarity without noise — serious, readable, and
+                built to stay with you after the page is gone.
               </motion.p>
 
               {whisper ? (
-                <div className="mt-10 flex justify-center">
+                <div className="mt-8 flex flex-wrap gap-3">
                   <WhisperPill text={whisper} rare={isRareWhisper} />
                 </div>
               ) : null}
             </div>
+
+            <PremiumFeatureRail featured={featured} />
           </div>
 
-          <div className="pb-6 md:pb-7" />
+          <div className="pb-8 md:pb-10" />
         </div>
       </div>
     </section>
@@ -538,21 +509,19 @@ function ImprintLine({
   const opacity = clamp(1 - (fadePercent || 0) / 115, 0.2, 1);
 
   return (
-    <div className="border-t border-white/10 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.82)_100%)] backdrop-blur-xl">
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-white/25">
+    <div className="border-t border-white/[0.06] bg-black/36 backdrop-blur-xl">
+      <div className="mx-auto max-w-5xl px-6 py-10 md:py-11">
+        <div className="mb-4 flex items-center justify-between">
+          <span className="text-[9px] font-mono uppercase tracking-[0.26em] text-white/22">
             Last Read
           </span>
-          <span className="text-[9px] font-mono text-white/18">
-            {hoursRemaining && hoursRemaining > 0
-              ? `${hoursRemaining}h ago`
-              : "fading"}
+          <span className="text-[10px] font-mono text-white/24">
+            {hoursRemaining && hoursRemaining > 0 ? `${hoursRemaining}h ago` : "fading"}
           </span>
         </div>
 
         <p
-          className="text-center font-serif text-[1.35rem] italic leading-relaxed text-white/42"
+          className="text-center font-serif text-[clamp(1.3rem,2vw,1.9rem)] italic leading-relaxed text-white/54"
           style={{ opacity }}
         >
           “{imprintTitle}”
@@ -563,7 +532,7 @@ function ImprintLine({
 }
 
 /* -----------------------------------------------------------------------------
-  FEATURED
+  FEATURED NOTES
 ----------------------------------------------------------------------------- */
 function FeaturedNoteCard({ item }: { item: FeaturedItem }) {
   return (
@@ -572,16 +541,16 @@ function FeaturedNoteCard({ item }: { item: FeaturedItem }) {
         className={[
           "relative h-full overflow-hidden",
           "border border-white/[0.08]",
-          "bg-[linear-gradient(180deg,rgba(8,8,9,0.92)_0%,rgba(3,3,4,0.98)_100%)]",
+          "bg-[linear-gradient(180deg,rgba(6,6,7,0.92)_0%,rgba(2,2,3,0.98)_100%)]",
           "transition-all duration-500 ease-out",
-          "hover:border-[#C9A96A]/26 hover:bg-[linear-gradient(180deg,rgba(10,10,11,0.96)_0%,rgba(4,4,5,1)_100%)]",
-          "hover:shadow-[0_18px_42px_rgba(0,0,0,0.34)] hover:-translate-y-[2px]",
+          "hover:-translate-y-[2px]",
+          "hover:border-[#C9A96A]/24",
+          "hover:shadow-[0_18px_42px_rgba(0,0,0,0.34)]",
         ].join(" ")}
       >
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,106,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.03),transparent_18%)] opacity-80" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/34 to-transparent" />
-          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-white/[0.07] to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/30 to-transparent" />
         </div>
 
         <div className="relative z-10 p-6 md:p-7">
@@ -603,12 +572,19 @@ function FeaturedNoteCard({ item }: { item: FeaturedItem }) {
                 {item.title}
               </h3>
 
-              <p className="mt-3 line-clamp-3 max-w-[40ch] text-[14px] leading-7 text-white/40 transition-colors duration-500 group-hover:text-white/56">
+              <p className="mt-3 line-clamp-3 max-w-[40ch] text-[14px] leading-7 text-white/42 transition-colors duration-500 group-hover:text-white/56">
                 {item.excerpt}
               </p>
             </div>
 
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/[0.09] bg-white/[0.02] text-white/24 transition-all duration-500 group-hover:border-[#C9A96A]/24 group-hover:bg-[#C9A96A]/[0.06] group-hover:text-[#D8B97F]">
+            <div
+              className={[
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
+                "border-white/[0.09] bg-white/[0.02]",
+                "text-white/24 transition-all duration-500",
+                "group-hover:border-[#C9A96A]/24 group-hover:bg-[#C9A96A]/[0.06] group-hover:text-[#D8B97F]",
+              ].join(" ")}
+            >
               <ArrowUpRight className="h-4 w-4" />
             </div>
           </div>
@@ -622,11 +598,11 @@ function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
   if (!items.length) return null;
 
   return (
-    <section className="border-y border-white/[0.08] bg-black/30">
+    <section className="border-y border-white/[0.06] bg-black/26">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-14">
-        <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-[#C9A96A]/45 to-transparent" />
+            <span className="h-px w-10 bg-gradient-to-r from-[#C9A96A]/42 to-transparent" />
             <h2 className="text-[9px] font-mono uppercase tracking-[0.32em] text-white/34">
               Featured Notes
             </h2>
@@ -639,18 +615,15 @@ function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
 
         <div className="grid grid-cols-1 gap-0 md:grid-cols-2 lg:grid-cols-3">
           {items.slice(0, 6).map((item, index) => {
-            const isLastColLg = index % 3 === 2;
-            const topRowLg = index < 3;
-            const isEvenMd = index % 2 === 0;
-
+            const addBottomBorder = index < 3;
             return (
               <div
                 key={item.id}
                 className={[
                   "relative border-white/[0.07]",
-                  !isLastColLg ? "lg:border-r" : "",
-                  isEvenMd ? "md:border-r lg:border-r-0" : "",
-                  topRowLg ? "border-b" : "",
+                  index % 2 === 0 ? "md:border-r lg:border-r-0" : "",
+                  index % 3 !== 2 ? "lg:border-r" : "",
+                  addBottomBorder ? "border-b" : "",
                 ].join(" ")}
               >
                 <FeaturedNoteCard item={item} />
@@ -667,78 +640,58 @@ function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
   FILTER BAR
 ----------------------------------------------------------------------------- */
 function FilterBar({
-  query,
-  setQuery,
+  searchQuery,
+  setSearchQuery,
   viewMode,
   setViewMode,
-  count,
 }: {
-  query: string;
-  setQuery: (v: string) => void;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
   viewMode: "grid" | "list";
-  setViewMode: (v: "grid" | "list") => void;
-  count: number;
+  setViewMode: (value: "grid" | "list") => void;
 }) {
   return (
-    <div className="sticky top-0 z-40 border-b border-white/[0.08] bg-black/88 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between md:gap-6">
+    <div className="sticky top-0 z-40 border-b border-white/[0.06] bg-black/86 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <div className="group relative max-w-md flex-1">
-          <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25 transition-colors group-focus-within:text-white/45" />
+          <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-white/24 transition-colors group-focus-within:text-white/42" />
           <input
             type="text"
             placeholder="Filter by keyword..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full border-none bg-transparent py-2 pl-8 pr-4 text-sm text-white placeholder:text-white/25 focus:ring-0"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border-none bg-transparent py-2 pl-8 pr-4 text-sm text-white placeholder:text-white/24 focus:ring-0"
           />
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/30">
-            {count} visible
-          </div>
+        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-1.5">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`rounded p-2 transition-all ${
+              viewMode === "grid"
+                ? "bg-white/10 text-white"
+                : "text-white/30 hover:text-white/55"
+            }`}
+            aria-label="Grid view"
+            type="button"
+          >
+            <Grid className="h-4 w-4" />
+          </button>
 
-          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-1.5">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`rounded p-2 transition-all ${
-                viewMode === "grid"
-                  ? "bg-white/10 text-white"
-                  : "text-white/30 hover:text-white/55"
-              }`}
-              aria-label="Grid view"
-              type="button"
-            >
-              <Grid className="h-4 w-4" />
-            </button>
-
-            <button
-              onClick={() => setViewMode("list")}
-              className={`rounded p-2 transition-all ${
-                viewMode === "list"
-                  ? "bg-white/10 text-white"
-                  : "text-white/30 hover:text-white/55"
-              }`}
-              aria-label="List view"
-              type="button"
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`rounded p-2 transition-all ${
+              viewMode === "list"
+                ? "bg-white/10 text-white"
+                : "text-white/30 hover:text-white/55"
+            }`}
+            aria-label="List view"
+            type="button"
+          >
+            <List className="h-4 w-4" />
+          </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* -----------------------------------------------------------------------------
-  EMPTY STATE
------------------------------------------------------------------------------ */
-function EmptyState() {
-  return (
-    <div className="mx-auto max-w-2xl py-20 text-center">
-      <p className="font-serif text-2xl text-white/80">No notes found.</p>
-      <p className="mt-3 text-white/45">Try a broader keyword.</p>
     </div>
   );
 }
@@ -753,11 +706,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
   const [visitCount, setVisitCount] = React.useState(1);
   const [whisper, setWhisper] = React.useState("");
   const [isRareWhisper, setIsRareWhisper] = React.useState(false);
-  const [imprint, setImprint] = React.useState<{
-    title?: string;
-    _hoursRemaining?: number;
-    _fadePercent?: number;
-  } | null>(null);
+  const [imprint, setImprint] = React.useState<any>(null);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -776,8 +725,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     setImprint(readImprint());
-    const interval = window.setInterval(() => setImprint(readImprint()), 60_000);
-    return () => window.clearInterval(interval);
+    const interval = setInterval(() => setImprint(readImprint()), 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = React.useMemo(() => {
@@ -787,10 +736,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
     if (!query) return list;
 
     return list.filter((s) => {
-      const t = safeString(s.title).toLowerCase();
-      const e = safeString(s.excerpt).toLowerCase();
-      const c = safeString(s.category).toLowerCase();
-      const r = safeString(s.readTime).toLowerCase();
+      const t = safeString(s?.title).toLowerCase();
+      const e = safeString(s?.excerpt).toLowerCase();
+      const c = safeString(s?.category).toLowerCase();
+      const r = safeString(s?.readTime).toLowerCase();
 
       return (
         t.includes(query) ||
@@ -816,20 +765,16 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
   return (
     <Layout
       title="Shorts // Abraham of London"
+      description="Small doses. Clear signal."
       className="min-h-screen bg-black text-white selection:bg-amber-500/10"
       fullWidth
       headerTransparent
       canonicalUrl="/shorts"
-      minimalHeader
       showFooter={false}
       enableVaultSearch={false}
     >
       <Head>
         <title>Shorts // Abraham of London</title>
-        <meta
-          name="description"
-          content="Compact notes for alignment, thought, and direction."
-        />
       </Head>
 
       <ShortsHeroChamber
@@ -838,6 +783,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
         visits={visitCount}
         whisper={whisper}
         isRareWhisper={isRareWhisper}
+        featured={featured}
       />
 
       <ImprintLine
@@ -849,16 +795,30 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
       <FeaturedGrid items={featured} />
 
       <FilterBar
-        query={searchQuery}
-        setQuery={setSearchQuery}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        count={filtered.length}
       />
 
       <main className="mx-auto max-w-7xl px-6 py-14 md:py-16">
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="h-px w-10 bg-gradient-to-r from-[#C9A96A]/42 to-transparent" />
+            <span className="text-[9px] font-mono uppercase tracking-[0.28em] text-white/30">
+              Library
+            </span>
+          </div>
+          <span className="text-[9px] font-mono uppercase tracking-[0.18em] text-white/22">
+            {filtered.length} visible
+          </span>
+        </div>
+
         {filtered.length === 0 ? (
-          <EmptyState />
+          <div className="mx-auto max-w-2xl py-20 text-center">
+            <p className="font-serif text-2xl text-white/80">No notes found.</p>
+            <p className="mt-3 text-white/45">Try a broader keyword.</p>
+          </div>
         ) : (
           <AnimatePresence mode="popLayout">
             <motion.div
@@ -927,7 +887,6 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     ).toLowerCase();
 
     const normalizedSlug = normalizePath(slug).toLowerCase();
-
     return docKind === "short" || normalizedSlug.startsWith("shorts/");
   });
 
@@ -944,22 +903,11 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     return bTime - aTime;
   });
 
-  console.log("[SHORTS_INDEX_GSP]", {
-    fromShorts: fromShorts.length,
-    fallbackShorts: fallbackShorts.length,
-    final: shorts.length,
-    sample: shorts.slice(0, 5).map((s) => ({
-      id: s.id,
-      slug: s.slug,
-      title: s.title,
-    })),
-  });
-
   return {
-    props: sanitizeData({
-      shorts,
+    props: {
+      shorts: sanitizeData(shorts),
       totalCount: shorts.length,
-    }),
+    },
     revalidate: 3600,
   };
 };

@@ -1,14 +1,15 @@
 /**
- * lib/contentlayer-helper.ts — SSOT CONTENT ADAPTER (SERVER-ONLY)
+ * lib/contentlayer-helper.ts — SSOT CONTENT ADAPTER
  *
- * Non-negotiables:
- * - No require("contentlayer/generated") in ESM runtime (Next 16 can run without require)
- * - Deterministic on Windows + Linux
- * - Always returns docs when .contentlayer/generated/<Type>/_index.json exists
- * - Every document exposes canonical slug fields: collectionSlug, urlSlug, href
+ * Guarantees:
+ * - Never relies on require("contentlayer/generated")
+ * - Reads deterministic JSON indexes from .contentlayer/generated/<Type>/_index.json
+ * - Enriches every document with canonical slug fields
+ * - Provides stable collection getters and by-slug lookup helpers
  *
  * IMPORTANT:
- * - Server-only module. Do not import from client components.
+ * - Server-intended module. Do not import from client components.
+ * - Do NOT use `import "server-only"` here because this project still uses Pages Router.
  */
 
 import fs from "fs";
@@ -16,12 +17,11 @@ import path from "path";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier } from "@/lib/access/tier-policy";
-import { 
-  buildCanonicalSlugFields, 
+import {
+  buildCanonicalSlugFields,
   inferCollectionFromDoc,
   normalizePath,
   stripContentPrefix,
-  type CanonicalSlugFields 
 } from "./content/canonical";
 
 export type DocKind =
@@ -65,7 +65,7 @@ export type ContentDoc = {
   excerpt?: string;
   description?: string;
   summary?: string;
-  tags?: any[];
+  tags?: unknown[];
   category?: string;
   date?: string;
   eventDate?: string;
@@ -80,7 +80,7 @@ export type ContentDoc = {
   imageAspect?: string;
   aspect?: string;
   theme?: string;
-  metadata?: any;
+  metadata?: unknown;
   _raw?: {
     flattenedPath?: string;
     sourceFilePath?: string;
@@ -88,7 +88,7 @@ export type ContentDoc = {
     sourceFileDir?: string;
     contentType?: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type CardProps = {
@@ -123,77 +123,83 @@ export const documentKinds: DocKind[] = [
   "vault",
 ];
 
-function isServerRuntime() {
-  return typeof window === "undefined";
+const GENERATED_ROOT = path.join(process.cwd(), ".contentlayer", "generated");
+
+let cache: ContentDoc[] | null = null;
+
+function assertServerRuntime(): void {
+  if (typeof window !== "undefined") {
+    throw new Error(
+      "lib/contentlayer-helper.ts was imported into a browser bundle. Move this access behind server data functions."
+    );
+  }
 }
 
-function safeString(v: unknown, fallback = ""): string {
-  return typeof v === "string" && v.trim() ? v.trim() : fallback;
+function safeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
-function lower(v: unknown): string {
-  return safeString(v, "").toLowerCase();
+
+function lower(value: unknown): string {
+  return safeString(value).toLowerCase();
 }
-function safeArray(v: unknown): string[] {
-  return Array.isArray(v) ? v.map((x) => safeString(x)).filter(Boolean) : [];
+
+function safeArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.map((item) => safeString(item)).filter(Boolean)
+    : [];
 }
-function safeISO(v: unknown): string | null {
-  const s = safeString(v, "");
+
+function safeISO(value: unknown): string | null {
+  const s = safeString(value);
   if (!s) return null;
   const t = Date.parse(s);
   if (!Number.isFinite(t)) return null;
   return new Date(t).toISOString();
 }
 
-export function sanitizeData<T>(v: T): T {
-  return JSON.parse(JSON.stringify(v)) as T;
+export function sanitizeData<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 export function normalizeSlug(input: string): string {
   return normalizePath(input);
 }
 
-/** tolerate content/<collection>/... */
 function normalizeFlattenedPath(input: string): string {
   return stripContentPrefix(normalizePath(input));
 }
 
-export function isPublished(doc: any): boolean {
+export function isPublished(doc: ContentDoc | null | undefined): boolean {
   if (!doc) return false;
-  if (doc?.draft === true) return false;
-  if (doc?.published === false) return false;
+  if (doc.draft === true) return false;
+  if (doc.published === false) return false;
   return true;
 }
 
-export function getAccessLevel(doc: any): AccessTier {
-  return normalizeRequiredTier((doc?.tier || doc?.accessLevel || doc?.classification || "public") as any) as AccessTier;
+export function getAccessLevel(doc: ContentDoc | null | undefined): AccessTier {
+  return normalizeRequiredTier(
+    (doc?.tier || doc?.accessLevel || doc?.classification || "public") as string
+  ) as AccessTier;
 }
 
-function fp(doc: any): string {
+function getRawPath(doc: ContentDoc | null | undefined): string {
   const raw =
     safeString(doc?._raw?.flattenedPath) ||
     safeString(doc?._raw?.sourceFilePath) ||
-    safeString(doc?.slug) ||
-    "";
-  return lower(normalizeFlattenedPath(raw));
+    safeString(doc?.slugComputed) ||
+    safeString(doc?.slug);
+  return normalizeFlattenedPath(raw);
 }
 
-/**
- * Priority order for kind inference:
- * 1) docKind (SSOT truth) — highest authority
- * 2) kind/type fields (legacy)
- * 3) Folder inference (always reliable)
- */
-export function getDocKind(doc: any): DocKind {
-  // docKind must win over everything else
-  const k = lower(doc?.docKind || doc?.kind || doc?.type);
+export function getDocKind(doc: ContentDoc | null | undefined): DocKind {
+  const explicit = lower(doc?.docKind || doc?.kind || doc?.type);
 
-  // Explicit safeguard: lexicon is always lexicon
-  if (k === "lexicon") return "lexicon";
+  if (explicit === "lexicon") return "lexicon";
+  if (explicit && (documentKinds as string[]).includes(explicit)) {
+    return explicit as DocKind;
+  }
 
-  if (k && (documentKinds as string[]).includes(k)) return k as DocKind;
-
-  // Folder inference (always reliable)
-  const p = fp(doc);
+  const p = lower(getRawPath(doc));
 
   if (p.startsWith("lexicon/")) return "lexicon";
   if (p.startsWith("shorts/")) return "short";
@@ -204,15 +210,251 @@ export function getDocKind(doc: any): DocKind {
   if (p.startsWith("downloads/")) return "download";
   if (p.startsWith("prints/")) return "print";
   if (p.startsWith("resources/")) return "resource";
-  if (p.startsWith("strategy/")) return "strategy";
+  if (p.startsWith("strategy/") || p.startsWith("strategies/")) return "strategy";
   if (p.startsWith("vault/")) return "vault";
   if (p.startsWith("blog/") || p.startsWith("posts/")) return "post";
 
   return "unknown";
 }
 
-function buildHref(kind: DocKind, bareSlug: string): string {
-  const s = normalizeSlug(bareSlug);
+function parseIndexJson(jsonPath: string): ContentDoc[] {
+  assertServerRuntime();
+
+  try {
+    const raw = fs.readFileSync(jsonPath, "utf8");
+    const data = JSON.parse(raw) as unknown;
+
+    if (Array.isArray(data)) return data as ContentDoc[];
+
+    if (data && typeof data === "object") {
+      const obj = data as Record<string, unknown>;
+
+      if (Array.isArray(obj.documents)) return obj.documents as ContentDoc[];
+      if (Array.isArray(obj.allDocuments)) return obj.allDocuments as ContentDoc[];
+
+      const out: ContentDoc[] = [];
+      for (const value of Object.values(obj)) {
+        if (Array.isArray(value)) out.push(...(value as ContentDoc[]));
+      }
+      return out;
+    }
+
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function loadAllFromGeneratedIndexes(): ContentDoc[] {
+  assertServerRuntime();
+
+  if (!fs.existsSync(GENERATED_ROOT)) return [];
+
+  const dirs = fs
+    .readdirSync(GENERATED_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory());
+
+  const docs: ContentDoc[] = [];
+
+  for (const dir of dirs) {
+    const indexPath = path.join(GENERATED_ROOT, dir.name, "_index.json");
+    if (fs.existsSync(indexPath)) {
+      docs.push(...parseIndexJson(indexPath));
+    }
+  }
+
+  return docs;
+}
+
+export function enrichWithCanonicalSlugs<T extends ContentDoc>(doc: T): T {
+  if (!doc) return doc;
+
+  const collection = inferCollectionFromDoc(doc);
+  if (!collection) return doc;
+
+  const rawSlug =
+    safeString(doc.slugComputed) ||
+    safeString(doc.slug) ||
+    safeString(doc._raw?.flattenedPath) ||
+    safeString(doc._raw?.sourceFilePath);
+
+  const canonical = buildCanonicalSlugFields(collection, rawSlug);
+  if (!canonical) return doc;
+
+  return {
+    ...doc,
+    collection: canonical.collection,
+    collectionSlug: canonical.collectionSlug,
+    urlSlug: canonical.urlSlug,
+    href: canonical.href,
+  };
+}
+
+function dedupeKey(doc: ContentDoc): string {
+  return (
+    safeString(doc._id) ||
+    safeString(doc._raw?.flattenedPath) ||
+    safeString(doc._raw?.sourceFilePath) ||
+    safeString(doc.slugComputed) ||
+    safeString(doc.slug) ||
+    JSON.stringify(doc)
+  );
+}
+
+export function getAllContentlayerDocs(): ContentDoc[] {
+  assertServerRuntime();
+
+  if (cache) return cache;
+
+  const sourceDocs = loadAllFromGeneratedIndexes();
+  const seen = new Set<string>();
+  const out: ContentDoc[] = [];
+
+  for (const rawDoc of sourceDocs) {
+    const key = dedupeKey(rawDoc);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(enrichWithCanonicalSlugs(rawDoc));
+  }
+
+  cache = out;
+  return cache;
+}
+
+function candidateKeys(doc: ContentDoc): string[] {
+  const rawPath = getRawPath(doc);
+  const slug = normalizeSlug(safeString(doc.slug));
+  const slugComputed = normalizeSlug(safeString(doc.slugComputed));
+  const urlSlug = normalizeSlug(safeString(doc.urlSlug));
+  const collectionSlug = normalizeFlattenedPath(safeString(doc.collectionSlug));
+  const href = normalizeSlug(safeString(doc.href).replace(/^\/+/, ""));
+
+  return [rawPath, slug, slugComputed, urlSlug, collectionSlug, href].filter(Boolean);
+}
+
+export function getDocBySlug(slug: string): ContentDoc | null {
+  const needle = normalizeFlattenedPath(String(slug || ""));
+  if (!needle) return null;
+
+  const docs = getAllContentlayerDocs();
+
+  for (const doc of docs) {
+    const keys = candidateKeys(doc);
+    if (keys.includes(needle)) return doc;
+
+    const docKind = getDocKind(doc);
+    const urlSlug = normalizeSlug(safeString(doc.urlSlug));
+    if (urlSlug) {
+      const maybeCollectionMatch =
+        (docKind === "short" && needle === `shorts/${urlSlug}`) ||
+        (docKind === "brief" && needle === `briefs/${urlSlug}`) ||
+        (docKind === "post" && (needle === `blog/${urlSlug}` || needle === `posts/${urlSlug}`)) ||
+        (docKind === "canon" && (needle === `canon/${urlSlug}` || needle === `canons/${urlSlug}`)) ||
+        (docKind === "book" && needle === `books/${urlSlug}`) ||
+        (docKind === "event" && needle === `events/${urlSlug}`) ||
+        (docKind === "download" && needle === `downloads/${urlSlug}`) ||
+        (docKind === "print" && needle === `prints/${urlSlug}`) ||
+        (docKind === "resource" && needle === `resources/${urlSlug}`) ||
+        (docKind === "strategy" &&
+          (needle === `strategy/${urlSlug}` || needle === `strategies/${urlSlug}`)) ||
+        (docKind === "lexicon" && needle === `lexicon/${urlSlug}`) ||
+        (docKind === "vault" && needle === `vault/${urlSlug}`);
+
+      if (maybeCollectionMatch) return doc;
+    }
+  }
+
+  return null;
+}
+
+function byKind(kind: DocKind): ContentDoc[] {
+  return getAllContentlayerDocs().filter((doc) => getDocKind(doc) === kind);
+}
+
+export const getAllBooks = () => byKind("book");
+export const getAllCanons = () => byKind("canon");
+export const getAllDownloads = () => byKind("download");
+export const getAllPosts = () => byKind("post");
+export const getAllEvents = () => byKind("event");
+export const getAllPrints = () => byKind("print");
+export const getAllResources = () => byKind("resource");
+export const getAllStrategies = () => byKind("strategy");
+export const getAllShorts = () => byKind("short");
+export const getAllBriefs = () => byKind("brief");
+export const getAllLexicon = () => byKind("lexicon");
+export const getAllVault = () => byKind("vault");
+
+function getByCollectionSlug(collections: string[], slug: string): ContentDoc | null {
+  const normalizedSlug = normalizeSlug(String(slug || ""));
+  if (!normalizedSlug) return null;
+
+  const wanted = collections.map((collection) => `${collection}/${normalizedSlug}`);
+  return (
+    getAllContentlayerDocs().find((doc) => {
+      const collectionSlug = normalizeFlattenedPath(safeString(doc.collectionSlug));
+      return wanted.includes(collectionSlug);
+    }) || null
+  );
+}
+
+export function getPostBySlug(slug: string) {
+  return getByCollectionSlug(["blog", "posts"], slug);
+}
+
+export function getBookBySlug(slug: string) {
+  return getByCollectionSlug(["books"], slug);
+}
+
+export function getDownloadBySlug(slug: string) {
+  return getByCollectionSlug(["downloads"], slug);
+}
+
+export function getResourceBySlug(slug: string) {
+  return getByCollectionSlug(["resources"], slug);
+}
+
+export function getEventBySlug(slug: string) {
+  return getByCollectionSlug(["events"], slug);
+}
+
+export function getPrintBySlug(slug: string) {
+  return getByCollectionSlug(["prints"], slug);
+}
+
+export function getStrategyBySlug(slug: string) {
+  return getByCollectionSlug(["strategy", "strategies"], slug);
+}
+
+export function getCanonBySlug(slug: string) {
+  return getByCollectionSlug(["canon", "canons"], slug);
+}
+
+export function getBriefBySlug(slug: string) {
+  return getByCollectionSlug(["briefs"], slug);
+}
+
+export function getShortBySlug(slug: string) {
+  return getByCollectionSlug(["shorts"], slug);
+}
+
+export function getLexiconBySlug(slug: string) {
+  return getByCollectionSlug(["lexicon"], slug);
+}
+
+export function getVaultBySlug(slug: string) {
+  return getByCollectionSlug(["vault"], slug);
+}
+
+export function getServerBookBySlug(slug: string) {
+  return getBookBySlug(slug);
+}
+
+export function getServerCanonBySlug(slug: string) {
+  return getCanonBySlug(slug);
+}
+
+function defaultHrefForKind(kind: DocKind, urlSlug: string): string {
+  const s = normalizeSlug(urlSlug);
   if (!s) return "/";
 
   switch (kind) {
@@ -243,285 +485,69 @@ function buildHref(kind: DocKind, bareSlug: string): string {
     case "vault":
       return `/vault/${s}`;
     default:
-      return s.startsWith("/") ? s : `/${s}`;
+      return `/${s}`;
   }
 }
 
-function stripPrefix(input: string, prefix: string) {
-  const re = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\/`, "i");
-  return input.replace(re, "");
-}
-
-function computeRawSlug(doc: any): string {
-  const raw =
-    safeString(doc?.slugComputed) ||
-    safeString(doc?.slug) ||
-    safeString(doc?._raw?.flattenedPath) ||
-    safeString(doc?._raw?.sourceFilePath) ||
-    "";
-  return normalizeFlattenedPath(raw);
-}
-
-function computeBareSlug(kind: DocKind, raw: string): string {
-  let s = normalizeFlattenedPath(raw);
-  if (!s) return "";
-
-  if (kind === "short") s = stripPrefix(s, "shorts");
-  else if (kind === "brief" || kind === "dispatch" || kind === "intelligence") s = stripPrefix(s, "briefs");
-  else if (kind === "post") {
-    s = stripPrefix(s, "blog");
-    s = stripPrefix(s, "posts");
-  } else if (kind === "canon") s = stripPrefix(s, "canon");
-  else if (kind === "book") s = stripPrefix(s, "books");
-  else if (kind === "event") s = stripPrefix(s, "events");
-  else if (kind === "download") s = stripPrefix(s, "downloads");
-  else if (kind === "print") s = stripPrefix(s, "prints");
-  else if (kind === "resource") s = stripPrefix(s, "resources");
-  else if (kind === "strategy") s = stripPrefix(s, "strategy");
-  else if (kind === "lexicon") s = stripPrefix(s, "lexicon");
-  else if (kind === "vault") s = stripPrefix(s, "vault");
-
-  return normalizeSlug(s);
-}
-
-/* -------------------- JSON index loader -------------------- */
-const GENERATED_ROOT = path.join(process.cwd(), ".contentlayer", "generated");
-
-let _cache: any[] | null = null;
-
-function parseIndexJson(jsonPath: string): any[] {
-  try {
-    const raw = fs.readFileSync(jsonPath, "utf8");
-    const data = JSON.parse(raw);
-
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray((data as any).documents)) return (data as any).documents;
-    if (data && Array.isArray((data as any).allDocuments)) return (data as any).allDocuments;
-
-    if (data && typeof data === "object") {
-      const out: any[] = [];
-      for (const v of Object.values(data)) if (Array.isArray(v)) out.push(...v);
-      return out;
-    }
-    return [];
-  } catch {
-    return [];
-  }
-}
-
-function loadAllFromGeneratedIndexes(): any[] {
-  if (!fs.existsSync(GENERATED_ROOT)) return [];
-  const dirs = fs.readdirSync(GENERATED_ROOT, { withFileTypes: true }).filter((d) => d.isDirectory());
-
-  const buckets: any[] = [];
-  for (const d of dirs) {
-    const idx = path.join(GENERATED_ROOT, d.name, "_index.json");
-    if (fs.existsSync(idx)) buckets.push(...parseIndexJson(idx));
-  }
-  return buckets;
-}
-
-/**
- * Enrich a document with canonical slug fields
- * This is called once per document at the adapter level
- */
-export function enrichWithCanonicalSlugs(doc: any): any {
-  if (!doc) return doc;
-  
-  // Skip if already enriched with valid slugs
-  if (doc.collectionSlug && doc.urlSlug && doc.href) {
-    return doc;
-  }
-
-  const collection = inferCollectionFromDoc(doc);
-  if (!collection) return doc;
-
-  // Try different sources for the raw slug
-  const rawSlug = 
-    doc.slugComputed ||
-    doc.slug ||
-    doc._raw?.flattenedPath ||
-    doc._raw?.sourceFilePath ||
-    "";
-
-  const canonical = buildCanonicalSlugFields(collection, rawSlug);
-  if (!canonical) return doc;
-
-  return {
-    ...doc,
-    collection: canonical.collection,
-    collectionSlug: canonical.collectionSlug,
-    urlSlug: canonical.urlSlug,
-    href: canonical.href,
-  };
-}
-
-export function getAllContentlayerDocs(): any[] {
-  if (!isServerRuntime()) {
-    throw new Error("lib/contentlayer-helper.ts is server-only but was imported in a client bundle.");
-  }
-  if (_cache) return _cache;
-
-  const docs = loadAllFromGeneratedIndexes();
-
-  // de-dupe and enrich with canonical slugs
-  const seen = new Set<string>();
-  const out: any[] = [];
-  for (const doc of docs) {
-    const key =
-      safeString(doc?._id) ||
-      safeString(doc?._raw?.flattenedPath) ||
-      safeString(doc?._raw?.sourceFilePath) ||
-      safeString(doc?.slug) ||
-      "";
-    const stable = key || JSON.stringify(doc);
-    if (!seen.has(stable)) {
-      seen.add(stable);
-      out.push(enrichWithCanonicalSlugs(doc));
-    }
-  }
-
-  _cache = out;
-  return out;
-}
-
-function matchesSlug(doc: any, normalized: string): boolean {
-  // Use canonical fields for matching
-  return (
-    doc.collectionSlug === normalized ||
-    doc.urlSlug === normalized ||
-    doc.href === `/${normalized}` ||
-    doc.href === normalized
-  );
-}
-
-export function getDocBySlug(slug: string): any | null {
-  const s = normalizeFlattenedPath(String(slug || ""));
-  if (!s) return null;
-
-  const docs = getAllContentlayerDocs();
-  return docs.find((d) => matchesSlug(d, s) || matchesSlug(d, `/${s}`) || matchesSlug(d, `content/${s}`)) || null;
-}
-
-/* COLLECTION GETTERS */
-function byKind(kind: DocKind): any[] {
-  return getAllContentlayerDocs().filter((d) => getDocKind(d) === kind);
-}
-
-export const getAllBooks = () => byKind("book");
-export const getAllCanons = () => byKind("canon");
-export const getAllDownloads = () => byKind("download");
-export const getAllPosts = () => byKind("post");
-export const getAllEvents = () => byKind("event");
-export const getAllPrints = () => byKind("print");
-export const getAllResources = () => byKind("resource");
-export const getAllStrategies = () => byKind("strategy");
-export const getAllShorts = () => byKind("short");
-export const getAllBriefs = () => byKind("brief");
-export const getAllLexicon = () => byKind("lexicon");
-export const getAllVault = () => byKind("vault");
-
-/* BY-SLUG LOOKUPS using canonical fields */
-function getByCollectionSlug(collection: string, slug: string): any | null {
-  const s = normalizeSlug(String(slug || ""));
-  if (!s) return null;
-  
-  const docs = getAllContentlayerDocs();
-  const collectionSlug = `${collection}/${s}`;
-  
-  return docs.find(d => d.collectionSlug === collectionSlug) || null;
-}
-
-export function getPostBySlug(slug: string) {
-  return getByCollectionSlug("blog", slug) || getByCollectionSlug("posts", slug);
-}
-
-export function getBookBySlug(slug: string) {
-  return getByCollectionSlug("books", slug);
-}
-
-export function getDownloadBySlug(slug: string) {
-  return getByCollectionSlug("downloads", slug);
-}
-
-export function getResourceBySlug(slug: string) {
-  return getByCollectionSlug("resources", slug);
-}
-
-export function getEventBySlug(slug: string) {
-  return getByCollectionSlug("events", slug);
-}
-
-export function getPrintBySlug(slug: string) {
-  return getByCollectionSlug("prints", slug);
-}
-
-export function getStrategyBySlug(slug: string) {
-  return getByCollectionSlug("strategy", slug) || getByCollectionSlug("strategies", slug);
-}
-
-export function getCanonBySlug(slug: string) {
-  return getByCollectionSlug("canon", slug) || getByCollectionSlug("canons", slug);
-}
-
-export function getBriefBySlug(slug: string) {
-  return getByCollectionSlug("briefs", slug);
-}
-
-/**
- * Get a short document by slug using canonical fields
- * No more slug guessing or path manipulation
- */
-export function getShortBySlug(slug: string) {
-  const input = normalizeSlug(String(slug || ""));
-  if (!input) return null;
-
-  const shorts = getAllShorts(); // Already enriched with canonical fields
-  
-  // Match against canonical fields only
-  return (
-    shorts.find(d => d.collectionSlug === `shorts/${input}`) ||
-    shorts.find(d => d.urlSlug === input) ||
-    shorts.find(d => d.href === `/shorts/${input}`) ||
-    null
-  );
-}
-
-export function getServerBookBySlug(slug: string) {
-  return getBookBySlug(slug);
-}
-
-export function getServerCanonBySlug(slug: string) {
-  return getCanonBySlug(slug);
-}
-
-/* getCardProps using canonical fields */
-export function getCardProps(doc: any): CardProps {
-  // Ensure doc has canonical slugs
+export function getCardProps(doc: ContentDoc): CardProps {
   const enriched = enrichWithCanonicalSlugs(doc);
-  
   const kind = getDocKind(enriched);
-  const title = safeString(enriched?.title, "Untitled");
-  const description = safeString(enriched?.excerpt || enriched?.description || enriched?.summary || "", "") || null;
 
-  // Use canonical fields directly - no manipulation needed
-  const slug = enriched.urlSlug || "unknown";
-  const href = enriched.href || buildHref(kind, slug);
+  const title = safeString(enriched.title, "Untitled");
+  const description =
+    safeString(enriched.excerpt || enriched.description || enriched.summary || "", "") || null;
 
-  const dateISO = safeISO(enriched?.date || enriched?.eventDate || enriched?.startDate || enriched?.datetime || enriched?.startsAt) ?? null;
-  const tags = safeArray(enriched?.tags);
+  const slug = normalizeSlug(safeString(enriched.urlSlug) || safeString(enriched.slug) || "unknown");
+  const href = safeString(enriched.href) || defaultHrefForKind(kind, slug);
 
-  const coverImage = safeString(enriched?.coverImage || enriched?.image || enriched?.heroImage || enriched?.ogImage || "", "") || null;
-  const coverAspect = safeString(enriched?.coverAspect || enriched?.imageAspect || enriched?.aspect || "", "") || null;
-  const category = safeString(enriched?.category || enriched?.theme || enriched?.tag || "", "") || null;
+  const dateISO =
+    safeISO(
+      enriched.date ||
+        enriched.eventDate ||
+        enriched.startDate ||
+        enriched.datetime ||
+        enriched.startsAt
+    ) ?? null;
 
+  const tags = safeArray(enriched.tags);
+  const coverImage =
+    safeString(
+      enriched.coverImage ||
+        enriched.image ||
+        enriched.heroImage ||
+        enriched.ogImage ||
+        "",
+      ""
+    ) || null;
+
+  const coverAspect =
+    safeString(enriched.coverAspect || enriched.imageAspect || enriched.aspect || "", "") || null;
+
+  const category = safeString(enriched.category || enriched.theme || "", "") || null;
   const tier = getAccessLevel(enriched);
   const published = isPublished(enriched);
 
-  return { kind, slug, href, title, description, dateISO, tags, coverImage, coverAspect, category, tier, published };
+  return {
+    kind,
+    slug,
+    href,
+    title,
+    description,
+    dateISO,
+    tags,
+    coverImage,
+    coverAspect,
+    category,
+    tier,
+    published,
+  };
 }
 
-export function toUiDoc(doc: any) {
+export function toUiDoc(doc: ContentDoc) {
   const props = getCardProps(doc);
-  return { ...props, id: safeString(doc?._id) || props.slug, raw: doc };
+  return {
+    ...props,
+    id: safeString(doc?._id) || props.slug,
+    raw: doc,
+  };
 }

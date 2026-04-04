@@ -1,17 +1,34 @@
-// lib/prisma.server.ts — SERVER-SIDE PRISMA BARREL
+// lib/prisma.server.ts — APP/SERVER SAFE PRISMA SINGLETON
 //
-// Single source of truth for database access.
-// Directives like "server-only" are removed to support the Pages Router 
-// while keeping DB logic isolated from the client bundle.
+// This file exists to provide a single server-side Prisma entrypoint
+// for server-only consumers. It must never be imported in client code.
 
-export {
-  prisma,
-  getPrisma,
-  safePrismaQuery,
-  checkDatabaseConnection,
-} from "@/lib/db/prisma";
+import "server-only";
 
-export { default } from "@/lib/db/prisma";
+import { PrismaClient, type Prisma } from "@prisma/client";
 
-export type PrismaClientType = import("@/lib/db/prisma").PrismaTransactionClient;
-export type { Prisma } from "@prisma/client";
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma_server__: PrismaClient | undefined;
+}
+
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    datasources: process.env.DATABASE_URL
+      ? { db: { url: process.env.DATABASE_URL } }
+      : undefined,
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  });
+}
+
+export const prisma: PrismaClient = global.__prisma_server__ ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  global.__prisma_server__ = prisma;
+}
+
+export const getPrisma = (): PrismaClient => prisma;
+
+export default prisma;
+export type { Prisma };
+export type PrismaClientType = PrismaClient;

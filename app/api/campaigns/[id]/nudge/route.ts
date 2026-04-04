@@ -1,3 +1,4 @@
+/* app/api/campaigns/[id]/nudge/route.ts — SOVEREIGN NUDGE DISPATCHER */
 import { db } from "@/lib/db";
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
@@ -9,26 +10,36 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // 0. Context extraction
     const body = await req.json().catch(() => ({}));
     const { participantId } = body;
     const campaignId = params.id;
 
-    // 1. Determine Target(s) with Strict Status Filtering
+    // 1. INITIALIZE PRISMA CLIENT via Institutional Wrapper
+    const prisma = await db.getPrismaClient();
+    if (!prisma) {
+      return new NextResponse("Institutional Database Connection Failure", { status: 500 });
+    }
+
+    // 2. Target Identification with Status Locking
     let targets = [];
 
     if (participantId) {
-      // Single Nudge Logic: Targeted intervention
-      const participant = await db.campaignParticipant.findUnique({
+      // Single Target Protocol
+      const participant = await prisma.campaignParticipant.findUnique({
         where: { id: participantId },
         include: { membership: true, campaign: true }
       });
-      // Only nudge if they haven't validated (completed) their telemetry
-      if (participant && participant.status !== 'completed') {
+      
+      // Verification: Ensure the participant belongs to the current campaign context
+      if (participant && 
+          participant.campaignId === campaignId && 
+          participant.status !== 'completed') {
         targets.push(participant);
       }
     } else {
-      // Bulk Nudge Logic: Find all incomplete participants for this specific campaign
-      targets = await db.campaignParticipant.findMany({
+      // Batch Target Protocol: Strictly exclude 'completed' nodes
+      targets = await prisma.campaignParticipant.findMany({
         where: { 
           campaignId: campaignId,
           status: { in: ['invited', 'opened'] } 
@@ -37,18 +48,19 @@ export async function POST(
       });
     }
 
+    // 3. Threshold Check
     if (targets.length === 0) {
       return NextResponse.json({ 
         success: true, 
-        message: "Registry Audit Complete: No eligible participants found for nudge." 
+        message: "Registry Audit Complete: No eligible nodes for intervention." 
       }, { status: 200 });
     }
 
-    // 2. Map Payload to Sovereign Visual Standard
+    // 4. Mapping to Sovereign Visual Standard
     const emailPayloads = targets.map((participant) => ({
       from: 'Sovereign OGR <audits@yourdomain.com>',
       to: participant.membership.userEmail,
-      subject: `Action Required: ${participant.campaign.title} Audit`,
+      subject: `Action Required: ${participant.campaign.title} Audit Calibration`,
       html: `
         <div style="font-family: 'Helvetica', sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #111; padding: 50px; background-color: #fff;">
           <div style="margin-bottom: 40px;">
@@ -58,7 +70,7 @@ export async function POST(
             ${participant.campaign.title}
           </h2>
           <p style="font-size: 14px; line-height: 1.6; color: #444; margin-bottom: 30px;">
-            Your institutional perspective is required to stabilize the resonance matrix for this audit window. The integrity of our current dataset depends on your node validation.
+            Your institutional perspective is required to stabilize the resonance matrix. The integrity of our current dataset depends on your node validation.
           </p>
           <div style="margin: 40px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/audit/${participant.id}" 
@@ -66,8 +78,8 @@ export async function POST(
               Resume Audit Protocol
             </a>
           </div>
-          <p style="font-size: 11px; color: #888; font-style: italic; margin-top: 40px; border-top: 1px solid #eee; pt: 20px;">
-            Sovereign Anonymity Guarantee: Your responses are mathematically decoupled from your identity.
+          <p style="font-size: 11px; color: #888; font-style: italic; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+            Sovereign Anonymity Guarantee: Your responses are mathematically decoupled from your identity within the telemetry layer.
           </p>
           <p style="font-size: 9px; color: #ccc; text-transform: uppercase; margin-top: 10px;">
             Ref ID: ${participant.id.split('-')[0].toUpperCase()}
@@ -76,7 +88,7 @@ export async function POST(
       `
     }));
 
-    // 3. Batched Dispatch (Handling Resend's 100-chunk limit)
+    // 5. Batch Processing Strategy (Chunked at 100 for Resend Limits)
     const CHUNK_SIZE = 100;
     for (let i = 0; i < emailPayloads.length; i += CHUNK_SIZE) {
       const chunk = emailPayloads.slice(i, i + CHUNK_SIZE);
@@ -89,7 +101,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error("[NUDGE_ERROR]", error);
+    console.error("[NUDGE_PROTOCOL_FAILURE]", error);
     return new NextResponse("Internal Diagnostic Error", { status: 500 });
   }
 }

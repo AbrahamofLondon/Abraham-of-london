@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* components/content/DirectorateOversight.tsx
-   INSTITUTIONAL READER SHELL — premium longform surface for essays, books, volumes, dossiers.
-*/
+/* components/content/DirectorateOversight.tsx */
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,6 +13,7 @@ import {
   FileText,
   Library,
 } from "lucide-react";
+
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { getTierLabel } from "@/lib/access/tier-policy";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
@@ -39,7 +37,7 @@ type DirectorateOversightProps = {
   requiredTier?: AccessTier;
   loading?: boolean;
   unlockError?: string | null;
-  activeCode?: string;
+  activeCode?: string | null;           // ← important: allow null
   emptyLabel?: string;
   childrenTopRight?: React.ReactNode;
 };
@@ -49,36 +47,27 @@ const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
 function formatDate(input?: string | null): string {
   if (!input) return "archive";
   const d = new Date(input);
-  if (Number.isNaN(d.getTime())) return "archive";
-  return d.toLocaleDateString("en-GB");
+  return Number.isNaN(d.getTime()) ? "archive" : d.toLocaleDateString("en-GB");
 }
 
 function normalizeReadTime(value?: string | number | null): string | null {
-  if (value === null || value === undefined || value === "") return null;
+  if (value == null || value === "") return null;
   return String(value);
 }
 
 function getResolvedCategory(kind: DirectorateKind, category?: string): string {
-  if (category && String(category).trim()) return String(category).trim();
+  if (category?.trim()) return category.trim();
   switch (kind) {
-    case "book":
-      return "Book";
-    case "volume":
-      return "Volume";
-    case "essay":
-      return "Essay";
-    default:
-      return "Document";
+    case "book": return "Book";
+    case "volume": return "Volume";
+    case "essay": return "Essay";
+    default: return "Document";
   }
 }
 
 function EmptyStateIcon({ kind }: { kind: DirectorateKind }) {
-  if (kind === "book" || kind === "volume") {
-    return <BookOpen className="mx-auto mb-3 h-6 w-6 text-white/30" />;
-  }
-  if (kind === "essay") {
-    return <FileText className="mx-auto mb-3 h-6 w-6 text-white/30" />;
-  }
+  if (kind === "book" || kind === "volume") return <BookOpen className="mx-auto mb-3 h-6 w-6 text-white/30" />;
+  if (kind === "essay") return <FileText className="mx-auto mb-3 h-6 w-6 text-white/30" />;
   return <Library className="mx-auto mb-3 h-6 w-6 text-white/30" />;
 }
 
@@ -105,50 +94,65 @@ export default function DirectorateOversight({
   const resolvedCover = cover || DEFAULT_COVER;
   const resolvedCategory = getResolvedCategory(kind, category);
   const resolvedReadTime = normalizeReadTime(readTime);
-  const hasContent = Boolean(String(activeCode || "").trim());
+
+  // === CRITICAL: Clean and validate the code before rendering ===
+  const cleanCode = React.useMemo(() => {
+    if (!activeCode || typeof activeCode !== "string") return "";
+    const trimmed = activeCode.trim();
+
+    // Reject obvious React runtime garbage / minified bundles
+    if (
+      trimmed.length > 500 &&
+      (trimmed.includes("Object.create") ||
+       trimmed.includes("getOwnPropertyDescriptor") ||
+       trimmed.includes("react-dom-client"))
+    ) {
+      console.warn("[DirectorateOversight] Detected invalid MDX code (React runtime leak). Skipping render.");
+      return "";
+    }
+    return trimmed;
+  }, [activeCode]);
+
+  const hasValidContent = cleanCode.length > 30; // reasonable minimum for real content
 
   return (
     <>
-      {/* Hero / Metadata Section */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-white/10 bg-black">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 aol-vignette" />
           <div className="absolute inset-0 aol-grain opacity-[0.10]" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-          <div className="absolute inset-y-0 right-0 hidden w-[38%] bg-gradient-to-l from-white/[0.02] to-transparent lg:block" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-6xl px-6 pb-10 pt-[calc(var(--aol-header-h,88px)+2rem)] lg:px-10">
           <div className="flex items-center justify-between gap-6">
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 transition-colors hover:bg-white/[0.06]"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 transition hover:bg-white/[0.06]"
             >
               <ArrowLeft className="h-4 w-4 text-white/70" />
-              <span className="aol-micro text-white/55">{backLabel}</span>
+              <span className="text-sm text-white/55">{backLabel}</span>
             </Link>
 
-            <div className="flex flex-wrap items-center justify-end gap-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-              {requiredTier !== "public" ? (
+            <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+              {requiredTier !== "public" && (
                 <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-amber-400">
-                  <Lock className="h-3 w-3" />
-                  {getTierLabel(requiredTier)}
+                  <Lock className="h-3 w-3" /> {getTierLabel(requiredTier)}
                 </span>
-              ) : null}
-              {resolvedReadTime ? (
+              )}
+              {resolvedReadTime && (
                 <span className="inline-flex items-center gap-2">
-                  <Clock3 className="h-3.5 w-3.5" />
-                  {resolvedReadTime}
+                  <Clock3 className="h-3.5 w-3.5" /> {resolvedReadTime}
                 </span>
-              ) : null}
+              )}
               {childrenTopRight}
             </div>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-12">
+          <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_24px_90px_rgba(0,0,0,0.38)]">
-                <div className="relative w-full" style={{ aspectRatio: "16 / 10" }}>
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+                <div className="relative w-full" style={{ aspectRatio: "16/10" }}>
                   <Image
                     src={resolvedCover}
                     alt={title}
@@ -157,61 +161,33 @@ export default function DirectorateOversight({
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 720px"
                   />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 ring-1 ring-inset ring-white/5"
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 </div>
               </div>
             </div>
 
             <div className="lg:col-span-7">
-              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
-                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
-                  {resolvedCategory}
-                </span>
+              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs">
+                <span className="text-amber-200/60">{resolvedCategory}</span>
                 <span className="h-1 w-1 rounded-full bg-white/20" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-                  {formatDate(date)}
-                </span>
-                {tags?.[0] ? (
+                <span className="text-white/35">{formatDate(date)}</span>
+                {tags?.[0] && (
                   <>
                     <span className="h-1 w-1 rounded-full bg-white/20" />
-                    <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-                      <Tag className="h-3.5 w-3.5" />
-                      {String(tags[0])}
-                    </span>
+                    <span className="text-white/35">{tags[0]}</span>
                   </>
-                ) : null}
+                )}
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl tracking-tight text-white/95 md:text-5xl">
+              <h1 className="mt-6 font-serif text-4xl tracking-tight text-white md:text-5xl">
                 {title}
               </h1>
 
-              {subtitle ? (
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-amber-200/55 md:text-base">
-                  {subtitle}
-                </p>
-              ) : null}
+              {subtitle && <p className="mt-4 text-lg text-amber-200/60">{subtitle}</p>}
+              {excerpt && <p className="mt-4 text-white/70">{excerpt}</p>}
 
-              {excerpt ? (
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/55 md:text-base">
-                  {excerpt}
-                </p>
-              ) : null}
-
-              <div className="mt-8 aol-hairline" />
-
-              <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.35em] text-white/30">
+              <div className="mt-8 h-px bg-white/10" />
+              <div className="mt-6 text-[10px] font-mono uppercase tracking-widest text-white/30">
                 {imprint}
               </div>
             </div>
@@ -219,51 +195,42 @@ export default function DirectorateOversight({
         </div>
       </section>
 
-      {/* Main Content + TOC Layout */}
+      {/* Content Area */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 py-14 lg:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Content Column */}
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           <div className="lg:col-span-9 order-2 lg:order-1">
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_24px_90px_rgba(0,0,0,0.26)] md:p-10">
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-8 md:p-12 shadow-xl">
               {unlockError ? (
-                <div className="mb-6 flex items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>{unlockError}</span>
+                <div className="mb-8 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-red-400 flex gap-3">
+                  <AlertCircle className="mt-0.5 h-5 w-5" />
+                  {unlockError}
                 </div>
-              ) : null}
-
-              {loading ? (
-                <div className="flex items-center justify-center py-14">
-                  <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+              ) : loading ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                 </div>
-              ) : hasContent ? (
-                <div className="prose-hardened aol-mdx-content">
-                  <SafeMDXRenderer code={activeCode} />
-                </div>
+              ) : hasValidContent ? (
+                <SafeMDXRenderer code={cleanCode} debug={process.env.NODE_ENV === "development"} />
               ) : (
-                <div className="py-10 text-center text-white/55">
+                <div className="py-20 text-center text-white/50">
                   <EmptyStateIcon kind={kind} />
-                  <div>{emptyLabel}</div>
+                  <p className="mt-4">{emptyLabel}</p>
                 </div>
               )}
             </div>
 
-            <div className="mt-10 aol-hairline" />
-
-            <div className="mt-8 text-center">
-              <div className="aol-micro text-white/35">{imprint}</div>
+            <div className="mt-10 h-px bg-white/10" />
+            <div className="mt-8 text-center text-[10px] font-mono tracking-widest text-white/30">
+              {imprint}
             </div>
           </div>
 
-          {/* TOC Sidebar – sticky on desktop */}
-          {hasContent && !loading && !unlockError ? (
+          {/* TOC Sidebar */}
+          {hasValidContent && !loading && !unlockError && (
             <div className="lg:col-span-3 order-1 lg:order-2 lg:sticky lg:top-24 h-fit">
-              <SafeTableOfContents
-                delayMs={400}
-                className="lg:-mr-4" // slight negative margin to align better
-              />
+              <SafeTableOfContents delayMs={600} />
             </div>
-          ) : null}
+          )}
         </div>
       </section>
     </>

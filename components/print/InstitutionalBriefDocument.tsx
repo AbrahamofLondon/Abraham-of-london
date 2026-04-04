@@ -22,6 +22,9 @@ import {
   extractKeyJudgements,
 } from "../renderers/renderBriefBody";
 
+/* -------------------------------------------------------------------------- */
+/* Type Definitions                                                           */
+/* -------------------------------------------------------------------------- */
 type LooseRecord = Record<string, unknown>;
 
 type SourceMeta = {
@@ -63,11 +66,15 @@ type BriefDocumentProps = {
   sourceMeta?: SourceMeta;
 };
 
-const PAPER = "#FCFBF7";
-const INK = "#111315";
-const BRASS = "#8A6A2F";
-const MIST = "#E8E1D4";
-const SOFT = "#4E5560";
+/* -------------------------------------------------------------------------- */
+/* Design Tokens — Premium Print Aesthetic                                    */
+/* -------------------------------------------------------------------------- */
+const PAPER = "#FDFBF7";
+const INK = "#1E1C1A";
+const BRASS = "#9B8A6B";
+const MIST = "#EDE8DE";
+const SOFT = "#6B655A";
+const PANEL = "#F9F6EF";
 
 const styles = StyleSheet.create({
   page: {
@@ -169,7 +176,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
     borderColor: MIST,
-    backgroundColor: "#F7F4EE",
+    backgroundColor: PANEL,
   },
 
   fallbackTitle: {
@@ -188,6 +195,9 @@ const styles = StyleSheet.create({
   },
 });
 
+/* -------------------------------------------------------------------------- */
+/* Safe Utilities — Production Hardened                                       */
+/* -------------------------------------------------------------------------- */
 function isObject(value: unknown): value is LooseRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -217,8 +227,8 @@ function mergeConfig(
   frontmatter: Record<string, unknown> | undefined
 ): LooseRecord {
   return {
-    ...(safeConfig(config)),
-    ...(safeConfig(frontmatter)),
+    ...safeConfig(config),
+    ...safeConfig(frontmatter),
   };
 }
 
@@ -241,15 +251,13 @@ function deriveClassification(
   watermark: WatermarkPayload | undefined
 ): string {
   const aol = deriveWatermarkAol(watermark);
-
-  return (
-    pickFirstString(
-      aol.classification,
-      config.classification,
-      config.tier,
-      "PUBLIC"
-    ).toUpperCase()
+  const classification = pickFirstString(
+    aol.classification,
+    config.classification,
+    config.tier,
+    "PUBLIC"
   );
+  return classification.toUpperCase();
 }
 
 function deriveReference(config: LooseRecord): string {
@@ -318,7 +326,6 @@ function deriveExecutiveSummaryBlock(
 ): string {
   const explicitSummary = pickFirstString(summaryText, config.summary, config.description);
   if (explicitSummary) return explicitSummary;
-
   return extractExecutiveSummary(resolvedContent);
 }
 
@@ -342,7 +349,6 @@ function buildAppendixRows(
   sourceMeta: SourceMeta | undefined
 ): Array<{ label: string; value: string }> {
   const aol = deriveWatermarkAol(watermark);
-
   const rows: Array<{ label: string; value: string }> = [];
 
   const reference = deriveReference(config);
@@ -371,6 +377,9 @@ function buildAppendixRows(
   return rows;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Main Component — Production Safe                                           */
+/* -------------------------------------------------------------------------- */
 export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
   config: configProp,
   content,
@@ -471,7 +480,7 @@ export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
             <View style={styles.bodyWrap}>{bodyNodes}</View>
           ) : (
             <View style={styles.fallbackBox}>
-              <Text style={styles.fallbackTitle}>Body unavailable</Text>
+              <Text style={styles.fallbackTitle}>Body Unavailable</Text>
               <Text style={styles.fallbackText}>
                 The document resolved successfully, but no structured body blocks
                 were produced by the renderer. The content source may be sparse,

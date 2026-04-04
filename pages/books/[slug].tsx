@@ -1,14 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/books/[slug].tsx — BOOK READER (SSG, SSOT slugs, tier-safe, pages-router safe) */
+/* pages/books/[slug].tsx */
+
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
+
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import DirectorateOversight from "@/components/content/DirectorateOversight";
+
 import { joinHref } from "@/lib/content/shared";
 import { sanitizeData, resolveDocCoverImage } from "@/lib/content/client-utils";
+import { getRenderableBody } from "@/lib/content/render-body";
+import { decodeBodyCodePayload } from "@/lib/content/client-codec";
+
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
   normalizeUserTier,
@@ -25,22 +31,35 @@ type Props = {
 
 const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
 
-function booksBareSlug(input: unknown): string {
-  let s = String(input ?? "")
+function safeString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+  return String(value);
+}
+
+function normalizePathish(input: unknown): string {
+  return safeString(input)
     .trim()
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
+}
+
+function booksBareSlug(input: unknown): string {
+  let s = normalizePathish(input);
+
   if (!s || s.includes("..")) return "";
+
   const stripOnce = (prefix: string) => {
-    const normalized = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
+    const normalized = `${prefix.replace(/^\/+/, "").replace(/\/+$/, "")}/`;
     if (s.toLowerCase().startsWith(normalized.toLowerCase())) {
       s = s.slice(normalized.length).replace(/^\/+/, "");
       return true;
     }
     return false;
   };
+
   let changed = true;
   while (changed) {
     changed = false;
@@ -48,20 +67,21 @@ function booksBareSlug(input: unknown): string {
     changed = stripOnce("vault") || changed;
     changed = stripOnce("books") || changed;
   }
-  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
+
+  s = normalizePathish(s).replace(/\.(md|mdx)$/i, "");
   if (!s || s.includes("..")) return "";
+
   return s;
 }
 
-function extractBodyCode(doc: any): string {
-  return String(
-    doc?.body?.code ||
-      doc?.bodyCode ||
-      doc?.content ||
-      doc?.mdx ||
-      doc?.body?.raw ||
-      (typeof doc?.body === "string" ? doc.body : "") ||
-      ""
+function pickBookSlug(doc: any): string {
+  return (
+    booksBareSlug(doc?.urlSlug) ||
+    booksBareSlug(doc?.collectionSlug) ||
+    booksBareSlug(doc?.slug) ||
+    booksBareSlug(doc?._raw?.flattenedPath) ||
+    booksBareSlug(doc?._raw?.sourceFilePath) ||
+    ""
   );
 }
 
@@ -87,19 +107,26 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
 
   const handleUnlock = React.useCallback(async () => {
     if (!needsAuth || !bareSlug) return;
+
     setUnlockError(null);
     setLoadingContent(true);
+
     try {
       const res = await fetch(`/api/books/${encodeURIComponent(bareSlug)}`, {
         method: "GET",
       });
+
       const json = await res.json().catch(() => ({}));
+
       if (!res.ok || !json?.ok) {
         setUnlockError(json?.reason || "UNLOCK_FAILED");
         return;
       }
-      if (typeof json?.bodyCode === "string" && json.bodyCode.trim()) {
-        setActiveCode(json.bodyCode);
+
+      const decoded = decodeBodyCodePayload(json);
+
+      if (decoded.trim()) {
+        setActiveCode(decoded);
       } else {
         setUnlockError("UNLOCK_PAYLOAD_MISSING");
       }
@@ -189,12 +216,12 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { getPublishedBooks } = await import("@/lib/content/server");
-  const books = getPublishedBooks() || [];
+  const books = (await getPublishedBooks()) || [];
+
   const paths = books
     .filter((b: any) => !b?.draft)
     .map((b: any) => {
-      const fp = String(b?._raw?.flattenedPath || b?.slug || "");
-      const bare = booksBareSlug(fp);
+      const bare = pickBookSlug(b);
       return bare ? { params: { slug: bare } } : null;
     })
     .filter(Boolean) as Array<{ params: { slug: string } }>;
@@ -208,11 +235,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     if (!bare) return { notFound: true };
 
     const { getPublishedBooks } = await import("@/lib/content/server");
+    const books = (await getPublishedBooks()) || [];
+
     const rawDoc =
-      getPublishedBooks().find((d: any) => {
-        const fp = String(d?._raw?.flattenedPath || d?.slug || "");
-        return booksBareSlug(fp) === bare;
-      }) || null;
+      books.find((d: any) => pickBookSlug(d) === bare) ||
+      books.find((d: any) => normalizePathish(d?.urlSlug) === bare) ||
+      books.find((d: any) => normalizePathish(d?.collectionSlug) === `books/${bare}`) ||
+      null;
 
     if (!rawDoc || rawDoc?.draft) {
       return { notFound: true };
@@ -220,12 +249,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
     const locked = requiredTier !== "public";
+    const renderBody = getRenderableBody(rawDoc);
 
     const doc = {
       ...rawDoc,
       slug: bare,
-      bodyCode: locked ? "" : extractBodyCode(rawDoc),
-      coverImage: resolveDocCoverImage(rawDoc),
+      bodyCode: locked ? "" : renderBody.code,
+      bodyMode: renderBody.mode,
+      coverImage: resolveDocCoverImage(rawDoc) || rawDoc?.coverImage || DEFAULT_COVER,
     };
 
     return {

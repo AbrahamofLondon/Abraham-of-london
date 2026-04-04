@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/vault/briefs/[slug].tsx — BRIEF READER (SSOT aligned with /api/briefs/[slug])
+// pages/vault/briefs/[slug].tsx
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -26,6 +26,8 @@ import {
   sanitizeData,
   normalizeSlug as normalizeContentSlug,
 } from "@/lib/content/server";
+import { getRenderableBody } from "@/lib/content/render-body";
+import { decodeBodyCodePayload } from "@/lib/content/client-codec";
 
 import type { TierDirective } from "@/lib/resources/tier-metadata";
 import type { AccessTier } from "@/lib/access/tier-policy";
@@ -118,15 +120,6 @@ function briefsBareSlug(input: unknown): string {
   return parts[parts.length - 1] || "";
 }
 
-function extractBodyCode(doc: any): string {
-  return safeString(
-    doc?.body?.code ||
-      doc?.bodyCode ||
-      doc?.content ||
-      "",
-  );
-}
-
 function isBriefDoc(doc: any): boolean {
   if (!doc) return false;
 
@@ -174,6 +167,43 @@ function getCombinedBriefs(): any[] {
     });
 }
 
+function looksLikeLeakedModuleCode(code: string): boolean {
+  const s = safeString(code).trim();
+  if (!s) return false;
+
+  return (
+    /\bObject\.defineProperty\s*\(\s*exports\b/.test(s) ||
+    /\bmodule\.exports\b/.test(s) ||
+    /\bexports\.[A-Za-z_$]/.test(s) ||
+    /\b__esModule\b/.test(s) ||
+    /\brequire\s*\(/.test(s) ||
+    /\bjsx_runtime\b/.test(s) ||
+    /\bvar\s+\w+\s*=\s*Object\.create/.test(s)
+  );
+}
+
+function pickRenderableBriefCode(doc: any, renderBody?: any): string {
+  const compiled =
+    safeString(renderBody?.code) ||
+    safeString(doc?.body?.code) ||
+    safeString(doc?.bodyCode);
+
+  const raw =
+    safeString(renderBody?.raw) ||
+    safeString(doc?.body?.raw) ||
+    safeString(doc?.content);
+
+  if (compiled && !looksLikeLeakedModuleCode(compiled)) {
+    return compiled;
+  }
+
+  if (raw) {
+    return raw;
+  }
+
+  return compiled || "";
+}
+
 function getMdxComponents(directive?: TierDirective) {
   return {
     h1: (p: any) => (
@@ -216,7 +246,6 @@ function getMdxComponents(directive?: TierDirective) {
         </Link>
       );
     },
-
     Note: (p: any) => <Note {...p} />,
     BriefAlert: (p: any) => <BriefAlert {...p} />,
     Callout: (p: any) => <Callout {...p} />,
@@ -240,8 +269,7 @@ const BriefPage: NextPage<Props> = ({
     safeString(brief?.summary) ||
     safeString(brief?.abstract) ||
     safeString(brief?.excerpt);
-  const coverImage =
-    resolveDocCoverImage(brief) || DEFAULT_COVER;
+  const coverImage = resolveDocCoverImage(brief) || DEFAULT_COVER;
 
   const required = normalizeRequiredTier(requiredTier);
   const needsAuth = required !== "public";
@@ -255,7 +283,9 @@ const BriefPage: NextPage<Props> = ({
   const canRead = !needsAuth || (!!session?.user && hasAccess(userTier, required));
   const directive = (session?.user as any)?.directive as TierDirective | undefined;
 
-  const [activeCode, setActiveCode] = React.useState<string>(brief?.bodyCode || "");
+  const [activeCode, setActiveCode] = React.useState<string>(
+    requiredTier === "public" ? safeString(brief?.bodyCode) : "",
+  );
   const [loadingContent, setLoadingContent] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
@@ -282,8 +312,13 @@ const BriefPage: NextPage<Props> = ({
         return;
       }
 
-      if (typeof json?.bodyCode === "string" && json.bodyCode.trim()) {
-        setActiveCode(json.bodyCode);
+      const decoded = decodeBodyCodePayload(json);
+      const raw = safeString((json as any)?.body?.raw || (json as any)?.content);
+      const nextCode =
+        decoded.trim() && !looksLikeLeakedModuleCode(decoded) ? decoded : raw;
+
+      if (nextCode.trim()) {
+        setActiveCode(nextCode);
       } else {
         setUnlockError("UNLOCK_PAYLOAD_MISSING");
       }
@@ -298,7 +333,7 @@ const BriefPage: NextPage<Props> = ({
     return (
       <Layout title={title}>
         <div className="flex min-h-screen items-center justify-center bg-black">
-          <div className="font-mono text-xs text-amber-500 animate-pulse">
+          <div className="animate-pulse font-mono text-xs text-amber-500">
             Verifying clearance...
           </div>
         </div>
@@ -537,6 +572,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
   const locked = requiredTier !== "public";
 
+  const renderBody = getRenderableBody(rawDoc);
+  const bodyCode = locked ? "" : pickRenderableBriefCode(rawDoc, renderBody);
+
   const recommendations: BriefRecommendation[] = docs
     .filter((doc: any) => {
       const docBare = briefsBareSlug(doc?.slug || doc?._raw?.flattenedPath || "");
@@ -551,7 +589,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const brief = {
     ...rawDoc,
     slug: bare,
-    bodyCode: locked ? "" : extractBodyCode(rawDoc),
+    bodyCode,
     coverImage: resolveDocCoverImage(rawDoc),
   };
 

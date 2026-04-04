@@ -1,18 +1,34 @@
-/* lib/pdf/renderers/renderBriefBody.tsx — INSTITUTIONAL BODY ORCHESTRATOR V4 */
+/* lib/pdf/renderers/renderBriefBody.tsx — INSTITUTIONAL BODY ORCHESTRATOR V5 */
 
 import React from "react";
 import type { ParsedBriefDocument, BriefBlock } from "./brief-types";
 import { parseBriefBody } from "./brief-parser";
 import { renderBriefBlock } from "./brief-blocks";
 
+/* -------------------------------------------------------------------------- */
+/* Safe Utilities — Production Hardened                                       */
+/* -------------------------------------------------------------------------- */
+const SAFE_CONFIG = {
+  MAX_SUMMARY_CHARS: 1800,
+  MAX_FIRST_PARAGRAPH_CHARS: 900,
+  MAX_KEY_JUDGEMENTS: 6,
+  MAX_BULLET_ITEMS: 6,
+} as const;
+
 function safeString(value: unknown): string {
   if (typeof value === "string") return value;
   if (value === null || value === undefined) return "";
-  return String(value);
+  try {
+    return String(value);
+  } catch {
+    return "";
+  }
 }
 
 function normalizeNewlines(value: string): string {
-  return safeString(value).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return safeString(value)
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
 }
 
 function normalizeLines(content: string): string[] {
@@ -26,6 +42,9 @@ function compactWhitespace(text: string): string {
     .trim();
 }
 
+/* -------------------------------------------------------------------------- */
+/* Sanitization — Safe Removal of MDX/JSX Markers                             */
+/* -------------------------------------------------------------------------- */
 function stripFenceBlocks(content: string): string {
   return content
     .replace(/```[\s\S]*?```/g, "")
@@ -88,6 +107,9 @@ function sanitizeSource(content: string): string {
   return compactWhitespace(sanitized);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Content Analysis — Safe Extraction Functions                               */
+/* -------------------------------------------------------------------------- */
 function isHeading(line: string): boolean {
   return /^#{1,6}\s+/.test(line.trim());
 }
@@ -103,24 +125,17 @@ function getHeadingText(line: string): string {
 
 function isExecutiveSummaryHeading(line: string): boolean {
   const heading = getHeadingText(line).toLowerCase();
-  return (
-    heading === "executive summary" ||
-    heading === "summary" ||
-    heading === "management summary" ||
-    heading === "overview"
-  );
+  const summaryKeywords = ["executive summary", "summary", "management summary", "overview", "executive overview"];
+  return summaryKeywords.some(keyword => heading === keyword);
 }
 
 function isKeyJudgementsHeading(line: string): boolean {
   const heading = getHeadingText(line).toLowerCase();
-  return (
-    heading === "key judgements" ||
-    heading === "key judgments" ||
-    heading === "judgements" ||
-    heading === "judgments" ||
-    heading === "key findings" ||
-    heading === "findings"
-  );
+  const judgementKeywords = [
+    "key judgements", "key judgments", "judgements", "judgments",
+    "key findings", "findings", "critical findings", "principal findings"
+  ];
+  return judgementKeywords.some(keyword => heading === keyword);
 }
 
 function isBulletLine(line: string): boolean {
@@ -144,10 +159,11 @@ function isDividerLine(line: string): boolean {
 function collectSectionContent(
   lines: string[],
   predicate: (line: string) => boolean,
-  maxChars = 1600
+  maxChars = SAFE_CONFIG.MAX_SUMMARY_CHARS
 ): string[] {
   let capture = false;
   const bucket: string[] = [];
+  let charCount = 0;
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
@@ -161,26 +177,19 @@ function collectSectionContent(
       break;
     }
 
-    if (capture) {
-      if (!line) {
-        if (bucket.length > 0 && bucket[bucket.length - 1] !== "") {
-          bucket.push("");
-        }
-      } else {
-        bucket.push(line);
-      }
-
-      if (bucket.join(" ").length >= maxChars) {
-        break;
-      }
+    if (capture && line) {
+      bucket.push(line);
+      charCount += line.length;
+      if (charCount >= maxChars) break;
     }
   }
 
   return bucket;
 }
 
-function extractFirstParagraph(lines: string[], maxChars = 700): string {
+function extractFirstParagraph(lines: string[], maxChars = SAFE_CONFIG.MAX_FIRST_PARAGRAPH_CHARS): string {
   const bucket: string[] = [];
+  let charCount = 0;
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
@@ -195,16 +204,15 @@ function extractFirstParagraph(lines: string[], maxChars = 700): string {
     if (isDividerLine(line)) continue;
 
     bucket.push(line);
+    charCount += line.length;
 
-    if (bucket.join(" ").length >= maxChars) {
-      break;
-    }
+    if (charCount >= maxChars) break;
   }
 
   return compactWhitespace(bucket.join(" "));
 }
 
-function extractLeadBullets(lines: string[], maxItems = 5): string[] {
+function extractLeadBullets(lines: string[], maxItems = SAFE_CONFIG.MAX_BULLET_ITEMS): string[] {
   const out: string[] = [];
 
   for (const rawLine of lines) {
@@ -222,6 +230,9 @@ function extractLeadBullets(lines: string[], maxItems = 5): string[] {
   return out;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Block Processing — Safe Merging and Rendering                              */
+/* -------------------------------------------------------------------------- */
 function mergeAdjacentListBlocks(blocks: BriefBlock[]): BriefBlock[] {
   const merged: BriefBlock[] = [];
 
@@ -334,20 +345,20 @@ function renderBlocksWithEditorialPriority(blocks: BriefBlock[]): React.ReactNod
   });
 }
 
+/* -------------------------------------------------------------------------- */
+/* Public API — Safe Export Functions                                         */
+/* -------------------------------------------------------------------------- */
 export function extractExecutiveSummary(content: string): string | null {
   const source = sanitizeSource(content);
   if (!source) return null;
 
   const lines = normalizeLines(source);
 
-  const sectionBucket = collectSectionContent(lines, isExecutiveSummaryHeading, 1800).filter(
-    (line) => !isBulletLine(line)
-  );
-
+  const sectionBucket = collectSectionContent(lines, isExecutiveSummaryHeading);
   const sectionSummary = compactWhitespace(sectionBucket.join(" "));
   if (sectionSummary) return sectionSummary;
 
-  const firstParagraph = extractFirstParagraph(lines, 900);
+  const firstParagraph = extractFirstParagraph(lines);
   if (firstParagraph) return firstParagraph;
 
   return null;
@@ -359,21 +370,24 @@ export function extractKeyJudgements(content: string): string[] {
 
   const lines = normalizeLines(source);
 
-  const sectionLines = collectSectionContent(lines, isKeyJudgementsHeading, 1800);
+  // Try to extract from dedicated section first
+  const sectionLines = collectSectionContent(lines, isKeyJudgementsHeading);
   const sectionBullets = sectionLines
     .filter((line) => isBulletLine(line))
     .map((line) => cleanBulletLine(line))
     .filter(Boolean);
 
   if (sectionBullets.length > 0) {
-    return sectionBullets.slice(0, 6);
+    return sectionBullets.slice(0, SAFE_CONFIG.MAX_KEY_JUDGEMENTS);
   }
 
-  const globalBullets = extractLeadBullets(lines, 6);
+  // Fallback to global bullets
+  const globalBullets = extractLeadBullets(lines);
   if (globalBullets.length > 0) {
     return globalBullets;
   }
 
+  // Final fallback: split executive summary
   const summary = extractExecutiveSummary(source);
   if (!summary) return [];
 
@@ -381,13 +395,14 @@ export function extractKeyJudgements(content: string): string[] {
     .split(/(?<=[.!?])\s+/)
     .map((item) => compactWhitespace(item))
     .filter(Boolean)
-    .slice(0, 4);
+    .slice(0, SAFE_CONFIG.MAX_KEY_JUDGEMENTS);
 }
 
 export function renderBriefBody(content: string): React.ReactNode[] {
   const sanitized = sanitizeSource(content);
   if (!sanitized) return [];
 
+  // Primary: Use the parser
   try {
     const parsed: ParsedBriefDocument = parseBriefBody(sanitized);
 
@@ -395,17 +410,25 @@ export function renderBriefBody(content: string): React.ReactNode[] {
       return renderBlocksWithEditorialPriority(parsed.blocks);
     }
   } catch (error) {
-    console.error("[renderBriefBody] parser failure:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[renderBriefBody] Parser failed, using fallback:", error);
+    }
   }
 
+  // Secondary: Use fallback block builder
   try {
     const fallbackBlocks = buildFallbackBlocksFromText(sanitized);
     return renderBlocksWithEditorialPriority(fallbackBlocks);
   } catch (error) {
-    console.error("[renderBriefBody] fallback renderer failure:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("[renderBriefBody] Fallback renderer failed:", error);
+    }
     return [];
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/* Re-exports for API compatibility                                            */
+/* -------------------------------------------------------------------------- */
 export { parseBriefBody } from "./brief-parser";
 export type { BriefBlock, ParsedBriefDocument } from "./brief-types";

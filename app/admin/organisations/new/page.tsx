@@ -1,189 +1,288 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createOrganisationSchema } from "@/lib/alignment/enterprise-schemas";
-import { 
-  Building2, 
-  Globe, 
-  ChevronRight, 
-  Loader2, 
-  AlertCircle,
-  CheckCircle2
+import * as React from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowRight,
+  AlertTriangle,
+  Building2,
+  CheckCircle2,
+  Shield,
 } from "lucide-react";
 
-type OrgFormData = {
+type FormState = {
   name: string;
   slug: string;
-  sector?: string | null;
-  sizeBand?: string | null;
-  region?: string | null;
+  sector: string;
+  description: string;
 };
 
+const INITIAL_FORM: FormState = {
+  name: "",
+  slug: "",
+  sector: "",
+  description: "",
+};
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export default function NewOrganisationPage() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [form, setForm] = React.useState<FormState>(INITIAL_FORM);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [serverError, setServerError] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<OrgFormData>({
-    resolver: zodResolver(createOrganisationSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
+
+    setForm((prev) => {
+      if (name === "name") {
+        const nextSlug = prev.slug.trim().length === 0 ? slugify(value) : prev.slug;
+        return {
+          ...prev,
+          name: value,
+          slug: nextSlug,
+        };
+      }
+
+      if (name === "slug") {
+        return {
+          ...prev,
+          slug: slugify(value),
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+
+    if (serverError) setServerError(null);
+    if (successMessage) setSuccessMessage(null);
+  }
+
+  function validate(): string | null {
+    if (!form.name.trim()) return "Organisation name is required.";
+    if (!form.slug.trim()) return "Organisation slug is required.";
+    if (!form.sector.trim()) return "Sector is required.";
+    if (form.description.trim().length < 20) {
+      return "Description is too thin. Give the organisation a proper profile.";
     }
-  });
+    return null;
+  }
 
-  // Automatically generate slug from name
-  const orgName = watch("name");
-  React.useEffect(() => {
-    if (orgName) {
-      const generatedSlug = orgName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      setValue("slug", generatedSlug, { shouldValidate: true });
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const error = validate();
+    if (error) {
+      setServerError(error);
+      return;
     }
-  }, [orgName, setValue]);
 
-  const onSubmit = async (data: OrgFormData) => {
     setIsSubmitting(true);
     setServerError(null);
+    setSuccessMessage(null);
 
     try {
-      const response = await fetch("/api/alignment/enterprise/organisations", {
+      const response = await fetch("/api/admin/organisations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          slug: form.slug.trim(),
+          sector: form.sector.trim(),
+          description: form.description.trim(),
+        }),
       });
 
-      const result = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (!response.ok) throw new Error(result.error || "Submission failed");
+      if (!response.ok) {
+        throw new Error(
+          data?.error || data?.message || "Failed to create organisation."
+        );
+      }
 
-      router.push(`/admin/organisations/${result.organisation.id}`);
-    } catch (err: any) {
-      setServerError(err.message);
+      setSuccessMessage("Organisation created successfully.");
+
+      const nextId = data?.organisation?.id ?? data?.id ?? null;
+
+      if (nextId) {
+        window.location.href = `/admin/organisations/${nextId}`;
+        return;
+      }
+
+      window.location.href = "/admin/organisations";
+    } catch (err) {
+      setServerError(
+        err instanceof Error ? err.message : "Failed to create organisation."
+      );
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#F9F7F2] p-6 lg:p-20 font-mono">
-      <div className="max-w-2xl mx-auto">
-        
-        {/* Header Section */}
-        <header className="mb-12 border-b border-white/10 pb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <Building2 className="w-5 h-5 text-[#8A6A2F]" />
-            <span className="text-[10px] uppercase tracking-[0.5em] text-[#8A6A2F] font-bold">
-              Entity Provisioning // OGR-CORE
+    <div className="min-h-screen bg-neutral-50">
+      <div className="mx-auto max-w-4xl px-6 py-10">
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            href="/admin/organisations"
+            className="inline-flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Organisations
+          </Link>
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
+            <Shield className="h-3.5 w-3.5 text-emerald-700" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-emerald-700">
+              Admin Surface
             </span>
           </div>
-          <h1 className="text-4xl font-serif italic text-white uppercase tracking-tight">
-            Register New <span className="not-italic font-sans font-black">Organisation</span>
-          </h1>
-        </header>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-          
-          {/* Main Identity Group */}
-          <div className="bg-white/[0.02] border border-white/5 p-8 space-y-8">
-            <h2 className="text-[10px] text-[#8A6A2F] font-bold tracking-widest uppercase flex items-center gap-2">
-              <ChevronRight className="w-3 h-3" /> Identity Matrix
-            </h2>
-
-            <div className="space-y-6">
-              <FormField label="Organisation Name" error={errors.name?.message}>
-                <input
-                  {...register("name")}
-                  className="w-full bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all font-sans text-white"
-                  placeholder="e.g. Sovereign Analytics Ltd"
-                />
-              </FormField>
-
-              <FormField label="URL Slug (System ID)" error={errors.slug?.message}>
-                <div className="relative">
-                  <input
-                    {...register("slug")}
-                    className="w-full bg-black/60 border border-white/10 p-4 pl-10 focus:border-[#8A6A2F] outline-none transition-all font-mono text-[11px] text-[#8A6A2F]"
-                  />
-                  <Globe className="absolute left-3 top-4 w-4 h-4 text-neutral-600" />
+        <div className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-sm">
+          <div className="border-b border-neutral-200 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 px-8 py-8 text-white">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/60">
+                  Enterprise Registry
                 </div>
-              </FormField>
+                <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+                  New Organisation
+                </h1>
+                <p className="mt-2 text-sm text-white/70">
+                  Create a clean registry node instead of smuggling campaign logic
+                  into the wrong route.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Categorization Group */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <FormField label="Industrial Sector" error={errors.sector?.message}>
-              <input
-                {...register("sector")}
-                className="w-full bg-white/[0.03] border border-white/10 p-3 focus:border-[#8A6A2F] outline-none transition-all"
-                placeholder="e.g. Finance"
-              />
-            </FormField>
+          <form onSubmit={handleSubmit} className="px-8 py-8">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  Organisation Name
+                </label>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Alomarada Ltd"
+                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-500"
+                />
+              </div>
 
-            <FormField label="Operational Region" error={errors.region?.message}>
-              <input
-                {...register("region")}
-                className="w-full bg-white/[0.03] border border-white/10 p-3 focus:border-[#8A6A2F] outline-none transition-all"
-                placeholder="e.g. EMEA"
-              />
-            </FormField>
-          </div>
+              <div>
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  Slug
+                </label>
+                <input
+                  name="slug"
+                  value={form.slug}
+                  onChange={handleChange}
+                  placeholder="alomarada-ltd"
+                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-500"
+                />
+                <p className="mt-2 text-xs text-neutral-500">
+                  Lowercase URL-safe identifier. Auto-derived from the name unless
+                  overridden.
+                </p>
+              </div>
 
-          {/* Submission Feedback */}
-          {serverError && (
-            <div className="p-4 bg-red-900/10 border border-red-500/50 flex items-center gap-3 text-red-500 text-xs">
-              <AlertCircle className="w-4 h-4" />
-              <span>PROTOCOL ERROR: {serverError}</span>
+              <div>
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  Sector
+                </label>
+                <input
+                  name="sector"
+                  value={form.sector}
+                  onChange={handleChange}
+                  placeholder="Advisory, infrastructure, governance..."
+                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-500"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-[11px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows={6}
+                  placeholder="Provide a concise but real description of the organisation, its mandate, and its operating profile."
+                  className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm leading-7 text-neutral-900 outline-none transition focus:border-neutral-500"
+                />
+              </div>
             </div>
-          )}
 
-          <div className="pt-6 border-t border-white/10 flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group relative flex items-center gap-4 px-10 py-4 bg-[#8A6A2F] text-white text-[11px] uppercase font-bold tracking-[0.3em] hover:bg-[#A68B56] disabled:opacity-50 transition-all"
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4" />
-              )}
-              {isSubmitting ? "Processing..." : "Commit Entity"}
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-          </div>
+            {serverError ? (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 text-red-600" />
+                  <p className="text-sm text-red-700">{serverError}</p>
+                </div>
+              </div>
+            ) : null}
 
-        </form>
+            {successMessage ? (
+              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                  <p className="text-sm text-emerald-700">{successMessage}</p>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs leading-6 text-neutral-500">
+                This route is for creating an organisation node. If you meant
+                “create campaign for a specific organisation,” that belongs under a
+                dynamic organisation route, not here.
+              </p>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={cx(
+                  "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-medium transition",
+                  isSubmitting
+                    ? "cursor-not-allowed bg-neutral-300 text-white"
+                    : "bg-neutral-900 text-white hover:bg-black"
+                )}
+              >
+                {isSubmitting ? "Creating..." : "Create Organisation"}
+                {!isSubmitting ? <ArrowRight className="h-4 w-4" /> : null}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  );
-}
-
-/** ATOMIC UI HELPER **/
-function FormField({ label, children, error }: { label: string; children: React.ReactNode; error?: string }) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-[9px] uppercase tracking-[0.2em] text-neutral-500 font-bold">
-        {label}
-      </label>
-      {children}
-      {error && (
-        <span className="block text-[10px] text-red-500 italic lowercase tracking-tight">
-          {error}
-        </span>
-      )}
     </div>
   );
 }

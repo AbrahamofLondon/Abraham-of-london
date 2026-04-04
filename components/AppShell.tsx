@@ -1,4 +1,4 @@
-// components/AppShell.tsx — CLIENT WRAPPER FOR GLOBAL UI
+// components/AppShell.tsx — FINAL POLISH
 "use client";
 
 import * as React from "react";
@@ -45,7 +45,7 @@ export default function AppShell({
         onClose={() => setIsSearchOpen(false)}
       />
 
-      <div className="pointer-events-none fixed inset-0 z-[99] bg-[url('/assets/images/grain.png')] opacity-[0.03] mix-blend-overlay" />
+      <div className="aol-grain-overlay" />
     </div>
   );
 }

@@ -258,3 +258,6 @@ ehthumbs.db
 !/db/**/*.sql
 !/prisma/schema.prisma
 !/prisma/migrations/
+
+# HubSpot config file
+hubspot.config.yml

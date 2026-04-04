@@ -1,0 +1,79 @@
+---
+type: Playbook
+title: The Alignment Audit Playbook
+slug: the-alignment-audit-playbook
+tier: premium
+description: A structured framework for diagnosing organisational misalignment before intervention.
+coverImage: /assets/images/playbooks/the-alignment-audit-playbook.jpg
+playbookType: diagnostic
+framework: Alignment Audit
+phases:
+  - Signal Capture
+  - Pattern Recognition
+  - Gap Analysis
+  - Correction Mapping
+signals:
+  - Strategic intent drift
+  - Operational inconsistency
+  - Leadership perception gap
+  - Communication fragmentation
+outputs:
+  - Alignment score
+  - Gap heatmap
+  - Correction priorities
+  - Intervention trigger points
+estimatedTime: "90 minutes"
+difficulty: executive
+prerequisites:
+  - Leadership team availability
+  - Access to strategic documents
+  - Organisational structure visibility
+tags:
+  - alignment
+  - audit
+  - diagnostic
+  - organisational-health
+---
+
+## What This Playbook Does
+
+This playbook provides a repeatable method for identifying:
+- misalignment between intent and execution  
+- leadership signal distortion  
+- operational clarity gaps  
+
+---
+
+## Core Framework
+
+### Step 1 — Intent Mapping
+Define what leadership believes is true.
+
+### Step 2 — Execution Reality
+Measure what is actually happening.
+
+### Step 3 — Dissonance Gap
+Quantify the difference.
+
+---
+
+## Output
+
+- Alignment scorecard  
+- Domain breakdown  
+- Correction priority map  
+
+---
+
+## Use Case
+
+Before:
+- hiring consultants  
+- scaling operations  
+- raising capital  
+
+---
+
+## Strategic Principle
+
+You do not fix what you have not properly read.

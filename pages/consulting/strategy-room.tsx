@@ -1,6 +1,7 @@
 /* ============================================================================
    FILE: pages/consulting/strategy-room.tsx
    STRATEGY ROOM — Institutional Private Chamber
+   Brand: Harrods refinement × BlackRock institutional discipline
 ============================================================================ */
 
 import * as React from "react";
@@ -32,41 +33,266 @@ import {
   Building2,
   Workflow,
   BadgeCheck,
+  Compass,
+  Sparkles,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { checkAccess } from "@/lib/inner-circle/access.client";
+import StrategyRoomEntryRouter from "@/components/consulting/StrategyRoomEntryRouter";
+import SeriousBuyerGate from "@/components/diagnostics/SeriousBuyerGate";
+import TrustFAQ from "@/components/diagnostics/TrustFAQ";
 
 const SITE = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
 ).replace(/\/+$/, "");
 
-const StrategyRoomForm = dynamic(() => import("@/components/strategy-room/Form"), {
-  ssr: false,
-  loading: () => (
-    <div className="border border-white/[0.08] bg-white/[0.02] p-12 text-center">
-      <div className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/58">
-        <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400/50" />
-        Loading secure intake
-      </div>
-    </div>
-  ),
-});
-
+// Dynamic imports with proper error handling
 const ArtifactGrid = dynamic(
-  () => import("@/components/strategy-room/ArtifactGrid"),
-  {
-    ssr: false,
-    loading: () => (
+  () => import("@/components/strategy-room/ArtifactGrid").catch(() => {
+    console.warn("ArtifactGrid failed to load");
+    return () => (
       <div className="border border-white/[0.08] bg-white/[0.02] p-12 text-center">
         <div className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/58">
           <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400/50" />
-          Decrypting artifacts
+          Artifacts available to qualified members
         </div>
       </div>
-    ),
-  }
+    );
+  }),
+  { ssr: false }
 );
+
+// Enhanced intake form with institutional tone
+function InstitutionalIntakeForm() {
+  const [form, setForm] = React.useState({
+    name: "",
+    email: "",
+    revenue: "",
+    problem: "",
+    urgency: "",
+    authority: "",
+  });
+
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [evaluation, setEvaluation] = React.useState<{
+    confidence?: number;
+    classification?: string;
+    summary?: string;
+    tier?: string;
+  } | null>(null);
+
+  function update(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    if (evaluation) setEvaluation(null);
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setEvaluation(null);
+
+    try {
+      const res = await fetch("/api/deal-flow/qualify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) throw new Error(data.message || "Submission failed");
+
+      // Store evaluation for display (rebranded from "AI" to "institutional assessment")
+      if (data.ai) {
+        setEvaluation({
+          confidence: data.ai.confidence,
+          classification: data.ai.intent,
+          summary: data.ai.summary,
+          tier: data.ai.dealQuality,
+        });
+      }
+
+      // Redirect based on route after showing evaluation
+      if (data.route === "STRATEGY") {
+        setTimeout(() => {
+          window.location.href = `/strategy-room/confirmed?id=${data.submissionId}`;
+        }, 2000);
+      } else if (data.route === "DIAGNOSTIC") {
+        setTimeout(() => {
+          window.location.href = "/diagnostic";
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          window.location.href = "/vault";
+        }, 2000);
+      }
+    } catch (err: any) {
+      setError(err.message || "Submission failed");
+      setLoading(false);
+    }
+  }
+
+  // Institutional classification display (refined, not "AI")
+  const renderClassification = (classification?: string) => {
+    if (!classification) return null;
+    
+    const config: Record<string, { label: string; description: string }> = {
+      STRATEGY: { label: "Chamber Priority", description: "Immediate engagement indicated" },
+      DIAGNOSTIC: { label: "Structured Review", description: "Diagnostic pathway recommended" },
+      NURTURE: { label: "Observational Track", description: "Extended evaluation period" },
+      REJECT: { label: "Not Aligned", description: "Current mandate mismatch" },
+    };
+    
+    const match = Object.keys(config).find(k => classification.toUpperCase().includes(k));
+    const { label, description } = config[match || "NURTURE"];
+    
+    return (
+      <div className="border-l-2 border-amber-500/40 pl-4">
+        <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-amber-400/60">
+          {label}
+        </div>
+        <div className="text-[11px] text-white/40 mt-1">{description}</div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-8">
+      <form onSubmit={submit} className="space-y-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          <input
+            name="name"
+            placeholder="Full Name"
+            onChange={update}
+            value={form.name}
+            required
+            className="w-full p-4 bg-white/5 border border-white/10 focus:border-amber-500/50 focus:outline-none transition-colors"
+          />
+          
+          <input
+            name="email"
+            type="email"
+            placeholder="Email Address"
+            onChange={update}
+            value={form.email}
+            required
+            className="w-full p-4 bg-white/5 border border-white/10 focus:border-amber-500/50 focus:outline-none transition-colors"
+          />
+        </div>
+
+        <input
+          name="revenue"
+          type="number"
+          placeholder="Annual Revenue (£)"
+          onChange={update}
+          value={form.revenue}
+          required
+          className="w-full p-4 bg-white/5 border border-white/10 focus:border-amber-500/50 focus:outline-none transition-colors"
+        />
+
+        <textarea
+          name="problem"
+          placeholder="Describe the situation requiring strategic counsel"
+          onChange={update}
+          value={form.problem}
+          required
+          rows={4}
+          className="w-full p-4 bg-white/5 border border-white/10 focus:border-amber-500/50 focus:outline-none transition-colors"
+        />
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <input
+            name="urgency"
+            placeholder="Required timeline"
+            onChange={update}
+            value={form.urgency}
+            required
+            className="w-full p-4 bg-white/5 border border-white/10 focus:border-amber-500/50 focus:outline-none transition-colors"
+          />
+
+          <input
+            name="authority"
+            placeholder="Decision authority (Yes/No)"
+            onChange={update}
+            value={form.authority}
+            required
+            className="w-full p-4 bg-white/5 border border-white/10 focus:border-amber-500/50 focus:outline-none transition-colors"
+          />
+        </div>
+
+        {error && (
+          <div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/30">
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <span className="text-sm text-red-400">{error}</span>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-5 bg-white text-black hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider font-semibold transition-colors"
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full" />
+              Processing assessment
+            </span>
+          ) : (
+            "Submit for institutional review"
+          )}
+        </button>
+      </form>
+
+      {/* Institutional Assessment Display */}
+      {evaluation && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-8 p-6 border border-amber-500/20 bg-gradient-to-br from-amber-500/[0.03] to-transparent"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Compass className="h-4 w-4 text-amber-500/60" />
+            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-amber-500/60">
+              Institutional Assessment
+            </span>
+          </div>
+          
+          <p className="text-sm text-white/70 leading-relaxed mb-4">
+            {evaluation.summary}
+          </p>
+          
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/10">
+            {renderClassification(evaluation.classification)}
+            
+            {evaluation.tier && (
+              <div className="text-right">
+                <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/30">
+                  Engagement Tier
+                </div>
+                <div className={`text-sm font-serif ${
+                  evaluation.tier === "ELITE" ? "text-amber-400" :
+                  evaluation.tier === "HIGH" ? "text-white/80" :
+                  "text-white/50"
+                }`}>
+                  {evaluation.tier === "ELITE" ? "Priority" :
+                   evaluation.tier === "HIGH" ? "Qualified" :
+                   "Standard"}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-4 text-[9px] font-mono text-white/20 text-center">
+            Redirecting to appropriate chamber in 2 seconds
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
 
 type Props = {};
 
@@ -176,13 +402,7 @@ function SectionDivider() {
   );
 }
 
-function MetricTile({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function MetricTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-l border-white/6 pl-4 first:border-l-0 first:pl-0">
       <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/28">
@@ -193,11 +413,7 @@ function MetricTile({
   );
 }
 
-function PressureCard({
-  icon: Icon,
-  title,
-  desc,
-}: PressureSignal) {
+function PressureCard({ icon: Icon, title, desc }: PressureSignal) {
   return (
     <article className="border border-white/[0.06] bg-white/[0.02] p-6 transition-colors duration-300 hover:border-white/[0.12] hover:bg-white/[0.03]">
       <Icon className="h-5 w-5 text-amber-300/65" />
@@ -207,11 +423,7 @@ function PressureCard({
   );
 }
 
-function DeliverableCard({
-  icon: Icon,
-  title,
-  desc,
-}: Deliverable) {
+function DeliverableCard({ icon: Icon, title, desc }: Deliverable) {
   return (
     <article className="border border-white/[0.06] bg-white/[0.02] p-6 transition-colors duration-300 hover:border-white/[0.12] hover:bg-white/[0.03]">
       <Icon className="h-5 w-5 text-amber-300/65" />
@@ -221,10 +433,7 @@ function DeliverableCard({
   );
 }
 
-function AdmissionCard({
-  title,
-  desc,
-}: AdmissionRule) {
+function AdmissionCard({ title, desc }: AdmissionRule) {
   return (
     <div className="border-b border-white/6 pb-6 last:border-b-0 last:pb-0">
       <h3 className="font-serif text-xl text-white">{title}</h3>
@@ -300,9 +509,16 @@ const StrategyRoomPage: NextPage<Props> = () => {
       <main className="relative min-h-screen bg-black text-white">
         <AmbientField />
 
-        {/* HERO */}
+        {/* SERIOUS BUYER GATE - TOP */}
+        <section className="relative pt-32 pb-16">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <SeriousBuyerGate />
+          </div>
+        </section>
+
+        {/* HERO - Harrods meets BlackRock branding */}
         <section className="relative overflow-hidden border-b border-white/5">
-          <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
+          <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-16 lg:px-12 lg:pb-32 lg:pt-24">
             <div className="grid gap-16 lg:grid-cols-[0.95fr_1.05fr]">
               <div className="max-w-4xl">
                 <motion.div
@@ -314,7 +530,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 </motion.div>
 
                 <motion.h1
-                  className="mt-8 max-w-[10ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.7rem]"
+                  className="mt-8 font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.7rem]"
                   initial={{ opacity: 0, y: reduceMotion ? 0 : 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.95, delay: 0.08 }}
@@ -338,9 +554,9 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.9, delay: 0.26 }}
                 >
-                  This is the private chamber for founders, boards, and institutional
-                  builders facing irreversible calls, internal friction, strategic
-                  pressure, or decisions with real downstream consequence.
+                  A private chamber for founders, boards, and institutional builders
+                  facing irreversible calls, internal friction, strategic pressure,
+                  or decisions with real downstream consequence.
                 </motion.p>
 
                 <motion.div
@@ -354,7 +570,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                     onClick={() => setShowForm(true)}
                     className="group inline-flex items-center justify-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
                   >
-                    <span>Begin intake</span>
+                    <span>Request admission</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </button>
 
@@ -413,18 +629,10 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 transition={{ duration: 0.9, delay: 0.2 }}
               >
                 <div className="border border-white/[0.06] bg-white/[0.02] p-8 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-[1px]"
-                    style={{
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.45)",
-                    }}
-                  />
                   <div className="relative">
                     <div className="mb-8 flex items-center justify-between">
                       <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
-                        Room profile
+                        Chamber profile
                       </span>
                       <Building2 className="h-4 w-4 text-amber-300/42" />
                     </div>
@@ -439,8 +647,9 @@ const StrategyRoomPage: NextPage<Props> = () => {
                       {[
                         "Authority audit before advice",
                         "Constraint-aware options and trade-offs",
-                        "No brainstorm theatre",
-                        "Structured artifacts for real execution",
+                        "No brainstorming theatre",
+                        "Structured artifacts for execution",
+                        "Institutional assessment framework",
                       ].map((line) => (
                         <div key={line} className="flex items-center gap-3">
                           <CheckCircle2 className="h-4 w-4 text-amber-300/70" />
@@ -455,17 +664,43 @@ const StrategyRoomPage: NextPage<Props> = () => {
           </div>
         </section>
 
+        {/* ENTRY ROUTING SECTION */}
+        <section className="relative border-t border-white/5 py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-12">
+              <div className="inline-flex items-center gap-3">
+                <span className="h-6 w-px bg-amber-500/30" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-400/62">
+                  Entry routing
+                </span>
+              </div>
+
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
+                Institutional assessment before admission
+              </h2>
+
+              <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
+                Strategy Room employs a structured assessment framework to ensure
+                alignment before access. Every submission is evaluated against
+                institutional criteria, with routing determined by mandate fit.
+              </p>
+            </div>
+
+            <StrategyRoomEntryRouter />
+          </div>
+        </section>
+
         {/* PRESSURE SIGNALS */}
         <section className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
               <RailLabel>Decision pressure</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                When this room is the right room
+                When this chamber is appropriate
               </h2>
               <p className="mt-4 max-w-3xl text-lg text-white/48">
-                Strategy Room is appropriate when the decision cannot safely be
-                handled by instinct, casual counsel, or loose internal alignment.
+                Strategy Room is designed for situations where the decision cannot
+                safely be handled by instinct, casual counsel, or loose internal alignment.
               </p>
             </div>
 
@@ -477,7 +712,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
           </div>
         </section>
 
-        {/* INTAKE */}
+        {/* INTAKE FORM - INSTITUTIONAL TONE */}
         {showForm && (
           <motion.section
             initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
@@ -487,13 +722,16 @@ const StrategyRoomPage: NextPage<Props> = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-amber-400/[0.035] to-transparent" />
             <div className="relative mx-auto max-w-4xl px-6">
               <div className="border border-white/[0.06] bg-white/[0.02] p-8 md:p-12">
-                <div className="mb-8 flex items-center gap-3">
-                  <ScrollText className="h-4 w-4 text-amber-400/48" />
-                  <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-amber-300/62">
-                    Confidential intake
-                  </span>
+                <div className="mb-8 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <ScrollText className="h-4 w-4 text-amber-400/48" />
+                    <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-amber-300/62">
+                      Confidential assessment
+                    </span>
+                  </div>
+                  <Compass className="h-4 w-4 text-amber-400/40" />
                 </div>
-                <StrategyRoomForm />
+                <InstitutionalIntakeForm />
               </div>
             </div>
           </motion.section>
@@ -509,7 +747,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
             <div className="mb-12">
               <RailLabel>Outputs</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                What leaves the room
+                What leaves the chamber
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/48">
                 Materials built to move a real decision, not to decorate one.
@@ -533,7 +771,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 Decision-grade supporting material
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/48">
-                The room draws from the Canon, the frameworks library, and the
+                The chamber draws from the Canon, the frameworks library, and the
                 controlled advisory stack behind the public-facing platform.
               </p>
             </div>
@@ -556,7 +794,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
               >
                 <RailLabel>Access</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  Who gets what
+                  Privilege tiers
                 </h2>
                 <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/48">
                   The chamber is private. Artifact access is more private still.
@@ -595,7 +833,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
               >
                 <RailLabel>Admission logic</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  What this room is not
+                  What this chamber is not
                 </h2>
 
                 <div className="mt-10 space-y-8">
@@ -631,11 +869,11 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 <div className="max-w-3xl">
                   <RailLabel>Not ready for the chamber?</RailLabel>
                   <h2 className="mt-6 font-serif text-3xl text-white md:text-4xl">
-                    Start with diagnostics.
+                    Begin with diagnostics.
                   </h2>
                   <p className="mt-4 text-base leading-relaxed text-white/48">
-                    When the issue needs a serious reading but not yet a private
-                    mandate, diagnostics provide the paid clarity layer that sharpens
+                    When the issue requires a serious reading but not yet a private
+                    mandate, diagnostics provide the clarity layer that sharpens
                     fit before escalation.
                   </p>
                 </div>
@@ -650,6 +888,23 @@ const StrategyRoomPage: NextPage<Props> = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* TRUST FAQ */}
+        <section className="relative border-t border-white/5 py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-14">
+              <RailLabel>Trust & reliability</RailLabel>
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
+                Questions from those who carry consequence
+              </h2>
+              <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
+                No generic answers. This is boardroom-level clarity.
+              </p>
+            </div>
+
+            <TrustFAQ />
           </div>
         </section>
 
@@ -675,8 +930,8 @@ const StrategyRoomPage: NextPage<Props> = () => {
               </h2>
 
               <p className="mx-auto mt-6 max-w-xl text-lg text-white/50">
-                Enter the chamber if the issue carries real weight. Start with
-                diagnostics if it still needs a clearer reading first.
+                Enter the chamber if the issue carries real weight. Begin with
+                diagnostics if it still requires a clearer reading first.
               </p>
 
               <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
@@ -685,7 +940,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   onClick={() => setShowForm(true)}
                   className="group inline-flex items-center justify-center gap-3 bg-white px-12 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
                 >
-                  <span>Begin intake</span>
+                  <span>Request admission</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </button>
 
@@ -693,7 +948,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
                   href="/diagnostics"
                   className="group inline-flex items-center justify-center gap-3 border border-white/10 px-12 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
                 >
-                  <span>Start with diagnostics</span>
+                  <span>Begin with diagnostics</span>
                   <ChevronRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
                 </Link>
               </div>
@@ -701,7 +956,7 @@ const StrategyRoomPage: NextPage<Props> = () => {
               <div className="mt-16 inline-flex items-center gap-2">
                 <Feather className="h-3 w-3 text-amber-300/20" />
                 <span className="font-mono text-[6px] uppercase tracking-[0.4em] text-white/10">
-                  Strategy Room • Private Chamber
+                  Strategy Room • Private Chamber • By Admission Only
                 </span>
                 <Feather className="h-3 w-3 text-amber-300/20" />
               </div>

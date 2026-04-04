@@ -1,9 +1,5 @@
-/* pages/api/downloads/[slug].ts — LEGACY COMPAT DOWNLOAD PAYLOAD ADAPTER
-   Purpose:
-   - preserve old callers hitting /api/downloads/[slug]
-   - delegate lookup to canonical registry
-   - keep response shape stable for UI consumers
-*/
+// pages/api/downloads/[slug].ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -16,10 +12,9 @@ import {
 
 import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
+import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
-import {
-  resolveDownloadAsset,
-} from "@/lib/downloads/asset-registry";
+import { resolveDownloadAsset } from "@/lib/downloads/asset-registry";
 import {
   createDownloadGrantToken,
   getTokenForensics,
@@ -30,6 +25,8 @@ type Ok = {
   tier: AccessTier;
   requiredTier: AccessTier;
   bodyCode: string;
+  compressed: true;
+  encoding: "gzip-base64";
   tierLabel?: string;
   watermarkId?: string | null;
   tokenId?: string | null;
@@ -45,10 +42,6 @@ type Fail = {
   reason: string;
   requiredTier?: AccessTier;
 };
-
-function safeTrim(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
 
 function normalizeLegacySlug(input: unknown): string {
   return String(input ?? "")
@@ -85,7 +78,6 @@ export default async function handler(
   }
 
   try {
-    // Legacy endpoint defaults to the "downloads" asset family.
     const asset = await resolveDownloadAsset({
       contentType: "downloads",
       slug,
@@ -167,22 +159,26 @@ export default async function handler(
       res.setHeader("X-AOL-Token-Id", issued.tokenId);
     }
 
-    return res.status(200).json({
-      ok: true,
-      tier: sessionTier,
-      requiredTier,
-      bodyCode: extractBodyCode(asset.bodyCode),
-      tierLabel: getTierLabel(sessionTier),
-      watermarkId: forensics.watermarkId,
-      tokenId: issued?.tokenId ?? null,
-      forensicFooter: forensics.expectedFooter,
-      downloadUrl: issued?.token
-        ? `/api/dl/${encodeURIComponent(issued.token)}`
-        : null,
-      slug: asset.slug,
-      title: asset.title,
-      contentType: asset.contentType,
-    });
+    return sendCompressedBodyCode(
+      res,
+      {
+        ok: true,
+        tier: sessionTier,
+        requiredTier,
+        bodyCode: extractBodyCode(asset.bodyCode),
+        tierLabel: getTierLabel(sessionTier),
+        watermarkId: forensics.watermarkId,
+        tokenId: issued?.tokenId ?? null,
+        forensicFooter: forensics.expectedFooter,
+        downloadUrl: issued?.token
+          ? `/api/dl/${encodeURIComponent(issued.token)}`
+          : null,
+        slug: asset.slug,
+        title: asset.title,
+        contentType: asset.contentType,
+      },
+      200,
+    );
   } catch (err) {
     console.error("[API_DOWNLOADS_ERROR]", err);
     return res.status(500).json({
@@ -191,3 +187,9 @@ export default async function handler(
     });
   }
 }
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};

@@ -1,10 +1,13 @@
-/* components/print/BriefCoverPage.tsx — V4.0 (PREMIUM INSTITUTIONAL COVER) */
+/* components/print/BriefCoverPage.tsx — V4.1 (PREMIUM INSTITUTIONAL COVER) */
 import React from "react";
 import { Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { PDFRegistryEntry as PDFConfig } from "../../lib/pdf/registry";
 import type { WatermarkPayload } from "../../lib/intelligence/watermark-delegate";
 import ForensicMarkLayer from "./ForensicMarkLayer";
 
+/* -------------------------------------------------------------------------- */
+/* Type Definitions                                                           */
+/* -------------------------------------------------------------------------- */
 type Props = {
   config: PDFConfig & {
     subtitle?: string;
@@ -21,16 +24,20 @@ type Props = {
   subtitle?: string;
 };
 
-const PAPER = "#FCFBF7";
-const INK = "#121416";
-const BRASS = "#8A6A2F";
-const BRASS_SOFT = "#B49861";
-const SILVER = "#56606C";
-const SOFTER = "#76808C";
-const MIST = "#E8E1D4";
-const DARK_MIST = "#C7C0B0";
-const PANEL = "#F7F3EC";
-const CHIP_BG = "#FBF9F4";
+/* -------------------------------------------------------------------------- */
+/* Premium Design Tokens — Quiet Luxury                                       */
+/* -------------------------------------------------------------------------- */
+const PAPER = "#FDFBF7";
+const INK = "#1E1C1A";
+const BRASS = "#9B8A6B";
+const BRASS_SOFT = "#C9BCA0";
+const BRASS_DARK = "#7A6848";
+const SILVER = "#7E7A72";
+const SILVER_LIGHT = "#9E9A92";
+const MIST = "#EDE8DE";
+const DARK_MIST = "#D9D0C0";
+const PANEL = "#F9F6EF";
+const CHIP_BG = "#FDFAF5";
 
 const styles = StyleSheet.create({
   page: {
@@ -39,6 +46,7 @@ const styles = StyleSheet.create({
     paddingBottom: 42,
     paddingHorizontal: 48,
     color: INK,
+    position: "relative",
   },
 
   outerFrame: {
@@ -125,7 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 7.8,
     letterSpacing: 1.45,
     textTransform: "uppercase",
-    color: SOFTER,
+    color: SILVER_LIGHT,
     marginBottom: 22,
   },
 
@@ -201,7 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 7.2,
     letterSpacing: 1,
     textTransform: "uppercase",
-    color: SOFTER,
+    color: SILVER,
   },
 
   metadataValue: {
@@ -248,7 +256,7 @@ const styles = StyleSheet.create({
   qrCaption: {
     fontFamily: "Helvetica",
     fontSize: 6.8,
-    color: SOFTER,
+    color: SILVER_LIGHT,
     letterSpacing: 0.35,
     marginBottom: 5,
   },
@@ -257,17 +265,52 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
   },
+
+  // Optional: Watermark overlay for cover
+  watermarkOverlay: {
+    position: "absolute",
+    bottom: 40,
+    right: 40,
+    opacity: 0.03,
+    transform: "rotate(-15deg)",
+  },
 });
 
-function safeString(value: unknown): string {
+/* -------------------------------------------------------------------------- */
+/* Safe Utilities                                                             */
+/* -------------------------------------------------------------------------- */
+function safeString(value: unknown, fallback = ""): string {
   if (typeof value === "string") return value;
-  if (value === null || value === undefined) return "";
-  return String(value);
+  if (value === null || value === undefined) return fallback;
+  try {
+    return String(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function safeDate(value: unknown): Date | null {
+  if (!value) return null;
+  try {
+    const date = new Date(safeString(value));
+    return isNaN(date.getTime()) ? null : date;
+  } catch {
+    return null;
+  }
 }
 
 function deriveIssueDate(config: Props["config"]): string {
   const explicit = safeString(config.date);
   if (explicit) return explicit;
+
+  const date = safeDate(config.date);
+  if (date) {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(date);
+  }
 
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
@@ -277,7 +320,7 @@ function deriveIssueDate(config: Props["config"]): string {
 }
 
 function deriveVersion(config: Props["config"]): string {
-  return safeString(config.version) || "1.0.0";
+  return safeString(config.version, "1.0.0");
 }
 
 function deriveTransmission(watermark: WatermarkPayload, config: Props["config"]): string {
@@ -290,9 +333,16 @@ function deriveTransmission(watermark: WatermarkPayload, config: Props["config"]
   const sig = safeString(aol.sig);
   if (sig) return sig;
 
-  return safeString(config.institutionalId) || safeString(config.id) || "UNTRACKED";
+  return safeString(config.institutionalId) || safeString(config.id).slice(0, 8) || "UNTRACKED";
 }
 
+function deriveAuthor(config: Props["config"]): string {
+  return safeString(config.author, "Abraham of London");
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main Component                                                             */
+/* -------------------------------------------------------------------------- */
 export const BriefCoverPage: React.FC<Props> = ({
   config,
   watermark,
@@ -304,17 +354,27 @@ export const BriefCoverPage: React.FC<Props> = ({
   const issueDate = deriveIssueDate(config);
   const version = deriveVersion(config);
   const transmission = deriveTransmission(watermark, config);
+  const author = deriveAuthor(config);
   const displaySubtitle = subtitle || config.subtitle || config.description || "";
 
   return (
     <Page size="A4" style={styles.page}>
+      {/* Frames */}
       <View style={styles.outerFrame} fixed />
       <View style={styles.innerFrame} fixed />
+      
+      {/* Forensic layer */}
       <ForensicMarkLayer watermark={watermark} mode="cover" />
 
+      {/* Optional subtle watermark */}
+      <View style={styles.watermarkOverlay} fixed>
+        <Text style={{ fontFamily: "Times-Italic", fontSize: 42, color: BRASS }}>AOL</Text>
+      </View>
+
+      {/* Header */}
       <View style={styles.topBand}>
         <View style={styles.identityWrap}>
-          <Text style={styles.identityKicker}>Abraham of London</Text>
+          <Text style={styles.identityKicker}>{author}</Text>
           <Text style={styles.identityName}>Institutional Briefing Series</Text>
           <Text style={styles.identitySubline}>
             Portfolio-controlled strategy, doctrine, intelligence, and operating papers
@@ -326,6 +386,7 @@ export const BriefCoverPage: React.FC<Props> = ({
         </View>
       </View>
 
+      {/* Body */}
       <View style={styles.body}>
         <Text style={styles.referenceLine}>Folio · {reference}</Text>
         <Text style={styles.title}>{config.title}</Text>
@@ -337,6 +398,7 @@ export const BriefCoverPage: React.FC<Props> = ({
 
         {displaySubtitle ? <Text style={styles.subtitle}>{displaySubtitle}</Text> : null}
 
+        {/* Metadata Panel */}
         <View style={styles.metadataPanel}>
           <View style={styles.metadataTopRule} />
           <Text style={styles.metadataPanelTitle}>Control Metadata</Text>
@@ -368,6 +430,7 @@ export const BriefCoverPage: React.FC<Props> = ({
         </View>
       </View>
 
+      {/* Footer */}
       <View style={styles.bottomBand}>
         <View style={styles.bottomLeft}>
           <Text style={styles.bottomKicker}>Institutional Notice</Text>

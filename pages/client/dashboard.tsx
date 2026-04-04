@@ -1,0 +1,165 @@
+/* pages/client/dashboard.tsx */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import * as React from "react";
+import type { GetServerSideProps, NextPage } from "next";
+import Layout from "@/components/layout/Layout";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
+import { getDiagnosticRecordsForUser, type DiagnosticRecord } from "@/lib/diagnostics/store";
+import { getReportRequestsForUser, type ClientReportRequest } from "@/lib/reports/store";
+import ClientReportRequestPanel from "@/components/reports/ClientReportRequestPanel";
+import ClientReportList from "@/components/reports/ClientReportList";
+import { Activity, ShieldCheck, FileText, Crown } from "lucide-react";
+
+type Props = {
+  user: {
+    name: string;
+    tier: string;
+    email: string | null;
+  };
+  diagnostics: DiagnosticRecord[];
+  reports: ClientReportRequest[];
+};
+
+const ClientDashboardPage: NextPage<Props> = ({ user, diagnostics, reports }) => {
+  return (
+    <Layout title="Client Dashboard | Abraham of London" className="bg-white">
+      <main className="min-h-screen bg-white px-6 py-16">
+        <div className="mx-auto max-w-7xl">
+          <header className="mb-12 border-b border-gray-100 pb-12">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-blue-700">
+              <ShieldCheck size={14} />
+              Client Reporting Console
+            </div>
+
+            <h1 className="font-serif text-5xl italic tracking-tighter text-gray-900 md:text-6xl">
+              Paid reporting, properly governed.
+            </h1>
+
+            <p className="mt-6 max-w-3xl text-lg font-light leading-relaxed text-gray-600">
+              Welcome, <span className="font-medium text-gray-900">{user.name}</span>. This console links
+              diagnostic telemetry, report purchase, and delivery visibility into one clean operating surface.
+            </p>
+          </header>
+
+          <section className="mb-12 grid gap-6 md:grid-cols-4">
+            <Tile label="Client Tier" value={user.tier} icon={<Crown size={18} />} />
+            <Tile label="Diagnostics" value={diagnostics.length} icon={<Activity size={18} />} />
+            <Tile label="Report Requests" value={reports.length} icon={<FileText size={18} />} />
+            <Tile
+              label="Delivered Reports"
+              value={reports.filter((r) => r.status === "delivered").length}
+              icon={<ShieldCheck size={18} />}
+            />
+          </section>
+
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <section className="space-y-10">
+              <ClientReportRequestPanel
+                diagnostics={diagnostics.map((d) => ({
+                  id: d.id,
+                  diagnosticType: d.diagnosticType,
+                  score: d.score,
+                  createdAt: d.createdAt,
+                  verdict: d.verdict,
+                }))}
+              />
+            </section>
+
+            <aside className="rounded-[28px] border border-gray-100 bg-gray-50 p-8">
+              <div className="mb-4 text-[10px] font-black uppercase tracking-[0.24em] text-gray-500">
+                Why this matters
+              </div>
+              <h2 className="font-serif text-3xl italic text-gray-900">
+                Same signal. Better monetisation. Better discipline.
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-gray-600">
+                Diagnostics are now traceable, reusable, and report-ready. That means
+                serious buyers do not need to repeat themselves, and commercial escalation
+                can happen without operational confusion.
+              </p>
+            </aside>
+          </div>
+
+          <section className="mt-14">
+            <div className="mb-6 text-[10px] font-black uppercase tracking-[0.24em] text-gray-500">
+              Report queue
+            </div>
+            <ClientReportList reports={reports} />
+          </section>
+        </div>
+      </main>
+    </Layout>
+  );
+};
+
+function Tile({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
+      <div className="mb-4 text-gray-400">{icon}</div>
+      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-400">
+        {label}
+      </div>
+      <div className="mt-2 text-2xl font-serif italic text-gray-900">{value}</div>
+    </div>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const sessionId = readAccessCookie(context.req as any);
+
+  if (!sessionId) {
+    return {
+      redirect: {
+        destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+        permanent: false,
+      },
+    };
+  }
+
+  const ctx = await getSessionContext(sessionId);
+
+  if (!ctx.ok || !ctx.valid || !tierAtLeast(ctx.tier, "inner-circle")) {
+    return {
+      redirect: {
+        destination: "/inner-circle/locked",
+        permanent: false,
+      },
+    };
+  }
+
+  const diagnostics = await getDiagnosticRecordsForUser({
+    userId: ctx.memberId || null,
+    userEmail: (ctx as any).email || null,
+    limit: 20,
+  });
+
+  const reports = await getReportRequestsForUser({
+    userId: ctx.memberId || null,
+    userEmail: (ctx as any).email || null,
+    limit: 20,
+  });
+
+  return {
+    props: {
+      user: {
+        name: ctx.name || "Client",
+        tier: ctx.tier || "inner-circle",
+        email: (ctx as any).email || null,
+      },
+      diagnostics,
+      reports,
+    },
+  };
+};
+
+export default ClientDashboardPage;

@@ -1,3 +1,4 @@
+/* pages/[slug].tsx */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -18,17 +19,23 @@ import {
   normalizeUserTier,
   hasAccess,
 } from "@/lib/access/tier-policy";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 /* -----------------------------------------------------------------------------
    Routing guardrails
 ----------------------------------------------------------------------------- */
 function norm(input: string): string {
-  return String(input || "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  return String(input || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
 }
 
 const RESERVED_ROOT = new Set<string>([
   "admin",
   "api",
+  "artifacts",
   "auth",
   "blog",
   "board",
@@ -39,19 +46,36 @@ const RESERVED_ROOT = new Set<string>([
   "chatham-rooms",
   "consulting",
   "content",
+  "contact",
   "debug",
+  "dev",
+  "diagnostics",
+  "directorate",
   "downloads",
+  "editorials",
+  "education-research",
   "events",
   "fatherhood",
   "founders",
+  "get",
   "inner-circle",
+  "institutional",
   "leadership",
+  "library",
+  "media",
+  "membership",
+  "playbooks",
+  "premium",
   "prints",
   "private",
+  "private-clients",
+  "registry",
   "resources",
   "shorts",
+  "sovereign",
   "speaking",
   "strategy",
+  "strategy-room",
   "vault",
   "ventures",
   "about",
@@ -62,16 +86,61 @@ const RESERVED_ROOT = new Set<string>([
   "subscribe",
   "newsletter",
   "cookies",
+  "cookie-policy",
   "diagnostic",
   "accessibility",
   "accessibility-statement",
   "works-in-progress",
+  "offline",
+  "dashboard",
   "404",
+  "500",
 ]);
 
 function allowRootSlug(slug: string): boolean {
   const s = norm(slug).toLowerCase();
   return !!s && !s.includes("/") && !RESERVED_ROOT.has(s);
+}
+
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value : value == null ? "" : String(value);
+}
+
+function looksLikeLeakedModuleCode(code: string): boolean {
+  const s = safeString(code).trim();
+  if (!s) return false;
+
+  return (
+    /\bObject\.defineProperty\s*\(\s*exports\b/.test(s) ||
+    /\bmodule\.exports\b/.test(s) ||
+    /\bexports\.[A-Za-z_$]/.test(s) ||
+    /\b__esModule\b/.test(s) ||
+    /\brequire\s*\(/.test(s) ||
+    /\bjsx_runtime\b/.test(s) ||
+    /\bvar\s+\w+\s*=\s*Object\.create/.test(s)
+  );
+}
+
+function pickRenderableDocCode(rawDoc: any, renderBody?: any): string {
+  const compiled =
+    safeString(renderBody?.code) ||
+    safeString(rawDoc?.body?.code) ||
+    safeString(rawDoc?.bodyCode);
+
+  const raw =
+    safeString(renderBody?.raw) ||
+    safeString(rawDoc?.body?.raw) ||
+    safeString(rawDoc?.content);
+
+  if (compiled && !looksLikeLeakedModuleCode(compiled)) {
+    return compiled;
+  }
+
+  if (raw) {
+    return raw;
+  }
+
+  return compiled || "";
 }
 
 interface Props {
@@ -82,6 +151,7 @@ interface Props {
     excerpt: string;
     readTime: string | null;
     bodyCode: string;
+    bodyMode: "compiled" | "raw" | "empty";
   } | null;
   canonicalUrl: string;
   requiredTier: AccessTier;
@@ -107,10 +177,10 @@ const GenericContentPage: NextPage<Props> = ({
         description="Content not found"
         canonicalUrl={canonicalUrl}
       >
-        <div className="flex min-h-screen items-center justify-center bg-black">
-          <div className="animate-aolFadeUp text-center">
-            <h1 className="aol-editorial mb-4 text-4xl">404</h1>
-            <p className="aol-micro uppercase tracking-widest text-white/30">
+        <div className="flex min-h-screen items-center justify-center bg-black px-6">
+          <div className="text-center">
+            <h1 className="font-serif text-5xl text-white md:text-6xl">404</h1>
+            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.35em] text-white/35">
               Asset Not Found
             </p>
           </div>
@@ -164,9 +234,7 @@ const GenericContentPage: NextPage<Props> = ({
     >
       <Head>
         <title>{doc.title} | Abraham of London</title>
-        {doc.excerpt ? (
-          <meta name="description" content={doc.excerpt} />
-        ) : null}
+        {doc.excerpt ? <meta name="description" content={doc.excerpt} /> : null}
         <meta
           name="robots"
           content={required === "public" ? "index, follow" : "noindex, nofollow"}
@@ -174,12 +242,12 @@ const GenericContentPage: NextPage<Props> = ({
       </Head>
 
       <article className="relative min-h-screen bg-black pb-32 pt-24">
-        <header className="mx-auto mb-16 max-w-3xl animate-aolFadeUp px-6 text-center">
+        <header className="mx-auto mb-16 max-w-3xl px-6 text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-500/60">
             {doc.kind} // {required === "public" ? "Public" : required}
           </div>
 
-          <h1 className="aol-editorial mb-8 text-5xl tracking-tight text-white md:text-7xl">
+          <h1 className="mb-8 font-serif text-5xl tracking-tight text-white md:text-7xl">
             {doc.title}
           </h1>
 
@@ -258,16 +326,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
+  const renderBody = getRenderableBody(rawDoc);
+  const bodyCode = requiredTier === "public" ? pickRenderableDocCode(rawDoc, renderBody) : "";
 
   const doc = sanitizeData({
     title: rawDoc?.title || "Untitled",
     kind: getDocKind(rawDoc) || "Content",
-    date: rawDoc?.date
-      ? new Date(rawDoc.date).toLocaleDateString("en-GB")
-      : null,
+    date: rawDoc?.date ? new Date(rawDoc.date).toLocaleDateString("en-GB") : null,
     excerpt: rawDoc?.excerpt || rawDoc?.description || "",
     readTime: rawDoc?.readTime ?? null,
-    bodyCode: String(rawDoc?.body?.code || ""),
+    bodyCode,
+    bodyMode: renderBody.mode,
   });
 
   return {

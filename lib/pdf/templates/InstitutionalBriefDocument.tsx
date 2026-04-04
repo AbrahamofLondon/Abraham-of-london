@@ -1,195 +1,345 @@
+/* lib/pdf/templates/InstitutionalBriefDocument.tsx */
 import React from "react";
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { PDFRegistryEntry as PDFConfig } from "../pdf/registry";
-import type { WatermarkPayload } from "../intelligence/watermark-delegate";
+import type { WatermarkPayload } from "../../intelligence/watermark-delegate";
 
 import BriefCoverPage from "../../../components/print/BriefCoverPage";
 import ForensicMarkLayer from "../../../components/print/ForensicMarkLayer";
 import BriefHeaderBar from "../../../components/print/BriefHeaderBar";
 import BriefFooterBar from "../../../components/print/BriefFooterBar";
-import ExecutiveSummaryPanel from "../../../components/print/ExecutiveSummaryPanel";
-import KeyJudgementsPanel from "../../../components/print/KeyJudgementsPanel";
+import { InstitutionalBriefInteriorPage } from "../renderers/InstitutionalBriefDocument";
 
-import * as briefRenderer from "../renderers/renderBriefBody";
+interface InstitutionalBriefTemplateProps {
+  config: {
+    id?: string;
+    title?: string;
+    classification?: string;
+    reference?: string;
+    signAs?: string;
+    summary?: string;
+    description?: string;
+    type?: string;
+    version?: string;
+    subtitle?: string;
+    [key: string]: unknown;
+  };
+  content: string;
+  watermark: WatermarkPayload;
+  qrCode?: string;
+  classification?: string;
+  reference?: string;
+}
 
-/* -------------------------------------------------------------------------- */
-/* Design Tokens                                                              */
-/* -------------------------------------------------------------------------- */
-const PAPER = "#FCFBF7";
-const INK = "#121416";
-const BRASS = "#8A6A2F";
-const BRASS_SOFT = "#B49861";
-const SOFT = "#59616E";
-const SOFTER = "#727B89";
-const MIST = "#E8E1D4";
-const PANEL = "#F7F3EC";
+const PAPER = "#FCFAF6";
+const INK = "#1A1713";
+const INK_SOFT = "#49443C";
+const INK_MUTE = "#7B7367";
+const BRASS = "#8E7A53";
+const BRASS_SOFT = "#C7B89B";
+const LINE = "#DED5C5";
+const PANEL = "#F5EFE5";
 
 const styles = StyleSheet.create({
   page: {
     backgroundColor: PAPER,
+    paddingTop: 60,
+    paddingBottom: 70,
+    paddingHorizontal: 56,
+    fontFamily: "AoLInter",
     color: INK,
-    paddingTop: 56,
-    paddingBottom: 56,
-    paddingHorizontal: 54,
-    fontFamily: "Helvetica",
-    fontSize: 10.4,
+    fontSize: 10,
     lineHeight: 1.58,
   },
-  pageFrameTop: { position: "absolute", top: 22, left: 54, right: 54, height: 1, backgroundColor: MIST },
-  pageFrameBottom: { position: "absolute", bottom: 48, left: 54, right: 54, height: 1, backgroundColor: MIST },
-  frontMatterWrap: { marginTop: 14 },
-  introText: { fontFamily: "Helvetica", fontSize: 10, lineHeight: 1.58, color: SOFT },
-  
-  // 4D Framework Headings
-  h2: { fontFamily: "Helvetica-Bold", fontSize: 13, color: BRASS, marginTop: 18, marginBottom: 6 },
-  h3: { fontFamily: "Helvetica-Bold", fontSize: 10.5, color: INK, marginTop: 12, marginBottom: 4 },
-  
-  // AOL Audit Table Styles (Mapped from Image 5cbeac.png)
-  tableContainer: { marginTop: 14, marginBottom: 14 },
-  tableRow: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.05)" },
-  tableHeaderRow: { borderBottomWidth: 1.5, borderBottomColor: BRASS_SOFT },
-  tableCell: { paddingVertical: 8, paddingHorizontal: 4, flex: 1 },
-  tableCellHeader: { fontFamily: "Helvetica-Bold", fontSize: 8, color: BRASS, textTransform: "uppercase", letterSpacing: 1 },
-  tableCellText: { fontSize: 9, color: INK },
-  tableCellMonospace: { fontFamily: "Courier", fontSize: 8.5, color: BRASS }, // For the "Day" column
 
-  listItem: { flexDirection: "row", marginBottom: 6, paddingLeft: 4 },
-  listBullet: { width: 12, color: BRASS_SOFT, fontFamily: "Helvetica-Bold" },
-  listContent: { flex: 1 },
-  
-  attestationBlock: { marginTop: 30, paddingTop: 14, borderTopWidth: 1, borderTopColor: MIST },
-  attestationKicker: { fontFamily: "Helvetica-Bold", fontSize: 8.1, letterSpacing: 1.8, textTransform: "uppercase", color: BRASS, marginBottom: 8 },
-  attestationText: { fontFamily: "Helvetica", fontSize: 8.9, lineHeight: 1.58, color: SOFT, marginBottom: 5 },
+  frameTop: {
+    position: "absolute",
+    top: 28,
+    left: 54,
+    right: 54,
+    height: 1,
+    backgroundColor: LINE,
+  },
+
+  frameBottom: {
+    position: "absolute",
+    bottom: 48,
+    left: 54,
+    right: 54,
+    height: 1,
+    backgroundColor: LINE,
+  },
+
+  masthead: {
+    marginTop: 8,
+    marginBottom: 18,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: LINE,
+  },
+
+  eyebrow: {
+    fontSize: 7.5,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    color: BRASS,
+    marginBottom: 8,
+  },
+
+  title: {
+    fontFamily: "AoLSerif",
+    fontSize: 28,
+    fontWeight: 700,
+    color: INK,
+    lineHeight: 1.08,
+    marginBottom: 8,
+  },
+
+  subtitle: {
+    fontSize: 10.2,
+    lineHeight: 1.55,
+    color: INK_SOFT,
+  },
+
+  metaRow: {
+    marginTop: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+
+  metaPill: {
+    flexGrow: 1,
+    borderWidth: 1,
+    borderColor: LINE,
+    backgroundColor: PANEL,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+
+  metaLabel: {
+    fontSize: 6.8,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+    color: BRASS,
+    marginBottom: 3,
+  },
+
+  metaValue: {
+    fontSize: 8.6,
+    color: INK_SOFT,
+    lineHeight: 1.35,
+  },
+
+  executivePanel: {
+    marginTop: 18,
+    marginBottom: 24,
+    backgroundColor: PANEL,
+    borderWidth: 1,
+    borderColor: LINE,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+  },
+
+  executiveKicker: {
+    fontSize: 7.5,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 1.4,
+    color: BRASS,
+    marginBottom: 8,
+  },
+
+  executiveSummary: {
+    fontSize: 10,
+    lineHeight: 1.64,
+    color: INK_SOFT,
+  },
+
+  attestationBlock: {
+    marginTop: 28,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: LINE,
+  },
+
+  attestationKicker: {
+    fontSize: 7.4,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    color: BRASS,
+    marginBottom: 8,
+  },
+
+  attestationText: {
+    fontSize: 8.5,
+    lineHeight: 1.48,
+    color: INK_MUTE,
+    marginBottom: 4,
+  },
+
+  footerStamp: {
+    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: LINE,
+    paddingTop: 10,
+  },
+
+  footerText: {
+    fontSize: 7,
+    color: INK_MUTE,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
 });
 
-/* -------------------------------------------------------------------------- */
-/* Helper Functions                                                           */
-/* -------------------------------------------------------------------------- */
-
-function safeString(value: unknown): string {
-  if (typeof value === "string") return value;
-  return value ? String(value) : "";
+function safeString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || fallback;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  return fallback;
 }
 
-function deriveClassification(config: PDFConfig, watermark: WatermarkPayload): string {
-  const metadata = watermark?.metadata as any;
-  return (safeString(metadata?.aol?.classification) || safeString((config as any).classification) || "PUBLIC").toUpperCase();
+function summarize(content: string, fallbackSummary?: string): string {
+  const cleaned = safeString(content)
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/^\s*#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{2,}/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const base = safeString(fallbackSummary) || cleaned;
+  if (!base) return "Institutional brief prepared for structured reading and executive judgment.";
+  return base.length > 360 ? `${base.slice(0, 359).trim()}…` : base;
 }
 
-function deriveReference(config: PDFConfig): string {
-  return safeString((config as any).institutionalId) || safeString(config.id) || "UNFILED";
-}
+export const InstitutionalBriefDocument: React.FC<InstitutionalBriefTemplateProps> = ({
+  config,
+  content,
+  watermark,
+  qrCode,
+  classification,
+  reference,
+}) => {
+  const resolvedClassification =
+    safeString(classification) ||
+    safeString(config.classification) ||
+    "PUBLIC";
 
-function deriveTransmissionToken(watermark: WatermarkPayload, config: PDFConfig): string {
-  const metadata = watermark?.metadata as any;
-  return safeString(metadata?.aol?.traceId) || safeString(watermark.overlayToken) || "UNTRACKED";
-}
+  const resolvedReference =
+    safeString(reference) ||
+    safeString(config.reference) ||
+    safeString(config.id).slice(0, 8).toUpperCase() ||
+    "UNFILED";
 
-/* -------------------------------------------------------------------------- */
-/* Body Renderer                                                              */
-/* -------------------------------------------------------------------------- */
+  const title = safeString(config.title, "Institutional Brief");
+  const subtitle =
+    safeString(config.subtitle) ||
+    `${safeString(config.type, "Institutional Brief")} prepared for disciplined reading, executive clarity, and governed action.`;
 
-function fallbackRenderBriefBody(content: string): React.ReactNode[] {
-  const lines = content.split("\n");
-  const nodes: React.ReactNode[] = [];
-  let currentTable: string[][] = [];
+  const summary = summarize(
+    content,
+    safeString(config.summary) || safeString(config.description),
+  );
 
-  const flushTable = () => {
-    if (currentTable.length > 0) {
-      nodes.push(
-        <View key={`table-${nodes.length}`} style={styles.tableContainer}>
-          {currentTable.map((row, ri) => (
-            <View key={`row-${ri}`} style={[styles.tableRow, ri === 0 && styles.tableHeaderRow]}>
-              {row.map((cell, ci) => (
-                <View key={`cell-${ci}`} style={styles.tableCell}>
-                  <Text style={ri === 0 ? styles.tableCellHeader : (ci === 0 ? styles.tableCellMonospace : styles.tableCellText)}>
-                    {cell.trim()}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ))}
-        </View>
-      );
-      currentTable = [];
-    }
+  const coverConfig = {
+    ...config,
+    classification: resolvedClassification,
+    reference: resolvedReference,
   };
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // Table Logic
-    if (line.startsWith("|")) {
-      const cells = line.split("|").filter(c => c.trim() !== "" && !c.includes("---"));
-      if (cells.length > 0) { currentTable.push(cells); continue; }
-    } else { flushTable(); }
-
-    // Heading Logic
-    if (line.startsWith("## ")) {
-      nodes.push(<Text key={i} style={styles.h2}>{line.replace("## ", "")}</Text>);
-      continue;
-    }
-    if (line.startsWith("### ")) {
-      nodes.push(<Text key={i} style={styles.h3}>{line.replace("### ", "")}</Text>);
-      continue;
-    }
-
-    // List Logic
-    if (line.startsWith("* ") || line.startsWith("- ")) {
-      nodes.push(
-        <View key={i} style={styles.listItem}>
-          <Text style={styles.listBullet}>•</Text>
-          <View style={styles.listContent}>
-            <Text style={styles.introText}>{line.substring(2)}</Text>
-          </View>
-        </View>
-      );
-      continue;
-    }
-
-    // Paragraph Logic
-    if (line && !line.startsWith("#")) {
-      nodes.push(<Text key={i} style={[styles.introText, { marginBottom: 8 }]}>{line}</Text>);
-    }
-  }
-  flushTable();
-  return nodes;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Main Component                                                             */
-/* -------------------------------------------------------------------------- */
-
-export const InstitutionalBriefDocument: React.FC<any> = ({ config, content, watermark, qrCode }) => {
-  const classification = deriveClassification(config, watermark);
-  const reference = deriveReference(config);
-  const transmission = deriveTransmissionToken(watermark, config);
-  const bodyNodes = fallbackRenderBriefBody(content);
-
   return (
-    <Document title={config.title} author="Abraham of London" language="en-GB">
-      <BriefCoverPage config={config} watermark={watermark} qrCode={qrCode} classification={classification} reference={reference} />
-      
+    <Document
+      title={title}
+      author="Abraham of London"
+      subject="Institutional Brief"
+      language="en-GB"
+      creator="Abraham of London"
+      producer="Abraham of London"
+    >
+      <BriefCoverPage
+        config={coverConfig}
+        watermark={watermark}
+        qrCode={qrCode}
+        classification={resolvedClassification}
+        reference={resolvedReference}
+      />
+
       <Page size="A4" style={styles.page}>
         <ForensicMarkLayer watermark={watermark} mode="interior" />
-        <View style={styles.pageFrameTop} fixed />
-        <View style={styles.pageFrameBottom} fixed />
-        
-        <BriefHeaderBar title={config.title} reference={reference} classification={classification} />
+        <View style={styles.frameTop} fixed />
+        <View style={styles.frameBottom} fixed />
 
-        <View style={styles.frontMatterWrap}>
-          <View style={{ marginBottom: 20 }}>
-            {bodyNodes}
-          </View>
+        <BriefHeaderBar
+          title={title}
+          reference={resolvedReference}
+          classification={resolvedClassification}
+        />
 
-          <View style={styles.attestationBlock} wrap={false}>
-            <Text style={styles.attestationKicker}>Attestation</Text>
-            <Text style={styles.attestationText}>Issued under the authority of {config.signAs || "The Architect"}.</Text>
-            <Text style={styles.attestationText}>Trace: {transmission}</Text>
+        <View style={styles.masthead}>
+          <Text style={styles.eyebrow}>Institutional Brief</Text>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
+
+          <View style={styles.metaRow}>
+            <View style={styles.metaPill}>
+              <Text style={styles.metaLabel}>Classification</Text>
+              <Text style={styles.metaValue}>{resolvedClassification}</Text>
+            </View>
+
+            <View style={styles.metaPill}>
+              <Text style={styles.metaLabel}>Reference</Text>
+              <Text style={styles.metaValue}>{resolvedReference}</Text>
+            </View>
+
+            <View style={styles.metaPill}>
+              <Text style={styles.metaLabel}>Version</Text>
+              <Text style={styles.metaValue}>{safeString(config.version, "1.0")}</Text>
+            </View>
           </View>
         </View>
 
-        <BriefFooterBar watermark={watermark} reference={reference} signAs={config.signAs || "The Architect"} />
+        <View style={styles.executivePanel}>
+          <Text style={styles.executiveKicker}>Executive Summary</Text>
+          <Text style={styles.executiveSummary}>{summary}</Text>
+        </View>
+
+        <InstitutionalBriefInteriorPage content={content} />
+
+        <View style={styles.attestationBlock}>
+          <Text style={styles.attestationKicker}>Attestation</Text>
+          <Text style={styles.attestationText}>
+            Issued under the authority of {safeString(config.signAs, "The Architect")}.
+          </Text>
+          <Text style={styles.attestationText}>
+            Classification: {resolvedClassification}
+          </Text>
+          <Text style={styles.attestationText}>
+            Reference: {resolvedReference}
+          </Text>
+        </View>
+
+        <View style={styles.footerStamp}>
+          <Text style={styles.footerText}>© Abraham of London</Text>
+          <Text style={styles.footerText}>Protocol Verified</Text>
+          <Text style={styles.footerText}>Sovereign Registry</Text>
+        </View>
+
+        <BriefFooterBar
+          watermark={watermark}
+          reference={resolvedReference}
+          signAs={safeString(config.signAs, "The Architect")}
+        />
       </Page>
     </Document>
   );

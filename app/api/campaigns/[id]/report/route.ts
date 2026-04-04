@@ -1,69 +1,82 @@
-import { db } from "@/lib/db";
+/* app/api/campaigns/[id]/report/route.ts
+   ---------------------------------------------------------------------------
+   EXECUTIVE REPORT API ROUTE
+   Canonical route backed by executive-report-service.
+   --------------------------------------------------------------------------- */
+
 import { NextResponse } from "next/server";
+import { buildExecutiveReportFromCampaign } from "@/lib/admin/reporting/executive-report-service";
+import { buildExecutiveReportRecommendations } from "@/lib/decision/report-recommendations-builder";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const campaignId = params.id;
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-    // 1. Fetch Campaign and all completed responses
-    const campaign = await db.alignmentCampaign.findUnique({
-      where: { id: campaignId },
-      include: {
-        organisation: true,
-        participants: {
-          where: { status: 'completed' },
-          include: { 
-            membership: true,
-            responses: true // Assuming a relation to the actual data points
-          }
-        }
-      }
-    });
+export async function GET(_request: Request, context: RouteContext) {
+  const { id } = await context.params;
 
-    if (!campaign) {
-      return new NextResponse("Campaign not found", { status: 404 });
+  const result = await buildExecutiveReportFromCampaign(id, {
+    skipAudit: false,
+  });
+
+  if (!result.ok) {
+    switch (result.error) {
+      case "INVALID_CAMPAIGN_ID":
+        return NextResponse.json(
+          { ok: false, error: result.error },
+          { status: 400 }
+        );
+
+      case "DATABASE_CONNECTION_FAILURE":
+        return NextResponse.json(
+          { ok: false, error: result.error },
+          { status: 500 }
+        );
+
+      case "CAMPAIGN_NOT_FOUND":
+        return NextResponse.json(
+          { ok: false, error: result.error },
+          { status: 404 }
+        );
+
+      case "ANONYMITY_THRESHOLD_NOT_MET":
+        return NextResponse.json(
+          {
+            ok: false,
+            error: result.error,
+            details: result.details,
+            threshold: result.threshold,
+            participantCount: result.participantCount,
+          },
+          { status: 403 }
+        );
+
+      default:
+        return NextResponse.json(
+          {
+            ok: false,
+            error: result.error,
+            details: result.details,
+          },
+          { status: 500 }
+        );
     }
-
-    // 2. STRICT ANONYMITY GUARD
-    const ANONYMITY_THRESHOLD = 5;
-    if (campaign.participants.length < ANONYMITY_THRESHOLD) {
-      return NextResponse.json({ 
-        ok: false, 
-        error: "Anonymity Threshold Not Met",
-        details: `Need ${ANONYMITY_THRESHOLD - campaign.participants.length} more responses.`
-      }, { status: 403 });
-    }
-
-    // 3. AGGREGATE METRICS (Logic Example)
-    const executiveResponses = campaign.participants.filter(p => p.membership.isExecutive);
-    const operationalResponses = campaign.participants.filter(p => !p.membership.isExecutive);
-
-    // This is where you would calculate the 'Delta' between leadership and operations
-    const reportData = {
-      campaignTitle: campaign.title,
-      organisation: campaign.organisation.name,
-      generatedAt: new Date().toISOString(),
-      summary: {
-        totalResponses: campaign.participants.length,
-        execCount: executiveResponses.length,
-        opCount: operationalResponses.length,
-      },
-      // Placeholder for your actual alignment math
-      alignmentScore: 72, 
-      leadershipGap: 14,
-      dissonanceLevel: "High"
-    };
-
-    return NextResponse.json({ 
-      ok: true, 
-      report: reportData 
-    });
-
-  } catch (error) {
-    console.error("[REPORT_ERROR]", error);
-    return new NextResponse("Internal Analytics Error", { status: 500 });
   }
+
+  // Build decision layer recommendations from the report
+  const decisionLayer = await buildExecutiveReportRecommendations({
+    report: result.payload.report,
+    organisationName: result.payload.organisationName,
+    participantCount: result.payload.completedParticipantCount || result.payload.participantCount,
+    campaignTitle: result.payload.campaignTitle,
+  });
+
+  return NextResponse.json({
+    ok: true,
+    payload: result.payload,
+    audit: result.audit ?? null,
+    decisionLayer, // ✅ Added decision intelligence layer
+  });
 }

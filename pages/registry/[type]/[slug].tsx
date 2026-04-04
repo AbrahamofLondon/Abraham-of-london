@@ -1,6 +1,4 @@
-/* pages/registry/[type]/[slug].tsx — UNIVERSAL REGISTRY DISPATCH (SSOT, BUILD-SAFE, NO PROP MUTATION) */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+/* pages/registry/[type]/[slug].tsx */
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
@@ -12,6 +10,7 @@ import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 
 import { allPosts, allShorts } from "@/lib/contentlayer";
 import { getDocBySlug } from "@/lib/content/unified-router";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -25,10 +24,9 @@ interface UniversalPageProps {
     date: string;
     description?: string | null;
     type: RegistryType;
-    slug: string; // bare param slug
+    slug: string;
   };
   requiredTier: AccessTier;
-  // Compiled MDX code only for public at build time
   initialBodyCode: string;
 }
 
@@ -39,8 +37,8 @@ function normalizeParamSlug(input: unknown): string {
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
     .replace(/\/{2,}/g, "/");
-  if (!s) return "";
-  if (s.includes("..")) return "";
+
+  if (!s || s.includes("..")) return "";
   return s.split("/").filter(Boolean).pop() || "";
 }
 
@@ -49,11 +47,14 @@ function isRegistryType(v: any): v is RegistryType {
 }
 
 function apiEndpointFor(type: RegistryType, slug: string): string {
-  // Your existing convention: /api/<type>/<slug>
   return `/api/${type}/${encodeURIComponent(slug)}`;
 }
 
-const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ metadata, requiredTier, initialBodyCode }) => {
+const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
+  metadata,
+  requiredTier,
+  initialBodyCode,
+}) => {
   const { data: session, status } = useSession();
 
   const [bodyCode, setBodyCode] = React.useState<string>(initialBodyCode);
@@ -64,17 +65,22 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ metadata, require
   const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
 
   const needsAuth = required !== "public";
-  const canAccess = !needsAuth || (session?.user ? tiers.hasAccess(user, required) : false);
+  const canAccess =
+    !needsAuth || (session?.user ? tiers.hasAccess(user, required) : false);
 
   const canonical = `https://www.abrahamoflondon.org/registry/${metadata.type}/${metadata.slug}`;
 
   const handleUnlock = async () => {
     if (!needsAuth) return;
+
     setBusy(true);
     setUnlockError(null);
 
     try {
-      const res = await fetch(apiEndpointFor(metadata.type, metadata.slug), { method: "GET" });
+      const res = await fetch(apiEndpointFor(metadata.type, metadata.slug), {
+        method: "GET",
+      });
+
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok || !json?.ok) {
@@ -88,7 +94,6 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ metadata, require
         return;
       }
 
-      // ✅ bodyCode is compiled MDX code: render via SafeMDXRenderer.
       setBodyCode(code);
     } catch {
       setUnlockError("UNLOCK_NETWORK_FAILURE");
@@ -97,12 +102,13 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ metadata, require
     }
   };
 
-  // Only show session loading screen if content is restricted.
   if (needsAuth && status === "loading") {
     return (
       <RegistryLayout>
         <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
+          <div className="text-amber-500 font-mono text-xs animate-pulse">
+            Verifying clearance...
+          </div>
         </div>
       </RegistryLayout>
     );
@@ -116,7 +122,7 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ metadata, require
             title={metadata.title}
             requiredTier={required}
             message="This content requires appropriate clearance."
-            onUnlocked={() => handleUnlock()}
+            onUnlocked={handleUnlock}
             onGoToJoin={() => window.location.assign("/inner-circle")}
           />
         </div>
@@ -128,27 +134,39 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({ metadata, require
     <RegistryLayout>
       <Head>
         <title>{metadata.title} | Abraham of London</title>
-        {metadata.description ? <meta name="description" content={metadata.description} /> : null}
+        {metadata.description ? (
+          <meta name="description" content={metadata.description} />
+        ) : null}
         <meta property="og:title" content={metadata.title} />
-        {metadata.description ? <meta property="og:description" content={metadata.description} /> : null}
+        {metadata.description ? (
+          <meta property="og:description" content={metadata.description} />
+        ) : null}
         <meta property="og:type" content="article" />
         <link rel="canonical" href={canonical} />
-        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
+        <meta
+          name="robots"
+          content={required === "public" ? "index, follow" : "noindex, nofollow"}
+        />
       </Head>
 
       <article className="prose prose-invert max-w-none">
         <header className="mb-12 border-b border-white/10 pb-8">
           <div className="flex items-center gap-4 mb-4">
-            <h1 className="font-serif text-4xl italic text-white md:text-5xl">{metadata.title}</h1>
-            {required !== "public" && (
+            <h1 className="font-serif text-4xl italic text-white md:text-5xl">
+              {metadata.title}
+            </h1>
+
+            {required !== "public" ? (
               <span className="px-3 py-1 text-[10px] font-mono uppercase tracking-widest bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400">
                 {required}
               </span>
-            )}
+            ) : null}
           </div>
 
           {metadata.subtitle ? (
-            <p className="mt-4 font-mono text-lg uppercase tracking-widest text-amber-500/80">{metadata.subtitle}</p>
+            <p className="mt-4 font-mono text-lg uppercase tracking-widest text-amber-500/80">
+              {metadata.subtitle}
+            </p>
           ) : null}
 
           <div className="mt-6 flex items-center gap-4 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
@@ -190,7 +208,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .map((p: any) => ({
       params: {
         type: "dispatches",
-        slug: normalizeParamSlug(p.slugAsParams || p._raw?.flattenedPath?.split("/").pop()),
+        slug: normalizeParamSlug(
+          p.slugAsParams || p._raw?.flattenedPath?.split("/").pop()
+        ),
       },
     }))
     .filter((p: any) => p.params.slug);
@@ -200,7 +220,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .map((s: any) => ({
       params: {
         type: "shorts",
-        slug: normalizeParamSlug(s.slugAsParams || s._raw?.flattenedPath?.split("/").pop()),
+        slug: normalizeParamSlug(
+          s.slugAsParams || s._raw?.flattenedPath?.split("/").pop()
+        ),
       },
     }))
     .filter((p: any) => p.params.slug);
@@ -208,23 +230,28 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths: [...dispatches, ...shorts], fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
+  params,
+}) => {
   const typeRaw = String(params?.type ?? "");
   const slugRaw = normalizeParamSlug(params?.slug);
 
-  if (!isRegistryType(typeRaw) || !slugRaw) return { notFound: true, revalidate: 60 };
+  if (!isRegistryType(typeRaw) || !slugRaw) {
+    return { notFound: true, revalidate: 60 };
+  }
 
-  // IMPORTANT: your unified-router must resolve correctly using type + slug.
-  // If it needs a prefix, do it here.
-  const docRaw: any = getDocBySlug(`${typeRaw}/${slugRaw}`) || getDocBySlug(slugRaw);
+  const docRaw: any =
+    getDocBySlug(`${typeRaw}/${slugRaw}`) || getDocBySlug(slugRaw);
 
-  if (!docRaw || docRaw.draft) return { notFound: true, revalidate: 60 };
+  if (!docRaw || docRaw.draft) {
+    return { notFound: true, revalidate: 60 };
+  }
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(docRaw));
   const isPublic = requiredTier === "public";
+  const renderBody = getRenderableBody(docRaw);
 
-  // Only include compiled code at build time for public docs
-  const initialBodyCode = isPublic ? String(docRaw?.body?.code || docRaw?.bodyCode || "") : "";
+  const initialBodyCode = isPublic ? renderBody.code : "";
 
   return {
     props: {

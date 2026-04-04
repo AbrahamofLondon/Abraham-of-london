@@ -1,91 +1,447 @@
 /* components/Intelligence/KnowledgeGraph.tsx */
-import React from 'react';
-import { Network, ZoomIn, ZoomOut, Maximize2, Share2 } from 'lucide-react';
+"use client";
 
-export const KnowledgeGraph: React.FC<{ frameworks: any[] }> = ({ frameworks }) => {
-  // Logic: In a full build, this uses D3.js or React Force Graph
+import * as React from "react";
+import {
+  Network,
+  Layers3,
+  Flame,
+  ShieldCheck,
+  Target,
+  Briefcase,
+  Landmark,
+} from "lucide-react";
+
+type FrameworkNode = {
+  id: string;
+  label: string;
+  kind?: string;
+};
+
+type CanonicalContext = {
+  route: string;
+  readinessTier: string;
+  authorityType: string;
+  revenueBand: string;
+  marketRiskBand: string;
+  orgState: string;
+  dominantDomains: string[];
+  failureModes: string[];
+  requiredInterventions: string[];
+  sponsorTypes: string[];
+  worldviewAnchors: string[];
+  clarityScore: number;
+  authorityScore: number;
+  governanceScore: number;
+  severityScore: number;
+  revenueScore: number;
+};
+
+type EfficacyRow = {
+  id: string;
+  joinKey: string;
+  context: CanonicalContext;
+  totalSessions: number;
+  impressionCount: number;
+  conversionCount: number;
+  contextualConversionRate: number;
+  rankedAssets: Array<{
+    assetId: string;
+    title: string;
+    kind: string;
+    href?: string | null;
+    impressions: number;
+    conversions: number;
+    conversionRate: number;
+    avgRank?: number;
+    avgMatchScore?: number;
+    contextualLift: number;
+    reasons: string[];
+  }>;
+};
+
+type KnowledgeGraphProps = {
+  frameworks?: FrameworkNode[];
+  efficacyRows?: EfficacyRow[];
+  overlayMode?: "none" | "canonical";
+};
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+function heatClass(rate: number) {
+  if (rate >= 0.35) return "border-emerald-500/25 bg-emerald-500/10 text-emerald-300";
+  if (rate >= 0.18) return "border-amber-500/25 bg-amber-500/10 text-amber-300";
+  return "border-red-500/25 bg-red-500/10 text-red-300";
+}
+
+function routeClass(route: string) {
+  const r = String(route || "").toUpperCase();
+  if (r === "STRATEGY") return "border-[#D4AF37]/25 bg-[#D4AF37]/10 text-[#E7D8A5]";
+  if (r === "DIAGNOSTIC") return "border-blue-500/25 bg-blue-500/10 text-blue-300";
+  return "border-zinc-500/25 bg-zinc-500/10 text-zinc-300";
+}
+
+function MicroPill({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="relative w-full h-[700px] bg-zinc-950 border border-white/5 rounded-3xl overflow-hidden mt-12">
-      {/* HUD Controls */}
-      <div className="absolute top-6 left-6 z-10 space-y-4">
-        <div>
-          <h3 className="text-white font-bold text-lg uppercase tracking-tighter flex items-center gap-2">
-            <Network className="text-amber-500" size={18} /> Master Pattern Topology
-          </h3>
-          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Relational_Intelligence_Map</p>
-        </div>
-        
-        <div className="flex flex-col gap-2">
-          <ControlButton icon={<ZoomIn size={14} />} label="Zoom In" />
-          <ControlButton icon={<ZoomOut size={14} />} label="Zoom Out" />
-          <ControlButton icon={<Maximize2 size={14} />} label="Reset View" />
-        </div>
-      </div>
+    <span
+      className={cx(
+        "inline-flex rounded-full border px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.12em]",
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
 
-      {/* Legend */}
-      <div className="absolute bottom-6 left-6 z-10 bg-black/60 backdrop-blur-md border border-white/10 p-4 rounded-xl">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-amber-500" />
-            <span className="text-[9px] font-black text-zinc-400 uppercase">Primary Dossier</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500" />
-            <span className="text-[9px] font-black text-zinc-400 uppercase">Private Annotation</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-px w-4 bg-zinc-700" />
-            <span className="text-[9px] font-black text-zinc-400 uppercase">Strategic Dependency</span>
-          </div>
-        </div>
+function DomainRail({
+  icon: Icon,
+  title,
+  items,
+  tone,
+}: {
+  icon: React.ElementType;
+  title: string;
+  items: string[];
+  tone: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/6 bg-black/20 p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <Icon className="h-4 w-4 text-zinc-400" />
+        <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+          {title}
+        </span>
       </div>
-
-      {/* The Visual Canvas (Simplified Mock) */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {/* Central Hub */}
-        <div className="relative">
-          <div className="h-4 w-4 bg-amber-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-pulse" />
-          
-          {/* Orbits & Lines - Representing the 75 briefs */}
-          {[...Array(12)].map((_, i) => (
-            <div 
-              key={i}
-              className="absolute border border-white/5 rounded-full"
-              style={{ 
-                width: `${(i + 1) * 100}px`, 
-                height: `${(i + 1) * 100}px`,
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                opacity: 0.3 - (i * 0.02)
-              }}
-            />
-          ))}
-          
-          {/* Floating Data Nodes */}
-          <div className="absolute -top-40 -left-40 bg-zinc-900 border border-amber-500/30 p-3 rounded-lg text-[9px] font-bold uppercase whitespace-nowrap">
-            Tax Optimization → Trust Structures
-          </div>
-          <div className="absolute top-20 left-60 bg-zinc-900 border border-blue-500/30 p-3 rounded-lg text-[9px] font-bold uppercase whitespace-nowrap">
-            Private Note: Q1 Liquidity Review
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute bottom-6 right-6 flex gap-3">
-        <button className="bg-white text-black px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 transition-all flex items-center gap-2">
-          <Share2 size={12} /> Export Map
-        </button>
+      <div className="flex flex-wrap gap-2">
+        {items.length ? (
+          items.map((item) => (
+            <MicroPill key={item} className={tone}>
+              {item}
+            </MicroPill>
+          ))
+        ) : (
+          <span className="text-sm text-zinc-500">No signals mapped.</span>
+        )}
       </div>
     </div>
   );
-};
+}
 
-const ControlButton = ({ icon, label }: any) => (
-  <button className="p-2 bg-zinc-900 border border-white/10 rounded-lg text-zinc-400 hover:text-white hover:border-white/20 transition-all group relative">
-    {icon}
-    <span className="absolute left-full ml-2 px-2 py-1 bg-black text-[8px] uppercase font-bold text-white rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-      {label}
-    </span>
-  </button>
-);
+function ClusterNodeCard({ row }: { row: EfficacyRow }) {
+  return (
+    <div className="rounded-[28px] border border-white/6 bg-zinc-900/25 p-5">
+      <div className="flex flex-wrap gap-2">
+        <MicroPill className={routeClass(row.context.route)}>{row.context.route}</MicroPill>
+        <MicroPill className="border-white/10 bg-white/[0.04] text-zinc-300">
+          {row.context.readinessTier}
+        </MicroPill>
+        <MicroPill className={heatClass(row.contextualConversionRate)}>
+          {(row.contextualConversionRate * 100).toFixed(1)}% heat
+        </MicroPill>
+      </div>
+
+      <div className="mt-4">
+        <div className="text-lg font-medium text-white">{row.context.orgState}</div>
+        <div className="mt-1 text-[11px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+          {row.context.authorityType} · {row.context.revenueBand} · {row.context.marketRiskBand}
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 xl:grid-cols-2">
+        <DomainRail
+          icon={Layers3}
+          title="Dominant Domains"
+          items={(row.context.dominantDomains || []).slice(0, 6)}
+          tone="border-[#D4AF37]/20 bg-[#D4AF37]/10 text-[#E7D8A5]"
+        />
+        <DomainRail
+          icon={Flame}
+          title="Failure Modes"
+          items={(row.context.failureModes || []).slice(0, 6)}
+          tone="border-red-500/20 bg-red-500/10 text-red-300"
+        />
+        <DomainRail
+          icon={Target}
+          title="Required Interventions"
+          items={(row.context.requiredInterventions || []).slice(0, 6)}
+          tone="border-blue-500/20 bg-blue-500/10 text-blue-300"
+        />
+        <DomainRail
+          icon={Briefcase}
+          title="Sponsor Types"
+          items={(row.context.sponsorTypes || []).slice(0, 6)}
+          tone="border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+        />
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/6 bg-black/20 p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Landmark className="h-4 w-4 text-zinc-400" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+            Worldview Anchors
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(row.context.worldviewAnchors || []).length ? (
+            row.context.worldviewAnchors.slice(0, 8).map((item) => (
+              <MicroPill
+                key={item}
+                className="border-white/10 bg-white/[0.04] text-zinc-300"
+              >
+                {item}
+              </MicroPill>
+            ))
+          ) : (
+            <span className="text-sm text-zinc-500">No worldview anchors recorded.</span>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+        {[
+          ["Clarity", row.context.clarityScore],
+          ["Authority", row.context.authorityScore],
+          ["Governance", row.context.governanceScore],
+          ["Severity", row.context.severityScore],
+          ["Revenue", row.context.revenueScore],
+        ].map(([label, value]) => (
+          <div
+            key={String(label)}
+            className="rounded-2xl border border-white/6 bg-black/20 px-4 py-3"
+          >
+            <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+              {label}
+            </div>
+            <div className="mt-2 text-xl font-light text-white">{String(value)}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-4">
+        <div className="rounded-2xl border border-white/6 bg-black/20 px-4 py-3">
+          <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+            Sessions
+          </div>
+          <div className="mt-2 text-xl font-light text-white">{row.totalSessions}</div>
+        </div>
+        <div className="rounded-2xl border border-white/6 bg-black/20 px-4 py-3">
+          <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+            Impressions
+          </div>
+          <div className="mt-2 text-xl font-light text-white">{row.impressionCount}</div>
+        </div>
+        <div className="rounded-2xl border border-white/6 bg-black/20 px-4 py-3">
+          <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+            Conversions
+          </div>
+          <div className="mt-2 text-xl font-light text-white">{row.conversionCount}</div>
+        </div>
+        <div className="rounded-2xl border border-white/6 bg-black/20 px-4 py-3">
+          <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+            Efficacy Heat
+          </div>
+          <div className="mt-2 text-xl font-light text-white">
+            {(row.contextualConversionRate * 100).toFixed(1)}%
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/6 bg-black/20 p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-zinc-400" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+            Ranked Recommendation Logic
+          </span>
+        </div>
+        <div className="space-y-3">
+          {(row.rankedAssets || []).slice(0, 4).map((asset) => (
+            <div
+              key={asset.assetId}
+              className="rounded-2xl border border-white/6 bg-white/[0.03] p-3"
+            >
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-white">{asset.title}</div>
+                  <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+                    {asset.kind} · lift {asset.contextualLift}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <MicroPill className={heatClass(asset.conversionRate)}>
+                    {(asset.conversionRate * 100).toFixed(1)}%
+                  </MicroPill>
+                  <MicroPill className="border-white/10 bg-white/[0.04] text-zinc-300">
+                    rank {asset.avgRank?.toFixed(2) ?? "—"}
+                  </MicroPill>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(asset.reasons || []).slice(0, 5).map((reason) => (
+                  <MicroPill
+                    key={`${asset.assetId}-${reason}`}
+                    className="border-[#D4AF37]/20 bg-[#D4AF37]/10 text-[#E7D8A5]"
+                  >
+                    {reason}
+                  </MicroPill>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function KnowledgeGraph({
+  frameworks = [],
+  efficacyRows = [],
+  overlayMode = "canonical",
+}: KnowledgeGraphProps) {
+  const topRows = React.useMemo(
+    () =>
+      [...efficacyRows]
+        .sort((a, b) => (b.contextualConversionRate || 0) - (a.contextualConversionRate || 0))
+        .slice(0, 4),
+    [efficacyRows]
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-[30px] border border-white/6 bg-zinc-900/30 p-6">
+        <div className="mb-5 flex items-center gap-2">
+          <Network className="h-4 w-4 text-amber-400" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-400">
+            Strategic Topology
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
+          <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+              Framework Nodes
+            </div>
+            <div className="mt-3 text-3xl font-light text-white">{frameworks.length}</div>
+            <div className="mt-2 text-sm text-zinc-500">Static architecture registered</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+              Canonical Clusters
+            </div>
+            <div className="mt-3 text-3xl font-light text-white">{efficacyRows.length}</div>
+            <div className="mt-2 text-sm text-zinc-500">Decision contexts in motion</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+              Hot Clusters
+            </div>
+            <div className="mt-3 text-3xl font-light text-white">
+              {topRows.filter((row) => row.contextualConversionRate >= 0.18).length}
+            </div>
+            <div className="mt-2 text-sm text-zinc-500">High-efficacy concentration</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+              Total Sessions
+            </div>
+            <div className="mt-3 text-3xl font-light text-white">
+              {efficacyRows.reduce((sum, row) => sum + (row.totalSessions || 0), 0)}
+            </div>
+            <div className="mt-2 text-sm text-zinc-500">Tracked across canonical contexts</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+              Total Conversions
+            </div>
+            <div className="mt-3 text-3xl font-light text-white">
+              {efficacyRows.reduce((sum, row) => sum + (row.conversionCount || 0), 0)}
+            </div>
+            <div className="mt-2 text-sm text-zinc-500">Decision path outcomes</div>
+          </div>
+        </div>
+      </div>
+
+      {overlayMode === "canonical" ? (
+        <div className="space-y-6">
+          <div className="rounded-[30px] border border-white/6 bg-zinc-900/30 p-6">
+            <div className="mb-5 flex items-center gap-2">
+              <Flame className="h-4 w-4 text-amber-400" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-400">
+                Canonical Decision Cluster Overlay
+              </span>
+            </div>
+
+            {topRows.length ? (
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                {topRows.map((row) => (
+                  <ClusterNodeCard key={row.joinKey} row={row} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/6 bg-black/20 p-4 text-sm text-zinc-500">
+                No canonical efficacy rows available to overlay.
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-[30px] border border-white/6 bg-zinc-900/30 p-6">
+            <div className="mb-5 flex items-center gap-2">
+              <Layers3 className="h-4 w-4 text-amber-400" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-400">
+                Adjacency Interpretation
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+                <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+                  Structural Layer
+                </div>
+                <p className="text-sm leading-7 text-zinc-300">
+                  The topology now shows which governance states, authority types, and
+                  readiness tiers are actually producing conversion rather than merely
+                  existing as abstract categories.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+                <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+                  Failure Layer
+                </div>
+                <p className="text-sm leading-7 text-zinc-300">
+                  Failure modes and interventions now sit adjacent to efficacy heat, so
+                  the graph stops pretending performance is disconnected from the
+                  decision logic that produced it.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/6 bg-black/20 p-5">
+                <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+                  Recommendation Layer
+                </div>
+                <p className="text-sm leading-7 text-zinc-300">
+                  Ranked asset rationale is part of the same surface, which means the
+                  estate can now inspect not just what converted, but why it was
+                  surfaced in the first place.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}

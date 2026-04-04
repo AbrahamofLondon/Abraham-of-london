@@ -1,196 +1,168 @@
+/* pages/canon/[slug].tsx */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/canon/[slug].tsx — CANON READER (SSOT, stable slug, tier-safe)
 
-import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
-import { Loader2 } from "lucide-react";
-
 import Layout from "@/components/Layout";
-import AccessGate from "@/components/AccessGate";
-import CanonHero from "@/components/canon/CanonHero";
-import { BriefSummaryCard } from "@/components/mdx/BriefSummaryCard";
-import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 
-import { getDocBySlug, getAllCanons, sanitizeData } from "@/lib/content/server";
-import { resolveDocCoverImage } from "@/lib/content/client-utils";
+import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
+import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
-import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
+import {
+  getDocBySlug,
+  getAllCombinedDocs,
+  normalizeSlug,
+  isDraftContent,
+  sanitizeData,
+} from "@/lib/content/server";
 
-interface Props {
-  doc: any;
+import { getRenderableBody } from "@/lib/content/render-body";
+
+import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
+import type { AccessTier } from "@/lib/access/tiers";
+
+type Props = {
+  canon: {
+    title: string;
+    slug: string;
+    excerpt?: string | null;
+    category?: string | null;
+    date?: string | null;
+    tags?: string[];
+    readTime?: string | null;
+  };
   requiredTier: AccessTier;
-}
+  bodyCode: string | null;
+};
 
-/** Canon SSOT slug normalizer:
- * - keeps nested paths intact
- * - strips only known prefixes
- * - blocks traversal
- */
 function canonBareSlug(input: unknown): string {
-  let s = String(input ?? "")
-    .trim()
-    .replace(/\\/g, "/")
+  const raw = String(input ?? "");
+
+  let s = normalizeSlug(raw)
+    .replace(/^content\//i, "")
+    .replace(/^vault\//i, "")
+    .replace(/^canon\//i, "")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
+    .replace(/\.(md|mdx)$/i, "");
 
   if (!s || s.includes("..")) return "";
 
-  // Strip prefixes repeatedly
-  const stripOnce = (prefix: string) => {
-    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
-    if (s.toLowerCase().startsWith(p.toLowerCase())) {
-      s = s.slice(p.length);
-      s = s.replace(/^\/+/, "");
-      return true;
-    }
-    return false;
-  };
-
-  let changed = true;
-  while (changed) {
-    changed = false;
-    changed = stripOnce("content") || changed;
-    changed = stripOnce("vault") || changed;
-    changed = stripOnce("canon") || changed;
-  }
-
-  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
-  if (!s || s.includes("..")) return "";
-  return s;
+  const parts = s.split("/").filter(Boolean);
+  return parts[parts.length - 1] || "";
 }
 
-function extractBodyCode(doc: any): string {
-  return String(doc?.body?.code || doc?.bodyCode || "");
-}
-
-const CanonSlugPage: NextPage<Props> = ({ doc, requiredTier }) => {
-  const { data: session, status } = useSession();
-
-  const required = tiers.normalizeRequired(requiredTier);
-  const needsAuth = required !== "public";
-
-  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
-  const canRead = !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
-
-  // ✅ the canonical bare slug for this route + unlock
-  const bare = canonBareSlug(doc?._raw?.flattenedPath || doc?.slug || "");
-
-  const [activeCode, setActiveCode] = React.useState<string>(doc?.bodyCode || "");
-  const [loadingContent, setLoadingContent] = React.useState(false);
-  const [unlockError, setUnlockError] = React.useState<string | null>(null);
-
-  const coverImage = doc.coverImage;
-
-  const handleUnlock = async () => {
-    if (!needsAuth) return;
-    if (!bare) return;
-
-    setUnlockError(null);
-    setLoadingContent(true);
-    try {
-      const res = await fetch(`/api/canon/${encodeURIComponent(bare)}`, { method: "GET" });
-      const json = await res.json().catch(() => ({}));
-
-      if (!res.ok || !json?.ok) {
-        setUnlockError(json?.reason || "UNLOCK_FAILED");
-        return;
-      }
-
-      if (typeof json?.bodyCode === "string") {
-        setActiveCode(json.bodyCode);
-      } else {
-        setUnlockError("UNLOCK_PAYLOAD_MISSING");
-      }
-    } catch {
-      setUnlockError("UNLOCK_NETWORK_FAILURE");
-    } finally {
-      setLoadingContent(false);
-    }
-  };
-
-  if (needsAuth && status === "loading") {
-    return (
-      <Layout title={doc.title}>
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-amber-500 font-mono text-xs animate-pulse">Verifying clearance...</div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (needsAuth && (!session?.user || !canRead)) {
-    return (
-      <Layout title={doc.title}>
-        <div className="min-h-screen bg-black">
-          <CanonHero title={doc.title} coverImage={coverImage} />
-          <div className="mx-auto max-w-7xl px-6 py-12">
-            <BriefSummaryCard classification={required} />
-            <div className="mt-16">
-              <AccessGate
-                title={doc.title}
-                requiredTier={required}
-                onUnlocked={handleUnlock}
-                message={
-                  doc.lockMessage ||
-                  "This canon volume is restricted to members of the appropriate clearance level."
-                }
-                onGoToJoin={() => window.location.assign("/inner-circle")}
-              />
-              {unlockError ? (
-                <div className="mt-6 text-center text-[10px] font-mono uppercase tracking-widest text-red-400/90">
-                  {unlockError}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+function isCanonDoc(doc: any): boolean {
+  const flat = String(doc?._raw?.flattenedPath || "").toLowerCase();
+  const source = String(doc?._raw?.sourceFilePath || "").toLowerCase();
+  const dir = String(doc?._raw?.sourceFileDir || "").toLowerCase();
+  const slug = String(doc?.slug || "").toLowerCase();
+  const collectionSlug = String(doc?.collectionSlug || "").toLowerCase();
+  const urlSlug = String(doc?.urlSlug || "").toLowerCase();
+  const href = String(doc?.href || "").toLowerCase();
+  const type = String(doc?.type || doc?.docKind || doc?.kind || "").toLowerCase();
 
   return (
-    <Layout title={doc.title} description={doc.description || ""}>
+    type === "canon" ||
+    dir.includes("canon") ||
+    flat.startsWith("canon/") ||
+    flat.startsWith("content/canon/") ||
+    flat.startsWith("vault/canon/") ||
+    source.startsWith("canon/") ||
+    source.startsWith("content/canon/") ||
+    source.startsWith("vault/canon/") ||
+    slug.startsWith("canon/") ||
+    collectionSlug.startsWith("canon/") ||
+    href.startsWith("/canon/") ||
+    (!!urlSlug && !collectionSlug && type === "canon")
+  );
+}
+
+const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
+  const isPublic = requiredTier === "public";
+
+  return (
+    <Layout
+      title={`${canon.title} // The Canon`}
+      description={canon.excerpt || "Canonical volume from Abraham of London."}
+      canonicalUrl={`/canon/${canon.slug}`}
+      className="bg-black text-white"
+      fullWidth
+      headerTransparent={false}
+    >
       <Head>
-        <meta name="robots" content={required === "public" ? "index, follow" : "noindex, nofollow"} />
+        <meta name="robots" content={isPublic ? "index,follow" : "noindex,nofollow"} />
       </Head>
 
-      <section className="min-h-screen bg-black text-white">
-        <CanonHero title={doc.title} coverImage={coverImage} />
-
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <BriefSummaryCard classification={required} />
-
-          <div className="mt-16">
-            <div className="relative min-h-[400px]">
-              {loadingContent ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="animate-spin text-amber-500 h-8 w-8" />
-                </div>
-              ) : null}
-              <div className={loadingContent ? "opacity-20 pointer-events-none" : "opacity-100"}>
-                <SafeMDXRenderer code={activeCode} />
-              </div>
+      <main className="min-h-screen bg-black text-white">
+        <section className="border-b border-white/8 px-6 pb-10 pt-32 md:pb-12 md:pt-36">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-px w-10 bg-gradient-to-r from-amber-500/50 to-transparent" />
+              <span className="font-mono text-[9px] uppercase tracking-[0.34em] text-white/34">
+                Canonical Volume
+              </span>
             </div>
+
+            <h1 className="max-w-5xl font-serif text-5xl font-light leading-[0.94] tracking-[-0.055em] text-white md:text-7xl">
+              {canon.title}
+            </h1>
+
+            {(canon.excerpt || canon.category || canon.readTime || canon.date) && (
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-mono uppercase tracking-[0.18em] text-white/36">
+                {canon.category ? <span>{canon.category}</span> : null}
+                {canon.readTime ? <span>{canon.readTime}</span> : null}
+                {canon.date ? <span>{canon.date}</span> : null}
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section className="px-6 py-12 md:py-16">
+          <div className="mx-auto max-w-5xl">
+            {isPublic ? (
+              <div className="aol-mdx-shell">
+                <ServerMDXRenderer code={bodyCode || ""} />
+              </div>
+            ) : (
+              <ClientUnlockRenderer
+                slug={`canon/${canon.slug}`}
+                requiredTier={requiredTier}
+                initialCode={null}
+              />
+            )}
+          </div>
+        </section>
+      </main>
     </Layout>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const canons = (getAllCanons() || []).filter((d: any) => !d?.draft);
+  const docs = getAllCombinedDocs() || [];
+  const seen = new Set<string>();
 
-  const paths = canons
+  const paths = docs
+    .filter((d: any) => !isDraftContent(d))
+    .filter(isCanonDoc)
     .map((d: any) => {
-      // ✅ SSOT: flattenedPath is the truth
-      const fp = String(d?._raw?.flattenedPath || d?.slug || "");
-      const bare = canonBareSlug(fp);
+      const raw =
+        d?.urlSlug ||
+        d?.collectionSlug ||
+        d?.slug ||
+        d?._raw?.flattenedPath ||
+        d?._raw?.sourceFilePath ||
+        "";
+
+      const bare = canonBareSlug(raw);
       if (!bare) return null;
-      return { params: { slug: bare } };
+      if (seen.has(bare)) return null;
+
+      seen.add(bare);
+
+      return {
+        params: { slug: bare },
+      };
     })
     .filter(Boolean) as Array<{ params: { slug: string } }>;
 
@@ -198,33 +170,41 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const bare = canonBareSlug(params?.slug);
-  if (!bare) return { notFound: true };
+  const slug = canonBareSlug(params?.slug);
+  if (!slug) return { notFound: true };
 
-  // ✅ SSOT lookup order
-  const rawDoc =
-    getDocBySlug(`canon/${bare}`) ||
-    getDocBySlug(`content/canon/${bare}`) ||
-    getDocBySlug(`vault/canon/${bare}`) ||
-    getDocBySlug(bare);
+  const doc =
+    getDocBySlug(`canon/${slug}`) ||
+    getDocBySlug(`content/canon/${slug}`) ||
+    getDocBySlug(`vault/canon/${slug}`) ||
+    getDocBySlug(slug);
 
-  if (!rawDoc || rawDoc?.draft) return { notFound: true };
+  if (!doc || isDraftContent(doc) || !isCanonDoc(doc)) {
+    return { notFound: true };
+  }
 
-  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(rawDoc));
-  const locked = requiredTier !== "public";
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const isPublic = requiredTier === "public";
 
-  const doc = {
-    ...rawDoc,
-    // keep the route’s bare slug stable
-    slug: bare,
-    bodyCode: locked ? "" : extractBodyCode(rawDoc),
-    coverImage: resolveDocCoverImage(rawDoc),
-  };
+  const renderBody = getRenderableBody(doc);
+  const safeCode = isPublic ? String(renderBody?.code || "") : null;
 
   return {
-    props: sanitizeData({ doc, requiredTier }),
-    revalidate: 1800,
+    props: sanitizeData({
+      canon: {
+        title: doc.title || "Untitled Canon",
+        slug,
+        excerpt: doc.excerpt || doc.description || null,
+        category: doc.category || doc.series || "Canon",
+        date: doc.date || null,
+        tags: Array.isArray(doc.tags) ? doc.tags.map(String) : [],
+        readTime: doc.readTime || null,
+      },
+      requiredTier,
+      bodyCode: safeCode,
+    }),
+    revalidate: 3600,
   };
 };
 
-export default CanonSlugPage;
+export default Page;

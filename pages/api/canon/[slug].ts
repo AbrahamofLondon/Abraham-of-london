@@ -1,11 +1,14 @@
-/* pages/api/canon/[slug].ts — SECURE CANON UNLOCK (SSOT, Pages Router) */
+// pages/api/canon/[slug].ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
+import { allCanons, allDocuments } from "contentlayer/generated";
 
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getDocBySlug } from "@/lib/content/server";
+import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
-import { getDocBySlug, getAllCanons, normalizeSlug } from "@/lib/content/server";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -14,6 +17,8 @@ type OkResponse = {
   tier: AccessTier;
   requiredTier: AccessTier;
   bodyCode: string;
+  compressed: true;
+  encoding: "gzip-base64";
   slugResolved: string;
 };
 
@@ -79,23 +84,26 @@ function canonBareSlug(input: unknown): string {
   return !s || s.includes("..") ? "" : s;
 }
 
-function extractBodyCode(doc: unknown): string {
-  const value = doc as {
-    body?: { code?: unknown };
-    bodyCode?: unknown;
-    content?: unknown;
-    mdx?: unknown;
-    bodyRaw?: unknown;
-  } | null;
+function getAllCanonDocuments(): any[] {
+  if (Array.isArray(allCanons) && allCanons.length > 0) {
+    return allCanons;
+  }
 
-  return safeStr(
-    value?.body?.code ??
-      value?.bodyCode ??
-      value?.content ??
-      value?.mdx ??
-      value?.bodyRaw ??
-      "",
-  );
+  if (Array.isArray(allDocuments)) {
+    return allDocuments.filter((doc: any) => {
+      const docType = String(
+        doc?.type || doc?.docType || doc?._raw?.sourceFilePath?.split("/")[0] || "",
+      ).toLowerCase();
+
+      return docType === "canon";
+    });
+  }
+
+  return [];
+}
+
+function extractBodyCode(doc: any): string {
+  return String(doc?.body?.code || doc?.bodyCode || "");
 }
 
 function resolveCanonDoc(bare: string): { doc: any | null; tried: string[] } {
@@ -103,41 +111,42 @@ function resolveCanonDoc(bare: string): { doc: any | null; tried: string[] } {
   const tryContentCanon = cleanPathish(`content/canon/${bare}`);
   const tryVaultCanon = cleanPathish(`vault/canon/${bare}`);
   const tryBare = cleanPathish(bare);
-  const tryNormalized = cleanPathish(normalizeSlug(bare));
 
-  const tried = [
-    tryCanon,
-    tryContentCanon,
-    tryVaultCanon,
-    tryBare,
-    tryNormalized,
-  ];
+  const tried = [tryCanon, tryContentCanon, tryVaultCanon, tryBare];
+
+  const allCanonDocs = getAllCanonDocuments();
 
   const direct =
-    getDocBySlug(tryCanon) ||
-    getDocBySlug(tryContentCanon) ||
-    getDocBySlug(tryVaultCanon) ||
-    getDocBySlug(tryBare) ||
-    getDocBySlug(tryNormalized) ||
-    null;
+    allCanonDocs.find((doc: any) => {
+      if (doc?.draft) return false;
+
+      const fp = cleanPathish(doc?._raw?.flattenedPath || "");
+      const slug = cleanPathish(doc?.slug || doc?.slugSafe || "");
+      const href = cleanPathish(doc?.href || doc?.hrefSafe || "");
+
+      return (
+        fp === tryCanon ||
+        fp === tryContentCanon ||
+        fp === tryVaultCanon ||
+        slug === tryBare ||
+        slug === tryCanon ||
+        href === tryCanon ||
+        href === tryBare
+      );
+    }) || null;
 
   if (direct) {
     return { doc: direct, tried };
   }
 
-  const canons = getAllCanons() || [];
-  const scanned =
-    canons.find((entry: any) => {
-      if (!entry || entry.draft) return false;
+  const fallback =
+    getDocBySlug(tryCanon) ||
+    getDocBySlug(tryContentCanon) ||
+    getDocBySlug(tryVaultCanon) ||
+    getDocBySlug(tryBare) ||
+    null;
 
-      const flattened = canonBareSlug(entry?._raw?.flattenedPath || "");
-      const slug = canonBareSlug(entry?.slug || "");
-      const sourcePath = canonBareSlug(entry?._raw?.sourceFilePath || "");
-
-      return flattened === bare || slug === bare || sourcePath === bare;
-    }) || null;
-
-  return { doc: scanned, tried };
+  return { doc: fallback, tried };
 }
 
 export default async function handler(
@@ -175,17 +184,22 @@ export default async function handler(
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
   const slugResolved = canonBareSlug(
-    doc?.slug || doc?._raw?.flattenedPath || bare,
+    doc?.slug || doc?.slugSafe || doc?._raw?.flattenedPath || bare,
   );
+  const bodyCode = extractBodyCode(doc);
 
   if (requiredTier === "public") {
-    return res.status(200).json({
-      ok: true,
-      tier: "public",
-      requiredTier: "public",
-      bodyCode: extractBodyCode(doc),
-      slugResolved,
-    });
+    return sendCompressedBodyCode(
+      res,
+      {
+        ok: true,
+        tier: "public",
+        requiredTier: "public",
+        slugResolved,
+        bodyCode,
+      },
+      200,
+    );
   }
 
   const sessionId = readAccessCookie(req);
@@ -212,18 +226,21 @@ export default async function handler(
     });
   }
 
-  return res.status(200).json({
-    ok: true,
-    tier: userTier,
-    requiredTier,
-    bodyCode: extractBodyCode(doc),
-    slugResolved,
-  });
+  return sendCompressedBodyCode(
+    res,
+    {
+      ok: true,
+      tier: userTier,
+      requiredTier,
+      slugResolved,
+      bodyCode,
+    },
+    200,
+  );
 }
 
 export const config = {
   api: {
     responseLimit: false,
-    bodyParser: false,
   },
 };

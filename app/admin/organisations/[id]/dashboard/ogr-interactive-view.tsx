@@ -1,142 +1,320 @@
-// app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx
-
 "use client";
 
-import React, { useState } from 'react';
-import { 
-  ChevronRight, 
-  Info, 
-  AlertCircle, 
-  CheckCircle2, 
-  BarChart3, 
-  Zap,
-  ArrowUpRight
+import * as React from "react";
+import {
+  Activity,
+  BarChart3,
+  Building2,
+  Shield,
+  Target,
+  TrendingUp,
+  Users,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
-interface DomainDrillDown {
-  domain: string;
-  score: number;
-  questions: { question: string; passRate: number; status: 'critical' | 'stable' }[];
+export type OGRCampaignView = {
+  id: string;
+  title: string;
+  status: string;
+  participantCount: number;
+  completedCount: number;
+  completionRate: number;
+};
+
+export type OGRInteractiveViewData = {
+  organisation: {
+    id: string;
+    name: string;
+    sector: string;
+    slug?: string | null;
+  };
+  metrics: {
+    totalCampaigns: number;
+    activeCampaigns: number;
+    totalParticipants: number;
+    completedParticipants: number;
+    responseRate: number;
+  };
+  campaigns: OGRCampaignView[];
+};
+
+export type OGRInteractiveViewProps = {
+  data: OGRInteractiveViewData;
+};
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
 
-export function OGRInteractiveView({ data }: { data: any }) {
-  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
-
-  const { organisationSnapshot } = data;
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  subtext,
+  tone = "neutral",
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string | number;
+  subtext?: string;
+  tone?: "neutral" | "gold" | "green" | "blue" | "red";
+}) {
+  const tones = {
+    neutral: "border-neutral-200 bg-white text-neutral-900",
+    gold: "border-amber-200 bg-amber-50 text-[#8A6A2F]",
+    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    blue: "border-blue-200 bg-blue-50 text-blue-700",
+    red: "border-red-200 bg-red-50 text-red-700",
+  } as const;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[700px]">
-      
-      {/* LEFT COLUMN: THE MATRIX LIST */}
-      <div className="lg:col-span-5 space-y-4">
-        <div className="p-6 bg-black text-white mb-6">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#8A6A2F] mb-2">
-            System Diagnostics
-          </h3>
-          <p className="text-xl font-black italic tracking-tighter">Operational Resonance Matrix</p>
-        </div>
-
-        {organisationSnapshot.domainScores.map((ds: any) => (
-          <button
-            key={ds.domain}
-            onClick={() => setSelectedDomain(ds.domain)}
-            className={`w-full text-left p-4 transition-all border-l-4 group ${
-              selectedDomain === ds.domain 
-                ? "bg-white border-[#8A6A2F] shadow-lg" 
-                : "bg-neutral-50 border-transparent hover:border-neutral-300"
-            }`}
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 group-hover:text-[#8A6A2F]">
-                  {ds.percentScore < 60 ? 'Fragility Detected' : 'Resonant'}
-                </p>
-                <h4 className="text-sm font-black uppercase tracking-tight">{ds.domain.replace(/_/g, ' ')}</h4>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-black font-sans">{Math.round(ds.percentScore)}%</span>
-                <ChevronRight className={`w-4 h-4 transition-transform ${selectedDomain === ds.domain ? 'rotate-90' : ''}`} />
-              </div>
-            </div>
-          </button>
-        ))}
+    <div className={cx("rounded-2xl border p-5", tones[tone])}>
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4" />
+        <span className="text-[10px] font-mono uppercase tracking-[0.18em] opacity-80">
+          {label}
+        </span>
       </div>
+      <div className="mt-3 text-3xl font-semibold tracking-tight">{value}</div>
+      {subtext ? (
+        <p className="mt-2 text-xs leading-6 text-neutral-500">{subtext}</p>
+      ) : null}
+    </div>
+  );
+}
 
-      {/* RIGHT COLUMN: THE DRILL-DOWN INTELLIGENCE */}
-      <div className="lg:col-span-7 bg-white border border-neutral-100 p-8 relative overflow-hidden">
-        <AnimatePresence mode="wait">
-          {selectedDomain ? (
-            <motion.div
-              key={selectedDomain}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-8"
-            >
-              <div className="flex justify-between items-start border-b border-neutral-100 pb-6">
-                <div>
-                  <h2 className="text-3xl font-black uppercase tracking-tighter leading-none mb-2">
-                    {selectedDomain.replace(/_/g, ' ')}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-neutral-100 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
-                      Deep-Dive Intelligence
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black uppercase text-[#8A6A2F]">Domain Score</p>
-                  <p className="text-4xl font-black tracking-tighter">
-                    {Math.round(organisationSnapshot.domainScores.find((d: any) => d.domain === selectedDomain)?.percentScore)}%
-                  </p>
-                </div>
-              </div>
+function ProgressBar({
+  label,
+  value,
+  colorClass,
+}: {
+  label: string;
+  value: number;
+  colorClass: string;
+}) {
+  const safeValue = Math.max(0, Math.min(100, value));
 
-              {/* MOCK QUESTIONS SECTION (This would pull from your raw Audit database) */}
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                  <BarChart3 className="w-4 h-4" /> Root Cause Analysis
-                </h5>
-                
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="p-4 border border-neutral-50 bg-[#FCFCFA] flex justify-between items-center group hover:bg-white hover:shadow-md transition-all">
-                    <div className="max-w-[80%]">
-                      <p className="text-xs font-medium text-neutral-600 italic mb-1">Audit Stimulus 0{i}:</p>
-                      <p className="text-sm font-black uppercase tracking-tight leading-tight">
-                        "Resources are allocated based on strategic priority rather than internal politics."
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold text-red-600 mb-1">42% PASS</p>
-                      <div className="w-12 h-1 bg-neutral-200 overflow-hidden">
-                        <div className="w-[42%] h-full bg-red-600" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* ACTION CALLOUT */}
-              <div className="mt-12 p-6 bg-[#8A6A2F] text-white flex justify-between items-center">
-                <div>
-                  <h4 className="text-sm font-black uppercase">Initiate Recovery Protocol</h4>
-                  <p className="text-[10px] opacity-80 font-medium uppercase tracking-widest">Deploy Strategic Intervention v3</p>
-                </div>
-                <ArrowUpRight className="w-6 h-6" />
-              </div>
-            </motion.div>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-neutral-300 space-y-4">
-              <Zap className="w-12 h-12 opacity-20" />
-              <p className="text-[10px] font-black uppercase tracking-[0.3em]">Select a Domain to Begin Diagnostic</p>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]" />
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[11px] font-medium text-neutral-700">{label}</span>
+        <span className="text-[11px] font-mono text-neutral-500">{safeValue}%</span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+        <div
+          className={cx("h-full rounded-full transition-all duration-500", colorClass)}
+          style={{ width: `${safeValue}%` }}
+        />
       </div>
     </div>
   );
 }
+
+export function OGRInteractiveView({ data }: OGRInteractiveViewProps) {
+  const { organisation, metrics, campaigns } = data;
+
+  const weakestCampaigns = [...campaigns]
+    .sort((a, b) => a.completionRate - b.completionRate)
+    .slice(0, 3);
+
+  const strongestCampaigns = [...campaigns]
+    .sort((a, b) => b.completionRate - a.completionRate)
+    .slice(0, 3);
+
+  const healthTone =
+    metrics.responseRate >= 70
+      ? "green"
+      : metrics.responseRate >= 45
+      ? "gold"
+      : "red";
+
+  return (
+    <div className="space-y-8">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          icon={Building2}
+          label="Organisation"
+          value={organisation.name}
+          subtext={organisation.sector || "Sector unspecified"}
+          tone="neutral"
+        />
+        <MetricCard
+          icon={BarChart3}
+          label="Campaigns"
+          value={metrics.totalCampaigns}
+          subtext={`${metrics.activeCampaigns} active campaign nodes`}
+          tone="blue"
+        />
+        <MetricCard
+          icon={Users}
+          label="Participants"
+          value={metrics.totalParticipants}
+          subtext={`${metrics.completedParticipants} completed submissions`}
+          tone="neutral"
+        />
+        <MetricCard
+          icon={Shield}
+          label="Response Health"
+          value={`${metrics.responseRate}%`}
+          subtext="Aggregate organisational response velocity"
+          tone={healthTone}
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-[#8A6A2F]" />
+            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800">
+              Organisational Signal
+            </h3>
+          </div>
+
+          <div className="space-y-5">
+            <ProgressBar
+              label="Response Rate"
+              value={metrics.responseRate}
+              colorClass="bg-emerald-500"
+            />
+            <ProgressBar
+              label="Campaign Activation"
+              value={
+                metrics.totalCampaigns > 0
+                  ? Math.round((metrics.activeCampaigns / metrics.totalCampaigns) * 100)
+                  : 0
+              }
+              colorClass="bg-blue-500"
+            />
+            <ProgressBar
+              label="Completion Density"
+              value={
+                metrics.totalParticipants > 0
+                  ? Math.round(
+                      (metrics.completedParticipants / metrics.totalParticipants) * 100
+                    )
+                  : 0
+              }
+              colorClass="bg-amber-500"
+            />
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  Strongest Campaigns
+                </span>
+              </div>
+              <div className="mt-4 space-y-3">
+                {strongestCampaigns.length ? (
+                  strongestCampaigns.map((campaign) => (
+                    <div key={campaign.id} className="rounded-xl bg-white p-3 border border-neutral-200">
+                      <div className="text-sm font-medium text-neutral-900">
+                        {campaign.title || "Untitled Campaign"}
+                      </div>
+                      <div className="mt-1 text-xs text-neutral-500">
+                        {campaign.completionRate}% completion • {campaign.completedCount}/
+                        {campaign.participantCount} completed
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-neutral-500">No campaign data available.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500">
+                  Weakest Campaigns
+                </span>
+              </div>
+              <div className="mt-4 space-y-3">
+                {weakestCampaigns.length ? (
+                  weakestCampaigns.map((campaign) => (
+                    <div key={campaign.id} className="rounded-xl bg-white p-3 border border-neutral-200">
+                      <div className="text-sm font-medium text-neutral-900">
+                        {campaign.title || "Untitled Campaign"}
+                      </div>
+                      <div className="mt-1 text-xs text-neutral-500">
+                        {campaign.completionRate}% completion • {campaign.completedCount}/
+                        {campaign.participantCount} completed
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-neutral-500">No campaign data available.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-[#8A6A2F]" />
+            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800">
+              Campaign Registry Snapshot
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            {campaigns.length ? (
+              campaigns.slice(0, 8).map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-neutral-900">
+                        {campaign.title || "Untitled Campaign"}
+                      </div>
+                      <div className="mt-1 text-[11px] text-neutral-500">
+                        Status: {campaign.status || "unknown"}
+                      </div>
+                    </div>
+                    <div className="rounded-full bg-white px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.12em] text-neutral-600 border border-neutral-200">
+                      {campaign.completionRate}%
+                    </div>
+                  </div>
+
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white border border-neutral-200">
+                    <div
+                      className={cx(
+                        "h-full rounded-full",
+                        campaign.completionRate >= 70
+                          ? "bg-emerald-500"
+                          : campaign.completionRate >= 45
+                          ? "bg-amber-500"
+                          : "bg-red-500"
+                      )}
+                      style={{ width: `${campaign.completionRate}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-2 text-[11px] text-neutral-500">
+                    {campaign.completedCount}/{campaign.participantCount} completed
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-8 text-center">
+                <Target className="mx-auto h-6 w-6 text-neutral-400" />
+                <p className="mt-3 text-sm text-neutral-600">
+                  No campaign activity available yet.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default OGRInteractiveView;

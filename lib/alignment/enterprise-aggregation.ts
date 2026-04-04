@@ -1,8 +1,11 @@
+// lib/alignment/enterprise-aggregation.ts
 import {
   ENTERPRISE_ALIGNMENT_DOMAIN_ORDER,
   type EnterpriseAlignmentBand,
   type EnterpriseAlignmentDomain,
   type EnterpriseDomainScore,
+  type EnterpriseVarianceScore,
+  type FragilitySignal,
 } from "./enterprise-types";
 import {
   getCampaignById,
@@ -11,6 +14,7 @@ import {
   replaceOrganisationSnapshot,
   replaceTeamSnapshots,
 } from "./enterprise-repository";
+import { determineEnterpriseBand } from "./enterprise-score";
 
 /* -----------------------------------------------------------------------------
    MATHEMATICAL & STATISTICAL UTILITIES
@@ -25,20 +29,27 @@ function round(value: number): number {
   return Math.round(value);
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(Math.round(value), min), max);
+}
+
 /**
- * Uses a 95% confidence interval + Response Rate weighting.
+ * Response confidence using response rate and margin of error.
  */
 function computeConfidenceScore(respondents: number, invited: number): number {
   if (invited <= 0 || respondents <= 0) return 0;
-  
+
   const responseRate = respondents / invited;
-  // Standard Error for finite populations (N=invited, n=respondents)
-  const standardError = Math.sqrt((0.25) / respondents) * Math.sqrt(Math.max(0, (invited - respondents) / (invited - 1 || 1)));
+  const finitePopulationFactor =
+    invited > 1
+      ? Math.sqrt(Math.max(0, (invited - respondents) / (invited - 1)))
+      : 1;
+
+  const standardError = Math.sqrt(0.25 / respondents) * finitePopulationFactor;
   const marginOfError = 1.96 * standardError;
-  
-  // Inverse relationship: High MoE = Low Confidence
-  const baseConfidence = Math.max(0, 100 - (marginOfError * 100)); 
-  return round((baseConfidence * 0.7) + (responseRate * 30));
+
+  const baseConfidence = Math.max(0, 100 - marginOfError * 100);
+  return clamp(baseConfidence * 0.7 + responseRate * 30, 0, 100);
 }
 
 function computeVariance(values: number[]): number {
@@ -48,10 +59,6 @@ function computeVariance(values: number[]): number {
   return round(Math.sqrt(mean(squaredDiffs)));
 }
 
-/**
- * Geometric Dissonance: Shoelace formula for polygon area.
- * Interprets variance as 'volatility' radii on a radar chart.
- */
 function computePolygonArea(scores: number[]): number {
   const numPoints = scores.length;
   if (numPoints < 3) return 0;
@@ -60,8 +67,8 @@ function computePolygonArea(scores: number[]): number {
   let area = 0;
 
   for (let i = 0; i < numPoints; i++) {
-    const r1 = scores[i];
-    const r2 = scores[(i + 1) % numPoints];
+    const r1 = scores[i] ?? 0;
+    const r2 = scores[(i + 1) % numPoints] ?? 0;
     area += 0.5 * r1 * r2 * Math.sin(angleStep);
   }
 
@@ -69,28 +76,42 @@ function computePolygonArea(scores: number[]): number {
 }
 
 /* -----------------------------------------------------------------------------
-   BRAND LOGIC & INTERPRETATION
+   INTERPRETATION LAYER
 ----------------------------------------------------------------------------- */
 
 function bandFromPercent(percent: number): EnterpriseAlignmentBand {
-  if (percent >= 85) return "SOVEREIGN"; // Updated to match your brand tiers
-  if (percent >= 70) return "ALIGNED";
-  if (percent >= 50) return "DRIFTING";
-  return "MISALIGNED";
+  return determineEnterpriseBand(percent);
 }
 
-function getTopDomains(domainScores: EnterpriseDomainScore[], count: number, ascending: boolean): EnterpriseAlignmentDomain[] {
+function getTopDomains(
+  domainScores: EnterpriseDomainScore[],
+  count: number,
+  ascending: boolean,
+): EnterpriseAlignmentDomain[] {
   return [...domainScores]
-    .sort((a, b) => ascending ? a.percent - b.percent : b.percent - a.percent)
+    .sort((a, b) => {
+      if (a.percent !== b.percent) {
+        return ascending ? a.percent - b.percent : b.percent - a.percent;
+      }
+      return String(a.domain).localeCompare(String(b.domain));
+    })
     .slice(0, count)
     .map((item) => item.domain);
 }
 
-function computeDomainAggregates(assessments: any[]) {
+function computeDomainAggregates(
+  assessments: Array<{
+    domainScoresJson: unknown;
+    percentScore: number;
+  }>,
+): {
+  domainScores: EnterpriseDomainScore[];
+  varianceScores: EnterpriseVarianceScore[];
+} {
   const domainScores = ENTERPRISE_ALIGNMENT_DOMAIN_ORDER.map((domain) => {
-    const domainValues = assessments.map((a) => {
-      const scores = (a.domainScoresJson as EnterpriseDomainScore[]) || [];
-      return scores.find((s) => s.domain === domain)?.percent ?? 0;
+    const domainValues = assessments.map((assessment) => {
+      const scores = (assessment.domainScoresJson as EnterpriseDomainScore[]) || [];
+      return scores.find((score) => score.domain === domain)?.percent ?? 0;
     });
 
     const percent = round(mean(domainValues));
@@ -104,15 +125,15 @@ function computeDomainAggregates(assessments: any[]) {
   });
 
   const varianceScores = ENTERPRISE_ALIGNMENT_DOMAIN_ORDER.map((domain) => {
-    const domainValues = assessments.map((a) => {
-      const scores = (a.domainScoresJson as EnterpriseDomainScore[]) || [];
-      return scores.find((s) => s.domain === domain)?.percent ?? 0;
+    const domainValues = assessments.map((assessment) => {
+      const scores = (assessment.domainScoresJson as EnterpriseDomainScore[]) || [];
+      return scores.find((score) => score.domain === domain)?.percent ?? 0;
     });
 
     return {
       domain,
       variance: computeVariance(domainValues),
-    };
+    } satisfies EnterpriseVarianceScore;
   });
 
   return { domainScores, varianceScores };
@@ -121,9 +142,11 @@ function computeDomainAggregates(assessments: any[]) {
 function computeFragilitySignal(params: {
   percentScore: number;
   overallGapPercent: number;
-  varianceScores: Array<{ variance: number }>;
-}): "HIGH" | "MEDIUM" | "LOW" {
-  const highVarianceCount = params.varianceScores.filter((v) => v.variance >= 20).length;
+  varianceScores: EnterpriseVarianceScore[];
+}): FragilitySignal {
+  const highVarianceCount = params.varianceScores.filter(
+    (value) => value.variance >= 20,
+  ).length;
 
   if (params.percentScore < 55 && params.overallGapPercent > 15) return "HIGH";
   if (params.percentScore < 65 || highVarianceCount >= 2) return "MEDIUM";
@@ -136,37 +159,46 @@ function computeFragilitySignal(params: {
 
 export async function aggregateEnterpriseCampaign(campaignId: string) {
   const campaign = await getCampaignById(campaignId);
-  if (!campaign) throw new Error("Campaign context missing from Registry.");
+  if (!campaign) throw new Error("Campaign context missing from registry.");
 
   const assessments = await loadCampaignAssessments(campaignId);
   const invitedCount = campaign.participants.length;
   const respondentCount = assessments.length;
 
-  // Handle zero-data state to prevent math errors
   if (!respondentCount) {
     await replaceTeamSnapshots(campaignId, []);
-    return { ok: true, respondentCount: 0, invitedCount };
+    return {
+      ok: true,
+      respondentCount: 0,
+      invitedCount,
+      confidenceScore: 0,
+      fragilitySignal: "LOW" as FragilitySignal,
+      dissonanceArea: 0,
+    };
   }
 
-  // 1. Core Organisational Aggregates
   const { domainScores, varianceScores } = computeDomainAggregates(assessments);
   const orgTotalPercent = round(mean(assessments.map((a) => a.percentScore)));
-  
-  // 2. Intelligence Metrics
-  const confidenceScore = computeConfidenceScore(respondentCount, invitedCount);
-  const dissonanceArea = computePolygonArea(varianceScores.map(v => v.variance));
 
-  // 3. Leadership Gap Architecture (Delta between Executive and Non-Executive)
-  const execs = assessments.filter((a) => a.isExecutive);
-  const staff = assessments.filter((a) => !a.isExecutive);
+  const confidenceScore = computeConfidenceScore(respondentCount, invitedCount);
+  const dissonanceArea = computePolygonArea(
+    varianceScores.map((value) => value.variance),
+  );
+
+  const execs = assessments.filter((assessment) => assessment.isExecutive);
+  const staff = assessments.filter((assessment) => !assessment.isExecutive);
 
   const gapValues = ENTERPRISE_ALIGNMENT_DOMAIN_ORDER.map((domain) => {
-    const getDomainAvg = (list: any[]) => {
+    const getDomainAvg = (
+      list: Array<{ domainScoresJson: unknown; percentScore: number }>,
+    ) => {
       if (list.length === 0) return orgTotalPercent;
-      const values = list.map(a => {
-        const scores = (a.domainScoresJson as EnterpriseDomainScore[]) || [];
-        return scores.find(s => s.domain === domain)?.percent ?? 0;
+
+      const values = list.map((assessment) => {
+        const scores = (assessment.domainScoresJson as EnterpriseDomainScore[]) || [];
+        return scores.find((score) => score.domain === domain)?.percent ?? 0;
       });
+
       return round(mean(values));
     };
 
@@ -181,9 +213,10 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
     };
   });
 
-  const overallGapPercent = round(mean(gapValues.map((v) => Math.abs(v.delta))));
+  const overallGapPercent = round(
+    mean(gapValues.map((value) => Math.abs(value.delta))),
+  );
 
-  // 4. Persistence: Organisation Snapshot
   const fragilitySignal = computeFragilitySignal({
     percentScore: orgTotalPercent,
     overallGapPercent,
@@ -195,7 +228,8 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
     organisationId: campaign.organisationId,
     respondentCount,
     invitedCount,
-    completionRate: invitedCount > 0 ? round((respondentCount / invitedCount) * 100) : 0,
+    completionRate:
+      invitedCount > 0 ? round((respondentCount / invitedCount) * 100) : 0,
     totalScore: orgTotalPercent,
     possibleScore: 100,
     percentScore: orgTotalPercent,
@@ -206,43 +240,49 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
     varianceScores,
     fragilitySignal,
     dissonanceArea,
+    confidenceScore,
   });
 
-  // 5. Persistence: Leadership Gap
   await replaceLeadershipGapSnapshot({
     campaignId,
     organisationId: campaign.organisationId,
     overallGapPercent,
     domainGaps: gapValues,
-    interpretationFlags: overallGapPercent >= 15 ? ["CRITICAL: Perceptual Drift Detected"] : [],
+    interpretationFlags:
+      overallGapPercent >= 15 ? ["CRITICAL: Perceptual Drift Detected"] : [],
   });
 
-  // 6. Persistence: Team Segmentation
-  const teamMap = assessments.reduce((acc, curr) => {
-    const team = curr.teamName || "General Operations";
+  const teamMap = assessments.reduce((acc, current) => {
+    const team = current.teamName || "General Operations";
     if (!acc[team]) acc[team] = [];
-    acc[team].push(curr);
+    acc[team].push(current);
     return acc;
   }, {} as Record<string, typeof assessments>);
 
-  const teamSnapshots = Object.entries(teamMap).map(([teamName, teamAssessments]) => {
-    const { domainScores: tDS, varianceScores: tVS } = computeDomainAggregates(teamAssessments);
-    const tPercent = round(mean(teamAssessments.map((a) => a.percentScore)));
+  const teamSnapshots = Object.entries(teamMap).map(
+    ([teamName, teamAssessments]) => {
+      const {
+        domainScores: teamDomainScores,
+        varianceScores: teamVarianceScores,
+      } = computeDomainAggregates(teamAssessments);
 
-    return {
-      organisationId: campaign.organisationId,
-      teamName,
-      respondentCount: teamAssessments.length,
-      totalScore: tPercent,
-      possibleScore: 100,
-      percentScore: tPercent,
-      band: bandFromPercent(tPercent),
-      weakestDomains: getTopDomains(tDS, 2, true),
-      strongestDomains: getTopDomains(tDS, 2, false),
-      domainScores: tDS,
-      varianceScores: tVS,
-    };
-  });
+      const teamPercent = round(mean(teamAssessments.map((a) => a.percentScore)));
+
+      return {
+        organisationId: campaign.organisationId,
+        teamName,
+        respondentCount: teamAssessments.length,
+        totalScore: teamPercent,
+        possibleScore: 100,
+        percentScore: teamPercent,
+        band: bandFromPercent(teamPercent),
+        weakestDomains: getTopDomains(teamDomainScores, 2, true),
+        strongestDomains: getTopDomains(teamDomainScores, 2, false),
+        domainScores: teamDomainScores,
+        varianceScores: teamVarianceScores,
+      };
+    },
+  );
 
   await replaceTeamSnapshots(campaignId, teamSnapshots);
 
@@ -252,6 +292,6 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
     invitedCount,
     confidenceScore,
     fragilitySignal,
-    dissonanceArea
+    dissonanceArea,
   };
 }

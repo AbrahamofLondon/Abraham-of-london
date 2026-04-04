@@ -1,3 +1,5 @@
+// lib/alignment/enterprise-types.ts
+
 export const ENTERPRISE_ALIGNMENT_DOMAIN_ORDER = [
   "mandate_clarity",
   "decision_integrity",
@@ -28,7 +30,6 @@ export type EnterpriseAlignmentBand =
   | "MISALIGNED"
   | "DISORDERED";
 
-// Literal union for intelligence signals to prevent "magic strings" in the UI
 export type FragilitySignal = "HIGH" | "MEDIUM" | "LOW";
 
 export type EnterpriseQuestion = {
@@ -64,7 +65,6 @@ export type EnterpriseAssessmentResult = {
   weakestDomains: EnterpriseAlignmentDomain[];
   strongestDomains: EnterpriseAlignmentDomain[];
   domainScores: EnterpriseDomainScore[];
-  // Intelligence extensions
   varianceScores?: EnterpriseVarianceScore[];
   fragilitySignal?: FragilitySignal;
   dissonanceArea?: number;
@@ -124,9 +124,9 @@ export type EnterpriseOrganisationSnapshotView = {
   strongestDomains: EnterpriseAlignmentDomain[];
   domainScores: EnterpriseDomainScore[];
   varianceScores: EnterpriseVarianceScore[];
-  // Intelligence extensions
   fragilitySignal: FragilitySignal | null;
   dissonanceArea: number;
+  confidenceScore?: number | null;
 };
 
 export type EnterpriseDashboardView = {

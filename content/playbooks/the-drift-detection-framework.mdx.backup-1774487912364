@@ -1,0 +1,74 @@
+---
+type: Playbook
+title: The Drift Detection Framework
+slug: the-drift-detection-framework
+tier: premium
+description: Identify silent organisational decay before it becomes structural failure.
+coverImage: /assets/images/playbooks/the-drift-detection-framework.jpg
+playbookType: diagnostic
+framework: Drift Detection
+phases:
+  - Signal Capture
+  - Pattern Recognition
+  - Escalation Threshold
+signals:
+  - Decision latency increase
+  - Rework frequency
+  - Leadership inconsistency
+  - Cultural friction
+outputs:
+  - Drift index
+  - Risk classification
+  - Intervention trigger points
+  - Early warning indicators
+estimatedTime: "60 minutes"
+difficulty: executive
+prerequisites:
+  - Historical organisational data
+  - Decision log access
+  - Leadership team input
+tags:
+  - drift
+  - detection
+  - organisational-health
+  - early-warning
+---
+
+## The Problem
+
+Drift is invisible until it is expensive.
+
+---
+
+## Detection Signals
+
+- Decision latency increase  
+- Rework frequency  
+- Leadership inconsistency  
+
+---
+
+## Framework
+
+### Phase 1 — Signal Capture  
+Track behavioural indicators.
+
+### Phase 2 — Pattern Recognition  
+Identify recurring misalignment.
+
+### Phase 3 — Escalation Threshold  
+Define when correction is mandatory.
+
+---
+
+## Output
+
+- Drift index  
+- Risk classification  
+- Intervention trigger points  
+
+---
+
+## Strategic Principle
+
+Drift ignored becomes dysfunction.

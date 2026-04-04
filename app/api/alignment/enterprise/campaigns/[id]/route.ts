@@ -11,7 +11,7 @@ export async function POST(
   try {
     // 1. Update Status to Closed
     await updateCampaignStatus({
-      campaignId: params.id,
+      id: params.id,
       status: "closed"
     });
 

@@ -1,5 +1,8 @@
-// pages/api/resources/[...slug].ts — SSOT RESOURCE UNLOCK (catch-all, nested slugs)
+// pages/api/resources/[...slug].ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { getAccessCookie } from "@/lib/server/auth/cookies";
 import {
@@ -7,6 +10,8 @@ import {
   getAllContentlayerDocs,
   normalizeSlug,
 } from "@/lib/content/server";
+import { sendCompressedBodyCode } from "@/lib/content/api-payload";
+
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
@@ -16,6 +21,8 @@ type ResponseData =
       tier: AccessTier;
       requiredTier: AccessTier;
       bodyCode: string;
+      compressed: true;
+      encoding: "gzip-base64";
       slugResolved: string;
     }
   | {
@@ -30,13 +37,17 @@ function pickSlug(req: NextApiRequest): string {
   return normalizeSlug(joined);
 }
 
-function isResourceDoc(d: any): boolean {
-  if (!d) return false;
+function isResourceDoc(doc: any): boolean {
+  if (!doc) return false;
 
-  const docKind = String(d?.docKind || "").toLowerCase();
+  const docKind = String(doc?.docKind || "").toLowerCase();
+  if (docKind === "lexicon") return false;
   if (docKind === "resource") return true;
 
-  const fp = String(d?._raw?.flattenedPath || d?._raw?.sourceFilePath || "").toLowerCase();
+  const kind = String(doc?.kind || doc?.type || "").toLowerCase();
+  if (kind === "resource") return true;
+
+  const fp = String(doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || "").toLowerCase();
   return fp.startsWith("resources/") || fp.startsWith("content/resources/");
 }
 
@@ -121,17 +132,23 @@ export default async function handler(
   }
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const bodyCode = String(doc?.body?.code || doc?.bodyCode || "");
+  const slugResolved = normalizePathish(
+    String(doc?.slug || doc?._raw?.flattenedPath || slug),
+  );
 
   if (requiredTier === "public") {
-    return res.status(200).json({
-      ok: true,
-      tier: "public",
-      requiredTier: "public",
-      bodyCode: doc.body?.code || doc.bodyCode || "",
-      slugResolved: normalizePathish(
-        String(doc?.slug || doc?._raw?.flattenedPath || slug),
-      ),
-    });
+    return sendCompressedBodyCode(
+      res,
+      {
+        ok: true,
+        tier: "public",
+        requiredTier: "public",
+        slugResolved,
+        bodyCode,
+      },
+      200,
+    );
   }
 
   const sessionId = getAccessCookie(req);
@@ -149,13 +166,21 @@ export default async function handler(
     return res.status(403).json({ ok: false, reason: "INSUFFICIENT_CLEARANCE" });
   }
 
-  return res.status(200).json({
-    ok: true,
-    tier: userTier,
-    requiredTier,
-    bodyCode: doc.body?.code || doc.bodyCode || "",
-    slugResolved: normalizePathish(
-      String(doc?.slug || doc?._raw?.flattenedPath || slug),
-    ),
-  });
+  return sendCompressedBodyCode(
+    res,
+    {
+      ok: true,
+      tier: userTier,
+      requiredTier,
+      slugResolved,
+      bodyCode,
+    },
+    200,
+  );
 }
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};

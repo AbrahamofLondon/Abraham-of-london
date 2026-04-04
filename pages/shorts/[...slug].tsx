@@ -1,4 +1,4 @@
-/* pages/shorts/[...slug].tsx — SHORTS DETAIL (DIRECT GENERATED MATCH) */
+/* pages/shorts/[...slug].tsx — SHORTS DETAIL (FIXED BODY CODE EXTRACTION) */
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -7,7 +7,6 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
-import { getAllShorts } from "@/lib/content/server";
 
 import ShortHero from "@/components/shorts/ShortHero";
 import ShortMetadata from "@/components/shorts/ShortMetadata";
@@ -17,7 +16,10 @@ import ShortShare from "@/components/shorts/ShortShare";
 import RelatedShorts from "@/components/shorts/RelatedShorts";
 import ShortComments from "@/components/shorts/ShortComments";
 
+import { getRenderableBody } from "@/lib/content/render-body";
+
 type RawShortLike = {
+  _id?: string | null;
   title?: string | null;
   description?: string | null;
   excerpt?: string | null;
@@ -29,6 +31,7 @@ type RawShortLike = {
   date?: string | null;
   tags?: string[] | null;
   readingTime?: string | null;
+  readTime?: string | null;
   readTimeSafe?: string | null;
   coverImage?: string | null;
   image?: string | null;
@@ -64,6 +67,7 @@ type PageItem = {
   excerpt: string;
   slug: string;
   bodyCode: string | null;
+  bodyMode: string | null;
   date: string | null;
   tags: string[];
   readingTime: string | null;
@@ -103,6 +107,7 @@ const EMPTY_ITEM: PageItem = {
   excerpt: "",
   slug: "",
   bodyCode: null,
+  bodyMode: null,
   date: null,
   tags: [],
   readingTime: null,
@@ -178,7 +183,9 @@ function getRawDocSlug(doc: RawShortLike): string {
     safeString(doc?.slug) ||
     safeString(doc?.hrefSafe) ||
     safeString(doc?._raw?.flattenedPath) ||
-    safeString(doc?._raw?.sourceFilePath)
+    safeString(doc?._raw?.sourceFilePath) ||
+    safeString(doc?._raw?.sourceFileName) ||
+    safeString(doc?._id)
   );
 }
 
@@ -191,6 +198,7 @@ function getCandidateSlugs(doc: RawShortLike): string[] {
     safeString(doc?._raw?.flattenedPath),
     safeString(doc?._raw?.sourceFilePath),
     safeString(doc?._raw?.sourceFileName),
+    safeString(doc?._id),
   ].filter(Boolean);
 
   const out = new Set<string>();
@@ -208,6 +216,12 @@ function getCandidateSlugs(doc: RawShortLike): string[] {
       out.add(toShortRouteSlug(withoutShorts));
     }
 
+    const withoutContent = stripPrefixOnce(normalized, "content");
+    if (withoutContent && withoutContent !== normalized) {
+      out.add(withoutContent);
+      out.add(toShortRouteSlug(withoutContent));
+    }
+
     const basename = normalized.split("/").filter(Boolean).pop() || "";
     if (basename) {
       out.add(normalizePathish(basename));
@@ -222,6 +236,8 @@ function isMatchingShort(doc: RawShortLike, targetSlug: string): boolean {
   const normalizedTarget = normalizePathish(targetSlug);
   const routeTarget = toShortRouteSlug(targetSlug);
 
+  if (!routeTarget) return false;
+
   return getCandidateSlugs(doc).some((candidate) => {
     const normalizedCandidate = normalizePathish(candidate);
     const routeCandidate = toShortRouteSlug(candidate);
@@ -229,18 +245,10 @@ function isMatchingShort(doc: RawShortLike, targetSlug: string): boolean {
     return (
       normalizedCandidate === normalizedTarget ||
       normalizedCandidate === `shorts/${routeTarget}` ||
-      normalizedCandidate === `/shorts/${routeTarget}`.replace(/^\/+/, "") ||
+      normalizedCandidate === `content/shorts/${routeTarget}` ||
       routeCandidate === routeTarget
     );
   });
-}
-
-function extractShortBodyCode(doc: RawShortLike): string | null {
-  const compiled =
-    safeString(doc?.body?.code).trim() ||
-    safeString(doc?.bodyCode).trim();
-
-  return compiled || null;
 }
 
 function toAbsoluteUrl(input: string | null | undefined): string | undefined {
@@ -274,10 +282,17 @@ function buildShortApiPath(slug: string, suffix?: string): string {
   return suffix ? `/api/shorts/${encoded}/${suffix}` : `/api/shorts/${encoded}`;
 }
 
+function getDocTimestamp(doc: RawShortLike): number {
+  const raw = safeString(doc?.date);
+  if (!raw) return 0;
+  const value = new Date(raw).getTime();
+  return Number.isFinite(value) ? value : 0;
+}
+
 function sortShorts(docs: RawShortLike[]): RawShortLike[] {
   return [...docs].sort((a, b) => {
-    const aTime = safeString(a?.date) ? new Date(safeString(a.date)).getTime() : 0;
-    const bTime = safeString(b?.date) ? new Date(safeString(b.date)).getTime() : 0;
+    const aTime = getDocTimestamp(a);
+    const bTime = getDocTimestamp(b);
 
     if (aTime !== bTime) return bTime - aTime;
 
@@ -302,21 +317,87 @@ function toShortLinkItem(doc: RawShortLike | null | undefined): ShortLinkItem | 
 
 function toPageItem(doc: RawShortLike): PageItem {
   const slug = toShortRouteSlug(getRawDocSlug(doc));
+  const renderBody = getRenderableBody(doc);
 
   return {
     title: safeString(doc.title).trim() || `[Untitled: ${slug || "unknown"}]`,
     description: safeString(doc.description || doc.excerpt || doc.summary).trim(),
     excerpt: safeString(doc.excerpt || doc.summary || doc.description).trim(),
     slug,
-    bodyCode: extractShortBodyCode(doc),
+    bodyCode: renderBody.code,
+    bodyMode: renderBody.mode,
     date: safeString(doc.date) || null,
     tags: safeArray(doc.tags).map((tag) => safeString(tag)).filter(Boolean),
     readingTime:
       safeString(doc.readingTime) ||
+      safeString(doc.readTime) ||
       safeString(doc.readTimeSafe) ||
       null,
     coverImage: safeString(doc.coverImage || doc.image) || null,
   };
+}
+
+function isPublishedShort(doc: RawShortLike): boolean {
+  if (!doc) return false;
+  if (doc.draft === true) return false;
+  if (doc.published === false) return false;
+
+  const slug = toShortRouteSlug(getRawDocSlug(doc));
+  return Boolean(slug);
+}
+
+async function loadAllShorts(): Promise<RawShortLike[]> {
+  try {
+    const generated: any = await import("contentlayer/generated");
+
+    const buckets = [
+      generated?.allShorts,
+      generated?.allDocuments,
+      generated?.documents,
+    ];
+
+    const flat: RawShortLike[] = [];
+    for (const bucket of buckets) {
+      if (Array.isArray(bucket)) {
+        flat.push(...(bucket as RawShortLike[]));
+      }
+    }
+
+    const deduped: RawShortLike[] = [];
+    const seen = new Set<string>();
+
+    for (const doc of flat) {
+      const key =
+        safeString(doc?._id) ||
+        safeString(doc?._raw?.flattenedPath) ||
+        safeString(doc?.slug) ||
+        JSON.stringify(doc);
+
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const rawSlug = getRawDocSlug(doc);
+      const routeSlug = toShortRouteSlug(rawSlug);
+      const fp = normalizePathish(doc?._raw?.flattenedPath);
+
+      const looksLikeShort =
+        safeString(doc?.kind).toLowerCase() === "short" ||
+        safeString(doc?.type).toLowerCase() === "short" ||
+        safeString(doc?.docKind).toLowerCase() === "short" ||
+        fp.startsWith("shorts/") ||
+        rawSlug.toLowerCase().includes("shorts/");
+
+      if (!looksLikeShort) continue;
+      if (!isPublishedShort(doc)) continue;
+
+      deduped.push(doc);
+    }
+
+    return deduped;
+  } catch (error) {
+    console.error("[shorts:loadAllShorts] failed", error);
+    return [];
+  }
 }
 
 const ShortsSlugPage: NextPage<Props> = ({
@@ -337,7 +418,7 @@ const ShortsSlugPage: NextPage<Props> = ({
   const absoluteCoverImage = toAbsoluteUrl(safeItem.coverImage);
   const formattedDate = React.useMemo(
     () => formatHumanDate(safeItem.date),
-    [safeItem.date],
+    [safeItem.date]
   );
 
   const [interactions, setInteractions] = React.useState<InteractionState>({
@@ -421,7 +502,7 @@ const ShortsSlugPage: NextPage<Props> = ({
         setInteractionPending((prev) => ({ ...prev, [kind]: false }));
       }
     },
-    [canonicalSlug, interactions.userLiked, interactions.userSaved],
+    [canonicalSlug, interactions.userLiked, interactions.userSaved]
   );
 
   const handleNativeShare = React.useCallback(async () => {
@@ -467,21 +548,35 @@ const ShortsSlugPage: NextPage<Props> = ({
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
-        {absoluteCoverImage ? <meta property="og:image" content={absoluteCoverImage} /> : null}
+        {absoluteCoverImage ? (
+          <meta property="og:image" content={absoluteCoverImage} />
+        ) : null}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
-        {absoluteCoverImage ? <meta name="twitter:image" content={absoluteCoverImage} /> : null}
+        {absoluteCoverImage ? (
+          <meta name="twitter:image" content={absoluteCoverImage} />
+        ) : null}
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white">
+      <main className="min-h-screen bg-gradient-to-b from-black via-[#050505] to-zinc-950 text-white">
         <div className="mx-auto max-w-3xl px-6 pt-6">
           <Link
             href="/shorts"
             className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-white/30 transition-colors hover:text-white/50"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back
           </Link>
@@ -506,7 +601,7 @@ const ShortsSlugPage: NextPage<Props> = ({
             <SafeMDXRenderer code={safeItem.bodyCode} />
           ) : (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center font-mono text-sm text-red-200">
-              No compiled MDX body found for slug: {safeItem.slug || "(empty)"}
+              No compiled MDX body found for: {safeItem.title || safeItem.slug || "(unknown)"}
             </div>
           )}
 
@@ -571,8 +666,18 @@ const ShortsSlugPage: NextPage<Props> = ({
           className="fixed bottom-6 right-6 rounded-full border border-white/10 bg-white/5 p-2 opacity-50 backdrop-blur-sm transition-all hover:bg-white/10 hover:opacity-100"
           aria-label="Back to top"
         >
-          <svg className="h-4 w-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7 7 7" />
+          <svg
+            className="h-4 w-4 text-white/60"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 10l7-7 7 7"
+            />
           </svg>
         </button>
       </main>
@@ -581,13 +686,17 @@ const ShortsSlugPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const allShorts = safeArray(getAllShorts()) as RawShortLike[];
-  const shorts = sortShorts(allShorts.filter((doc) => doc.draft !== true));
+  const allShorts = await loadAllShorts();
+  const shorts = sortShorts(allShorts);
+
+  const seen = new Set<string>();
 
   const paths = shorts
     .map((doc) => {
       const slug = toShortRouteSlug(getRawDocSlug(doc));
-      if (!slug) return null;
+      if (!slug || seen.has(slug)) return null;
+
+      seen.add(slug);
 
       const parts = slug.split("/").filter(Boolean);
       if (!parts.length) return null;
@@ -603,31 +712,40 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const rawParam = joinParamSlug(params?.slug);
+  const rawParam = joinParamSlug(params?.slug as string | string[] | undefined);
   const targetSlug = toShortRouteSlug(rawParam);
 
   if (!targetSlug) {
     return { notFound: true };
   }
 
-  const allShorts = sortShorts(
-    (safeArray(getAllShorts()) as RawShortLike[]).filter((doc) => doc.draft !== true),
-  );
+  const allShorts = sortShorts(await loadAllShorts());
 
-  const doc = allShorts.find((candidate) => isMatchingShort(candidate, targetSlug)) || null;
-
-  if (!doc) {
-    console.log("[shorts:getStaticProps] no match", {
-      targetSlug,
-      sample: allShorts.slice(0, 10).map((d) => ({
-        title: d.title,
-        candidates: getCandidateSlugs(d),
-      })),
-    });
+  if (!allShorts.length) {
     return { notFound: true };
   }
 
-  const currentIndex = allShorts.findIndex((candidate) => isMatchingShort(candidate, targetSlug));
+  const currentIndex = allShorts.findIndex((candidate) =>
+    isMatchingShort(candidate, targetSlug)
+  );
+
+  const doc = currentIndex >= 0 ? allShorts[currentIndex] : null;
+
+  if (!doc) {
+    return { notFound: true };
+  }
+
+  const item = toPageItem(doc);
+
+  if (!item.slug) {
+    return { notFound: true };
+  }
+
+  // FIXED: Allow content to render even if bodyCode is raw MDX
+  // The SafeMDXRenderer will handle raw MDX content appropriately
+  if (!item.bodyCode) {
+    console.warn(`[Short ${item.title}] No body code available. Content may not render.`);
+  }
 
   const prevDoc =
     currentIndex >= 0 && currentIndex < allShorts.length - 1
@@ -647,7 +765,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   return {
     props: {
-      item: toPageItem(doc),
+      item,
       relatedShorts,
       prevShort: toShortLinkItem(prevDoc),
       nextShort: toShortLinkItem(nextDoc),

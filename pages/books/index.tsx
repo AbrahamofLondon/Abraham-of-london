@@ -10,14 +10,14 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { Search, ArrowRight, Tag } from "lucide-react";
 
-import { getPublishedBooks, sanitizeData, resolveDocCoverImage } from "@/lib/content/server";
+import { getPublishedBooks, resolveDocCoverImage } from "@/lib/content/server";
 
 /* -----------------------------------------------------------------------------
   TYPES
 ----------------------------------------------------------------------------- */
 
 type BookItem = {
-  slug: string; // bare (may include nested segments)
+  slug: string;
   url: string;
   title: string;
   subtitle?: string | null;
@@ -29,7 +29,6 @@ type BookItem = {
   tags: string[];
   author: string | null;
   featured?: boolean;
-
   coverAspect?: "wide" | "book" | "square" | string | null;
   coverFit?: "cover" | "contain" | "smart" | string | null;
   coverPosition?: "center" | string | null;
@@ -43,8 +42,18 @@ type BooksIndexProps = {
 const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
 
 /* -----------------------------------------------------------------------------
-  SLUG HELPERS — preserve slashes, normalize segments (same as canon pattern)
+  HELPERS
 ----------------------------------------------------------------------------- */
+
+function sanitizeData<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function safeString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+  return String(value);
+}
 
 function collapseSlashes(s: string): string {
   return String(s || "")
@@ -63,11 +72,11 @@ function booksBareSlug(input: unknown): string {
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
+    .replace(/\/{2,}/g, "/")
+    .replace(/\.(md|mdx)$/i, "");
 
   if (!s || s.includes("..")) return "";
 
-  // Strip prefixes repeatedly
   const stripOnce = (prefix: string) => {
     const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
     if (s.toLowerCase().startsWith(p.toLowerCase())) {
@@ -88,14 +97,45 @@ function booksBareSlug(input: unknown): string {
 
   s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
   if (!s || s.includes("..")) return "";
+
   return s;
+}
+
+function pickBookBareSlug(doc: any): string {
+  return (
+    booksBareSlug(doc?.urlSlug) ||
+    booksBareSlug(doc?.collectionSlug) ||
+    booksBareSlug(doc?.slug) ||
+    booksBareSlug(doc?._raw?.flattenedPath) ||
+    booksBareSlug(doc?._raw?.sourceFilePath) ||
+    ""
+  );
+}
+
+function normalizeTagArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.map((v) => safeString(v).trim()).filter(Boolean)
+    : [];
+}
+
+function safeDateIso(value: unknown): string | null {
+  const raw = safeString(value).trim();
+  if (!raw) return null;
+  const time = Date.parse(raw);
+  if (!Number.isFinite(time)) return null;
+  return new Date(time).toISOString();
+}
+
+function safeDateLabel(value: unknown): string | null {
+  const iso = safeDateIso(value);
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString("en-GB");
 }
 
 function aspectToStyle(a?: string | null): React.CSSProperties {
   const v = (a || "").toLowerCase();
   if (v === "wide") return { aspectRatio: "16 / 9" };
   if (v === "square") return { aspectRatio: "1 / 1" };
-  // default "book"
   return { aspectRatio: "3 / 4" };
 }
 
@@ -171,7 +211,11 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 
   const allTags = React.useMemo(() => {
     const map = new Map<string, number>();
-    for (const b of items) for (const t of b.tags || []) map.set(t, (map.get(t) || 0) + 1);
+    for (const b of items) {
+      for (const t of b.tags || []) {
+        map.set(t, (map.get(t) || 0) + 1);
+      }
+    }
     return Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 14)
@@ -180,6 +224,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 
   const filtered = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
+
     return items.filter((b) => {
       const matchesSearch =
         !q ||
@@ -210,11 +255,9 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
         <title>Books // Abraham of London</title>
       </Head>
 
-      {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/10" style={{ paddingTop: 80 }}>
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-12 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left */}
+        <div className="relative mx-auto max-w-7xl px-6 py-12 lg:px-12">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
                 <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
@@ -226,21 +269,22 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                 </span>
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">Books</h1>
-              <p className="mt-3 max-w-xl text-sm md:text-base text-white/50 leading-relaxed">
+              <h1 className="mt-6 font-serif text-4xl tracking-tight text-white/95 md:text-5xl">
+                Books
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50 md:text-base">
                 Premium long-form work — built for builders who govern what they touch.
               </p>
 
-              {/* Search */}
               <div className="mt-8">
                 <div className="relative max-w-xl">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
                   <input
                     type="text"
                     placeholder="Search books, themes, tags…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 placeholder:text-white/20 outline-none focus:border-amber-500/25 focus:bg-white/[0.05]"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 outline-none placeholder:text-white/20 focus:border-amber-500/25 focus:bg-white/[0.05]"
                   />
                 </div>
 
@@ -250,10 +294,10 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                       type="button"
                       onClick={() => setSelectedTag(null)}
                       className={[
-                        "inline-flex items-center gap-2 rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
                         !selectedTag
                           ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                          : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]",
+                          : "border-white/10 bg-white/[0.02] text-white/45 hover:bg-white/[0.04] hover:text-white/70",
                       ].join(" ")}
                     >
                       <Tag className="h-3.5 w-3.5" />
@@ -268,10 +312,10 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                           type="button"
                           onClick={() => setSelectedTag(active ? null : t)}
                           className={[
-                            "rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                            "rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
                             active
                               ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                              : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]",
+                              : "border-white/10 bg-white/[0.02] text-white/45 hover:bg-white/[0.04] hover:text-white/70",
                           ].join(" ")}
                         >
                           {t}
@@ -283,7 +327,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
               </div>
             </div>
 
-            {/* Right banner */}
             <div className="lg:col-span-7">
               <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
                 <div className="relative w-full" style={{ aspectRatio: "21 / 9" }}>
@@ -305,20 +348,11 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                   <div className="absolute inset-0 flex items-center justify-end pr-6 md:pr-10 lg:pr-12">
                     <div
                       className={[
-                        "relative",
-                        "h-[86%]",
-                        "w-[64%] md:w-[56%] lg:w-[52%]",
-                        "max-w-[560px]",
-                        "rounded-2xl md:rounded-3xl",
-                        "border border-white/12",
-                        "bg-black/18",
-                        "backdrop-blur-xl",
-                        "shadow-[0_34px_110px_-70px_rgba(245,158,11,0.40)]",
-                        "overflow-hidden",
+                        "relative h-[86%] w-[64%] max-w-[560px] overflow-hidden rounded-2xl border border-white/12 bg-black/18 shadow-[0_34px_110px_-70px_rgba(245,158,11,0.40)] backdrop-blur-xl md:w-[56%] md:rounded-3xl lg:w-[52%]",
                       ].join(" ")}
                     >
-                      <div className="absolute inset-3 rounded-2xl border border-white/10 pointer-events-none" />
-                      <div className="absolute inset-[18px] rounded-xl border border-white/[0.06] pointer-events-none" />
+                      <div className="pointer-events-none absolute inset-3 rounded-2xl border border-white/10" />
+                      <div className="pointer-events-none absolute inset-[18px] rounded-xl border border-white/[0.06]" />
 
                       <div className="absolute inset-0 p-5 md:p-6 lg:p-7">
                         <div className="relative h-full w-full">
@@ -362,19 +396,20 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
         </div>
       </section>
 
-      {/* FEATURED */}
       {featured.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 lg:px-12 pt-12">
+        <section className="mx-auto max-w-7xl px-6 pt-12 lg:px-12">
           <div className="mb-6 flex items-center justify-between">
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">Featured</div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
+              Featured
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featured.map((b, idx) => (
               <Link
                 key={b.url}
                 href={b.url}
-                className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
+                className="group block rounded-3xl border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.03]"
               >
                 <article className="p-6">
                   <CoverCard
@@ -393,16 +428,20 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                       {b.tags?.[0] ? <span className="text-white/25">{b.tags[0]}</span> : null}
                     </div>
 
-                    <h2 className="mt-4 font-serif text-2xl text-white/92 tracking-tight group-hover:text-amber-100 transition-colors">
+                    <h2 className="mt-4 font-serif text-2xl tracking-tight text-white/92 transition-colors group-hover:text-amber-100">
                       {b.title}
                     </h2>
 
                     {b.subtitle ? (
-                      <p className="mt-2 text-sm text-white/50 leading-relaxed line-clamp-2">{b.subtitle}</p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/50">
+                        {b.subtitle}
+                      </p>
                     ) : null}
 
                     {b.excerpt ? (
-                      <p className="mt-3 text-sm text-white/45 leading-relaxed line-clamp-2">{b.excerpt}</p>
+                      <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-white/45">
+                        {b.excerpt}
+                      </p>
                     ) : null}
 
                     <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
@@ -417,8 +456,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
         </section>
       )}
 
-      {/* GRID */}
-      <section className="mx-auto max-w-7xl px-6 lg:px-12 py-12">
+      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
         <div className="mb-6 flex items-center justify-between">
           <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">Library</div>
           <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
@@ -426,12 +464,12 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {rest.map((b) => (
             <Link
               key={b.url}
               href={b.url}
-              className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
+              className="group block rounded-3xl border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.03]"
             >
               <article className="p-6">
                 <CoverCard
@@ -449,12 +487,14 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                     {b.tags?.[0] ? <span className="text-white/25">{b.tags[0]}</span> : null}
                   </div>
 
-                  <h2 className="mt-4 font-serif text-2xl text-white/92 tracking-tight group-hover:text-amber-100 transition-colors line-clamp-2">
+                  <h2 className="mt-4 line-clamp-2 font-serif text-2xl tracking-tight text-white/92 transition-colors group-hover:text-amber-100">
                     {b.title}
                   </h2>
 
                   {b.subtitle ? (
-                    <p className="mt-2 text-sm text-white/50 leading-relaxed line-clamp-2">{b.subtitle}</p>
+                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/50">
+                      {b.subtitle}
+                    </p>
                   ) : null}
 
                   <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
@@ -467,7 +507,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
           ))}
 
           {filtered.length === 0 && (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center lg:col-span-3">
+            <div className="lg:col-span-3 rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
               <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">No matches</div>
               <div className="mt-3 text-white/70">Try a different keyword or clear the tag filter.</div>
             </div>

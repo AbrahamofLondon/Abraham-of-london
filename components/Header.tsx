@@ -1,9 +1,9 @@
-/* components/Header.tsx — stable, no useRouter, pages/app safe */
+/* components/Header.tsx — UNIFIED SOVEREIGN HEADER */
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, Command, ChevronRight } from "lucide-react";
+import { Menu, X, Command, ChevronRight, Fingerprint, FileText, Activity } from "lucide-react";
 
 type HeaderProps = {
   transparent?: boolean;
@@ -15,10 +15,11 @@ const NAV_ITEMS = [
   { href: "/books", label: "Books", sub: "Long-form Works" },
   { href: "/blog", label: "Essays", sub: "Ideas & Commentary" },
   { href: "/library", label: "Library", sub: "Knowledge Shelf" },
-  { href: "/artifacts", label: "Artifacts", sub: "Premium Editions" },
+  { href: "/shorts", label: "Shorts", sub: "Short-form Signal" },
+  { href: "/dashboard", label: "Registry", sub: "Sovereign Dashboard" },
   { href: "/vault/briefs", label: "Briefs", sub: "Operational Intelligence" },
   { href: "/ventures", label: "Ventures", sub: "Execution Arms" },
-  { href: "/shorts", label: "Shorts", sub: "Short-form Signal" },
+  { href: "/artifacts", label: "Artifacts", sub: "Premium Editions" },
   { href: "/vault", label: "Vault", sub: "Secure Repository" },
 ] as const;
 
@@ -154,10 +155,11 @@ export default function Header({
             ) : null}
 
             <Link
-              href="/artifacts"
-              className="hidden rounded-full border border-amber-500/18 bg-amber-500/9 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/85 transition-all duration-300 hover:border-amber-400/30 hover:bg-amber-500/14 hover:text-amber-200 md:inline-flex"
+              href="/dashboard"
+              className="hidden rounded-full border border-amber-500/18 bg-amber-500/9 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/85 transition-all duration-300 hover:border-amber-400/30 hover:bg-amber-500/14 hover:text-amber-200 md:inline-flex items-center gap-2"
             >
-              Artifacts
+              <Fingerprint size={12} />
+              Sovereign Registry
             </Link>
 
             <button
@@ -244,6 +246,44 @@ export default function Header({
                 </Link>
               );
             })}
+            
+            <Link
+              href="/dashboard/live"
+              onClick={() => setIsOpen(false)}
+              className="group flex items-end justify-between border-b border-white/5 pb-5 md:pb-6 mt-4"
+            >
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono font-bold text-amber-500/60">
+                  INTELLIGENCE
+                </span>
+                <h2 className="font-serif text-3xl uppercase italic transition-colors text-white group-hover:text-amber-500">
+                  OGR Terminal
+                </h2>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-white/30">
+                  Live Telemetry & Analysis
+                </p>
+              </div>
+              <Activity size={24} className="mb-4 text-white/10 group-hover:text-amber-500 transition-all" />
+            </Link>
+
+            <Link
+              href="/pdf-dashboard"
+              onClick={() => setIsOpen(false)}
+              className="group flex items-end justify-between border-b border-white/5 pb-5 md:pb-6"
+            >
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono font-bold text-amber-500/60">
+                  ANALYTICS
+                </span>
+                <h2 className="font-serif text-3xl uppercase italic transition-colors text-white group-hover:text-amber-500">
+                  PDF Reports
+                </h2>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-white/30">
+                  Export & Intelligence Briefs
+                </p>
+              </div>
+              <FileText size={24} className="mb-4 text-white/10 group-hover:text-amber-500 transition-all" />
+            </Link>
           </nav>
         </div>
       </div>

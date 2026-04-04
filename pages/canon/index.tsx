@@ -1,5 +1,6 @@
-/* pages/canon/index.tsx — THE CANON ARCHIVE (FLAGSHIP / CLEAN CONTRAST EDITION) */
+/* pages/canon/index.tsx — THE CANON ARCHIVE */
 /* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -111,7 +112,8 @@ function normalizeBareCanonSlug(input: unknown): string {
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
+    .replace(/\/{2,}/g, "/")
+    .replace(/\.(md|mdx)$/i, "");
 
   if (!s || s.includes("..")) return "";
 
@@ -141,7 +143,7 @@ function normalizeBareCanonSlug(input: unknown): string {
     .map((seg) => normalizeSlug(seg))
     .filter(Boolean);
 
-  return segments.join("/");
+  return segments[segments.length - 1] || "";
 }
 
 function classifyAccess(requiredTier: AccessTier): AccessLevel {
@@ -326,13 +328,7 @@ function StatPillar({
   );
 }
 
-function JumpChip({
-  href,
-  label,
-}: {
-  href: string;
-  label: string;
-}) {
+function JumpChip({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}
@@ -688,7 +684,13 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     const items: CanonItem[] = rawDocs
       .filter((doc: any) => !doc?.draft)
       .map((doc: any) => {
-        const raw = doc?.slug || doc?._raw?.flattenedPath || "";
+        const raw =
+          doc?.urlSlug ||
+          doc?.collectionSlug ||
+          doc?.slug ||
+          doc?._raw?.flattenedPath ||
+          "";
+
         const bare = normalizeBareCanonSlug(raw);
         if (!bare) return null;
 

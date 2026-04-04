@@ -52,7 +52,7 @@ export async function GET(
     return NextResponse.json({
       ok: true,
       report: {
-        campaignId: campaign.id,
+        id: campaign.id,
         generatedAt: new Date(),
         cohortSize: campaign._count.participants,
         findings: intelligenceFindings,

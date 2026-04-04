@@ -2,7 +2,11 @@
 
 import * as React from "react";
 import { ChevronRight, Navigation } from "lucide-react";
-import { classNames } from "@/lib/utils/safe"; // adjust import if using clsx/tailwind-merge
+
+// Safe classNames utility (fallback if your lib/utils/safe doesn't exist)
+function cx(...inputs: Array<string | false | null | undefined>): string {
+  return inputs.filter(Boolean).join(" ");
+}
 
 interface Heading {
   id: string;
@@ -24,22 +28,20 @@ function getHeadingLevel(heading: Element): number {
 }
 
 function makeId(text: string, index: number): string {
-  const base = String(text || "")
+  return String(text || "")
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/(^-|-$)/g, "")
-    .slice(0, 80);
-  return base || `section-${index}`;
+    .slice(0, 80) || `section-${index}`;
 }
 
 function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): Heading[] {
   if (!root) return [];
 
-  const selector = "h2, h3, h4, h5";
-  const elements = Array.from(root.querySelectorAll(selector));
+  const elements = Array.from(root.querySelectorAll("h2, h3, h4, h5"));
   const used = new Set<string>();
   const extracted: Heading[] = [];
 
@@ -50,11 +52,8 @@ function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): He
     const text = (el.textContent || "").trim();
     if (!text) continue;
 
-    let id = el.id?.trim();
-    if (!id) {
-      id = makeId(text, i);
-      if (!el.id) el.id = id;
-    }
+    let id = el.id?.trim() || makeId(text, i);
+    if (!el.id) el.id = id;
 
     let uniqueId = id;
     let suffix = 2;
@@ -74,39 +73,40 @@ function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): He
   return extracted;
 }
 
-export const TableOfContents: React.FC<TableOfContentsProps> = ({
+const TableOfContents: React.FC<TableOfContentsProps> = ({
   contentRef,
   className = "",
   maxHeadings = 50,
-  delayMs = 300,
+  delayMs = 400,
 }) => {
   const [headings, setHeadings] = React.useState<Heading[]>([]);
   const [activeId, setActiveId] = React.useState<string>("");
 
+  // Collect headings after content is rendered
   React.useEffect(() => {
     const root =
       contentRef?.current ||
       document.querySelector(".aol-mdx-content") ||
       document.querySelector(".prose-hardened") ||
       document.querySelector("main") ||
-      document.body;
+      null;
 
     if (!root) return;
 
-    let timeoutId: NodeJS.Timeout;
+    const timeoutId = setTimeout(() => {
+      const nextHeadings = collectHeadings(root as HTMLElement, maxHeadings);
+      setHeadings(nextHeadings);
+    }, delayMs);
 
-    const syncHeadings = () => {
-      const next = collectHeadings(root as HTMLElement, maxHeadings);
-      setHeadings(next);
-    };
+    // Re-collect on mutations (useful when MDX renders dynamically)
+    const observer = new MutationObserver(() => {
+      const nextHeadings = collectHeadings(root as HTMLElement, maxHeadings);
+      setHeadings(nextHeadings);
+    });
 
-    timeoutId = setTimeout(syncHeadings, delayMs);
-
-    const observer = new MutationObserver(syncHeadings);
     observer.observe(root, {
       childList: true,
       subtree: true,
-      characterData: true,
       attributes: true,
       attributeFilter: ["id"],
     });
@@ -117,35 +117,36 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     };
   }, [contentRef, maxHeadings, delayMs]);
 
+  // Intersection Observer for active heading
   React.useEffect(() => {
-    if (!headings.length) return;
+    if (headings.length === 0) return;
 
     const targets = headings
       .map((h) => document.getElementById(h.id))
-      .filter((el): el is HTMLElement => !!el);
+      .filter((el): el is HTMLElement => Boolean(el));
 
-    if (!targets.length) return;
+    if (targets.length === 0) return;
 
-    const io = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
-        // FIXED: null check before accessing [0]
         if (visible.length > 0 && visible[0]?.target?.id) {
           setActiveId(visible[0].target.id);
         }
       },
       {
         root: null,
-        rootMargin: "-18% 0% -70% 0%",
-        threshold: [0.05, 0.2, 0.5],
+        rootMargin: "-20% 0% -65% 0%",
+        threshold: [0.1, 0.5],
       }
     );
 
-    targets.forEach((t) => io.observe(t));
-    return () => io.disconnect();
+    targets.forEach((target) => observer.observe(target));
+
+    return () => observer.disconnect();
   }, [headings]);
 
   const scrollToHeading = React.useCallback((id: string, e: React.MouseEvent) => {
@@ -154,17 +155,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     if (!el) return;
 
     const offset = 120;
-    const y = el.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top: y, behavior: "smooth" });
+    const yPosition = el.getBoundingClientRect().top + window.scrollY - offset;
 
+    window.scrollTo({ top: yPosition, behavior: "smooth" });
     window.history.replaceState(null, "", `#${id}`);
     setActiveId(id);
   }, []);
 
-  if (!headings.length) return null;
+  if (headings.length === 0) return null;
 
   return (
-    <aside className={classNames("my-10", className)} data-toc-root="true">
+    <aside className={cx("my-10", className)} data-toc-root="true">
       <nav className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
         <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-5">
           <div className="flex items-center gap-3">
@@ -179,52 +180,53 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             </div>
           </div>
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-            {(headings.findIndex((h) => h.id === activeId) + 1) || 0} of {headings.length}
+            {headings.findIndex((h) => h.id === activeId) + 1 || 0} / {headings.length}
           </div>
         </div>
 
         <div className="px-4 py-4">
           <ul className="max-h-[60vh] space-y-1 overflow-y-auto pr-2">
-            {headings.map((h) => {
-              const isActive = activeId === h.id;
-              const indent =
-                h.level === 3 ? "pl-6" : h.level === 4 ? "pl-10" : h.level >= 5 ? "pl-14" : "";
+            {headings.map((heading) => {
+              const isActive = activeId === heading.id;
+              const indent = heading.level === 3 ? "pl-6" : heading.level >= 4 ? "pl-10" : "";
 
               return (
-                <li key={h.id} className={indent}>
+                <li key={heading.id} className={indent}>
                   <a
-                    href={`#${h.id}`}
-                    onClick={(e) => scrollToHeading(h.id, e)}
-                    className={classNames(
-                      "group flex items-center gap-3 rounded-xl border px-3 py-2 text-sm transition-colors",
+                    href={`#${heading.id}`}
+                    onClick={(e) => scrollToHeading(heading.id, e)}
+                    className={cx(
+                      "group flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-all",
                       isActive
                         ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
                         : "border-transparent text-white/70 hover:bg-white/[0.03] hover:text-white"
                     )}
                   >
                     <span
-                      className={classNames(
-                        "h-2.5 w-2.5 rounded-full transition-colors",
-                        isActive ? "bg-amber-400" : "bg-white/20 group-hover:bg-white/30"
+                      className={cx(
+                        "h-2.5 w-2.5 shrink-0 rounded-full transition-colors",
+                        isActive ? "bg-amber-400" : "bg-white/20 group-hover:bg-white/40"
                       )}
                     />
-                    <span className="line-clamp-2 flex-1 leading-relaxed">{h.text}</span>
-                    {isActive && <ChevronRight className="h-4 w-4 flex-shrink-0 text-amber-300/80" />}
+                    <span className="line-clamp-2 flex-1 leading-relaxed">{heading.text}</span>
+                    {isActive && <ChevronRight className="h-4 w-4 shrink-0 text-amber-300/80" />}
                   </a>
                 </li>
               );
             })}
           </ul>
 
-          <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-white/45">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-amber-400/70 animate-pulse" />
-              <span>Currently reading</span>
+          {activeId && (
+            <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-white/45">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                Currently reading
+              </div>
+              <div className="max-w-[45%] truncate font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
+                {headings.find((h) => h.id === activeId)?.text || "—"}
+              </div>
             </div>
-            <div className="max-w-[45%] truncate font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
-              {activeId ? headings.find((x) => x.id === activeId)?.text || "—" : "—"}
-            </div>
-          </div>
+          )}
         </div>
       </nav>
     </aside>
@@ -233,8 +235,13 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
 export const SafeTableOfContents: React.FC<TableOfContentsProps> = (props) => {
   const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!mounted) return null;
+
   return <TableOfContents {...props} />;
 };
 

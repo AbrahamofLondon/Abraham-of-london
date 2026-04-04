@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/library/index.tsx — LIBRARY INDEX (PDF REGISTRY, SSOT, build-safe, design-preserving)
+// pages/library/index.tsx — LIBRARY INDEX (PDF REGISTRY, SSOT, Premium-Correct)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -18,6 +18,7 @@ import {
   FileText,
   Lock,
   Tag,
+  LibraryBig,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -28,20 +29,16 @@ import tiers, { type AccessTier } from "@/lib/access/tiers";
 ---------------------------------------------- */
 
 type PdfAsset = {
-  slug: string; // registry slug (may include folders)
-  routeSlug: string; // last segment for /library/[slug]
+  slug: string;
+  routeSlug: string;
   title: string;
   description?: string | null;
   category?: string | null;
   tags?: string[] | null;
   updated?: string | null;
   date?: string | null;
-
-  // access controls
-  requiredTier: AccessTier; // normalized
+  requiredTier: AccessTier;
   isPublic: boolean;
-
-  // for UI only (we never expose restricted direct URLs here)
   displayPath?: string | null;
 };
 
@@ -113,12 +110,10 @@ function inferRequiredTier(x: any, isPublic: boolean): AccessTier {
 }
 
 function inferDisplayPath(x: any): string | null {
-  // purely informational; do NOT use this as a direct link for restricted assets
   const href = safeStr(x?.href || "");
   const url = safeStr(x?.url || x?.publicUrl || "");
   const path = safeStr(x?.path || x?.filePath || x?.file || "");
 
-  // Prefer a nice short internal path if present
   if (href && href.startsWith("/")) return href;
   if (path) {
     const p = normalizeSlug(path);
@@ -147,11 +142,12 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
 
         const title = safeStr(x?.title || x?.name || x?.label || routeSlug || "Untitled");
         const desc = safeStr(x?.description || x?.excerpt || x?.summary || "") || null;
-
         const isPublic = inferIsPublic(x);
         const requiredTier = inferRequiredTier(x, isPublic);
 
-        const updated = safeStr(x?.updated || x?.updatedAt || x?.modified || x?.lastModified || x?.date || "") || null;
+        const updated =
+          safeStr(x?.updated || x?.updatedAt || x?.modified || x?.lastModified || x?.date || "") ||
+          null;
         const date = safeStr(x?.date || x?.publishedAt || "") || null;
 
         return {
@@ -170,7 +166,6 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
       })
       .filter(Boolean) as PdfAsset[];
 
-    // Deduplicate by routeSlug (last segment)
     const seen = new Set<string>();
     const deduped: PdfAsset[] = [];
     for (const it of out) {
@@ -180,7 +175,6 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
       deduped.push(it);
     }
 
-    // Sort newest first (updated/date fallback)
     deduped.sort((a, b) => {
       const aIso = toIsoDate(a.updated || a.date || "") || "";
       const bIso = toIsoDate(b.updated || b.date || "") || "";
@@ -242,8 +236,8 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
 
   const filtered = React.useMemo(() => {
     let list = items;
-
     const q = searchTerm.trim().toLowerCase();
+
     if (q) {
       list = list.filter((it) => {
         const inTitle = it.title.toLowerCase().includes(q);
@@ -255,8 +249,13 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
       });
     }
 
-    if (selectedTier) list = list.filter((it) => String(it.requiredTier) === selectedTier);
-    if (selectedCategory) list = list.filter((it) => String(it.category || "") === selectedCategory);
+    if (selectedTier) {
+      list = list.filter((it) => String(it.requiredTier) === selectedTier);
+    }
+
+    if (selectedCategory) {
+      list = list.filter((it) => String(it.category || "") === selectedCategory);
+    }
 
     return list;
   }, [items, searchTerm, selectedTier, selectedCategory]);
@@ -280,24 +279,26 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
 
   return (
     <Layout
-      title="Library"
+      title="Library | Abraham of London"
       description="Verified PDF library assets — controlled distribution, audit-friendly URLs."
       fullWidth
       className="bg-black text-white"
       headerTransparent={false}
     >
       <Head>
-        <title>Library // Abraham of London</title>
+        <title>Library | Abraham of London</title>
       </Head>
 
       <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-gray-300">
         <section className="relative overflow-hidden border-b border-white/5 pb-16 pt-24 lg:pt-32">
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_#d4af37_1px,_transparent_1px)] bg-[length:32px_32px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.06),transparent_45%)]" />
+          <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px]" />
+
           <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
               <Terminal size={14} className="text-amber-500" />
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-500">
-                System: Central Vault
+                Central Library
               </span>
               <span className="h-1 w-1 rounded-full bg-amber-500/40" />
               <span className="text-xs font-mono uppercase tracking-widest text-amber-200/70">
@@ -306,11 +307,13 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
             </div>
 
             <h1 className="mb-6 font-serif text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-              Everything. <span className="italic text-amber-400">Organised.</span>
+              Everything.
+              <span className="ml-2 italic text-amber-400">Organised.</span>
             </h1>
 
             <p className="mb-12 max-w-3xl text-lg text-gray-400">
-              This index lists PDF assets from the registry. Public assets open instantly. Restricted assets require clearance.
+              Verified PDF assets, surfaced cleanly. Public material opens immediately.
+              Restricted material remains controlled.
             </p>
 
             <div className="max-w-3xl space-y-4">
@@ -365,8 +368,9 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
                 <div className="space-y-4 rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <h3 className="mb-2 text-sm font-semibold text-gray-300 flex items-center gap-2">
-                        <Lock className="h-4 w-4 text-amber-400" /> Clearance
+                      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
+                        <Lock className="h-4 w-4 text-amber-400" />
+                        Clearance
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {tiersAvailable.map((t) => (
@@ -386,8 +390,9 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
                     </div>
 
                     <div>
-                      <h3 className="mb-2 text-sm font-semibold text-gray-300 flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-amber-400" /> Categories
+                      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
+                        <Tag className="h-4 w-4 text-amber-400" />
+                        Categories
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {categoriesAvailable.map((c) => (
@@ -424,7 +429,9 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
               className="rounded-3xl border border-dashed border-white/10 py-24 text-center"
             >
               <Box className="mx-auto mb-4 text-gray-700" size={48} />
-              <p className="mb-6 font-serif text-xl italic text-gray-500">No assets matching current filters.</p>
+              <p className="mb-6 font-serif text-xl italic text-gray-500">
+                No assets matching current filters.
+              </p>
               <button
                 onClick={clearFilters}
                 className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
@@ -436,7 +443,7 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
             <div className="space-y-10">
               <div className="flex items-center gap-4">
                 <div className="rounded-lg bg-white/5 p-2">
-                  <FileText className="h-4 w-4 text-amber-400" />
+                  <LibraryBig className="h-4 w-4 text-amber-400" />
                 </div>
                 <h2 className="font-serif text-2xl font-bold text-white md:text-3xl">Library Assets</h2>
                 <div className="h-px flex-1 bg-gradient-to-r from-amber-500/20 to-transparent" />
@@ -449,7 +456,11 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
                 {filtered.map((item) => {
                   const iso = toIsoDate(item.updated || item.date || "");
                   const dateLabel = iso
-                    ? new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                    ? new Date(iso).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
                     : null;
 
                   return (
@@ -469,7 +480,7 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
                               <>
                                 <span className="h-1 w-1 rounded-full bg-white/20" />
                                 <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-400">
-                                  <Lock className="h-3 w-3 inline mr-1" />
+                                  <Lock className="mr-1 inline h-3 w-3" />
                                   {item.requiredTier}
                                 </span>
                               </>
@@ -482,12 +493,14 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
                           />
                         </div>
 
-                        <h3 className="mt-4 mb-3 line-clamp-2 font-serif text-xl font-semibold leading-tight text-white transition-colors group-hover:text-amber-400">
+                        <h3 className="mb-3 mt-4 line-clamp-2 font-serif text-xl font-semibold leading-tight text-white transition-colors group-hover:text-amber-400">
                           {item.title}
                         </h3>
 
                         {item.description ? (
-                          <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-gray-400">{item.description}</p>
+                          <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-gray-400">
+                            {item.description}
+                          </p>
                         ) : null}
 
                         <div className="mt-auto space-y-3 border-t border-white/5 pt-4">

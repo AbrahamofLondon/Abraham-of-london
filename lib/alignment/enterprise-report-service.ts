@@ -1,59 +1,138 @@
-import { getEnterpriseDashboardView } from "./enterprise-repository";
-import { ENTERPRISE_ALIGNMENT_DOMAIN_ORDER } from "./enterprise-types";
+// lib/alignment/enterprise-report-service.ts
+import {
+  getCampaignById,
+  getLeadershipGapSnapshot,
+  getOrganisationSnapshot,
+} from "./enterprise-repository";
+import type {
+  EnterpriseAlignmentBand,
+  EnterpriseOrganisationSnapshotView,
+  LeadershipGapView,
+} from "./enterprise-types";
 
-export async function generateExecutiveReportData(campaignId: string) {
-  const dashboard = await getEnterpriseDashboardView(campaignId);
-  if (!dashboard || !dashboard.organisationSnapshot) {
+type ExecutiveReportData = {
+  metadata: {
+    generatedAt: string;
+    organisationName: string;
+    campaignTitle: string;
+    auditID: string;
+    campaignId: string;
+    organisationId: string;
+  };
+  scores: {
+    overall: number;
+    band: EnterpriseAlignmentBand;
+    dissonanceArea: number;
+    fragility: EnterpriseOrganisationSnapshotView["fragilitySignal"];
+    confidenceScore: number | null;
+    completionRate: number;
+  };
+  domainPerformance: EnterpriseOrganisationSnapshotView["domainScores"];
+  findings: string[];
+  strategicGuidance: string;
+};
+
+function buildCriticalFindings(params: {
+  organisationSnapshot: EnterpriseOrganisationSnapshotView;
+  leadershipGap: LeadershipGapView | null;
+}): string[] {
+  const findings: string[] = [];
+
+  if (params.organisationSnapshot.percentScore < 60) {
+    findings.push(
+      "STRUCTURAL_DRIFT: Overall alignment is below institutional safety thresholds.",
+    );
+  }
+
+  if (
+    params.leadershipGap &&
+    params.leadershipGap.overallGapPercent > 15
+  ) {
+    findings.push(
+      "PERCEPTUAL_DISSONANCE: Significant delta between executive vision and staff execution.",
+    );
+  }
+
+  if (params.organisationSnapshot.fragilitySignal === "HIGH") {
+    findings.push(
+      "VOLATILITY_ALERT: High variance across domains suggests localised silos or uneven execution discipline.",
+    );
+  }
+
+  if (
+    (params.organisationSnapshot.confidenceScore ?? 0) > 0 &&
+    (params.organisationSnapshot.confidenceScore ?? 0) < 55
+  ) {
+    findings.push(
+      "CONFIDENCE_LIMITATION: Response confidence is modest, so directional judgment should be paired with qualitative review.",
+    );
+  }
+
+  if (params.organisationSnapshot.completionRate < 50) {
+    findings.push(
+      "COVERAGE_WARNING: Participation coverage is thin enough to weaken organisation-wide certainty.",
+    );
+  }
+
+  return findings;
+}
+
+function getStrategicGuidance(band: EnterpriseAlignmentBand): string {
+  switch (band) {
+    case "ALIGNED":
+      return "Maintain strategic coherence. Focus on variance reduction, execution discipline, and institutional compounding.";
+    case "DRIFTING":
+      return "Immediate recalibration is advised. Tighten mandate translation, restore operating discipline, and reduce silent drift between leadership intent and field execution.";
+    case "MISALIGNED":
+      return "Critical intervention is recommended. Structural incoherence is now affecting performance and decision quality across the estate.";
+    case "DISORDERED":
+    default:
+      return "Foundational repair is required. Restore order, clarify authority, and stabilise the environment before escalation or transformation.";
+  }
+}
+
+export async function generateExecutiveReportData(
+  campaignId: string,
+): Promise<ExecutiveReportData> {
+  const campaign = await getCampaignById(campaignId);
+
+  if (!campaign) {
+    throw new Error("REPORT_FAILURE: Campaign context not found.");
+  }
+
+  const organisationSnapshot = await getOrganisationSnapshot(
+    campaign.organisationId,
+  );
+
+  if (!organisationSnapshot) {
     throw new Error("REPORT_FAILURE: Insufficient data for aggregation.");
   }
 
-  const { organisation, campaign, organisationSnapshot, leadershipGap } = dashboard;
-
-  // Analysis Logic for the Board
-  const criticalFindings = [];
-
-  if (organisationSnapshot.percentScore < 60) {
-    criticalFindings.push("STRUCTURAL_DRIFT: Overall alignment is below institutional safety thresholds.");
-  }
-
-  if (leadershipGap && leadershipGap.overallGapPercent > 15) {
-    criticalFindings.push("PERCEPTUAL_DISSONANCE: Significant delta between Executive vision and Staff execution.");
-  }
-
-  if (organisationSnapshot.fragilitySignal === "HIGH") {
-    criticalFindings.push("VOLATILITY_ALERT: High variance in domain scores suggests localized cultural silos.");
-  }
+  const leadershipGap = await getLeadershipGapSnapshot(campaignId);
+  const findings = buildCriticalFindings({
+    organisationSnapshot,
+    leadershipGap,
+  });
 
   return {
     metadata: {
       generatedAt: new Date().toISOString(),
-      organisationName: organisation.name,
+      organisationName: campaign.organisation.name,
       campaignTitle: campaign.title,
       auditID: `OGR-${campaignId.slice(0, 8).toUpperCase()}`,
+      campaignId: campaign.id,
+      organisationId: campaign.organisationId,
     },
     scores: {
       overall: organisationSnapshot.percentScore,
       band: organisationSnapshot.band,
       dissonanceArea: organisationSnapshot.dissonanceArea,
       fragility: organisationSnapshot.fragilitySignal,
+      confidenceScore: organisationSnapshot.confidenceScore ?? null,
+      completionRate: organisationSnapshot.completionRate,
     },
     domainPerformance: organisationSnapshot.domainScores,
-    findings: criticalFindings,
+    findings,
     strategicGuidance: getStrategicGuidance(organisationSnapshot.band),
   };
-}
-
-function getStrategicGuidance(band: string): string {
-  switch (band) {
-    case "SOVEREIGN":
-      return "Maintain current velocity. Focus on institutional legacy and market expansion.";
-    case "ALIGNED":
-      return "Optimize sub-domain variances. Ensure middle-management remains tethered to core objectives.";
-    case "DRIFTING":
-      return "IMMEDIATE ACTION: Re-calibrate internal communications. Address the 'Integration Tax' in core operations.";
-    case "MISALIGNED":
-      return "CRITICAL INTERVENTION: Full structural audit recommended. Operational silos are actively eroding value.";
-    default:
-      return "Await further data for strategic determination.";
-  }
 }

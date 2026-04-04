@@ -1,4 +1,4 @@
-// scripts/pdf/generate-pdfs.ts
+ // scripts/pdf/generate-pdfs.ts
 // ABRAHAM OF LONDON — SSOT VALIDATOR (Inventory-First, No Placeholders)
 // -----------------------------------------------------------------------------
 // POLICY (matches build-pdf-registry-generated.ts):

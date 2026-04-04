@@ -1,8 +1,3 @@
-/* ============================================================================
-   FILE: pages/diagnostics/enterprise.tsx
-   ENTERPRISE DIAGNOSTIC — Board / Institution Layer
-============================================================================ */
-
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -12,7 +7,6 @@ import {
   ArrowRight,
   Building2,
   Crown,
-  ShieldCheck,
   ChevronRight,
   CheckCircle2,
   Activity,
@@ -23,15 +17,20 @@ import {
   AlertTriangle,
   Users,
   Gavel,
-  Layers,
   ScanSearch,
+  Briefcase,
+  ShieldCheck,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { bandFromPct, buildSectionScore, severityFromPct, submitDiagnostic } from "@/lib/diagnostics/client";
+import type {
+  DiagnosticAnswer,
+  DiagnosticAnswerValue,
+  DiagnosticSubmitResponse,
+} from "@/lib/diagnostics/types";
 
-const SITE = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
-).replace(/\/+$/, "");
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
 type BoardSignal = {
   icon: React.ComponentType<any>;
@@ -45,24 +44,27 @@ type EnterpriseOutput = {
   desc: string;
 };
 
+type QuestionBlock = {
+  id: string;
+  title: string;
+  prompts: string[];
+};
+
 const SIGNALS: BoardSignal[] = [
   {
     icon: AlertTriangle,
     title: "The institution looks stable, but confidence is thinning",
-    desc:
-      "This is the zone where surface order can mask leadership gap, variance, and structural fragility.",
+    desc: "This is the zone where surface order can mask leadership gap, variance, and structural fragility.",
   },
   {
     icon: Users,
     title: "Executives and teams may be reading different realities",
-    desc:
-      "Perception divergence is often one of the clearest warnings that governance or culture is weakening.",
+    desc: "Perception divergence is often one of the clearest warnings that governance or culture is weakening.",
   },
   {
     icon: Gavel,
     title: "Delay now carries strategic cost",
-    desc:
-      "When hesitation increases operational, reputational, or leadership risk, a serious reading becomes commercially rational.",
+    desc: "When hesitation increases operational, reputational, or leadership risk, a serious reading becomes commercially rational.",
   },
 ];
 
@@ -70,28 +72,71 @@ const OUTPUTS: EnterpriseOutput[] = [
   {
     icon: BarChart3,
     title: "Organisation snapshot",
-    desc:
-      "A top-line structural reading across key enterprise alignment domains.",
+    desc: "A top-line structural reading across key enterprise alignment domains.",
   },
   {
     icon: Radar,
     title: "Team variance and fragility signal",
-    desc:
-      "A reading of divergence, internal inconsistency, and where operating coherence is thinning.",
+    desc: "A reading of divergence, internal inconsistency, and where operating coherence is thinning.",
   },
   {
     icon: Scale,
     title: "Leadership gap interpretation",
-    desc:
-      "A focused reading of executive versus non-executive perception across the institution.",
+    desc: "A focused reading of executive versus non-executive perception across the institution.",
   },
   {
     icon: FileText,
     title: "Board-useful reporting posture",
-    desc:
-      "Structured outputs strong enough to support escalation, intervention, or private strategic follow-through.",
+    desc: "Structured outputs strong enough to support escalation, intervention, or private strategic follow-through.",
   },
 ];
+
+const BLOCKS: QuestionBlock[] = [
+  {
+    id: "leadership",
+    title: "Leadership Coherence",
+    prompts: [
+      "The senior leadership group is reading the condition of the institution with enough consistency.",
+      "Critical leadership disagreements are being surfaced rather than buried.",
+      "Strategic messaging remains coherent as it moves through the enterprise.",
+    ],
+  },
+  {
+    id: "governance",
+    title: "Governance Reliability",
+    prompts: [
+      "Decision rights are clear enough to reduce drag and duplication.",
+      "Escalation and accountability are operating at the correct level.",
+      "Governance structures are supporting execution rather than slowing it.",
+    ],
+  },
+  {
+    id: "execution",
+    title: "Execution Variance",
+    prompts: [
+      "Performance varies within acceptable bounds rather than by dangerous extremes.",
+      "Teams are not operating with materially different interpretations of priority.",
+      "Operational signals are trustworthy enough for leadership to act on them.",
+    ],
+  },
+  {
+    id: "risk",
+    title: "Institutional Risk Posture",
+    prompts: [
+      "Current delay does not materially increase strategic cost.",
+      "Trust in the institution is not quietly weakening.",
+      "Corrective action can still be taken without disproportionate political resistance.",
+    ],
+  },
+];
+
+function scoreLabel(value: DiagnosticAnswerValue) {
+  if (value === 1) return "Strongly No";
+  if (value === 2) return "No";
+  if (value === 3) return "Mixed";
+  if (value === 4) return "Yes";
+  return "Strongly Yes";
+}
 
 function AmbientField() {
   return (
@@ -109,49 +154,21 @@ function RailLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="inline-flex items-center gap-3">
       <span className="h-6 w-px bg-amber-500/30" />
-      <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-400/62">
-        {children}
-      </span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-400/62">{children}</span>
     </div>
   );
 }
 
-function SectionDivider() {
-  return (
-    <div className="my-20 flex items-center gap-3">
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-      <Crown className="h-3.5 w-3.5 text-amber-500/36" />
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-    </div>
-  );
-}
-
-function MetricTile({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function MetricTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-l border-white/6 pl-4 first:border-l-0 first:pl-0">
-      <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/28">
-        {label}
-      </div>
+      <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/28">{label}</div>
       <div className="mt-2 font-serif text-lg text-white/84">{value}</div>
     </div>
   );
 }
 
-function Card({
-  icon: Icon,
-  title,
-  desc,
-}: {
-  icon: React.ComponentType<any>;
-  title: string;
-  desc: string;
-}) {
+function Card({ icon: Icon, title, desc }: { icon: React.ComponentType<any>; title: string; desc: string }) {
   return (
     <article className="border border-white/[0.06] bg-white/[0.015] p-8 transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.025]">
       <Icon className="h-6 w-6 text-amber-300/65" />
@@ -163,6 +180,95 @@ function Card({
 
 const EnterpriseDiagnosticPage: NextPage = () => {
   const reduceMotion = useReducedMotion();
+  const [answers, setAnswers] = React.useState<Record<string, DiagnosticAnswerValue>>({});
+  const [organisation, setOrganisation] = React.useState("");
+  const [respondentName, setRespondentName] = React.useState("");
+  const [respondentEmail, setRespondentEmail] = React.useState("");
+  const [respondentRole, setRespondentRole] = React.useState("");
+  const [notes, setNotes] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitResult, setSubmitResult] = React.useState<DiagnosticSubmitResponse | null>(null);
+
+  const allPrompts = React.useMemo(
+    () =>
+      BLOCKS.flatMap((block) =>
+        block.prompts.map((prompt, idx) => ({
+          sectionId: block.id,
+          sectionTitle: block.title,
+          questionId: `${block.id}-${idx}`,
+          prompt,
+        })),
+      ),
+    [],
+  );
+
+  const answerList = React.useMemo<DiagnosticAnswer[]>(
+    () =>
+      allPrompts
+        .filter((p) => answers[p.questionId])
+        .map((p) => ({
+          sectionId: p.sectionId,
+          questionId: p.questionId,
+          prompt: p.prompt,
+          value: answers[p.questionId],
+        })),
+    [allPrompts, answers],
+  );
+
+  const totalQuestions = allPrompts.length;
+  const totalScore = answerList.reduce((sum, a) => sum + a.value, 0);
+  const maxScore = totalQuestions * 5;
+  const pct = maxScore ? Math.round((totalScore / maxScore) * 100) : 0;
+  const severity = severityFromPct(pct);
+  const band = bandFromPct(pct);
+  const canSubmit = answerList.length === totalQuestions && !isSubmitting;
+  const strategyReady = pct >= 70;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+
+    setIsSubmitting(true);
+    setSubmitResult(null);
+
+    const res = await submitDiagnostic({
+      kind: "enterprise",
+      version: "2026.1",
+      source: "diagnostics",
+      entry: "enterprise",
+      intent: "enterprise-diagnostic",
+      title: "Enterprise Alignment Diagnostic",
+      respondent: {
+        name: respondentName || null,
+        email: respondentEmail || null,
+        organisation: organisation || null,
+        role: respondentRole || null,
+      },
+      answers: answerList,
+      notes: notes || null,
+      summary: {
+        totalScore,
+        maxScore,
+        pct,
+        severity,
+        band,
+        sectionScores: BLOCKS.map((block) =>
+          buildSectionScore({
+            sectionId: block.id,
+            title: block.title,
+            answers: answerList.filter((a) => a.sectionId === block.id),
+          }),
+        ),
+      },
+      metadata: {
+        ui: "enterprise-diagnostic",
+        nextStepHref: strategyReady ? "/strategy-room" : "/diagnostics/executive-reporting",
+        nextRoute: strategyReady ? "STRATEGY_ROOM" : "EXECUTIVE_REPORTING",
+      },
+    });
+
+    setSubmitResult(res);
+    setIsSubmitting(false);
+  };
 
   return (
     <Layout
@@ -175,18 +281,13 @@ const EnterpriseDiagnosticPage: NextPage = () => {
       </Head>
 
       <main className="min-h-screen bg-black text-white">
-        {/* HERO SECTION */}
         <section className="relative overflow-hidden border-b border-white/5">
           <AmbientField />
 
           <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
             <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr]">
               <div className="max-w-4xl">
-                <motion.div
-                  initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                >
+                <motion.div initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
                   <RailLabel>Enterprise diagnostic</RailLabel>
                 </motion.div>
 
@@ -206,82 +307,10 @@ const EnterpriseDiagnosticPage: NextPage = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.9, delay: 0.18 }}
                 >
-                  A board-grade diagnostic for organisations facing fragility,
-                  perception gap, team divergence, or rising institutional risk.
+                  This is the final serious stop before the chamber. The purpose is not to flatter the buyer. It is to determine whether the institution is ready for private intervention.
                 </motion.p>
-
-                <motion.p
-                  className="mt-5 max-w-2xl text-base leading-relaxed text-white/40"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.9, delay: 0.24 }}
-                >
-                  This is not a survey product with expensive typography. It is a
-                  structured enterprise reading designed to clarify whether the
-                  institution requires monitoring, correction, or private intervention.
-                </motion.p>
-
-                <motion.div
-                  className="mt-12 flex flex-wrap gap-4"
-                  initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.85, delay: 0.26 }}
-                >
-                  <Link
-                    href="/contact?intent=enterprise-alignment-diagnostic"
-                    className="group inline-flex items-center justify-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
-                  >
-                    <span>Request enterprise diagnostic</span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-
-                  <Link
-                    href="/consulting/strategy-room"
-                    className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/78 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
-                  >
-                    <span>Private chamber</span>
-                    <ChevronRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </motion.div>
-
-                <motion.div
-                  className="mt-12 flex flex-wrap items-center gap-5"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.9, delay: 0.34 }}
-                >
-                  <div className="inline-flex items-center gap-2">
-                    <Building2 className="h-3.5 w-3.5 text-amber-500/38" />
-                    <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/28">
-                      Institution-scale signal
-                    </span>
-                  </div>
-                  <div className="h-3 w-px bg-white/10" />
-                  <div className="inline-flex items-center gap-2">
-                    <ShieldCheck className="h-3.5 w-3.5 text-amber-500/38" />
-                    <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/28">
-                      Board-grade posture
-                    </span>
-                  </div>
-                  <div className="h-3 w-px bg-white/10" />
-                  <div className="inline-flex items-center gap-2">
-                    <Layers className="h-3.5 w-3.5 text-amber-500/38" />
-                    <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/28">
-                      Advisory-linked
-                    </span>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="mt-12 h-px w-40 bg-gradient-to-r from-amber-500/30 to-transparent"
-                  initial={{ scaleX: 0, opacity: 0 }}
-                  animate={{ scaleX: 1, opacity: 1 }}
-                  transition={{ duration: 1.1, delay: 0.42 }}
-                  style={{ transformOrigin: "left" }}
-                />
               </div>
 
-              {/* SIDEBAR WIDGET */}
               <motion.div
                 className="relative self-end"
                 initial={{ opacity: 0, x: reduceMotion ? 0 : 16 }}
@@ -289,33 +318,29 @@ const EnterpriseDiagnosticPage: NextPage = () => {
                 transition={{ duration: 0.9, delay: 0.18 }}
               >
                 <div className="border border-white/[0.07] bg-white/[0.02] p-8 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
-                  <div className="relative">
-                    <div className="mb-8 flex items-center justify-between">
-                      <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
-                        Commercial role
-                      </span>
-                      <Crown className="h-4 w-4 text-amber-500/40" />
-                    </div>
+                  <div className="mb-8 flex items-center justify-between">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">Commercial role</span>
+                    <Crown className="h-4 w-4 text-amber-500/40" />
+                  </div>
 
-                    <div className="grid grid-cols-3 gap-6 border-y border-white/6 py-6">
-                      <MetricTile label="Tier" value="Board" />
-                      <MetricTile label="Use" value="Signal" />
-                      <MetricTile label="Bias" value="Serious" />
-                    </div>
+                  <div className="grid grid-cols-3 gap-6 border-y border-white/6 py-6">
+                    <MetricTile label="Tier" value="Board" />
+                    <MetricTile label="Use" value="Signal" />
+                    <MetricTile label="Bias" value="Serious" />
+                  </div>
 
-                    <div className="mt-8 space-y-4">
-                      {[
-                        "Clarifies institutional condition before mandate escalation",
-                        "Exposes leadership perception gap",
-                        "Surfaces variance and fragility risk",
-                        "Supports board-level next-step logic",
-                      ].map((line, idx) => (
-                        <div key={`hero-feature-${idx}`} className="flex items-center gap-3">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400/70" />
-                          <span className="text-sm text-white/58">{line}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="mt-8 space-y-4">
+                    {[
+                      "Clarifies institutional condition before mandate escalation",
+                      "Exposes leadership perception gap",
+                      "Surfaces variance and fragility risk",
+                      "Supports board-level next-step logic",
+                    ].map((line) => (
+                      <div key={line} className="flex items-center gap-3">
+                        <CheckCircle2 className="h-4 w-4 text-amber-400/70" />
+                        <span className="text-sm text-white/58">{line}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -323,17 +348,12 @@ const EnterpriseDiagnosticPage: NextPage = () => {
           </div>
         </section>
 
-        {/* TYPICAL TRIGGERS SECTION */}
         <section className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
               <RailLabel>Typical triggers</RailLabel>
-              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                Why institutions usually enter here
-              </h2>
-              <p className="mt-4 max-w-3xl text-lg text-white/48">
-                Not because collapse has happened. Because consequence is becoming visible.
-              </p>
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">Why institutions usually enter here</h2>
+              <p className="mt-4 max-w-3xl text-lg text-white/48">Not because collapse has happened. Because consequence is becoming visible.</p>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-3">
@@ -344,131 +364,228 @@ const EnterpriseDiagnosticPage: NextPage = () => {
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <SectionDivider />
-        </div>
-
-        {/* OUTPUTS SECTION */}
         <section className="relative border-t border-white/5 py-24">
           <div className="absolute inset-0 bg-gradient-to-b from-amber-500/[0.03] to-transparent" />
-
           <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-            <div className="grid gap-16 lg:grid-cols-2">
-              <motion.div
-                initial={{ opacity: 0, x: reduceMotion ? 0 : -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.65 }}
-              >
-                <RailLabel>Enterprise outputs</RailLabel>
+            <div className="grid gap-16 lg:grid-cols-[1.2fr_0.8fr]">
+              <div>
+                <RailLabel>Enterprise instrument</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  The institution gets more than a score
+                  Build the reading before private mandate work
                 </h2>
-                <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/48">
-                  The buyer is purchasing a governed reading of organisational condition.
-                </p>
 
                 <div className="mt-10 grid gap-6 md:grid-cols-2">
-                  {OUTPUTS.map((item, idx) => (
-                    <Card key={`output-card-${idx}`} {...item} />
+                  {[
+                    { label: "Organisation", value: organisation, set: setOrganisation, type: "text" },
+                    { label: "Respondent Name", value: respondentName, set: setRespondentName, type: "text" },
+                    { label: "Respondent Email", value: respondentEmail, set: setRespondentEmail, type: "email" },
+                    { label: "Role", value: respondentRole, set: setRespondentRole, type: "text" },
+                  ].map((field) => (
+                    <div key={field.label} className="border border-white/[0.06] bg-white/[0.015] p-6">
+                      <label className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/28">{field.label}</label>
+                      <input
+                        type={field.type}
+                        value={field.value}
+                        onChange={(e) => field.set(e.target.value)}
+                        className="mt-3 w-full border border-white/10 bg-black/20 px-4 py-4 text-sm text-white outline-none focus:border-amber-500/30"
+                      />
+                    </div>
                   ))}
                 </div>
-              </motion.div>
 
-              {/* ESCALATION SIDEBAR */}
-              <motion.div
-                initial={{ opacity: 0, x: reduceMotion ? 0 : 16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.65 }}
-              >
-                <div className="border border-amber-500/16 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-8">
-                  <ScanSearch className="mb-6 h-9 w-9 text-amber-400/55" />
-                  <h3 className="font-serif text-2xl text-white">
-                    This is the last serious stop before private chamber work
-                  </h3>
+                <div className="mt-10 space-y-8">
+                  {BLOCKS.map((block) => (
+                    <div key={block.id} className="border border-white/[0.06] bg-white/[0.015] p-8">
+                      <h3 className="font-serif text-2xl text-white">{block.title}</h3>
 
-                  <ul className="mt-8 space-y-5">
-                    {[
-                      "Appropriate when multiple teams and perceptions are involved",
-                      "Useful when leadership needs clearer signal before intervention",
-                      "Strong enough to justify escalation into private advisory",
-                    ].map((line, idx) => (
-                      <li key={`escalation-reason-${idx}`} className="flex items-center gap-4">
-                        <CheckCircle2 className="h-4 w-4 text-amber-400/72" />
-                        <span className="text-sm text-white/68">{line}</span>
-                      </li>
-                    ))}
-                  </ul>
+                      <div className="mt-6 space-y-4">
+                        {block.prompts.map((prompt, qIdx) => {
+                          const qId = `${block.id}-${qIdx}`;
+                          const selected = answers[qId];
 
-                  <div className="mt-10 rounded-2xl border border-white/8 bg-black/20 p-5">
-                    <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/56">
-                      Escalation principle
+                          return (
+                            <div key={qId} className="border border-white/6 bg-black/20 p-5">
+                              <div className="text-sm leading-relaxed text-white/78">{prompt}</div>
+
+                              <div className="mt-4 grid grid-cols-5 gap-2">
+                                {[1, 2, 3, 4, 5].map((n) => {
+                                  const value = n as DiagnosticAnswerValue;
+                                  const active = selected === value;
+
+                                  return (
+                                    <button
+                                      key={n}
+                                      type="button"
+                                      onClick={() => setAnswers((prev) => ({ ...prev, [qId]: value }))}
+                                      className={[
+                                        "border px-2 py-3 text-center transition-all",
+                                        active
+                                          ? "border-amber-500 bg-amber-500/10 text-white"
+                                          : "border-white/10 bg-black/10 text-white/40 hover:border-white/20 hover:text-white/70",
+                                      ].join(" ")}
+                                    >
+                                      <div className="font-mono text-[11px] font-bold">{n}</div>
+                                      <div className="mt-1 text-[9px] uppercase tracking-wide">{scoreLabel(value)}</div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-white/46">
-                      If the diagnostic reveals leadership gap, high variance, and a
-                      rising fragility signal, delay becomes a strategic error.
-                    </p>
+                  ))}
+                </div>
+
+                <div className="mt-10 border border-white/[0.06] bg-white/[0.015] p-8">
+                  <label className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/28">
+                    Institutional Observations
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={6}
+                    className="mt-3 w-full border border-white/10 bg-black/20 px-4 py-4 text-sm text-white outline-none focus:border-amber-500/30"
+                    placeholder="Where are leadership signal, governance reliability, trust, or institutional risk posture becoming unstable?"
+                  />
+                </div>
+
+                <div className="mt-10 flex flex-wrap gap-4">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={!canSubmit}
+                    className="inline-flex items-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {isSubmitting ? "Submitting…" : "Submit enterprise diagnostic"}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+
+                  <Link
+                    href={strategyReady ? "/strategy-room" : "/diagnostics/executive-reporting"}
+                    className="inline-flex items-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/78 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
+                  >
+                    {strategyReady ? "Enter Strategy Room" : "View Executive Reporting"}
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+
+                <div className="mt-10 text-xs opacity-40">
+                  Diagnostic Ref: {submitResult?.ok ? submitResult.diagnosticRef : "Pending API generation"}
+                </div>
+
+                {submitResult?.ok ? (
+                  <div className="mt-8 border border-emerald-500/20 bg-emerald-500/[0.04] p-6">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300">Submitted</div>
+                    <div className="mt-3 text-sm text-white/70">
+                      Enterprise diagnostic captured and prepared for board-grade reporting and strategic escalation.
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Link
+                        href={submitResult.dashboardHref || "/dashboard?tab=diagnostics"}
+                        className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-300 hover:text-emerald-200"
+                      >
+                        Continue to dashboard
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+
+                      <Link
+                        href={strategyReady ? "/strategy-room" : "/diagnostics/executive-reporting"}
+                        className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300 hover:text-amber-200"
+                      >
+                        {strategyReady ? "Enter Strategy Room" : "Open Executive Reporting"}
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                ) : null}
+
+                {submitResult && !submitResult.ok ? (
+                  <div className="mt-8 border border-red-500/20 bg-red-500/[0.04] p-6">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-red-300">Submission error</div>
+                    <div className="mt-3 text-sm text-white/70">{submitResult.error}</div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="space-y-10">
+                <div className="sticky top-24 space-y-10">
+                  <div className="border border-amber-500/16 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-8">
+                    <ScanSearch className="mb-6 h-9 w-9 text-amber-400/55" />
+                    <h3 className="font-serif text-2xl text-white">Current board signal</h3>
+
+                    <div className="mt-6 grid grid-cols-3 gap-4 border-y border-white/6 py-6">
+                      <MetricTile label="Score" value={`${totalScore}/${maxScore}`} />
+                      <MetricTile label="Band" value={band} />
+                      <MetricTile label="Severity" value={severity} />
+                    </div>
+
+                    <div className="mt-8 rounded-2xl border border-white/8 bg-black/20 p-5">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/56">
+                        Chamber threshold
+                      </div>
+                      <p className="mt-3 text-sm leading-relaxed text-white/46">
+                        A serious enterprise signal should make the buyer feel one thing clearly: delaying the Strategy Room may now be more expensive than entering it.
+                      </p>
+                    </div>
+
+                    <div className="mt-6 rounded-2xl border border-white/8 bg-black/20 p-5">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/56">
+                        Current next move
+                      </div>
+                      <div className="mt-3 text-lg text-white">
+                        {strategyReady ? "Strategy Room now makes sense" : "Executive reporting still has commercial value"}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    <Link
-                      href="/contact?intent=enterprise-alignment-diagnostic"
-                      className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
-                    >
-                      Request enterprise diagnostic <ArrowRight className="h-4 w-4" />
-                    </Link>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+                    {OUTPUTS.map((item, idx) => (
+                      <Card key={`output-card-${idx}`} {...item} />
+                    ))}
+                  </div>
 
-                    <Link
-                      href="/consulting/strategy-room"
-                      className="inline-flex items-center gap-2 rounded-full border border-white/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/72 hover:bg-white/[0.04]"
-                    >
-                      Strategy Room <ChevronRight className="h-4 w-4" />
-                    </Link>
+                  <div className="border border-white/[0.06] bg-white/[0.015] p-8">
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="h-5 w-5 text-amber-300/70" />
+                      <div className="font-serif text-2xl text-white">Why this page must feel heavier</div>
+                    </div>
+                    <p className="mt-4 text-sm leading-7 text-white/55">
+                      Because this is the step immediately before private mandate work. It should not feel lighter than Directional Integrity. It should feel more consequential.
+                    </p>
+                    <div className="mt-5">
+                      <Link
+                        href="/strategy-room"
+                        className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-300 transition hover:bg-amber-500/18"
+                      >
+                        Inspect Strategy Room
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="border border-white/[0.06] bg-white/[0.015] p-8">
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck className="h-5 w-5 text-amber-300/70" />
+                      <div className="font-serif text-2xl text-white">Executive Reporting</div>
+                    </div>
+                    <p className="mt-4 text-sm leading-7 text-white/55">
+                      Where a full advisory mandate is premature, executive reporting becomes the disciplined commercial middle. That keeps the ladder clean.
+                    </p>
+                    <div className="mt-5">
+                      <Link
+                        href="/diagnostics/executive-reporting"
+                        className="inline-flex items-center gap-2 rounded-full border border-white/12 px-4 py-2 text-sm text-white/70 transition hover:bg-white/[0.04] hover:text-white"
+                      >
+                        Open Executive Reporting
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* FINAL CALL TO ACTION */}
-        <section className="relative border-t border-white/5 py-24">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <Activity className="mx-auto mb-6 h-6 w-6 text-amber-500/30" />
-
-              <h2 className="font-serif text-4xl text-white md:text-5xl">
-                Read the institution before the institution pays for delay.
-              </h2>
-
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-white/50">
-                Strong institutions do not fear diagnosis. Weak ones postpone it.
-              </p>
-
-              <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
-                <Link
-                  href="/contact?intent=enterprise-alignment-diagnostic"
-                  className="group inline-flex items-center justify-center gap-3 bg-white px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50"
-                >
-                  <span>Request enterprise diagnostic</span>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-
-                <Link
-                  href="/consulting/strategy-room"
-                  className="group inline-flex items-center justify-center gap-3 border border-white/10 px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
-                >
-                  <span>Private chamber</span>
-                  <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
-                </Link>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
       </main>

@@ -1,9 +1,11 @@
-/* pages/api/access/revoke.ts — GOVERNANCE COMPLIANT REVOCATION */
+/* pages/api/access/revoke.ts — V7.1 GOVERNANCE COMPLIANT (SYNCED) */
 import { safeSlice } from "@/lib/utils/safe";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma"; // Added for Global Sync
 import {
   revokeSession,
   revokeKeyByHash,
+  verifySession, // Added to find the User associated with the session
 } from "@/lib/server/auth/tokenStore.postgres";
 import {
   getAccessTokenFromReq,
@@ -17,6 +19,7 @@ type RevokeBody = {
   sessionToken?: string;
   keyHash?: string;
   reason?: string;
+  forceGlobalLogout?: boolean; // New directive for project-wide reset
 };
 
 /** Simple admin guard for institutional security */
@@ -24,7 +27,6 @@ function requireAdmin(req: NextApiRequest): { ok: true } | { ok: false; reason: 
   const expected = process.env.ACCESS_REVOKE_ADMIN_TOKEN;
 
   if (!expected) {
-    // Safety fallback for development; strict for production
     if (process.env.NODE_ENV !== "production") return { ok: true };
     return { ok: false, reason: "Server not configured for revocation" };
   }
@@ -41,6 +43,7 @@ function requireAdmin(req: NextApiRequest): { ok: true } | { ok: false; reason: 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Ok | Fail>) {
   if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
     return res.status(405).json({ ok: false, reason: "Method not allowed" });
   }
 
@@ -61,7 +64,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const reason = safeSlice(String(body.reason || "manual_revoke"), 0, 120);
 
   try {
-    // 1. Revoke the specific session in Postgres
+    // 0. PROJECT-WIDE SYNC PREP: Find the associated User before we kill the session
+    const activeSession = await verifySession(sessionToken);
+
+    // 1. Revoke the specific session in Postgres (Institutional Layer)
     const sessionRes = await revokeSession(sessionToken);
     if (!sessionRes.ok) {
         console.warn("[REVOKE_WARNING] Session revocation returned failure", sessionRes.reason);
@@ -73,17 +79,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       await revokeKeyByHash(keyHash);
     }
 
-    // 3. Telemetry / Logging
+    // 3. GLOBAL PROJECT SYNC: Invalidate NextAuth User Session
+    // If forceGlobalLogout is passed, we reset the user's tier or flag them for a re-auth.
+    if (body.forceGlobalLogout && activeSession.ok && activeSession.valid && activeSession.memberId) {
+      // Find the member to get the userId
+      const member = await prisma.innerCircleMember.findUnique({
+        where: { id: activeSession.memberId },
+        select: { userId: true }
+      });
+
+      if (member?.userId) {
+        await prisma.user.update({
+          where: { id: member.userId },
+          data: { 
+            tier: "public", // Drop them back to public 
+            lastSeenAt: new Date() // Triggers session mismatch in some JWT configs
+          }
+        });
+      }
+    }
+
+    // 4. Telemetry / Logging
     if (process.env.NODE_ENV !== "production") {
       console.info("[ACCESS_REVOKE_SUCCESS]", {
         sessionToken: `${sessionToken.slice(0, 8)}...`,
         keyRevoked: !!keyHash,
+        globalSync: !!body.forceGlobalLogout,
         reason,
       });
     }
 
-    // 4. Client-side cleanup: Wipe the cookie
+    // 5. Client-side cleanup: Wipe the cookie
     removeAccessCookie(res);
+    
     return res.status(200).json({ ok: true });
 
   } catch (err) {

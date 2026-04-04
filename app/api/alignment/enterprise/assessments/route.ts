@@ -1,119 +1,163 @@
-/* app/api/alignment/enterprise/assessments/route.ts — HARDENED HANDLER */
+// app/api/alignment/enterprise/assessments/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { 
-  getParticipantByInviteTokenHash, 
-  saveEnterpriseAssessment, 
-  markParticipantCompleted 
+import {
+  getParticipantByInviteTokenHash,
+  markParticipantCompleted,
+  markParticipantOpened,
+  saveEnterpriseAssessment,
 } from "@/lib/alignment/enterprise-repository";
-import { calculateEnterpriseAssessment } from "@/lib/alignment/enterprise-logic";
+import { aggregateEnterpriseCampaign } from "@/lib/alignment/enterprise-aggregation";
+import {
+  hashEnterpriseInviteToken,
+  verifyEnterpriseInviteToken,
+} from "@/lib/alignment/enterprise-invites";
 import { submitEnterpriseAssessmentSchema } from "@/lib/alignment/enterprise-schemas";
+import { scoreEnterpriseAssessment } from "@/lib/alignment/enterprise-score";
+import { adaptEnterpriseAssessmentToConstitution } from "@/lib/alignment/enterprise-constitution-adapter";
 
-/**
- * FETCH CONTEXT: Validates the token and retrieves campaign metadata.
- */
+function errorResponse(message: string, status = 400, details?: unknown) {
+  return NextResponse.json({ ok: false, error: message, details }, { status });
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
     if (!token) {
-      return NextResponse.json({ error: "Missing authentication token" }, { status: 400 });
+      return errorResponse("Missing authentication token", 400);
     }
 
-    const participant = await getParticipantByInviteTokenHash(token);
+    const payload = verifyEnterpriseInviteToken(token);
+    if (!payload) {
+      return errorResponse("Invite is invalid or expired", 401);
+    }
+
+    const participant = await getParticipantByInviteTokenHash(
+      hashEnterpriseInviteToken(token),
+    );
 
     if (!participant) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+      return errorResponse("Participant record not found", 404);
     }
 
-    return NextResponse.json({ 
-      status: "success", 
+    if (participant.status === "invited") {
+      await markParticipantOpened(participant.id);
+    }
+
+    return NextResponse.json({
+      ok: true,
       data: {
         participantId: participant.id,
         campaignId: participant.campaignId,
         organisationId: participant.campaign.organisationId,
         organisationName: participant.campaign.organisation.name,
-        status: participant.status,
+        campaignTitle: participant.campaign.title,
+        campaignStatus: participant.campaign.status,
+        participantStatus: participant.status,
         openedAt: participant.openedAt,
         isExecutive: participant.membership?.isExecutive ?? false,
-        teamName: participant.membership?.teamName ?? "General"
-      }
-    }, { status: 200 });
-    
+        teamName: participant.membership?.teamName ?? "General Operations",
+        fullName: participant.membership?.fullName ?? null,
+        roleTitle: participant.membership?.roleTitle ?? null,
+      },
+    });
   } catch (error) {
     console.error("[ENTERPRISE_ASSESSMENT_GET_ERROR]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return errorResponse("Internal server error", 500);
   }
 }
 
-/**
- * SUBMIT ASSESSMENT: Calculates OGR score and persists result atomically.
- */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { token, answers } = body;
+    const token = body?.token;
 
-    if (!token) {
-      return NextResponse.json({ error: "Missing authentication token" }, { status: 401 });
+    if (!token || typeof token !== "string") {
+      return errorResponse("Missing authentication token", 401);
     }
 
-    // 1. Resolve Identity & Current Status
-    const participant = await getParticipantByInviteTokenHash(token);
-    
+    const payload = verifyEnterpriseInviteToken(token);
+    if (!payload) {
+      return errorResponse("Invite is invalid or expired", 401);
+    }
+
+    const participant = await getParticipantByInviteTokenHash(
+      hashEnterpriseInviteToken(token),
+    );
+
     if (!participant) {
-      return NextResponse.json({ error: "Identity mismatch or invalid token" }, { status: 401 });
+      return errorResponse("Identity mismatch or invalid token", 401);
     }
-    
+
+    if (participant.email.toLowerCase() !== payload.email.toLowerCase()) {
+      return errorResponse("Invite identity mismatch", 403);
+    }
+
     if (participant.status === "completed") {
-      return NextResponse.json({ error: "Assessment already finalized" }, { status: 409 });
+      return errorResponse("Assessment already finalized", 409);
     }
 
-    // 2. Schema Validation (Hardened)
-    const validated = submitEnterpriseAssessmentSchema.safeParse({ answers });
-    
-    if (!validated.success) {
-      return NextResponse.json({ 
-        error: "Data integrity validation failed", 
-        details: validated.error.errors 
-      }, { status: 400 });
+    if (["closed", "archived"].includes(participant.campaign.status)) {
+      return errorResponse("The campaign is currently closed to new entries", 409);
     }
 
-    // 3. Execution of 0-Error Scoring Engine
-    const scoreResult = calculateEnterpriseAssessment(validated.data.answers);
-
-    // 4. Atomic Transactional Persistence
-    const record = await prisma.$transaction(async (tx) => {
-      // Create the assessment record (Using the repository within tx context)
-      const assessment = await saveEnterpriseAssessment({
-        campaignId: participant.campaignId,
-        participantId: participant.id,
-        organisationId: participant.campaign.organisationId,
-        teamName: participant.membership?.teamName ?? null,
-        isExecutive: participant.membership?.isExecutive ?? false,
-        answersJson: validated.data.answers,
-        score: scoreResult,
-      });
-
-      // Close the participant loop
-      await markParticipantCompleted(participant.id);
-
-      return assessment;
+    const validated = submitEnterpriseAssessmentSchema.safeParse({
+      answers: body?.answers,
     });
 
-    return NextResponse.json({ 
-      ok: true, 
-      score: scoreResult.percentScore,
-      band: scoreResult.band,
-      registryId: record.id,
-      message: "Context committed to Sovereign Registry"
-    }, { status: 201 });
-    
+    if (!validated.success) {
+      return errorResponse(
+        "Data integrity validation failed",
+        400,
+        validated.error.flatten(),
+      );
+    }
+
+    const score = scoreEnterpriseAssessment(validated.data.answers);
+    const constitutional = adaptEnterpriseAssessmentToConstitution(score);
+
+    const assessment = await saveEnterpriseAssessment({
+      campaignId: participant.campaignId,
+      participantId: participant.id,
+      organisationId: participant.campaign.organisationId,
+      teamName: participant.membership?.teamName ?? null,
+      isExecutive: participant.membership?.isExecutive ?? false,
+      answersJson: validated.data.answers,
+      totalScore: score.totalScore,
+      possibleScore: score.possibleScore,
+      percentScore: score.percentScore,
+      band: score.band,
+      weakestDomains: score.weakestDomains,
+      strongestDomains: score.strongestDomains,
+      domainScores: score.domainScores,
+    });
+
+    await markParticipantCompleted(participant.id);
+
+    try {
+      await aggregateEnterpriseCampaign(participant.campaignId);
+    } catch (aggErr) {
+      console.error("[ENTERPRISE_AGGREGATION_ERROR]", aggErr);
+    }
+
+    return NextResponse.json(
+      {
+        ok: true,
+        registryId: assessment.id,
+        campaignId: participant.campaignId,
+        organisationId: participant.campaign.organisationId,
+        result: score,
+        constitutional,
+        message: "Enterprise assessment committed successfully.",
+      },
+      { status: 201 },
+    );
   } catch (error: any) {
     console.error("[ENTERPRISE_ASSESSMENT_POST_ERROR]", error);
-    return NextResponse.json({ 
-      error: error.message || "Failed to process OGR synchronization" 
-    }, { status: 400 });
+    return errorResponse(
+      error?.message || "Failed to process enterprise assessment",
+      400,
+    );
   }
 }

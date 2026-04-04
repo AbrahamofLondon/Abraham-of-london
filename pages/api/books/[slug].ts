@@ -1,6 +1,6 @@
-/* pages/api/books/[slug].ts — SECURE BOOK UNLOCK (SSOT, Pages Router) */
-
+/* pages/api/books/[slug].ts */
 import type { NextApiRequest, NextApiResponse } from "next";
+import { gzipSync } from "zlib";
 
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
@@ -13,12 +13,15 @@ import {
   getDocBySlug,
   normalizeSlug,
 } from "@/lib/content/server";
+import { getRenderableBody } from "@/lib/content/render-body";
 
 type OkResponse = {
   ok: true;
   tier: AccessTier;
   requiredTier: AccessTier;
   bodyCode: string;
+  compressed: true;
+  encoding: "gzip-base64";
   slugResolved: string;
 };
 
@@ -29,6 +32,10 @@ type FailResponse = {
 };
 
 type ResponseData = OkResponse | FailResponse;
+
+function compress(content: string): string {
+  return gzipSync(content).toString("base64");
+}
 
 function safeStr(value: unknown): string {
   if (typeof value === "string") return value;
@@ -84,25 +91,6 @@ function booksBareSlug(input: unknown): string {
   return !s || s.includes("..") ? "" : s;
 }
 
-function extractBodyCode(doc: unknown): string {
-  const value = doc as {
-    body?: { code?: unknown };
-    bodyCode?: unknown;
-    content?: unknown;
-    mdx?: unknown;
-    bodyRaw?: unknown;
-  } | null;
-
-  return safeStr(
-    value?.body?.code ??
-      value?.bodyCode ??
-      value?.content ??
-      value?.mdx ??
-      value?.bodyRaw ??
-      "",
-  );
-}
-
 function resolveBookDoc(bare: string): { doc: any | null; tried: string[] } {
   const tryBook = cleanPathish(`books/${bare}`);
   const tryContentBook = cleanPathish(`content/books/${bare}`);
@@ -110,13 +98,7 @@ function resolveBookDoc(bare: string): { doc: any | null; tried: string[] } {
   const tryBare = cleanPathish(bare);
   const tryNormalized = cleanPathish(normalizeSlug(bare));
 
-  const tried = [
-    tryBook,
-    tryContentBook,
-    tryVaultBook,
-    tryBare,
-    tryNormalized,
-  ];
+  const tried = [tryBook, tryContentBook, tryVaultBook, tryBare, tryNormalized];
 
   const direct =
     getDocBySlug(tryBook) ||
@@ -126,9 +108,7 @@ function resolveBookDoc(bare: string): { doc: any | null; tried: string[] } {
     getDocBySlug(tryNormalized) ||
     null;
 
-  if (direct) {
-    return { doc: direct, tried };
-  }
+  if (direct) return { doc: direct, tried };
 
   const books = getPublishedBooks() || [];
   const scanned =
@@ -151,10 +131,7 @@ export default async function handler(
 ) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({
-      ok: false,
-      reason: "METHOD_NOT_ALLOWED",
-    });
+    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
   }
 
   const raw = req.query.slug;
@@ -162,66 +139,57 @@ export default async function handler(
   const bare = booksBareSlug(joined);
 
   if (!bare) {
-    return res.status(400).json({
-      ok: false,
-      reason: "SLUG_MISSING",
-    });
+    return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
   }
 
   const { doc, tried } = resolveBookDoc(bare);
 
   if (!doc || doc.draft) {
-    return res.status(404).json({
-      ok: false,
-      reason: "NOT_FOUND",
-      tried,
-    });
+    return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried });
   }
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
-  const slugResolved = booksBareSlug(
-    doc?.slug || doc?._raw?.flattenedPath || bare,
-  );
+  const slugResolved = booksBareSlug(doc?.slug || doc?._raw?.flattenedPath || bare);
+  const renderBody = getRenderableBody(doc);
+
+  if (!renderBody.code.trim()) {
+    return res.status(500).json({ ok: false, reason: "BODY_UNAVAILABLE" });
+  }
 
   if (requiredTier === "public") {
     return res.status(200).json({
       ok: true,
       tier: "public",
       requiredTier: "public",
-      bodyCode: extractBodyCode(doc),
+      bodyCode: compress(renderBody.code),
+      compressed: true,
+      encoding: "gzip-base64",
       slugResolved,
     });
   }
 
   const sessionId = readAccessCookie(req);
   if (!sessionId) {
-    return res.status(401).json({
-      ok: false,
-      reason: "CLEARANCE_REQUIRED",
-    });
+    return res.status(401).json({ ok: false, reason: "CLEARANCE_REQUIRED" });
   }
 
   const session = await verifySession(sessionId);
   if (!session || !session.valid) {
-    return res.status(401).json({
-      ok: false,
-      reason: "SESSION_INVALID",
-    });
+    return res.status(401).json({ ok: false, reason: "SESSION_INVALID" });
   }
 
   const userTier = tiers.normalizeUser(session.tier);
   if (!tiers.hasAccess(userTier, requiredTier)) {
-    return res.status(403).json({
-      ok: false,
-      reason: "INSUFFICIENT_CLEARANCE",
-    });
+    return res.status(403).json({ ok: false, reason: "INSUFFICIENT_CLEARANCE" });
   }
 
   return res.status(200).json({
     ok: true,
     tier: userTier,
     requiredTier,
-    bodyCode: extractBodyCode(doc),
+    bodyCode: compress(renderBody.code),
+    compressed: true,
+    encoding: "gzip-base64",
     slugResolved,
   });
 }

@@ -14,6 +14,7 @@ import {
   Terminal,
   ShieldCheck,
   Vault,
+  Crown,
 } from "lucide-react";
 
 import PolicyFooter from "@/components/PolicyFooter";
@@ -158,6 +159,7 @@ export default function EnhancedFooter(): React.ReactElement {
       </div>
 
       <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-12">
+        {/* Top Row: Primary CTAs */}
         <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-4">
           <FooterCTA
             href="/canon"
@@ -189,7 +191,17 @@ export default function EnhancedFooter(): React.ReactElement {
           />
         </div>
 
-        <div className="mt-px grid grid-cols-1 gap-px border-x border-b border-white/5 bg-white/5 md:grid-cols-3">
+        {/* Middle Row: Strategy Room & Frameworks */}
+        <div className="mt-px grid grid-cols-1 gap-px border-x border-b border-white/5 bg-white/5 md:grid-cols-4">
+          {/* Strategy Room - New CTA Injection */}
+          <FooterCTA
+            href="/consulting/strategy-room"
+            title="Strategy Room"
+            label="Qualified Access"
+            tag="STRAT-V1"
+            hint="Controlled entry for qualified operators. Score-based routing. Institutional gatekeeping."
+            icon={<Crown size={16} />}
+          />
           <FooterCTA
             href="/resources/strategic-frameworks"
             title="Strategic Frameworks"
@@ -216,6 +228,7 @@ export default function EnhancedFooter(): React.ReactElement {
           />
         </div>
 
+        {/* Main Footer Content */}
         <div className="mt-24 grid grid-cols-1 gap-16 border-t border-white/10 pt-16 lg:grid-cols-12">
           <div className="space-y-10 lg:col-span-5">
             <div>
@@ -237,14 +250,26 @@ export default function EnhancedFooter(): React.ReactElement {
               intend to endure.
             </p>
 
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-4 bg-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-black transition-all hover:bg-amber-500"
-            >
-              <Terminal size={14} />
-              Secure Inquiry
-              <ArrowRight size={14} />
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-4 bg-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-black transition-all hover:bg-amber-500"
+              >
+                <Terminal size={14} />
+                Secure Inquiry
+                <ArrowRight size={14} />
+              </Link>
+
+              {/* Strategy Room Secondary CTA */}
+              <Link
+                href="/consulting/strategy-room"
+                className="inline-flex items-center justify-center gap-4 border border-amber-500/30 bg-amber-500/[0.03] px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80 transition-all hover:border-amber-500/60 hover:bg-amber-500/[0.08] hover:text-amber-300"
+              >
+                <Crown size={14} />
+                Enter Strategy Room
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4 lg:col-span-7">

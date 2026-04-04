@@ -1,11 +1,15 @@
-/* components/Navbar.tsx — BULLETPROOF & ATMOSPHERIC */
+/* components/LuxuryNavbar.tsx — BULLETPROOF & ATMOSPHERIC WITH ADMIN ACCESS */
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useSession, signOut } from "next-auth/react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowRight, Vault, Shield, Compass, Briefcase } from "lucide-react";
+import { 
+  Menu, X, ArrowRight, Vault, Shield, Compass, Briefcase, 
+  Terminal, Crown, LayoutDashboard, Brain, Activity, LogOut, User 
+} from "lucide-react";
 
 const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
 
@@ -19,26 +23,24 @@ const NAV = [
   { href: "/downloads/vault", label: "Vault" },
 ] as const;
 
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@abrahamoflondon.com";
+
 export default function Navbar(): React.ReactElement {
   const [mounted, setMounted] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [showAdminMenu, setShowAdminMenu] = React.useState(false);
   const router = useRouter();
+  const { data: session, status } = useSession();
   const asPath = mounted ? router.asPath : "/";
+  
+  const isAdmin = session?.user?.email === ADMIN_EMAIL;
+  const isAuthenticated = status === "authenticated";
+  const isLoading = status === "loading";
 
   // Scroll Orchestration
   const { scrollY } = useScroll();
-
-  // 1. DESATURATION PROTOCOL: Syncs with Hero Banner
-  const bgColor = useTransform(
-    scrollY,
-    [0, 100],
-    ["rgba(0, 0, 0, 0)", "rgba(10, 10, 10, 0.95)"]
-  );
-  const borderColor = useTransform(
-    scrollY,
-    [0, 100],
-    ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.1)"]
-  );
+  const bgColor = useTransform(scrollY, [0, 100], ["rgba(0, 0, 0, 0)", "rgba(10, 10, 10, 0.95)"]);
+  const borderColor = useTransform(scrollY, [0, 100], ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 0.1)"]);
   const backdropBlur = useTransform(scrollY, [0, 100], ["blur(0px)", "blur(12px)"]);
   const logoSaturation = useTransform(scrollY, [0, 200], ["grayscale(0%)", "grayscale(100%)"]);
 
@@ -47,6 +49,7 @@ export default function Navbar(): React.ReactElement {
   React.useEffect(() => {
     if (!mounted) return;
     setOpen(false);
+    setShowAdminMenu(false);
   }, [asPath, mounted]);
 
   React.useEffect(() => {
@@ -62,6 +65,11 @@ export default function Navbar(): React.ReactElement {
     return currentPath.startsWith(href);
   }, [asPath, mounted]);
 
+  const handleLogout = async () => {
+    await signOut({ redirect: false, callbackUrl: "/" });
+    window.location.href = "/";
+  };
+
   // SSR Skeleton
   if (!mounted) {
     return (
@@ -72,11 +80,7 @@ export default function Navbar(): React.ReactElement {
   return (
     <>
       <motion.header
-        style={{ 
-          backgroundColor: bgColor, 
-          borderColor, 
-          backdropFilter: backdropBlur 
-        }}
+        style={{ backgroundColor: bgColor, borderColor, backdropFilter: backdropBlur }}
         className="fixed inset-x-0 top-0 z-[100] border-b transition-colors duration-500"
       >
         <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
@@ -114,6 +118,69 @@ export default function Navbar(): React.ReactElement {
                 ))}
               </ul>
             </div>
+
+            {/* Admin Section - Desktop */}
+            {!isLoading && isAdmin && (
+              <div className="relative mr-4">
+                <button
+                  onClick={() => setShowAdminMenu(!showAdminMenu)}
+                  className="flex items-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[9px] font-mono uppercase tracking-wider text-amber-400 transition-all hover:bg-amber-500/20"
+                >
+                  <Terminal className="h-3 w-3" />
+                  Command
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {showAdminMenu && (
+                  <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-sm border border-white/10 bg-black/95 backdrop-blur-xl py-2 shadow-2xl z-50">
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-3 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <LayoutDashboard className="h-3.5 w-3.5" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/admin/intelligence"
+                      className="flex items-center gap-3 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <Brain className="h-3.5 w-3.5" />
+                      Intelligence Center
+                    </Link>
+                    <Link
+                      href="/admin/command-wall"
+                      className="flex items-center gap-3 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <Activity className="h-3.5 w-3.5" />
+                      Command Wall
+                    </Link>
+                    <div className="my-1 border-t border-white/10" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 px-4 py-2 text-xs text-red-400/60 hover:text-red-400 hover:bg-white/5 transition-colors"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      Exit Terminal
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* User Status Indicator */}
+            {!isLoading && isAuthenticated && !isAdmin && (
+              <div className="mr-4 flex items-center gap-2 rounded border border-white/10 px-3 py-2">
+                <User className="h-3 w-3 text-white/40" />
+                <span className="text-[8px] font-mono uppercase tracking-wider text-white/40">
+                  {session?.user?.email?.split("@")[0]}
+                </span>
+              </div>
+            )}
 
             {/* Inquiries CTA */}
             <Link
@@ -169,16 +236,67 @@ export default function Navbar(): React.ReactElement {
                       "block border-b border-white/5 py-4 text-[11px] font-black uppercase tracking-[0.3em]",
                       isActive(item.href) ? "text-amber-400" : "text-zinc-400"
                     )}
+                    onClick={() => setOpen(false)}
                   >
                     {item.label}
                   </Link>
                 ))}
               </div>
 
+              {/* Admin Section - Mobile */}
+              {!isLoading && isAdmin && (
+                <div className="pt-6 mt-6 border-t border-white/10">
+                  <p className="mb-3 text-[8px] font-mono uppercase tracking-wider text-amber-500/60">
+                    Command Terminal
+                  </p>
+                  <Link
+                    href="/admin"
+                    className="flex items-center justify-between py-3 text-sm text-white/60 hover:text-white"
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="flex items-center gap-3">
+                      <LayoutDashboard size={16} />
+                      Dashboard
+                    </span>
+                    <ArrowRight size={12} />
+                  </Link>
+                  <Link
+                    href="/admin/intelligence"
+                    className="flex items-center justify-between py-3 text-sm text-white/60 hover:text-white"
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Brain size={16} />
+                      Intelligence Center
+                    </span>
+                    <ArrowRight size={12} />
+                  </Link>
+                  <Link
+                    href="/admin/command-wall"
+                    className="flex items-center justify-between py-3 text-sm text-white/60 hover:text-white"
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Activity size={16} />
+                      Command Wall
+                    </span>
+                    <ArrowRight size={12} />
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-4 w-full flex items-center justify-center gap-3 rounded border border-red-500/20 bg-red-500/5 py-3 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut size={14} />
+                    Exit Terminal
+                  </button>
+                </div>
+              )}
+
               <div className="pt-8 mt-auto border-t border-white/10">
-                 <Link
+                <Link
                   href="/downloads/vault"
                   className="flex items-center justify-between p-4 bg-amber-500/5 border border-amber-500/20 text-amber-200 text-[10px] font-black uppercase tracking-widest mb-4"
+                  onClick={() => setOpen(false)}
                 >
                   <span className="flex items-center gap-3"><Vault size={16}/> Secure Vault</span>
                   <Shield size={16}/>

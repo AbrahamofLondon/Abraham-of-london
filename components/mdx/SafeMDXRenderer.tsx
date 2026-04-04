@@ -7,8 +7,7 @@ import { useMDXComponent } from "next-contentlayer2/hooks";
 import { getSafeComponents } from "@/components/mdx/MDXComponents";
 import type { TierDirective } from "@/lib/resources/tier-metadata";
 
-// Safe check for development mode that won't crash the browser
-const IS_DEV = typeof process !== 'undefined' ? process.env.NODE_ENV !== "production" : false;
+const IS_DEV = process.env.NODE_ENV !== "production";
 
 interface SafeMDXRendererProps {
   code?: string | null;
@@ -18,179 +17,448 @@ interface SafeMDXRendererProps {
   disableBaseComponents?: boolean;
 }
 
-type ErrorBoundaryProps = {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-};
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value : value == null ? "" : String(value);
+}
 
-type ErrorBoundaryState = {
-  hasError: boolean;
-  message?: string;
-};
+function escapeHtml(input: string): string {
+  return input
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
 
-const STABLE_EMPTY_MDX_CODE = "function MDXContent(){return null} return { default: MDXContent };";
+function looksLikeCompiledMdx(code: string): boolean {
+  const s = code.trim();
+  if (!s) return false;
 
-class MDXErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, message: undefined };
+  return (
+    /\bfunction\s+MDXContent\s*\(/.test(s) ||
+    /\buseMDXComponents\b/.test(s) ||
+    /\breturn\s+_jsx\s*\(/.test(s) ||
+    /\breturn\s+_jsxs\s*\(/.test(s) ||
+    /\b_jsx\s*\(/.test(s) ||
+    /\b_jsxs\s*\(/.test(s) ||
+    /\bjsxDEV\s*\(/.test(s) ||
+    /react\/jsx-runtime/.test(s) ||
+    /\/\*@jsxRuntime\s+automatic\*\//.test(s)
+  );
+}
+
+function looksLikeLeakedModuleCode(code: string): boolean {
+  const s = code.trim();
+  if (!s) return false;
+
+  return (
+    /\bObject\.defineProperty\s*\(\s*exports\b/.test(s) ||
+    /\bmodule\.exports\b/.test(s) ||
+    /\bexports\.[A-Za-z_$]/.test(s) ||
+    /\b__esModule\b/.test(s) ||
+    /\brequire\s*\(/.test(s)
+  );
+}
+
+function looksLikeRawMdx(code: string): boolean {
+  const s = code.trim();
+  if (!s) return false;
+  if (looksLikeCompiledMdx(s) || looksLikeLeakedModuleCode(s)) return false;
+
+  return (
+    /^\s*import\s.+from\s+["'][^"']+["'];?\s*$/m.test(s) ||
+    /^\s*export\s.+$/m.test(s) ||
+    /<[A-Z][A-Za-z0-9._-]*\b[^>]*>/.test(s) ||
+    /<\/[A-Z][A-Za-z0-9._-]*>/.test(s) ||
+    /<[A-Z][A-Za-z0-9._-]*\b[^>]*/.test(s)
+  );
+}
+
+function looksLikeRawMarkdown(code: string): boolean {
+  const s = code.trim();
+  if (!s) return false;
+
+  if (looksLikeCompiledMdx(s) || looksLikeLeakedModuleCode(s)) {
+    return false;
   }
 
-  static getDerivedStateFromError(err: unknown): ErrorBoundaryState {
+  return (
+    /^#{1,6}\s+/m.test(s) ||
+    /^\s*[-*+]\s+/m.test(s) ||
+    /^\s*\d+\.\s+/m.test(s) ||
+    /(^|\n)\s*>\s+/.test(s) ||
+    /\[([^\]]+)\]\(([^)]+)\)/.test(s) ||
+    /```[\s\S]*?```/.test(s) ||
+    /\*\*[^*]+\*\*/.test(s) ||
+    /^---$/m.test(s) ||
+    /^\|(.+)\|$/m.test(s) ||
+    s.length > 80
+  );
+}
+
+class MDXErrorBoundary extends React.Component<
+  {
+    children: React.ReactNode;
+    fallback?: React.ReactNode;
+    onError?: (message: string) => void;
+  },
+  { hasError: boolean; error: string | null }
+> {
+  constructor(
+    props: {
+      children: React.ReactNode;
+      fallback?: React.ReactNode;
+      onError?: (message: string) => void;
+    },
+  ) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: unknown) {
     return {
       hasError: true,
-      message:
-        err instanceof Error
-          ? err.message
-          : typeof err === "string"
-            ? err
-            : "MDX render error",
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 
-  override componentDidCatch(err: unknown) {
+  override componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (this.props.onError) {
+      this.props.onError(message);
+    }
+
     if (IS_DEV) {
-      console.error("[SafeMDXRenderer] MDXErrorBoundary caught:", err);
+      console.error("[SafeMDXRenderer] Render error:", error, errorInfo);
     }
   }
 
   override render() {
-    if (!this.state.hasError) return this.props.children;
-
-    return (
-      this.props.fallback ?? (
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-300/80">
-            MDX render failure
+    if (this.state.hasError) {
+      return (
+        this.props.fallback ?? (
+          <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+            <div className="font-mono text-xs uppercase tracking-widest text-red-400">
+              MDX Rendering Failed
+            </div>
+            <p className="mt-3 text-sm text-red-300/80">
+              The content could not be rendered properly.
+            </p>
+            {IS_DEV && this.state.error && (
+              <pre className="mt-6 max-h-64 overflow-auto rounded-xl bg-black/60 p-4 text-left text-xs whitespace-pre-wrap text-red-400/70">
+                {this.state.error}
+              </pre>
+            )}
           </div>
-          <p className="mt-3 text-sm text-white/70">
-            The MDX compiled, but rendering failed at runtime.
-          </p>
-          {IS_DEV && this.state.message ? (
-            <pre className="mt-4 overflow-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-white/60">
-              {this.state.message}
-            </pre>
-          ) : null}
-        </div>
-      )
-    );
+        )
+      );
+    }
+
+    return this.props.children;
   }
 }
 
 function EmptyState() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 text-center">
-      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
-        MDX unavailable
+    <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-12 text-center">
+      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30">
+        No content to display
       </div>
-      <p className="mt-3 text-sm text-white/60">
-        No compiled MDX body was provided.
-      </p>
     </div>
   );
 }
 
-function InvalidComponentState({
-  debug,
-  code,
-}: {
-  debug?: boolean;
-  code: string;
-}) {
+function stripInlineJsxProps(input: string): string {
+  return input.replace(/\s+[A-Za-z_:][-A-Za-z0-9_:.]*=(\{[^}]*\}|"[^"]*"|'[^']*')/g, "");
+}
+
+function transformRawMdxToMarkdownLike(input: string): string {
+  let s = safeString(input).replace(/\r\n/g, "\n").trim();
+  if (!s) return "";
+
+  // Strip JS module lines
+  s = s.replace(/^\s*import\s.+?;?\s*$/gm, "");
+  s = s.replace(/^\s*export\s.+?;?\s*$/gm, "");
+
+  // Callout blocks
+  s = s.replace(/^\s*<Callout\b([^>]*)>\s*$/gm, (_m, attrs: string) => {
+    const titleMatch = attrs.match(/\btitle=(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\}|\{"([^"]*)"\}|\{'([^']*)'\})/);
+    const title =
+      titleMatch?.[1] ||
+      titleMatch?.[2] ||
+      titleMatch?.[3] ||
+      titleMatch?.[4] ||
+      titleMatch?.[5] ||
+      "Callout";
+    return `> **${title}**\n>`;
+  });
+  s = s.replace(/^\s*<\/Callout>\s*$/gm, "");
+
+  // Section breaks
+  s = s.replace(/^\s*<SectionBreak\s*\/>\s*$/gm, "\n---\n");
+
+  // PullQuote
+  s = s.replace(/^\s*<PullQuote\b([^>]*)>\s*$/gm, (_m, attrs: string) => {
+    const textMatch = attrs.match(/\bquote=(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\}|\{"([^"]*)"\}|\{'([^']*)'\})/);
+    const text =
+      textMatch?.[1] ||
+      textMatch?.[2] ||
+      textMatch?.[3] ||
+      textMatch?.[4] ||
+      textMatch?.[5] ||
+      "";
+    return text ? `> *${text}*` : "";
+  });
+  s = s.replace(/^\s*<\/PullQuote>\s*$/gm, "");
+
+  // Blockquote wrappers
+  s = s.replace(/^\s*<Blockquote>\s*$/gm, "> ");
+  s = s.replace(/^\s*<\/Blockquote>\s*$/gm, "");
+
+  // Common lowercase HTML wrappers used in MDX prose
+  s = s.replace(/^\s*<(div|section|article|span)\b[^>]*>\s*$/gm, "");
+  s = s.replace(/^\s*<\/(div|section|article|span)>\s*$/gm, "");
+
+  // Self-closing anchors / wrappers
+  s = s.replace(/^\s*<div\b[^>]*id=["']([^"']+)["'][^>]\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^\s*<(div|section|article|span)\b[^>]*\/>\s*$/gm, "");
+
+  // Bracket tokens used as visual component markers
+  s = s.replace(/^\s*\[Link\]\s*$/gm, "**Link**");
+  s = s.replace(/^\s*\[Rule\]\s*$/gm, "---");
+
+  // Generic capitalized component wrappers
+  s = s.replace(/^\s*<([A-Z][A-Za-z0-9._-]*)\b([^>]*)\/>\s*$/gm, (_m, tag: string) => {
+    return `**[${tag}]**`;
+  });
+
+  s = s.replace(/^\s*<([A-Z][A-Za-z0-9._-]*)\b([^>]*)>\s*$/gm, (_m, tag: string) => {
+    return `**[${tag}]**`;
+  });
+
+  s = s.replace(/^\s*<\/([A-Z][A-Za-z0-9._-]*)>\s*$/gm, "");
+
+  // Remove isolated JSX expressions / comments
+  s = s.replace(/^\s*\{\s*\/\*[\s\S]*?\*\/\s*\}\s*$/gm, "");
+  s = s.replace(/^\s*\{[^{}\n]*\}\s*$/gm, "");
+
+  s = s.replace(/\n{3,}/g, "\n\n").trim();
+
+  return s;
+}
+
+function RawMarkdownFallback({ content }: { content: string }) {
+  const html = React.useMemo(() => {
+    let processed = safeString(content).replace(/\r\n/g, "\n").trim();
+    processed = escapeHtml(processed);
+
+    processed = processed.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" class="text-amber-400 hover:text-amber-300 underline decoration-amber-400/30">$1</a>',
+    );
+
+    processed = processed.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    processed = processed.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+
+    processed = processed.replace(
+      /^###### (.+)$/gm,
+      '<h6 class="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/60">$1</h6>',
+    );
+    processed = processed.replace(
+      /^##### (.+)$/gm,
+      '<h5 class="mt-8 mb-3 font-mono text-[11px] uppercase tracking-[0.28em] text-amber-200/80">$1</h5>',
+    );
+    processed = processed.replace(
+      /^#### (.+)$/gm,
+      '<h4 class="mt-10 mb-3 font-serif text-xl text-zinc-300">$1</h4>',
+    );
+    processed = processed.replace(
+      /^### (.+)$/gm,
+      '<h3 class="mt-12 mb-4 font-serif text-2xl text-zinc-200">$1</h3>',
+    );
+    processed = processed.replace(
+      /^## (.+)$/gm,
+      '<h2 class="mt-16 mb-5 border-b border-white/10 pb-3 font-mono text-[10px] uppercase tracking-[0.35em] text-amber-400">$1</h2>',
+    );
+    processed = processed.replace(
+      /^# (.+)$/gm,
+      '<h1 class="mt-10 mb-6 font-serif text-4xl tracking-tight text-white">$1</h1>',
+    );
+
+    const blocks = processed.split(/\n{2,}/);
+
+    return blocks
+      .map((block) => {
+        const trimmed = block.trim();
+        if (!trimmed) return "";
+
+        if (/^<h[1-6]/.test(trimmed)) return trimmed;
+
+        if (/^---$/.test(trimmed)) {
+          return `<hr class="my-8 border-white/10" />`;
+        }
+
+        if (/^&gt;/.test(trimmed)) {
+          const quoteBody = trimmed
+            .split("\n")
+            .map((line) => line.replace(/^&gt;\s?/, "").trim())
+            .join("<br />");
+
+          return `<blockquote class="my-8 border-l-2 border-amber-400/40 pl-5 italic text-white/75">${quoteBody}</blockquote>`;
+        }
+
+        if (/^[-*+]\s+/m.test(trimmed)) {
+          const items = trimmed
+            .split("\n")
+            .map((line) => line.replace(/^[-*+]\s+/, "").trim())
+            .filter(Boolean)
+            .map(
+              (item) =>
+                `<li class="flex items-start gap-3 text-white/80"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400"></span><span>${item}</span></li>`,
+            )
+            .join("");
+
+          return `<ul class="mb-6 space-y-3">${items}</ul>`;
+        }
+
+        if (/^\d+\.\s+/m.test(trimmed)) {
+          const items = trimmed
+            .split("\n")
+            .map((line) => line.replace(/^\d+\.\s+/, "").trim())
+            .filter(Boolean)
+            .map(
+              (item) => `<li class="ml-5 list-decimal text-white/80">${item}</li>`,
+            )
+            .join("");
+
+          return `<ol class="mb-6 space-y-3">${items}</ol>`;
+        }
+
+        return `<p class="mb-6 leading-8 text-white/80">${trimmed.replace(/\n/g, "<br />")}</p>`;
+      })
+      .join("");
+  }, [content]);
+
   return (
-    <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
-      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-300/80">
-        MDX hydration failure
+    <div
+      className="aol-mdx-content max-w-none"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
+function SuspiciousCodeState({ code }: { code: string }) {
+  return (
+    <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
+      <div className="font-mono text-xs uppercase tracking-widest text-amber-400">
+        Content Payload Invalid
       </div>
       <p className="mt-3 text-sm text-white/70">
-        The compiled MDX did not return a valid component.
+        The payload appears to be leaked module code rather than renderable MDX.
       </p>
-      {(debug || IS_DEV) && (
-        <pre className="mt-4 max-h-72 overflow-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-white/60">
-          {code.slice(0, 1200)}
+      {IS_DEV ? (
+        <pre className="mt-6 max-h-64 overflow-auto rounded-xl bg-black/60 p-4 text-left text-xs whitespace-pre-wrap text-amber-200/70">
+          {code.slice(0, 4000)}
         </pre>
-      )}
+      ) : null}
     </div>
   );
+}
+
+function CompiledMDXRenderer({
+  code,
+  components,
+}: {
+  code: string;
+  components: Record<string, any>;
+}) {
+  const MDXContent = useMDXComponent(code);
+  return <MDXContent components={components} />;
 }
 
 export default function SafeMDXRenderer({
   code,
-  components,
+  components = {},
   directive,
-  debug = false,
   disableBaseComponents = false,
+  debug = false,
 }: SafeMDXRendererProps) {
-  // Defensive check: If some compiled MDX tries to access 'process', 
-  // we provide a tiny polyfill on the window if it's missing during the render phase.
-  if (typeof window !== "undefined" && typeof (window as any).process === "undefined") {
-    (window as any).process = { env: { NODE_ENV: IS_DEV ? "development" : "production" } };
-  }
+  const safeCode = React.useMemo(() => safeString(code).trim(), [code]);
+  const [renderError, setRenderError] = React.useState<string | null>(null);
 
-  const safeCode = React.useMemo(() => {
-    return typeof code === "string" ? code.trim() : "";
-  }, [code]);
-
-  const hasCode = safeCode.length > 0;
-
-  const stableDirective = React.useMemo(() => directive ?? undefined, [directive]);
-
-  const merged = React.useMemo(() => {
-    const incoming = components ?? {};
+  const finalComponents = React.useMemo(() => {
     const base = disableBaseComponents
-      ? { ...incoming }
-      : getSafeComponents(incoming as Record<string, any>);
+      ? { ...components }
+      : getSafeComponents(components);
 
-    const nextMap: Record<string, any> = { ...base };
-
-    if (nextMap.DocumentFooter) {
-      const OriginalFooter = nextMap.DocumentFooter;
-      nextMap.DocumentFooter = function DocumentFooterWithDirective(props: any) {
-        return <OriginalFooter {...props} directive={stableDirective} />;
-      };
+    if (directive && base.DocumentFooter) {
+      const Original = base.DocumentFooter;
+      const Wrapped = (props: any) => (
+        <Original {...props} directive={directive} />
+      );
+      Wrapped.displayName = "DocumentFooterWithDirective";
+      base.DocumentFooter = Wrapped;
     }
 
-    return nextMap;
-  }, [components, disableBaseComponents, stableDirective]);
+    return base;
+  }, [components, disableBaseComponents, directive]);
 
-  const mdxCodeForHook = hasCode ? safeCode : STABLE_EMPTY_MDX_CODE;
-  
-  // The error is thrown here because useMDXComponent executes the code string
-  const MDXContent = useMDXComponent(mdxCodeForHook);
-
-  if (!hasCode) {
+  if (!safeCode) {
     return <EmptyState />;
   }
 
-  if (typeof MDXContent !== "function") {
-    return <InvalidComponentState debug={debug} code={safeCode} />;
+  const isSuspicious = looksLikeLeakedModuleCode(safeCode);
+  const isCompiled = !isSuspicious && looksLikeCompiledMdx(safeCode);
+  const isRawMdx = !isSuspicious && !isCompiled && looksLikeRawMdx(safeCode);
+  const isRaw = !isSuspicious && !isCompiled && !isRawMdx && looksLikeRawMarkdown(safeCode);
+
+  if (debug && IS_DEV) {
+    console.log("[SafeMDXRenderer]", {
+      codeLength: safeCode.length,
+      isCompiled,
+      isRawMdx,
+      isRaw,
+      isSuspicious,
+      preview: safeCode.slice(0, 250),
+    });
+  }
+
+  if (isSuspicious) {
+    return <SuspiciousCodeState code={safeCode} />;
+  }
+
+  if (isRawMdx) {
+    const normalized = transformRawMdxToMarkdownLike(safeCode);
+    return <RawMarkdownFallback content={normalized} />;
+  }
+
+  if (isRaw) {
+    return <RawMarkdownFallback content={safeCode} />;
   }
 
   return (
-    <MDXErrorBoundary>
-      <div className="aol-mdx-content text-white">
-        <MDXContent components={merged} />
-      </div>
-
-      {(debug || IS_DEV) && (
-        <details className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
-          <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.25em] text-amber-300/85">
-            MDX debug
-          </summary>
-          <div className="mt-4 space-y-3 text-xs text-white/70">
-            <div>hasCode: {String(hasCode)}</div>
-            <div>code length: {safeCode.length}</div>
-            <div>disableBaseComponents: {String(disableBaseComponents)}</div>
-            <div>component keys: {Object.keys(merged).join(", ") || "(none)"}</div>
-            <pre className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] text-white/60">
-              {safeCode.slice(0, 1200)}
-            </pre>
+    <MDXErrorBoundary
+      onError={(message) => setRenderError(message)}
+      fallback={
+        renderError ? (
+          <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+            <div className="font-mono text-xs uppercase tracking-widest text-red-400">
+              MDX Rendering Failed
+            </div>
+            <p className="mt-3 text-sm text-white/70">
+              The content could not be rendered properly.
+            </p>
+            {IS_DEV && (
+              <pre className="mt-6 max-h-64 overflow-auto rounded-xl bg-black/60 p-4 text-left text-xs whitespace-pre-wrap text-red-400/70">
+                {safeCode.slice(0, 4000)}
+              </pre>
+            )}
           </div>
-        </details>
-      )}
+        ) : undefined
+      }
+    >
+      <div className="aol-mdx-content prose prose-invert max-w-none">
+        <CompiledMDXRenderer code={safeCode} components={finalComponents} />
+      </div>
     </MDXErrorBoundary>
   );
 }

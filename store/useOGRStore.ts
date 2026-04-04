@@ -1,202 +1,495 @@
-/* store/useOGRStore.ts — OGR GLOBAL STATE (Consolidated) */
-import { create } from 'zustand';
-import { devtools, subscribeWithSelector, persist } from 'zustand/middleware';
+/* store/useOGRStore.ts — OGR GLOBAL STATE (ULTRA-HARDENED, MANIFEST-ALIGNED) */
+import { create } from "zustand";
+import { devtools, persist, subscribeWithSelector } from "zustand/middleware";
+import {
+  calculateDerived,
+  sanitizeResonance,
+  sanitizeFriction,
+  sanitizeRevenue,
+  roundTo,
+  type OGRMetrics,
+  type OGRComputed,
+} from "@/lib/ogr/manifest-engine";
 
-const CONSTANTS = {
-  FRICTION_CEILING: 99.99,
-  RESONANCE_FLOOR: 0.00,
-  RESONANCE_CEILING: 100.00,
-  SOVEREIGN_THRESHOLD: 90.00, 
-  AUTH_KEY: "OGR-2026-ALPHA",
-  PRECISION: 8
-} as const;
+/* -------------------------------------------------------------------------- */
+/* TYPES                                                                      */
+/* -------------------------------------------------------------------------- */
 
-interface OGRMetrics {
+type BaselineSnapshot = OGRMetrics & OGRComputed;
+
+type DeltaSnapshot = {
   resonanceScore: number;
   marketFriction: number;
   targetRevenue: number;
-}
-
-interface OGRComputed {
   integrationTax: number;
   velocityMultiplier: number;
   resonanceAlpha: number;
   sovereignCertainty: number;
-  isAuthorizedToExecute: boolean;
-}
+};
 
-interface OGRState extends OGRMetrics {
-  // Selection State
+type SovereignAuthResponse = {
+  ok?: boolean;
+  error?: string;
+};
+
+type SovereignReportResponse = {
+  status?: string;
+  reportId?: string;
+  error?: string;
+};
+
+type PersistedOGRState = {
+  resonanceScore: number;
+  marketFriction: number;
+  targetRevenue: number;
   selectedBriefIds: string[];
   isRegistryOpen: boolean;
-  
-  // Authentication
+  baseline: BaselineSnapshot | null;
   isAuthenticated: boolean;
-  
-  // Computed Values
+};
+
+interface OGRState extends OGRMetrics {
+  selectedBriefIds: string[];
+  isRegistryOpen: boolean;
+  isAuthenticated: boolean;
+
   computed: OGRComputed;
-  
-  // Baseline Tracking
-  baseline: (OGRMetrics & OGRComputed) | null;
-  
-  // Selection Actions
+  baseline: BaselineSnapshot | null;
+
+  /* Selection */
   toggleBrief: (id: string) => void;
   clearSelection: () => void;
   setRegistryOpen: (open: boolean) => void;
-  
-  // Metrics Actions
+
+  /* Metrics */
   setResonance: (val: number) => void;
   setFriction: (val: number) => void;
   setRevenue: (val: number) => void;
-  
-  // Auth Actions
-  authenticate: (key: string) => boolean;
-  logout: () => void;
-  
-  // Report Actions
-  commitReport: () => Promise<{ success: boolean; id?: string }>;
-  
-  // Baseline Actions
+  setMetrics: (metrics: Partial<OGRMetrics>) => void;
+  resetMetrics: () => void;
+
+  /* Auth */
+  authenticate: (key: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  setAuthenticated: (value: boolean) => void;
+
+  /* Reporting */
+  commitReport: () => Promise<{ success: boolean; id?: string; error?: string }>;
+
+  /* Baseline */
   setBaseline: () => void;
   clearBaseline: () => void;
-  getDeltaFromBaseline: () => Partial<OGRMetrics & OGRComputed> | null;
+  getDeltaFromBaseline: () => DeltaSnapshot | null;
 }
 
-const calculateDerived = (m: OGRMetrics): OGRComputed => {
-  const R = Math.max(CONSTANTS.RESONANCE_FLOOR, Math.min(CONSTANTS.RESONANCE_CEILING, m.resonanceScore));
-  const F = Math.max(0, Math.min(CONSTANTS.FRICTION_CEILING, m.marketFriction));
-  const Rev = Math.max(0, m.targetRevenue);
+/* -------------------------------------------------------------------------- */
+/* CONSTANTS                                                                  */
+/* -------------------------------------------------------------------------- */
 
-  const itax = ((100 - R) * 1.25) + (F * 0.05);
-  const vMult = R / (Math.max(0.01, 100 - F));
-  const alpha = Rev * ((F / 100) - ((100 - R) / 100));
-  const certainty = (R * 0.7) + ((100 - F) * 0.3);
+const STORE_NAME = "ogr-sovereign-storage";
+const STORE_VERSION = 1;
 
-  return {
-    integrationTax: Number(itax.toFixed(2)),
-    velocityMultiplier: Number(vMult.toFixed(2)),
-    resonanceAlpha: Number(alpha.toFixed(2)),
-    sovereignCertainty: Number(certainty.toFixed(4)),
-    isAuthorizedToExecute: certainty >= CONSTANTS.SOVEREIGN_THRESHOLD
-  };
+const INITIAL_METRICS: OGRMetrics = {
+  resonanceScore: 92.5,
+  marketFriction: 65.0,
+  targetRevenue: 100,
 };
+
+const INITIAL_COMPUTED: OGRComputed = calculateDerived(INITIAL_METRICS);
+
+/* -------------------------------------------------------------------------- */
+/* PURE HELPERS                                                               */
+/* -------------------------------------------------------------------------- */
+
+function toSafeString(value: unknown): string {
+  return typeof value === "string" ? value : value == null ? "" : String(value);
+}
+
+function uniqueNonEmptyStrings(values: unknown[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  for (const value of values) {
+    const next = toSafeString(value).trim();
+    if (!next || seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+
+  return out;
+}
+
+function buildMetrics(
+  current: OGRMetrics,
+  patch: Partial<OGRMetrics>
+): OGRMetrics {
+  return {
+    resonanceScore:
+      patch.resonanceScore !== undefined
+        ? sanitizeResonance(patch.resonanceScore)
+        : current.resonanceScore,
+    marketFriction:
+      patch.marketFriction !== undefined
+        ? sanitizeFriction(patch.marketFriction)
+        : current.marketFriction,
+    targetRevenue:
+      patch.targetRevenue !== undefined
+        ? sanitizeRevenue(patch.targetRevenue)
+        : current.targetRevenue,
+  };
+}
+
+function buildComputed(metrics: OGRMetrics): OGRComputed {
+  return calculateDerived(metrics);
+}
+
+function toDelta(current: OGRState, baseline: BaselineSnapshot): DeltaSnapshot {
+  return {
+    resonanceScore: roundTo(
+      current.resonanceScore - baseline.resonanceScore,
+      4
+    ),
+    marketFriction: roundTo(
+      current.marketFriction - baseline.marketFriction,
+      4
+    ),
+    targetRevenue: roundTo(
+      current.targetRevenue - baseline.targetRevenue,
+      4
+    ),
+    integrationTax: roundTo(
+      current.computed.integrationTax - baseline.integrationTax,
+      4
+    ),
+    velocityMultiplier: roundTo(
+      current.computed.velocityMultiplier - baseline.velocityMultiplier,
+      4
+    ),
+    resonanceAlpha: roundTo(
+      current.computed.resonanceAlpha - baseline.resonanceAlpha,
+      4
+    ),
+    sovereignCertainty: roundTo(
+      current.computed.sovereignCertainty - baseline.sovereignCertainty,
+      4
+    ),
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* STORE                                                                      */
+/* -------------------------------------------------------------------------- */
 
 export const useOGRStore = create<OGRState>()(
   devtools(
     persist(
       subscribeWithSelector((set, get) => ({
-        // Initial State
-        resonanceScore: 92.5,
-        marketFriction: 65.0,
-        targetRevenue: 100,
+        /* ------------------------------------------------------------------ */
+        /* INITIAL STATE                                                      */
+        /* ------------------------------------------------------------------ */
+        resonanceScore: INITIAL_METRICS.resonanceScore,
+        marketFriction: INITIAL_METRICS.marketFriction,
+        targetRevenue: INITIAL_METRICS.targetRevenue,
+
         selectedBriefIds: [],
         isRegistryOpen: false,
         isAuthenticated: false,
+
+        computed: INITIAL_COMPUTED,
         baseline: null,
-        computed: calculateDerived({ resonanceScore: 92.5, marketFriction: 65.0, targetRevenue: 100 }),
 
-        // Selection Actions
-        toggleBrief: (id) => set((state) => ({
-          selectedBriefIds: state.selectedBriefIds.includes(id)
-            ? state.selectedBriefIds.filter(bid => bid !== id)
-            : [...state.selectedBriefIds, id]
-        }), false, "toggleBrief"),
+        /* ------------------------------------------------------------------ */
+        /* SELECTION ACTIONS                                                  */
+        /* ------------------------------------------------------------------ */
+        toggleBrief: (id) =>
+          set(
+            (state) => ({
+              selectedBriefIds: state.selectedBriefIds.includes(id)
+                ? state.selectedBriefIds.filter((bid) => bid !== id)
+                : [...state.selectedBriefIds, id],
+            }),
+            false,
+            "ogr/toggleBrief"
+          ),
 
-        clearSelection: () => set({ selectedBriefIds: [] }, false, "clearSelection"),
+        clearSelection: () =>
+          set({ selectedBriefIds: [] }, false, "ogr/clearSelection"),
 
-        setRegistryOpen: (open) => set({ isRegistryOpen: open }, false, "setRegistryOpen"),
+        setRegistryOpen: (open) =>
+          set(
+            { isRegistryOpen: Boolean(open) },
+            false,
+            "ogr/setRegistryOpen"
+          ),
 
-        // Metrics Actions
-        setResonance: (val) => set((state) => {
-          const resonanceScore = Number(val.toFixed(CONSTANTS.PRECISION));
-          const nextMetrics = { ...state, resonanceScore };
-          return { resonanceScore, computed: calculateDerived(nextMetrics) };
-        }, false, "setResonance"),
+        /* ------------------------------------------------------------------ */
+        /* METRIC ACTIONS                                                     */
+        /* ------------------------------------------------------------------ */
+        setResonance: (val) =>
+          set(
+            (state) => {
+              const metrics = buildMetrics(
+                {
+                  resonanceScore: state.resonanceScore,
+                  marketFriction: state.marketFriction,
+                  targetRevenue: state.targetRevenue,
+                },
+                { resonanceScore: val }
+              );
 
-        setFriction: (val) => set((state) => {
-          const marketFriction = Number(val.toFixed(CONSTANTS.PRECISION));
-          const nextMetrics = { ...state, marketFriction };
-          return { marketFriction, computed: calculateDerived(nextMetrics) };
-        }, false, "setFriction"),
+              return {
+                resonanceScore: metrics.resonanceScore,
+                computed: buildComputed(metrics),
+              };
+            },
+            false,
+            "ogr/setResonance"
+          ),
 
-        setRevenue: (val) => set((state) => {
-          const targetRevenue = Number(val.toFixed(CONSTANTS.PRECISION));
-          const nextMetrics = { ...state, targetRevenue };
-          return { targetRevenue, computed: calculateDerived(nextMetrics) };
-        }, false, "setRevenue"),
+        setFriction: (val) =>
+          set(
+            (state) => {
+              const metrics = buildMetrics(
+                {
+                  resonanceScore: state.resonanceScore,
+                  marketFriction: state.marketFriction,
+                  targetRevenue: state.targetRevenue,
+                },
+                { marketFriction: val }
+              );
 
-        // Auth Actions
-        authenticate: (key) => {
-          const isValid = key === CONSTANTS.AUTH_KEY;
-          set({ isAuthenticated: isValid }, false, "authenticate");
-          return isValid;
+              return {
+                marketFriction: metrics.marketFriction,
+                computed: buildComputed(metrics),
+              };
+            },
+            false,
+            "ogr/setFriction"
+          ),
+
+        setRevenue: (val) =>
+          set(
+            (state) => {
+              const metrics = buildMetrics(
+                {
+                  resonanceScore: state.resonanceScore,
+                  marketFriction: state.marketFriction,
+                  targetRevenue: state.targetRevenue,
+                },
+                { targetRevenue: val }
+              );
+
+              return {
+                targetRevenue: metrics.targetRevenue,
+                computed: buildComputed(metrics),
+              };
+            },
+            false,
+            "ogr/setRevenue"
+          ),
+
+        setMetrics: (patch) =>
+          set(
+            (state) => {
+              const metrics = buildMetrics(
+                {
+                  resonanceScore: state.resonanceScore,
+                  marketFriction: state.marketFriction,
+                  targetRevenue: state.targetRevenue,
+                },
+                patch
+              );
+
+              return {
+                ...metrics,
+                computed: buildComputed(metrics),
+              };
+            },
+            false,
+            "ogr/setMetrics"
+          ),
+
+        resetMetrics: () =>
+          set(
+            {
+              resonanceScore: INITIAL_METRICS.resonanceScore,
+              marketFriction: INITIAL_METRICS.marketFriction,
+              targetRevenue: INITIAL_METRICS.targetRevenue,
+              computed: INITIAL_COMPUTED,
+            },
+            false,
+            "ogr/resetMetrics"
+          ),
+
+        /* ------------------------------------------------------------------ */
+        /* AUTH ACTIONS                                                       */
+        /* ------------------------------------------------------------------ */
+        setAuthenticated: (value) =>
+          set(
+            { isAuthenticated: Boolean(value) },
+            false,
+            "ogr/setAuthenticated"
+          ),
+
+        authenticate: async (key) => {
+          const trimmedKey = toSafeString(key).trim();
+
+          if (!trimmedKey) {
+            set({ isAuthenticated: false }, false, "ogr/authenticateEmpty");
+            return false;
+          }
+
+          try {
+            const response = await fetch("/api/sovereign/auth", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+              body: JSON.stringify({ key: trimmedKey }),
+            });
+
+            if (!response.ok) {
+              set({ isAuthenticated: false }, false, "ogr/authenticateFail");
+              return false;
+            }
+
+            const data = (await response.json()) as SovereignAuthResponse;
+            const isValid = Boolean(data?.ok);
+
+            set(
+              { isAuthenticated: isValid },
+              false,
+              isValid ? "ogr/authenticateSuccess" : "ogr/authenticateReject"
+            );
+
+            return isValid;
+          } catch {
+            set({ isAuthenticated: false }, false, "ogr/authenticateError");
+            return false;
+          }
         },
 
-        logout: () => set({ isAuthenticated: false }, false, "logout"),
+        logout: async () => {
+          try {
+            await fetch("/api/sovereign/logout", {
+              method: "POST",
+              credentials: "same-origin",
+            });
+          } catch {
+            // Intentionally fail-open on network layer.
+          }
 
-        // Report Actions
+          set({ isAuthenticated: false }, false, "ogr/logout");
+        },
+
+        /* ------------------------------------------------------------------ */
+        /* REPORTING                                                          */
+        /* ------------------------------------------------------------------ */
         commitReport: async () => {
           const state = get();
+
           try {
-            const response = await fetch('/api/sovereign/report', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+            const response = await fetch("/api/sovereign/report", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
               body: JSON.stringify({
                 metrics: {
                   resonanceScore: state.resonanceScore,
                   marketFriction: state.marketFriction,
-                  targetRevenue: state.targetRevenue
+                  targetRevenue: state.targetRevenue,
                 },
                 selectedBriefs: state.selectedBriefIds,
-                authKey: CONSTANTS.AUTH_KEY,
-                timestamp: new Date().toISOString()
-              })
+                timestamp: new Date().toISOString(),
+              }),
             });
-            const data = await response.json();
-            return { success: data.status === "SUCCESS", id: data.reportId };
-          } catch (err) {
-            return { success: false };
+
+            if (!response.ok) {
+              return {
+                success: false,
+                error: `REPORT_HTTP_${response.status}`,
+              };
+            }
+
+            const data = (await response.json()) as SovereignReportResponse;
+
+            return {
+              success: data?.status === "SUCCESS",
+              id:
+                typeof data?.reportId === "string" ? data.reportId : undefined,
+              error:
+                data?.status === "SUCCESS"
+                  ? undefined
+                  : toSafeString(data?.error) || "REPORT_REJECTED",
+            };
+          } catch {
+            return { success: false, error: "REPORT_NETWORK_FAILURE" };
           }
         },
 
-        // Baseline Actions
-        setBaseline: () => set((state) => ({
-          baseline: {
-            resonanceScore: state.resonanceScore,
-            marketFriction: state.marketFriction,
-            targetRevenue: state.targetRevenue,
-            ...state.computed
-          }
-        }), false, "setBaseline"),
+        /* ------------------------------------------------------------------ */
+        /* BASELINE                                                           */
+        /* ------------------------------------------------------------------ */
+        setBaseline: () =>
+          set(
+            (state) => ({
+              baseline: {
+                resonanceScore: state.resonanceScore,
+                marketFriction: state.marketFriction,
+                targetRevenue: state.targetRevenue,
+                ...state.computed,
+              },
+            }),
+            false,
+            "ogr/setBaseline"
+          ),
 
-        clearBaseline: () => set({ baseline: null }, false, "clearBaseline"),
+        clearBaseline: () =>
+          set({ baseline: null }, false, "ogr/clearBaseline"),
 
         getDeltaFromBaseline: () => {
           const state = get();
           if (!state.baseline) return null;
-          
-          return {
-            resonanceScore: state.resonanceScore - state.baseline.resonanceScore,
-            marketFriction: state.marketFriction - state.baseline.marketFriction,
-            targetRevenue: state.targetRevenue - state.baseline.targetRevenue,
-            integrationTax: state.computed.integrationTax - state.baseline.integrationTax,
-            velocityMultiplier: state.computed.velocityMultiplier - state.baseline.velocityMultiplier,
-            resonanceAlpha: state.computed.resonanceAlpha - state.baseline.resonanceAlpha,
-            sovereignCertainty: state.computed.sovereignCertainty - state.baseline.sovereignCertainty
-          };
-        }
+          return toDelta(state, state.baseline);
+        },
       })),
-      { 
-        name: "ogr-sovereign-storage",
-        partialize: (state) => ({
+      {
+        name: STORE_NAME,
+        version: STORE_VERSION,
+
+        partialize: (state): PersistedOGRState => ({
           resonanceScore: state.resonanceScore,
           marketFriction: state.marketFriction,
           targetRevenue: state.targetRevenue,
-          selectedBriefIds: state.selectedBriefIds,
+          selectedBriefIds: uniqueNonEmptyStrings(state.selectedBriefIds),
           isRegistryOpen: state.isRegistryOpen,
           baseline: state.baseline,
-          isAuthenticated: state.isAuthenticated
-        })
+          isAuthenticated: state.isAuthenticated,
+        }),
+
+        migrate: (persistedState, version) => {
+          const raw = (persistedState ?? {}) as Partial<PersistedOGRState>;
+
+          if (version < STORE_VERSION) {
+            const metrics: OGRMetrics = buildMetrics(INITIAL_METRICS, {
+              resonanceScore: raw.resonanceScore,
+              marketFriction: raw.marketFriction,
+              targetRevenue: raw.targetRevenue,
+            });
+
+            return {
+              ...raw,
+              resonanceScore: metrics.resonanceScore,
+              marketFriction: metrics.marketFriction,
+              targetRevenue: metrics.targetRevenue,
+              selectedBriefIds: uniqueNonEmptyStrings(raw.selectedBriefIds ?? []),
+              isRegistryOpen: Boolean(raw.isRegistryOpen),
+              isAuthenticated: Boolean(raw.isAuthenticated),
+              baseline: raw.baseline ?? null,
+            };
+          }
+
+          return raw as PersistedOGRState;
+        },
       }
     ),
     { name: "OGR_Intelligence_Engine" }

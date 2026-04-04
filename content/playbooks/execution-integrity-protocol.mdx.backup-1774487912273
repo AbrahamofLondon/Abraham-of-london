@@ -1,0 +1,67 @@
+---
+type: Playbook
+title: Execution Integrity Protocol
+slug: execution-integrity-protocol
+tier: premium
+description: Restore execution discipline without rewriting strategy.
+coverImage: /assets/images/playbooks/execution-integrity-protocol.jpg
+playbookType: execution
+framework: Execution Integrity
+phases:
+  - Integrity Audit
+  - Constraint Identification
+  - Cadence Restoration
+  - Reinforcement Loop
+signals:
+  - Missed deadlines
+  - Quality degradation
+  - Communication breakdown
+  - Decision avoidance
+outputs:
+  - Integrity score
+  - Constraint map
+  - Execution cadence
+  - Accountability matrix
+estimatedTime: "75 minutes"
+difficulty: advanced
+prerequisites:
+  - Project execution data
+  - Team availability
+  - Leadership alignment
+tags:
+  - execution
+  - integrity
+  - discipline
+  - operational
+---
+
+## Core Insight
+
+Most failures are execution failures, not strategy failures.
+
+---
+
+## Protocol
+
+### Layer 1 — Clarity  
+Are instructions unambiguous?
+
+### Layer 2 — Alignment  
+Do teams interpret intent the same way?
+
+### Layer 3 — Friction  
+Where is execution slowing down?
+
+---
+
+## Output
+
+- Execution breakdown map  
+- Friction index  
+- System capability rating  
+
+---
+
+## Strategic Principle
+
+A weak system cannot carry a strong strategy.

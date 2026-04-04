@@ -10,6 +10,10 @@ interface CampaignActionsProps {
   disabled?: boolean;
 }
 
+/**
+ * CAMPAIGN ACTIONS PROTOCOL
+ * Facilitates node stimulation (Nudges) and final data aggregation (Snapshots).
+ */
 export function CampaignActions({ 
   campaignId, 
   variant = 'header', 
@@ -17,14 +21,15 @@ export function CampaignActions({
 }: CampaignActionsProps) {
   const [loading, setLoading] = useState<'nudge' | 'report' | null>(null);
 
+  /**
+   * TRIGGER NUDGE: Dispatches targeted communications to nodes with status 'invited' or 'opened'.
+   */
   const handleNudge = async () => {
     setLoading('nudge');
     try {
-      // Logic: Targeted push for participants who have not yet submitted telemetry
       const res = await fetch(`/api/campaigns/${campaignId}/nudge`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}) 
       });
       
       const data = await res.json();
@@ -41,6 +46,9 @@ export function CampaignActions({
     }
   };
 
+  /**
+   * GENERATE SNAPSHOT: Synthesizes resonance data into a high-fidelity intelligence brief.
+   */
   const handleGenerateReport = async () => {
     if (disabled) {
       toast.error("Discretionary Guard: Anonymity threshold not yet reached.");
@@ -49,13 +57,13 @@ export function CampaignActions({
     
     setLoading('report');
     try {
-      // Placeholder for your high-fidelity PDF/Analytics engine
       const res = await fetch(`/api/campaigns/${campaignId}/report`);
       const data = await res.json();
       
       if (res.ok && data.ok) {
         toast.success("Executive Snapshot ready for review.");
-        // Implement routing/download logic here: window.location.href = data.url;
+        // Logic: Redirect to generated PDF or view
+        if (data.url) window.open(data.url, '_blank');
       } else {
         toast.error(data.error || "Failed to generate snapshot.");
       }
@@ -66,25 +74,25 @@ export function CampaignActions({
     }
   };
 
-  // HEADER VARIANT: Primary Action for Audit Management
+  // HEADER VARIANT: Deployed in the top registry navigation
   if (variant === 'header') {
     return (
       <button 
         onClick={handleNudge}
         disabled={!!loading}
-        className="px-6 py-2.5 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#8A6A2F] disabled:opacity-50 transition-all flex items-center gap-2 border border-black shadow-sm active:scale-95"
+        className="px-6 py-2.5 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#8A6A2F] disabled:opacity-50 transition-all flex items-center gap-2 border border-black shadow-sm active:scale-95 group"
       >
         {loading === 'nudge' ? (
           <Loader2 className="w-3 h-3 animate-spin" />
         ) : (
-          <Send className="w-3 h-3" />
+          <Send className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
         )}
         Batch Nudge (Incomplete)
       </button>
     );
   }
 
-  // SIDEBAR VARIANT: Integrated into the Live Resonance Card
+  // SIDEBAR VARIANT: Deployed within the Live Resonance (Black) Card
   return (
     <button 
       onClick={handleGenerateReport}
@@ -99,7 +107,7 @@ export function CampaignActions({
       {loading === 'report' ? (
         <Loader2 className="w-3 h-3 animate-spin" />
       ) : disabled ? (
-        <Lock className="w-3 h-3" />
+        <Lock className="w-3 h-3 opacity-50" />
       ) : (
         <BarChart3 className="w-3 h-3" />
       )}

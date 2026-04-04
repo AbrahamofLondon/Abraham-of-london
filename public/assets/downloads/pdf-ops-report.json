@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-03-21T19:49:32.129Z",
+  "generatedAt": "2026-03-25T02:58:55.836Z",
   "totals": {
-    "allDocs": 602,
-    "queued": 183,
-    "restored": 182,
-    "failed": 1,
-    "skipped": 236,
-    "deduped": 183
+    "allDocs": 606,
+    "queued": 184,
+    "restored": 0,
+    "failed": 184,
+    "skipped": 238,
+    "deduped": 184
   },
   "skipped": [
     {
@@ -114,6 +114,12 @@
     {
       "id": "christianity-not-extremism",
       "slug": "christianity-not-extremism",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "eden-mandate-civilisations-rise-fall",
+      "slug": "eden-mandate-civilisations-rise-fall",
       "type": "Post",
       "reason": "forbidden-type"
     },
@@ -822,6 +828,12 @@
     {
       "id": "christianity-not-extremism",
       "slug": "christianity-not-extremism",
+      "type": "Post",
+      "reason": "forbidden-type"
+    },
+    {
+      "id": "eden-mandate-civilisations-rise-fall",
+      "slug": "eden-mandate-civilisations-rise-fall",
       "type": "Post",
       "reason": "forbidden-type"
     },
@@ -1428,21 +1440,1109 @@
   ],
   "failures": [
     {
+      "id": "CB-AOE-078",
+      "slug": "audit-of-ease",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "CB-ROL-076",
+      "slug": "canon-builders-rule-of-life",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/briefs/conviction-vs-coercion",
+      "slug": "conviction-vs-coercion",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "FR-001-ALPHA",
+      "slug": "frontier-resilience-001",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-004.mdx",
+      "slug": "fr-004",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-007.mdx",
+      "slug": "fr-007",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-010.mdx",
+      "slug": "fr-010",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-013.mdx",
+      "slug": "fr-013",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-016.mdx",
+      "slug": "fr-016",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-019.mdx",
+      "slug": "fr-019",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-022.mdx",
+      "slug": "fr-022",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-025.mdx",
+      "slug": "fr-025",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-028.mdx",
+      "slug": "fr-028",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-031.mdx",
+      "slug": "fr-031",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-034.mdx",
+      "slug": "fr-034",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-037.mdx",
+      "slug": "fr-037",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-040.mdx",
+      "slug": "fr-040",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-043.mdx",
+      "slug": "fr-043",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-046.mdx",
+      "slug": "fr-046",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-049.mdx",
+      "slug": "fr-049",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-052.mdx",
+      "slug": "fr-052",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-055.mdx",
+      "slug": "fr-055",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-058.mdx",
+      "slug": "fr-058",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-061.mdx",
+      "slug": "fr-061",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-064.mdx",
+      "slug": "fr-064",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-067.mdx",
+      "slug": "fr-067",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-070.mdx",
+      "slug": "fr-070",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/fr-073.mdx",
+      "slug": "fr-073",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/frontier-resilience-01.mdx",
+      "slug": "frontier-resilience-01",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "CB-GOV-DIAG-077",
+      "slug": "governance-diagnostic-toolkit",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-003.mdx",
+      "slug": "ia-003",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-006.mdx",
+      "slug": "ia-006",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-009.mdx",
+      "slug": "ia-009",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-012.mdx",
+      "slug": "ia-012",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-015.mdx",
+      "slug": "ia-015",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-018.mdx",
+      "slug": "ia-018",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-021.mdx",
+      "slug": "ia-021",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-024.mdx",
+      "slug": "ia-024",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-027.mdx",
+      "slug": "ia-027",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-030.mdx",
+      "slug": "ia-030",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-033.mdx",
+      "slug": "ia-033",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-036.mdx",
+      "slug": "ia-036",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-039.mdx",
+      "slug": "ia-039",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-042.mdx",
+      "slug": "ia-042",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-045.mdx",
+      "slug": "ia-045",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-048.mdx",
+      "slug": "ia-048",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-051.mdx",
+      "slug": "ia-051",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-054.mdx",
+      "slug": "ia-054",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-057.mdx",
+      "slug": "ia-057",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-060.mdx",
+      "slug": "ia-060",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-063.mdx",
+      "slug": "ia-063",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-066.mdx",
+      "slug": "ia-066",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-069.mdx",
+      "slug": "ia-069",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-072.mdx",
+      "slug": "ia-072",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/ia-075.mdx",
+      "slug": "ia-075",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "CB-INT-AUDIT-078",
+      "slug": "institutional-integrity-audit",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-002.mdx",
+      "slug": "si-002",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-005.mdx",
+      "slug": "si-005",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-008.mdx",
+      "slug": "si-008",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-011.mdx",
+      "slug": "si-011",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-014.mdx",
+      "slug": "si-014",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-017.mdx",
+      "slug": "si-017",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-020.mdx",
+      "slug": "si-020",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-023.mdx",
+      "slug": "si-023",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-026.mdx",
+      "slug": "si-026",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-029.mdx",
+      "slug": "si-029",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-032.mdx",
+      "slug": "si-032",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-035.mdx",
+      "slug": "si-035",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-038.mdx",
+      "slug": "si-038",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-041.mdx",
+      "slug": "si-041",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-044.mdx",
+      "slug": "si-044",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-047.mdx",
+      "slug": "si-047",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-050.mdx",
+      "slug": "si-050",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-053.mdx",
+      "slug": "si-053",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-056.mdx",
+      "slug": "si-056",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-059.mdx",
+      "slug": "si-059",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-062.mdx",
+      "slug": "si-062",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-065.mdx",
+      "slug": "si-065",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-068.mdx",
+      "slug": "si-068",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-071.mdx",
+      "slug": "si-071",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "briefs/si-074.mdx",
+      "slug": "si-074",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "CB-STRATEGY-EXTREMISM-SHIELD",
+      "slug": "extremism-shield",
+      "type": "Brief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-001-modern-household",
+      "slug": "brief-001-modern-household",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-002-economic-fortress",
+      "slug": "brief-002-economic-fortress",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-003-education-of-heirs",
+      "slug": "brief-003-education-of-heirs",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-004-parallel-estate",
+      "slug": "brief-004-parallel-estate",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-005-brotherhood-protocol",
+      "slug": "brief-005-brotherhood-protocol",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-006-sisterhood-and-hearth",
+      "slug": "brief-006-sisterhood-and-hearth",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-007-covenantal-oath",
+      "slug": "brief-007-covenantal-oath",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-008-ledger-of-legacy",
+      "slug": "brief-008-ledger-of-legacy",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-009-sovereignty-of-time",
+      "slug": "brief-009-sovereignty-of-time",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-010-geometry-of-inner-circle",
+      "slug": "brief-010-geometry-of-inner-circle",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-011-geography-of-estate",
+      "slug": "brief-011-geography-of-estate",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/briefs/brief-012-aesthetics-of-order",
+      "slug": "brief-012-aesthetics-of-order",
+      "type": "VaultBrief",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-001-FOUNDATION",
+      "slug": "strategic-autonomy-001",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-002-STRATA",
+      "slug": "strategic-autonomy-002",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-003-DECISION",
+      "slug": "strategic-autonomy-003",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-004-INTELLECT",
+      "slug": "strategic-autonomy-004",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-005-LEGACY",
+      "slug": "strategic-autonomy-005",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-006-SEQUENCE",
+      "slug": "strategic-autonomy-006",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-007-SYNTHESIS",
+      "slug": "strategic-autonomy-007",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-008-ECONOMICS",
+      "slug": "strategic-autonomy-008",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-009-RELATIONSHIPS",
+      "slug": "strategic-autonomy-009",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-010-COMMUNICATION",
+      "slug": "strategic-autonomy-010",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-011-RHYTHM",
+      "slug": "strategic-autonomy-011",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "SI-012-COMPLETE",
+      "slug": "strategic-autonomy-012",
+      "type": "Intelligence",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/abraham-vault-pack",
+      "slug": "abraham-vault-pack",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/board-decision-log-template",
+      "slug": "board-decision-log-template",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/board-investor-onepager",
+      "slug": "board-investor-onepager",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/brotherhood-covenant",
+      "slug": "brotherhood-covenant",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/canon-volume-iv-diagnostic-toolkit",
+      "slug": "canon-volume-iv-diagnostic-toolkit",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/canon-volume-v-governance-diagnostic-toolkit",
+      "slug": "canon-volume-v-governance-diagnostic-toolkit",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/communication-script-bpf",
+      "slug": "communication-script-bpf",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/decision-log-template",
+      "slug": "decision-log-template",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/decision-matrix-scorecard",
+      "slug": "decision-matrix-scorecard",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/legacy-architecture-canvas",
+      "slug": "legacy-architecture-canvas",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/entrepreneur-operating-pack",
+      "slug": "entrepreneur-operating-pack",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/entrepreneur-survival-checklist",
+      "slug": "entrepreneur-survival-checklist",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/family-altar-liturgy",
+      "slug": "family-altar-liturgy",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/leaders-cue-card-two-up",
+      "slug": "leaders-cue-card-two-up",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/leadership-playbook",
+      "slug": "leadership-playbook",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/legacy-canvas",
+      "slug": "legacy-canvas",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/life-alignment-assessment",
+      "slug": "life-alignment-assessment",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/mentorship-starter-kit",
+      "slug": "mentorship-starter-kit",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/operating-cadence-pack",
+      "slug": "operating-cadence-pack",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/principles-for-my-son-cue-card",
+      "slug": "principles-for-my-son-cue-card",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/principles-for-my-son",
+      "slug": "principles-for-my-son",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/principles-of-surrender",
+      "slug": "principles-of-surrender",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/purpose-pyramid-worksheet",
+      "slug": "purpose-pyramid-worksheet",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/scripture-track-john14",
+      "slug": "scripture-track-john14",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/standards-brief",
+      "slug": "standards-brief",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "downloads/the-builders-catechism-founders-illuminated-edition.mdx",
+      "slug": "the-builders-catechism-founders-illuminated-edition",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/the-builders-catechism-founders-illuminated-edition-xl",
+      "slug": "the-builders-catechism-founders-illuminated-edition-xl",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/ultimate-purpose-of-man-editorial",
+      "slug": "ultimate-purpose-of-man-editorial",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/downloads/weekly-operating-rhythm",
+      "slug": "weekly-operating-rhythm",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "LEG-FC-001",
+      "slug": "family-court-practical-pack",
+      "type": "Download",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "founders-salon",
+      "slug": "founders-salon",
+      "type": "Event",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "leadership-workshop",
+      "slug": "leadership-workshop",
+      "type": "Event",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/prints/entrepreneur-operating-pack",
+      "slug": "entrepreneur-operating-pack",
+      "type": "Print",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/prints/fatherhood-standards-card",
+      "slug": "fatherhood-standards-card",
+      "type": "Print",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/prints/leadership-playbook",
+      "slug": "leadership-playbook",
+      "type": "Print",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/prints/mentorship-starter-kit",
+      "slug": "mentorship-starter-kit",
+      "type": "Print",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/prints/standards-brief",
+      "slug": "standards-brief",
+      "type": "Print",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/prints/weekly-operating-rhythm",
+      "slug": "weekly-operating-rhythm",
+      "type": "Print",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/clarity",
+      "slug": "lexicon/clarity",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/integrity",
+      "slug": "lexicon/integrity",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/legacy",
+      "slug": "lexicon/legacy",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/sovereignty",
+      "slug": "lexicon/sovereignty",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/strategic-autonomy",
+      "slug": "lexicon/strategic-autonomy",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/strategy",
+      "slug": "lexicon/strategy",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/surrender",
+      "slug": "lexicon/surrender",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "resources/brotherhood-leader-guide.mdx",
+      "slug": "brotherhood-leader-guide",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "BHD-SK-001",
+      "slug": "brotherhood-starter-kit",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/canon-campaign",
+      "slug": "canon-campaign",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/canon-council-table-agenda",
+      "slug": "canon-council-table-agenda",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
       "id": "FAM-TPL-002",
       "slug": "canon-household-charter-template",
       "type": "Resource",
-      "reason": "unsupported number: -2.203643948769682e+22"
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/canon-household-charter",
+      "slug": "canon-household-charter",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/canon-reading-plan-year-one",
+      "slug": "canon-reading-plan-year-one",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/destiny-mapping-worksheet",
+      "slug": "destiny-mapping-worksheet",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "IA-FIF-001",
+      "slug": "fatherhood-impact-framework",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/getting-started",
+      "slug": "getting-started",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "IA-IHS-001",
+      "slug": "institutional-health-scorecard",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "IA-LSB-001",
+      "slug": "leadership-standards-blueprint",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "IA-MLL-001",
+      "slug": "multi-generational-legacy-ledger",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/purpose-alignment-checklist.pdf",
+      "slug": "purpose-alignment-checklist-pdf",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "resources/strategy-room-intake",
+      "slug": "strategy-room-intake",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/vault-index",
+      "slug": "vault-index",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/resources/vault",
+      "slug": "vault",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "resources/strategic-frameworks",
+      "slug": "strategic-frameworks",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "resources/strategic-frameworks/v4",
+      "slug": "strategic-frameworks/v4",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "surrender-framework/surrender-operational-framework",
+      "slug": "surrender-framework/surrender-operational-framework",
+      "type": "Resource",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "strategy/institutional-governance.mdx",
+      "slug": "institutional-governance",
+      "type": "Strategy",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/strategy/sample-strategy",
+      "slug": "sample-strategy",
+      "type": "Strategy",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/brotherhood",
+      "slug": "brotherhood",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/covenant",
+      "slug": "covenant",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/family",
+      "slug": "family",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "father",
+      "slug": "father",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/governance",
+      "slug": "governance",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/identity",
+      "slug": "identity",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/leadership",
+      "slug": "leadership",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/purpose",
+      "slug": "purpose",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/responsibility",
+      "slug": "responsibility",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/lexicon/sisterhood",
+      "slug": "sisterhood",
+      "type": "Lexicon",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
+    },
+    {
+      "id": "/vault/indices/rise-decay-index",
+      "slug": "indices/rise-decay-index",
+      "type": "Vault",
+      "reason": "[WATERMARK] Missing/weak SYSTEM_INTEGRITY_SALT. Set a strong secret (>=16 chars)."
     }
   ],
-  "restoredByType": {
-    "Brief": 94,
-    "Intelligence": 12,
-    "Download": 29,
-    "Event": 2,
-    "Print": 6,
-    "Lexicon": 17,
-    "Resource": 19,
-    "Strategy": 2,
-    "Vault": 1
-  }
+  "restoredByType": {}
 }

@@ -1,4 +1,4 @@
-/* proxy.ts — INSTITUTIONAL PERIMETER V4.0 (Pages Router / Edge-safe) */
+// proxy.ts — INSTITUTIONAL PERIMETER V5.0 (Constitutional Gateway with Session Tracking)
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -6,13 +6,126 @@ import { getToken } from "next-auth/jwt";
 
 import { ROLE_HIERARCHY } from "@/types/auth";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { validateAuthority, validateThreshold, type ConstitutionalAuthority } from "@/lib/constitution/constitutional-authority";
+import { sessionTracker } from "@/lib/analytics/session-tracker";
+import { coerceCanonicalSectionsEnvelope, type CanonicalSectionsEnvelope } from "@/lib/decision/canonical-sections";
 
-const CANONICAL_HOST = "www.abrahamoflondon.org";
+/* -------------------------------------------------------------------------- */
+/* CONSTANTS & CONFIGURATION                                                  */
+/* -------------------------------------------------------------------------- */
 
+const CANONICAL_HOST = process.env.NEXT_PUBLIC_CANONICAL_HOST || "www.abrahamoflondon.org";
+
+// Production-safe rate limiting with memory limits
 const RATE_LIMIT_CONFIGS = {
-  ADMIN: { limit: 30, windowMs: 60_000 },
-  API_GENERAL: { limit: 100, windowMs: 60_000 },
+  ADMIN: { limit: 60, windowMs: 60_000 },
+  API_GENERAL: { limit: 200, windowMs: 60_000 },
+  CONSTITUTIONAL: { limit: 30, windowMs: 60_000 },
+  SOVEREIGN: { limit: 20, windowMs: 60_000 },
+  AUTH: { limit: 10, windowMs: 60_000 },
 } as const;
+
+// Public paths - must be accessible without authentication
+const PUBLIC_PREFIXES = [
+  "/api/auth",
+  "/api/contact",
+  "/api/health",
+  "/api/middleware-health",
+  "/api/access",
+  "/api/check-access",
+  "/api/inner-circle",
+  "/api/pdfs",
+  "/api/premium/content",
+  "/api/auth/sovereign",
+  "/api/auth/sovereign/login",
+  "/api/auth/sovereign/logout",
+  "/api/auth/sovereign/verify",
+  "/api/auth/sovereign/register",
+  "/api/constitutional/verify",
+  "/api/system/lock-status",
+  "/api/purpose-alignment",
+  "/api/purpose-alignment/assessments",
+  "/api/purpose-alignment/report",
+  "/_next",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/assets",
+  "/fonts",
+  "/images",
+  "/inner-circle/login",
+  "/admin/login",
+  "/restricted",
+  "/strategy",
+  "/consulting",
+  "/speaking",
+  "/founders",
+  "/fatherhood",
+  "/leadership",
+  "/auth/access-denied",
+  "/inner-circle/insufficient-clearance",
+] as const;
+
+// Constitutional protected paths with granular requirements
+// NOTE: purpose-alignment routes are NOT included here to allow free public access
+const CONSTITUTIONAL_PROTECTED_PATHS: Record<string, { 
+  minAuthority: string; 
+  requireSignature: boolean; 
+  requireQuorum: boolean;
+  auditLevel: 'INFO' | 'WARNING' | 'CRITICAL';
+  readOnly?: boolean;
+}> = {
+  "/dashboard": { minAuthority: "PARTICIPANT", requireSignature: false, requireQuorum: false, auditLevel: "INFO" },
+  "/pdf-dashboard": { minAuthority: "PARTICIPANT", requireSignature: false, requireQuorum: false, auditLevel: "INFO" },
+  "/api/campaigns": { minAuthority: "PARTICIPANT", requireSignature: false, requireQuorum: false, auditLevel: "INFO", readOnly: true },
+  "/admin/reporting": { minAuthority: "AUTHORITY", requireSignature: false, requireQuorum: false, auditLevel: "WARNING" },
+  "/api/reports": { minAuthority: "AUTHORITY", requireSignature: false, requireQuorum: false, auditLevel: "WARNING", readOnly: true },
+  "/admin/campaigns": { minAuthority: "DELEGATE", requireSignature: false, requireQuorum: false, auditLevel: "INFO" },
+  "/api/admin/campaigns": { minAuthority: "AUTHORITY", requireSignature: true, requireQuorum: false, auditLevel: "WARNING" },
+  "/api/constitutional/export": { minAuthority: "PARTICIPANT", requireSignature: false, requireQuorum: false, auditLevel: "INFO" },
+  "/api/constitutional/appeal": { minAuthority: "PARTICIPANT", requireSignature: true, requireQuorum: false, auditLevel: "WARNING" },
+  "/api/constitutional/audit": { minAuthority: "AUTHORITY", requireSignature: true, requireQuorum: false, auditLevel: "CRITICAL" },
+  "/api/constitutional/override": { minAuthority: "SOVEREIGN", requireSignature: true, requireQuorum: true, auditLevel: "CRITICAL" },
+  "/api/interventions": { minAuthority: "DELEGATE", requireSignature: true, requireQuorum: false, auditLevel: "WARNING" },
+  "/api/strategy-room": { minAuthority: "PARTICIPANT", requireSignature: false, requireQuorum: false, auditLevel: "INFO" },
+  "/api/alignment/assess": { minAuthority: "PARTICIPANT", requireSignature: false, requireQuorum: false, auditLevel: "INFO" },
+};
+
+// Paths that can bypass global lockdown
+const LOCKDOWN_EXEMPT_PATHS = [
+  "/admin/login",
+  "/api/auth",
+  "/api/system/lock-status",
+  "/restricted",
+  "/inner-circle/insufficient-clearance",
+  "/api/health",
+  "/api/purpose-alignment",
+  "/api/purpose-alignment/assessments",
+  "/api/purpose-alignment/report",
+];
+
+// Paths that should trigger session tracking
+const TRACKABLE_PATHS = [
+  "/dashboard",
+  "/pdf-dashboard",
+  "/admin/reporting",
+  "/admin/campaigns",
+  "/api/reports",
+  "/api/constitutional",
+  "/api/interventions",
+  "/api/strategy-room",
+];
+
+// Paths that should trigger conversion events
+const CONVERSION_PATHS = [
+  "/api/interventions",
+  "/api/constitutional/appeal",
+  "/api/constitutional/override",
+];
+
+/* -------------------------------------------------------------------------- */
+/* TYPES                                                                      */
+/* -------------------------------------------------------------------------- */
 
 type RateLimitResult = {
   allowed: boolean;
@@ -22,15 +135,66 @@ type RateLimitResult = {
   limit: number;
 };
 
+type AuditEntry = {
+  id: string;
+  timestamp: string;
+  userId: string;
+  action: string;
+  path: string;
+  method: string;
+  ip: string;
+  userAgent: string;
+  authorityLevel: string;
+  success: boolean;
+  durationMs?: number;
+  metadata?: Record<string, unknown>;
+};
+
+/* -------------------------------------------------------------------------- */
+/* IN-MEMORY STORES (with cleanup)                                            */
+/* -------------------------------------------------------------------------- */
+
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+const auditBuffer: AuditEntry[] = [];
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (now >= value.resetAt) {
+      rateLimitStore.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
+setInterval(() => {
+  if (auditBuffer.length > 0 && process.env.NODE_ENV === "production") {
+    const batch = [...auditBuffer];
+    auditBuffer.length = 0;
+    void sendAuditBatch(batch);
+  }
+}, 30_000);
+
+/* -------------------------------------------------------------------------- */
+/* UTILITIES                                                                  */
+/* -------------------------------------------------------------------------- */
 
 function getClientIp(req: NextRequest): string {
   const xff = req.headers.get("x-forwarded-for");
   if (xff) {
-    const first = xff.split(",").map((v) => v.trim()).filter(Boolean)[0];
-    if (first) return first;
+    const first = xff.split(",").map(v => v.trim()).filter(Boolean)[0];
+    if (first && !first.startsWith("::") && first !== "::1") return first;
   }
-  return req.headers.get("x-real-ip") || "0.0.0.0";
+  return req.headers.get("x-real-ip") || 
+         req.headers.get("cf-connecting-ip") || 
+         "0.0.0.0";
+}
+
+function getRateLimitConfig(pathname: string): { limit: number; windowMs: number } {
+  if (pathname.includes("/constitutional/")) return RATE_LIMIT_CONFIGS.CONSTITUTIONAL;
+  if (pathname.includes("/admin/")) return RATE_LIMIT_CONFIGS.ADMIN;
+  if (pathname.includes("/auth/")) return RATE_LIMIT_CONFIGS.AUTH;
+  if (pathname.includes("/sovereign/")) return RATE_LIMIT_CONFIGS.SOVEREIGN;
+  return RATE_LIMIT_CONFIGS.API_GENERAL;
 }
 
 async function rateLimit(
@@ -38,7 +202,7 @@ async function rateLimit(
   options: { limit: number; windowMs: number }
 ): Promise<RateLimitResult> {
   const now = Date.now();
-  const windowKey = `rl:${key}:${Math.floor(now / options.windowMs)}`;
+  const windowKey = `${key}:${Math.floor(now / options.windowMs)}`;
   const current = rateLimitStore.get(windowKey);
 
   if (!current || now >= current.resetAt) {
@@ -75,29 +239,39 @@ async function rateLimit(
 function createRateLimitHeaders(result: RateLimitResult): Record<string, string> {
   return {
     "X-RateLimit-Limit": String(result.limit),
-    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Remaining": String(Math.max(0, result.remaining)),
     "X-RateLimit-Reset": String(Math.ceil(result.resetAt / 1000)),
-    ...(typeof result.retryAfterMs === "number"
+    ...(typeof result.retryAfterMs === "number" && result.retryAfterMs > 0
       ? { "Retry-After": String(Math.ceil(result.retryAfterMs / 1000)) }
       : {}),
   };
 }
 
-function isAllowedIp(ip: string): boolean {
-  const allowedIps =
-    process.env.ADMIN_ALLOWED_IPS?.split(",").map((v) => v.trim()).filter(Boolean) || [];
-
-  if (allowedIps.length === 0 || allowedIps.includes("0.0.0.0/0")) return true;
-  return allowedIps.includes(ip);
+async function sendAuditBatch(batch: AuditEntry[]): Promise<void> {
+  try {
+    await fetch(`${process.env.AUDIT_SERVICE_URL || "http://localhost:3003"}/api/audit/batch`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-Internal-Key": process.env.INTERNAL_API_KEY || "",
+      },
+      body: JSON.stringify(batch),
+    }).catch(() => {});
+  } catch {}
 }
 
-function safeReturnTo(req: NextRequest): string {
-  const pathname = req.nextUrl.pathname;
-  const search = req.nextUrl.search;
-  const url = new URL(`${pathname}${search}`, "http://localhost");
-  url.searchParams.delete("callbackUrl");
-  url.searchParams.delete("returnTo");
-  return `${url.pathname}${url.search}`;
+async function auditLog(entry: AuditEntry): Promise<void> {
+  auditBuffer.push(entry);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[AUDIT]", JSON.stringify(entry, null, 2));
+  }
+}
+
+function makeRequestId(req: NextRequest): string {
+  return (
+    req.headers.get("x-request-id") ||
+    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  );
 }
 
 function jsonResponse(
@@ -109,233 +283,593 @@ function jsonResponse(
     status,
     headers: {
       "Content-Type": "application/json",
+      "Cache-Control": "no-store, private",
       ...(extraHeaders || {}),
     },
   });
 }
 
-function makeRequestId(req: NextRequest): string {
-  return (
-    req.headers.get("x-request-id") ||
-    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-  );
+function safeReturnTo(req: NextRequest): string {
+  const { pathname, search } = req.nextUrl;
+  const returnTo = `${pathname}${search}`;
+  if (returnTo.startsWith("//") || returnTo.includes("://")) {
+    return "/dashboard";
+  }
+  return encodeURIComponent(returnTo);
 }
 
-const PUBLIC_PREFIXES = [
-  "/api/auth",
-  "/api/contact",
-  "/api/health",
-  "/api/middleware-health",
-  "/api/access",
-  "/api/check-access",
-  "/api/inner-circle",
-  "/api/pdfs",
-  "/api/premium/content",
-  "/_next",
-  "/favicon.ico",
-  "/robots.txt",
-  "/sitemap.xml",
-  "/assets",
-  "/fonts",
-  "/images",
-  "/inner-circle/login",
-  "/admin/login",
-  "/strategy",
-  "/consulting",
-  "/speaking",
-  "/founders",
-  "/fatherhood",
-  "/leadership",
-  "/auth/access-denied",
-  "/inner-circle/insufficient-clearance",
-] as const;
+function setSecurityHeaders(response: NextResponse, req: NextRequest): void {
+  response.headers.set("X-Request-ID", makeRequestId(req));
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.sovereign.ai https://www.google.com/recaptcha/;"
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* CANONICAL SNAPSHOT EXTRACTION                                              */
+/* -------------------------------------------------------------------------- */
+
+async function extractCanonicalSnapshot(req: NextRequest): Promise<CanonicalSectionsEnvelope | null> {
+  const { method } = req.nextUrl;
+  
+  // Try headers first
+  const headerSnapshot = req.headers.get("X-Canonical-Snapshot");
+  if (headerSnapshot) {
+    try {
+      const parsed = JSON.parse(headerSnapshot);
+      return coerceCanonicalSectionsEnvelope(parsed);
+    } catch {}
+  }
+  
+  // Try query params
+  const url = new URL(req.url);
+  const querySnapshot = url.searchParams.get("canonical");
+  if (querySnapshot) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(querySnapshot));
+      return coerceCanonicalSectionsEnvelope(parsed);
+    } catch {}
+  }
+  
+  // Try request body for POST/PUT
+  if (method === "POST" || method === "PUT") {
+    try {
+      const clonedReq = req.clone();
+      const body = await clonedReq.json();
+      if (body.canonicalSnapshot) {
+        return coerceCanonicalSectionsEnvelope(body.canonicalSnapshot);
+      }
+      if (body.canonical) {
+        return coerceCanonicalSectionsEnvelope(body.canonical);
+      }
+      if (body.sections) {
+        return coerceCanonicalSectionsEnvelope({ sections: body.sections });
+      }
+    } catch {}
+  }
+  
+  // Try session
+  const sessionId = req.cookies.get("constitutional_session_id")?.value;
+  if (sessionId) {
+    try {
+      const session = await sessionTracker.getSession(sessionId);
+      if (session?.initialCanonicalSnapshot) {
+        return session.initialCanonicalSnapshot;
+      }
+    } catch {}
+  }
+  
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* SESSION TRACKING                                                           */
+/* -------------------------------------------------------------------------- */
+
+async function trackSessionEvent(
+  req: NextRequest,
+  userId: string,
+  campaignId: string | undefined,
+  canonicalSnapshot: CanonicalSectionsEnvelope | null,
+  sessionId?: string
+): Promise<string | undefined> {
+  const { pathname, method } = req.nextUrl;
+  const shouldTrack = TRACKABLE_PATHS.some(path => pathname.startsWith(path));
+  
+  if (!shouldTrack) return sessionId;
+  
+  let currentSessionId = sessionId;
+  const isConversion = CONVERSION_PATHS.some(path => pathname.startsWith(path)) && method === "POST";
+  
+  // Update existing session
+  if (currentSessionId && canonicalSnapshot) {
+    try {
+      if (isConversion) {
+        await sessionTracker.recordConversion(
+          currentSessionId,
+          campaignId || "unknown",
+          userId,
+          "CONVERSION",
+          canonicalSnapshot,
+          null,
+          { url: pathname, method, isConversion: true }
+        );
+      } else {
+        await sessionTracker.recordEvent(
+          currentSessionId,
+          campaignId || "unknown",
+          userId,
+          "IMPRESSION",
+          canonicalSnapshot,
+          null,
+          { url: pathname, method }
+        );
+      }
+    } catch (error) {
+      console.error("[Proxy] Session tracking error:", error);
+    }
+  }
+  
+  // Create new session
+  if (!currentSessionId && userId && campaignId && canonicalSnapshot) {
+    try {
+      const session = await sessionTracker.initSession(
+        campaignId,
+        userId,
+        canonicalSnapshot,
+        {
+          userAgent: req.headers.get("user-agent") || undefined,
+          ip: getClientIp(req),
+          source: "proxy",
+          url: pathname,
+        }
+      );
+      currentSessionId = session.id;
+    } catch (error) {
+      console.error("[Proxy] Session init error:", error);
+    }
+  }
+  
+  return currentSessionId;
+}
+
+/* -------------------------------------------------------------------------- */
+/* AUTHENTICATION CHECKS                                                      */
+/* -------------------------------------------------------------------------- */
+
+function getSovereignAuthority(req: NextRequest): ConstitutionalAuthority | null {
+  const sessionCookie = req.cookies.get("sovereign_session")?.value;
+  if (!sessionCookie) return null;
+  
+  try {
+    const parts = sessionCookie.split(":");
+    if (parts.length < 4) return null;
+    
+    const [userId, campaignId, authorityLevel, signature] = parts;
+    const validLevels = ["OBSERVER", "PARTICIPANT", "DELEGATE", "AUTHORITY", "SOVEREIGN"];
+    if (!validLevels.includes(authorityLevel)) return null;
+    
+    return {
+      userId,
+      campaignId,
+      authorityLevel: authorityLevel as ConstitutionalAuthority["authorityLevel"],
+      grantedAt: new Date().toISOString(),
+      grantedBy: "system",
+      signature: signature || "",
+      scope: ["*"],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function isSovereignAuthenticated(req: NextRequest): { authenticated: boolean; authority?: ConstitutionalAuthority } {
+  if (process.env.NODE_ENV === "development" && process.env.BYPASS_SOVEREIGN === "true") {
+    return { 
+      authenticated: true, 
+      authority: { 
+        userId: "dev-user",
+        campaignId: "dev-campaign",
+        authorityLevel: "SOVEREIGN",
+        grantedAt: new Date().toISOString(),
+        grantedBy: "system",
+        signature: "dev-signature",
+        scope: ["*"],
+      } as ConstitutionalAuthority 
+    };
+  }
+  
+  const authority = getSovereignAuthority(req);
+  if (authority) {
+    if (authority.expiresAt && new Date(authority.expiresAt) < new Date()) {
+      return { authenticated: false };
+    }
+    return { authenticated: true, authority };
+  }
+  
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    const validToken = process.env.SOVEREIGN_ACCESS_TOKEN;
+    if (validToken && token === validToken) {
+      return {
+        authenticated: true,
+        authority: {
+          userId: "api-client",
+          campaignId: "system",
+          authorityLevel: "AUTHORITY",
+          grantedAt: new Date().toISOString(),
+          grantedBy: "system",
+          signature: "api-token",
+          scope: ["*"],
+        },
+      };
+    }
+  }
+  
+  return { authenticated: false };
+}
+
+function isAllowedIp(ip: string): boolean {
+  if (process.env.NODE_ENV === "development") return true;
+  const allowedIps = process.env.ADMIN_ALLOWED_IPS?.split(",").map(v => v.trim()).filter(Boolean) || [];
+  if (allowedIps.length === 0) return true;
+  if (ip === "127.0.0.1" || ip === "::1") return true;
+  return allowedIps.includes(ip);
+}
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  return PUBLIC_PREFIXES.some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+function getConstitutionalConfig(pathname: string, method: string): typeof CONSTITUTIONAL_PROTECTED_PATHS[string] | null {
+  for (const [pattern, config] of Object.entries(CONSTITUTIONAL_PROTECTED_PATHS)) {
+    if (pathname.startsWith(pattern)) {
+      if (config.readOnly && method === "GET") {
+        return { ...config, requireSignature: false, minAuthority: "PARTICIPANT" };
+      }
+      return config;
+    }
+  }
+  return null;
+}
+
+function isConstitutionalPath(pathname: string): boolean {
+  return getConstitutionalConfig(pathname, "GET") !== null;
 }
 
 function isAdminPath(pathname: string): boolean {
-  return pathname.startsWith("/admin") ||
-    pathname.startsWith("/api/vault") ||
-    pathname.startsWith("/api/admin");
+  return pathname.startsWith("/admin") || pathname.startsWith("/api/vault") || pathname.startsWith("/api/admin");
 }
 
 function needsInstitutionalSession(pathname: string): boolean {
-  return pathname.startsWith("/inner-circle") ||
-    pathname.startsWith("/api/premium") ||
-    pathname.startsWith("/api/dl/");
+  return pathname.startsWith("/inner-circle") || pathname.startsWith("/api/premium") || pathname.startsWith("/api/dl/");
 }
 
+function extractCampaignId(pathname: string): string | undefined {
+  const campaignMatch = pathname.match(/\/campaigns\/([^\/]+)/);
+  if (campaignMatch) return campaignMatch[1];
+  const adminMatch = pathname.match(/\/admin\/campaigns\/([^\/]+)/);
+  if (adminMatch) return adminMatch[1];
+  const reportMatch = pathname.match(/\/api\/reports\/([^\/]+)/);
+  if (reportMatch) return reportMatch[1];
+  const urlParams = new URLSearchParams(pathname.split("?")[1] || "");
+  return urlParams.get("campaignId") || undefined;
+}
+
+/* -------------------------------------------------------------------------- */
+/* CONSTITUTIONAL AUTHORITY VALIDATION                                        */
+/* -------------------------------------------------------------------------- */
+
+async function validateConstitutionalAuthority(
+  authority: ConstitutionalAuthority,
+  config: { minAuthority: string; requireSignature: boolean; requireQuorum: boolean },
+  req: NextRequest,
+  campaignId?: string
+): Promise<{ valid: boolean; reason?: string; requiredLevel?: string }> {
+  const authorityLevels: Record<string, number> = {
+    OBSERVER: 0, PARTICIPANT: 1, DELEGATE: 2, AUTHORITY: 3, SOVEREIGN: 4,
+  };
+  
+  const requiredLevel = authorityLevels[config.minAuthority];
+  const currentLevel = authorityLevels[authority.authorityLevel];
+  
+  if (currentLevel < requiredLevel) {
+    return { valid: false, reason: `Insufficient authority: ${authority.authorityLevel} < ${config.minAuthority}`, requiredLevel: config.minAuthority };
+  }
+  
+  if (authority.scope && authority.scope.length > 0 && !authority.scope.includes("*")) {
+    const pathMatchesScope = authority.scope.some(scope => req.nextUrl.pathname.startsWith(scope));
+    if (!pathMatchesScope) return { valid: false, reason: "Action outside authorized scope" };
+  }
+  
+  if (config.requireSignature && ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+    const signature = req.headers.get("X-Constitutional-Signature");
+    if (!signature) return { valid: false, reason: "Constitutional signature required" };
+    
+    const [userId, hash, timestamp] = signature.split(":");
+    if (!userId || !hash || !timestamp) return { valid: false, reason: "Invalid signature format" };
+    
+    const signatureTime = parseInt(timestamp, 10);
+    if (isNaN(signatureTime) || Date.now() - signatureTime > 300000) return { valid: false, reason: "Signature expired" };
+    if (userId !== authority.userId) return { valid: false, reason: "Signature user mismatch" };
+  }
+  
+  if (config.requireQuorum && campaignId) {
+    const participantCount = await getParticipantCount(campaignId);
+    const threshold = await getThreshold(campaignId);
+    const quorumValidation = validateThreshold(participantCount, threshold);
+    if (!quorumValidation.valid) return { valid: false, reason: quorumValidation.reason };
+  }
+  
+  return { valid: true };
+}
+
+/* -------------------------------------------------------------------------- */
+/* DATABASE HELPERS                                                           */
+/* -------------------------------------------------------------------------- */
+
+const participantCountCache = new Map<string, { count: number; timestamp: number }>();
+const thresholdCache = new Map<string, { threshold: number; timestamp: number }>();
+
+async function getParticipantCount(campaignId: string): Promise<number> {
+  const cached = participantCountCache.get(campaignId);
+  if (cached && Date.now() - cached.timestamp < 300000) return cached.count;
+  
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/campaigns/${campaignId}/participant-count`, {
+      headers: { "X-Internal-Key": process.env.INTERNAL_API_KEY || "" },
+      cache: "no-store",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const count = data.count || 0;
+      participantCountCache.set(campaignId, { count, timestamp: Date.now() });
+      return count;
+    }
+  } catch {}
+  return 0;
+}
+
+async function getThreshold(campaignId: string): Promise<number> {
+  const cached = thresholdCache.get(campaignId);
+  if (cached && Date.now() - cached.timestamp < 300000) return cached.threshold;
+  
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/campaigns/${campaignId}/threshold`, {
+      headers: { "X-Internal-Key": process.env.INTERNAL_API_KEY || "" },
+      cache: "no-store",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const threshold = data.threshold || 5;
+      thresholdCache.set(campaignId, { threshold, timestamp: Date.now() });
+      return threshold;
+    }
+  } catch {}
+  return 5;
+}
+
+/* -------------------------------------------------------------------------- */
+/* GLOBAL LOCK CHECK                                                          */
+/* -------------------------------------------------------------------------- */
+
+let lockCache: { isLocked: boolean; timestamp: number } | null = null;
+
 async function checkGlobalLock(req: NextRequest): Promise<boolean> {
+  if (lockCache && Date.now() - lockCache.timestamp < 15000) return lockCache.isLocked;
+  
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
-
     const res = await fetch(`${req.nextUrl.origin}/api/system/lock-status`, {
       signal: controller.signal,
       cache: "no-store",
-      headers: {
-        "X-Institutional-Action": "true",
-      },
+      headers: { "X-Internal-Request": "true" },
     });
-
     clearTimeout(timeoutId);
-
     if (!res.ok) return false;
-
-    const data = (await res.json()) as { isLocked?: boolean };
-    return Boolean(data?.isLocked);
+    const data = await res.json();
+    const isLocked = Boolean(data?.isLocked);
+    lockCache = { isLocked, timestamp: Date.now() };
+    return isLocked;
   } catch {
+    lockCache = { isLocked: false, timestamp: Date.now() };
     return false;
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/* MAIN PROXY HANDLER                                                         */
+/* -------------------------------------------------------------------------- */
+
 export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const startTime = Date.now();
+  const { pathname, method } = req.nextUrl;
   const isApi = pathname.startsWith("/api/");
   const isAdmin = isAdminPath(pathname);
   const requiresInstitutionalSession = needsInstitutionalSession(pathname);
+  const isConstitutional = isConstitutionalPath(pathname);
+  const constitutionalConfig = getConstitutionalConfig(pathname, method);
+  
+  const requestId = makeRequestId(req);
+  const clientIp = getClientIp(req);
+  const userAgent = req.headers.get("user-agent") || "unknown";
 
-  const masterKey = process.env.INTERNAL_BYPASS_KEY;
-  if (masterKey && req.headers.get("X-Directorate-Bypass") === masterKey) {
+  /* DEVELOPMENT BYPASS */
+  if (process.env.NODE_ENV === "development" && process.env.BYPASS_SOVEREIGN === "true") {
     const response = NextResponse.next();
-    response.headers.set("X-Directorate-Safety-Active", "true");
-    response.headers.set("X-Request-ID", makeRequestId(req));
+    response.headers.set("X-Development-Bypass", "true");
+    setSecurityHeaders(response, req);
     return response;
   }
 
-  if (
-    req.headers.get("X-Institutional-Action") === "true" ||
-    pathname === "/api/system/lock-status"
-  ) {
-    return NextResponse.next();
+  /* INTERNAL BYPASS */
+  const masterKey = process.env.INTERNAL_BYPASS_KEY;
+  if (masterKey && req.headers.get("X-Directorate-Bypass") === masterKey) {
+    const response = NextResponse.next();
+    response.headers.set("X-Directorate-Bypass-Active", "true");
+    setSecurityHeaders(response, req);
+    return response;
   }
 
-  if (
-    process.env.NODE_ENV === "production" &&
-    req.nextUrl.hostname === "abrahamoflondon.org"
-  ) {
+  /* INSTITUTIONAL ACTION EXEMPTION */
+  if (req.headers.get("X-Institutional-Action") === "true") {
+    const response = NextResponse.next();
+    setSecurityHeaders(response, req);
+    return response;
+  }
+
+  /* CANONICAL REDIRECT */
+  if (process.env.NODE_ENV === "production" && CANONICAL_HOST &&
+      req.nextUrl.hostname !== CANONICAL_HOST && req.nextUrl.hostname !== "localhost" &&
+      !req.nextUrl.hostname.includes("vercel.app")) {
     const url = req.nextUrl.clone();
     url.hostname = CANONICAL_HOST;
     return NextResponse.redirect(url, 308);
   }
 
-  const isLockdownExempt =
-    pathname.startsWith("/admin/login") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/system/lock-status") ||
-    pathname.includes("insufficient-clearance");
-
-  if (!isLockdownExempt) {
+  /* GLOBAL LOCKDOWN */
+  const isLockdownExempt = LOCKDOWN_EXEMPT_PATHS.some(path => pathname === path || pathname.startsWith(`${path}/`));
+  if (!isLockdownExempt && !isPublicPath(pathname)) {
     const isLocked = await checkGlobalLock(req);
     if (isLocked) {
-      const token = await getToken({
-        req,
-        secret: process.env.NEXTAUTH_SECRET,
-      });
-
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
       const role = String((token as any)?.role || "guest").toLowerCase();
       const isAdminUser = role === "admin" || role === "root";
-
       if (!isAdminUser) {
-        if (isApi) {
-          return jsonResponse(
-            { error: "SYSTEM_LOCKED", message: "Emergency Lockdown" },
-            503
-          );
-        }
-
-        return NextResponse.redirect(
-          new URL("/inner-circle/insufficient-clearance?reason=lockdown", req.url)
-        );
+        if (isApi) return jsonResponse({ error: "SYSTEM_LOCKED", message: "Emergency maintenance" }, 503, { "Retry-After": "300" });
+        return NextResponse.redirect(new URL("/restricted?reason=maintenance", req.url));
       }
     }
   }
 
+  /* PUBLIC PATHS - Purpose Alignment routes are public, no auth required */
   if (isPublicPath(pathname)) {
     const response = NextResponse.next();
-    response.headers.set("X-Request-ID", makeRequestId(req));
-    response.headers.set("X-Frame-Options", "DENY");
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    setSecurityHeaders(response, req);
     return response;
   }
 
-  const ip = getClientIp(req);
-
-  if (isAdmin && !isAllowedIp(ip)) {
-    if (isApi) return jsonResponse({ error: "ACCESS_DENIED" }, 403);
-    return NextResponse.redirect(new URL("/auth/access-denied", req.url));
+  /* RATE LIMITING */
+  const rateConfig = getRateLimitConfig(pathname);
+  const rl = await rateLimit(`${clientIp}:${pathname}`, rateConfig);
+  if (!rl.allowed) {
+    return jsonResponse({ error: "RATE_LIMIT_EXCEEDED", retryAfter: rl.retryAfterMs }, 429, createRateLimitHeaders(rl));
   }
 
-  if (isAdmin || isApi) {
-    const config = isAdmin
-      ? RATE_LIMIT_CONFIGS.ADMIN
-      : RATE_LIMIT_CONFIGS.API_GENERAL;
-
-    const rl = await rateLimit(ip, config);
-
-    if (!rl.allowed) {
-      return jsonResponse(
-        { error: "RATE_LIMIT_EXCEEDED" },
-        429,
-        createRateLimitHeaders(rl)
-      );
+  /* CONSTITUTIONAL AUTHORITY ENFORCEMENT & SESSION TRACKING */
+  let constitutionalAuthority: ConstitutionalAuthority | null = null;
+  let sessionId: string | undefined = req.cookies.get("constitutional_session_id")?.value;
+  let canonicalSnapshot: CanonicalSectionsEnvelope | null = null;
+  
+  if (isConstitutional && constitutionalConfig) {
+    const { authenticated, authority } = isSovereignAuthenticated(req);
+    if (!authenticated) {
+      await auditLog({
+        id: crypto.randomUUID(), timestamp: new Date().toISOString(), userId: "anonymous",
+        action: "CONSTITUTIONAL_ACCESS_DENIED", path: pathname, method, ip: clientIp,
+        userAgent, authorityLevel: "NONE", success: false, metadata: { reason: "Not authenticated" },
+      });
+      if (isApi) return jsonResponse({ error: "CONSTITUTIONAL_ACCESS_REQUIRED" }, 401, { "WWW-Authenticate": 'Bearer realm="Constitutional Access"' });
+      const url = new URL("/restricted", req.url);
+      url.searchParams.set("returnTo", safeReturnTo(req));
+      return NextResponse.redirect(url, 307);
     }
+    
+    constitutionalAuthority = authority!;
+    canonicalSnapshot = await extractCanonicalSnapshot(req);
+    const campaignId = extractCampaignId(pathname);
+    
+    const validation = await validateConstitutionalAuthority(constitutionalAuthority, constitutionalConfig, req, campaignId);
+    if (!validation.valid) {
+      await auditLog({
+        id: crypto.randomUUID(), timestamp: new Date().toISOString(), userId: constitutionalAuthority.userId,
+        action: "CONSTITUTIONAL_AUTHORITY_DENIED", path: pathname, method, ip: clientIp,
+        userAgent, authorityLevel: constitutionalAuthority.authorityLevel, success: false,
+        metadata: { reason: validation.reason, required: validation.requiredLevel },
+      });
+      if (isApi) return jsonResponse({ error: validation.reason, requiredLevel: validation.requiredLevel }, 403);
+      return NextResponse.redirect(new URL("/auth/access-denied", req.url));
+    }
+    
+    // Session tracking
+    sessionId = await trackSessionEvent(req, constitutionalAuthority.userId, campaignId, canonicalSnapshot, sessionId);
   }
 
-  try {
-    const token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
+  /* IP RESTRICTION */
+  if (isAdmin && !isAllowedIp(clientIp)) {
+    return isApi ? jsonResponse({ error: "ACCESS_DENIED" }, 403) : NextResponse.redirect(new URL("/auth/access-denied", req.url));
+  }
 
+  /* SESSION & ROLE VALIDATION */
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const hasInstitutionalCookie = Boolean(readAccessCookie(req));
     const hasInstitutionalSession = Boolean(token) || hasInstitutionalCookie;
 
-    if (isAdmin) {
+    if (isAdmin && !pathname.includes("/login")) {
       if (!token) {
-        if (pathname.includes("/login")) return NextResponse.next();
-
         const url = new URL("/admin/login", req.url);
         url.searchParams.set("returnTo", safeReturnTo(req));
         return NextResponse.redirect(url, 307);
       }
-
       const role = String((token as any)?.role ?? "guest").toLowerCase();
       const rank = ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] ?? 0;
       const requiredRank = ROLE_HIERARCHY.admin ?? 100;
-
       if (rank < requiredRank) {
-        return isApi
-          ? jsonResponse({ error: "CLEARANCE_REQUIRED" }, 403)
-          : NextResponse.redirect(new URL("/auth/access-denied", req.url));
+        return isApi ? jsonResponse({ error: "CLEARANCE_REQUIRED" }, 403) : NextResponse.redirect(new URL("/auth/access-denied", req.url));
       }
     }
 
-    if (requiresInstitutionalSession && !hasInstitutionalSession) {
-      if (pathname.includes("/login")) return NextResponse.next();
-
+    if (requiresInstitutionalSession && !hasInstitutionalSession && !pathname.includes("/login")) {
       const url = new URL("/inner-circle/login", req.url);
       url.searchParams.set("returnTo", safeReturnTo(req));
       return NextResponse.redirect(url, 307);
     }
-  } catch {
-    return isApi
-      ? jsonResponse({ error: "AUTH_ERROR" }, 500)
-      : NextResponse.next();
+  } catch (error) {
+    console.error("[Proxy] Auth error:", error);
   }
 
+  /* SUCCESSFUL ACCESS AUDIT */
+  if (constitutionalAuthority && constitutionalConfig) {
+    await auditLog({
+      id: crypto.randomUUID(), timestamp: new Date().toISOString(), userId: constitutionalAuthority.userId,
+      action: "CONSTITUTIONAL_ACCESS", path: pathname, method, ip: clientIp,
+      userAgent, authorityLevel: constitutionalAuthority.authorityLevel, success: true,
+      durationMs: Date.now() - startTime, metadata: { config: constitutionalConfig },
+    });
+  }
+
+  /* FINAL RESPONSE */
   const response = NextResponse.next();
-  response.headers.set("X-Request-ID", makeRequestId(req));
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-
-  if (isAdmin || pathname.startsWith("/inner-circle")) {
+  setSecurityHeaders(response, req);
+  Object.assign(response.headers, createRateLimitHeaders(rl));
+  
+  if (isAdmin || pathname.startsWith("/inner-circle") || isConstitutional) {
     response.headers.set("Cache-Control", "no-store, private, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
   }
-
+  
+  if (constitutionalConfig) {
+    response.headers.set("X-Constitutional-Protected", "true");
+    response.headers.set("X-Constitutional-Authority", constitutionalAuthority?.authorityLevel || "NONE");
+  }
+  
+  if (sessionId) {
+    response.cookies.set("constitutional_session_id", sessionId, {
+      httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60 * 24, path: "/",
+    });
+  }
+  
   return response;
 }
 

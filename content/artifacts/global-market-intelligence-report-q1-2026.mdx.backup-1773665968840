@@ -17,17 +17,81 @@ tags:
   - macro
   - capital-flows
 coverImage: /assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg
----
-# Global Market Intelligence Report Q1 2026
-## Institutional Briefing for Strategic Operators
 
-**Document ID:** GMI-Q1-2026  
-**Author:** Abraham of London Intelligence  
-**Date:** 15 January 2026  
-**Tier:** Architect  
-**Version:** 1.2.0  
-**Classification:** RESTRICTED
-
+decisionMetadata:
+  assetKind: brief
+  appliesTo:
+    - ADVISORY
+    - STRATEGY
+  sectors:
+    - finance
+    - governance
+    - operations
+    - general
+  revenueBands:
+    - MID
+    - ENTERPRISE
+    - WHALE
+  orgStates:
+    - ORDERED
+    - DRIFTING
+    - MISALIGNED
+  readinessTiers:
+    - ADVISORY
+    - EXECUTION
+    - SOVEREIGN
+  failureModes:
+    - Strategic-operational misalignment
+    - Capital allocation distortion
+    - Trust erosion
+    - Decision-rights ambiguity
+  dominantDomains:
+    - STRATEGIC_INTENT
+    - GOVERNANCE
+    - OPERATIONAL_CLARITY
+    - DECISION_QUALITY
+  requiredInterventions:
+    - Adjust decision horizon for external volatility
+    - Re-sequence strategic priorities
+    - Escalate to strategy-room review
+  marketRiskBands:
+    - MEDIUM
+    - HIGH
+    - CRITICAL
+  sponsorTypes:
+    - DIRECT
+    - PROXY
+  decisionTags:
+    - global
+    - quarterly
+    - forecast
+    - institutions
+    - macro
+    - capital-flows
+    - market-intelligence
+  worldviewAnchors:
+    - stewardship
+    - truth-discipline
+  commercialUseCases:
+    - board-review
+    - executive-alignment
+    - investor-readiness
+    - strategic-repositioning
+  audience:
+    - executives
+    - boards
+    - investors
+    - policy-makers
+  transformationStage:
+    - assess
+    - diagnose
+    - realign
+  priorityWeight: 9
+  confidenceWeight: 9
+  notes: >
+    Strategic intelligence brief for institutional operators. Use when the decision
+    problem involves macro-economic positioning, capital allocation, or navigating
+    external volatility at the institutional level.
 ---
 
 # Executive Summary

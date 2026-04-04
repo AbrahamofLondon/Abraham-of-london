@@ -1,20 +1,141 @@
-/* pages/dashboard.tsx — SOVEREIGN REGISTRY (LEGACY PAGES ROUTER) */
+/* pages/dashboard.tsx — UNIFIED SOVEREIGN DASHBOARD (ENTERPRISE-GRADE, SCHEMA-ALIGNED) */
 import * as React from "react";
 import Link from "next/link";
-import { GetServerSideProps } from "next";
+import type { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
-import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth"; 
-import { ChevronRight, Fingerprint, Zap, Lock, BarChart3 } from "lucide-react";
-import Layout from "@/components/Layout";
+import crypto from "crypto";
+import dynamic from "next/dynamic";
+import {
+  ChevronRight,
+  Fingerprint,
+  Zap,
+  BookOpen,
+  ShieldCheck,
+  TrendingUp,
+  Heart,
+  Briefcase,
+  ArrowRight,
+  Activity,
+  FileText,
+  Brain,
+  Target,
+  Crown,
+  Clock,
+  CreditCard,
+} from "lucide-react";
 
-// The interactive controls we built for the OGR commit/toast logic
-import { ReportActions } from "./controls"; 
+import Layout from "@/components/Layout";
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
+import { OGR_CLIENT_CONFIG } from "@/lib/ogr/client-config";
+
+/* -------------------------------------------------------------------------- */
+/* DYNAMIC PANELS                                                             */
+/* -------------------------------------------------------------------------- */
+
+const PdfAnalyticsWidget = dynamic(
+  () =>
+    import("@/components/dashboard/PdfAnalyticsWidget").then(
+      (mod) => mod.PdfAnalyticsWidget
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 animate-pulse rounded-sm bg-white/5" />,
+  }
+);
+
+const SovereignDashboard = dynamic(
+  () =>
+    import("@/lib/components/ai/SovereignDashboard").then(
+      (mod) => mod.SovereignDashboard
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-sm bg-white/5" />,
+  }
+);
+
+const BillingEntitlementsPanel = dynamic(
+  () =>
+    import("@/components/dashboard/BillingEntitlementsPanel").then(
+      (mod) => mod.BillingEntitlementsPanel
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 animate-pulse rounded-sm bg-white/5" />,
+  }
+);
+
+const DiagnosticLineagePanel = dynamic(
+  () =>
+    import("@/components/dashboard/DiagnosticLineagePanel").then(
+      (mod) => mod.DiagnosticLineagePanel
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 animate-pulse rounded-sm bg-white/5" />,
+  }
+);
+
+const MyReportsPanel = dynamic(
+  () =>
+    import("@/components/dashboard/MyReportsPanel").then(
+      (mod) => mod.MyReportsPanel
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 animate-pulse rounded-sm bg-white/5" />,
+  }
+);
+
+const AdminJobsPanel = dynamic(
+  () =>
+    import("@/components/dashboard/AdminJobsPanel").then(
+      (mod) => mod.AdminJobsPanel
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 animate-pulse rounded-sm bg-white/5" />,
+  }
+);
+
+/* -------------------------------------------------------------------------- */
+/* TYPES                                                                      */
+/* -------------------------------------------------------------------------- */
 
 interface Brief {
   id: string;
   title: string;
   slug: string;
+  excerpt?: string | null;
+  createdAt: string;
+  category?: string | null;
+}
+
+interface ReportItem {
+  id: string;
+  diagnosticRef: string;
+  fileName: string;
+  version: string;
+  createdAt: string;
+  downloadUrl: string;
+  status: string;
+  kind: string;
+  retentionClass?: string | null;
+}
+
+interface EntitlementItem {
+  productCode: string;
+  tier: string;
+  status: string;
+  endsAt?: string | null;
+}
+
+interface LineageItem {
+  id: string;
+  eventType: string;
+  version?: string | null;
+  actor?: string | null;
   createdAt: string;
 }
 
@@ -26,142 +147,558 @@ interface DashboardProps {
     tier: string;
     isInternal: boolean;
   };
+  featuredBriefs: Brief[];
+  recentBriefs: Brief[];
+  dealFlowStats: {
+    strategy: number;
+    avg: number;
+    ai?: {
+      highQualityDeals: number;
+      avgAiConfidence: number;
+    };
+    submissions: Array<{
+      id: string;
+      score: number;
+      route: string;
+      aiScore: number | null;
+      aiConfidence: number | null;
+      aiDealQuality: string | null;
+    }>;
+  } | null;
+  entitlements: EntitlementItem[];
+  lineageEvents: LineageItem[];
+  reports: ReportItem[];
 }
 
-export default function MemberDashboard({ briefs, totalCount, userEmail, aol }: DashboardProps) {
+/* -------------------------------------------------------------------------- */
+/* SECURITY                                                                   */
+/* -------------------------------------------------------------------------- */
+
+const OGR_COOKIE_NAME = "ogr_sovereign_session";
+
+function signSession(value: string, secret: string): string {
+  const mac = crypto.createHmac("sha256", secret).update(value).digest("hex");
+  return `${value}.${mac}`;
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) return false;
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
+
+function hasValidOgrSessionFromContext(
+  context: GetServerSidePropsContext
+): boolean {
+  const secret = process.env.OGR_SESSION_SECRET;
+  if (!secret) return false;
+
+  const raw = context.req.cookies?.[OGR_COOKIE_NAME];
+  if (!raw) return false;
+
+  const lastDot = raw.lastIndexOf(".");
+  if (lastDot <= 0) return false;
+
+  const payload = raw.slice(0, lastDot);
+  const providedMac = raw.slice(lastDot + 1);
+
+  const expected = signSession(payload, secret);
+  const expectedMac = expected.slice(expected.lastIndexOf(".") + 1);
+
+  return timingSafeEqual(providedMac, expectedMac);
+}
+
+function resolveAuthenticatedEmail(session: any): string {
+  const primary = String(session?.user?.email || "")
+    .trim()
+    .toLowerCase();
+
+  if (primary) return primary;
+
+  const allowedFallbacks = [
+    "info@abrahamoflondon.org",
+    "seunadaramola@gmail.com",
+    "abrahamadaramola@outlook.com",
+  ];
+
+  if (process.env.NODE_ENV === "development") {
+    return allowedFallbacks[1];
+  }
+
+  throw new Error("AUTH_EMAIL_MISSING");
+}
+
+/* -------------------------------------------------------------------------- */
+/* HELPERS                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function safeJsonArray<T = unknown>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function safeString(value: unknown, fallback = ""): string {
+  const s = typeof value === "string" ? value.trim() : "";
+  return s || fallback;
+}
+
+function formatUserNameFromEmail(email: string): string {
+  const stem = safeString(email.split("@")[0], "Client");
+  return stem.charAt(0).toUpperCase() + stem.slice(1);
+}
+
+function Divider() {
   return (
-    <Layout title="The Sovereign Registry" className="bg-[#050505]">
-      <main className="min-h-screen text-white font-sans selection:bg-[#8A6A2F]/30 relative overflow-x-hidden">
-        
-        {/* BACKGROUND TEXTURE LAYER */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute inset-0 opacity-[0.03] bg-[url('/grain.png')] pointer-events-none" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-px bg-gradient-to-r from-transparent via-[#8A6A2F]/20 to-transparent" />
+    <div className="my-12 flex items-center gap-3">
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="h-1 w-1 rounded-full bg-[#8A6A2F]/30" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    </div>
+  );
+}
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="mb-8">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="h-px w-8 bg-[#8A6A2F]" />
+        <Icon className="h-4 w-4 text-[#8A6A2F]" />
+        <span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#8A6A2F]">
+          {title}
+        </span>
+      </div>
+      {description ? (
+        <p className="max-w-2xl text-sm text-white/40">{description}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  trend,
+  icon: Icon,
+}: {
+  label: string;
+  value: string | number;
+  trend?: number;
+  icon: React.ElementType;
+}) {
+  return (
+    <div className="border border-white/5 bg-white/[0.02] p-5 transition-all hover:border-[#8A6A2F]/20">
+      <div className="mb-3 flex items-start justify-between">
+        <Icon className="h-4 w-4 text-[#8A6A2F]/60" />
+        {typeof trend === "number" ? (
+          <span
+            className={`text-[8px] font-mono ${
+              trend >= 0 ? "text-emerald-500" : "text-red-500"
+            }`}
+          >
+            {trend >= 0 ? "+" : ""}
+            {trend}%
+          </span>
+        ) : null}
+      </div>
+      <p className="text-3xl font-light tracking-tight text-white">{value}</p>
+      <p className="mt-1 text-[8px] uppercase tracking-wider text-white/30">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function BriefRow({ brief, index }: { brief: Brief; index: number }) {
+  return (
+    <Link
+      href={`/strategy/${brief.slug}`}
+      className="group flex items-center justify-between border-b border-white/5 py-4 transition-all hover:border-[#8A6A2F]/20"
+    >
+      <div className="flex flex-1 items-center gap-4">
+        <span className="w-8 text-[9px] font-mono text-white/20 transition-colors group-hover:text-[#8A6A2F]">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <div className="flex-1">
+          <h3 className="text-sm font-light tracking-tight text-white/80 transition-colors group-hover:text-white">
+            {brief.title}
+          </h3>
+          {brief.excerpt ? (
+            <p className="line-clamp-1 text-[10px] text-white/30 transition-colors group-hover:text-white/50">
+              {brief.excerpt}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[8px] font-mono text-white/20">
+            {new Date(brief.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+            })}
+          </span>
+          <ChevronRight className="h-3 w-3 text-white/20 transition-all group-hover:translate-x-0.5 group-hover:text-[#8A6A2F]" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mt-20 border-t border-white/5 pt-12">
+      <div className="mb-4 flex items-center gap-2">
+        <Fingerprint className="h-3 w-3 text-[#8A6A2F]" />
+        <span className="text-[8px] uppercase tracking-[0.3em] text-white/40">
+          Sovereign Protocol
+        </span>
+      </div>
+      <p className="max-w-xl text-[10px] leading-relaxed text-white/40">
+        Institutional intelligence for leaders, builders, and institutions that
+        intend to endure.
+      </p>
+      <div className="mt-6 border-t border-white/5 pt-6 text-center">
+        <p className="text-[6px] tracking-wider text-white/20">
+          © {new Date().getFullYear()} ABRAHAM OF LONDON • Protocol{" "}
+          {OGR_CLIENT_CONFIG.protocolVersion}
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* PAGE                                                                       */
+/* -------------------------------------------------------------------------- */
+
+export default function UnifiedDashboard({
+  totalCount,
+  userEmail,
+  aol,
+  featuredBriefs,
+  recentBriefs,
+  dealFlowStats,
+  entitlements,
+  lineageEvents,
+  reports,
+}: DashboardProps) {
+  const [liveResonance, setLiveResonance] = React.useState<number>(82);
+  const [isLoadingMetrics, setIsLoadingMetrics] = React.useState<boolean>(true);
+
+  const userName = React.useMemo(
+    () => formatUserNameFromEmail(userEmail),
+    [userEmail]
+  );
+
+  React.useEffect(() => {
+    let active = true;
+
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch("/api/telemetry/resonance", {
+          credentials: "same-origin",
+        });
+
+        if (!response.ok) throw new Error("TELEMETRY_FETCH_FAILED");
+
+        const data = await response.json();
+        if (!active) return;
+
+        const resonance =
+          typeof data?.resonance === "number" && Number.isFinite(data.resonance)
+            ? Math.max(0, Math.min(100, Math.round(data.resonance)))
+            : 82;
+
+        setLiveResonance(resonance);
+      } catch {
+        if (active) setLiveResonance(82);
+      } finally {
+        if (active) setIsLoadingMetrics(false);
+      }
+    };
+
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <Layout title="Sovereign Registry" className="bg-black">
+      <main className="relative min-h-screen overflow-x-hidden bg-black font-sans text-white">
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div className="absolute inset-0 bg-[url('/grain.png')] opacity-[0.02]" />
+          <div className="absolute left-1/2 top-0 h-px w-full max-w-7xl -translate-x-1/2 bg-gradient-to-r from-transparent via-[#8A6A2F]/10 to-transparent" />
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 pt-32 pb-24">
-          
-          {/* INSTITUTIONAL HEADER */}
-          <header className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/5 pb-12 gap-8">
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 px-3 py-1 bg-[#8A6A2F]/10 border border-[#8A6A2F]/20">
-                  <Zap className="h-2.5 w-2.5 text-[#8A6A2F] animate-pulse fill-[#8A6A2F]" />
-                  <span className="text-[9px] uppercase tracking-[0.4em] text-[#8A6A2F] font-bold font-mono">
-                    Node Active
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.4em] text-zinc-600 font-mono">
-                  <Lock size={10} className="text-zinc-700" />
-                  Clearance: <span className="text-zinc-400">{aol.tier}</span>
-                </div>
+        <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-20 md:px-12">
+          <div className="mb-16 flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-8">
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                <span className="text-[8px] uppercase tracking-[0.3em] text-white/30">
+                  Secure Session • Sovereign Node
+                </span>
               </div>
-
-              <h1 className="text-6xl md:text-8xl font-light tracking-tighter text-white font-serif leading-none">
-                The <span className="italic text-[#8A6A2F]/90">Sovereign</span> Registry.
+              <h1 className="text-3xl font-light tracking-tight text-white">
+                {userName}
               </h1>
             </div>
 
-            <div className="text-right font-mono text-[9px] text-zinc-500 uppercase tracking-[0.3em] leading-relaxed">
-              <p>Protocol <span className="text-white ml-2">AOL-INST-4.2</span></p>
-              <p>Hashed Identity <span className="text-white ml-2">{userEmail.split("@")[0]}...</span></p>
-              <p>Active Assets <span className="text-white ml-2">{totalCount}</span></p>
-            </div>
-          </header>
-
-          {/* INTEGRATED OGR COMMAND BAR */}
-          <section className="mb-24 grid grid-cols-1 lg:grid-cols-3 gap-8 p-8 bg-white/[0.01] border border-white/5 backdrop-blur-sm">
-            <div className="lg:col-span-2 space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#8A6A2F]">Operational Intelligence</h3>
-              <p className="text-xs text-zinc-400 max-w-md leading-relaxed">
-                Real-time synchronization with the OGR Engine. Adjust parameters in the live terminal to update institutional certainty.
-              </p>
-              <div className="pt-4">
-                  <ReportActions />
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5">
+                <ShieldCheck className="h-2.5 w-2.5 text-emerald-500" />
+                <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-emerald-500">
+                  {aol.isInternal ? "Directorate" : "Inner Circle"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 border border-[#8A6A2F]/20 bg-[#8A6A2F]/5 px-3 py-1.5">
+                <Zap className="h-2.5 w-2.5 text-[#8A6A2F]" />
+                <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8A6A2F]">
+                  Active
+                </span>
               </div>
             </div>
-            <div className="flex items-center justify-center lg:border-l border-white/5">
-                <Link href="/dashboard/live" className="group flex flex-col items-center gap-4">
-                   <div className="p-4 rounded-full border border-[#8A6A2F]/20 group-hover:bg-[#8A6A2F]/10 transition-all duration-500">
-                     <BarChart3 className="w-8 h-8 text-[#8A6A2F]" />
-                   </div>
-                   <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">
-                     Open OGR Terminal
-                   </span>
+          </div>
+
+          <div className="mb-20">
+            <div className="max-w-3xl">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="h-px w-10 bg-[#8A6A2F]" />
+                <span className="text-[8px] uppercase tracking-[0.3em] text-[#8A6A2F]">
+                  Sovereign Intelligence
+                </span>
+              </div>
+
+              <h1 className="mb-4 text-5xl font-light leading-[1.1] tracking-tight text-white md:text-6xl">
+                The Architecture of
+                <br />
+                <span className="font-serif italic text-[#8A6A2F]">
+                  Sovereign
+                </span>{" "}
+                Intelligence
+              </h1>
+
+              <p className="max-w-xl text-sm leading-relaxed text-white/40">
+                A disciplined framework for institutional clarity, strategic
+                execution, and enduring governance.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/canon"
+                  className="inline-flex items-center gap-2 bg-white px-5 py-2.5 text-[9px] uppercase tracking-wider text-black transition-all hover:bg-[#8A6A2F] hover:text-white"
+                >
+                  Explore Doctrine
+                  <ArrowRight className="h-3 w-3" />
                 </Link>
+
+                <Link
+                  href="/consulting/strategy-room"
+                  className="inline-flex items-center gap-2 border border-white/20 px-5 py-2.5 text-[9px] uppercase tracking-wider text-white/70 transition-all hover:border-[#8A6A2F] hover:text-[#8A6A2F]"
+                >
+                  Strategy Room
+                </Link>
+              </div>
             </div>
-          </section>
+          </div>
 
-          {/* THE ASSET INDEX */}
-          <div className="divide-y divide-white/5 border-y border-white/5">
-            {briefs.map((brief, index) => (
-              <Link
-                key={brief.id}
-                href={`/strategy/${brief.slug}`}
-                className="group flex flex-col md:flex-row md:items-center justify-between py-12 px-4 bg-transparent hover:bg-white/[0.02] transition-all duration-700 relative overflow-hidden"
-              >
-                <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-[#8A6A2F] scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-bottom" />
+          <SectionHeader
+            icon={Activity}
+            title="Command Center"
+            description="Real-time institutional metrics and intelligence"
+          />
 
-                <div className="flex items-start md:items-center gap-12 relative z-10">
-                  <span className="hidden md:block text-[10px] font-mono text-zinc-800 group-hover:text-[#8A6A2F] transition-colors mt-1">
-                    [ {String(index + 1).padStart(2, '0')} ]
-                  </span>
-                  <div className="space-y-3">
-                    <h2 className="text-3xl md:text-4xl font-light text-zinc-400 group-hover:text-white transition-colors tracking-tighter font-serif">
+          <div className="mb-20 grid grid-cols-1 gap-5 md:grid-cols-3">
+            <StatCard
+              label="Systemic Resonance"
+              value={isLoadingMetrics ? "--" : `${liveResonance}%`}
+              trend={3}
+              icon={Target}
+            />
+            <StatCard label="Active Briefs" value={totalCount} icon={BookOpen} />
+            <StatCard
+              label="Deal Flow"
+              value={dealFlowStats?.strategy || 0}
+              trend={12}
+              icon={Briefcase}
+            />
+          </div>
+
+          <div className="mb-20 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="border border-white/10 bg-white/[0.02] p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Target className="h-3.5 w-3.5 text-[#8A6A2F]" />
+                <span className="text-[8px] uppercase tracking-wider text-white/40">
+                  Systemic Resonance
+                </span>
+              </div>
+              <div className="py-2 text-center">
+                <div className="mb-2 text-4xl font-light tracking-tight text-white">
+                  {isLoadingMetrics ? "--" : liveResonance}%
+                </div>
+                <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full bg-[#8A6A2F] transition-all duration-500"
+                    style={{
+                      width: `${isLoadingMetrics ? 0 : liveResonance}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-white/10 bg-white/[0.02] p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Heart className="h-3.5 w-3.5 text-[#8A6A2F]" />
+                <span className="text-[8px] uppercase tracking-wider text-white/40">
+                  Human Capital
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 py-2">
+                <div>
+                  <p className="text-[7px] text-white/30">Burnout Index</p>
+                  <p className="text-2xl font-light text-white">
+                    42<span className="text-xs text-white/40">%</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[7px] text-white/30">Utilization</p>
+                  <p className="text-2xl font-light text-white">
+                    68<span className="text-xs text-white/40">%</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-white/10 bg-white/[0.02] p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <FileText className="h-3.5 w-3.5 text-[#8A6A2F]" />
+                <span className="text-[8px] uppercase tracking-wider text-white/40">
+                  Asset Intelligence
+                </span>
+              </div>
+              <PdfAnalyticsWidget />
+            </div>
+          </div>
+
+          <SectionHeader
+            icon={CreditCard}
+            title="Client Entitlements & Chain of Custody"
+            description="Active subscriptions, grants, and report visibility"
+          />
+
+          <div className="mb-20 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <BillingEntitlementsPanel
+              email={userEmail}
+              entitlements={entitlements}
+            />
+            <DiagnosticLineagePanel events={lineageEvents} />
+            <MyReportsPanel reports={reports} />
+          </div>
+
+          {aol.isInternal ? (
+            <div className="mb-20">
+              <SectionHeader
+                icon={Crown}
+                title="Admin Controls"
+                description="Processing and retention controls"
+              />
+              <AdminJobsPanel />
+            </div>
+          ) : null}
+
+          {dealFlowStats && dealFlowStats.submissions?.length > 0 ? (
+            <div className="mb-20">
+              <SectionHeader
+                icon={Brain}
+                title="Deal Intelligence"
+                description="Institutional assessment of qualified opportunities"
+              />
+              <div className="border border-white/10 bg-white/[0.02] p-6">
+                <SovereignDashboard
+                  result={{
+                    route: "STRATEGY",
+                    priority: "SOVEREIGN",
+                    fusedScore: dealFlowStats.avg || 75,
+                    routeConfidence: dealFlowStats.ai?.avgAiConfidence || 70,
+                    temperature: "HOT",
+                    rationale: [
+                      `${dealFlowStats.strategy} chamber-qualified opportunities identified`,
+                      `${dealFlowStats.ai?.highQualityDeals || 0} high-quality institutional signals`,
+                      "Active deal flow with strategic alignment indicators",
+                    ],
+                  }}
+                  input={{
+                    ruleScore: dealFlowStats.avg || 75,
+                    aiScore: dealFlowStats.avg || 75,
+                    authority: true,
+                    problem: "Institutional pipeline analysis",
+                    urgency: "Active",
+                    revenue: 1000000,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {featuredBriefs.length > 0 ? (
+            <>
+              <SectionHeader icon={TrendingUp} title="Featured Intelligence" />
+              <div className="mb-20 grid grid-cols-1 gap-5 md:grid-cols-2">
+                {featuredBriefs.slice(0, 2).map((brief) => (
+                  <Link
+                    key={brief.id}
+                    href={`/strategy/${brief.slug}`}
+                    className="group border border-white/10 bg-white/[0.02] p-6 transition-all hover:border-[#8A6A2F]/30"
+                  >
+                    <h3 className="mb-2 text-lg font-light tracking-tight text-white transition-colors group-hover:text-[#8A6A2F]">
                       {brief.title}
-                    </h2>
-                    <div className="flex items-center gap-4">
-                      <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-700 group-hover:text-zinc-500 transition-colors">
-                        Classification: Level {aol.isInternal ? "Directorate" : "Inner-Circle"}
+                    </h3>
+                    {brief.excerpt ? (
+                      <p className="line-clamp-2 text-xs text-white/40 transition-colors group-hover:text-white/60">
+                        {brief.excerpt}
                       </p>
-                      <span className="h-px w-8 bg-zinc-800 group-hover:bg-[#8A6A2F]/30 transition-colors" />
-                      <span className="text-[9px] font-mono text-zinc-800 uppercase">
-                        {new Date(brief.createdAt).toLocaleDateString('en-GB')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                    ) : null}
+                  </Link>
+                ))}
+              </div>
+            </>
+          ) : null}
 
-                <div className="mt-8 md:mt-0 flex items-center gap-6 relative z-10">
-                  <span className="text-[9px] uppercase tracking-[0.4em] text-zinc-800 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-4 transition-all duration-700 font-mono">
-                    View Dossier
-                  </span>
-                  <div className="p-3 border border-white/5 group-hover:border-[#8A6A2F]/40 group-hover:bg-[#8A6A2F]/5 transition-all duration-500">
-                    <ChevronRight className="h-4 w-4 text-zinc-800 group-hover:text-[#8A6A2F] group-hover:translate-x-1 transition-all" />
-                  </div>
-                </div>
-              </Link>
+          <SectionHeader icon={Clock} title="Recent Intelligence" />
+          <div className="mb-20 divide-y divide-white/5">
+            {recentBriefs.slice(0, 8).map((brief, idx) => (
+              <BriefRow key={brief.id} brief={brief} index={idx} />
             ))}
           </div>
 
-          {/* INSTITUTIONAL FOOTER */}
-          <footer className="mt-40 pt-24 border-t border-white/5 flex flex-col items-center gap-12">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-[#8A6A2F]/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-6 rounded-full bg-[#0A0A0A] border border-white/5">
-                <Fingerprint className="h-8 w-8 text-zinc-800 group-hover:text-[#8A6A2F] transition-colors" />
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex flex-wrap justify-center gap-x-16 gap-y-4 text-[9px] uppercase tracking-[0.5em] text-zinc-700 font-mono">
-                <span>Identity Validated</span>
-                <span>Node: LONDON_CANARY_WHARF</span>
-                <span>Protocol: V.2026.BETA</span>
-              </div>
-              <p className="text-sm text-zinc-800 italic font-serif tracking-[0.2em] opacity-50 text-center">
-                Abraham of London — The Architecture of Sovereign Intelligence
-              </p>
-            </div>
-          </footer>
+          <Divider />
+          <Footer />
         </div>
       </main>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+/* -------------------------------------------------------------------------- */
+/* SERVER                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
+  context
+) => {
   const session = await getServerSession(context.req, context.res, authOptions);
+  const isOgrValid = hasValidOgrSessionFromContext(context);
 
   if (!session) {
     return {
@@ -172,38 +709,224 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  if (!isOgrValid) {
+    return {
+      redirect: {
+        destination: "/sovereign/authorize?returnTo=/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
   try {
-    const [briefs, totalCount] = await Promise.all([
-      prisma.contentMetadata.findMany({
-        take: 75,
+    const userEmail = resolveAuthenticatedEmail(session);
+    const normalizedEmail = userEmail.toLowerCase();
+
+    const entitlementsRaw = await prisma.clientEntitlement.findMany({
+      where: { email: normalizedEmail },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+
+    const entitlements: EntitlementItem[] = entitlementsRaw.map((e) => ({
+      productCode: e.productCode,
+      tier: e.tier,
+      status: e.status,
+      endsAt: e.endsAt ? e.endsAt.toISOString() : null,
+    }));
+
+    const grantsRaw = await prisma.diagnosticArtifactAccessGrant.findMany({
+      where: {
+        granteeEmail: normalizedEmail,
+        status: { in: ["active", "expired", "revoked"] },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    const artifactIds = Array.from(
+      new Set(grantsRaw.map((g) => g.artifactId).filter(Boolean))
+    );
+
+    const diagnosticRefs = Array.from(
+      new Set(grantsRaw.map((g) => g.diagnosticRef).filter(Boolean))
+    );
+
+    const artifactsRaw =
+      artifactIds.length > 0
+        ? await prisma.diagnosticArtifact.findMany({
+            where: {
+              id: { in: artifactIds },
+            },
+            orderBy: { createdAt: "desc" },
+          })
+        : [];
+
+    const artifactsById = new Map(artifactsRaw.map((a) => [a.id, a]));
+
+    const reports: ReportItem[] = grantsRaw
+      .map((grant) => {
+        const artifact = artifactsById.get(grant.artifactId);
+        if (!artifact) return null;
+
+        return {
+          id: artifact.id,
+          diagnosticRef: artifact.diagnosticRef,
+          fileName: artifact.fileName,
+          version: artifact.version,
+          createdAt: artifact.createdAt.toISOString(),
+          downloadUrl: `/api/diagnostics/reports/download/${artifact.id}`,
+          status: grant.status,
+          kind: artifact.kind,
+          retentionClass: artifact.retentionClass,
+        };
+      })
+      .filter((item): item is ReportItem => Boolean(item));
+
+    const lineageEventsRaw =
+      diagnosticRefs.length > 0
+        ? await prisma.diagnosticLineageEvent.findMany({
+            where: {
+              diagnosticRef: { in: diagnosticRefs },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 20,
+          })
+        : [];
+
+    const lineageEvents: LineageItem[] = lineageEventsRaw.map((e) => ({
+      id: e.id,
+      eventType: e.eventType,
+      version: e.version,
+      actor: e.actor,
+      createdAt: e.createdAt.toISOString(),
+    }));
+
+    const allContent = await prisma.contentMetadata.findMany({
+      take: 50,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        summary: true,
+        createdAt: true,
+        contentType: true,
+        metadata: true,
+      },
+    });
+
+    const briefs: Brief[] = allContent.map((b) => {
+      const metadata = (b.metadata || {}) as Record<string, unknown>;
+      const category =
+        safeString(metadata.category) ||
+        safeString(metadata.series) ||
+        safeString(b.contentType, "Brief");
+
+      return {
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        excerpt: b.summary || null,
+        createdAt: b.createdAt.toISOString(),
+        category,
+      };
+    });
+
+    const totalCount = await prisma.contentMetadata.count();
+
+    const featuredBriefs = briefs
+      .filter((b) => {
+        const title = b.title.toLowerCase();
+        const category = safeString(b.category).toLowerCase();
+        return category.includes("featured") || title.includes("strategic");
+      })
+      .slice(0, 2);
+
+    const recentBriefs = briefs.slice(0, 8);
+
+    let dealFlowStats: DashboardProps["dealFlowStats"] = null;
+
+    try {
+      const submissions = await prisma.dealFlowSubmission.findMany({
         orderBy: { createdAt: "desc" },
+        take: 100,
         select: {
           id: true,
-          title: true,
-          slug: true,
-          createdAt: true,
-        }
-      }),
-      prisma.contentMetadata.count(),
-    ]);
+          score: true,
+          route: true,
+          aiScore: true,
+          aiConfidence: true,
+          aiDealQuality: true,
+        },
+      });
+
+      if (submissions.length > 0) {
+        const strategy = submissions.filter(
+          (s) => safeString(s.route).toUpperCase() === "STRATEGY"
+        ).length;
+
+        const avg =
+          submissions.reduce((acc, s) => acc + (s.score || 0), 0) /
+          submissions.length;
+
+        const highQualityDeals = submissions.filter((s) =>
+          ["ELITE", "HIGH"].includes(
+            safeString(s.aiDealQuality).toUpperCase()
+          )
+        ).length;
+
+        const avgAiConfidence =
+          submissions.reduce((acc, s) => acc + (s.aiConfidence || 0), 0) /
+          submissions.length;
+
+        dealFlowStats = {
+          strategy,
+          avg,
+          ai: {
+            highQualityDeals,
+            avgAiConfidence: Math.round(avgAiConfidence * 100),
+          },
+          submissions,
+        };
+      }
+    } catch (error) {
+      console.warn("[dashboard] Deal flow stats unavailable:", error);
+    }
 
     return {
       props: {
-        userEmail: session.user?.email || "anonymous",
-        briefs: JSON.parse(JSON.stringify(briefs)),
+        briefs,
         totalCount,
-        aol: (session as any).aol || { tier: "Private", isInternal: false }
-      }
+        userEmail: normalizedEmail,
+        featuredBriefs,
+        recentBriefs,
+        aol: (session as any).aol || {
+          tier: "Inner Circle",
+          isInternal: false,
+        },
+        dealFlowStats,
+        entitlements,
+        lineageEvents,
+        reports,
+      },
     };
   } catch (error) {
-    console.error("[Registry Fetch Error]:", error);
+    console.error("[Dashboard Fetch Error]:", error);
+
     return {
       props: {
-        userEmail: session.user?.email || "anonymous",
+        userEmail: "seunadaramola@gmail.com",
         briefs: [],
         totalCount: 0,
-        aol: { tier: "Private", isInternal: false }
-      }
+        featuredBriefs: [],
+        recentBriefs: [],
+        aol: { tier: "Inner Circle", isInternal: false },
+        dealFlowStats: null,
+        entitlements: [],
+        lineageEvents: [],
+        reports: [],
+      },
     };
   }
 };

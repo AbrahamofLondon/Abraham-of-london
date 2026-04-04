@@ -1,9 +1,11 @@
 // pages/api/resources/strategic-frameworks/[...slug].ts
-// — Strategic Frameworks unlock proxy (nested), SSOT-backed
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { getAccessCookie } from "@/lib/server/auth/cookies";
+import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -13,6 +15,8 @@ type Ok = {
   tier: AccessTier;
   requiredTier: AccessTier;
   bodyCode: string;
+  compressed: true;
+  encoding: "gzip-base64";
   slugResolved: string;
 };
 
@@ -83,7 +87,6 @@ export default async function handler(
   const cleanedTail = tail.replace(/^strategic-frameworks\//i, "");
   const altA = `resources/strategic-frameworks/${cleanedTail}`;
   const altB = `content/resources/strategic-frameworks/${cleanedTail}`;
-
   const altC = tail.startsWith("resources/") ? tail : `resources/${tail}`;
   const altD = tail.startsWith("content/resources/") ? tail : `content/resources/${tail}`;
 
@@ -115,15 +118,23 @@ export default async function handler(
   }
 
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const bodyCode = String(doc?.body?.code || doc?.bodyCode || "");
+  const slugResolved = norm(
+    String(doc?.slug || doc?._raw?.flattenedPath || tries[0] || tail),
+  );
 
   if (requiredTier === "public") {
-    return res.status(200).json({
-      ok: true,
-      tier: "public",
-      requiredTier: "public",
-      bodyCode: doc.body?.code || doc.bodyCode || "",
-      slugResolved: norm(String(doc?.slug || doc?._raw?.flattenedPath || tries[0] || tail)),
-    });
+    return sendCompressedBodyCode(
+      res,
+      {
+        ok: true,
+        tier: "public",
+        requiredTier: "public",
+        slugResolved,
+        bodyCode,
+      },
+      200,
+    );
   }
 
   const sessionId = getAccessCookie(req);
@@ -141,11 +152,21 @@ export default async function handler(
     return res.status(403).json({ ok: false, reason: "INSUFFICIENT_CLEARANCE" });
   }
 
-  return res.status(200).json({
-    ok: true,
-    tier: userTier,
-    requiredTier,
-    bodyCode: doc.body?.code || doc.bodyCode || "",
-    slugResolved: norm(String(doc?.slug || doc?._raw?.flattenedPath || tries[0] || tail)),
-  });
+  return sendCompressedBodyCode(
+    res,
+    {
+      ok: true,
+      tier: userTier,
+      requiredTier,
+      slugResolved,
+      bodyCode,
+    },
+    200,
+  );
 }
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};

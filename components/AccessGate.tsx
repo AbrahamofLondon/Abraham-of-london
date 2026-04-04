@@ -1,16 +1,22 @@
-/* components/AccessGate.tsx — Optimized for Unified Vault */
+/* components/AccessGate.tsx — V7.1 CANONICAL ALIGNED */
 "use client";
 
-import React from "react";
-import { Shield, Lock, ArrowRight, Loader2, Key, CheckCircle2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Shield, Lock, Loader2, CheckCircle2 } from "lucide-react";
 import clsx from "clsx";
-import tiers, { type AccessTier } from "@/lib/access/tiers";
-import { getTierLabelAny } from "@/lib/access/aol-tier-bridge";
+
+// Import directly from your SSOT (Single Source of Truth)
+import { 
+  normalizeUserTier, 
+  hasAccess, 
+  TIER_LABELS, 
+  type AccessTier 
+} from "@/lib/access/tier-policy";
 import { clearAccessCache } from "@/lib/inner-circle/access.client";
 
 interface AccessGateProps {
   title: string;
-  message?: string; // Made optional
+  message?: string;
   requiredTier: AccessTier;
   userTier?: AccessTier | string | null;
   onUnlocked?: (tier: AccessTier) => void;
@@ -25,35 +31,41 @@ export default function AccessGate({
   onUnlocked,
   onGoToJoin,
 }: AccessGateProps) {
-  const [token, setToken] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [token, setToken] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const required = tiers.normalizeRequired(requiredTier);
-  const user = tiers.normalizeUser(userTier ?? "public");
-  
-  // Logical check: Does the current user session satisfy the document requirement?
-  const alreadyHasAccess = required === "public" || tiers.hasAccess(user, required);
-  const requiredLabel = getTierLabelAny(required);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  // If access is already granted, show the "Protocol Cleared" screen
-  if (alreadyHasAccess) {
+  // Use the Canonical V7.1 Policy Engine
+  const uTier = normalizeUserTier(userTier);
+  const isCleared = hasAccess(uTier, requiredTier);
+  const requiredLabel = TIER_LABELS[requiredTier] || "Restricted";
+
+  if (!mounted) return <div className="min-h-[400px] bg-black" />;
+
+  // 1. CLEARANCE VERIFIED SCREEN
+  if (isCleared) {
     return (
-      <div className="flex items-center justify-center py-20 px-4">
+      <div className="flex items-center justify-center py-20 px-4 animate-in fade-in duration-700">
         <div className="w-full max-w-md border border-white/10 bg-zinc-950 shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.02] px-4 py-2">
             <div className="flex items-center gap-2">
               <Shield size={10} className="text-emerald-500" />
               <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">Protocol // Cleared</span>
             </div>
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </div>
           <div className="p-10 text-center">
             <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500 mb-6" />
             <h2 className="font-serif text-2xl italic text-white">{title}</h2>
-            <p className="mt-4 text-sm text-zinc-500 italic">Clearance verified. System ready.</p>
+            <p className="mt-4 text-sm text-zinc-500 italic">Clearance confirmed at {TIER_LABELS[uTier]} level.</p>
             <button
-              onClick={() => onUnlocked ? onUnlocked(user) : window.location.reload()}
+              onClick={() => onUnlocked ? onUnlocked(uTier) : window.location.reload()}
               className="mt-8 w-full border border-emerald-500/20 bg-emerald-500 px-6 py-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-black hover:bg-white transition-all"
             >
               Enter Vault
@@ -64,6 +76,7 @@ export default function AccessGate({
     );
   }
 
+  // 2. DECRYPTION / ACCESS FORM
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -78,14 +91,13 @@ export default function AccessGate({
       });
 
       const j = await r.json();
-      if (!r.ok || !j?.ok) throw new Error(j?.reason || "INVALID_KEY");
+      if (!r.ok || !j?.ok) throw new Error(j?.reason || "INVALID_PROTOCOL_KEY");
 
       setSuccess(true);
       clearAccessCache();
       
-      // Delay to show success state before reloading/unlocking
       setTimeout(() => {
-        if (onUnlocked) onUnlocked(j.tier);
+        if (onUnlocked) onUnlocked(j.tier as AccessTier);
         else window.location.reload();
       }, 800);
     } catch (err: any) {
@@ -96,9 +108,8 @@ export default function AccessGate({
   };
 
   return (
-    <div className="flex items-center justify-center py-20 px-4">
+    <div className="flex items-center justify-center py-20 px-4 animate-in fade-in slide-in-from-bottom-4">
       <div className="w-full max-w-md border border-white/10 bg-zinc-950 shadow-2xl">
-        {/* Top Status Bar */}
         <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.02] px-4 py-2">
           <div className="flex items-center gap-2">
             <Lock size={10} className={success ? "text-emerald-500" : "text-amber-500"} />
@@ -111,7 +122,7 @@ export default function AccessGate({
 
         <div className="p-8 text-center">
           <h2 className="font-serif text-2xl italic text-white">{title}</h2>
-          <p className="mt-3 text-xs text-zinc-500 italic">"{message}"</p>
+          <p className="mt-3 text-xs text-zinc-500 italic leading-relaxed">"{message}"</p>
           <div className="mt-6 inline-flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-4 py-1.5 font-mono text-[9px] uppercase tracking-widest text-amber-500">
             Required: {requiredLabel}
           </div>
@@ -124,7 +135,7 @@ export default function AccessGate({
             onChange={(e) => setToken(e.target.value)}
             disabled={busy || success}
             placeholder="ENTER PROTOCOL KEY"
-            className="w-full bg-white/[0.02] border border-white/10 px-4 py-4 font-mono text-xs text-center tracking-[0.2em] focus:border-amber-500/50 outline-none transition-all"
+            className="w-full bg-white/[0.02] border border-white/10 px-4 py-4 font-mono text-xs text-center tracking-[0.2em] focus:border-amber-500/50 outline-none transition-all text-white"
           />
           {error && <p className="text-[9px] font-mono text-red-500 uppercase text-center tracking-widest">{error}</p>}
           
@@ -142,7 +153,7 @@ export default function AccessGate({
           <button
             type="button"
             onClick={onGoToJoin || (() => window.location.assign("/inner-circle"))}
-            className="w-full text-[9px] font-mono uppercase text-zinc-600 hover:text-white transition-colors pt-2 tracking-widest"
+            className="w-full text-[9px] font-mono uppercase text-zinc-600 hover:text-white transition-colors pt-4 tracking-widest"
           >
             Request Access // Inner Circle
           </button>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/index.tsx — HOMEPAGE (SSR-stable, no hidden first paint, no client-only homepage shell)
+// pages/index.tsx — HOMEPAGE (Institutional, Route-Disciplined, Playbooks Surfaced)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -13,7 +13,6 @@ import {
   Sparkles,
   ChevronRight,
   Compass,
-  Vault,
   AlertTriangle,
   BookOpen,
   ScrollText,
@@ -25,6 +24,8 @@ import {
   Briefcase,
   FileText,
   Eye,
+  Archive,
+  Workflow,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -37,6 +38,9 @@ import EventsSection from "@/components/homepage/EventsSection";
 import ContentShowcase from "@/components/homepage/ContentShowcase";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import InstitutionalClose from "@/components/homepage/InstitutionalClose";
+import ExecutiveReportingFlagship from "@/components/homepage/ExecutiveReportingFlagship";
+import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
+import StrategyRoomIntegration from "@/components/consulting/StrategyRoomIntegration";
 import { CanonInstitutionalIntro, OperatorBriefing } from "@/components/homepage";
 import type { CanonPrelude } from "@/components/homepage/CanonInstitutionalIntro";
 
@@ -84,13 +88,32 @@ type PublicationItem = {
   readingTime?: string | null;
   documentId?: string | null;
   href: string;
-  pdfHref: string;
+  pdfHref: string | null;
+};
+
+type PlaybookItem = {
+  slug: string;
+  title: string;
+  description?: string | null;
+  difficulty?: string | null;
+  playbookType?: string | null;
+  estimatedTime?: string | null;
+  href: string;
+};
+
+type FeaturedRoute = {
+  title: string;
+  href: string;
+  description: string;
+  eyebrow: string;
+  icon: React.ReactNode;
 };
 
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
   featuredPublications: PublicationItem[];
+  featuredPlaybooks: PlaybookItem[];
   events: EventItem[];
   canonPrelude: CanonPrelude;
   counts: {
@@ -100,8 +123,57 @@ type HomePageProps = {
     downloads: number;
     library: number;
     publications: number;
+    playbooks: number;
   };
 };
+
+/* -----------------------------------------------------------------------------
+  VERIFIED DESTINATIONS
+----------------------------------------------------------------------------- */
+const FEATURED_DESTINATIONS: FeaturedRoute[] = [
+  {
+    title: "Canon",
+    href: "/canon",
+    description: "Doctrine, purpose, governance, civilisation, and the long-form spine of the platform.",
+    eyebrow: "Doctrine",
+    icon: <Compass className="h-4 w-4" />,
+  },
+  {
+    title: "Editorials",
+    href: "/editorials",
+    description: "Flagship essays, formal publications, and institutional written property.",
+    eyebrow: "Publications",
+    icon: <ScrollText className="h-4 w-4" />,
+  },
+  {
+    title: "Playbooks",
+    href: "/playbooks",
+    description: "Execution-grade frameworks for leaders, operators, and institutions under pressure.",
+    eyebrow: "Execution",
+    icon: <Workflow className="h-4 w-4" />,
+  },
+  {
+    title: "Resources",
+    href: "/resources",
+    description: "Structured tools, frameworks, and reference assets.",
+    eyebrow: "Frameworks",
+    icon: <LibraryBig className="h-4 w-4" />,
+  },
+  {
+    title: "Vault Briefs",
+    href: "/vault/briefs",
+    description: "Operator-grade briefings, dossiers, and premium intelligence.",
+    eyebrow: "Intelligence",
+    icon: <FileText className="h-4 w-4" />,
+  },
+  {
+    title: "Consulting",
+    href: "/consulting",
+    description: "Private advisory, diagnostics, board-grade problem solving, and decision architecture.",
+    eyebrow: "Advisory",
+    icon: <Briefcase className="h-4 w-4" />,
+  },
+];
 
 /* -----------------------------------------------------------------------------
   DESIGN SYSTEM COMPONENTS
@@ -332,14 +404,84 @@ function PublicationCard({ item }: { item: PublicationItem }) {
             Open Page <ChevronRight className="h-4 w-4" />
           </Link>
 
-          <a
-            href={item.pdfHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+          {item.pdfHref ? (
+            <a
+              href={item.pdfHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+            >
+              Open PDF <ArrowRight className="h-4 w-4" />
+            </a>
+          ) : null}
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function PlaybookCard({ item }: { item: PlaybookItem }) {
+  return (
+    <Panel>
+      <div className="p-6 md:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+            {item.playbookType || "Playbook"}
+          </div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-white/45">
+            {item.difficulty || "Advanced"}
+          </div>
+        </div>
+
+        <h3 className="mt-5 font-serif text-2xl leading-tight text-white">
+          {item.title}
+        </h3>
+
+        {item.description ? (
+          <p className="mt-4 text-sm leading-relaxed text-white/70">
+            {item.description}
+          </p>
+        ) : null}
+
+        <div className="mt-5 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+          {item.estimatedTime ? <span>{item.estimatedTime}</span> : null}
+          <span>Execution Asset</span>
+        </div>
+
+        <div className="mt-7">
+          <Link
+            href={item.href}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
           >
-            Open PDF <ArrowRight className="h-4 w-4" />
-          </a>
+            Open Playbook <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function RouteCard({ item }: { item: FeaturedRoute }) {
+  return (
+    <Panel>
+      <div className="p-6 md:p-8">
+        <div className="flex items-center gap-3 text-amber-300/85">
+          {item.icon}
+          <div className="text-[10px] font-mono uppercase tracking-[0.34em]">
+            {item.eyebrow}
+          </div>
+        </div>
+
+        <h3 className="mt-5 font-serif text-2xl text-white">{item.title}</h3>
+        <p className="mt-4 text-sm leading-relaxed text-white/70">{item.description}</p>
+
+        <div className="mt-7">
+          <Link
+            href={item.href}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
+          >
+            Enter <ChevronRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </Panel>
@@ -385,7 +527,7 @@ function DiagnosticEntryCard() {
         </div>
 
         <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
-          Paid clarity before mandate work.
+          Commission diagnostic review before mandate work.
         </h3>
 
         <p className="mt-4 text-sm leading-relaxed text-white/70">
@@ -412,13 +554,6 @@ function DiagnosticEntryCard() {
             className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
           >
             Enter Diagnostics <ChevronRight className="h-4 w-4" />
-          </Link>
-
-          <Link
-            href="/purpose-alignment"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
-          >
-            Run Instrument <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -468,7 +603,7 @@ function AdvisoryPathCard() {
           </Link>
 
           <Link
-            href="/consulting/strategy-room"
+            href="/strategy-room"
             className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
           >
             Enter Strategy Room <ArrowRight className="h-4 w-4" />
@@ -479,9 +614,6 @@ function AdvisoryPathCard() {
   );
 }
 
-/* -----------------------------------------------------------------------------
-  FAILSAFE UI
------------------------------------------------------------------------------ */
 function InlineFail({ label, hint }: { label: string; hint?: string }) {
   return (
     <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-6">
@@ -521,37 +653,6 @@ class ModuleBoundary extends React.Component<
   }
 }
 
-function SectionSkeleton({ label }: { label: string }) {
-  return (
-    <div className="animate-pulse rounded-[30px] border border-white/12 bg-white/[0.055] p-10">
-      <div className="flex items-center justify-between gap-4">
-        <div className="h-10 w-10 rounded-2xl bg-white/10" />
-        <div className="h-6 w-28 rounded-full bg-white/10" />
-      </div>
-      <div className="mt-6 h-7 w-64 rounded bg-white/10" />
-      <div className="mt-8 text-[10px] font-mono uppercase tracking-[0.3em] text-white/55">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function ContentShowcaseSkeleton() {
-  return (
-    <div className="rounded-[30px] border border-white/12 bg-white/[0.055] p-10">
-      <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-32 animate-pulse rounded-2xl border border-white/12 bg-black/40"
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* -----------------------------------------------------------------------------
   HOMEPAGE COMPONENT
 ----------------------------------------------------------------------------- */
@@ -559,6 +660,7 @@ const HomePage: NextPage<HomePageProps> = ({
   featuredShorts = [],
   featuredBriefing = null,
   featuredPublications = [],
+  featuredPlaybooks = [],
   events = [],
   counts = {
     shorts: 0,
@@ -567,6 +669,7 @@ const HomePage: NextPage<HomePageProps> = ({
     downloads: 0,
     library: 0,
     publications: 0,
+    playbooks: 0,
   },
   canonPrelude,
 }) => {
@@ -586,14 +689,14 @@ const HomePage: NextPage<HomePageProps> = ({
       tag: "Primary",
     },
     {
-      href: "/diagnostics",
-      title: "Run Diagnostics",
+      href: "/diagnostics/executive-reporting",
+      title: "View Executive Reporting",
       description:
-        "Paid clarity for individuals, teams, and institutions before advisory escalation.",
-      tag: "Diagnostic",
+        "Premium reporting for founders, boards, leadership teams, and institutions before advisory escalation.",
+      tag: "Flagship",
     },
     {
-      href: "/consulting/strategy-room",
+      href: "/strategy-room",
       title: "Enter Strategy Room",
       description:
         "For high-consequence decisions requiring documented thinking, trade-offs, and control.",
@@ -604,15 +707,14 @@ const HomePage: NextPage<HomePageProps> = ({
   return (
     <Layout
       title="Abraham of London"
-      description="Institutional doctrine, diagnostics, disciplined strategy, editorial canon, and deployable assets for builders."
+      description="Institutional doctrine, diagnostics, disciplined strategy, editorial canon, playbooks, and deployable assets for builders."
       canonicalUrl="/"
       fullWidth
       headerTransparent
     >
-
-   <Head>
+      <Head>
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="/assets/images/social/og-home.jpg" />
+        <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
       <section className="relative bg-black">
@@ -624,13 +726,15 @@ const HomePage: NextPage<HomePageProps> = ({
         />
       </section>
 
+      <ExecutiveReportingFlagship />
+
       <Section id="prelude" variant="surface" cap="Prelude — doctrinal gateway">
         <AnchorOffset id="prelude" />
 
         <HQHeader
           eyebrow="Prelude"
           title="The gateway to the whole system."
-          description="Not a blog. Not a personality platform. Doctrine, diagnostics, strategy, deployables, and private mandate work arranged as one disciplined architecture."
+          description="Not a blog. Not a personality platform. Doctrine, diagnostics, strategy, playbooks, deployables, and private mandate work arranged as one disciplined architecture."
           icon={<Layers className="h-4 w-4" />}
         />
 
@@ -638,7 +742,8 @@ const HomePage: NextPage<HomePageProps> = ({
           items={[
             { href: "/canon", label: "Canon", icon: <Compass className="h-3.5 w-3.5" /> },
             { href: "/editorials", label: "Editorials", icon: <BookOpen className="h-3.5 w-3.5" /> },
-            { href: "/vault", label: "Vault", icon: <Vault className="h-3.5 w-3.5" /> },
+            { href: "/playbooks", label: "Playbooks", icon: <Workflow className="h-3.5 w-3.5" /> },
+            { href: "/vault/briefs", label: "Briefs", icon: <FileText className="h-3.5 w-3.5" /> },
             { href: "/diagnostics", label: "Diagnostics", icon: <ScanSearch className="h-3.5 w-3.5" /> },
             { href: "/consulting", label: "Advisory", icon: <Briefcase className="h-3.5 w-3.5" /> },
           ]}
@@ -654,7 +759,7 @@ const HomePage: NextPage<HomePageProps> = ({
           </Panel>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 lg:grid-cols-4">
           <OperatingStat
             label="Registry"
             value={String(counts.library)}
@@ -668,11 +773,23 @@ const HomePage: NextPage<HomePageProps> = ({
             icon={<ScrollText className="h-5 w-5" />}
           />
           <OperatingStat
+            label="Playbooks"
+            value={String(counts.playbooks)}
+            body="Execution-grade frameworks for operators who need more than inspiration."
+            icon={<Workflow className="h-5 w-5" />}
+          />
+          <OperatingStat
             label="Deployables"
             value={String(counts.downloads)}
-            body="Execution-grade assets, templates, and controlled operating resources."
-            icon={<Vault className="h-5 w-5" />}
+            body="Execution assets, templates, and controlled operating resources."
+            icon={<Archive className="h-5 w-5" />}
           />
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {FEATURED_DESTINATIONS.map((item) => (
+            <RouteCard key={item.href} item={item} />
+          ))}
         </div>
 
         <div className="mt-10">
@@ -717,7 +834,7 @@ const HomePage: NextPage<HomePageProps> = ({
                     {
                       n: "03",
                       t: "System-first",
-                      d: "A living platform: doctrine, diagnostics, editorial property, deployables, and controlled engagement paths.",
+                      d: "A living platform: doctrine, diagnostics, editorial property, playbooks, deployables, and controlled engagement paths.",
                     },
                   ].map((x) => (
                     <div key={x.n} className="border-l border-amber-500/25 pl-5">
@@ -775,7 +892,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
         <HQHeader
           eyebrow="Diagnostics"
-          title="A paid entry layer for serious operators."
+          title="Commission diagnostic review before escalation."
           description="Not every issue warrants immediate advisory. Some require a disciplined reading of drift, weakness, misalignment, and correction priority."
           icon={<Activity className="h-4 w-4" />}
         />
@@ -829,39 +946,83 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      {featuredPublications.length > 0 ? (
-        <>
-          <Bridge text="From diagnostics → to editorial canon" />
+      <Bridge text="From diagnostics → to buyer fit" />
 
-          <Section id="publications" variant="surface" cap="Editorial canon — flagship publications">
+      <Section id="buyer-fit" variant="surface" cap="Buyer fit — who this is for">
+        <AnchorOffset id="buyer-fit" />
+        <ModuleBoundary label="ExecutiveBuyerFitSection">
+          <ExecutiveBuyerFitSection />
+        </ModuleBoundary>
+      </Section>
+
+      <Bridge text="From clarity → to intervention" />
+
+      <Section id="strategy-room" variant="default" cap="Escalation — when reporting becomes mandate">
+        <AnchorOffset id="strategy-room" />
+        <ModuleBoundary label="StrategyRoomIntegration">
+          <StrategyRoomIntegration />
+        </ModuleBoundary>
+      </Section>
+
+      {(featuredPublications.length > 0 || featuredPlaybooks.length > 0) ? (
+        <>
+          <Bridge text="From diagnostics → to editorial canon and execution" />
+
+          <Section id="publications" variant="surface" cap="Publications and playbooks — doctrine and execution">
             <AnchorOffset id="publications" />
 
             <HQHeader
-              eyebrow="Editorial Canon"
-              title="Books, flagship editorials, and institutional texts."
-              description="Publishing is not filler here. It is part of the operating system and part of the doctrine-bearing architecture of the brand."
+              eyebrow="Publications & Playbooks"
+              title="Ideas that can be read. Frameworks that can be used."
+              description="Publishing is part of the doctrine-bearing architecture of the brand. Playbooks translate that doctrine into execution."
               icon={<ScrollText className="h-4 w-4" />}
             />
 
-            <div className="mt-10 grid gap-6 lg:grid-cols-3">
-              {featuredPublications.slice(0, 3).map((item) => (
-                <PublicationCard key={item.slug} item={item} />
-              ))}
-            </div>
+            {featuredPublications.length > 0 ? (
+              <>
+                <div className="mt-10 text-[10px] font-mono uppercase tracking-[0.34em] text-white/50">
+                  Flagship Publications
+                </div>
+                <div className="mt-4 grid gap-6 lg:grid-cols-3">
+                  {featuredPublications.slice(0, 3).map((item) => (
+                    <PublicationCard key={item.slug} item={item} />
+                  ))}
+                </div>
+              </>
+            ) : null}
 
-            <div className="mt-10 flex justify-center">
+            {featuredPlaybooks.length > 0 ? (
+              <>
+                <div className="mt-12 text-[10px] font-mono uppercase tracking-[0.34em] text-white/50">
+                  Execution Playbooks
+                </div>
+                <div className="mt-4 grid gap-6 lg:grid-cols-3">
+                  {featuredPlaybooks.slice(0, 3).map((item) => (
+                    <PlaybookCard key={item.slug} item={item} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Link
                 href="/editorials"
                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
               >
                 Browse Publications <ChevronRight className="h-4 w-4" />
               </Link>
+              <Link
+                href="/playbooks"
+                className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-300 hover:bg-amber-500/18"
+              >
+                Browse Playbooks <ChevronRight className="h-4 w-4" />
+              </Link>
             </div>
           </Section>
         </>
       ) : null}
 
-      <Bridge text="From editorials → to operators" />
+      <Bridge text="From publications → to operators" />
 
       <Section id="who" variant="default" cap="Operators — target audience">
         <AnchorOffset id="who" />
@@ -891,7 +1052,7 @@ const HomePage: NextPage<HomePageProps> = ({
 
         <HQHeader
           eyebrow="Engagement"
-          title="Public signal. Paid diagnostics. Private mandate work."
+          title="Public signal. Commissioned diagnostics. Private mandate work."
           description="Clean boundaries protect trust, pricing, and seriousness. No confusion. No leakage."
           icon={<Layers className="h-4 w-4" />}
         />
@@ -972,7 +1133,7 @@ const HomePage: NextPage<HomePageProps> = ({
           eyebrow="Vault"
           title="Deployables for actual execution."
           description="Templates, packs, frameworks, and operating assets engineered for reuse, not decoration."
-          icon={<Vault className="h-4 w-4" />}
+          icon={<Archive className="h-4 w-4" />}
         />
 
         <div className="mt-10">
@@ -1118,6 +1279,14 @@ function pickBooleanFlag(d: any): boolean {
   );
 }
 
+function fileExistsInPublic(relPath: string): boolean {
+  try {
+    return fs.existsSync(path.join(process.cwd(), "public", relPath.replace(/^\/+/, "")));
+  } catch {
+    return false;
+  }
+}
+
 function toItem(d: any): FeaturedItem | null {
   const k = kindLower(d);
   const fp = flattenedPath(d);
@@ -1255,6 +1424,7 @@ function collectAnyDocs(data: any): any[] {
     data?.allCanon,
     data?.allDownloads,
     data?.allBooks,
+    data?.allPlaybooks,
     data?.documents,
   ];
 
@@ -1318,6 +1488,14 @@ function readPrintSourcePublications(): PublicationItem[] {
         null;
       const documentId = safeString(data.documentId) || null;
 
+      const preferredPdf = `/downloads/${slug}.pdf`;
+      const fallbackPdf = `/assets/downloads/${slug}.pdf`;
+      const pdfHref = fileExistsInPublic(preferredPdf)
+        ? preferredPdf
+        : fileExistsInPublic(fallbackPdf)
+        ? fallbackPdf
+        : null;
+
       return {
         slug,
         title,
@@ -1330,7 +1508,7 @@ function readPrintSourcePublications(): PublicationItem[] {
         readingTime,
         documentId,
         href: `/editorials/${slug}`,
-        pdfHref: `/assets/downloads/${slug}.pdf`,
+        pdfHref,
       };
     })
     .sort((a, b) => {
@@ -1338,6 +1516,25 @@ function readPrintSourcePublications(): PublicationItem[] {
       const db = Date.parse(b.date || "") || 0;
       return db - da;
     });
+}
+
+function readPlaybooksFromGenerated(gen: any): PlaybookItem[] {
+  const arr = Array.isArray(gen?.allPlaybooks) ? gen.allPlaybooks : [];
+  return arr
+    .filter((p: any) => !p?.draft)
+    .map((p: any) => {
+      const slug = safeString(p?.slug).replace(/^\/+|\/+$/g, "");
+      return {
+        slug,
+        title: safeString(p?.title, "Untitled Playbook"),
+        description: safeString(p?.description) || null,
+        difficulty: safeString(p?.difficulty) || null,
+        playbookType: safeString(p?.playbookType) || null,
+        estimatedTime: safeString(p?.estimatedTime) || null,
+        href: `/playbooks/${slug}`,
+      };
+    })
+    .filter((p: PlaybookItem) => !!p.slug);
 }
 
 /* -----------------------------------------------------------------------------
@@ -1348,6 +1545,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   let featuredBriefing: FeaturedItem | null = null;
   let events: EventItem[] = [];
   let featuredPublications: PublicationItem[] = readPrintSourcePublications();
+  let featuredPlaybooks: PlaybookItem[] = [];
 
   const counts = {
     shorts: 0,
@@ -1356,6 +1554,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     downloads: 0,
     library: readLibraryCount(),
     publications: featuredPublications.length,
+    playbooks: 0,
   };
 
   let canonPrelude: CanonPrelude = {
@@ -1366,12 +1565,12 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     excerpt:
       "Human flourishing is not accidental. It is architectural. This Prelude reveals the structural laws that govern human purpose and civilisational rise.",
     coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
-    href: "/books/the-architecture-of-human-purpose-landing",
+    href: "/books/the-architecture-of-human-purpose",
     canonHref: "/canon",
     ctaLabel: "Open the Prelude MiniBook",
   };
 
-  const computeFromDocs = (docsIn: any[], dataForBooks?: any) => {
+  const computeFromDocs = (docsIn: any[], dataForBooks?: any, dataForPlaybooks?: any) => {
     const stableDocs = (docsIn || []).filter((d) => !isDraftLocal(d));
 
     const shortsDocs = stableDocs.filter(
@@ -1406,6 +1605,11 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     });
 
     if (preludeBook) {
+      const rawBookSlug = safeString(preludeBook?.slug) || PRELUDE_SOURCE_FP;
+      const bareBookSlug = normalizeSlug(rawBookSlug)
+        .replace(/^books\//, "")
+        .replace(/^\/books\//, "");
+
       canonPrelude = {
         title: safeString(preludeBook?.title, canonPrelude.title),
         subtitle: safeString(preludeBook?.subtitle, canonPrelude.subtitle),
@@ -1415,11 +1619,14 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
           canonPrelude.excerpt
         ),
         coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
-        href: "/books/the-architecture-of-human-purpose-landing",
+        href: `/books/${bareBookSlug}`,
         canonHref: "/canon",
         ctaLabel: "Open the Prelude MiniBook",
       };
     }
+
+    featuredPlaybooks = readPlaybooksFromGenerated(dataForPlaybooks).slice(0, 3);
+    counts.playbooks = readPlaybooksFromGenerated(dataForPlaybooks).length;
 
     const rawEvents = stableDocs.filter(
       (d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/")
@@ -1472,7 +1679,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
     const data = getContentlayerData();
     const docs = collectAnyDocs(data);
-    computeFromDocs(docs, data);
+    computeFromDocs(docs, data, data);
 
     if (shouldForceFallback(counts, docs.length)) {
       throw new Error("FORCE_FALLBACK_TO_GENERATED");
@@ -1481,9 +1688,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     try {
       const gen: any = await import("contentlayer/generated");
       const docs = collectAnyDocs(gen);
-      computeFromDocs(docs, gen);
+      computeFromDocs(docs, gen, gen);
     } catch {
-      // keep defaults
+      // defaults remain
     }
   }
 
@@ -1492,6 +1699,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       featuredShorts,
       featuredBriefing,
       featuredPublications,
+      featuredPlaybooks,
       events,
       counts,
       canonPrelude,

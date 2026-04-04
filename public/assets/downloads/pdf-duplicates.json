@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-24T01:46:12.310Z",
+  "generatedAt": "2026-04-04T13:57:05.926Z",
   "totalDuplicateIds": 10,
   "duplicates": [
     {
@@ -16,7 +16,7 @@
       "dropped": [
         "/assets/downloads/extremism-shield.pdf"
       ],
-      "reason": "bucket(other) > type(.pdf) > size(25KB) > mtime"
+      "reason": "bucket(other) > type(.pdf) > size(44KB) > mtime"
     },
     {
       "id": "integrity",

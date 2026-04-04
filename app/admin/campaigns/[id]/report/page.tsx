@@ -1,163 +1,380 @@
-import { db } from "@/lib/db";
-import { notFound } from "next/navigation";
-import { ShieldCheck, Lock, ChevronLeft, AlertTriangle } from "lucide-react";
+// app/admin/campaigns/[id]/report/page.tsx
 import Link from "next/link";
+import {
+  ShieldCheck,
+  ChevronLeft,
+  AlertTriangle,
+  Download,
+} from "lucide-react";
+import { db } from "@/lib/db";
+
 import { DissonanceMatrix } from "@/components/admin/reporting/dissonance-matrix";
 import { InterventionProposal } from "@/components/admin/reporting/intervention-proposal";
+import { ConstitutionalRecommendationPanel } from "@/components/admin/reporting/ConstitutionalRecommendationPanel";
+import { ReportRecommendationsPanel } from "@/components/admin/reporting/ReportRecommendationsPanel";
+import { ReportEngineClient } from "@/components/admin/reporting/report-engine-client";
+import { CorrectionRegistry } from "@/components/admin/governance/correction-registry";
+import { BriefingTrigger } from "@/components/admin/governance/briefing-trigger";
+import ReportPrintButton from "./ReportPrintButton";
+import { generateExecutiveReportForCampaign } from "@/lib/admin/reporting/executive-report-service";
 
-export default async function ExecutiveReportPage({ params }: { params: { id: string } }) {
-  // 1. Fetch Campaign and Participants with established status
-  const campaign = await db.alignmentCampaign.findUnique({
-    where: { id: params.id },
-    include: { 
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
+
+type CampaignParticipant = {
+  id: string;
+  status: string;
+};
+
+type CampaignRecord = {
+  id: string;
+  organisation?: {
+    name?: string | null;
+  } | null;
+  participants?: CampaignParticipant[];
+};
+
+function ReportNotFound({ id }: { id: string }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-8">
+      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm">
+        <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-500" />
+        <h2 className="mb-3 text-2xl font-medium text-neutral-900">
+          Report not available
+        </h2>
+        <p className="leading-relaxed text-neutral-600">
+          The executive report could not be generated for this campaign.
+        </p>
+        <Link
+          href={`/admin/campaigns/${id}`}
+          className="mt-8 inline-block rounded-xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-black"
+        >
+          Return to Campaign
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function AnonymityThresholdPanel({
+  id,
+  threshold,
+  participantCount,
+}: {
+  id: string;
+  threshold: number;
+  participantCount: number;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-8">
+      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-12 text-center shadow-sm">
+        <AlertTriangle className="mx-auto mb-6 h-10 w-10 text-amber-500" />
+        <h2 className="mb-3 text-2xl font-medium text-neutral-900">
+          Anonymity Threshold Not Met
+        </h2>
+        <p className="leading-relaxed text-neutral-600">
+          Executive reports require a minimum of {threshold} completed responses.
+          This campaign currently has {participantCount}.
+        </p>
+        <Link
+          href={`/admin/campaigns/${id}`}
+          className="mt-8 inline-block rounded-xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-black"
+        >
+          Return to Campaign
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+async function getCampaign(id: string): Promise<CampaignRecord | null> {
+  const prisma =
+    typeof db.getPrismaClient === "function" ? await db.getPrismaClient() : null;
+
+  if (!prisma) return null;
+
+  return (prisma as any).alignmentCampaign.findUnique({
+    where: { id },
+    include: {
       organisation: true,
       participants: {
-        where: { status: 'completed' },
-        include: { responses: true } // Assuming responses exist for calculation
-      }
-    }
+        where: { status: "completed" },
+      },
+    },
   });
+}
 
-  if (!campaign) notFound();
+export default async function ExecutiveReportPage({ params }: PageProps) {
+  const { id } = await params;
 
-  // 2. SOVEREIGN ANONYMITY GUARD
-  const ANONYMITY_THRESHOLD = 5;
-  const participantCount = campaign.participants.length;
+  const campaign = await getCampaign(id);
 
-  if (participantCount < ANONYMITY_THRESHOLD) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8F8F6] p-8">
-        <div className="max-w-md w-full bg-white p-12 shadow-sm border border-neutral-100 text-center">
-          <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-6" />
-          <h2 className="text-xl font-medium text-neutral-900 mb-2">Threshold Warning</h2>
-          <p className="text-sm text-neutral-500 leading-relaxed mb-8">
-            The Executive Snapshot is locked. Institutional anonymity requires a minimum of {ANONYMITY_THRESHOLD} completed responses.
-          </p>
-          <div className="flex items-center justify-center gap-4 text-[10px] font-mono uppercase tracking-widest text-neutral-400">
-            <span>Current: {participantCount}</span>
-            <span className="h-px w-4 bg-neutral-200" />
-            <span>Required: {ANONYMITY_THRESHOLD}</span>
-          </div>
-          <Link 
-            href={`/admin/campaigns/${params.id}`}
-            className="mt-10 inline-block px-6 py-3 bg-neutral-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-colors"
-          >
-            Return to Registry
-          </Link>
-        </div>
-      </div>
-    );
+  if (!campaign) {
+    return <ReportNotFound id={id} />;
   }
 
-  // 3. RESONANCE CALCULATION
-  // In a real scenario, these would be derived from the 'responses' relation
-  const resonanceMetrics = [
-    { label: "Strategic Intent", intent: 95, reality: 72 },
-    { label: "Operational Clarity", intent: 88, reality: 45 },
-    { label: "Leadership Trust", intent: 92, reality: 58 },
-    { label: "Cultural Cohesion", intent: 85, reality: 79 },
-  ];
+  const reportResult = await generateExecutiveReportForCampaign(id);
 
-  const overallDissonance = resonanceMetrics.reduce((acc, m) => acc + (m.intent - m.reality), 0) / resonanceMetrics.length;
+  if (!reportResult.ok) {
+    if (reportResult.error === "ANONYMITY_THRESHOLD_NOT_MET") {
+      return (
+        <AnonymityThresholdPanel
+          id={id}
+          threshold={Number(reportResult.threshold || 5)}
+          participantCount={Number(
+            reportResult.participantCount || campaign.participants?.length || 0,
+          )}
+        />
+      );
+    }
+
+    return <ReportNotFound id={id} />;
+  }
+
+  const { report, constitution, guidance, campaign: campaignPayload, context } =
+    reportResult.payload;
+
+  const resonanceMetrics = Array.isArray(report?.resonance?.telemetry?.domains)
+    ? report.resonance.telemetry.domains.map((d: any) => ({
+        label: d.label || d.domain || "Unknown",
+        intent: Number(d.intent || 0),
+        reality: Number(d.reality || 0),
+        dissonance: Number(
+          d.dissonance ??
+            Math.abs(Number(d.intent || 0) - Number(d.reality || 0)),
+        ),
+      }))
+    : [];
+
+  const overallDissonance =
+    typeof report?.resonance?.telemetry?.averageDissonance === "number"
+      ? report.resonance.telemetry.averageDissonance
+      : resonanceMetrics.length
+        ? resonanceMetrics.reduce(
+            (acc: number, m: any) => acc + (m.dissonance || 0),
+            0,
+          ) / resonanceMetrics.length
+        : 0;
+
+  const integrityIndex = Math.max(0, 100 - Math.round(overallDissonance));
+  const participantCount =
+    context?.completedParticipantCount ?? campaign.participants?.length ?? 0;
+  const priorities = Array.isArray(report?.priorityStack) ? report.priorityStack : [];
+  const failureModes = Array.isArray(report?.failureModes) ? report.failureModes : [];
+  const financialExposure = report?.financialExposure || {};
+
+  const decisionLayer = {
+    worldviewAnchors: Array.isArray(constitution?.worldviewAnchors)
+      ? constitution.worldviewAnchors
+      : [],
+    recommendations: Array.isArray(guidance?.recommendations)
+      ? guidance.recommendations.map((item: any, index: number) => ({
+          id: item.id || `report-rec-${index + 1}`,
+          title: item.title || item.label || item.name || "Recommendation",
+          type: item.type || item.kind || "advisory",
+          description:
+            item.description ||
+            item.summary ||
+            item.rationale ||
+            "Recommended action generated from the report engine.",
+          priority:
+            item.priority ||
+            (typeof item.score === "number"
+              ? item.score >= 80
+                ? "high"
+                : item.score >= 60
+                  ? "medium"
+                  : "low"
+              : "medium"),
+          href: item.href || item.url || undefined,
+          score: typeof item.score === "number" ? item.score : undefined,
+          reasons: Array.isArray(item.reasons) ? item.reasons : [],
+        }))
+      : [],
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8F8F6] p-8 font-serif print:bg-white print:p-0 selection:bg-[#8A6A2F] selection:text-white">
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Report Controls */}
-        <div className="mb-12 flex justify-between items-center print:hidden">
-           <Link 
-            href={`/admin/campaigns/${params.id}`}
-            className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-neutral-400 hover:text-neutral-700 transition-colors"
+    <div className="min-h-screen bg-neutral-50 font-sans print:bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-10 print:px-4 print:py-6">
+        <div className="mb-10 flex items-center justify-between print:hidden">
+          <Link
+            href={`/admin/campaigns/${id}`}
+            className="flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-700"
           >
-            <ChevronLeft className="w-3 h-3" /> Back to Registry
+            <ChevronLeft className="h-4 w-4" />
+            Back to Registry
           </Link>
-          <button 
-            onClick={() => window.print()}
-            className="text-[10px] font-mono uppercase tracking-widest px-4 py-2 border border-neutral-200 hover:border-neutral-900 transition-all"
-          >
-            Download Protocol (PDF)
-          </button>
+
+          <div className="flex items-center gap-3">
+            <a
+              href={`/api/admin/campaigns/${id}/report/json`}
+              className="flex items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 font-mono text-xs uppercase tracking-wider text-neutral-600 transition hover:bg-neutral-100"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export JSON
+            </a>
+            <a
+              href={`/api/admin/campaigns/${id}/report/pdf`}
+              className="flex items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 font-mono text-xs uppercase tracking-wider text-neutral-600 transition hover:bg-neutral-100"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export PDF
+            </a>
+            <BriefingTrigger campaignId={id} />
+            <ReportPrintButton />
+          </div>
         </div>
 
-        {/* Report Document */}
-        <div className="bg-white shadow-lg print:shadow-none relative overflow-hidden">
-          {/* Edge line for institutional feel */}
-          <div className="absolute top-0 left-0 w-1 h-full bg-neutral-100" />
-          
-          <div className="px-12 py-16 print:px-8 print:py-12">
-            
-            {/* Header */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="h-px w-8 bg-[#8A6A2F]" />
-                <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-[#8A6A2F]">Institutional Alignment Registry</span>
-              </div>
-              
-              <h1 className="text-6xl font-light tracking-tight text-neutral-900 mb-6 leading-[1.1]">
-                Resonance
-                <br />
-                <span className="font-medium italic">Snapshot</span>
-              </h1>
-              
-              <div className="grid grid-cols-3 gap-8 pt-8 border-t border-neutral-100">
-                <div>
-                  <p className="text-[8px] font-mono uppercase tracking-wider text-neutral-400 mb-1">Entity</p>
-                  <p className="text-xs font-medium text-neutral-700 uppercase tracking-tight">{campaign.organisation.name}</p>
+        <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
+          <div className="p-10 md:p-16 print:p-8">
+            <div className="mb-14 flex items-start justify-between">
+              <div>
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="h-px w-12 bg-neutral-400" />
+                  <span className="font-mono text-xs uppercase tracking-[0.3em] text-neutral-500">
+                    Sovereign Alignment Registry
+                  </span>
                 </div>
-                <div>
-                  <p className="text-[8px] font-mono uppercase tracking-wider text-neutral-400 mb-1">Protocol Period</p>
-                  <p className="text-xs font-medium text-neutral-700">Q1 2026 // Active</p>
-                </div>
-                <div>
-                  <p className="text-[8px] font-mono uppercase tracking-wider text-neutral-400 mb-1">Classification</p>
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-2.5 h-2.5 text-[#8A6A2F]" />
-                    <p className="text-xs font-medium text-neutral-500">Client Confidential</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Executive Summary */}
-            <div className="mb-20">
-              <div className="max-w-2xl">
-                <p className="text-xl leading-relaxed text-neutral-600 font-light tracking-wide">
-                  The organisation exhibits a <span className="text-neutral-900 font-medium italic underline decoration-[#8A6A2F] decoration-2 underline-offset-4">structural friction delta</span> of <span className="text-neutral-900 font-semibold">{Math.round(overallDissonance)}%</span>. Strategic intent is currently diluted through operational layers, causing significant resonance leakage.
+                <h1 className="text-5xl font-light tracking-tighter text-neutral-900 md:text-6xl">
+                  Executive Intelligence Brief
+                </h1>
+                <p className="mt-4 text-neutral-600">
+                  {campaignPayload.organisationName || "Unknown Organisation"} •{" "}
+                  {new Date().toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+                <p className="mt-2 text-xs text-neutral-400">
+                  {participantCount} completed participants
                 </p>
               </div>
-            </div>
 
-            {/* Dissonance Matrix Component */}
-            <div className="mb-20">
-              <DissonanceMatrix metrics={resonanceMetrics} />
-            </div>
-
-            {/* Intervention Proposal (Print Hidden) */}
-            <section className="mb-24 print:hidden">
-              <InterventionProposal metrics={resonanceMetrics} />
-            </section>
-
-            {/* Closing Footer */}
-            <footer className="pt-12 border-t border-neutral-100">
-              <div className="flex justify-between items-end">
-                <div className="max-w-md">
-                  <p className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 mb-2">Strategic Recommendation</p>
-                  <p className="text-xs leading-relaxed text-neutral-500 italic">
-                    Immediate structural realignment advised. Priority intervention required in the <span className="text-neutral-900 font-bold">Operational Clarity</span> domain to prevent mission drift.
-                  </p>
+              <div className="text-right">
+                <div className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+                  Status
                 </div>
-                <div className="text-right">
-                  <div className="w-32 h-px bg-neutral-200 mb-3 ml-auto" />
-                  <p className="text-[9px] font-mono uppercase tracking-wider text-neutral-400">Registry Verified</p>
-                  <p className="text-xs font-medium text-neutral-800 mt-1 uppercase tracking-tighter">Sovereign Protocol v1.4</p>
+                <div className="mt-1 inline-block rounded-full bg-emerald-100 px-4 py-1 text-sm font-medium text-emerald-700">
+                  {report.state || constitution.orgState || "GENERATED"}
                 </div>
               </div>
-            </footer>
+            </div>
 
-            {/* Subtle watermark */}
-            <div className="absolute bottom-12 right-12 opacity-5 pointer-events-none select-none print:opacity-10">
-              <ShieldCheck className="w-24 h-24" />
+            <div className="mb-12 rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-5">
+              <div className="mb-3 flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-neutral-500" />
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-neutral-500">
+                  Constitutional Posture
+                </span>
+              </div>
+              <p className="text-lg leading-relaxed text-neutral-800">
+                {report?.narrative?.headline ||
+                  constitution.narrativeSummary ||
+                  "Executive review generated."}
+              </p>
+              {report?.narrative?.summary ? (
+                <p className="mt-3 text-sm leading-7 text-neutral-600">
+                  {report.narrative.summary}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mb-16">
+              <ConstitutionalRecommendationPanel
+                constitution={constitution}
+                recommendations={decisionLayer.recommendations}
+              />
+            </div>
+
+            {decisionLayer.recommendations.length > 0 && (
+              <div className="mb-16">
+                <ReportRecommendationsPanel
+                  decisionLayer={decisionLayer}
+                  sessionKey={`report-${id}`}
+                />
+              </div>
+            )}
+
+            <div className="mb-12 grid gap-4 md:grid-cols-4">
+              {[
+                {
+                  label: "Integrity Index",
+                  value: `${integrityIndex}%`,
+                },
+                {
+                  label: "Average Dissonance",
+                  value: `${Math.round(overallDissonance)}%`,
+                },
+                {
+                  label: "Priority Count",
+                  value: `${priorities.length}`,
+                },
+                {
+                  label: "Total Exposure",
+                  value: `${Number(financialExposure.totalExposure || 0).toLocaleString()}`,
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-neutral-200 bg-white p-5"
+                >
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                    {item.label}
+                  </div>
+                  <div className="mt-3 text-3xl font-light tracking-tight text-neutral-900">
+                    {item.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <DissonanceMatrix metrics={resonanceMetrics} />
+
+            {(report.state === "DISORDERED" ||
+              constitution.orgState === "DISORDERED" ||
+              constitution.route === "REJECT") && (
+              <div className="mt-16">
+                <InterventionProposal
+                  metrics={resonanceMetrics}
+                  campaignId={id}
+                  reportContext={{
+                    state: report.state || constitution.orgState || "DISORDERED",
+                    priorityStack: priorities,
+                    failureModes,
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="mt-16">
+              <ReportEngineClient
+                strategicMetrics={resonanceMetrics}
+                humanCapitalMetrics={report?.hcd || []}
+                financialMetrics={[
+                  {
+                    label: "Replacement Cost",
+                    value: financialExposure.replacementCost || 0,
+                  },
+                  {
+                    label: "Execution Loss",
+                    value: financialExposure.executionLoss || 0,
+                  },
+                  {
+                    label: "Total Exposure",
+                    value: financialExposure.totalExposure || 0,
+                  },
+                ]}
+                operationalMetrics={[]}
+              />
+            </div>
+
+            <div className="mt-16">
+              <CorrectionRegistry
+                campaignId={id}
+                nodes={campaignPayload.correctionNodes || []}
+              />
             </div>
           </div>
         </div>

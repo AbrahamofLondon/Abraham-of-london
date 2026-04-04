@@ -1,268 +1,172 @@
-/* pages/api/briefs/[slug].ts — SECURE BRIEF UNLOCK (SSOT, Pages Router) */
+// pages/api/briefs/[slug].ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
 
-import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { authOptions } from "@/lib/auth";
+import { getAllCombinedDocs, normalizeSlug } from "@/lib/content/server";
+import { getRenderableBody } from "@/lib/content/render-body";
+import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
 import {
-  getDocBySlug,
-  getAllCombinedDocs,
-  normalizeSlug,
-} from "@/lib/content/server";
-import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
-import type { AccessTier } from "@/lib/access/tiers";
+  normalizeUserTier,
+  normalizeRequiredTier,
+  hasAccess,
+  requiredTierFromDoc,
+} from "@/lib/access/tier-policy";
 
 type OkResponse = {
   ok: true;
-  tier: AccessTier;
-  requiredTier: AccessTier;
   bodyCode: string;
+  compressed: true;
+  encoding: "gzip-base64";
+  requiredTier: string;
+  tier: string;
   slugResolved: string;
 };
 
 type FailResponse = {
   ok: false;
   reason: string;
-  tried?: string[];
 };
 
-type ResponseData = OkResponse | FailResponse;
-
-function safeStr(value: unknown): string {
-  if (typeof value === "string") return value;
-  if (value == null) return "";
-  return String(value);
-}
-
-function cleanPathish(input: unknown): string {
-  return safeStr(input)
+function cleanSlug(input: unknown): string {
+  const s = String(input ?? "")
     .trim()
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/");
-}
+    .replace(/\/+$/, "");
 
-function stripPrefixOnce(source: string, prefix: string): string {
-  const normalizedPrefix = `${prefix.toLowerCase()}/`;
-  if (source.toLowerCase().startsWith(normalizedPrefix)) {
-    return source.slice(normalizedPrefix.length).replace(/^\/+/, "");
-  }
-  return source;
-}
-
-function briefsBareSlug(input: unknown): string {
-  let s = cleanPathish(input);
   if (!s || s.includes("..")) return "";
-
-  let changed = true;
-  while (changed) {
-    changed = false;
-
-    const nextA = stripPrefixOnce(s, "content");
-    if (nextA !== s) {
-      s = nextA;
-      changed = true;
-    }
-
-    const nextB = stripPrefixOnce(s, "vault");
-    if (nextB !== s) {
-      s = nextB;
-      changed = true;
-    }
-
-    const nextC = stripPrefixOnce(s, "briefs");
-    if (nextC !== s) {
-      s = nextC;
-      changed = true;
-    }
-  }
-
-  s = cleanPathish(s);
-  return !s || s.includes("..") ? "" : s;
-}
-
-function extractBodyCode(doc: unknown): string {
-  const value = doc as {
-    body?: { code?: unknown };
-    bodyCode?: unknown;
-    content?: unknown;
-    mdx?: unknown;
-    bodyRaw?: unknown;
-  } | null;
-
-  return safeStr(
-    value?.body?.code ??
-      value?.bodyCode ??
-      value?.content ??
-      value?.mdx ??
-      value?.bodyRaw ??
-      "",
-  );
+  return s.split("/").filter(Boolean).pop() || "";
 }
 
 function isBriefDoc(doc: any): boolean {
   if (!doc) return false;
 
-  const docKind = safeStr(doc?.docKind).toLowerCase();
-  const type = safeStr(doc?.type || doc?._type).toLowerCase();
-  const kind = safeStr(doc?.kind).toLowerCase();
-  const category = safeStr(doc?.category).toLowerCase();
-  const series = safeStr(doc?.series).toLowerCase();
-  const flattened = safeStr(doc?._raw?.flattenedPath).toLowerCase();
-  const sourceFilePath = safeStr(doc?._raw?.sourceFilePath).toLowerCase();
-  const slug = safeStr(doc?.slug).toLowerCase();
+  const path = String(doc?._raw?.flattenedPath || "").toLowerCase();
+  const source = String(doc?._raw?.sourceFilePath || "").toLowerCase();
+  const slug = String(doc?.slug || "").toLowerCase();
+  const kind = String(doc?.kind || doc?.type || doc?.docKind || "").toLowerCase();
 
-  if (docKind === "brief") return true;
-  if (type === "brief") return true;
-  if (kind === "brief") return true;
-  if (category.includes("brief")) return true;
-  if (series.includes("brief")) return true;
-
-  if (flattened.startsWith("briefs/")) return true;
-  if (flattened.startsWith("content/briefs/")) return true;
-  if (flattened.startsWith("vault/briefs/")) return true;
-
-  if (sourceFilePath.startsWith("briefs/")) return true;
-  if (sourceFilePath.startsWith("content/briefs/")) return true;
-  if (sourceFilePath.startsWith("vault/briefs/")) return true;
-
-  if (slug.startsWith("briefs/")) return true;
-  if (slug.startsWith("content/briefs/")) return true;
-  if (slug.startsWith("vault/briefs/")) return true;
-
-  return false;
+  return (
+    kind.includes("brief") ||
+    path.startsWith("briefs/") ||
+    path.startsWith("vault/briefs/") ||
+    path.startsWith("content/briefs/") ||
+    source.startsWith("briefs/") ||
+    source.startsWith("vault/briefs/") ||
+    source.startsWith("content/briefs/") ||
+    slug.startsWith("briefs/") ||
+    slug.startsWith("vault/briefs/")
+  );
 }
 
-function resolveBriefDoc(bare: string): { doc: any | null; tried: string[] } {
-  const tryBrief = cleanPathish(`briefs/${bare}`);
-  const tryContentBrief = cleanPathish(`content/briefs/${bare}`);
-  const tryVaultBrief = cleanPathish(`vault/briefs/${bare}`);
-  const tryBare = cleanPathish(bare);
-  const tryNormalized = cleanPathish(normalizeSlug(bare));
+function resolveBriefDoc(slug: string): any | null {
+  const docs = getAllCombinedDocs() || [];
 
-  const tried = [
-    tryBrief,
-    tryContentBrief,
-    tryVaultBrief,
-    tryBare,
-    tryNormalized,
-  ];
+  return (
+    docs.find((d: any) => {
+      if (!isBriefDoc(d) || d?.draft) return false;
 
-  const directCandidates = [
-    getDocBySlug(tryBrief),
-    getDocBySlug(tryContentBrief),
-    getDocBySlug(tryVaultBrief),
-    getDocBySlug(tryBare),
-    getDocBySlug(tryNormalized),
-  ];
+      const flattened = normalizeSlug(String(d?._raw?.flattenedPath || ""));
+      const source = normalizeSlug(String(d?._raw?.sourceFilePath || ""));
+      const docSlug = normalizeSlug(String(d?.slug || ""));
 
-  const direct = directCandidates.find((entry) => isBriefDoc(entry)) || null;
-  if (direct) {
-    return { doc: direct, tried };
-  }
-
-  const allDocs = getAllCombinedDocs() || [];
-  const scanned =
-    allDocs.find((entry: any) => {
-      if (!entry || entry.draft) return false;
-      if (!isBriefDoc(entry)) return false;
-
-      const flattened = briefsBareSlug(entry?._raw?.flattenedPath || "");
-      const slug = briefsBareSlug(entry?.slug || "");
-      const sourcePath = briefsBareSlug(entry?._raw?.sourceFilePath || "");
-
-      return flattened === bare || slug === bare || sourcePath === bare;
-    }) || null;
-
-  return { doc: scanned, tried };
+      return (
+        flattened.endsWith(`/${slug}`) ||
+        flattened === slug ||
+        source.endsWith(`/${slug}`) ||
+        source === slug ||
+        docSlug.endsWith(`/${slug}`) ||
+        docSlug === slug
+      );
+    }) || null
+  );
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResponseData>,
+  res: NextApiResponse<OkResponse | FailResponse>,
 ) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({
+    return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
+  }
+
+  try {
+    const slug = cleanSlug(req.query.slug);
+
+    if (!slug) {
+      return res.status(400).json({ ok: false, reason: "INVALID_SLUG" });
+    }
+
+    const doc = resolveBriefDoc(slug);
+
+    if (!doc || doc.draft) {
+      return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
+    }
+
+    const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
+    const body = getRenderableBody(doc);
+    const bodyCode = body.code || "";
+
+    if (requiredTier === "public") {
+      return sendCompressedBodyCode(
+        res,
+        {
+          ok: true,
+          tier: "public",
+          requiredTier,
+          slugResolved: slug,
+          bodyCode,
+        },
+        200,
+      );
+    }
+
+    const session = await getServerSession(req, res, authOptions);
+
+    if (!session?.user) {
+      return res.status(401).json({
+        ok: false,
+        reason: "AUTH_REQUIRED",
+      });
+    }
+
+    const userTier = normalizeUserTier((session.user as any)?.tier ?? "public");
+
+    if (!hasAccess(userTier, requiredTier)) {
+      return res.status(403).json({
+        ok: false,
+        reason: "INSUFFICIENT_TIER",
+      });
+    }
+
+    return sendCompressedBodyCode(
+      res,
+      {
+        ok: true,
+        tier: userTier,
+        requiredTier,
+        slugResolved: slug,
+        bodyCode,
+      },
+      200,
+    );
+  } catch (err) {
+    console.error("[BRIEF_API_ERROR]", err);
+
+    return res.status(500).json({
       ok: false,
-      reason: "METHOD_NOT_ALLOWED",
+      reason: "SERVER_ERROR",
     });
   }
-
-  const raw = req.query.slug;
-  const joined = Array.isArray(raw) ? raw.join("/") : safeStr(raw);
-  const bare = briefsBareSlug(joined);
-
-  if (!bare) {
-    return res.status(400).json({
-      ok: false,
-      reason: "SLUG_MISSING",
-    });
-  }
-
-  const { doc, tried } = resolveBriefDoc(bare);
-
-  if (!doc || doc.draft) {
-    return res.status(404).json({
-      ok: false,
-      reason: "NOT_FOUND",
-      tried,
-    });
-  }
-
-  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
-  const slugResolved = briefsBareSlug(
-    doc?.slug || doc?._raw?.flattenedPath || bare,
-  );
-
-  if (requiredTier === "public") {
-    return res.status(200).json({
-      ok: true,
-      tier: "public",
-      requiredTier: "public",
-      bodyCode: extractBodyCode(doc),
-      slugResolved,
-    });
-  }
-
-  const sessionId = readAccessCookie(req);
-  if (!sessionId) {
-    return res.status(401).json({
-      ok: false,
-      reason: "CLEARANCE_REQUIRED",
-    });
-  }
-
-  const session = await verifySession(sessionId);
-  if (!session || !session.valid) {
-    return res.status(401).json({
-      ok: false,
-      reason: "SESSION_INVALID",
-    });
-  }
-
-  const userTier = tiers.normalizeUser(session.tier);
-  if (!tiers.hasAccess(userTier, requiredTier)) {
-    return res.status(403).json({
-      ok: false,
-      reason: "INSUFFICIENT_CLEARANCE",
-    });
-  }
-
-  return res.status(200).json({
-    ok: true,
-    tier: userTier,
-    requiredTier,
-    bodyCode: extractBodyCode(doc),
-    slugResolved,
-  });
 }
 
 export const config = {
   api: {
     responseLimit: false,
-    bodyParser: false,
   },
 };

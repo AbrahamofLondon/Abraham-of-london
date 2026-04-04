@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createCampaignSchema } from "@/lib/alignment/enterprise-schemas";
 import { 
   Send, 
-  Calendar, 
   Users, 
   Target, 
   Loader2, 
@@ -16,8 +15,16 @@ import {
   Zap
 } from "lucide-react";
 
-export default function NewCampaignPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+// Define proper type for the params
+type PageProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default function NewCampaignPage({ params }: PageProps) {
+  // Use dynamic import or direct reference
+  const router = require("next/navigation").useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
   const [currentEmail, setCurrentEmail] = useState("");
@@ -43,7 +50,10 @@ export default function NewCampaignPage({ params }: { params: { id: string } }) 
   };
 
   const onSubmit = async (data: any) => {
-    if (emails.length === 0) return alert("Please add at least one participant.");
+    if (emails.length === 0) {
+      alert("Please add at least one participant.");
+      return;
+    }
     
     setIsSubmitting(true);
     try {
@@ -56,12 +66,16 @@ export default function NewCampaignPage({ params }: { params: { id: string } }) 
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to deploy campaign");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to deploy campaign");
+      }
       
       router.push(`/admin/organisations/${params.id}`);
       router.refresh();
     } catch (err) {
-      console.error(err);
+      console.error("Campaign creation error:", err);
+      alert(err instanceof Error ? err.message : "Failed to create campaign");
     } finally {
       setIsSubmitting(false);
     }
@@ -94,17 +108,17 @@ export default function NewCampaignPage({ params }: { params: { id: string } }) 
                 <label className="text-[9px] uppercase tracking-widest text-neutral-500 mb-2 block">Campaign Title</label>
                 <input 
                   {...register("title")}
-                  className="w-full bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all font-sans"
+                  className="w-full bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all font-sans text-white"
                   placeholder="e.g. Q3 Strategic Integrity Audit"
                 />
                 {errors.title && <p className="text-red-500 text-[10px] mt-1">{errors.title.message as string}</p>}
               </div>
 
               <div>
-                <label className="text-[9px] uppercase tracking-widest text-neutral-500 mb-2 block text-white">Cadence</label>
+                <label className="text-[9px] uppercase tracking-widest text-neutral-500 mb-2 block">Cadence</label>
                 <select 
                   {...register("cadenceType")}
-                  className="w-full bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all"
+                  className="w-full bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all text-white"
                 >
                   <option value="ad_hoc">Ad Hoc</option>
                   <option value="quarterly">Quarterly</option>
@@ -113,7 +127,7 @@ export default function NewCampaignPage({ params }: { params: { id: string } }) 
               </div>
 
               <div>
-                <label className="text-[9px] uppercase tracking-widest text-neutral-500 mb-2 block">Close Date</label>
+                <label className="text-[9px] uppercase tracking-widest text-neutral-500 mb-2 block">Close Date (Optional)</label>
                 <input 
                   type="date"
                   {...register("closesAt")}
@@ -134,9 +148,15 @@ export default function NewCampaignPage({ params }: { params: { id: string } }) 
                 <input 
                   value={currentEmail}
                   onChange={(e) => setCurrentEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addEmail())}
-                  className="flex-1 bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addEmail();
+                    }
+                  }}
+                  className="flex-1 bg-black/40 border border-white/10 p-4 focus:border-[#8A6A2F] outline-none transition-all text-white"
                   placeholder="Enter participant email..."
+                  type="email"
                 />
                 <button 
                   type="button" 
@@ -151,8 +171,8 @@ export default function NewCampaignPage({ params }: { params: { id: string } }) 
                 {emails.map((email) => (
                   <div key={email} className="flex items-center gap-2 px-3 py-1 bg-[#8A6A2F]/10 border border-[#8A6A2F]/30 text-[#8A6A2F] text-[10px] font-bold">
                     {email}
-                    <button type="button" onClick={() => removeEmail(email)}>
-                      <X className="w-3 h-3 hover:text-white" />
+                    <button type="button" onClick={() => removeEmail(email)} className="hover:text-white transition-colors">
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 ))}

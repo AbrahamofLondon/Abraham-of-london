@@ -1,4 +1,5 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
+/** @type {import("tailwindcss").Config} */
 module.exports = {
   darkMode: "class",
 
@@ -32,71 +33,69 @@ module.exports = {
 
     extend: {
       colors: {
-        /* -----------------------------------------------------------------
-           Core CSS-var driven semantic tokens
-        ----------------------------------------------------------------- */
-        background: "var(--aol-dark)",
-        foreground: "var(--aol-ink)",
-        border: "var(--aol-border)",
-        surface: "var(--aol-surface)",
-        "surface-2": "var(--aol-surface-2)",
+        background: "rgb(var(--aol-bg) / <alpha-value>)",
+        foreground: "rgb(var(--aol-ink) / <alpha-value>)",
+        border: "rgb(255 255 255 / 0.1)",
+        input: "rgb(255 255 255 / 0.1)",
+        ring: "rgb(var(--aol-gold) / <alpha-value>)",
 
-        /* -----------------------------------------------------------------
-           Brand namespace (preferred modern usage)
-        ----------------------------------------------------------------- */
+        surface: "rgb(15 15 17 / <alpha-value>)",
+        "surface-2": "rgb(19 19 22 / <alpha-value>)",
+        "surface-3": "rgb(24 24 28 / <alpha-value>)",
+
+        card: "rgb(15 15 17 / <alpha-value>)",
+        "card-foreground": "rgb(var(--aol-ink) / <alpha-value>)",
+
         brand: {
-          obsidian: "var(--aol-dark)",
-          charcoal: "var(--aol-darker)",
-          cream: "var(--aol-ink)",
-          "cream-dim": "var(--aol-ink-dim)",
-          "cream-muted": "var(--aol-ink-muted)",
-          gold: "var(--aol-gold)",
-          amber: "var(--aol-gold-strong)",
-          forest: "#0e3b33",
+          obsidian: "rgb(var(--aol-bg) / <alpha-value>)",
+          "obsidian-2": "rgb(var(--aol-bg-2) / <alpha-value>)",
+          charcoal: "rgb(var(--aol-bg-3) / <alpha-value>)",
+          panel: "rgb(var(--aol-panel) / <alpha-value>)",
+          "panel-2": "rgb(var(--aol-panel-2) / <alpha-value>)",
+          "panel-3": "rgb(var(--aol-panel-3) / <alpha-value>)",
+          cream: "rgb(var(--aol-ink) / <alpha-value>)",
+          "cream-dim": "rgb(var(--aol-ink-dim) / <alpha-value>)",
+          "cream-muted": "rgb(var(--aol-ink-muted) / <alpha-value>)",
+          gold: "rgb(var(--aol-gold) / <alpha-value>)",
+          "gold-strong": "rgb(var(--aol-gold-strong) / <alpha-value>)",
+          "gold-soft": "rgb(var(--aol-gold-soft) / <alpha-value>)",
+          danger: "rgb(var(--aol-danger) / <alpha-value>)",
+          success: "rgb(var(--aol-success) / <alpha-value>)",
+          warning: "rgb(var(--aol-warning) / <alpha-value>)",
         },
 
-        /* -----------------------------------------------------------------
-           Legacy aliases used all over the estate
-           These are the “do not break old pages” shims.
-        ----------------------------------------------------------------- */
-        softGold: "var(--aol-gold)",
-        gold: "var(--aol-gold)",
-        amber: "var(--aol-gold-strong)",
-
-        cream: "var(--aol-ink)",
-        warmWhite: "var(--aol-ink)",
-
-        charcoal: "var(--aol-darker)",
-        "charcoal-light": "#111111",
-        deepCharcoal: "var(--aol-darker)",
-        softBlack: "#080808",
-        obsidian: "var(--aol-dark)",
-
-        lightGrey: "rgba(255,255,255,0.14)",
+        /* Compatibility shims */
+        softGold: "rgb(var(--aol-gold) / <alpha-value>)",
+        gold: "rgb(var(--aol-gold) / <alpha-value>)",
+        amber: "rgb(var(--aol-gold-strong) / <alpha-value>)",
+        cream: "rgb(var(--aol-ink) / <alpha-value>)",
+        warmWhite: "rgb(var(--aol-ink) / <alpha-value>)",
+        charcoal: "rgb(var(--aol-bg-3) / <alpha-value>)",
+        "charcoal-light": "rgb(22 22 24 / <alpha-value>)",
+        deepCharcoal: "rgb(var(--aol-bg-2) / <alpha-value>)",
+        softBlack: "rgb(var(--aol-bg) / <alpha-value>)",
+        obsidian: "rgb(var(--aol-bg) / <alpha-value>)",
+        lightGrey: "rgb(255 255 255 / 0.14)",
         forest: "#0e3b33",
-
-        /* Common UI aliases */
-        card: "rgba(255,255,255,0.04)",
-        "card-foreground": "var(--aol-ink)",
       },
 
       fontFamily: {
         sans: [
-          "var(--font-family-sans)",
+          "var(--font-sans)",
           "Inter",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
         ],
         serif: [
-          "var(--font-family-serif)",
+          "var(--font-serif)",
           "Cormorant Garamond",
           "ui-serif",
           "Georgia",
           "serif",
         ],
         mono: [
-          "var(--font-family-mono)",
+          "var(--font-mono)",
           "JetBrains Mono",
           "ui-monospace",
           "SFMono-Regular",
@@ -144,29 +143,30 @@ module.exports = {
         xs: "2px",
       },
 
-      /* -----------------------------------------------------------------
-         Restored gradients / visual surfaces
-      ----------------------------------------------------------------- */
       backgroundImage: {
         "gold-radial":
-          "radial-gradient(circle at center, rgba(184,155,110,0.15) 0%, transparent 70%)",
+          "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
         "premium-card":
-          "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)",
+          "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
         "gold-linear":
-          "linear-gradient(to right, transparent, rgba(184,155,110,0.30), transparent)",
+          "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
         "aol-hairline":
           "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
         "aol-hairline-gold":
-          "linear-gradient(to right, transparent, rgba(245,158,11,0.30), transparent)",
+          "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
+        "terminal-core":
+          "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
       },
 
       boxShadow: {
         premium: "0 20px 40px -15px rgba(0,0,0,0.80)",
         card:
-          "0 10px 30px -15px rgba(0,0,0,0.70), 0 1px 1px 0 rgba(255,255,255,0.05) inset",
+          "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
         cardHover:
-          "0 18px 40px -18px rgba(0,0,0,0.78), 0 1px 2px 0 rgba(255,255,255,0.06) inset",
-        "gold-glow": "0 0 40px rgba(184,155,110,0.12)",
+          "0 28px 80px -30px rgba(0,0,0,0.82), 0 1px 2px 0 rgba(255,255,255,0.05) inset, 0 0 36px rgba(201,169,106,0.06)",
+        "gold-glow": "0 0 40px rgba(201,169,106,0.12)",
+        terminal:
+          "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
       },
     },
   },

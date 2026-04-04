@@ -1,3 +1,5 @@
+/* lib/alignment/hardened-pulse-engine.ts — HARDENED TELEMETRY LOGIC */
+
 export interface PulseResponse {
   domain: string;
   resonance: number; // 0-100
@@ -11,25 +13,29 @@ export interface PulseAnalysis {
   activeNodes: number;
 }
 
+/**
+ * CORE LOGIC: Calculates the mathematical alignment of telemetry nodes.
+ */
 export function calculateHardenedMetrics(responses: PulseResponse[]): PulseAnalysis {
-  // 1. Filter out "Ghost Nodes" (Zero or near-zero certainty)
+  // 1. Filter out "Ghost Nodes" (Certainty floor of 10%)
   const validResponses = responses.filter(r => r.certainty >= 10);
   const n = validResponses.length;
 
-  if (n === 0) return { weightedScore: 0, confidenceScore: 0, dataIntegrity: 'LOW', activeNodes: 0 };
+  if (n === 0) {
+    return { weightedScore: 0, confidenceScore: 0, dataIntegrity: 'LOW', activeNodes: 0 };
+  }
 
-  // 2. Calculate Weighted Average
-  // Formula: Σ(Resonance * Certainty) / Σ(Certainty)
+  // 2. Calculate Weighted Average: Σ(Resonance * Certainty) / Σ(Certainty)
   const totalWeight = validResponses.reduce((acc, r) => acc + r.certainty, 0);
   const weightedSum = validResponses.reduce((acc, r) => {
     return acc + (r.resonance * (r.certainty / 100));
   }, 0);
 
-  const weightedScore = Math.round((weightedSum / totalWeight) * 100);
+  const weightedScore = Math.round((weightedSum / (totalWeight || 1)) * 100);
 
-  // 3. Calculate Confidence Score (Sample Size + Average Certainty)
+  // 3. Confidence Score: Balance of Average Certainty (70%) and Sample Volume (30%)
   const avgCertainty = totalWeight / n;
-  const sampleStrength = Math.min((n / 10) * 100, 100); // Benchmarked at 10 nodes for 100% strength
+  const sampleStrength = Math.min((n / 10) * 100, 100); 
   const confidenceScore = Math.round((avgCertainty * 0.7) + (sampleStrength * 0.3));
 
   // 4. Determine Data Integrity
@@ -44,3 +50,7 @@ export function calculateHardenedMetrics(responses: PulseResponse[]): PulseAnaly
     activeNodes: n
   };
 }
+
+/** * ALIAS FOR COMPATIBILITY: Resolves "Attempted import error" in Admin Snapshot & API
+ */
+export const calculateInstitutionalIntegrity = calculateHardenedMetrics;

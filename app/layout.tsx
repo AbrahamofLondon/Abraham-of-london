@@ -1,6 +1,7 @@
-// app/layout.tsx — ROOT LAYOUT (App Router valid)
+// app/layout.tsx — FINAL POLISH
 import * as React from "react";
 import type { Metadata } from "next";
+import "@/app/globals.css";
 import AppShell from "@/components/AppShell";
 
 const BASE_URL = (

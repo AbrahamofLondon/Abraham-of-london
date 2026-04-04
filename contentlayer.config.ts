@@ -1,375 +1,246 @@
-// contentlayer.config.ts — ULTRA PRODUCTION SAFE
-// - No duplicate routes
-// - Strict access tier normalization
-// - Comprehensive validation
-// - Zero tolerance for ambiguous states
+// contentlayer.config.ts — ULTRA PRODUCTION SAFE / WINDOWS-TOLERANT
+// -----------------------------------------------------------------------------
+// Goals
+// - No undefined plugin references
+// - Stable route generation
+// - Clear validation and reporting
+// - Duplicate route detection
+// - Broad document coverage without muddy route collisions
+// -----------------------------------------------------------------------------
 
+import path from "path";
+import { fileURLToPath } from "url";
+import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import {
   defineDocumentType,
-  defineNestedType,
   makeSource,
   type ComputedFields,
 } from "contentlayer2/source-files";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // ============================================================================
-// ENVIRONMENT & CONFIGURATION
+// ENVIRONMENT
 // ============================================================================
 
 const ENV = {
   IS_WINDOWS: process.platform === "win32",
   IS_CI: process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true",
   IS_PROD: process.env.NODE_ENV === "production",
-  IS_DEV: process.env.NODE_ENV === "development",
-  FAIL_ON_INVALID: process.env.CONTENTLAYER_FAIL_ON_INVALID === "true",
   STRICT_MODE: process.env.CONTENTLAYER_STRICT === "true",
+  FAIL_ON_INVALID: process.env.CONTENTLAYER_FAIL_ON_INVALID === "true",
 } as const;
 
 // ============================================================================
-// TYPE DEFINITIONS (CANONICAL)
+// TYPES
 // ============================================================================
 
-export const ACCESS_TIER_ORDER = [
-  "public",
-  "member",
-  "verified",
-  "restricted",
-  "top-secret",
-] as const;
-
-export type AccessTier = (typeof ACCESS_TIER_ORDER)[number];
-
-const ACCESS_TIER_LABELS: Record<AccessTier, string> = {
-  public: "Public",
-  member: "Inner Circle",
-  verified: "Verified",
-  restricted: "Restricted",
-  "top-secret": "Top Secret",
-} as const;
-
-// ============================================================================
-// SAFE UTILITIES (IMMUTABLE, PURE)
-// ============================================================================
-
-const safeString = (v: unknown): string => {
-  if (typeof v === "string") return v;
-  if (typeof v === "number") return String(v);
-  if (typeof v === "boolean") return String(v);
-  if (v === null || v === undefined) return "";
-  if (typeof v === "object") {
-    try {
-      return JSON.stringify(v);
-    } catch {
-      return "";
-    }
-  }
-  return "";
-};
-
-const safeNumber = (v: unknown, fallback = 0): number => {
-  if (typeof v === "number") return Number.isFinite(v) ? v : fallback;
-  if (typeof v === "string") {
-    const parsed = Number(v);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-  return fallback;
-};
-
-const safeBoolean = (v: unknown, fallback = false): boolean => {
-  if (typeof v === "boolean") return v;
-  if (typeof v === "string") {
-    const lower = v.toLowerCase().trim();
-    if (lower === "true" || lower === "1" || lower === "yes") return true;
-    if (lower === "false" || lower === "0" || lower === "no") return false;
-  }
-  if (typeof v === "number") return v !== 0;
-  return fallback;
-};
-
-const safeDate = (v: unknown): Date | null => {
-  if (!v) return null;
-  try {
-    const date = new Date(safeString(v));
-    return Number.isFinite(date.getTime()) ? date : null;
-  } catch {
-    return null;
-  }
-};
-
-const cleanSlug = (v: unknown): string => {
-  return safeString(v)
-    .trim()
-    .toLowerCase()
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/\.(md|mdx)$/i, "")
-    .replace(/[^a-z0-9-/_]/g, "-")
-    .replace(/-+/g, "-");
-};
-
-const stripPrefix = (s: string, prefix: string): string => {
-  if (!s || !prefix) return s;
-  return s.startsWith(prefix) ? s.slice(prefix.length).replace(/^\/+/, "") : s;
-};
-
-const defaultSlugFrom = (doc: any, prefix: string): string => {
-  const flat = cleanSlug(doc?._raw?.flattenedPath || doc?._raw?.sourceFilePath || "");
-  return stripPrefix(flat, prefix);
-};
-
-const normalizeSlugForRoute = (slug: string, routeBase: string): string => {
-  const s = cleanSlug(slug);
-  const prefix = `${routeBase}/`;
-  return s.startsWith(prefix) ? s.slice(prefix.length) : s;
-};
-
-const defaultHrefFrom = (doc: any, prefix: string, routeBase: string): string => {
-  const rawSlug = cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix);
-  const slug = normalizeSlugForRoute(rawSlug, routeBase).replace(/\/index$/, "");
-  return slug ? `/${routeBase}/${slug}` : `/${routeBase}`;
-};
-
-// ============================================================================
-// ACCESS TIER NORMALIZATION (SINGLE SOURCE OF TRUTH)
-// ============================================================================
-
-const ACCESS_TIER_MAP: Readonly<Record<string, AccessTier>> = {
-  // Public variants
-  public: "public",
-  open: "public",
-  unclassified: "public",
-  free: "public",
-  "free-tier": "public",
-  basic: "public",
-
-  // Member variants
-  member: "member",
-  members: "member",
-  "inner-circle": "member",
-  innercircle: "member",
-
-  // Verified variants
-  verified: "verified",
-  "verified-member": "verified",
-
-  // Restricted variants
-  restricted: "restricted",
-  private: "restricted",
-  premium: "restricted",
-  architect: "restricted",
-  confidential: "restricted",
-  secret: "restricted",
-
-  // Top secret variants
-  "top-secret": "top-secret",
-  "top secret": "top-secret",
-  ts: "top-secret",
-  hardened: "top-secret",
-  sovereign: "top-secret",
-} as const;
-
-const normalizeAccessTier = (input?: unknown): AccessTier => {
-  if (input === null || input === undefined) return "public";
-  
-  const raw = safeString(input).toLowerCase().trim();
-  if (!raw) return "public";
-
-  // Direct mapping
-  const mapped = ACCESS_TIER_MAP[raw];
-  if (mapped) return mapped;
-
-  // Check if valid tier directly
-  if (ACCESS_TIER_ORDER.includes(raw as AccessTier)) {
-    return raw as AccessTier;
-  }
-
-  // Default secure: unknown = restricted
-  return "restricted";
-};
-
-const requiredAccessTierFromDoc = (doc: any): AccessTier => {
-  if (!doc) return "public";
-
-  // Priority order: new canonical first, then legacy fields
-  const raw =
-    doc.accessTier ??
-    doc.accessLevel ??
-    doc.tier ??
-    doc.clearance ??
-    doc.classification;
-
-  if (raw !== undefined && raw !== null) {
-    return normalizeAccessTier(raw);
-  }
-
-  // Boolean fallback
-  if (safeBoolean(doc.requiresAuth)) return "restricted";
-
-  return "public";
-};
-
-// Legacy access level (backward compatibility)
-type AccessLevel = "public" | "inner-circle" | "private";
-const asAccessLevel = (v: unknown): AccessLevel => {
-  const s = safeString(v).toLowerCase().trim();
-  if (s === "private") return "private";
-  if (s === "inner-circle" || s === "innercircle" || s === "member" || s === "members") {
-    return "inner-circle";
-  }
-  return "public";
-};
-
-// ============================================================================
-// CONTENT ANALYSIS (PURE FUNCTIONS)
-// ============================================================================
-
-const safeRawBody = (doc: any): string => {
-  try {
-    return safeString(doc?.body?.raw ?? doc?.body?.code ?? doc?.body ?? "");
-  } catch {
-    return "";
-  }
-};
-
-const analyzeContent = (text: string) => {
-  const t = safeString(text);
-  
-  // Use regex test with proper escaping
-  const imageRegex = /!\[.*?\]\(.*?\)/g;
-  const codeRegex = /```[\s\S]*?```/g;
-  
-  const images = (t.match(imageRegex) || []).length;
-  const codeBlocks = (t.match(codeRegex) || []).length;
-  
-  // Word count: strip markdown and normalize whitespace
-  const words = t
-    .replace(/[`*_>#~\[\]\(\)\{\}.,;:!?'"\\\/|-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(/\s+/)
-    .filter(w => w.length > 0).length;
-    
-  return { images, codeBlocks, words } as const;
-};
-
-const estimateReadTime = (text: string): string => {
-  const { images, codeBlocks, words } = analyzeContent(text);
-  // Weighted calculation: code blocks are denser, images add context
-  const adjustedWords = words + codeBlocks * 50 + images * 12;
-  const minutes = Math.max(1, Math.ceil(adjustedWords / 200));
-  return minutes === 1 ? "1 min read" : `${minutes} min read`;
-};
-
-// ============================================================================
-// VALIDATION
-// ============================================================================
-
-interface ValidationResult {
+type ValidationResult = {
   isValid: boolean;
   errors: string[];
   warnings: string[];
+};
+
+type AccessTier = "public" | "member" | "verified" | "restricted" | "top-secret";
+
+// ============================================================================
+// DECISION METADATA FIELDS — APPLIES TO ALL DOCUMENT TYPES
+// ============================================================================
+
+const decisionMetadataFields = {
+  decisionMetadata: {
+    type: "json",
+    required: false,
+    description: "Decision intelligence metadata for asset classification and matching",
+  },
+} as const;
+
+// ============================================================================
+// SAFE UTILITIES
+// ============================================================================
+
+function safeString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return "";
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "";
+  }
 }
 
-const validateBase = (doc: any): ValidationResult => {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  
-  const flat = cleanSlug(doc?._raw?.flattenedPath || "");
-  const slug = cleanSlug(doc?.slug) || flat;
-  
-  if (!slug) errors.push("Missing slug (slug + flattenedPath both empty)");
-  if (!doc?.title && ENV.STRICT_MODE) errors.push("Missing title in strict mode");
-  if (doc?.title && safeString(doc.title).length > 200) warnings.push("Title exceeds 200 characters");
-  
-  return { isValid: errors.length === 0, errors, warnings };
-};
+function safeNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  return fallback;
+}
 
-const parseEventDate = (raw: unknown): { start: string | null; end: string | null } => {
+function safeBoolean(value: unknown, fallback = false): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const s = value.trim().toLowerCase();
+    if (["true", "1", "yes", "y"].includes(s)) return true;
+    if (["false", "0", "no", "n"].includes(s)) return false;
+  }
+  return fallback;
+}
+
+function safeDate(value: unknown): Date | null {
+  const s = safeString(value).trim();
+  if (!s) return null;
+  const d = new Date(s);
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+
+function cleanSlug(input: unknown): string {
+  return safeString(input)
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/\.(md|mdx)$/i, "")
+    .replace(/\/{2,}/g, "/")
+    .toLowerCase();
+}
+
+function normalizeRouteSegment(input: unknown): string {
+  return cleanSlug(input)
+    .replace(/[^a-z0-9/_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/\/index$/i, "");
+}
+
+function stripPrefix(input: string, prefix: string): string {
+  const normalized = normalizeRouteSegment(input);
+  const p = normalizeRouteSegment(prefix);
+  if (!normalized) return "";
+  if (!p) return normalized;
+  return normalized.startsWith(`${p}/`) ? normalized.slice(p.length + 1) : normalized;
+}
+
+function defaultSlugFrom(doc: any, prefix: string): string {
+  const raw =
+    safeString(doc?.slug) ||
+    safeString(doc?._raw?.flattenedPath) ||
+    safeString(doc?._raw?.sourceFilePath) ||
+    safeString(doc?._raw?.sourceFileName);
+
+  return stripPrefix(raw, prefix);
+}
+
+function defaultHrefFrom(doc: any, prefix: string, routeBase: string): string {
+  const slug = defaultSlugFrom(doc, prefix);
+  return slug ? `/${routeBase}/${slug}` : `/${routeBase}`;
+}
+
+function safeRawBody(doc: any): string {
+  if (typeof doc?.body?.raw === "string") return doc.body.raw;
+  if (typeof doc?.raw === "string") return doc.raw;
+  if (typeof doc?.content === "string") return doc.content;
+  if (typeof doc?.mdx === "string") return doc.mdx;
+  return "";
+}
+
+function stripMdxNoise(input: string): string {
+  return String(input || "")
+    .replace(/^import\s.+$/gm, "")
+    .replace(/^export\s.+$/gm, "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[*_>#~]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function estimateReadTime(text: string): string {
+  const plain = stripMdxNoise(text);
+  const words = plain ? plain.split(/\s+/).filter(Boolean).length : 0;
+  const mins = Math.max(1, Math.ceil(words / 200));
+  return `${mins} min read`;
+}
+
+function parseEventDate(raw: unknown): { start: string | null; end: string | null } {
   const s = safeString(raw).trim();
   if (!s) return { start: null, end: null };
-  
-  try {
-    const parts = s.split(" - ").map(p => p.trim());
-    const startStr = parts[0];
-    
-    if (!startStr) return { start: null, end: null };
-    
-    const startDate = new Date(startStr);
-    if (!Number.isFinite(startDate.getTime())) return { start: null, end: null };
-    
-    // If we have an end time
-    if (parts.length > 1 && parts[1]) {
-      const timeParts = parts[1].split(":").map(n => parseInt(n, 10));
-      const [hours = 0, minutes = 0, seconds = 0] = timeParts;
-      
-      const endDate = new Date(startDate);
-      endDate.setHours(hours, minutes, seconds, 0);
-      
-      if (Number.isFinite(endDate.getTime())) {
-        return { start: startDate.toISOString(), end: endDate.toISOString() };
-      }
-    }
-    
-    return { start: startDate.toISOString(), end: null };
-  } catch {
-    return { start: null, end: null };
+
+  const direct = safeDate(s);
+  if (direct) return { start: direct.toISOString(), end: null };
+
+  const parts = s.split(" - ").map((p) => p.trim());
+  const start = safeDate(parts[0]);
+  if (!start) return { start: null, end: null };
+
+  if (parts[1]) {
+    const end = safeDate(parts[1]);
+    if (end) return { start: start.toISOString(), end: end.toISOString() };
   }
-};
 
-const validateEvent = (doc: any): ValidationResult => {
-  const base = validateBase(doc);
-  const errors = [...base.errors];
-  
-  const dateInput = doc?.eventDate ?? doc?.startDate ?? doc?.startdate;
-  const { start, end } = parseEventDate(dateInput);
-  
-  if (!start && ENV.STRICT_MODE) {
-    errors.push(`Invalid or missing event date: ${safeString(dateInput)}`);
-  }
-  
-  return { ...base, errors };
-};
+  return { start: start.toISOString(), end: null };
+}
+
+function normalizeAccessTier(input: unknown): AccessTier {
+  const raw = safeString(input).trim().toLowerCase();
+
+  if (!raw) return "public";
+
+  const map: Record<string, AccessTier> = {
+    public: "public",
+    open: "public",
+    free: "public",
+    unclassified: "public",
+
+    member: "member",
+    members: "member",
+    "inner-circle": "member",
+    innercircle: "member",
+
+    verified: "verified",
+    "verified-member": "verified",
+
+    restricted: "restricted",
+    private: "restricted",
+    premium: "restricted",
+    confidential: "restricted",
+    secret: "restricted",
+
+    "top-secret": "top-secret",
+    "top secret": "top-secret",
+    hardened: "top-secret",
+    sovereign: "top-secret",
+  };
+
+  return map[raw] ?? "restricted";
+}
+
+function validateBase(doc: any): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  const flattened = cleanSlug(doc?._raw?.flattenedPath || "");
+  const slug = cleanSlug(doc?.slug || flattened);
+
+  if (!slug) errors.push("Missing slug / flattenedPath");
+  if (!doc?.title && ENV.STRICT_MODE) errors.push("Missing title in strict mode");
+  if (safeString(doc?.title).length > 200) warnings.push("Title exceeds 200 characters");
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
 
 // ============================================================================
-// NESTED TYPES
-// ============================================================================
-
-const FeatureGridItem = defineNestedType(() => ({
-  name: "FeatureGridItem",
-  fields: {
-    title: { type: "string", required: true },
-    icon: { type: "string", required: false },
-    content: { type: "string", required: false },
-    color: { type: "string", required: false },
-    badge: { type: "string", required: false },
-    link: { 
-      type: "string", 
-      required: false,
-      validate: (v: unknown) => !v || safeString(v).startsWith("/") || safeString(v).startsWith("http"),
-    },
-  },
-}));
-
-const CTAButton = defineNestedType(() => ({
-  name: "CTAButton",
-  fields: {
-    label: { type: "string", required: true },
-    href: { 
-      type: "string", 
-      required: true,
-      validate: (v: unknown) => safeString(v).startsWith("/") || safeString(v).startsWith("http"),
-    },
-    variant: { 
-      type: "enum", 
-      options: ["primary", "secondary", "outline", "ghost"], 
-      default: "primary",
-      required: false,
-    },
-    icon: { type: "string", required: false },
-    external: { type: "boolean", required: false, default: false },
-  },
-}));
-
-// ============================================================================
-// FIELD DEFINITIONS (SHARED)
+// SHARED FIELDS
 // ============================================================================
 
 const seoFields = {
@@ -385,7 +256,7 @@ const seoFields = {
   robots: { type: "string", required: false },
 } as const;
 
-export const baseFields = {
+const baseFields = {
   title: { type: "string", required: false },
   subtitle: { type: "string", required: false },
   description: { type: "string", required: false },
@@ -397,14 +268,7 @@ export const baseFields = {
   published: { type: "boolean", required: false, default: true },
   draft: { type: "boolean", required: false, default: false },
   featured: { type: "boolean", required: false, default: false },
-  
-  // ✅ Add status field to base fields
-  status: { 
-    type: "string", 
-    required: false,
-    description: "Document status (published, draft, archived, limited, etc.)"
-  },
-  
+  status: { type: "string", required: false },
   aliases: { type: "list", of: { type: "string" }, required: false },
   docKind: { type: "string", required: false },
   layout: { type: "string", required: false },
@@ -421,16 +285,11 @@ export const baseFields = {
   coverPosition: { type: "string", required: false },
   socialCaption: { type: "string", required: false },
   readTime: { type: "string", required: false },
-
-  // Legacy access fields
   accessLevel: { type: "string", required: false },
   requiresAuth: { type: "boolean", required: false, default: false },
   tier: { type: "string", required: false },
   lockMessage: { type: "string", required: false },
-
-  // Canonical access field
   accessTier: { type: "string", required: false },
-
   resources: { type: "json", required: false },
   downloads: { type: "json", required: false },
   relatedDownloads: { type: "list", of: { type: "string" }, required: false },
@@ -443,124 +302,97 @@ export const baseFields = {
   version: { type: "string", required: false },
   institutionalId: { type: "string", required: false },
   ...seoFields,
+  ...decisionMetadataFields,
 } as const;
 
 // ============================================================================
-// COMPUTED FIELDS FACTORY — PRODUCTION READY
+// COMPUTED FIELDS FACTORY
 // ============================================================================
 
-const createComputedFields = (prefix: string, routeBase: string): ComputedFields => {
+function createComputedFields(prefix: string, routeBase: string): ComputedFields {
   return {
     slugSafe: {
       type: "string",
-      resolve: (doc) => {
-        const raw = cleanSlug(doc?.slug) || defaultSlugFrom(doc, prefix) || "";
-        return normalizeSlugForRoute(raw, routeBase);
-      },
+      resolve: (doc) => defaultSlugFrom(doc, prefix),
     },
-    
+
     hrefSafe: {
       type: "string",
       resolve: (doc) => {
-        const rawFlat = safeString(doc?._raw?.flattenedPath || "");
-        if (/^downloads\/linked-/i.test(rawFlat)) {
-          const s = cleanSlug(rawFlat).replace(/^downloads\/linked-[^/]+\//i, "");
-          return s ? `/downloads/linked/${s}` : "/downloads/linked";
-        }
-        if (doc?.href && typeof doc.href === 'string' && doc.href.startsWith("/")) {
-          return doc.href;
-        }
+        const rawHref = safeString(doc?.href);
+        if (rawHref.startsWith("/")) return rawHref;
         return defaultHrefFrom(doc, prefix, routeBase);
       },
     },
-    
+
     titleSafe: {
       type: "string",
       resolve: (doc) => {
         const title = safeString(doc?.title).trim();
-        return title || doc?._raw?.sourceFileName?.replace(/\.mdx?$/, "") || "Untitled Brief";
+        if (title) return title;
+
+        const filename = safeString(doc?._raw?.sourceFileName).replace(/\.mdx?$/i, "");
+        return filename || "Untitled";
       },
     },
-    
+
     excerptSafe: {
       type: "string",
       resolve: (doc) => {
         const excerpt = safeString(doc?.excerpt).trim();
         if (excerpt) return excerpt;
-        const desc = safeString(doc?.description).trim();
-        if (desc) return desc;
-        return safeRawBody(doc).slice(0, 160).replace(/[#*`]/g, "").trim() + "...";
+
+        const description = safeString(doc?.description).trim();
+        if (description) return description;
+
+        const plain = stripMdxNoise(safeRawBody(doc));
+        return plain ? `${plain.slice(0, 160)}${plain.length > 160 ? "..." : ""}` : "";
       },
     },
-    
-    statusSafe: {
-      type: "string",
-      resolve: (doc) => {
-        const status = doc?.status;
-        if (!status) return "published";
-        const normalized = String(status).toLowerCase().trim();
-        const validStatuses = [
-          "published", "draft", "archived", "deprecated", "superseded",
-          "announced", "open", "limited", "sold-out", "cancelled", "completed",
-          "verified", "classified", "production", "active", "inactive",
-        ];
-        return validStatuses.includes(normalized) ? normalized : "published";
-      },
-    },
-    
+
     accessTierSafe: {
       type: "string",
-      resolve: (doc) => requiredAccessTierFromDoc(doc) || "public",
+      resolve: (doc) =>
+        normalizeAccessTier(
+          doc?.accessTier ?? doc?.accessLevel ?? doc?.tier ?? doc?.classification
+        ),
     },
-    
-    // ✅ FIXED: Removed "open" comparison to resolve Type Overlap Error
+
     requiresAuthSafe: {
       type: "boolean",
       resolve: (doc) => {
-        const tier = requiredAccessTierFromDoc(doc);
-        // Logic: If it's not public, it's a restricted institutional brief.
-        return tier !== "public";
+        const tier = normalizeAccessTier(
+          doc?.accessTier ?? doc?.accessLevel ?? doc?.tier ?? doc?.classification
+        );
+        return tier !== "public" || safeBoolean(doc?.requiresAuth, false);
       },
     },
-    
+
     publishedSafe: {
       type: "boolean",
       resolve: (doc) => safeBoolean(doc?.published, true) && !safeBoolean(doc?.draft, false),
     },
-    
+
     readTimeSafe: {
       type: "string",
       resolve: (doc) => {
-        if (doc?.readTime && typeof doc.readTime === "string") return doc.readTime.trim();
-        const words = analyzeContent(safeRawBody(doc)).words;
-        return `${Math.ceil(words / 200)} min read`;
+        const raw = safeString(doc?.readTime).trim();
+        return raw || estimateReadTime(safeRawBody(doc));
       },
     },
-    
-    wordCount: {
-      type: "number",
-      resolve: (doc) => analyzeContent(safeRawBody(doc)).words,
-    },
-    
+
     validation: {
       type: "json",
-      resolve: (doc) => {
-        const result = validateBase(doc);
-        if (!result.isValid && process.env.NODE_ENV === 'production') {
-          console.error(`[Audit Failure] ${doc?._id}: ${result.errors.join(", ")}`);
-        }
-        return result;
-      },
+      resolve: (doc) => validateBase(doc),
     },
   };
-};
+}
 
 // ============================================================================
-// DOCUMENT TYPES (ONE CANONICAL SOURCE PER PATTERN)
+// DOCUMENT TYPES — ALL INCLUDE decisionMetadata VIA baseFields
 // ============================================================================
 
-// Blog posts
-export const Post = defineDocumentType(() => ({
+const Post = defineDocumentType(() => ({
   name: "Post",
   filePathPattern: "blog/**/*.{md,mdx}",
   contentType: "mdx",
@@ -572,8 +404,7 @@ export const Post = defineDocumentType(() => ({
   computedFields: createComputedFields("blog/", "blog"),
 }));
 
-// Books
-export const Book = defineDocumentType(() => ({
+const Book = defineDocumentType(() => ({
   name: "Book",
   filePathPattern: "books/**/*.{md,mdx}",
   contentType: "mdx",
@@ -585,24 +416,23 @@ export const Book = defineDocumentType(() => ({
     edition: { type: "string", required: false },
     isbn: { type: "string", required: false },
     pages: { type: "number", required: false },
-    coverAspect: { 
-      type: "enum", 
-      options: ["wide", "book", "square"], 
+    coverAspect: {
+      type: "enum",
+      options: ["wide", "book", "square"],
       default: "book",
-      required: false 
+      required: false,
     },
-    coverFit: { 
-      type: "enum", 
-      options: ["cover", "contain"], 
+    coverFit: {
+      type: "enum",
+      options: ["cover", "contain"],
       default: "cover",
-      required: false 
+      required: false,
     },
   },
   computedFields: createComputedFields("books/", "books"),
 }));
 
-// Shorts
-export const Short = defineDocumentType(() => ({
+const Short = defineDocumentType(() => ({
   name: "Short",
   filePathPattern: "shorts/**/*.{md,mdx}",
   contentType: "mdx",
@@ -614,68 +444,46 @@ export const Short = defineDocumentType(() => ({
   computedFields: createComputedFields("shorts/", "shorts"),
 }));
 
-// Downloads
-export const Download = defineDocumentType(() => ({
+const Download = defineDocumentType(() => ({
   name: "Download",
   filePathPattern: "downloads/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
     ...baseFields,
-
     file: { type: "string", required: false },
     downloadUrl: { type: "string", required: false },
     previewUrl: { type: "string", required: false },
-
     format: { type: "string", required: false },
     fileFormat: { type: "string", required: false },
     formatHint: { type: "string", required: false },
-    paperFormats: {
-      type: "list",
-      of: { type: "string" },
-      required: false,
-    },
-
+    paperFormats: { type: "list", of: { type: "string" }, required: false },
     isInteractive: { type: "boolean", required: false },
     isFillable: { type: "boolean", required: false },
-
     printable: { type: "boolean", required: false },
     fillable: { type: "boolean", required: false },
     includesWorksheets: { type: "boolean", required: false },
-
     pageCount: { type: "number", required: false },
     fileSize: { type: "string", required: false },
     version: { type: "string", required: false },
     documentId: { type: "string", required: false },
-
     downloadType: { type: "string", required: false },
     classification: { type: "string", required: false },
-
     coverImageAlt: { type: "string", required: false },
-
     useFeatureGrid: { type: "boolean", required: false },
     featureGridColumns: { type: "number", required: false },
     useLegacyDiagram: { type: "boolean", required: false },
     useProTip: { type: "boolean", required: false },
     useDownloadCTA: { type: "boolean", required: false },
-
     ctaConfig: { type: "json", required: false },
     cover: { type: "json", required: false },
     downloadProcess: { type: "json", required: false },
-
-    relatedDownloads: {
-      type: "list",
-      of: { type: "string" },
-      required: false,
-    },
-
-    // Stable fallback: avoid nested list bug in contentlayer2
+    relatedDownloads: { type: "list", of: { type: "string" }, required: false },
     features: { type: "json", required: false },
   },
   computedFields: createComputedFields("downloads/", "downloads"),
 }));
 
-// Canon
-export const Canon = defineDocumentType(() => ({
+const Canon = defineDocumentType(() => ({
   name: "Canon",
   filePathPattern: "canon/**/*.{md,mdx}",
   contentType: "mdx",
@@ -683,85 +491,45 @@ export const Canon = defineDocumentType(() => ({
   computedFields: createComputedFields("canon/", "canon"),
 }));
 
-// Public Briefs (content/briefs/**)
-export const Brief = defineDocumentType(() => ({
+const Brief = defineDocumentType(() => ({
   name: "Brief",
   filePathPattern: "briefs/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    date: { type: "string", required: false },
+    ...baseFields,
     classification: { type: "string", required: false, default: "Unclassified" },
-    accessLevel: { type: "string", required: false, default: "public" },
-    tier: { type: "string", required: false },
-    accessTier: { type: "string", required: false },
     audience: { type: "string", required: false },
-    docKind: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
-    version: { type: "string", required: false },
-    lastUpdated: { type: "string", required: false },
-    status: { type: "string", required: false },
-    category: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
     format: { type: "string", required: false },
-    series: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    featuredImage: { type: "string", required: false },
-    featured: { type: "boolean", required: false, default: false },
-    published: { type: "boolean", required: false, default: true },
-    readTime: { type: "string", required: false },
-    author: { type: "string", required: false },
-    slug: { type: "string", required: false },
     briefId: { type: "string", required: false },
     volume: { type: "number", required: false },
+    lastUpdated: { type: "string", required: false },
+    series: { type: "string", required: false },
+    seriesOrder: { type: "number", required: false },
   },
   computedFields: createComputedFields("briefs/", "briefs"),
 }));
 
-// Vault Briefs (content/vault/briefs/**)
-export const VaultBrief = defineDocumentType(() => ({
+const VaultBrief = defineDocumentType(() => ({
   name: "VaultBrief",
   filePathPattern: "vault/briefs/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    title: { type: "string", required: false },
-    subtitle: { type: "string", required: false },
-    description: { type: "string", required: false },
-    excerpt: { type: "string", required: false },
-    date: { type: "string", required: false },
+    ...baseFields,
     type: { type: "string", required: false },
     classification: { type: "string", required: false, default: "Unclassified" },
     accessLevel: { type: "string", required: false, default: "restricted" },
-    tier: { type: "string", required: false },
-    accessTier: { type: "string", required: false },
     audience: { type: "string", required: false },
-    docKind: { type: "string", required: false },
-    institutionalId: { type: "string", required: false },
-    version: { type: "string", required: false },
-    lastUpdated: { type: "string", required: false },
-    status: { type: "string", required: false },
-    category: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
     format: { type: "string", required: false },
-    series: { type: "string", required: false },
-    coverImage: { type: "string", required: false },
-    featuredImage: { type: "string", required: false },
-    featured: { type: "boolean", required: false, default: false },
-    published: { type: "boolean", required: false, default: true },
-    readTime: { type: "string", required: false },
-    author: { type: "string", required: false },
-    slug: { type: "string", required: false },
     briefId: { type: "string", required: false },
     volume: { type: "number", required: false },
+    lastUpdated: { type: "string", required: false },
+    series: { type: "string", required: false },
+    seriesOrder: { type: "number", required: false },
   },
   computedFields: createComputedFields("vault/briefs/", "vault/briefs"),
 }));
 
-// Intelligence
-export const Intelligence = defineDocumentType(() => ({
+const Intelligence = defineDocumentType(() => ({
   name: "Intelligence",
   filePathPattern: "intelligence/**/*.{md,mdx}",
   contentType: "mdx",
@@ -775,13 +543,8 @@ export const Intelligence = defineDocumentType(() => ({
       default: "Unclassified",
       required: false,
     },
-    status: { type: "string", required: false, default: "ACTIVE" },
-    institutionalId: { type: "string", required: false },
-    version: { type: "string", required: false },
-    lastUpdated: { type: "string", required: false },
-    category: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
     briefId: { type: "string", required: false },
+    lastUpdated: { type: "string", required: false },
   },
   computedFields: {
     ...createComputedFields("intelligence/", "intelligence"),
@@ -792,18 +555,15 @@ export const Intelligence = defineDocumentType(() => ({
     classificationSafe: {
       type: "string",
       resolve: (doc) => {
-        const raw = doc?.classification;
-        if (!raw) return "Unclassified";
-        const upper = safeString(raw).toUpperCase().trim();
+        const raw = safeString(doc?.classification).toUpperCase().trim();
         const valid = ["UNCLASSIFIED", "RESTRICTED", "CONFIDENTIAL", "SECRET", "TOP SECRET", "HARDENED"];
-        return valid.includes(upper) ? upper : "Unclassified";
+        return valid.includes(raw) ? raw : "Unclassified";
       },
     },
   },
 }));
 
-// Dispatches
-export const Dispatch = defineDocumentType(() => ({
+const Dispatch = defineDocumentType(() => ({
   name: "Dispatch",
   filePathPattern: "dispatches/**/*.{md,mdx}",
   contentType: "mdx",
@@ -817,10 +577,6 @@ export const Dispatch = defineDocumentType(() => ({
       default: "Unclassified",
       required: false,
     },
-    status: { type: "string", required: false, default: "PUBLISHED" },
-    category: { type: "string", required: false },
-    tags: { type: "list", of: { type: "string" }, required: false },
-    date: { type: "string", required: false },
     timeSensitive: { type: "boolean", required: false, default: false },
     expiresAt: { type: "string", required: false },
     references: { type: "list", of: { type: "string" }, required: false },
@@ -835,136 +591,67 @@ export const Dispatch = defineDocumentType(() => ({
     isExpired: {
       type: "boolean",
       resolve: (doc) => {
-        if (!doc?.expiresAt) return false;
-        const expiry = safeDate(doc.expiresAt);
+        const expiry = safeDate(doc?.expiresAt);
         return expiry ? expiry < new Date() : false;
       },
     },
   },
 }));
 
-// Events - CLEANED & PRODUCTION SAFE
-export const Event = defineDocumentType(() => ({
+const Event = defineDocumentType(() => ({
   name: "Event",
   filePathPattern: "events/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
     ...baseFields,
-    
-    // Core event fields
     eventType: { type: "string", required: false },
     location: { type: "string", required: false },
     registrationUrl: { type: "string", required: false },
-    
-    // Date fields - consolidated to catch all variants
     eventDate: { type: "string", required: false },
     startDate: { type: "string", required: false },
     startdate: { type: "string", required: false },
     endDate: { type: "string", required: false },
-    
-    // Additional metadata
     timezone: { type: "string", required: false },
     isVirtual: { type: "boolean", required: false },
     meetingLink: { type: "string", required: false },
-    
-    // ✅ Explicitly define the 'mode' field to eliminate warnings
-    mode: { 
-      type: "enum", 
-      options: ["in-person", "virtual", "hybrid"], 
+    mode: {
+      type: "enum",
+      options: ["in-person", "virtual", "hybrid"],
       required: false,
-      default: "in-person"
+      default: "in-person",
     },
-    
-    // ✅ Catch-all for any other undefined fields (prevents warnings)
-    // This tells Contentlayer to accept but not validate additional fields
     extra: { type: "json", required: false },
   },
   computedFields: {
     ...createComputedFields("events/", "events"),
-    
-    // Safe date parsing with fallbacks
     parsedStartDate: {
       type: "string",
       resolve: (doc) => {
-        try {
-          const dateInput = doc?.eventDate ?? doc?.startDate ?? doc?.startdate;
-          return parseEventDate(dateInput).start || "";
-        } catch {
-          return "";
-        }
+        const dateInput = doc?.eventDate ?? doc?.startDate ?? doc?.startdate;
+        return parseEventDate(dateInput).start || "";
       },
     },
-    
     parsedEndDate: {
       type: "string",
       resolve: (doc) => {
-        try {
-          const dateInput = doc?.eventDate ?? doc?.startDate ?? doc?.startdate;
-          return parseEventDate(dateInput).end || "";
-        } catch {
-          return "";
-        }
+        const dateInput = doc?.eventDate ?? doc?.startDate ?? doc?.startdate;
+        return parseEventDate(dateInput).end || "";
       },
     },
-    
-    // Safe mode accessor (ensures we always have a value)
     modeSafe: {
       type: "string",
       resolve: (doc) => {
-        const mode = doc?.mode;
-        if (mode && ["in-person", "virtual", "hybrid"].includes(mode)) {
-          return mode;
-        }
-        // Default based on other fields
+        const mode = safeString(doc?.mode);
+        if (["in-person", "virtual", "hybrid"].includes(mode)) return mode;
         if (doc?.isVirtual === true) return "virtual";
         if (doc?.meetingLink) return "virtual";
         return "in-person";
       },
     },
-    
-    // Validation with extra field warning suppression
-    validation: {
-      type: "json",
-      resolve: (doc) => {
-        // Use a more lenient validation for events
-        const result = {
-          isValid: true,
-          errors: [] as string[],
-          warnings: [] as string[]
-        };
-        
-        // Only validate critical fields
-        if (!doc?.title && ENV.STRICT_MODE) {
-          result.warnings.push("Missing title");
-        }
-        
-        // Log but don't fail on extra fields
-        const definedFields = new Set([
-          ...Object.keys(baseFields),
-          'eventType', 'location', 'registrationUrl', 'eventDate', 
-          'startDate', 'startdate', 'endDate', 'timezone', 
-          'isVirtual', 'meetingLink', 'mode', 'extra', 'type', '_id', '_raw'
-        ]);
-        
-        const extraFields = Object.keys(doc).filter(key => !definedFields.has(key));
-        if (extraFields.length > 0 && ENV.IS_DEV) {
-          console.warn(`[Event] Extra fields in ${doc?._id}:`, extraFields.join(', '));
-        }
-        
-        if (!result.isValid && ENV.FAIL_ON_INVALID) {
-          throw new Error(
-            `[Contentlayer] Invalid Event (${safeString(doc?._id || "unknown")}): ${result.errors.join("; ")}`
-          );
-        }
-        
-        return result;
-      },
-    },
   },
 }));
 
-// Prints
-export const Print = defineDocumentType(() => ({
+const Print = defineDocumentType(() => ({
   name: "Print",
   filePathPattern: "prints/**/*.{md,mdx}",
   contentType: "mdx",
@@ -972,8 +659,7 @@ export const Print = defineDocumentType(() => ({
   computedFields: createComputedFields("prints/", "prints"),
 }));
 
-// Resources
-export const Resource = defineDocumentType(() => ({
+const Resource = defineDocumentType(() => ({
   name: "Resource",
   filePathPattern: "resources/**/*.{md,mdx}",
   contentType: "mdx",
@@ -993,8 +679,7 @@ export const Resource = defineDocumentType(() => ({
   computedFields: createComputedFields("resources/", "resources"),
 }));
 
-// Strategy
-export const Strategy = defineDocumentType(() => ({
+const Strategy = defineDocumentType(() => ({
   name: "Strategy",
   filePathPattern: "strategy/**/*.{md,mdx}",
   contentType: "mdx",
@@ -1002,8 +687,7 @@ export const Strategy = defineDocumentType(() => ({
   computedFields: createComputedFields("strategy/", "strategy"),
 }));
 
-// Lexicon
-export const Lexicon = defineDocumentType(() => ({
+const Lexicon = defineDocumentType(() => ({
   name: "Lexicon",
   filePathPattern: "lexicon/**/*.{md,mdx}",
   contentType: "mdx",
@@ -1015,8 +699,7 @@ export const Lexicon = defineDocumentType(() => ({
   computedFields: createComputedFields("lexicon/", "lexicon"),
 }));
 
-// Vault (top-level only)
-export const Vault = defineDocumentType(() => ({
+const Vault = defineDocumentType(() => ({
   name: "Vault",
   filePathPattern: "vault/*.{md,mdx}",
   contentType: "mdx",
@@ -1029,27 +712,64 @@ export const Vault = defineDocumentType(() => ({
   computedFields: createComputedFields("vault/", "vault"),
 }));
 
+const Playbook = defineDocumentType(() => ({
+  name: "Playbook",
+  filePathPattern: "playbooks/**/*.{md,mdx}",
+  contentType: "mdx",
+  fields: {
+    ...baseFields,
+    playbookType: {
+      type: "enum",
+      options: ["diagnostic", "execution", "correction", "strategic", "operational"],
+      required: false,
+      default: "strategic",
+    },
+    framework: { type: "string", required: false },
+    phases: { type: "list", of: { type: "string" }, required: false },
+    signals: { type: "list", of: { type: "string" }, required: false },
+    outputs: { type: "list", of: { type: "string" }, required: false },
+    estimatedTime: { type: "string", required: false },
+    difficulty: {
+      type: "enum",
+      options: ["beginner", "intermediate", "advanced", "executive"],
+      required: false,
+      default: "intermediate",
+    },
+    prerequisites: { type: "list", of: { type: "string" }, required: false },
+  },
+  computedFields: {
+    ...createComputedFields("playbooks/", "playbook"),
+    playbookSlug: {
+      type: "string",
+      resolve: (doc) => stripPrefix(doc?._raw?.flattenedPath || "", "playbooks/"),
+    },
+    phaseCount: {
+      type: "number",
+      resolve: (doc) => Array.isArray(doc?.phases) ? doc.phases.length : 0,
+    },
+    signalCount: {
+      type: "number",
+      resolve: (doc) => Array.isArray(doc?.signals) ? doc.signals.length : 0,
+    },
+    outputCount: {
+      type: "number",
+      resolve: (doc) => Array.isArray(doc?.outputs) ? doc.outputs.length : 0,
+    },
+  },
+}));
+
 // ============================================================================
-// EXCLUSIONS (DUPLICATE PREVENTION)
+// EXCLUSIONS
 // ============================================================================
 
-const getExclusions = (): string[] => {
+function getExclusions(): string[] {
   const exclusions = [
-    // Linked derivatives
     "downloads/linked-*/**",
-    "downloads/linked-*/**/*",
-
-    // Case variants
     "Vault/**",
-    "Vault/**/*",
-
-    // Partials and drafts
     "**/_*.mdx",
     "**/_*.md",
     "**/drafts/**",
     "**/templates/**",
-
-    // System
     "node_modules",
     ".git",
     ".next",
@@ -1058,8 +778,6 @@ const getExclusions = (): string[] => {
     "_templates",
     "tmp",
     "temp",
-
-    // Assets
     "public/**/*",
     "**/public/assets/**",
     "**/*.jpg",
@@ -1078,8 +796,6 @@ const getExclusions = (): string[] => {
     "**/*.7z",
     "**/*.mp4",
     "**/*.mp3",
-
-    // Temp files
     "**/.DS_Store",
     "**/Thumbs.db",
     "**/*.lnk",
@@ -1087,24 +803,16 @@ const getExclusions = (): string[] => {
     "**/*.tmp",
     "**/*.swp",
     "**/*.backup*",
-
-    // Common typos
     "donwloads",
     "donwloads/**",
   ];
 
   if (ENV.IS_WINDOWS) {
-    exclusions.push(
-      "**/~$*.docx",
-      "**/~$*.xlsx",
-      "**/~$*.pptx",
-      "**/desktop.ini",
-      "**/Thumbs.db"
-    );
+    exclusions.push("**/~$*.docx", "**/~$*.xlsx", "**/~$*.pptx", "**/desktop.ini");
   }
 
   return exclusions;
-};
+}
 
 // ============================================================================
 // SOURCE CONFIGURATION
@@ -1128,6 +836,7 @@ export default makeSource({
     "lexicon",
     "vault/briefs",
     "vault",
+    "playbooks",
   ],
   contentDirExclude: getExclusions(),
   documentTypes: [
@@ -1146,46 +855,86 @@ export default makeSource({
     Strategy,
     Lexicon,
     Vault,
+    Playbook,
   ],
   disableImportAliasWarning: true,
+
   mdx: {
-    remarkPlugins: [],
-    rehypePlugins: [],
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: "wrap" }],
+    ],
     esbuildOptions: (options) => {
       options.platform = "node";
-      options.target = "es2022";
-      
-      const rootPath = process.cwd().replace(/\\/g, "/");
-      options.alias = { ...options.alias, "@": rootPath };
-      
+      options.target = "es2020";
+      options.format = "esm";
+      options.jsx = "automatic";
+      options.jsxDev = process.env.NODE_ENV !== "production";
+
+      options.alias = {
+        ...options.alias,
+        "@": path.resolve(process.cwd()),
+      };
+
+      options.define = {
+        ...options.define,
+        "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
+      };
+
       return options;
     },
   },
+
+  onError: (error, filePath) => {
+    const message = error instanceof Error ? error.message : safeString(error);
+    console.error(`[MDX ERROR] ${filePath}:`, message);
+    if (ENV.STRICT_MODE) throw error;
+  },
+
   onSuccess: async (importData) => {
     const data = await importData();
-    const allDocuments: any[] = (data as any)?.allDocuments || [];
 
-    // Duplicate detection (strict)
-    const seenHref = new Map<string, string>();
-    const dupErrors: string[] = [];
+    const buckets = [
+      (data as any)?.allDocuments,
+      (data as any)?.allPosts,
+      (data as any)?.allShorts,
+      (data as any)?.allBooks,
+      (data as any)?.allCanon,
+      (data as any)?.allBriefs,
+      (data as any)?.allVaultBriefs,
+      (data as any)?.allIntelligence,
+      (data as any)?.allDispatches,
+      (data as any)?.allDownloads,
+      (data as any)?.allEvents,
+      (data as any)?.allPrints,
+      (data as any)?.allResources,
+      (data as any)?.allStrategy,
+      (data as any)?.allLexicon,
+      (data as any)?.allVaults,
+      (data as any)?.allPlaybooks,
+    ];
 
-    for (const doc of allDocuments) {
-      const id = safeString(doc?._id);
-      const href = safeString(doc?.hrefSafe);
-      
-      if (!href) continue;
+    const allDocuments: any[] = [];
+    const seenIds = new Set<string>();
 
-      const prev = seenHref.get(href);
-      if (prev) {
-        if (prev !== id) {
-          dupErrors.push(`Duplicate href: ${href} (${prev} vs ${id})`);
-        }
-      } else {
-        seenHref.set(href, id);
+    for (const bucket of buckets) {
+      if (!Array.isArray(bucket)) continue;
+
+      for (const doc of bucket) {
+        const key =
+          safeString(doc?._id) ||
+          safeString(doc?._raw?.flattenedPath) ||
+          JSON.stringify(doc);
+
+        if (seenIds.has(key)) continue;
+        seenIds.add(key);
+        allDocuments.push(doc);
       }
     }
 
-    // Statistics
+    const seenHref = new Map<string, string>();
+    const dupErrors: string[] = [];
     const typeCounts: Record<string, number> = {};
     const tierCounts: Record<string, number> = {};
     let validCount = 0;
@@ -1193,7 +942,14 @@ export default makeSource({
     const invalidSamples: string[] = [];
 
     for (const doc of allDocuments) {
-      const type = safeString(doc?.type || "unknown");
+      const id = safeString(doc?._id);
+      const href = safeString(doc?.hrefSafe);
+      const type =
+        safeString(doc?.type) ||
+        safeString(doc?.docType) ||
+        safeString(doc?._raw?.sourceFilePath).split("/")[0] ||
+        "unknown";
+
       typeCounts[type] = (typeCounts[type] || 0) + 1;
 
       const tier = safeString(doc?.accessTierSafe || "public");
@@ -1206,21 +962,31 @@ export default makeSource({
         invalidCount++;
         if (invalidSamples.length < 10) {
           invalidSamples.push(
-            `${type} ${safeString(doc?._id)}: ${(validation.errors || ["Unknown error"]).join(", ")}`
+            `${type} ${id}: ${(validation.errors || ["Unknown error"]).join(", ")}`
           );
         }
       }
+
+      if (!href) continue;
+
+      const prev = seenHref.get(href);
+      if (prev && prev !== id) {
+        dupErrors.push(`Duplicate href: ${href} (${prev} vs ${id})`);
+      } else if (!prev) {
+        seenHref.set(href, id);
+      }
     }
 
-    // Console output
     console.log("\n" + "=".repeat(60));
     console.log("📊 CONTENTLAYER BUILD REPORT");
     console.log("=".repeat(60));
-    console.log(`Environment: ${ENV.IS_PROD ? "production" : "development"}${ENV.IS_CI ? " • CI" : ""}`);
+    console.log(
+      `Environment: ${ENV.IS_PROD ? "production" : "development"}${ENV.IS_CI ? " • CI" : ""}`
+    );
     console.log(`Platform: ${process.platform}${ENV.IS_WINDOWS ? " (Windows)" : ""}`);
     console.log(`Total documents: ${allDocuments.length}`);
+
     console.log("\n📑 By type:");
-    
     Object.entries(typeCounts)
       .sort((a, b) => b[1] - a[1])
       .forEach(([type, count]) => {
@@ -1239,7 +1005,7 @@ export default makeSource({
 
     if (dupErrors.length > 0) {
       console.warn("\n⚠️  DUPLICATE ROUTES DETECTED:");
-      dupErrors.slice(0, 15).forEach(err => console.warn(`  - ${err}`));
+      dupErrors.slice(0, 15).forEach((err) => console.warn(`  - ${err}`));
       if (dupErrors.length > 15) {
         console.warn(`  ...and ${dupErrors.length - 15} more`);
       }
@@ -1250,7 +1016,7 @@ export default makeSource({
 
     if (invalidCount > 0) {
       console.warn("\n⚠️  INVALID DOCUMENTS (samples):");
-      invalidSamples.forEach(sample => console.warn(`  - ${sample}`));
+      invalidSamples.forEach((sample) => console.warn(`  - ${sample}`));
       if (ENV.FAIL_ON_INVALID) {
         throw new Error(`Build failed: ${invalidCount} invalid documents`);
       }

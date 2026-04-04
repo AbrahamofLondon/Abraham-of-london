@@ -1,9 +1,10 @@
-// pages/api/access/enter.ts — HARDENED (Atomic Redemption)
+/* pages/api/access/enter.ts — V7.1 CANONICAL ALIGNED */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { redeemAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 import { setAccessCookie } from "@/lib/server/auth/cookies";
-import type { AccessTier as Tier } from "@/lib/access/tier-policy";
+// Import the Policy Engine to ensure data purity
+import { normalizeUserTier, type AccessTier as Tier } from "@/lib/access/tier-policy";
 
 type Ok = { ok: true; tier: Tier };
 type Fail = { ok: false; reason: string };
@@ -30,11 +31,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  // 1. Method Guard
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).json({ ok: false, reason: "Method Not Allowed" });
   }
 
+  // 2. Payload Validation
   const { token: tokenRaw } = req.body || {};
 
   if (!isNonEmptyString(tokenRaw)) {
@@ -43,6 +46,7 @@ export default async function handler(
 
   const token = tokenRaw.trim();
 
+  // Basic Sanity/Security Bounds
   if (token.length < 8) {
     return res.status(400).json({ ok: false, reason: "Invalid format" });
   }
@@ -52,6 +56,7 @@ export default async function handler(
   }
 
   try {
+    // 3. Atomic Redemption against Postgres Store
     const redeemed = await redeemAccessKey(token, {
       ipAddress: getClientIp(req),
       userAgent: String(req.headers["user-agent"] || "unknown"),
@@ -64,6 +69,7 @@ export default async function handler(
         .json({ ok: false, reason: redeemed.reason || "Unauthorized" });
     }
 
+    // 4. Session Persistence Logic
     if (!redeemed.sessionId) {
       console.error(
         "[AUTH_FAILURE] Token redeemed but session creation failed."
@@ -73,12 +79,19 @@ export default async function handler(
         .json({ ok: false, reason: "System misconfiguration" });
     }
 
+    // Set the secondary access cookie for the Vault
     setAccessCookie(res, redeemed.sessionId);
+
+    // 5. Canonical Data Return
+    // We normalize the tier here so the frontend AccessGate receives 
+    // the exact key expected by the TIER_HIERARCHY map.
+    const normalizedTier = normalizeUserTier(redeemed.tier);
 
     return res.status(200).json({
       ok: true,
-      tier: redeemed.tier as Tier,
+      tier: normalizedTier,
     });
+    
   } catch (err) {
     console.error("[CRITICAL_AUTH_ERROR]", err);
     return res

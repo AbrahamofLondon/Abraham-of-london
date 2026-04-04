@@ -1,23 +1,19 @@
-/* pages/downloads/index.tsx — DOWNLOADS VAULT (PRODUCTION INTEGRITY) */
+/* pages/downloads/index.tsx — DOWNLOADS INDEX (Premium Archive) */
 import * as React from "react";
-import type { GetStaticProps, InferGetStaticPropsType } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   Download as DownloadIcon,
+  Archive,
   Shield,
-  Sparkles,
-  FolderOpen,
-  Users,
-  Activity,
-  FileText
+  FileText,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { getContentlayerData } from "@/lib/content/server";
-import { normalizeSlug, sanitizeData } from "@/lib/content/shared";
+import { sanitizeData } from "@/lib/content/shared";
 
 type AccessLevel = "public" | "inner-circle" | "private";
 
@@ -26,7 +22,6 @@ type DownloadListItem = {
   title: string;
   excerpt: string | null;
   description: string | null;
-  coverImage: string | null;
   pageHref: string;
   assetUrl: string | null;
   accessLevel: AccessLevel;
@@ -38,27 +33,11 @@ type DownloadListItem = {
   featured: boolean;
 };
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
-
 function toAccessLevel(v: unknown): AccessLevel {
   const s = String(v || "").trim().toLowerCase();
-  if (["inner-circle", "innercircle", "members", "subscriber"].includes(s)) return "inner-circle";
+  if (["inner-circle", "innercircle", "members", "subscriber", "member"].includes(s)) return "inner-circle";
   if (["private", "restricted", "confidential", "draft"].includes(s)) return "private";
   return "public";
-}
-
-function resolveDocCoverImage(doc: any): string | null {
-  return doc.coverImage || doc.featuredImage || doc.image || doc.thumbnail || null;
-}
-
-function resolveDownloadSlug(doc: any): string {
-  const raw = doc?._raw?.flattenedPath || "";
-  // Extract the final segment to ensure it maps to /[slug] regardless of folder nesting
-  return raw.split('/').pop() || "";
-}
-
-function resolveAssetUrl(doc: any): string | null {
-  return doc.downloadUrl || doc.file || doc.fileUrl || doc.url || null;
 }
 
 function safeDateISO(d: any): string | null {
@@ -71,30 +50,55 @@ function formatDate(iso: string | null): string | null {
   if (!iso) return null;
   const t = new Date(iso).getTime();
   if (!Number.isFinite(t) || t <= 0) return null;
-  return new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(t).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+function normalizeSlug(input: string): string {
+  return String(input || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .replace(/\.mdx?$/i, "");
+}
+
+function resolveDownloadSlug(doc: any): string {
+  const raw = normalizeSlug(doc?.slug || doc?._raw?.flattenedPath || "");
+  return raw.split("/").filter(Boolean).pop() || "";
+}
+
+function resolveAssetUrl(doc: any): string | null {
+  return doc.downloadUrl || doc.file || doc.fileUrl || doc.url || null;
+}
+
+export const getStaticProps: GetStaticProps<{
+  downloads: DownloadListItem[];
+  categories: string[];
+  featuredCount: number;
+}> = async () => {
   try {
     const data = getContentlayerData();
-    const docs = Array.isArray(data.allDownloads) ? data.allDownloads : [];
+    const docs = Array.isArray((data as any).allDownloads) ? (data as any).allDownloads : [];
 
     const downloads: DownloadListItem[] = docs
+      .filter((d: any) => !d?.draft)
       .map((d: any) => {
         const slug = resolveDownloadSlug(d);
         const dateISO = safeDateISO(d?.date);
-        const category = (typeof d?.category === "string" && d.category.trim() ? d.category.trim() : "Operational");
-        
+
         return {
           slug,
           title: d?.title || "Strategic Asset",
           excerpt: d?.excerpt || d?.summary || null,
           description: d?.description ?? null,
-          coverImage: resolveDocCoverImage(d),
           pageHref: `/downloads/${slug}`,
           assetUrl: resolveAssetUrl(d),
-          accessLevel: toAccessLevel(d?.accessLevel),
-          category,
+          accessLevel: toAccessLevel(d?.accessLevel || d?.tier),
+          category: d?.category || "Operational",
           tags: Array.isArray(d?.tags) ? d.tags : [],
           dateISO,
           formattedDate: formatDate(dateISO),
@@ -102,8 +106,7 @@ export const getStaticProps: GetStaticProps = async () => {
           featured: Boolean(d?.featured),
         };
       })
-      // HARDENED FILTER: Allow all valid slugs and titles to ensure 75/75 resolution
-      .filter((x) => Boolean(x.slug) && x.title !== "Untitled Download")
+      .filter((x: DownloadListItem) => Boolean(x.slug))
       .sort((a, b) => {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
@@ -112,114 +115,159 @@ export const getStaticProps: GetStaticProps = async () => {
         return db - da || a.title.localeCompare(b.title);
       });
 
-    const categories = Array.from(new Set(downloads.map((d) => d.category).filter(Boolean) as string[])).sort();
-    const featuredCount = downloads.filter((d) => d.featured).length;
+    const categories = Array.from(
+      new Set(downloads.map((d) => d.category).filter(Boolean) as string[])
+    ).sort();
 
-    return { 
-      props: sanitizeData({ downloads, categories, featuredCount }), 
-      revalidate: 60 
+    return {
+      props: sanitizeData({
+        downloads,
+        categories,
+        featuredCount: downloads.filter((d) => d.featured).length,
+      }),
+      revalidate: 1800,
     };
-  } catch (error) {
-    console.error("Downloads Critical Failure:", error);
-    return { props: { downloads: [], categories: [], featuredCount: 0 } };
+  } catch {
+    return {
+      props: { downloads: [], categories: [], featuredCount: 0 },
+      revalidate: 1800,
+    };
   }
 };
 
-export default function DownloadsIndexPage({ downloads, categories, featuredCount }: any) {
-  const featured = downloads.filter((d: any) => d.featured);
-  const byCategory = categories.reduce((acc: any, c: string) => {
-    acc[c] = downloads.filter((d: any) => d.category === c);
+const DownloadsIndexPage: NextPage<{
+  downloads: DownloadListItem[];
+  categories: string[];
+  featuredCount: number;
+}> = ({ downloads, categories }) => {
+  const byCategory = categories.reduce((acc: Record<string, DownloadListItem[]>, c: string) => {
+    acc[c] = downloads.filter((d) => d.category === c);
     return acc;
-  }, {} as Record<string, DownloadListItem[]>);
+  }, {});
 
   return (
-    <Layout title="Strategic Assets">
-      <main className="min-h-screen bg-[#050505] text-white selection:bg-[#D4AF37]/30">
-        {/* Institutional Header */}
-        <section className="relative pt-32 pb-20 border-b border-white/5 overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-[url('/assets/grid-white.svg')] opacity-[0.02] pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-8 relative z-10">
-            <div className="flex items-center gap-3 mb-8">
-              <Activity className="h-4 w-4 text-[#D4AF37]" />
-              <span className="text-[10px] uppercase tracking-[0.4em] text-[#D4AF37] font-bold">Registry Online</span>
+    <Layout
+      title="Downloads | Abraham of London"
+      description="Operational packs, templates, worksheets, and strategic assets."
+      canonicalUrl="/downloads"
+      fullWidth
+      className="bg-black text-white"
+    >
+      <Head>
+        <title>Downloads | Abraham of London</title>
+      </Head>
+
+      <main className="min-h-screen bg-[#050505] text-white">
+        <section className="relative overflow-hidden border-b border-white/5 px-6 pb-20 pt-28 md:pt-36">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.06),transparent_45%)]" />
+          <div className="relative mx-auto max-w-7xl">
+            <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.36em] text-amber-300/90">
+              <Archive className="h-4 w-4" />
+              Operational Assets
             </div>
-            <h1 className="text-6xl md:text-8xl font-light tracking-tighter mb-8 leading-[0.9]">
-              Strategic <br /><span className="italic font-serif text-[#D4AF37]">Assets.</span>
+
+            <h1 className="mt-6 max-w-5xl font-serif text-5xl leading-[0.95] text-white md:text-7xl lg:text-8xl">
+              Downloads
+              <span className="ml-3 italic text-amber-200/90">Vault.</span>
             </h1>
-            <div className="flex gap-16">
-              <div className="space-y-1">
-                <span className="block text-4xl font-light">{downloads.length}</span>
-                <span className="text-[10px] uppercase tracking-widest text-zinc-500">Total Briefs</span>
-              </div>
-              <div className="space-y-1">
-                <span className="block text-4xl font-light text-[#D4AF37]">{featuredCount}</span>
-                <span className="text-[10px] uppercase tracking-widest text-zinc-500">Priority Access</span>
-              </div>
-            </div>
+
+            <p className="mt-8 max-w-3xl text-lg leading-relaxed text-white/65">
+              Templates, packs, cue cards, worksheets, and decision assets designed for use,
+              not decoration.
+            </p>
           </div>
         </section>
 
-        {downloads.length === 0 ? (
-          <div className="py-40 text-center space-y-4">
-            <FolderOpen className="mx-auto h-12 w-12 text-zinc-800" />
-            <p className="text-zinc-600 font-mono text-xs uppercase tracking-widest">Awaiting Contentlayer Synchronization</p>
-          </div>
-        ) : (
-          <div className="max-w-7xl mx-auto px-8 py-24 space-y-32">
-            {categories.map((cat) => (
-              <section key={cat} className="space-y-12">
-                <div className="flex items-center gap-6">
-                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 whitespace-nowrap">{cat}</h2>
-                   <div className="h-px w-full bg-white/5" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5 border border-white/5">
-                  {byCategory[cat].map((item: any) => (
-                    <DownloadIndexCard key={item.slug} item={item} />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
+        <section className="mx-auto max-w-7xl px-6 py-20">
+          {downloads.length === 0 ? (
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-12 text-center">
+              <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-white/35">
+                No downloads indexed
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-14">
+              {categories.map((cat) => (
+                <section key={cat}>
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.36em] text-white/45">
+                      {cat}
+                    </div>
+                    <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    {byCategory[cat].map((item) => (
+                      <article
+                        key={item.slug}
+                        className="group rounded-[2rem] border border-white/10 bg-white/[0.03] transition-all duration-300 hover:border-amber-500/30 hover:bg-white/[0.05]"
+                      >
+                        <div className="p-7">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300/85">
+                              <FileText className="h-3.5 w-3.5" />
+                              {item.accessLevel}
+                            </div>
+
+                            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40">
+                              {item.readTime || "Asset"}
+                            </span>
+                          </div>
+
+                          <h2 className="mt-6 font-serif text-2xl leading-tight text-white transition-colors group-hover:text-amber-100">
+                            {item.title}
+                          </h2>
+
+                          {item.excerpt ? (
+                            <p className="mt-4 text-sm leading-relaxed text-white/65">
+                              {item.excerpt}
+                            </p>
+                          ) : null}
+
+                          <div className="mt-6 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
+                            {item.formattedDate ? <span>{item.formattedDate}</span> : null}
+                            {item.formattedDate ? <span className="h-1 w-1 rounded-full bg-white/15" /> : null}
+                            <span>{item.category}</span>
+                          </div>
+
+                          <div className="mt-8 flex flex-wrap gap-3">
+                            <Link
+                              href={item.pageHref}
+                              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/85 transition-all hover:bg-white/[0.10]"
+                            >
+                              Open Page
+                              <ArrowRight className="h-4 w-4" />
+                            </Link>
+
+                            {item.assetUrl && item.accessLevel === "public" ? (
+                              <a
+                                href={item.assetUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-amber-300 transition-all hover:bg-amber-500/18"
+                              >
+                                <DownloadIcon className="h-4 w-4" />
+                                Download
+                              </a>
+                            ) : item.accessLevel !== "public" ? (
+                              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/45">
+                                <Shield className="h-4 w-4 text-amber-300/80" />
+                                Restricted
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </Layout>
   );
-}
+};
 
-function AccessBadge({ level }: { level: AccessLevel }) {
-  const cls = level === "public" ? "border-emerald-400/20 text-emerald-400 bg-emerald-400/5" 
-            : level === "inner-circle" ? "border-[#D4AF37]/20 text-[#D4AF37] bg-[#D4AF37]/5" 
-            : "border-zinc-700 text-zinc-500";
-  return <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${cls}`}>{level}</span>;
-}
-
-function DownloadIndexCard({ item }: { item: DownloadListItem }) {
-  return (
-    <div className="group relative p-10 bg-[#050505] hover:bg-zinc-900/30 transition-all duration-500">
-      <div className="flex flex-col h-full justify-between">
-        <div className="space-y-6">
-          <div className="flex justify-between items-start">
-            <AccessBadge level={item.accessLevel} />
-            <span className="text-[9px] font-mono text-zinc-600 uppercase">{item.readTime}</span>
-          </div>
-          <Link href={item.pageHref}>
-            <h3 className="text-2xl font-medium group-hover:text-[#D4AF37] transition-colors leading-tight">
-              {item.title}
-            </h3>
-          </Link>
-          {item.excerpt && <p className="text-sm text-zinc-500 line-clamp-2 font-light leading-relaxed">{item.excerpt}</p>}
-        </div>
-        <div className="mt-12 pt-6 border-t border-white/5 flex justify-between items-center">
-          <Link href={item.pageHref} className="text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 group-hover:gap-4 transition-all text-white group-hover:text-[#D4AF37]">
-            View Brief <ArrowRight className="h-3 w-3" />
-          </Link>
-          {item.assetUrl && item.accessLevel === "public" && (
-            <a href={item.assetUrl} className="p-2 border border-white/10 hover:bg-white hover:text-black transition-all">
-              <DownloadIcon className="h-3 w-3" />
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+export default DownloadsIndexPage;

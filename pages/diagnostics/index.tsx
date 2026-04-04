@@ -1,10 +1,10 @@
 /* ============================================================================
    FILE: pages/diagnostics/index.tsx
-   DIAGNOSTICS — Institutional Clarity Layer (OGR Integrated)
+   DIAGNOSTICS — CLARITY ARCHITECTURE (SYSTEM-INTEGRATED / UPGRADED)
 ============================================================================ */
 
 import * as React from "react";
-import type { GetStaticProps, NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -12,7 +12,6 @@ import {
   ArrowRight,
   ScanSearch,
   Scale,
-  Crown,
   CheckCircle2,
   Radar,
   Activity,
@@ -20,19 +19,38 @@ import {
   Users,
   Building2,
   Shield,
-  Briefcase,
   Layers,
-  Terminal,
-  Zap,
+  Crown,
+  FileText,
+  Fingerprint,
+  Lock,
+  Briefcase,
+  ChevronRight,
+  Sparkles,
+  Target,
+  BarChart3,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import AnonymisedCaseProof from "@/components/diagnostics/AnonymisedCaseProof";
+import TrustFAQ from "@/components/diagnostics/TrustFAQ";
+import SeriousBuyerGate from "@/components/diagnostics/SeriousBuyerGate";
+
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 
 const SITE = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
 ).replace(/\/+$/, "");
 
-type Props = {};
+type Props = {
+  access: {
+    authenticated: boolean;
+    tier: string;
+    name: string | null;
+    dashboardHref: string | null;
+  };
+};
 
 type Instrument = {
   title: string;
@@ -41,7 +59,8 @@ type Instrument = {
   desc: string;
   icon: React.ComponentType<any>;
   bullets: string[];
-  isLive?: boolean;
+  tension: string;
+  next: string;
 };
 
 type Signal = {
@@ -50,65 +69,64 @@ type Signal = {
   icon: React.ComponentType<any>;
 };
 
+type LadderStep = {
+  step: string;
+  title: string;
+  body: string;
+  icon: React.ComponentType<any>;
+  href: string;
+};
+
 const SIGNALS: Signal[] = [
   {
     title: "Narrative clarity",
-    body: "A disciplined reading of the real situation beneath surface explanations.",
+    body: "A disciplined reading of what is actually happening beneath surface explanations, ego protection, and emotional noise.",
     icon: FileSearch,
   },
   {
     title: "Pattern visibility",
-    body: "Drift, inconsistency, and structural weakness surfaced before they become expensive.",
+    body: "Drift, inconsistency, weak governance, and structural softness surfaced before they harden into cost and consequence.",
     icon: Radar,
   },
   {
     title: "Decision fit",
-    body: "Clarifies whether the right next move is correction, intervention, or escalation.",
+    body: "Clarifies whether the right next move is correction, intervention, escalation, or restraint — instead of action for action’s sake.",
     icon: Scale,
   },
 ];
 
 const INSTRUMENTS: Instrument[] = [
   {
-    title: "Institutional OGR",
-    href: "/dashboard/live",
-    label: "Strategic Live",
-    isLive: true,
-    desc: "A high-fidelity operational diagnostic using the OGR engine to simulate institutional friction and outcome certainty.",
-    icon: Terminal,
-    bullets: [
-      "Live friction simulation",
-      "Operational resonance signal",
-      "Decision-grade outcome modeling",
-    ],
-  },
-  {
-    title: "Quick Diagnostic",
-    href: "/purpose-alignment",
+    title: "Directional Integrity",
+    href: "/diagnostics/directional-integrity?source=diagnostics&entry=individual&intent=directional-integrity",
     label: "Individual",
-    desc: "A fast structured reading for personal clarity, directional drift, and behavioural alignment.",
+    desc: "A structured instrument for mandate clarity, behavioural alignment, emotional order, and legacy posture.",
     icon: ScanSearch,
     bullets: [
-      "Personal alignment signal",
-      "Low-friction entry point",
-      "Immediate correction priority",
+      "Mandate and identity signal",
+      "Operational drift detection",
+      "Report-ready personal diagnostic",
     ],
+    tension: "Useful when the problem still appears personal, internal, or behavioural.",
+    next: "Often leads into Team Alignment when the issue has already started affecting execution around the person.",
   },
   {
     title: "Team Alignment",
-    href: "/diagnostics/team-alignment",
+    href: "/diagnostics/team-alignment?source=diagnostics&entry=team&intent=team-alignment",
     label: "Team",
-    desc: "A sharper reading of team coherence, operating softness, and execution friction before problems harden.",
+    desc: "A sharper reading of team coherence, communication drag, and execution softness before problems harden.",
     icon: Users,
     bullets: [
       "Inter-team drift detection",
       "Execution and communication signal",
       "Correction themes by domain",
     ],
+    tension: "Useful when several people are now part of the problem, not just one person’s private confusion.",
+    next: "Often leads into Enterprise Diagnostic when authority, governance, or institutional consequence becomes visible.",
   },
   {
     title: "Enterprise Diagnostic",
-    href: "/diagnostics/enterprise",
+    href: "/diagnostics/enterprise?source=diagnostics&entry=enterprise&intent=enterprise-diagnostic",
     label: "Enterprise",
     desc: "A deeper organisational reading where leadership gap, team variance, and structural fragility matter.",
     icon: Building2,
@@ -117,6 +135,39 @@ const INSTRUMENTS: Instrument[] = [
       "Institutional fragility signal",
       "Decision-grade organisational reading",
     ],
+    tension: "Useful when consequence is now institutional, reputational, operational, or political.",
+    next: "Where the matter is commercially serious enough, this leads naturally into Executive Reporting or Strategy Room.",
+  },
+];
+
+const LADDER: LadderStep[] = [
+  {
+    step: "01",
+    title: "Initial personal signal",
+    body: "Directional Integrity determines whether the issue is still private, behavioural, or mandate-based.",
+    icon: ScanSearch,
+    href: "/diagnostics/directional-integrity?source=diagnostics&entry=individual&intent=directional-integrity",
+  },
+  {
+    step: "02",
+    title: "Operating-team signal",
+    body: "Team Alignment determines whether the issue has already spread into execution, trust, and communication.",
+    icon: Users,
+    href: "/diagnostics/team-alignment?source=diagnostics&entry=team&intent=team-alignment",
+  },
+  {
+    step: "03",
+    title: "Institutional signal",
+    body: "Enterprise Diagnostic determines whether the problem now belongs in governance, leadership, and enterprise consequence.",
+    icon: Building2,
+    href: "/diagnostics/enterprise?source=diagnostics&entry=enterprise&intent=enterprise-diagnostic",
+  },
+  {
+    step: "04",
+    title: "Private mandate path",
+    body: "Executive Reporting and Strategy Room handle matters where the cost of misreading is already material.",
+    icon: Crown,
+    href: "/diagnostics/executive-reporting",
   },
 ];
 
@@ -153,13 +204,7 @@ function RailDivider() {
   );
 }
 
-function MetricTile({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function MetricTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-l border-white/6 pl-4 first:border-l-0 first:pl-0">
       <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/28">
@@ -170,7 +215,27 @@ function MetricTile({
   );
 }
 
-const DiagnosticsPage: NextPage<Props> = () => {
+function Surface({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={[
+        "border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm",
+        "shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]",
+        className,
+      ].join(" ")}
+    >
+      {children}
+    </div>
+  );
+}
+
+const DiagnosticsPage: NextPage<Props> = ({ access }) => {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -184,11 +249,14 @@ const DiagnosticsPage: NextPage<Props> = () => {
       </Head>
 
       <main className="min-h-screen bg-black text-white">
+        {/* ------------------------------------------------------------------ */}
+        {/* HERO                                                               */}
+        {/* ------------------------------------------------------------------ */}
         <section className="relative overflow-hidden border-b border-white/5">
           <AmbientField />
 
           <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
-            <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="grid gap-14 lg:grid-cols-[0.98fr_1.02fr]">
               <div className="max-w-4xl">
                 <motion.div
                   initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
@@ -198,14 +266,26 @@ const DiagnosticsPage: NextPage<Props> = () => {
                   <RailLabel>Diagnostics</RailLabel>
                 </motion.div>
 
+                <motion.div
+                  className="mt-6 inline-flex items-center gap-3 border border-amber-500/18 bg-amber-500/[0.05] px-4 py-2"
+                  initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.75, delay: 0.06 }}
+                >
+                  <Fingerprint className="h-4 w-4 text-amber-400/70" />
+                  <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber-300/78">
+                    System-integrated diagnostic layer
+                  </span>
+                </motion.div>
+
                 <motion.h1
-                  className="mt-8 max-w-[10ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.4rem]"
+                  className="mt-8 max-w-[10ch] font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.2rem]"
                   initial={{ opacity: 0, y: reduceMotion ? 0 : 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.95, delay: 0.08 }}
                 >
-                  Clarity before
-                  <span className="mt-3 block text-white/58">commitment</span>
+                  Read pressure
+                  <span className="mt-3 block text-white/58">before action</span>
                 </motion.h1>
 
                 <motion.p
@@ -214,9 +294,9 @@ const DiagnosticsPage: NextPage<Props> = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.9, delay: 0.18 }}
                 >
-                  Structured instruments for reading pressure, drift, and
-                  misalignment before decisions are made and consequences
-                  compound.
+                  This is not a menu of random assessments. It is a governed
+                  diagnostic ladder designed to sort weak signal from serious signal,
+                  and serious signal from private mandate work.
                 </motion.p>
 
                 <motion.div
@@ -226,29 +306,31 @@ const DiagnosticsPage: NextPage<Props> = () => {
                   transition={{ duration: 0.85, delay: 0.26 }}
                 >
                   <Link
-                    href="/dashboard/live"
+                    href="#pathways"
                     className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
                   >
-                    <span>Enter OGR Terminal</span>
-                    <Zap className="h-4 w-4 transition-transform group-hover:scale-110" />
+                    <span>Explore pathways</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
 
                   <Link
-                    href="/purpose-alignment"
+                    href="/diagnostics/executive-reporting"
                     className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/78 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
                   >
-                    <span>Quick Diagnostic</span>
-                    <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
+                    <span>View flagship product</span>
+                    <FileText className="h-4 w-4 opacity-60 transition-transform group-hover:scale-105" />
                   </Link>
-                </motion.div>
 
-                <motion.div
-                  className="mt-12 h-px w-40 bg-gradient-to-r from-amber-500/30 to-transparent"
-                  initial={{ scaleX: 0, opacity: 0 }}
-                  animate={{ scaleX: 1, opacity: 1 }}
-                  transition={{ duration: 1.1, delay: 0.42 }}
-                  style={{ transformOrigin: "left" }}
-                />
+                  {access.dashboardHref ? (
+                    <Link
+                      href={access.dashboardHref}
+                      className="group inline-flex items-center justify-center gap-3 border border-amber-500/18 bg-amber-500/[0.04] px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300 transition-colors hover:border-amber-500/28 hover:bg-amber-500/[0.07]"
+                    >
+                      <span>Continue to dashboard</span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  ) : null}
+                </motion.div>
               </div>
 
               <motion.div
@@ -257,41 +339,154 @@ const DiagnosticsPage: NextPage<Props> = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.9, delay: 0.18 }}
               >
-                <div className="border border-white/[0.07] bg-white/[0.02] p-8 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
-                  <div className="relative">
-                    <div className="mb-8 flex items-center justify-between">
-                      <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
-                        Diagnostic posture
-                      </span>
-                      <Terminal className="h-4 w-4 text-amber-500/40" />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-6 border-y border-white/6 py-6">
-                      <MetricTile label="Mode" value="Real-time" />
-                      <MetricTile label="Bias" value="Friction" />
-                      <MetricTile label="Output" value="Simulation" />
-                    </div>
-
-                    <div className="mt-8 space-y-4">
-                      {[
-                        "Institutional friction simulation",
-                        "Decision-grade resonance mapping",
-                        "Structural reading before escalation",
-                        "Clearer pathway into private mandate",
-                      ].map((line) => (
-                        <div key={line} className="flex items-center gap-3">
-                          <CheckCircle2 className="h-4 w-4 text-amber-400/70" />
-                          <span className="text-sm text-white/58">{line}</span>
-                        </div>
-                      ))}
-                    </div>
+                <Surface className="p-8">
+                  <div className="mb-8 flex items-center justify-between">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
+                      Diagnostic posture
+                    </span>
+                    <Shield className="h-4 w-4 text-amber-500/40" />
                   </div>
-                </div>
+
+                  <div className="grid grid-cols-3 gap-6 border-y border-white/6 py-6">
+                    <MetricTile label="Mode" value="Disciplined" />
+                    <MetricTile label="Bias" value="Clarity" />
+                    <MetricTile label="Output" value="Fit" />
+                  </div>
+
+                  <div className="mt-8 space-y-4">
+                    {[
+                      "Traceable diagnostics",
+                      "Reusable data",
+                      "Report-ready structure",
+                      "CRM-forwardable reference layer",
+                    ].map((line) => (
+                      <div key={line} className="flex items-center gap-3">
+                        <CheckCircle2 className="h-4 w-4 text-amber-400/70" />
+                        <span className="text-sm text-white/58">{line}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 border-t border-white/6 pt-6">
+                    <div className="flex items-center gap-3">
+                      <Fingerprint className="h-4 w-4 text-amber-400/60" />
+                      <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/70">
+                        Diagnostic identity layer active
+                      </span>
+                    </div>
+                    {access.authenticated ? (
+                      <div className="mt-3 text-sm text-white/65">
+                        Session recognised for {access.name || "authenticated operator"}.
+                      </div>
+                    ) : (
+                      <div className="mt-3 text-sm text-white/45">
+                        Anonymous entry permitted. Serious escalation comes later.
+                      </div>
+                    )}
+                  </div>
+                </Surface>
               </motion.div>
             </div>
           </div>
         </section>
 
+        {/* ------------------------------------------------------------------ */}
+        {/* DIAGNOSTIC LADDER                                                  */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="relative py-20">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-14">
+              <RailLabel>Escalation ladder</RailLabel>
+              <h2 className="mt-7 max-w-4xl font-serif text-4xl text-white md:text-5xl">
+                This is a sequence, not a shopping aisle.
+              </h2>
+              <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
+                The system is designed to move a serious buyer from personal signal,
+                to team signal, to enterprise consequence, and finally into private
+                mandate work where justified.
+              </p>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-4">
+              {LADDER.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.step}
+                    initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.06 }}
+                  >
+                    <Surface className="h-full p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <Icon className="h-5 w-5 text-amber-400/70" />
+                        <span className="font-mono text-[10px] text-white/20">{item.step}</span>
+                      </div>
+                      <h3 className="mt-5 font-serif text-2xl text-white">{item.title}</h3>
+                      <p className="mt-4 text-sm leading-relaxed text-white/48">{item.body}</p>
+                      <Link
+                        href={item.href}
+                        className="mt-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
+                      >
+                        <span>Open step</span>
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    </Surface>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* FLAGSHIP PRODUCT LEAD                                              */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="relative py-16 border-t border-white/5">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.65 }}
+              className="border border-amber-500/16 bg-amber-500/[0.03] p-8 md:p-10"
+            >
+              <div className="font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/78">
+                Flagship product
+              </div>
+              <h2 className="mt-4 font-serif text-3xl text-white md:text-4xl">
+                Executive Reporting
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/52">
+                The premium middle layer between raw diagnostic signal and full
+                advisory mandate. Built for boards, founders, leadership teams,
+                and institutions that need disciplined interpretation before intervention.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-4">
+                <Link
+                  href="/diagnostics/executive-reporting"
+                  className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/72 transition-colors hover:text-amber-300 group"
+                >
+                  <span>Open flagship product</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </Link>
+
+                <Link
+                  href="/strategy-room"
+                  className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/56 transition-colors hover:text-white"
+                >
+                  <span>Inspect Strategy Room</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* WHY DIAGNOSTICS EXIST                                              */}
+        {/* ------------------------------------------------------------------ */}
         <section className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="grid gap-12 lg:grid-cols-[0.98fr_1.02fr]">
@@ -314,7 +509,6 @@ const DiagnosticsPage: NextPage<Props> = () => {
                 <div className="mt-10 space-y-8">
                   {SIGNALS.map((item, index) => {
                     const Icon = item.icon;
-
                     return (
                       <motion.div
                         key={item.title}
@@ -328,9 +522,7 @@ const DiagnosticsPage: NextPage<Props> = () => {
                           <Icon className="h-5 w-5 text-amber-400/60" />
                         </div>
                         <div>
-                          <h3 className="font-serif text-2xl text-white">
-                            {item.title}
-                          </h3>
+                          <h3 className="font-serif text-2xl text-white">{item.title}</h3>
                           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/48">
                             {item.body}
                           </p>
@@ -347,7 +539,7 @@ const DiagnosticsPage: NextPage<Props> = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.65, delay: 0.08 }}
               >
-                <div className="border border-white/[0.08] bg-white/[0.015] p-8 md:p-10">
+                <Surface className="p-8 md:p-10">
                   <Shield className="h-8 w-8 text-white/90" />
                   <h3 className="mt-8 font-serif text-3xl text-white md:text-4xl">
                     Why diagnostics come before escalation
@@ -357,31 +549,28 @@ const DiagnosticsPage: NextPage<Props> = () => {
                     {[
                       "Establishes a disciplined reading before action.",
                       "Improves fit between the problem and the response.",
-                      "Protects judgement from haste, emotion, and vagueness.",
+                      "Protects judgement from haste, ego, and vagueness.",
+                      "Stops weak cases from entering private advisory too early.",
                     ].map((line) => (
                       <div key={line} className="flex items-start gap-4">
                         <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-white/90" />
-                        <span className="text-lg leading-relaxed text-white/72">
-                          {line}
-                        </span>
+                        <span className="text-lg leading-relaxed text-white/72">{line}</span>
                       </div>
                     ))}
                   </div>
 
-                  <Link
-                    href="/consulting"
-                    className="group mt-12 flex items-center justify-between border border-amber-500/18 px-8 py-6 transition-colors hover:border-amber-500/35 hover:bg-amber-500/[0.03]"
-                  >
-                    <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber-300/78">
-                      View advisory pathways
-                    </span>
-                    <ArrowRight className="h-5 w-5 text-amber-300/78 transition-transform group-hover:translate-x-1" />
-                  </Link>
-
-                  <p className="mt-6 text-center font-mono text-[8px] uppercase tracking-[0.26em] text-white/28">
-                    Structured diagnosis • better fit • cleaner escalation
-                  </p>
-                </div>
+                  <div className="mt-10 border-t border-white/6 pt-6">
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="h-4 w-4 text-amber-400/60" />
+                      <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/72">
+                        Commercial logic
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-white/52">
+                      The system should never feel like a desperate funnel. It should feel like disciplined sorting.
+                    </p>
+                  </div>
+                </Surface>
               </motion.div>
             </div>
           </div>
@@ -391,86 +580,79 @@ const DiagnosticsPage: NextPage<Props> = () => {
           <RailDivider />
         </div>
 
-        <section className="relative py-24">
+        {/* ------------------------------------------------------------------ */}
+        {/* DIAGNOSTIC PATHWAYS                                                */}
+        {/* ------------------------------------------------------------------ */}
+        <section id="pathways" className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Instruments</RailLabel>
+              <RailLabel>Pathways</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                The Diagnostic Arsenal
+                Diagnostic pathways
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/48">
-                Four levels of diagnostic depth, from personal alignment to live institutional simulation.
+                Three levels of diagnostic depth, then a premium bridge into private mandate work.
               </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-3">
               {INSTRUMENTS.map((item, index) => {
                 const Icon = item.icon;
 
                 return (
                   <motion.article
                     key={`${item.title}-${item.href}-${index}`}
-                    className={`group relative overflow-hidden border transition-all duration-500 p-8 
-                      ${item.isLive 
-                        ? "border-amber-500/20 bg-amber-500/[0.02] hover:border-amber-500/40 hover:bg-amber-500/[0.04]" 
-                        : "border-white/[0.06] bg-white/[0.015] hover:border-white/[0.12] hover:bg-white/[0.025]"
-                      }`}
+                    className="group relative overflow-hidden border border-white/[0.06] bg-white/[0.015] p-8 transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.025]"
                     initial={{ opacity: 0, y: reduceMotion ? 0 : 18 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.08, duration: 0.65 }}
                     viewport={{ once: true }}
                   >
-                    <div className="relative">
-                      <div className="mb-8 flex items-start justify-between gap-4">
-                        <Icon className={`h-7 w-7 transition-colors duration-300 
-                          ${item.isLive ? "text-amber-400" : "text-amber-400/60 group-hover:text-amber-300"}`} 
-                        />
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[8px] font-mono uppercase tracking-[0.2em] text-white/58">
-                            {item.label}
-                          </span>
-                          {item.isLive && (
-                            <span className="flex items-center gap-1.5 font-mono text-[7px] uppercase tracking-widest text-amber-500 animate-pulse">
-                              <span className="h-1 w-1 rounded-full bg-amber-500" />
-                              Live Terminal
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                    <div className="mb-8 flex items-start justify-between gap-4">
+                      <Icon className="h-7 w-7 text-amber-400/60 transition-colors duration-300 group-hover:text-amber-300" />
+                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[8px] font-mono uppercase tracking-[0.2em] text-white/58">
+                        {item.label}
+                      </span>
+                    </div>
 
-                      <h3 className="font-serif text-2xl text-white transition-colors duration-300 group-hover:text-amber-50">
-                        {item.title}
-                      </h3>
+                    <h3 className="font-serif text-2xl text-white transition-colors duration-300 group-hover:text-amber-50">
+                      {item.title}
+                    </h3>
 
-                      <p className="mt-3 text-sm leading-relaxed text-white/48">
-                        {item.desc}
-                      </p>
+                    <p className="mt-3 text-sm leading-relaxed text-white/48">{item.desc}</p>
 
-                      <ul className="mt-7 space-y-3">
-                        {item.bullets.map((bullet) => (
-                          <li
-                            key={`${item.title}-${bullet}`}
-                            className="flex items-start gap-3 text-sm text-white/42"
-                          >
-                            <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500/40" />
-                            <span>{bullet}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="mt-8 flex items-center justify-between border-t border-white/6 pt-6">
-                        <Link
-                          href={item.href}
-                          className="group/link inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
+                    <ul className="mt-7 space-y-3">
+                      {item.bullets.map((bullet) => (
+                        <li
+                          key={`${item.title}-${bullet}`}
+                          className="flex items-start gap-3 text-sm text-white/42"
                         >
-                          <span>{item.isLive ? "Enter Terminal" : "Open instrument"}</span>
-                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-1" />
-                        </Link>
+                          <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500/40" />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-                        <span className="font-mono text-[8px] text-white/12">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
+                    <div className="mt-6 rounded-2xl border border-white/8 bg-black/20 p-4">
+                      <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/26">
+                        When it is useful
                       </div>
+                      <p className="mt-2 text-sm leading-relaxed text-white/50">{item.tension}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-white/38">{item.next}</p>
+                    </div>
+
+                    <div className="mt-8 flex items-center justify-between border-t border-white/6 pt-6">
+                      <Link
+                        href={item.href}
+                        className="group/link inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
+                      >
+                        <span>Open pathway</span>
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-1" />
+                      </Link>
+
+                      <span className="font-mono text-[8px] text-white/12">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
                     </div>
                   </motion.article>
                 );
@@ -479,134 +661,50 @@ const DiagnosticsPage: NextPage<Props> = () => {
           </div>
         </section>
 
+        {/* ------------------------------------------------------------------ */}
+        {/* MARKET PROOF                                                       */}
+        {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
-          <div className="absolute inset-0 bg-gradient-to-b from-amber-500/[0.03] to-transparent" />
-
-          <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-            <div className="grid gap-16 lg:grid-cols-2">
-              <motion.div
-                initial={{ opacity: 0, x: reduceMotion ? 0 : -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.65 }}
-              >
-                <RailLabel>Escalation logic</RailLabel>
-                <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  Not every situation needs advisory. Every serious situation needs clarity.
-                </h2>
-                <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/48">
-                  Diagnostics exist to create cleaner fit. Some situations need
-                  correction. Some need intervention. Some justify private mandate work.
-                </p>
-
-                <div className="mt-10 space-y-5">
-                  {[
-                    "Use diagnostics when the problem still needs reading",
-                    "Use advisory when the decision already carries consequence",
-                    "Use both when clarity and execution need to meet",
-                  ].map((item, index) => (
-                    <motion.div
-                      key={item}
-                      className="flex items-center gap-4"
-                      initial={{ opacity: 0, x: reduceMotion ? 0 : -8 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.08, duration: 0.5 }}
-                      viewport={{ once: true }}
-                    >
-                      <CheckCircle2 className="h-4 w-4 text-amber-400/72" />
-                      <span className="text-white/66">{item}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: reduceMotion ? 0 : 16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.65 }}
-              >
-                <div className="border border-amber-500/16 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-8">
-                  <Crown className="mb-6 h-9 w-9 text-amber-400/55" />
-                  <h3 className="font-serif text-2xl text-white">
-                    Advisory pathway
-                  </h3>
-                  <p className="mt-4 text-sm leading-relaxed text-white/44">
-                    Private work remains selective. Diagnostics help determine
-                    whether the matter should remain at the level of correction
-                    or move into structured counsel.
-                  </p>
-
-                  <div className="mt-8 space-y-4">
-                    {[
-                      "Structured decision environments",
-                      "Board and founder counsel",
-                      "Documented trade-offs and next-step logic",
-                    ].map((line) => (
-                      <div key={line} className="flex items-center gap-3">
-                        <Briefcase className="h-4 w-4 text-amber-400/60" />
-                        <span className="text-sm text-white/62">{line}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Link
-                    href="/consulting"
-                    className="group mt-8 inline-flex w-full items-center justify-center gap-3 border border-amber-500/25 bg-amber-500/[0.05] px-6 py-4 transition-colors hover:border-amber-500/55 hover:bg-amber-500/[0.08]"
-                  >
-                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300/82">
-                      View advisory
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-amber-400/48 transition-transform group-hover:translate-x-1 group-hover:text-amber-300" />
-                  </Link>
-                </div>
-              </motion.div>
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-14">
+              <RailLabel>Market proof</RailLabel>
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
+                Real patterns, anonymised
+              </h2>
+              <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
+                Not testimonials. Real-world friction patterns surfaced by the diagnostic architecture.
+              </p>
             </div>
+
+            <AnonymisedCaseProof />
           </div>
         </section>
 
+        {/* ------------------------------------------------------------------ */}
+        {/* TRUST FAQ                                                          */}
+        {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(245,158,11,0.04),transparent_70%)]" />
-
-          <div className="relative mx-auto max-w-4xl px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <Activity className="mx-auto mb-6 h-6 w-6 text-amber-500/30" />
-
-              <h2 className="font-serif text-4xl text-white md:text-5xl">
-                Start with a disciplined reading
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="mb-14">
+              <RailLabel>Trust & reliability</RailLabel>
+              <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
+                Questions from people who carry consequence
               </h2>
-
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-white/50">
-                Use diagnostics to reduce ambiguity before the next move is made.
+              <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
+                No generic answers. This is boardroom-level clarity.
               </p>
+            </div>
 
-              <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
-                <Link
-                  href="/dashboard/live"
-                  className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
-                >
-                  <span>Enter OGR Terminal</span>
-                  <Zap className="h-4 w-4 transition-transform group-hover:scale-110" />
-                </Link>
+            <TrustFAQ />
+          </div>
+        </section>
 
-                <Link
-                  href="/consulting"
-                  className="group inline-flex items-center justify-center gap-3 border border-white/10 px-10 py-5 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-colors hover:border-white/20 hover:bg-white/5"
-                >
-                  <span>View advisory</span>
-                  <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
-                </Link>
-              </div>
-
-              <div className="mt-16 flex justify-center">
-                <div className="h-12 w-px bg-gradient-to-b from-transparent via-amber-500/30 to-transparent" />
-              </div>
-            </motion.div>
+        {/* ------------------------------------------------------------------ */}
+        {/* SERIOUS BUYER GATE                                                 */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="relative border-t border-white/5 py-24">
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <SeriousBuyerGate />
           </div>
         </section>
       </main>
@@ -614,8 +712,64 @@ const DiagnosticsPage: NextPage<Props> = () => {
   );
 };
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  return { props: {}, revalidate: 3600 };
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  try {
+    const sessionId = readAccessCookie(context.req as any);
+
+    if (!sessionId) {
+      return {
+        props: {
+          access: {
+            authenticated: false,
+            tier: "public",
+            name: null,
+            dashboardHref: null,
+          },
+        },
+      };
+    }
+
+    const ctx = await getSessionContext(sessionId);
+
+    if (!ctx?.ok || !ctx?.valid) {
+      return {
+        props: {
+          access: {
+            authenticated: false,
+            tier: "public",
+            name: null,
+            dashboardHref: null,
+          },
+        },
+      };
+    }
+
+    const tier = String(ctx.tier || "public");
+
+    return {
+      props: {
+        access: {
+          authenticated: true,
+          tier,
+          name: ctx.name || "Member",
+          dashboardHref: tierAtLeast(tier, "inner-circle")
+            ? "/inner-circle/dashboard?tab=diagnostics"
+            : "/dashboard?tab=diagnostics",
+        },
+      },
+    };
+  } catch {
+    return {
+      props: {
+        access: {
+          authenticated: false,
+          tier: "public",
+          name: null,
+          dashboardHref: null,
+        },
+      },
+    };
+  }
 };
 
 export default DiagnosticsPage;

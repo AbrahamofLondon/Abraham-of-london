@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/blog/[slug].tsx — ESSAY READER (SSG-correct, scan-ready, build-safe, SSOT) */
+/* pages/blog/[...slug].tsx */
 
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
@@ -12,6 +12,8 @@ import DirectorateOversight from "@/components/content/DirectorateOversight";
 
 import { normalizeSlug, joinHref } from "@/lib/content/shared";
 import { resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
+import { getRenderableBody } from "@/lib/content/render-body";
+import { decodeBodyCodePayload } from "@/lib/content/client-codec";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
@@ -63,18 +65,6 @@ function toBareBlogSlug(input: unknown): string {
   return s;
 }
 
-function extractCode(doc: any): string {
-  return String(
-    doc?.body?.code ||
-      doc?.bodyCode ||
-      doc?.content ||
-      doc?.mdx ||
-      doc?.body?.raw ||
-      (typeof doc?.body === "string" ? doc.body : "") ||
-      ""
-  );
-}
-
 const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSlug }) => {
   const { data: session, status } = useSession();
 
@@ -110,8 +100,10 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
         return;
       }
 
-      if (typeof json?.bodyCode === "string" && json.bodyCode.trim()) {
-        setActiveCode(json.bodyCode);
+      const decoded = decodeBodyCodePayload(json);
+
+      if (decoded.trim()) {
+        setActiveCode(decoded);
       } else {
         setUnlockError("UNLOCK_PAYLOAD_MISSING");
       }
@@ -148,7 +140,6 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
                 window.location.href = "/inner-circle";
               }}
             />
-
             {unlockError ? (
               <div className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-red-400/90">
                 {unlockError}
@@ -202,12 +193,19 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
 export const getStaticPaths: GetStaticPaths = async () => {
   const { getPublishedPosts } = await import("@/lib/content/server");
 
-  const posts = getPublishedPosts() || [];
+  const posts = (await getPublishedPosts()) || [];
 
   const paths = posts
     .filter((p: any) => !p?.draft)
     .map((p: any) => {
-      const raw = normalizeSlug(p?.slug || p?._raw?.flattenedPath || "");
+      const raw = normalizeSlug(
+        p?.urlSlug ||
+          p?.collectionSlug ||
+          p?.slug ||
+          p?._raw?.flattenedPath ||
+          ""
+      );
+
       const bare = toBareBlogSlug(raw);
       return bare ? { params: { slug: bare.split("/") } } : null;
     })
@@ -226,17 +224,19 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
     if (!bare) return { notFound: true };
 
     const { getPublishedPosts } = await import("@/lib/content/server");
+    const posts = (await getPublishedPosts()) || [];
 
     const wantBlog = `blog/${bare}`;
     const wantPosts = `posts/${bare}`;
 
-    const posts = getPublishedPosts() || [];
-
     const rawDoc =
+      posts.find((p: any) => normalizeSlug(p?.collectionSlug || "") === wantBlog) ||
+      posts.find((p: any) => normalizeSlug(p?.collectionSlug || "") === wantPosts) ||
       posts.find((p: any) => normalizeSlug(p?.slug || "") === wantBlog) ||
       posts.find((p: any) => normalizeSlug(p?._raw?.flattenedPath || "") === wantBlog) ||
       posts.find((p: any) => normalizeSlug(p?.slug || "") === wantPosts) ||
       posts.find((p: any) => normalizeSlug(p?._raw?.flattenedPath || "") === wantPosts) ||
+      posts.find((p: any) => normalizeSlug(p?.urlSlug || "") === bare) ||
       null;
 
     if (!rawDoc || rawDoc?.draft) {
@@ -244,11 +244,13 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
     }
 
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
-    const code = requiredTier === "public" ? extractCode(rawDoc) : "";
+    const renderBody = getRenderableBody(rawDoc);
+    const code = requiredTier === "public" ? renderBody.code : "";
 
     const doc = {
       ...rawDoc,
       slug: bare,
+      bodyMode: renderBody.mode,
     };
 
     return {
@@ -261,7 +263,6 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
       revalidate: 1800,
     };
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("[Blog] Error in getStaticProps:", error);
     return { notFound: true, revalidate: 60 };
   }

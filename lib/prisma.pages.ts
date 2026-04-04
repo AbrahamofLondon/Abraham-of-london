@@ -16,26 +16,22 @@ function createPrismaClient(): PrismaClient {
     datasources: process.env.DATABASE_URL
       ? { db: { url: process.env.DATABASE_URL } }
       : undefined,
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["warn", "error"]
-        : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 }
 
-const prismaClient = global.__prisma_pages__ ?? createPrismaClient();
+const prisma = global.__prisma_pages__ ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
-  global.__prisma_pages__ = prismaClient;
+  global.__prisma_pages__ = prisma;
 }
 
-export const prisma: PrismaClient = prismaClient;
+export { prisma };
 export const getPrisma = (): PrismaClient => prisma;
 
 /**
  * Safe query helper:
  * retries once on transient closed/connection issues, then rethrows.
- * Do not silently null out genuine application errors.
  */
 export async function safePrismaQuery<T>(
   query: (client: PrismaClient) => Promise<T>
@@ -58,10 +54,10 @@ export async function safePrismaQuery<T>(
       console.warn("[PRISMA_RETRY] attempting one reconnect after transient failure");
     }
 
-    await prisma.$disconnect().catch(() => {});
+    await prisma.$disconnect().catch(() => undefined);
     await prisma.$connect();
 
-    return await query(prisma);
+    return query(prisma);
   }
 }
 

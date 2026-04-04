@@ -7,7 +7,7 @@ import type { PDFItem as CanonPDFItem } from "@/lib/pdf/types";
 // ------------------------------------------------------------
 export type ViewMode = "list" | "grid" | "detail";
 
-// so other components can import it directly.
+// Re-export PDFItem from canon types
 export type PDFType = CanonPDFItem['type'];
 
 // ✅ SINGLE SOURCE OF TRUTH
@@ -94,106 +94,26 @@ export interface DashboardStats {
   oldest?: string | PDFItem | null;
 }
 
-// Props for DashboardHeader component
-export interface DashboardHeaderProps {
-  title: string;
-  subtitle: string;
-  stats: {
-    total: number;
-    available: number;
-    missing: number;
-  };
-  user?: AdminUser;
-  onRefresh: () => void;
-  onGenerateAll: () => void;
-  isGenerating: boolean;
-}
-
-// Props for PDFActionsBar component
-export interface PDFActionsBarProps {
-  pdf: PDFItem & {
-    status?: 'generated' | 'pending' | 'error' | 'missing';
-    fileSize?: number;
-  };
-  isGenerating: boolean;
-  onGeneratePDF: () => void;
-  onDeletePDF: () => void;
-  onDuplicatePDF: () => void;
-  onRenamePDF: () => void;
-  canEdit: boolean;
-  canDelete: boolean;
-}
-
-// Props for PDFViewerPanel component
-export interface PDFViewerPanelProps {
-  pdf: (PDFItem & {
-    fileSize?: number;
-    outputPath: string;
-    status?: 'generated' | 'pending' | 'error' | 'missing';
-  }) | null;
-  isGenerating: boolean;
-  onGeneratePDF: (id: string) => void;
-  refreshKey: number;
-}
-
 // ------------------------------------------------------------
-// Hook types
-// ------------------------------------------------------------
-export interface UsePDFDashboardOptions {
-  initialViewMode?: ViewMode;
-  defaultCategory?: string;
-  autoRefreshInterval?: number;
-  enableAutoRefresh?: boolean;
-  initialFilter?: Partial<FilterState>;
-  maxItems?: number;
-}
-
-export interface UsePDFDashboardReturn {
-  pdfs: PDFItem[];
-  filteredPDFs: PDFItem[];
-  selectedPDF: PDFItem | null;
-  selectedPDFId: string | null;
-
-  isLoading: boolean;
-  isGenerating: boolean;
-
-  viewMode: ViewMode;
-  filterState: FilterState;
-
-  categories: string[];
-  stats: DashboardStats;
-
-  generationStatus: GenerationStatus | null;
-  error: Error | null;
-
-  setSelectedPDFId: React.Dispatch<React.SetStateAction<string | null>>;
-  setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
-  setGenerationStatus: React.Dispatch<React.SetStateAction<GenerationStatus | null>>;
-
-  refreshPDFList: () => Promise<void>;
-  generatePDF: (pdfId?: string, options?: any) => Promise<GenerationResponse>;
-  generateAllPDFs: () => Promise<GenerationResponse>;
-
-  updateFilter: (updates: Partial<FilterState>) => void;
-  searchPDFs: (query: string) => void;
-  sortPDFs: (sortBy: string) => void;
-  clearFilters: () => void;
-
-  deletePDF: (pdfId: string) => Promise<void>;
-  duplicatePDF: (pdfId: string) => Promise<PDFItem>;
-  renamePDF: (pdfId: string, newTitle: string) => Promise<void>;
-  updatePDFMetadata: (pdfId: string, metadata: Partial<PDFItem>) => Promise<void>;
-}
-
-// ------------------------------------------------------------
-// Supporting Types
+// Analytics types
 // ------------------------------------------------------------
 export interface AnalyticsEvent {
   name: string;
   properties?: Record<string, any>;
   timestamp?: string;
+  userId?: string;
 }
 
+export interface AnalyticsContextType {
+  trackEvent: (event: AnalyticsEvent) => void;
+  trackError: (error: Error | string, details?: any) => void;
+  trackPageView: (path: string) => void;
+  setUser: (userId: string, traits?: Record<string, any>) => void;
+}
+
+// ------------------------------------------------------------
+// PDF Metadata types
+// ------------------------------------------------------------
 export interface PDFMetadata {
   title?: string;
   description?: string;
@@ -205,6 +125,9 @@ export interface PDFMetadata {
   [key: string]: any;
 }
 
+// ------------------------------------------------------------
+// Share & Export types
+// ------------------------------------------------------------
 export interface ShareOptions {
   method: "link" | "email" | "download";
   recipients?: string[];
@@ -239,6 +162,9 @@ export interface ExportOptions {
   orientation?: "portrait" | "landscape";
 }
 
+// ------------------------------------------------------------
+// Service & API types
+// ------------------------------------------------------------
 export interface ServiceResponse<T = any> {
   success: boolean;
   data?: T;
@@ -274,6 +200,105 @@ export interface PDFPermissions {
   canBatch?: boolean;
 }
 
+// ------------------------------------------------------------
+// Component Props
+// ------------------------------------------------------------
+export interface DashboardHeaderProps {
+  title: string;
+  subtitle: string;
+  stats: {
+    total: number;
+    available: number;
+    missing: number;
+  };
+  user?: AdminUser;
+  onRefresh: () => void;
+  onGenerateAll: () => void;
+  isGenerating: boolean;
+}
+
+export interface PDFActionsBarProps {
+  pdf: PDFItem & {
+    status?: 'generated' | 'pending' | 'error' | 'missing';
+    fileSize?: number;
+  };
+  isGenerating: boolean;
+  onGeneratePDF: () => void;
+  onDeletePDF: () => void;
+  onDuplicatePDF: () => void;
+  onRenamePDF: () => void;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
+export interface PDFViewerPanelProps {
+  pdf: (PDFItem & {
+    fileSize?: number;
+    outputPath: string;
+    status?: 'generated' | 'pending' | 'error' | 'missing';
+  }) | null;
+  isGenerating: boolean;
+  onGeneratePDF: (id: string) => void;
+  refreshKey: number;
+}
+
+// ------------------------------------------------------------
+// Hook types
+// ------------------------------------------------------------
+export interface UsePDFDashboardOptions {
+  initialViewMode?: ViewMode;
+  defaultCategory?: string;
+  autoRefreshInterval?: number;
+  enableAutoRefresh?: boolean;
+  initialFilter?: Partial<FilterState>;
+  maxItems?: number;
+}
+
+export interface UsePDFDashboardReturn {
+  // State
+  pdfs: PDFItem[];
+  filteredPDFs: PDFItem[];
+  selectedPDF: PDFItem | null;
+  selectedPDFId: string | null;
+
+  isLoading: boolean;
+  isGenerating: boolean;
+
+  viewMode: ViewMode;
+  filterState: FilterState;
+
+  categories: string[];
+  stats: DashboardStats;
+
+  generationStatus: GenerationStatus | null;
+  error: Error | null;
+
+  // Setters
+  setSelectedPDFId: React.Dispatch<React.SetStateAction<string | null>>;
+  setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
+  setGenerationStatus: React.Dispatch<React.SetStateAction<GenerationStatus | null>>;
+
+  // Actions
+  refreshPDFList: () => Promise<void>;
+  generatePDF: (pdfId?: string, options?: any) => Promise<GenerationResponse>;
+  generateAllPDFs: () => Promise<GenerationResponse>;
+
+  // Filters
+  updateFilter: (updates: Partial<FilterState>) => void;
+  searchPDFs: (query: string) => void;
+  sortPDFs: (sortBy: string) => void;
+  clearFilters: () => void;
+
+  // CRUD
+  deletePDF: (pdfId: string) => Promise<void>;
+  duplicatePDF: (pdfId: string) => Promise<PDFItem>;
+  renamePDF: (pdfId: string, newTitle: string) => Promise<void>;
+  updatePDFMetadata: (pdfId: string, metadata: Partial<PDFItem>) => Promise<void>;
+}
+
+// ------------------------------------------------------------
+// Settings & Preferences
+// ------------------------------------------------------------
 export interface DashboardSettings {
   autoRefresh: boolean;
   refreshInterval: number;
@@ -286,45 +311,6 @@ export interface DashboardSettings {
   enableBatchOperations?: boolean;
   enableSearch?: boolean;
   enableFilters?: boolean;
-}
-
-export interface IPDFService {
-  getPDFs(): Promise<PDFItem[]>;
-  getPDFById(id: string): Promise<PDFItem | null>;
-  generatePDF(id: string, options?: any): Promise<GenerationResponse>;
-  generateAllPDFs(): Promise<GenerationResponse>;
-  deletePDF(id: string): Promise<void>;
-  duplicatePDF(id: string): Promise<PDFItem>;
-  renamePDF(id: string, newTitle: string): Promise<void>;
-  updateMetadata(id: string, metadata: Partial<PDFItem>): Promise<void>;
-  searchPDFs(query: string): Promise<SearchResult[]>;
-  exportPDF(id: string, options: ExportOptions): Promise<Blob>;
-  batchOperation(operation: BatchOperation): Promise<ServiceResponse>;
-  getStats(): Promise<DashboardStats>;
-  getCategories(): Promise<string[]>;
-}
-
-// Re-exports
-export type {
-  PDFItem as PDFDocument,
-  FilterState as PDFFilterState,
-  DashboardStats as PDFStats,
-  GenerationStatus as PDFGenerationStatus,
-  UsePDFDashboardReturn as PDFDashboardHookReturn,
-};
-
-// Events
-export type PDFEventType =
-  | "pdf_open" | "pdf_generated" | "pdf_deleted" | "pdf_shared" | "pdf_exported"
-  | "pdf_view_changed" | "pdf_filter_changed" | "pdf_search_performed"
-  | "batch_operation" | "error_occurred";
-
-export interface PDFEvent {
-  type: PDFEventType;
-  payload: Record<string, any>;
-  timestamp: string;
-  userId?: string;
-  sessionId?: string;
 }
 
 export interface ThemeSettings {
@@ -363,3 +349,56 @@ export interface UserPreferences {
   recentSearches: string[];
   favoritePDFs: string[];
 }
+
+// ------------------------------------------------------------
+// Service Interface
+// ------------------------------------------------------------
+export interface IPDFService {
+  getPDFs: () => Promise<PDFItem[]>;
+  getPDFById: (id: string) => Promise<PDFItem | null>;
+  generatePDF: (id: string, options?: any) => Promise<GenerationResponse>;
+  generateAllPDFs: () => Promise<GenerationResponse>;
+  deletePDF: (id: string) => Promise<void>;
+  duplicatePDF: (id: string) => Promise<PDFItem>;
+  renamePDF: (id: string, newTitle: string) => Promise<void>;
+  updateMetadata: (id: string, metadata: Partial<PDFItem>) => Promise<void>;
+  searchPDFs: (query: string) => Promise<SearchResult[]>;
+  exportPDF: (id: string, options: ExportOptions) => Promise<Blob>;
+  batchOperation: (operation: BatchOperation) => Promise<ServiceResponse>;
+  getStats: () => Promise<DashboardStats>;
+  getCategories: () => Promise<string[]>;
+}
+
+// ------------------------------------------------------------
+// Events
+// ------------------------------------------------------------
+export type PDFEventType =
+  | "pdf_open" 
+  | "pdf_generated" 
+  | "pdf_deleted" 
+  | "pdf_shared" 
+  | "pdf_exported"
+  | "pdf_view_changed" 
+  | "pdf_filter_changed" 
+  | "pdf_search_performed"
+  | "batch_operation" 
+  | "error_occurred";
+
+export interface PDFEvent {
+  type: PDFEventType;
+  payload: Record<string, any>;
+  timestamp: string;
+  userId?: string;
+  sessionId?: string;
+}
+
+// ------------------------------------------------------------
+// Re-exports for convenience
+// ------------------------------------------------------------
+export type {
+  PDFItem as PDFDocument,
+  FilterState as PDFFilterState,
+  DashboardStats as PDFStats,
+  GenerationStatus as PDFGenerationStatus,
+  UsePDFDashboardReturn as PDFDashboardHookReturn,
+};

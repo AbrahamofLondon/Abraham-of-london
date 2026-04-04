@@ -1,44 +1,128 @@
-import { NextResponse } from 'next/server';
+/* app/api/sovereign/report/route.ts — SOVEREIGN API PROTOCOL (HARDENED + AUTH-GATED) */
 
-/**
- * SOVEREIGN API PROTOCOL:
- * 1. AUTHENTICATION: Validates the request against the Sovereign Key.
- * 2. INTEGRITY: Re-calculates metrics server-side to prevent client-side tampering.
- * 3. PERSISTENCE: Logs the snapshot into the OGR Brief Portfolio.
- */
+import { NextResponse } from "next/server";
+import crypto from "crypto";
+import {
+  calculateDerived,
+  sanitizeMetrics,
+} from "@/lib/ogr/manifest-engine";
+import { hasValidOgrSession } from "@/lib/ogr/server-auth";
+import { OGR_CLIENT_CONFIG } from "@/lib/ogr/client-config";
 
-const SOVEREIGN_KEY = "OGR-2026-ALPHA";
+type IncomingMetrics = {
+  resonanceScore?: unknown;
+  marketFriction?: unknown;
+  targetRevenue?: unknown;
+};
+
+type IncomingBody = {
+  metrics?: IncomingMetrics;
+  timestamp?: unknown;
+  selectedBriefs?: unknown;
+};
+
+/* -------------------------------------------------------------------------- */
+/* SERVER-SIDE UTILITIES                                                      */
+/* -------------------------------------------------------------------------- */
+
+function sanitizeTimestamp(value: unknown): string {
+  const raw = typeof value === "string" ? value : "";
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime())
+    ? new Date().toISOString()
+    : parsed.toISOString();
+}
+
+function sanitizeBriefSelection(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((v) => String(v ?? "").trim())
+    .filter(Boolean)
+    .slice(0, OGR_CLIENT_CONFIG.registry.maxSelectedBriefsForReport);
+}
+
+function generateReportId(): string {
+  return `OGR-${crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`;
+}
+
+/* -------------------------------------------------------------------------- */
+/* CORE POST HANDLER                                                          */
+/* -------------------------------------------------------------------------- */
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { metrics, authKey, timestamp } = body;
+    /* ---------------------------------------------------------------------- */
+    /* 0. AUTHORIZATION GATE                                                  */
+    /* ---------------------------------------------------------------------- */
+    const authorized = await hasValidOgrSession();
 
-    // 1. Authorization Gate
-    if (authKey !== SOVEREIGN_KEY) {
-      return NextResponse.json({ error: "UNAUTHORIZED_ACCESS_BLOCK" }, { status: 403 });
+    if (!authorized) {
+      return NextResponse.json(
+        { status: "ERROR", error: "UNAUTHORIZED_ACCESS_BLOCK", code: 401 },
+        { status: 401 }
+      );
     }
 
-    // 2. Server-Side Verification (The "Double-Check")
-    const { resonanceScore, marketFriction, targetRevenue } = metrics;
-    
-    // Recalculate Alpha to ensure integrity
-    const legacyDrag = marketFriction / 100;
-    const ogrDrag = (100 - resonanceScore) / 100;
-    const verifiedAlpha = targetRevenue * (legacyDrag - ogrDrag);
+    /* ---------------------------------------------------------------------- */
+    /* 1. SERVER CONFIG VALIDATION                                            */
+    /* ---------------------------------------------------------------------- */
+    const serverKey = process.env.OGR_SOVEREIGN_KEY;
+    if (!serverKey) {
+      return NextResponse.json(
+        { status: "ERROR", error: "SOVEREIGN_KEY_NOT_CONFIGURED", code: 500 },
+        { status: 500 }
+      );
+    }
 
-    // 3. Simulated Database Entry
-    console.log(`[SOVEREIGN_LOG]: Report Generated at ${timestamp}`);
-    console.log(`[METRICS]: R:${resonanceScore} F:${marketFriction} ALPHA:${verifiedAlpha.toFixed(2)}M`);
+    const body = (await request.json()) as IncomingBody;
 
+    /* ---------------------------------------------------------------------- */
+    /* 2. CANONICAL RECOMPUTATION                                             */
+    /* ---------------------------------------------------------------------- */
+    const metrics = sanitizeMetrics(body?.metrics || {});
+    const derived = calculateDerived(metrics);
+
+    const timestamp = sanitizeTimestamp(body?.timestamp);
+    const selectedBriefs = sanitizeBriefSelection(body?.selectedBriefs);
+
+    /* ---------------------------------------------------------------------- */
+    /* 3. AUDIT RECORD GENERATION                                             */
+    /* ---------------------------------------------------------------------- */
+    const auditRecord = {
+      reportId: generateReportId(),
+      timestamp,
+      metrics,
+      derived,
+      selectedBriefs,
+      committedAt: new Date().toISOString(),
+      protocolVersion: OGR_CLIENT_CONFIG.protocolVersion,
+    };
+
+    /* ---------------------------------------------------------------------- */
+    /* 4. INSTITUTIONAL LOGGING                                               */
+    /* ---------------------------------------------------------------------- */
+    console.log(
+      `[SOVEREIGN_AUDIT] Generated ${auditRecord.reportId} | C_sov: ${derived.sovereignCertainty}`
+    );
+    console.log(JSON.stringify(auditRecord));
+
+    /* ---------------------------------------------------------------------- */
+    /* 5. HARDENED RESPONSE                                                   */
+    /* ---------------------------------------------------------------------- */
     return NextResponse.json({
       status: "SUCCESS",
-      reportId: `OGR-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-      verifiedAlpha: verifiedAlpha.toFixed(2),
-      message: "Snapshot committed to Portfolio Brief."
+      reportId: auditRecord.reportId,
+      verified: {
+        ...metrics,
+        ...derived,
+      },
+      message: "Snapshot committed to Portfolio Brief.",
     });
-
   } catch (error) {
-    return NextResponse.json({ error: "INTERNAL_CORE_FAILURE" }, { status: 500 });
+    console.error("[SOVEREIGN_REPORT_FAILURE]", error);
+    return NextResponse.json(
+      { status: "ERROR", error: "INTERNAL_CORE_FAILURE", code: 500 },
+      { status: 500 }
+    );
   }
 }

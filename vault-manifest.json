@@ -66,8 +66,20 @@
     "type": "brief"
   },
   {
+    "title": "The Pain Paradox: Why Suffering Is Not the Problem — And What Actually Is",
+    "slug": "/vault/blog/pain-paradox-suffering-meaning-alignment",
+    "category": "blog",
+    "type": "brief"
+  },
+  {
     "title": "Principle For My Son",
     "slug": "/vault/blog/principles-for-my-son",
+    "category": "blog",
+    "type": "brief"
+  },
+  {
+    "title": "The Purpose Economy: Why Profit Without Mission Is the Fastest Path to Irrelevance",
+    "slug": "/vault/blog/purpose-economy-profit-mission-survival",
     "category": "blog",
     "type": "brief"
   },
@@ -104,6 +116,12 @@
   {
     "title": "The Ultimate Purpose of Man",
     "slug": "/vault/blog/ultimate-purpose-of-man",
+    "category": "blog",
+    "type": "brief"
+  },
+  {
+    "title": "The Unseen Dawn: Why Darkness Is Not the Opposite of Light — It Is the Evidence",
+    "slug": "/vault/blog/unseen-dawn-divine-light-evidence",
     "category": "blog",
     "type": "brief"
   },
@@ -168,13 +186,19 @@
     "type": "brief"
   },
   {
+    "title": "Canon System Constitution",
+    "slug": "/vault/briefs/canon-system-constitution",
+    "category": "briefs",
+    "type": "brief"
+  },
+  {
     "title": "The Architecture of Conviction vs. The Mechanics of Coercion",
     "slug": "/vault/briefs/conviction-vs-coercion",
     "category": "briefs",
     "type": "brief"
   },
   {
-    "title": "Frontier Resilience // Briefing 001",
+    "title": "Frontier Resilience // Brief-001",
     "slug": "/vault/briefs/fr-001",
     "category": "briefs",
     "type": "brief"
@@ -666,6 +690,18 @@
     "type": "brief"
   },
   {
+    "title": "Execution Breaks Long Before Strategy Does",
+    "slug": "/vault/canon/execution-breaks-long-before-strategy-does",
+    "category": "canon",
+    "type": "brief"
+  },
+  {
+    "title": "The Hidden Cost of Organisational Drift",
+    "slug": "/vault/canon/the-hidden-cost-of-organisational-drift",
+    "category": "canon",
+    "type": "brief"
+  },
+  {
     "title": "Volume I - Foundations of Purpose",
     "slug": "/vault/canon/volume-i-foundations-of-purpose",
     "category": "canon",
@@ -710,6 +746,12 @@
   {
     "title": "VOLUME X - THE ARC OF FUTURE CIVILISATION",
     "slug": "/vault/canon/volume-x-the-arc-of-future-civilisation",
+    "category": "canon",
+    "type": "brief"
+  },
+  {
+    "title": "Why Most Consulting Fails Before It Begins",
+    "slug": "/vault/canon/why-most-consulting-fails-before-it -begins",
     "category": "canon",
     "type": "brief"
   },
@@ -2037,6 +2079,24 @@
     "title": "The Lexicon",
     "slug": "/vault/lexicon/_index",
     "category": "lexicon",
+    "type": "brief"
+  },
+  {
+    "title": "Execution Integrity Protocol",
+    "slug": "/vault/playbooks/execution-integrity-protocol",
+    "category": "playbooks",
+    "type": "brief"
+  },
+  {
+    "title": "The Alignment Audit Playbook",
+    "slug": "/vault/playbooks/the-alignment-audit-playbook",
+    "category": "playbooks",
+    "type": "brief"
+  },
+  {
+    "title": "The Drift Detection Framework",
+    "slug": "/vault/playbooks/the-drift-detection-framework",
+    "category": "playbooks",
     "type": "brief"
   },
   {
