@@ -1,4 +1,4 @@
-/* store/useOGRStore.ts — OGR GLOBAL STATE (ULTRA-HARDENED, MANIFEST-ALIGNED) */
+/* store/useOGRStore.ts — OGR GLOBAL STATE (CANONICAL AUTH ALIGNED) */
 import { create } from "zustand";
 import { devtools, persist, subscribeWithSelector } from "zustand/middleware";
 import {
@@ -10,10 +10,6 @@ import {
   type OGRMetrics,
   type OGRComputed,
 } from "@/lib/ogr/manifest-engine";
-
-/* -------------------------------------------------------------------------- */
-/* TYPES                                                                      */
-/* -------------------------------------------------------------------------- */
 
 type BaselineSnapshot = OGRMetrics & OGRComputed;
 
@@ -52,39 +48,29 @@ interface OGRState extends OGRMetrics {
   selectedBriefIds: string[];
   isRegistryOpen: boolean;
   isAuthenticated: boolean;
-
   computed: OGRComputed;
   baseline: BaselineSnapshot | null;
 
-  /* Selection */
   toggleBrief: (id: string) => void;
   clearSelection: () => void;
   setRegistryOpen: (open: boolean) => void;
 
-  /* Metrics */
   setResonance: (val: number) => void;
   setFriction: (val: number) => void;
   setRevenue: (val: number) => void;
   setMetrics: (metrics: Partial<OGRMetrics>) => void;
   resetMetrics: () => void;
 
-  /* Auth */
   authenticate: (key: string) => Promise<boolean>;
   logout: () => Promise<void>;
   setAuthenticated: (value: boolean) => void;
 
-  /* Reporting */
   commitReport: () => Promise<{ success: boolean; id?: string; error?: string }>;
 
-  /* Baseline */
   setBaseline: () => void;
   clearBaseline: () => void;
   getDeltaFromBaseline: () => DeltaSnapshot | null;
 }
-
-/* -------------------------------------------------------------------------- */
-/* CONSTANTS                                                                  */
-/* -------------------------------------------------------------------------- */
 
 const STORE_NAME = "ogr-sovereign-storage";
 const STORE_VERSION = 1;
@@ -96,10 +82,6 @@ const INITIAL_METRICS: OGRMetrics = {
 };
 
 const INITIAL_COMPUTED: OGRComputed = calculateDerived(INITIAL_METRICS);
-
-/* -------------------------------------------------------------------------- */
-/* PURE HELPERS                                                               */
-/* -------------------------------------------------------------------------- */
 
 function toSafeString(value: unknown): string {
   return typeof value === "string" ? value : value == null ? "" : String(value);
@@ -176,17 +158,10 @@ function toDelta(current: OGRState, baseline: BaselineSnapshot): DeltaSnapshot {
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* STORE                                                                      */
-/* -------------------------------------------------------------------------- */
-
 export const useOGRStore = create<OGRState>()(
   devtools(
     persist(
       subscribeWithSelector((set, get) => ({
-        /* ------------------------------------------------------------------ */
-        /* INITIAL STATE                                                      */
-        /* ------------------------------------------------------------------ */
         resonanceScore: INITIAL_METRICS.resonanceScore,
         marketFriction: INITIAL_METRICS.marketFriction,
         targetRevenue: INITIAL_METRICS.targetRevenue,
@@ -198,9 +173,6 @@ export const useOGRStore = create<OGRState>()(
         computed: INITIAL_COMPUTED,
         baseline: null,
 
-        /* ------------------------------------------------------------------ */
-        /* SELECTION ACTIONS                                                  */
-        /* ------------------------------------------------------------------ */
         toggleBrief: (id) =>
           set(
             (state) => ({
@@ -222,9 +194,6 @@ export const useOGRStore = create<OGRState>()(
             "ogr/setRegistryOpen"
           ),
 
-        /* ------------------------------------------------------------------ */
-        /* METRIC ACTIONS                                                     */
-        /* ------------------------------------------------------------------ */
         setResonance: (val) =>
           set(
             (state) => {
@@ -321,9 +290,6 @@ export const useOGRStore = create<OGRState>()(
             "ogr/resetMetrics"
           ),
 
-        /* ------------------------------------------------------------------ */
-        /* AUTH ACTIONS                                                       */
-        /* ------------------------------------------------------------------ */
         setAuthenticated: (value) =>
           set(
             { isAuthenticated: Boolean(value) },
@@ -340,7 +306,7 @@ export const useOGRStore = create<OGRState>()(
           }
 
           try {
-            const response = await fetch("/api/sovereign/auth", {
+            const response = await fetch("/api/auth/sovereign", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               credentials: "same-origin",
@@ -375,15 +341,12 @@ export const useOGRStore = create<OGRState>()(
               credentials: "same-origin",
             });
           } catch {
-            // Intentionally fail-open on network layer.
+            // fail-open on network layer
           }
 
           set({ isAuthenticated: false }, false, "ogr/logout");
         },
 
-        /* ------------------------------------------------------------------ */
-        /* REPORTING                                                          */
-        /* ------------------------------------------------------------------ */
         commitReport: async () => {
           const state = get();
 
@@ -426,9 +389,6 @@ export const useOGRStore = create<OGRState>()(
           }
         },
 
-        /* ------------------------------------------------------------------ */
-        /* BASELINE                                                           */
-        /* ------------------------------------------------------------------ */
         setBaseline: () =>
           set(
             (state) => ({

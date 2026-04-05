@@ -1,4 +1,4 @@
-/* pages/playbooks/index.tsx — PLAYBOOKS INDEX (Institutional Grade) */
+/* pages/playbooks/index.tsx — PLAYBOOKS INDEX (Institutional Grade, Pages-safe) */
 
 import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { getAllContentlayerDocs } from "@/lib/content/server";
 
 type PlaybookItem = {
   slug: string;
@@ -29,31 +30,60 @@ function safeStr(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+function normalizeSlug(value: unknown): string {
+  return safeStr(value)
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/^playbooks\//i, "");
+}
+
+function isPlaybookDoc(doc: Record<string, unknown>): boolean {
+  const type = safeStr(doc.type).toLowerCase();
+  const kind = safeStr(doc.kind).toLowerCase();
+  const docKind = safeStr(doc.docKind).toLowerCase();
+  const collection = safeStr(doc.collection).toLowerCase();
+  const rawFlattenedPath = safeStr(
+    (doc._raw as { flattenedPath?: unknown } | undefined)?.flattenedPath,
+  ).toLowerCase();
+  const slug = safeStr(doc.slug).toLowerCase();
+  const urlSlug = safeStr(doc.urlSlug).toLowerCase();
+
+  return (
+    type === "playbook" ||
+    kind === "playbook" ||
+    docKind === "playbook" ||
+    collection === "playbooks" ||
+    rawFlattenedPath.startsWith("playbooks/") ||
+    slug.startsWith("playbooks/") ||
+    urlSlug.startsWith("playbooks/")
+  );
+}
+
 export const getStaticProps: GetStaticProps<{
   items: PlaybookItem[];
 }> = async () => {
   try {
-    const generated: any = await import("contentlayer/generated");
-    const raw = Array.isArray(generated?.allPlaybooks) ? generated.allPlaybooks : [];
+    const rawDocs = getAllContentlayerDocs() as Array<Record<string, unknown>>;
 
-    const items: PlaybookItem[] = raw
-      .filter((p: any) => !p?.draft)
-      .map((p: any) => ({
-        slug: safeStr(p?.slug),
-        title: safeStr(p?.title, "Untitled Playbook"),
-        description: safeStr(p?.description) || null,
-        difficulty: safeStr(p?.difficulty) || null,
-        playbookType: safeStr(p?.playbookType) || null,
-        estimatedTime: safeStr(p?.estimatedTime) || null,
+    const items: PlaybookItem[] = rawDocs
+      .filter((doc) => isPlaybookDoc(doc))
+      .filter((doc) => doc.draft !== true && doc.published !== false)
+      .map((doc) => ({
+        slug: normalizeSlug(doc.urlSlug || doc.slug || doc.slugComputed),
+        title: safeStr(doc.title, "Untitled Playbook"),
+        description: safeStr(doc.description || doc.summary || doc.excerpt) || null,
+        difficulty: safeStr(doc.difficulty) || null,
+        playbookType: safeStr(doc.playbookType || doc.category || doc.theme) || null,
+        estimatedTime: safeStr(doc.estimatedTime || doc.readingTime) || null,
       }))
-      .filter((p: PlaybookItem) => !!p.slug)
+      .filter((item) => Boolean(item.slug))
       .sort((a, b) => a.title.localeCompare(b.title));
 
     return {
       props: { items },
       revalidate: 1800,
     };
-  } catch {
+  } catch (error) {
+    console.error("[playbooks/index] getStaticProps failed", error);
     return {
       props: { items: [] },
       revalidate: 1800,
@@ -61,7 +91,9 @@ export const getStaticProps: GetStaticProps<{
   }
 };
 
-const PlaybooksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ items }) => {
+const PlaybooksPage: NextPage<
+  InferGetStaticPropsType<typeof getStaticProps>
+> = ({ items }) => {
   return (
     <Layout
       title="Playbooks | Abraham of London"

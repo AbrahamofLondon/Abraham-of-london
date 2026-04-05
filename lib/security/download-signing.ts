@@ -29,23 +29,44 @@ function b64url(input: Buffer | string): string {
 
 function unb64url(input: string): string {
   const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
+  const padded =
+    normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
   return Buffer.from(padded, "base64").toString("utf8");
 }
 
 function sign(input: string): string {
   return b64url(
-    crypto.createHmac("sha256", requireSecret()).update(input).digest()
+    crypto.createHmac("sha256", requireSecret()).update(input).digest(),
   );
 }
 
-export function createSignedDownloadToken(payload: SignedDownloadPayload): string {
-  const body = b64url(JSON.stringify(payload));
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function safeNumber(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+export function createSignedDownloadToken(
+  payload: SignedDownloadPayload,
+): string {
+  const normalized: SignedDownloadPayload = {
+    artifactId: safeString(payload.artifactId),
+    diagnosticRef: safeString(payload.diagnosticRef),
+    email: safeString(payload.email).toLowerCase(),
+    exp: safeNumber(payload.exp),
+  };
+
+  const body = b64url(JSON.stringify(normalized));
   const mac = sign(body);
   return `${body}.${mac}`;
 }
 
-export function verifySignedDownloadToken(token: string): SignedDownloadPayload | null {
+export function verifySignedDownloadToken(
+  token: string,
+): SignedDownloadPayload | null {
   const idx = token.lastIndexOf(".");
   if (idx <= 0) return null;
 
@@ -55,24 +76,37 @@ export function verifySignedDownloadToken(token: string): SignedDownloadPayload 
 
   const a = Buffer.from(providedMac);
   const b = Buffer.from(expectedMac);
+
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
     return null;
   }
 
-  let parsed: SignedDownloadPayload;
+  let parsed: unknown;
   try {
     parsed = JSON.parse(unb64url(body));
   } catch {
     return null;
   }
 
-  if (!parsed?.artifactId || !parsed?.diagnosticRef || !parsed?.email || !parsed?.exp) {
+  const payload = parsed as Partial<SignedDownloadPayload>;
+
+  const artifactId = safeString(payload.artifactId);
+  const diagnosticRef = safeString(payload.diagnosticRef);
+  const email = safeString(payload.email).toLowerCase();
+  const exp = safeNumber(payload.exp);
+
+  if (!artifactId || !diagnosticRef || !email || !exp) {
     return null;
   }
 
-  if (Date.now() > parsed.exp) {
+  if (Date.now() > exp) {
     return null;
   }
 
-  return parsed;
+  return {
+    artifactId,
+    diagnosticRef,
+    email,
+    exp,
+  };
 }

@@ -1,5 +1,4 @@
 /* lib/server/diagnostics/report-pdf.tsx */
-import "server-only";
 
 import React from "react";
 import {

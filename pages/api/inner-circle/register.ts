@@ -119,7 +119,7 @@ export default async function handler(
     const appUrl = String(
       process.env.NEXT_PUBLIC_APP_URL ||
         process.env.NEXT_PUBLIC_SITE_URL ||
-        "http://localhost:3000"
+        "https://www.abrahamoflondon.org"
     ).trim();
 
     const unlockUrl = `${appUrl.replace(

@@ -93,7 +93,7 @@ export const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
       skipSuccessfulRequests: false,
       trustProxy: true,
     },
-    allowedOrigins: ["http://localhost:3000", "https://www.abrahamoflondon.org"],
+    allowedOrigins: ["https://www.abrahamoflondon.org", "https://www.abrahamoflondon.org"],
     corsHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     maxBodySize: "10mb",
     timeout: 30_000,

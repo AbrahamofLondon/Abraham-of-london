@@ -96,7 +96,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const base =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXTAUTH_URL ||
-    "http://localhost:3000";
+    "https://www.abrahamoflondon.org";
 
   const cookie = context.req.headers.cookie || "";
   const resp = await fetch(`${base}/api/admin/reports/${id}`, {

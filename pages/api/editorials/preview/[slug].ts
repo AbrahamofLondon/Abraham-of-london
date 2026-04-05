@@ -9,7 +9,9 @@ function abs(p: string): string {
 }
 
 function safeSlug(value: unknown): string {
-  return typeof value === "string" ? value.trim().replace(/^\/+|\/+$/g, "") : "";
+  return typeof value === "string"
+    ? value.trim().replace(/^\/+|\/+$/g, "")
+    : "";
 }
 
 function escapeHtml(input: string): string {
@@ -34,7 +36,9 @@ function candidateSlugs(slug: string): string[] {
   return Array.from(new Set(candidates.filter(Boolean)));
 }
 
-function findPreviewSource(slug: string): { slug: string; filePath: string } | null {
+function findPreviewSource(
+  slug: string,
+): { slug: string; filePath: string } | null {
   for (const candidate of candidateSlugs(slug)) {
     const filePath = abs(`scripts/pdf/print-sources/${candidate}.print.md`);
     if (fs.existsSync(filePath)) {
@@ -50,8 +54,22 @@ marked.setOptions({
   pedantic: false,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const requestedSlug = safeSlug(req.query.slug);
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).send("Method not allowed");
+  }
+
+  const requestedSlug =
+    typeof req.query.slug === "string"
+      ? safeSlug(req.query.slug)
+      : Array.isArray(req.query.slug)
+        ? safeSlug(req.query.slug[0])
+        : "";
+
   const resolved = findPreviewSource(requestedSlug);
 
   if (!requestedSlug || !resolved) {
@@ -60,6 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const raw = fs.readFileSync(resolved.filePath, "utf8");
   const parsed = matter(raw);
+
   const title =
     typeof parsed.data?.title === "string" && parsed.data.title.trim()
       ? parsed.data.title.trim()
@@ -70,9 +89,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ? parsed.data.subtitle.trim()
       : "";
 
-  const html = await marked.parse(parsed.content);
+  const rendered = await marked.parse(parsed.content);
+  const html = typeof rendered === "string" ? rendered : String(rendered ?? "");
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store");
 
   return res.status(200).send(`
     <!doctype html>

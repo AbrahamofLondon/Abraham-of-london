@@ -1,5 +1,4 @@
 /* lib/server/diagnostics/storage/s3.ts */
-import "server-only";
 
 import {
   S3Client,

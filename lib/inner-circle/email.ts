@@ -76,7 +76,7 @@ export async function sendInnerCircleEmail(
   const text = buildText("resend", {
     name,
     accessKey: key,
-    unlockUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/inner-circle?key=${encodeURIComponent(
+    unlockUrl: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"}/inner-circle?key=${encodeURIComponent(
       key
     )}`,
   });
@@ -89,5 +89,6 @@ export async function sendInnerCircleEmail(
     from: process.env.INNER_CIRCLE_FROM_EMAIL || process.env.MAIL_FROM,
   });
 }
+
 
 

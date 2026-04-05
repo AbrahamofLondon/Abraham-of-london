@@ -47,6 +47,7 @@ import {
   getPostBySlug as helperGetPostBySlug,
   getBriefBySlug as helperGetBriefBySlug,
   getAccessLevel as helperGetAccessLevel,
+  getDocKind as helperGetDocKind,
   toUiDoc as helperToUiDoc,
   documentKinds,
   getCardProps,
@@ -73,7 +74,13 @@ export const normalizeSlug = helperNormalizeSlug;
 export const sanitizeData = helperSanitizeData;
 export const getAccessLevel = helperGetAccessLevel;
 export const toUiDoc = helperToUiDoc ?? sharedToUiDoc;
-export const getDocKind = sharedGetDocKind;
+
+/**
+ * Important:
+ * Use the helper's content-aware doc kind resolver as primary SSOT.
+ * Keep sharedGetDocKind available only as fallback if needed elsewhere.
+ */
+export const getDocKind = helperGetDocKind || sharedGetDocKind;
 
 function isLiveDoc(doc: any): boolean {
   if (!doc) return false;
@@ -97,7 +104,14 @@ export const getAllResources = (): ContentDoc[] => helperGetAllResources();
 export const getAllStrategies = (): ContentDoc[] => helperGetAllStrategies();
 export const getAllShorts = (): ContentDoc[] => helperGetAllShorts();
 export const getAllBriefs = (): ContentDoc[] => helperGetAllBriefs();
+
+/**
+ * Backward-compatible lexicon aliases.
+ * Some older files may call singular, others plural.
+ */
 export const getAllLexicons = (): ContentDoc[] => helperGetAllLexicon();
+export const getAllLexicon = (): ContentDoc[] => helperGetAllLexicon();
+
 export const getAllVault = (): ContentDoc[] => helperGetAllVault();
 export const getAllBlogs = (): ContentDoc[] => getAllPosts();
 
@@ -116,6 +130,7 @@ export const getPublishedStrategies = (): ContentDoc[] => getAllStrategies().fil
 export const getPublishedShorts = (): ContentDoc[] => getAllShorts().filter(isLiveDoc);
 export const getPublishedBriefs = (): ContentDoc[] => getAllBriefs().filter(isLiveDoc);
 export const getPublishedLexicons = (): ContentDoc[] => getAllLexicons().filter(isLiveDoc);
+export const getPublishedLexicon = (): ContentDoc[] => getAllLexicon().filter(isLiveDoc);
 export const getPublishedVault = (): ContentDoc[] => getAllVault().filter(isLiveDoc);
 export const getPublishedDocuments = (): ContentDoc[] => getAllCombinedDocs().filter(isLiveDoc);
 
@@ -128,7 +143,10 @@ export const getPublishedDocumentsByType = (kind: string): ContentDoc[] => {
     const docKind = String(doc?.docKind || "").toLowerCase();
     const legacyKind = String(doc?.kind || "").toLowerCase();
 
-    return (type === requested || docKind === requested || legacyKind === requested) && isLiveDoc(doc);
+    return (
+      (type === requested || docKind === requested || legacyKind === requested) &&
+      isLiveDoc(doc)
+    );
   });
 };
 

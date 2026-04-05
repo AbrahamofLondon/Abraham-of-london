@@ -5,6 +5,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 // ============================================================================
@@ -172,6 +173,45 @@ enum Permission {
   ADMIN_ACCESS
 }
 
+enum DiagnosticSeverity {
+  low
+  moderate
+  high
+  critical
+}
+
+enum DiagnosticLifecycleStatus {
+  draft
+  completed
+  archived
+}
+
+enum DiagnosticReportStatus {
+  none
+  pending
+  paid
+  generated
+  failed
+  revoked
+}
+
+enum DiagnosticArtifactKind {
+  pdf
+}
+
+enum DiagnosticStorageProvider {
+  local
+  s3
+}
+
+enum DiagnosticRegenerationStatus {
+  queued
+  processing
+  completed
+  failed
+  cancelled
+}
+
 // ============================================================================
 // ORGANISATION & ENTERPRISE CAMPAIGN SYSTEM
 // ============================================================================
@@ -184,7 +224,7 @@ model Organisation {
   sizeBand  String?
   region    String?
   status    String   @default("active")
-  metadata  Json?    @default("{}")
+  metadata  String?  @default("{}")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -211,7 +251,7 @@ model AlignmentCampaign {
   createdByMembershipId String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
-  metadata              Json?     @default("{}")
+  metadata              String?   @default("{}")
 
   organisation        Organisation            @relation(fields: [organisationId], references: [id], onDelete: Cascade)
   createdByMembership OrganisationMembership? @relation("CampaignCreatedByMembership", fields: [createdByMembershipId], references: [id])
@@ -238,7 +278,7 @@ model AlignmentSnapshot {
   campaignId     String   @unique
   organisationId String
   cohortSize     Int
-  aggregatedData Json
+  aggregatedData String
   finalizedAt    DateTime @default(now())
 
   campaign     AlignmentCampaign @relation("CampaignAlignmentSnapshot", fields: [campaignId], references: [id], onDelete: Cascade)
@@ -257,7 +297,7 @@ model OrganisationInvite {
   expiresAt      DateTime
   acceptedAt     DateTime?
   revokedAt      DateTime?
-  metadata       Json?        @default("{}")
+  metadata       String?      @default("{}")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
@@ -301,7 +341,7 @@ model GovernanceLog {
   action      String
   performedBy String
   target      String?
-  details     Json?
+  details     String?
   createdAt   DateTime @default(now())
 }
 
@@ -349,14 +389,14 @@ model EnterpriseAssessment {
   organisationId       String
   teamName             String?
   isExecutive          Boolean  @default(false)
-  answersJson          Json
+  answersJson          String
   totalScore           Int
   possibleScore        Int
   percentScore         Int
   band                 String
-  weakestDomainsJson   Json
-  strongestDomainsJson Json?
-  domainScoresJson     Json
+  weakestDomainsJson   String
+  strongestDomainsJson String?
+  domainScoresJson     String
   submittedAt          DateTime @default(now())
 
   campaign    AlignmentCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -380,10 +420,10 @@ model TeamAssessmentSnapshot {
   possibleScore        Int
   percentScore         Int
   band                 String
-  weakestDomainsJson   Json
-  strongestDomainsJson Json
-  domainScoresJson     Json
-  varianceScoresJson   Json
+  weakestDomainsJson   String
+  strongestDomainsJson String
+  domainScoresJson     String
+  varianceScoresJson   String
   generatedAt          DateTime @default(now())
 
   campaign AlignmentCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -405,10 +445,10 @@ model OrganisationAssessmentSnapshot {
   possibleScore        Int
   percentScore         Int
   band                 String
-  weakestDomainsJson   Json
-  strongestDomainsJson Json
-  domainScoresJson     Json
-  varianceScoresJson   Json
+  weakestDomainsJson   String
+  strongestDomainsJson String
+  domainScoresJson     String
+  varianceScoresJson   String
   fragilitySignal      String?
   generatedAt          DateTime @default(now())
 
@@ -423,8 +463,8 @@ model LeadershipGapSnapshot {
   campaignId              String   @unique
   organisationId          String
   overallGapPercent       Int
-  domainGapsJson          Json
-  interpretationFlagsJson Json
+  domainGapsJson          String
+  interpretationFlagsJson String
   generatedAt             DateTime @default(now())
 
   campaign AlignmentCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -454,98 +494,188 @@ model EnterpriseReport {
 // DIAGNOSTIC ARTEFACT REGISTRY / LINEAGE / RETENTION
 // ============================================================================
 
+model DiagnosticRecord {
+  id             String                    @id @default(cuid())
+  diagnosticType String
+  title          String?
+  score          Int
+  severity       DiagnosticSeverity
+  verdict        String
+  responsesJson  String
+  notes          String?
+
+  userEmail      String?
+  userId         String?
+
+  status         DiagnosticLifecycleStatus @default(completed)
+  reportStatus   DiagnosticReportStatus    @default(none)
+  reportTier     String?
+
+  latestVersion  String?
+  generatedAt    DateTime?
+  failedAt       DateTime?
+  failureReason  String?
+
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  reportOrders   DiagnosticReportOrder[]
+  artifacts      DiagnosticArtifact[]
+  accessGrants   DiagnosticArtifactAccessGrant[]
+  lineageEvents  DiagnosticLineageEvent[]
+  auditEvents    DiagnosticAuditEvent[]
+  regenJobs      DiagnosticRegenerationJob[]
+
+  @@index([userEmail, createdAt])
+  @@index([userId, createdAt])
+  @@index([diagnosticType, createdAt])
+  @@index([reportStatus, createdAt])
+  @@index([status, createdAt])
+  @@map("diagnostic_records")
+}
+
+model DiagnosticReportOrder {
+  id                 String   @id @default(cuid())
+  diagnosticRecordId String
+
+  stripeSessionId    String?  @unique
+  stripePaymentId    String?
+
+  reportTier         String
+  amount             Int
+  currency           String   @default("gbp")
+  status             String   @default("pending")
+
+  userEmail          String?
+  userId             String?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  diagnosticRecord   DiagnosticRecord @relation(fields: [diagnosticRecordId], references: [id], onDelete: Cascade)
+
+  @@index([diagnosticRecordId])
+  @@index([status, createdAt])
+  @@map("diagnostic_report_orders")
+}
+
 model DiagnosticArtifact {
-  id            String @id @default(cuid())
-  diagnosticRef String
-  reportId      String
-  version       String
+  id              String                    @id @default(cuid())
+  diagnosticRef   String
+  diagnosticId    String
+  reportId        String?
+  version         String
+  kind            DiagnosticArtifactKind    @default(pdf)
 
-  kind String @default("pdf")
+  fileName        String
+  mimeType        String
+  byteLength      Int
+  sha256          String
 
-  fileName   String
-  mimeType   String
-  byteLength Int
-  sha256     String
-
-  storageProvider String
+  storageProvider DiagnosticStorageProvider
   objectKey       String
   bucket          String?
 
-  etag       String?
-  publicPath String?
+  etag            String?
+  publicPath      String?
 
-  isRevoked     Boolean   @default(false)
-  revokedAt     DateTime?
-  revokedReason String?
+  isRevoked       Boolean                   @default(false)
+  revokedAt       DateTime?
+  revokedReason   String?
 
-  retentionClass String    @default("standard")
-  expiresAt      DateTime?
+  retentionClass  String                    @default("standard")
+  expiresAt       DateTime?
 
-  createdAt DateTime @default(now())
-  createdBy String?
+  createdAt       DateTime                  @default(now())
+  createdBy       String?
+
+  diagnostic      DiagnosticRecord          @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
 
   @@unique([diagnosticRef, version, kind])
   @@index([diagnosticRef])
+  @@index([diagnosticId])
   @@index([version])
+  @@index([isRevoked])
+  @@map("diagnostic_artifacts")
 }
 
 model DiagnosticRegenerationJob {
-  id            String  @id @default(cuid())
-  diagnosticRef String
-  version       String?
+  id              String                       @id @default(cuid())
+  diagnosticRef   String
+  diagnosticId    String?
+  version         String?
 
-  status  String @default("queued")
-  attempt Int    @default(0)
+  status          DiagnosticRegenerationStatus @default(queued)
+  attempt         Int                          @default(0)
+  error           String?
 
-  error String?
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  diagnostic      DiagnosticRecord?            @relation(fields: [diagnosticId], references: [id], onDelete: SetNull)
 
   @@index([diagnosticRef])
+  @@index([diagnosticId])
+  @@index([status, createdAt])
+  @@map("diagnostic_regeneration_jobs")
 }
 
 model DiagnosticAuditEvent {
-  id            String   @id @default(cuid())
-  diagnosticRef String?
-  action        String
-  actor         String?
-  metadata      Json?
-  createdAt     DateTime @default(now())
+  id              String           @id @default(cuid())
+  diagnosticRef   String?
+  diagnosticId    String?
+  action          String
+  actor           String?
+  metadata        String?
+  createdAt       DateTime         @default(now())
+
+  diagnostic      DiagnosticRecord? @relation(fields: [diagnosticId], references: [id], onDelete: SetNull)
 
   @@index([diagnosticRef])
+  @@index([diagnosticId])
   @@index([createdAt])
+  @@map("diagnostic_audit_events")
 }
 
 model DiagnosticArtifactAccessGrant {
-  id             String    @id @default(cuid())
-  diagnosticRef  String
-  artifactId     String
-  granteeEmail   String
-  entitlementKey String    @unique
-  status         String    @default("active")
-  expiresAt      DateTime?
-  createdAt      DateTime  @default(now())
-  createdBy      String?
+  id              String           @id @default(cuid())
+  diagnosticRef   String
+  diagnosticId    String
+  artifactId      String
+  granteeEmail    String
+  entitlementKey  String           @unique
+  status          String           @default("active")
+  expiresAt       DateTime?
+  createdAt       DateTime         @default(now())
+  createdBy       String?
+
+  diagnostic      DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
 
   @@index([diagnosticRef])
+  @@index([diagnosticId])
   @@index([granteeEmail])
   @@index([diagnosticRef, granteeEmail])
+  @@map("diagnostic_artifact_access_grants")
 }
 
 model DiagnosticLineageEvent {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   diagnosticRef    String
+  diagnosticId     String
   artifactId       String?
   parentArtifactId String?
   eventType        String
   version          String?
   actor            String?
-  metadata         Json?
-  createdAt        DateTime @default(now())
+  metadata         String?
+  createdAt        DateTime         @default(now())
+
+  diagnostic       DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
 
   @@index([diagnosticRef])
+  @@index([diagnosticId])
   @@index([createdAt])
+  @@map("diagnostic_lineage_events")
 }
 
 model ClientEntitlement {
@@ -582,7 +712,7 @@ model OperationalIncident {
   status      String    @default("open")
   category    String?
   summary     String?
-  details     Json?
+  details     String?
   source      String?
   firstSeenAt DateTime  @default(now())
   lastSeenAt  DateTime  @default(now())
@@ -623,7 +753,7 @@ model JobDeadLetter {
   queue        String
   jobType      String
   reason       String
-  payloadJson  Json?
+  payloadJson  String?
   fingerprint  String?
   source       String?
   actor        String?
@@ -631,7 +761,7 @@ model JobDeadLetter {
   retryable    Boolean   @default(true)
   status       String    @default("open")
   replayNote   String?
-  metadataJson Json?
+  metadataJson String?
   replayedAt   DateTime?
   resolvedAt   DateTime?
   createdAt    DateTime  @default(now())
@@ -650,7 +780,7 @@ model ServiceLevelSnapshot {
   p95Ms           Float?
   requestCount    Int      @default(0)
   breachCount     Int      @default(0)
-  metadata        Json?
+  metadata        String?
   createdAt       DateTime @default(now())
 
   @@index([serviceName, windowStart, windowEnd])
@@ -702,7 +832,7 @@ model DecisionRecommendationSession {
   conversionType      String?
   conversionAt        DateTime?
 
-  metadata Json?
+  metadata String?
 
   impressions DecisionRecommendationImpression[]
   clicks      DecisionRecommendationClick[]
@@ -730,8 +860,8 @@ model DecisionRecommendationImpression {
   matchScore         Float
   metadataConfidence Float?
 
-  reasons         Json?
-  contextSnapshot Json?
+  reasons         String?
+  contextSnapshot String?
 
   clicks DecisionRecommendationClick[]
 
@@ -786,7 +916,7 @@ model DecisionRecommendationConversion {
   assetHref  String?
   assetKind  String?
 
-  metadata Json?
+  metadata String?
 
   @@index([sessionId])
   @@index([clickId])
@@ -815,7 +945,7 @@ model DecisionSessionFollowup {
   routeImproved          Boolean @default(false)
   convertedAfterGuidance Boolean @default(false)
 
-  metadata Json?
+  metadata String?
 }
 
 model DecisionAssetEfficacy {
@@ -843,7 +973,7 @@ model DecisionAssetEfficacy {
   confidenceScore         Float @default(0)
 
   lastEvaluatedAt DateTime?
-  metadata        Json?
+  metadata        String?
 }
 
 model DecisionAssetContextPerformance {
@@ -874,7 +1004,7 @@ model DecisionAssetContextPerformance {
   usefulnessScore  Float @default(0)
 
   lastEvaluatedAt DateTime?
-  metadata        Json?
+  metadata        String?
 
   @@unique([assetId, contextType, contextValue])
   @@index([contextType, contextValue])
@@ -884,51 +1014,6 @@ model DecisionAssetContextPerformance {
 // ============================================================================
 // CORE INDIVIDUAL ASSESSMENT MODELS
 // ============================================================================
-
-model DiagnosticRecord {
-  id             String   @id @default(cuid())
-  diagnosticType String
-  title          String?
-  score          Int
-  severity       String
-  verdict        String
-  responsesJson  Json
-  notes          String?
-  userEmail      String?
-  userId         String?
-  status         String   @default("completed")
-  reportStatus   String   @default("none")
-  reportTier     String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  reportOrders DiagnosticReportOrder[]
-
-  @@index([userEmail, createdAt])
-  @@index([userId, createdAt])
-  @@index([diagnosticType, createdAt])
-  @@index([reportStatus, createdAt])
-}
-
-model DiagnosticReportOrder {
-  id                 String   @id @default(cuid())
-  diagnosticRecordId String
-  stripeSessionId    String?  @unique
-  stripePaymentId    String?
-  reportTier         String
-  amount             Int
-  currency           String   @default("gbp")
-  status             String   @default("pending")
-  userEmail          String?
-  userId             String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  diagnosticRecord DiagnosticRecord @relation(fields: [diagnosticRecordId], references: [id], onDelete: Cascade)
-
-  @@index([diagnosticRecordId])
-  @@index([status, createdAt])
-}
 
 model PurposeAlignmentAssessment {
   id                 String        @id @default(cuid())
@@ -942,12 +1027,12 @@ model PurposeAlignmentAssessment {
   band               AlignmentBand
   fragilitySignal    String?       @default("LOW")
   dissonanceArea     Int?          @default(0)
-  varianceScores     Json?
-  weakestDomains     Json
-  strengths          Json
-  corrections        Json
-  answers            Json
-  domainScores       Json
+  varianceScores     String?
+  weakestDomains     String
+  strengths          String
+  corrections        String
+  answers            String
+  domainScores       String
   reportVersion      String        @default("1.0.0")
   sourceInstrumentId String        @default("IA-PAC-001")
   createdAt          DateTime      @default(now())
@@ -1004,7 +1089,7 @@ model PurposeAlignmentReminderLog {
   channel      String    @default("in_app")
   scheduledFor DateTime
   sentAt       DateTime?
-  payload      Json
+  payload      String
   error        String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -1077,7 +1162,7 @@ model DecisionAssetPerformance {
   adaptiveWeight   Float @default(1)
 
   lastInteractionAt DateTime?
-  metadata          Json?
+  metadata          String?
 }
 
 // ============================================================================
@@ -1092,7 +1177,7 @@ model InnerCircleMember {
   status          MemberStatus @default(active) @map("status")
   tier            AccessTier   @default(member) @map("tier")
   flags           String?      @map("flags")
-  metadata        Json?        @default("{}") @map("metadata")
+  metadata        String?      @default("{}") @map("metadata")
   emailHash       String       @unique @map("email_hash")
   emailHashPrefix String?      @map("email_hash_prefix")
   passwordHash    String?      @map("password_hash")
@@ -1102,8 +1187,7 @@ model InnerCircleMember {
   updatedAt       DateTime     @updatedAt @map("updated_at")
   lastSeenAt      DateTime     @default(now()) @map("last_seen_at")
 
-  // SQLite-safe replacement for Permission[]
-  permissions Json? @default("[]") @map("permissions")
+  permissions String? @default("[]") @map("permissions")
 
   adminSessions   AdminSession[]
   apiKeys         ApiKey[]
@@ -1168,7 +1252,7 @@ model ApiLog {
   userAgent      String?
   actorId        String?
   actorEmail     String?
-  metadata       Json?              @default("{}")
+  metadata       String?            @default("{}")
   createdAt      DateTime           @default(now())
   memberId       String?
   member         InnerCircleMember? @relation(fields: [memberId], references: [id])
@@ -1187,7 +1271,7 @@ model InnerCircleKey {
   keySuffix     String?
   keyType       String
   lastUsedAt    DateTime?
-  metadata      Json?             @default("{}")
+  metadata      String?           @default("{}")
   revokedAt     DateTime?
   revokedReason String?
   memberId      String
@@ -1200,11 +1284,10 @@ model InnerCircleKey {
 model MfaSetup {
   id            String            @id @default(cuid())
   enabled       Boolean           @default(false)
-  // SQLite-safe replacement for MfaMethod[]
-  methods       Json?             @default("[\"totp\"]")
+  methods       String?           @default("[\"totp\"]")
   totpSecret    String?
   totpVerified  Boolean           @default(false)
-  backupCodes   Json?             @default("[]")
+  backupCodes   String?           @default("[]")
   phoneNumber   String?
   phoneVerified Boolean           @default(false)
   emailVerified Boolean           @default(false)
@@ -1227,7 +1310,7 @@ model Session {
   updatedAt DateTime           @updatedAt
   memberId  String?
   ipAddress String?            @map("ip_address")
-  metadata  Json?              @default("{}")
+  metadata  String?            @default("{}")
   userAgent String?            @map("user_agent")
   member    InnerCircleMember? @relation(fields: [memberId], references: [id])
 
@@ -1240,7 +1323,7 @@ model SecurityLog {
   event     SecurityEvent
   severity  AuditSeverity      @default(info)
   action    String
-  details   Json?              @default("{}")
+  details   String?            @default("{}")
   ipAddress String?
   userAgent String?
   createdAt DateTime           @default(now())
@@ -1293,7 +1376,7 @@ model SystemAuditLog {
   resourceId   String?
   ipAddress    String?
   userAgent    String?
-  metadata     Json?         @default("{}")
+  metadata     String?       @default("{}")
   createdAt    DateTime      @default(now())
   actorEmail   String?
   actorType    String?       @default("system") @map("actor_type")
@@ -1306,7 +1389,7 @@ model SystemAuditLog {
   sessionId    String?       @map("session_id")
   status       String?       @default("success") @map("status")
   subCategory  String?       @map("sub_category")
-  tags         Json?         @default("[]") @map("tags")
+  tags         String?       @default("[]") @map("tags")
 
   @@index([action])
   @@map("system_audit_logs")
@@ -1315,7 +1398,7 @@ model SystemAuditLog {
 model UserPreference {
   id        String            @id @default(cuid())
   memberId  String            @unique
-  settings  Json              @default("{}")
+  settings  String            @default("{}")
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   member    InnerCircleMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
@@ -1329,7 +1412,7 @@ model StrategyInquiry {
   email     String
   intent    String
   status    InquiryStatus      @default(PENDING)
-  metadata  Json?              @default("{}")
+  metadata  String?            @default("{}")
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
   memberId  String?
@@ -1346,12 +1429,12 @@ model StrategyIntake {
   dependencyLevel String
   volatility      String
   readinessScore  Int                  @default(5)
-  payload         Json
+  payload         String
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   emailHash       String?
   memberId        String?
-  analysisNotes   Json?                @default("{}")
+  analysisNotes   String?              @default("{}")
   analysisVersion String?
   analyzedAt      DateTime?
   analyzedBy      String?
@@ -1368,8 +1451,8 @@ model StrategyRoomSession {
   sessionKey         String    @unique
   status             String
   source             String?
-  intake             Json?
-  canonicalSnapshot  Json?
+  intake             String?
+  canonicalSnapshot  String?
   route              String?
   readinessTier      String?
   authorityType      String?
@@ -1384,8 +1467,8 @@ model StrategyRoomSession {
 model StrategyRoomRecommendationImpression {
   id                String   @id @default(cuid())
   sessionKey        String
-  recommendations   Json
-  canonicalSnapshot Json?
+  recommendations   String
+  canonicalSnapshot String?
   createdAt         DateTime @default(now())
 }
 
@@ -1398,8 +1481,8 @@ model StrategyRoomFollowup {
   clarityDelta           Float
   authorityDelta         Float
   convertedAfterGuidance Boolean
-  metadata               Json?
-  canonicalSnapshot      Json?
+  metadata               String?
+  canonicalSnapshot      String?
   createdAt              DateTime @default(now())
 }
 
@@ -1407,20 +1490,20 @@ model StrategyRoomConversion {
   id                String   @id @default(cuid())
   sessionKey        String
   conversionType    String
-  metadata          Json?
-  canonicalSnapshot Json?
+  metadata          String?
+  canonicalSnapshot String?
   createdAt         DateTime @default(now())
 }
 
 model AdminDecisionContextualEfficacy {
   id                       String   @id @default(cuid())
   joinKey                  String   @unique
-  context                  Json
+  context                  String
   totalSessions            Int
   impressionCount          Int
   conversionCount          Int
   contextualConversionRate Float
-  rankedAssets             Json
+  rankedAssets             String
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 }
@@ -1436,9 +1519,8 @@ model ContentMetadata {
   contentType      ContentType @default(Briefs)
   summary          String?
   content          String?
-  metadata         Json?       @default("{}")
+  metadata         String?     @default("{}")
   version          String      @default("1.0.0")
-  // embedding       Unsupported("vector")? // reserved for PostgreSQL migration
   totalPrints      Int         @default(0)
   engagementScore  Float       @default(0.0)
   downloadCount    Int         @default(0)
@@ -1477,8 +1559,7 @@ model Framework {
   tag              String?
   accent           String?
   canonRoot        String?
-  // SQLite-safe replacement for String[]
-  audience         Json?                @default("[]")
+  audience         String?              @default("[]")
   tier             AccessTier           @default(member)
   pdfPath          String
   fileSize         Int?
@@ -1491,7 +1572,7 @@ model Framework {
   lastViewedAt     DateTime?
   lastDownloadedAt DateTime?
   isActive         Boolean              @default(true)
-  metadata         Json?                @default("{}")
+  metadata         String?              @default("{}")
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   downloadEvents   DownloadAuditEvent[] @relation("FrameworkDownloadEvents")
@@ -1534,7 +1615,6 @@ model PrivateAnnotation {
   body      String
   priority  AnnotationPriority @default(ROUTINE)
   contentId String
-  // embedding Unsupported("vector")?
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
   memberId  String
@@ -1570,7 +1650,7 @@ model StrategicFramework {
   tag         String
   accent      String
   canonRoot   String
-  audience    Json       @default("[]")
+  audience    String     @default("[]")
   content     String?
   artifactUrl String?
   createdAt   DateTime   @default(now())
@@ -1636,7 +1716,7 @@ model DecisionAssetGovernanceRule {
   priorityBoost       Float   @default(0)
 
   rationale String?
-  metadata  Json?
+  metadata  String?
 
   @@index([assetId])
   @@index([assetKind])
@@ -1666,7 +1746,7 @@ model DecisionGovernanceAlert {
 
   isActive   Boolean   @default(true)
   resolvedAt DateTime?
-  metadata   Json?
+  metadata   String?
 
   @@index([assetId, isActive])
   @@index([alertType, severity])
@@ -1686,7 +1766,7 @@ model DownloadAuditEvent {
   emailHash         String?
   ipHash            String?
   latencyMs         Int
-  metadata          Json?                @default("{}")
+  metadata          String?              @default("{}")
   processedAt       DateTime
   success           Boolean
   memberId          String?
@@ -1750,7 +1830,7 @@ model PremiumDownloadToken {
   usedCount    Int                      @default(0)
   revokedAt    DateTime?
   lastUsedAt   DateTime?
-  metadata     Json?
+  metadata     String?
   createdAt    DateTime                 @default(now())
   updatedAt    DateTime                 @updatedAt
   attempts     PremiumDownloadAttempt[]
@@ -1796,7 +1876,7 @@ model FrameworkAccessLog {
   slug         String
   memberId     String?
   accessType   AccessType         @default(VIEW)
-  decision     Json
+  decision     String
   allowed      Boolean
   requiredTier AccessTier?
   currentTier  AccessTier?

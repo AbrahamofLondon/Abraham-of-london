@@ -1,5 +1,4 @@
 /* lib/server/diagnostics/storage/types.ts */
-import "server-only";
 
 export type DiagnosticStorageProvider = "local" | "s3";
 

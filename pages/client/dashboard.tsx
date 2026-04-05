@@ -4,13 +4,36 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/layout/Layout";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
-import { getDiagnosticRecordsForUser, type DiagnosticRecord } from "@/lib/diagnostics/store";
-import { getReportRequestsForUser, type ClientReportRequest } from "@/lib/reports/store";
 import ClientReportRequestPanel from "@/components/reports/ClientReportRequestPanel";
 import ClientReportList from "@/components/reports/ClientReportList";
 import { Activity, ShieldCheck, FileText, Crown } from "lucide-react";
+
+type DiagnosticRecord = {
+  id: string;
+  reference: string;
+  diagnosticType: string;
+  score: number | null;
+  severity: string | null;
+  verdict: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string | null;
+  userEmail: string | null;
+  payload: Record<string, any> | null;
+};
+
+type ClientReportRequest = {
+  id: string;
+  diagnosticId?: string | null;
+  diagnosticType?: string | null;
+  reportTier?: string | null;
+  amount?: number | null;
+  currency?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt?: string | null;
+};
 
 type Props = {
   user: {
@@ -23,6 +46,11 @@ type Props = {
 };
 
 const ClientDashboardPage: NextPage<Props> = ({ user, diagnostics, reports }) => {
+  const deliveredCount = React.useMemo(
+    () => reports.filter((r) => String(r.status || "").toLowerCase() === "delivered").length,
+    [reports],
+  );
+
   return (
     <Layout title="Client Dashboard | Abraham of London" className="bg-white">
       <main className="min-h-screen bg-white px-6 py-16">
@@ -47,11 +75,7 @@ const ClientDashboardPage: NextPage<Props> = ({ user, diagnostics, reports }) =>
             <Tile label="Client Tier" value={user.tier} icon={<Crown size={18} />} />
             <Tile label="Diagnostics" value={diagnostics.length} icon={<Activity size={18} />} />
             <Tile label="Report Requests" value={reports.length} icon={<FileText size={18} />} />
-            <Tile
-              label="Delivered Reports"
-              value={reports.filter((r) => r.status === "delivered").length}
-              icon={<ShieldCheck size={18} />}
-            />
+            <Tile label="Delivered Reports" value={deliveredCount} icon={<ShieldCheck size={18} />} />
           </section>
 
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -115,6 +139,14 @@ function Tile({
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const [{ readAccessCookie }, { getSessionContext, tierAtLeast }, diagnosticsStore, reportsStore] =
+    await Promise.all([
+      import("@/lib/server/auth/cookies"),
+      import("@/lib/server/auth/tokenStore.postgres"),
+      import("@/lib/diagnostics/store"),
+      import("@/lib/reports/store"),
+    ]);
+
   const sessionId = readAccessCookie(context.req as any);
 
   if (!sessionId) {
@@ -137,24 +169,28 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  const diagnostics = await getDiagnosticRecordsForUser({
-    userId: ctx.memberId || null,
-    userEmail: (ctx as any).email || null,
-    limit: 20,
-  });
+  const email = (ctx as any).email || null;
+  const memberId = ctx.memberId || null;
 
-  const reports = await getReportRequestsForUser({
-    userId: ctx.memberId || null,
-    userEmail: (ctx as any).email || null,
-    limit: 20,
-  });
+  const [diagnostics, reports] = await Promise.all([
+    diagnosticsStore.getDiagnosticRecordsForUser({
+      userId: memberId,
+      userEmail: email,
+      limit: 20,
+    }),
+    reportsStore.getReportRequestsForUser({
+      userId: memberId,
+      userEmail: email,
+      limit: 20,
+    }),
+  ]);
 
   return {
     props: {
       user: {
         name: ctx.name || "Client",
         tier: ctx.tier || "inner-circle",
-        email: (ctx as any).email || null,
+        email,
       },
       diagnostics,
       reports,

@@ -133,6 +133,9 @@ const AdminInnerCirclePage: NextPage = () => {
   const [requiresReauth, setRequiresReauth] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
+  // ✅ Debounce ref for search
+  const searchTimeout = React.useRef<any>(null);
+
   React.useEffect(() => setMounted(true), []);
 
   // ✅ Client-only session load (prevents SSR/export from touching next-auth)
@@ -197,16 +200,34 @@ const AdminInnerCirclePage: NextPage = () => {
     if (requiresReauth) setRequiresReauth(false);
   };
 
+  // ✅ FIX #1: Proper admin authorization check
+  const isAdminSession = React.useMemo(() => {
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
+    return (
+      session?.user?.email &&
+      session.user.email.toLowerCase() === adminEmail.toLowerCase()
+    );
+  }, [session]);
+
+  const isAuthorized = React.useMemo(() => {
+    return isAdminSession || Boolean(adminKey);
+  }, [isAdminSession, adminKey]);
+
+  // ✅ FIX #2: Remove identity headers - only admin key, no user-id spoofing
   const secureFetch = React.useCallback(
     async (endpoint: string, options: RequestInit = {}, retryCount = 0): Promise<any> => {
-      if ((!adminKey && !session?.user) || requiresReauth) {
-        throw new Error(requiresReauth ? "Session expired. Re-authenticate." : "Authentication required");
+      // ✅ FIX #4: Strict requiresReauth check
+      if (!isAuthorized || requiresReauth) {
+        throw new Error(
+          requiresReauth
+            ? "Session expired. Re-authenticate."
+            : "Administrative authorization required"
+        );
       }
 
       const headers: HeadersInit = {
         "Content-Type": "application/json",
         ...(adminKey ? { "x-inner-circle-admin-key": adminKey } : {}),
-        ...(session?.user?.id ? { "x-user-id": session.user.id } : {}),
       };
 
       try {
@@ -234,12 +255,12 @@ const AdminInnerCirclePage: NextPage = () => {
         throw e;
       }
     },
-    [adminKey, session, requiresReauth]
+    [adminKey, isAuthorized, requiresReauth]
   );
 
   const loadData = React.useCallback(
     async (page = 1) => {
-      if (!adminKey && !session?.user) return;
+      if (!isAuthorized) return;
 
       updateActivity();
       setLoading(true);
@@ -272,13 +293,14 @@ const AdminInnerCirclePage: NextPage = () => {
         setLoading(false);
       }
     },
-    [adminKey, session, pagination.limit, filters, secureFetch]
+    [isAuthorized, pagination.limit, filters, secureFetch]
   );
 
+  // ✅ FIX #5: Use isAdminSession, not session?.user
   React.useEffect(() => {
     if (!mounted) return;
-    if (adminKey || session?.user) void loadData(1);
-  }, [mounted, adminKey, session, loadData]);
+    if (adminKey || isAdminSession) void loadData(1);
+  }, [mounted, adminKey, isAdminSession, loadData]);
 
   const handleExport = async (format: "csv" | "json" | "excel") => {
     if (!rows.length) return;
@@ -348,6 +370,17 @@ const AdminInnerCirclePage: NextPage = () => {
     }
   };
 
+  // ✅ FIX #6: Debounced search handler
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => {
+      setFilters((f) => ({ ...f, search: value }));
+    }, 400);
+  };
+
   // SSR-safe shell (no window)
   if (!mounted) {
     return (
@@ -380,7 +413,7 @@ const AdminInnerCirclePage: NextPage = () => {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-zinc-500">Node: {session?.user?.email || "admin_bearer"}</p>
+              <p className="text-xs text-zinc-500">Node: {isAdminSession ? session?.user?.email : "admin_bearer"}</p>
               <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">
                 Session Lock:{" "}
                 {Math.max(0, Math.floor((SECURITY_CONFIG.sessionTimeout - (Date.now() - lastActivity)) / 60000))}m
@@ -394,7 +427,7 @@ const AdminInnerCirclePage: NextPage = () => {
           <div className="flex h-[60vh] items-center justify-center text-zinc-600">
             Verifying credentials…
           </div>
-        ) : !session?.user && !adminKey ? (
+        ) : !isAdminSession && !adminKey ? (
           <div className="flex h-[80vh] items-center justify-center bg-black">
             <div className="w-full max-w-md p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl">
               <h2 className="text-xl font-bold text-white mb-6">Administrative Authority</h2>
@@ -412,7 +445,7 @@ const AdminInnerCirclePage: NextPage = () => {
                 Verify Credentials
               </button>
               <p className="mt-4 text-xs text-zinc-500">
-                Tip: admin pages are runtime SSR. If you’re running static export, this route must not be included.
+                Tip: admin pages are runtime SSR. If you're running static export, this route must not be included.
               </p>
             </div>
           </div>
@@ -433,10 +466,7 @@ const AdminInnerCirclePage: NextPage = () => {
                 placeholder="Search keys, hashes, or status..."
                 className="bg-black border border-white/5 rounded-xl px-4 py-2 w-[420px] max-w-full text-sm"
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setFilters((f) => ({ ...f, search: e.target.value }));
-                }}
+                onChange={handleSearchChange}
               />
               <div className="flex gap-3">
                 <button

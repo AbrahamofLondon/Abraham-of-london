@@ -1,5 +1,4 @@
 /* lib/server/diagnostics/report-archive.ts */
-import "server-only";
 
 import crypto from "crypto";
 
@@ -108,7 +107,11 @@ export async function getArchivedDiagnosticPdfSignedUrl(args: {
   if (!artifact) return null;
 
   const storage = getDiagnosticStorageAdapter();
-  const signed = await storage.getSignedReadUrl(artifact.objectKey, artifact.fileName);
+  const signed = await storage.getSignedReadUrl(
+    artifact.objectKey,
+    artifact.fileName,
+  );
+
   if (!signed) return null;
 
   return {
@@ -118,6 +121,10 @@ export async function getArchivedDiagnosticPdfSignedUrl(args: {
   };
 }
 
-export function listDiagnosticPdfArtifacts(diagnosticRef: string): DiagnosticArtifactRecord[] {
-  return listArtifactsByDiagnosticRef(diagnosticRef).filter((item) => item.kind === "pdf");
+export function listDiagnosticPdfArtifacts(
+  diagnosticRef: string,
+): DiagnosticArtifactRecord[] {
+  return listArtifactsByDiagnosticRef(diagnosticRef).filter(
+    (item) => item.kind === "pdf",
+  );
 }

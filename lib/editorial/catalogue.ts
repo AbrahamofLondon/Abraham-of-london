@@ -1,8 +1,23 @@
-// lib/editorial/catalogue.ts
 import type { PublicationRecord } from "./types";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
-export const EDITORIAL_CATALOGUE: PublicationRecord[] = [
+function normalizeTag(tag: string): string {
+  return String(tag || "").trim().toLowerCase();
+}
+
+function normalizePublicationTier(tier: string): PublicationRecord["tier"] {
+  return normalizeUserTier(tier || "public") as PublicationRecord["tier"];
+}
+
+function sortCatalogue(items: PublicationRecord[]): PublicationRecord[] {
+  return [...items].sort((a, b) => {
+    const aTime = a.date ? new Date(a.date).getTime() : 0;
+    const bTime = b.date ? new Date(b.date).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
+export const EDITORIAL_CATALOGUE: PublicationRecord[] = sortCatalogue([
   {
     slug: "ultimate-purpose-of-man",
     contentId: "CB-ED-001",
@@ -51,24 +66,18 @@ export const EDITORIAL_CATALOGUE: PublicationRecord[] = [
       doi: "10.54210/aol.2026.001",
     },
   },
-];
-
-function normalizeTag(tag: string): string {
-  return tag.trim().toLowerCase();
-}
-
-function normalizePublicationTier(tier: string): string {
-  return normalizeUserTier(tier || "public");
-}
+]);
 
 export function getPublicationCatalogue(): PublicationRecord[] {
-  return EDITORIAL_CATALOGUE;
+  return [...EDITORIAL_CATALOGUE];
 }
 
 export function getPublicationBySlug(
   slug: string,
 ): PublicationRecord | undefined {
   const normalized = String(slug || "").trim().toLowerCase();
+  if (!normalized) return undefined;
+
   return EDITORIAL_CATALOGUE.find(
     (entry) => entry.slug.trim().toLowerCase() === normalized,
   );
@@ -84,7 +93,9 @@ export function getPublicationsByTier(
 }
 
 export function getPublicPublications(): PublicationRecord[] {
-  return getPublicationsByTier("public");
+  return EDITORIAL_CATALOGUE.filter(
+    (entry) => normalizePublicationTier(entry.tier) === "public",
+  );
 }
 
 export function getPublicationsWithTag(tag: string): PublicationRecord[] {

@@ -1,17 +1,26 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import * as React from "react";
 import { pdf } from "@react-pdf/renderer";
 import { getServerSession } from "next-auth/next";
+
 import { authOptions } from "@/lib/auth";
 import DiagnosticReportDocument from "@/lib/diagnostics/pdf/DiagnosticReportDocument";
-import { getDiagnosticRecordById, markDiagnosticReportGenerated } from "@/lib/diagnostics/store";
+import {
+  getDiagnosticRecordById,
+  markDiagnosticReportGenerated,
+} from "@/lib/diagnostics/store";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "GET") {
     return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
   }
 
   try {
     const id = typeof req.query.id === "string" ? req.query.id.trim() : "";
+
     if (!id) {
       return res.status(400).json({ ok: false, reason: "ID_REQUIRED" });
     }
@@ -20,6 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const sessionEmail = session?.user?.email ?? null;
 
     const record = await getDiagnosticRecordById(id);
+
     if (!record) {
       return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
     }
@@ -28,11 +38,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ ok: false, reason: "OWNERSHIP_MISMATCH" });
     }
 
-    if (!["paid", "generated"].includes(record.reportStatus)) {
+    if (!["paid", "generated"].includes(String(record.reportStatus || ""))) {
       return res.status(402).json({ ok: false, reason: "REPORT_NOT_PAID" });
     }
 
-    const instance = pdf(<DiagnosticReportDocument record={record} />);
+    const instance = pdf(
+      React.createElement(DiagnosticReportDocument, { record }),
+    );
     const buffer = await instance.toBuffer();
 
     await markDiagnosticReportGenerated(record.id);

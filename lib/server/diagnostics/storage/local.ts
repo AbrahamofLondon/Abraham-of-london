@@ -1,8 +1,9 @@
-/* lib/server/diagnostics/storage */
+/* lib/server/diagnostics/storage/local.ts */
 import "server-only";
 
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
+import crypto from "crypto";
 
 import type {
   DiagnosticStorageAdapter,
@@ -11,52 +12,46 @@ import type {
   SignedObjectUrlResult,
 } from "@/lib/server/diagnostics/storage/types";
 
-function ensureDir(dir: string): void {
-  fs.mkdirSync(dir, { recursive: true });
+function getBaseDir(): string {
+  return path.join(process.cwd(), ".runtime", "diagnostic-artifacts");
 }
 
-function getRoot(): string {
-  const root =
-    process.env.DIAGNOSTIC_LOCAL_STORAGE_DIR?.trim() ||
-    path.join(process.cwd(), "var", "diagnostic-artifacts");
-  ensureDir(root);
-  return root;
-}
-
-function safeJoinFromKey(objectKey: string): string {
-  const normalized = String(objectKey || "")
+function resolvePath(objectKey: string): string {
+  const safeKey = String(objectKey || "")
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
-    .replace(/\.\./g, "")
-    .trim();
-
-  return path.join(getRoot(), normalized);
+    .replace(/\.\.+/g, "_");
+  return path.join(getBaseDir(), safeKey);
 }
 
 export class LocalDiagnosticStorageAdapter implements DiagnosticStorageAdapter {
   provider = "local" as const;
 
   async putObject(input: PutStoredObjectInput): Promise<DiagnosticStoredObject> {
-    const abs = safeJoinFromKey(input.objectKey);
-    ensureDir(path.dirname(abs));
-    await fs.promises.writeFile(abs, input.body);
+    const filePath = resolvePath(input.objectKey);
+    const dir = path.dirname(filePath);
+
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(filePath, input.body);
+
+    const etag = crypto.createHash("md5").update(input.body).digest("hex");
 
     return {
       provider: "local",
       objectKey: input.objectKey,
+      bucket: null,
       contentType: input.contentType,
       byteLength: input.body.length,
-      fileName: input.fileName ?? null,
+      etag,
       sha256: input.sha256 ?? null,
-      etag: null,
-      bucket: null,
+      fileName: input.fileName ?? null,
     };
   }
 
   async getObjectBuffer(objectKey: string): Promise<Buffer | null> {
     try {
-      const abs = safeJoinFromKey(objectKey);
-      return await fs.promises.readFile(abs);
+      const filePath = resolvePath(objectKey);
+      return await fs.readFile(filePath);
     } catch {
       return null;
     }
@@ -64,22 +59,25 @@ export class LocalDiagnosticStorageAdapter implements DiagnosticStorageAdapter {
 
   async deleteObject(objectKey: string): Promise<boolean> {
     try {
-      const abs = safeJoinFromKey(objectKey);
-      await fs.promises.unlink(abs);
+      const filePath = resolvePath(objectKey);
+      await fs.unlink(filePath);
       return true;
     } catch {
       return false;
     }
   }
 
-  async getSignedReadUrl(_objectKey: string, _fileName?: string | null): Promise<SignedObjectUrlResult | null> {
+  async getSignedReadUrl(
+    _objectKey: string,
+    _fileName?: string | null,
+  ): Promise<SignedObjectUrlResult | null> {
     return null;
   }
 
   async exists(objectKey: string): Promise<boolean> {
     try {
-      const abs = safeJoinFromKey(objectKey);
-      await fs.promises.access(abs, fs.constants.F_OK);
+      const filePath = resolvePath(objectKey);
+      await fs.access(filePath);
       return true;
     } catch {
       return false;

@@ -1,55 +1,140 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 import { getCampaignById } from "@/lib/alignment/enterprise-repository";
-// Replace with your actual mail provider (Postmark/Resend/SendGrid)
-// import { sendNudgeEmail } from "@/lib/mail/service"; 
+import { sendCampaignNudgeEmail } from "@/lib/mail";
+
+export const runtime = "nodejs";
+
+type CampaignParticipantLite = {
+  email: string;
+  status: string;
+  openedAt: Date | string | null;
+  createdAt: Date | string;
+  inviteTokenHash: string;
+};
+
+type CampaignLite = {
+  id: string;
+  title: string;
+  organisation: {
+    name: string;
+  } | null;
+  participants: CampaignParticipantLite[];
+};
+
+type NudgeResult =
+  | {
+      sent: true;
+      email: string;
+    }
+  | {
+      skipped: true;
+      email: string;
+      reason: string;
+    };
+
+function normalizeString(value: unknown): string {
+  return String(value || "").trim();
+}
+
+function isFulfilledResult(
+  result: PromiseSettledResult<NudgeResult>,
+): result is PromiseFulfilledResult<NudgeResult> {
+  return result.status === "fulfilled";
+}
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: { id: string } },
 ) {
   try {
-    const id = params.id;
+    const id = normalizeString(params.id);
 
-    // 1. Fetch Campaign and Participants
-    const campaign = await getCampaignById(id);
-    if (!campaign) {
-      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+    if (!id) {
+      return NextResponse.json(
+        { ok: false, error: "Campaign id is required" },
+        { status: 400 },
+      );
     }
 
-    // 2. Filter for 'Incomplete' (status is 'invited' or 'opened')
+    const campaign = (await getCampaignById(id)) as CampaignLite | null;
+
+    if (!campaign) {
+      return NextResponse.json(
+        { ok: false, error: "Campaign not found" },
+        { status: 404 },
+      );
+    }
+
     const targets = campaign.participants.filter(
-      (p) => p.status === "invited" || p.status === "opened"
+      (participant: CampaignParticipantLite) =>
+        participant.status === "invited" || participant.status === "opened",
     );
 
     if (targets.length === 0) {
-      return NextResponse.json({ message: "No pending participants to nudge." });
+      return NextResponse.json({
+        ok: true,
+        message: "No pending participants to nudge.",
+        summary: {
+          totalTargets: 0,
+          sent: 0,
+          skipped: 0,
+          failed: 0,
+        },
+      });
     }
 
-    // 3. Execution Loop
-    // In a production environment, move this to a Background Job (BullMQ/Vercel Cron)
-    const results = await Promise.allSettled(
-      targets.map(async (participant) => {
-        // Logic: Only nudge if last activity was > 24h ago to prevent fatigue
+    const results: PromiseSettledResult<NudgeResult>[] = await Promise.allSettled(
+      targets.map(async (participant: CampaignParticipantLite): Promise<NudgeResult> => {
         const lastActivity = participant.openedAt || participant.createdAt;
-        const hoursSinceActivity = (Date.now() - new Date(lastActivity).getTime()) / 3600000;
+        const lastActivityMs = new Date(lastActivity).getTime();
 
-        if (hoursSinceActivity < 24) return { skipped: true, email: participant.email };
+        if (!Number.isFinite(lastActivityMs)) {
+          return {
+            skipped: true,
+            email: participant.email,
+            reason: "INVALID_ACTIVITY_TIMESTAMP",
+          };
+        }
 
-        /* await sendNudgeEmail({
+        const hoursSinceActivity = (Date.now() - lastActivityMs) / 3_600_000;
+
+        if (hoursSinceActivity < 24) {
+          return {
+            skipped: true,
+            email: participant.email,
+            reason: "RECENT_ACTIVITY",
+          };
+        }
+
+        const sent = await sendCampaignNudgeEmail({
           email: participant.email,
           campaignTitle: campaign.title,
-          inviteToken: participant.inviteTokenHash, // Or the raw token if stored
-          orgName: campaign.organisation.name
+          organisationName: campaign.organisation?.name || "Organisation",
+          inviteToken: participant.inviteTokenHash,
         });
-        */
 
-        return { sent: true, email: participant.email };
-      })
+        if (!sent.success) {
+          throw new Error(
+            sent.error || `Failed to send nudge to ${participant.email}`,
+          );
+        }
+
+        return {
+          sent: true,
+          email: participant.email,
+        };
+      }),
     );
 
-    const sentCount = results.filter((r: any) => r.value?.sent).length;
-    const skippedCount = results.filter((r: any) => r.value?.skipped).length;
+    const fulfilled = results.filter(isFulfilledResult);
+
+    const sentCount = fulfilled.filter((result) => "sent" in result.value).length;
+
+    const skippedCount = fulfilled.filter((result) => "skipped" in result.value).length;
+
+    const failedCount = results.filter(
+      (result) => result.status === "rejected",
+    ).length;
 
     return NextResponse.json({
       ok: true,
@@ -57,10 +142,14 @@ export async function POST(
         totalTargets: targets.length,
         sent: sentCount,
         skipped: skippedCount,
+        failed: failedCount,
       },
     });
   } catch (error) {
-    console.error("BATCH_NUDGE_ERROR:", error);
-    return NextResponse.json({ error: "Internal Execution Error" }, { status: 500 });
+    console.error("[BATCH_NUDGE_ERROR]", error);
+    return NextResponse.json(
+      { ok: false, error: "Internal execution error" },
+      { status: 500 },
+    );
   }
 }

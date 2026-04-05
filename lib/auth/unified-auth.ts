@@ -105,7 +105,7 @@ async function checkServerSideInnerCircleAccess(
   try {
     // Validate the token server-side
     // You can call your inner-circle validation API or validate directly
-    const apiUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const apiUrl = process.env.NEXTAUTH_URL || 'https://www.abrahamoflondon.org';
     
     const response = await fetch(`${apiUrl}/api/inner-circle/validate`, {
       method: 'POST',

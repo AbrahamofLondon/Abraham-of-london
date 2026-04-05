@@ -47,7 +47,7 @@ class SecurityConfiguration {
           windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
           maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
         },
-        allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(','),
+        allowedOrigins: (process.env.ALLOWED_ORIGINS || 'https://www.abrahamoflondon.org').split(','),
       },
       cookies: {
         secure: process.env.NODE_ENV === 'production',
@@ -83,4 +83,5 @@ class SecurityConfiguration {
 }
 
 export default SecurityConfiguration;
+
 

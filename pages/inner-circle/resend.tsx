@@ -1,13 +1,22 @@
-/* pages/inner-circle/resend.tsx — ACCESS RECOVERY (INTEGRITY MODE, ROUTER-SAFE) */
-'use client';
+// pages/inner-circle/resend.tsx — ACCESS RECOVERY (ROUTER-SAFE)
 
 import * as React from "react";
 import type { NextPage, GetServerSideProps } from "next";
 import Link from "next/link";
-import { Mail, RefreshCw, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
+import {
+  Mail,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react";
+
 import Layout from "@/components/Layout";
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
-import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
+import {
+  useClientRouter,
+  useClientQuery,
+} from "@/lib/router/useClientRouter";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 
 type ApiResponse = {
@@ -21,16 +30,19 @@ interface ResendProps {
   hasActiveSession?: boolean;
 }
 
-const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inner-circle/dashboard", hasActiveSession = false }) => {
-  // ✅ Router-safe hooks
+const InnerCircleResendPage: NextPage<ResendProps> = ({
+  initialReturnTo = "/inner-circle/dashboard",
+  hasActiveSession = false,
+}) => {
   const router = useClientRouter();
   const query = useClientQuery();
-  const isReady = useClientIsReady();
-  
+
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [status, setStatus] = React.useState<"idle" | "success" | "error">("idle");
+  const [status, setStatus] = React.useState<"idle" | "success" | "error">(
+    "idle"
+  );
   const [feedback, setFeedback] = React.useState<string | null>(null);
   const [mounted, setMounted] = React.useState(false);
 
@@ -38,22 +50,20 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
     setMounted(true);
   }, []);
 
-  // Redirection target after recovery for UX continuity
   const returnTo = React.useMemo(() => {
-    if (!mounted || !router) return initialReturnTo;
-    const queryReturnTo = typeof query.returnTo === "string" ? query.returnTo : null;
-    return queryReturnTo || initialReturnTo;
-  }, [mounted, router, query.returnTo, initialReturnTo]);
+    const value = query?.returnTo;
+    return typeof value === "string" && value.trim()
+      ? value
+      : initialReturnTo;
+  }, [query, initialReturnTo]);
 
-  // Redirect if already authenticated
   React.useEffect(() => {
     if (mounted && router && hasActiveSession) {
       router.push(returnTo);
     }
   }, [mounted, router, hasActiveSession, returnTo]);
 
-  // ✅ Early return during SSR/prerender
-  if (!router) {
+  if (!mounted || !router) {
     return (
       <Layout title="Access Recovery | Inner Circle">
         <div className="min-h-screen bg-black" />
@@ -61,7 +71,7 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
     );
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email)) {
@@ -75,20 +85,23 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
     setFeedback(null);
 
     try {
-      // 1. Security Check: Recaptcha verification
-      const recaptchaToken = await getRecaptchaTokenSafe("inner_circle_resend");
+      const recaptchaToken = await getRecaptchaTokenSafe(
+        "inner_circle_resend"
+      );
 
       if (!recaptchaToken) {
         setStatus("error");
-        setFeedback("Security verification failed. Please ensure JavaScript is enabled.");
-        setLoading(false);
+        setFeedback(
+          "Security verification failed. Please ensure JavaScript is enabled."
+        );
         return;
       }
 
-      // 2. Request fresh key via API
       const res = await fetch("/api/inner-circle/resend", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           email: email.trim(),
           name: name.trim() || undefined,
@@ -101,17 +114,24 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
 
       if (!data.ok) {
         setStatus("error");
-        setFeedback(data.error || "We couldn't locate an active session for this email.");
+        setFeedback(
+          data.error ||
+            "We could not locate an active session for this email."
+        );
         return;
       }
 
-      // 3. Success State
       setStatus("success");
-      setFeedback(data.message || "A fresh Inner Circle access email has been dispatched. Please check your inbox.");
+      setFeedback(
+        data.message ||
+          "A fresh Inner Circle access email has been dispatched. Please check your inbox."
+      );
     } catch (error) {
       console.error("[RESEND_FAILURE]", error);
       setStatus("error");
-      setFeedback("A system error occurred. Please attempt recovery again shortly.");
+      setFeedback(
+        "A system error occurred. Please attempt recovery again shortly."
+      );
     } finally {
       setLoading(false);
     }
@@ -119,31 +139,36 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
 
   return (
     <Layout title="Access Recovery | Inner Circle">
-      <main className="min-h-screen flex items-center justify-center px-4 py-20 bg-black relative overflow-hidden">
-        {/* Institutional Ambience */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/[0.03] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-900/[0.02] rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
-        
-        <section className="w-full max-w-xl relative z-10">
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-20">
+        <div className="absolute right-0 top-0 h-[500px] w-[500px] translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/[0.03] blur-[120px]" />
+        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] -translate-x-1/2 translate-y-1/2 rounded-full bg-amber-900/[0.02] blur-[100px]" />
+
+        <section className="relative z-10 w-full max-w-xl">
           <header className="mb-12 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 text-gold text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-gold">
               <Mail size={12} />
               Access Recovery
             </div>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+
+            <h1 className="mb-6 font-serif text-4xl font-bold tracking-tight text-white md:text-5xl">
               Request <span className="italic text-gold">Fresh Link</span>
             </h1>
-            <p className="text-zinc-500 text-sm md:text-base leading-relaxed max-w-md mx-auto">
-              Lost your entry point? Enter your registered email to synchronize your session and receive a new secure access key.
+
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-zinc-500 md:text-base">
+              Lost your entry point? Enter your registered email to synchronize
+              your session and receive a new secure access key.
             </p>
           </header>
 
           <form
             onSubmit={handleSubmit}
-            className="space-y-8 rounded-[2rem] border border-white/10 bg-zinc-950/50 p-10 backdrop-blur-xl shadow-2xl"
+            className="space-y-8 rounded-[2rem] border border-white/10 bg-zinc-950/50 p-10 shadow-2xl backdrop-blur-xl"
           >
             <div className="space-y-3">
-              <label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-1">
+              <label
+                htmlFor="email"
+                className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600"
+              >
                 Registered Email
               </label>
               <input
@@ -153,13 +178,16 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/5 bg-black px-5 py-4 text-white outline-none focus:border-gold/40 transition-all font-mono text-sm placeholder:text-zinc-800"
+                className="w-full rounded-xl border border-white/5 bg-black px-5 py-4 font-mono text-sm text-white outline-none transition-all placeholder:text-zinc-800 focus:border-gold/40"
                 placeholder="identity@institution.com"
               />
             </div>
 
             <div className="space-y-3">
-              <label htmlFor="name" className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-1">
+              <label
+                htmlFor="name"
+                className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600"
+              >
                 Verify Name <span className="text-zinc-800">(Optional)</span>
               </label>
               <input
@@ -168,7 +196,7 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-white/5 bg-black px-5 py-4 text-white outline-none focus:border-gold/40 transition-all font-mono text-sm placeholder:text-zinc-800"
+                className="w-full rounded-xl border border-white/5 bg-black px-5 py-4 font-mono text-sm text-white outline-none transition-all placeholder:text-zinc-800 focus:border-gold/40"
                 placeholder="Institutional Name"
               />
             </div>
@@ -176,44 +204,54 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
             <button
               type="submit"
               disabled={loading || status === "success"}
-              className="w-full bg-gradient-to-r from-gold to-amber-600 text-black py-5 rounded-xl font-black uppercase tracking-[0.2em] text-[11px] hover:from-white hover:to-white disabled:opacity-50 transition-all flex items-center justify-center gap-3 shadow-xl shadow-gold/5 group"
+              className="group flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-gold to-amber-600 py-5 text-[11px] font-black uppercase tracking-[0.2em] text-black shadow-xl shadow-gold/5 transition-all hover:from-white hover:to-white disabled:opacity-50"
             >
               {loading ? (
-                <RefreshCw size={18} className="animate-spin" />
+                <>
+                  <RefreshCw size={18} className="animate-spin" />
+                  Sending…
+                </>
               ) : status === "success" ? (
-                <CheckCircle size={18} />
+                <>
+                  <CheckCircle size={18} />
+                  Dispatched
+                </>
               ) : (
                 "Dispatch Recovery Key"
               )}
             </button>
 
-            {feedback && (
+            {feedback ? (
               <div
-                className={`flex items-start gap-4 p-5 rounded-2xl text-xs font-medium border leading-relaxed animate-in fade-in slide-in-from-top-2 duration-500 ${
+                className={`animate-in fade-in slide-in-from-top-2 flex items-start gap-4 rounded-2xl border p-5 text-xs font-medium leading-relaxed duration-500 ${
                   status === "success"
                     ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-400"
                     : "border-red-500/30 bg-red-500/5 text-red-400"
                 }`}
               >
                 {status === "error" ? (
-                  <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
                 ) : (
-                  <CheckCircle size={18} className="shrink-0 mt-0.5" />
+                  <CheckCircle size={18} className="mt-0.5 shrink-0" />
                 )}
                 <p>{feedback}</p>
               </div>
-            )}
+            ) : null}
           </form>
 
           <footer className="mt-12 flex flex-col items-center gap-6">
-            <Link 
-              href="/inner-circle" 
-              className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors group"
+            <Link
+              href="/inner-circle"
+              className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 transition-colors hover:text-white"
             >
-              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft
+                size={14}
+                className="transition-transform group-hover:-translate-x-1"
+              />
               Return to Gate
             </Link>
-            <p className="text-[10px] text-zinc-700 text-center max-w-sm leading-loose uppercase tracking-widest">
+
+            <p className="max-w-sm text-center text-[10px] uppercase tracking-widest text-zinc-700">
               Automated institutional verification may take up to 600 seconds.
             </p>
           </footer>
@@ -223,24 +261,27 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({ initialReturnTo = "/inne
   );
 };
 
-/* -----------------------------------------------------------------------------
-  SERVER SIDE PROPS
------------------------------------------------------------------------------ */
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps<ResendProps> = async (
+  context
+) => {
   try {
     const sessionId = readAccessCookie(context.req as any);
-    const hasActiveSession = !!sessionId;
-    
-    const returnTo = context.query.returnTo || "/inner-circle/dashboard";
-    
+    const hasActiveSession = Boolean(sessionId);
+
+    const queryValue = context.query.returnTo;
+    const initialReturnTo =
+      typeof queryValue === "string" && queryValue.trim()
+        ? queryValue
+        : "/inner-circle/dashboard";
+
     return {
       props: {
-        initialReturnTo: returnTo,
+        initialReturnTo,
         hasActiveSession,
       },
     };
-  } catch (err) {
-    console.error("[RESEND_SSR_ERROR]:", err);
+  } catch (error) {
+    console.error("[RESEND_SSR_ERROR]", error);
     return {
       props: {
         initialReturnTo: "/inner-circle/dashboard",

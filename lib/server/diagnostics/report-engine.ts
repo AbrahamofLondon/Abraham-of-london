@@ -1,5 +1,4 @@
 /* lib/server/diagnostics/report-engine.ts */
-import "server-only";
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";
 
@@ -40,13 +39,6 @@ function pctBand(pct: number): "stable" | "watch" | "fragile" | "escalate" {
   return "escalate";
 }
 
-function severityFromPct(pct: number): string {
-  if (pct >= 80) return "low";
-  if (pct >= 60) return "moderate";
-  if (pct >= 40) return "high";
-  return "critical";
-}
-
 function priorityFromPct(pct: number): ReportPriority {
   if (pct < 40) return "critical";
   if (pct < 60) return "high";
@@ -58,9 +50,15 @@ function buildHeadline(record: StoredDiagnosticRecord): string {
   const pct = record.summary.pct;
   const title = safeString(record.title, record.kind);
 
-  if (pct >= 80) return `${title}: structurally stable, with selective watchpoints`;
-  if (pct >= 60) return `${title}: functional, but beginning to show material strain`;
-  if (pct >= 40) return `${title}: fragile, with correction now commercially justified`;
+  if (pct >= 80) {
+    return `${title}: structurally stable, with selective watchpoints`;
+  }
+  if (pct >= 60) {
+    return `${title}: functional, but beginning to show material strain`;
+  }
+  if (pct >= 40) {
+    return `${title}: fragile, with correction now commercially justified`;
+  }
   return `${title}: escalation warranted before the cost of drift compounds`;
 }
 
@@ -112,33 +110,42 @@ function buildNarrativeSummary(record: StoredDiagnosticRecord): string {
 function buildKeyFindings(record: StoredDiagnosticRecord): string[] {
   const sorted = [...record.summary.sectionScores].sort((a, b) => a.pct - b.pct);
   const weakest = sorted.slice(0, 3);
-  const strongest = [...record.summary.sectionScores].sort((a, b) => b.pct - a.pct).slice(0, 1);
+  const strongest = [...record.summary.sectionScores]
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 1);
 
   const out: string[] = [];
 
   if (weakest[0]) {
     out.push(
-      `${weakest[0].title} is the principal weakness at ${weakest[0].pct}%, making it the first correction priority.`
+      `${weakest[0].title} is the principal weakness at ${weakest[0].pct}%, making it the first correction priority.`,
     );
   }
+
   if (weakest[1]) {
     out.push(
-      `${weakest[1].title} follows closely behind, which suggests this is not an isolated weakness but a pattern beginning to spread across the operating structure.`
+      `${weakest[1].title} follows closely behind, which suggests this is not an isolated weakness but a pattern beginning to spread across the operating structure.`,
     );
   }
+
   if (strongest[0]) {
     out.push(
-      `${strongest[0].title} is currently the strongest domain at ${strongest[0].pct}%, and should be used as a stabilising anchor rather than taken for granted.`
+      `${strongest[0].title} is currently the strongest domain at ${strongest[0].pct}%, and should be used as a stabilising anchor rather than taken for granted.`,
     );
   }
+
   if (record.notes) {
-    out.push("Supplementary notes were provided and should be treated as contextual signal rather than ignored anecdote.");
+    out.push(
+      "Supplementary notes were provided and should be treated as contextual signal rather than ignored anecdote.",
+    );
   }
 
   return out;
 }
 
-function buildRecommendations(record: StoredDiagnosticRecord): GeneratedRecommendation[] {
+function buildRecommendations(
+  record: StoredDiagnosticRecord,
+): GeneratedRecommendation[] {
   const sorted = [...record.summary.sectionScores].sort((a, b) => a.pct - b.pct);
 
   const top = sorted.slice(0, 3).map((section, index) => {
@@ -190,13 +197,14 @@ export function composeDiagnosticReport(args: {
   const version = safeString(args.version, "2026.1");
   const unlocked = Boolean(args.unlocked);
 
-  const reportId = `RPT-${record.diagnosticRef}-V${version.replace(/[^\d]+/g, "") || "1"}`;
-  const generatedAt = new Date().toISOString();
+  const reportId = `RPT-${record.diagnosticRef}-V${
+    version.replace(/[^\d]+/g, "") || "1"
+  }`;
 
   return {
     reportId,
     version,
-    generatedAt,
+    generatedAt: new Date().toISOString(),
     headline: buildHeadline(record),
     strapline: buildStrapline(record),
     executiveSummary: buildExecutiveSummary(record),

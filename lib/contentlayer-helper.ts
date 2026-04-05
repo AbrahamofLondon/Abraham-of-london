@@ -10,10 +10,8 @@
  * IMPORTANT:
  * - Server-intended module. Do not import from client components.
  * - Do NOT use `import "server-only"` here because this project still uses Pages Router.
+ * - Do NOT use top-level imports for fs/path in Pages Router. Load them lazily.
  */
-
-import fs from "fs";
-import path from "path";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier } from "@/lib/access/tier-policy";
@@ -123,9 +121,10 @@ export const documentKinds: DocKind[] = [
   "vault",
 ];
 
-const GENERATED_ROOT = path.join(process.cwd(), ".contentlayer", "generated");
-
 let cache: ContentDoc[] | null = null;
+
+type NodeFs = typeof import("fs");
+type NodePath = typeof import("path");
 
 function assertServerRuntime(): void {
   if (typeof window !== "undefined") {
@@ -133,6 +132,26 @@ function assertServerRuntime(): void {
       "lib/contentlayer-helper.ts was imported into a browser bundle. Move this access behind server data functions."
     );
   }
+}
+
+function getNodeModules(): {
+  fs: NodeFs;
+  path: NodePath;
+  generatedRoot: string;
+} {
+  assertServerRuntime();
+
+  // Avoid static bundling of Node built-ins in Pages Router
+  // eslint-disable-next-line no-eval
+  const req = eval("require") as NodeRequire;
+  const fs = req("fs") as NodeFs;
+  const path = req("path") as NodePath;
+
+  return {
+    fs,
+    path,
+    generatedRoot: path.join(process.cwd(), ".contentlayer", "generated"),
+  };
 }
 
 function safeString(value: unknown, fallback = ""): string {
@@ -218,7 +237,7 @@ export function getDocKind(doc: ContentDoc | null | undefined): DocKind {
 }
 
 function parseIndexJson(jsonPath: string): ContentDoc[] {
-  assertServerRuntime();
+  const { fs } = getNodeModules();
 
   try {
     const raw = fs.readFileSync(jsonPath, "utf8");
@@ -246,18 +265,18 @@ function parseIndexJson(jsonPath: string): ContentDoc[] {
 }
 
 function loadAllFromGeneratedIndexes(): ContentDoc[] {
-  assertServerRuntime();
+  const { fs, path, generatedRoot } = getNodeModules();
 
-  if (!fs.existsSync(GENERATED_ROOT)) return [];
+  if (!fs.existsSync(generatedRoot)) return [];
 
   const dirs = fs
-    .readdirSync(GENERATED_ROOT, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory());
+    .readdirSync(generatedRoot, { withFileTypes: true })
+    .filter((entry: { isDirectory: () => boolean }) => entry.isDirectory());
 
   const docs: ContentDoc[] = [];
 
   for (const dir of dirs) {
-    const indexPath = path.join(GENERATED_ROOT, dir.name, "_index.json");
+    const indexPath = path.join(generatedRoot, dir.name, "_index.json");
     if (fs.existsSync(indexPath)) {
       docs.push(...parseIndexJson(indexPath));
     }
@@ -302,8 +321,6 @@ function dedupeKey(doc: ContentDoc): string {
 }
 
 export function getAllContentlayerDocs(): ContentDoc[] {
-  assertServerRuntime();
-
   if (cache) return cache;
 
   const sourceDocs = loadAllFromGeneratedIndexes();

@@ -1,4 +1,8 @@
-// lib/prisma.pages.ts — PAGES ROUTER SAFE PRISMA (SSR / API only)
+// lib/prisma.pages.ts — PAGES/LEGACY API SAFE PRISMA SINGLETON
+//
+// Canonical Prisma runtime for Pages Router, legacy API routes,
+// and any shared server utilities that may be imported from pages/**.
+// Do NOT add `server-only` here.
 
 import { PrismaClient, type Prisma } from "@prisma/client";
 
@@ -7,92 +11,138 @@ declare global {
   var __prisma_pages__: PrismaClient | undefined;
 }
 
-if (typeof window !== "undefined") {
-  throw new Error("⛔ Prisma client was imported into a browser bundle. Check your imports.");
-}
-
 function createPrismaClient(): PrismaClient {
   return new PrismaClient({
     datasources: process.env.DATABASE_URL
       ? { db: { url: process.env.DATABASE_URL } }
       : undefined,
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["warn", "error"]
+        : ["error"],
   });
 }
 
-const prisma = global.__prisma_pages__ ?? createPrismaClient();
+export const prisma: PrismaClient =
+  global.__prisma_pages__ ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   global.__prisma_pages__ = prisma;
 }
 
-export { prisma };
 export const getPrisma = (): PrismaClient => prisma;
 
-/**
- * Safe query helper:
- * retries once on transient closed/connection issues, then rethrows.
- */
 export async function safePrismaQuery<T>(
-  query: (client: PrismaClient) => Promise<T>
+  label: string,
+  fn: () => Promise<T>,
+  fallback?: T,
 ): Promise<T> {
   try {
-    return await query(prisma);
+    return await fn();
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const shouldRetry =
-      /closed/i.test(message) ||
-      /connection/i.test(message) ||
-      /Can't reach database server/i.test(message) ||
-      /Server has closed the connection/i.test(message);
+    console.error(`[PRISMA:${label}]`, error);
 
-    if (!shouldRetry) {
-      throw error;
+    if (arguments.length >= 3) {
+      return fallback as T;
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[PRISMA_RETRY] attempting one reconnect after transient failure");
-    }
-
-    await prisma.$disconnect().catch(() => undefined);
-    await prisma.$connect();
-
-    return query(prisma);
+    throw error;
   }
 }
 
 export async function checkDatabaseConnection(): Promise<{
-  online: boolean;
-  error: string | null;
+  ok: boolean;
+  provider: string;
+  timestamp: string;
+  error?: string;
 }> {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return { online: true, error: null };
-  } catch (error) {
+
     return {
-      online: false,
-      error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+      ok: true,
+      provider: "prisma",
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error: any) {
+    return {
+      ok: false,
+      provider: "prisma",
+      timestamp: new Date().toISOString(),
+      error: error?.message || "DATABASE_CONNECTION_FAILED",
     };
   }
 }
 
-export async function getVaultStatus() {
-  return checkDatabaseConnection();
+export async function getVaultStatus(): Promise<{
+  ok: boolean;
+  counts: {
+    members: number;
+    content: number;
+    frameworks: number;
+    downloads: number;
+  };
+  timestamp: string;
+}> {
+  const [members, content, frameworks, downloads] = await Promise.all([
+    safePrismaQuery("vault.members.count", () => prisma.innerCircleMember.count(), 0),
+    safePrismaQuery("vault.content.count", () => prisma.contentMetadata.count(), 0),
+    safePrismaQuery("vault.frameworks.count", () => prisma.framework.count(), 0),
+    safePrismaQuery("vault.downloads.count", () => prisma.downloadAuditEvent.count(), 0),
+  ]);
+
+  return {
+    ok: true,
+    counts: {
+      members,
+      content,
+      frameworks,
+      downloads,
+    },
+    timestamp: new Date().toISOString(),
+  };
 }
 
-export async function getStrategicContext(slug: string) {
-  return safePrismaQuery((client) =>
-    client.contentMetadata.findUnique({
-      where: { slug },
-      include: {
-        dependencies: { include: { targetBrief: true } },
-        dependents: { include: { sourceBrief: true } },
-      },
-    })
+export async function getStrategicContext(): Promise<{
+  ok: boolean;
+  metrics: {
+    dealFlowSubmissions: number;
+    strategyIntakes: number;
+    inquiries: number;
+    diagnostics: number;
+  };
+  timestamp: string;
+}> {
+  const diagnostics = await safePrismaQuery(
+    "strategic.diagnostics.count",
+    async () => {
+      const p = prisma as any;
+
+      if (p.diagnosticResult?.count) return await p.diagnosticResult.count();
+      if (p.diagnosticRecord?.count) return await p.diagnosticRecord.count();
+      return 0;
+    },
+    0,
   );
+
+  const [dealFlowSubmissions, strategyIntakes, inquiries] = await Promise.all([
+    safePrismaQuery("strategic.dealFlow.count", () => prisma.dealFlowSubmission.count(), 0),
+    safePrismaQuery("strategic.strategyIntake.count", () => prisma.strategyIntake.count(), 0),
+    safePrismaQuery("strategic.inquiries.count", () => prisma.strategyInquiry.count(), 0),
+  ]);
+
+  return {
+    ok: true,
+    metrics: {
+      dealFlowSubmissions,
+      strategyIntakes,
+      inquiries,
+      diagnostics,
+    },
+    timestamp: new Date().toISOString(),
+  };
 }
 
 export default prisma;
-
 export type { Prisma };
 export type PrismaClientType = PrismaClient;

@@ -1,34 +1,18 @@
-// lib/prisma.server.ts — APP/SERVER SAFE PRISMA SINGLETON
+// lib/prisma.server.ts — SERVER COMPAT ALIAS
 //
-// This file exists to provide a single server-side Prisma entrypoint
-// for server-only consumers. It must never be imported in client code.
+// Keep this file for compatibility with older imports.
+// In a Pages Router-heavy codebase, do NOT use `server-only` here.
 
-import "server-only";
+export {
+  prisma,
+  getPrisma,
+  safePrismaQuery,
+  checkDatabaseConnection,
+  getVaultStatus,
+  getStrategicContext,
+} from "./prisma.pages";
 
-import { PrismaClient, type Prisma } from "@prisma/client";
+export type { Prisma } from "@prisma/client";
+export type { PrismaClientType } from "./prisma.pages";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma_server__: PrismaClient | undefined;
-}
-
-function createPrismaClient(): PrismaClient {
-  return new PrismaClient({
-    datasources: process.env.DATABASE_URL
-      ? { db: { url: process.env.DATABASE_URL } }
-      : undefined,
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-  });
-}
-
-export const prisma: PrismaClient = global.__prisma_server__ ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  global.__prisma_server__ = prisma;
-}
-
-export const getPrisma = (): PrismaClient => prisma;
-
-export default prisma;
-export type { Prisma };
-export type PrismaClientType = PrismaClient;
+export { default } from "./prisma.pages";

@@ -1,13 +1,10 @@
 /* pages/inner-circle/reports/[ref].tsx */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as React from "react";
-import type { GetServerSideProps } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Download,
-  FileText,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowRight, Download, FileText, RefreshCw } from "lucide-react";
 
 import Layout from "@/components/layout/Layout";
 import ReportShell from "@/components/diagnostics/report/ReportShell";
@@ -18,35 +15,64 @@ import ReportRecommendations from "@/components/diagnostics/report/ReportRecomme
 import ReportVersionHistory from "@/components/diagnostics/report/ReportVersionHistory";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
+import {
+  getSessionContext,
+  tierAtLeast,
+} from "@/lib/server/auth/tokenStore.postgres";
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
 import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
 import { listDiagnosticPdfArtifacts } from "@/lib/server/diagnostics/report-archive";
+
+type ReportVersionRow = {
+  reportId: string;
+  version: string;
+  generatedAt: string;
+  htmlPath?: string | null;
+  pdfPath?: string | null;
+  archivedArtifactId?: string | null;
+  archivedAt?: string | null;
+};
 
 type Props = {
   item: any | null;
   renderedReport: any | null;
   canGenerate: boolean;
   unlocked: boolean;
-  reportVersions: Array<{
-    reportId: string;
-    version: string;
-    generatedAt: string;
-    htmlPath?: string | null;
-    pdfPath?: string | null;
-    archivedArtifactId?: string | null;
-    archivedAt?: string | null;
-  }>;
+  reportVersions: ReportVersionRow[];
 };
 
-export default function ReportDetailPage({
+function safeString(value: unknown, fallback = ""): string {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return fallback;
+}
+
+function safeArray<T = any>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function uniqBy<T>(items: T[], getKey: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+
+  for (const item of items) {
+    const key = getKey(item);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+
+  return out;
+}
+
+const ReportDetailPage: NextPage<Props> = ({
   item,
   renderedReport,
   canGenerate,
   unlocked,
   reportVersions,
-}: Props) {
+}) => {
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [signedUrlBusy, setSignedUrlBusy] = React.useState(false);
@@ -54,8 +80,8 @@ export default function ReportDetailPage({
   if (!item || !renderedReport) {
     return (
       <Layout title="Report Not Found">
-        <main className="min-h-screen bg-black text-white p-10">
-          <div className="max-w-4xl mx-auto">
+        <main className="min-h-screen bg-black p-10 text-white">
+          <div className="mx-auto max-w-4xl">
             <h1 className="font-serif text-4xl">Report not found</h1>
           </div>
         </main>
@@ -63,18 +89,33 @@ export default function ReportDetailPage({
     );
   }
 
+  const diagnosticRef = safeString(item?.diagnosticRef);
+  const latestVersion = safeString(renderedReport?.version, "2026.1");
+  const sectionScores = safeArray(item?.summary?.sectionScores);
+  const keyFindings = safeArray<string>(renderedReport?.keyFindings);
+  const recommendations = safeArray(renderedReport?.recommendations);
+
   const handleGenerate = async () => {
+    if (!diagnosticRef) return;
+
     setBusy(true);
     setError(null);
+
     try {
       const res = await fetch("/api/diagnostics/report/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ diagnosticRef: item.diagnosticRef }),
+        body: JSON.stringify({ diagnosticRef }),
       });
-      const json = await res.json();
+
+      const json = await res.json().catch(() => ({}));
+
       if (!res.ok || !json?.ok) {
-        setError(json?.error || "REPORT_GENERATION_FAILED");
+        setError(
+          safeString(json?.error) ||
+            safeString(json?.reason) ||
+            "REPORT_GENERATION_FAILED",
+        );
       } else {
         window.location.reload();
       }
@@ -86,38 +127,52 @@ export default function ReportDetailPage({
   };
 
   const handleOpenSignedPdf = async () => {
+    if (!diagnosticRef || !latestVersion) return;
+
     try {
       setSignedUrlBusy(true);
+
       const res = await fetch(
-        `/api/diagnostics/report/signed-url?ref=${encodeURIComponent(item.diagnosticRef)}&version=${encodeURIComponent(latestVersion)}`,
+        `/api/diagnostics/report/signed-url?ref=${encodeURIComponent(
+          diagnosticRef,
+        )}&version=${encodeURIComponent(latestVersion)}`,
       );
-      const json = await res.json();
-      if (res.ok && json?.ok && json.url) {
-        window.open(json.url, "_blank", "noopener,noreferrer");
+
+      const json = await res.json().catch(() => ({}));
+
+      if (res.ok && json?.ok && json?.url) {
+        window.open(String(json.url), "_blank", "noopener,noreferrer");
+      } else {
+        setError(
+          safeString(json?.error) ||
+            safeString(json?.reason) ||
+            "SIGNED_URL_FAILED",
+        );
       }
+    } catch {
+      setError("SIGNED_URL_FAILED");
     } finally {
       setSignedUrlBusy(false);
     }
   };
 
-  const latestVersion = renderedReport?.version || "2026.1";
-
   return (
-    <Layout title={`${item.title} | Report`}>
+    <Layout title={`${safeString(item?.title, "Report")} | Report`}>
       <ReportShell>
         <div className="space-y-8">
           <ReportHeader
-            diagnosticRef={item.diagnosticRef}
-            title={item.title}
-            headline={renderedReport.headline}
-            strapline={renderedReport.strapline}
-            version={renderedReport.version}
-            generatedAt={renderedReport.generatedAt}
+            diagnosticRef={diagnosticRef}
+            title={safeString(item?.title, "Diagnostic Report")}
+            headline={safeString(renderedReport?.headline)}
+            strapline={safeString(renderedReport?.strapline)}
+            version={latestVersion}
+            generatedAt={safeString(renderedReport?.generatedAt)}
           />
 
           <div className="flex flex-wrap gap-4">
             {canGenerate ? (
               <button
+                type="button"
                 onClick={handleGenerate}
                 disabled={busy}
                 className="inline-flex items-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50 disabled:opacity-50"
@@ -130,9 +185,9 @@ export default function ReportDetailPage({
             {unlocked ? (
               <>
                 <a
-                  href={`/api/diagnostics/report/pdf?ref=${encodeURIComponent(item.diagnosticRef)}&version=${encodeURIComponent(
-                    latestVersion,
-                  )}`}
+                  href={`/api/diagnostics/report/pdf?ref=${encodeURIComponent(
+                    diagnosticRef,
+                  )}&version=${encodeURIComponent(latestVersion)}`}
                   className="inline-flex items-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/82 hover:bg-white/[0.04]"
                 >
                   Download Latest PDF
@@ -175,13 +230,13 @@ export default function ReportDetailPage({
             <div className="space-y-8">
               <ReportSummaryBlock
                 title="Executive Summary"
-                body={renderedReport.executiveSummary}
+                body={safeString(renderedReport?.executiveSummary)}
               />
               <ReportSummaryBlock
                 title="Narrative Summary"
-                body={renderedReport.narrativeSummary}
+                body={safeString(renderedReport?.narrativeSummary)}
               />
-              <ReportSectionScores sections={item.summary?.sectionScores || []} />
+              <ReportSectionScores sections={sectionScores} />
             </div>
 
             <div className="space-y-8">
@@ -189,47 +244,58 @@ export default function ReportDetailPage({
                 <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-amber-300/70">
                   Key Findings
                 </div>
+
                 <div className="mt-6 space-y-4">
-                  {(renderedReport.keyFindings || []).map((finding: string, idx: number) => (
-                    <div
-                      key={`${finding}-${idx}`}
-                      className="border border-white/6 bg-black/20 p-4 text-sm leading-relaxed text-white/64"
-                    >
-                      {finding}
+                  {keyFindings.length ? (
+                    keyFindings.map((finding, idx) => (
+                      <div
+                        key={`${finding}-${idx}`}
+                        className="border border-white/6 bg-black/20 p-4 text-sm leading-relaxed text-white/64"
+                      >
+                        {finding}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="border border-white/6 bg-black/20 p-4 text-sm leading-relaxed text-white/50">
+                      No key findings available.
                     </div>
-                  ))}
+                  )}
                 </div>
               </section>
 
-              <ReportRecommendations recommendations={renderedReport.recommendations || []} />
+              <ReportRecommendations recommendations={recommendations} />
             </div>
           </div>
 
           <ReportVersionHistory
-            diagnosticRef={item.diagnosticRef}
+            diagnosticRef={diagnosticRef}
             reports={reportVersions}
           />
         </div>
       </ReportShell>
     </Layout>
   );
-}
+};
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  const diagnosticRef = String(context.params?.ref || "");
+  const diagnosticRef = safeString(context.params?.ref);
 
   try {
     const sessionId = readAccessCookie(context.req as any);
+
     if (!sessionId) {
       return {
         redirect: {
-          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
+          destination: `/inner-circle?returnTo=${encodeURIComponent(
+            context.resolvedUrl,
+          )}`,
           permanent: false,
         },
       };
     }
 
     const ctx = await getSessionContext(sessionId);
+
     if (!ctx?.ok || !ctx?.valid) {
       return {
         redirect: {
@@ -239,17 +305,25 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       };
     }
 
+    if (!diagnosticRef) {
+      return { notFound: true };
+    }
+
     const item = await getDiagnosticRecordByRef(diagnosticRef);
     if (!item) return { notFound: true };
 
-    const isAdmin = tierAtLeast(String(ctx.tier || "public"), "private");
-    if (!isAdmin && item.actor.userId && item.actor.userId !== ctx.memberId) {
+    const tier = safeString((ctx as any)?.tier, "public");
+    const memberId = safeString((ctx as any)?.memberId);
+    const isAdmin = tierAtLeast(tier, "private");
+
+    const actorUserId = safeString(item?.actor?.userId);
+    if (!isAdmin && actorUserId && actorUserId !== memberId) {
       return { notFound: true };
     }
 
     const unlocked = canUnlockReport({
       record: item,
-      userTier: String(ctx.tier || "public"),
+      userTier: tier,
       isAdmin,
     });
 
@@ -258,36 +332,42 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       unlocked,
     });
 
-    const current = item.report ? [item.report] : [];
-    const history = Array.isArray(item.reportHistory) ? item.reportHistory : [];
-    const merged = [...current, ...history]
-      .filter(Boolean)
-      .filter(
-        (r, idx, arr) =>
-          idx ===
-          arr.findIndex(
-            (x) =>
-              x?.reportId === r?.reportId &&
-              x?.version === r?.version,
-          ),
-      )
-      .sort((a, b) => (b?.generatedAt || "").localeCompare(a?.generatedAt || ""));
+    const current = item?.report ? [item.report] : [];
+    const history = safeArray(item?.reportHistory);
+    const merged = uniqBy(
+      [...current, ...history].filter(Boolean),
+      (r: any) =>
+        `${safeString(r?.reportId, "no-report-id")}::${safeString(
+          r?.version,
+          "no-version",
+        )}`,
+    ).sort((a: any, b: any) =>
+      safeString(b?.generatedAt).localeCompare(safeString(a?.generatedAt)),
+    );
 
     const archivedArtifacts = listDiagnosticPdfArtifacts(diagnosticRef);
-    const reportVersions = merged.map((report) => {
-      const artifact = archivedArtifacts.find((a) => a.version === report.version) || null;
+
+    const reportVersions: ReportVersionRow[] = merged.map((report: any) => {
+      const version = safeString(report?.version, renderedReport?.version || "2026.1");
+      const artifact =
+        archivedArtifacts.find((a) => safeString(a?.version) === version) || null;
+
       return {
-        reportId: report.reportId,
-        version: report.version,
-        generatedAt: report.generatedAt,
-        htmlPath: report.htmlPath ?? null,
+        reportId: safeString(report?.reportId, `RPT-${diagnosticRef}-${version}`),
+        version,
+        generatedAt: safeString(
+          report?.generatedAt,
+          safeString(renderedReport?.generatedAt),
+        ),
+        htmlPath: report?.htmlPath ?? null,
         pdfPath:
-          report.pdfPath ??
-          `/api/diagnostics/report/pdf?ref=${encodeURIComponent(diagnosticRef)}&version=${encodeURIComponent(
-            report.version,
-          )}`,
-        archivedArtifactId: report.archivedArtifactId ?? artifact?.artifactId ?? null,
-        archivedAt: report.archivedAt ?? artifact?.createdAt ?? null,
+          report?.pdfPath ??
+          `/api/diagnostics/report/pdf?ref=${encodeURIComponent(
+            diagnosticRef,
+          )}&version=${encodeURIComponent(version)}`,
+        archivedArtifactId:
+          report?.archivedArtifactId ?? artifact?.artifactId ?? null,
+        archivedAt: report?.archivedAt ?? artifact?.createdAt ?? null,
       };
     });
 
@@ -305,3 +385,5 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     return { notFound: true };
   }
 };
+
+export default ReportDetailPage;

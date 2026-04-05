@@ -1,12 +1,16 @@
 /* pages/api/diagnostics/reports/download.ts */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import PDFDocument from "pdfkit";
+
 import { prisma } from "@/lib/prisma";
 import { verifySignedDownloadToken } from "@/lib/security/download-signing";
-import { consumeRateLimit, attachRateLimitHeaders } from "@/lib/security/rate-limit";
+import {
+  consumeRateLimit,
+  attachRateLimitHeaders,
+} from "@/lib/security/rate-limit";
 import { getClientIp } from "@/lib/security/client-ip";
 import { writeSecurityAudit } from "@/lib/security/audit-log";
+import { getDiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage";
 
 export const config = {
   api: {
@@ -14,68 +18,40 @@ export const config = {
   },
 };
 
-function streamPdf(res: NextApiResponse, artifact: any) {
-  const doc = new PDFDocument({ margin: 50 });
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `inline; filename="${artifact.fileName || "diagnostic-report.pdf"}"`
-  );
-
-  doc.pipe(res);
-
-  doc.fontSize(20).text(artifact.title || "Diagnostic Report");
-  doc.moveDown();
-
-  doc.fontSize(10).fillColor("gray").text(`Diagnostic Ref: ${artifact.diagnosticRef}`);
-  doc.text(`Version: ${artifact.version || "v1"}`);
-  doc.text(`Score: ${artifact.score ?? "—"}`);
-  doc.moveDown();
-
-  doc.fillColor("black").fontSize(12).text("Narrative", { underline: true });
-  doc.moveDown(0.5);
-  doc.fontSize(11).text(artifact.narrative || "No narrative provided.");
-  doc.moveDown();
-
-  doc.fontSize(12).text("Sections", { underline: true });
-  doc.moveDown(0.5);
-
-  const sections = Array.isArray(artifact.sections) ? artifact.sections : [];
-  for (const section of sections) {
-    doc.fontSize(11).text(`• ${section?.title || "Untitled Section"}`);
-    if (section?.body) {
-      doc.moveDown(0.25);
-      doc.fontSize(10).fillColor("gray").text(String(section.body));
-      doc.fillColor("black");
-      doc.moveDown(0.5);
-    }
-  }
-
-  doc.moveDown();
-  doc.fontSize(9).fillColor("gray").text("Generated under controlled diagnostic reporting protocol.");
-
-  doc.end();
+function safeString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (value == null) return fallback;
+  return String(value);
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+function normalizeEmail(value: unknown): string {
+  return safeString(value).trim().toLowerCase();
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "GET") {
     return res.status(405).json({ ok: false, reason: "METHOD_NOT_ALLOWED" });
   }
 
   const ip = getClientIp(req);
+  const userAgent = safeString(req.headers["user-agent"] || "");
+
   const rl = consumeRateLimit({
     key: `report-download:${ip}`,
     limit: 30,
     windowMs: 60_000,
   });
+
   attachRateLimitHeaders(res, rl);
 
   if (!rl.ok) {
     return res.status(429).json({ ok: false, reason: "RATE_LIMITED" });
   }
 
-  const token = String(req.query.token || "");
+  const token = safeString(req.query.token).trim();
   if (!token) {
     return res.status(400).json({ ok: false, reason: "TOKEN_MISSING" });
   }
@@ -87,18 +63,70 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       severity: "warning",
       status: "INVALID_TOKEN",
       ip,
-      userAgent: String(req.headers["user-agent"] || ""),
+      userAgent,
+      metadata: {
+        route: "/api/diagnostics/reports/download",
+      },
     });
 
-    return res.status(403).json({ ok: false, reason: "INVALID_OR_EXPIRED_TOKEN" });
+    return res
+      .status(403)
+      .json({ ok: false, reason: "INVALID_OR_EXPIRED_TOKEN" });
+  }
+
+  const artifactId = safeString(verified.artifactId).trim();
+  const diagnosticRef = safeString(verified.diagnosticRef).trim();
+  const email = normalizeEmail(verified.email);
+
+  if (!artifactId || !diagnosticRef || !email) {
+    await writeSecurityAudit({
+      action: "REPORT_DOWNLOAD_DENIED",
+      severity: "warning",
+      status: "TOKEN_PAYLOAD_INVALID",
+      ip,
+      userAgent,
+      metadata: {
+        artifactId,
+        diagnosticRef,
+        email,
+      },
+    });
+
+    return res.status(403).json({ ok: false, reason: "TOKEN_PAYLOAD_INVALID" });
+  }
+
+  const grant = await prisma.diagnosticArtifactAccessGrant.findFirst({
+    where: {
+      artifactId,
+      diagnosticRef,
+      granteeEmail: email,
+      status: "active",
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
+  });
+
+  if (!grant) {
+    await writeSecurityAudit({
+      action: "REPORT_DOWNLOAD_DENIED",
+      severity: "warning",
+      status: "ACCESS_GRANT_NOT_FOUND",
+      subjectEmail: email,
+      ip,
+      userAgent,
+      metadata: {
+        artifactId,
+        diagnosticRef,
+      },
+    });
+
+    return res.status(403).json({ ok: false, reason: "ACCESS_NOT_GRANTED" });
   }
 
   const artifact = await prisma.diagnosticArtifact.findFirst({
     where: {
-      id: verified.artifactId,
-      diagnosticRef: verified.diagnosticRef,
-      granteeEmail: verified.email.toLowerCase(),
-      status: "issued",
+      id: artifactId,
+      diagnosticRef,
+      isRevoked: false,
       revokedAt: null,
     },
   });
@@ -108,37 +136,102 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       action: "REPORT_DOWNLOAD_DENIED",
       severity: "warning",
       status: "ARTIFACT_NOT_FOUND_OR_REVOKED",
-      subjectEmail: verified.email,
+      subjectEmail: email,
       ip,
-      userAgent: String(req.headers["user-agent"] || ""),
-      metadata: { artifactId: verified.artifactId, diagnosticRef: verified.diagnosticRef },
+      userAgent,
+      metadata: {
+        artifactId,
+        diagnosticRef,
+      },
     });
 
     return res.status(404).json({ ok: false, reason: "ARTIFACT_NOT_AVAILABLE" });
   }
 
-  await prisma.diagnosticLineageEvent.create({
-    data: {
-      diagnosticRef: artifact.diagnosticRef,
-      eventType: "artifact_downloaded",
-      version: artifact.version,
-      actor: verified.email,
+  try {
+    const storage = getDiagnosticStorageAdapter();
+    const bytes = await storage.getObjectBuffer(artifact.objectKey);
+
+    if (!bytes || !bytes.length) {
+      await writeSecurityAudit({
+        action: "REPORT_DOWNLOAD_FAILED",
+        severity: "critical",
+        status: "ARTIFACT_BINARY_MISSING",
+        subjectEmail: email,
+        ip,
+        userAgent,
+        metadata: {
+          artifactId: artifact.id,
+          diagnosticRef: artifact.diagnosticRef,
+          objectKey: artifact.objectKey,
+          storageProvider: artifact.storageProvider,
+        },
+      });
+
+      return res.status(404).json({ ok: false, reason: "ARTIFACT_BINARY_MISSING" });
+    }
+
+    await prisma.diagnosticLineageEvent.create({
+      data: {
+        diagnosticRef: artifact.diagnosticRef,
+        artifactId: artifact.id,
+        eventType: "artifact_downloaded",
+        version: artifact.version,
+        actor: email,
+        metadata: {
+          artifactId: artifact.id,
+          ip,
+          objectKey: artifact.objectKey,
+          storageProvider: artifact.storageProvider,
+          byteLength: artifact.byteLength,
+        },
+      },
+    });
+
+    await writeSecurityAudit({
+      action: "REPORT_DOWNLOADED",
+      severity: "info",
+      status: "SUCCESS",
+      subjectEmail: email,
+      ip,
+      userAgent,
       metadata: {
         artifactId: artifact.id,
-        ip,
+        diagnosticRef: artifact.diagnosticRef,
+        version: artifact.version,
+        fileName: artifact.fileName,
       },
-    },
-  });
+    });
 
-  await writeSecurityAudit({
-    action: "REPORT_DOWNLOADED",
-    severity: "info",
-    status: "SUCCESS",
-    subjectEmail: verified.email,
-    ip,
-    userAgent: String(req.headers["user-agent"] || ""),
-    metadata: { artifactId: artifact.id, diagnosticRef: artifact.diagnosticRef },
-  });
+    res.setHeader("Content-Type", artifact.mimeType || "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${safeString(
+        artifact.fileName,
+        "diagnostic-report.pdf",
+      ).replace(/"/g, "")}"`,
+    );
+    res.setHeader("Content-Length", String(bytes.length));
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
 
-  return streamPdf(res, artifact);
+    return res.send(bytes);
+  } catch (error: any) {
+    console.error("[REPORT_DOWNLOAD_STORAGE_ERROR]", error);
+
+    await writeSecurityAudit({
+      action: "REPORT_DOWNLOAD_FAILED",
+      severity: "critical",
+      status: "STORAGE_READ_FAILED",
+      subjectEmail: email,
+      ip,
+      userAgent,
+      metadata: {
+        artifactId,
+        diagnosticRef,
+        error: error?.message || "UNKNOWN_ERROR",
+      },
+    });
+
+    return res.status(500).json({ ok: false, reason: "STORAGE_READ_FAILED" });
+  }
 }

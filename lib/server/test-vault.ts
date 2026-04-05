@@ -5,7 +5,7 @@
  */
 
 const TEST_CONFIG = {
-  endpoint: "http://localhost:3000/api/access/enter",
+  endpoint: "https://www.abrahamoflondon.org/api/access/enter",
   // Replace with a known test email from your Neon DB or a Master Key
   testToken: "MASTER_KEY_001", 
   attackVolume: 35, // Exceeds the 30-limit threshold

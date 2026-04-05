@@ -58,7 +58,7 @@ export async function POST(
 
     // 4. Mapping to Sovereign Visual Standard
     const emailPayloads = targets.map((participant) => ({
-      from: 'Sovereign OGR <audits@yourdomain.com>',
+      from: 'Sovereign OGR <info@abrahamoflondon.org>',
       to: participant.membership.userEmail,
       subject: `Action Required: ${participant.campaign.title} Audit Calibration`,
       html: `

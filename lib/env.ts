@@ -42,8 +42,8 @@ export const ENV = env.success ? env.data : {
   DATABASE_URL: 'file:./dev.db',
   JWT_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
   NEXTAUTH_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
-  NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',
-  NEXTAUTH_URL: 'http://localhost:3000',
+  NEXT_PUBLIC_SITE_URL: 'https://www.abrahamoflondon.org',
+  NEXTAUTH_URL: 'https://www.abrahamoflondon.org',
   ENABLE_AUDIT_LOGGING: false,
   SKIP_AUTH_IN_DEV: false,
 };

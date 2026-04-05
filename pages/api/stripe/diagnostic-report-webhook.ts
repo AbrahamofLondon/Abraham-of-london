@@ -1,12 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import Stripe from "stripe";
 import { buffer } from "micro";
-import { prisma } from "@/lib/prisma.server";
+import Stripe from "stripe";
+
+import { prisma } from "@/lib/prisma";
 import { markDiagnosticReportPaid } from "@/lib/diagnostics/store";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-02-25.clover" as any,
-});
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
+const diagnosticWebhookSecret =
+  process.env.STRIPE_DIAGNOSTIC_REPORT_WEBHOOK_SECRET?.trim();
+
+const stripe = stripeSecretKey
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: "2023-10-16",
+    })
+  : null;
 
 export const config = {
   api: {
@@ -14,34 +21,52 @@ export const config = {
   },
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
 
-  const sig = req.headers["stripe-signature"];
-  const secret = process.env.STRIPE_DIAGNOSTIC_REPORT_WEBHOOK_SECRET;
+  if (!stripe || !diagnosticWebhookSecret) {
+    return res.status(500).send("Stripe webhook configuration missing");
+  }
 
-  if (!sig || !secret) {
-    return res.status(400).send("Missing webhook secret or signature");
+  const sig = req.headers["stripe-signature"];
+  if (!sig || typeof sig !== "string") {
+    return res.status(400).send("Missing stripe signature");
   }
 
   try {
     const rawBody = await buffer(req);
-    const event = stripe.webhooks.constructEvent(rawBody, sig, secret);
+    const event = stripe.webhooks.constructEvent(
+      rawBody,
+      sig,
+      diagnosticWebhookSecret,
+    );
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      const diagnosticRecordId = session.metadata?.diagnosticRecordId;
-      const reportTier = (session.metadata?.reportTier || "standard") as "standard" | "premium";
+      const diagnosticRecordId = String(
+        session.metadata?.diagnosticRecordId || "",
+      ).trim();
+
+      const reportTier = String(
+        session.metadata?.reportTier || "standard",
+      ).trim() as "standard" | "premium";
 
       if (diagnosticRecordId) {
         await prisma.diagnosticReportOrder.updateMany({
           where: { stripeSessionId: session.id },
           data: {
             status: "paid",
-            stripePaymentId: typeof session.payment_intent === "string" ? session.payment_intent : null,
+            stripePaymentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : null,
+            updatedAt: new Date(),
           },
         });
 

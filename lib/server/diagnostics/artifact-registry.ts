@@ -1,5 +1,5 @@
 /* lib/server/diagnostics/artifact-registry.ts */
-import "server-only";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import fs from "fs";
 import path from "path";
@@ -96,6 +96,7 @@ export function readArtifactRegistry(): RegistryShape {
 
 export function writeArtifactRegistry(registry: RegistryShape): void {
   ensureDir(REGISTRY_DIR);
+
   fs.writeFileSync(
     REGISTRY_FILE,
     JSON.stringify(
@@ -121,7 +122,8 @@ export function createArtifactObjectKey(args: {
 } {
   const ref = safeFileSegment(args.diagnosticRef);
   const version = safeFileSegment(args.version);
-  const extension = safeFileSegment(args.extension).replace(/^\.+/, "") || "bin";
+  const extension =
+    safeFileSegment(args.extension).replace(/^\.+/, "") || "bin";
   const fileName = `${ref}-${version}.${extension}`;
 
   return {
@@ -165,7 +167,9 @@ export function buildArtifactRecord(args: {
   };
 }
 
-export function upsertArtifactRecord(record: DiagnosticArtifactRecord): DiagnosticArtifactRecord {
+export function upsertArtifactRecord(
+  record: DiagnosticArtifactRecord,
+): DiagnosticArtifactRecord {
   const registry = readArtifactRegistry();
 
   registry.items = [
@@ -184,8 +188,11 @@ export function upsertArtifactRecord(record: DiagnosticArtifactRecord): Diagnost
   return record;
 }
 
-export function listArtifactsByDiagnosticRef(diagnosticRef: string): DiagnosticArtifactRecord[] {
+export function listArtifactsByDiagnosticRef(
+  diagnosticRef: string,
+): DiagnosticArtifactRecord[] {
   const ref = normalizeRef(diagnosticRef);
+
   return readArtifactRegistry()
     .items
     .filter((item) => item.diagnosticRef === ref)

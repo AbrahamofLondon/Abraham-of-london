@@ -5,20 +5,14 @@ import type { DiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage/
 import { LocalDiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage/local";
 import { S3DiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage/s3";
 
-let singleton: DiagnosticStorageAdapter | null = null;
-
 export function getDiagnosticStorageAdapter(): DiagnosticStorageAdapter {
-  if (singleton) return singleton;
-
   const provider = String(process.env.DIAGNOSTIC_STORAGE_PROVIDER || "local")
     .trim()
     .toLowerCase();
 
   if (provider === "s3") {
-    singleton = new S3DiagnosticStorageAdapter();
-    return singleton;
+    return new S3DiagnosticStorageAdapter();
   }
 
-  singleton = new LocalDiagnosticStorageAdapter();
-  return singleton;
+  return new LocalDiagnosticStorageAdapter();
 }

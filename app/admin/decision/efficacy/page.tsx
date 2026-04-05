@@ -7,7 +7,7 @@ import { ContextualRankingPanel } from "@/components/admin/decision/ContextualRa
 import { ShieldCheck, Crown } from "lucide-react";
 
 async function getEfficacyData() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
   const [efficacyResponse, contextualResponse] = await Promise.all([
     fetch(`${base}/api/admin/decision/efficacy`, { 

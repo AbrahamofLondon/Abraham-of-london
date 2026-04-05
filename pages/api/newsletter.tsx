@@ -1,4 +1,3 @@
-// pages/api/newsletter.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifyRecaptcha } from "@/lib/recaptchaServer";
 import {
@@ -31,7 +30,7 @@ interface NewsletterResponseBody {
 }
 
 const EMAIL_REGEX =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/u;
 
 const DISPOSABLE_DOMAINS = [
   "tempmail.com",
@@ -42,6 +41,12 @@ const DISPOSABLE_DOMAINS = [
   "throwaway.com",
   "fakeinbox.com",
   "trashmail.com",
+];
+
+const ADMIN_NOTIFICATION_RECIPIENTS = [
+  "info@abrahamoflondon.org",
+  "seunadaramola@gmail.com",
+  "abrahamadaramola@outlook.com",
 ];
 
 function logSecurityEvent(
@@ -102,7 +107,7 @@ function validateName(name: string): { isValid: boolean; error?: string } {
     return { isValid: false, error: "Name is too long" };
   }
 
-  const suspiciousPatterns = [/[\<\>\{\}\[\]]/, /(.)\1{10,}/];
+  const suspiciousPatterns = [/[<>{}\[\]]/u, /(.)\1{10,}/u];
 
   if (suspiciousPatterns.some((pattern) => pattern.test(trimmedName))) {
     return { isValid: false, error: "Invalid name format" };
@@ -121,7 +126,7 @@ async function subscribeToMailchimp(
   const audienceId = process.env.MAILCHIMP_AUDIENCE_ID;
 
   if (!apiKey || !apiServer || !audienceId) {
-    console.error("Mailchimp environment variables not configured");
+    console.error("[NEWSLETTER] Mailchimp environment variables not configured");
     return { success: false, error: "Service configuration error" };
   }
 
@@ -160,13 +165,13 @@ async function subscribeToMailchimp(
       };
     }
 
-    console.error("Mailchimp API error:", errorData);
+    console.error("[NEWSLETTER] Mailchimp API error:", errorData);
     return {
       success: false,
       error: "Failed to subscribe. Please try again later.",
     };
   } catch (error) {
-    console.error("Mailchimp subscription error:", error);
+    console.error("[NEWSLETTER] Mailchimp subscription error:", error);
     return {
       success: false,
       error: "Subscription service temporarily unavailable",
@@ -179,20 +184,27 @@ async function sendNotificationToAbraham(subscriberData: {
   name?: string;
   source: string;
 }): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) {
+    console.warn("[NEWSLETTER] RESEND_API_KEY missing; admin notification skipped.");
+    return;
+  }
+
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Newsletter System <system@fatheringwithoutfear.com>",
-        to: "Abraham@AbrahamofLondon.com",
-        subject: "🎉 New Newsletter Subscriber",
+        from: "Abraham of London <info@abrahamoflondon.org>",
+        to: ADMIN_NOTIFICATION_RECIPIENTS,
+        reply_to: subscriberData.email,
+        subject: "New Newsletter Subscriber",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2c5530;">New Newsletter Subscriber!</h2>
+            <h2 style="color: #2c5530;">New Newsletter Subscriber</h2>
             <p><strong>Email:</strong> ${subscriberData.email}</p>
             <p><strong>Name:</strong> ${subscriberData.name || "Not provided"}</p>
             <p><strong>Source:</strong> ${subscriberData.source}</p>
@@ -205,7 +217,7 @@ async function sendNotificationToAbraham(subscriberData: {
       }),
     });
   } catch (error) {
-    console.error("Failed to send notification to Abraham:", error);
+    console.error("[NEWSLETTER] Failed to send admin notification:", error);
   }
 }
 
@@ -324,7 +336,7 @@ export default async function handler(
     return;
   }
 
-  let recaptchaResult: any; // Using any to handle varying return types from verifyRecaptcha
+  let recaptchaResult: unknown;
   try {
     recaptchaResult = await verifyRecaptcha(
       recaptchaToken,
@@ -332,16 +344,25 @@ export default async function handler(
       ip,
     );
 
-    // Hardened check: handle both boolean and object returns
-    const isSuccess = typeof recaptchaResult === 'boolean' ? recaptchaResult : recaptchaResult?.success;
-    const score = typeof recaptchaResult === 'object' ? recaptchaResult?.score : undefined;
+    const isSuccess =
+      typeof recaptchaResult === "boolean"
+        ? recaptchaResult
+        : Boolean((recaptchaResult as { success?: boolean })?.success);
+
+    const score =
+      typeof recaptchaResult === "object" && recaptchaResult
+        ? (recaptchaResult as { score?: number })?.score
+        : undefined;
 
     if (!isSuccess) {
       logSecurityEvent("reCAPTCHA failed", {
         ip,
         email,
-        score: score,
-        reasons: typeof recaptchaResult === 'object' ? recaptchaResult?.reasons : "unknown",
+        score,
+        reasons:
+          typeof recaptchaResult === "object" && recaptchaResult
+            ? (recaptchaResult as { reasons?: unknown })?.reasons
+            : "unknown",
       });
 
       res.status(400).json({
@@ -351,12 +372,15 @@ export default async function handler(
       return;
     }
 
-    if (score !== undefined && score < 0.3) {
+    if (typeof score === "number" && score < 0.3) {
       logSecurityEvent("Low reCAPTCHA score", {
         ip,
         email,
-        score: score,
-        action: recaptchaResult?.action,
+        score,
+        action:
+          typeof recaptchaResult === "object" && recaptchaResult
+            ? (recaptchaResult as { action?: unknown })?.action
+            : undefined,
       });
     }
   } catch (err) {
@@ -397,7 +421,10 @@ export default async function handler(
       email: `${email.substring(0, 3)}...`,
       name: name ? `${name.substring(0, 1)}...` : "not provided",
       source,
-      recaptchaScore: typeof recaptchaResult === 'object' ? recaptchaResult?.score : "N/A",
+      recaptchaScore:
+        typeof recaptchaResult === "object" && recaptchaResult
+          ? (recaptchaResult as { score?: unknown })?.score
+          : "N/A",
       userAgent: userAgent.substring(0, 100),
     });
 

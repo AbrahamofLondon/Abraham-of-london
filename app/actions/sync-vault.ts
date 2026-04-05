@@ -1,4 +1,3 @@
-// app/actions/sync-vault.ts
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -9,23 +8,29 @@ import type { AccessTier as PrismaAccessTier } from '@prisma/client';
 
 const toPrismaAccessTier = (tier: string): PrismaAccessTier => {
   const normalized = normalizeRequiredTier(tier);
-  
-  // Use type assertion with runtime check
+
   const validTiers: string[] = [
-    'public', 'member', 'inner_circle', 'restricted',
-    'client', 'legacy', 'architect', 'owner', 'top_secret'
+    'public',
+    'member',
+    'inner_circle',
+    'restricted',
+    'client',
+    'legacy',
+    'architect',
+    'owner',
+    'top_secret',
   ];
-  
+
   if (validTiers.includes(normalized)) {
     return normalized as PrismaAccessTier;
   }
-  
+
   return 'public' as PrismaAccessTier;
 };
 
 export async function syncVaultRegistry() {
   try {
-    const prisma = await getPrisma();
+    const prisma = getPrisma();
     if (!prisma) throw new Error('Database connection unavailable.');
 
     const fsItems = await getAllPDFItemsNode({ includeMissing: true });
@@ -41,11 +46,12 @@ export async function syncVaultRegistry() {
       const ops = batch.map((item: any) => {
         const classification = toPrismaAccessTier(item.tier ?? item.accessLevel);
 
-        const metadata = {
+        const metadataObject = {
           version: String(item.version || '1.0.0'),
           existsOnDisk: Boolean(item.existsOnDisk),
           fileSizeHuman: String(item.fileSizeHuman || ''),
-          fileSizeBytes: typeof item.fileSizeBytes === 'number' ? item.fileSizeBytes : undefined,
+          fileSizeBytes:
+            typeof item.fileSizeBytes === 'number' ? item.fileSizeBytes : null,
           lastModifiedISO: String(item.lastModifiedISO || ''),
           outputPath: String(item.outputPath || item.path || ''),
           sourceTierRaw: String(item.tier ?? item.accessLevel ?? ''),
@@ -57,7 +63,10 @@ export async function syncVaultRegistry() {
             title: String(item.title || item.id),
             classification,
             updatedAt: now,
-            metadata,
+
+            // Current generated Prisma client expects a string here.
+            // Keep this stringified until Prisma client/schema are fully aligned.
+            metadata: JSON.stringify(metadataObject),
           },
           create: {
             slug: String(item.id),
@@ -65,7 +74,7 @@ export async function syncVaultRegistry() {
             classification,
             createdAt: now,
             updatedAt: now,
-            metadata,
+            metadata: JSON.stringify(metadataObject),
           },
         });
       });
@@ -76,6 +85,9 @@ export async function syncVaultRegistry() {
     }
 
     revalidatePath('/dashboard');
+    revalidatePath('/vault');
+    revalidatePath('/downloads');
+
     return { success: true, count: fsItems.length };
   } catch (error: any) {
     console.error('[SYNC_CRITICAL_FAILURE]:', error);

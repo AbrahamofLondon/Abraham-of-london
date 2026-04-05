@@ -11,7 +11,7 @@ type AnyObj = Record<string, any>;
 function getBaseUrl(request: NextRequest): string {
   const prod = process.env.NODE_ENV === "production";
   if (prod) return process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
-  return "http://localhost:3000";
+  return "https://www.abrahamoflondon.org";
 }
 
 function getClientIp(req: NextRequest): string {

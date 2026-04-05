@@ -1,13 +1,8 @@
-// lib/editorial/types.ts
 import type { AccessTier } from "@/lib/access/tier-policy";
 
 export type PublicationTier = AccessTier;
 
-export type PublicationFormat =
-  | "pdf"
-  | "epub"
-  | "preview"
-  | "print";
+export type PublicationFormat = "pdf" | "epub" | "preview" | "print";
 
 export type PrintEdition = {
   provider: "amazon-kdp" | "ingramspark" | "local";
@@ -58,4 +53,14 @@ export type PublicationRecord = {
 
   citation: CitationMeta;
   print?: PrintEdition;
+};
+
+export type DiscoveredPublication = {
+  slug: string;
+  title: string;
+  description?: string | null;
+  cover?: string | null;
+  category?: string | null;
+  tier?: PublicationTier | null;
+  date?: string | null;
 };

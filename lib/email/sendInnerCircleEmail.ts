@@ -211,7 +211,7 @@ export async function sendInnerCircleEmail(
   const key = String(b || "").trim();
   const name = c ? String(c).trim() : "Builder";
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
   const unlockUrl = `${site}/inner-circle?key=${encodeURIComponent(key)}`;
 
   const to = normalizeRecipients(email);
@@ -225,5 +225,6 @@ export async function sendInnerCircleEmail(
 
   await dispatchEmail({ to, subject, text, html });
 }
+
 
 
