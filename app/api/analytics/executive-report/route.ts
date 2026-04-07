@@ -30,10 +30,15 @@ const QuerySchema = z.object({
 });
 
 // ============================================================
-// SECTOR INTELLIGENCE
+// SECTOR INTELLIGENCE — HARDENED VERSION
 // ============================================================
 
-const SECTOR_MAP: Record<string, string[]> = {
+interface SectorMap {
+  [key: string]: string[];
+  default: string[];
+}
+
+const SECTOR_MAP: SectorMap = {
   technology: ['TECH', 'SEMI', 'SOFT', 'CLOUD'],
   financial: ['FIN', 'BANK', 'INS', 'ASSET'],
   consumer: ['CONS', 'RETL', 'HOSP', 'LUX'],
@@ -62,14 +67,23 @@ const HORIZON_FACTORS: Record<string, number> = {
 // ============================================================
 
 function getCampaignSectors(campaign: any): string[] {
-  const industry = campaign?.organisation?.industry?.toLowerCase() || 'default';
-  const matchingIndustry = Object.keys(SECTOR_MAP).find(key => 
-    industry.includes(key) || (key === 'default' && !industry)
-  );
-  // ✅ FIX: Ensure we always return a valid string array with fallback
-  const sectorKey = matchingIndustry || 'default';
-  const sectors = SECTOR_MAP[sectorKey];
-  return sectors || SECTOR_MAP.default;
+  const industry = campaign?.organisation?.industry?.toLowerCase() || '';
+  
+  // Find matching industry key
+  let matchedKey: string = 'default';
+  
+  for (const key of Object.keys(SECTOR_MAP)) {
+    if (key !== 'default' && industry.includes(key)) {
+      matchedKey = key;
+      break;
+    }
+  }
+  
+  // ✅ Explicitly check for key existence to satisfy strict null checks
+  const matched = SECTOR_MAP[matchedKey];
+  if (matched) return matched;
+  
+  return SECTOR_MAP.default;
 }
 
 function calculateVolatility(
@@ -77,8 +91,8 @@ function calculateVolatility(
   sectorCode: string,
   horizon: string
 ): number {
-  const sectorFactor = SECTOR_VOLATILITY_FACTORS[sectorCode] || 1.0;
-  const horizonFactor = HORIZON_FACTORS[horizon] || 1.0;
+  const sectorFactor = SECTOR_VOLATILITY_FACTORS[sectorCode] ?? 1.0;
+  const horizonFactor = HORIZON_FACTORS[horizon] ?? 1.0;
   return Math.min(0.85, Number((baseVolatility * sectorFactor * horizonFactor).toFixed(4)));
 }
 
@@ -214,7 +228,7 @@ export async function GET(req: NextRequest) {
           volatility: calculateVolatility(baseVolatility, sector, h),
           isHigh: calculateVolatility(baseVolatility, sector, h) > 0.45,
           confidence: forecastConfidence,
-          factor: SECTOR_VOLATILITY_FACTORS[sector] || 1.0
+          factor: SECTOR_VOLATILITY_FACTORS[sector] ?? 1.0
         }))
       );
     }

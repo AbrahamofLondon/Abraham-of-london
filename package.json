@@ -417,6 +417,7 @@
     "micromark": "4.0.2",
     "micromark-extension-mdx-jsx": "3",
     "netlify-cli": "^24.9.0",
+    "netlify-plugin-cache": "^1.0.3",
     "next-sitemap": "4.2.3",
     "null-loader": "^4.0.1",
     "pdf-lib": "^1.17.1",
@@ -435,45 +436,6 @@
     "webpack-bundle-analyzer": "^5.2.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "better-sqlite3", "sharp", "argon2", "prisma"],  
-    "overrides": {
-    "hono": "^4.12.7",
-    "opencontrol>hono": "^4.12.7",
-    "@modelcontextprotocol/sdk": "^1.27.1",
-    "@opentelemetry/api": "1.9.0",
-    "glob": "10.5.0",
-    "lodash-es": "4.17.23",
-    "lodash": "4.17.23",
-    "diff": "5.2.2",
-    "@types/dompurify": "3.2.0",
-    "fast-xml-parser": "^5.3.4",
-    "@prisma/client": "6.6.0",
-    "prisma": "6.6.0",
-    "cookie": ">=0.7.0",
-    "undici": ">=6.23.0",
-    "axios": ">=1.13.5",
-    "qs": ">=6.14.2",
-    "ajv": ">=8.18.0",
-    "minimatch": ">=10.2.1",
-    "bn.js": ">=5.2.3",
-    "semver": ">=7.6.3",
-    "path-to-regexp": ">=6.3.0",
-    "elliptic": ">=6.6.1",
-    "browserify-sign": ">=4.2.3",
-    "create-ecdh": ">=4.0.4",
-    "crypto-browserify": ">=3.12.1",
-    "picomatch": ">=2.3.2",
-    "defu": ">=6.1.5",
-    "aws-sdk": ">=2.1692.0",
-    "next-contentlayer>next": "$next",
-    "next-contentlayer2>next": "$next"
-  },
-    "peerDependencyRules": {
-      "allowAny": [
-        "react",
-        "react-dom"
-      ]
-    },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
       "@playwright/browser-chromium",
@@ -493,6 +455,44 @@
       "sharp",
       "unrs-resolver"
     ],
+    "overrides": {
+      "hono": "^4.12.7",
+      "opencontrol>hono": "^4.12.7",
+      "@modelcontextprotocol/sdk": "^1.27.1",
+      "@opentelemetry/api": "1.9.0",
+      "glob": "10.5.0",
+      "lodash-es": "4.17.23",
+      "lodash": "4.17.23",
+      "diff": "5.2.2",
+      "@types/dompurify": "3.2.0",
+      "fast-xml-parser": "^5.3.4",
+      "@prisma/client": "6.6.0",
+      "prisma": "6.6.0",
+      "cookie": ">=0.7.0",
+      "undici": ">=6.23.0",
+      "axios": ">=1.13.5",
+      "qs": ">=6.14.2",
+      "ajv": ">=8.18.0",
+      "minimatch": ">=10.2.1",
+      "bn.js": ">=5.2.3",
+      "semver": ">=7.6.3",
+      "path-to-regexp": ">=6.3.0",
+      "elliptic": ">=6.6.1",
+      "browserify-sign": ">=4.2.3",
+      "create-ecdh": ">=4.0.4",
+      "crypto-browserify": ">=3.12.1",
+      "picomatch": ">=2.3.2",
+      "defu": ">=6.1.5",
+      "aws-sdk": ">=2.1692.0",
+      "next-contentlayer>next": "$next",
+      "next-contentlayer2>next": "$next"
+    },
+    "peerDependencyRules": {
+      "allowAny": [
+        "react",
+        "react-dom"
+      ]
+    },
     "ignoredBuiltDependencies": [
       "contentlayer",
       "netlify-cli",

@@ -1,9 +1,14 @@
 /* lib/inner-circle/exports.server.ts — PRODUCTION READY */
 import { prisma } from "@/lib/prisma.server";
 import * as Core from "./keys.server";
-import { generatePDF } from "@/lib/pdf-generator";
 import type { AccessTier } from "@prisma/client";
 import { auditLogger } from "@/lib/server/db/audit";
+
+/**
+ * SOVEREIGN PROTOCOL: 
+ * We use dynamic imports for PDF generation to prevent Webpack "Critical Dependency" warnings 
+ * and to keep the server bundle lean, bypassing Framer Motion/DOM-related leaks.
+ */
 
 // ✅ Resolved: Explicitly pulling required exports for the Admin Export API
 export const {
@@ -34,7 +39,14 @@ export async function generateBriefPDF(id: string, options?: any) {
   const forceRebuild = Boolean(options?.force);
 
   try {
-    const result = await generatePDF(id, forceRebuild);
+    /**
+     * ✅ FIX: DYNAMIC IMPORT
+     * This stops Webpack from analyzing @/lib/pdf-generator at build-time.
+     * It resolves the "request of a dependency is an expression" warning.
+     */
+    const { generatePDF: lazyGeneratePDF } = await import("@/lib/pdf-generator");
+    
+    const result = await lazyGeneratePDF(id, forceRebuild);
     if (!result.success) throw new Error(result.error || "Institutional PDF Generation Failed");
 
     await auditLogger.log({

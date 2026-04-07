@@ -65,16 +65,26 @@ function toCalloutType(v: CalloutVariant): CalloutTypeActual {
 }
 
 const CalloutAdapter: ComponentType<AnyProps> = (props) => {
+  // 1. Determine the visual variant (for CSS) and the functional type (for TS/Logic)
   const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
   const t = toCalloutType(v);
 
-  // We extract 'variant' and 'type' to prevent them from leaking into ...rest
-  // and potentially conflicting with the props we manually pass to <Callout />
-  const { type, variant, intent, tone, kind, className, children, ...rest } = props ?? {};
+  // 2. Extract props to prevent non-standard attributes from hitting the DOM or base component
+  const { 
+    type: _type, 
+    variant: _variant, 
+    intent: _intent, 
+    tone: _tone, 
+    kind: _kind, 
+    className, 
+    children, 
+    ...rest 
+  } = props ?? {};
   
-  // Custom styling for strategy variant
+  // 3. Apply custom strategy class if applicable
   const nextClassName = cx(className, v === "strategy" && "callout--strategy");
 
+  // 4. Return the base component with the VALIDATED type 't'
   return (
     <Callout {...rest} className={nextClassName} type={t}>
       {children ?? null}

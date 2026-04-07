@@ -1,4 +1,9 @@
-// next.config.mjs
+/**
+ * next.config.mjs — V12.0 (Abraham of London Performance Hardening)
+ * Optimized for Netlify Build Times and Webpack Cache Efficiency.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
 import path from "path";
 import { fileURLToPath } from "url";
 import { withContentlayer } from "next-contentlayer2";
@@ -12,7 +17,6 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
-
   productionBrowserSourceMaps: false,
 
   experimental: {
@@ -31,16 +35,22 @@ const nextConfig = {
     },
   },
 
+  /**
+   * ✅ SERVER EXTERNAL PACKAGES
+   * Prevents Webpack from attempting to bundle heavy Node-only binaries.
+   */
   serverExternalPackages: [
     "@prisma/client",
     "contentlayer2",
     "next-contentlayer2",
+    "@react-pdf/renderer",
+    "canvas",
+    "jsdom",
   ],
 
   images: {
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
-    // FIX: Add all quality values used in your Image components
     qualities: [75, 82, 85],
   },
 
@@ -49,11 +59,37 @@ const nextConfig = {
   },
 
   webpack: (config, { isServer, dev }) => {
+    // 1. Alias Resolution
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       "@": path.resolve(__dirname),
     };
 
+    /**
+     * 2. ✅ CRITICAL: DYNAMIC CONTEXT RESOLUTION
+     * unknownContextCritical: false silences the Contentlayer internal import errors.
+     * exprContextCritical: false allows the dynamic PDF template loading.
+     */
+    config.module = {
+      ...config.module,
+      exprContextCritical: false,
+      unknownContextCritical: false,
+    };
+
+    /**
+     * 3. ✅ LOGGING & CACHE OPTIMIZATION
+     * Prevents the build process from hanging on stdout logging and stops
+     * large serialized string bloat in the Webpack filesystem cache.
+     */
+    config.infrastructureLogging = {
+      level: "error",
+    };
+
+    if (config.cache && config.cache.type === "filesystem") {
+      config.cache.maxMemoryGenerations = 1;
+    }
+
+    // 4. Client-side optimizations
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
@@ -64,12 +100,24 @@ const nextConfig = {
       };
     }
 
+    // 5. Build Safety: Block server-only logic from client bundles
     if (!isServer) {
       config.module.rules.push({
         test: /\.mdx?$/,
         include: [path.resolve(__dirname, "content")],
         use: "null-loader",
       });
+
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        stream: false,
+        crypto: false,
+        canvas: false,
+        net: false,
+        tls: false,
+      };
     }
 
     if (dev) {

@@ -1,4 +1,4 @@
-# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED)
+# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED & OPTIMIZED)
 
 [build]
   command = "pnpm build:netlify"            
@@ -9,11 +9,16 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "true"
   NEXT_TELEMETRY_DISABLED = "1"
+  # ✅ PRO TIP: Disabling linting/type-checking during 'next build' can save minutes
+  # if you already run them as separate CI steps.
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   NETLIFY_USE_PNPM = "true"
   PNPM_FLAGS = "--frozen-lockfile"
   PNPM_VERSION = "10.29.3"
+  
+  # ✅ SPEED FIX: Force Next.js to use the cache more aggressively on Netlify
+  NEXT_CACHE_DIR = ".next/cache"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -21,15 +26,24 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
+# ✅ SPEED FIX: Adding a caching plugin for Contentlayer
+# This prevents Contentlayer from re-processing 313 docs from scratch every time.
+[[plugins]]
+  package = "netlify-plugin-cache"
+  [plugins.inputs]
+    paths = [".contentlayer", ".next/cache"]
+
 # ✅ Custom functions configuration
 [functions]
-  directory = "netlify/functions_src/functions"  # ✅ Fixed path
+  directory = "netlify/functions_src/functions"
   node_bundler = "esbuild"
+  # ✅ SPEED FIX: Externalize heavy PDF libs so they don't bloat the function bundle
+  external_node_modules = ["@react-pdf/renderer", "canvas"]
 
 # ✅ Scheduled function for token cleanup
 [[schedule]]
-  path = "/api/cleanup-download-tokens"  # This will call your function
-  schedule = "0 2 * * *"  # Daily at 2 AM
+  path = "/api/cleanup-download-tokens"
+  schedule = "0 2 * * *"
 
 [functions.emails]
   included_files = ["emails/**"]
@@ -47,26 +61,22 @@
 # REDIRECTS
 # -----------------------
 
-# Canonical host (force www)
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
   status = 301
   force = true
 
-# Canonical index
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
 
-# ✅ Essays brand alias → Blog canonical
 [[redirects]]
   from = "/essays/*"
   to = "/blog/:splat"
   status = 301
 
-# ✅ Canonicalize Vault paths (legacy /downloads/vault → /vault canonical)
 [[redirects]]
   from = "/downloads/vault/*"
   to = "/vault/:splat"

@@ -1,22 +1,26 @@
-/* app/api/audit/submit/route.ts — TELEMETRY INGESTION PROTOCOL */
+/* app/api/audit/[id]/submit/route.ts — TELEMETRY INGESTION PROTOCOL */
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { participantId, responses } = await req.json();
+    const { responses } = await req.json();
+    const participantId = params.id;
 
     if (!participantId || !Array.isArray(responses)) {
       return new NextResponse("Invalid Telemetry Packet", { status: 400 });
     }
 
+    // ✅ STEP 1: Get Prisma client first to resolve the "Property does not exist" error
     const prisma = await db.getPrismaClient();
     if (!prisma) {
       return new NextResponse("Database Connection Failure", { status: 500 });
     }
 
-    // 1. VERIFY PARTICIPANT & LOCK STATE
-    // We fetch the participant first to ensure they exist and haven't completed the audit.
+    // ✅ STEP 2: Access models through the prisma instance
     const participant = await prisma.campaignParticipant.findUnique({
       where: { id: participantId },
       select: { id: true, status: true, campaignId: true }
@@ -33,8 +37,7 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
 
-    // 2. ATOMIC TRANSACTION: UPDATE STATUS & RECORD TELEMETRY
-    // This ensures we don't mark them as complete if the data save fails.
+    // ✅ STEP 3: Atomic Transaction Protocol
     await prisma.$transaction([
       // A. Update Participant Status
       prisma.campaignParticipant.update({
@@ -43,7 +46,6 @@ export async function POST(req: Request) {
       }),
 
       // B. Create Anonymized Responses
-      // Note: We do NOT link the response to the membershipId, only the campaignId.
       prisma.auditResponse.createMany({
         data: responses.map((r: any) => ({
           campaignId: participant.campaignId,
@@ -58,7 +60,10 @@ export async function POST(req: Request) {
         data: {
           action: "NODE_VALIDATED",
           entityId: participant.campaignId,
-          metadata: { participantId: participant.id }
+          metadata: { 
+            participantId: participant.id,
+            timestamp: new Date().toISOString()
+          }
         }
       })
     ]);
