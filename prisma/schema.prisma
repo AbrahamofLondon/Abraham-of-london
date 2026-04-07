@@ -495,7 +495,7 @@ model EnterpriseReport {
 // ============================================================================
 
 model DiagnosticRecord {
-  id             String                    @id @default(cuid())
+  id             String             @id @default(cuid())
   diagnosticType String
   title          String?
   score          Int
@@ -504,27 +504,27 @@ model DiagnosticRecord {
   responsesJson  String
   notes          String?
 
-  userEmail      String?
-  userId         String?
+  userEmail String?
+  userId    String?
 
-  status         DiagnosticLifecycleStatus @default(completed)
-  reportStatus   DiagnosticReportStatus    @default(none)
-  reportTier     String?
+  status       DiagnosticLifecycleStatus @default(completed)
+  reportStatus DiagnosticReportStatus    @default(none)
+  reportTier   String?
 
-  latestVersion  String?
-  generatedAt    DateTime?
-  failedAt       DateTime?
-  failureReason  String?
+  latestVersion String?
+  generatedAt   DateTime?
+  failedAt      DateTime?
+  failureReason String?
 
-  createdAt      DateTime                  @default(now())
-  updatedAt      DateTime                  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  reportOrders   DiagnosticReportOrder[]
-  artifacts      DiagnosticArtifact[]
-  accessGrants   DiagnosticArtifactAccessGrant[]
-  lineageEvents  DiagnosticLineageEvent[]
-  auditEvents    DiagnosticAuditEvent[]
-  regenJobs      DiagnosticRegenerationJob[]
+  reportOrders  DiagnosticReportOrder[]
+  artifacts     DiagnosticArtifact[]
+  accessGrants  DiagnosticArtifactAccessGrant[]
+  lineageEvents DiagnosticLineageEvent[]
+  auditEvents   DiagnosticAuditEvent[]
+  regenJobs     DiagnosticRegenerationJob[]
 
   @@index([userEmail, createdAt])
   @@index([userId, createdAt])
@@ -535,24 +535,24 @@ model DiagnosticRecord {
 }
 
 model DiagnosticReportOrder {
-  id                 String   @id @default(cuid())
+  id                 String @id @default(cuid())
   diagnosticRecordId String
 
-  stripeSessionId    String?  @unique
-  stripePaymentId    String?
+  stripeSessionId String? @unique
+  stripePaymentId String?
 
-  reportTier         String
-  amount             Int
-  currency           String   @default("gbp")
-  status             String   @default("pending")
+  reportTier String
+  amount     Int
+  currency   String @default("gbp")
+  status     String @default("pending")
 
-  userEmail          String?
-  userId             String?
+  userEmail String?
+  userId    String?
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  diagnosticRecord   DiagnosticRecord @relation(fields: [diagnosticRecordId], references: [id], onDelete: Cascade)
+  diagnosticRecord DiagnosticRecord @relation(fields: [diagnosticRecordId], references: [id], onDelete: Cascade)
 
   @@index([diagnosticRecordId])
   @@index([status, createdAt])
@@ -560,36 +560,36 @@ model DiagnosticReportOrder {
 }
 
 model DiagnosticArtifact {
-  id              String                    @id @default(cuid())
-  diagnosticRef   String
-  diagnosticId    String
-  reportId        String?
-  version         String
-  kind            DiagnosticArtifactKind    @default(pdf)
+  id            String                 @id @default(cuid())
+  diagnosticRef String
+  diagnosticId  String
+  reportId      String?
+  version       String
+  kind          DiagnosticArtifactKind @default(pdf)
 
-  fileName        String
-  mimeType        String
-  byteLength      Int
-  sha256          String
+  fileName   String
+  mimeType   String
+  byteLength Int
+  sha256     String
 
   storageProvider DiagnosticStorageProvider
   objectKey       String
   bucket          String?
 
-  etag            String?
-  publicPath      String?
+  etag       String?
+  publicPath String?
 
-  isRevoked       Boolean                   @default(false)
-  revokedAt       DateTime?
-  revokedReason   String?
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedReason String?
 
-  retentionClass  String                    @default("standard")
-  expiresAt       DateTime?
+  retentionClass String    @default("standard")
+  expiresAt      DateTime?
 
-  createdAt       DateTime                  @default(now())
-  createdBy       String?
+  createdAt DateTime @default(now())
+  createdBy String?
 
-  diagnostic      DiagnosticRecord          @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
+  diagnostic DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
 
   @@unique([diagnosticRef, version, kind])
   @@index([diagnosticRef])
@@ -600,19 +600,19 @@ model DiagnosticArtifact {
 }
 
 model DiagnosticRegenerationJob {
-  id              String                       @id @default(cuid())
-  diagnosticRef   String
-  diagnosticId    String?
-  version         String?
+  id            String  @id @default(cuid())
+  diagnosticRef String
+  diagnosticId  String?
+  version       String?
 
-  status          DiagnosticRegenerationStatus @default(queued)
-  attempt         Int                          @default(0)
-  error           String?
+  status  DiagnosticRegenerationStatus @default(queued)
+  attempt Int                          @default(0)
+  error   String?
 
-  createdAt       DateTime                     @default(now())
-  updatedAt       DateTime                     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  diagnostic      DiagnosticRecord?            @relation(fields: [diagnosticId], references: [id], onDelete: SetNull)
+  diagnostic DiagnosticRecord? @relation(fields: [diagnosticId], references: [id], onDelete: SetNull)
 
   @@index([diagnosticRef])
   @@index([diagnosticId])
@@ -621,15 +621,15 @@ model DiagnosticRegenerationJob {
 }
 
 model DiagnosticAuditEvent {
-  id              String           @id @default(cuid())
-  diagnosticRef   String?
-  diagnosticId    String?
-  action          String
-  actor           String?
-  metadata        String?
-  createdAt       DateTime         @default(now())
+  id            String   @id @default(cuid())
+  diagnosticRef String?
+  diagnosticId  String?
+  action        String
+  actor         String?
+  metadata      String?
+  createdAt     DateTime @default(now())
 
-  diagnostic      DiagnosticRecord? @relation(fields: [diagnosticId], references: [id], onDelete: SetNull)
+  diagnostic DiagnosticRecord? @relation(fields: [diagnosticId], references: [id], onDelete: SetNull)
 
   @@index([diagnosticRef])
   @@index([diagnosticId])
@@ -638,18 +638,18 @@ model DiagnosticAuditEvent {
 }
 
 model DiagnosticArtifactAccessGrant {
-  id              String           @id @default(cuid())
-  diagnosticRef   String
-  diagnosticId    String
-  artifactId      String
-  granteeEmail    String
-  entitlementKey  String           @unique
-  status          String           @default("active")
-  expiresAt       DateTime?
-  createdAt       DateTime         @default(now())
-  createdBy       String?
+  id             String    @id @default(cuid())
+  diagnosticRef  String
+  diagnosticId   String
+  artifactId     String
+  granteeEmail   String
+  entitlementKey String    @unique
+  status         String    @default("active")
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  createdBy      String?
 
-  diagnostic      DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
+  diagnostic DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
 
   @@index([diagnosticRef])
   @@index([diagnosticId])
@@ -659,7 +659,7 @@ model DiagnosticArtifactAccessGrant {
 }
 
 model DiagnosticLineageEvent {
-  id               String           @id @default(cuid())
+  id               String   @id @default(cuid())
   diagnosticRef    String
   diagnosticId     String
   artifactId       String?
@@ -668,9 +668,9 @@ model DiagnosticLineageEvent {
   version          String?
   actor            String?
   metadata         String?
-  createdAt        DateTime         @default(now())
+  createdAt        DateTime @default(now())
 
-  diagnostic       DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
+  diagnostic DiagnosticRecord @relation(fields: [diagnosticId], references: [id], onDelete: Cascade)
 
   @@index([diagnosticRef])
   @@index([diagnosticId])
@@ -800,7 +800,7 @@ model RunbookEntry {
 }
 
 // ============================================================================
-// DECISION RECOMMENDATION SYSTEM
+// DECISION RECOMMENDATION + GOVERNANCE SIGNAL SYSTEM
 // ============================================================================
 
 model DecisionRecommendationSession {
@@ -832,7 +832,7 @@ model DecisionRecommendationSession {
   conversionType      String?
   conversionAt        DateTime?
 
-  metadata String?
+  metadata Json?
 
   impressions DecisionRecommendationImpression[]
   clicks      DecisionRecommendationClick[]
@@ -840,6 +840,13 @@ model DecisionRecommendationSession {
   followups   DecisionSessionFollowup[]
 
   @@index([sessionKey])
+  @@index([submissionId])
+  @@index([anonymousId])
+  @@index([email])
+  @@index([route])
+  @@index([readinessTier])
+  @@index([authorityType])
+  @@index([converted])
   @@index([createdAt])
   @@map("decision_recommendation_sessions")
 }
@@ -860,13 +867,15 @@ model DecisionRecommendationImpression {
   matchScore         Float
   metadataConfidence Float?
 
-  reasons         String?
-  contextSnapshot String?
+  reasons         Json?
+  contextSnapshot Json?
 
   clicks DecisionRecommendationClick[]
 
   @@index([sessionId])
   @@index([assetId])
+  @@index([assetKind])
+  @@index([createdAt])
   @@map("decision_recommendation_impressions")
 }
 
@@ -878,7 +887,7 @@ model DecisionRecommendationClick {
   session   DecisionRecommendationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   impressionId String?
-  impression   DecisionRecommendationImpression? @relation(fields: [impressionId], references: [id])
+  impression   DecisionRecommendationImpression? @relation(fields: [impressionId], references: [id], onDelete: SetNull)
 
   assetId    String
   assetTitle String
@@ -894,7 +903,11 @@ model DecisionRecommendationClick {
   conversion DecisionRecommendationConversion?
 
   @@index([sessionId])
+  @@index([impressionId])
   @@index([assetId])
+  @@index([assetKind])
+  @@index([isConverted])
+  @@index([createdAt])
   @@map("decision_recommendation_clicks")
 }
 
@@ -906,7 +919,7 @@ model DecisionRecommendationConversion {
   session   DecisionRecommendationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   clickId String?                      @unique
-  click   DecisionRecommendationClick? @relation(fields: [clickId], references: [id])
+  click   DecisionRecommendationClick? @relation(fields: [clickId], references: [id], onDelete: SetNull)
 
   conversionType  String
   conversionValue Float?
@@ -916,11 +929,13 @@ model DecisionRecommendationConversion {
   assetHref  String?
   assetKind  String?
 
-  metadata String?
+  metadata Json?
 
   @@index([sessionId])
   @@index([clickId])
   @@index([assetId])
+  @@index([assetKind])
+  @@index([conversionType])
   @@index([createdAt])
   @@map("decision_recommendation_conversions")
 }
@@ -945,7 +960,11 @@ model DecisionSessionFollowup {
   routeImproved          Boolean @default(false)
   convertedAfterGuidance Boolean @default(false)
 
-  metadata String?
+  metadata Json?
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("decision_session_followups")
 }
 
 model DecisionAssetEfficacy {
@@ -973,7 +992,18 @@ model DecisionAssetEfficacy {
   confidenceScore         Float @default(0)
 
   lastEvaluatedAt DateTime?
-  metadata        String?
+  metadata        Json?
+
+  contextPerformances DecisionAssetContextPerformance[]
+  signalRegistry      DecisionSignalRegistry[]
+  governanceAlerts    DecisionGovernanceAlert[]
+
+  @@index([assetKind])
+  @@index([efficacyScore])
+  @@index([decisionUsefulnessScore])
+  @@index([confidenceScore])
+  @@index([lastEvaluatedAt])
+  @@map("decision_asset_efficacy")
 }
 
 model DecisionAssetContextPerformance {
@@ -1004,11 +1034,133 @@ model DecisionAssetContextPerformance {
   usefulnessScore  Float @default(0)
 
   lastEvaluatedAt DateTime?
-  metadata        String?
+  metadata        Json?
+
+  signalRegistry          DecisionSignalRegistry[]
+  governanceAlerts        DecisionGovernanceAlert[]
+  DecisionAssetEfficacy   DecisionAssetEfficacy?    @relation(fields: [decisionAssetEfficacyId], references: [id])
+  decisionAssetEfficacyId String?
 
   @@unique([assetId, contextType, contextValue])
   @@index([contextType, contextValue])
   @@index([assetId])
+  @@index([assetKind])
+  @@index([usefulnessScore])
+  @@index([confidenceScore])
+  @@index([contextualWeight])
+  @@index([lastEvaluatedAt])
+  @@map("decision_asset_context_performance")
+}
+
+model DecisionSignalRegistry {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  registryKey String @unique
+
+  assetId    String
+  assetTitle String
+  assetHref  String?
+  assetKind  String
+
+  contextType  String
+  contextValue String
+
+  status          String
+  highestSeverity String
+
+  healthScore     Float   @default(0)
+  driftScore      Float   @default(0)
+  resonanceScore  Float   @default(0)
+  confidenceScore Float?
+  resonanceBand   String?
+
+  alertCount Int @default(0)
+
+  metrics  Json?
+  alerts   Json?
+  metadata Json?
+
+  lastEvaluatedAt DateTime?
+
+  assetEfficacyId String?
+  assetEfficacy   DecisionAssetEfficacy? @relation(fields: [assetEfficacyId], references: [id], onDelete: SetNull)
+
+  contextPerformanceId String?
+  contextPerformance   DecisionAssetContextPerformance? @relation(fields: [contextPerformanceId], references: [id], onDelete: SetNull)
+
+  governanceAlerts DecisionGovernanceAlert[]
+
+  @@unique([assetId, contextType, contextValue])
+  @@index([assetId])
+  @@index([assetKind])
+  @@index([contextType, contextValue])
+  @@index([status])
+  @@index([highestSeverity])
+  @@index([healthScore])
+  @@index([lastEvaluatedAt])
+  @@map("decision_signal_registry")
+}
+
+model DecisionGovernanceAlert {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assetId    String
+  assetTitle String
+  assetHref  String?
+  assetKind  String
+
+  contextType  String?
+  contextValue String?
+
+  registryKey String?
+
+  alertType String
+  metricKey String?
+
+  severity String
+  status   String @default("ACTIVE")
+
+  message String
+
+  previousValue Float?
+  currentValue  Float?
+  deltaValue    Float?
+  deltaPercent  Float?
+
+  firstDetectedAt DateTime  @default(now())
+  lastDetectedAt  DateTime  @default(now())
+  resolvedAt      DateTime?
+
+  occurrenceCount Int     @default(1)
+  isActive        Boolean @default(true)
+
+  metadata Json?
+
+  assetEfficacyId String?
+  assetEfficacy   DecisionAssetEfficacy? @relation(fields: [assetEfficacyId], references: [id], onDelete: SetNull)
+
+  contextPerformanceId String?
+  contextPerformance   DecisionAssetContextPerformance? @relation(fields: [contextPerformanceId], references: [id], onDelete: SetNull)
+
+  signalRegistryId String?
+  signalRegistry   DecisionSignalRegistry? @relation(fields: [signalRegistryId], references: [id], onDelete: SetNull)
+
+  @@index([assetId])
+  @@index([assetKind])
+  @@index([contextType, contextValue])
+  @@index([registryKey])
+  @@index([alertType])
+  @@index([metricKey])
+  @@index([severity])
+  @@index([status])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([lastDetectedAt])
+  @@map("decision_governance_alerts")
 }
 
 // ============================================================================
@@ -1722,35 +1874,6 @@ model DecisionAssetGovernanceRule {
   @@index([assetKind])
   @@index([contextType, contextValue])
   @@index([ruleType])
-}
-
-model DecisionGovernanceAlert {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  assetId    String
-  assetTitle String
-  assetKind  String
-
-  alertType String
-  severity  String
-  message   String
-
-  previousValue Float?
-  currentValue  Float?
-  deltaValue    Float?
-
-  contextType  String?
-  contextValue String?
-
-  isActive   Boolean   @default(true)
-  resolvedAt DateTime?
-  metadata   String?
-
-  @@index([assetId, isActive])
-  @@index([alertType, severity])
-  @@index([contextType, contextValue])
 }
 
 // ============================================================================

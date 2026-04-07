@@ -1,4 +1,3 @@
-// tailwind.config.js
 /** @type {import("tailwindcss").Config} */
 module.exports = {
   darkMode: "class",
@@ -32,6 +31,11 @@ module.exports = {
     },
 
     extend: {
+      transitionDuration: {
+        "4000": "4000ms",
+        "10000": "10000ms",
+      },
+
       colors: {
         background: "rgb(var(--aol-bg) / <alpha-value>)",
         foreground: "rgb(var(--aol-ink) / <alpha-value>)",
@@ -64,8 +68,9 @@ module.exports = {
           warning: "rgb(var(--aol-warning) / <alpha-value>)",
         },
 
-        /* Compatibility shims */
+        // ADD THIS LINE — softGold was missing
         softGold: "rgb(var(--aol-gold) / <alpha-value>)",
+        
         gold: "rgb(var(--aol-gold) / <alpha-value>)",
         amber: "rgb(var(--aol-gold-strong) / <alpha-value>)",
         cream: "rgb(var(--aol-ink) / <alpha-value>)",
@@ -80,27 +85,9 @@ module.exports = {
       },
 
       fontFamily: {
-        sans: [
-          "var(--font-sans)",
-          "Inter",
-          "ui-sans-serif",
-          "system-ui",
-          "sans-serif",
-        ],
-        serif: [
-          "var(--font-serif)",
-          "Cormorant Garamond",
-          "ui-serif",
-          "Georgia",
-          "serif",
-        ],
-        mono: [
-          "var(--font-mono)",
-          "JetBrains Mono",
-          "ui-monospace",
-          "SFMono-Regular",
-          "monospace",
-        ],
+        sans: ["var(--font-sans)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Cormorant Garamond", "ui-serif", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "SFMono-Regular", "monospace"],
       },
 
       fontSize: {
@@ -144,29 +131,20 @@ module.exports = {
       },
 
       backgroundImage: {
-        "gold-radial":
-          "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
-        "premium-card":
-          "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
-        "gold-linear":
-          "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "aol-hairline":
-          "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
-        "aol-hairline-gold":
-          "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "terminal-core":
-          "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
+        "gold-radial": "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
+        "premium-card": "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
+        "gold-linear": "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
+        "aol-hairline": "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
+        "aol-hairline-gold": "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
+        "terminal-core": "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
       },
 
       boxShadow: {
         premium: "0 20px 40px -15px rgba(0,0,0,0.80)",
-        card:
-          "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
-        cardHover:
-          "0 28px 80px -30px rgba(0,0,0,0.82), 0 1px 2px 0 rgba(255,255,255,0.05) inset, 0 0 36px rgba(201,169,106,0.06)",
+        card: "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
+        cardHover: "0 28px 80px -30px rgba(0,0,0,0.82), 0 1px 2px 0 rgba(255,255,255,0.05) inset, 0 0 36px rgba(201,169,106,0.06)",
         "gold-glow": "0 0 40px rgba(201,169,106,0.12)",
-        terminal:
-          "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
+        terminal: "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
       },
     },
   },
@@ -175,5 +153,6 @@ module.exports = {
     require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
     require("@tailwindcss/aspect-ratio"),
+    require("tailwindcss-animate"),
   ],
 };

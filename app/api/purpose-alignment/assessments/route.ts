@@ -11,39 +11,54 @@ import {
 } from "@/lib/alignment/repository";
 import { getOrCreatePurposeAlignmentSessionKey } from "@/lib/alignment/session";
 
-// No auth required - free quick test
-export const config = {
-  api: {
-    externalResolver: true,
-  },
-};
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function badRequest(message: string) {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: message,
+      isPreview: true,
+    },
+    { status: 400 },
+  );
+}
+
+function internalError(message: string) {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: message,
+      isPreview: true,
+    },
+    { status: 500 },
+  );
+}
 
 export async function GET(req: NextRequest) {
   try {
     const sessionKey = await getOrCreatePurposeAlignmentSessionKey(req);
-    const latest = await getLatestPurposeAlignmentAssessment({ sessionKey });
-    const history = await listPurposeAlignmentAssessments({
-      sessionKey,
-      limit: 12,
-    });
+
+    const [latest, history] = await Promise.all([
+      getLatestPurposeAlignmentAssessment({ sessionKey }),
+      listPurposeAlignmentAssessments({
+        sessionKey,
+        limit: 12,
+      }),
+    ]);
 
     return NextResponse.json({
       ok: true,
       latest,
       history,
       isPreview: true,
-      message: "This is a free preview of the constitutional intelligence engine.",
+      message:
+        "This is a free preview of the constitutional intelligence engine.",
     });
   } catch (error) {
     console.error("[PURPOSE_ALIGNMENT_GET_ERROR]", error);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "Unable to retrieve assessments",
-        isPreview: true,
-      },
-      { status: 500 }
-    );
+    return internalError("Unable to retrieve assessments");
   }
 }
 
@@ -51,12 +66,13 @@ export async function POST(req: NextRequest) {
   try {
     const json = await req.json();
     const parsed = purposeAlignmentInputSchema.parse(json);
+
     validatePurposeAlignmentAnswers(parsed.answers);
 
     const result = scorePurposeAlignment({
       answers: parsed.answers,
       notes: parsed.notes || undefined,
-      resonanceData: parsed.resonanceData, // Include full resonance/certainty data
+      resonanceData: parsed.resonanceData,
     });
 
     const sessionKey = await getOrCreatePurposeAlignmentSessionKey(req);
@@ -84,13 +100,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("[PURPOSE_ALIGNMENT_POST_ERROR]", error);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: error instanceof Error ? error.message : "Invalid request",
-        isPreview: true,
-      },
-      { status: 400 }
-    );
+
+    if (error instanceof Error) {
+      return badRequest(error.message);
+    }
+
+    return badRequest("Invalid request");
   }
 }

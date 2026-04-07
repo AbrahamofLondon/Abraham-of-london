@@ -1,9 +1,26 @@
 /* pages/api/strategy-room/intake.ts — legacy adapter to canonical enrolment */
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   normalizeCanonicalInput,
   processStrategyRoomEnrolment,
 } from "@/lib/strategy-room/enrol-core";
+
+type ApiSuccess = {
+  ok: true;
+  status: "accepted";
+  message: string;
+  referenceId: string | null;
+  priorityStatus: string | null;
+  warning?: string | null;
+};
+
+type ApiFailure = {
+  ok: false;
+  status: "declined";
+  message: string;
+  details?: unknown;
+};
 
 function getClientIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
@@ -22,9 +39,10 @@ function getClientIp(req: NextApiRequest): string {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse<ApiSuccess | ApiFailure>,
 ) {
   if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({
       ok: false,
       status: "declined",
@@ -56,9 +74,9 @@ export default async function handler(
       ok: true,
       status: "accepted",
       message: result.message,
-      referenceId: result.referenceId,
-      priorityStatus: result.priorityStatus || null,
-      warning: result.warning,
+      referenceId: result.referenceId ?? null,
+      priorityStatus: result.priorityStatus ?? null,
+      warning: result.warning ?? null,
     });
   } catch (error) {
     console.error("[STRATEGY_ROOM_INTAKE_ERROR]", error);

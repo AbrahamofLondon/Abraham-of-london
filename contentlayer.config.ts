@@ -692,9 +692,28 @@ const Lexicon = defineDocumentType(() => ({
   filePathPattern: "lexicon/**/*.{md,mdx}",
   contentType: "mdx",
   fields: {
-    ...baseFields,
-    term: { type: "string", required: false },
-    phonetic: { type: "string", required: false },
+    // Core required fields
+    title: { type: "string", required: true },
+    description: { type: "string", required: false },
+    subtitle: { type: "string", required: false },
+    
+    // Classification
+    category: { type: "string", required: false },
+    type: { type: "string", required: false },
+    docKind: { type: "string", required: false },
+    
+    // Access control
+    accessLevel: { type: "string", required: false },
+    tier: { type: "string", required: false },
+    
+    // Metadata
+    author: { type: "string", required: false },
+    date: { type: "date", required: false },
+    slug: { type: "string", required: false },
+    tags: { type: "list", of: { type: "string" }, required: false },
+    
+    // Status
+    draft: { type: "boolean", required: false, default: false },
   },
   computedFields: createComputedFields("lexicon/", "lexicon"),
 }));

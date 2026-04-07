@@ -6,23 +6,41 @@ import fs from "fs";
 
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import tiers, { requiredTierFromVaultPath } from "@/lib/access/tiers";
+import { vaultRuntimeConfig } from "@/lib/runtime/vault-config";
 
-const VAULT_ROOT = path.join(process.cwd(), "private", "vault");
+const VAULT_ROOT = path.join(
+  process.cwd(),
+  ...vaultRuntimeConfig.vaultRootSegments,
+);
 
 function contentTypeFor(filePath: string): string {
-  const ext = filePath.toLowerCase().split(".").pop() || "";
-  if (ext === "pdf") return "application/pdf";
-  if (ext === "zip") return "application/zip";
-  if (ext === "png") return "image/png";
-  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
-  if (ext === "webp") return "image/webp";
-  if (ext === "pptx") {
-    return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+  const ext = path.extname(filePath).toLowerCase();
+
+  switch (ext) {
+    case ".pdf":
+      return "application/pdf";
+    case ".zip":
+      return "application/zip";
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".webp":
+      return "image/webp";
+    case ".pptx":
+      return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    case ".docx":
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    case ".epub":
+      return "application/epub+zip";
+    case ".json":
+      return "application/json; charset=utf-8";
+    case ".txt":
+      return "text/plain; charset=utf-8";
+    default:
+      return "application/octet-stream";
   }
-  if (ext === "docx") {
-    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-  }
-  return "application/octet-stream";
 }
 
 function safeResolveVaultPath(parts: string[]): string | null {
@@ -34,10 +52,15 @@ function safeResolveVaultPath(parts: string[]): string | null {
   if (!clean.length) return null;
 
   for (const seg of clean) {
-    if (seg === "." || seg === ".." || seg.includes("..") || seg.includes("\0")) {
-      return null;
-    }
-    if (seg.startsWith("/") || seg.startsWith("\\") || seg.includes(":")) {
+    if (
+      seg === "." ||
+      seg === ".." ||
+      seg.includes("..") ||
+      seg.includes("\0") ||
+      seg.startsWith("/") ||
+      seg.startsWith("\\") ||
+      seg.includes(":")
+    ) {
       return null;
     }
   }
@@ -56,17 +79,17 @@ function safeResolveVaultPath(parts: string[]): string | null {
   return normalizedJoined;
 }
 
-function isPreviewInline(ct: string): boolean {
-  return ct === "application/pdf" || ct.startsWith("image/");
+function isPreviewInline(contentType: string): boolean {
+  return contentType === "application/pdf" || contentType.startsWith("image/");
 }
 
 function weakEtag(stat: fs.Stats): string {
-  return `W/"${stat.size}-${stat.mtimeMs}"`;
+  return `W/"${stat.size}-${Math.floor(stat.mtimeMs)}"`;
 }
 
 function firstHeaderValue(value: string | string[] | undefined): string | null {
   if (Array.isArray(value)) return value[0] ? String(value[0]) : null;
-  if (typeof value === "string" && value) return value;
+  if (typeof value === "string" && value.trim()) return value;
   return null;
 }
 
@@ -76,30 +99,39 @@ function parseRange(
 ): { start: number; end: number } | null {
   if (!rangeHeader) return null;
 
-  const m = rangeHeader.match(/^bytes=(\d*)-(\d*)$/i);
-  if (!m) return null;
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader);
+  if (!match) return null;
 
-  const startStr = m[1];
-  const endStr = m[2];
+  const startStr = match[1];
+  const endStr = match[2];
 
-  let start = startStr ? parseInt(startStr, 10) : Number.NaN;
-  let end = endStr ? parseInt(endStr, 10) : Number.NaN;
+  let start = startStr ? Number.parseInt(startStr, 10) : Number.NaN;
+  let end = endStr ? Number.parseInt(endStr, 10) : Number.NaN;
 
   if (Number.isNaN(start) && !Number.isNaN(end)) {
-    const last = end;
-    if (last <= 0) return null;
-    start = Math.max(0, size - last);
+    const suffixLength = end;
+    if (suffixLength <= 0) return null;
+    start = Math.max(0, size - suffixLength);
     end = size - 1;
   } else if (!Number.isNaN(start) && Number.isNaN(end)) {
     end = size - 1;
   }
 
-  if (Number.isNaN(start) || Number.isNaN(end)) return null;
-  if (start < 0 || end < 0 || start > end) return null;
-  if (start >= size) return null;
+  if (
+    Number.isNaN(start) ||
+    Number.isNaN(end) ||
+    start < 0 ||
+    end < 0 ||
+    start > end ||
+    start >= size
+  ) {
+    return null;
+  }
 
-  end = Math.min(end, size - 1);
-  return { start, end };
+  return {
+    start,
+    end: Math.min(end, size - 1),
+  };
 }
 
 function safeAttachmentName(filePath: string): string {
@@ -122,8 +154,14 @@ export default async function handler(
     return;
   }
 
-  res.setHeader("Cache-Control", "no-store, max-age=0");
-  res.setHeader("Pragma", "no-cache");
+  const cacheSeconds = vaultRuntimeConfig.cacheSeconds;
+  if (cacheSeconds > 0) {
+    res.setHeader("Cache-Control", `private, max-age=${cacheSeconds}`);
+  } else {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
 
   const parts = Array.isArray(req.query.path)
     ? req.query.path
@@ -148,10 +186,14 @@ export default async function handler(
     return;
   }
 
-  const requiredTier = tiers.normalizeRequired(requiredTierFromVaultPath(filePath));
+  const requiredTier = tiers.normalizeRequired(
+    requiredTierFromVaultPath(filePath),
+  );
 
-  if (requiredTier !== "public") {
-    const auth = (await getInnerCircleAccess(req)) as InnerCircleAccessResult | null;
+  if (vaultRuntimeConfig.enforceAuth && requiredTier !== "public") {
+    const auth = (await getInnerCircleAccess(
+      req,
+    )) as InnerCircleAccessResult | null;
 
     if (!auth?.hasAccess) {
       res.status(401).json({
@@ -173,30 +215,27 @@ export default async function handler(
     }
   }
 
-  const ct = contentTypeFor(filePath);
+  const contentType = contentTypeFor(filePath);
   const etag = weakEtag(stat);
-  const filename = safeAttachmentName(filePath);
+  const fileName = safeAttachmentName(filePath);
 
-  res.setHeader("Content-Type", ct);
+  res.setHeader("Content-Type", contentType);
+  res.setHeader("Content-Length", String(stat.size));
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("ETag", etag);
   res.setHeader("Accept-Ranges", "bytes");
-
-  const inline = isPreviewInline(ct);
+  res.setHeader("ETag", etag);
   res.setHeader(
     "Content-Disposition",
-    `${inline ? "inline" : "attachment"}; filename="${filename}"`,
+    `${isPreviewInline(contentType) ? "inline" : "attachment"}; filename="${fileName}"`,
   );
 
   const ifNoneMatch = firstHeaderValue(req.headers["if-none-match"]);
   if (ifNoneMatch && ifNoneMatch === etag) {
-    res.statusCode = 304;
-    res.end();
+    res.status(304).end();
     return;
   }
 
   if (req.method === "HEAD") {
-    res.setHeader("Content-Length", String(stat.size));
     res.status(200).end();
     return;
   }
@@ -206,7 +245,7 @@ export default async function handler(
   const range = parseRange(rangeHeader, stat.size);
 
   if (hasRangeHeader && !range) {
-    res.statusCode = 416;
+    res.status(416);
     res.setHeader("Content-Range", `bytes */${stat.size}`);
     res.end();
     return;
@@ -216,25 +255,26 @@ export default async function handler(
     const { start, end } = range;
     const chunkSize = end - start + 1;
 
-    res.statusCode = 206;
+    res.status(206);
     res.setHeader("Content-Length", String(chunkSize));
     res.setHeader("Content-Range", `bytes ${start}-${end}/${stat.size}`);
 
-    const stream = fs.createReadStream(filePath, { start, end });
-    stream.on("error", () => {
-      if (!res.headersSent) res.status(500);
+    const rangedStream = fs.createReadStream(filePath, { start, end });
+    rangedStream.on("error", () => {
+      if (!res.headersSent) {
+        res.status(500);
+      }
       res.end("STREAM_ERROR");
     });
-    stream.pipe(res);
+    rangedStream.pipe(res);
     return;
   }
 
-  res.statusCode = 200;
-  res.setHeader("Content-Length", String(stat.size));
-
   const stream = fs.createReadStream(filePath);
   stream.on("error", () => {
-    if (!res.headersSent) res.status(500);
+    if (!res.headersSent) {
+      res.status(500);
+    }
     res.end("STREAM_ERROR");
   });
   stream.pipe(res);

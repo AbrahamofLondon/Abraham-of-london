@@ -151,7 +151,11 @@ function makeDiagnosticRef(type: string): string {
       .toUpperCase()
       .slice(0, 16) || "DIAG";
 
-  const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+  const stamp = new Date()
+  .toISOString()
+  .replace(/[-:.]/g, "")
+  .replace(/T/g, "")
+  .replace(/Z/g, "")
   const rand = crypto.randomBytes(3).toString("hex").toUpperCase();
   return `${prefix}-${stamp}-${rand}`;
 }

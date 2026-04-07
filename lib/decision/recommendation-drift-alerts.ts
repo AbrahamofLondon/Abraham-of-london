@@ -1,171 +1,211 @@
-// app/api/admin/decision/rebuild-governance-alerts/route.ts
+// lib/decision/recommendation-drift-alerts.ts
 
-import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { detectDriftAlert } from "@/lib/decision/recommendation-drift-alerts";
+export type DriftDirection = "UP" | "DOWN" | "FLAT";
+export type DriftSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
-export async function POST() {
-  try {
-    const prisma =
-      typeof (db as any)?.getPrismaClient === "function"
-        ? await (db as any).getPrismaClient()
-        : db;
+export type DriftMetric =
+  | "contextualWeight"
+  | "usefulnessScore"
+  | string;
 
-    if (!prisma) throw new Error("Database unavailable");
+export type DriftAlertCandidate = {
+  /**
+   * Backward-compatible:
+   * old consumers use `metric`
+   * newer consumers may use `metricKey`
+   */
+  metric?: DriftMetric;
+  metricKey?: string;
 
-    const rows = await prisma.decisionAssetContextPerformance.findMany({
-      orderBy: [{ updatedAt: "desc" }],
-    });
+  /**
+   * Optional human label for dashboards and messages
+   */
+  label?: string;
 
-    let created = 0;
+  currentValue: number;
+  previousValue: number;
+  warningThreshold?: number;
+  criticalThreshold?: number;
 
-    for (const row of rows as any[]) {
-      const previousWeight =
-        typeof row.metadata?.previousContextualWeight === "number"
-          ? row.metadata.previousContextualWeight
-          : null;
+  /**
+   * If true, an upward move is treated as adverse in the message layer.
+   * Detection itself still tracks magnitude neutrally.
+   */
+  isInverse?: boolean;
+};
 
-      const previousUsefulness =
-        typeof row.metadata?.previousUsefulnessScore === "number"
-          ? row.metadata.previousUsefulnessScore
-          : null;
-
-      const candidates = [
-        previousWeight != null
-          ? detectDriftAlert({
-              assetId: row.assetId,
-              assetTitle: row.assetTitle,
-              assetKind: row.assetKind,
-              contextType: row.contextType,
-              contextValue: row.contextValue,
-              previousValue: previousWeight,
-              currentValue: row.contextualWeight,
-              metric: "contextualWeight",
-            })
-          : null,
-        previousUsefulness != null
-          ? detectDriftAlert({
-              assetId: row.assetId,
-              assetTitle: row.assetTitle,
-              assetKind: row.assetKind,
-              contextType: row.contextType,
-              contextValue: row.contextValue,
-              previousValue: previousUsefulness,
-              currentValue: row.usefulnessScore,
-              metric: "usefulnessScore",
-            })
-          : null,
-      ].filter(Boolean);
-
-      for (const alert of candidates) {
-        if (!alert) continue;
-
-        await prisma.decisionGovernanceAlert.create({
-          data: {
-            assetId: row.assetId,
-            assetTitle: row.assetTitle,
-            assetKind: row.assetKind,
-            alertType: alert.alertType,
-            severity: alert.severity,
-            message: alert.message,
-            previousValue:
-              alert.alertType === "CONTEXTUALWEIGHT_DRIFT"
-                ? previousWeight
-                : previousUsefulness,
-            currentValue:
-              alert.alertType === "CONTEXTUALWEIGHT_DRIFT"
-                ? row.contextualWeight
-                : row.usefulnessScore,
-            deltaValue: alert.deltaValue,
-            contextType: row.contextType,
-            contextValue: row.contextValue,
-            isActive: true,
-          },
-        });
-
-        created += 1;
-      }
-
-      await prisma.decisionAssetContextPerformance.update({
-        where: {
-          assetId_contextType_contextValue: {
-            assetId: row.assetId,
-            contextType: row.contextType,
-            contextValue: row.contextValue,
-          },
-        },
-        data: {
-          metadata: {
-            ...(row.metadata || {}),
-            previousContextualWeight: row.contextualWeight,
-            previousUsefulnessScore: row.usefulnessScore,
-          },
-        },
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      createdAlerts: created,
-    });
-  } catch (error) {
-    console.error("[REBUILD_GOVERNANCE_ALERTS_ERROR]", error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to rebuild governance alerts.",
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export interface DriftAlertCandidate {
-  assetId: string;
-  assetTitle: string;
-  assetKind: string;
-  contextType?: string | null;
-  contextValue?: string | null;
+export type DriftAlertResult = {
+  alertType: string;
+  metric: DriftMetric;
+  metricKey: string;
+  label: string;
   previousValue: number;
   currentValue: number;
-  metric: "contextualWeight" | "usefulnessScore" | "efficacyScore";
-}
-
-export interface DriftAlertResult {
-  alertType: string;
-  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-  message: string;
   deltaValue: number;
+  delta: number;
+  deltaPercent: number;
+  direction: DriftDirection;
+  severity: DriftSeverity;
+  isInverse: boolean;
+  message: string;
+};
+
+function round(value: number, places = 6): number {
+  const factor = 10 ** places;
+  return Math.round(value * factor) / factor;
 }
 
-function roundTo(value: number, digits = 6): number {
-  return Number(value.toFixed(digits));
+function normalizeNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
+function normalizeMetric(input: DriftAlertCandidate): string {
+  const metricKey =
+    typeof input.metricKey === "string" && input.metricKey.trim()
+      ? input.metricKey.trim()
+      : typeof input.metric === "string" && input.metric.trim()
+        ? input.metric.trim()
+        : "";
+
+  return metricKey;
+}
+
+function normalizeLabel(metric: string, label?: string): string {
+  const raw =
+    typeof label === "string" && label.trim()
+      ? label.trim()
+      : metric;
+
+  if (!raw) return "Unknown Metric";
+
+  return raw
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getDirection(delta: number): DriftDirection {
+  if (delta > 0) return "UP";
+  if (delta < 0) return "DOWN";
+  return "FLAT";
+}
+
+function getSeverity(
+  magnitude: number,
+  warning: number,
+  critical: number,
+): DriftSeverity | null {
+  if (magnitude >= critical) return "CRITICAL";
+  if (magnitude >= warning * 2) return "HIGH";
+  if (magnitude >= warning) return "MEDIUM";
+  if (magnitude > 0) return "LOW";
+  return null;
+}
+
+function buildAlertType(metric: string): string {
+  if (metric === "contextualWeight") return "CONTEXTUALWEIGHT_DRIFT";
+  if (metric === "usefulnessScore") return "USEFULNESSSCORE_DRIFT";
+
+  return `${metric.replace(/[^A-Za-z0-9]+/g, "").toUpperCase()}_DRIFT`;
+}
+
+function buildMessage(args: {
+  label: string;
+  metric: string;
+  direction: DriftDirection;
+  severity: DriftSeverity;
+  delta: number;
+  percent: number;
+  isInverse: boolean;
+}): string {
+  const sign = args.delta > 0 ? "+" : "";
+  const pSign = args.percent > 0 ? "+" : "";
+
+  if (args.isInverse) {
+    return `${args.label} moved ${args.direction.toLowerCase()} by ${sign}${round(
+      args.delta,
+      4,
+    )} (${pSign}${round(args.percent, 2)}%). Severity: ${
+      args.severity
+    }. Upward drift is adverse for this metric.`;
+  }
+
+  return `${args.label} moved ${args.direction.toLowerCase()} by ${sign}${round(
+    args.delta,
+    4,
+  )} (${pSign}${round(args.percent, 2)}%). Severity: ${args.severity}.`;
 }
 
 export function detectDriftAlert(
-  input: DriftAlertCandidate
+  input: DriftAlertCandidate,
 ): DriftAlertResult | null {
-  const delta = roundTo(input.currentValue - input.previousValue, 6);
-  const absDelta = Math.abs(delta);
+  const metricKey = normalizeMetric(input);
+  if (!metricKey) return null;
 
-  if (absDelta < 0.15) return null;
+  const current = normalizeNumber(input.currentValue, 0);
+  const previous = normalizeNumber(input.previousValue, 0);
 
-  let severity: DriftAlertResult["severity"] = "LOW";
-  if (absDelta >= 0.6) severity = "CRITICAL";
-  else if (absDelta >= 0.4) severity = "HIGH";
-  else if (absDelta >= 0.25) severity = "MEDIUM";
+  const delta = round(current - previous, 6);
+  const denominator = previous === 0 ? 1 : Math.abs(previous);
+  const deltaPercent = round((delta / denominator) * 100, 4);
 
-  const direction = delta < 0 ? "declined" : "improved";
+  const warning = Math.abs(normalizeNumber(input.warningThreshold, 5));
+  const critical = Math.max(
+    warning,
+    Math.abs(normalizeNumber(input.criticalThreshold, warning * 3)),
+  );
+
+  const magnitude = Math.abs(deltaPercent);
+  const severity = getSeverity(magnitude, warning, critical);
+
+  if (!severity) return null;
+
+  const direction = getDirection(delta);
+  const label = normalizeLabel(metricKey, input.label);
+  const isInverse = Boolean(input.isInverse);
 
   return {
-    alertType: `${input.metric.toUpperCase()}_DRIFT`,
-    severity,
+    alertType: buildAlertType(metricKey),
+    metric: metricKey,
+    metricKey,
+    label,
+    previousValue: previous,
+    currentValue: current,
     deltaValue: delta,
-    message: `${input.assetTitle} ${direction} materially on ${input.metric}${
-      input.contextType && input.contextValue
-        ? ` for ${input.contextType}=${input.contextValue}`
-        : ""
-    }.`,
+    delta,
+    deltaPercent,
+    direction,
+    severity,
+    isInverse,
+    message: buildMessage({
+      label,
+      metric: metricKey,
+      direction,
+      severity,
+      delta,
+      percent: deltaPercent,
+      isInverse,
+    }),
   };
 }
+
+export function detectDriftAlerts(
+  inputs: DriftAlertCandidate[],
+): DriftAlertResult[] {
+  if (!Array.isArray(inputs)) return [];
+
+  return inputs
+    .map((input) => detectDriftAlert(input))
+    .filter((item): item is DriftAlertResult => Boolean(item))
+    .sort((a, b) => Math.abs(b.deltaPercent) - Math.abs(a.deltaPercent));
+}
+
+export default {
+  detectDriftAlert,
+  detectDriftAlerts,
+};

@@ -2,15 +2,10 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-
-function toNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-  return fallback;
-}
+import {
+  buildDecisionSignalProfiles,
+  type DecisionAssetContextRow,
+} from "@/lib/decision/build-decision-signal-profile";
 
 export async function GET() {
   try {
@@ -21,40 +16,37 @@ export async function GET() {
 
     if (!prisma) throw new Error("Database unavailable");
 
-    const [rules, alerts] = await Promise.all([
-      prisma.decisionAssetGovernanceRule.findMany({
+    const [rows, alerts] = await Promise.all([
+      prisma.decisionAssetContextPerformance.findMany({
         orderBy: [{ updatedAt: "desc" }],
       }),
       prisma.decisionGovernanceAlert.findMany({
         where: { isActive: true },
-        orderBy: [{ updatedAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }],
+        take: 100,
       }),
     ]);
 
+    const profiles = buildDecisionSignalProfiles(rows as DecisionAssetContextRow[]);
+
+    const governanceBoard = profiles
+      .filter((profile) => profile.governanceRiskScore > 0 || profile.drifts.length > 0)
+      .slice(0, 50);
+
     return NextResponse.json({
       ok: true,
-      rules,
-      alerts: alerts.map((item: any) => ({
-        id: item.id,
-        assetId: item.assetId,
-        assetTitle: item.assetTitle,
-        assetKind: item.assetKind,
-        alertType: item.alertType,
-        severity: item.severity,
-        message: item.message,
-        previousValue: toNumber(item.previousValue, 0),
-        currentValue: toNumber(item.currentValue, 0),
-        deltaValue: toNumber(item.deltaValue, 0),
-        contextType: item.contextType,
-        contextValue: item.contextValue,
-        createdAt: item.createdAt,
-      })),
       summary: {
-        ruleCount: rules.length,
-        activeAlertCount: alerts.length,
-        criticalAlertCount: alerts.filter((x: any) => x.severity === "CRITICAL").length,
-        highAlertCount: alerts.filter((x: any) => x.severity === "HIGH").length,
+        activeAlerts: Array.isArray(alerts) ? alerts.length : 0,
+        monitoredProfiles: profiles.length,
+        highRiskProfiles: governanceBoard.filter(
+          (profile) => profile.governanceRiskScore >= 70,
+        ).length,
+        criticalDriftProfiles: governanceBoard.filter(
+          (profile) => profile.topDriftSeverity === "CRITICAL",
+        ).length,
       },
+      governanceBoard,
+      alerts,
     });
   } catch (error) {
     console.error("[ADMIN_DECISION_GOVERNANCE_ERROR]", error);
@@ -62,9 +54,9 @@ export async function GET() {
     return NextResponse.json(
       {
         ok: false,
-        error: "Failed to load decision governance surface.",
+        error: "Failed to load governance dashboard.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

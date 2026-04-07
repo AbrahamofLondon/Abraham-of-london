@@ -1,83 +1,155 @@
+// app/api/alignment/enterprise/campaigns/[id]/report/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { scrubParticipantIdentity, isCohortSafe } from "@/lib/alignment/anonymity-service";
+import {
+  getCampaignById,
+  getOrganisationSnapshot,
+  getLeadershipGapSnapshot,
+  getTeamSnapshots,
+  loadCampaignAssessments,
+} from "@/lib/alignment/enterprise-repository";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export const runtime = "nodejs";
+
+/**
+ * DRIFT PREVENTION: 
+ * We extract the exact type from the Repository's return promise.
+ * This ensures the 'participant' and 'membership' shapes stay 100% 
+ * synced with the database and repository logic.
+ */
+type CampaignWithParticipants = Awaited<ReturnType<typeof getCampaignById>>;
+type Participant = NonNullable<CampaignWithParticipants>['participants'][number];
+
+type RouteContext = {
+  params: {
+    id: string;
+  };
+};
+
+function normalizeString(value: unknown): string {
+  return String(value ?? "").trim();
+}
+
+function normalizeDate(value: Date | null | undefined): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+}
+
+export async function GET(_req: NextRequest, context: RouteContext) {
   try {
-    // 1. Fetch Campaign with completed participants ONLY
-    const campaign = await db.alignmentCampaign.findUnique({
-      where: { id: params.id },
-      include: {
-        participants: {
-          where: { status: 'completed' },
-          select: {
-            id: true,
-            rawScores: true, // Assuming JSON structure of domain scores
-            completedAt: true,
-            // We EXCLUDE PII like email and fullName here
-          }
-        },
-        _count: {
-          select: { participants: { where: { status: 'completed' } } }
-        }
-      }
-    });
+    const campaignId = normalizeString(context.params?.id);
+
+    if (!campaignId) {
+      return NextResponse.json(
+        { ok: false, error: "Campaign id is required" },
+        { status: 400 },
+      );
+    }
+
+    // SSOT repository call
+    const campaign = await getCampaignById(campaignId);
 
     if (!campaign) {
-      return NextResponse.json({ error: "Campaign Not Found" }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: "Campaign not found" },
+        { status: 404 },
+      );
     }
 
-    // 2. Discretionary Guard Check (Server-side Enforcement)
-    if (!isCohortSafe(campaign._count.participants)) {
-      return NextResponse.json({ 
-        ok: false, 
-        error: "ANONYMITY_VIOLATION: Data points below safety threshold (n < 5)." 
-      }, { status: 403 });
-    }
+    // Typed directly from the repository 'include' block
+    const participants: Participant[] = campaign.participants || [];
 
-    // 3. Execution of the "Scrubber"
-    // We map the raw data into a new shape that loses the original ID link
-    const intelligenceFindings = campaign.participants.map(p => ({
-      hash: scrubParticipantIdentity(p.id, campaign.id),
-      data: p.rawScores,
-      velocity: p.completedAt
-    }));
+    const completedParticipants = participants.filter(
+      (participant) => participant?.status === "completed"
+    );
 
-    // 4. Structural Aggregation (Calculating the 'Dissonance' baseline)
-    const domainAverages = aggregateDomainScores(intelligenceFindings.map(f => f.data));
+    const [
+      organisationSnapshot,
+      leadershipGapSnapshot,
+      teamSnapshots,
+      assessments,
+    ] = await Promise.all([
+      getOrganisationSnapshot(campaign.organisationId),
+      getLeadershipGapSnapshot(campaignId),
+      getTeamSnapshots(campaignId),
+      loadCampaignAssessments(campaignId),
+    ]);
 
     return NextResponse.json({
       ok: true,
       report: {
-        id: campaign.id,
-        generatedAt: new Date(),
-        cohortSize: campaign._count.participants,
-        findings: intelligenceFindings,
-        averages: domainAverages,
-        resonanceStatus: domainAverages.overall < 60 ? "HIGH_DISSONANCE" : "ALIGNED"
-      }
+        campaign: {
+          id: campaign.id,
+          title: campaign.title,
+          objective: campaign.objective,
+          status: campaign.status,
+          organisationId: campaign.organisationId,
+          opensAt: normalizeDate(campaign.opensAt),
+          closesAt: normalizeDate(campaign.closesAt),
+          cadenceType: campaign.cadenceType,
+          createdAt: normalizeDate(campaign.createdAt),
+          updatedAt: normalizeDate(campaign.updatedAt),
+          metadata: campaign.metadata,
+          organisation: campaign.organisation
+            ? {
+                id: campaign.organisation.id,
+                name: campaign.organisation.name,
+              }
+            : null,
+        },
+
+        participants: {
+          total: participants.length,
+          completed: completedParticipants.length,
+          invited: participants.filter((p) => p?.status === "invited").length,
+          opened: participants.filter((p) => p?.status === "opened").length,
+          completionRate:
+            participants.length > 0
+              ? Number(
+                  (
+                    (completedParticipants.length / participants.length) *
+                    100
+                  ).toFixed(2),
+                )
+              : 0,
+          rows: completedParticipants.map((participant) => ({
+            id: participant.id,
+            status: participant.status,
+            email: participant.membership?.userEmail ?? null,
+            name: participant.membership?.userName ?? null,
+            teamName: participant.membership?.teamName ?? null,
+            isExecutive: Boolean(participant.membership?.isExecutive),
+            openedAt: normalizeDate(participant.openedAt),
+            completedAt: normalizeDate(participant.completedAt),
+            createdAt: normalizeDate(participant.createdAt),
+          })),
+        },
+
+        snapshot: organisationSnapshot
+          ? {
+              id: organisationSnapshot.id,
+              campaignId: organisationSnapshot.campaignId,
+              organisationId: organisationSnapshot.organisationId,
+              cohortSize: organisationSnapshot.cohortSize,
+              finalizedAt: normalizeDate(organisationSnapshot.finalizedAt),
+              aggregatedData: organisationSnapshot.aggregatedData ?? null,
+            }
+          : null,
+
+        leadershipGap: leadershipGapSnapshot ?? null,
+        teamSnapshots: teamSnapshots ?? [],
+        assessments: assessments ?? [],
+      },
     });
-
   } catch (error) {
-    console.error("[INTELLIGENCE_API_FAILURE]", error);
-    return NextResponse.json({ error: "Internal Diagnostic Error" }, { status: 500 });
-  }
-}
+    console.error("[ENTERPRISE_CAMPAIGN_REPORT_GET_ERROR]", error);
 
-/**
- * UTILITY: AGGREGATE_DOMAIN_SCORES
- * Summarizes the findings into institutional trends without individual outliers.
- */
-function aggregateDomainScores(scoresArray: any[]) {
-  // Logic to iterate through JSON scores and return means
-  // Implementation depends on your EnterpriseAlignmentDomain structure
-  return {
-    overall: 72, // Mock average
-    strategic_intent: 68,
-    operational_clarity: 75,
-    leadership_trust: 54 // This identifies the friction point
-  };
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Failed to generate campaign report",
+      },
+      { status: 500 },
+    );
+  }
 }

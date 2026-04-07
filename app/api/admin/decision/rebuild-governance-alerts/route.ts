@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { detectDriftAlert } from "@/lib/decision/recommendation-drift-alerts";
+import { detectDriftAlerts } from "@/lib/decision/recommendation-drift-alerts";
 
 type ContextPerformanceRow = {
   assetId: string;
@@ -12,8 +12,32 @@ type ContextPerformanceRow = {
   contextValue: string;
   contextualWeight: number;
   usefulnessScore: number;
-  metadata?: Record<string, unknown> | null;
+  confidenceScore?: number | null;
+  metadata?: Record<string, unknown> | string | null;
 };
+
+function asRecord(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return {};
+}
+
+function asNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
 
 export async function POST() {
   try {
@@ -33,49 +57,46 @@ export async function POST() {
     let created = 0;
 
     for (const row of rows) {
-      const metadata =
-        row.metadata && typeof row.metadata === "object" ? row.metadata : {};
+      const metadata = asRecord(row.metadata);
 
-      const previousContextualWeight =
-        typeof metadata.previousContextualWeight === "number"
-          ? metadata.previousContextualWeight
-          : null;
+      const previousContextualWeight = asNumber(metadata.previousContextualWeight);
+      const previousUsefulnessScore = asNumber(metadata.previousUsefulnessScore);
+      const previousConfidenceScore = asNumber(metadata.previousConfidenceScore);
 
-      const previousUsefulnessScore =
-        typeof metadata.previousUsefulnessScore === "number"
-          ? metadata.previousUsefulnessScore
-          : null;
+      const alerts = detectDriftAlerts(
+        [
+          previousContextualWeight != null
+            ? {
+                metric: "contextualWeight",
+                label: `${row.assetTitle} · ${row.contextType} · ${row.contextValue}`,
+                previousValue: previousContextualWeight,
+                currentValue: row.contextualWeight,
+              }
+            : null,
+          previousUsefulnessScore != null
+            ? {
+                metric: "usefulnessScore",
+                label: `${row.assetTitle} · ${row.contextType} · ${row.contextValue}`,
+                previousValue: previousUsefulnessScore,
+                currentValue: row.usefulnessScore,
+              }
+            : null,
+          previousConfidenceScore != null
+            ? {
+                metricKey: "confidenceScore",
+                label: `${row.assetTitle} · ${row.contextType} · ${row.contextValue}`,
+                previousValue: previousConfidenceScore,
+                currentValue:
+                  typeof row.confidenceScore === "number" ? row.confidenceScore : 0,
+              }
+            : null,
+        ].filter(Boolean) as Parameters<typeof detectDriftAlerts>[0],
+      );
 
-      const candidates = [
-        previousContextualWeight != null
-          ? detectDriftAlert({
-              assetId: row.assetId,
-              assetTitle: row.assetTitle,
-              assetKind: row.assetKind,
-              contextType: row.contextType,
-              contextValue: row.contextValue,
-              previousValue: previousContextualWeight,
-              currentValue: row.contextualWeight,
-              metric: "contextualWeight",
-            })
-          : null,
-
-        previousUsefulnessScore != null
-          ? detectDriftAlert({
-              assetId: row.assetId,
-              assetTitle: row.assetTitle,
-              assetKind: row.assetKind,
-              contextType: row.contextType,
-              contextValue: row.contextValue,
-              previousValue: previousUsefulnessScore,
-              currentValue: row.usefulnessScore,
-              metric: "usefulnessScore",
-            })
-          : null,
-      ].filter(Boolean);
-
-      for (const alert of candidates) {
-        if (!alert) continue;
+      for (const alert of alerts) {
+        const isContextualWeightAlert = alert.metricKey === "contextualWeight";
+        const isUsefulnessScoreAlert = alert.metricKey === "usefulnessScore";
+        const isConfidenceAlert = alert.metricKey === "confidenceScore";
 
         await prisma.decisionGovernanceAlert.create({
           data: {
@@ -85,14 +106,20 @@ export async function POST() {
             alertType: alert.alertType,
             severity: alert.severity,
             message: alert.message,
-            previousValue:
-              alert.alertType === "CONTEXTUALWEIGHT_DRIFT"
-                ? previousContextualWeight
-                : previousUsefulnessScore,
-            currentValue:
-              alert.alertType === "CONTEXTUALWEIGHT_DRIFT"
-                ? row.contextualWeight
-                : row.usefulnessScore,
+            previousValue: isContextualWeightAlert
+              ? previousContextualWeight
+              : isUsefulnessScoreAlert
+                ? previousUsefulnessScore
+                : isConfidenceAlert
+                  ? previousConfidenceScore
+                  : null,
+            currentValue: isContextualWeightAlert
+              ? row.contextualWeight
+              : isUsefulnessScoreAlert
+                ? row.usefulnessScore
+                : isConfidenceAlert
+                  ? row.confidenceScore ?? 0
+                  : null,
             deltaValue: alert.deltaValue,
             contextType: row.contextType,
             contextValue: row.contextValue,
@@ -116,6 +143,8 @@ export async function POST() {
             ...metadata,
             previousContextualWeight: row.contextualWeight,
             previousUsefulnessScore: row.usefulnessScore,
+            previousConfidenceScore:
+              typeof row.confidenceScore === "number" ? row.confidenceScore : 0,
           },
         },
       });

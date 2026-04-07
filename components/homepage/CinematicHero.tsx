@@ -1,12 +1,19 @@
+"use client";
+
 /* ============================================================================
    FILE: components/homepage/CinematicHero.tsx
-   HOMEPAGE HERO — CINEMATIC / QUIET LUXURY / FLAGSHIP-READY
+   HOMEPAGE HERO — INSTITUTIONAL PRESENCE (HARDENED / CLICK-SAFE)
+   Philosophy:
+   - Calm authority, not noise
+   - Decorative layers can never swallow clicks
+   - Cleaner route hierarchy
+   - Properly impressive without theatrical clutter
 ============================================================================ */
 
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Compass, Crown, ScrollText } from "lucide-react";
 
 type HeroCounts = {
   shorts: number;
@@ -20,169 +27,140 @@ type CinematicHeroProps = {
   onScroll?: () => void;
 };
 
-function CountChip({
-  value,
-  label,
-  href,
-}: {
-  value: number;
-  label: string;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-4 py-2 backdrop-blur-md transition-all duration-500 hover:border-white/20 hover:bg-white/[0.06]"
-    >
-      <span className="font-mono text-[10px] font-semibold text-white/92">
-        {value}
-      </span>
-      <span className="h-3 w-px bg-white/14" />
-      <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/50 transition-all duration-500 group-hover:text-white/75">
-        {label}
-      </span>
-    </Link>
-  );
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
 
-function Hairline() {
+function InstitutionalBadge() {
   return (
-    <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-  );
-}
-
-function CinematicBackdrop() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0">
-        <Image
-          src="/assets/images/abraham-of-london-banner@2560.webp"
-          alt="London skyline"
-          fill
-          priority
-          sizes="100vw"
-          quality={82}
-          className="object-cover object-[28%_center]"
-        />
-      </div>
-
-      <div className="absolute inset-0 bg-black/42" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.24)_24%,rgba(0,0,0,0.42)_50%,rgba(0,0,0,0.74)_76%,rgba(0,0,0,0.93)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_22%_38%,rgba(214,178,106,0.13),transparent_42%)]" />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/82 via-black/30 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/55 to-transparent" />
-      <div className="absolute inset-0 aol-grain opacity-[0.06]" />
+    <div className="inline-flex items-center gap-3 border border-white/10 bg-black/35 px-4 py-2 backdrop-blur-md">
+      <span className="h-1.5 w-1.5 rounded-full bg-softGold" />
+      <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/68">
+        Strategic clarity for serious builders
+      </span>
     </div>
   );
 }
 
-function HeroContent({
-  counts,
-  onScroll,
-}: {
-  counts: HeroCounts;
-  onScroll?: () => void;
-}) {
+function HeroBackdrop() {
   return (
-    <div className="relative z-20 flex h-full items-center">
-      <div className="mx-auto flex h-full w-full max-w-7xl items-center px-6 sm:px-10 lg:px-20">
-        <div className="relative w-full max-w-4xl pt-28 sm:pt-32 lg:pt-24">
-          <div className="absolute -left-6 top-1/2 hidden h-[360px] w-[560px] -translate-y-1/2 xl:block">
-            <div className="absolute inset-[5%] border border-white/[0.05]" />
-            <div className="absolute left-[10%] right-[30%] top-[20%] h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
-            <div className="absolute bottom-[18%] left-[14%] right-[34%] h-px bg-gradient-to-r from-transparent via-white/[0.03] to-transparent" />
-          </div>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+    >
+      <Image
+        src="/assets/images/abraham-of-london-banner@2560.webp"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        quality={85}
+        className="object-cover object-[28%_center] opacity-[0.92]"
+      />
 
-          <div className="relative text-center sm:text-left">
-            <div className="inline-flex items-center gap-3 border border-white/10 bg-black/35 px-4 py-2 backdrop-blur-md">
-              <span className="h-1.5 w-1.5 rounded-full bg-softGold" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/68">
-                Strategic clarity for serious builders
-              </span>
-            </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/82 via-black/56 to-black/44" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_18%_20%,rgba(201,169,106,0.10),transparent_38%),radial-gradient(ellipse_at_82%_24%,rgba(255,255,255,0.06),transparent_34%)]" />
+      <div className="pointer-events-none absolute inset-0 aol-grain opacity-[0.045]" />
 
-            <h1
-              className="mt-8 max-w-[8.8ch] font-serif tracking-[-0.05em] text-white"
-              style={{
-                fontSize: "clamp(3.25rem, 5.7vw, 6rem)",
-                lineHeight: 0.9,
-                textShadow: "0 18px 32px rgba(0,0,0,0.35)",
-              }}
-            >
-              Abraham
-              <br />
-              <span className="font-light italic text-white/95">of </span>
-              <span className="font-light italic text-softGold">London</span>
-            </h1>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/70 to-transparent" />
+    </div>
+  );
+}
 
-            <div className="mt-7 max-w-[40rem] space-y-4">
-              <p
-                className="text-white/92"
-                style={{
-                  fontSize: "clamp(1.04rem, 1.36vw, 1.22rem)",
-                  lineHeight: 1.52,
-                }}
-              >
-                Doctrine, strategy, and execution organised into one platform.
-              </p>
-
-              <p
-                className="max-w-[35rem] text-white/62"
-                style={{
-                  fontSize: "clamp(0.96rem, 1.02vw, 1.03rem)",
-                  lineHeight: 1.72,
-                }}
-              >
-                A premium environment for founders, leaders, and institutions
-                seeking clearer judgement, stronger architecture, and work that
-                endures beyond the moment.
-              </p>
-            </div>
-
-            <div className="mt-10 max-w-[46rem]">
-              <Hairline />
-
-              <div className="flex flex-wrap justify-center gap-3 py-6 sm:justify-start">
-                <CountChip value={counts.shorts} label="SHORTS" href="/shorts" />
-                <CountChip value={counts.canon} label="CANON" href="/canon" />
-                <CountChip value={counts.briefs} label="BRIEFS" href="/vault/briefs" />
-                <CountChip value={counts.library} label="VAULT" href="/vault" />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                <button
-                  type="button"
-                  onClick={onScroll}
-                  className="inline-flex items-center gap-2 rounded-full border border-softGold/30 bg-softGold/12 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.3em] text-softGold transition-all duration-500 hover:bg-softGold/18"
-                >
-                  Enter the Platform
-                </button>
-
-                <Link
-                  href="/dashboard/live"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.05] px-5 py-3 font-mono text-[10px] uppercase tracking-[0.3em] text-white/80 transition-all duration-500 hover:bg-white/[0.08] hover:text-white"
-                >
-                  OGR Terminal
-                </Link>
-
-                <Link
-                  href="/consulting/strategy-room"
-                  className="group inline-flex items-center gap-2 rounded-full border border-white/12 bg-transparent px-5 py-3 font-mono text-[10px] uppercase tracking-[0.3em] text-white/62 transition-all duration-500 hover:border-white/18 hover:bg-white/[0.04] hover:text-white"
-                >
-                  <span>Strategy Room</span>
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-
-              <div className="mt-8 max-w-[34rem]">
-                <p className="font-mono text-[8px] uppercase tracking-[0.26em] text-white/28">
-                  Writing • diagnostics • advisory • institutional architecture
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+function AbrahamMark() {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="font-serif text-5xl font-light tracking-[-0.03em] text-white sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
+          Abraham
+        </span>
+        <span className="font-serif text-4xl font-light italic text-white/40 sm:text-5xl lg:text-6xl xl:text-[4.7rem]">
+          of
+        </span>
+        <span className="font-serif text-5xl font-light italic text-softGold sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
+          London
+        </span>
       </div>
+
+      <div className="h-px w-24 bg-softGold/35" />
+    </div>
+  );
+}
+
+function PositioningBlock() {
+  return (
+    <div className="space-y-5">
+      <p className="max-w-2xl font-serif text-3xl font-light leading-[1.02] tracking-[-0.025em] text-white/94 sm:text-4xl lg:text-5xl">
+        Doctrine, strategy, and execution
+        <span className="block text-white/56">organised into one platform.</span>
+      </p>
+
+      <p className="max-w-xl text-base leading-relaxed text-white/62 sm:text-lg">
+        Institutional thought, disciplined diagnostics, premium reporting,
+        private strategy, and deployable intellectual property for serious operators.
+      </p>
+    </div>
+  );
+}
+
+function PrimaryActions({ onScroll }: { onScroll?: () => void }) {
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+      <button
+        type="button"
+        onClick={onScroll}
+        className="group inline-flex items-center justify-center gap-3 border border-white/10 bg-white/[0.04] px-6 py-4 font-mono text-[10px] uppercase tracking-[0.28em] text-white/86 transition hover:border-white/20 hover:bg-white/[0.07]"
+      >
+        <Compass className="h-4 w-4 text-softGold/90" />
+        <span>Access the canon</span>
+        <ArrowRight className="h-4 w-4 text-white/55 transition-transform group-hover:translate-x-1" />
+      </button>
+
+      <Link
+        href="/diagnostics/executive-reporting"
+        className="group inline-flex items-center justify-center gap-3 border border-softGold/30 bg-softGold/10 px-6 py-4 font-mono text-[10px] uppercase tracking-[0.28em] text-softGold transition hover:bg-softGold/15"
+      >
+        <ScrollText className="h-4 w-4" />
+        <span>Flagship product</span>
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+      </Link>
+
+      <Link
+        href="/consulting/strategy-room"
+        className="group inline-flex items-center justify-center gap-3 border border-white/10 px-6 py-4 font-mono text-[10px] uppercase tracking-[0.28em] text-white/72 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
+      >
+        <Crown className="h-4 w-4 text-softGold/80" />
+        <span>Strategy Room</span>
+      </Link>
+    </div>
+  );
+}
+
+function InstitutionalCounts({ counts }: { counts: HeroCounts }) {
+  const items = [
+    { value: counts.canon, label: "CANON ENTRIES", href: "/canon" },
+    { value: counts.library, label: "LIBRARY WORKS", href: "/library" },
+    { value: counts.briefs, label: "STRATEGIC BRIEFS", href: "/vault/briefs" },
+    { value: counts.shorts, label: "SHORTS", href: "/shorts" },
+  ];
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {items.map((item) => (
+        <Link
+          key={item.label}
+          href={item.href}
+          className="group block border border-white/[0.08] bg-black/20 px-4 py-4 transition hover:border-softGold/22 hover:bg-white/[0.03]"
+        >
+          <div className="font-mono text-2xl font-light text-white/84 transition-colors group-hover:text-white">
+            {item.value}
+          </div>
+          <div className="mt-2 font-mono text-[8px] uppercase tracking-[0.22em] text-white/36 transition-colors group-hover:text-white/52">
+            {item.label}
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
@@ -192,14 +170,26 @@ export default function CinematicHero({
   onScroll,
 }: CinematicHeroProps) {
   return (
-    <section className="relative w-full overflow-hidden bg-[#050505]">
-      <div className="relative h-[100svh] min-h-[620px] max-h-[1200px]">
-        <CinematicBackdrop />
-        <HeroContent counts={counts} onScroll={onScroll} />
+    <section className="relative isolate min-h-[760px] w-full overflow-hidden bg-black lg:min-h-[880px]">
+      <HeroBackdrop />
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30">
-          <div className="h-28 bg-gradient-to-t from-black via-black/45 to-transparent" />
-          <div className="h-px w-full bg-white/[0.08]" />
+      <div className="relative z-10 flex min-h-[760px] items-center lg:min-h-[880px]">
+        <div className="mx-auto w-full max-w-7xl px-8 pb-16 pt-28 lg:px-16 lg:pb-20 lg:pt-36">
+          <div className="max-w-4xl">
+            <div className="space-y-8">
+              <InstitutionalBadge />
+              <AbrahamMark />
+              <PositioningBlock />
+            </div>
+
+            <div className="mt-10">
+              <PrimaryActions onScroll={onScroll} />
+            </div>
+
+            <div className="mt-12">
+              <InstitutionalCounts counts={counts} />
+            </div>
+          </div>
         </div>
       </div>
     </section>

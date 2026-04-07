@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
 import {
   LineChart,
   Line,
@@ -9,141 +9,254 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
-  Area,
-  AreaChart
 } from "recharts";
+import { motion } from "framer-motion";
+import { TrendingUp, TrendingDown, Minus, Crown } from "lucide-react";
 
-type Point = {
-  label: string; // e.g., "March 2026" or "Q1 Brief"
-  score: number; // Percentage score
+type AssessmentRoute = "STRATEGY" | "DIAGNOSTIC" | "REJECT";
+
+type AssessmentPoint = {
+  label: string;
+  score: number;
+  route?: AssessmentRoute;
+  confidence?: number;
 };
 
 type Props = {
-  data: Point[];
-  title?: string;
+  data: AssessmentPoint[];
+  currentScore?: number;
 };
 
-export default function PurposeAlignmentTrendChart({ 
-  data, 
-  title = "Alignment Trajectory" 
+type TooltipProps = {
+  active?: boolean;
+  payload?: Array<{
+    payload: AssessmentPoint;
+  }>;
+};
+
+function cn(...parts: Array<string | false | null | undefined>): string {
+  return parts.filter(Boolean).join(" ");
+}
+
+function normalizeScore(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, n));
+}
+
+function normalizeConfidence(value: unknown): number | undefined {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return undefined;
+  return Math.max(0, Math.min(1, n));
+}
+
+function normalizeData(data: AssessmentPoint[]): AssessmentPoint[] {
+  if (!Array.isArray(data)) return [];
+  return data.map((item, index) => ({
+    label: String(item?.label || `Point ${index + 1}`),
+    score: normalizeScore(item?.score),
+    route:
+      item?.route === "STRATEGY" ||
+      item?.route === "DIAGNOSTIC" ||
+      item?.route === "REJECT"
+        ? item.route
+        : undefined,
+    confidence: normalizeConfidence(item?.confidence),
+  }));
+}
+
+function CustomTooltip({ active, payload }: TooltipProps) {
+  if (!active || !payload || payload.length === 0) return null;
+
+  const point = payload[0]?.payload;
+  if (!point) return null;
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/90 p-3 shadow-2xl backdrop-blur-md">
+      <div className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/40">
+        {point.label}
+      </div>
+
+      <div className="mt-2 text-xl font-light text-white">{point.score}%</div>
+
+      {point.route ? (
+        <div className="mt-1 flex items-center gap-1.5">
+          <div
+            className={cn(
+              "h-1.5 w-1.5 rounded-full",
+              point.route === "STRATEGY"
+                ? "bg-emerald-400"
+                : point.route === "DIAGNOSTIC"
+                  ? "bg-amber-400"
+                  : "bg-white/20",
+            )}
+          />
+          <span className="text-[9px] font-mono text-white/40">
+            {point.route === "STRATEGY"
+              ? "Strategy qualified"
+              : point.route === "DIAGNOSTIC"
+                ? "Diagnostic route"
+                : "Below threshold"}
+          </span>
+        </div>
+      ) : null}
+
+      {typeof point.confidence === "number" ? (
+        <div className="mt-1 text-[8px] font-mono text-white/25">
+          Confidence: {Math.round(point.confidence * 100)}%
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export default function ConstitutionalTrendChart({
+  data,
+  currentScore,
 }: Props) {
-  
-  if (!data || data.length === 0) {
+  const safeData = React.useMemo(() => normalizeData(data), [data]);
+
+  if (safeData.length === 0) {
     return (
-      <div className="city-gate-card flex h-[320px] items-center justify-center p-5 text-sm text-brand-cream-dim">
-        No longitudinal data available for trend analysis.
+      <div className="rounded-3xl border border-white/10 bg-black/30 p-8 text-center backdrop-blur-sm">
+        <div className="text-sm text-white/40">
+          No historical trace available. Complete assessments to build the constitutional record.
+        </div>
       </div>
     );
   }
 
+  const lastPoint = safeData[safeData.length - 1];
+  const previousPoint = safeData.length > 1 ? safeData[safeData.length - 2] : null;
+  const trend = previousPoint ? lastPoint.score - previousPoint.score : 0;
+
+  const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
+  const trendColor =
+    trend > 0 ? "text-emerald-400" : trend < 0 ? "text-red-400" : "text-amber-400";
+
   return (
-    <div className="city-gate-card flex flex-col gap-6 p-6 shadow-premium overflow-hidden">
-      {/* Institutional Header */}
-      <div className="flex items-end justify-between border-b border-brand-charcoal pb-4">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+      className="rounded-3xl border border-white/10 bg-black/30 p-4 backdrop-blur-sm"
+    >
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-3">
         <div>
-          <h3 className="font-serif text-lg text-brand-cream">{title}</h3>
-          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-brand-cream-muted">
-            Longitudinal Alignment Variance
+          <h3 className="font-serif text-lg text-white">Constitutional Trace</h3>
+          <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/30">
+            Longitudinal alignment variance
           </p>
         </div>
-        <div className="text-right">
-          <span className="font-mono text-[10px] text-brand-gold opacity-80 uppercase">
-            Status: Institutional Trace
-          </span>
-        </div>
+
+        {typeof currentScore === "number" ? (
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-right">
+            <div className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/30">
+              Current Score
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-light text-white">
+                {Math.max(0, Math.min(100, currentScore))}
+              </span>
+              <span className="text-xs text-white/40">/100</span>
+              <TrendIcon className={cn("ml-1 h-3 w-3", trendColor)} />
+            </div>
+          </div>
+        ) : null}
       </div>
 
-      <div className="h-[280px] w-full">
+      <div className="h-[260px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart 
-            data={data} 
-            margin={{ top: 20, right: 20, left: -20, bottom: 0 }}
+          <LineChart
+            data={safeData}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
-            {/* Subtle Horizontal Grid Only for a cleaner "Forensic" look */}
-            <CartesianGrid 
-              stroke="#2A2A2A" 
-              vertical={false} 
-              strokeDasharray="4 4" 
+            <CartesianGrid
+              stroke="rgba(255,255,255,0.05)"
+              vertical={false}
+              strokeDasharray="3 3"
             />
-            
-            <XAxis 
-              dataKey="label" 
+            <XAxis
+              dataKey="label"
               axisLine={false}
               tickLine={false}
-              tick={{ 
-                fill: "#948F85", 
-                fontSize: 10, 
+              tick={{
+                fill: "rgba(255,255,255,0.3)",
+                fontSize: 9,
                 fontFamily: "var(--font-mono)",
-                letterSpacing: "0.05em"
-              }} 
-              dy={10}
-            />
-            
-            <YAxis 
-              domain={[0, 100]} 
-              axisLine={false}
-              tickLine={false}
-              tick={{ 
-                fill: "#948F85", 
-                fontSize: 10, 
-                fontFamily: "var(--font-mono)" 
-              }} 
-            />
-            
-            <Tooltip 
-              cursor={{ stroke: '#d6b26a', strokeWidth: 1 }}
-              contentStyle={{ 
-                backgroundColor: "#0F0F0F", 
-                border: "1px solid #d6b26a",
-                borderRadius: "4px",
-                fontSize: "11px",
-                fontFamily: "var(--font-mono)",
-                color: "#E5E1D8",
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)"
               }}
-              itemStyle={{ color: "#d6b26a" }}
-              labelStyle={{ marginBottom: '4px', color: '#948F85' }}
+              dy={8}
             />
-
-            {/* The Alignment Trace */}
+            <YAxis
+              domain={[0, 100]}
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "rgba(255,255,255,0.2)",
+                fontSize: 9,
+                fontFamily: "var(--font-mono)",
+              }}
+              tickCount={5}
+            />
+            <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"
               dataKey="score"
-              stroke="#d6b26a" // Brand softGold
+              stroke="#c9a96a"
               strokeWidth={2.5}
-              dot={{ 
-                r: 4, 
-                fill: "#0F0F0F", 
-                stroke: "#d6b26a", 
-                strokeWidth: 2 
+              dot={{
+                r: 3.5,
+                fill: "#0a0a0a",
+                stroke: "#c9a96a",
+                strokeWidth: 1.5,
               }}
-              activeDot={{ 
-                r: 6, 
-                fill: "#d6b26a", 
-                stroke: "#E5E1D8", 
-                strokeWidth: 2,
-                filter: "drop-shadow(0 0 8px rgba(214, 178, 106, 0.8))"
+              activeDot={{
+                r: 5,
+                fill: "#c9a96a",
+                stroke: "#ffffff",
+                strokeWidth: 1.5,
               }}
-              animationDuration={1500}
+              animationDuration={1200}
+              animationBegin={300}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Narrative Footer */}
-      <div className="flex justify-between items-center pt-2">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-brand-gold shadow-[0_0_5px_#d6b26a]" />
-            <span className="font-mono text-[8px] uppercase tracking-widest text-brand-cream-dim">
-              Current Vector
-            </span>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
+          <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/25">
+            Strategy Room
           </div>
+          <div className="mt-1 text-xs font-medium text-emerald-400/60">≥82%</div>
         </div>
-        <span className="font-mono text-[8px] text-brand-charcoal-light uppercase">
-          Abraham of London // Protocol 75
+
+        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
+          <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/25">
+            Executive Reporting
+          </div>
+          <div className="mt-1 text-xs font-medium text-amber-400/60">60–81%</div>
+        </div>
+
+        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2">
+          <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/25">
+            Foundation Required
+          </div>
+          <div className="mt-1 text-xs font-medium text-white/25">&lt;60%</div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between pt-2">
+        <div className="flex items-center gap-2">
+          <Crown className="h-2.5 w-2.5 text-white/20" />
+          <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/15">
+            Constitutional Protocol
+          </span>
+        </div>
+        <span className="font-mono text-[7px] text-white/15">
+          Abraham of London
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 }

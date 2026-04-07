@@ -18,12 +18,13 @@ interface AnalyticsProviderProps {
 
 const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
 
-export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({ 
+// CHANGE: Named function instead of arrow function
+export function AnalyticsProvider({ 
   children, 
   enabled = true,
   debug = process.env.NODE_ENV === 'development',
   endpoint = '/api/analytics/event'
-}) => {
+}: AnalyticsProviderProps) {
   const queueRef = useRef<AnalyticsEvent[]>([]);
   const userIdRef = useRef<string | null>(null);
   const userTraitsRef = useRef<Record<string, any>>({});
@@ -32,12 +33,10 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
   const sendEvent = useCallback(async (event: AnalyticsEvent) => {
     if (!enabled) return;
     
-    // In development, log to console
     if (debug) {
       console.log('📊 Analytics Event:', event);
     }
     
-    // Add user context if available
     const enrichedEvent = {
       ...event,
       userId: userIdRef.current,
@@ -48,7 +47,6 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : ''
     };
     
-    // Send to analytics service
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -63,12 +61,10 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
       if (debug) {
         console.warn('Analytics send failed, queueing:', error);
       }
-      // Queue failed events for retry
       queueRef.current.push(enrichedEvent);
     }
   }, [enabled, debug, endpoint]);
   
-  // Retry queued events periodically
   useEffect(() => {
     if (!enabled) return;
     
@@ -76,12 +72,9 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
       if (queueRef.current.length > 0) {
         const events = [...queueRef.current];
         queueRef.current = [];
-        
-        events.forEach(event => {
-          sendEvent(event);
-        });
+        events.forEach(event => sendEvent(event));
       }
-    }, 30000); // Retry every 30 seconds
+    }, 30000);
     
     return () => clearInterval(retryInterval);
   }, [enabled, sendEvent]);
@@ -128,29 +121,22 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
     });
   }, [trackEvent]);
   
-  // Track initial page view on mount
   useEffect(() => {
     if (!enabled) return;
-    
     const path = typeof window !== 'undefined' ? window.location.pathname : '';
     trackPageView(path);
   }, [enabled, trackPageView]);
   
-  // Track route changes if using Next.js router
   useEffect(() => {
     if (!enabled || typeof window === 'undefined') return;
     
-    const handleRouteChange = (url: string) => {
-      trackPageView(url);
+    const handleRouteChange = () => {
+      trackPageView(window.location.pathname);
     };
     
-    // Listen for popstate (back/forward navigation)
-    window.addEventListener('popstate', () => {
-      trackPageView(window.location.pathname);
-    });
-    
+    window.addEventListener('popstate', handleRouteChange);
     return () => {
-      window.removeEventListener('popstate', () => {});
+      window.removeEventListener('popstate', handleRouteChange);
     };
   }, [enabled, trackPageView]);
   
@@ -168,10 +154,14 @@ export const AnalyticsProvider: React.FC<AnalyticsProviderProps> = ({
   );
 };
 
-export const useAnalytics = (): AnalyticsContextType => {
+// CHANGE: Named export for hook (better for Fast Refresh)
+export function useAnalytics(): AnalyticsContextType {
   const context = useContext(AnalyticsContext);
   if (!context) {
     throw new Error('useAnalytics must be used within AnalyticsProvider');
   }
   return context;
-};
+}
+
+// Keep default export for backward compatibility
+export default AnalyticsProvider;

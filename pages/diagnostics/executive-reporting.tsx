@@ -6,6 +6,10 @@
    - position it as a premium niche solution
    - connect assessment -> report -> advisory
    - bridge cleanly into Strategy Room
+   CRITICAL FIXES APPLIED:
+   1. Hero CTA hierarchy — flagship product sells itself first
+   2. Architecture block added under hero metrics
+   3. Inevitability language sharpened in final section
 ============================================================================ */
 
 import * as React from "react";
@@ -21,19 +25,9 @@ import {
   Crown,
   Lock,
   CheckCircle2,
-  Download,
-  AlertTriangle,
   Eye,
-  Sparkles,
-  Briefcase,
-  Building2,
   Target,
   ChevronRight,
-  Activity,
-  BarChart3,
-  Layers,
-  Landmark,
-  Users,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -63,16 +57,6 @@ type Pillar = {
   icon: React.ComponentType<any>;
 };
 
-type Offer = {
-  title: string;
-  label: string;
-  price: string;
-  body: string;
-  bullets: string[];
-  href: string;
-  emphasis?: boolean;
-};
-
 const PILLARS: Pillar[] = [
   {
     title: "Readable under pressure",
@@ -88,46 +72,6 @@ const PILLARS: Pillar[] = [
     title: "Commercially selective",
     body: "Built for serious operators, boards, founders, and institutions where the cost of error justifies disciplined reading before action.",
     icon: Crown,
-  },
-];
-
-const OFFERS: Offer[] = [
-  {
-    title: "Diagnostic Entry",
-    label: "Entry",
-    price: "Paid",
-    body: "A structured first-layer reading for leaders who need clarity before escalation.",
-    bullets: [
-      "Signal reading",
-      "Initial structural interpretation",
-      "Suitable before mandate work",
-    ],
-    href: "/diagnostics",
-  },
-  {
-    title: "Executive Report",
-    label: "Flagship",
-    price: "Premium",
-    body: "The core reporting product for institutions needing a disciplined narrative, quantified friction, and correction architecture.",
-    bullets: [
-      "Executive diagnostic report",
-      "Narrative + matrix + exposure model",
-      "PDF + structured export surface",
-    ],
-    href: "/diagnostics/executive-reporting",
-    emphasis: true,
-  },
-  {
-    title: "Advisory Escalation",
-    label: "Selective",
-    price: "Mandate",
-    body: "For matters where the cost of mis-execution is already material and structured intervention is justified.",
-    bullets: [
-      "Private advisory path",
-      "Correction environment design",
-      "Decision architecture under pressure",
-    ],
-    href: "/strategy-room",
   },
 ];
 
@@ -242,6 +186,7 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
                   casually handing over the matter to private chamber work.
                 </motion.p>
 
+                {/* CHANGE A — Hero CTA order flipped */}
                 <motion.div
                   className="mt-10 flex flex-col gap-4 sm:flex-row"
                   initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
@@ -249,27 +194,44 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
                   transition={{ duration: 0.85, delay: 0.28 }}
                 >
                   <Link
-                    href="/strategy-room"
+                    href="#sample-report"
                     className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
                   >
-                    <span>Enter Strategy Room</span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <span>View sample output</span>
+                    <FileText className="h-4 w-4 transition-transform group-hover:scale-105" />
                   </Link>
 
                   <Link
-                    href="#sample-report"
+                    href="/strategy-room"
                     className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
                   >
-                    <span>View sample output</span>
-                    <FileText className="h-4 w-4 opacity-60 transition-transform group-hover:scale-105" />
+                    <span>Enter Strategy Room</span>
+                    <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
                   </Link>
+                </motion.div>
+
+                {/* CHANGE B — Architecture block under hero metrics */}
+                <motion.div
+                  className="mt-10 border border-white/[0.08] bg-white/[0.015] p-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.9, delay: 0.4 }}
+                >
+                  <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/28">
+                    Position in the system
+                  </div>
+                  <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/56">
+                    Diagnostics identifies the signal. Executive Reporting interprets it.
+                    Strategy Room intervenes when the report makes mandate-level action feel
+                    justified rather than prematurely sold.
+                  </p>
                 </motion.div>
 
                 <motion.div
                   className="mt-10 grid gap-4 sm:grid-cols-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.9, delay: 0.34 }}
+                  transition={{ duration: 0.9, delay: 0.45 }}
                 >
                   {[
                     { label: "Output", value: "Executive PDF" },
@@ -368,20 +330,19 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* POSITIONING                                                        */}
+        {/* THREE PILLARS — What makes this different                          */}
         {/* ------------------------------------------------------------------ */}
         <section className="relative py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Why this wins</RailLabel>
+              <RailLabel>Structure</RailLabel>
               <h2 className="mt-7 max-w-4xl font-serif text-4xl text-white md:text-5xl">
                 A category between soft diagnostics and full advisory.
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
                 Most firms either sell vague diagnostics or jump too quickly into
                 advisory. Executive Reporting occupies the high-value middle:
-                premium enough to matter, disciplined enough to stand alone, and
-                commercially honest enough to prepare the buyer for Strategy Room when appropriate.
+                premium enough to matter, disciplined enough to stand alone.
               </p>
             </div>
 
@@ -414,62 +375,133 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* OFFER LADDER                                                       */}
+        {/* OFFER LADDER — Demonstrated, not announced                         */}
         {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Offer ladder</RailLabel>
+              <RailLabel>How it works</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                This product belongs in a sequence
+                Three layers. One path.
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                Entry diagnostic, flagship report, private mandate. The architecture
-                must feel deliberate, not opportunistic.
+                Start where you are. Move when the signal justifies it.
               </p>
             </div>
 
             <ExecutiveOfferLadder />
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              {OFFERS.map((offer) => (
-                <Surface
-                  key={offer.title}
-                  className={[
-                    "p-8",
-                    offer.emphasis ? "border-amber-500/20 bg-amber-500/[0.03]" : "",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">
-                        {offer.label}
-                      </div>
-                      <h3 className="mt-3 font-serif text-2xl text-white">{offer.title}</h3>
+              {/* Diagnostic Entry */}
+              <Surface className="p-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">
+                      Entry
                     </div>
-                    <div className="text-sm text-amber-300">{offer.price}</div>
+                    <h3 className="mt-3 font-serif text-2xl text-white">Diagnostic</h3>
                   </div>
+                  <div className="text-sm text-amber-300">Paid</div>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-white/48">
+                  A structured first-layer reading for leaders who need clarity before escalation.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Signal reading</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Initial structural interpretation</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Suitable before mandate work</span>
+                  </li>
+                </ul>
+                <Link
+                  href="/diagnostics"
+                  className="mt-8 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
+                >
+                  <span>Start here</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Surface>
 
-                  <p className="mt-4 text-sm leading-relaxed text-white/48">{offer.body}</p>
+              {/* Executive Report — Flagship */}
+              <Surface className="border-amber-500/20 bg-amber-500/[0.03] p-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">
+                      Flagship
+                    </div>
+                    <h3 className="mt-3 font-serif text-2xl text-white">Executive Report</h3>
+                  </div>
+                  <div className="text-sm text-amber-300">Premium</div>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-white/48">
+                  The core reporting product for institutions needing a disciplined narrative, quantified friction, and correction architecture.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Executive diagnostic report</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Narrative + matrix + exposure model</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>PDF + structured export surface</span>
+                  </li>
+                </ul>
+                <Link
+                  href="/diagnostics/executive-reporting"
+                  className="mt-8 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
+                >
+                  <span>Current page</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Surface>
 
-                  <ul className="mt-6 space-y-3">
-                    {offer.bullets.map((bullet) => (
-                      <li key={bullet} className="flex items-start gap-3 text-sm text-white/56">
-                        <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href={offer.href}
-                    className="mt-8 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
-                  >
-                    <span>Open</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </Surface>
-              ))}
+              {/* Advisory Escalation */}
+              <Surface className="p-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">
+                      Selective
+                    </div>
+                    <h3 className="mt-3 font-serif text-2xl text-white">Strategy Room</h3>
+                  </div>
+                  <div className="text-sm text-amber-300">Mandate</div>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-white/48">
+                  For matters where the cost of mis-execution is already material and structured intervention is justified.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Private advisory path</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Correction environment design</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-white/56">
+                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/60" />
+                    <span>Decision architecture under pressure</span>
+                  </li>
+                </ul>
+                <Link
+                  href="/strategy-room"
+                  className="mt-8 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/68 transition-colors hover:text-amber-300"
+                >
+                  <span>Learn when</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Surface>
             </div>
           </div>
         </section>
@@ -480,12 +512,12 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Buyer variants</RailLabel>
+              <RailLabel>Who it serves</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                Same engine. Sharper buyer language.
+                One engine. Different languages.
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                The structure remains stable. The language changes based on who is carrying the consequence.
+                The structure remains stable. The framing changes based on who carries the consequence.
               </p>
             </div>
 
@@ -504,20 +536,18 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
               <div>
                 <RailLabel>Sample output</RailLabel>
                 <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  What the buyer actually receives
+                  What you actually receive
                 </h2>
                 <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                  Not another airy summary. A structured executive artifact:
-                  headline, systemic reading, domain matrix, financial exposure,
-                  priority stack, and decision mandate.
+                  Not a summary. A structured executive artifact: headline, systemic reading, domain matrix, financial exposure, priority stack, and decision mandate.
                 </p>
               </div>
 
               <Link
-                href="/strategy-room"
+                href="/diagnostics"
                 className="group inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-amber-400/66 transition-colors hover:text-amber-300"
               >
-                <span>Enter Strategy Room</span>
+                <span>Begin with diagnostics</span>
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -525,7 +555,7 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
             {!unlocked ? (
               <div className="border border-white/10 bg-white/[0.02] p-10 text-center">
                 <p className="mb-6 text-white/60">
-                  This content is reserved for serious buyers. The point is to reveal quality without giving away the cathedral.
+                  Reserved for serious buyers. Quality without exposure.
                 </p>
                 <button
                   onClick={() => setUnlocked(true)}
@@ -542,18 +572,17 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* DEMO SCENARIOS                                                     */}
+        {/* USE CASES                                                          */}
         {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Use cases</RailLabel>
+              <RailLabel>When to use it</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
                 Where this product earns its keep
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                Executive Reporting should feel like a real commercial instrument,
-                not a dressed-up PDF. The buyer should quickly recognise when it fits.
+                Executive Reporting is a commercial instrument. Here's when it fits.
               </p>
             </div>
 
@@ -562,18 +591,17 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* PRICING / PROOF                                                    */}
+        {/* PRICING — Clean, no commentary                                     */}
         {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Commercial architecture</RailLabel>
+              <RailLabel>Investment</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                A cleaner way to package the offer
+                Clarity before commitment
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                The market needs a clear ladder: entry signal, flagship report, then
-                private mandate where consequence justifies it.
+                Entry signal. Flagship report. Private mandate.
               </p>
             </div>
 
@@ -605,17 +633,17 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* MARKET PROOF                                                       */}
+        {/* MARKET PROOF — Anonymised patterns                                 */}
         {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Market proof</RailLabel>
+              <RailLabel>Patterns we've surfaced</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                Real patterns, anonymised
+                Real friction. Anonymised.
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                Not testimonials. Real-world friction patterns surfaced by the system.
+                Not testimonials. Actual structural patterns the system has identified.
               </p>
             </div>
 
@@ -629,12 +657,12 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Objection handling</RailLabel>
+              <RailLabel>Questions</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                The questions a serious buyer will ask
+                What serious buyers ask
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                This page must answer real commercial resistance, not just sound intelligent to people already sold.
+                Direct answers. No deflection.
               </p>
             </div>
 
@@ -648,12 +676,12 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         <section className="relative border-t border-white/5 py-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-12">
             <div className="mb-14">
-              <RailLabel>Trust & reliability</RailLabel>
+              <RailLabel>Reliability</RailLabel>
               <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                Questions from people who carry consequence
+                Boardroom-level clarity
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white/48">
-                No generic answers. This is boardroom-level clarity.
+                No generic answers. Just precision.
               </p>
             </div>
 
@@ -671,7 +699,7 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* FINAL BRIDGE TO STRATEGY ROOM                                      */}
+        {/* FINAL BRIDGE — CHANGE C applied                                    */}
         {/* ------------------------------------------------------------------ */}
         <section className="relative border-t border-white/5 py-24">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(245,158,11,0.04),transparent_70%)]" />
@@ -683,7 +711,7 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-lg text-white/50">
                 It is the disciplined bridge. Where the signal is serious enough,
-                the next right move is no longer more browsing. It is Strategy Room.
+                the next right move is Strategy Room.
               </p>
             </div>
 
@@ -693,11 +721,12 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
               <div className="mx-auto max-w-3xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/[0.06] px-4 py-2 font-mono text-[9px] uppercase tracking-[0.24em] text-amber-300/78">
                   <Target className="h-3.5 w-3.5" />
-                  Final commercial bridge
+                  When to escalate
                 </div>
 
+                {/* CHANGE C — Sharpened inevitability language */}
                 <h3 className="mt-6 font-serif text-3xl text-white md:text-4xl">
-                  When the cost of delay is already material, the report should make the Strategy Room feel inevitable.
+                  When the report exposes material risk, escalation is no longer a branding move. It becomes the responsible next step.
                 </h3>
 
                 <p className="mt-5 text-base leading-relaxed text-white/58">
@@ -707,7 +736,7 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
                 <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
                   <Link
                     href="/strategy-room"
-                    className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
+                    className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
                   >
                     <span>Enter Strategy Room</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -715,10 +744,10 @@ const ExecutiveReportingPage: NextPage<Props> = () => {
 
                   <Link
                     href="/diagnostics"
-                    className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
+                    className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
                   >
-                    <span>Back to diagnostics</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <span>Begin with diagnostics</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
               </div>

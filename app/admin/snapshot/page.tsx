@@ -21,6 +21,7 @@ const GLOBAL_DATA = {
   ]
 };
 
+// ✅ FIX: Added varianceScoresJson to match TeamSnapshot type
 const TEAM_SNAPSHOTS = [
   {
     teamName: 'Engineering Alpha',
@@ -33,20 +34,34 @@ const TEAM_SNAPSHOTS = [
       { domain: 'Operational Velocity', percentScore: 85 },
       { domain: 'Cultural Resonance', percentScore: 90 },
       { domain: 'Resource Fluidity', percentScore: 86 },
-    ]
+    ],
+    // ✅ Added required varianceScoresJson field
+    varianceScoresJson: JSON.stringify([
+      { domain: 'Strategic Alignment', variance: 8 },
+      { domain: 'Operational Velocity', variance: 12 },
+      { domain: 'Cultural Resonance', variance: 6 },
+      { domain: 'Resource Fluidity', variance: 9 },
+    ])
   },
   {
     teamName: 'Marketing Core',
     respondentCount: 22,
     band: 'DISORDERED' as const,
     percentScore: 42,
-    rawScoreDistribution: [10, 80, 15, 90, 20, 75, 12], // High Variance Example
+    rawScoreDistribution: [10, 80, 15, 90, 20, 75, 12],
     domainScoresJson: [
       { domain: 'Strategic Alignment', percentScore: 45 },
       { domain: 'Operational Velocity', percentScore: 38 },
       { domain: 'Cultural Resonance', percentScore: 50 },
       { domain: 'Resource Fluidity', percentScore: 35 },
-    ]
+    ],
+    // ✅ Added required varianceScoresJson field
+    varianceScoresJson: JSON.stringify([
+      { domain: 'Strategic Alignment', variance: 35 },
+      { domain: 'Operational Velocity', variance: 42 },
+      { domain: 'Cultural Resonance', variance: 28 },
+      { domain: 'Resource Fluidity', variance: 31 },
+    ])
   }
 ];
 

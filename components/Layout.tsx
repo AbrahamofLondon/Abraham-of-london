@@ -122,24 +122,35 @@ export default function Layout({
         ) : null}
       </Head>
 
-      <div className="relative min-h-screen bg-[#050505] text-white">
-        <Header transparent={headerTransparent} />
+      {/* Explicit stacking context — root layer */}
+      <div className="relative isolate min-h-screen bg-[#050505] text-white">
+        {/* Header layer — higher z-index to stay above content */}
+        <div className="relative z-50">
+          <Header transparent={headerTransparent} />
+        </div>
 
+        {/* Main content layer — base z-index, content flows naturally */}
         <main
           className={cn(
-            "relative w-full overflow-x-clip bg-[#050505] text-white antialiased",
+            "relative z-0 w-full overflow-x-clip bg-[#050505] text-white antialiased",
             headerTransparent ? "pt-0" : "pt-[84px]",
             fullWidth
-              ? "min-h-screen"
-              : "mx-auto min-h-screen max-w-7xl px-6 py-12 lg:px-12 lg:py-20",
+              ? "min-h-[calc(100vh-84px)]"
+              : "mx-auto min-h-[calc(100vh-84px)] max-w-7xl px-6 py-12 lg:px-12 lg:py-20",
             className
           )}
         >
           {children}
         </main>
 
-        {showFooter ? <EnhancedFooter /> : null}
+        {/* Footer layer — below overlay but above main content when needed */}
+        {showFooter ? (
+          <div className="relative z-10">
+            <EnhancedFooter />
+          </div>
+        ) : null}
 
+        {/* Overlay layer — highest z-index when active */}
         {shouldEnableVaultSearch ? (
           <VaultSearchOverlay
             isOpen={isSearchOpen}

@@ -1,9 +1,18 @@
-/* components/Header.tsx — UNIFIED SOVEREIGN HEADER */
+/* components/Header.tsx — UNIFIED SOVEREIGN HEADER (corrected) */
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, Command, ChevronRight, Fingerprint, FileText, Activity } from "lucide-react";
+import { useRouter } from "next/router";
+import {
+  Menu,
+  X,
+  Command,
+  ChevronRight,
+  Fingerprint,
+  FileText,
+  Activity,
+} from "lucide-react";
 
 type HeaderProps = {
   transparent?: boolean;
@@ -42,51 +51,37 @@ export default function Header({
   transparent = false,
   minimal = false,
 }: HeaderProps) {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
-  const [currentPath, setCurrentPath] = React.useState("/");
+
+  const currentPath = React.useMemo(
+    () => normalizePath(router.asPath || router.pathname || "/"),
+    [router.asPath, router.pathname],
+  );
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    const onScroll = () => {
+      if (typeof window === "undefined") return;
+      setScrolled(window.scrollY > 20);
+    };
 
-    const syncPath = () => setCurrentPath(normalizePath(window.location.pathname));
-    syncPath();
-
-    const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
 
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
     };
 
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-
-    const patchedPushState: History["pushState"] = function (...args) {
-      const result = originalPushState.apply(window.history, args);
-      syncPath();
-      return result;
-    };
-
-    const patchedReplaceState: History["replaceState"] = function (...args) {
-      const result = originalReplaceState.apply(window.history, args);
-      syncPath();
-      return result;
-    };
-
-    window.history.pushState = patchedPushState;
-    window.history.replaceState = patchedReplaceState;
-    window.addEventListener("popstate", syncPath);
-    window.addEventListener("hashchange", syncPath);
-    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("keydown", onKeyDown);
-
     return () => {
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      window.removeEventListener("popstate", syncPath);
-      window.removeEventListener("hashchange", syncPath);
-      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
@@ -96,9 +91,9 @@ export default function Header({
   }, [currentPath]);
 
   React.useEffect(() => {
-    if (typeof document === "undefined") return;
     const original = document.body.style.overflow;
     document.body.style.overflow = isOpen ? "hidden" : original || "";
+
     return () => {
       document.body.style.overflow = original;
     };
@@ -115,24 +110,33 @@ export default function Header({
         className={`fixed left-0 right-0 top-0 z-[100] w-full transition-all duration-500 ${shellClass}`}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 lg:px-12">
-          <Link href="/" className="group flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center border border-white/12 bg-white/95 shadow-[0_8px_24px_rgba(255,255,255,0.06)]">
-              <Command size={21} className="text-black/90" />
-            </div>
+          <div className="flex min-w-0 items-center">
+            <Link
+              href="/"
+              aria-label="Go to homepage"
+              className="group inline-flex shrink-0 items-center gap-4"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-white/12 bg-white/95 shadow-[0_8px_24px_rgba(255,255,255,0.06)]">
+                <Command size={21} className="text-black/90" />
+              </div>
 
-            <div className="flex flex-col">
-              <span className="text-[12px] font-black uppercase tracking-[0.32em] text-white/94">
-                Abraham of London
-              </span>
-              <span className="hidden text-[9px] font-mono uppercase tracking-[0.24em] text-white/30 md:block">
-                Strategy • Canon • Library
-              </span>
-            </div>
-          </Link>
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-[12px] font-black uppercase tracking-[0.32em] text-white/94">
+                  Abraham of London
+                </span>
+                <span className="hidden text-[9px] font-mono uppercase tracking-[0.24em] text-white/30 md:block">
+                  Strategy • Canon • Library
+                </span>
+              </div>
+            </Link>
+          </div>
 
           <div className="flex items-center gap-4 md:gap-6">
             {!minimal ? (
-              <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
+              <nav
+                className="hidden items-center gap-6 md:flex"
+                aria-label="Primary"
+              >
                 {NAV_ITEMS.slice(0, 8).map((item, idx) => {
                   const active = isActivePath(currentPath, item.href);
 
@@ -140,6 +144,7 @@ export default function Header({
                     <Link
                       key={`desktop-nav-${idx}-${item.href}`}
                       href={item.href}
+                      aria-current={active ? "page" : undefined}
                       className={[
                         "text-[10px] font-mono uppercase tracking-[0.22em] transition-colors duration-300",
                         active
@@ -156,7 +161,7 @@ export default function Header({
 
             <Link
               href="/dashboard"
-              className="hidden rounded-full border border-amber-500/18 bg-amber-500/9 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/85 transition-all duration-300 hover:border-amber-400/30 hover:bg-amber-500/14 hover:text-amber-200 md:inline-flex items-center gap-2"
+              className="hidden items-center gap-2 rounded-full border border-amber-500/18 bg-amber-500/9 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/85 transition-all duration-300 hover:border-amber-400/30 hover:bg-amber-500/14 hover:text-amber-200 md:inline-flex"
             >
               <Fingerprint size={12} />
               Sovereign Registry
@@ -165,7 +170,7 @@ export default function Header({
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
-              className="border border-white/10 bg-white/[0.03] p-3 text-white/88 transition-all duration-300 hover:bg-white hover:text-black"
+              className="inline-flex items-center justify-center border border-white/10 bg-white/[0.03] p-3 text-white/88 transition-all duration-300 hover:bg-white hover:text-black"
               aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
               aria-controls="site-mobile-menu"
@@ -195,7 +200,7 @@ export default function Header({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="border border-white/10 p-4 text-white transition-colors hover:bg-white hover:text-black"
+              className="inline-flex items-center justify-center border border-white/10 p-4 text-white transition-colors hover:bg-white hover:text-black"
               aria-label="Close menu"
             >
               <X size={28} />
@@ -211,6 +216,7 @@ export default function Header({
                   key={`mobile-nav-${idx}-${item.href}`}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
+                  aria-current={active ? "page" : undefined}
                   className="group flex items-end justify-between border-b border-white/5 pb-5 md:pb-6"
                 >
                   <div className="space-y-2">
@@ -246,24 +252,27 @@ export default function Header({
                 </Link>
               );
             })}
-            
+
             <Link
               href="/dashboard/live"
               onClick={() => setIsOpen(false)}
-              className="group flex items-end justify-between border-b border-white/5 pb-5 md:pb-6 mt-4"
+              className="group mt-4 flex items-end justify-between border-b border-white/5 pb-5 md:pb-6"
             >
               <div className="space-y-2">
                 <span className="text-[10px] font-mono font-bold text-amber-500/60">
                   INTELLIGENCE
                 </span>
-                <h2 className="font-serif text-3xl uppercase italic transition-colors text-white group-hover:text-amber-500">
+                <h2 className="font-serif text-3xl uppercase italic text-white transition-colors group-hover:text-amber-500">
                   OGR Terminal
                 </h2>
                 <p className="text-[10px] font-mono uppercase tracking-widest text-white/30">
                   Live Telemetry & Analysis
                 </p>
               </div>
-              <Activity size={24} className="mb-4 text-white/10 group-hover:text-amber-500 transition-all" />
+              <Activity
+                size={24}
+                className="mb-4 text-white/10 transition-all group-hover:text-amber-500"
+              />
             </Link>
 
             <Link
@@ -275,14 +284,17 @@ export default function Header({
                 <span className="text-[10px] font-mono font-bold text-amber-500/60">
                   ANALYTICS
                 </span>
-                <h2 className="font-serif text-3xl uppercase italic transition-colors text-white group-hover:text-amber-500">
+                <h2 className="font-serif text-3xl uppercase italic text-white transition-colors group-hover:text-amber-500">
                   PDF Reports
                 </h2>
                 <p className="text-[10px] font-mono uppercase tracking-widest text-white/30">
                   Export & Intelligence Briefs
                 </p>
               </div>
-              <FileText size={24} className="mb-4 text-white/10 group-hover:text-amber-500 transition-all" />
+              <FileText
+                size={24}
+                className="mb-4 text-white/10 transition-all group-hover:text-amber-500"
+              />
             </Link>
           </nav>
         </div>

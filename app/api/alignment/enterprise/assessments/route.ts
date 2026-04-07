@@ -90,7 +90,9 @@ export async function POST(req: NextRequest) {
       return errorResponse("Identity mismatch or invalid token", 401);
     }
 
-    if (participant.email.toLowerCase() !== payload.email.toLowerCase()) {
+    // Email is on membership, not directly on participant
+    const participantEmail = participant.membership?.userEmail;
+    if (!participantEmail || participantEmail.toLowerCase() !== payload.email.toLowerCase()) {
       return errorResponse("Invite identity mismatch", 403);
     }
 
@@ -117,13 +119,15 @@ export async function POST(req: NextRequest) {
     const score = scoreEnterpriseAssessment(validated.data.answers);
     const constitutional = adaptEnterpriseAssessmentToConstitution(score);
 
+    // ✅ FIX: Pass the object directly, NOT JSON.stringify
+    // The repository's toPrismaJsonValue will handle serialization correctly
     const assessment = await saveEnterpriseAssessment({
       campaignId: participant.campaignId,
       participantId: participant.id,
       organisationId: participant.campaign.organisationId,
       teamName: participant.membership?.teamName ?? null,
       isExecutive: participant.membership?.isExecutive ?? false,
-      answersJson: validated.data.answers,
+      answersJson: validated.data.answers, // Pass object directly, not stringified
       totalScore: score.totalScore,
       possibleScore: score.possibleScore,
       percentScore: score.percentScore,
@@ -135,10 +139,12 @@ export async function POST(req: NextRequest) {
 
     await markParticipantCompleted(participant.id);
 
+    // Trigger aggregation asynchronously without blocking response
     try {
       await aggregateEnterpriseCampaign(participant.campaignId);
     } catch (aggErr) {
       console.error("[ENTERPRISE_AGGREGATION_ERROR]", aggErr);
+      // Don't fail the request if aggregation fails
     }
 
     return NextResponse.json(
@@ -147,7 +153,15 @@ export async function POST(req: NextRequest) {
         registryId: assessment.id,
         campaignId: participant.campaignId,
         organisationId: participant.campaign.organisationId,
-        result: score,
+        result: {
+          totalScore: score.totalScore,
+          possibleScore: score.possibleScore,
+          percentScore: score.percentScore,
+          band: score.band,
+          weakestDomains: score.weakestDomains,
+          strongestDomains: score.strongestDomains,
+          domainScores: score.domainScores,
+        },
         constitutional,
         message: "Enterprise assessment committed successfully.",
       },

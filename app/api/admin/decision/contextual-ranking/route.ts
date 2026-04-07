@@ -2,102 +2,26 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import {
+  buildDecisionSignalProfiles,
+  summarizeDecisionSignalProfiles,
+  type DecisionAssetContextRow,
+  type DecisionSignalProfile,
+} from "@/lib/decision/build-decision-signal-profile";
 
-function toNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-  return fallback;
-}
-
-function sortRows(rows: any[]) {
-  return rows.sort((a, b) => {
-    if (b.contextualWeight !== a.contextualWeight) {
-      return b.contextualWeight - a.contextualWeight;
-    }
-    if (b.usefulnessScore !== a.usefulnessScore) {
-      return b.usefulnessScore - a.usefulnessScore;
-    }
-    if (b.routeImprovements !== a.routeImprovements) {
-      return b.routeImprovements - a.routeImprovements;
-    }
-    return b.impressions - a.impressions;
-  });
-}
-
-function mapRow(row: any) {
-  const metadata = (row.metadata || {}) as Record<string, unknown>;
-
-  return {
-    assetId: row.assetId,
-    assetTitle: row.assetTitle,
-    assetHref: row.assetHref,
-    assetKind: row.assetKind,
-    contextType: row.contextType,
-    contextValue: row.contextValue,
-    contextualWeight: toNumber(row.contextualWeight, 1),
-    confidenceScore: toNumber(row.confidenceScore, 0),
-    usefulnessScore: toNumber(row.usefulnessScore, 0),
-    impressions: toNumber(row.impressions, 0),
-    clicks: toNumber(row.clicks, 0),
-    conversions: toNumber(row.conversions, 0),
-    assistedConversions: toNumber(row.assistedConversions, 0),
-    routeImprovements: toNumber(row.routeImprovements, 0),
-    readinessImprovements: toNumber(row.readinessImprovements, 0),
-    clarityGain: toNumber(row.clarityGain, 0),
-    authorityGain: toNumber(row.authorityGain, 0),
-    governanceGain: toNumber(metadata.governanceGain, 0),
-    constitutionalSource: Boolean(metadata.constitutionalSource),
-    updatedAt: row.updatedAt,
-  };
-}
-
-function byType(rows: any[], type: string) {
-  return sortRows(
-    rows.filter(
-      (row) =>
-        row.contextType === type &&
-        toNumber(row.impressions, 0) >= 3 &&
-        toNumber(row.confidenceScore, 0) > 0
+function byType(
+  profiles: DecisionSignalProfile[],
+  type: string,
+  minImpressions = 3,
+): DecisionSignalProfile[] {
+  return profiles
+    .filter(
+      (profile) =>
+        profile.contextType === type &&
+        profile.impressions >= minImpressions &&
+        profile.confidenceScore > 0,
     )
-  )
-    .slice(0, 20)
-    .map(mapRow);
-}
-
-function buildSummary(rows: any[]) {
-  const constitutionalRows = rows.filter(
-    (row) => Boolean((row.metadata || {}).constitutionalSource)
-  );
-
-  return {
-    totalRows: rows.length,
-    constitutionalRows: constitutionalRows.length,
-    avgContextualWeight:
-      rows.length > 0
-        ? Number(
-            (
-              rows.reduce(
-                (acc, row) => acc + toNumber(row.contextualWeight, 0),
-                0
-              ) / rows.length
-            ).toFixed(6)
-          )
-        : 0,
-    avgConfidenceScore:
-      rows.length > 0
-        ? Number(
-            (
-              rows.reduce(
-                (acc, row) => acc + toNumber(row.confidenceScore, 0),
-                0
-              ) / rows.length
-            ).toFixed(6)
-          )
-        : 0,
-  };
+    .slice(0, 20);
 }
 
 export async function GET() {
@@ -109,21 +33,23 @@ export async function GET() {
 
     if (!prisma) throw new Error("Database unavailable");
 
-    const rows = await prisma.decisionAssetContextPerformance.findMany({
+    const rows = (await prisma.decisionAssetContextPerformance.findMany({
       orderBy: [{ updatedAt: "desc" }],
-    });
+    })) as DecisionAssetContextRow[];
+
+    const profiles = buildDecisionSignalProfiles(rows);
 
     return NextResponse.json({
       ok: true,
       mode: "constitutional",
-      summary: buildSummary(rows),
-      bySector: byType(rows, "sector"),
-      byRoute: byType(rows, "route"),
-      byReadinessTier: byType(rows, "readinessTier"),
-      byAuthorityType: byType(rows, "authorityType"),
-      byOrgState: byType(rows, "orgState"),
-      byMarketRiskBand: byType(rows, "marketRiskBand"),
-      byRevenueBand: byType(rows, "revenueBand"),
+      summary: summarizeDecisionSignalProfiles(profiles),
+      bySector: byType(profiles, "sector"),
+      byRoute: byType(profiles, "route"),
+      byReadinessTier: byType(profiles, "readinessTier"),
+      byAuthorityType: byType(profiles, "authorityType"),
+      byOrgState: byType(profiles, "orgState"),
+      byMarketRiskBand: byType(profiles, "marketRiskBand"),
+      byRevenueBand: byType(profiles, "revenueBand"),
     });
   } catch (error) {
     console.error("[ADMIN_CONTEXTUAL_RANKING_ERROR]", error);
@@ -133,7 +59,7 @@ export async function GET() {
         ok: false,
         error: "Failed to load constitutional contextual ranking.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

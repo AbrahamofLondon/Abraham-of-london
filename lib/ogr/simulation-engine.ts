@@ -1,138 +1,240 @@
-// pages/api/ogr/simulate.ts
-import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { calculateResonance } from "@/lib/ogr/simulation-engine";
-import { 
-  calculateHCDelta, 
-  aggregateHCDMetrics, 
-  calculateHCDContagion,
-  type HCDMetrics
-} from "@/lib/alignment/human-capital-delta";
+// lib/ogr/simulation-engine.ts
 
-interface SimulationRequest {
-  ids?: string[];
-  metrics?: HCDMetrics[];
+export type ResonanceInputRecord = {
+  id: string;
+  score?: number | null;
+  certainty?: number | null;
+  weight?: number | null;
+};
+
+export type ResonanceBand =
+  | "LOW"
+  | "MODERATE"
+  | "STRONG"
+  | "HIGH"
+  | "SOVEREIGN";
+
+export type ResonanceComputation = {
+  id: string;
+  score: number;
+  certainty: number;
+  weight: number;
+  weightedScore: number;
+};
+
+export type ResonanceResult = {
+  score: number;
+  confidence?: number;
+  band?: ResonanceBand;
+  count: number;
+  items: ResonanceComputation[];
+};
+
+export type ResonanceOptions = {
+  includeConfidence?: boolean;
+  calculateBand?: boolean;
+  minWeight?: number;
+  maxScore?: number;
+  minScore?: number;
+};
+
+const DEFAULT_MIN_WEIGHT = 0.0001;
+const DEFAULT_MAX_SCORE = 100;
+const DEFAULT_MIN_SCORE = 0;
+const DEFAULT_CERTAINTY_FALLBACK = 1;
+const EPSILON = 0.000001;
+const ROUND_PLACES_SCORE = 4;
+const ROUND_PLACES_WEIGHT = 6;
+
+function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, value));
 }
 
-interface SimulationResponse {
-  resonance?: any;
-  hcd?: any[];
-  summary?: any;
-  contagion?: any[];
-  error?: string;
+function normalizeNumber(value: unknown, fallback: number): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value.trim());
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<SimulationResponse>
-) {
-  // 1. Method validation
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+function roundTo(value: number, places: number): number {
+  const factor = 10 ** places;
+  return Math.round(value * factor) / factor;
+}
+
+export function scoreToBand(score: number): ResonanceBand {
+  const s = clamp(score, 0, 100);
+  if (s >= 90) return "SOVEREIGN";
+  if (s >= 75) return "HIGH";
+  if (s >= 60) return "STRONG";
+  if (s >= 40) return "MODERATE";
+  return "LOW";
+}
+
+function normaliseRecord(
+  input: ResonanceInputRecord,
+  minWeight: number,
+  minScore: number,
+  maxScore: number,
+): ResonanceComputation | null {
+  const id = String(input?.id ?? "").trim();
+  if (!id) return null;
+
+  const rawScore = normalizeNumber(input?.score, 0);
+  const rawCertainty = normalizeNumber(
+    input?.certainty,
+    DEFAULT_CERTAINTY_FALLBACK,
+  );
+  const rawWeight = normalizeNumber(input?.weight, 1);
+
+  if (!Number.isFinite(rawScore)) return null;
+  if (!Number.isFinite(rawCertainty)) return null;
+  if (!Number.isFinite(rawWeight) || rawWeight < 0) return null;
+
+  const score = clamp(rawScore, minScore, maxScore);
+  const certainty = clamp(rawCertainty, 0, 1);
+  const weight = Math.max(minWeight, rawWeight);
+
+  return {
+    id,
+    score: roundTo(score, ROUND_PLACES_SCORE),
+    certainty: roundTo(certainty, ROUND_PLACES_SCORE),
+    weight: roundTo(weight, ROUND_PLACES_WEIGHT),
+    weightedScore: roundTo(
+      score * certainty * weight,
+      ROUND_PLACES_WEIGHT,
+    ),
+  };
+}
+
+function computeFromItems(items: ResonanceComputation[]): {
+  score: number;
+  confidence: number;
+} {
+  let totalWeight = 0;
+  let totalWeightedScore = 0;
+  let totalWeightedCertainty = 0;
+
+  for (const item of items) {
+    totalWeight += item.weight;
+    totalWeightedScore += item.weightedScore;
+    totalWeightedCertainty += item.certainty * item.weight;
   }
 
-  // 2. Authentication
-  const session = await getServerSession(req, res, authOptions);
-  if (!session) {
-    return res.status(401).json({ error: "Unauthorized: Sovereign access required." });
+  if (totalWeight < EPSILON) {
+    return { score: 0, confidence: 0 };
   }
 
-  try {
-    // 3. Parse request body
-    let body: SimulationRequest;
-    try {
-      body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-    } catch {
-      return res.status(400).json({ error: "Invalid JSON payload" });
-    }
+  return {
+    score: roundTo(totalWeightedScore / totalWeight, ROUND_PLACES_SCORE),
+    confidence: roundTo(
+      totalWeightedCertainty / totalWeight,
+      ROUND_PLACES_SCORE,
+    ),
+  };
+}
 
-    const { ids, metrics } = body;
-    const response: SimulationResponse = {};
+function emptyResult(options?: ResonanceOptions): ResonanceResult {
+  return {
+    score: 0,
+    confidence: options?.includeConfidence ? 0 : undefined,
+    band: options?.calculateBand ? "LOW" : undefined,
+    count: 0,
+    items: [],
+  };
+}
 
-    // 4. Calculate resonance from brief IDs (if provided)
-    if (ids && Array.isArray(ids) && ids.length > 0) {
-      try {
-        const resonance = await calculateResonance(ids, {
-          includeConfidence: true,
-          calculateBand: true,
-        });
-        response.resonance = resonance;
-      } catch (error) {
-        console.error("[OGR_SIM] Resonance calculation failed:", error);
-      }
-    }
-
-    // 5. Calculate HCD metrics (if metrics provided)
-    if (metrics && Array.isArray(metrics) && metrics.length > 0) {
-      try {
-        const hcdResults = calculateHCDelta(metrics);
-        const summary = aggregateHCDMetrics(hcdResults);
-        const contagion = calculateHCDContagion(hcdResults, [
-          "CULTURAL_COHESION",
-          "TRUST_INDEX",
-          "OPERATIONAL_CLARITY",
-          "STRATEGIC_INTENT"
-        ]);
-
-        response.hcd = hcdResults;
-        response.summary = summary;
-        response.contagion = contagion;
-
-        // If resonance wasn't calculated from briefs, map burnout to resonance
-        if (!response.resonance && summary.overallBurnoutIndex) {
-          response.resonance = {
-            resonance: Math.max(0.05, Math.min(0.95, 1 - (summary.overallBurnoutIndex / 100))),
-            friction: summary.averageUtilization,
-            complexity: summary.overallFragilityIndex / 100,
-            stability: 1 - (summary.overallFragilityIndex / 100),
-            count: metrics.length,
-            confidence: Math.max(0, Math.min(100, 100 - summary.overallBurnoutIndex)),
-            band: summary.riskScore === "CRITICAL" ? "CRITICAL" : 
-                  summary.riskScore === "ELEVATED" ? "WARNING" : 
-                  summary.riskScore === "MODERATE" ? "STABLE" : "OPTIMAL",
-            classification: summary.riskScore === "CRITICAL" ? "DISORDERED" :
-                           summary.riskScore === "ELEVATED" ? "DRIFTING" :
-                           summary.riskScore === "MODERATE" ? "ALIGNED" : "RESONANT",
-          };
-        }
-      } catch (error) {
-        console.error("[OGR_SIM] HCD calculation failed:", error);
-      }
-    }
-
-    // 6. Validate we have at least some data to return
-    if (!response.resonance && !response.hcd) {
-      return res.status(400).json({ 
-        error: "Insufficient data: Provide either 'ids' or 'metrics' for simulation." 
-      });
-    }
-
-    // 7. Return successful response
-    return res.status(200).json(response);
-
-  } catch (error) {
-    console.error("[OGR_SIM_ERROR]:", error);
-    return res.status(500).json({ 
-      error: "Internal System Error during simulation." 
-    });
+function runResonanceEngine(
+  items: ResonanceInputRecord[],
+  options?: ResonanceOptions,
+): ResonanceResult {
+  if (!Array.isArray(items) || items.length === 0) {
+    return emptyResult(options);
   }
+
+  const minWeight = options?.minWeight ?? DEFAULT_MIN_WEIGHT;
+  const minScore = options?.minScore ?? DEFAULT_MIN_SCORE;
+  const maxScore = options?.maxScore ?? DEFAULT_MAX_SCORE;
+
+  const computed: ResonanceComputation[] = [];
+
+  for (const item of items) {
+    const record = normaliseRecord(item, minWeight, minScore, maxScore);
+    if (record) computed.push(record);
+  }
+
+  if (computed.length === 0) {
+    return emptyResult(options);
+  }
+
+  const { score, confidence } = computeFromItems(computed);
+
+  return {
+    score,
+    confidence: options?.includeConfidence ? confidence : undefined,
+    band: options?.calculateBand ? scoreToBand(score) : undefined,
+    count: computed.length,
+    items: computed,
+  };
 }
 
 export async function calculateResonance(
-  ids: string[],
-  options?: { includeConfidence?: boolean; calculateBand?: boolean }
-) {
-  // Your implementation here
-  // This is a placeholder - implement based on your actual logic
+  items: ResonanceInputRecord[],
+  options?: ResonanceOptions,
+): Promise<ResonanceResult> {
+  return runResonanceEngine(items, options);
+}
+
+export function calculateResonanceSync(
+  items: ResonanceInputRecord[],
+  options?: ResonanceOptions,
+): ResonanceResult {
+  return runResonanceEngine(items, options);
+}
+
+export function aggregateResonanceResults(
+  results: ResonanceResult[],
+): ResonanceResult {
+  if (!Array.isArray(results) || results.length === 0) {
+    return emptyResult({ includeConfidence: true, calculateBand: true });
+  }
+
+  const valid = results.filter((result) => result.count > 0);
+  if (valid.length === 0) {
+    return emptyResult({ includeConfidence: true, calculateBand: true });
+  }
+
+  let totalCount = 0;
+  let weightedScoreSum = 0;
+  let weightedConfidenceSum = 0;
+
+  for (const result of valid) {
+    totalCount += result.count;
+    weightedScoreSum += result.score * result.count;
+    weightedConfidenceSum += (result.confidence ?? 0) * result.count;
+  }
+
+  const score = roundTo(weightedScoreSum / totalCount, ROUND_PLACES_SCORE);
+  const confidence = roundTo(
+    weightedConfidenceSum / totalCount,
+    ROUND_PLACES_SCORE,
+  );
+
   return {
-    resonance: 0.75,
-    friction: 25,
-    complexity: 30,
-    stability: 70,
-    count: ids.length,
-    confidence: 85,
-    band: "STABLE",
-    classification: "ALIGNED",
+    score,
+    confidence,
+    band: scoreToBand(score),
+    count: totalCount,
+    items: valid.flatMap((result) => result.items),
   };
 }
+
+export default {
+  scoreToBand,
+  calculateResonance,
+  calculateResonanceSync,
+  aggregateResonanceResults,
+};

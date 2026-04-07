@@ -2,36 +2,30 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  ALIGNMENT_DOMAIN_LABELS,
-  ALIGNMENT_DOMAIN_ORDER,
-  PURPOSE_ALIGNMENT_QUESTIONS,
-  type AlignmentDomain,
-  type AlignmentQuestion,
-} from "@/lib/alignment/checklist";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   AlertTriangle,
-  BadgeCheck,
-  BarChart3,
-  Building2,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
+  Activity,
   Compass,
   Crown,
   Eye,
-  Globe,
-  Heart,
+  Gavel,
   LayoutGrid,
   LineChart,
   Loader2,
   Lock,
+  Scale,
   ShieldCheck,
   Sparkles,
   Target,
-  Users,
+  CheckCircle2,
 } from "lucide-react";
+
+import {
+  evaluateConstitutionalRoute,
+  type ConstitutionalDecision,
+} from "@/lib/constitution/rules";
 
 type LikertValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
@@ -40,57 +34,91 @@ type AnswerValue = {
   certainty: LikertValue;
 };
 
-type DomainComputed = {
-  domain: AlignmentDomain;
-  resonanceAvg: number;
-  certaintyAvg: number;
-  rawScore: number;
-  weightedScore: number;
-  strength: "strong" | "developing" | "weak" | "critical";
-  answeredCount: number;
-};
+type EvaluationPhase = "idle" | "reading" | "parsing" | "weighing" | "complete";
 
-type PreviewRoute = "FOUNDATION" | "TEAM" | "ENTERPRISE" | "STRATEGY_ROOM";
-
-const STORAGE_KEY = "aol-purpose-alignment-v3";
-const AUTO_SAVE_DELAY_MS = 800;
+const STORAGE_KEY = "aol-constitutional-diagnostic-v2";
+const AUTO_SAVE_DELAY_MS = 700;
 
 const RESONANCE_LABELS = [
-  "Completely misaligned",
-  "Severely misaligned",
-  "Mostly misaligned",
-  "Meaningfully misaligned",
-  "Slightly misaligned",
-  "Mixed / uncertain",
-  "Slightly aligned",
-  "Solidly aligned",
-  "Strongly aligned",
-  "Highly aligned",
-  "Fully aligned",
+  "Completely false",
+  "Severely false",
+  "Mostly false",
+  "Meaningfully false",
+  "Slightly false",
+  "Uncertain / mixed",
+  "Slightly true",
+  "Solidly true",
+  "Strongly true",
+  "Highly true",
+  "Completely true",
 ] as const;
 
 const CERTAINTY_LABELS = [
   "No certainty",
-  "Very low certainty",
-  "Low certainty",
-  "Limited certainty",
-  "Some certainty",
-  "Moderate certainty",
-  "Reasonable certainty",
-  "Strong certainty",
-  "High certainty",
-  "Very high certainty",
-  "Absolute certainty",
+  "Very low",
+  "Low",
+  "Limited",
+  "Some",
+  "Moderate",
+  "Reasonable",
+  "Strong",
+  "High",
+  "Very high",
+  "Absolute",
 ] as const;
 
-const DOMAIN_ICONS: Partial<Record<AlignmentDomain, React.ElementType>> = {
-  IDENTITY: ShieldCheck,
-  DECISION: Crown,
-  ENVIRONMENT: Globe,
-  BEHAVIOUR: Users,
-  EMOTIONAL_ORDER: Heart,
-  LEGACY: Compass,
-};
+const DIAGNOSTIC_QUESTIONS = [
+  {
+    id: "q1",
+    text: "The stated strategy and actual resource allocation are meaningfully aligned.",
+    domain: "coherence",
+  },
+  {
+    id: "q2",
+    text: "Decision authority is clear and exercised without chronic diffusion or bottleneck.",
+    domain: "authority",
+  },
+  {
+    id: "q3",
+    text: "The operating environment has changed faster than the organisation's ability to adapt.",
+    domain: "environment",
+  },
+  {
+    id: "q4",
+    text: "There is a pattern of strategic drift — direction stated but not executed with discipline.",
+    domain: "execution",
+  },
+  {
+    id: "q5",
+    text: "Trust between leadership and execution layers is materially intact.",
+    domain: "trust",
+  },
+  {
+    id: "q6",
+    text: "The organisation carries visible friction: coordination failures, duplicated work, or unresolved conflict.",
+    domain: "friction",
+  },
+  {
+    id: "q7",
+    text: "There is a clear decision-maker who can authorise strategic intervention.",
+    domain: "authority",
+  },
+  {
+    id: "q8",
+    text: "The cost of getting this wrong would be material — financial, reputational, or structural.",
+    domain: "stakes",
+  },
+  {
+    id: "q9",
+    text: "Past attempts to correct the issue have failed due to structural, not motivational, causes.",
+    domain: "pattern",
+  },
+  {
+    id: "q10",
+    text: "External market or stakeholder pressure is actively forcing attention to this issue.",
+    domain: "pressure",
+  },
+] as const;
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -100,187 +128,102 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-function average(values: number[]) {
-  if (!values.length) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function round1(value: number) {
-  return Math.round(value * 10) / 10;
-}
-
 function toLikert(value: number): LikertValue {
   return clamp(Math.round(value), 0, 10) as LikertValue;
 }
 
-function getBand(percent: number): "aligned" | "drifting" | "misaligned" | "disordered" {
-  if (percent >= 80) return "aligned";
-  if (percent >= 60) return "drifting";
-  if (percent >= 40) return "misaligned";
-  return "disordered";
+function average(values: number[], fallback = 5) {
+  if (!values.length) return fallback;
+  return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-function getBandMeta(band: ReturnType<typeof getBand>) {
-  switch (band) {
-    case "aligned":
-      return {
-        label: "Aligned",
-        chip: "border-emerald-400/25 bg-emerald-500/10 text-emerald-300",
-        bar: "bg-emerald-400",
-        summary: "Direction and reality are materially coherent.",
-      };
-    case "drifting":
-      return {
-        label: "Drifting",
-        chip: "border-amber-400/25 bg-amber-500/10 text-amber-300",
-        bar: "bg-amber-300",
-        summary: "The centre is holding, but drift is beginning to tax execution.",
-      };
-    case "misaligned":
-      return {
-        label: "Misaligned",
-        chip: "border-orange-400/25 bg-orange-500/10 text-orange-300",
-        bar: "bg-orange-300",
-        summary: "Declared direction and lived reality are starting to separate.",
-      };
-    default:
-      return {
-        label: "Disordered",
-        chip: "border-red-400/25 bg-red-500/10 text-red-300",
-        bar: "bg-red-400",
-        summary: "The present structure is not carrying weight cleanly enough.",
-      };
-  }
-}
+function computeConstitutionalInput(answers: Record<string, AnswerValue>) {
+  const byDomain = (domain: string) =>
+    Object.entries(answers)
+      .filter(([id]) => DIAGNOSTIC_QUESTIONS.find((q) => q.id === id)?.domain === domain)
+      .map(([, answer]) => answer.resonance);
 
-function getStrength(weightedScore: number): DomainComputed["strength"] {
-  if (weightedScore >= 80) return "strong";
-  if (weightedScore >= 60) return "developing";
-  if (weightedScore >= 40) return "weak";
-  return "critical";
-}
-
-function getStrengthTone(strength: DomainComputed["strength"]) {
-  switch (strength) {
-    case "strong":
-      return "text-emerald-300";
-    case "developing":
-      return "text-amber-300";
-    case "weak":
-      return "text-orange-300";
-    default:
-      return "text-red-300";
-  }
-}
-
-function safeDomainIcon(domain: AlignmentDomain): React.ElementType {
-  return DOMAIN_ICONS[domain] ?? LayoutGrid;
-}
-
-function computeDomainScore(
-  domain: AlignmentDomain,
-  questions: AlignmentQuestion[],
-  answers: Record<string, AnswerValue>,
-): DomainComputed {
-  const resonanceValues: number[] = [];
-  const certaintyValues: number[] = [];
-  let answeredCount = 0;
-
-  for (const question of questions) {
-    const answer = answers[question.id];
-    const resonance = answer?.resonance ?? 5;
-    const certainty = answer?.certainty ?? 5;
-
-    resonanceValues.push(resonance);
-    certaintyValues.push(certainty);
-
-    if (!(resonance === 5 && certainty === 5)) {
-      answeredCount += 1;
-    }
-  }
-
-  const resonanceAvg = average(resonanceValues);
-  const certaintyAvg = average(certaintyValues);
-  const rawScore = clamp(Math.round(resonanceAvg * 10), 0, 100);
-  const weightedScore = clamp(Math.round(rawScore * (0.55 + certaintyAvg / 20)), 0, 100);
+  const authorityClarity = average(byDomain("authority")) * 10;
+  const coherence = average(byDomain("coherence")) * 10;
+  const pressure =
+    average([
+      ...byDomain("pressure"),
+      ...byDomain("stakes"),
+      ...byDomain("environment"),
+    ]) * 10;
+  const friction =
+    average([
+      ...byDomain("friction"),
+      ...byDomain("execution"),
+      ...byDomain("pattern"),
+    ]) * 10;
 
   return {
-    domain,
-    resonanceAvg: round1(resonanceAvg),
-    certaintyAvg: round1(certaintyAvg),
-    rawScore,
-    weightedScore,
-    strength: getStrength(weightedScore),
-    answeredCount,
+    mandateText: `Authority ${authorityClarity}%, coherence ${coherence}%, pressure ${pressure}%, friction ${friction}%.`,
+    role: "diagnostic_user",
+    jurisdiction: "international",
+    organisationType: "corporation",
+    annualRevenueBand: "confidential",
+    authorityClarity,
+    coherence,
+    pressure,
+    friction,
   };
 }
 
-function getPreviewRoute(args: {
-  score: number;
-  clarity: number;
-  weakestDomains: AlignmentDomain[];
-  completionPercent: number;
-}): {
-  route: PreviewRoute;
-  title: string;
-  description: string;
-  href: string;
-  cta: string;
-} {
-  const { score, clarity, weakestDomains, completionPercent } = args;
-  const weakSet = new Set(weakestDomains);
-
-  if (completionPercent < 35) {
+function getRouteFromDecision(decision: ConstitutionalDecision | null) {
+  if (!decision) {
     return {
-      route: "FOUNDATION",
-      title: "Not enough signal yet",
-      description: "The system needs more truthful differentiation before it should tell you what comes next.",
-      href: "#assessment",
-      cta: "Complete the assessment",
+      route: "PENDING" as const,
+      title: "Assessment in progress",
+      description: "The chamber is still weighing the signal.",
+      href: "#",
+      cta: "Continue assessment",
+      tone: "neutral" as const,
     };
   }
 
-  if (score >= 82 && clarity >= 78) {
-    return {
-      route: "STRATEGY_ROOM",
-      title: "This looks like escalation territory",
-      description:
-        "The signal suggests a serious operator problem, not casual self-improvement. The next useful room is governed advisory.",
-      href: "/strategy-room",
-      cta: "Enter Strategy Room",
-    };
+  switch (decision.route) {
+    case "STRATEGY":
+      return {
+        route: "STRATEGY_ROOM" as const,
+        title: "Strategy Room — mandate qualified",
+        description:
+          "The signal suggests material consequence, real stakes, and sufficiently clear authority for escalation.",
+        href: "/consulting/strategy-room",
+        cta: "Enter Strategy Room",
+        tone: "emerald" as const,
+      };
+    case "DIAGNOSTIC":
+      return {
+        route: "EXECUTIVE_REPORTING" as const,
+        title: "Executive Reporting — structured interpretation required",
+        description:
+          "The signal is credible, but it should be refined into a disciplined executive reading before mandate-level intervention.",
+        href: "/diagnostics/executive-reporting",
+        cta: "Review Executive Reporting",
+        tone: "amber" as const,
+      };
+    case "REJECT":
+      return {
+        route: "DIAGNOSTIC" as const,
+        title: "Continue with disciplined diagnosis",
+        description:
+          "The matter does not yet justify escalation. More clarity is needed before the system advances it.",
+        href: "/diagnostics",
+        cta: "Open diagnostics",
+        tone: "neutral" as const,
+      };
+    default:
+      return {
+        route: "DIAGNOSTIC" as const,
+        title: "Continue assessment",
+        description: "More signal is required before the chamber can route you.",
+        href: "#",
+        cta: "Continue",
+        tone: "neutral" as const,
+      };
   }
-
-  if (weakSet.has("BEHAVIOUR" as AlignmentDomain) || weakSet.has("ENVIRONMENT" as AlignmentDomain)) {
-    return {
-      route: "TEAM",
-      title: "The next signal is probably operating-team level",
-      description:
-        "The issue may not be private conviction alone. It may already be affecting execution, coordination, and alignment around you.",
-      href: "/diagnostics/team-alignment",
-      cta: "Open Team Alignment",
-    };
-  }
-
-  if (weakSet.has("DECISION" as AlignmentDomain) || weakSet.has("LEGACY" as AlignmentDomain)) {
-    return {
-      route: "ENTERPRISE",
-      title: "This is drifting into institutional territory",
-      description:
-        "The pressure looks bigger than motivation. It smells like governance, authority, and strategic consequence.",
-      href: "/diagnostics/enterprise",
-      cta: "Open Enterprise Diagnostic",
-    };
-  }
-
-  return {
-    route: "FOUNDATION",
-    title: "Start by tightening the core structure",
-    description:
-      "The present reading suggests foundational correction before heavier escalation. That is not defeat. That is honesty.",
-    href: "/diagnostics",
-    cta: "Browse Diagnostics",
-  };
 }
 
 function Pill({
@@ -297,728 +240,618 @@ function Pill({
   );
 }
 
-function SectionShell({
-  eyebrow,
-  title,
-  description,
-  aside,
-  children,
-}: {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  aside?: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function PhaseStatus({ phase }: { phase: EvaluationPhase }) {
+  const label =
+    phase === "idle"
+      ? "Awaiting sufficient signal"
+      : phase === "reading"
+        ? "Reading structural pattern"
+        : phase === "parsing"
+          ? "Parsing authority and coherence"
+          : phase === "weighing"
+            ? "Weighing against constitutional thresholds"
+            : "Assessment complete";
+
   return (
-    <section className="overflow-hidden rounded-[30px] border border-white/[0.08] bg-white/[0.02] shadow-[0_24px_80px_rgba(0,0,0,0.25)] backdrop-blur-sm">
-      <div className="flex flex-col gap-4 border-b border-white/[0.07] px-6 py-5 sm:px-8 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          {eyebrow ? (
-            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#C9A96A]">
-              {eyebrow}
-            </div>
-          ) : null}
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">{title}</h2>
-          {description ? <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">{description}</p> : null}
-        </div>
-        {aside ? <div className="shrink-0">{aside}</div> : null}
+    <div className="rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-sm">
+      <div className="flex items-center gap-3">
+        {phase === "complete" ? (
+          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+        ) : phase === "idle" ? (
+          <Eye className="h-4 w-4 text-white/35" />
+        ) : (
+          <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+        )}
+
+        <span className="text-xs font-mono uppercase tracking-[0.16em] text-white/42">
+          {label}
+        </span>
       </div>
-      <div className="px-6 py-6 sm:px-8">{children}</div>
-    </section>
+    </div>
   );
 }
 
-function ScoreCard({
-  icon: Icon,
+function SignalTile({
+  title,
+  value,
+  tone = "neutral",
+}: {
+  title: string;
+  value: string;
+  tone?: "neutral" | "amber" | "emerald";
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border p-4",
+        tone === "emerald"
+          ? "border-emerald-500/20 bg-emerald-500/10"
+          : tone === "amber"
+            ? "border-amber-500/20 bg-amber-500/10"
+            : "border-white/10 bg-white/5",
+      )}
+    >
+      <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">
+        {title}
+      </div>
+      <div className="mt-2 font-serif text-2xl text-white">{value}</div>
+    </div>
+  );
+}
+
+function RatingRail({
   label,
   value,
-  sublabel,
-  barClassName,
+  onChange,
+  valueLabel,
+  accent,
 }: {
-  icon: React.ElementType;
   label: string;
-  value: number;
-  sublabel?: string;
-  barClassName: string;
+  value: LikertValue;
+  onChange: (value: LikertValue) => void;
+  valueLabel: string;
+  accent: "amber" | "emerald";
 }) {
   return (
-    <div className="rounded-3xl border border-white/[0.08] bg-black/30 p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
-            <Icon className="h-4 w-4 text-white/80" />
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-[0.16em] text-white/45">{label}</div>
-            {sublabel ? <div className="mt-1 text-xs text-white/50">{sublabel}</div> : null}
-          </div>
-        </div>
-        <div className="text-2xl font-light text-white">{value}%</div>
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-4">
+        <span className="text-xs font-mono uppercase tracking-[0.16em] text-white/40">
+          {label}
+        </span>
+        <span
+          className={cn(
+            "text-xs font-medium",
+            accent === "amber" ? "text-amber-300" : "text-emerald-300",
+          )}
+        >
+          {valueLabel}
+        </span>
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-        <div className={cn("h-full rounded-full transition-all duration-500", barClassName)} style={{ width: `${value}%` }} />
-      </div>
+
+      <input
+        type="range"
+        min={0}
+        max={10}
+        step={1}
+        value={value}
+        onChange={(e) => onChange(toLikert(Number(e.target.value)))}
+        className={cn(
+          "h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10",
+          accent === "amber" ? "accent-amber-500" : "accent-emerald-400",
+        )}
+      />
     </div>
   );
 }
 
-function DomainQuestionCard({
-  id,
-  statement,
-  domain,
-  resonance,
-  certainty,
-  onResonanceChange,
-  onCertaintyChange,
-}: {
-  id: string;
-  statement: string;
-  domain: AlignmentDomain;
-  resonance: LikertValue;
-  certainty: LikertValue;
-  onResonanceChange: (id: string, value: LikertValue) => void;
-  onCertaintyChange: (id: string, value: LikertValue) => void;
-}) {
-  const Icon = safeDomainIcon(domain);
-  const signalGap = Math.abs(resonance - certainty);
-  const signalTone = resonance >= 8 ? "strong" : resonance <= 3 ? "weak" : "mixed";
+export default function ConstitutionalDiagnostic() {
+  const [answers, setAnswers] = React.useState<Record<string, AnswerValue>>({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
+  const [phase, setPhase] = React.useState<EvaluationPhase>("idle");
+  const [decision, setDecision] = React.useState<ConstitutionalDecision | null>(null);
+  const [savingDraft, setSavingDraft] = React.useState(false);
+  const [showResults, setShowResults] = React.useState(false);
 
-  return (
-    <div className="rounded-3xl border border-white/[0.08] bg-black/30 p-5 transition-all hover:border-white/[0.14] hover:bg-white/[0.03]">
-      <div className="flex items-start gap-4">
-        <div className="mt-0.5 rounded-2xl border border-[#C9A96A]/20 bg-[#C9A96A]/10 p-2">
-          <Icon className="h-4 w-4 text-[#C9A96A]" />
-        </div>
+  const answeredCount = Object.keys(answers).length;
+  const progress = Math.round((answeredCount / DIAGNOSTIC_QUESTIONS.length) * 100);
+  const currentQuestion = DIAGNOSTIC_QUESTIONS[currentQuestionIndex];
+  const currentAnswer =
+    answers[currentQuestion.id] ?? { resonance: 5 as LikertValue, certainty: 5 as LikertValue };
+  const isComplete = answeredCount === DIAGNOSTIC_QUESTIONS.length;
 
-        <div className="min-w-0 flex-1">
-          <p className="text-[15px] leading-7 text-white/90">{statement}</p>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Pill
-              className={
-                signalTone === "strong"
-                  ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
-                  : signalTone === "weak"
-                    ? "border-red-400/25 bg-red-500/10 text-red-300"
-                    : "border-amber-400/25 bg-amber-500/10 text-amber-300"
-              }
-            >
-              {signalTone === "strong"
-                ? "Strong alignment signal"
-                : signalTone === "weak"
-                  ? "Weak alignment signal"
-                  : "Mixed signal"}
-            </Pill>
-
-            {signalGap >= 4 ? (
-              <Pill className="border-orange-400/25 bg-orange-500/10 text-orange-300">
-                Certainty gap detected
-              </Pill>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <div>
-          <div className="mb-2 flex items-center justify-between gap-4">
-            <span className="text-xs uppercase tracking-[0.16em] text-white/45">Resonance</span>
-            <span className={cn("text-xs font-medium", resonance >= 8 ? "text-emerald-300" : resonance <= 3 ? "text-red-300" : "text-[#C9A96A]")}>
-              {RESONANCE_LABELS[resonance]}
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={10}
-            step={1}
-            value={resonance}
-            onChange={(e) => onResonanceChange(id, toLikert(Number(e.target.value)))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#C9A96A]"
-          />
-          <div className="mt-2 flex justify-between text-[11px] text-white/30">
-            <span>0</span>
-            <span>5</span>
-            <span>10</span>
-          </div>
-        </div>
-
-        <div>
-          <div className="mb-2 flex items-center justify-between gap-4">
-            <span className="text-xs uppercase tracking-[0.16em] text-white/45">Certainty</span>
-            <span className="text-xs font-medium text-white/70">{CERTAINTY_LABELS[certainty]}</span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={10}
-            step={1}
-            value={certainty}
-            onChange={(e) => onCertaintyChange(id, toLikert(Number(e.target.value)))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-emerald-400"
-          />
-          <div className="mt-2 flex justify-between text-[11px] text-white/30">
-            <span>0</span>
-            <span>5</span>
-            <span>10</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DomainSummaryCard({
-  score,
-  questions,
-  expanded,
-  onToggle,
-  children,
-}: {
-  score: DomainComputed;
-  questions: AlignmentQuestion[];
-  expanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  const Icon = safeDomainIcon(score.domain);
-
-  return (
-    <div className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-black/30">
-      <button onClick={onToggle} className="w-full px-5 py-5 text-left transition hover:bg-white/[0.03] sm:px-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="rounded-2xl border border-[#C9A96A]/20 bg-[#C9A96A]/10 p-2.5">
-              <Icon className="h-5 w-5 text-[#C9A96A]" />
-            </div>
-
-            <div className="min-w-0">
-              <div className="text-lg font-medium text-white">
-                {ALIGNMENT_DOMAIN_LABELS[score.domain] ?? String(score.domain)}
-              </div>
-              <div className="mt-1 flex flex-wrap gap-2">
-                <span className={cn("text-xs font-medium", getStrengthTone(score.strength))}>
-                  {score.strength.toUpperCase()}
-                </span>
-                <span className="text-xs text-white/45">Resonance {score.resonanceAvg}/10</span>
-                <span className="text-xs text-white/45">Certainty {score.certaintyAvg}/10</span>
-                <span className="text-xs text-white/45">{score.answeredCount}/{questions.length} answered</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-2xl font-light text-white">{score.weightedScore}%</div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">weighted</div>
-            </div>
-            {expanded ? <ChevronUp className="h-5 w-5 text-white/45" /> : <ChevronDown className="h-5 w-5 text-white/45" />}
-          </div>
-        </div>
-      </button>
-
-      {expanded ? (
-        <div className="border-t border-white/[0.06] px-5 pb-5 pt-5 sm:px-6">
-          <div className="mb-5 grid gap-4 md:grid-cols-3">
-            <ScoreCard icon={LayoutGrid} label="Raw score" value={score.rawScore} barClassName="bg-[#C9A96A]" />
-            <ScoreCard icon={ShieldCheck} label="Confidence" value={Math.round(score.certaintyAvg * 10)} barClassName="bg-emerald-400" />
-            <ScoreCard icon={BarChart3} label="Weighted output" value={score.weightedScore} barClassName="bg-sky-400" />
-          </div>
-
-          <div className="grid gap-5">{children}</div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-export default function PurposeAlignmentAssessment() {
-  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
-  const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [savingDraft, setSavingDraft] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedDomains, setExpandedDomains] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    ALIGNMENT_DOMAIN_ORDER.forEach((domain, index) => {
-      initial[String(domain)] = index < 2;
-    });
-    return initial;
-  });
-
-  const defaultAnswers = useMemo(() => {
-    const initial: Record<string, AnswerValue> = {};
-    PURPOSE_ALIGNMENT_QUESTIONS.forEach((question) => {
-      initial[question.id] = { resonance: 5, certainty: 5 };
-    });
-    return initial;
-  }, []);
-
-  useEffect(() => {
-    setAnswers(defaultAnswers);
-  }, [defaultAnswers]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-
-      const parsed = JSON.parse(raw) as {
-        answers?: Record<string, AnswerValue>;
-        notes?: string;
-        expandedDomains?: Record<string, boolean>;
-      };
-
-      if (parsed.answers && Object.keys(parsed.answers).length > 0) {
-        setAnswers((prev) => ({ ...prev, ...parsed.answers }));
+      const parsed = JSON.parse(raw);
+      if (parsed?.answers) setAnswers(parsed.answers);
+      if (typeof parsed?.currentQuestionIndex === "number") {
+        setCurrentQuestionIndex(parsed.currentQuestionIndex);
       }
-      if (typeof parsed.notes === "string") setNotes(parsed.notes);
-      if (parsed.expandedDomains) {
-        setExpandedDomains((prev) => ({ ...prev, ...parsed.expandedDomains }));
-      }
-    } catch {
-      //
-    }
+    } catch {}
   }, []);
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
+  React.useEffect(() => {
+    if (!answeredCount) return;
+
+    const timeout = setTimeout(() => {
       try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, notes, expandedDomains }));
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ answers, currentQuestionIndex }),
+        );
         setSavingDraft(true);
-        window.setTimeout(() => setSavingDraft(false), 500);
-      } catch {
-        //
-      }
+        setTimeout(() => setSavingDraft(false), 450);
+      } catch {}
     }, AUTO_SAVE_DELAY_MS);
 
-    return () => window.clearTimeout(timeout);
-  }, [answers, notes, expandedDomains]);
+    return () => clearTimeout(timeout);
+  }, [answers, currentQuestionIndex, answeredCount]);
 
-  const groupedQuestions = useMemo(() => {
-    const grouped: Record<string, AlignmentQuestion[]> = {};
-    ALIGNMENT_DOMAIN_ORDER.forEach((domain) => {
-      grouped[String(domain)] = PURPOSE_ALIGNMENT_QUESTIONS.filter((q) => q.domain === domain);
-    });
-    return grouped;
-  }, []);
-
-  const domainScores = useMemo(() => {
-    const scores: Record<string, DomainComputed> = {};
-    ALIGNMENT_DOMAIN_ORDER.forEach((domain) => {
-      scores[String(domain)] = computeDomainScore(domain, groupedQuestions[String(domain)] ?? [], answers);
-    });
-    return scores;
-  }, [groupedQuestions, answers]);
-
-  const totalQuestions = PURPOSE_ALIGNMENT_QUESTIONS.length;
-
-  const answeredCount = useMemo(() => {
-    return PURPOSE_ALIGNMENT_QUESTIONS.filter((question) => {
-      const answer = answers[question.id];
-      if (!answer) return false;
-      return !(answer.resonance === 5 && answer.certainty === 5);
-    }).length;
-  }, [answers]);
-
-  const completionPercent = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
-
-  const allWeighted = ALIGNMENT_DOMAIN_ORDER.map((domain) => domainScores[String(domain)]?.weightedScore ?? 50);
-  const score = Math.round(average(allWeighted));
-  const clarity = Math.round(
-    average(ALIGNMENT_DOMAIN_ORDER.map((domain) => (domainScores[String(domain)]?.certaintyAvg ?? 5) * 10)),
-  );
-
-  const weakestDomains = [...ALIGNMENT_DOMAIN_ORDER]
-    .sort((a, b) => (domainScores[String(a)]?.weightedScore ?? 50) - (domainScores[String(b)]?.weightedScore ?? 50))
-    .slice(0, 2);
-
-  const strongestDomains = [...ALIGNMENT_DOMAIN_ORDER]
-    .sort((a, b) => (domainScores[String(b)]?.weightedScore ?? 50) - (domainScores[String(a)]?.weightedScore ?? 50))
-    .slice(0, 2);
-
-  const band = getBand(score);
-  const bandMeta = getBandMeta(band);
-
-  const preview = getPreviewRoute({
-    score,
-    clarity,
-    weakestDomains,
-    completionPercent,
-  });
-
-  const strongestDomainLabels = strongestDomains.map((domain) => ALIGNMENT_DOMAIN_LABELS[domain] ?? String(domain));
-  const weakestDomainLabels = weakestDomains.map((domain) => ALIGNMENT_DOMAIN_LABELS[domain] ?? String(domain));
-
-  const handleResonanceChange = useCallback((id: string, value: LikertValue) => {
-    setAnswers((prev) => ({ ...prev, [id]: { ...(prev[id] ?? { resonance: 5, certainty: 5 }), resonance: value } }));
-    setError(null);
-  }, []);
-
-  const handleCertaintyChange = useCallback((id: string, value: LikertValue) => {
-    setAnswers((prev) => ({ ...prev, [id]: { ...(prev[id] ?? { resonance: 5, certainty: 5 }), certainty: value } }));
-    setError(null);
-  }, []);
-
-  const toggleDomain = useCallback((domain: AlignmentDomain) => {
-    const key = String(domain);
-    setExpandedDomains((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
-
-  const expandAll = useCallback(() => {
-    const next: Record<string, boolean> = {};
-    ALIGNMENT_DOMAIN_ORDER.forEach((domain) => (next[String(domain)] = true));
-    setExpandedDomains(next);
-  }, []);
-
-  const collapseAll = useCallback(() => {
-    const next: Record<string, boolean> = {};
-    ALIGNMENT_DOMAIN_ORDER.forEach((domain) => (next[String(domain)] = false));
-    setExpandedDomains(next);
-  }, []);
-
-  const clearDraft = useCallback(() => {
-    if (!window.confirm("Clear all answers, notes, and the saved local draft?")) return;
-    setAnswers(defaultAnswers);
-    setNotes("");
-    setError(null);
-    window.localStorage.removeItem(STORAGE_KEY);
-  }, [defaultAnswers]);
-
-  const handleSubmit = useCallback(async () => {
-    if (answeredCount < totalQuestions) {
-      setError(`Complete all ${totalQuestions} questions. ${totalQuestions - answeredCount} remain.`);
+  React.useEffect(() => {
+    if (answeredCount < 4) {
+      setPhase("idle");
+      setDecision(null);
       return;
     }
 
-    setSubmitting(true);
-    setError(null);
+    let cancelled = false;
 
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-      window.location.href = preview.href;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to continue.");
-    } finally {
-      setSubmitting(false);
+    const run = async () => {
+      setPhase("reading");
+      await new Promise((r) => setTimeout(r, 320));
+      if (cancelled) return;
+
+      setPhase("parsing");
+      await new Promise((r) => setTimeout(r, 420));
+      if (cancelled) return;
+
+      setPhase("weighing");
+      await new Promise((r) => setTimeout(r, 540));
+      if (cancelled) return;
+
+      const input = computeConstitutionalInput(answers);
+      const result = evaluateConstitutionalRoute(input);
+      if (cancelled) return;
+
+      setDecision(result);
+      setPhase("complete");
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [answers, answeredCount]);
+
+  const routeInfo = getRouteFromDecision(decision);
+
+  const derivedInput = computeConstitutionalInput(answers);
+  const authorityValue = Math.round(derivedInput.authorityClarity || 0);
+  const coherenceValue = Math.round(derivedInput.coherence || 0);
+  const pressureValue = Math.round(derivedInput.pressure || 0);
+  const frictionValue = Math.round(derivedInput.friction || 0);
+
+  const setResonance = (value: LikertValue) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: {
+        ...currentAnswer,
+        resonance: value,
+      },
+    }));
+  };
+
+  const setCertainty = (value: LikertValue) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: {
+        ...currentAnswer,
+        certainty: value,
+      },
+    }));
+  };
+
+  const goNext = () => {
+    if (currentQuestionIndex < DIAGNOSTIC_QUESTIONS.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      return;
     }
-  }, [answeredCount, totalQuestions, preview.href]);
+    if (isComplete) setShowResults(true);
+  };
 
-  return (
-    <main id="assessment" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-      <section className="relative overflow-hidden rounded-[36px] border border-white/[0.08] bg-black">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,106,0.16),transparent_35%),radial-gradient(circle_at_85%_15%,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(201,169,106,0.08),transparent_24%)]" />
-        <div className="relative z-10 px-6 py-10 sm:px-8 lg:px-12 lg:py-14">
-          <div className="flex flex-wrap items-center gap-3">
-            <Pill className="border-[#C9A96A]/20 bg-[#C9A96A]/10 text-[#E6C27A]">Initial Assessment</Pill>
-            <Pill className="border-white/10 bg-white/5 text-white/60">Private session</Pill>
-            <Pill className="border-white/10 bg-white/5 text-white/60">Live route preview</Pill>
-          </div>
+  const goPrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+  };
 
-          <div className="mt-7 grid gap-8 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
-            <div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-[#C9A96A]">
-                Alignment Intelligence
-              </div>
-              <h1 className="mt-5 max-w-4xl font-serif text-4xl font-light leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-6xl">
-                The first serious reading of whether your stated direction and your lived structure are even telling the same story.
-              </h1>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-white/65 sm:text-lg">
-                This is not therapy theatre and not motivational fluff. It is a clean first-pass diagnostic across identity,
-                decisions, environment, behaviour, emotional order, and legacy pressure.
-              </p>
+  const clearAll = () => {
+    const ok = window.confirm("Clear all answers and restart the constitutional intake?");
+    if (!ok) return;
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
-                  <Lock className="h-3.5 w-3.5 text-white/55" />
-                  No account required
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
-                  <BadgeCheck className="h-3.5 w-3.5 text-emerald-300" />
-                  Governed preview
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
-                  <Sparkles className="h-3.5 w-3.5 text-[#C9A96A]" />
-                  Tantaliser, not the whole cathedral
-                </div>
-              </div>
-            </div>
+    localStorage.removeItem(STORAGE_KEY);
+    setAnswers({});
+    setDecision(null);
+    setPhase("idle");
+    setCurrentQuestionIndex(0);
+    setShowResults(false);
+  };
 
-            <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-              <ScoreCard
-                icon={LineChart}
-                label="Completion"
-                value={completionPercent}
-                sublabel={`${answeredCount} of ${totalQuestions} active responses`}
-                barClassName="bg-[#C9A96A]"
-              />
-              <ScoreCard
-                icon={Target}
-                label="Live score"
-                value={score}
-                sublabel={bandMeta.summary}
-                barClassName={bandMeta.bar}
-              />
-              <ScoreCard
-                icon={Eye}
-                label="Clarity"
-                value={clarity}
-                sublabel={savingDraft ? "Saving local draft..." : "Draft active"}
-                barClassName="bg-sky-400"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="mt-8 grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
-        <SectionShell
-          eyebrow="Immediate reading"
-          title="What the current signal suggests"
-          description="Enough to sharpen appetite. Not enough to replace the deeper instruments."
-          aside={
-            <div className="flex flex-wrap gap-2">
-              <Pill className={bandMeta.chip}>{bandMeta.label}</Pill>
-              <Pill className="border-[#C9A96A]/20 bg-[#C9A96A]/10 text-[#E6C27A]">{preview.route.replaceAll("_", " ")}</Pill>
-            </div>
-          }
+  if (showResults && isComplete) {
+    return (
+      <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-8"
         >
-          <div className="grid gap-4 md:grid-cols-3">
-            <ScoreCard icon={TrendingUp} label="Structural alignment" value={score} barClassName={bandMeta.bar} />
-            <ScoreCard icon={Crown} label="Clarity" value={clarity} barClassName="bg-[#C9A96A]" />
-            <ScoreCard icon={ShieldCheck} label="Completion quality" value={completionPercent} barClassName="bg-emerald-400" />
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
+                Constitutional verdict
+              </span>
+            </div>
+
+            <h1 className="mt-6 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+              The chamber has read your signal
+            </h1>
+
+            <p className="mx-auto mt-4 max-w-2xl text-white/52">
+              This is not a personality quiz. It is a routing verdict based on
+              authority, coherence, pressure, and friction.
+            </p>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/[0.08] bg-black/30 p-5">
-              <div className="text-xs uppercase tracking-[0.16em] text-white/45">Strongest domains</div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {strongestDomainLabels.map((label) => (
-                  <Pill key={label} className="border-emerald-400/20 bg-emerald-500/10 text-emerald-300">
-                    {label}
-                  </Pill>
+          <div
+            className={cn(
+              "rounded-3xl border-2 p-8 text-center",
+              routeInfo.tone === "emerald"
+                ? "border-emerald-500/30 bg-emerald-500/10"
+                : routeInfo.tone === "amber"
+                  ? "border-amber-500/30 bg-amber-500/10"
+                  : "border-white/10 bg-white/5",
+            )}
+          >
+            <div className="mb-4">
+              {routeInfo.tone === "emerald" ? (
+                <div className="inline-flex rounded-full bg-emerald-500/20 p-3">
+                  <Crown className="h-8 w-8 text-emerald-400" />
+                </div>
+              ) : routeInfo.tone === "amber" ? (
+                <div className="inline-flex rounded-full bg-amber-500/20 p-3">
+                  <Compass className="h-8 w-8 text-amber-400" />
+                </div>
+              ) : (
+                <div className="inline-flex rounded-full bg-white/10 p-3">
+                  <Target className="h-8 w-8 text-white/60" />
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
+              {routeInfo.title}
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-white/58">
+              {routeInfo.description}
+            </p>
+
+            {decision ? (
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Pill
+                  className={cn(
+                    decision.confidence > 0.7
+                      ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                      : decision.confidence > 0.4
+                        ? "border-amber-400/30 bg-amber-500/10 text-amber-300"
+                        : "border-white/20 bg-white/5 text-white/50",
+                  )}
+                >
+                  Confidence: {Math.round(decision.confidence * 100)}%
+                </Pill>
+
+                <Pill className="border-white/20 bg-white/5 text-white/65">
+                  Authority: {authorityValue}%
+                </Pill>
+                <Pill className="border-white/20 bg-white/5 text-white/65">
+                  Coherence: {coherenceValue}%
+                </Pill>
+                <Pill className="border-white/20 bg-white/5 text-white/65">
+                  Pressure: {pressureValue}%
+                </Pill>
+                <Pill className="border-white/20 bg-white/5 text-white/65">
+                  Friction: {frictionValue}%
+                </Pill>
+              </div>
+            ) : null}
+          </div>
+
+          {decision?.disqualifiersTriggered?.length ? (
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-6">
+              <div className="flex items-center gap-2 text-sm text-white/40">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em]">
+                  Constitutional signals
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                {decision.disqualifiersTriggered.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-2 text-sm leading-relaxed text-white/60"
+                  >
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    <span>{item}</span>
+                  </div>
                 ))}
               </div>
             </div>
+          ) : null}
 
-            <div className="rounded-3xl border border-white/[0.08] bg-black/30 p-5">
-              <div className="text-xs uppercase tracking-[0.16em] text-white/45">Weakest domains</div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {weakestDomainLabels.map((label) => (
-                  <Pill key={label} className="border-amber-400/20 bg-amber-500/10 text-amber-300">
-                    {label}
-                  </Pill>
-                ))}
-              </div>
-            </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            <SignalTile title="Authority" value={`${authorityValue}%`} tone={authorityValue >= 70 ? "emerald" : authorityValue >= 45 ? "amber" : "neutral"} />
+            <SignalTile title="Coherence" value={`${coherenceValue}%`} tone={coherenceValue >= 70 ? "emerald" : coherenceValue >= 45 ? "amber" : "neutral"} />
+            <SignalTile title="Pressure" value={`${pressureValue}%`} tone={pressureValue >= 70 ? "amber" : "neutral"} />
+            <SignalTile title="Friction" value={`${frictionValue}%`} tone={frictionValue >= 70 ? "amber" : "neutral"} />
           </div>
 
-          <div className="mt-6 rounded-3xl border border-white/[0.08] bg-black/30 p-5">
-            <div className="text-xs uppercase tracking-[0.16em] text-white/45">Likely next move</div>
-            <div className="mt-3 text-xl font-semibold text-white">{preview.title}</div>
-            <p className="mt-3 text-sm leading-6 text-white/65">{preview.description}</p>
-            <div className="mt-5">
+          <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:justify-center">
+            {routeInfo.href !== "#" ? (
               <Link
-                href={preview.href}
-                className="inline-flex items-center gap-2 rounded-full border border-[#C9A96A]/25 bg-[#C9A96A]/10 px-4 py-2 text-sm font-medium text-[#E6C27A] transition hover:bg-[#C9A96A]/18"
+                href={routeInfo.href}
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-sm font-medium transition",
+                  routeInfo.tone === "emerald"
+                    ? "bg-emerald-500 text-black hover:bg-emerald-400"
+                    : routeInfo.tone === "amber"
+                      ? "border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
+                      : "border border-white/20 bg-white/5 text-white/70 hover:bg-white/10",
+                )}
               >
-                {preview.cta}
+                {routeInfo.cta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
+            ) : null}
+
+            <button
+              onClick={() => setShowResults(false)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-8 py-4 text-sm font-medium text-white/50 transition hover:bg-white/5"
+            >
+              Review answers
+            </button>
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={clearAll}
+              className="text-xs text-white/30 transition hover:text-white/50"
+            >
+              Clear all answers
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+      <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-8"
+        >
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
+                Constitutional intake
+              </span>
+            </div>
+
+            <h1 className="mt-6 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
+              A formidable first reading,
+              <span className="block text-white/58">not just a questionnaire</span>
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-white/52">
+              This intake does not ask whether you feel vaguely stuck. It reads
+              whether the situation carries authority, coherence, pressure, and
+              friction serious enough to justify escalation.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <SignalTile title="Progress" value={`${progress}%`} tone="amber" />
+            <SignalTile title="Answered" value={`${answeredCount}/${DIAGNOSTIC_QUESTIONS.length}`} tone="neutral" />
+            <SignalTile title="Current Domain" value={currentQuestion.domain} tone="neutral" />
+            <SignalTile
+              title="Draft Status"
+              value={savingDraft ? "Saving" : "Saved"}
+              tone={savingDraft ? "amber" : "emerald"}
+            />
+          </div>
+
+          <PhaseStatus phase={phase} />
+
+          <div className="rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">
+                Question {currentQuestionIndex + 1} of {DIAGNOSTIC_QUESTIONS.length}
+              </span>
+
+              <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">
+                {currentQuestion.domain}
+              </span>
+            </div>
+
+            <p className="text-xl leading-relaxed text-white sm:text-2xl">
+              {currentQuestion.text}
+            </p>
+
+            <div className="mt-8 space-y-6">
+              <RatingRail
+                label="How true is this?"
+                value={currentAnswer.resonance}
+                onChange={setResonance}
+                valueLabel={RESONANCE_LABELS[currentAnswer.resonance]}
+                accent="amber"
+              />
+
+              <RatingRail
+                label="How certain are you?"
+                value={currentAnswer.certainty}
+                onChange={setCertainty}
+                valueLabel={CERTAINTY_LABELS[currentAnswer.certainty]}
+                accent="emerald"
+              />
+            </div>
+
+            <div className="mt-8 flex justify-between gap-4">
+              <button
+                onClick={goPrevious}
+                disabled={currentQuestionIndex === 0}
+                className={cn(
+                  "rounded-xl px-5 py-2.5 text-sm font-medium transition",
+                  currentQuestionIndex === 0
+                    ? "cursor-not-allowed text-white/20"
+                    : "border border-white/10 text-white/70 hover:bg-white/5",
+                )}
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={goNext}
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-medium text-black transition hover:bg-amber-400"
+              >
+                {currentQuestionIndex === DIAGNOSTIC_QUESTIONS.length - 1
+                  ? "Complete"
+                  : "Next"}
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
           </div>
-        </SectionShell>
+        </motion.div>
 
-        <SectionShell
-          eyebrow="Why this exists"
-          title="This is the foyer, not the whole building"
-          description="The point is to reveal enough truth that serious people want the deeper instruments."
+        <motion.aside
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 }}
+          className="space-y-6"
         >
-          <div className="space-y-4">
-            {[
-              "It gives a first disciplined reading without forcing the user into heavy enterprise detail immediately.",
-              "It exposes whether the problem is private, team-level, institutional, or already advisory-grade.",
-              "It creates appetite for the next room by proving there is actually a structure behind the language.",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-black/30 p-4">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
-                <span className="text-sm leading-6 text-white/68">{item}</span>
-              </div>
-            ))}
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <div className="flex items-center gap-2">
+              <LayoutGrid className="h-4 w-4 text-amber-400/70" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
+                Live constitutional readout
+              </span>
+            </div>
 
-            <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4">
-              <div className="text-xs uppercase tracking-[0.16em] text-amber-300">Commercial logic</div>
-              <p className="mt-2 text-sm leading-6 text-white/70">
-                Weak signal should not be sold Strategy Room. Strong signal should not be left wandering in content. This first layer exists to sort the traffic honestly.
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <SignalTile title="Authority clarity" value={`${authorityValue}%`} tone={authorityValue >= 70 ? "emerald" : authorityValue >= 45 ? "amber" : "neutral"} />
+              <SignalTile title="Strategic coherence" value={`${coherenceValue}%`} tone={coherenceValue >= 70 ? "emerald" : coherenceValue >= 45 ? "amber" : "neutral"} />
+              <SignalTile title="Pressure load" value={`${pressureValue}%`} tone={pressureValue >= 70 ? "amber" : "neutral"} />
+              <SignalTile title="Structural friction" value={`${frictionValue}%`} tone={frictionValue >= 70 ? "amber" : "neutral"} />
+            </div>
+
+            {decision ? (
+              <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4">
+                <div className="flex items-center gap-2">
+                  {decision.route === "STRATEGY" ? (
+                    <Crown className="h-4 w-4 text-emerald-400" />
+                  ) : decision.route === "DIAGNOSTIC" ? (
+                    <Scale className="h-4 w-4 text-amber-400" />
+                  ) : (
+                    <Lock className="h-4 w-4 text-white/45" />
+                  )}
+
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/42">
+                    Provisional route
+                  </span>
+                </div>
+
+                <div className="mt-3 text-base font-medium text-white">
+                  {routeInfo.title}
+                </div>
+                <div className="mt-2 text-sm leading-relaxed text-white/52">
+                  {routeInfo.description}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
+            <div className="flex items-center gap-2">
+              <LineChart className="h-4 w-4 text-amber-400/70" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
+                Routing logic
+              </span>
+            </div>
+
+            <div className="mt-5 space-y-4 text-sm leading-relaxed text-white/58">
+              <div className="flex items-start gap-3">
+                <Gavel className="mt-0.5 h-4 w-4 text-emerald-400/75" />
+                <span>
+                  <strong className="text-white/80">Strategy Room</strong> is reserved for signals that demonstrate consequence, authority, and credible escalation fitness.
+                </span>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Scale className="mt-0.5 h-4 w-4 text-amber-400/75" />
+                <span>
+                  <strong className="text-white/80">Executive Reporting</strong> is the correct middle layer when the issue is real but still needs disciplined interpretation.
+                </span>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Target className="mt-0.5 h-4 w-4 text-white/45" />
+                <span>
+                  The system does not escalate weak cases merely because the user wants importance theatre.
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-amber-500/16 bg-amber-500/[0.04] p-4">
+              <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-amber-300/74">
+                Institutional posture
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-white/56">
+                This chamber is designed to feel governed, commercial, and credible.
+                It should lower frivolity while increasing buyer confidence.
               </p>
             </div>
           </div>
-        </SectionShell>
-      </div>
 
-      <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_360px]">
-        <div className="space-y-8">
-          <SectionShell
-            eyebrow="Assessment domains"
-            title="Review each operating domain"
-            description="Rate both lived resonance and certainty."
-            aside={
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={expandAll}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 transition hover:bg-white/10"
-                >
-                  Expand all
-                </button>
-                <button
-                  onClick={collapseAll}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 transition hover:bg-white/10"
-                >
-                  Collapse all
-                </button>
+          {isComplete ? (
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <div className="flex items-center gap-2">
+                <ArrowRight className="h-4 w-4 text-amber-400/70" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
+                  Ready for verdict
+                </span>
               </div>
-            }
-          >
-            <div className="space-y-6">
-              {ALIGNMENT_DOMAIN_ORDER.map((domain) => {
-                const key = String(domain);
-                const scoreItem = domainScores[key];
-                const questions = groupedQuestions[key] ?? [];
-                const expanded = !!expandedDomains[key];
 
-                return (
-                  <DomainSummaryCard
-                    key={key}
-                    score={scoreItem}
-                    questions={questions}
-                    expanded={expanded}
-                    onToggle={() => toggleDomain(domain)}
-                  >
-                    {questions.map((question) => {
-                      const answer = answers[question.id] ?? { resonance: 5 as LikertValue, certainty: 5 as LikertValue };
-
-                      return (
-                        <DomainQuestionCard
-                          key={question.id}
-                          id={question.id}
-                          statement={question.statement}
-                          domain={question.domain}
-                          resonance={answer.resonance}
-                          certainty={answer.certainty}
-                          onResonanceChange={handleResonanceChange}
-                          onCertaintyChange={handleCertaintyChange}
-                        />
-                      );
-                    })}
-                  </DomainSummaryCard>
-                );
-              })}
-            </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Notes"
-            title="Additional context"
-            description="Use this space for context that should sit alongside the scored answers."
-          >
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={8}
-              className="w-full rounded-3xl border border-white/[0.08] bg-black/35 px-5 py-4 text-sm leading-7 text-white placeholder:text-white/28 focus:border-[#C9A96A]/40 focus:outline-none"
-              placeholder="Add any recurring pattern, pressure point, structural frustration, or context worth holding in view."
-            />
-          </SectionShell>
-        </div>
-
-        <div className="space-y-8 xl:sticky xl:top-6 xl:self-start">
-          <SectionShell
-            eyebrow="Action"
-            title="Move to the next room"
-            description="Complete the review and let the system route you to the right depth."
-          >
-            <div className="space-y-4">
-              <div className="rounded-3xl border border-white/[0.08] bg-black/30 p-5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Pill className={bandMeta.chip}>{bandMeta.label}</Pill>
-                  <Pill className="border-white/10 bg-white/5 text-white/60">{answeredCount}/{totalQuestions} answered</Pill>
-                </div>
-
-                <p className="mt-4 text-sm leading-6 text-white/60">
-                  {answeredCount === totalQuestions
-                    ? "The initial reading is complete. Proceed to the right next instrument."
-                    : `Finish the remaining ${totalQuestions - answeredCount} responses to unlock the proper next route.`}
-                </p>
-
-                {error ? (
-                  <div className="mt-4 flex items-start gap-2 rounded-2xl border border-red-400/20 bg-red-500/10 p-3 text-sm text-red-300">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                ) : null}
-              </div>
+              <p className="mt-3 text-sm leading-relaxed text-white/54">
+                You have completed the intake. Reveal the constitutional verdict
+                and let the system route you properly.
+              </p>
 
               <button
-                onClick={handleSubmit}
-                disabled={submitting || answeredCount !== totalQuestions}
-                className={cn(
-                  "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-medium transition",
-                  answeredCount === totalQuestions
-                    ? "bg-[#C9A96A] text-black hover:bg-[#E6C27A]"
-                    : "cursor-not-allowed bg-white/10 text-white/35",
-                )}
+                onClick={() => setShowResults(true)}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-medium text-black transition hover:bg-amber-400"
               >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Opening next route
-                  </>
-                ) : (
-                  <>
-                    {preview.cta}
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
+                Reveal verdict
+                <ArrowRight className="h-4 w-4" />
               </button>
-
-              <button
-                onClick={clearDraft}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
-              >
-                <AlertTriangle className="h-4 w-4" />
-                Clear saved draft
-              </button>
-
-              <div className="text-xs text-white/45">
-                {savingDraft ? "Saving local draft..." : "Draft saved locally."}
-              </div>
             </div>
-          </SectionShell>
-
-          <SectionShell
-            eyebrow="Escalation ladder"
-            title="Where this can lead"
-            description="The system should feel intentional, not random."
-          >
-            <div className="space-y-3">
-              {[
-                { label: "Initial Assessment", active: true },
-                { label: "Team Alignment", active: preview.route === "TEAM" || preview.route === "ENTERPRISE" || preview.route === "STRATEGY_ROOM" },
-                { label: "Enterprise Diagnostic", active: preview.route === "ENTERPRISE" || preview.route === "STRATEGY_ROOM" },
-                { label: "Strategy Room", active: preview.route === "STRATEGY_ROOM" },
-              ].map((step, idx) => (
-                <div key={step.label} className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-black/30 p-3">
-                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-full border text-xs", step.active ? "border-[#C9A96A]/30 bg-[#C9A96A]/10 text-[#E6C27A]" : "border-white/10 text-white/35")}>
-                    {idx + 1}
-                  </div>
-                  <div className={cn("text-sm", step.active ? "text-white" : "text-white/42")}>{step.label}</div>
-                </div>
-              ))}
-            </div>
-          </SectionShell>
-        </div>
+          ) : null}
+        </motion.aside>
       </div>
-    </main>
+    </div>
   );
 }

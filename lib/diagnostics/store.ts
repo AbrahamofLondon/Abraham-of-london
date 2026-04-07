@@ -71,7 +71,11 @@ function makeDiagnosticReference(type: string): string {
       .toUpperCase()
       .slice(0, 16) || "DIAG";
 
-  const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+  const stamp = new Date()
+  .toISOString()
+  .replace(/[-:.]/g, "")
+  .replace(/T/g, "")
+  .replace(/Z/g, "")
   const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `${prefix}-${stamp}-${rand}`;
 }

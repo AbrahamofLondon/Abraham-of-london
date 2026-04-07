@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/index.tsx — HOMEPAGE (Institutional, Route-Disciplined, Playbooks Surfaced)
+// pages/index.tsx — HOMEPAGE (Institutional, Route-Disciplined, Two Flagships Surfaced)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -26,6 +26,7 @@ import {
   Eye,
   Archive,
   Workflow,
+  Download,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -41,15 +42,20 @@ import InstitutionalClose from "@/components/homepage/InstitutionalClose";
 import ExecutiveReportingFlagship from "@/components/homepage/ExecutiveReportingFlagship";
 import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
 import StrategyRoomIntegration from "@/components/consulting/StrategyRoomIntegration";
-import { CanonInstitutionalIntro, OperatorBriefing } from "@/components/homepage";
+import {
+  CanonInstitutionalIntro,
+  OperatorBriefing,
+} from "@/components/homepage";
 import type { CanonPrelude } from "@/components/homepage/CanonInstitutionalIntro";
 
 import { joinHref, normalizeSlug } from "@/lib/content/shared";
 import { sanitizeData } from "@/lib/content/server";
-
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
+import {
+  getPublicationCatalogue,
+  getPublicationBySlug,
+} from "@/lib/editorial/catalogue";
+import type { PublicationRecord } from "@/lib/editorial/types";
+import type { PublicationItem } from "@/lib/editorial/server-readers";
 
 /* -----------------------------------------------------------------------------
   TYPES
@@ -76,21 +82,6 @@ export type EventItem = {
   status?: "open" | "limited" | "full" | "past" | null;
 };
 
-type PublicationItem = {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  description?: string | null;
-  author: string;
-  date?: string | null;
-  tier: string;
-  category?: string | null;
-  readingTime?: string | null;
-  documentId?: string | null;
-  href: string;
-  pdfHref: string | null;
-};
-
 type PlaybookItem = {
   slug: string;
   title: string;
@@ -112,6 +103,7 @@ type FeaturedRoute = {
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
+  flagshipPublication: PublicationItem | null;
   featuredPublications: PublicationItem[];
   featuredPlaybooks: PlaybookItem[];
   events: EventItem[];
@@ -134,21 +126,24 @@ const FEATURED_DESTINATIONS: FeaturedRoute[] = [
   {
     title: "Canon",
     href: "/canon",
-    description: "Doctrine, purpose, governance, civilisation, and the long-form spine of the platform.",
+    description:
+      "Doctrine, purpose, governance, civilisation, and the long-form spine of the platform.",
     eyebrow: "Doctrine",
     icon: <Compass className="h-4 w-4" />,
   },
   {
     title: "Editorials",
     href: "/editorials",
-    description: "Flagship essays, formal publications, and institutional written property.",
+    description:
+      "Flagship essays, formal publications, citations, previews, and institutional written property.",
     eyebrow: "Publications",
     icon: <ScrollText className="h-4 w-4" />,
   },
   {
     title: "Playbooks",
     href: "/playbooks",
-    description: "Execution-grade frameworks for leaders, operators, and institutions under pressure.",
+    description:
+      "Execution-grade frameworks for leaders, operators, and institutions under pressure.",
     eyebrow: "Execution",
     icon: <Workflow className="h-4 w-4" />,
   },
@@ -162,14 +157,16 @@ const FEATURED_DESTINATIONS: FeaturedRoute[] = [
   {
     title: "Vault Briefs",
     href: "/vault/briefs",
-    description: "Operator-grade briefings, dossiers, and premium intelligence.",
+    description:
+      "Operator-grade briefings, dossiers, and premium intelligence.",
     eyebrow: "Intelligence",
     icon: <FileText className="h-4 w-4" />,
   },
   {
     title: "Consulting",
     href: "/consulting",
-    description: "Private advisory, diagnostics, board-grade problem solving, and decision architecture.",
+    description:
+      "Private advisory, diagnostics, board-grade problem solving, and decision architecture.",
     eyebrow: "Advisory",
     icon: <Briefcase className="h-4 w-4" />,
   },
@@ -261,7 +258,12 @@ function HQHeader({
 
   return (
     <div className={["max-w-4xl", isCenter ? "mx-auto text-center" : ""].join(" ")}>
-      <div className={["flex items-center gap-2", isCenter ? "justify-center" : ""].join(" ")}>
+      <div
+        className={[
+          "flex items-center gap-2",
+          isCenter ? "justify-center" : "",
+        ].join(" ")}
+      >
         {icon ? (
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.05] text-amber-300">
             {icon}
@@ -473,7 +475,9 @@ function RouteCard({ item }: { item: FeaturedRoute }) {
         </div>
 
         <h3 className="mt-5 font-serif text-2xl text-white">{item.title}</h3>
-        <p className="mt-4 text-sm leading-relaxed text-white/70">{item.description}</p>
+        <p className="mt-4 text-sm leading-relaxed text-white/70">
+          {item.description}
+        </p>
 
         <div className="mt-7">
           <Link
@@ -508,106 +512,232 @@ function OperatingStat({
           </div>
           <div className="text-amber-300/80">{icon}</div>
         </div>
-        <div className="mt-6 font-serif text-5xl leading-none text-white">{value}</div>
+        <div className="mt-6 font-serif text-5xl leading-none text-white">
+          {value}
+        </div>
         <p className="mt-5 text-base leading-relaxed text-white/68">{body}</p>
       </div>
     </Panel>
   );
 }
 
-function DiagnosticEntryCard() {
+function FlagshipProductCard() {
   return (
-    <Panel className="h-full">
-      <div className="p-6 md:p-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-            Diagnostics
-          </div>
-          <ScanSearch className="h-5 w-5 text-amber-300/80" />
-        </div>
-
-        <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
-          Commission diagnostic review before mandate work.
-        </h3>
-
-        <p className="mt-4 text-sm leading-relaxed text-white/70">
-          Not every serious problem should begin with a call. Some should begin
-          with a disciplined reading of reality.
-        </p>
-
-        <div className="mt-6 space-y-3">
-          {[
-            "Quick Diagnostic — individual signal",
-            "Team Alignment — execution and coherence reading",
-            "Enterprise Diagnostic — structural interpretation under pressure",
-          ].map((line) => (
-            <div key={line} className="flex items-start gap-3 text-sm text-white/58">
-              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
-              <span>{line}</span>
+    <Panel>
+      <div className="p-6 md:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+              Flagship Product
             </div>
-          ))}
+            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">
+              Executive Reporting · Diagnostics Bridge
+            </div>
+          </div>
+
+          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.22em] text-white/50">
+            Premium Interpretation Layer
+          </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/diagnostics"
-            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
-          >
-            Enter Diagnostics <ChevronRight className="h-4 w-4" />
-          </Link>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <h3 className="font-serif text-3xl leading-[1.02] text-white md:text-4xl">
+              Executive Reporting
+            </h3>
+
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/60">
+              The premium bridge between raw diagnostic signal and private
+              mandate work.
+            </p>
+
+            <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/72 md:text-[15px]">
+              Built for founders, boards, leadership teams, and institutions
+              that need disciplined interpretation before escalation. This is
+              where signal becomes structured judgement.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+              <span>Diagnostic-grade</span>
+              <span>Board-facing</span>
+              <span>Strategy-ready</span>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/diagnostics/executive-reporting"
+                className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 transition hover:bg-amber-500/18"
+              >
+                Open Flagship Product
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/diagnostics"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition hover:bg-white/[0.08]"
+              >
+                Enter Diagnostics
+                <ScanSearch className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-white/10 bg-black/30 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.30em] text-white/45">
+              Product Logic
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {[
+                "Structured interpretation before intervention",
+                "Bridges free signal and private mandate",
+                "Filters weak cases before advisory escalation",
+                "Produces decision-facing outputs, not generic feedback",
+              ].map((line) => (
+                <div
+                  key={line}
+                  className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white/78"
+                >
+                  <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+                  <span>{line}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 text-xs leading-relaxed text-white/45">
+              This is the first commercial layer that feels like a serious
+              institutional product rather than a glorified form result.
+            </p>
+          </div>
         </div>
       </div>
     </Panel>
   );
 }
 
-function AdvisoryPathCard() {
+function FlagshipPublicationCard({ item }: { item: PublicationItem }) {
   return (
-    <Panel className="h-full">
-      <div className="p-6 md:p-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-            Advisory
-          </div>
-          <Briefcase className="h-5 w-5 text-amber-300/80" />
-        </div>
-
-        <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
-          Private work begins where consequence hardens.
-        </h3>
-
-        <p className="mt-4 text-sm leading-relaxed text-white/70">
-          Strategy Room and private advisory remain selective. Diagnostics improve
-          fit before private work is accepted.
-        </p>
-
-        <div className="mt-6 space-y-3">
-          {[
-            "Board-grade decision environments",
-            "Founder advisory under pressure",
-            "Structured artifacts, not decorative advice",
-          ].map((line) => (
-            <div key={line} className="flex items-start gap-3 text-sm text-white/58">
-              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
-              <span>{line}</span>
+    <Panel>
+      <div className="p-6 md:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+              Flagship Editorial
             </div>
-          ))}
+            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">
+              {item.category || "Editorial"} · {item.tier}
+            </div>
+          </div>
+
+          {item.documentId ? (
+            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.22em] text-white/50">
+              {item.documentId}
+            </div>
+          ) : null}
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/consulting"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
-          >
-            Advisory Page <ChevronRight className="h-4 w-4" />
-          </Link>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+          <div>
+            <h3 className="font-serif text-3xl leading-[1.02] text-white md:text-4xl">
+              {item.title}
+            </h3>
 
-          <Link
-            href="/strategy-room"
-            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
-          >
-            Enter Strategy Room <ArrowRight className="h-4 w-4" />
-          </Link>
+            {item.subtitle ? (
+              <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/60">
+                {item.subtitle}
+              </p>
+            ) : null}
+
+            {item.description ? (
+              <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/72 md:text-[15px]">
+                {item.description}
+              </p>
+            ) : null}
+
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+              {item.readingTime ? <span>{item.readingTime}</span> : null}
+              {item.date ? <span>{item.date}</span> : null}
+              <span>Abraham of London</span>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href={item.href}
+                className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 transition hover:bg-amber-500/18"
+              >
+                Read Editorial
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+
+              {item.previewHref ? (
+                <a
+                  href={item.previewHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition hover:bg-white/[0.08]"
+                >
+                  Preview
+                  <Eye className="h-4 w-4" />
+                </a>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-white/10 bg-black/30 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.30em] text-white/45">
+              Publication Assets
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {item.pdfHref ? (
+                <a
+                  href={item.pdfHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white transition hover:bg-white/[0.07]"
+                >
+                  <span className="inline-flex items-center gap-3">
+                    <Download className="h-4 w-4 text-amber-300" />
+                    Premium PDF Edition
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-white/45" />
+                </a>
+              ) : null}
+
+              {item.epubHref ? (
+                <a
+                  href={item.epubHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white transition hover:bg-white/[0.07]"
+                >
+                  <span className="inline-flex items-center gap-3">
+                    <BookOpen className="h-4 w-4 text-amber-300" />
+                    EPUB Edition
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-white/45" />
+                </a>
+              ) : null}
+
+              <a
+                href={item.citationHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white transition hover:bg-white/[0.07]"
+              >
+                <span className="inline-flex items-center gap-3">
+                  <FileText className="h-4 w-4 text-amber-300" />
+                  Citation Record
+                </span>
+                <ArrowRight className="h-4 w-4 text-white/45" />
+              </a>
+            </div>
+
+            <p className="mt-5 text-xs leading-relaxed text-white/45">
+              Clean page first. Verified assets second. No raw dump, no dead-end
+              file theatre.
+            </p>
+          </div>
         </div>
       </div>
     </Panel>
@@ -659,6 +789,7 @@ class ModuleBoundary extends React.Component<
 const HomePage: NextPage<HomePageProps> = ({
   featuredShorts = [],
   featuredBriefing = null,
+  flagshipPublication = null,
   featuredPublications = [],
   featuredPlaybooks = [],
   events = [],
@@ -682,25 +813,25 @@ const HomePage: NextPage<HomePageProps> = ({
 
   const actions = [
     {
-      href: "/canon",
-      title: "Enter the Canon",
+      href: "/diagnostics",
+      title: "Begin with Diagnostics",
       description:
-        "Doctrine, purpose, governance, and civilisation arranged as one coherent spine.",
-      tag: "Primary",
+        "Use the diagnostic ladder to establish signal, pressure, and fit before escalation.",
+      tag: "Gateway",
     },
     {
       href: "/diagnostics/executive-reporting",
       title: "View Executive Reporting",
       description:
-        "Premium reporting for founders, boards, leadership teams, and institutions before advisory escalation.",
+        "See the flagship bridge product that turns diagnostic signal into decision-grade interpretation.",
       tag: "Flagship",
     },
     {
-      href: "/strategy-room",
+      href: "/consulting/strategy-room",
       title: "Enter Strategy Room",
       description:
-        "For high-consequence decisions requiring documented thinking, trade-offs, and control.",
-      tag: "Private",
+        "Private chamber for situations where consequence is already material and mandate-level intervention is justified.",
+      tag: "Selective",
     },
   ];
 
@@ -717,11 +848,13 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
-      <section className="relative bg-black">
+      <section className="relative z-0 isolate bg-black">
         <CinematicHero
           counts={heroCounts}
           onScroll={() =>
-            document.getElementById("prelude")?.scrollIntoView({ behavior: "smooth" })
+            document
+              .getElementById("prelude")
+              ?.scrollIntoView({ behavior: "smooth" })
           }
         />
       </section>
@@ -734,18 +867,42 @@ const HomePage: NextPage<HomePageProps> = ({
         <HQHeader
           eyebrow="Prelude"
           title="The gateway to the whole system."
-          description="Not a blog. Not a personality platform. Doctrine, diagnostics, strategy, playbooks, deployables, and private mandate work arranged as one disciplined architecture."
+          description="Not a blog. Not a personality platform. Doctrine, diagnostics, strategy, playbooks, deployables, publications, and private mandate work arranged as one disciplined architecture."
           icon={<Layers className="h-4 w-4" />}
         />
 
         <ExecutiveRail
           items={[
-            { href: "/canon", label: "Canon", icon: <Compass className="h-3.5 w-3.5" /> },
-            { href: "/editorials", label: "Editorials", icon: <BookOpen className="h-3.5 w-3.5" /> },
-            { href: "/playbooks", label: "Playbooks", icon: <Workflow className="h-3.5 w-3.5" /> },
-            { href: "/vault/briefs", label: "Briefs", icon: <FileText className="h-3.5 w-3.5" /> },
-            { href: "/diagnostics", label: "Diagnostics", icon: <ScanSearch className="h-3.5 w-3.5" /> },
-            { href: "/consulting", label: "Advisory", icon: <Briefcase className="h-3.5 w-3.5" /> },
+            {
+              href: "/canon",
+              label: "Canon",
+              icon: <Compass className="h-3.5 w-3.5" />,
+            },
+            {
+              href: "/editorials",
+              label: "Editorials",
+              icon: <BookOpen className="h-3.5 w-3.5" />,
+            },
+            {
+              href: "/playbooks",
+              label: "Playbooks",
+              icon: <Workflow className="h-3.5 w-3.5" />,
+            },
+            {
+              href: "/vault/briefs",
+              label: "Briefs",
+              icon: <FileText className="h-3.5 w-3.5" />,
+            },
+            {
+              href: "/diagnostics",
+              label: "Diagnostics",
+              icon: <ScanSearch className="h-3.5 w-3.5" />,
+            },
+            {
+              href: "/consulting",
+              label: "Advisory",
+              icon: <Briefcase className="h-3.5 w-3.5" />,
+            },
           ]}
         />
 
@@ -769,7 +926,7 @@ const HomePage: NextPage<HomePageProps> = ({
           <OperatingStat
             label="Editorial Spine"
             value={String(counts.publications)}
-            body="Flagship publications and printed assets treated as institutional property, not loose posts."
+            body="Flagship publications and editorial property treated as institutional assets, not loose content."
             icon={<ScrollText className="h-5 w-5" />}
           />
           <OperatingStat
@@ -803,7 +960,31 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      <Bridge text="From doctrine → to credibility" />
+      <Bridge text="From doctrine → to two flagships" />
+
+      <Section
+        id="flagships"
+        variant="surface"
+        cap="Flagships — product and editorial"
+      >
+        <AnchorOffset id="flagships" />
+
+        <HQHeader
+          eyebrow="Flagships"
+          title="The front of the platform now carries its lead product and lead publication."
+          description="One flagship product for interpretation and escalation. One flagship editorial for doctrine and argument in full."
+          icon={<Crown className="h-4 w-4" />}
+        />
+
+        <div className="mt-10 space-y-8">
+          <FlagshipProductCard />
+          {flagshipPublication ? (
+            <FlagshipPublicationCard item={flagshipPublication} />
+          ) : null}
+        </div>
+      </Section>
+
+      <Bridge text="From flagships → to credibility" />
 
       <Section id="proof" variant="surface" cap="Credibility — withstands scrutiny">
         <AnchorOffset id="proof" />
@@ -837,12 +1018,17 @@ const HomePage: NextPage<HomePageProps> = ({
                       d: "A living platform: doctrine, diagnostics, editorial property, playbooks, deployables, and controlled engagement paths.",
                     },
                   ].map((x) => (
-                    <div key={x.n} className="border-l border-amber-500/25 pl-5">
+                    <div
+                      key={x.n}
+                      className="border-l border-amber-500/25 pl-5"
+                    >
                       <div className="text-[10px] font-mono tracking-[0.28em] text-amber-300/90">
                         {x.n}
                       </div>
                       <div className="mt-2 font-medium text-white">{x.t}</div>
-                      <div className="mt-2 text-sm leading-relaxed text-white/70">{x.d}</div>
+                      <div className="mt-2 text-sm leading-relaxed text-white/70">
+                        {x.d}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -863,7 +1049,8 @@ const HomePage: NextPage<HomePageProps> = ({
                       {featuredBriefing.title}
                     </div>
                     <div className="mt-3 leading-relaxed text-white/70">
-                      {featuredBriefing.excerpt || "Operator-grade intelligence engineered for decisions."}
+                      {featuredBriefing.excerpt ||
+                        "Operator-grade intelligence engineered for decisions."}
                     </div>
                     <div className="mt-6">
                       <Link
@@ -887,37 +1074,174 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="From credibility → to diagnostics" />
 
-      <Section id="diagnostics" variant="default" cap="Diagnostics — paid clarity">
+      <Section
+        id="diagnostics"
+        variant="default"
+        cap="Diagnostics architecture — gateway to escalation"
+      >
         <AnchorOffset id="diagnostics" />
 
         <HQHeader
           eyebrow="Diagnostics"
-          title="Commission diagnostic review before escalation."
-          description="Not every issue warrants immediate advisory. Some require a disciplined reading of drift, weakness, misalignment, and correction priority."
+          title="Clarity before intervention."
+          description="The platform does not force serious buyers into advisory too early. Diagnostics establish the signal. Executive Reporting interprets it. Strategy Room intervenes when the cost of delay or misjudgment is already material."
           icon={<Activity className="h-4 w-4" />}
         />
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <DiagnosticEntryCard />
-          <AdvisoryPathCard />
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <Panel className="h-full">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+                  Step 01
+                </div>
+                <ScanSearch className="h-5 w-5 text-amber-300/80" />
+              </div>
+
+              <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
+                Diagnostics
+              </h3>
+
+              <p className="mt-4 text-sm leading-relaxed text-white/70">
+                The gateway layer. Use this to read pressure, drift, misalignment,
+                and structural weakness before forcing a solution.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                {[
+                  "Directional Integrity — individual signal",
+                  "Team Alignment — execution and communication signal",
+                  "Enterprise Diagnostic — institutional consequence signal",
+                ].map((line) => (
+                  <div
+                    key={line}
+                    className="flex items-start gap-3 text-sm text-white/58"
+                  >
+                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <Link
+                  href="/diagnostics"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
+                >
+                  Open Diagnostics <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </Panel>
+
+          <Panel className="h-full">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+                  Step 02
+                </div>
+                <FileText className="h-5 w-5 text-amber-300/80" />
+              </div>
+
+              <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
+                Executive Reporting
+              </h3>
+
+              <p className="mt-4 text-sm leading-relaxed text-white/70">
+                The flagship bridge product. It takes raw diagnostic signal and turns
+                it into a disciplined executive artifact: narrative, exposure,
+                correction priority, and decision fit.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                {[
+                  "Readable by founders, boards, and operators",
+                  "Narrative + matrix + exposure in one output",
+                  "Premium bridge before private mandate work",
+                ].map((line) => (
+                  <div
+                    key={line}
+                    className="flex items-start gap-3 text-sm text-white/58"
+                  >
+                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <Link
+                  href="/diagnostics/executive-reporting"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
+                >
+                  View Flagship Product <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </Panel>
+
+          <Panel className="h-full">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+                  Step 03
+                </div>
+                <Crown className="h-5 w-5 text-amber-300/80" />
+              </div>
+
+              <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
+                Strategy Room
+              </h3>
+
+              <p className="mt-4 text-sm leading-relaxed text-white/70">
+                The private chamber. Reserved for high-consequence situations where
+                the problem is already material and structured intervention is justified.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                {[
+                  "Selective, not casual",
+                  "For live decisions under pressure",
+                  "Mandate work with documented trade-offs and control",
+                ].map((line) => (
+                  <div
+                    key={line}
+                    className="flex items-start gap-3 text-sm text-white/58"
+                  >
+                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <Link
+                  href="/consulting/strategy-room"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
+                >
+                  Enter Strategy Room <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </Panel>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {[
             {
               icon: <ScanSearch className="h-4 w-4" />,
-              title: "Quick Diagnostic",
-              body: "Fast signal for individuals or small-team clarity.",
+              title: "Signal first",
+              body: "Use diagnostics to establish what is actually happening before the room fills with noise.",
             },
             {
               icon: <Scale className="h-4 w-4" />,
-              title: "Strategic Diagnostic",
-              body: "Deeper interpretation where correction priority matters more than raw scoring.",
+              title: "Interpretation second",
+              body: "Executive Reporting turns signal into a decision-grade reading that can be understood and acted on.",
             },
             {
               icon: <Crown className="h-4 w-4" />,
-              title: "Diagnostic + Advisory",
-              body: "For decisions with politics, execution risk, and consequence.",
+              title: "Mandate last",
+              body: "Strategy Room is the private chamber when the consequences already justify intervention.",
             },
           ].map((item) => (
             <Panel key={item.title}>
@@ -936,12 +1260,18 @@ const HomePage: NextPage<HomePageProps> = ({
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
           <Link
             href="/diagnostics"
             className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-300 hover:bg-amber-500/18"
           >
-            Enter Diagnostics <ChevronRight className="h-4 w-4" />
+            Begin with Diagnostics <ChevronRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/diagnostics/executive-reporting"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
+          >
+            Open Flagship Product <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
       </Section>
@@ -957,18 +1287,26 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="From clarity → to intervention" />
 
-      <Section id="strategy-room" variant="default" cap="Escalation — when reporting becomes mandate">
+      <Section
+        id="strategy-room"
+        variant="default"
+        cap="Escalation — when reporting becomes mandate"
+      >
         <AnchorOffset id="strategy-room" />
         <ModuleBoundary label="StrategyRoomIntegration">
           <StrategyRoomIntegration />
         </ModuleBoundary>
       </Section>
 
-      {(featuredPublications.length > 0 || featuredPlaybooks.length > 0) ? (
+      {featuredPublications.length > 0 || featuredPlaybooks.length > 0 ? (
         <>
           <Bridge text="From diagnostics → to editorial canon and execution" />
 
-          <Section id="publications" variant="surface" cap="Publications and playbooks — doctrine and execution">
+          <Section
+            id="publications"
+            variant="surface"
+            cap="Publications and playbooks — doctrine and execution"
+          >
             <AnchorOffset id="publications" />
 
             <HQHeader
@@ -981,7 +1319,7 @@ const HomePage: NextPage<HomePageProps> = ({
             {featuredPublications.length > 0 ? (
               <>
                 <div className="mt-10 text-[10px] font-mono uppercase tracking-[0.34em] text-white/50">
-                  Flagship Publications
+                  Supporting Publications
                 </div>
                 <div className="mt-4 grid gap-6 lg:grid-cols-3">
                   {featuredPublications.slice(0, 3).map((item) => (
@@ -1087,8 +1425,12 @@ const HomePage: NextPage<HomePageProps> = ({
                 <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
                   {a.tag}
                 </div>
-                <div className="mt-4 font-serif text-2xl text-white">{a.title}</div>
-                <div className="mt-3 leading-relaxed text-white/70">{a.description}</div>
+                <div className="mt-4 font-serif text-2xl text-white">
+                  {a.title}
+                </div>
+                <div className="mt-3 leading-relaxed text-white/70">
+                  {a.description}
+                </div>
                 <div className="mt-6">
                   <Link
                     href={a.href}
@@ -1279,12 +1621,40 @@ function pickBooleanFlag(d: any): boolean {
   );
 }
 
-function fileExistsInPublic(relPath: string): boolean {
-  try {
-    return fs.existsSync(path.join(process.cwd(), "public", relPath.replace(/^\/+/, "")));
-  } catch {
-    return false;
-  }
+function publicationToItem(item: PublicationRecord): PublicationItem {
+  const editorialHref = `/editorials/${encodeURIComponent(item.slug)}`;
+
+  const previewHref =
+    item.previewEnabled
+      ? item.previewPath ||
+        `/api/editorials/preview/${encodeURIComponent(item.slug)}`
+      : null;
+
+  const pdfHref =
+    item.pdfPath && item.pdfPath.trim() ? item.pdfPath.trim() : null;
+
+  const epubHref =
+    item.epubEnabled && item.epubPath && item.epubPath.trim()
+      ? item.epubPath.trim()
+      : null;
+
+  return {
+    slug: item.slug,
+    title: item.title,
+    subtitle: item.subtitle || null,
+    description: item.description || null,
+    author: item.author,
+    date: item.date || null,
+    tier: item.tier,
+    category: item.category || null,
+    readingTime: item.readingTime || null,
+    documentId: item.contentId || null,
+    href: editorialHref,
+    pdfHref,
+    previewHref,
+    epubHref,
+    citationHref: `/api/editorials/citation/${encodeURIComponent(item.slug)}`,
+  };
 }
 
 function toItem(d: any): FeaturedItem | null {
@@ -1294,9 +1664,17 @@ function toItem(d: any): FeaturedItem | null {
   const isShort = k === "short" || fp.startsWith("shorts/");
   const isBrief =
     k === "brief" || fp.startsWith("briefs/") || fp.startsWith("vault/briefs/");
-  const isPost = k === "post" || fp.startsWith("blog/") || fp.startsWith("posts/");
+  const isPost =
+    k === "post" || fp.startsWith("blog/") || fp.startsWith("posts/");
 
-  const collection = isShort ? "shorts" : isBrief ? "vault/briefs" : isPost ? "blog" : null;
+  const collection = isShort
+    ? "shorts"
+    : isBrief
+      ? "vault/briefs"
+      : isPost
+        ? "blog"
+        : null;
+
   if (!collection) return null;
 
   const rawSlug = computedSlug(d);
@@ -1308,7 +1686,9 @@ function toItem(d: any): FeaturedItem | null {
     .replace(/^posts\//, "");
 
   const href =
-    collection === "vault/briefs" ? `/vault/briefs/${bare}` : joinHref(collection, bare);
+    collection === "vault/briefs"
+      ? `/vault/briefs/${bare}`
+      : joinHref(collection, bare);
 
   return {
     title: safeString(d?.title, "Untitled"),
@@ -1322,7 +1702,10 @@ function toItem(d: any): FeaturedItem | null {
 }
 
 function deriveEventMode(d: any): EventItem["mode"] {
-  const raw = String(d?.mode || d?.format || d?.delivery || "in-person").toLowerCase();
+  const raw = String(
+    d?.mode || d?.format || d?.delivery || "in-person"
+  ).toLowerCase();
+
   if (raw.includes("hybrid")) return "hybrid";
   if (raw.includes("online") || raw.includes("virtual")) return "online";
   return "in-person";
@@ -1330,6 +1713,7 @@ function deriveEventMode(d: any): EventItem["mode"] {
 
 function deriveEventStatus(date: string, explicit?: any): EventItem["status"] {
   const explicitRaw = String(explicit || "").toLowerCase();
+
   if (
     explicitRaw === "open" ||
     explicitRaw === "limited" ||
@@ -1378,7 +1762,10 @@ function toEvent(d: any): EventItem | null {
   if (!date) return null;
 
   const mode = deriveEventMode(d);
-  const location = safeString(d?.location, mode === "online" ? "Online" : "London");
+  const location = safeString(
+    d?.location,
+    mode === "online" ? "Online" : "London"
+  );
   const status = deriveEventStatus(String(date), d?.status);
 
   const capacity = typeof d?.capacity === "number" ? d.capacity : null;
@@ -1395,20 +1782,6 @@ function toEvent(d: any): EventItem | null {
     duration,
     status,
   };
-}
-
-function readLibraryCount(): number {
-  try {
-    const jsonPath = path.join(process.cwd(), "public", "pdfs", "registry.json");
-    if (!fs.existsSync(jsonPath)) return 0;
-
-    const raw = fs.readFileSync(jsonPath, "utf8");
-    const parsed = JSON.parse(raw);
-    const arr = Array.isArray(parsed?.items) ? parsed.items : Array.isArray(parsed) ? parsed : [];
-    return Array.isArray(arr) ? arr.length : 0;
-  } catch {
-    return 0;
-  }
 }
 
 function isDraftLocal(d: any): boolean {
@@ -1462,64 +1835,9 @@ function shouldForceFallback(
 
 const PRELUDE_SOURCE_FP = "books/the-architecture-of-human-purpose";
 
-function readPrintSourcePublications(): PublicationItem[] {
-  const dir = path.join(process.cwd(), "scripts", "pdf", "print-sources");
-  if (!fs.existsSync(dir)) return [];
-
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".print.md"));
-
-  return files
-    .map((file) => {
-      const raw = fs.readFileSync(path.join(dir, file), "utf8");
-      const parsed = matter(raw);
-      const data = parsed.data as Record<string, unknown>;
-
-      const slug = file.replace(/\.print\.md$/i, "");
-      const title = safeString(data.title, slug);
-      const subtitle = safeString(data.subtitle) || null;
-      const description = safeString(data.description) || null;
-      const author = safeString(data.author, "Abraham of London");
-      const date = safeString(data.date) || null;
-      const tier = safeString(data.tier, "public");
-      const category = safeString(data.category) || "Editorial";
-      const readingTime =
-        safeString(data.readingTime) ||
-        safeString(data.readTime) ||
-        null;
-      const documentId = safeString(data.documentId) || null;
-
-      const preferredPdf = `/downloads/${slug}.pdf`;
-      const fallbackPdf = `/assets/downloads/${slug}.pdf`;
-      const pdfHref = fileExistsInPublic(preferredPdf)
-        ? preferredPdf
-        : fileExistsInPublic(fallbackPdf)
-        ? fallbackPdf
-        : null;
-
-      return {
-        slug,
-        title,
-        subtitle,
-        description,
-        author,
-        date,
-        tier,
-        category,
-        readingTime,
-        documentId,
-        href: `/editorials/${slug}`,
-        pdfHref,
-      };
-    })
-    .sort((a, b) => {
-      const da = Date.parse(a.date || "") || 0;
-      const db = Date.parse(b.date || "") || 0;
-      return db - da;
-    });
-}
-
 function readPlaybooksFromGenerated(gen: any): PlaybookItem[] {
   const arr = Array.isArray(gen?.allPlaybooks) ? gen.allPlaybooks : [];
+
   return arr
     .filter((p: any) => !p?.draft)
     .map((p: any) => {
@@ -1543,17 +1861,29 @@ function readPlaybooksFromGenerated(gen: any): PlaybookItem[] {
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
-  let events: EventItem[] = [];
-  let featuredPublications: PublicationItem[] = readPrintSourcePublications();
   let featuredPlaybooks: PlaybookItem[] = [];
+  let events: EventItem[] = [];
+
+  const catalogue = getPublicationCatalogue();
+  const flagshipPublicationRecord =
+    getPublicationBySlug("ultimate-purpose-of-man") || catalogue[0] || null;
+
+  const flagshipPublication = flagshipPublicationRecord
+    ? publicationToItem(flagshipPublicationRecord)
+    : null;
+
+  const featuredPublications: PublicationItem[] = catalogue
+    .filter((item) => item.slug !== flagshipPublication?.slug)
+    .slice(0, 3)
+    .map(publicationToItem);
 
   const counts = {
     shorts: 0,
     canon: 0,
     briefs: 0,
     downloads: 0,
-    library: readLibraryCount(),
-    publications: featuredPublications.length,
+    library: 0,
+    publications: catalogue.length,
     playbooks: 0,
   };
 
@@ -1570,7 +1900,11 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     ctaLabel: "Open the Prelude MiniBook",
   };
 
-  const computeFromDocs = (docsIn: any[], dataForBooks?: any, dataForPlaybooks?: any) => {
+  const computeFromDocs = (
+    docsIn: any[],
+    dataForBooks?: any,
+    dataForPlaybooks?: any
+  ) => {
     const stableDocs = (docsIn || []).filter((d) => !isDraftLocal(d));
 
     const shortsDocs = stableDocs.filter(
@@ -1586,7 +1920,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
         flattenedPath(d).startsWith("vault/briefs/")
     );
     const downloadsDocs = stableDocs.filter(
-      (d) => kindLower(d) === "download" || flattenedPath(d).startsWith("downloads/")
+      (d) =>
+        kindLower(d) === "download" ||
+        flattenedPath(d).startsWith("downloads/")
     );
 
     counts.shorts = shortsDocs.length;
@@ -1601,7 +1937,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     const preludeBook = books.find((b: any) => {
       const fp = String(b?._raw?.flattenedPath || "");
       const slug = String(b?.slug || "");
-      return fp === PRELUDE_SOURCE_FP || slug === "/books/the-architecture-of-human-purpose";
+      return (
+        fp === PRELUDE_SOURCE_FP ||
+        slug === "/books/the-architecture-of-human-purpose"
+      );
     });
 
     if (preludeBook) {
@@ -1613,7 +1952,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       canonPrelude = {
         title: safeString(preludeBook?.title, canonPrelude.title),
         subtitle: safeString(preludeBook?.subtitle, canonPrelude.subtitle),
-        description: safeString(preludeBook?.description, canonPrelude.description),
+        description: safeString(
+          preludeBook?.description,
+          canonPrelude.description
+        ),
         excerpt: safeString(
           preludeBook?.excerpt || preludeBook?.description,
           canonPrelude.excerpt
@@ -1625,18 +1967,15 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       };
     }
 
-    featuredPlaybooks = readPlaybooksFromGenerated(dataForPlaybooks).slice(0, 3);
-    counts.playbooks = readPlaybooksFromGenerated(dataForPlaybooks).length;
+    const allPlaybooks = readPlaybooksFromGenerated(dataForPlaybooks);
+    featuredPlaybooks = allPlaybooks.slice(0, 3);
+    counts.playbooks = allPlaybooks.length;
 
     const rawEvents = stableDocs.filter(
       (d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/")
     );
 
-    events = rawEvents
-      .map(toEvent)
-      .filter(Boolean) as EventItem[];
-
-    events = events
+    events = (rawEvents.map(toEvent).filter(Boolean) as EventItem[])
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 6);
 
@@ -1662,7 +2001,8 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
         : (shortsDocs
             .sort(
               (a: any, b: any) =>
-                (Date.parse(b?.date || "") || 0) - (Date.parse(a?.date || "") || 0)
+                (Date.parse(b?.date || "") || 0) -
+                (Date.parse(a?.date || "") || 0)
             )
             .slice(0, 8)
             .map(toItem)
@@ -1690,7 +2030,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       const docs = collectAnyDocs(gen);
       computeFromDocs(docs, gen, gen);
     } catch {
-      // defaults remain
+      // keep defaults
     }
   }
 
@@ -1698,6 +2038,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     props: sanitizeData({
       featuredShorts,
       featuredBriefing,
+      flagshipPublication,
       featuredPublications,
       featuredPlaybooks,
       events,

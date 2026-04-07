@@ -1,3 +1,4 @@
+// next.config.mjs
 import path from "path";
 import { fileURLToPath } from "url";
 import { withContentlayer } from "next-contentlayer2";
@@ -11,16 +12,22 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
-  swcMinify: true,
+
+  productionBrowserSourceMaps: false,
 
   experimental: {
-    optimizePackageImports: ["lucide-react"],
-    serverComponentsExternalPackages: ["@prisma/client"],
-    serverActions: true,
-    turbo: {
-      rules: {
-        "*.mdx": ["@mdx-js/loader"],
-      },
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-icons",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-tooltip",
+      "date-fns",
+      "lodash-es",
+    ],
+    serverActions: {
+      bodySizeLimit: "2mb",
     },
   },
 
@@ -33,21 +40,30 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
+    // FIX: Add all quality values used in your Image components
+    qualities: [75, 82, 85],
   },
 
   httpAgentOptions: {
     keepAlive: true,
   },
 
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       "@": path.resolve(__dirname),
     };
 
-    config.module.exprContextCritical = false;
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: "all",
+          maxSize: 244000,
+        },
+      };
+    }
 
-    // 🚀 IMPORTANT: prevent large MDX bundling into client
     if (!isServer) {
       config.module.rules.push({
         test: /\.mdx?$/,
@@ -56,23 +72,43 @@ const nextConfig = {
       });
     }
 
+    if (dev) {
+      config.module.rules.push({
+        test: /\.map$/,
+        use: "null-loader",
+      });
+    }
+
     return config;
   },
 
-  headers: async () => [
-    {
-      source: "/api/:path*",
-      headers: [
-        { key: "Cache-Control", value: "no-store" },
-      ],
-    },
-    {
-      source: "/static/:path*",
-      headers: [
-        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-      ],
-    },
-  ],
+  async headers() {
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+      {
+        source: "/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+    ];
+  },
 };
 
 export default withContentlayer(nextConfig);

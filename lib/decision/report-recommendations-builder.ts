@@ -1,267 +1,241 @@
-// lib/decision/report-recommendations-builder.ts
-// ============================================================================
-// REPORT RECOMMENDATIONS BUILDER
-// Generates decision intelligence recommendations from executive report context
-// ============================================================================
+import {
+  buildDecisionSignalProfiles,
+  type DecisionAssetContextRow,
+  type DecisionSignalProfile,
+} from "@/lib/decision/build-decision-signal-profile";
 
-import { getAllDecisionAssetsFromContent } from "@/lib/decision/content-asset-adapter";
-import type { DecisionAsset } from "@/lib/decision/content-asset-adapter";
-import type { ExecutiveReport } from "@/lib/admin/reporting/executive-report-builder";
-import type {
-  WorldviewAnchor,
-  CommercialUseCase,
-  DecisionAudience,
-  TransformationStage,
-} from "@/lib/decision/decision-metadata";
+export type RecommendationPriority = "PRIMARY" | "SECONDARY" | "TERTIARY";
 
-export type Recommendation = {
-  type: "worldview" | "commercial" | "audience" | "transformation";
-  title: string;
-  description: string;
-  priority: "high" | "medium" | "low";
-  assetId?: string;
-  assetTitle?: string;
-  assetHref?: string;
+export type RecommendationReason = {
+  code: string;
+  label: string;
+  value?: number | string | boolean;
 };
 
-export type DecisionLayer = {
-  worldviewAnchors: WorldviewAnchor[];
-  commercialUseCases: CommercialUseCase[];
-  audience: DecisionAudience[];
-  transformationStage: TransformationStage[];
-  matchedAssets: Array<{
-    id: string;
-    title: string;
-    kind: string;
-    confidence: number;
-    href?: string;
-  }>;
-  recommendations: Recommendation[];
+export type RecommendationAsset = {
+  assetId: string;
+  assetTitle: string;
+  assetHref: string | null;
+  assetKind: string;
+  contextType: string;
+  contextValue: string;
+  rankingScore: number;
+  resonanceScore: number;
+  resonanceBand: string;
+  confidenceScore: number;
+  usefulnessScore: number;
+  governanceRiskScore: number;
+  priority: RecommendationPriority;
+  reasons: RecommendationReason[];
+  constitutionalSource: boolean;
+  drifts: DecisionSignalProfile["drifts"];
 };
 
-type ReportContext = {
-  report: ExecutiveReport;
-  organisationName: string;
-  participantCount: number;
-  campaignTitle: string;
+export type RecommendationContext = {
+  route?: string | null;
+  readinessTier?: string | null;
+  authorityType?: string | null;
+  orgState?: string | null;
+  sector?: string | null;
+  marketRiskBand?: string | null;
+  revenueBand?: string | null;
 };
 
-function calculateAssetConfidence(
-  asset: DecisionAsset,
-  context: ReportContext
+export type RecommendationBuildResult = {
+  generatedAt: string;
+  summary: {
+    totalCandidates: number;
+    primaryCount: number;
+    secondaryCount: number;
+    tertiaryCount: number;
+  };
+  recommendations: RecommendationAsset[];
+};
+
+function normalizeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function roundTo(value: number, places = 4): number {
+  const factor = 10 ** places;
+  return Math.round(value * factor) / factor;
+}
+
+function matchesContext(
+  profile: DecisionSignalProfile,
+  context: RecommendationContext,
+): boolean {
+  const pairs: Array<[keyof RecommendationContext, string]> = [
+    ["route", "route"],
+    ["readinessTier", "readinessTier"],
+    ["authorityType", "authorityType"],
+    ["orgState", "orgState"],
+    ["sector", "sector"],
+    ["marketRiskBand", "marketRiskBand"],
+    ["revenueBand", "revenueBand"],
+  ];
+
+  return pairs.some(([contextKey, type]) => {
+    const wanted = normalizeString(context[contextKey]);
+    if (!wanted) return false;
+
+    return (
+      normalizeString(profile.contextType).toLowerCase() === type.toLowerCase() &&
+      normalizeString(profile.contextValue).toLowerCase() === wanted.toLowerCase()
+    );
+  });
+}
+
+function buildReasons(
+  profile: DecisionSignalProfile,
+  context: RecommendationContext,
+): RecommendationReason[] {
+  const reasons: RecommendationReason[] = [
+    {
+      code: "RANKING_SCORE",
+      label: "Ranking score",
+      value: profile.rankingScore,
+    },
+    {
+      code: "RESONANCE_BAND",
+      label: "Resonance band",
+      value: profile.resonanceBand,
+    },
+    {
+      code: "USEFULNESS_SCORE",
+      label: "Usefulness score",
+      value: profile.usefulnessScore,
+    },
+  ];
+
+  if (matchesContext(profile, context)) {
+    reasons.push({
+      code: "CONTEXT_MATCH",
+      label: "Direct context match",
+      value: `${profile.contextType}:${profile.contextValue}`,
+    });
+  }
+
+  if (profile.constitutionalSource) {
+    reasons.push({
+      code: "CONSTITUTIONAL_SOURCE",
+      label: "Constitutional source",
+      value: true,
+    });
+  }
+
+  if (profile.totalConversionRate > 0) {
+    reasons.push({
+      code: "CONVERSION_SIGNAL",
+      label: "Conversion signal",
+      value: profile.totalConversionRate,
+    });
+  }
+
+  if (profile.routeImprovements > 0 || profile.readinessImprovements > 0) {
+    reasons.push({
+      code: "IMPROVEMENT_SIGNAL",
+      label: "Improvement signal",
+      value: roundTo(profile.routeImprovements + profile.readinessImprovements, 2),
+    });
+  }
+
+  if (profile.topDriftSeverity) {
+    reasons.push({
+      code: "DRIFT_MONITORING",
+      label: "Governance drift monitored",
+      value: profile.topDriftSeverity,
+    });
+  }
+
+  return reasons;
+}
+
+function priorityFor(index: number): RecommendationPriority {
+  if (index === 0) return "PRIMARY";
+  if (index <= 2) return "SECONDARY";
+  return "TERTIARY";
+}
+
+function scoreCandidate(
+  profile: DecisionSignalProfile,
+  context: RecommendationContext,
 ): number {
-  let score = 0;
+  const contextBonus = matchesContext(profile, context) ? 12 : 0;
+  const constitutionalBonus = profile.constitutionalSource ? 4 : 0;
+  const riskPenalty = profile.governanceRiskScore * 0.12;
 
-  // Check worldview anchors alignment with report state
-  if (asset.worldviewAnchors?.length) {
-    if (context.report.state === "DISORDERED" || context.report.state === "MISALIGNED") {
-      if (asset.worldviewAnchors.includes("moral-order") || 
-          asset.worldviewAnchors.includes("stewardship")) {
-        score += 25;
-      }
-    }
-    if (context.report.state === "DRIFTING") {
-      if (asset.worldviewAnchors.includes("truth-discipline")) {
-        score += 20;
-      }
-    }
-    if (context.report.state === "ORDERED") {
-      if (asset.worldviewAnchors.includes("covenantal-leadership")) {
-        score += 15;
-      }
-    }
-  }
-
-  // Check commercial use cases alignment with failure modes
-  if (asset.commercialUseCases?.length) {
-    const failureModes = context.report.failureModes || [];
-    
-    if (failureModes.some(f => f.includes("Governance") || f.includes("authority"))) {
-      if (asset.commercialUseCases.includes("board-review") ||
-          asset.commercialUseCases.includes("institutional-realignment")) {
-        score += 25;
-      }
-    }
-    if (failureModes.some(f => f.includes("execution") || f.includes("cadence"))) {
-      if (asset.commercialUseCases.includes("operating-model-reset") ||
-          asset.commercialUseCases.includes("executive-alignment")) {
-        score += 20;
-      }
-    }
-    if (failureModes.some(f => f.includes("Trust") || f.includes("narrative"))) {
-      if (asset.commercialUseCases.includes("culture-realignment") ||
-          asset.commercialUseCases.includes("executive-reframing")) {
-        score += 20;
-      }
-    }
-  }
-
-  // Check audience alignment with organisation context
-  if (asset.audience?.length) {
-    if (context.participantCount > 10) {
-      if (asset.audience.includes("executives") || asset.audience.includes("boards")) {
-        score += 15;
-      }
-    }
-    if (context.participantCount <= 5) {
-      if (asset.audience.includes("founders")) {
-        score += 15;
-      }
-    }
-    if (context.participantCount > 5 && context.participantCount <= 10) {
-      if (asset.audience.includes("institution-builders")) {
-        score += 12;
-      }
-    }
-  }
-
-  // Check transformation stage alignment with report state
-  if (asset.transformationStage?.length) {
-    if (context.report.state === "DISORDERED" && asset.transformationStage.includes("assess")) {
-      score += 20;
-    }
-    if (context.report.state === "MISALIGNED" && asset.transformationStage.includes("diagnose")) {
-      score += 18;
-    }
-    if (context.report.state === "DRIFTING" && asset.transformationStage.includes("realign")) {
-      score += 15;
-    }
-    if (context.report.state === "ORDERED" && asset.transformationStage.includes("govern")) {
-      score += 12;
-    }
-  }
-
-  // Priority stack alignment
-  if (asset.priorityWeight && context.report.priorityStack?.length) {
-    score += Math.min(10, asset.priorityWeight);
-  }
-
-  return Math.min(100, score);
+  return roundTo(
+    profile.rankingScore + contextBonus + constitutionalBonus - riskPenalty,
+    4,
+  );
 }
 
-function generateRecommendations(
-  assets: DecisionAsset[],
-  context: ReportContext
-): Recommendation[] {
-  const recommendations: Recommendation[] = [];
+export function buildDecisionRecommendations(
+  rows: DecisionAssetContextRow[],
+  context: RecommendationContext = {},
+  limit = 8,
+): RecommendationBuildResult {
+  const profiles = buildDecisionSignalProfiles(rows);
 
-  // Top worldview anchor recommendation
-  const worldviewAssets = assets.filter(a => a.worldviewAnchors?.length);
-  if (worldviewAssets.length > 0) {
-    const topWorldview = worldviewAssets[0];
-    recommendations.push({
-      type: "worldview",
-      title: "Align with Foundational Worldview",
-      description: `Consider engaging with "${topWorldview.title}" to establish ${topWorldview.worldviewAnchors?.join(", ")} framework for institutional integrity.`,
-      priority: context.report.state === "DISORDERED" ? "high" : "medium",
-      assetId: topWorldview.id,
-      assetTitle: topWorldview.title,
-      assetHref: topWorldview.href,
-    });
-  }
+  const ranked = [...profiles]
+    .map((profile) => ({
+      profile,
+      candidateScore: scoreCandidate(profile, context),
+    }))
+    .sort((a, b) => b.candidateScore - a.candidateScore)
+    .slice(0, Math.max(1, limit));
 
-  // Top commercial use case recommendation based on failure modes
-  const commercialAssets = assets.filter(a => a.commercialUseCases?.length);
-  if (commercialAssets.length > 0) {
-    const topCommercial = commercialAssets[0];
-    const primaryUseCase = topCommercial.commercialUseCases?.[0];
-    recommendations.push({
-      type: "commercial",
-      title: `${primaryUseCase?.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())}`,
-      description: `"${topCommercial.title}" provides frameworks for ${primaryUseCase} in ${context.organisationName}.`,
-      priority: "high",
-      assetId: topCommercial.id,
-      assetTitle: topCommercial.title,
-      assetHref: topCommercial.href,
-    });
-  }
+  const recommendations: RecommendationAsset[] = ranked.map(
+    ({ profile }, index) => ({
+      assetId: profile.assetId,
+      assetTitle: profile.assetTitle,
+      assetHref: profile.assetHref,
+      assetKind: profile.assetKind,
+      contextType: profile.contextType,
+      contextValue: profile.contextValue,
+      rankingScore: profile.rankingScore,
+      resonanceScore: profile.resonanceScore,
+      resonanceBand: profile.resonanceBand,
+      confidenceScore: profile.confidenceScore,
+      usefulnessScore: profile.usefulnessScore,
+      governanceRiskScore: profile.governanceRiskScore,
+      priority: priorityFor(index),
+      reasons: buildReasons(profile, context),
+      constitutionalSource: profile.constitutionalSource,
+      drifts: profile.drifts,
+    }),
+  );
 
-  // Audience-specific recommendation
-  const audienceAssets = assets.filter(a => a.audience?.length);
-  if (audienceAssets.length > 0) {
-    const topAudience = audienceAssets[0];
-    recommendations.push({
-      type: "audience",
-      title: `${topAudience.audience?.map(a => a.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())).join(", ")} Resource`,
-      description: `Designed for ${topAudience.audience?.join(", ")}, "${topAudience.title}" addresses key leadership challenges.`,
-      priority: "medium",
-      assetId: topAudience.id,
-      assetTitle: topAudience.title,
-      assetHref: topAudience.href,
-    });
-  }
-
-  // Transformation stage recommendation
-  const stageAssets = assets.filter(a => a.transformationStage?.length);
-  if (stageAssets.length > 0) {
-    const topStage = stageAssets[0];
-    const currentStage = topStage.transformationStage?.[0];
-    recommendations.push({
-      type: "transformation",
-      title: `${currentStage?.toUpperCase()} Phase Resource`,
-      description: `"${topStage.title}" supports the ${currentStage} phase of your transformation journey.`,
-      priority: "medium",
-      assetId: topStage.id,
-      assetTitle: topStage.title,
-      assetHref: topStage.href,
-    });
-  }
-
-  return recommendations.slice(0, 5);
-}
-
-export async function buildExecutiveReportRecommendations(
-  context: ReportContext
-): Promise<DecisionLayer> {
-  // Get all decision assets from content
-  const allAssets = getAllDecisionAssetsFromContent();
-  
-  // Calculate confidence scores for each asset
-  const scoredAssets = allAssets.map(asset => ({
-    ...asset,
-    confidence: calculateAssetConfidence(asset, context),
-  }));
-  
-  // Sort by confidence and take top matches
-  const matchedAssets = scoredAssets
-    .sort((a, b) => b.confidence - a.confidence)
-    .slice(0, 10)
-    .map(asset => ({
-      id: asset.id,
-      title: asset.title,
-      kind: asset.kind,
-      confidence: asset.confidence,
-      href: asset.href,
-    }));
-  
-  // Aggregate unique metadata from top assets
-  const topAssets = scoredAssets.slice(0, 5);
-  
-  const worldviewAnchors = [...new Set(
-    topAssets.flatMap(a => a.worldviewAnchors || [])
-  )] as WorldviewAnchor[];
-  
-  const commercialUseCases = [...new Set(
-    topAssets.flatMap(a => a.commercialUseCases || [])
-  )] as CommercialUseCase[];
-  
-  const audience = [...new Set(
-    topAssets.flatMap(a => a.audience || [])
-  )] as DecisionAudience[];
-  
-  const transformationStage = [...new Set(
-    topAssets.flatMap(a => a.transformationStage || [])
-  )] as TransformationStage[];
-  
-  // Generate recommendations
-  const recommendations = generateRecommendations(scoredAssets.slice(0, 15), context);
-  
   return {
-    worldviewAnchors,
-    commercialUseCases,
-    audience,
-    transformationStage,
-    matchedAssets,
+    generatedAt: new Date().toISOString(),
+    summary: {
+      totalCandidates: profiles.length,
+      primaryCount: recommendations.filter((item) => item.priority === "PRIMARY")
+        .length,
+      secondaryCount: recommendations.filter(
+        (item) => item.priority === "SECONDARY",
+      ).length,
+      tertiaryCount: recommendations.filter((item) => item.priority === "TERTIARY")
+        .length,
+    },
     recommendations,
   };
 }
+
+/**
+ * Backward-compatible alias for older report routes.
+ * This keeps existing imports working while the codebase converges on one SSOT name.
+ */
+export function buildExecutiveReportRecommendations(
+  rows: DecisionAssetContextRow[],
+  context: RecommendationContext = {},
+  limit = 8,
+): RecommendationBuildResult {
+  return buildDecisionRecommendations(rows, context, limit);
+}
+
+export default {
+  buildDecisionRecommendations,
+  buildExecutiveReportRecommendations,
+};

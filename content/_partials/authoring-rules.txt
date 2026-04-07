@@ -15,3 +15,9 @@ These guardrails stop regressions and keep the reading surface premium. Follow t
 ```md
 ## Section Heading (H2)
 Clear, skimmable intro sentence.
+
+### Subsection (H3)
+Detailed content under the subsection.
+
+#### Deep Dive (H4)
+Specific technical details when necessary.

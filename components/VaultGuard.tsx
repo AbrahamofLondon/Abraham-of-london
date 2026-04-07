@@ -55,7 +55,7 @@ export const VaultGuard = ({ title, slug, preview, isGated, children }: VaultGua
       {/* The Elegant Overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center backdrop-blur-[3px] bg-slate-950/40">
         <div className="mb-8 relative">
-          <div className="absolute inset-0 bg-white/5 rounded-full animate-ping duration-[4000ms]" />
+          <div className="absolute inset-0 bg-white/5 rounded-full animate-ping duration-4000" />
           <div className="relative bg-black border border-white/10 p-6 rounded-full shadow-2xl transition-transform duration-700 group-hover:scale-110">
             <Fingerprint className="w-12 h-12 text-white/70 font-extra-light" />
           </div>

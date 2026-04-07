@@ -40,7 +40,7 @@ const EventHero: React.FC<EventHeroProps> = ({
             <img
               src={coverImage}
               alt=""
-              className="h-full w-full object-cover opacity-30 mix-blend-luminosity grayscale transition-transform duration-[10s] hover:scale-105"
+              className="h-full w-full object-cover opacity-30 mix-blend-luminosity grayscale transition-transform duration-10000 hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent" />
           </>

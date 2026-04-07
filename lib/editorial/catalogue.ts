@@ -37,7 +37,7 @@ export const EDITORIAL_CATALOGUE: PublicationRecord[] = sortCatalogue([
     socialImage: "/assets/images/books/ultimate-purpose-social.jpg",
 
     pdfPath: "/assets/downloads/ultimate-purpose-of-man-editorial.pdf",
-    epubPath: "/assets/downloads/ultimate-purpose-of-man-editorial.epub",
+    epubPath: "/epubs/ultimate-purpose-of-man-editorial.epub",
     previewPath: "/api/editorials/preview/ultimate-purpose-of-man-editorial",
 
     previewEnabled: true,
