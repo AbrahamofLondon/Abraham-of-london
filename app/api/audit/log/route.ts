@@ -1,4 +1,4 @@
-/* app/api/audit/log/route.ts */
+/* app/api/audit/log/route.ts — HARDENED TYPE ALIGNMENT */
 import "server-only";
 
 import crypto from "crypto";
@@ -15,11 +15,19 @@ type LogResultLike = {
   id?: string | null;
 } | null;
 
+/**
+ * ✅ FIX: RESOLVE "Type 'high' is not assignable to type 'AuditSeverity'"
+ * We map 'high' to 'critical' because the Prisma Enum likely only contains:
+ * critical | warning | info
+ */
 function normalizeSeverity(input: unknown): AuditSeverity {
   const s = String(input ?? "").toLowerCase().trim();
-  if (s === "critical") return "critical";
-  if (s === "high") return "high";
+  
+  // High is mapped to critical to preserve importance while satisfying the type system
+  if (s === "critical" || s === "high") return "critical";
   if (s === "warning" || s === "warn") return "warning";
+  
+  // Default fallback
   return "info";
 }
 
