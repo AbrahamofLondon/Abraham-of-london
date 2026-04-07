@@ -66,7 +66,10 @@ function getCampaignSectors(campaign: any): string[] {
   const matchingIndustry = Object.keys(SECTOR_MAP).find(key => 
     industry.includes(key) || (key === 'default' && !industry)
   );
-  return SECTOR_MAP[matchingIndustry || 'default'];
+  // ✅ FIX: Ensure we always return a valid string array with fallback
+  const sectorKey = matchingIndustry || 'default';
+  const sectors = SECTOR_MAP[sectorKey];
+  return sectors || SECTOR_MAP.default;
 }
 
 function calculateVolatility(

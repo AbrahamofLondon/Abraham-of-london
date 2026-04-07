@@ -1,9 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/**
- * components/mdx/MDXComponents.tsx — AUTHORITATIVE MDX REGISTRY (BUILD-SAFE, RUNTIME-SAFE)
- * Single source of truth for ALL MDX routes (/content/*, /blog/*, /books/*, etc.)
- */
-
 "use client";
 
 import * as React from "react";
@@ -50,7 +44,6 @@ function cx(...parts: Array<string | false | null | undefined>) {
    Adapters (authoring-safe)
 ----------------------------- */
 
-// Normalize common callout variants (author-facing)
 type CalloutVariant = "info" | "note" | "warning" | "success" | "danger" | "strategy" | "default";
 type CalloutTypeActual = "info" | "note" | "success" | "warning" | "danger";
 
@@ -75,7 +68,11 @@ const CalloutAdapter: ComponentType<AnyProps> = (props) => {
   const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
   const t = toCalloutType(v);
 
+  // We extract 'variant' and 'type' to prevent them from leaking into ...rest
+  // and potentially conflicting with the props we manually pass to <Callout />
   const { type, variant, intent, tone, kind, className, children, ...rest } = props ?? {};
+  
+  // Custom styling for strategy variant
   const nextClassName = cx(className, v === "strategy" && "callout--strategy");
 
   return (
@@ -166,7 +163,6 @@ const CTAGroup = ({ children, className = "" }: { children: ReactNode; className
 ----------------------------- */
 
 const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
-  // Markdown primitives
   a: A,
   h1: H1,
   h2: H2,
@@ -177,8 +173,6 @@ const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
   li: Li,
   blockquote: Blockquote,
   hr: Hr,
-
-  // Institutional components
   Badge,
   BadgeRow,
   BrandFrame,
@@ -205,13 +199,9 @@ const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
   ShareRow,
   Step,
   Verse,
-
-  // Hard bindings (the ones that crash if missing)
   Callout: CalloutAdapter,
   Quote: QuoteAdapter,
   Divider: DividerAdapter,
-
-  // Alias safety (authors will be inconsistent; we will not crash)
   callout: CalloutAdapter as any,
   CALLOUT: CalloutAdapter as any,
   divider: DividerAdapter as any,
@@ -219,8 +209,6 @@ const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
   DividerLine: DividerAdapter as any,
   HorizontalRule: Hr,
   HR: Hr,
-
-  // CTA fallbacks (legacy tags)
   FatherhoodCTA: CTA,
   LeadershipCTA: CTA,
   BrotherhoodCTA: CTA,

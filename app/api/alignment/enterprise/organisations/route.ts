@@ -23,14 +23,13 @@ export async function POST(req: NextRequest) {
     const slug = parsed.slug || generateSlug(parsed.name);
     
     // Persistence layer call to create the record
+    // Both status and metadata have defaults in Prisma schema
     const organisation = await createOrganisation({
       name: parsed.name,
       slug: slug,
       sector: parsed.sector ?? null,
       sizeBand: parsed.sizeBand ?? null,
       region: parsed.region ?? null,
-      status: parsed.status ?? "active",
-      metadata: parsed.metadata ?? "{}",
     });
     
     return NextResponse.json({ ok: true, organisation }, { status: 201 });

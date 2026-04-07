@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = createCampaignSchema.parse(body);
 
-    // ✅ FIX: Use the nested connect pattern that Prisma expects
     const campaign = await createCampaign({
       organisation: {
         connect: {
@@ -36,7 +35,12 @@ export async function POST(req: NextRequest) {
       opensAt: validatedData.opensAt ? new Date(validatedData.opensAt) : null,
       closesAt: validatedData.closesAt ? new Date(validatedData.closesAt) : null,
       cadenceType: validatedData.cadenceType,
-      createdByMembershipId: validatedData.createdByMembershipId ?? null,
+      // ✅ FIX: Use nested connect for membership relation
+      createdByMembership: validatedData.createdByMembershipId ? {
+        connect: {
+          id: validatedData.createdByMembershipId,
+        },
+      } : undefined,
     });
 
     // Handle participants if provided

@@ -24,17 +24,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = createCampaignSchema.parse(body);
 
-    // The createCampaign function expects data matching the Prisma schema
+    // ✅ FIX: Use nested connect for relations, not raw ID fields
     const campaign = await createCampaign({
-      organisationId: parsed.organisationId,
+      organisation: {
+        connect: {
+          id: parsed.organisationId,
+        },
+      },
       title: parsed.title,
       objective: parsed.objective ?? null,
       opensAt: parsed.opensAt ? new Date(parsed.opensAt) : null,
       closesAt: parsed.closesAt ? new Date(parsed.closesAt) : null,
       cadenceType: parsed.cadenceType,
-      createdByMembershipId: parsed.createdByMembershipId ?? null,
-      // status defaults to "draft" in schema, so optional
-      // metadata defaults to "{}" in schema, so optional
+      createdByMembership: parsed.createdByMembershipId ? {
+        connect: {
+          id: parsed.createdByMembershipId,
+        },
+      } : undefined,
     });
 
     // Handle participants if provided
@@ -49,7 +55,6 @@ export async function POST(req: NextRequest) {
         .filter((p: CampaignParticipantCreateInput) => Boolean(p.email));
 
       if (mappedParticipants.length > 0) {
-        // createCampaignParticipants expects an array of CampaignParticipantCreateInput
         await createCampaignParticipants(mappedParticipants);
       }
     }
