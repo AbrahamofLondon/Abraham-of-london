@@ -41,12 +41,20 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* -----------------------------
-   Adapters (authoring-safe)
+    Adapters (authoring-safe)
 ----------------------------- */
 
+/** * Extended variants used in Markdown content 
+ */
 type CalloutVariant = "info" | "note" | "warning" | "success" | "danger" | "strategy" | "default";
+
+/** * Strict types accepted by the underlying UI component 
+ */
 type CalloutTypeActual = "info" | "note" | "success" | "warning" | "danger";
 
+/**
+ * Normalizes various input prop names (intent, tone, kind) into a standard CalloutVariant.
+ */
 function normalizeCalloutVariant(input: unknown): CalloutVariant {
   const raw = String(input ?? "").trim().toLowerCase();
   if (!raw) return "info";
@@ -54,10 +62,16 @@ function normalizeCalloutVariant(input: unknown): CalloutVariant {
   if (raw === "ok" || raw === "positive") return "success";
   if (raw === "error" || raw === "critical") return "danger";
   if (raw === "tip" || raw === "hint") return "note";
-  if (["info", "note", "warning", "success", "danger", "strategy", "default"].includes(raw)) return raw as CalloutVariant;
+  
+  const valid: CalloutVariant[] = ["info", "note", "warning", "success", "danger", "strategy", "default"];
+  if (valid.includes(raw as CalloutVariant)) return raw as CalloutVariant;
+  
   return "info";
 }
 
+/**
+ * Maps the brand-specific variants to functionally compatible base types.
+ */
 function toCalloutType(v: CalloutVariant): CalloutTypeActual {
   if (v === "strategy") return "note";
   if (v === "default") return "info";
@@ -69,7 +83,7 @@ const CalloutAdapter: ComponentType<AnyProps> = (props) => {
   const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
   const t = toCalloutType(v);
 
-  // 2. Extract props to prevent non-standard attributes from hitting the DOM or base component
+  // 2. Extract props to prevent non-standard attributes from hitting the DOM
   const { 
     type: _type, 
     variant: _variant, 
@@ -81,7 +95,7 @@ const CalloutAdapter: ComponentType<AnyProps> = (props) => {
     ...rest 
   } = props ?? {};
   
-  // 3. Apply custom strategy class if applicable
+  // 3. Apply custom strategy class for unique styling if needed
   const nextClassName = cx(className, v === "strategy" && "callout--strategy");
 
   // 4. Return the base component with the VALIDATED type 't'
@@ -106,7 +120,7 @@ const DividerAdapter: ComponentType<AnyProps> = (props) => {
 };
 
 /* -----------------------------
-   Markdown primitives (prose-safe)
+    Markdown primitives (prose-safe)
 ----------------------------- */
 
 const A: ComponentType<AnyProps> = (props) => {
@@ -169,7 +183,7 @@ const CTAGroup = ({ children, className = "" }: { children: ReactNode; className
 );
 
 /* -----------------------------
-   Export registry
+    Export registry
 ----------------------------- */
 
 const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
