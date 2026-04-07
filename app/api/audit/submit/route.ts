@@ -14,13 +14,19 @@ export async function POST(
       return new NextResponse("Invalid Telemetry Packet", { status: 400 });
     }
 
-    // ✅ STEP 1: Get Prisma client first to resolve the "Property does not exist" error
+    /**
+     * ✅ FIX: RESOLVE TYPE ERROR
+     * We must call getPrismaClient() to get the actual Prisma instance.
+     * The 'db' object itself only contains management methods.
+     */
     const prisma = await db.getPrismaClient();
+    
     if (!prisma) {
       return new NextResponse("Database Connection Failure", { status: 500 });
     }
 
-    // ✅ STEP 2: Access models through the prisma instance
+    // 1. VERIFY PARTICIPANT & LOCK STATE
+    // Use the 'prisma' instance, which contains the 'campaignParticipant' model.
     const participant = await prisma.campaignParticipant.findUnique({
       where: { id: participantId },
       select: { id: true, status: true, campaignId: true }
@@ -37,7 +43,8 @@ export async function POST(
       }, { status: 403 });
     }
 
-    // ✅ STEP 3: Atomic Transaction Protocol
+    // 2. ATOMIC TRANSACTION: UPDATE STATUS & RECORD TELEMETRY
+    // This ensures data integrity across the telemetry ingestion.
     await prisma.$transaction([
       // A. Update Participant Status
       prisma.campaignParticipant.update({
