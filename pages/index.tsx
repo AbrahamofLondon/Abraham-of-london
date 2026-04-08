@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/index.tsx — HOMEPAGE (Institutional, Route-Disciplined, Two Flagships Surfaced)
+// pages/index.tsx — HOMEPAGE (Institutional, Portfolio-First, Client-Facing)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
@@ -27,6 +27,10 @@ import {
   Archive,
   Workflow,
   Download,
+  TrendingUp,
+  Landmark,
+  Building2,
+  Lock,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -39,7 +43,6 @@ import EventsSection from "@/components/homepage/EventsSection";
 import ContentShowcase from "@/components/homepage/ContentShowcase";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import InstitutionalClose from "@/components/homepage/InstitutionalClose";
-import ExecutiveReportingFlagship from "@/components/homepage/ExecutiveReportingFlagship";
 import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
 import StrategyRoomIntegration from "@/components/consulting/StrategyRoomIntegration";
 import {
@@ -100,7 +103,6 @@ type FeaturedRoute = {
   icon: React.ReactNode;
 };
 
-// Quarterly Report type
 type QuarterlyReport = {
   id: string;
   title: string;
@@ -110,7 +112,7 @@ type QuarterlyReport = {
   quarter: string;
   year: number;
   readingTime: number;
-  pdfUrl?: string;
+  pdfUrl?: string | null;
   keyFindings?: string[];
 };
 
@@ -163,11 +165,12 @@ const FEATURED_DESTINATIONS: FeaturedRoute[] = [
     icon: <Workflow className="h-4 w-4" />,
   },
   {
-    title: "Resources",
-    href: "/resources",
-    description: "Structured tools, frameworks, and reference assets.",
-    eyebrow: "Frameworks",
-    icon: <LibraryBig className="h-4 w-4" />,
+    title: "Artifacts",
+    href: "/artifacts",
+    description:
+      "Market intelligence, strategic products, protected artifacts, and governed premium surfaces.",
+    eyebrow: "Products",
+    icon: <Archive className="h-4 w-4" />,
   },
   {
     title: "Vault Briefs",
@@ -536,6 +539,193 @@ function OperatingStat({
   );
 }
 
+function PlatformArchitectureCard() {
+  return (
+    <Panel>
+      <div className="p-6 md:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+              Platform Architecture
+            </div>
+            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">
+              Doctrine · Products · Private Mandate
+            </div>
+          </div>
+
+          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.22em] text-white/50">
+            Portfolio First
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          {[
+            {
+              title: "Thought and doctrine",
+              body:
+                "Canon, editorials, and publications establish the worldview, language, and authority structure of the platform.",
+              icon: <Compass className="h-5 w-5" />,
+            },
+            {
+              title: "Structured products",
+              body:
+                "Diagnostics, Executive Reporting, Market Intelligence, playbooks, and vault assets turn authority into usable products.",
+              icon: <Archive className="h-5 w-5" />,
+            },
+            {
+              title: "Selective intervention",
+              body:
+                "Consulting and Strategy Room exist for live situations where consequence is already material and judgment cannot be casual.",
+              icon: <Crown className="h-5 w-5" />,
+            },
+          ].map((item) => (
+            <div key={item.title} className="rounded-[24px] border border-white/10 bg-black/30 p-5">
+              <div className="flex items-center gap-3 text-amber-300/85">
+                {item.icon}
+                <div className="text-[10px] font-mono uppercase tracking-[0.30em]">
+                  {item.title}
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-white/72">
+                {item.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-6 text-xs leading-relaxed text-white/45">
+          From public signal to product utility to mandate work.
+        </p>
+      </div>
+    </Panel>
+  );
+}
+
+function FlagshipIntelligenceCard({
+  latestReport,
+}: {
+  latestReport: QuarterlyReport | null;
+}) {
+  const reportTitle =
+    latestReport?.title || "Global Market Intelligence Report Q1 2026";
+
+  const reportDescription =
+    latestReport?.description ||
+    "A disciplined reading of global market conditions, policy pressure, and strategic positioning for serious operators.";
+
+  const periodLabel =
+    latestReport?.quarter && latestReport?.year
+      ? `${latestReport.quarter} ${latestReport.year}`
+      : "Current Edition";
+
+  const findings =
+    latestReport?.keyFindings && latestReport.keyFindings.length > 0
+      ? latestReport.keyFindings.slice(0, 3)
+      : [
+          "Markets are increasingly pricing resilience, policy credibility, and strategic positioning.",
+          "Trade friction and policy instability are reshaping capital allocation patterns.",
+          "Serious boards now need structured macro interpretation, not ambient commentary.",
+        ];
+
+  return (
+    <Panel>
+      <div className="p-6 md:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
+              Flagship Intelligence Product
+            </div>
+            <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">
+              Market Intelligence · Public + Institutional + Boardroom Layers
+            </div>
+          </div>
+
+          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.22em] text-white/50">
+            {periodLabel}
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <h3 className="font-serif text-3xl leading-[1.02] text-white md:text-4xl">
+              {reportTitle}
+            </h3>
+
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/60">
+              A disciplined intelligence surface for operators who prefer signal
+              over noise.
+            </p>
+
+            <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/72 md:text-[15px]">
+              {reportDescription}
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+              <span>Public orientation</span>
+              <span>Institutional edition</span>
+              <span>Boardroom PDF</span>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/intelligence/global-market-intelligence-q1-2026"
+                className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 transition hover:bg-amber-500/18"
+              >
+                Open Intelligence Surface
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/artifacts/global-market-outlook-q1-2026-public"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition hover:bg-white/[0.08]"
+              >
+                Public Brief
+                <FileText className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/artifacts/global-market-intelligence-report-q1-2026"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition hover:bg-white/[0.08]"
+              >
+                Institutional Edition
+                <Lock className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-white/10 bg-black/30 p-5">
+            <div className="text-[10px] font-mono uppercase tracking-[0.30em] text-white/45">
+              Key Signals
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {findings.map((line) => (
+                <div
+                  key={line}
+                  className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white/78"
+                >
+                  <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+                  <span>{line}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5">
+              <Link
+                href="/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition hover:bg-white/[0.08]"
+              >
+                Boardroom PDF
+                <Scale className="h-4 w-4 text-amber-300" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
 function FlagshipProductCard() {
   return (
     <Panel>
@@ -543,7 +733,7 @@ function FlagshipProductCard() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-              Flagship Product
+              Flagship Advisory Product
             </div>
             <div className="mt-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">
               Executive Reporting · Diagnostics Bridge
@@ -568,8 +758,7 @@ function FlagshipProductCard() {
 
             <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/72 md:text-[15px]">
               Built for founders, boards, leadership teams, and institutions
-              that need disciplined interpretation before escalation. This is
-              where signal becomes structured judgement.
+              that need disciplined interpretation before escalation.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
@@ -607,7 +796,7 @@ function FlagshipProductCard() {
                 "Structured interpretation before intervention",
                 "Bridges free signal and private mandate",
                 "Filters weak cases before advisory escalation",
-                "Produces decision-facing outputs, not generic feedback",
+                "Produces decision-facing outputs",
               ].map((line) => (
                 <div
                   key={line}
@@ -618,11 +807,6 @@ function FlagshipProductCard() {
                 </div>
               ))}
             </div>
-
-            <p className="mt-5 text-xs leading-relaxed text-white/45">
-              This is the first commercial layer that feels like a serious
-              institutional product rather than a glorified form result.
-            </p>
           </div>
         </div>
       </div>
@@ -749,8 +933,7 @@ function FlagshipPublicationCard({ item }: { item: PublicationItem }) {
             </div>
 
             <p className="mt-5 text-xs leading-relaxed text-white/45">
-              Clean page first. Verified assets second. No raw dump, no dead-end
-              file theatre.
+              Clean page first. Verified assets second.
             </p>
           </div>
         </div>
@@ -829,24 +1012,24 @@ const HomePage: NextPage<HomePageProps> = ({
 
   const actions = [
     {
-      href: "/diagnostics",
-      title: "Begin with Diagnostics",
+      href: "/artifacts",
+      title: "Browse strategic products",
       description:
-        "Use the diagnostic ladder to establish signal, pressure, and fit before escalation.",
-      tag: "Gateway",
+        "Market intelligence, artifacts, frameworks, and premium assets.",
+      tag: "Products",
     },
     {
-      href: "/diagnostics/executive-reporting",
-      title: "View Executive Reporting",
+      href: "/diagnostics",
+      title: "Begin with diagnostics",
       description:
-        "See the flagship bridge product that turns diagnostic signal into decision-grade interpretation.",
-      tag: "Flagship",
+        "Establish signal, pressure, and fit before escalation.",
+      tag: "Gateway",
     },
     {
       href: "/consulting/strategy-room",
       title: "Enter Strategy Room",
       description:
-        "Private chamber for situations where consequence is already material and mandate-level intervention is justified.",
+        "Private chamber for situations where consequence is already material.",
       tag: "Selective",
     },
   ];
@@ -854,7 +1037,7 @@ const HomePage: NextPage<HomePageProps> = ({
   return (
     <Layout
       title="Abraham of London"
-      description="Institutional doctrine, diagnostics, disciplined strategy, editorial canon, playbooks, and deployable assets for builders."
+      description="Institutional doctrine, strategic products, diagnostics, disciplined strategy, editorial canon, playbooks, and selective mandate work for serious operators."
       canonicalUrl="/"
       fullWidth
       headerTransparent
@@ -875,16 +1058,13 @@ const HomePage: NextPage<HomePageProps> = ({
         />
       </section>
 
-      {/* Pass the latest report to the flagship component */}
-      <ExecutiveReportingFlagship latestReport={latestReport} />
-
-      <Section id="prelude" variant="surface" cap="Prelude — doctrinal gateway">
+      <Section id="prelude" variant="surface" cap="Prelude — portfolio logic">
         <AnchorOffset id="prelude" />
 
         <HQHeader
           eyebrow="Prelude"
-          title="The gateway to the whole system."
-          description="Not a blog. Not a personality platform. Doctrine, diagnostics, strategy, playbooks, deployables, publications, and private mandate work arranged as one disciplined architecture."
+          title="A governed platform for leaders, operators, and institutions under pressure."
+          description="Doctrine, strategic products, diagnostics, editorial property, execution frameworks, and private mandate work arranged as one disciplined architecture."
           icon={<Layers className="h-4 w-4" />}
         />
 
@@ -896,6 +1076,11 @@ const HomePage: NextPage<HomePageProps> = ({
               icon: <Compass className="h-3.5 w-3.5" />,
             },
             {
+              href: "/artifacts",
+              label: "Artifacts",
+              icon: <Archive className="h-3.5 w-3.5" />,
+            },
+            {
               href: "/editorials",
               label: "Editorials",
               icon: <BookOpen className="h-3.5 w-3.5" />,
@@ -904,11 +1089,6 @@ const HomePage: NextPage<HomePageProps> = ({
               href: "/playbooks",
               label: "Playbooks",
               icon: <Workflow className="h-3.5 w-3.5" />,
-            },
-            {
-              href: "/vault/briefs",
-              label: "Briefs",
-              icon: <FileText className="h-3.5 w-3.5" />,
             },
             {
               href: "/diagnostics",
@@ -924,6 +1104,10 @@ const HomePage: NextPage<HomePageProps> = ({
         />
 
         <div className="mt-10">
+          <PlatformArchitectureCard />
+        </div>
+
+        <div className="mt-10">
           <Panel>
             <div className="p-6 md:p-10">
               <ModuleBoundary label="CanonIntro">
@@ -937,13 +1121,13 @@ const HomePage: NextPage<HomePageProps> = ({
           <OperatingStat
             label="Registry"
             value={String(counts.library)}
-            body="Indexed assets, frameworks, texts, and strategic material across the platform."
+            body="Indexed assets, frameworks, texts, strategic products, and institutional material."
             icon={<LibraryBig className="h-5 w-5" />}
           />
           <OperatingStat
-            label="Editorial Spine"
+            label="Publications"
             value={String(counts.publications)}
-            body="Flagship publications and editorial property treated as institutional assets, not loose content."
+            body="Flagship publications and editorial property treated as institutional assets."
             icon={<ScrollText className="h-5 w-5" />}
           />
           <OperatingStat
@@ -953,9 +1137,9 @@ const HomePage: NextPage<HomePageProps> = ({
             icon={<Workflow className="h-5 w-5" />}
           />
           <OperatingStat
-            label="Deployables"
-            value={String(counts.downloads)}
-            body="Execution assets, templates, and controlled operating resources."
+            label="Products"
+            value={String(counts.downloads + counts.briefs)}
+            body="Operator-grade briefs, deployables, and premium assets designed for use."
             icon={<Archive className="h-5 w-5" />}
           />
         </div>
@@ -977,23 +1161,24 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      <Bridge text="From doctrine → to two flagships" />
+      <Bridge text="From platform logic → to flagship surfaces" />
 
       <Section
         id="flagships"
         variant="surface"
-        cap="Flagships — product and editorial"
+        cap="Flagships — product, interpretation, and editorial"
       >
         <AnchorOffset id="flagships" />
 
         <HQHeader
           eyebrow="Flagships"
-          title="The front of the platform now carries its lead product and lead publication."
-          description="One flagship product for interpretation and escalation. One flagship editorial for doctrine and argument in full."
+          title="The front of the platform carries what best represents the business."
+          description="One flagship intelligence product. One flagship advisory product. One flagship editorial."
           icon={<Crown className="h-4 w-4" />}
         />
 
         <div className="mt-10 space-y-8">
+          <FlagshipIntelligenceCard latestReport={latestReport} />
           <FlagshipProductCard />
           {flagshipPublication ? (
             <FlagshipPublicationCard item={flagshipPublication} />
@@ -1027,12 +1212,12 @@ const HomePage: NextPage<HomePageProps> = ({
                     {
                       n: "02",
                       t: "Commercially structured",
-                      d: "Content is public signal. Diagnostics are paid clarity. Advisory is selective mandate work.",
+                      d: "Public signal builds authority. Products create utility. Advisory remains selective and consequence-aware.",
                     },
                     {
                       n: "03",
                       t: "System-first",
-                      d: "A living platform: doctrine, diagnostics, editorial property, playbooks, deployables, and controlled engagement paths.",
+                      d: "A living architecture: doctrine, products, diagnostics, editorial property, playbooks, deployables, and controlled engagement paths.",
                     },
                   ].map((x) => (
                     <div
@@ -1089,20 +1274,20 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      <Bridge text="From credibility → to diagnostics" />
+      <Bridge text="From credibility → to products and diagnostics" />
 
       <Section
-        id="diagnostics"
+        id="products"
         variant="default"
-        cap="Diagnostics architecture — gateway to escalation"
+        cap="Products — clarity before intervention"
       >
-        <AnchorOffset id="diagnostics" />
+        <AnchorOffset id="products" />
 
         <HQHeader
-          eyebrow="Diagnostics"
-          title="Clarity before intervention."
-          description="The platform does not force serious buyers into advisory too early. Diagnostics establish the signal. Executive Reporting interprets it. Strategy Room intervenes when the cost of delay or misjudgment is already material."
-          icon={<Activity className="h-4 w-4" />}
+          eyebrow="Products"
+          title="Structured products create trust before private mandate work."
+          description="Strategic products give serious buyers a disciplined way to engage, interpret, and decide."
+          icon={<Building2 className="h-4 w-4" />}
         />
 
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
@@ -1110,25 +1295,25 @@ const HomePage: NextPage<HomePageProps> = ({
             <div className="p-6 md:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-                  Step 01
+                  Product 01
                 </div>
-                <ScanSearch className="h-5 w-5 text-amber-300/80" />
+                <TrendingUp className="h-5 w-5 text-amber-300/80" />
               </div>
 
               <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
-                Diagnostics
+                Market Intelligence
               </h3>
 
               <p className="mt-4 text-sm leading-relaxed text-white/70">
-                The gateway layer. Use this to read pressure, drift, misalignment,
-                and structural weakness before forcing a solution.
+                A discoverable intelligence line with public, institutional, and
+                boardroom layers for serious operators who want cleaner judgment.
               </p>
 
               <div className="mt-6 space-y-3">
                 {[
-                  "Directional Integrity — individual signal",
-                  "Team Alignment — execution and communication signal",
-                  "Enterprise Diagnostic — institutional consequence signal",
+                  "Public brief for orientation",
+                  "Institutional edition for deeper reading",
+                  "Boardroom PDF for executive portability",
                 ].map((line) => (
                   <div
                     key={line}
@@ -1142,10 +1327,10 @@ const HomePage: NextPage<HomePageProps> = ({
 
               <div className="mt-8">
                 <Link
-                  href="/diagnostics"
+                  href="/intelligence/global-market-intelligence-q1-2026"
                   className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 hover:bg-amber-500/18"
                 >
-                  Open Diagnostics <ChevronRight className="h-4 w-4" />
+                  Open Intelligence Surface <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
@@ -1155,7 +1340,7 @@ const HomePage: NextPage<HomePageProps> = ({
             <div className="p-6 md:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-                  Step 02
+                  Product 02
                 </div>
                 <FileText className="h-5 w-5 text-amber-300/80" />
               </div>
@@ -1165,9 +1350,8 @@ const HomePage: NextPage<HomePageProps> = ({
               </h3>
 
               <p className="mt-4 text-sm leading-relaxed text-white/70">
-                The flagship bridge product. It takes raw diagnostic signal and turns
-                it into a disciplined executive artifact: narrative, exposure,
-                correction priority, and decision fit.
+                The flagship interpretation product. Converts raw diagnostic
+                signal into a disciplined executive artifact for boards and operators.
               </p>
 
               <div className="mt-6 space-y-3">
@@ -1201,25 +1385,25 @@ const HomePage: NextPage<HomePageProps> = ({
             <div className="p-6 md:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-300/85">
-                  Step 03
+                  Product 03
                 </div>
-                <Crown className="h-5 w-5 text-amber-300/80" />
+                <ScanSearch className="h-5 w-5 text-amber-300/80" />
               </div>
 
               <h3 className="mt-5 font-serif text-3xl leading-tight text-white">
-                Strategy Room
+                Diagnostics
               </h3>
 
               <p className="mt-4 text-sm leading-relaxed text-white/70">
-                The private chamber. Reserved for high-consequence situations where
-                the problem is already material and structured intervention is justified.
+                The gateway layer. Use this to establish pressure, drift,
+                misalignment, and fit before forcing intervention.
               </p>
 
               <div className="mt-6 space-y-3">
                 {[
-                  "Selective, not casual",
-                  "For live decisions under pressure",
-                  "Mandate work with documented trade-offs and control",
+                  "Directional Integrity",
+                  "Team Alignment",
+                  "Enterprise Diagnostic",
                 ].map((line) => (
                   <div
                     key={line}
@@ -1233,67 +1417,31 @@ const HomePage: NextPage<HomePageProps> = ({
 
               <div className="mt-8">
                 <Link
-                  href="/consulting/strategy-room"
+                  href="/diagnostics"
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 hover:bg-white/[0.08]"
                 >
-                  Enter Strategy Room <ArrowRight className="h-4 w-4" />
+                  Open Diagnostics <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
           </Panel>
         </div>
-
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {[
-            {
-              icon: <ScanSearch className="h-4 w-4" />,
-              title: "Signal first",
-              body: "Use diagnostics to establish what is actually happening before the room fills with noise.",
-            },
-            {
-              icon: <Scale className="h-4 w-4" />,
-              title: "Interpretation second",
-              body: "Executive Reporting turns signal into a decision-grade reading that can be understood and acted on.",
-            },
-            {
-              icon: <Crown className="h-4 w-4" />,
-              title: "Mandate last",
-              body: "Strategy Room is the private chamber when the consequences already justify intervention.",
-            },
-          ].map((item) => (
-            <Panel key={item.title}>
-              <div className="p-6">
-                <div className="flex items-center gap-2 text-amber-300/90">
-                  {item.icon}
-                  <div className="text-[10px] font-mono uppercase tracking-[0.30em]">
-                    {item.title}
-                  </div>
-                </div>
-                <div className="mt-4 text-sm leading-relaxed text-white/68">
-                  {item.body}
-                </div>
-              </div>
-            </Panel>
-          ))}
-        </div>
-
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/diagnostics"
-            className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-300 hover:bg-amber-500/18"
-          >
-            Begin with Diagnostics <ChevronRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/diagnostics/executive-reporting"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.32em] text-white/85 hover:bg-white/[0.08]"
-          >
-            Open Flagship Product <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
       </Section>
 
-      <Bridge text="From diagnostics → to buyer fit" />
+      <Bridge text="From products → to private escalation" />
+
+      <Section
+        id="strategy-room"
+        variant="default"
+        cap="Escalation — when product becomes mandate"
+      >
+        <AnchorOffset id="strategy-room" />
+        <ModuleBoundary label="StrategyRoomIntegration">
+          <StrategyRoomIntegration />
+        </ModuleBoundary>
+      </Section>
+
+      <Bridge text="From products → to buyer fit" />
 
       <Section id="buyer-fit" variant="surface" cap="Buyer fit — who this is for">
         <AnchorOffset id="buyer-fit" />
@@ -1302,22 +1450,9 @@ const HomePage: NextPage<HomePageProps> = ({
         </ModuleBoundary>
       </Section>
 
-      <Bridge text="From clarity → to intervention" />
-
-      <Section
-        id="strategy-room"
-        variant="default"
-        cap="Escalation — when reporting becomes mandate"
-      >
-        <AnchorOffset id="strategy-room" />
-        <ModuleBoundary label="StrategyRoomIntegration">
-          <StrategyRoomIntegration />
-        </ModuleBoundary>
-      </Section>
-
       {featuredPublications.length > 0 || featuredPlaybooks.length > 0 ? (
         <>
-          <Bridge text="From diagnostics → to editorial canon and execution" />
+          <Bridge text="From products → to editorial and execution property" />
 
           <Section
             id="publications"
@@ -1329,7 +1464,7 @@ const HomePage: NextPage<HomePageProps> = ({
             <HQHeader
               eyebrow="Publications & Playbooks"
               title="Ideas that can be read. Frameworks that can be used."
-              description="Publishing is part of the doctrine-bearing architecture of the brand. Playbooks translate that doctrine into execution."
+              description="Publishing is part of the authority architecture. Playbooks translate that authority into execution."
               icon={<ScrollText className="h-4 w-4" />}
             />
 
@@ -1377,7 +1512,7 @@ const HomePage: NextPage<HomePageProps> = ({
         </>
       ) : null}
 
-      <Bridge text="From publications → to operators" />
+      <Bridge text="From execution property → to operators" />
 
       <Section id="who" variant="default" cap="Operators — target audience">
         <AnchorOffset id="who" />
@@ -1407,8 +1542,8 @@ const HomePage: NextPage<HomePageProps> = ({
 
         <HQHeader
           eyebrow="Engagement"
-          title="Public signal. Commissioned diagnostics. Private mandate work."
-          description="Clean boundaries protect trust, pricing, and seriousness. No confusion. No leakage."
+          title="Public signal. Structured products. Private mandate work."
+          description="Clean boundaries protect trust, pricing, and seriousness."
           icon={<Layers className="h-4 w-4" />}
         />
 
@@ -1425,13 +1560,13 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="From lanes → to next actions" />
 
-      <Section id="pathways" variant="default" cap="Pathways — three clean moves">
+      <Section id="pathways" variant="default" cap="Pathways — three clear moves">
         <AnchorOffset id="pathways" />
 
         <HQHeader
           eyebrow="Pathways"
           title="Three clear moves. No wandering."
-          description="The architecture now tells the user what to do next."
+          description="Diagnostics. Products. Strategy Room."
           icon={<ArrowRight className="h-4 w-4" />}
         />
 
@@ -1462,7 +1597,7 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      <Bridge text="From actions → to events and assets" />
+      <Bridge text="From actions → to live rooms and deployables" />
 
       <Section id="events" variant="surface" cap="Events — live rooms">
         <AnchorOffset id="events" />
@@ -1491,7 +1626,7 @@ const HomePage: NextPage<HomePageProps> = ({
         <HQHeader
           eyebrow="Vault"
           title="Deployables for actual execution."
-          description="Templates, packs, frameworks, and operating assets engineered for reuse, not decoration."
+          description="Templates, packs, frameworks, and operating assets engineered for reuse."
           icon={<Archive className="h-4 w-4" />}
         />
 
@@ -1517,7 +1652,7 @@ const HomePage: NextPage<HomePageProps> = ({
               eyebrow="Briefing"
               title="Operator-grade intelligence."
               description="Focused transmission: clarity that survives hostile scrutiny."
-              icon={<FileText className="h-4 w-4" />}
+              icon={<Landmark className="h-4 w-4" />}
             />
 
             <div className="mt-10">
@@ -1872,42 +2007,37 @@ function readPlaybooksFromGenerated(gen: any): PlaybookItem[] {
     .filter((p: PlaybookItem) => !!p.slug);
 }
 
-// Helper to parse frontmatter from MDX content
 function parseFrontmatter(content: string): Record<string, any> {
   const frontmatterRegex = /^---\n([\s\S]*?)\n---/;
   const match = content.match(frontmatterRegex);
   if (!match) return {};
-  
+
   const frontmatterContent = match[1];
   const result: Record<string, any> = {};
-  
-  frontmatterContent.split('\n').forEach(line => {
-    const colonIndex = line.indexOf(':');
+
+  frontmatterContent.split("\n").forEach((line) => {
+    const colonIndex = line.indexOf(":");
     if (colonIndex > 0) {
       const key = line.slice(0, colonIndex).trim();
       let value: any = line.slice(colonIndex + 1).trim();
-      
-      // Handle arrays
-      if (value.startsWith('[') && value.endsWith(']')) {
-        value = value.slice(1, -1).split(',').map((v: string) => v.trim().replace(/['"]/g, ''));
-      }
-      // Handle strings without quotes
-      else if (value.match(/^[a-zA-Z]/) && !value.startsWith('"')) {
-        // Keep as string
-      }
-      // Handle numbers
-      else if (!isNaN(Number(value))) {
+
+      if (value.startsWith("[") && value.endsWith("]")) {
+        value = value
+          .slice(1, -1)
+          .split(",")
+          .map((v: string) => v.trim().replace(/['"]/g, ""));
+      } else if (value.match(/^[a-zA-Z]/) && !value.startsWith('"')) {
+        // keep string
+      } else if (!isNaN(Number(value))) {
         value = Number(value);
-      }
-      // Remove quotes
-      else if (value.startsWith('"') && value.endsWith('"')) {
+      } else if (value.startsWith('"') && value.endsWith('"')) {
         value = value.slice(1, -1);
       }
-      
+
       result[key] = value;
     }
   });
-  
+
   return result;
 }
 
@@ -1957,93 +2087,97 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     ctaLabel: "Open the Prelude MiniBook",
   };
 
-  // Fetch the latest quarterly report from artifacts
   try {
-    const fs = await import('fs');
-    const path = await import('path');
-    const artifactsDir = path.join(process.cwd(), 'content/artifacts');
-    
+    const fs = await import("fs");
+    const path = await import("path");
+    const artifactsDir = path.join(process.cwd(), "content/artifacts");
+
     if (fs.existsSync(artifactsDir)) {
       const files = fs.readdirSync(artifactsDir);
-      const mdxFiles = files.filter(f => f.endsWith('.mdx') && !f.includes('.backup'));
-      
-      // Find quarterly reports
+      const mdxFiles = files.filter(
+        (f) => f.endsWith(".mdx") && !f.includes(".backup"),
+      );
+
       const quarterlyReports = [];
-      
+
       for (const file of mdxFiles) {
         const filePath = path.join(artifactsDir, file);
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = fs.readFileSync(filePath, "utf-8");
         const frontmatter = parseFrontmatter(content);
-        
-        if (frontmatter.type === 'quarterly_report' || file.includes('global-market-intelligence')) {
-          // Extract quarter and year
-          let quarter = frontmatter.quarter || 'Q1';
+
+        if (
+          frontmatter.type === "quarterly_report" ||
+          file.includes("global-market-intelligence")
+        ) {
+          let quarter = frontmatter.quarter || "Q1";
           let year = frontmatter.year || 2026;
-          
-          // Try to parse from filename if not in frontmatter
-          if (!frontmatter.quarter && file.includes('q1')) quarter = 'Q1';
-          if (!frontmatter.quarter && file.includes('q2')) quarter = 'Q2';
-          if (!frontmatter.quarter && file.includes('q3')) quarter = 'Q3';
-          if (!frontmatter.quarter && file.includes('q4')) quarter = 'Q4';
-          if (!frontmatter.year && file.includes('2026')) year = 2026;
-          
+
+          if (!frontmatter.quarter && file.includes("q1")) quarter = "Q1";
+          if (!frontmatter.quarter && file.includes("q2")) quarter = "Q2";
+          if (!frontmatter.quarter && file.includes("q3")) quarter = "Q3";
+          if (!frontmatter.quarter && file.includes("q4")) quarter = "Q4";
+          if (!frontmatter.year && file.includes("2026")) year = 2026;
+
           quarterlyReports.push({
-            id: file.replace('.mdx', ''),
-            slug: file.replace('.mdx', ''),
-            title: frontmatter.title || 'Global Market Intelligence Report',
-            description: frontmatter.description || 'Executive analysis of market conditions, strategic risks, and institutional opportunities.',
+            id: file.replace(".mdx", ""),
+            slug: file.replace(".mdx", ""),
+            title: frontmatter.title || "Global Market Intelligence Report",
+            description:
+              frontmatter.description ||
+              "Executive analysis of market conditions, strategic risks, and institutional opportunities.",
             publishedAt: frontmatter.date || new Date().toISOString(),
             quarter,
             year,
             readingTime: frontmatter.readingTime || 25,
             pdfUrl: frontmatter.pdfUrl || null,
             keyFindings: frontmatter.keyFindings || [
-              'Market volatility signals increasing strategic divergence',
-              'Capital allocation patterns show institutional realignment',
-              'Regulatory pressure creating asymmetric opportunities'
+              "Markets are increasingly pricing resilience, policy credibility, and strategic positioning.",
+              "Capital allocation patterns show sharper institutional discrimination.",
+              "Policy pressure is changing operating assumptions across jurisdictions.",
             ],
           });
         }
       }
-      
-      // Sort by year and quarter (newest first)
+
       const quarterOrder = { Q1: 1, Q2: 2, Q3: 3, Q4: 4 };
       quarterlyReports.sort((a, b) => {
         if (a.year !== b.year) return b.year - a.year;
-        return (quarterOrder[b.quarter as keyof typeof quarterOrder] || 0) - 
-               (quarterOrder[a.quarter as keyof typeof quarterOrder] || 0);
+        return (
+          (quarterOrder[b.quarter as keyof typeof quarterOrder] || 0) -
+          (quarterOrder[a.quarter as keyof typeof quarterOrder] || 0)
+        );
       });
-      
+
       latestReport = quarterlyReports[0] || null;
     }
   } catch (err) {
-    console.error('Failed to load quarterly report:', err);
+    console.error("Failed to load quarterly report:", err);
     latestReport = null;
   }
 
   const computeFromDocs = (
     docsIn: any[],
     dataForBooks?: any,
-    dataForPlaybooks?: any
+    dataForPlaybooks?: any,
   ) => {
     const stableDocs = (docsIn || []).filter((d) => !isDraftLocal(d));
 
     const shortsDocs = stableDocs.filter(
-      (d) => kindLower(d) === "short" || flattenedPath(d).startsWith("shorts/")
+      (d) => kindLower(d) === "short" || flattenedPath(d).startsWith("shorts/"),
     );
     const canonDocs = stableDocs.filter(
-      (d) => kindLower(d) === "canon" || flattenedPath(d).startsWith("canon/")
+      (d) => kindLower(d) === "canon" || flattenedPath(d).startsWith("canon/"),
     );
     const briefsDocs = stableDocs.filter(
       (d) =>
         kindLower(d) === "brief" ||
         flattenedPath(d).startsWith("briefs/") ||
-        flattenedPath(d).startsWith("vault/briefs/")
+        flattenedPath(d).startsWith("vault/briefs/"),
     );
     const downloadsDocs = stableDocs.filter(
       (d) =>
         kindLower(d) === "download" ||
-        flattenedPath(d).startsWith("downloads/")
+        flattenedPath(d).startsWith("downloads/"),
     );
 
     counts.shorts = shortsDocs.length;
@@ -2075,11 +2209,11 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
         subtitle: safeString(preludeBook?.subtitle, canonPrelude.subtitle),
         description: safeString(
           preludeBook?.description,
-          canonPrelude.description
+          canonPrelude.description,
         ),
         excerpt: safeString(
           preludeBook?.excerpt || preludeBook?.description,
-          canonPrelude.excerpt
+          canonPrelude.excerpt,
         ),
         coverImage: "/assets/images/books/the-architecture-of-human-purpose.jpg",
         href: `/books/${bareBookSlug}`,
@@ -2093,7 +2227,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     counts.playbooks = allPlaybooks.length;
 
     const rawEvents = stableDocs.filter(
-      (d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/")
+      (d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/"),
     );
 
     events = (rawEvents.map(toEvent).filter(Boolean) as EventItem[])
@@ -2123,7 +2257,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
             .sort(
               (a: any, b: any) =>
                 (Date.parse(b?.date || "") || 0) -
-                (Date.parse(a?.date || "") || 0)
+                (Date.parse(a?.date || "") || 0),
             )
             .slice(0, 8)
             .map(toItem)
@@ -2155,17 +2289,18 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     }
   }
 
-  // Update library count to include artifacts
   try {
-    const fs = await import('fs');
-    const path = await import('path');
-    const artifactsDir = path.join(process.cwd(), 'content/artifacts');
+    const fs = await import("fs");
+    const path = await import("path");
+    const artifactsDir = path.join(process.cwd(), "content/artifacts");
     if (fs.existsSync(artifactsDir)) {
-      const artifactFiles = fs.readdirSync(artifactsDir).filter(f => f.endsWith('.mdx') && !f.includes('.backup'));
+      const artifactFiles = fs
+        .readdirSync(artifactsDir)
+        .filter((f) => f.endsWith(".mdx") && !f.includes(".backup"));
       counts.library = (counts.library || 0) + artifactFiles.length;
     }
   } catch {
-    // Keep existing library count
+    // keep existing library count
   }
 
   return {

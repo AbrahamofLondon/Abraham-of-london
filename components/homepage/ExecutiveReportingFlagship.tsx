@@ -82,17 +82,17 @@ const BUYER_FIT: BuyerFitItem[] = [
   {
     icon: Building2,
     title: "Founders & leadership teams",
-    body: "For situations where execution is active, but clarity, trust, and interpretation are starting to decay.",
+    body: "Execution is active, but clarity, trust, and interpretation are starting to decay.",
   },
   {
     icon: ShieldCheck,
     title: "Boards & operators",
-    body: "For cases where a sharper reading is required before corrective action, escalation, or mandate work.",
+    body: "A sharper reading is required before corrective action, escalation, or mandate work.",
   },
   {
     icon: Landmark,
     title: "Institutions under exposure",
-    body: "For environments where the cost of misreading the situation is already reputational, operational, or political.",
+    body: "The cost of misreading the situation is already reputational, operational, or political.",
   },
 ];
 
@@ -103,7 +103,6 @@ const CORE_PROOFS = [
   "Makes Strategy Room feel justified rather than prematurely pushed",
 ];
 
-// Type for the quarterly report artifact
 type QuarterlyReport = {
   id: string;
   title: string;
@@ -113,29 +112,40 @@ type QuarterlyReport = {
   quarter: string;
   year: number;
   readingTime: number;
-  pdfUrl?: string;
+  pdfUrl?: string | null;
   keyFindings?: string[];
 };
 
-interface ExecutiveReportingFlagshipProps {
+type ExecutiveReportingFlagshipProps = {
   latestReport?: QuarterlyReport | null;
-}
+  compact?: boolean;
+  className?: string;
+};
 
-export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveReportingFlagshipProps = {}) {
+export default function ExecutiveReportingFlagship({
+  latestReport = null,
+  compact = false,
+  className = "",
+}: ExecutiveReportingFlagshipProps) {
   const reduceMotion = useReducedMotion();
 
-  // Format the quarter display
   const getQuarterDisplay = () => {
     if (!latestReport) return null;
     return `${latestReport.quarter.toUpperCase()} ${latestReport.year}`;
   };
 
   return (
-    <section className="relative border-t border-white/5 bg-[#070707] py-24">
+    <section
+      className={cn(
+        "relative border-t border-white/5 bg-[#070707]",
+        compact ? "py-16" : "py-24",
+        className,
+      )}
+    >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(245,158,11,0.06),transparent_42%),radial-gradient(ellipse_at_82%_36%,rgba(255,255,255,0.04),transparent_55%)]" />
       <div className="absolute inset-0 aol-grain opacity-[0.04]" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
           <motion.div
             initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
@@ -144,17 +154,17 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
             transition={{ duration: 0.65 }}
             className="max-w-4xl"
           >
-            <RailLabel>Flagship bridge product</RailLabel>
+            <RailLabel>Executive Reporting</RailLabel>
 
             <div className="mt-6 inline-flex items-center gap-3 border border-amber-500/18 bg-amber-500/[0.05] px-4 py-2">
               <Crown className="h-4 w-4 text-amber-400/70" />
               <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber-300/78">
-                Executive Reporting
+                Flagship advisory product
               </span>
             </div>
 
             <h2 className="mt-8 max-w-[13ch] font-serif text-4xl font-light leading-[0.96] tracking-[-0.03em] text-white md:text-5xl lg:text-[4.1rem]">
-              The flagship product between
+              The flagship bridge between
               <span className="mt-2 block text-white/58">
                 signal and intervention
               </span>
@@ -168,24 +178,23 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
               fact.
             </p>
 
-            {/* Quarterly Report Spotlight — Integrated elegantly */}
-            {latestReport && (
+            {latestReport ? (
               <div className="mt-8 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-6">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="mb-3 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-amber-400/70" />
                   <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-amber-400/50">
-                    Latest Quarterly Release
+                    Current intelligence companion
                   </span>
                 </div>
-                
+
                 <h3 className="font-serif text-xl text-white">
                   {latestReport.title}
                 </h3>
-                
+
                 <p className="mt-2 text-sm text-white/50">
                   {latestReport.description}
                 </p>
-                
+
                 <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] font-mono text-white/35">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="h-3 w-3" />
@@ -196,33 +205,36 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
                     <span>{latestReport.readingTime} min read</span>
                   </div>
                 </div>
-                
-                {latestReport.keyFindings && latestReport.keyFindings.length > 0 && (
+
+                {latestReport.keyFindings && latestReport.keyFindings.length > 0 ? (
                   <div className="mt-4 space-y-1.5">
                     <p className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/30">
-                      Key Findings
+                      Related signals
                     </p>
                     <ul className="space-y-1">
                       {latestReport.keyFindings.slice(0, 2).map((finding, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-[11px] text-white/45">
+                        <li
+                          key={`${finding}-${idx}`}
+                          className="flex items-start gap-2 text-[11px] text-white/45"
+                        >
                           <span className="mt-1 h-1 w-1 rounded-full bg-amber-400/50" />
                           {finding}
                         </li>
                       ))}
                     </ul>
                   </div>
-                )}
-                
+                ) : null}
+
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link
                     href={`/artifacts/${latestReport.slug}`}
                     className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/18"
                   >
                     <Eye className="h-3 w-3" />
-                    Read Report
+                    Read report
                   </Link>
-                  
-                  {latestReport.pdfUrl && (
+
+                  {latestReport.pdfUrl ? (
                     <a
                       href={latestReport.pdfUrl}
                       target="_blank"
@@ -232,10 +244,10 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
                       <Download className="h-3 w-3" />
                       Download PDF
                     </a>
-                  )}
+                  ) : null}
                 </div>
               </div>
-            )}
+            ) : null}
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {CORE_PROOFS.map((line) => (
@@ -271,11 +283,11 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
-                href="/diagnostics/executive-reporting"
+                href="#sample-report"
                 className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
               >
-                <span>View flagship product</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <span>View sample output</span>
+                <FileText className="h-4 w-4 transition-transform group-hover:scale-105" />
               </Link>
 
               <Link
@@ -284,6 +296,14 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
               >
                 <span>Begin with diagnostics</span>
                 <Activity className="h-4 w-4 opacity-60 transition-transform group-hover:scale-105" />
+              </Link>
+
+              <Link
+                href="/consulting/strategy-room"
+                className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
+              >
+                <span>Enter Strategy Room</span>
+                <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </motion.div>
@@ -338,12 +358,10 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
                   <Eye className="mt-0.5 h-4 w-4 text-amber-400/68" />
                   <div>
                     <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-amber-300/72">
-                      Commercial logic
+                      Structured interpretation
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-white/56">
-                      The buyer should feel this page is not prematurely selling
-                      advisory. That restraint is part of what makes the advisory
-                      path more credible.
+                      A disciplined reading before escalation. Not advisory. Not a dashboard. A bridge.
                     </p>
                   </div>
                 </div>
@@ -354,8 +372,7 @@ export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveRe
                   Positioning
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-white/58">
-                  A defensible premium niche between shallow diagnostics and full
-                  advisory retainers.
+                  A defensible premium niche between shallow diagnostics and full advisory retainers.
                 </p>
               </div>
             </Surface>

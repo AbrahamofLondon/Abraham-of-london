@@ -1,8 +1,20 @@
 import * as React from "react";
 import Head from "next/head";
+import Link from "next/link";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import {
+  ArrowLeft,
+  FileText,
+  Lock,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
+
 import Layout from "@/components/Layout";
 import DownloadButton from "@/components/premium/DownloadButton";
+import PremiumAssetLaunchButton from "@/components/premium/PremiumAssetLaunchButton";
 import {
   getPremiumContentById,
   type PremiumContentItem,
@@ -14,6 +26,22 @@ type Props = {
 
 function safeStr(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function isMarketIntelligenceItem(item: PremiumContentItem): boolean {
+  const id = item.id.toLowerCase();
+  const title = item.title.toLowerCase();
+  const category = String(item.categorySlug || item.category || "").toLowerCase();
+  const tags = Array.isArray(item.tags) ? item.tags.join(" ").toLowerCase() : "";
+
+  return (
+    id.includes("global-market-intelligence") ||
+    id.includes("market-outlook") ||
+    title.includes("market intelligence") ||
+    title.includes("market outlook") ||
+    category.includes("market") ||
+    tags.includes("macro")
+  );
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
@@ -40,6 +68,7 @@ function getAssetType(
   if (cat.includes("report")) return "report";
   if (cat.includes("toolkit")) return "toolkit";
   if (cat.includes("brief")) return "brief";
+  if (cat.includes("market")) return "intelligence";
   return "intelligence";
 }
 
@@ -85,6 +114,13 @@ export default function ArtifactDetailPage({
               The requested artifact does not exist in the current premium
               registry.
             </p>
+            <Link
+              href="/artifacts"
+              className="mt-8 inline-flex items-center rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to artifacts
+            </Link>
           </div>
         </main>
       </Layout>
@@ -96,6 +132,10 @@ export default function ArtifactDetailPage({
     "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg";
 
   const classification = item.metadata?.classification || "PUBLIC";
+  const formatLabel = getFormatLabel(item);
+  const assetType = getAssetType(item);
+  const isMarket = isMarketIntelligenceItem(item);
+
   const tierLabel = item.metadata?.watermarkRequired
     ? "Traceable distribution"
     : item.asset.mimeType?.includes("presentationml")
@@ -115,6 +155,16 @@ export default function ArtifactDetailPage({
           <div className="absolute inset-0 opacity-[0.06] aol-grain" />
 
           <div className="relative mx-auto max-w-6xl px-6 py-20 md:px-10">
+            <div className="mb-8">
+              <Link
+                href="/artifacts"
+                className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/62 transition hover:bg-white/[0.05]"
+              >
+                <ArrowLeft className="mr-2 h-3.5 w-3.5" />
+                Back to artifacts
+              </Link>
+            </div>
+
             <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
               <div>
                 <div className="overflow-hidden rounded-[30px] border border-white/10 bg-black shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
@@ -128,7 +178,17 @@ export default function ArtifactDetailPage({
 
                     <div className="absolute left-6 top-6 flex flex-wrap gap-2">
                       <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.24em] text-amber-300/90">
-                        Artifact
+                        {isMarket ? (
+                          <>
+                            <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+                            Market Intelligence
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                            Artifact
+                          </>
+                        )}
                       </span>
                       <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.24em] text-white/65">
                         {classification}
@@ -175,6 +235,50 @@ export default function ArtifactDetailPage({
                     </div>
                   ) : null}
                 </div>
+
+                {isMarket ? (
+                  <div className="mt-8 rounded-[28px] border border-[#C9A96A]/20 bg-[linear-gradient(180deg,rgba(201,169,106,0.08),rgba(255,255,255,0.02))] p-8">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
+                      Intelligence Surface
+                    </div>
+
+                    <h2 className="mt-4 font-serif text-2xl text-white/95">
+                      Quiet product architecture around the report.
+                    </h2>
+
+                    <p className="mt-4 max-w-3xl text-sm leading-8 text-white/72">
+                      This intelligence line is structured in layers: a public
+                      market outlook, a premium institutional edition, and a
+                      boardroom PDF for disciplined readers who need cleaner
+                      portability.
+                    </p>
+
+                    <div className="mt-7 flex flex-wrap gap-3">
+                      <Link
+                        href="/artifacts/global-market-outlook-q1-2026-public"
+                        className="inline-flex items-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-95"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Public brief
+                      </Link>
+
+                      <Link
+                        href="/intelligence/global-market-intelligence-q1-2026"
+                        className="inline-flex items-center rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
+                      >
+                        View intelligence surface
+                      </Link>
+
+                      <Link
+                        href="/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf"
+                        className="inline-flex items-center rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
+                      >
+                        <Scale className="mr-2 h-4 w-4 text-[#C9A96A]" />
+                        Boardroom PDF
+                      </Link>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               <div className="space-y-8">
@@ -209,9 +313,7 @@ export default function ArtifactDetailPage({
                       <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
                         Format
                       </div>
-                      <div className="mt-2 text-white/82">
-                        {getFormatLabel(item)}
-                      </div>
+                      <div className="mt-2 text-white/82">{formatLabel}</div>
                     </div>
 
                     <div>
@@ -234,16 +336,74 @@ export default function ArtifactDetailPage({
                   </div>
                 </div>
 
+                <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+                  <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.24em] text-amber-300/75">
+                    Access Layer
+                  </div>
+
+                  <div className="space-y-4">
+                    <PremiumAssetLaunchButton
+                      contentId={item.id}
+                      fallbackHref={`/artifacts/${item.id}`}
+                      variant="primary"
+                      className="w-full justify-center"
+                    >
+                      Open current edition
+                    </PremiumAssetLaunchButton>
+
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                      {item.metadata?.watermarkRequired ? (
+                        <>
+                          <ShieldCheck className="h-3.5 w-3.5 text-amber-300/70" />
+                          Traceable distribution
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-300/70" />
+                          Open circulation
+                        </>
+                      )}
+                    </div>
+
+                    {isMarket ? (
+                      <Link
+                        href="/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf"
+                        className="inline-flex w-full items-center justify-center rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
+                      >
+                        <Scale className="mr-2 h-4 w-4 text-[#C9A96A]" />
+                        Open boardroom PDF
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+
                 <DownloadButton
                   contentId={item.id}
                   assetTitle={item.title}
-                  assetType={getAssetType(item)}
+                  assetType={assetType}
                   classification={classification}
                   tierLabel={tierLabel}
                   fileName={item.asset.filename || `${item.id}.bin`}
                   maxDownloads={item.metadata?.maxDownloads || 1}
                   usedCount={0}
                 />
+
+                {isMarket ? (
+                  <div className="rounded-[28px] border border-[#C9A96A]/20 bg-white/[0.03] p-8">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
+                      Product Position
+                    </div>
+                    <p className="mt-4 text-sm leading-8 text-white/68">
+                      This is positioned as a discoverable intelligence product, not
+                      a loud campaign asset. That is deliberate. Serious readers
+                      tend to prefer standards over noise.
+                    </p>
+                    <div className="mt-5 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                      <Lock className="h-3.5 w-3.5 text-[#C9A96A]" />
+                      Quiet premium positioning
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
