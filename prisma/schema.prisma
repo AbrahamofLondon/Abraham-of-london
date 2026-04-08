@@ -212,6 +212,22 @@ enum DiagnosticRegenerationStatus {
   cancelled
 }
 
+enum GovernanceSeverity {
+  CRITICAL
+  HIGH
+  WARNING
+  INFO
+  DEBUG
+}
+
+enum GovernanceStatus {
+  ACTIVE
+  PENDING
+  RESOLVED
+  SUPPRESSED
+  ARCHIVED
+}
+
 // ============================================================================
 // ORGANISATION & ENTERPRISE CAMPAIGN SYSTEM
 // ============================================================================
@@ -1052,54 +1068,88 @@ model DecisionAssetContextPerformance {
   @@map("decision_asset_context_performance")
 }
 
+// ============================================================================
+// NEW: GOVERNANCE DEFINITION ENGINE
+// ============================================================================
+
+model GovernanceMetricDefinition {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  key         String   @unique // e.g., "RESONANCE_THRESHOLD" or "CERTAINTY_MIN"
+  name        String
+  description String?
+  category    String   // e.g., "Audit", "Strategic", "Operational"
+  
+  dataType    String   @default("PERCENTAGE") 
+  thresholdHi Float?   // Upper bound for "Healthy"
+  thresholdLo Float?   // Lower bound for "Critical"
+
+  active      Boolean  @default(true)
+  
+  // Link to signals to see which entities are currently being measured by this metric
+  signals     DecisionSignalRegistry[]
+
+  @@index([category])
+  @@map("governance_metric_definitions")
+}
+
+// ============================================================================
+// EXPANDED: SIGNAL REGISTRY (Synchronized with your Decision models)
+// ============================================================================
+
 model DecisionSignalRegistry {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  registryKey String @unique
+  registryKey     String   @unique // Unique identifier for the specific observation trace
 
-  assetId    String
-  assetTitle String
-  assetHref  String?
-  assetKind  String
+  // POLYMORPHIC LINKING
+  // This allows the registry to track Campaign Assets, Participants, or even API routes
+  assetId         String
+  assetTitle      String
+  assetHref       String?
+  assetKind       String
 
-  contextType  String
-  contextValue String
+  contextType     String   // e.g., "PARTICIPANT_AUDIT"
+  contextValue    String   // e.g., the participantId
 
-  status          String
-  highestSeverity String
+  status          String   @default("ACTIVE")
+  highestSeverity String   @default("info") // info, warning, critical
 
-  healthScore     Float   @default(0)
-  driftScore      Float   @default(0)
-  resonanceScore  Float   @default(0)
+  healthScore     Float    @default(0)
+  driftScore      Float    @default(0)
+  resonanceScore  Float    @default(0)
   confidenceScore Float?
   resonanceBand   String?
 
-  alertCount Int @default(0)
-
-  metrics  Json?
-  alerts   Json?
-  metadata Json?
-
+  alertCount      Int      @default(0)
   lastEvaluatedAt DateTime?
 
+  // RELATION TO METRIC DEFINITION
+  metricKey       String?
+  metric          GovernanceMetricDefinition? @relation(fields: [metricKey], references: [key], onDelete: SetNull)
+
+  // RELATION TO EFFICACY (Existing)
   assetEfficacyId String?
   assetEfficacy   DecisionAssetEfficacy? @relation(fields: [assetEfficacyId], references: [id], onDelete: SetNull)
 
+  // RELATION TO CONTEXT PERFORMANCE (Existing)
   contextPerformanceId String?
   contextPerformance   DecisionAssetContextPerformance? @relation(fields: [contextPerformanceId], references: [id], onDelete: SetNull)
+
+  metrics         Json?
+  alerts          Json?
+  metadata        Json?
 
   governanceAlerts DecisionGovernanceAlert[]
 
   @@unique([assetId, contextType, contextValue])
   @@index([assetId])
-  @@index([assetKind])
-  @@index([contextType, contextValue])
   @@index([status])
   @@index([highestSeverity])
-  @@index([healthScore])
-  @@index([lastEvaluatedAt])
   @@map("decision_signal_registry")
 }
 

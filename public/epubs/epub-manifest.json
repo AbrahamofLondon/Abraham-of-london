@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-07T23:42:57.841Z",
+  "generatedAt": "2026-04-08T09:38:52.457Z",
   "count": 4,
   "items": [
     {
@@ -9,8 +9,8 @@
       "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\4d-surrender-framework-worksheet.print.md",
       "outputPath": "C:\\Abraham-of-london\\public\\epubs\\4d-surrender-framework-worksheet.epub",
       "publicHref": "/epubs/4d-surrender-framework-worksheet.epub",
-      "sizeBytes": 5564,
-      "generatedAt": "2026-04-07T23:42:57.840Z"
+      "sizeBytes": 5561,
+      "generatedAt": "2026-04-08T09:38:52.457Z"
     },
     {
       "slug": "surrender-decision-matrix",
@@ -19,8 +19,8 @@
       "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\surrender-decision-matrix.print.md",
       "outputPath": "C:\\Abraham-of-london\\public\\epubs\\surrender-decision-matrix.epub",
       "publicHref": "/epubs/surrender-decision-matrix.epub",
-      "sizeBytes": 5327,
-      "generatedAt": "2026-04-07T23:42:57.841Z"
+      "sizeBytes": 5330,
+      "generatedAt": "2026-04-08T09:38:52.457Z"
     },
     {
       "slug": "ultimate-purpose-of-man-editorial",
@@ -29,8 +29,8 @@
       "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\ultimate-purpose-of-man-editorial.print.md",
       "outputPath": "C:\\Abraham-of-london\\public\\epubs\\ultimate-purpose-of-man-editorial.epub",
       "publicHref": "/epubs/ultimate-purpose-of-man-editorial.epub",
-      "sizeBytes": 15225,
-      "generatedAt": "2026-04-07T23:42:57.841Z"
+      "sizeBytes": 15227,
+      "generatedAt": "2026-04-08T09:38:52.457Z"
     },
     {
       "slug": "weekly-surrender-audit-template",
@@ -39,8 +39,8 @@
       "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\weekly-surrender-audit-template.print.md",
       "outputPath": "C:\\Abraham-of-london\\public\\epubs\\weekly-surrender-audit-template.epub",
       "publicHref": "/epubs/weekly-surrender-audit-template.epub",
-      "sizeBytes": 5065,
-      "generatedAt": "2026-04-07T23:42:57.841Z"
+      "sizeBytes": 5071,
+      "generatedAt": "2026-04-08T09:38:52.457Z"
     }
   ]
 }

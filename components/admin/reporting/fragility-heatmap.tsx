@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { calculateFragility } from '@/lib/alignment/fragility-logic';
-import { AlertCircle, ShieldCheck, Zap, Crown } from 'lucide-react';
+import * as React from "react";
+import { calculateFragility } from "@/lib/alignment/fragility-logic";
+import { ShieldCheck, Crown } from "lucide-react";
 
-// Aligned with your Prisma TeamAssessmentSnapshot model
 interface TeamSnapshot {
   teamName: string;
   percentScore: number;
-  varianceScoresJson: string; // Contains the distribution data
+  varianceScoresJson: string;
   respondentCount: number;
 }
 
@@ -16,43 +15,116 @@ interface FragilityHeatmapProps {
   teams: TeamSnapshot[];
 }
 
-// Parse variance scores from JSON string
+type FragilityStatus = "STABLE" | "VOLATILE" | "FRACTURED";
+
+type ProcessedTeam = TeamSnapshot & {
+  varianceMagnitude: number;
+  fragilityStatus: FragilityStatus;
+  fragilityDescription: string;
+};
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(Math.max(value, min), max);
+}
+
+function toNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
 function parseVarianceScores(varianceScoresJson: string): number[] {
   try {
     const parsed = JSON.parse(varianceScoresJson);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => toNumber(item, Number.NaN))
+      .filter((item) => Number.isFinite(item));
   } catch {
     return [];
   }
 }
 
-// Calculate variance magnitude from scores
 function calculateVarianceMagnitude(scores: number[]): number {
   if (scores.length === 0) return 0;
-  const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
-  const variance = scores.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / scores.length;
-  return Math.min(Math.sqrt(variance) * 10, 95); // Scale to 0-95 range
+  const mean = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+  const variance =
+    scores.reduce((sum, value) => sum + (value - mean) ** 2, 0) / scores.length;
+  const deviation = Math.sqrt(variance);
+  return clamp(deviation * 10, 0, 95);
+}
+
+function normalizeFragilityStatus(status: unknown): FragilityStatus {
+  const raw = String(status || "").toUpperCase();
+  if (raw === "FRACTURED") return "FRACTURED";
+  if (raw === "VOLATILE") return "VOLATILE";
+  return "STABLE";
+}
+
+function getNodeColor(status: FragilityStatus): string {
+  switch (status) {
+    case "FRACTURED":
+      return "bg-red-500";
+    case "VOLATILE":
+      return "bg-amber-500";
+    case "STABLE":
+    default:
+      return "bg-emerald-500";
+  }
+}
+
+function LegendItem({
+  color,
+  label,
+}: {
+  color: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={cn("h-2 w-2 rounded-full", color)} />
+      <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/40">
+        {label}
+      </span>
+    </div>
+  );
 }
 
 export function FragilityHeatmap({ teams }: FragilityHeatmapProps) {
-  const processedTeams = teams.map(team => {
-    const varianceScores = parseVarianceScores(team.varianceScoresJson);
-    const varianceMagnitude = calculateVarianceMagnitude(varianceScores);
-    
-    const fragility = calculateFragility(varianceScores);
-    
-    return {
-      ...team,
-      varianceMagnitude,
-      fragilityStatus: fragility.status,
-      fragilityDescription: fragility.description,
-    };
-  });
+  const processedTeams = React.useMemo<ProcessedTeam[]>(() => {
+    if (!Array.isArray(teams)) return [];
+
+    return teams.map((team) => {
+      const varianceScores = parseVarianceScores(team.varianceScoresJson);
+      const varianceMagnitude = calculateVarianceMagnitude(varianceScores);
+      const fragility = calculateFragility(varianceScores);
+
+      return {
+        ...team,
+        percentScore: clamp(toNumber(team.percentScore, 0), 0, 100),
+        respondentCount: Math.max(0, Math.round(toNumber(team.respondentCount, 0))),
+        varianceMagnitude,
+        fragilityStatus: normalizeFragilityStatus((fragility as any)?.status),
+        fragilityDescription:
+          typeof (fragility as any)?.description === "string" &&
+          (fragility as any).description.trim()
+            ? (fragility as any).description.trim()
+            : "Fragility signal unavailable.",
+      };
+    });
+  }, [teams]);
 
   return (
     <div className="border border-white/10 bg-black/30 p-6 md:p-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6 mb-8">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6">
         <div>
           <div className="inline-flex items-center gap-2">
             <span className="h-5 w-px bg-amber-400/40" />
@@ -60,95 +132,100 @@ export function FragilityHeatmap({ teams }: FragilityHeatmapProps) {
               Institutional Risk Map
             </span>
           </div>
+
           <h3 className="mt-3 font-serif text-2xl text-white md:text-3xl">
             Fragility Heatmap
           </h3>
-          <p className="mt-2 text-sm text-white/45 max-w-md">
-            Visualising team alignment resonance against internal variance
+
+          <p className="mt-2 max-w-md text-sm text-white/45">
+            Visualising team alignment resonance against internal variance.
           </p>
         </div>
-        
-        <div className="flex gap-4">
+
+        <div className="flex flex-wrap gap-4">
           <LegendItem color="bg-red-500/80" label="Fractured" />
           <LegendItem color="bg-amber-500/80" label="Volatile" />
           <LegendItem color="bg-emerald-500/80" label="Stable" />
         </div>
       </div>
 
-      {/* Grid Container */}
-      <div className="relative aspect-video w-full border-l border-b border-white/10 mb-8 bg-[radial-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:20px_20px]">
-        
-        {/* Axis Labels */}
-        <div className="absolute -left-10 top-1/2 -translate-y-1/2 -rotate-90 origin-center">
-          <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/30 whitespace-nowrap">
+      <div className="relative mb-8 aspect-video w-full border-b border-l border-white/10 bg-[radial-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:20px_20px]">
+        <div className="pointer-events-none absolute -left-10 top-1/2 origin-center -translate-y-1/2 -rotate-90">
+          <span className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.2em] text-white/30">
             Volatility (Internal Variance →)
           </span>
         </div>
-        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
-          <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/30 whitespace-nowrap">
+
+        <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2">
+          <span className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.2em] text-white/30">
             Resonance (Alignment Score →)
           </span>
         </div>
 
-        {/* Quadrant Indicators */}
-        <div className="absolute top-3 right-3 text-right opacity-30 pointer-events-none">
+        <div className="pointer-events-none absolute right-3 top-3 text-right opacity-30">
           <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-red-400">
             High Risk Zone
           </p>
-          <p className="text-[6px] font-mono uppercase text-white/30">
+          <p className="font-mono text-[6px] uppercase text-white/30">
             False Positive Alignment
           </p>
         </div>
 
-        {/* Grid Lines */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/5" />
+        <div className="absolute bottom-0 left-1/2 top-0 w-px bg-white/5" />
         <div className="absolute left-0 right-0 top-1/2 h-px bg-white/5" />
 
-        {/* Team Nodes */}
         {processedTeams.map((team) => {
-          // X = Resonance Score (0-100)
-          const xPos = team.percentScore;
-          // Y = Variance Magnitude (0-95, inverted so higher variance = higher on chart)
-          const yPos = team.varianceMagnitude;
-
-          // Determine node color based on fragility status
-          const nodeColor = 
-            team.fragilityStatus === 'FRACTURED' ? 'bg-red-500' :
-            team.fragilityStatus === 'VOLATILE' ? 'bg-amber-500' : 'bg-emerald-500';
+          const xPos = clamp(team.percentScore, 0, 100);
+          const yPos = clamp(team.varianceMagnitude, 0, 95);
+          const nodeColor = getNodeColor(team.fragilityStatus);
 
           return (
-            <div 
+            <div
               key={team.teamName}
-              className="absolute transition-all duration-700 group cursor-pointer"
-              style={{ left: `${xPos}%`, bottom: `${yPos}%`, transform: 'translate(-50%, 50%)' }}
+              className="group absolute cursor-pointer transition-all duration-700"
+              style={{
+                left: `${xPos}%`,
+                bottom: `${yPos}%`,
+                transform: "translate(-50%, 50%)",
+              }}
             >
-              {/* Node */}
-              <div className={cn(
-                "w-3 h-3 rounded-full border border-black/30 shadow-lg transition-all duration-300 group-hover:scale-150 group-hover:shadow-xl",
-                nodeColor
-              )}>
-                <div className="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-amber-400/20 blur-sm" />
+              <div
+                className={cn(
+                  "relative h-3 w-3 rounded-full border border-black/30 shadow-lg transition-all duration-300 group-hover:scale-150 group-hover:shadow-xl",
+                  nodeColor,
+                )}
+              >
+                <div className="absolute -inset-1 rounded-full bg-amber-400/20 opacity-0 blur-sm transition-opacity group-hover:opacity-100" />
               </div>
-              
-              {/* Tooltip */}
-              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-56 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                <div className="bg-black/95 border border-white/10 rounded-xl p-3 shadow-2xl backdrop-blur-sm">
-                  <p className="font-mono text-[9px] font-medium text-amber-400/80 uppercase tracking-wider mb-2">
+
+              <div className="pointer-events-none absolute bottom-5 left-1/2 z-50 w-56 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="rounded-xl border border-white/10 bg-black/95 p-3 shadow-2xl backdrop-blur-sm">
+                  <p className="mb-2 font-mono text-[9px] font-medium uppercase tracking-wider text-amber-400/80">
                     {team.teamName}
                   </p>
-                  <div className="flex justify-between items-center border-b border-white/10 pb-1.5 mb-1.5">
+
+                  <div className="mb-1.5 flex items-center justify-between border-b border-white/10 pb-1.5">
                     <span className="text-[10px] text-white/60">Resonance</span>
-                    <span className="text-[10px] font-mono text-white">{team.percentScore}%</span>
+                    <span className="font-mono text-[10px] text-white">
+                      {Math.round(team.percentScore)}%
+                    </span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-white/10 pb-1.5 mb-1.5">
+
+                  <div className="mb-1.5 flex items-center justify-between border-b border-white/10 pb-1.5">
                     <span className="text-[10px] text-white/60">Variance</span>
-                    <span className="text-[10px] font-mono text-white">{Math.round(team.varianceMagnitude)}%</span>
+                    <span className="font-mono text-[10px] text-white">
+                      {Math.round(team.varianceMagnitude)}%
+                    </span>
                   </div>
-                  <div className="flex justify-between items-center">
+
+                  <div className="flex items-center justify-between">
                     <span className="text-[10px] text-white/60">Respondents</span>
-                    <span className="text-[10px] font-mono text-white">{team.respondentCount}</span>
+                    <span className="font-mono text-[10px] text-white">
+                      {team.respondentCount}
+                    </span>
                   </div>
-                  <p className="mt-2 text-[8px] font-mono uppercase tracking-[0.1em] text-white/40">
+
+                  <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.1em] text-white/40">
                     {team.fragilityDescription}
                   </p>
                 </div>
@@ -158,15 +235,16 @@ export function FragilityHeatmap({ teams }: FragilityHeatmapProps) {
         })}
       </div>
 
-      {/* Insight Footer */}
-      <div className="border-t border-white/10 pt-5 flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4 border-t border-white/10 pt-5">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-400/60" />
           <span className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/40">
-            Nodes in the upper right indicate high alignment averages masking deep internal polarisation.
+            Nodes in the upper right indicate high alignment averages masking deep
+            internal polarisation.
           </span>
         </div>
-        <div className="flex items-center gap-2 ml-auto">
+
+        <div className="ml-auto flex items-center gap-2">
           <Crown className="h-3 w-3 text-amber-400/30" />
           <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/20">
             Abraham of London • Fragility Protocol
@@ -177,17 +255,4 @@ export function FragilityHeatmap({ teams }: FragilityHeatmapProps) {
   );
 }
 
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className={cn("w-2 h-2 rounded-full", color)} />
-      <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/40">
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function cn(...parts: (string | false | null | undefined)[]) {
-  return parts.filter(Boolean).join(' ');
-}
+export default FragilityHeatmap;

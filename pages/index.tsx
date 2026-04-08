@@ -100,6 +100,20 @@ type FeaturedRoute = {
   icon: React.ReactNode;
 };
 
+// Quarterly Report type
+type QuarterlyReport = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  publishedAt: string;
+  quarter: string;
+  year: number;
+  readingTime: number;
+  pdfUrl?: string;
+  keyFindings?: string[];
+};
+
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
@@ -108,6 +122,7 @@ type HomePageProps = {
   featuredPlaybooks: PlaybookItem[];
   events: EventItem[];
   canonPrelude: CanonPrelude;
+  latestReport: QuarterlyReport | null;
   counts: {
     shorts: number;
     canon: number;
@@ -803,6 +818,7 @@ const HomePage: NextPage<HomePageProps> = ({
     playbooks: 0,
   },
   canonPrelude,
+  latestReport,
 }) => {
   const heroCounts = {
     shorts: counts.shorts,
@@ -859,7 +875,8 @@ const HomePage: NextPage<HomePageProps> = ({
         />
       </section>
 
-      <ExecutiveReportingFlagship />
+      {/* Pass the latest report to the flagship component */}
+      <ExecutiveReportingFlagship latestReport={latestReport} />
 
       <Section id="prelude" variant="surface" cap="Prelude — doctrinal gateway">
         <AnchorOffset id="prelude" />
@@ -1855,6 +1872,45 @@ function readPlaybooksFromGenerated(gen: any): PlaybookItem[] {
     .filter((p: PlaybookItem) => !!p.slug);
 }
 
+// Helper to parse frontmatter from MDX content
+function parseFrontmatter(content: string): Record<string, any> {
+  const frontmatterRegex = /^---\n([\s\S]*?)\n---/;
+  const match = content.match(frontmatterRegex);
+  if (!match) return {};
+  
+  const frontmatterContent = match[1];
+  const result: Record<string, any> = {};
+  
+  frontmatterContent.split('\n').forEach(line => {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex > 0) {
+      const key = line.slice(0, colonIndex).trim();
+      let value: any = line.slice(colonIndex + 1).trim();
+      
+      // Handle arrays
+      if (value.startsWith('[') && value.endsWith(']')) {
+        value = value.slice(1, -1).split(',').map((v: string) => v.trim().replace(/['"]/g, ''));
+      }
+      // Handle strings without quotes
+      else if (value.match(/^[a-zA-Z]/) && !value.startsWith('"')) {
+        // Keep as string
+      }
+      // Handle numbers
+      else if (!isNaN(Number(value))) {
+        value = Number(value);
+      }
+      // Remove quotes
+      else if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.slice(1, -1);
+      }
+      
+      result[key] = value;
+    }
+  });
+  
+  return result;
+}
+
 /* -----------------------------------------------------------------------------
   DATA FETCHING
 ----------------------------------------------------------------------------- */
@@ -1863,6 +1919,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   let featuredBriefing: FeaturedItem | null = null;
   let featuredPlaybooks: PlaybookItem[] = [];
   let events: EventItem[] = [];
+  let latestReport: QuarterlyReport | null = null;
 
   const catalogue = getPublicationCatalogue();
   const flagshipPublicationRecord =
@@ -1899,6 +1956,70 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     canonHref: "/canon",
     ctaLabel: "Open the Prelude MiniBook",
   };
+
+  // Fetch the latest quarterly report from artifacts
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const artifactsDir = path.join(process.cwd(), 'content/artifacts');
+    
+    if (fs.existsSync(artifactsDir)) {
+      const files = fs.readdirSync(artifactsDir);
+      const mdxFiles = files.filter(f => f.endsWith('.mdx') && !f.includes('.backup'));
+      
+      // Find quarterly reports
+      const quarterlyReports = [];
+      
+      for (const file of mdxFiles) {
+        const filePath = path.join(artifactsDir, file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const frontmatter = parseFrontmatter(content);
+        
+        if (frontmatter.type === 'quarterly_report' || file.includes('global-market-intelligence')) {
+          // Extract quarter and year
+          let quarter = frontmatter.quarter || 'Q1';
+          let year = frontmatter.year || 2026;
+          
+          // Try to parse from filename if not in frontmatter
+          if (!frontmatter.quarter && file.includes('q1')) quarter = 'Q1';
+          if (!frontmatter.quarter && file.includes('q2')) quarter = 'Q2';
+          if (!frontmatter.quarter && file.includes('q3')) quarter = 'Q3';
+          if (!frontmatter.quarter && file.includes('q4')) quarter = 'Q4';
+          if (!frontmatter.year && file.includes('2026')) year = 2026;
+          
+          quarterlyReports.push({
+            id: file.replace('.mdx', ''),
+            slug: file.replace('.mdx', ''),
+            title: frontmatter.title || 'Global Market Intelligence Report',
+            description: frontmatter.description || 'Executive analysis of market conditions, strategic risks, and institutional opportunities.',
+            publishedAt: frontmatter.date || new Date().toISOString(),
+            quarter,
+            year,
+            readingTime: frontmatter.readingTime || 25,
+            pdfUrl: frontmatter.pdfUrl || null,
+            keyFindings: frontmatter.keyFindings || [
+              'Market volatility signals increasing strategic divergence',
+              'Capital allocation patterns show institutional realignment',
+              'Regulatory pressure creating asymmetric opportunities'
+            ],
+          });
+        }
+      }
+      
+      // Sort by year and quarter (newest first)
+      const quarterOrder = { Q1: 1, Q2: 2, Q3: 3, Q4: 4 };
+      quarterlyReports.sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return (quarterOrder[b.quarter as keyof typeof quarterOrder] || 0) - 
+               (quarterOrder[a.quarter as keyof typeof quarterOrder] || 0);
+      });
+      
+      latestReport = quarterlyReports[0] || null;
+    }
+  } catch (err) {
+    console.error('Failed to load quarterly report:', err);
+    latestReport = null;
+  }
 
   const computeFromDocs = (
     docsIn: any[],
@@ -2034,6 +2155,19 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     }
   }
 
+  // Update library count to include artifacts
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const artifactsDir = path.join(process.cwd(), 'content/artifacts');
+    if (fs.existsSync(artifactsDir)) {
+      const artifactFiles = fs.readdirSync(artifactsDir).filter(f => f.endsWith('.mdx') && !f.includes('.backup'));
+      counts.library = (counts.library || 0) + artifactFiles.length;
+    }
+  } catch {
+    // Keep existing library count
+  }
+
   return {
     props: sanitizeData({
       featuredShorts,
@@ -2044,6 +2178,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       events,
       counts,
       canonPrelude,
+      latestReport,
     }),
     revalidate: 3600,
   };

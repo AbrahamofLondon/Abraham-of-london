@@ -70,7 +70,6 @@ export interface EnhancedDomainDiagnostic extends DomainDiagnostic {
   sovereignDataHash?: string;
   signatureRequired: boolean;
   quorumRequired: number;
-  // FIXED: Add missing property
   recommendedAction: string;
 }
 
@@ -216,6 +215,21 @@ function getReadinessTierRequired(score: number, trajectory: string): ReadinessT
   return 'SOVEREIGN';
 }
 
+async function generateConstitutionalSignature(
+  campaignId: string,
+  domain: string,
+  authority?: ConstitutionalAuthority,
+): Promise<string> {
+  const timestamp = Date.now();
+  const payload = `${campaignId}:${domain}:${timestamp}:${authority?.userId || 'unknown'}`;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(payload);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${authority?.userId || 'system'}:${hashHex.slice(0, 16)}:${timestamp}`;
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function InterventionCopilot({ 
@@ -236,7 +250,6 @@ export function InterventionCopilot({
   onAuditAction,
 }: InterventionCopilotProps) {
   const [signing, setSigning] = useState<Record<string, boolean>>({});
-  const [verifying, setVerifying] = useState(false);
   const [thresholdValid, setThresholdValid] = useState<{ valid: boolean; reason?: string }>({ valid: true });
 
   // Validate threshold on mount
@@ -443,7 +456,7 @@ export function InterventionCopilot({
         resourceRequirements,
         signatureRequired,
         quorumRequired,
-        recommendedAction, // FIXED: Added missing property
+        recommendedAction,
       };
     });
   }, [diagnostics, completedQuestions, totalQuestionsPerDomain, participantCount]);
@@ -545,19 +558,6 @@ export function InterventionCopilot({
       setSigning(prev => ({ ...prev, [domain]: false }));
     }
   }, [canCreateIntervention, thresholdValid, campaignId, constitutionalAuthority, onCreateIntervention, onVerifyAuthority, onAuditAction]);
-
-  const generateConstitutionalSignature = async (campaignId: string, domain: string, authority?: ConstitutionalAuthority): Promise<string> => {
-    const timestamp = Date.now();
-    const payload = `${campaignId}:${domain}:${timestamp}:${authority?.userId || 'unknown'}`;
-    
-    const encoder = new TextEncoder();
-    const data = encoder.encode(payload);
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hash));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    return `${authority?.userId || 'system'}:${hashHex.slice(0, 16)}:${timestamp}`;
-  };
 
   const overallIcon = overallPosture.icon || Shield;
 

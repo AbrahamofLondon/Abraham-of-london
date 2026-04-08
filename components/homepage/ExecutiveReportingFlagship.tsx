@@ -14,6 +14,10 @@ import {
   Activity,
   Eye,
   Landmark,
+  Calendar,
+  Clock,
+  Download,
+  TrendingUp,
 } from "lucide-react";
 
 function cn(...parts: Array<string | false | null | undefined>): string {
@@ -99,8 +103,32 @@ const CORE_PROOFS = [
   "Makes Strategy Room feel justified rather than prematurely pushed",
 ];
 
-export default function ExecutiveReportingFlagship() {
+// Type for the quarterly report artifact
+type QuarterlyReport = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  publishedAt: string;
+  quarter: string;
+  year: number;
+  readingTime: number;
+  pdfUrl?: string;
+  keyFindings?: string[];
+};
+
+interface ExecutiveReportingFlagshipProps {
+  latestReport?: QuarterlyReport | null;
+}
+
+export default function ExecutiveReportingFlagship({ latestReport }: ExecutiveReportingFlagshipProps = {}) {
   const reduceMotion = useReducedMotion();
+
+  // Format the quarter display
+  const getQuarterDisplay = () => {
+    if (!latestReport) return null;
+    return `${latestReport.quarter.toUpperCase()} ${latestReport.year}`;
+  };
 
   return (
     <section className="relative border-t border-white/5 bg-[#070707] py-24">
@@ -139,6 +167,75 @@ export default function ExecutiveReportingFlagship() {
               interpretation before escalation, not vague dashboards after the
               fact.
             </p>
+
+            {/* Quarterly Report Spotlight — Integrated elegantly */}
+            {latestReport && (
+              <div className="mt-8 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="h-4 w-4 text-amber-400/70" />
+                  <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-amber-400/50">
+                    Latest Quarterly Release
+                  </span>
+                </div>
+                
+                <h3 className="font-serif text-xl text-white">
+                  {latestReport.title}
+                </h3>
+                
+                <p className="mt-2 text-sm text-white/50">
+                  {latestReport.description}
+                </p>
+                
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] font-mono text-white/35">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-3 w-3" />
+                    <span>{getQuarterDisplay()}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-3 w-3" />
+                    <span>{latestReport.readingTime} min read</span>
+                  </div>
+                </div>
+                
+                {latestReport.keyFindings && latestReport.keyFindings.length > 0 && (
+                  <div className="mt-4 space-y-1.5">
+                    <p className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/30">
+                      Key Findings
+                    </p>
+                    <ul className="space-y-1">
+                      {latestReport.keyFindings.slice(0, 2).map((finding, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-[11px] text-white/45">
+                          <span className="mt-1 h-1 w-1 rounded-full bg-amber-400/50" />
+                          {finding}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link
+                    href={`/artifacts/${latestReport.slug}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/18"
+                  >
+                    <Eye className="h-3 w-3" />
+                    Read Report
+                  </Link>
+                  
+                  {latestReport.pdfUrl && (
+                    <a
+                      href={latestReport.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-[9px] font-mono uppercase tracking-[0.2em] text-white/70 transition hover:bg-white/[0.08]"
+                    >
+                      <Download className="h-3 w-3" />
+                      Download PDF
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {CORE_PROOFS.map((line) => (
