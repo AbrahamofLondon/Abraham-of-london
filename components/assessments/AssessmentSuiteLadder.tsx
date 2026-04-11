@@ -1,196 +1,137 @@
 // components/assessments/AssessmentSuiteLadder.tsx
-"use client";
+// Design: Institutional Monumentalism
+// Changes from v1:
+// - "use client" removed (Pages Router)
+// - All rounded-[26px] / rounded-2xl / rounded-full → sharp panel system
+// - amber-500 → #C9A96E softGold throughout (CTA gold on flagship only)
+// - bg-black/50 backdrop-blur-sm → rgb(5 5 7) platform token
+// - Connector line removed (decorative noise)
+// - Step badges: rounded-full → sharp pills
+// - Icon containers: rounded-2xl → sharp 38×38 frames
+// - All four rungs use the same sharp panel baseline
+// - Flagship (Executive Reporting) distinguished by gold border only
+// - Hover: translateY(-2px) + gold thread top
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Crown, FileText, LayoutGrid, Radar, Users, ChevronRight } from "lucide-react";
+import { ArrowRight, FileText, LayoutGrid, Radar, Users } from "lucide-react";
 import { ASSESSMENT_LADDER, type AssessmentId } from "@/lib/assessments/suite-registry";
 
-const ICONS: Record<AssessmentId, React.ComponentType<{ className?: string }>> = {
-  CONSTITUTIONAL: Radar,
-  TEAM: Users,
-  ENTERPRISE: LayoutGrid,
-  EXECUTIVE_REPORTING: FileText,
+const GOLD = "#C9A96E";
+
+const ICONS: Record<AssessmentId, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  CONSTITUTIONAL:     Radar,
+  TEAM:               Users,
+  ENTERPRISE:         LayoutGrid,
+  EXECUTIVE_REPORTING:FileText,
 };
 
-// Step accent colours — each rung of the ladder is visually distinct
-const STEP_PALETTE = [
-  {
-    border: "border-white/[0.09]",
-    hoverBorder: "hover:border-white/[0.18]",
-    iconColor: "text-white/50",
-    numberColor: "text-white/20",
-    accentBar: "bg-white/10",
-    badge: "border-white/[0.08] bg-white/[0.03] text-white/40",
-    cta: "text-white/55",
-    glow: "",
-  },
-  {
-    border: "border-white/[0.09]",
-    hoverBorder: "hover:border-white/[0.18]",
-    iconColor: "text-white/50",
-    numberColor: "text-white/20",
-    accentBar: "bg-white/10",
-    badge: "border-white/[0.08] bg-white/[0.03] text-white/40",
-    cta: "text-white/55",
-    glow: "",
-  },
-  {
-    border: "border-white/[0.09]",
-    hoverBorder: "hover:border-white/[0.18]",
-    iconColor: "text-white/50",
-    numberColor: "text-white/20",
-    accentBar: "bg-white/10",
-    badge: "border-white/[0.08] bg-white/[0.03] text-white/40",
-    cta: "text-white/55",
-    glow: "",
-  },
-  {
-    border: "border-amber-500/25",
-    hoverBorder: "hover:border-amber-500/45",
-    iconColor: "text-amber-400/80",
-    numberColor: "text-amber-500/30",
-    accentBar: "bg-amber-500/30",
-    badge: "border-amber-500/20 bg-amber-500/[0.07] text-amber-300/80",
-    cta: "text-amber-300/90",
-    glow: "shadow-[0_0_60px_-20px_rgba(245,158,11,0.15)]",
-  },
-];
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
+function stepConfig(isFlagship: boolean) {
+  if (isFlagship) return {
+    border:     `${GOLD}28`, borderHover: `${GOLD}50`,
+    iconColor:  `${GOLD}AA`, numColor: `${GOLD}20`,
+    badgeBorder:`${GOLD}22`, badgeBg: `${GOLD}08`, badgeText: `${GOLD}CC`,
+    ctaColor:   `${GOLD}BB`, ctaHover: GOLD,
+  };
+  return {
+    border:     "rgba(255,255,255,0.062)", borderHover: "rgba(255,255,255,0.120)",
+    iconColor:  "rgba(255,255,255,0.45)", numColor: "rgba(255,255,255,0.08)",
+    badgeBorder:"rgba(255,255,255,0.09)", badgeBg: "rgba(255,255,255,0.02)", badgeText: "rgba(255,255,255,0.38)",
+    ctaColor:   "rgba(255,255,255,0.40)", ctaHover: "rgba(255,255,255,0.70)",
+  };
 }
 
 export default function AssessmentSuiteLadder() {
   const [hovered, setHovered] = React.useState<string | null>(null);
 
   return (
-    <div className="relative">
-      {/* Connector line running through card centres on desktop */}
-      <div className="pointer-events-none absolute left-[calc(50%_-_0.5px)] top-0 hidden h-full w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent lg:block" />
-
+    <div>
       <div className="grid gap-4 lg:grid-cols-4">
         {ASSESSMENT_LADDER.map((item, i) => {
-          const Icon = ICONS[item.id];
-          const pal = (STEP_PALETTE[i] ?? STEP_PALETTE[0])!;
-          const isHovered = hovered === item.id;
+          const Icon      = ICONS[item.id];
           const isFlagship = i === ASSESSMENT_LADDER.length - 1;
+          const cfg       = stepConfig(isFlagship);
+          const isHovered = hovered === item.id;
 
           return (
-            <Link
-              key={item.id}
-              href={item.href}
+            <Link key={item.id} href={item.href}
               onMouseEnter={() => setHovered(item.id)}
               onMouseLeave={() => setHovered(null)}
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-[26px] border bg-black/50 backdrop-blur-sm",
-                "transition-all duration-500",
-                pal.border,
-                pal.hoverBorder,
-                pal.glow,
-                isHovered && "translate-y-[-2px]",
-              )}
+              className="group relative flex flex-col overflow-hidden"
+              style={{
+                border:          `1px solid ${isHovered ? cfg.borderHover : cfg.border}`,
+                backgroundColor: "rgb(5 5 7)",
+                transform:       isHovered ? "translateY(-2px)" : "translateY(0)",
+                transition:      "border-color 300ms ease, transform 300ms ease, box-shadow 300ms ease",
+                boxShadow:       isHovered ? "0 20px 60px -20px rgba(0,0,0,0.65)" : "none",
+              }}
             >
-              {/* Top shimmer */}
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              {/* Gold thread — hover only */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${GOLD}30, transparent)`, opacity: isHovered ? 1 : 0, transition: "opacity 300ms ease" }} />
 
-              {/* Flagship ambient glow */}
-              {isFlagship && (
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(245,158,11,0.06),transparent_60%)]" />
-              )}
+              {/* Flagship ambient */}
+              {isFlagship && <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse at top right, ${GOLD}06, transparent 60%)` }} />}
 
-              {/* Accent bar — left edge */}
-              <div
-                className={cn(
-                  "absolute inset-y-0 left-0 w-[3px] rounded-r-full transition-all duration-500",
-                  pal.accentBar,
-                  isHovered ? "opacity-100" : "opacity-0",
-                )}
-              />
+              <div className="relative z-10 flex flex-1 flex-col" style={{ padding: "1.75rem 2rem" }}>
 
-              <div className="relative z-10 flex flex-1 flex-col p-6">
-                {/* Step number + icon row */}
-                <div className="flex items-start justify-between">
-                  <div
-                    className={cn(
-                      "font-mono text-[42px] font-light leading-none tracking-[-0.04em] transition-all duration-500",
-                      pal.numberColor,
-                      isHovered && "opacity-60",
-                    )}
-                  >
+                {/* Number + icon */}
+                <div className="flex items-start justify-between mb-6">
+                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "2.8rem", lineHeight: 1, letterSpacing: "-0.04em", color: cfg.numColor, transition: "color 300ms ease" }}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
-
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.03] transition-all duration-300",
-                      isHovered && "border-white/[0.12] bg-white/[0.06]",
-                    )}
-                  >
-                    <Icon className={cn("h-4.5 w-4.5 transition-colors duration-300", pal.iconColor)} />
+                  <div style={{ width: "38px", height: "38px", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", display: "flex", alignItems: "center", justifyContent: "center", transition: "border-color 300ms ease" }}>
+                    <Icon style={{ width: "18px", height: "18px", color: cfg.iconColor }} />
                   </div>
                 </div>
 
                 {/* Position badge */}
-                <div className="mt-5">
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[8px] uppercase tracking-[0.22em] transition-colors duration-300",
-                      pal.badge,
-                    )}
-                  >
+                <div style={{ marginBottom: "1rem" }}>
+                  <span style={{ display: "inline-block", padding: "3px 10px", border: `1px solid ${cfg.badgeBorder}`, backgroundColor: cfg.badgeBg, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: cfg.badgeText, transition: "border-color 300ms ease" }}>
                     {item.position}
                   </span>
                 </div>
 
                 {/* Title */}
-                <h3 className="mt-4 font-serif text-xl leading-snug text-white/92 transition-colors duration-300 group-hover:text-white">
+                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.1rem, 1.5vw, 1.35rem)", lineHeight: 1.10, letterSpacing: "-0.018em", color: "rgba(255,255,255,0.88)", marginBottom: "0.65rem", transition: "color 300ms ease" }}>
                   {item.title}
                 </h3>
 
                 {/* Strapline */}
-                <p className="mt-3 flex-1 text-sm leading-[1.7] text-white/42 transition-colors duration-300 group-hover:text-white/58">
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65, color: "rgba(255,255,255,0.38)", flex: 1, marginBottom: "1.25rem" }}>
                   {item.strapline}
                 </p>
 
                 {/* Divider */}
-                <div className="my-5 h-px w-full bg-gradient-to-r from-white/[0.06] to-transparent" />
+                <div style={{ height: "1px", background: "linear-gradient(to right, rgba(255,255,255,0.06), transparent)", marginBottom: "1rem" }} />
 
-                {/* Output label */}
-                <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/25">
+                {/* Output */}
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.35rem" }}>
                   Output
                 </div>
-                <div className="mt-1.5 text-[11px] leading-relaxed text-white/45">
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)", marginBottom: "1.25rem" }}>
                   {item.output}
                 </div>
 
-                {/* CTA row */}
-                <div
-                  className={cn(
-                    "mt-5 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.22em] transition-all duration-300",
-                    pal.cta,
-                    isHovered && "gap-2.5",
-                  )}
-                >
+                {/* CTA */}
+                <div className="inline-flex items-center" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: isHovered ? cfg.ctaHover : cfg.ctaColor, transition: "color 300ms ease", gap: isHovered ? "10px" : "6px" }}>
                   {isFlagship ? "Open flagship" : "Open"}
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  <ArrowRight style={{ width: "11px", height: "11px", transform: isHovered ? "translateX(3px)" : "translateX(0)", transition: "transform 300ms ease" }} />
                 </div>
               </div>
 
               {/* Bottom shimmer */}
-              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent)" }} />
             </Link>
           );
         })}
       </div>
 
-      {/* Footer note */}
-      <div className="mt-8 flex items-center justify-center gap-3">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
-        <span className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/22">
+      <div className="flex items-center justify-center gap-4 mt-8">
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent)" }} />
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
           Each layer hands signal to the next without rework
         </span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent)" }} />
       </div>
     </div>
   );

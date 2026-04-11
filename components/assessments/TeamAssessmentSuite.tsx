@@ -1,356 +1,39 @@
 // components/assessments/TeamAssessmentSuite.tsx
-"use client";
+// Design: Institutional Monumentalism
+// Changes from v1:
+// - "use client" removed (Pages Router)
+// - All rounded-* → sharp panel system
+// - amber-500 → #C9A96E softGold throughout
+// - rounded-full badges → sharp pills
+// - ScoreBar: rounded-full → sharp, amber → platform colours
+// - TeamCard: rounded-[22px] → sharp border system
+// - Submit button: amber-500 fill → platform sharp CTA
+// - ResultPanel: rounded-[22px] → sharp, amber tints → softGold
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertTriangle,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  CheckCircle2,
-  Loader2,
-  Minus,
-  Plus,
-  ShieldCheck,
-  Trash2,
-  Users,
+  AlertTriangle, ArrowDown, ArrowRight, ArrowUp,
+  CheckCircle2, Loader2, Minus, ShieldCheck, Trash2,
 } from "lucide-react";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  Radar,
-  ResponsiveContainer,
-} from "recharts";
+import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from "recharts";
 import Link from "next/link";
 
+const GOLD = "#C9A96E";
+const LIFT = "rgb(10 14 20)";
+
 type TeamRow = {
-  teamName: string;
-  respondents: number;
-  authorityClarity: number;
-  executionTrust: number;
-  operatingFriction: number;
-  strategicCoherence: number;
+  teamName: string; respondents: number;
+  authorityClarity: number; executionTrust: number;
+  operatingFriction: number; strategicCoherence: number;
 };
 
 const METRICS: Array<{ key: keyof TeamRow; label: string; inverse?: boolean }> = [
-  { key: "authorityClarity", label: "Authority clarity" },
-  { key: "executionTrust", label: "Execution trust" },
-  { key: "operatingFriction", label: "Operating friction", inverse: true },
+  { key: "authorityClarity",   label: "Authority clarity" },
+  { key: "executionTrust",     label: "Execution trust" },
+  { key: "operatingFriction",  label: "Operating friction", inverse: true },
   { key: "strategicCoherence", label: "Strategic coherence" },
 ];
-
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
-
-function Rule() {
-  return (
-    <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
-  );
-}
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="inline-flex items-center gap-3">
-      <span className="h-5 w-px bg-amber-500/40" />
-      <span className="font-mono text-[9px] uppercase tracking-[0.36em] text-amber-400/75">
-        {children}
-      </span>
-    </div>
-  );
-}
-
-/** Horizontal score bar with animated fill */
-function ScoreBar({
-  value,
-  inverse = false,
-  size = "sm",
-}: {
-  value: number;
-  inverse?: boolean;
-  size?: "sm" | "md";
-}) {
-  const health = inverse ? 100 - value : value;
-  const color =
-    health >= 65
-      ? "bg-emerald-500/70"
-      : health >= 40
-        ? "bg-amber-500/70"
-        : "bg-red-500/60";
-
-  return (
-    <div
-      className={cn(
-        "w-full overflow-hidden rounded-full bg-white/[0.06]",
-        size === "sm" ? "h-1" : "h-1.5",
-      )}
-    >
-      <motion.div
-        className={cn("h-full rounded-full", color)}
-        initial={{ width: 0 }}
-        animate={{ width: `${value}%` }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      />
-    </div>
-  );
-}
-
-/** Single number input with label and score bar */
-function MetricInput({
-  label,
-  value,
-  inverse,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  inverse?: boolean;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[7.5px] uppercase tracking-[0.22em] text-white/32">
-          {label}
-        </span>
-        <span
-          className={cn(
-            "font-mono text-[9px] tabular-nums",
-            (inverse ? 100 - value : value) >= 65
-              ? "text-emerald-400/80"
-              : (inverse ? 100 - value : value) >= 40
-                ? "text-amber-400/80"
-                : "text-red-400/80",
-          )}
-        >
-          {value}
-        </span>
-      </div>
-      <ScoreBar value={value} inverse={inverse} />
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={1}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-transparent accent-amber-500"
-      />
-    </div>
-  );
-}
-
-/** Team row card */
-function TeamCard({
-  row,
-  index,
-  onUpdate,
-  onRemove,
-  canRemove,
-}: {
-  row: TeamRow;
-  index: number;
-  onUpdate: (key: keyof TeamRow, value: string | number) => void;
-  onRemove: () => void;
-  canRemove: boolean;
-}) {
-  const health = Math.round(
-    (row.authorityClarity +
-      row.executionTrust +
-      (100 - row.operatingFriction) +
-      row.strategicCoherence) /
-      4,
-  );
-
-  const healthLabel =
-    health >= 65 ? "Ordered" : health >= 40 ? "Drifting" : "Misaligned";
-  const healthColor =
-    health >= 65
-      ? "border-emerald-500/20 bg-emerald-500/[0.07] text-emerald-300/80"
-      : health >= 40
-        ? "border-amber-500/20 bg-amber-500/[0.07] text-amber-300/80"
-        : "border-red-400/20 bg-red-500/[0.07] text-red-300/80";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8, scale: 0.97 }}
-      transition={{ duration: 0.35 }}
-      className="relative overflow-hidden rounded-[22px] border border-white/[0.08] bg-black/40 backdrop-blur-sm"
-    >
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-      <div className="p-5">
-        {/* Header row */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] font-mono text-[9px] text-white/30">
-              {String(index + 1).padStart(2, "0")}
-            </div>
-            <input
-              value={row.teamName}
-              onChange={(e) => onUpdate("teamName", e.target.value)}
-              placeholder="Team name"
-              className="min-w-0 flex-1 bg-transparent font-serif text-lg text-white/90 outline-none placeholder:text-white/20 focus:text-white"
-            />
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <div
-              className={cn(
-                "rounded-full border px-2.5 py-1 font-mono text-[7.5px] uppercase tracking-[0.20em]",
-                healthColor,
-              )}
-            >
-              {healthLabel}
-            </div>
-
-            {canRemove && (
-              <button
-                type="button"
-                onClick={onRemove}
-                className="flex h-7 w-7 items-center justify-center rounded-xl border border-white/[0.06] text-white/25 transition hover:border-red-400/20 hover:bg-red-500/[0.07] hover:text-red-300/70"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Respondents */}
-        <div className="mt-4 flex items-center gap-3">
-          <span className="font-mono text-[7.5px] uppercase tracking-[0.22em] text-white/28">
-            Respondents
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onUpdate("respondents", Math.max(1, row.respondents - 1))}
-              className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.07] text-white/40 transition hover:bg-white/[0.05] hover:text-white/70"
-            >
-              −
-            </button>
-            <span className="w-8 text-center font-mono text-sm text-white/80">
-              {row.respondents}
-            </span>
-            <button
-              type="button"
-              onClick={() => onUpdate("respondents", row.respondents + 1)}
-              className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/[0.07] text-white/40 transition hover:bg-white/[0.05] hover:text-white/70"
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        {/* Metric sliders */}
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {METRICS.map((m) => (
-            <MetricInput
-              key={m.key}
-              label={m.label}
-              value={row[m.key] as number}
-              inverse={m.inverse}
-              onChange={(v) => onUpdate(m.key, v)}
-            />
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-/** Live variance readout panel */
-function VariancePanel({ rows }: { rows: TeamRow[] }) {
-  const filled = rows.filter((r) => r.teamName.trim());
-
-  if (filled.length < 2) {
-    return (
-      <div className="rounded-[20px] border border-white/[0.06] bg-white/[0.02] p-5 text-center">
-        <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/22">
-          Variance readout
-        </div>
-        <p className="mt-3 text-xs text-white/28">
-          Add at least two named teams to see live variance.
-        </p>
-      </div>
-    );
-  }
-
-  const metric = (key: keyof TeamRow) => {
-    const vals = filled.map((r) => r[key] as number);
-    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-    const variance = Math.round(Math.max(...vals) - Math.min(...vals));
-    return { avg: Math.round(avg), variance };
-  };
-
-  const metrics = METRICS.map((m) => ({
-    ...m,
-    ...metric(m.key),
-  }));
-
-  const maxVariance = Math.max(...metrics.map((m) => m.variance));
-  const criticalMetric = metrics.find((m) => m.variance === maxVariance);
-
-  return (
-    <div className="space-y-3">
-      <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
-        <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30">
-          Live variance readout
-        </div>
-
-        <div className="mt-4 space-y-3.5">
-          {metrics.map((m) => {
-            const isHigh = m.variance >= 25;
-            return (
-              <div key={String(m.key)}>
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="font-mono text-[7.5px] uppercase tracking-[0.20em] text-white/35">
-                    {m.label}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[9px] text-white/45">avg {m.avg}</span>
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 font-mono text-[7px] uppercase tracking-[0.16em]",
-                        isHigh
-                          ? "bg-red-500/[0.10] text-red-300/80"
-                          : "bg-white/[0.04] text-white/30",
-                      )}
-                    >
-                      Δ {m.variance}
-                    </span>
-                  </div>
-                </div>
-                <ScoreBar value={m.avg} inverse={m.inverse} size="md" />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {criticalMetric && criticalMetric.variance >= 20 && (
-        <div className="flex items-start gap-3 rounded-[16px] border border-amber-500/15 bg-amber-500/[0.05] px-4 py-3.5">
-          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/70" />
-          <div>
-            <div className="font-mono text-[7.5px] uppercase tracking-[0.22em] text-amber-400/70">
-              High variance detected
-            </div>
-            <div className="mt-1 text-xs leading-relaxed text-white/50">
-              {criticalMetric.label} shows a {criticalMetric.variance}-point spread across
-              teams — a signal of misalignment rather than consistent drift.
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ---- Statistical helpers ---- */
 
 const BENCHMARKS: Record<string, number> = {
   authorityClarity: 62, executionTrust: 58, operatingFriction: 45, strategicCoherence: 55,
@@ -364,107 +47,185 @@ function stddev(values: number[]): number {
 }
 
 function computeAdvancedMetrics(rows: TeamRow[]) {
-  const filled = rows.filter((r) => r.teamName.trim());
+  const filled = rows.filter(r => r.teamName.trim());
   if (filled.length < 2) return null;
-
-  const metricStddevs = METRICS.map((m) => {
-    const vals = filled.map((r) => r[m.key] as number);
-    return stddev(vals);
-  });
+  const metricStddevs = METRICS.map(m => stddev(filled.map(r => r[m.key] as number)));
   const varianceIndex = Math.round(metricStddevs.reduce((a, b) => a + b, 0) / metricStddevs.length);
-
   const leadership = filled[0]!;
   const otherTeams = filled.slice(1);
-  const meanTrust = otherTeams.reduce((s, r) => s + r.executionTrust, 0) / otherTeams.length;
-  const trustGap = Math.round(Math.abs(leadership.executionTrust - meanTrust));
-
-  const healths = filled.map((r) =>
-    Math.round((r.authorityClarity + r.executionTrust + (100 - r.operatingFriction) + r.strategicCoherence) / 4),
-  );
+  const meanTrust  = otherTeams.reduce((s, r) => s + r.executionTrust, 0) / otherTeams.length;
+  const trustGap   = Math.round(Math.abs(leadership.executionTrust - meanTrust));
+  const healths    = filled.map(r => Math.round((r.authorityClarity + r.executionTrust + (100 - r.operatingFriction) + r.strategicCoherence) / 4));
   const executionCoherence = Math.max(0, Math.round(100 - stddev(healths)));
-
-  const metricAvgs = Object.fromEntries(
-    METRICS.map((m) => [m.key, Math.round(filled.reduce((s, r) => s + (r[m.key] as number), 0) / filled.length)]),
-  );
-
+  const metricAvgs = Object.fromEntries(METRICS.map(m => [m.key, Math.round(filled.reduce((s, r) => s + (r[m.key] as number), 0) / filled.length)]));
   return { varianceIndex, trustGap, executionCoherence, metricAvgs };
 }
 
 function generateNarrative(adv: NonNullable<ReturnType<typeof computeAdvancedMetrics>>): string {
   const parts: string[] = [];
-  if (adv.varianceIndex > 30) {
-    parts.push(`Team alignment shows significant divergence (variance index ${adv.varianceIndex}), indicating systemic misalignment rather than localised drift.`);
-  } else if (adv.varianceIndex > 15) {
-    parts.push(`Moderate variance detected across teams (index ${adv.varianceIndex}). Some divergence is expected, but attention is needed before it compounds.`);
-  } else {
-    parts.push(`Teams are operating with reasonable consistency (variance index ${adv.varianceIndex}).`);
-  }
-  if (adv.trustGap > 25) {
-    parts.push(`A ${adv.trustGap}-point trust gap between leadership and teams signals a dangerous perception disconnect.`);
-  } else if (adv.trustGap > 10) {
-    parts.push(`The ${adv.trustGap}-point trust gap warrants monitoring.`);
-  }
+  if (adv.varianceIndex > 30) parts.push(`Team alignment shows significant divergence (variance index ${adv.varianceIndex}), indicating systemic misalignment rather than localised drift.`);
+  else if (adv.varianceIndex > 15) parts.push(`Moderate variance detected across teams (index ${adv.varianceIndex}). Attention is needed before it compounds.`);
+  else parts.push(`Teams are operating with reasonable consistency (variance index ${adv.varianceIndex}).`);
+  if (adv.trustGap > 25) parts.push(`A ${adv.trustGap}-point trust gap between leadership and teams signals a dangerous perception disconnect.`);
+  else if (adv.trustGap > 10) parts.push(`The ${adv.trustGap}-point trust gap warrants monitoring.`);
   return parts.join(" ");
 }
 
-/* ---- Radar chart panel ---- */
-
-function RadarPanel({ rows }: { rows: TeamRow[] }) {
-  const filled = rows.filter((r) => r.teamName.trim());
-  if (filled.length < 1) return null;
-
-  const data = METRICS.map((m) => {
-    const entry: Record<string, string | number> = { metric: m.label };
-    filled.forEach((r, i) => { entry[`team${i}`] = r[m.key] as number; });
-    return entry;
-  });
-
-  const fills = ["#f59e0b", "#ffffff", "#ffffff", "#ffffff", "#ffffff"];
-  const opacities = [0.4, 0.25, 0.18, 0.12, 0.08];
-
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
-      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Team Profile Overlay</div>
-      <ResponsiveContainer width="100%" height={220}>
-        <RadarChart data={data}>
-          <PolarGrid stroke="rgba(255,255,255,0.06)" />
-          <PolarAngleAxis dataKey="metric" tick={{ fontSize: 8, fill: "rgba(255,255,255,0.35)" }} />
-          {filled.map((_, i) => (
-            <Radar key={i} dataKey={`team${i}`} stroke={fills[i] ?? "#fff"} fill={fills[i] ?? "#fff"}
-              fillOpacity={opacities[i] ?? 0.05} strokeWidth={1} />
-          ))}
-        </RadarChart>
-      </ResponsiveContainer>
+    <div className="flex items-center gap-3">
+      <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.38em", textTransform: "uppercase", color: `${GOLD}BB` }}>{children}</span>
     </div>
   );
 }
 
-/* ---- Benchmark panel ---- */
+function ScoreBar({ value, inverse = false, size = "sm" }: { value: number; inverse?: boolean; size?: "sm" | "md" }) {
+  const health = inverse ? 100 - value : value;
+  const barColor = health >= 65 ? "rgba(110,231,183,0.65)" : health >= 40 ? `${GOLD}80` : "rgba(252,165,165,0.65)";
+  return (
+    <div style={{ width: "100%", overflow: "hidden", height: size === "sm" ? "2px" : "3px", backgroundColor: "rgba(255,255,255,0.06)" }}>
+      <motion.div style={{ height: "100%", backgroundColor: barColor }} initial={{ width: 0 }} animate={{ width: `${value}%` }} transition={{ duration: 0.6, ease: "easeOut" }} />
+    </div>
+  );
+}
+
+function MetricInput({ label, value, inverse, onChange }: { label: string; value: number; inverse?: boolean; onChange: (v: number) => void }) {
+  const health = inverse ? 100 - value : value;
+  const valColor = health >= 65 ? "rgba(110,231,183,0.80)" : health >= 40 ? `${GOLD}BB` : "rgba(252,165,165,0.80)";
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>{label}</span>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", color: valColor }}>{value}</span>
+      </div>
+      <ScoreBar value={value} inverse={inverse} />
+      <input type="range" min={0} max={100} step={1} value={value} onChange={e => onChange(Number(e.target.value))} style={{ height: "2px", width: "100%", cursor: "pointer", accentColor: GOLD }} />
+    </div>
+  );
+}
+
+function TeamCard({ row, index, onUpdate, onRemove, canRemove }: { row: TeamRow; index: number; onUpdate: (key: keyof TeamRow, value: string | number) => void; onRemove: () => void; canRemove: boolean }) {
+  const health = Math.round((row.authorityClarity + row.executionTrust + (100 - row.operatingFriction) + row.strategicCoherence) / 4);
+  const healthLabel = health >= 65 ? "Ordered" : health >= 40 ? "Drifting" : "Misaligned";
+  const hc = health >= 65 ? { border: "rgba(110,231,183,0.22)", bg: "rgba(110,231,183,0.05)", text: "rgba(110,231,183,0.80)" } : health >= 40 ? { border: `${GOLD}28`, bg: `${GOLD}07`, text: `${GOLD}CC` } : { border: "rgba(252,165,165,0.22)", bg: "rgba(252,165,165,0.05)", text: "rgba(252,165,165,0.80)" };
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8, scale: 0.98 }} transition={{ duration: 0.35 }} style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+      <div style={{ padding: "1.25rem 1.5rem" }}>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div style={{ flexShrink: 0, width: "28px", height: "28px", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.25)" }}>{String(index + 1).padStart(2, "0")}</div>
+            <input value={row.teamName} onChange={e => onUpdate("teamName", e.target.value)} placeholder="Team name" style={{ flex: 1, minWidth: 0, background: "transparent", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.10rem", color: "rgba(255,255,255,0.85)", outline: "none", border: "none" }} />
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <span style={{ padding: "2px 10px", border: `1px solid ${hc.border}`, backgroundColor: hc.bg, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: hc.text }}>{healthLabel}</span>
+            {canRemove && (
+              <button type="button" onClick={onRemove} style={{ width: "28px", height: "28px", flexShrink: 0, border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(255,255,255,0.22)", transition: "all 200ms ease" }} onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = "rgba(252,165,165,0.22)"; el.style.color = "rgba(252,165,165,0.70)"; }} onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(255,255,255,0.06)"; el.style.color = "rgba(255,255,255,0.22)"; }}>
+                <Trash2 style={{ width: "12px", height: "12px" }} />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-3 mt-4">
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Respondents</span>
+          <div className="flex items-center gap-2">
+            {(["−", "+"] as const).map(sym => (
+              <button key={sym} type="button" onClick={() => onUpdate("respondents", sym === "−" ? Math.max(1, row.respondents - 1) : row.respondents + 1)} style={{ width: "22px", height: "22px", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", color: "rgba(255,255,255,0.40)", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", transition: "all 180ms ease" }} onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}30`; el.style.color = `${GOLD}AA`; }} onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.color = "rgba(255,255,255,0.40)"; }}>{sym}</button>
+            ))}
+            <span style={{ width: "28px", textAlign: "center", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", color: "rgba(255,255,255,0.70)" }}>{row.respondents}</span>
+          </div>
+        </div>
+        <div className="grid gap-4 mt-5 sm:grid-cols-2">
+          {METRICS.map(m => <MetricInput key={m.key} label={m.label} value={row[m.key] as number} inverse={m.inverse} onChange={v => onUpdate(m.key, v)} />)}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function VariancePanel({ rows }: { rows: TeamRow[] }) {
+  const filled = rows.filter(r => r.teamName.trim());
+  if (filled.length < 2) return (
+    <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+      <Eyebrow>Variance readout</Eyebrow>
+      <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>Add at least two named teams to see live variance.</p>
+    </div>
+  );
+  const metric = (key: keyof TeamRow) => { const vals = filled.map(r => r[key] as number); return { avg: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length), variance: Math.round(Math.max(...vals) - Math.min(...vals)) }; };
+  const metrics = METRICS.map(m => ({ ...m, ...metric(m.key) }));
+  const maxV = Math.max(...metrics.map(m => m.variance));
+  const critical = metrics.find(m => m.variance === maxV);
+  return (
+    <div className="space-y-3">
+      <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+        <Eyebrow>Live variance readout</Eyebrow>
+        <div className="mt-4 space-y-4">
+          {metrics.map(m => (
+            <div key={String(m.key)}>
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>{m.label}</span>
+                <div className="flex items-center gap-2">
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.40)" }}>avg {m.avg}</span>
+                  <span style={{ padding: "1px 6px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: m.variance >= 25 ? "rgba(252,165,165,0.80)" : "rgba(255,255,255,0.28)", border: `1px solid ${m.variance >= 25 ? "rgba(252,165,165,0.20)" : "rgba(255,255,255,0.06)"}` }}>Δ {m.variance}</span>
+                </div>
+              </div>
+              <ScoreBar value={m.avg} inverse={m.inverse} size="md" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {critical && critical.variance >= 20 && (
+        <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1rem 1.25rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+          <AlertTriangle style={{ width: "12px", height: "12px", color: `${GOLD}90`, flexShrink: 0, marginTop: "2px" }} />
+          <div>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.40rem" }}>High variance detected</div>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.50)" }}>{critical.label} shows a {critical.variance}-point spread — a signal of misalignment rather than consistent drift.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RadarPanel({ rows }: { rows: TeamRow[] }) {
+  const filled = rows.filter(r => r.teamName.trim());
+  if (filled.length < 1) return null;
+  const data = METRICS.map(m => { const e: Record<string, string | number> = { metric: m.label }; filled.forEach((r, i) => { e[`team${i}`] = r[m.key] as number; }); return e; });
+  const strokes = [`${GOLD}`, "rgba(148,163,184,0.80)", "rgba(110,231,183,0.70)", "rgba(252,165,165,0.70)", "rgba(255,255,255,0.50)"];
+  return (
+    <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+      <Eyebrow>Team profile overlay</Eyebrow>
+      <div style={{ marginTop: "1rem" }}>
+        <ResponsiveContainer width="100%" height={200}>
+          <RadarChart data={data}>
+            <PolarGrid stroke="rgba(255,255,255,0.06)" />
+            <PolarAngleAxis dataKey="metric" tick={{ fontSize: 7, fill: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }} />
+            {filled.map((_, i) => <Radar key={i} dataKey={`team${i}`} stroke={strokes[i] ?? "rgba(255,255,255,0.40)"} fill={strokes[i] ?? "rgba(255,255,255,0.40)"} fillOpacity={[0.18, 0.10, 0.08, 0.06, 0.04][i] ?? 0.04} strokeWidth={1.5} />)}
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
 
 function BenchmarkPanel({ rows }: { rows: TeamRow[] }) {
   const adv = computeAdvancedMetrics(rows);
   if (!adv) return null;
-
   return (
-    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
-      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">vs Platform Average</div>
-      <div className="space-y-2.5">
-        {METRICS.map((m) => {
-          const avg = adv.metricAvgs[m.key as string] ?? 50;
-          const bench = BENCHMARKS[m.key as string] ?? 50;
-          const delta = avg - bench;
+    <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+      <Eyebrow>vs Platform average</Eyebrow>
+      <div className="mt-4 space-y-3">
+        {METRICS.map(m => {
+          const avg = adv.metricAvgs[m.key as string] ?? 50; const bench = BENCHMARKS[m.key as string] ?? 50; const delta = avg - bench;
+          const D = delta > 0 ? ArrowUp : delta < 0 ? ArrowDown : Minus;
+          const dc = delta > 0 ? "rgba(110,231,183,0.70)" : delta < 0 ? "rgba(252,165,165,0.70)" : "rgba(255,255,255,0.20)";
           return (
             <div key={String(m.key)} className="flex items-center justify-between">
-              <span className="font-mono text-[7.5px] uppercase tracking-[0.2em] text-white/35">{m.label}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>{m.label}</span>
               <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] text-white/50">{avg}</span>
-                {delta > 0 ? <ArrowUp className="h-3 w-3 text-emerald-400/60" /> :
-                  delta < 0 ? <ArrowDown className="h-3 w-3 text-red-400/60" /> :
-                  <Minus className="h-3 w-3 text-white/20" />}
-                <span className={cn("font-mono text-[8px]",
-                  delta > 0 ? "text-emerald-400/60" : delta < 0 ? "text-red-400/60" : "text-white/25")}>
-                  {delta > 0 ? "+" : ""}{delta}
-                </span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.45)" }}>{avg}</span>
+                <D style={{ width: "10px", height: "10px", color: dc }} />
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: dc }}>{delta > 0 ? "+" : ""}{delta}</span>
               </div>
             </div>
           );
@@ -474,40 +235,31 @@ function BenchmarkPanel({ rows }: { rows: TeamRow[] }) {
   );
 }
 
-/* ---- Advanced metrics summary ---- */
-
 function AdvancedMetricsPanel({ rows }: { rows: TeamRow[] }) {
   const adv = computeAdvancedMetrics(rows);
   if (!adv) return null;
-
   return (
     <div className="space-y-3">
-      <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
-        <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Advanced Metrics</div>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Variance Index", value: adv.varianceIndex, warn: adv.varianceIndex > 30 },
-            { label: "Trust Gap", value: adv.trustGap, warn: adv.trustGap > 25 },
-            { label: "Exec. Coherence", value: adv.executionCoherence, warn: adv.executionCoherence < 60 },
-          ].map((m) => (
-            <div key={m.label} className="text-center">
-              <span className={cn("font-serif text-xl", m.warn ? "text-red-400" : "text-white/70")}>{m.value}</span>
-              <div className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/25 mt-1">{m.label}</div>
+      <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+        <Eyebrow>Advanced metrics</Eyebrow>
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          {[{ label: "Variance index", value: adv.varianceIndex, warn: adv.varianceIndex > 30 }, { label: "Trust gap", value: adv.trustGap, warn: adv.trustGap > 25 }, { label: "Exec. coherence", value: adv.executionCoherence, warn: adv.executionCoherence < 60 }].map(m => (
+            <div key={m.label} style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.8rem", lineHeight: 1, color: m.warn ? "rgba(252,165,165,0.85)" : "rgba(255,255,255,0.70)" }}>{m.value}</div>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "4px" }}>{m.label}</div>
             </div>
           ))}
         </div>
-        <p className="mt-4 text-[11px] leading-relaxed text-white/40">{generateNarrative(adv)}</p>
+        <p style={{ marginTop: "1rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.38)" }}>{generateNarrative(adv)}</p>
       </div>
-
       {(adv.varianceIndex > 30 || adv.trustGap > 25) && (
-        <div className="flex items-start gap-3 rounded-[16px] border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3.5">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/80" />
+        <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1rem 1.25rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+          <AlertTriangle style={{ width: "12px", height: "12px", color: `${GOLD}90`, flexShrink: 0, marginTop: "2px" }} />
           <div>
-            <div className="font-mono text-[7.5px] uppercase tracking-[0.22em] text-amber-400/70">Escalation recommended</div>
-            <p className="mt-1 text-xs text-white/50">Signal divergence exceeds safe thresholds. Enterprise Assessment is recommended.</p>
-            <Link href="/diagnostics/enterprise-assessment"
-              className="mt-2 inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.2em] text-amber-300/80 hover:text-amber-200 transition-colors">
-              Proceed to Enterprise Assessment <ArrowRight className="h-3 w-3" />
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.40rem" }}>Escalation recommended</div>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.50)", marginBottom: "0.65rem" }}>Signal divergence exceeds safe thresholds. Enterprise Assessment is the appropriate next layer.</p>
+            <Link href="/diagnostics/enterprise-assessment" className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+              Enterprise Assessment <ArrowRight style={{ width: "10px", height: "10px" }} />
             </Link>
           </div>
         </div>
@@ -516,296 +268,112 @@ function AdvancedMetricsPanel({ rows }: { rows: TeamRow[] }) {
   );
 }
 
-/** Result output panel */
-function ResultPanel({ result }: { result: any }) {
+function ResultPanel({ result }: { result: Record<string, unknown> }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="overflow-hidden rounded-[22px] border border-amber-500/20 bg-amber-500/[0.04]"
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-amber-400/80" />
-          <div className="font-mono text-[8px] uppercase tracking-[0.28em] text-amber-300/80">
-            Assessment complete
-          </div>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.50 }} style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}08` }}>
+      <div style={{ padding: "1.5rem" }}>
+        <div className="flex items-center gap-2 mb-5">
+          <CheckCircle2 style={{ width: "14px", height: "14px", color: `${GOLD}AA` }} />
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}BB` }}>Assessment complete</span>
         </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {[
-            { label: "Organisation", value: result.organisation },
-            { label: "Variance index", value: `${result.varianceIndex}%` },
-            { label: "Trust gap", value: `${result.trustGap}%` },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-[14px] border border-white/[0.06] bg-black/30 p-3.5"
-            >
-              <div className="font-mono text-[7px] uppercase tracking-[0.22em] text-white/28">
-                {item.label}
-              </div>
-              <div className="mt-2 font-serif text-xl text-white/90">{item.value}</div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[{ label: "Organisation", value: String(result.organisation ?? "—") }, { label: "Variance index", value: `${result.varianceIndex ?? "—"}%` }, { label: "Trust gap", value: `${result.trustGap ?? "—"}%` }].map(item => (
+            <div key={item.label} style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "0.85rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.4rem" }}>{item.label}</div>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.4rem", lineHeight: 1, color: "rgba(255,255,255,0.85)" }}>{item.value}</div>
             </div>
           ))}
         </div>
-
-        <div className="mt-4 rounded-[14px] border border-amber-500/15 bg-amber-500/[0.06] p-4">
-          <div className="font-mono text-[7px] uppercase tracking-[0.22em] text-amber-400/60">
-            Recommended next layer
-          </div>
-          <div className="mt-2 font-serif text-lg text-white/85">
-            {result.nextLayer}
-          </div>
+        <div style={{ marginTop: "1rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}09`, padding: "0.85rem 1rem" }}>
+          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.35rem" }}>Recommended next layer</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", color: "rgba(255,255,255,0.80)" }}>{String(result.nextLayer ?? "Enterprise Assessment")}</div>
         </div>
       </div>
     </motion.div>
   );
 }
 
-// ── MAIN COMPONENT ────────────────────────────────────────────────────────────
-
 export default function TeamAssessmentSuite() {
   const [email, setEmail] = React.useState("");
   const [organisation, setOrganisation] = React.useState("");
   const [rows, setRows] = React.useState<TeamRow[]>([
-    {
-      teamName: "Leadership",
-      respondents: 6,
-      authorityClarity: 72,
-      executionTrust: 61,
-      operatingFriction: 44,
-      strategicCoherence: 68,
-    },
-    {
-      teamName: "Operations",
-      respondents: 12,
-      authorityClarity: 48,
-      executionTrust: 42,
-      operatingFriction: 70,
-      strategicCoherence: 51,
-    },
+    { teamName: "Leadership", respondents: 6, authorityClarity: 72, executionTrust: 61, operatingFriction: 44, strategicCoherence: 68 },
+    { teamName: "Operations", respondents: 12, authorityClarity: 48, executionTrust: 42, operatingFriction: 70, strategicCoherence: 51 },
   ]);
   const [loading, setLoading] = React.useState(false);
-  const [result, setResult] = React.useState<any>(null);
+  const [result, setResult] = React.useState<Record<string, unknown> | null>(null);
   const [error, setError] = React.useState("");
 
-  function updateRow(index: number, key: keyof TeamRow, value: string | number) {
-    setRows((prev) =>
-      prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
-    );
-  }
-
-  function addRow() {
-    setRows((prev) => [
-      ...prev,
-      {
-        teamName: "",
-        respondents: 5,
-        authorityClarity: 50,
-        executionTrust: 50,
-        operatingFriction: 50,
-        strategicCoherence: 50,
-      },
-    ]);
-  }
-
-  function removeRow(index: number) {
-    setRows((prev) => prev.filter((_, i) => i !== index));
-  }
+  function updateRow(index: number, key: keyof TeamRow, value: string | number) { setRows(prev => prev.map((row, i) => i === index ? { ...row, [key]: value } : row)); }
+  function addRow() { setRows(prev => [...prev, { teamName: "", respondents: 5, authorityClarity: 50, executionTrust: 50, operatingFriction: 50, strategicCoherence: 50 }]); }
+  function removeRow(index: number) { setRows(prev => prev.filter((_, i) => i !== index)); }
 
   async function run() {
-    setLoading(true);
-    setError("");
-    setResult(null);
+    setLoading(true); setError(""); setResult(null);
     try {
-      const response = await fetch("/api/assessments/team/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, organisation, rows }),
-      });
-      const json = await response.json();
-      if (!response.ok || !json?.ok) throw new Error(json?.error || "Failed to run team assessment.");
+      const res = await fetch("/api/assessments/team/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, organisation, rows }) });
+      const json = await res.json();
+      if (!res.ok || !json?.ok) throw new Error(json?.error || "Failed to run team assessment.");
       setResult(json);
-      try { sessionStorage.setItem("team-assessment-result", JSON.stringify(json)); } catch { /* SSR */ }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to run.");
-    } finally {
-      setLoading(false);
-    }
+      try { sessionStorage.setItem("team-assessment-result", JSON.stringify(json)); } catch {}
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to run."); }
+    finally { setLoading(false); }
   }
 
-  const inputClass =
-    "w-full rounded-[14px] border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[14px] text-white/90 outline-none placeholder:text-white/20 transition focus:border-amber-500/30 focus:bg-white/[0.05]";
+  const inputStyle: React.CSSProperties = { width: "100%", border: "1px solid rgba(255,255,255,0.09)", backgroundColor: "rgba(255,255,255,0.025)", outline: "none", padding: "10px 13px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.80)", transition: "border-color 250ms ease" };
 
   return (
     <div className="grid gap-10 xl:grid-cols-[1.1fr_0.9fr] xl:items-start">
-
-      {/* ── LEFT COLUMN ─────────────────────────────────────────────────── */}
-      <div className="space-y-6">
-        {/* Identity inputs */}
-        <div className="overflow-hidden rounded-[26px] border border-white/[0.08] bg-black/40 backdrop-blur-sm">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          <div className="p-6">
-            <Eyebrow>Submission details</Eyebrow>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="block font-mono text-[7.5px] uppercase tracking-[0.26em] text-white/30">
-                  Email
-                </label>
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@institution.com"
-                  className={inputClass}
-                />
+      <div className="space-y-5">
+        <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgb(5 5 7)", padding: "1.5rem" }}>
+          <Eyebrow>Submission details</Eyebrow>
+          <div className="grid gap-3 mt-5 sm:grid-cols-2">
+            {[{ label: "Email", value: email, set: setEmail, placeholder: "you@institution.com", type: "email" }, { label: "Organisation", value: organisation, set: setOrganisation, placeholder: "Firm or institution", type: "text" }].map(f => (
+              <div key={f.label}>
+                <label style={{ display: "block", marginBottom: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)" }}>{f.label}</label>
+                <input type={f.type} value={f.value} onChange={e => f.set(e.target.value)} placeholder={f.placeholder} style={inputStyle} onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }} onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }} />
               </div>
-              <div className="space-y-1.5">
-                <label className="block font-mono text-[7.5px] uppercase tracking-[0.26em] text-white/30">
-                  Organisation
-                </label>
-                <input
-                  value={organisation}
-                  onChange={(e) => setOrganisation(e.target.value)}
-                  placeholder="Firm or institution"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Team cards */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Eyebrow>Team data</Eyebrow>
-            <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/22">
-              {rows.length} {rows.length === 1 ? "team" : "teams"}
-            </span>
-          </div>
-
-          <AnimatePresence mode="popLayout">
-            {rows.map((row, i) => (
-              <TeamCard
-                key={i}
-                row={row}
-                index={i}
-                onUpdate={(key, value) => updateRow(i, key, value)}
-                onRemove={() => removeRow(i)}
-                canRemove={rows.length > 1}
-              />
             ))}
-          </AnimatePresence>
-
-          <button
-            type="button"
-            onClick={addRow}
-            className="group flex w-full items-center justify-center gap-2 rounded-[18px] border border-dashed border-white/[0.09] py-3.5 font-mono text-[9px] uppercase tracking-[0.22em] text-white/28 transition hover:border-white/[0.16] hover:text-white/50"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add team
-          </button>
+          </div>
         </div>
 
-        {/* Error */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="flex items-start gap-3 rounded-[14px] border border-red-400/20 bg-red-500/[0.07] px-4 py-3"
-            >
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/80" />
-              <span className="text-sm text-red-300/80">{error}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between"><Eyebrow>Team data</Eyebrow><span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{rows.length} {rows.length === 1 ? "team" : "teams"}</span></div>
+          <AnimatePresence mode="popLayout">{rows.map((row, i) => <TeamCard key={i} row={row} index={i} onUpdate={(key, value) => updateRow(i, key, value)} onRemove={() => removeRow(i)} canRemove={rows.length > 1} />)}</AnimatePresence>
+          <button type="button" onClick={addRow} className="w-full flex items-center justify-center gap-2 transition-all duration-300" style={{ padding: "12px", border: "1px dashed rgba(255,255,255,0.09)", backgroundColor: "transparent", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", cursor: "pointer" }} onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}28`; el.style.color = `${GOLD}80`; }} onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.25)"; }}>+ Add team</button>
+        </div>
 
-        {/* Submit */}
-        <button
-          type="button"
-          onClick={run}
-          disabled={loading}
-          className={cn(
-            "group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-[14px] px-6 py-4",
-            "font-mono text-[10px] uppercase tracking-[0.24em] transition-all duration-300",
-            loading
-              ? "cursor-not-allowed bg-amber-500/40 text-black/60"
-              : "bg-amber-500 text-black hover:bg-amber-400",
-          )}
-        >
-          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Processing team data…
-            </>
-          ) : (
-            <>
-              <ShieldCheck className="h-4 w-4" />
-              Run team assessment
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </>
-          )}
+        <AnimatePresence>{error && (<motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ border: "1px solid rgba(252,165,165,0.20)", backgroundColor: "rgba(252,165,165,0.04)", padding: "0.85rem 1.25rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}><AlertTriangle style={{ width: "13px", height: "13px", color: "rgba(252,165,165,0.80)", flexShrink: 0, marginTop: "2px" }} /><span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", color: "rgba(252,165,165,0.85)" }}>{error}</span></motion.div>)}</AnimatePresence>
+
+        <button type="button" onClick={run} disabled={loading} className="w-full inline-flex items-center justify-center gap-3 transition-all duration-300" style={{ padding: "14px 24px", border: `1px solid ${loading ? "rgba(255,255,255,0.06)" : `${GOLD}42`}`, backgroundColor: loading ? "rgba(255,255,255,0.02)" : `${GOLD}10`, color: loading ? "rgba(255,255,255,0.22)" : `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: loading ? "not-allowed" : "pointer" }} onMouseEnter={e => { if (!loading) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }} onMouseLeave={e => { if (!loading) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}>
+          {loading ? (<><Loader2 style={{ width: "14px", height: "14px" }} /> Processing team data…</>) : (<><ShieldCheck style={{ width: "14px", height: "14px" }} /> Run team assessment <ArrowRight style={{ width: "13px", height: "13px" }} /></>)}
         </button>
 
-        {/* Result */}
-        <AnimatePresence>
-          {result && <ResultPanel result={result} />}
-        </AnimatePresence>
+        <AnimatePresence>{result && <ResultPanel result={result} />}</AnimatePresence>
       </div>
 
-      {/* ── RIGHT COLUMN ────────────────────────────────────────────────── */}
-      <div className="space-y-5 xl:sticky xl:top-24">
-        {/* Why this layer */}
-        <div className="overflow-hidden rounded-[22px] border border-white/[0.07] bg-white/[0.02]">
-          <div className="p-5">
-            <Eyebrow>Why this layer exists</Eyebrow>
-            <div className="mt-4 space-y-3 text-sm leading-[1.8] text-white/45">
-              <p>
-                One leader's perception is not evidence. Team assessment exists
-                because institutional misalignment is almost never visible from
-                a single vantage point.
-              </p>
-              <p>
-                The question is not whether things feel aligned at the top. The
-                question is whether different parts of the institution are reading
-                the same reality.
-              </p>
-            </div>
+      <div className="space-y-4 xl:sticky xl:top-24">
+        <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+          <Eyebrow>Why this layer exists</Eyebrow>
+          <div style={{ marginTop: "0.85rem" }}>
+            {["One leader's perception is not evidence. Team assessment exists because institutional misalignment is almost never visible from a single vantage point.", "The question is not whether things feel aligned at the top. The question is whether different parts of the institution are reading the same reality."].map((text, i) => (
+              <p key={i} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.75, color: "rgba(255,255,255,0.42)", marginBottom: "0.75rem" }}>{text}</p>
+            ))}
           </div>
         </div>
-
-        {/* Radar chart */}
         <RadarPanel rows={rows} />
-
-        {/* Live variance */}
         <VariancePanel rows={rows} />
-
-        {/* Advanced metrics (variance index, trust gap, coherence, narrative, escalation) */}
         <AdvancedMetricsPanel rows={rows} />
-
-        {/* Benchmark comparison */}
         <BenchmarkPanel rows={rows} />
-
-        {/* Metric legend */}
-        <div className="rounded-[20px] border border-white/[0.06] bg-white/[0.015] p-5">
-          <div className="font-mono text-[7.5px] uppercase tracking-[0.26em] text-white/25">
-            Metric guide
-          </div>
+        <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.008)", padding: "1.25rem" }}>
+          <Eyebrow>Metric guide</Eyebrow>
           <div className="mt-4 space-y-3">
-            {METRICS.map((m) => (
+            {METRICS.map(m => (
               <div key={String(m.key)} className="flex items-start gap-3">
-                <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500/40" />
+                <div style={{ flexShrink: 0, marginTop: "5px", width: "4px", height: "4px", borderRadius: "50%", backgroundColor: `${GOLD}60` }} />
                 <div>
-                  <div className="text-[11px] font-medium text-white/55">{m.label}</div>
-                  {m.inverse && (
-                    <div className="mt-0.5 font-mono text-[7px] uppercase tracking-[0.16em] text-white/25">
-                      Lower is better
-                    </div>
-                  )}
+                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", color: "rgba(255,255,255,0.55)" }}>{m.label}</div>
+                  {m.inverse && <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Lower is better</div>}
                 </div>
               </div>
             ))}

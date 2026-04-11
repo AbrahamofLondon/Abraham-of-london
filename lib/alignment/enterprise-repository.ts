@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { prisma as db } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import type {
   EnterpriseAlignmentBand,
