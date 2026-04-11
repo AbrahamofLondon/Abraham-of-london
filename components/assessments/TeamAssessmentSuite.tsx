@@ -6,13 +6,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
   CheckCircle2,
   Loader2,
+  Minus,
   Plus,
   ShieldCheck,
   Trash2,
   Users,
 } from "lucide-react";
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+  ResponsiveContainer,
+} from "recharts";
+import Link from "next/link";
 
 type TeamRow = {
   teamName: string;
@@ -339,6 +350,172 @@ function VariancePanel({ rows }: { rows: TeamRow[] }) {
   );
 }
 
+/* ---- Statistical helpers ---- */
+
+const BENCHMARKS: Record<string, number> = {
+  authorityClarity: 62, executionTrust: 58, operatingFriction: 45, strategicCoherence: 55,
+};
+
+function stddev(values: number[]): number {
+  const n = values.length;
+  if (n < 2) return 0;
+  const mean = values.reduce((a, b) => a + b, 0) / n;
+  return Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / n);
+}
+
+function computeAdvancedMetrics(rows: TeamRow[]) {
+  const filled = rows.filter((r) => r.teamName.trim());
+  if (filled.length < 2) return null;
+
+  const metricStddevs = METRICS.map((m) => {
+    const vals = filled.map((r) => r[m.key] as number);
+    return stddev(vals);
+  });
+  const varianceIndex = Math.round(metricStddevs.reduce((a, b) => a + b, 0) / metricStddevs.length);
+
+  const leadership = filled[0]!;
+  const otherTeams = filled.slice(1);
+  const meanTrust = otherTeams.reduce((s, r) => s + r.executionTrust, 0) / otherTeams.length;
+  const trustGap = Math.round(Math.abs(leadership.executionTrust - meanTrust));
+
+  const healths = filled.map((r) =>
+    Math.round((r.authorityClarity + r.executionTrust + (100 - r.operatingFriction) + r.strategicCoherence) / 4),
+  );
+  const executionCoherence = Math.max(0, Math.round(100 - stddev(healths)));
+
+  const metricAvgs = Object.fromEntries(
+    METRICS.map((m) => [m.key, Math.round(filled.reduce((s, r) => s + (r[m.key] as number), 0) / filled.length)]),
+  );
+
+  return { varianceIndex, trustGap, executionCoherence, metricAvgs };
+}
+
+function generateNarrative(adv: NonNullable<ReturnType<typeof computeAdvancedMetrics>>): string {
+  const parts: string[] = [];
+  if (adv.varianceIndex > 30) {
+    parts.push(`Team alignment shows significant divergence (variance index ${adv.varianceIndex}), indicating systemic misalignment rather than localised drift.`);
+  } else if (adv.varianceIndex > 15) {
+    parts.push(`Moderate variance detected across teams (index ${adv.varianceIndex}). Some divergence is expected, but attention is needed before it compounds.`);
+  } else {
+    parts.push(`Teams are operating with reasonable consistency (variance index ${adv.varianceIndex}).`);
+  }
+  if (adv.trustGap > 25) {
+    parts.push(`A ${adv.trustGap}-point trust gap between leadership and teams signals a dangerous perception disconnect.`);
+  } else if (adv.trustGap > 10) {
+    parts.push(`The ${adv.trustGap}-point trust gap warrants monitoring.`);
+  }
+  return parts.join(" ");
+}
+
+/* ---- Radar chart panel ---- */
+
+function RadarPanel({ rows }: { rows: TeamRow[] }) {
+  const filled = rows.filter((r) => r.teamName.trim());
+  if (filled.length < 1) return null;
+
+  const data = METRICS.map((m) => {
+    const entry: Record<string, string | number> = { metric: m.label };
+    filled.forEach((r, i) => { entry[`team${i}`] = r[m.key] as number; });
+    return entry;
+  });
+
+  const fills = ["#f59e0b", "#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+  const opacities = [0.4, 0.25, 0.18, 0.12, 0.08];
+
+  return (
+    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
+      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Team Profile Overlay</div>
+      <ResponsiveContainer width="100%" height={220}>
+        <RadarChart data={data}>
+          <PolarGrid stroke="rgba(255,255,255,0.06)" />
+          <PolarAngleAxis dataKey="metric" tick={{ fontSize: 8, fill: "rgba(255,255,255,0.35)" }} />
+          {filled.map((_, i) => (
+            <Radar key={i} dataKey={`team${i}`} stroke={fills[i] ?? "#fff"} fill={fills[i] ?? "#fff"}
+              fillOpacity={opacities[i] ?? 0.05} strokeWidth={1} />
+          ))}
+        </RadarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/* ---- Benchmark panel ---- */
+
+function BenchmarkPanel({ rows }: { rows: TeamRow[] }) {
+  const adv = computeAdvancedMetrics(rows);
+  if (!adv) return null;
+
+  return (
+    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
+      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">vs Platform Average</div>
+      <div className="space-y-2.5">
+        {METRICS.map((m) => {
+          const avg = adv.metricAvgs[m.key as string] ?? 50;
+          const bench = BENCHMARKS[m.key as string] ?? 50;
+          const delta = avg - bench;
+          return (
+            <div key={String(m.key)} className="flex items-center justify-between">
+              <span className="font-mono text-[7.5px] uppercase tracking-[0.2em] text-white/35">{m.label}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[9px] text-white/50">{avg}</span>
+                {delta > 0 ? <ArrowUp className="h-3 w-3 text-emerald-400/60" /> :
+                  delta < 0 ? <ArrowDown className="h-3 w-3 text-red-400/60" /> :
+                  <Minus className="h-3 w-3 text-white/20" />}
+                <span className={cn("font-mono text-[8px]",
+                  delta > 0 ? "text-emerald-400/60" : delta < 0 ? "text-red-400/60" : "text-white/25")}>
+                  {delta > 0 ? "+" : ""}{delta}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ---- Advanced metrics summary ---- */
+
+function AdvancedMetricsPanel({ rows }: { rows: TeamRow[] }) {
+  const adv = computeAdvancedMetrics(rows);
+  if (!adv) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
+        <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Advanced Metrics</div>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Variance Index", value: adv.varianceIndex, warn: adv.varianceIndex > 30 },
+            { label: "Trust Gap", value: adv.trustGap, warn: adv.trustGap > 25 },
+            { label: "Exec. Coherence", value: adv.executionCoherence, warn: adv.executionCoherence < 60 },
+          ].map((m) => (
+            <div key={m.label} className="text-center">
+              <span className={cn("font-serif text-xl", m.warn ? "text-red-400" : "text-white/70")}>{m.value}</span>
+              <div className="font-mono text-[6px] uppercase tracking-[0.2em] text-white/25 mt-1">{m.label}</div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-[11px] leading-relaxed text-white/40">{generateNarrative(adv)}</p>
+      </div>
+
+      {(adv.varianceIndex > 30 || adv.trustGap > 25) && (
+        <div className="flex items-start gap-3 rounded-[16px] border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3.5">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/80" />
+          <div>
+            <div className="font-mono text-[7.5px] uppercase tracking-[0.22em] text-amber-400/70">Escalation recommended</div>
+            <p className="mt-1 text-xs text-white/50">Signal divergence exceeds safe thresholds. Enterprise Assessment is recommended.</p>
+            <Link href="/diagnostics/enterprise-assessment"
+              className="mt-2 inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.2em] text-amber-300/80 hover:text-amber-200 transition-colors">
+              Proceed to Enterprise Assessment <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Result output panel */
 function ResultPanel({ result }: { result: any }) {
   return (
@@ -451,6 +628,7 @@ export default function TeamAssessmentSuite() {
       const json = await response.json();
       if (!response.ok || !json?.ok) throw new Error(json?.error || "Failed to run team assessment.");
       setResult(json);
+      try { sessionStorage.setItem("team-assessment-result", JSON.stringify(json)); } catch { /* SSR */ }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to run.");
     } finally {
@@ -600,8 +778,17 @@ export default function TeamAssessmentSuite() {
           </div>
         </div>
 
+        {/* Radar chart */}
+        <RadarPanel rows={rows} />
+
         {/* Live variance */}
         <VariancePanel rows={rows} />
+
+        {/* Advanced metrics (variance index, trust gap, coherence, narrative, escalation) */}
+        <AdvancedMetricsPanel rows={rows} />
+
+        {/* Benchmark comparison */}
+        <BenchmarkPanel rows={rows} />
 
         {/* Metric legend */}
         <div className="rounded-[20px] border border-white/[0.06] bg-white/[0.015] p-5">

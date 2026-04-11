@@ -408,7 +408,7 @@ const DirectionalIntegrityPage: NextPage = () => {
         <link rel="canonical" href={`${SITE}/diagnostics/directional-integrity`} />
       </Head>
 
-      <main className="min-h-screen bg-black text-white">
+      <main className="min-h-screen text-white">
         {/* HERO */}
         <section className="relative overflow-hidden border-b border-white/5">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -418,6 +418,11 @@ const DirectionalIntegrityPage: NextPage = () => {
           </div>
 
           <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-28 lg:px-12 lg:pb-28 lg:pt-36">
+            <div className="flex items-center gap-2 text-sm text-white/40 mb-8">
+              <Link href="/diagnostics" className="hover:text-white/60 transition-colors">Diagnostics</Link>
+              <span>/</span>
+              <span className="text-white/60">Directional Integrity</span>
+            </div>
             <div className="grid gap-14 lg:grid-cols-[1.02fr_0.98fr]">
               <div className="max-w-4xl">
                 <motion.div

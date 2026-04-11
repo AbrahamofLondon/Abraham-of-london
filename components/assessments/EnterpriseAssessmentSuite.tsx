@@ -467,6 +467,124 @@ function ResultPanel({ result }: { result: any }) {
   );
 }
 
+/* ---- Posture Matrix ---- */
+
+type InstitutionalPosture = "ORDERED" | "DRIFTING" | "CONTESTED" | "DISORDERED";
+
+function computePosture(domains: EnterpriseDomain[]): { posture: InstitutionalPosture; govAvg: number; execAvg: number } {
+  if (domains.length === 0) return { posture: "DISORDERED", govAvg: 0, execAvg: 0 };
+  const govAvg = Math.round(domains.reduce((s, d) => s + d.governance, 0) / domains.length);
+  const execAvg = Math.round(domains.reduce((s, d) => s + d.execution, 0) / domains.length);
+  const posture: InstitutionalPosture =
+    govAvg >= 60 && execAvg >= 60 ? "ORDERED" :
+    govAvg >= 60 && execAvg < 60 ? "DRIFTING" :
+    govAvg < 60 && execAvg >= 60 ? "CONTESTED" : "DISORDERED";
+  return { posture, govAvg, execAvg };
+}
+
+function PostureMatrix({ domains }: { domains: EnterpriseDomain[] }) {
+  const { posture, govAvg, execAvg } = computePosture(domains);
+  const cells: Array<{ id: InstitutionalPosture; label: string; row: number; col: number }> = [
+    { id: "ORDERED", label: "Ordered", row: 0, col: 1 },
+    { id: "DRIFTING", label: "Drifting", row: 0, col: 0 },
+    { id: "CONTESTED", label: "Contested", row: 1, col: 1 },
+    { id: "DISORDERED", label: "Disordered", row: 1, col: 0 },
+  ];
+
+  return (
+    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
+      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Institutional Posture</div>
+      <div className="grid grid-cols-2 gap-2">
+        {cells.map((c) => (
+          <div key={c.id} className={cn(
+            "rounded-xl border p-3 text-center transition-all",
+            posture === c.id
+              ? "border-amber-500/30 bg-amber-500/[0.08]"
+              : "border-white/[0.06] bg-white/[0.02]",
+          )}>
+            <span className={cn("font-mono text-[8px] uppercase tracking-[0.2em]",
+              posture === c.id ? "text-amber-300" : "text-white/25")}>{c.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center justify-between font-mono text-[7px] text-white/30">
+        <span>Gov: {govAvg}</span>
+        <span>Exec: {execAvg}</span>
+      </div>
+      {posture === "DISORDERED" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="mt-3 rounded-xl border border-red-500/20 bg-red-500/[0.06] p-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-3.5 w-3.5 text-red-400/80" />
+            <span className="font-mono text-[7px] uppercase tracking-[0.2em] text-red-300/80">Mandatory escalation</span>
+          </div>
+          <p className="mt-1 text-[10px] text-white/40">Institutional disorder detected. Executive Reporting is required.</p>
+          <a href="/diagnostics/executive-reporting" className="mt-2 inline-flex items-center gap-1 font-mono text-[7px] uppercase tracking-[0.2em] text-red-300/70 hover:text-red-200">
+            Escalate <ArrowRight className="h-3 w-3" />
+          </a>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+/* ---- Critical Path ---- */
+
+function CriticalPath({ domains }: { domains: EnterpriseDomain[] }) {
+  if (domains.length === 0) return null;
+  const ranked = domains.map((d) => {
+    const composite = domainHealth(d);
+    const cascadeRisk = Math.round((100 - composite) * 1.4);
+    return { label: d.label || "Unnamed", composite, cascadeRisk };
+  }).sort((a, b) => b.cascadeRisk - a.cascadeRisk);
+
+  return (
+    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
+      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Critical Path Analysis</div>
+      <div className="space-y-2">
+        {ranked.map((d, i) => (
+          <div key={d.label} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[8px] text-white/20">{i + 1}.</span>
+              <span className="text-[11px] text-white/55">{d.label}</span>
+            </div>
+            <span className={cn("font-mono text-[9px]",
+              d.cascadeRisk >= 60 ? "text-red-400/70" : d.cascadeRisk >= 35 ? "text-amber-400/70" : "text-white/35")}>
+              {d.cascadeRisk} risk
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---- Board Summary ---- */
+
+function BoardSummary({ domains }: { domains: EnterpriseDomain[] }) {
+  if (domains.length === 0) return null;
+  const { posture } = computePosture(domains);
+  const weakest = [...domains].sort((a, b) => domainHealth(a) - domainHealth(b))[0]!;
+  const avgExposure = Math.round(domains.reduce((s, d) => s + d.exposure, 0) / domains.length);
+
+  const lines = [
+    `The institution is currently classified as ${posture}${posture === "ORDERED" ? ", indicating structural coherence across governance and execution." : ", indicating structural misalignment that requires attention."}`,
+    `The weakest domain is ${weakest.label || "unnamed"} (health ${domainHealth(weakest)}%), where intervention priority is highest.`,
+    `Average exposure across domains is ${avgExposure}%${avgExposure >= 70 ? " — this represents material institutional risk." : "."}`,
+  ];
+
+  return (
+    <div className="rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-5">
+      <div className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/30 mb-3">Board-Ready Summary</div>
+      <div className="space-y-2">
+        {lines.map((line, i) => (
+          <p key={i} className="text-[11px] leading-relaxed text-white/45">{line}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 
 export default function EnterpriseAssessmentSuite() {
@@ -509,6 +627,11 @@ export default function EnterpriseAssessmentSuite() {
       const json = await response.json();
       if (!response.ok || !json?.ok) throw new Error(json?.error || "Failed to run enterprise assessment.");
       setResult(json);
+      try {
+        const prior = sessionStorage.getItem("enterprise-assessment-result");
+        if (prior) sessionStorage.setItem("enterprise-assessment-prior", prior);
+        sessionStorage.setItem("enterprise-assessment-result", JSON.stringify(json));
+      } catch { /* SSR */ }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to run.");
     } finally {
@@ -635,6 +758,15 @@ export default function EnterpriseAssessmentSuite() {
 
         {/* Live system readout */}
         <SystemReadout domains={domains} />
+
+        {/* Posture Matrix */}
+        <PostureMatrix domains={domains} />
+
+        {/* Critical Path */}
+        <CriticalPath domains={domains} />
+
+        {/* Board Summary */}
+        <BoardSummary domains={domains} />
       </div>
     </div>
   );

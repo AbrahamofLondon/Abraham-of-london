@@ -24,6 +24,45 @@ export type AlignmentAssessmentInput = {
   notes?: string;
 };
 
+/** Dual-axis answer: resonance (how true, 0-10) x certainty (how confident, 0-10) */
+export type DualAxisAnswer = {
+  resonance: number;
+  certainty: number;
+};
+
+export type DualAxisInput = {
+  answers: Record<string, DualAxisAnswer>;
+};
+
+export type CoherenceBand =
+  | "SOVEREIGN"
+  | "ALIGNED"
+  | "DRIFTING"
+  | "FRAGMENTED";
+
+export type PurposeProfileResult = {
+  totalScore: number;
+  maxScore: number;
+  percent: number;
+  coherenceBand: CoherenceBand;
+  domainProfiles: DomainProfile[];
+  weakestDomains: AlignmentDomain[];
+  strengths: string[];
+  corrections: string[];
+  narrative: string;
+  nextActions: string[];
+  createdAt: string;
+};
+
+export type DomainProfile = {
+  domain: AlignmentDomain;
+  label: string;
+  resonance: number;
+  certainty: number;
+  weighted: number;
+  percent: number;
+};
+
 export type AlignmentDomainScore = {
   domain: AlignmentDomain;
   earned: number;

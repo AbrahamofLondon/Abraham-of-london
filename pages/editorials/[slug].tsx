@@ -1,373 +1,792 @@
-// pages/editorials/[slug].tsx — EDITORIAL DETAIL (Production Grade Publication Record)
+// pages/editorials/[slug].tsx
+// Design: Institutional publication record — the formal page for a written asset
+// Every publication has: a proper hero, a citation panel, access surfaces,
+// and an escalation close. Nothing generic. Nothing decorative without purpose.
 
+import * as React from "react";
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
+  ChevronRight,
   Download,
-  Eye,
   ExternalLink,
+  Eye,
   FileText,
   Quote,
-  ScrollText,
 } from "lucide-react";
 
+import Layout from "@/components/Layout";
 import {
   getPublicationBySlug,
   getPublicationCatalogue,
 } from "@/lib/editorial/catalogue";
 import type { PublicationRecord } from "@/lib/editorial/types";
-import Layout from "@/components/Layout";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
 
 type Props = {
   item: PublicationRecord;
   previewHref: string | null;
   citationHref: string;
+  relatedSlugs: { prev: string | null; next: string | null };
 };
 
-function Hairline() {
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+const BASE = "rgb(6 6 9)";
+const LIFT = "rgb(10 14 20)";
+const VOID = "rgb(3 3 5)";
+
+const GRAIN: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  backgroundSize: "180px 180px",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIMITIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
+function GoldRule({ soft = false }: { soft?: boolean }) {
   return (
-    <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    <div className={soft
+      ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+      : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/28 to-transparent"
+    } />
   );
 }
 
-function Panel({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className={[
-        "rounded-[30px] border border-white/12 bg-white/[0.04]",
-        "shadow-[0_35px_95px_-60px_rgba(0,0,0,0.95)]",
-        className,
-      ].join(" ")}
-    >
-      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+    <div className="flex items-center gap-3">
+      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span style={{
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontSize: "8.5px",
+        letterSpacing: "0.40em",
+        textTransform: "uppercase",
+        color: `${GOLD}BB`,
+      }}>
         {children}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      </div>
+      </span>
     </div>
   );
 }
 
-function Flag({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300">
-      {children}
-    </div>
-  );
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 
-const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref }) => {
+const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relatedSlugs }) => {
   return (
     <Layout
       title={`${item.title} | Abraham of London`}
       description={item.description || item.subtitle || item.title}
       canonicalUrl={`/editorials/${item.slug}`}
       fullWidth
-      className="bg-black text-white"
+      headerTransparent
     >
       <Head>
-        <title>{item.title} | Abraham of London</title>
-        <meta
-          name="description"
-          content={item.description || item.subtitle || item.title}
-        />
+        <meta name="robots" content="index,follow" />
       </Head>
 
-      <main className="min-h-screen bg-[#050505] text-white">
-        <section className="relative overflow-hidden border-b border-white/5 px-6 pb-16 pt-24 md:pt-32">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(212,175,55,0.07),transparent_42%)]" />
-          <div className="relative mx-auto max-w-7xl">
-            <div className="mb-8">
+      <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
+
+        {/* ── COVER ─────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+          {/* Atmosphere */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute" style={{
+              left: "-5%", top: "-15%",
+              width: "650px", height: "600px",
+              borderRadius: "50%",
+              background: `radial-gradient(ellipse at center, ${GOLD}10 0%, ${GOLD}04 30%, transparent 65%)`,
+              filter: "blur(130px)",
+            }} />
+            <div className="absolute inset-x-0 bottom-0 h-40" style={{
+              background: `linear-gradient(to top, ${BASE}, transparent)`,
+            }} />
+            <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
+          </div>
+
+          {/* Top gold rule */}
+          <div className="absolute inset-x-0 top-0 h-px" style={{
+            background: `linear-gradient(to right, transparent, ${GOLD}25, transparent)`,
+          }} />
+
+          <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="pt-28 md:pt-36" />
+
+            {/* Breadcrumb */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.55 }}
+              className="flex items-center gap-2"
+            >
               <Link
                 href="/editorials"
-                className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.30em] text-white/55 transition hover:text-white"
+                className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.30em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                }}
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Editorial Library
+                <ArrowLeft style={{ width: "11px", height: "11px" }} />
+                Editorials
               </Link>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Flag>
-                <ScrollText className="h-3.5 w-3.5" />
+              <span style={{ color: "rgba(255,255,255,0.12)", fontSize: "10px" }}>/</span>
+              <span style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.24em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.20)",
+              }}>
                 {item.category || "Editorial"}
-              </Flag>
+              </span>
+            </motion.div>
 
-              <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40">
-                {item.tier}
-              </div>
-            </div>
+            {/* Cover block */}
+            <div className="mt-8 grid gap-12 lg:grid-cols-[1.3fr_0.7fr] lg:items-start">
 
-            <h1 className="mt-6 max-w-5xl font-serif text-5xl leading-[0.95] text-white md:text-7xl">
-              {item.title}
-            </h1>
-
-            {item.subtitle ? (
-              <p className="mt-5 max-w-4xl text-xl leading-relaxed text-amber-100/80">
-                {item.subtitle}
-              </p>
-            ) : null}
-
-            {item.description ? (
-              <p className="mt-6 max-w-3xl text-base leading-relaxed text-white/70">
-                {item.description}
-              </p>
-            ) : null}
-
-            <div className="mt-8 flex flex-wrap items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-white/40">
-              <span>{item.author}</span>
-              {item.date ? <span>{item.date}</span> : null}
-              {item.readingTime ? <span>{item.readingTime}</span> : null}
-              {item.version ? <span>v{item.version}</span> : null}
-              <span>{item.contentId}</span>
-            </div>
-
-            <div className="mt-10 flex flex-wrap gap-3">
-              {item.pdfPath ? (
-                <a
-                  href={item.pdfPath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300 transition-all hover:bg-amber-500/18"
-                >
-                  <Download className="h-4 w-4" />
-                  Download PDF
-                </a>
-              ) : null}
-
-              {previewHref ? (
-                <a
-                  href={previewHref}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition-all hover:bg-white/[0.10]"
-                >
-                  <Eye className="h-4 w-4" />
-                  Preview
-                </a>
-              ) : null}
-
-              {item.epubEnabled && item.epubPath ? (
-                <a
-                  href={item.epubPath}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/85 transition-all hover:bg-white/[0.10]"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  EPUB
-                </a>
-              ) : null}
-
-              <a
-                href={citationHref}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3 text-[10px] font-mono uppercase tracking-[0.30em] text-white/75 transition-all hover:bg-white/[0.08]"
+              {/* Left — title block */}
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.85, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
               >
-                <ExternalLink className="h-4 w-4" />
-                Citation JSON
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-6 py-16">
-          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-            <Panel>
-              <div className="p-7 md:p-10">
-                <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-white/50">
-                  Publication Record
-                </div>
-
-                <div className="mt-6 grid gap-6 md:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.26em] text-amber-300/85">
-                      Identity
+                {/* Classification badges */}
+                <div className="flex flex-wrap items-center gap-2.5 mb-6">
+                  {item.category && (
+                    <div className="px-3 py-1.5" style={{
+                      border: `1px solid ${GOLD}30`,
+                      backgroundColor: `${GOLD}09`,
+                    }}>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px",
+                        letterSpacing: "0.38em",
+                        textTransform: "uppercase",
+                        color: `${GOLD}BB`,
+                      }}>
+                        {item.category}
+                      </span>
                     </div>
-                    <dl className="mt-4 space-y-3 text-sm text-white/72">
-                      <div>
-                        <dt className="font-semibold text-white">Author</dt>
-                        <dd>{item.author}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold text-white">Content ID</dt>
-                        <dd>{item.contentId}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold text-white">Tier</dt>
-                        <dd>{item.tier}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold text-white">Category</dt>
-                        <dd>{item.category || "—"}</dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.26em] text-amber-300/85">
-                      Edition
-                    </div>
-                    <dl className="mt-4 space-y-3 text-sm text-white/72">
-                      <div>
-                        <dt className="font-semibold text-white">Date</dt>
-                        <dd>{item.date || "—"}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold text-white">Version</dt>
-                        <dd>{item.version || "—"}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold text-white">Status</dt>
-                        <dd>{item.status || "—"}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold text-white">Reading Time</dt>
-                        <dd>{item.readingTime || "—"}</dd>
-                      </div>
-                    </dl>
+                  )}
+                  <div className="px-3 py-1.5" style={{
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                  }}>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.34em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.35)",
+                    }}>
+                      {item.tier}
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <Hairline />
-                </div>
+                {/* Title */}
+                <h1 style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(2.2rem, 5vw, 4.2rem)",
+                  lineHeight: 0.94,
+                  letterSpacing: "-0.035em",
+                  color: "rgba(255,255,255,0.94)",
+                }}>
+                  {item.title}
+                </h1>
 
-                <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                  <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300/85">
-                    <FileText className="h-4 w-4" />
-                    Publication Summary
-                  </div>
-                  <p className="mt-4 text-sm leading-relaxed text-white/72">
-                    {item.description ||
-                      item.subtitle ||
-                      "Formal editorial record within the Abraham of London publication library."}
+                {item.subtitle && (
+                  <p style={{
+                    marginTop: "1.1rem",
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "clamp(1.05rem, 1.4vw, 1.30rem)",
+                    lineHeight: 1.55,
+                    color: "rgba(255,255,255,0.45)",
+                    fontStyle: "italic",
+                    maxWidth: "46ch",
+                  }}>
+                    {item.subtitle}
                   </p>
-                </div>
-              </div>
-            </Panel>
+                )}
 
-            <div className="space-y-8">
-              <Panel>
-                <div className="p-7 md:p-8">
-                  <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300/85">
-                    <Quote className="h-4 w-4" />
-                    Citation
-                  </div>
-
-                  <p className="mt-5 text-sm leading-7 text-white/72">
-                    {item.citation.citationAuthor}.{" "}
-                    <em>{item.citation.citationTitle}</em>.{" "}
-                    {item.citation.citationPublisher}, {item.citation.citationYear}.
+                {item.description && (
+                  <p style={{
+                    marginTop: "0.85rem",
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "1.02rem",
+                    lineHeight: 1.72,
+                    color: "rgba(255,255,255,0.38)",
+                    maxWidth: "46ch",
+                  }}>
+                    {item.description}
                   </p>
+                )}
 
-                  <div className="mt-6 space-y-3 text-sm text-white/65">
-                    <div>
-                      <span className="font-semibold text-white">Canonical URL:</span>{" "}
-                      {item.citation.canonicalUrl}
-                    </div>
-                    {item.citation.doi ? (
-                      <div>
-                        <span className="font-semibold text-white">DOI:</span>{" "}
-                        {item.citation.doi}
-                      </div>
-                    ) : null}
-                  </div>
+                {/* Meta strip */}
+                <div className="flex flex-wrap items-center gap-3 mt-6">
+                  {[item.author, item.date, item.readingTime, item.version ? `v${item.version}` : null, item.contentId]
+                    .filter(Boolean)
+                    .map((val, i, arr) => (
+                      <React.Fragment key={i}>
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7.5px",
+                          letterSpacing: "0.26em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.22)",
+                        }}>
+                          {val}
+                        </span>
+                        {i < arr.length - 1 && <span style={{ color: "rgba(255,255,255,0.08)" }}>·</span>}
+                      </React.Fragment>
+                    ))}
+                </div>
 
-                  <div className="mt-6">
+                {/* CTAs */}
+                <div className="flex flex-wrap gap-3 mt-8">
+                  {item.pdfPath && (
                     <a
-                      href={citationHref}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3 text-[10px] font-mono uppercase tracking-[0.28em] text-white/75 transition-all hover:bg-white/[0.08]"
+                      href={item.pdfPath}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group inline-flex items-center gap-2.5 transition-all duration-300"
+                      style={{
+                        padding: "12px 24px",
+                        border: `1px solid ${GOLD}42`,
+                        backgroundColor: `${GOLD}0E`,
+                        color: GOLD,
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "8.5px",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                      }}
+                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
+                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
                     >
+                      <Download style={{ width: "12px", height: "12px" }} />
+                      Download PDF
+                    </a>
+                  )}
+
+                  {previewHref && (
+                    <a
+                      href={previewHref}
+                      className="inline-flex items-center gap-2.5 transition-all duration-300"
+                      style={{
+                        padding: "12px 24px",
+                        border: "1px solid rgba(255,255,255,0.09)",
+                        backgroundColor: "rgba(255,255,255,0.02)",
+                        color: "rgba(255,255,255,0.50)",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "8.5px",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                      }}
+                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.75)"; }}
+                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.50)"; }}
+                    >
+                      <Eye style={{ width: "12px", height: "12px" }} />
+                      Preview
+                    </a>
+                  )}
+
+                  {item.epubEnabled && item.epubPath && (
+                    <a
+                      href={item.epubPath}
+                      className="inline-flex items-center gap-2.5 transition-all duration-300"
+                      style={{
+                        padding: "12px 24px",
+                        border: "1px solid rgba(255,255,255,0.07)",
+                        color: "rgba(255,255,255,0.32)",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "8.5px",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                      }}
+                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.14)"; el.style.color = "rgba(255,255,255,0.55)"; }}
+                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.color = "rgba(255,255,255,0.32)"; }}
+                    >
+                      <BookOpen style={{ width: "12px", height: "12px" }} />
+                      EPUB
+                    </a>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Right — metadata record panel */}
+              <motion.div
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.75, delay: 0.14 }}
+                className="space-y-3 lg:sticky lg:top-28"
+              >
+                {/* Publication record */}
+                <div style={{
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  backgroundColor: LIFT,
+                }}>
+                  <div style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}>
+                      Publication record
+                    </span>
+                  </div>
+                  <div style={{ padding: "0.75rem 1.25rem" }}>
+                    {[
+                      { label: "Content ID",  value: item.contentId },
+                      { label: "Author",      value: item.author },
+                      { label: "Tier",        value: item.tier },
+                      { label: "Category",    value: item.category || "—" },
+                      { label: "Date",        value: item.date || "—" },
+                      { label: "Version",     value: item.version || "—" },
+                      { label: "Status",      value: item.status || "—" },
+                      { label: "Reading time", value: item.readingTime || "—" },
+                    ].map(({ label, value }) => (
+                      <div key={label}
+                        className="flex items-start justify-between gap-3 py-2"
+                        style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                      >
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.32em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.20)",
+                        }}>
+                          {label}
+                        </span>
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7.5px",
+                          letterSpacing: "0.10em",
+                          color: "rgba(255,255,255,0.55)",
+                          textAlign: "right",
+                          maxWidth: "58%",
+                          wordBreak: "break-all",
+                        }}>
+                          {value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Citation panel */}
+                <div style={{
+                  border: `1px solid ${GOLD}18`,
+                  backgroundColor: `${GOLD}06`,
+                  padding: "1.25rem",
+                }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Quote style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}90`,
+                    }}>
+                      Citation
+                    </span>
+                  </div>
+
+                  <p style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "0.90rem",
+                    lineHeight: 1.65,
+                    color: "rgba(255,255,255,0.60)",
+                    fontStyle: "italic",
+                    marginBottom: "1rem",
+                  }}>
+                    {item.citation.citationAuthor}.{" "}
+                    <em style={{ fontStyle: "normal", color: "rgba(255,255,255,0.75)" }}>
+                      {item.citation.citationTitle}
+                    </em>
+                    .{" "}
+                    {item.citation.citationPublisher},{" "}
+                    {item.citation.citationYear}.
+                  </p>
+
+                  {item.citation.doi && (
+                    <div style={{ marginBottom: "0.5rem" }}>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "6.5px",
+                        letterSpacing: "0.30em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.20)",
+                      }}>
+                        DOI
+                      </span>
+                      <span style={{
+                        marginLeft: "0.75rem",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px",
+                        color: "rgba(255,255,255,0.45)",
+                        letterSpacing: "0.06em",
+                      }}>
+                        {item.citation.doi}
+                      </span>
+                    </div>
+                  )}
+
+                  <a
+                    href={citationHref}
+                    className="group mt-3 flex items-center justify-between transition-opacity hover:opacity-75"
+                  >
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}90`,
+                    }}>
                       Citation JSON
-                      <ExternalLink className="h-4 w-4" />
+                    </span>
+                    <ExternalLink style={{ width: "10px", height: "10px", color: `${GOLD}70` }} />
+                  </a>
+                </div>
+
+                {/* Access surfaces */}
+                <div style={{
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.01)",
+                }}>
+                  <div style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  }}>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.18)",
+                    }}>
+                      Access surfaces
+                    </span>
+                  </div>
+
+                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    {item.pdfPath && (
+                      <a href={item.pdfPath} target="_blank" rel="noopener noreferrer"
+                        className="group flex items-center justify-between transition-opacity hover:opacity-75"
+                        style={{ padding: "0.85rem 1.25rem" }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Download style={{ width: "10px", height: "10px", color: `${GOLD}80` }} />
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>PDF Edition</span>
+                        </div>
+                        <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
+                      </a>
+                    )}
+                    {previewHref && (
+                      <a href={previewHref}
+                        className="group flex items-center justify-between transition-opacity hover:opacity-75"
+                        style={{ padding: "0.85rem 1.25rem" }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Eye style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preview Route</span>
+                        </div>
+                        <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
+                      </a>
+                    )}
+                    {item.epubEnabled && item.epubPath && (
+                      <a href={item.epubPath}
+                        className="group flex items-center justify-between transition-opacity hover:opacity-75"
+                        style={{ padding: "0.85rem 1.25rem" }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <BookOpen style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>EPUB Edition</span>
+                        </div>
+                        <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
+                      </a>
+                    )}
+                    <a href={citationHref}
+                      className="group flex items-center justify-between transition-opacity hover:opacity-75"
+                      style={{ padding: "0.85rem 1.25rem" }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <ExternalLink style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Citation JSON</span>
+                      </div>
+                      <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                     </a>
                   </div>
                 </div>
-              </Panel>
+              </motion.div>
+            </div>
 
-              <Panel>
-                <div className="p-7 md:p-8">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.30em] text-amber-300/85">
-                    Access Surfaces
-                  </div>
+            <div style={{ paddingBottom: "4rem" }} />
+          </div>
+        </section>
 
-                  <div className="mt-5 space-y-3">
-                    {item.pdfPath ? (
-                      <a
-                        href={item.pdfPath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-white/78 transition hover:bg-white/[0.06]"
-                      >
-                        <span>PDF Edition</span>
-                        <Download className="h-4 w-4 text-amber-300/80" />
-                      </a>
-                    ) : null}
-
-                    {previewHref ? (
-                      <a
-                        href={previewHref}
-                        className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-white/78 transition hover:bg-white/[0.06]"
-                      >
-                        <span>Preview Route</span>
-                        <Eye className="h-4 w-4 text-amber-300/80" />
-                      </a>
-                    ) : null}
-
-                    {item.epubEnabled && item.epubPath ? (
-                      <a
-                        href={item.epubPath}
-                        className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-white/78 transition hover:bg-white/[0.06]"
-                      >
-                        <span>EPUB Edition</span>
-                        <BookOpen className="h-4 w-4 text-amber-300/80" />
-                      </a>
-                    ) : null}
-                  </div>
+        {/* ── PUBLICATION SUMMARY ───────────────────────────────────────── */}
+        {item.description && (
+          <section style={{ backgroundColor: BASE }}>
+            <div className="mx-auto max-w-4xl px-6 py-14 lg:px-12">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.70 }}
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-px w-8" style={{ background: `linear-gradient(to right, ${GOLD}45, transparent)` }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px",
+                    letterSpacing: "0.40em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.20)",
+                  }}>
+                    Publication summary
+                  </span>
                 </div>
-              </Panel>
+
+                <div style={{
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.012)",
+                  padding: "2rem 2.5rem",
+                }}>
+                  <p style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "clamp(1.05rem, 1.3vw, 1.20rem)",
+                    lineHeight: 1.80,
+                    color: "rgba(255,255,255,0.62)",
+                  }}>
+                    {item.description}
+                  </p>
+
+                  {item.subtitle && (
+                    <p style={{
+                      marginTop: "1.25rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1.02rem",
+                      lineHeight: 1.72,
+                      color: "rgba(255,255,255,0.38)",
+                      fontStyle: "italic",
+                      borderTop: "1px solid rgba(255,255,255,0.05)",
+                      paddingTop: "1.25rem",
+                    }}>
+                      {item.subtitle}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </section>
+        )}
+
+        {/* ── ADJACENT NAVIGATION ───────────────────────────────────────── */}
+        {(relatedSlugs.prev || relatedSlugs.next) && (() => {
+          const catalogue = getPublicationCatalogue();
+          const prevItem = relatedSlugs.prev ? catalogue.find(i => i.slug === relatedSlugs.prev) : null;
+          const nextItem = relatedSlugs.next ? catalogue.find(i => i.slug === relatedSlugs.next) : null;
+          return (
+            <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+              <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {prevItem ? (
+                    <Link href={`/editorials/${prevItem.slug}`}
+                      className="group flex items-center gap-4 transition-opacity hover:opacity-75"
+                      style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
+                    >
+                      <ArrowLeft style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Previous</div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{prevItem.title}</div>
+                      </div>
+                    </Link>
+                  ) : <div />}
+
+                  {nextItem && (
+                    <Link href={`/editorials/${nextItem.slug}`}
+                      className="group flex items-center justify-end gap-4 text-right transition-opacity hover:opacity-75"
+                      style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
+                    >
+                      <div>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Next</div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{nextItem.title}</div>
+                      </div>
+                      <ArrowRight style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ── ESCALATION CLOSE ──────────────────────────────────────────── */}
+        <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-14 lg:px-12">
+            <div style={{
+              border: `1px solid ${GOLD}18`,
+              backgroundColor: `${GOLD}06`,
+              padding: "2rem 2.5rem",
+            }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.40em",
+                textTransform: "uppercase",
+                color: `${GOLD}90`,
+                marginBottom: "1rem",
+              }}>
+                If this publication raises a question that requires a conversation
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "1.02rem",
+                lineHeight: 1.72,
+                color: "rgba(255,255,255,0.42)",
+                fontStyle: "italic",
+                maxWidth: "48ch",
+                marginBottom: "1.5rem",
+              }}>
+                Publications establish the intellectual frame. Diagnostics apply it.
+                The Strategy Room exists for situations where the question carries
+                material consequence.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/diagnostics"
+                  className="inline-flex items-center gap-2.5 transition-all duration-300"
+                  style={{
+                    padding: "11px 22px",
+                    border: `1px solid ${GOLD}35`,
+                    backgroundColor: `${GOLD}0D`,
+                    color: `${GOLD}BB`,
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
+                >
+                  Enter diagnostics <ArrowRight style={{ width: "11px", height: "11px" }} />
+                </Link>
+                <Link href="/consulting/strategy-room"
+                  className="inline-flex items-center gap-2.5 transition-all duration-300"
+                  style={{
+                    padding: "11px 22px",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                    color: "rgba(255,255,255,0.38)",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.62)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.08)"; el.style.color = "rgba(255,255,255,0.38)"; }}
+                >
+                  Strategy Room
+                </Link>
+                <Link href="/editorials"
+                  className="inline-flex items-center gap-2.5 transition-all duration-300"
+                  style={{
+                    padding: "11px 22px",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    color: "rgba(255,255,255,0.22)",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.45)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.22)"; }}
+                >
+                  All editorials
+                </Link>
+              </div>
             </div>
           </div>
         </section>
-      </main>
+
+      </div>
     </Layout>
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const items = getPublicationCatalogue();
-
   return {
-    paths: items.map((item) => ({ params: { slug: item.slug } })),
+    paths: items.map(item => ({ params: { slug: item.slug } })),
     fallback: false,
   };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
+export const getStaticProps: GetStaticProps<Props> = async ctx => {
   const slug = typeof ctx.params?.slug === "string" ? ctx.params.slug : "";
   const item = getPublicationBySlug(slug);
+  if (!item) return { notFound: true };
 
-  if (!item) {
-    return { notFound: true };
-  }
+  const catalogue = getPublicationCatalogue();
+  const sorted = [...catalogue].sort((a, b) => a.title.localeCompare(b.title));
+  const idx = sorted.findIndex(i => i.slug === slug);
+  const prev = idx > 0 ? sorted[idx - 1]!.slug : null;
+  const next = idx < sorted.length - 1 ? sorted[idx + 1]!.slug : null;
 
-  const previewHref =
-    item.previewEnabled && item.previewPath
-      ? item.previewPath
-      : item.previewEnabled
-        ? `/api/editorials/preview/${item.slug}`
-        : null;
+  const previewHref = item.previewEnabled
+    ? (item.previewPath || `/api/editorials/preview/${item.slug}`)
+    : null;
 
   return {
     props: {
       item,
       previewHref,
       citationHref: `/api/editorials/citation/${item.slug}`,
+      relatedSlugs: { prev, next },
     },
     revalidate: 1800,
   };

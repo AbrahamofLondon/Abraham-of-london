@@ -286,11 +286,16 @@ const TeamAlignmentDiagnosticPage: NextPage = () => {
         <link rel="canonical" href={`${SITE}/diagnostics/team-alignment`} />
       </Head>
 
-      <main className="min-h-screen bg-black text-white selection:bg-amber-500/30">
+      <main className="min-h-screen text-white selection:bg-amber-500/30">
         <section className="relative overflow-hidden border-b border-white/5">
           <AmbientField />
 
           <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
+            <div className="flex items-center gap-2 text-sm text-white/40 mb-8">
+              <Link href="/diagnostics" className="hover:text-white/60 transition-colors">Diagnostics</Link>
+              <span>/</span>
+              <span className="text-white/60">Team Alignment</span>
+            </div>
             <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr]">
               <div className="max-w-4xl">
                 <motion.div

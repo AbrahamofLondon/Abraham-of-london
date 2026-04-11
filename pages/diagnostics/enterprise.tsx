@@ -280,11 +280,16 @@ const EnterpriseDiagnosticPage: NextPage = () => {
         <link rel="canonical" href={`${SITE}/diagnostics/enterprise`} />
       </Head>
 
-      <main className="min-h-screen bg-black text-white">
+      <main className="min-h-screen text-white">
         <section className="relative overflow-hidden border-b border-white/5">
           <AmbientField />
 
           <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
+            <div className="flex items-center gap-2 text-sm text-white/40 mb-8">
+              <Link href="/diagnostics" className="hover:text-white/60 transition-colors">Diagnostics</Link>
+              <span>/</span>
+              <span className="text-white/60">Enterprise</span>
+            </div>
             <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr]">
               <div className="max-w-4xl">
                 <motion.div initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>

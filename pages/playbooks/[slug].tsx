@@ -1,41 +1,67 @@
-/* pages/playbooks/[slug].tsx */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// pages/playbooks/[slug].tsx
+// Design: Institutional reading chamber — same language as GMI institutional edition
+// The document IS the playbook. Frontmatter frames it, doesn't fragment it.
+// All metadata (phases, signals, outputs, prerequisites) integrated into a
+// structured cover panel — then the MDX body flows uninterrupted beneath.
 
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { allPlaybooks } from "contentlayer/generated";
 import type { Playbook } from "contentlayer/generated";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronRight,
+  Clock,
+  Layers,
+  AlertTriangle,
+  CheckSquare,
+  Lock,
+  ShieldCheck,
+} from "lucide-react";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
-import {
-  CalendarDays,
-  Clock,
-  BookOpen,
-  Layers,
-  List,
-  AlertCircle,
-} from "lucide-react";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface PlaybookPageProps {
   playbook: Playbook;
   renderCode: string;
+  adjacentSlugs: { prev: string | null; next: string | null };
 }
 
-const difficultyColors = {
-  beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  intermediate: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  advanced: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  executive: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+const BASE = "rgb(6 6 9)";
+const LIFT = "rgb(10 14 22)";
+const VOID = "rgb(3 3 5)";
+
+const GRAIN: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  backgroundSize: "180px 180px",
 };
 
-const typeColors = {
-  diagnostic: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  execution: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  correction: "bg-red-500/10 text-red-400 border-red-500/20",
-  strategic: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  operational: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+// ─────────────────────────────────────────────────────────────────────────────
+// MOTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 
 function safeString(value: unknown): string {
   return typeof value === "string" ? value : value == null ? "" : String(value);
@@ -44,7 +70,6 @@ function safeString(value: unknown): string {
 function looksLikeLeakedModuleCode(code: string): boolean {
   const s = safeString(code).trim();
   if (!s) return false;
-
   return (
     /\bObject\.defineProperty\s*\(\s*exports\b/.test(s) ||
     /\bmodule\.exports\b/.test(s) ||
@@ -58,228 +83,816 @@ function looksLikeLeakedModuleCode(code: string): boolean {
 
 function pickRenderablePlaybookCode(playbook: Playbook): string {
   const compiled = safeString((playbook as any)?.body?.code);
-  const raw = safeString((playbook as any)?.body?.raw);
-
-  if (compiled && !looksLikeLeakedModuleCode(compiled)) {
-    return compiled;
-  }
-
-  if (raw) {
-    return raw;
-  }
-
+  const raw      = safeString((playbook as any)?.body?.raw);
+  if (compiled && !looksLikeLeakedModuleCode(compiled)) return compiled;
+  if (raw) return raw;
   return compiled || "";
 }
 
-const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode }) => {
-  return (
-    <Layout
-      title={playbook.title}
-      description={playbook.description}
-      className="bg-black text-white"
-      canonicalUrl={`/playbooks/${playbook.slug}`}
-      fullWidth
-      headerTransparent={false}
-    >
-      <Head>
-        <meta name="robots" content="index,follow" />
-      </Head>
-
-      <main className="min-h-screen bg-black text-white">
-        <div className="relative overflow-hidden border-b border-white/5">
-          <div className="absolute inset-0 bg-gradient-to-b from-amber-500/[0.03] to-transparent" />
-
-          <div className="relative mx-auto max-w-5xl px-6 pb-16 pt-32 lg:px-8 lg:pb-20 lg:pt-36">
-            <div className="mb-6 flex flex-wrap gap-3">
-              <span
-                className={`rounded-full border px-3 py-1 text-[8px] font-mono uppercase tracking-wider ${
-                  typeColors[
-                    playbook.playbookType as keyof typeof typeColors
-                  ] || "border-white/10 text-white/40"
-                }`}
-              >
-                {playbook.playbookType || "Playbook"}
-              </span>
-
-              <span
-                className={`rounded-full border px-3 py-1 text-[8px] font-mono uppercase tracking-wider ${
-                  difficultyColors[
-                    playbook.difficulty as keyof typeof difficultyColors
-                  ] || "border-white/10 text-white/40"
-                }`}
-              >
-                {playbook.difficulty || "Advanced"}
-              </span>
-
-              {playbook.tier === "premium" && (
-                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[8px] font-mono uppercase tracking-wider text-amber-400">
-                  Premium
-                </span>
-              )}
-            </div>
-
-            <h1 className="text-5xl font-light tracking-tight text-white md:text-6xl lg:text-7xl">
-              {playbook.title}
-            </h1>
-
-            <p className="mt-6 max-w-3xl text-xl leading-relaxed text-white/60">
-              {playbook.description}
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-6 border-t border-white/10 pt-6">
-              {playbook.estimatedTime && (
-                <div className="flex items-center gap-2 text-sm text-white/40">
-                  <Clock className="h-4 w-4" />
-                  <span>{playbook.estimatedTime}</span>
-                </div>
-              )}
-
-              {playbook.date && (
-                <div className="flex items-center gap-2 text-sm text-white/40">
-                  <CalendarDays className="h-4 w-4" />
-                  <span>{new Date(playbook.date).toLocaleDateString()}</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 text-sm text-white/40">
-                <BookOpen className="h-4 w-4" />
-                <span>Playbook</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-4xl px-6 py-16 lg:px-8">
-          {playbook.framework && (
-            <div className="mb-12 border-l-2 border-amber-500/50 py-2 pl-6">
-              <p className="mb-2 text-sm uppercase tracking-wider text-white/40">
-                Core Framework
-              </p>
-              <p className="text-xl text-white/80">{playbook.framework}</p>
-            </div>
-          )}
-
-          {playbook.phases?.length > 0 && (
-            <div className="mb-12">
-              <div className="mb-6 flex items-center gap-2">
-                <Layers className="h-5 w-5 text-amber-500" />
-                <h2 className="text-2xl font-light text-white">Execution Phases</h2>
-              </div>
-              <div className="grid gap-4">
-                {playbook.phases.map((phase, idx) => (
-                  <div key={idx} className="border border-white/10 p-5">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 font-mono text-sm text-amber-400">
-                        {idx + 1}
-                      </span>
-                      <span className="text-white/90">{phase}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {playbook.signals?.length > 0 && (
-            <div className="mb-12">
-              <div className="mb-6 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-amber-500" />
-                <h2 className="text-2xl font-light text-white">Detection Signals</h2>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {playbook.signals.map((signal, idx) => (
-                  <div key={idx} className="border-l-2 border-amber-500/30 py-2 pl-4">
-                    <span className="text-sm text-white/80">{signal}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {playbook.outputs?.length > 0 && (
-            <div className="mb-12">
-              <div className="mb-6 flex items-center gap-2">
-                <List className="h-5 w-5 text-amber-500" />
-                <h2 className="text-2xl font-light text-white">Outputs</h2>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {playbook.outputs.map((output, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    <span className="text-sm text-white/70">{output}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {playbook.prerequisites?.length > 0 && (
-            <div className="mb-12 border border-white/10 bg-white/5 p-6">
-              <h3 className="mb-4 text-sm font-mono uppercase tracking-wider text-amber-400">
-                Prerequisites
-              </h3>
-              <ul className="space-y-2">
-                {playbook.prerequisites.map((req, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center gap-2 text-sm text-white/60"
-                  >
-                    <span className="h-1 w-1 rounded-full bg-amber-500" />
-                    {req}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {playbook.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-t border-white/10 pt-6">
-              {playbook.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="border border-white/10 px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-white/40"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-12">
-            <SafeMDXRenderer code={renderCode} />
-          </div>
-        </div>
-      </main>
-    </Layout>
-  );
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: allPlaybooks.map((playbook) => ({
-      params: { slug: playbook.slug },
-    })),
-    fallback: false,
-  };
-};
-
-export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({
-  params,
-}) => {
-  const slug = safeString(params?.slug);
-  const playbook = allPlaybooks.find((p) => p.slug === slug);
-
-  if (!playbook) {
-    return { notFound: true };
+/** Difficulty → colour */
+function difficultyColor(d?: string): string {
+  switch ((d ?? "").toLowerCase()) {
+    case "executive":    return "rgba(168,85,247,0.80)";
+    case "advanced":     return `${GOLD}CC`;
+    case "intermediate": return "rgba(99,179,237,0.75)";
+    default:             return "rgba(134,239,172,0.65)";
   }
+}
+
+/** Playbook type → colour */
+function typeColor(t?: string): string {
+  switch ((t ?? "").toLowerCase()) {
+    case "diagnostic":   return `${GOLD}BB`;
+    case "execution":    return "rgba(134,239,172,0.70)";
+    case "correction":   return "rgba(252,165,165,0.70)";
+    case "leadership":   return "rgba(147,197,253,0.70)";
+    default:             return "rgba(255,255,255,0.45)";
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: allPlaybooks.map(p => ({ params: { slug: p.slug } })),
+  fallback: false,
+});
+
+export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params }) => {
+  const slug     = safeString(params?.slug);
+  const playbook = allPlaybooks.find(p => p.slug === slug);
+  if (!playbook) return { notFound: true };
+
+  const sorted = [...allPlaybooks].sort((a, b) => a.title.localeCompare(b.title));
+  const idx    = sorted.findIndex(p => p.slug === slug);
+  const prev   = idx > 0 ? sorted[idx - 1]!.slug : null;
+  const next   = idx < sorted.length - 1 ? sorted[idx + 1]!.slug : null;
 
   return {
     props: {
       playbook,
       renderCode: pickRenderablePlaybookCode(playbook),
+      adjacentSlugs: { prev, next },
     },
     revalidate: 3600,
   };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+import * as React from "react";
+
+const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjacentSlugs }) => {
+  const typeLabel = playbook.playbookType
+    ? playbook.playbookType.charAt(0).toUpperCase() + playbook.playbookType.slice(1)
+    : "Playbook";
+
+  const isArchitect = (playbook.tier ?? "").toLowerCase() === "architect";
+
+  return (
+    <Layout
+      title={`${playbook.title} | Abraham of London`}
+      description={playbook.description}
+      canonicalUrl={`/playbooks/${playbook.slug}`}
+      fullWidth
+      headerTransparent
+    >
+      <Head>
+        <meta name="robots" content="index,follow" />
+      </Head>
+
+      <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
+
+        {/* ── COVER ─────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+          {/* Atmosphere */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute" style={{
+              right: "-5%", top: "-15%",
+              width: "550px", height: "550px",
+              borderRadius: "50%",
+              background: `radial-gradient(ellipse at center, ${GOLD}10 0%, ${GOLD}04 30%, transparent 65%)`,
+              filter: "blur(130px)",
+            }} />
+            <div className="absolute inset-x-0 bottom-0 h-40" style={{
+              background: `linear-gradient(to top, ${BASE}, transparent)`,
+            }} />
+            <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
+          </div>
+
+          {/* Classification bar — architect tier only */}
+          {isArchitect && (
+            <div style={{
+              backgroundColor: `${GOLD}12`,
+              borderBottom: `1px solid ${GOLD}20`,
+              padding: "0.50rem 0",
+            }}>
+              <div className="mx-auto max-w-7xl px-6 lg:px-12">
+                <div className="flex items-center gap-2.5">
+                  <Lock style={{ width: "9px", height: "9px", color: `${GOLD}AA` }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.40em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}CC`,
+                  }}>
+                    Architect Tier — Restricted Circulation
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Top gold rule */}
+          <div className="absolute inset-x-0 top-0 h-px" style={{
+            background: `linear-gradient(to right, transparent, ${GOLD}25, transparent)`,
+          }} />
+
+          <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="pt-28 md:pt-36" />
+
+            {/* Breadcrumb */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.55 }}
+              className="flex items-center gap-2"
+            >
+              <Link href="/playbooks"
+                className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.30em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                }}
+              >
+                <ArrowLeft style={{ width: "11px", height: "11px" }} />
+                Playbooks
+              </Link>
+              <span style={{ color: "rgba(255,255,255,0.12)", fontSize: "10px" }}>/</span>
+              <span style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.24em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.20)",
+              }}>
+                {typeLabel}
+              </span>
+            </motion.div>
+
+            {/* Cover block */}
+            <div className="mt-8 grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+
+              {/* Left — title + meta */}
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.85, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {/* Type + difficulty badges */}
+                <div className="flex flex-wrap items-center gap-2.5 mb-6">
+                  <div className="flex items-center gap-2 px-3 py-1.5" style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                  }}>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: typeColor(playbook.playbookType),
+                    }}>
+                      {typeLabel}
+                    </span>
+                  </div>
+
+                  {playbook.difficulty && (
+                    <div className="flex items-center gap-2 px-3 py-1.5" style={{
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      backgroundColor: "rgba(255,255,255,0.015)",
+                    }}>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px",
+                        letterSpacing: "0.34em",
+                        textTransform: "uppercase",
+                        color: difficultyColor(playbook.difficulty),
+                      }}>
+                        {playbook.difficulty}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h1 style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(2.2rem, 5vw, 4.0rem)",
+                  lineHeight: 0.94,
+                  letterSpacing: "-0.035em",
+                  color: "rgba(255,255,255,0.94)",
+                }}>
+                  {playbook.title}
+                </h1>
+
+                {/* Description */}
+                {playbook.description && (
+                  <p style={{
+                    marginTop: "1.25rem",
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)",
+                    lineHeight: 1.65,
+                    color: "rgba(255,255,255,0.45)",
+                    maxWidth: "46ch",
+                    fontStyle: "italic",
+                  }}>
+                    {playbook.description}
+                  </p>
+                )}
+
+                {/* Framework */}
+                {(playbook as any).framework && (
+                  <div style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}50, transparent)` }} />
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.34em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}90`,
+                    }}>
+                      Framework
+                    </span>
+                    <span style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1.05rem",
+                      color: "rgba(255,255,255,0.65)",
+                    }}>
+                      {(playbook as any).framework}
+                    </span>
+                  </div>
+                )}
+
+                {/* Time */}
+                {playbook.estimatedTime && (
+                  <div style={{ marginTop: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Clock style={{ width: "11px", height: "11px", color: "rgba(255,255,255,0.20)" }} />
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.28)",
+                    }}>
+                      {playbook.estimatedTime}
+                    </span>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {playbook.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-5">
+                    {playbook.tags.slice(0, 6).map(tag => (
+                      <span key={tag} style={{
+                        padding: "3px 10px",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        backgroundColor: "rgba(255,255,255,0.015)",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "6.5px",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.26)",
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Right — structured metadata panel */}
+              <motion.div
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.75, delay: 0.14 }}
+                className="space-y-3"
+              >
+                {/* Phases */}
+                {playbook.phases?.length > 0 && (
+                  <div style={{
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    backgroundColor: LIFT,
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      padding: "0.85rem 1.25rem",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}>
+                      <div className="flex items-center gap-2">
+                        <Layers style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.38em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.25)",
+                        }}>
+                          Execution phases
+                        </span>
+                      </div>
+                    </div>
+                    <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                      {playbook.phases.map((phase, i) => (
+                        <div key={i} className="flex items-center gap-3" style={{ padding: "0.75rem 1.25rem" }}>
+                          <span style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "1.5rem",
+                            lineHeight: 1,
+                            color: `${GOLD}30`,
+                            minWidth: "28px",
+                          }}>
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <span style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.95rem",
+                            color: "rgba(255,255,255,0.70)",
+                          }}>
+                            {phase}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Signals */}
+                {playbook.signals?.length > 0 && (
+                  <div style={{
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                  }}>
+                    <div style={{ padding: "0.85rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle style={{ width: "11px", height: "11px", color: "rgba(252,165,165,0.60)" }} />
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.38em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.22)",
+                        }}>
+                          Detection signals
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ padding: "0.75rem 1.25rem" }}>
+                      {playbook.signals.map((signal, i) => (
+                        <div key={i} className="flex items-start gap-2.5 py-2" style={{ borderBottom: i < playbook.signals.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                          <div style={{
+                            flexShrink: 0,
+                            width: "4px",
+                            height: "4px",
+                            borderRadius: "50%",
+                            backgroundColor: "rgba(252,165,165,0.45)",
+                            marginTop: "6px",
+                          }} />
+                          <span style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.90rem",
+                            lineHeight: 1.55,
+                            color: "rgba(255,255,255,0.50)",
+                          }}>
+                            {signal}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Outputs */}
+                {playbook.outputs?.length > 0 && (
+                  <div style={{
+                    border: `1px solid ${GOLD}18`,
+                    backgroundColor: `${GOLD}06`,
+                  }}>
+                    <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${GOLD}12` }}>
+                      <div className="flex items-center gap-2">
+                        <CheckSquare style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.38em",
+                          textTransform: "uppercase",
+                          color: `${GOLD}90`,
+                        }}>
+                          Deliverable outputs
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ padding: "0.75rem 1.25rem" }}>
+                      {playbook.outputs.map((output, i) => (
+                        <div key={i} className="flex items-start gap-2.5 py-1.5">
+                          <div style={{
+                            flexShrink: 0,
+                            width: "18px",
+                            height: "1px",
+                            background: `${GOLD}55`,
+                            marginTop: "8px",
+                          }} />
+                          <span style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.90rem",
+                            lineHeight: 1.55,
+                            color: "rgba(255,255,255,0.62)",
+                          }}>
+                            {output}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Prerequisites */}
+                {playbook.prerequisites?.length > 0 && (
+                  <div style={{
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    backgroundColor: "rgba(255,255,255,0.01)",
+                    padding: "1rem 1.25rem",
+                  }}>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.36em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.20)",
+                      marginBottom: "0.75rem",
+                    }}>
+                      Prerequisites
+                    </div>
+                    {playbook.prerequisites.map((req, i) => (
+                      <div key={i} className="flex items-start gap-2 py-1.5">
+                        <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)", flexShrink: 0, marginTop: "3px" }} />
+                        <span style={{
+                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                          fontWeight: 300,
+                          fontSize: "0.88rem",
+                          lineHeight: 1.55,
+                          color: "rgba(255,255,255,0.40)",
+                        }}>
+                          {req}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            <div style={{ paddingBottom: "4rem" }} />
+          </div>
+        </section>
+
+        {/* ── DOCUMENT BODY ─────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE }}>
+          <div className="mx-auto px-6 lg:px-12" style={{
+            maxWidth: "800px",
+            paddingTop: "4rem",
+            paddingBottom: "5rem",
+          }}>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.70 }}
+            >
+              {/*
+                Playbook body styles — applied via a wrapper div.
+                The MDX content is the playbook. Frontmatter frames it above.
+                We do NOT repeat phases/signals/outputs here — they are in the cover.
+              */}
+              <div className="playbook-body">
+                <SafeMDXRenderer code={renderCode} />
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── ADJACENT NAVIGATION ───────────────────────────────────────── */}
+        {(adjacentSlugs.prev || adjacentSlugs.next) && (
+          <section style={{
+            backgroundColor: VOID,
+            borderTop: "1px solid rgba(255,255,255,0.04)",
+          }}>
+            <div className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {adjacentSlugs.prev ? (
+                  <Link href={`/playbooks/${adjacentSlugs.prev}`}
+                    className="group flex items-center gap-4 transition-opacity hover:opacity-75"
+                    style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
+                  >
+                    <ArrowLeft style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Previous</div>
+                      <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", color: "rgba(255,255,255,0.60)" }}>
+                        {allPlaybooks.find(p => p.slug === adjacentSlugs.prev)?.title ?? adjacentSlugs.prev}
+                      </div>
+                    </div>
+                  </Link>
+                ) : <div />}
+
+                {adjacentSlugs.next && (
+                  <Link href={`/playbooks/${adjacentSlugs.next}`}
+                    className="group flex items-center justify-end gap-4 text-right transition-opacity hover:opacity-75"
+                    style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
+                  >
+                    <div>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Next</div>
+                      <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", color: "rgba(255,255,255,0.60)" }}>
+                        {allPlaybooks.find(p => p.slug === adjacentSlugs.next)?.title ?? adjacentSlugs.next}
+                      </div>
+                    </div>
+                    <ArrowRight style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+                  </Link>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── ESCALATION CLOSE ──────────────────────────────────────────── */}
+        <section style={{
+          backgroundColor: VOID,
+          borderTop: "1px solid rgba(255,255,255,0.04)",
+        }}>
+          <div className="mx-auto max-w-5xl px-6 py-14 lg:px-12">
+            <div style={{
+              border: `1px solid ${GOLD}20`,
+              backgroundColor: `${GOLD}07`,
+              padding: "2rem 2.5rem",
+            }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.40em",
+                textTransform: "uppercase",
+                color: `${GOLD}90`,
+                marginBottom: "1rem",
+              }}>
+                If this playbook surfaces a real problem
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "1.05rem",
+                lineHeight: 1.72,
+                color: "rgba(255,255,255,0.45)",
+                fontStyle: "italic",
+                maxWidth: "48ch",
+                marginBottom: "1.5rem",
+              }}>
+                A playbook identifies the pattern. Diagnostics establish the signal.
+                The Strategy Room exists for situations where the diagnosis is complete
+                and the mandate is serious.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/diagnostics"
+                  className="inline-flex items-center gap-2 transition-all duration-300"
+                  style={{
+                    padding: "11px 22px",
+                    border: `1px solid ${GOLD}35`,
+                    backgroundColor: `${GOLD}0D`,
+                    color: `${GOLD}BB`,
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
+                >
+                  Enter diagnostics <ArrowRight style={{ width: "11px", height: "11px" }} />
+                </Link>
+                <Link href="/consulting/strategy-room"
+                  className="inline-flex items-center gap-2 transition-all duration-300"
+                  style={{
+                    padding: "11px 22px",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                    color: "rgba(255,255,255,0.40)",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.65)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.08)"; el.style.color = "rgba(255,255,255,0.40)"; }}
+                >
+                  Strategy Room
+                </Link>
+                <Link href="/playbooks"
+                  className="inline-flex items-center gap-2 transition-all duration-300"
+                  style={{
+                    padding: "11px 22px",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    color: "rgba(255,255,255,0.25)",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.50)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.25)"; }}
+                >
+                  All playbooks
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      {/*
+        ── PLAYBOOK BODY TYPOGRAPHY ────────────────────────────────────────
+        Global styles for the SafeMDXRenderer output — scoped to .playbook-body.
+        Applied here as a style tag to keep them co-located with the page.
+        All values match the institutional design system.
+      */}
+      <style>{`
+        .playbook-body {
+          font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+          font-weight: 300;
+          font-size: clamp(1rem, 1.2vw, 1.08rem);
+          line-height: 1.82;
+          color: rgba(255, 255, 255, 0.62);
+        }
+
+        /* Headings */
+        .playbook-body h1 {
+          margin-top: 3.5rem;
+          margin-bottom: 1.25rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+          font-weight: 300;
+          font-size: clamp(1.8rem, 3vw, 2.6rem);
+          line-height: 1.0;
+          letter-spacing: -0.028em;
+          color: rgba(255, 255, 255, 0.94);
+        }
+
+        .playbook-body h2 {
+          margin-top: 3rem;
+          margin-bottom: 1rem;
+          padding-bottom: 0.65rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+          font-weight: 300;
+          font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+          line-height: 1.05;
+          letter-spacing: -0.020em;
+          color: rgba(255, 255, 255, 0.88);
+        }
+
+        .playbook-body h3 {
+          margin-top: 2rem;
+          margin-bottom: 0.65rem;
+          font-family: 'JetBrains Mono', ui-monospace, monospace;
+          font-size: 0.70rem;
+          letter-spacing: 0.34em;
+          text-transform: uppercase;
+          color: rgba(201, 169, 110, 0.72);
+        }
+
+        .playbook-body h4 {
+          margin-top: 1.5rem;
+          margin-bottom: 0.5rem;
+          font-family: 'JetBrains Mono', ui-monospace, monospace;
+          font-size: 0.65rem;
+          letter-spacing: 0.30em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.30);
+        }
+
+        /* Paragraphs */
+        .playbook-body p {
+          margin: 1.25rem 0;
+          color: rgba(255, 255, 255, 0.62);
+        }
+
+        /* Blockquotes — key insight callouts */
+        .playbook-body blockquote {
+          margin: 2rem 0;
+          padding: 1.25rem 1.5rem;
+          border-left: 2px solid rgba(201, 169, 110, 0.55);
+          background: rgba(201, 169, 110, 0.06);
+          font-style: italic;
+          color: rgba(255, 255, 255, 0.72);
+        }
+
+        /* Lists */
+        .playbook-body ul {
+          margin: 1.5rem 0;
+          padding: 0;
+          list-style: none;
+        }
+
+        .playbook-body ul li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.85rem;
+          padding: 0.6rem 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          color: rgba(255, 255, 255, 0.60);
+        }
+
+        .playbook-body ul li::before {
+          content: '';
+          flex-shrink: 0;
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: rgba(201, 169, 110, 0.55);
+          margin-top: 0.58rem;
+        }
+
+        .playbook-body ol {
+          margin: 1.5rem 0;
+          padding: 0;
+          list-style: none;
+          counter-reset: ol-counter;
+        }
+
+        .playbook-body ol li {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          padding: 0.75rem 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          color: rgba(255, 255, 255, 0.60);
+          counter-increment: ol-counter;
+        }
+
+        .playbook-body ol li::before {
+          content: counter(ol-counter, decimal-leading-zero);
+          flex-shrink: 0;
+          font-family: 'Cormorant Garamond', Georgia, ui-serif, serif;
+          font-weight: 300;
+          font-size: 1.5rem;
+          line-height: 1;
+          color: rgba(201, 169, 110, 0.28);
+          min-width: 28px;
+        }
+
+        /* Strong / em */
+        .playbook-body strong {
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .playbook-body em {
+          color: rgba(255, 255, 255, 0.72);
+          font-style: italic;
+        }
+
+        /* HR */
+        .playbook-body hr {
+          margin: 2.5rem 0;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.07), transparent);
+          border: none;
+        }
+
+        /* Code */
+        .playbook-body code {
+          font-family: 'JetBrains Mono', ui-monospace, monospace;
+          font-size: 0.875em;
+          color: rgba(201, 169, 110, 0.85);
+          background: rgba(255, 255, 255, 0.05);
+          padding: 0.15rem 0.35rem;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+      `}</style>
+
+    </Layout>
+  );
 };
 
 export default PlaybookPage;

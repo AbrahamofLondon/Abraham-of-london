@@ -1,119 +1,257 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// components/playbooks/PlaybookCard.tsx
+// Design: Institutional Monumentalism — matches homepage Panel language
+// Sharp 2px borders. Cormorant Garamond titles. JetBrains Mono labels.
+// Displays real playbook data (type, difficulty, time) — no generic placeholder tags.
+
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Lock,
-  ShieldCheck,
-  Sparkles,
-  FileStack,
-} from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type PlaybookCardProps = {
+  title: string;
+  description?: string | null;
+  href: string;
+  playbookType?: string | null;
+  difficulty?: string | null;
+  estimatedTime?: string | null;
+  tier?: string | null;
+  phases?: string[];
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS (inline)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Difficulty → a single colour signal */
+function difficultyColor(d?: string | null): string {
+  switch ((d ?? "").toLowerCase()) {
+    case "executive":     return "rgba(168,85,247,0.75)";  // purple
+    case "advanced":      return `${GOLD}CC`;              // gold
+    case "intermediate":  return "rgba(99,179,237,0.75)";  // blue
+    default:              return "rgba(134,239,172,0.65)"; // green
+  }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CARD
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function PlaybookCard({
   title,
   description,
   href,
-  locked = true,
-}: {
-  title: string;
-  description: string;
-  href: string;
-  locked?: boolean;
-}) {
+  playbookType,
+  difficulty,
+  estimatedTime,
+  tier,
+  phases = [],
+}: PlaybookCardProps) {
+  const typeLabel = playbookType
+    ? playbookType.charAt(0).toUpperCase() + playbookType.slice(1)
+    : "Playbook";
+
+  const isArchitect = (tier ?? "").toLowerCase() === "architect";
+
   return (
-    <Link
-      href={href}
-      className={cn(
-        "group relative block overflow-hidden rounded-[28px]",
-        "border border-white/[0.08] bg-[linear-gradient(180deg,rgba(16,16,17,0.96)_0%,rgba(8,8,9,0.98)_100%)]",
-        "p-8 shadow-[0_24px_70px_rgba(0,0,0,0.34)] transition-all duration-300",
-        "hover:-translate-y-1 hover:border-[#C9A96A]/30 hover:shadow-[0_28px_90px_rgba(0,0,0,0.42)]",
-        "focus:outline-none focus:ring-2 focus:ring-[#C9A96A]/30",
-      )}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(201,169,106,0.12),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.04),transparent_28%)] opacity-90" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/40 to-transparent" />
+    <Link href={href} className="group block outline-none focus-visible:outline-none">
+      <article
+        className="relative overflow-hidden transition-all duration-400"
+        style={{
+          backgroundColor: "rgb(5 5 7)",
+          border: "1px solid rgba(255,255,255,0.062)",
+        }}
+        onMouseEnter={e => {
+          const el = e.currentTarget;
+          el.style.borderColor = `${GOLD}22`;
+          el.style.transform = "translateY(-2px)";
+          el.style.boxShadow = "0 24px 60px -20px rgba(0,0,0,0.65)";
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget;
+          el.style.borderColor = "rgba(255,255,255,0.062)";
+          el.style.transform = "translateY(0)";
+          el.style.boxShadow = "none";
+        }}
+      >
+        {/* Gold thread — appears on hover */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{ background: `linear-gradient(to right, transparent, ${GOLD}35, transparent)` }}
+        />
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-2xl border border-[#C9A96A]/20 bg-[#C9A96A]/10 p-2.5">
-              <FileStack className="h-4 w-4 text-[#E6C27A]" />
+        {/* Atmospheric radial */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{ background: `radial-gradient(ellipse 60% 40% at 20% 10%, ${GOLD}05, transparent)` }}
+        />
+
+        <div className="relative z-10 p-8 md:p-9">
+
+          {/* ── META ROW ─────────────────────────────────────────────────── */}
+          <div className="flex items-start justify-between gap-4">
+
+            {/* Left: type + difficulty */}
+            <div className="flex items-center gap-2.5">
+              <span style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.40em",
+                textTransform: "uppercase",
+                color: `${GOLD}80`,
+              }}>
+                {typeLabel}
+              </span>
+
+              {difficulty && (
+                <>
+                  <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.26em",
+                    textTransform: "uppercase",
+                    color: difficultyColor(difficulty),
+                  }}>
+                    {difficulty}
+                  </span>
+                </>
+              )}
             </div>
 
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#E6C27A]/80">
-                  Institutional Playbook
-                </span>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/45">
-                  Strategic asset
-                </span>
+            {/* Right: tier badge — only if architect */}
+            {isArchitect && (
+              <div style={{
+                padding: "3px 10px",
+                border: `1px solid ${GOLD}30`,
+                backgroundColor: `${GOLD}08`,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+                color: `${GOLD}AA`,
+                flexShrink: 0,
+              }}>
+                Architect
               </div>
-            </div>
+            )}
           </div>
 
-          <div
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em]",
-              locked
-                ? "border-amber-400/20 bg-amber-500/10 text-amber-200/80"
-                : "border-emerald-400/20 bg-emerald-500/10 text-emerald-200/80",
-            )}
+          {/* ── TITLE ────────────────────────────────────────────────────── */}
+          <h3
+            style={{
+              marginTop: "1.4rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(1.45rem, 2.0vw, 1.75rem)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.028em",
+              color: "rgba(255,255,255,0.90)",
+              transition: "color 350ms ease",
+            }}
+            className="group-hover:[color:rgba(255,255,255,1)]"
           >
-            {locked ? (
-              <>
-                <Lock className="h-3.5 w-3.5" />
-                Restricted
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Available
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-7">
-          <h3 className="max-w-[16ch] font-serif text-3xl leading-[1.02] tracking-tight text-white transition-colors duration-300 group-hover:text-white">
             {title}
           </h3>
 
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/58">
-            {description}
-          </p>
-        </div>
+          {/* ── DESCRIPTION ──────────────────────────────────────────────── */}
+          {description && (
+            <p style={{
+              marginTop: "0.85rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(0.90rem, 1.1vw, 0.98rem)",
+              lineHeight: 1.68,
+              color: "rgba(255,255,255,0.38)",
+              maxWidth: "34ch",
+              transition: "color 350ms ease",
+            }}
+            className="group-hover:[color:rgba(255,255,255,0.50)]"
+            >
+              {description}
+            </p>
+          )}
 
-        <div className="mt-7 flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/52">
-            Guided structure
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/52">
-            Execution discipline
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/52">
-            Decision clarity
-          </span>
-        </div>
+          {/* ── PHASE STRIP — top 3 phases at near-invisibility ─────────── */}
+          {phases.length > 0 && (
+            <div style={{ marginTop: "1.25rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {phases.slice(0, 3).map((phase, i) => (
+                <span key={i} style={{
+                  padding: "3px 10px",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  backgroundColor: "rgba(255,255,255,0.012)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.22)",
+                }}>
+                  {phase}
+                </span>
+              ))}
+            </div>
+          )}
 
-        <div className="mt-8 flex items-center justify-between gap-4 border-t border-white/[0.07] pt-6">
-          <div className="inline-flex items-center gap-2 text-[11px] text-white/42">
-            <Sparkles className="h-3.5 w-3.5 text-[#C9A96A]/75" />
-            <span>Built for serious operators</span>
+          {/* ── FOOTER ───────────────────────────────────────────────────── */}
+          <div style={{
+            marginTop: "1.75rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            paddingTop: "1.25rem",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+          }}>
+            {/* Estimated time */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {estimatedTime && (
+                <>
+                  <Clock style={{ width: "11px", height: "11px", color: "rgba(255,255,255,0.20)" }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px",
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.22)",
+                  }}>
+                    {estimatedTime}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* CTA */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: `${GOLD}AA`,
+              transition: "gap 300ms ease, color 300ms ease",
+            }}
+            className="group-hover:[gap:0.75rem] group-hover:[color:#C9A96E]"
+            >
+              Open playbook
+              <ArrowRight style={{ width: "11px", height: "11px" }} />
+            </div>
           </div>
-
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C9A96A]/25 bg-[#C9A96A]/[0.05] px-4 py-2 text-[10px] font-mono uppercase tracking-[0.2em] text-[#E6C27A] transition-all duration-300 group-hover:border-[#C9A96A]/45 group-hover:bg-[#C9A96A]/[0.10]">
-            {locked ? "Request access" : "Open playbook"}
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-          </div>
         </div>
-      </div>
+      </article>
     </Link>
   );
 }

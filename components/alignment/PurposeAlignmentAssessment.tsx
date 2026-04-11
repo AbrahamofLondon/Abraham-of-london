@@ -1,1158 +1,478 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, ArrowLeft, CheckCircle2, Shield, Target, Activity, Heart, Landmark, ChevronRight } from "lucide-react";
 import {
-  ArrowRight,
-  AlertTriangle,
-  CheckCircle2,
-  Compass,
-  Crown,
-  Eye,
-  Gavel,
-  LayoutGrid,
-  LineChart,
-  Loader2,
-  Lock,
-  Scale,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  Building2,
-  TimerReset,
-  Activity,
-} from "lucide-react";
+  PURPOSE_ALIGNMENT_QUESTIONS,
+  ALIGNMENT_DOMAIN_ORDER,
+  ALIGNMENT_DOMAIN_LABELS,
+} from "@/lib/alignment/checklist";
+import { scorePurposeProfile } from "@/lib/alignment/scoring";
+import type {
+  AlignmentDomain,
+  DualAxisAnswer,
+  PurposeProfileResult,
+  DomainProfile,
+  CoherenceBand,
+} from "@/lib/alignment/types";
 
-import {
-  evaluateConstitutionalRoute,
-  type ConstitutionalDecision,
-  type AuthorityType,
-  type OrgPosture,
-  type ReadinessTier,
-} from "@/lib/constitution/rules";
+/* ---- Constants ---- */
 
-type LikertValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+const STAGE_DOMAINS: AlignmentDomain[][] = [
+  ["identity", "decision"],
+  ["environment", "behaviour"],
+  ["emotional_order", "legacy"],
+];
 
-type AnswerValue = {
-  resonance: LikertValue;
-  certainty: LikertValue;
+const STAGE_LABELS = [
+  "Identity & Decision Integrity",
+  "Environment & Behaviour",
+  "Internal Order & Legacy",
+];
+
+const DOMAIN_ICONS: Record<AlignmentDomain, React.ComponentType<{ className?: string }>> = {
+  identity: Shield,
+  decision: Target,
+  environment: Activity,
+  behaviour: CheckCircle2,
+  emotional_order: Heart,
+  legacy: Landmark,
 };
 
-type EvaluationPhase = "idle" | "reading" | "parsing" | "weighing" | "complete";
-
-type DiagnosticQuestion = {
-  id: string;
-  text: string;
-  domain:
-    | "coherence"
-    | "authority"
-    | "environment"
-    | "execution"
-    | "trust"
-    | "friction"
-    | "stakes"
-    | "pattern"
-    | "pressure";
-  reverse?: boolean;
+const RESONANCE_LABELS: Record<number, string> = {
+  0: "Completely untrue", 1: "Almost entirely untrue", 2: "Mostly untrue",
+  3: "Somewhat untrue", 4: "Slightly untrue", 5: "Neutral",
+  6: "Slightly true", 7: "Somewhat true", 8: "Mostly true",
+  9: "Almost entirely true", 10: "Completely true",
 };
 
-type MicroReport = {
-  authorityScore: number;
-  coherenceScore: number;
-  pressureScore: number;
-  frictionScore: number;
-  trustScore: number;
-  seriousnessScore: number;
-  governanceDiscipline: number;
-  interventionReadiness: number;
-  narrativeCoherence: number;
-  failureModeCount: number;
-  failureModeSeverity: number;
-  authorityType: AuthorityType;
-  posture: OrgPosture;
-  readinessTier: ReadinessTier;
-  mandateFit: boolean;
-  summary: string;
-  keyFindings: string[];
+const CERTAINTY_LABELS: Record<number, string> = {
+  0: "No confidence", 1: "Very low", 2: "Low", 3: "Some doubt",
+  4: "Uncertain", 5: "Moderate", 6: "Fairly confident",
+  7: "Confident", 8: "High confidence", 9: "Very high", 10: "Absolute certainty",
 };
 
-const STORAGE_KEY = "aol-constitutional-diagnostic-v3";
-const AUTO_SAVE_DELAY_MS = 700;
-
-const RESONANCE_LABELS = [
-  "Completely false",
-  "Severely false",
-  "Mostly false",
-  "Meaningfully false",
-  "Slightly false",
-  "Uncertain / mixed",
-  "Slightly true",
-  "Solidly true",
-  "Strongly true",
-  "Highly true",
-  "Completely true",
-] as const;
-
-const CERTAINTY_LABELS = [
-  "No certainty",
-  "Very low",
-  "Low",
-  "Limited",
-  "Some",
-  "Moderate",
-  "Reasonable",
-  "Strong",
-  "High",
-  "Very high",
-  "Absolute",
-] as const;
-
-const DIAGNOSTIC_QUESTIONS: readonly DiagnosticQuestion[] = [
-  {
-    id: "q1",
-    text: "The stated strategy and actual resource allocation are meaningfully aligned.",
-    domain: "coherence",
-  },
-  {
-    id: "q2",
-    text: "Decision authority is clear and exercised without chronic diffusion or bottleneck.",
-    domain: "authority",
-  },
-  {
-    id: "q3",
-    text: "The operating environment has changed faster than the organisation's ability to adapt.",
-    domain: "environment",
-    reverse: true,
-  },
-  {
-    id: "q4",
-    text: "There is a pattern of strategic drift — direction stated but not executed with discipline.",
-    domain: "execution",
-    reverse: true,
-  },
-  {
-    id: "q5",
-    text: "Trust between leadership and execution layers is materially intact.",
-    domain: "trust",
-  },
-  {
-    id: "q6",
-    text: "The organisation carries visible friction: coordination failures, duplicated work, or unresolved conflict.",
-    domain: "friction",
-    reverse: true,
-  },
-  {
-    id: "q7",
-    text: "There is a clear decision-maker who can authorise strategic intervention.",
-    domain: "authority",
-  },
-  {
-    id: "q8",
-    text: "The cost of getting this wrong would be material — financial, reputational, or structural.",
-    domain: "stakes",
-  },
-  {
-    id: "q9",
-    text: "Past attempts to correct the issue have failed due to structural, not motivational, causes.",
-    domain: "pattern",
-    reverse: true,
-  },
-  {
-    id: "q10",
-    text: "External market or stakeholder pressure is actively forcing attention to this issue.",
-    domain: "pressure",
-  },
-] as const;
+const BAND_CONFIG: Record<CoherenceBand, { color: string; border: string; bg: string }> = {
+  SOVEREIGN: { color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/10" },
+  ALIGNED: { color: "text-amber-400", border: "border-amber-500/30", bg: "bg-amber-500/10" },
+  DRIFTING: { color: "text-orange-400", border: "border-orange-500/30", bg: "bg-orange-500/10" },
+  FRAGMENTED: { color: "text-red-400", border: "border-red-500/30", bg: "bg-red-500/10" },
+};
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-function clamp(value: number, min: number, max: number) {
-  if (!Number.isFinite(value)) return min;
-  return Math.min(Math.max(value, min), max);
-}
-
-function toLikert(value: number): LikertValue {
-  return clamp(Math.round(value), 0, 10) as LikertValue;
-}
-
-function average(values: number[], fallback = 5) {
-  if (!values.length) return fallback;
-  return values.reduce((a, b) => a + b, 0) / values.length;
-}
-
-function percentFromLikert(value: number): number {
-  return clamp(Math.round(value * 10), 0, 100);
-}
-
-function certaintyWeight(certainty: LikertValue): number {
-  return clamp(0.45 + certainty / 18, 0.45, 1);
-}
-
-function scoreQuestion(question: DiagnosticQuestion, answer: AnswerValue): number {
-  const base = question.reverse ? 10 - answer.resonance : answer.resonance;
-  return base * certaintyWeight(answer.certainty);
-}
-
-function getDomainScores(answers: Record<string, AnswerValue>) {
-  const result: Record<string, number[]> = {};
-
-  for (const question of DIAGNOSTIC_QUESTIONS) {
-    const answer = answers[question.id];
-    if (!answer) continue;
-    const scored = scoreQuestion(question, answer);
-    if (!result[question.domain]) result[question.domain] = [];
-    result[question.domain].push(scored);
-  }
-
-  return result;
-}
-
-function classifyAuthorityType(authorityScore: number): AuthorityType {
-  if (authorityScore >= 70) return "DIRECT";
-  if (authorityScore >= 45) return "PROXY";
-  return "UNCLEAR";
-}
-
-function classifyPosture(input: {
-  coherenceScore: number;
-  frictionScore: number;
-  trustScore: number;
-  governanceDiscipline: number;
-}): OrgPosture {
-  const disorderSignals = [
-    input.coherenceScore < 35,
-    input.frictionScore >= 70,
-    input.trustScore < 35,
-    input.governanceDiscipline < 35,
-  ].filter(Boolean).length;
-
-  if (disorderSignals >= 3) return "DISORDERED";
-  if (input.coherenceScore < 45 || input.frictionScore >= 60) return "MISALIGNED";
-  if (input.coherenceScore < 65 || input.governanceDiscipline < 60) return "DRIFTING";
-  return "ORDERED";
-}
-
-function classifyReadinessTier(input: {
-  authorityScore: number;
-  coherenceScore: number;
-  trustScore: number;
-  interventionReadiness: number;
-  governanceDiscipline: number;
-}): ReadinessTier {
-  const composite = average([
-    input.authorityScore / 10,
-    input.coherenceScore / 10,
-    input.trustScore / 10,
-    input.interventionReadiness / 10,
-    input.governanceDiscipline / 10,
-  ]);
-
-  const pct = percentFromLikert(composite);
-
-  if (pct < 35) return "FRAGILE";
-  if (pct < 50) return "EMERGING";
-  if (pct < 68) return "STABILIZING";
-  if (pct < 85) return "EXECUTION_READY";
-  return "SOVEREIGN";
-}
-
-function buildMicroReport(
-  answers: Record<string, AnswerValue>,
-): MicroReport {
-  const byDomain = getDomainScores(answers);
-
-  const authorityScore = percentFromLikert(average(byDomain.authority || []));
-  const coherenceScore = percentFromLikert(average(byDomain.coherence || []));
-  const trustScore = percentFromLikert(average(byDomain.trust || []));
-  const pressureScore = percentFromLikert(
-    average([
-      ...(byDomain.pressure || []),
-      ...(byDomain.stakes || []),
-      ...(byDomain.environment || []),
-    ]),
-  );
-  const frictionScore = percentFromLikert(
-    average([
-      ...(byDomain.friction || []),
-      ...(byDomain.execution || []),
-      ...(byDomain.pattern || []),
-    ]),
-  );
-
-  const seriousnessScore = clamp(
-    Math.round(average([pressureScore, frictionScore, authorityScore]) * 0.9),
-    0,
-    100,
-  );
-
-  const governanceDiscipline = clamp(
-    Math.round(average([coherenceScore, trustScore, authorityScore])),
-    0,
-    100,
-  );
-
-  const narrativeCoherence = clamp(
-    Math.round(average([coherenceScore, trustScore, authorityScore])),
-    0,
-    100,
-  );
-
-  const interventionReadiness = clamp(
-    Math.round(average([authorityScore, coherenceScore, trustScore, 100 - frictionScore])),
-    0,
-    100,
-  );
-
-  let failureModeCount = 0;
-  if (coherenceScore < 50) failureModeCount += 1;
-  if (authorityScore < 50) failureModeCount += 1;
-  if (trustScore < 50) failureModeCount += 1;
-  if (frictionScore >= 60) failureModeCount += 1;
-  if (pressureScore >= 70) failureModeCount += 1;
-
-  const failureModeSeverity = clamp(
-    Math.round(
-      average([
-        (100 - coherenceScore) / 10,
-        (100 - authorityScore) / 10,
-        frictionScore / 10,
-        pressureScore / 12,
-      ]),
-    ),
-    0,
-    10,
-  );
-
-  const authorityType = classifyAuthorityType(authorityScore);
-  const posture = classifyPosture({
-    coherenceScore,
-    frictionScore,
-    trustScore,
-    governanceDiscipline,
-  });
-
-  const readinessTier = classifyReadinessTier({
-    authorityScore,
-    coherenceScore,
-    trustScore,
-    interventionReadiness,
-    governanceDiscipline,
-  });
-
-  const mandateFit = seriousnessScore >= 30;
-
-  const findings: string[] = [];
-
-  if (authorityScore < 45) findings.push("Authority is weak or insufficiently explicit.");
-  else if (authorityScore < 70) findings.push("Authority exists, but escalation boundaries are still imperfect.");
-  else findings.push("Authority appears sufficiently explicit for serious intervention.");
-
-  if (coherenceScore < 45) findings.push("Strategic coherence is materially compromised.");
-  else if (coherenceScore < 70) findings.push("Coherence exists, but execution and direction are not fully locked.");
-  else findings.push("Strategic coherence is comparatively strong.");
-
-  if (frictionScore >= 70) findings.push("Structural friction is high and likely compounding execution drag.");
-  else if (frictionScore >= 50) findings.push("Friction is present and meaningful.");
-  else findings.push("Friction is present but currently governable.");
-
-  if (pressureScore >= 70) findings.push("The situation carries material consequence and external pressure.");
-  else if (pressureScore >= 50) findings.push("Pressure is real, but not yet fully acute.");
-  else findings.push("Pressure exists, but the signal is not yet severe.");
-
-  const summary =
-    posture === "DISORDERED"
-      ? "The system reads this as a disorder-risk case: structure is compromised, readiness is weak, and escalation must be governed carefully."
-      : posture === "MISALIGNED"
-        ? "The system reads this as a misalignment case: the signal is real, but coherence, authority, or execution order remain materially imperfect."
-        : posture === "DRIFTING"
-          ? "The system reads this as a drift case: the problem is meaningful, but foundational correction is still more urgent than full escalation."
-          : "The system reads this as relatively ordered: the issue may justify sharper escalation if consequence and authority remain strong.";
-
-  return {
-    authorityScore,
-    coherenceScore,
-    pressureScore,
-    frictionScore,
-    trustScore,
-    seriousnessScore,
-    governanceDiscipline,
-    interventionReadiness,
-    narrativeCoherence,
-    failureModeCount,
-    failureModeSeverity,
-    authorityType,
-    posture,
-    readinessTier,
-    mandateFit,
-    summary,
-    keyFindings: findings,
-  };
-}
-
-function computeConstitutionalInput(report: MicroReport) {
-  return {
-    clarityScore: report.coherenceScore,
-    authorityType: report.authorityType,
-    readinessTier: report.readinessTier,
-    posture: report.posture,
-    failureModeCount: report.failureModeCount,
-    failureModeSeverity: report.failureModeSeverity,
-    narrativeCoherence: report.narrativeCoherence,
-    interventionReadiness: report.interventionReadiness,
-    seriousnessScore: report.seriousnessScore,
-    governanceDiscipline: report.governanceDiscipline,
-    trustCondition: report.trustScore,
-    mandateFit: report.mandateFit,
-    operatorOverrideRequested: false,
-    operatorKey: "constitutional_diagnostic_public",
-  };
-}
-
-function getRouteFromDecision(
-  decision: ConstitutionalDecision | null,
-  report: MicroReport | null,
-) {
-  if (!decision || !report) {
-    return {
-      route: "PENDING" as const,
-      title: "Assessment in progress",
-      description: "The chamber is still weighing the signal.",
-      href: "#",
-      cta: "Continue assessment",
-      tone: "neutral" as const,
-    };
-  }
-
-  switch (decision.route) {
-    case "STRATEGY":
-      return {
-        route: "STRATEGY_ROOM" as const,
-        title: "Strategy Room — escalation justified",
-        description:
-          "This signal shows sufficient authority, consequence, and readiness to justify private strategic escalation.",
-        href: "/consulting/strategy-room",
-        cta: "Enter Strategy Room",
-        tone: "emerald" as const,
-      };
-
-    case "DIAGNOSTIC":
-      return {
-        route: "EXECUTIVE_REPORTING" as const,
-        title: "Executive Reporting — the right next layer",
-        description:
-          "The signal is real, but disciplined interpretation should come before premium intervention. This is exactly where Executive Reporting earns its keep.",
-        href: "/diagnostics/executive-reporting",
-        cta: "Review Executive Reporting",
-        tone: "amber" as const,
-      };
-
-    case "REJECT":
-    default:
-      return {
-        route: "DIAGNOSTIC" as const,
-        title: "Foundational diagnosis required",
-        description:
-          "The current signal is not yet strong enough for escalation. The right move is clearer diagnostic work, not importance theatre.",
-        href: "/diagnostics",
-        cta: "Open diagnostics",
-        tone: "neutral" as const,
-      };
-  }
-}
-
-function Pill({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <span className={cn("rounded-full border px-3 py-1 text-xs font-medium", className)}>
-      {children}
-    </span>
-  );
-}
-
-function PhaseStatus({ phase }: { phase: EvaluationPhase }) {
-  const label =
-    phase === "idle"
-      ? "Awaiting sufficient signal"
-      : phase === "reading"
-        ? "Reading structural pattern"
-        : phase === "parsing"
-          ? "Parsing authority, coherence, and strain"
-          : phase === "weighing"
-            ? "Weighing constitutional thresholds"
-            : "Assessment complete";
-
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        {phase === "complete" ? (
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-        ) : phase === "idle" ? (
-          <Eye className="h-4 w-4 text-white/35" />
-        ) : (
-          <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
-        )}
-        <span className="text-xs font-mono uppercase tracking-[0.16em] text-white/42">
-          {label}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function SignalTile({
-  title,
-  value,
-  tone = "neutral",
-}: {
-  title: string;
-  value: string;
-  tone?: "neutral" | "amber" | "emerald";
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border p-4",
-        tone === "emerald"
-          ? "border-emerald-500/20 bg-emerald-500/10"
-          : tone === "amber"
-            ? "border-amber-500/20 bg-amber-500/10"
-            : "border-white/10 bg-white/5",
-      )}
-    >
-      <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">
-        {title}
-      </div>
-      <div className="mt-2 font-serif text-2xl text-white">{value}</div>
-    </div>
-  );
-}
+/* ---- Sub-components ---- */
 
 function RatingRail({
   label,
   value,
   onChange,
-  valueLabel,
   accent,
 }: {
   label: string;
-  value: LikertValue;
-  onChange: (value: LikertValue) => void;
-  valueLabel: string;
+  value: number;
+  onChange: (v: number) => void;
   accent: "amber" | "emerald";
 }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-4">
-        <span className="text-xs font-mono uppercase tracking-[0.16em] text-white/40">
-          {label}
-        </span>
-        <span
-          className={cn(
-            "text-xs font-medium",
-            accent === "amber" ? "text-amber-300" : "text-emerald-300",
-          )}
-        >
-          {valueLabel}
-        </span>
-      </div>
+  const accentClass = accent === "amber" ? "accent-amber-500" : "accent-emerald-500";
+  const labels = accent === "amber" ? RESONANCE_LABELS : CERTAINTY_LABELS;
 
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/40">{label}</span>
+        <span className="font-mono text-[10px] text-white/60">{value}/10 — {labels[value] ?? ""}</span>
+      </div>
       <input
         type="range"
         min={0}
         max={10}
         step={1}
         value={value}
-        onChange={(e) => onChange(toLikert(Number(e.target.value)))}
-        className={cn(
-          "h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10",
-          accent === "amber" ? "accent-amber-500" : "accent-emerald-400",
-        )}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className={cn("w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/10", accentClass)}
       />
     </div>
   );
 }
 
-export default function ConstitutionalDiagnostic() {
-  const [answers, setAnswers] = React.useState<Record<string, AnswerValue>>({});
-  const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
-  const [phase, setPhase] = React.useState<EvaluationPhase>("idle");
-  const [decision, setDecision] = React.useState<ConstitutionalDecision | null>(null);
-  const [report, setReport] = React.useState<MicroReport | null>(null);
-  const [savingDraft, setSavingDraft] = React.useState(false);
-  const [showResults, setShowResults] = React.useState(false);
+function LiveDomainBar({ profile, delay }: { profile: DomainProfile; delay: number }) {
+  const Icon = DOMAIN_ICONS[profile.domain];
+  const width = Math.max(2, profile.percent);
 
-  const answeredCount = Object.keys(answers).length;
-  const progress = Math.round((answeredCount / DIAGNOSTIC_QUESTIONS.length) * 100);
-  const currentQuestion = DIAGNOSTIC_QUESTIONS[currentQuestionIndex];
-  const currentAnswer =
-    answers[currentQuestion.id] ?? { resonance: 5 as LikertValue, certainty: 5 as LikertValue };
-  const isComplete = answeredCount === DIAGNOSTIC_QUESTIONS.length;
-
-  React.useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (parsed?.answers && typeof parsed.answers === "object") {
-        setAnswers(parsed.answers);
-      }
-      if (typeof parsed?.currentQuestionIndex === "number") {
-        setCurrentQuestionIndex(
-          clamp(parsed.currentQuestionIndex, 0, DIAGNOSTIC_QUESTIONS.length - 1),
-        );
-      }
-    } catch {
-      // ignore bad local state
-    }
-  }, []);
-
-  React.useEffect(() => {
-    if (!answeredCount) return;
-
-    const timeout = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({ answers, currentQuestionIndex }),
-        );
-        setSavingDraft(true);
-        window.setTimeout(() => setSavingDraft(false), 450);
-      } catch {
-        // ignore local save errors
-      }
-    }, AUTO_SAVE_DELAY_MS);
-
-    return () => window.clearTimeout(timeout);
-  }, [answers, currentQuestionIndex, answeredCount]);
-
-  React.useEffect(() => {
-    if (answeredCount < 4) {
-      setPhase("idle");
-      setDecision(null);
-      setReport(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    const run = async () => {
-      setPhase("reading");
-      await new Promise((r) => setTimeout(r, 260));
-      if (cancelled) return;
-
-      setPhase("parsing");
-      await new Promise((r) => setTimeout(r, 360));
-      if (cancelled) return;
-
-      setPhase("weighing");
-      await new Promise((r) => setTimeout(r, 460));
-      if (cancelled) return;
-
-      const nextReport = buildMicroReport(answers);
-      const input = computeConstitutionalInput(nextReport);
-      const nextDecision = evaluateConstitutionalRoute(input);
-
-      if (cancelled) return;
-
-      setReport(nextReport);
-      setDecision(nextDecision);
-      setPhase("complete");
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [answers, answeredCount]);
-
-  const routeInfo = getRouteFromDecision(decision, report);
-
-  const setResonance = (value: LikertValue) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: {
-        ...currentAnswer,
-        resonance: value,
-      },
-    }));
-  };
-
-  const setCertainty = (value: LikertValue) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: {
-        ...currentAnswer,
-        certainty: value,
-      },
-    }));
-  };
-
-  const goNext = () => {
-    if (currentQuestionIndex < DIAGNOSTIC_QUESTIONS.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-      return;
-    }
-    if (isComplete) setShowResults(true);
-  };
-
-  const goPrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-    }
-  };
-
-  const clearAll = () => {
-    const ok = window.confirm("Clear all answers and restart the constitutional intake?");
-    if (!ok) return;
-
-    window.localStorage.removeItem(STORAGE_KEY);
-    setAnswers({});
-    setDecision(null);
-    setReport(null);
-    setPhase("idle");
-    setCurrentQuestionIndex(0);
-    setShowResults(false);
-  };
-
-  if (showResults && isComplete && report && decision) {
-    return (
-      <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
-                Constitutional verdict
-              </span>
-            </div>
-
-            <h1 className="mt-6 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
-              The chamber has read your signal
-            </h1>
-
-            <p className="mx-auto mt-4 max-w-3xl text-white/52">
-              This is a governed micro-assessment: a real first reading of authority,
-              coherence, strain, readiness, and escalation fitness.
-            </p>
-          </div>
-
-          <div
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay }}
+      className="flex items-center gap-3"
+    >
+      <Icon className="h-3.5 w-3.5 text-white/30 shrink-0" />
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-1">
+          <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/45">{profile.label}</span>
+          <span className="font-mono text-[9px] text-white/55">{profile.percent}%</span>
+        </div>
+        <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
+          <motion.div
             className={cn(
-              "rounded-3xl border-2 p-8",
-              routeInfo.tone === "emerald"
-                ? "border-emerald-500/30 bg-emerald-500/10"
-                : routeInfo.tone === "amber"
-                  ? "border-amber-500/30 bg-amber-500/10"
-                  : "border-white/10 bg-white/5",
+              "h-full rounded-full",
+              profile.percent >= 70 ? "bg-emerald-500/70" : profile.percent >= 40 ? "bg-amber-500/70" : "bg-red-500/60",
             )}
-          >
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-3xl">
-                <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-                  {routeInfo.title}
-                </h2>
-                <p className="mt-3 text-white/62">{routeInfo.description}</p>
-                <p className="mt-5 text-sm leading-7 text-white/70">{report.summary}</p>
+            initial={{ width: 0 }}
+            animate={{ width: `${width}%` }}
+            transition={{ duration: 0.8, delay: delay + 0.1, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Pill className="border-white/20 bg-white/5 text-white/70">
-                    Posture: {report.posture}
-                  </Pill>
-                  <Pill className="border-white/20 bg-white/5 text-white/70">
-                    Readiness: {report.readinessTier}
-                  </Pill>
-                  <Pill className="border-white/20 bg-white/5 text-white/70">
-                    Authority: {report.authorityType}
-                  </Pill>
-                  <Pill
+/* ---- Main Component ---- */
+
+type Props = {
+  onScored?: (result: PurposeProfileResult, answers: Record<string, DualAxisAnswer>) => void;
+};
+
+export default function PurposeAlignmentAssessment({ onScored }: Props) {
+  const [stage, setStage] = React.useState(0);
+  const [answers, setAnswers] = React.useState<Record<string, DualAxisAnswer>>({});
+  const [result, setResult] = React.useState<PurposeProfileResult | null>(null);
+  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [direction, setDirection] = React.useState(1);
+
+  const isResultStage = stage === STAGE_DOMAINS.length;
+  const currentDomains = isResultStage ? [] : STAGE_DOMAINS[stage]!;
+  const currentQuestions = PURPOSE_ALIGNMENT_QUESTIONS.filter((q) =>
+    currentDomains.includes(q.domain),
+  );
+
+  const allAnswered = currentQuestions.every((q) => answers[q.id] !== undefined);
+  const totalAnswered = Object.keys(answers).length;
+  const totalQuestions = PURPOSE_ALIGNMENT_QUESTIONS.length;
+  const progressPercent = Math.round((totalAnswered / totalQuestions) * 100);
+
+  // Live profile computation
+  const liveProfile = React.useMemo(() => {
+    if (totalAnswered === 0) return null;
+    return scorePurposeProfile({ answers });
+  }, [answers, totalAnswered]);
+
+  const updateAnswer = (questionId: string, field: "resonance" | "certainty", value: number) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: {
+        resonance: prev[questionId]?.resonance ?? 5,
+        certainty: prev[questionId]?.certainty ?? 5,
+        [field]: value,
+      },
+    }));
+  };
+
+  const advance = () => {
+    if (stage < STAGE_DOMAINS.length - 1) {
+      setDirection(1);
+      setStage((s) => s + 1);
+    } else if (stage === STAGE_DOMAINS.length - 1) {
+      handleScore();
+    }
+  };
+
+  const retreat = () => {
+    if (stage > 0) {
+      setDirection(-1);
+      setStage((s) => s - 1);
+    }
+  };
+
+  const handleScore = async () => {
+    setStatus("loading");
+    const scored = scorePurposeProfile({ answers });
+    setResult(scored);
+    setDirection(1);
+    setStage(STAGE_DOMAINS.length);
+
+    // Persist to session for downstream diagnostics
+    try {
+      sessionStorage.setItem("purpose-alignment-result", JSON.stringify(scored));
+      sessionStorage.setItem("purpose-alignment-answers", JSON.stringify(answers));
+    } catch { /* SSR safety */ }
+
+    onScored?.(scored, answers);
+
+    try {
+      await fetch("/api/purpose-alignment/assessments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, result: scored }),
+      });
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div className="relative min-h-[600px]">
+      {/* Progress bar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">
+            Purpose Alignment Assessment
+          </span>
+          <span className="font-mono text-[9px] text-white/40">
+            {totalAnswered}/{totalQuestions} answered — {progressPercent}%
+          </span>
+        </div>
+        <div className="h-px w-full bg-white/[0.06] overflow-hidden">
+          <motion.div
+            className="h-full bg-amber-500/50"
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.4 }}
+          />
+        </div>
+        {/* Stage indicators */}
+        <div className="flex gap-2 mt-3">
+          {STAGE_LABELS.map((label, i) => (
+            <button
+              key={i}
+              onClick={() => { setDirection(i > stage ? 1 : -1); setStage(i); }}
+              className={cn(
+                "flex-1 py-2 rounded-lg border text-center font-mono text-[7px] uppercase tracking-[0.2em] transition-all duration-300",
+                i === stage && !isResultStage
+                  ? "border-amber-500/30 bg-amber-500/[0.07] text-amber-300/80"
+                  : i < stage || isResultStage
+                    ? "border-white/[0.08] bg-white/[0.02] text-white/40"
+                    : "border-white/[0.05] text-white/20",
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+        {/* Main panel */}
+        <div className="min-h-[500px]">
+          <AnimatePresence mode="wait" custom={direction}>
+            {!isResultStage ? (
+              <motion.div
+                key={`stage-${stage}`}
+                custom={direction}
+                initial={{ opacity: 0, x: direction * 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction * -30 }}
+                transition={{ duration: 0.35 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h2 className="font-serif text-2xl text-white/90">
+                    {STAGE_LABELS[stage]}
+                  </h2>
+                  <p className="mt-2 text-sm text-white/40">
+                    Rate each statement on two axes: how true it is for you right now, and how confident you are in that assessment.
+                  </p>
+                </div>
+
+                {currentQuestions.map((q, qi) => {
+                  const answer = answers[q.id];
+                  const DomainIcon = DOMAIN_ICONS[q.domain];
+
+                  return (
+                    <motion.div
+                      key={q.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: qi * 0.06 }}
+                      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 backdrop-blur-sm"
+                    >
+                      <div className="flex items-start gap-3 mb-5">
+                        <DomainIcon className="h-4 w-4 text-white/30 mt-0.5 shrink-0" />
+                        <div>
+                          <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/30 block mb-1">
+                            {ALIGNMENT_DOMAIN_LABELS[q.domain]}
+                          </span>
+                          <p className="text-sm leading-relaxed text-white/75">{q.statement}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pl-7">
+                        <RatingRail
+                          label="Resonance — how true is this?"
+                          value={answer?.resonance ?? 5}
+                          onChange={(v) => updateAnswer(q.id, "resonance", v)}
+                          accent="amber"
+                        />
+                        <RatingRail
+                          label="Certainty — how confident are you?"
+                          value={answer?.certainty ?? 5}
+                          onChange={(v) => updateAnswer(q.id, "certainty", v)}
+                          accent="emerald"
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between pt-4">
+                  <button
+                    onClick={retreat}
+                    disabled={stage === 0}
                     className={cn(
-                      decision.confidence > 0.7
-                        ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
-                        : decision.confidence > 0.4
-                          ? "border-amber-400/30 bg-amber-500/10 text-amber-300"
-                          : "border-white/20 bg-white/5 text-white/50",
+                      "flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] transition-colors",
+                      stage === 0 ? "text-white/15 cursor-not-allowed" : "text-white/50 hover:text-white/80",
                     )}
                   >
-                    Confidence: {Math.round(decision.confidence * 100)}%
-                  </Pill>
+                    <ArrowLeft className="h-3.5 w-3.5" /> Previous
+                  </button>
+                  <button
+                    onClick={advance}
+                    disabled={!allAnswered}
+                    className={cn(
+                      "flex items-center gap-2 rounded-xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.2em] transition-all",
+                      allAnswered
+                        ? "border border-amber-500/30 bg-amber-500/[0.08] text-amber-300 hover:bg-amber-500/[0.15]"
+                        : "border border-white/[0.06] text-white/20 cursor-not-allowed",
+                    )}
+                  >
+                    {stage === STAGE_DOMAINS.length - 1 ? "Complete Assessment" : "Continue"}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
                 </div>
-              </div>
-
-              {routeInfo.href !== "#" ? (
-                <Link
-                  href={routeInfo.href}
-                  className={cn(
-                    "inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-sm font-medium transition",
-                    routeInfo.tone === "emerald"
-                      ? "bg-emerald-500 text-black hover:bg-emerald-400"
-                      : routeInfo.tone === "amber"
-                        ? "border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
-                        : "border border-white/20 bg-white/5 text-white/70 hover:bg-white/10",
-                  )}
-                >
-                  {routeInfo.cta}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-4">
-            <SignalTile
-              title="Authority"
-              value={`${report.authorityScore}%`}
-              tone={report.authorityScore >= 70 ? "emerald" : report.authorityScore >= 45 ? "amber" : "neutral"}
-            />
-            <SignalTile
-              title="Coherence"
-              value={`${report.coherenceScore}%`}
-              tone={report.coherenceScore >= 70 ? "emerald" : report.coherenceScore >= 45 ? "amber" : "neutral"}
-            />
-            <SignalTile
-              title="Pressure"
-              value={`${report.pressureScore}%`}
-              tone={report.pressureScore >= 70 ? "amber" : "neutral"}
-            />
-            <SignalTile
-              title="Friction"
-              value={`${report.frictionScore}%`}
-              tone={report.frictionScore >= 70 ? "amber" : report.frictionScore >= 50 ? "amber" : "neutral"}
-            />
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-amber-400/80" />
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/42">
-                  Micro-report
-                </span>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {report.keyFindings.map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm leading-7 text-white/68">
-                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <SignalTile title="Trust" value={`${report.trustScore}%`} tone={report.trustScore >= 70 ? "emerald" : report.trustScore >= 45 ? "amber" : "neutral"} />
-                <SignalTile title="Governance" value={`${report.governanceDiscipline}%`} tone={report.governanceDiscipline >= 70 ? "emerald" : report.governanceDiscipline >= 45 ? "amber" : "neutral"} />
-                <SignalTile title="Readiness" value={`${report.interventionReadiness}%`} tone={report.interventionReadiness >= 70 ? "emerald" : report.interventionReadiness >= 45 ? "amber" : "neutral"} />
-                <SignalTile title="Failure load" value={`${report.failureModeCount}/${Math.max(report.failureModeCount, 5)}`} tone={report.failureModeCount >= 4 ? "amber" : "neutral"} />
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                <div className="flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4 text-amber-400/70" />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                    Constitutional interventions
+              </motion.div>
+            ) : result ? (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="space-y-6"
+              >
+                {/* Score headline */}
+                <div className={cn("rounded-2xl border p-8", BAND_CONFIG[result.coherenceBand].border, BAND_CONFIG[result.coherenceBand].bg)}>
+                  <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/40 block mb-3">
+                    Purpose Alignment Score
                   </span>
-                </div>
-
-                <div className="mt-5 space-y-3">
-                  {decision.recommendedInterventions.slice(0, 6).map((item) => (
-                    <div key={item} className="flex items-start gap-3 text-sm leading-7 text-white/64">
-                      <TimerReset className="mt-1 h-4 w-4 shrink-0 text-amber-300" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {decision.disqualifiersTriggered.length > 0 ? (
-                <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
-                  <div className="flex items-center gap-2 text-sm text-white/40">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span className="font-mono text-[10px] uppercase tracking-[0.16em]">
-                      Constitutional constraints
+                  <div className="flex items-baseline gap-3">
+                    <span className={cn("font-serif text-5xl font-light", BAND_CONFIG[result.coherenceBand].color)}>
+                      {result.percent}%
+                    </span>
+                    <span className={cn("font-mono text-xs uppercase tracking-wider", BAND_CONFIG[result.coherenceBand].color)}>
+                      {result.coherenceBand}
                     </span>
                   </div>
+                </div>
 
-                  <div className="mt-4 space-y-2">
-                    {decision.disqualifiersTriggered.map((item) => (
-                      <div key={item} className="flex items-start gap-2 text-sm leading-relaxed text-white/60">
-                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
-                        <span>{item}</span>
-                      </div>
+                {/* Narrative */}
+                <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 block mb-3">
+                    Interpretation
+                  </span>
+                  <p className="text-sm leading-[1.8] text-white/60">{result.narrative}</p>
+                </div>
+
+                {/* Domain breakdown */}
+                <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 space-y-4">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 block">
+                    Domain Profile
+                  </span>
+                  {result.domainProfiles.map((dp, i) => (
+                    <LiveDomainBar key={dp.domain} profile={dp} delay={i * 0.08} />
+                  ))}
+                </div>
+
+                {/* Next actions */}
+                <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 block mb-3">
+                    Recommended Next Actions
+                  </span>
+                  <div className="space-y-3">
+                    {result.nextActions.map((action, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + i * 0.1 }}
+                        className="flex items-start gap-3"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5 text-amber-500/60 mt-0.5 shrink-0" />
+                        <p className="text-sm leading-relaxed text-white/55">{action}</p>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
-              ) : null}
-            </div>
-          </div>
 
-          <div className="rounded-3xl border border-amber-500/20 bg-amber-500/[0.05] p-6">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-amber-300" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-300/80">
-                What the next layers add
-              </span>
-            </div>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div className="text-sm font-medium text-white">Team assessment</div>
-                <p className="mt-2 text-sm leading-6 text-white/58">
-                  Multi-respondent evidence, variance detection, and cross-layer trust analysis.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div className="text-sm font-medium text-white">Executive Reporting</div>
-                <p className="mt-2 text-sm leading-6 text-white/58">
-                  A disciplined executive artifact with posture, risks, priorities, and mandate implications.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div className="text-sm font-medium text-white">Strategy Room</div>
-                <p className="mt-2 text-sm leading-6 text-white/58">
-                  Private intervention where the signal is strong enough to justify consequence-bearing action.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:justify-center">
-            <button
-              onClick={() => setShowResults(false)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-8 py-4 text-sm font-medium text-white/50 transition hover:bg-white/5"
-            >
-              Review answers
-            </button>
-
-            <button
-              onClick={clearAll}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-8 py-4 text-sm font-medium text-white/50 transition hover:bg-white/5"
-            >
-              Start again
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  const previewReport = report ?? buildMicroReport(answers);
-
-  return (
-    <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-      <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
-                Constitutional intake
-              </span>
-            </div>
-
-            <h1 className="mt-6 font-serif text-4xl font-light tracking-tight text-white sm:text-5xl">
-              A real first reading,
-              <span className="block text-white/58">not a decorative questionnaire</span>
-            </h1>
-
-            <p className="mt-4 max-w-3xl text-white/52">
-              This intake is designed to function as a credible city gate. It gives
-              serious users immediate structural insight, constitutional routing,
-              and practical next-step discipline without pretending to replace deeper layers.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <SignalTile title="Progress" value={`${progress}%`} tone="amber" />
-            <SignalTile title="Answered" value={`${answeredCount}/${DIAGNOSTIC_QUESTIONS.length}`} tone="neutral" />
-            <SignalTile title="Current Domain" value={currentQuestion.domain} tone="neutral" />
-            <SignalTile title="Draft Status" value={savingDraft ? "Saving" : "Saved"} tone={savingDraft ? "amber" : "emerald"} />
-          </div>
-
-          <PhaseStatus phase={phase} />
-
-          <div className="rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
-            <div className="mb-6 flex items-center justify-between gap-4">
-              <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">
-                Question {currentQuestionIndex + 1} of {DIAGNOSTIC_QUESTIONS.length}
-              </span>
-
-              <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">
-                {currentQuestion.domain}
-              </span>
-            </div>
-
-            <p className="text-xl leading-relaxed text-white sm:text-2xl">
-              {currentQuestion.text}
-            </p>
-
-            <div className="mt-8 space-y-6">
-              <RatingRail
-                label="How true is this?"
-                value={currentAnswer.resonance}
-                onChange={setResonance}
-                valueLabel={RESONANCE_LABELS[currentAnswer.resonance]}
-                accent="amber"
-              />
-
-              <RatingRail
-                label="How certain are you?"
-                value={currentAnswer.certainty}
-                onChange={setCertainty}
-                valueLabel={CERTAINTY_LABELS[currentAnswer.certainty]}
-                accent="emerald"
-              />
-            </div>
-
-            <div className="mt-8 flex justify-between gap-4">
-              <button
-                onClick={goPrevious}
-                disabled={currentQuestionIndex === 0}
-                className={cn(
-                  "rounded-xl px-5 py-2.5 text-sm font-medium transition",
-                  currentQuestionIndex === 0
-                    ? "cursor-not-allowed text-white/20"
-                    : "border border-white/10 text-white/70 hover:bg-white/5",
+                {/* Save status */}
+                {status === "loading" && (
+                  <p className="font-mono text-[9px] text-white/30">Saving assessment...</p>
                 )}
-              >
-                Previous
-              </button>
-
-              <button
-                onClick={goNext}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-medium text-black transition hover:bg-amber-400"
-              >
-                {currentQuestionIndex === DIAGNOSTIC_QUESTIONS.length - 1 ? "Complete" : "Next"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.aside
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.06 }}
-          className="space-y-6"
-        >
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <div className="flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4 text-amber-400/70" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                Live constitutional readout
-              </span>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <SignalTile title="Authority" value={`${previewReport.authorityScore}%`} tone={previewReport.authorityScore >= 70 ? "emerald" : previewReport.authorityScore >= 45 ? "amber" : "neutral"} />
-              <SignalTile title="Coherence" value={`${previewReport.coherenceScore}%`} tone={previewReport.coherenceScore >= 70 ? "emerald" : previewReport.coherenceScore >= 45 ? "amber" : "neutral"} />
-              <SignalTile title="Pressure" value={`${previewReport.pressureScore}%`} tone={previewReport.pressureScore >= 70 ? "amber" : "neutral"} />
-              <SignalTile title="Friction" value={`${previewReport.frictionScore}%`} tone={previewReport.frictionScore >= 70 ? "amber" : "neutral"} />
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4">
-              <div className="flex items-center gap-2">
-                {decision?.route === "STRATEGY" ? (
-                  <Crown className="h-4 w-4 text-emerald-400" />
-                ) : decision?.route === "DIAGNOSTIC" ? (
-                  <Scale className="h-4 w-4 text-amber-400" />
-                ) : decision?.route === "REJECT" ? (
-                  <Lock className="h-4 w-4 text-white/45" />
-                ) : (
-                  <Eye className="h-4 w-4 text-white/45" />
+                {status === "error" && (
+                  <p className="font-mono text-[9px] text-red-400/60">Failed to save. Your results are preserved in this session.</p>
                 )}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
 
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/42">
-                  Provisional route
-                </span>
-              </div>
-
-              <div className="mt-3 text-base font-medium text-white">
-                {decision ? routeInfo.title : "Signal still forming"}
-              </div>
-
-              <div className="mt-2 text-sm leading-relaxed text-white/52">
-                {decision
-                  ? routeInfo.description
-                  : "Once the signal is strong enough, the system will classify posture, readiness, authority, and escalation fitness."}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
-            <div className="flex items-center gap-2">
-              <LineChart className="h-4 w-4 text-amber-400/70" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                What this layer actually gives you
+        {/* Live purpose profile sidebar */}
+        <div className="hidden lg:block">
+          <div className="sticky top-24 space-y-4">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 backdrop-blur-sm">
+              <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 block mb-4">
+                Live Purpose Profile
               </span>
+
+              {liveProfile ? (
+                <div className="space-y-3">
+                  {liveProfile.domainProfiles.map((dp) => (
+                    <LiveDomainBar key={dp.domain} profile={dp} delay={0} />
+                  ))}
+                  <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                    <div className="flex items-baseline justify-between">
+                      <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/35">Overall</span>
+                      <span className={cn(
+                        "font-serif text-lg",
+                        liveProfile.percent >= 70 ? "text-emerald-400" : liveProfile.percent >= 40 ? "text-amber-400" : "text-red-400",
+                      )}>
+                        {liveProfile.percent}%
+                      </span>
+                    </div>
+                    <span className={cn(
+                      "font-mono text-[8px] uppercase tracking-[0.2em]",
+                      BAND_CONFIG[liveProfile.coherenceBand].color,
+                    )}>
+                      {liveProfile.coherenceBand}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[11px] text-white/25 leading-relaxed">
+                  Begin answering questions to see your live purpose profile build in real time.
+                </p>
+              )}
             </div>
 
-            <div className="mt-5 space-y-4 text-sm leading-relaxed text-white/58">
-              <div className="flex items-start gap-3">
-                <Gavel className="mt-0.5 h-4 w-4 text-emerald-400/75" />
-                <span>
-                  A constitutional route based on authority, coherence, consequence, and readiness.
-                </span>
+            {/* Legend */}
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.015] p-5">
+              <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/25 block mb-3">
+                Scoring
+              </span>
+              <div className="space-y-1.5 text-[10px] text-white/35">
+                <p><span className="text-amber-400/60">Resonance</span> — how true the statement is for you right now</p>
+                <p><span className="text-emerald-400/60">Certainty</span> — how confident you are in that assessment</p>
+                <p className="pt-1 border-t border-white/[0.04] mt-2">
+                  Score = resonance x (certainty / 10). High resonance with low certainty produces a lower weighted score.
+                </p>
               </div>
-
-              <div className="flex items-start gap-3">
-                <Activity className="mt-0.5 h-4 w-4 text-amber-400/75" />
-                <span>
-                  A real micro-report that surfaces posture, failure load, readiness, and interventions.
-                </span>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Target className="mt-0.5 h-4 w-4 text-white/45" />
-                <span>
-                  A clearer sense of whether you need deeper diagnostics, executive interpretation, or mandate-level escalation.
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-amber-500/16 bg-amber-500/[0.04] p-4">
-              <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-amber-300/74">
-                Institutional posture
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-white/56">
-                This gate is useful on its own. Other layers are optional and only explored on need-to basis.
-              </p>
             </div>
           </div>
-
-          {isComplete ? (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-              <div className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-amber-400/70" />
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                  Ready for verdict
-                </span>
-              </div>
-
-              <p className="mt-3 text-sm leading-relaxed text-white/54">
-                You have completed the intake. Reveal the constitutional verdict and the micro-report.
-              </p>
-
-              <button
-                onClick={() => setShowResults(true)}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-medium text-black transition hover:bg-amber-400"
-              >
-                Reveal verdict
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          ) : null}
-        </motion.aside>
+        </div>
       </div>
     </div>
   );

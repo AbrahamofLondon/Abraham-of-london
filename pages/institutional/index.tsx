@@ -1,7 +1,14 @@
+// pages/institutional.tsx
+// Design: Institutional Monumentalism
+// The strongest of the three engagement lane pages — keeps its structural
+// depth (hero grid, capabilities, operating posture, CTA) while aligning
+// every visual detail to the platform design system.
+
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Landmark,
   ArrowRight,
@@ -10,89 +17,160 @@ import {
   Network,
   Scale,
   Gavel,
-  Crown,
   Eye,
   Briefcase,
+  ChevronRight,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 
-function RailLabel({ children }: { children: React.ReactNode }) {
+// ─────────────────────────────────────────────────────────────────────────────
+// TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+const BASE = "rgb(6 6 9)";
+const VOID = "rgb(3 3 5)";
+const LIFT = "rgb(10 14 20)";
+
+const GRAIN: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  backgroundSize: "180px 180px",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+};
+
+const stagger = (d = 0.10) => ({
+  hidden: {},
+  show: { transition: { staggerChildren: d } },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIMITIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
+function GoldRule({ soft = false }: { soft?: boolean }) {
   return (
-    <div className="inline-flex items-center gap-3">
-      <span className="h-6 w-px bg-amber-400/30" />
-      <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-300/65">
+    <div className={soft
+      ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+      : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/28 to-transparent"
+    } />
+  );
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span style={{
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontSize: "8.5px",
+        letterSpacing: "0.40em",
+        textTransform: "uppercase",
+        color: `${GOLD}BB`,
+      }}>
         {children}
       </span>
     </div>
   );
 }
 
-function SectionDivider() {
-  return (
-    <div className="my-20 flex items-center gap-3">
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400/18 to-transparent" />
-      <div className="relative">
-        <div className="absolute inset-0 rounded-full bg-amber-400/10 blur-md" />
-        <Crown className="relative h-4 w-4 text-amber-300/50" />
-      </div>
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400/18 to-transparent" />
-    </div>
-  );
-}
-
-function AmbientField() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute left-[10%] top-[8%] h-[24rem] w-[24rem] rounded-full bg-amber-500/[0.05] blur-[130px]" />
-      <div className="absolute right-[12%] top-[24%] h-[18rem] w-[18rem] rounded-full bg-white/[0.02] blur-[110px]" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.012)_48%,transparent_100%)]" />
-      <div className="absolute inset-x-0 top-20 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
-      <div className="absolute inset-x-0 bottom-20 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
-    </div>
-  );
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// CAPABILITY CARD
+// ─────────────────────────────────────────────────────────────────────────────
 
 function CapabilityCard({
   icon: Icon,
   title,
   text,
-  tag,
+  n,
 }: {
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ style?: React.CSSProperties }>;
   title: string;
   text: string;
-  tag: string;
+  n: string;
 }) {
   return (
-    <div className="group relative overflow-hidden border border-white/[0.08] bg-white/[0.02] p-8 transition-all duration-500 hover:border-white/[0.14] hover:bg-white/[0.03]">
+    <motion.div variants={fadeUp}>
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="relative overflow-hidden h-full transition-all duration-400"
         style={{
-          background:
-            "radial-gradient(600px 180px at 0% 0%, rgba(245,158,11,0.05), transparent 55%), linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.14))",
+          backgroundColor: "rgb(5 5 7)",
+          border: "1px solid rgba(255,255,255,0.062)",
         }}
-      />
-      <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-amber-400/20 opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+        onMouseEnter={e => {
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.borderColor = `${GOLD}22`;
+          el.style.transform = "translateY(-2px)";
+          el.style.boxShadow = "0 24px 60px -20px rgba(0,0,0,0.65)";
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.borderColor = "rgba(255,255,255,0.062)";
+          el.style.transform = "translateY(0)";
+          el.style.boxShadow = "none";
+        }}
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500"
+          style={{ background: `linear-gradient(to right, transparent, ${GOLD}28, transparent)` }}
+        />
+        {/* Corner accent */}
+        <div className="absolute right-0 top-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{ width: "24px", height: "24px", borderRight: `1px solid ${GOLD}25`, borderTop: `1px solid ${GOLD}25` }}
+        />
 
-      <div className="relative">
-        <div className="flex items-start justify-between">
-          <Icon className="h-5 w-5 text-amber-400/72 transition-transform duration-500 group-hover:scale-110" />
-          <span className="font-mono text-[8px] text-white/18">{tag}</span>
+        <div className="p-8 md:p-9">
+          <div className="flex items-start justify-between mb-7">
+            <Icon style={{ width: "20px", height: "20px", color: `${GOLD}AA` }} />
+            <span style={{
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "2.2rem",
+              lineHeight: 1,
+              color: "rgba(255,255,255,0.06)",
+            }}>
+              {n}
+            </span>
+          </div>
+
+          <h3 style={{
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "clamp(1.35rem, 1.8vw, 1.60rem)",
+            lineHeight: 1.06,
+            letterSpacing: "-0.022em",
+            color: "rgba(255,255,255,0.88)",
+          }}>
+            {title}
+          </h3>
+
+          <p style={{
+            marginTop: "0.85rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "0.95rem",
+            lineHeight: 1.68,
+            color: "rgba(255,255,255,0.40)",
+            maxWidth: "30ch",
+          }}>
+            {text}
+          </p>
         </div>
-
-        <h3 className="mt-6 font-serif text-2xl text-white transition-colors group-hover:text-amber-50">
-          {title}
-        </h3>
-
-        <p className="mt-4 text-sm leading-relaxed text-white/50 transition-colors group-hover:text-white/68">
-          {text}
-        </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 
 const InstitutionalPage: NextPage = () => {
   return (
@@ -101,250 +179,450 @@ const InstitutionalPage: NextPage = () => {
       description="Governance, policy, and institutional architecture for serious organisations that need systems built to outlast personalities."
       canonicalUrl="/institutional"
       fullWidth
-      className="bg-black text-white"
+      headerTransparent
     >
       <Head>
         <meta property="og:title" content="Institutional | Abraham of London" />
-        <meta
-          property="og:description"
-          content="Governance with spine. Policy with structure. Advisory for organisations that need systems, standards, and decision architecture."
-        />
+        <meta property="og:description" content="Governance with spine. Policy with structure. Advisory for organisations that need systems, standards, and decision architecture." />
       </Head>
 
-      <main className="relative min-h-screen bg-black text-white">
-        <AmbientField />
+      <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
 
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-white/8">
-          <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-36 lg:px-12 lg:pb-32 lg:pt-44">
-            <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
-              <div className="max-w-4xl">
-                <RailLabel>Governance · Policy · Architecture</RailLabel>
+        {/* ── HERO ──────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute" style={{
+              left: "8%", top: "6%",
+              width: "500px", height: "500px",
+              borderRadius: "50%",
+              background: `radial-gradient(ellipse at center, ${GOLD}09 0%, ${GOLD}03 30%, transparent 65%)`,
+              filter: "blur(140px)",
+            }} />
+            <div className="absolute" style={{
+              right: "10%", top: "22%",
+              width: "380px", height: "380px",
+              borderRadius: "50%",
+              background: "radial-gradient(circle at center, rgba(255,255,255,0.025) 0%, transparent 65%)",
+              filter: "blur(110px)",
+            }} />
+            <div className="absolute inset-x-0 bottom-0 h-40"
+              style={{ background: `linear-gradient(to top, ${BASE}, transparent)` }} />
+            <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
+          </div>
+          <div className="absolute inset-x-0 top-0 h-px"
+            style={{ background: `linear-gradient(to right, transparent, ${GOLD}22, transparent)` }} />
 
-                <h1 className="mt-8 font-serif text-5xl font-light leading-[0.92] tracking-[-0.04em] text-white md:text-7xl lg:text-[5.6rem]">
+          <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="pt-36 md:pt-44 lg:pt-52" />
+
+            <div className="grid gap-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+
+              {/* Left */}
+              <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
+                <motion.div variants={fadeUp}>
+                  <Eyebrow>Governance · Policy · Architecture</Eyebrow>
+                </motion.div>
+
+                <motion.h1 variants={fadeUp} style={{
+                  marginTop: "1.5rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(2.8rem, 6.5vw, 7rem)",
+                  lineHeight: 0.90,
+                  letterSpacing: "-0.048em",
+                  color: "rgba(255,255,255,0.94)",
+                }}>
                   Governance with spine.
-                  <span className="mt-3 block text-white/58">
-                    Policy with structure.
-                  </span>
-                </h1>
+                  <br />
+                  <span style={{ color: "rgba(255,255,255,0.30)" }}>Policy with structure.</span>
+                </motion.h1>
 
-                <p className="mt-8 max-w-2xl text-xl font-light leading-relaxed text-white/56">
+                <motion.p variants={fadeUp} style={{
+                  marginTop: "1.75rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1rem, 1.4vw, 1.25rem)",
+                  lineHeight: 1.72,
+                  color: "rgba(255,255,255,0.42)",
+                  maxWidth: "46ch",
+                }}>
                   Advisory for organisations, public institutions, and serious
                   leadership teams that need systems, standards, and decision
                   architecture built to last.
-                </p>
+                </motion.p>
 
-                <div className="mt-10 flex flex-wrap items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Scale className="h-3 w-3 text-amber-400/60" />
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">
-                      Decision rights
+                <motion.div variants={fadeUp} style={{ marginTop: "2rem" }}>
+                  <div className="flex flex-wrap items-center gap-5">
+                    {[
+                      { icon: Scale,  label: "Decision rights" },
+                      { icon: Gavel, label: "Accountability" },
+                      { icon: Shield, label: "Control systems" },
+                    ].map((item, i, arr) => (
+                      <React.Fragment key={item.label}>
+                        <div className="flex items-center gap-2">
+                          <item.icon style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7.5px",
+                            letterSpacing: "0.28em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.28)",
+                          }}>
+                            {item.label}
+                          </span>
+                        </div>
+                        {i < arr.length - 1 && <div className="h-3 w-px bg-white/[0.08]" />}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeUp} style={{ marginTop: "2rem" }}>
+                  <div className="flex items-center gap-3">
+                    <div className="h-px w-12" style={{ background: `linear-gradient(to right, ${GOLD}35, transparent)` }} />
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.32em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}>
+                      Built for institutional durability
                     </span>
                   </div>
+                </motion.div>
+              </motion.div>
 
-                  <div className="h-3 w-px bg-white/10" />
-
-                  <div className="flex items-center gap-2">
-                    <Gavel className="h-3 w-3 text-amber-400/60" />
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">
-                      Accountability
-                    </span>
-                  </div>
-
-                  <div className="h-3 w-px bg-white/10" />
-
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-3 w-3 text-amber-400/60" />
-                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">
-                      Control systems
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-12 flex items-center gap-4">
-                  <div className="h-px w-12 bg-gradient-to-r from-amber-400/28 to-transparent" />
-                  <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">
-                    Built for institutional durability
-                  </span>
-                </div>
-              </div>
-
-              <div className="self-end lg:justify-self-end">
-                <div className="border border-white/[0.08] bg-white/[0.02] p-6 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
-                  <div className="grid grid-cols-2 gap-px border border-white/8 bg-white/8">
+              {/* Right — capability grid */}
+              <motion.div
+                initial={{ opacity: 0, x: 14 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.80, delay: 0.16 }}
+              >
+                <div style={{
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  backgroundColor: LIFT,
+                  padding: "1.5rem",
+                }}>
+                  {/* 2×2 icon grid */}
+                  <div className="grid grid-cols-2 gap-px" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
                     {[
                       { icon: Landmark, label: "Governance" },
-                      { icon: Scale, label: "Policy" },
-                      { icon: Network, label: "Systems" },
-                      { icon: Gavel, label: "Control" },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <div
-                          key={item.label}
-                          className="bg-black/70 p-6 text-center"
-                        >
-                          <Icon className="mx-auto h-5 w-5 text-amber-400/72" />
-                          <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.22em] text-white/48">
-                            {item.label}
-                          </p>
-                        </div>
-                      );
-                    })}
+                      { icon: Scale,    label: "Policy" },
+                      { icon: Network,  label: "Systems" },
+                      { icon: Gavel,    label: "Control" },
+                    ].map(({ icon: Icon, label }) => (
+                      <div key={label} className="py-6 text-center" style={{ backgroundColor: "rgb(5 5 7)" }}>
+                        <Icon style={{ width: "18px", height: "18px", color: `${GOLD}AA`, margin: "0 auto" }} />
+                        <p style={{
+                          marginTop: "0.75rem",
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7.5px",
+                          letterSpacing: "0.26em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.38)",
+                        }}>
+                          {label}
+                        </p>
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="mt-5 border border-white/10 bg-black/45 p-5">
-                    <p className="font-serif text-lg text-white">
+                  {/* Mission statement */}
+                  <div style={{
+                    marginTop: "1rem",
+                    padding: "1.25rem",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    backgroundColor: "rgba(255,255,255,0.01)",
+                  }}>
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1.05rem",
+                      color: "rgba(255,255,255,0.72)",
+                    }}>
                       Institutional mandate
                     </p>
-                    <p className="mt-2 text-sm text-white/60">
+                    <p style={{
+                      marginTop: "0.5rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.92rem",
+                      lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.40)",
+                    }}>
                       Systems designed to survive leadership transition, strain,
                       and external pressure.
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
+
+            <div style={{ paddingBottom: "5rem" }} />
           </div>
         </section>
 
-        {/* CAPABILITIES */}
-        <section className="relative py-24">
-          <div className="mx-auto max-w-7xl px-6 lg:px-12">
-            <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div>
-                <RailLabel>Core Capabilities</RailLabel>
-                <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  Systems that outlast personalities
+        {/* ── CAPABILITIES ──────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE }}>
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+            <div className="mb-12 grid gap-8 md:grid-cols-2 md:items-end">
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+              >
+                <Eyebrow>Core capabilities</Eyebrow>
+                <h2 style={{
+                  marginTop: "1.25rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+                  lineHeight: 1.0,
+                  letterSpacing: "-0.025em",
+                  color: "rgba(255,255,255,0.90)",
+                }}>
+                  Systems that outlast personalities.
                 </h2>
-              </div>
+              </motion.div>
 
-              <p className="max-w-md text-sm leading-relaxed text-white/48">
-                Built for durability, not convenience. Designed to remain
-                coherent through leadership transitions, institutional strain,
-                and external pressure.
-              </p>
+              <motion.p
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ delay: 0.10 }}
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1.02rem",
+                  lineHeight: 1.72,
+                  color: "rgba(255,255,255,0.38)",
+                  maxWidth: "38ch",
+                }}
+              >
+                Built for durability, not convenience. Designed to remain coherent
+                through leadership transitions, institutional strain, and external pressure.
+              </motion.p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <motion.div
+              variants={stagger(0.10)}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-40px" }}
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            >
               <CapabilityCard
                 icon={Building2}
                 title="Institution design"
                 text="Structures, mandates, and operating principles designed to outlast personalities and preserve institutional continuity."
-                tag="01"
+                n="01"
               />
               <CapabilityCard
                 icon={Shield}
                 title="Governance advisory"
                 text="Decision rights, accountability, controls, and legitimacy under scrutiny. Systems that hold under pressure."
-                tag="02"
+                n="02"
               />
               <CapabilityCard
                 icon={Network}
                 title="System architecture"
                 text="Operating models that connect policy, leadership rhythm, and execution from boardroom to front line."
-                tag="03"
+                n="03"
               />
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <SectionDivider />
+        {/* ── SECTION DIVIDER ───────────────────────────────────────────── */}
+        <div style={{ backgroundColor: BASE }}>
+          <div className="mx-auto max-w-7xl px-6 lg:px-12">
+            <GoldRule soft />
+          </div>
         </div>
 
-        {/* OPERATING POSTURE */}
-        <section className="relative py-24">
-          <div className="mx-auto max-w-6xl px-6 lg:px-12">
-            <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-              <div>
-                <RailLabel>Operating Posture</RailLabel>
-                <h2 className="mt-7 font-serif text-4xl text-white md:text-5xl">
-                  Advisory for institutions
-                  <span className="mt-2 block text-white/58">
-                    that cannot afford drift
-                  </span>
-                </h2>
-              </div>
+        {/* ── OPERATING POSTURE ─────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE }}>
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
+            <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
 
-              <div className="space-y-6 text-[1.02rem] leading-relaxed text-white/52">
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+              >
+                <Eyebrow>Operating posture</Eyebrow>
+                <h2 style={{
+                  marginTop: "1.25rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1.7rem, 2.8vw, 2.5rem)",
+                  lineHeight: 1.0,
+                  letterSpacing: "-0.022em",
+                  color: "rgba(255,255,255,0.88)",
+                }}>
+                  Advisory for institutions
+                  <span style={{ color: "rgba(255,255,255,0.32)" }}> that cannot afford drift.</span>
+                </h2>
+              </motion.div>
+
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ delay: 0.12 }}
+                className="space-y-5"
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1.05rem",
+                  lineHeight: 1.80,
+                  color: "rgba(255,255,255,0.48)",
+                }}
+              >
                 <p>
-                  This work is suited to boards, executive teams, regulated
-                  entities, and public institutions where legitimacy, operating
-                  discipline, and continuity matter.
+                  This work is suited to boards, executive teams, regulated entities,
+                  and public institutions where legitimacy, operating discipline, and
+                  continuity matter.
                 </p>
                 <p>
-                  The aim is not decorative strategy. The aim is to produce
-                  decision architecture, governance clarity, and system
-                  coherence that survives scrutiny.
+                  The aim is not decorative strategy. The aim is to produce decision
+                  architecture, governance clarity, and system coherence that survives
+                  scrutiny.
                 </p>
-              </div>
+              </motion.div>
             </div>
 
-            <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {/* Audience cards */}
+            <motion.div
+              variants={stagger(0.09)}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-40px" }}
+              className="grid gap-4 md:grid-cols-3 mt-12"
+            >
               {[
-                {
-                  icon: Briefcase,
-                  title: "Boards",
-                  text: "Governance rhythm, clarity of role, and defensible decision process.",
-                },
-                {
-                  icon: Eye,
-                  title: "Executive teams",
-                  text: "Operational alignment between policy intent and execution reality.",
-                },
-                {
-                  icon: Landmark,
-                  title: "Public institutions",
-                  text: "Structures with enough discipline to hold under political and external pressure.",
-                },
-              ].map((item) => {
+                { icon: Briefcase, title: "Boards", text: "Governance rhythm, clarity of role, and defensible decision process." },
+                { icon: Eye,       title: "Executive teams", text: "Operational alignment between policy intent and execution reality." },
+                { icon: Landmark,  title: "Public institutions", text: "Structures with enough discipline to hold under political and external pressure." },
+              ].map(item => {
                 const Icon = item.icon;
                 return (
-                  <div
-                    key={item.title}
-                    className="border border-white/[0.08] bg-white/[0.02] p-6"
-                  >
-                    <Icon className="mb-4 h-5 w-5 text-amber-400/70" />
-                    <h3 className="font-serif text-xl text-white">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-white/48">
-                      {item.text}
-                    </p>
-                  </div>
+                  <motion.div key={item.title} variants={fadeUp}>
+                    <div style={{
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      backgroundColor: "rgba(255,255,255,0.015)",
+                      padding: "1.75rem 2rem",
+                    }}>
+                      <Icon style={{ width: "18px", height: "18px", color: `${GOLD}80`, marginBottom: "1.25rem" }} />
+                      <h3 style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "1.2rem",
+                        color: "rgba(255,255,255,0.82)",
+                        marginBottom: "0.65rem",
+                      }}>
+                        {item.title}
+                      </h3>
+                      <p style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.92rem",
+                        lineHeight: 1.65,
+                        color: "rgba(255,255,255,0.38)",
+                      }}>
+                        {item.text}
+                      </p>
+                    </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="relative border-t border-white/8 py-24">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(245,158,11,0.04),transparent_60%)]" />
-
-          <div className="relative mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-6 lg:flex-row lg:items-center lg:px-12">
-            <div className="max-w-xl">
-              <RailLabel>Institutional Mandate</RailLabel>
-
-              <h3 className="mt-5 font-serif text-3xl text-white md:text-4xl">
-                Discuss an organisational brief
-              </h3>
-
-              <p className="mt-4 text-sm leading-relaxed text-white/50">
-                For boards, executive teams, and public institutions. Initial
-                conversations are handled discreetly and with clear boundaries.
-              </p>
-            </div>
-
-            <Link
-              href="/contact"
-              className="group inline-flex items-center gap-3 border border-white/15 bg-white/[0.04] px-7 py-3.5 font-mono text-[10px] uppercase tracking-[0.28em] text-white/85 backdrop-blur-sm transition-all hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-white"
+        {/* ── MANDATE CLOSE ─────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-60px" }}
             >
-              <span>Discuss a mandate</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+              <div style={{
+                border: `1px solid ${GOLD}18`,
+                backgroundColor: `${GOLD}06`,
+                padding: "2rem 2.5rem",
+              }}>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.40em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}90`,
+                  marginBottom: "1rem",
+                }}>
+                  Institutional mandate
+                </div>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1.02rem",
+                  lineHeight: 1.72,
+                  color: "rgba(255,255,255,0.42)",
+                  fontStyle: "italic",
+                  maxWidth: "48ch",
+                  marginBottom: "1.5rem",
+                }}>
+                  For boards, executive teams, and public institutions. Initial
+                  conversations are handled discreetly and with clear boundaries.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/contact"
+                    className="inline-flex items-center gap-2.5 transition-all duration-300"
+                    style={{
+                      padding: "11px 22px",
+                      border: `1px solid ${GOLD}35`,
+                      backgroundColor: `${GOLD}0D`,
+                      color: `${GOLD}BB`,
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8px",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                    }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
+                  >
+                    Discuss a mandate <ArrowRight style={{ width: "11px", height: "11px" }} />
+                  </Link>
+                  <Link href="/diagnostics"
+                    className="inline-flex items-center gap-2.5 transition-all duration-300"
+                    style={{
+                      padding: "11px 22px",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      color: "rgba(255,255,255,0.30)",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8px",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                    }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.55)"; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.30)"; }}
+                  >
+                    Enter diagnostics
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
-      </main>
+
+      </div>
     </Layout>
   );
 };
