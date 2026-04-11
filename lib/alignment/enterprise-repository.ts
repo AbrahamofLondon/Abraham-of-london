@@ -1,5 +1,19 @@
-import { prisma as db } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+
+// Lazy-load prisma to prevent build-time crash (PrismaClient constructor
+// runs at import time and fails without DATABASE_URL during static analysis)
+function getDb() {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { prisma } = require("@/lib/prisma") as { prisma: import("@prisma/client").PrismaClient };
+  return prisma;
+}
+
+// Proxy that lazily initialises on first property access
+const db = new Proxy({} as import("@prisma/client").PrismaClient, {
+  get(_target, prop) {
+    return (getDb() as any)[prop];
+  },
+});
 import type {
   EnterpriseAlignmentBand,
   EnterpriseAlignmentDomain,
