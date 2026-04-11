@@ -151,5 +151,84 @@ export async function verifyApiKey(_apiKey: string): Promise<{
   }
 }
 
-// Export SSOT type for server consumers
+// ─── CANONICAL GUARD PRIMITIVES ──────────────────────────────────────────────
+// Every protected route handler MUST use one of these.
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  name?: string | null;
+  role?: string;
+  tier: AccessTier;
+};
+
+export type AuthResult =
+  | { ok: true; user: AuthUser }
+  | { ok: false; error: string; status: number };
+
+/** Require authenticated user. Returns typed user or error. */
+export async function requireUser(): Promise<AuthResult> {
+  if (IS_BUILD) return { ok: false, error: "Build phase", status: 503 };
+  const session = await getAuthSession();
+  if (!session?.user?.email) {
+    return { ok: false, error: "Authentication required", status: 401 };
+  }
+  const user = session.user as any;
+  const tierRaw = (session as any).aol?.tier ?? user.tier ?? user.role ?? "public";
+  return {
+    ok: true,
+    user: {
+      id: String(user.id || ""),
+      email: user.email!,
+      name: user.name ?? null,
+      role: user.role ?? "USER",
+      tier: normalizeUserTier(tierRaw),
+    },
+  };
+}
+
+/** Require admin access. */
+export async function requireAdmin(): Promise<AuthResult> {
+  const auth = await requireUser();
+  if (!auth.ok) return auth;
+  const isAdmin =
+    auth.user.role === "ADMIN" ||
+    auth.user.role === "SUPER_ADMIN" ||
+    hasAccess(auth.user.tier, "architect" as AccessTier);
+  if (!isAdmin) return { ok: false, error: "Admin access required", status: 403 };
+  return auth;
+}
+
+/** Require specific role. */
+export async function requireRole(role: string): Promise<AuthResult> {
+  const auth = await requireUser();
+  if (!auth.ok) return auth;
+  if (auth.user.role !== role) return { ok: false, error: `Role '${role}' required`, status: 403 };
+  return auth;
+}
+
+/** Get user if authenticated, null otherwise. Never throws. */
+export async function getOptionalUser(): Promise<AuthUser | null> {
+  const auth = await requireUser();
+  return auth.ok ? auth.user : null;
+}
+
+/** Documents that a route is intentionally public. */
+export function assertPublicRoute(): void {}
+
+// ─── AUTHORIZATION MATRIX ────────────────────────────────────────────────────
+// PATH                              ACCESS     GUARD
+// /diagnostics/**                   PUBLIC     assertPublicRoute()
+// /consulting/strategy-room         PUBLIC     assertPublicRoute()
+// /vault/**                         PREMIUM    requireUser() + checkUserAccess("member")
+// /admin/**                         ADMIN      requireAdmin()
+// /api/admin/**                     ADMIN      requireAdmin()
+// /api/executive-reporting/run      AUTH       requireUser()
+// /api/alignment/enterprise/**      AUTH       requireUser()
+// /api/download/[token]             TOKEN      token verification
+// /api/cron/**                      INTERNAL   CRON_SECRET header
+// /api/purpose-alignment/**         PUBLIC     assertPublicRoute()
+// /api/strategy-room/**             PUBLIC     assertPublicRoute()
+// /api/decision/**                  PUBLIC     assertPublicRoute()
+
 export type { AccessTier };
