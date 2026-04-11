@@ -1,158 +1,172 @@
-/* components/homepage/StrategicFunnelStrip.tsx */
+/* components/homepage/StrategicFunnelStrip.tsx
+   Design: Institutional Monumentalism
+   
+   Previous version had: "Initialize Protocol", "Auth.State: Verified_Operational",
+   "P-01 // Tools" — theatrical tech-cosplay signalling insecurity.
+   
+   Rebuilt as: Three routes, stated plainly. What each does. Where it leads.
+   No performed seriousness. No invented jargon. No corner-bracket decorations.
+*/
+
 import * as React from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Briefcase,
-  CalendarDays,
-  Users,
-  Wrench,
-  ShieldCheck,
-  ChevronRight,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Briefcase, CalendarDays, Users, type LucideIcon } from "lucide-react";
 
-type CardItem = {
+const GOLD = "#C9A96E";
+
+type RouteItem = {
   href: string;
   label: string;
-  kicker: string;
+  tag: string;
   description: string;
   Icon: LucideIcon;
-  pillar: {
-    icon: LucideIcon;
-    name: string;
-    phase: string;
-  };
 };
 
-const CARDS: readonly CardItem[] = [
+const ROUTES: readonly RouteItem[] = [
   {
     href: "/consulting",
-    label: "Advisory & Strategy",
-    kicker: "Direct Implementation",
+    label: "Advisory & Consulting",
+    tag: "Direct engagement",
     description:
-      "Board-level architecture for founders. We build the operating logic required to survive growth and pressure.",
+      "Board-level architecture for founders and leadership teams navigating growth, transition, or structural pressure.",
     Icon: Briefcase,
-    pillar: { icon: Wrench, name: "Tools", phase: "01" },
   },
   {
-    href: "/chatham-rooms",
-    label: "The Chatham Rooms",
-    kicker: "Asymmetric Intelligence",
+    href: "/consulting/strategy-room",
+    label: "Strategy Room",
+    tag: "Private mandate",
     description:
-      "Private, off-record sessions under strict protocol. A space for sharpening judgment away from the public eye.",
+      "Reserved for situations where consequence is material and casual engagement would not serve the problem.",
     Icon: Users,
-    pillar: { icon: ShieldCheck, name: "Rooms", phase: "02" },
   },
   {
     href: "/events",
     label: "Executive Salons",
-    kicker: "Public Discourse",
+    tag: "Live sessions",
     description:
-      "High-signal environments blending Scripture and market reality. Strategy sessions for the serious operator.",
+      "High-signal environments for serious operators. Doctrine meets current conditions in structured, off-record form.",
     Icon: CalendarDays,
-    pillar: { icon: ShieldCheck, name: "Rooms", phase: "03" },
   },
 ] as const;
 
 export default function StrategicFunnelStrip(): React.ReactElement {
   return (
-    <section
-      data-probe="funnel-strip-v3"
-      className="relative overflow-hidden bg-black py-16 lg:py-20"
-    >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
-        <div className="absolute inset-0 aol-grain opacity-[0.02]" />
+    <div>
+      {/* Section header */}
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-5">
+          <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+          <span style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+            color: `${GOLD}BF`,
+          }}>
+            Engagement routes
+          </span>
+        </div>
+        <h2 style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "clamp(1.6rem, 2.8vw, 2.4rem)",
+          lineHeight: 1.0, letterSpacing: "-0.025em",
+          color: "rgba(255,255,255,0.88)",
+        }}>
+          Three routes. Each with a distinct function.
+        </h2>
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="mb-12 border-l border-amber-500/30 pl-6">
-          <span className="text-[9px] font-bold uppercase tracking-[0.5em] text-amber-500/60">
-            System Sequence
-          </span>
-
-          <h2 className="mt-4 font-serif text-3xl italic leading-none tracking-tight text-white md:text-4xl">
-            Doctrine{" "}
-            <ChevronRight className="inline h-5 w-5 text-white/10" />
-            {" "}Logic{" "}
-            <ChevronRight className="inline h-5 w-5 text-white/10" />
-            {" "}Artifacts
-          </h2>
-
-          <p className="mt-4 max-w-xl text-sm font-light leading-relaxed text-white/30">
-            From the architecture of the <span className="text-white/60">Canon</span> to
-            reproducible <span className="text-white/60">Tools</span>, proven in the{" "}
-            <span className="text-white/60">Rooms</span>.
-          </p>
-        </div>
-
-        <div className="grid gap-px border border-white/5 bg-white/5 md:grid-cols-3">
-          {CARDS.map((card, index) => {
-            const PillarIcon = card.pillar.icon;
-            const CardIcon = card.Icon;
-
-            return (
-              <Link
-                key={card.href}
-                href={card.href}
-                className="group block h-full bg-black"
+      {/* Route cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {ROUTES.map((route) => {
+          const Icon = route.Icon;
+          return (
+            <Link key={route.href} href={route.href} className="group block outline-none">
+              <div
+                className="relative overflow-hidden h-full transition-all duration-400"
+                style={{ backgroundColor: "rgb(5 5 7)", border: "1px solid rgba(255,255,255,0.062)" }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.borderColor = `${GOLD}20`;
+                  el.style.transform = "translateY(-2px)";
+                  el.style.boxShadow = "0 24px 60px -20px rgba(0,0,0,0.65)";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.borderColor = "rgba(255,255,255,0.062)";
+                  el.style.transform = "translateY(0)";
+                  el.style.boxShadow = "none";
+                }}
               >
-                <div className="relative flex h-full flex-col p-8 transition-colors duration-700 hover:bg-white/[0.03]">
-                  <div className="mb-8 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-px w-4 bg-amber-500/40" />
-                      <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-amber-500/80">
-                        P-{card.pillar.phase} // {card.pillar.name}
-                      </span>
-                    </div>
+                {/* Gold thread on hover */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{ background: `linear-gradient(to right, transparent, ${GOLD}30, transparent)` }}
+                />
 
-                    <div className="flex items-center gap-3">
-                      <PillarIcon className="h-3.5 w-3.5 text-zinc-600 transition-colors group-hover:text-amber-500/70" />
-                      <span className="text-[9px] font-mono text-zinc-700">
-                        0{index + 1}
-                      </span>
+                <div className="relative z-10 p-7 md:p-8 flex flex-col h-full">
+                  {/* Icon + tag */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className="flex items-center justify-center transition-colors duration-300"
+                      style={{ width: "32px", height: "32px", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)" }}
+                    >
+                      <Icon style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.35)" }} />
                     </div>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase",
+                      color: `${GOLD}80`,
+                    }}>
+                      {route.tag}
+                    </span>
                   </div>
 
-                  <div className="mb-6">
-                    <div className="mb-3 flex items-center gap-3">
-                      <CardIcon className="h-4 w-4 text-amber-500/70 transition-colors group-hover:text-amber-400" />
-                      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-amber-600/70">
-                        {card.kicker}
-                      </p>
-                    </div>
+                  {/* Label */}
+                  <h3
+                    className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,1)]"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1.35rem", lineHeight: 1.10,
+                      letterSpacing: "-0.020em", color: "rgba(255,255,255,0.82)",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    {route.label}
+                  </h3>
 
-                    <h3 className="font-serif text-xl italic text-white transition-all group-hover:text-amber-50">
-                      {card.label}
-                    </h3>
-                  </div>
-
-                  <p className="mb-10 text-[13px] leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-300">
-                    {card.description}
+                  {/* Description */}
+                  <p
+                    className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,0.50)]"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.68,
+                      color: "rgba(255,255,255,0.36)",
+                    }}
+                  >
+                    {route.description}
                   </p>
 
-                  <div className="mt-auto flex items-center justify-between border-t border-white/[0.03] pt-6">
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 transition-colors group-hover:text-white">
-                      Initialize Protocol
+                  {/* CTA */}
+                  <div
+                    className="mt-auto pt-5 flex items-center gap-2 transition-all duration-300 group-hover:gap-3"
+                    style={{
+                      marginTop: "auto", paddingTop: "1.25rem",
+                      borderTop: "1px solid rgba(255,255,255,0.05)",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    <span className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.75)]">
+                      Enter
                     </span>
-                    <ArrowRight className="h-3 w-3 text-zinc-700 transition-all group-hover:translate-x-1 group-hover:text-amber-500" />
+                    <ArrowRight style={{ width: "11px", height: "11px" }} className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.75)]" />
                   </div>
-
-                  <div className="absolute right-0 top-0 h-4 w-4 border-r border-t border-transparent transition-all group-hover:border-amber-500/20" />
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="mt-12 flex items-center gap-4">
-          <div className="h-px w-8 bg-amber-500/30" />
-          <p className="text-[8px] font-mono uppercase tracking-[0.6em] text-zinc-700">
-            Auth.State: Verified_Operational
-          </p>
-        </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
-    </section>
+    </div>
   );
 }

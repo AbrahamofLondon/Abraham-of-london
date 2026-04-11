@@ -1,7 +1,19 @@
+/* components/homepage/CanonInstitutionalIntro.tsx
+   Design: Institutional Monumentalism — sharp panels, softGold tokens, no gradients
+   
+   Previous version had: rounded-3xl, rounded-2xl, rounded-full throughout,
+   amber gradient fills, "Not random content" defensive copy, font-semibold weights.
+   
+   Rebuilt: Sharp panel system. Cormorant typography. Factual copy — the Canon
+   is presented as what it is, not defended against what it isn't.
+*/
+
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { BookOpen, ChevronRight, Layers } from "lucide-react";
+
+const GOLD = "#C9A96E";
 
 export type CanonPrelude = {
   title: string;
@@ -14,139 +26,216 @@ export type CanonPrelude = {
   ctaLabel?: string | null;
 };
 
+function Pillar({ title, body }: { title: string; body: string }) {
+  return (
+    <div
+      style={{
+        padding: "1.25rem",
+        border: "1px solid rgba(255,255,255,0.055)",
+        backgroundColor: "rgba(255,255,255,0.018)",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7px",
+          letterSpacing: "0.34em",
+          textTransform: "uppercase",
+          color: `${GOLD}90`,
+          marginBottom: "0.5rem",
+        }}
+      >
+        {title}
+      </div>
+      <div
+        style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300,
+          fontSize: "0.92rem",
+          lineHeight: 1.62,
+          color: "rgba(255,255,255,0.58)",
+        }}
+      >
+        {body}
+      </div>
+    </div>
+  );
+}
+
 export default function CanonInstitutionalIntro({
   prelude,
 }: {
   prelude: CanonPrelude;
 }): React.ReactElement {
-  const title = prelude?.title || "The Architecture of Human Purpose";
-  const subtitle = prelude?.subtitle || "Prelude MiniBook — Gateway to the Canon";
-  const excerpt =
-    prelude?.excerpt ||
-    prelude?.description ||
-    "Human flourishing is not accidental. It is architectural.";
-
-  const cover =
-    prelude?.coverImage ||
-    "/assets/images/books/the-architecture-of-human-purpose.jpg";
-  const primaryHref =
-    prelude?.href || "/books/the-architecture-of-human-purpose-landing";
-  const canonHref = prelude?.canonHref || "/canon";
-  const ctaLabel = prelude?.ctaLabel || "Open the Prelude MiniBook";
-
-  const focusRing =
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
+  const title      = prelude?.title       || "The Architecture of Human Purpose";
+  const subtitle   = prelude?.subtitle    || "Prelude MiniBook — Gateway to the Canon";
+  const excerpt    = prelude?.excerpt || prelude?.description || "Human flourishing is not accidental. It is architectural.";
+  const cover      = prelude?.coverImage  || "/assets/images/books/the-architecture-of-human-purpose.jpg";
+  const primaryHref = prelude?.href       || "/books/the-architecture-of-human-purpose";
+  const canonHref  = prelude?.canonHref   || "/canon";
+  const ctaLabel   = prelude?.ctaLabel    || "Open the Prelude MiniBook";
 
   return (
-    <section data-probe="canon-intro-v3" className="bg-black">
-      <div className="rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-950/18 to-black p-7 sm:p-8 md:p-10">
-        <div className="flex items-center gap-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/18 bg-amber-500/10 px-4 py-2">
-            <Layers className="h-4 w-4 text-amber-300" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200">
+    <section>
+      <div
+        style={{
+          border: `1px solid ${GOLD}20`,
+          backgroundColor: `${GOLD}06`,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Gold thread — top */}
+        <div
+          style={{
+            position: "absolute", inset: 0, top: 0, left: 0, right: 0,
+            height: "1px",
+            background: `linear-gradient(to right, transparent, ${GOLD}35, transparent)`,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div style={{ padding: "2rem 2rem 2rem", position: "relative", zIndex: 1 }}>
+
+          {/* Eyebrow */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "2rem" }}>
+            <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+              color: `${GOLD}BF`,
+            }}>
               Canon gateway
             </span>
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-amber-500/30 via-amber-500/10 to-transparent" />
-        </div>
+          </div>
 
-        <div className="mt-7 grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-center">
-          <div className="flex items-center gap-5">
-            <div className="relative shrink-0">
-              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-amber-500/20 via-amber-500/8 to-transparent blur-xl opacity-70" />
-              <div className="relative rounded-2xl border border-amber-500/25 bg-black/50 p-2">
+          {/* Main grid */}
+          <div className="grid gap-8 md:grid-cols-[auto_1fr] md:items-start">
+
+            {/* Left — cover */}
+            <div style={{ flexShrink: 0 }}>
+              <div
+                style={{
+                  border: `1px solid ${GOLD}28`,
+                  backgroundColor: "rgba(0,0,0,0.40)",
+                  padding: "8px",
+                  display: "inline-block",
+                }}
+              >
                 <Image
                   src={cover}
                   alt={`${title} cover`}
                   width={220}
                   height={320}
                   loading="lazy"
-                  quality={85}
-                  sizes="(max-width: 640px) 120px, (max-width: 1024px) 140px, 160px"
-                  className="h-auto w-[120px] rounded-xl border border-amber-500/30 shadow-xl sm:w-[140px] md:w-[160px]"
+                  quality={90}
+                  sizes="(max-width: 640px) 100px, (max-width: 1024px) 130px, 150px"
+                  className="h-auto w-[100px] sm:w-[130px] md:w-[150px]"
+                  style={{ display: "block" }}
                 />
               </div>
             </div>
 
-            <div className="min-w-0">
-              <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-white/55">
-                Limited release
+            {/* Right — content */}
+            <div>
+              {/* Title block */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <h2
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "clamp(1.5rem, 2.5vw, 2.4rem)",
+                    lineHeight: 1.0,
+                    letterSpacing: "-0.028em",
+                    color: "rgba(255,255,255,0.94)",
+                    marginBottom: "0.6rem",
+                  }}
+                >
+                  {title}
+                </h2>
+                <p style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                  color: `${GOLD}90`,
+                }}>
+                  {subtitle}
+                </p>
               </div>
-              <h2 className="mt-2 font-serif text-2xl font-bold leading-tight text-white/95 sm:text-3xl">
-                {title}
-              </h2>
-              <p className="mt-2 font-mono text-xs uppercase tracking-[0.22em] text-amber-200/80 sm:text-sm">
-                {subtitle}
-              </p>
+
+              {/* Excerpt panel */}
+              <div
+                style={{
+                  padding: "1rem 1.25rem",
+                  border: "1px solid rgba(255,255,255,0.055)",
+                  backgroundColor: "rgba(255,255,255,0.018)",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "6.5px", letterSpacing: "0.32em", textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.22)", marginBottom: "0.5rem",
+                }}>
+                  From the text
+                </div>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.68,
+                  color: "rgba(255,255,255,0.72)", fontStyle: "italic",
+                }}>
+                  {excerpt}
+                </p>
+              </div>
+
+              {/* CTAs */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link
+                  href={primaryHref}
+                  className="group inline-flex items-center gap-2.5 transition-all duration-300"
+                  style={{
+                    padding: "12px 22px",
+                    border: `1px solid ${GOLD}42`,
+                    backgroundColor: `${GOLD}0E`,
+                    color: GOLD,
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
+                >
+                  <BookOpen style={{ width: "13px", height: "13px" }} />
+                  {ctaLabel}
+                  <ChevronRight style={{ width: "13px", height: "13px" }} />
+                </Link>
+
+                <Link
+                  href={canonHref}
+                  className="inline-flex items-center gap-2.5 transition-all duration-300"
+                  style={{
+                    padding: "12px 22px",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                    color: "rgba(255,255,255,0.50)",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.18)"; el.style.color = "rgba(255,255,255,0.75)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.50)"; }}
+                >
+                  Browse Canon
+                </Link>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-5">
-            <p className="text-sm leading-relaxed text-white/75 sm:text-base">
-              <span className="text-white/90">Not random content.</span> One
-              doctrinal spine powering the library. Start with the Prelude—then
-              enter the Canon properly.
-            </p>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/80">
-                Worldview frame
-              </div>
-              <p className="mt-2 line-clamp-3 font-serif text-sm leading-relaxed text-white/90 sm:text-base">
-                {excerpt}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href={primaryHref}
-                aria-label={ctaLabel}
-                className={[
-                  "relative inline-flex items-center gap-2 overflow-hidden rounded-2xl",
-                  "bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3",
-                  "text-[11px] font-mono uppercase tracking-[0.28em] text-black",
-                  "transition-all duration-300 hover:-translate-y-0.5 hover:from-amber-400 hover:to-amber-500",
-                  "after:absolute after:inset-0 after:rounded-[inherit] after:bg-white/20 after:opacity-0 after:transition-opacity hover:after:opacity-100",
-                  focusRing,
-                ].join(" ")}
-              >
-                <BookOpen className="relative z-[1] h-4 w-4" />
-                <span className="relative z-[1]">{ctaLabel}</span>
-                <ChevronRight className="relative z-[1] h-4 w-4" />
-              </Link>
-
-              <Link
-                href={canonHref}
-                aria-label="Browse Canon"
-                className={[
-                  "inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-6 py-3",
-                  "text-[11px] font-mono uppercase tracking-[0.28em] text-white/85",
-                  "transition-all duration-300 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/10",
-                  focusRing,
-                ].join(" ")}
-              >
-                Browse Canon
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
+          {/* Three pillars */}
+          <div className="grid gap-3 md:grid-cols-3" style={{ marginTop: "2rem" }}>
+            <Pillar title="Purpose architecture" body="Meaning, formation, and direction — the structural logic beneath serious work." />
+            <Pillar title="Canon discipline"     body="Frameworks built to survive pressure, not to comfort the comfortable." />
+            <Pillar title="Operational use"      body="Deployable models and tools extracted from the doctrinal layer." />
           </div>
-        </div>
-
-        <div className="mt-8 grid gap-3 md:grid-cols-3">
-          <MiniPill title="Purpose architecture" body="Meaning, formation, direction." />
-          <MiniPill title="Canon discipline" body="Frameworks, not vibes." />
-          <MiniPill title="Operational use" body="Deployable models & tools." />
         </div>
       </div>
     </section>
-  );
-}
-
-function MiniPill({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-      <div className="text-sm font-semibold text-white">{title}</div>
-      <div className="mt-1.5 text-sm leading-relaxed text-white/65">{body}</div>
-    </div>
   );
 }

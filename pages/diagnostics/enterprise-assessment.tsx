@@ -207,7 +207,7 @@ function deriveReading(
   } else if (execWeak) {
     patternTitle   = "Execution consistency failure — operating layer drift";
     primaryReading = `Execution variance is at ${execution}% while leadership and governance show relative strength. This is the pattern of an institution where the strategic and structural layers are functioning but the operating layer is not translating intent into consistent action. Teams are reading different versions of priority. Operational signals are unreliable. Performance varies beyond acceptable bounds. This is the most correctable of the structural failure patterns — but only if addressed before it compounds.`;
-    firstAction    = "Identify the highest-variance operating unit. Run a structured rapid diagnostic there — not a full assessment, a focused reading of three things: what do they believe the current priorities are, what do they believe success looks like this quarter, and what is stopping them from operating at full capacity. The answers will locate the translation failure.`;
+    firstAction    = "Identify the highest-variance operating unit. Run a structured rapid diagnostic there — not a full assessment, a focused reading of three things: what do they believe the current priorities are, what do they believe success looks like this quarter, and what is stopping them from operating at full capacity. The answers will locate the translation failure.";
     escalationNote = "Execution drift at this level is typically resolved through a combination of governance clarification and operating cadence work. Executive Reporting will confirm whether the issue is contained or whether it reflects a deeper institutional pattern.";
     route = "WATCH";
 

@@ -1,5 +1,5 @@
-export const dynamic = "force-dynamic";
 'use server';
+export const dynamic = "force-dynamic";
 
 import { getPrisma } from '@/lib/prisma.server';
 import { sendAccessRequestEmail } from '@/lib/mail';
