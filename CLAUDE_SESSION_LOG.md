@@ -116,6 +116,51 @@ Comprehensive audit of the diagnostics pipeline across `pages/diagnostics/`, `co
 
 ---
 
+## 7-Phase Product Upgrade (commit ec586a12)
+
+### Phase 1: PurposeAlignmentAssessment
+| File | Change |
+|------|--------|
+| `lib/alignment/types.ts` | Added `DualAxisAnswer`, `DualAxisInput`, `CoherenceBand`, `PurposeProfileResult`, `DomainProfile` types |
+| `lib/alignment/scoring.ts` | Added `scorePurposeProfile()` dual-axis scoring engine with coherence bands, narrative, next-actions |
+| `components/alignment/PurposeAlignmentAssessment.tsx` | Full rebuild: 3-stage questionnaire, dual-axis sliders, live sidebar, result screen |
+
+### Phase 2: Strategy Room Intake
+| File | Change |
+|------|--------|
+| `components/strategy-room/Form.tsx` | Full rebuild: 5-stage mandate pipeline (gravity/authority/consequence/readiness/fit), live score panel, routing logic |
+
+### Phase 3: TeamAssessmentSuite
+| File | Change |
+|------|--------|
+| `components/assessments/TeamAssessmentSuite.tsx` | Added: RadarChart (recharts), stddev-based variance index, trust gap, execution coherence, benchmark comparison, narrative, escalation banner |
+
+### Phase 4: EnterpriseAssessmentSuite
+| File | Change |
+|------|--------|
+| `components/assessments/EnterpriseAssessmentSuite.tsx` | Added: 2x2 posture matrix, critical path analysis, board-ready summary, DISORDERED escalation, sessionStorage with prior delta |
+
+### Phase 5: Executive Reporting Page
+| File | Change |
+|------|--------|
+| `pages/diagnostics/executive-reporting.tsx` | Full rebuild as conversion surface: hero, live demo, pricing tiers, case patterns, escalation close |
+| `pages/diagnostics/executive-reporting/run.tsx` | Created stub run page with session data compilation |
+
+### Phase 6: Diagnostics Completeness
+| File | Change |
+|------|--------|
+| `pages/diagnostics/constitutional-diagnostic.tsx` | Added breadcrumb, meta description, escalation close → Team Assessment |
+| `pages/diagnostics/enterprise.tsx` | Added breadcrumb |
+| `pages/diagnostics/team-alignment.tsx` | Added breadcrumb |
+| `pages/diagnostics/directional-integrity.tsx` | Added breadcrumb |
+
+### Phase 7: Cross-System Integration
+- Verified sessionStorage chain: purpose-alignment → team-assessment → enterprise-assessment → executive-report
+- All API routes verified present
+- Navigation ladder validated end-to-end
+
+---
+
 ## Remaining Known Issues (out of scope)
 
 - `components/reporting/pdf/ExecutiveBriefingPdfDocument.tsx` is unique to the reporting/ tree (no admin/ counterpart) — left as-is
