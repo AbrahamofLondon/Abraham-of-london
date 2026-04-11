@@ -1,9 +1,32 @@
 // components/assessments/ConstitutionalDiagnosticSuite.tsx
-"use client";
+// Design: Institutional Monumentalism
+// The constitutional diagnostic is the entry gate to the entire product ladder.
+// It uses a serious scoring engine (evaluateConstitutionalRoute) that produces
+// STRATEGY / DIAGNOSTIC / REJECT routes with confidence scores, disqualifiers,
+// and recommended interventions.
+//
+// What was rebuilt:
+// 1. "use client" directive removed (Pages Router)
+// 2. All rounded-* classes removed — sharp panel system throughout
+// 3. Question instrument: design tokens, Cormorant statement text, gold resonance rail
+// 4. Verdict surface: full constitutional reading — not just a route badge
+//    - Named disqualifiers that triggered
+//    - Posture and readiness classification
+//    - Recommended interventions from the engine
+//    - Scoring rationale as a transparent log
+//    - Conditional escalation routing with structural justification
+// 5. Amber-500 CTAs replaced with platform-standard buttons
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Lock, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowRight,
+  AlertTriangle,
+  CheckSquare,
+  ChevronRight,
+  Shield,
+} from "lucide-react";
 import {
   evaluateConstitutionalRoute,
   type ConstitutionalDecision,
@@ -12,41 +35,56 @@ import {
   type ReadinessTier,
 } from "@/lib/constitution/rules";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+const LIFT = "rgb(10 14 20)";
+const VOID = "rgb(3 3 5)";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
+
 type Likert = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 type Answer = { resonance: Likert; certainty: Likert };
 
 type Question = {
   id: string;
   text: string;
-  domain:
-    | "coherence"
-    | "authority"
-    | "environment"
-    | "execution"
-    | "trust"
-    | "friction"
-    | "stakes"
-    | "pattern"
-    | "pressure";
+  domain: "coherence" | "authority" | "environment" | "execution" | "trust" | "friction" | "stakes" | "pattern" | "pressure";
   reverse?: boolean;
 };
 
 const QUESTIONS: readonly Question[] = [
-  { id: "q1", text: "Strategy and actual resource allocation are aligned.", domain: "coherence" },
-  { id: "q2", text: "Decision authority is explicit and consistently exercised.", domain: "authority" },
-  { id: "q3", text: "The environment has changed faster than adaptation.", domain: "environment", reverse: true },
-  { id: "q4", text: "There is visible strategic drift.", domain: "execution", reverse: true },
-  { id: "q5", text: "Trust between leadership and execution is intact.", domain: "trust" },
-  { id: "q6", text: "The organisation carries material operating friction.", domain: "friction", reverse: true },
-  { id: "q7", text: "A decision-bearing sponsor exists.", domain: "authority" },
-  { id: "q8", text: "The cost of error is material.", domain: "stakes" },
-  { id: "q9", text: "Past attempts failed for structural reasons.", domain: "pattern", reverse: true },
-  { id: "q10", text: "External pressure is actively forcing attention.", domain: "pressure" },
+  { id: "q1",  text: "Strategy and actual resource allocation are aligned.",          domain: "coherence" },
+  { id: "q2",  text: "Decision authority is explicit and consistently exercised.",    domain: "authority" },
+  { id: "q3",  text: "The environment has changed faster than the organisation has adapted.", domain: "environment", reverse: true },
+  { id: "q4",  text: "There is visible strategic drift.",                             domain: "execution",   reverse: true },
+  { id: "q5",  text: "Trust between leadership and execution is intact.",             domain: "trust" },
+  { id: "q6",  text: "The organisation carries material operating friction.",         domain: "friction",    reverse: true },
+  { id: "q7",  text: "A decision-bearing sponsor exists for the matter at hand.",     domain: "authority" },
+  { id: "q8",  text: "The cost of error in this situation is material.",              domain: "stakes" },
+  { id: "q9",  text: "Past correction attempts have failed for structural reasons.",  domain: "pattern",     reverse: true },
+  { id: "q10", text: "External pressure is actively forcing institutional attention.", domain: "pressure" },
 ] as const;
 
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
-}
+const DOMAIN_LABELS: Record<Question["domain"], string> = {
+  coherence:   "Strategic coherence",
+  authority:   "Decision authority",
+  environment: "Environmental shift",
+  execution:   "Execution quality",
+  trust:       "Trust condition",
+  friction:    "Operating friction",
+  stakes:      "Consequence weight",
+  pattern:     "Prior correction history",
+  pressure:    "External pressure",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCORING ENGINE (client-side, mirrors the backend)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
@@ -74,13 +112,7 @@ function classifyPosture(coherence: number, friction: number, trust: number, gov
   return "ORDERED";
 }
 
-function classifyReadiness(
-  authority: number,
-  coherence: number,
-  trust: number,
-  readiness: number,
-  governance: number,
-): ReadinessTier {
+function classifyReadiness(authority: number, coherence: number, trust: number, readiness: number, governance: number): ReadinessTier {
   const composite = (authority + coherence + trust + readiness + governance) / 5;
   if (composite < 35) return "FRAGILE";
   if (composite < 50) return "EMERGING";
@@ -89,8 +121,17 @@ function classifyReadiness(
   return "SOVEREIGN";
 }
 
+type DerivedScores = {
+  authority: number; coherence: number; trust: number;
+  pressure: number; friction: number; seriousness: number;
+  governance: number; narrative: number; interventionReadiness: number;
+  severity: number; failureModeCount: number;
+  authorityType: AuthorityType; posture: OrgPosture; readinessTier: ReadinessTier;
+};
+
 function buildDecision(answers: Record<string, Answer>): {
   decision: ConstitutionalDecision | null;
+  scores: DerivedScores | null;
   routeHref: string;
 } {
   const buckets: Record<string, number[]> = {};
@@ -103,8 +144,7 @@ function buildDecision(answers: Record<string, Answer>): {
     (buckets[q.domain] ||= []).push(scored);
   }
 
-  const avg = (items: number[]) =>
-    items.length ? items.reduce((a, b) => a + b, 0) / items.length : 5;
+  const avg = (items: number[]) => items.length ? items.reduce((a, b) => a + b, 0) / items.length : 5;
 
   const authority = pct(avg(buckets.authority || []));
   const coherence = pct(avg(buckets.coherence || []));
@@ -113,8 +153,8 @@ function buildDecision(answers: Record<string, Answer>): {
   const friction = pct(avg([...(buckets.friction || []), ...(buckets.execution || []), ...(buckets.pattern || [])]));
 
   const seriousness = clamp(Math.round((pressure + friction + authority) / 3), 0, 100);
-  const governance = clamp(Math.round((coherence + trust + authority) / 3), 0, 100);
-  const narrative = clamp(Math.round((coherence + trust + authority) / 3), 0, 100);
+  const governance  = clamp(Math.round((coherence + trust + authority) / 3), 0, 100);
+  const narrative   = clamp(Math.round((coherence + trust + authority) / 3), 0, 100);
   const interventionReadiness = clamp(Math.round((authority + coherence + trust + (100 - friction)) / 4), 0, 100);
 
   let failureModeCount = 0;
@@ -126,19 +166,12 @@ function buildDecision(answers: Record<string, Answer>): {
 
   const severity = clamp(
     Math.round(((100 - coherence) / 10 + (100 - authority) / 10 + friction / 10 + pressure / 12) / 4),
-    0,
-    10,
+    0, 10,
   );
 
-  const authorityType = classifyAuthorityType(authority);
-  const posture = classifyPosture(coherence, friction, trust, governance);
-  const readinessTier = classifyReadiness(
-    authority,
-    coherence,
-    trust,
-    interventionReadiness,
-    governance,
-  );
+  const authorityType  = classifyAuthorityType(authority);
+  const posture        = classifyPosture(coherence, friction, trust, governance);
+  const readinessTier  = classifyReadiness(authority, coherence, trust, interventionReadiness, governance);
 
   const decision = evaluateConstitutionalRoute({
     clarityScore: coherence,
@@ -164,243 +197,708 @@ function buildDecision(answers: Record<string, Answer>): {
         ? "/diagnostics/executive-reporting"
         : "/diagnostics";
 
-  return { decision, routeHref };
+  const scores: DerivedScores = {
+    authority, coherence, trust, pressure, friction,
+    seriousness, governance, narrative, interventionReadiness,
+    severity, failureModeCount, authorityType, posture, readinessTier,
+  };
+
+  return { decision, scores, routeHref };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIMITIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span style={{
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB`,
+      }}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
+function GoldRule({ soft = false }: { soft?: boolean }) {
+  return (
+    <div className={soft
+      ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+      : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/22 to-transparent"
+    } />
+  );
+}
+
+// Route colours
+function routeColor(route: string): { border: string; bg: string; text: string } {
+  switch (route) {
+    case "STRATEGY":   return { border: "rgba(52,211,153,0.25)", bg: "rgba(52,211,153,0.06)", text: "rgba(110,231,183,0.90)" };
+    case "REJECT":     return { border: "rgba(248,113,113,0.25)", bg: "rgba(248,113,113,0.06)", text: "rgba(252,165,165,0.90)" };
+    default:           return { border: `${GOLD}30`, bg: `${GOLD}08`, text: `${GOLD}CC` };
+  }
+}
+
+// Posture colour
+function postureColor(posture: string): string {
+  switch (posture) {
+    case "ORDERED":     return "rgba(110,231,183,0.75)";
+    case "DRIFTING":    return `${GOLD}CC`;
+    case "MISALIGNED":  return "rgba(253,186,116,0.85)";
+    default:            return "rgba(252,165,165,0.85)";
+  }
+}
+
+// Readiness colour
+function readinessColor(tier: string): string {
+  switch (tier) {
+    case "SOVEREIGN":       return "rgba(110,231,183,0.90)";
+    case "EXECUTION_READY": return "rgba(110,231,183,0.70)";
+    case "STABILIZING":     return `${GOLD}CC`;
+    case "EMERGING":        return "rgba(253,186,116,0.80)";
+    default:                return "rgba(252,165,165,0.80)";
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VERDICT READING — what the constitutional engine found
+// ─────────────────────────────────────────────────────────────────────────────
+
+function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScores): string {
+  const { route } = decision;
+  const { posture, readinessTier, authorityType, coherence, trust } = scores;
+
+  if (route === "STRATEGY") {
+    return `The constitutional signal meets all thresholds for direct strategic engagement. Coherence is above the clarity minimum, decision authority is established, and the posture condition (${posture.toLowerCase()}) is compatible with private advisory work. The route is clear.`;
+  }
+
+  if (route === "REJECT") {
+    if (decision.disqualifiersTriggered.some(d => /clarity|coherence/i.test(d))) {
+      return `The diagnostic signal does not yet carry the structural clarity required for constitutional routing. This is not a judgement on the situation's importance — it means the declared problem has not been reduced to a form that the constitutional system can assess. Diagnostic clarification precedes everything else.`;
+    }
+    if (decision.disqualifiersTriggered.some(d => /authority/i.test(d))) {
+      return `The authority condition is not established. The constitutional system cannot route a matter to private advisory work without a confirmed decision-bearing sponsor. Clarify the authority position before re-entering.`;
+    }
+    if (decision.disqualifiersTriggered.some(d => /seriousness|mandate/i.test(d))) {
+      return `The situation does not yet register as decision-grade — it is exploratory rather than consequential. The constitutional system routes exploratory concerns to the foundational diagnostic layer, not to private advisory.`;
+    }
+    return `Multiple constitutional thresholds are triggered simultaneously. The diagnostic layer will establish which structural conditions need correction before escalation is appropriate.`;
+  }
+
+  // DIAGNOSTIC
+  if (authorityType === "UNCLEAR") {
+    return `The situation carries genuine signal — coherence at ${coherence}%, trust at ${trust}% — but the authority condition is not established. The diagnostic route is the correct next step: it will surface whether the authority ambiguity is a clarity problem or a governance problem.`;
+  }
+  if (posture === "DISORDERED" || posture === "MISALIGNED") {
+    return `The posture reading (${posture.toLowerCase()}) indicates structural misalignment that should be formally mapped before private advisory escalation. The diagnostic layer exists precisely for this condition — real consequence with structural disorder that needs reading before it can be corrected.`;
+  }
+  if (readinessTier === "FRAGILE" || readinessTier === "EMERGING") {
+    return `The readiness tier (${readinessTier.toLowerCase()}) indicates the organisation is not yet structurally prepared for premium intervention. This is the most common diagnostic finding — genuine consequence paired with insufficient structural readiness. The route is not rejection; it is ordered preparation.`;
+  }
+  return `The constitutional signal is genuine but not yet strong enough for the highest escalation layer. The diagnostic route will sharpen the reading and establish whether private advisory engagement is the next correct move.`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ESCALATION ROUTING CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+
+function routeConfig(route: string, scores: DerivedScores) {
+  switch (route) {
+    case "STRATEGY":
+      return {
+        label:         "Strategy Route",
+        destination:   "Strategy Room",
+        href:          "/consulting/strategy-room",
+        note:          "The signal warrants direct private advisory engagement.",
+        secondaryHref: "/diagnostics/executive-reporting",
+        secondaryLabel:"Executive Reporting",
+      };
+    case "REJECT":
+      return {
+        label:         "Foundational Route",
+        destination:   "Diagnostic Ladder",
+        href:          "/diagnostics",
+        note:          "Foundational clarification precedes any premium escalation.",
+        secondaryHref: null,
+        secondaryLabel: null,
+      };
+    default:
+      return {
+        label:         "Diagnostic Route",
+        destination:   "Executive Reporting",
+        href:          "/diagnostics/executive-reporting",
+        note:          scores.authorityType === "UNCLEAR"
+          ? "Establish authority clarity before escalating to private advisory."
+          : "Diagnostic clarification will sharpen the constitutional case for private engagement.",
+        secondaryHref: "/consulting/strategy-room",
+        secondaryLabel: "Strategy Room (pending diagnostic)",
+      };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function ConstitutionalDiagnosticSuite() {
-  const [index, setIndex] = React.useState(0);
+  const [index,   setIndex]   = React.useState(0);
   const [answers, setAnswers] = React.useState<Record<string, Answer>>({});
-  const [show, setShow] = React.useState(false);
+  const [verdict, setVerdict] = React.useState(false);
 
-  const current = QUESTIONS[index]!;
-  const currentAnswer = answers[current.id] || { resonance: 5 as Likert, certainty: 5 as Likert };
-  const complete = Object.keys(answers).length === QUESTIONS.length;
-  const progress = Math.round((Object.keys(answers).length / QUESTIONS.length) * 100);
+  const current        = QUESTIONS[index]!;
+  const currentAnswer  = answers[current.id] || { resonance: 5 as Likert, certainty: 5 as Likert };
+  const answeredCount  = Object.keys(answers).length;
+  const complete       = answeredCount === QUESTIONS.length;
+  const progress       = Math.round((answeredCount / QUESTIONS.length) * 100);
 
-  const { decision, routeHref } = React.useMemo(() => buildDecision(answers), [answers]);
+  const { decision, scores, routeHref } = React.useMemo(() => buildDecision(answers), [answers]);
+
+  function setResonance(v: number) {
+    setAnswers(prev => ({ ...prev, [current.id]: { ...currentAnswer, resonance: v as Likert } }));
+  }
+  function setCertainty(v: number) {
+    setAnswers(prev => ({ ...prev, [current.id]: { ...currentAnswer, certainty: v as Likert } }));
+  }
+
+  const rc = routeColor(decision?.route ?? "DIAGNOSTIC");
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-      {!show ? (
-        <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-8">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
-                  Constitutional diagnostic
-                </span>
-              </div>
+    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <AnimatePresence mode="wait">
 
-              <h1 className="mt-6 font-serif text-4xl text-white sm:text-5xl">
-                Serious first reading
-              </h1>
-              <p className="mt-4 max-w-3xl text-white/52">
-                This is the city gate. It gives route, posture, and escalation fitness without pretending to replace deeper evidence layers.
-              </p>
-            </div>
+        {/* ── INSTRUMENT ─────────────────────────────────────────────── */}
+        {!verdict && (
+          <motion.div key="instrument"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.50 }}
+          >
+            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] py-12">
 
-            <div className="grid gap-4 sm:grid-cols-4">
-              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
-                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Progress</div>
-                <div className="mt-2 font-serif text-2xl text-white">{progress}%</div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Answered</div>
-                <div className="mt-2 font-serif text-2xl text-white">{Object.keys(answers).length}/10</div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Domain</div>
-                <div className="mt-2 font-serif text-2xl text-white">{current.domain}</div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Provisional route</div>
-                <div className="mt-2 font-serif text-2xl text-white">{decision?.route || "…"}</div>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
-              <div className="mb-6 flex items-center justify-between">
-                <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">
-                  Question {index + 1} of {QUESTIONS.length}
-                </span>
-                <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">
-                  {current.domain}
-                </span>
-              </div>
-
-              <p className="text-xl leading-relaxed text-white sm:text-2xl">
-                {current.text}
-              </p>
-
-              <div className="mt-8 space-y-6">
+              {/* Left — question instrument */}
+              <div className="space-y-6">
+                {/* Progress strip */}
                 <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase tracking-[0.16em] text-white/40">How true is this?</span>
-                    <span className="text-xs text-amber-300">{currentAnswer.resonance}/10</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}>
+                      Constitutional diagnostic
+                    </span>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8px", letterSpacing: "0.18em",
+                      color: "rgba(255,255,255,0.38)",
+                    }}>
+                      {answeredCount} / {QUESTIONS.length}
+                    </span>
                   </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={10}
-                    step={1}
-                    value={currentAnswer.resonance}
-                    onChange={(e) =>
-                      setAnswers((prev) => ({
-                        ...prev,
-                        [current.id]: { ...currentAnswer, resonance: Number(e.target.value) as Likert },
-                      }))
-                    }
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase tracking-[0.16em] text-white/40">How certain are you?</span>
-                    <span className="text-xs text-emerald-300">{currentAnswer.certainty}/10</span>
+                  <div style={{ height: "2px", backgroundColor: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
+                    <motion.div
+                      style={{ height: "100%", backgroundColor: `${GOLD}80` }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.4 }}
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={10}
-                    step={1}
-                    value={currentAnswer.certainty}
-                    onChange={(e) =>
-                      setAnswers((prev) => ({
-                        ...prev,
-                        [current.id]: { ...currentAnswer, certainty: Number(e.target.value) as Likert },
-                      }))
-                    }
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-emerald-400"
-                  />
                 </div>
+
+                {/* Question card */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`q-${index}`}
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.30 }}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      backgroundColor: LIFT,
+                    }}
+                  >
+                    {/* Card header */}
+                    <div style={{
+                      padding: "0.85rem 1.5rem",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.22)",
+                      }}>
+                        {DOMAIN_LABELS[current.domain]}
+                      </span>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px", letterSpacing: "0.20em",
+                        color: "rgba(255,255,255,0.20)",
+                      }}>
+                        {index + 1} / {QUESTIONS.length}
+                      </span>
+                    </div>
+
+                    {/* Statement */}
+                    <div style={{ padding: "1.75rem 1.5rem" }}>
+                      <p style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "clamp(1.1rem, 1.8vw, 1.45rem)",
+                        lineHeight: 1.55,
+                        color: "rgba(255,255,255,0.85)",
+                        marginBottom: "1.75rem",
+                      }}>
+                        {current.text}
+                      </p>
+
+                      {/* Resonance rail */}
+                      <div style={{ marginBottom: "1.25rem" }}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
+                            color: `${GOLD}90`,
+                          }}>
+                            Resonance — how true is this?
+                          </span>
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "8px", color: `${GOLD}CC`,
+                          }}>
+                            {currentAnswer.resonance}/10
+                          </span>
+                        </div>
+                        <input
+                          type="range" min={0} max={10} step={1}
+                          value={currentAnswer.resonance}
+                          onChange={e => setResonance(Number(e.target.value))}
+                          style={{ width: "100%", height: "2px", cursor: "pointer", accentColor: GOLD }}
+                        />
+                        <div className="flex justify-between mt-1">
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Not true</span>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Completely true</span>
+                        </div>
+                      </div>
+
+                      {/* Certainty rail */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
+                            color: "rgba(110,231,183,0.70)",
+                          }}>
+                            Certainty — how confident are you?
+                          </span>
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "8px", color: "rgba(110,231,183,0.85)",
+                          }}>
+                            {currentAnswer.certainty}/10
+                          </span>
+                        </div>
+                        <input
+                          type="range" min={0} max={10} step={1}
+                          value={currentAnswer.certainty}
+                          onChange={e => setCertainty(Number(e.target.value))}
+                          style={{ width: "100%", height: "2px", cursor: "pointer", accentColor: "rgb(110,231,183)" }}
+                        />
+                        <div className="flex justify-between mt-1">
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Uncertain</span>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Certain</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <div style={{
+                      padding: "1rem 1.5rem",
+                      borderTop: "1px solid rgba(255,255,255,0.05)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => setIndex(v => Math.max(0, v - 1))}
+                        disabled={index === 0}
+                        style={{
+                          background: "none", border: "none",
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+                          color: index === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.35)",
+                          cursor: index === 0 ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        Previous
+                      </button>
+
+                      {index < QUESTIONS.length - 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => setIndex(v => v + 1)}
+                          className="inline-flex items-center gap-2 transition-all duration-300"
+                          style={{
+                            padding: "9px 20px",
+                            border: `1px solid ${GOLD}42`,
+                            backgroundColor: `${GOLD}10`,
+                            color: `${GOLD}CC`,
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+                            cursor: "pointer",
+                          }}
+                          onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
+                          onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
+                        >
+                          Next <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => complete && setVerdict(true)}
+                          disabled={!complete}
+                          className="inline-flex items-center gap-2 transition-all duration-300"
+                          style={{
+                            padding: "9px 20px",
+                            border: `1px solid ${complete ? "rgba(52,211,153,0.35)" : "rgba(255,255,255,0.06)"}`,
+                            backgroundColor: complete ? "rgba(52,211,153,0.08)" : "rgba(255,255,255,0.01)",
+                            color: complete ? "rgba(110,231,183,0.90)" : "rgba(255,255,255,0.18)",
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+                            cursor: complete ? "pointer" : "not-allowed",
+                          }}
+                        >
+                          {complete ? "Reveal verdict" : "Answer all questions"}
+                          <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
-              <div className="mt-8 flex justify-between gap-4">
-                <button
-                  type="button"
-                  onClick={() => setIndex((v) => Math.max(0, v - 1))}
-                  disabled={index === 0}
-                  className={cn(
-                    "rounded-xl px-5 py-2.5 text-sm font-medium transition",
-                    index === 0
-                      ? "cursor-not-allowed text-white/20"
-                      : "border border-white/10 text-white/70 hover:bg-white/5",
+              {/* Right — live readout */}
+              <div>
+                <div style={{ position: "sticky", top: "6rem" }} className="space-y-4">
+                  {/* Live constitutional signal */}
+                  <div style={{ border: `1px solid ${rc.border}`, backgroundColor: rc.bg }}>
+                    <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${rc.border}`, opacity: 0.70 }}>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase",
+                        color: rc.text,
+                      }}>
+                        Live constitutional signal
+                      </span>
+                    </div>
+                    <div style={{ padding: "1.25rem" }}>
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "3rem", lineHeight: 1,
+                        color: rc.text, marginBottom: "0.35rem",
+                      }}>
+                        {decision?.route ?? "…"}
+                      </div>
+                      <div style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px", letterSpacing: "0.20em",
+                        color: "rgba(255,255,255,0.35)",
+                      }}>
+                        {decision ? `${Math.round(decision.confidence * 100)}% confidence` : "Awaiting signal"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Domain scores */}
+                  {scores && (
+                    <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                      <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <Eyebrow>Domain scores</Eyebrow>
+                      </div>
+                      <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
+                        {[
+                          { label: "Coherence",    value: scores.coherence },
+                          { label: "Authority",    value: scores.authority },
+                          { label: "Trust",        value: scores.trust },
+                          { label: "Pressure",     value: scores.pressure },
+                          { label: "Friction",     value: 100 - scores.friction }, // inverse
+                          { label: "Seriousness",  value: scores.seriousness },
+                          { label: "Governance",   value: scores.governance },
+                        ].map(({ label, value }) => {
+                          const barColor = value >= 65 ? "rgba(110,231,183,0.65)" : value >= 40 ? `${GOLD}80` : "rgba(252,165,165,0.65)";
+                          return (
+                            <div key={label} style={{ marginBottom: "0.85rem" }}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                                  {label}
+                                </span>
+                                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: barColor }}>
+                                  {value}
+                                </span>
+                              </div>
+                              <div style={{ height: "2px", backgroundColor: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                                <motion.div
+                                  style={{ height: "100%", backgroundColor: barColor }}
+                                  animate={{ width: `${Math.max(2, value)}%` }}
+                                  transition={{ duration: 0.5 }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
-                >
-                  Previous
-                </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (index < QUESTIONS.length - 1) {
-                      setIndex((v) => v + 1);
-                    } else if (complete) {
-                      setShow(true);
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-medium text-black transition hover:bg-amber-400"
-                >
-                  {index === QUESTIONS.length - 1 ? "Complete" : "Next"}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <aside className="space-y-6">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                Live readout
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Route</div>
-                  <div className="mt-2 font-serif text-2xl text-white">{decision?.route || "Pending"}</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">Confidence</div>
-                  <div className="mt-2 font-serif text-2xl text-white">{decision ? `${Math.round(decision.confidence * 100)}%` : "—"}</div>
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4">
-                <div className="flex items-center gap-2">
-                  {decision?.route === "STRATEGY" ? (
-                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  ) : decision?.route === "DIAGNOSTIC" ? (
-                    <CheckCircle2 className="h-4 w-4 text-amber-400" />
-                  ) : (
-                    <Lock className="h-4 w-4 text-white/45" />
+                  {/* Posture & Readiness */}
+                  {scores && (
+                    <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.008)", padding: "1rem 1.25rem" }}>
+                      <div className="flex items-center justify-between gap-4 mb-2">
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Posture</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", color: postureColor(scores.posture) }}>{scores.posture}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Readiness</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", color: readinessColor(scores.readinessTier) }}>{scores.readinessTier}</span>
+                      </div>
+                    </div>
                   )}
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/42">
-                    Next layer
-                  </span>
-                </div>
 
-                <div className="mt-3 text-base font-medium text-white">
-                  {decision?.route === "STRATEGY"
-                    ? "Strategy Room"
-                    : decision?.route === "DIAGNOSTIC"
-                      ? "Executive Reporting"
-                      : "Foundational Diagnostics"}
+                  {/* Complete CTA */}
+                  {complete && (
+                    <button
+                      type="button"
+                      onClick={() => setVerdict(true)}
+                      className="w-full inline-flex items-center justify-center gap-2 transition-all duration-300"
+                      style={{
+                        padding: "12px 20px",
+                        border: "1px solid rgba(52,211,153,0.35)",
+                        backgroundColor: "rgba(52,211,153,0.08)",
+                        color: "rgba(110,231,183,0.90)",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = "rgba(52,211,153,0.55)"; el.style.backgroundColor = "rgba(52,211,153,0.12)"; }}
+                      onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(52,211,153,0.35)"; el.style.backgroundColor = "rgba(52,211,153,0.08)"; }}
+                    >
+                      Reveal constitutional verdict <ArrowRight style={{ width: "11px", height: "11px" }} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
+          </motion.div>
+        )}
 
-            {complete ? (
-              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
-                  Ready for verdict
+        {/* ── VERDICT ────────────────────────────────────────────────────── */}
+        {verdict && decision && scores && (
+          <motion.div key="verdict"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+          >
+            <div className="py-12 space-y-6">
+              {/* Verdict headline */}
+              <div style={{ border: `1px solid ${rc.border}`, backgroundColor: rc.bg, padding: "2rem" }}>
+                <Eyebrow>Constitutional verdict</Eyebrow>
+                <div className="flex items-end justify-between gap-4 flex-wrap mt-4">
+                  <div>
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+                      lineHeight: 1, letterSpacing: "-0.040em", color: rc.text,
+                    }}>
+                      {decision.route}
+                    </div>
+                    <div style={{
+                      marginTop: "0.5rem",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.38)",
+                    }}>
+                      {Math.round(decision.confidence * 100)}% constitutional confidence
+                    </div>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", flexShrink: 0 }}>
+                    {[
+                      { label: "Posture",    value: scores.posture,      color: postureColor(scores.posture) },
+                      { label: "Readiness",  value: scores.readinessTier, color: readinessColor(scores.readinessTier) },
+                      { label: "Authority",  value: scores.authorityType, color: scores.authorityType === "DIRECT" ? "rgba(110,231,183,0.80)" : scores.authorityType === "PROXY" ? `${GOLD}CC` : "rgba(252,165,165,0.80)" },
+                      { label: "Governance", value: `${scores.governance}%`, color: scores.governance >= 65 ? "rgba(110,231,183,0.75)" : scores.governance >= 40 ? `${GOLD}BB` : "rgba(252,165,165,0.75)" },
+                    ].map(({ label, value, color }) => (
+                      <div key={label} style={{ textAlign: "right" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{label}</div>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", letterSpacing: "0.12em", color, marginTop: "2px" }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <button
-                  onClick={() => setShow(true)}
-                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-medium text-black transition hover:bg-amber-400"
-                >
-                  Reveal verdict
-                  <ArrowRight className="h-4 w-4" />
-                </button>
               </div>
-            ) : null}
-          </aside>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400">
-                Constitutional verdict
-              </span>
+
+              <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+                {/* Left */}
+                <div className="space-y-5">
+                  {/* Constitutional reading */}
+                  <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, overflow: "hidden" }}>
+                    <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
+                      <Eyebrow>Constitutional reading</Eyebrow>
+                    </div>
+                    <div style={{ padding: "1.5rem" }}>
+                      <p style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.78,
+                        color: "rgba(255,255,255,0.70)",
+                      }}>
+                        {verdictNarrative(decision, scores)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Disqualifiers — if any triggered */}
+                  {decision.disqualifiersTriggered.length > 0 && (
+                    <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1.25rem 1.5rem" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)", marginBottom: "0.85rem" }}>
+                        Constitutional disqualifiers triggered
+                      </div>
+                      <div className="space-y-2">
+                        {decision.disqualifiersTriggered.map(d => (
+                          <div key={d} className="flex items-start gap-2.5">
+                            <AlertTriangle style={{ width: "11px", height: "11px", color: "rgba(252,165,165,0.60)", flexShrink: 0, marginTop: "3px" }} />
+                            <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.55, color: "rgba(255,255,255,0.60)" }}>
+                              {d}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recommended interventions */}
+                  {decision.recommendedInterventions.length > 0 && (
+                    <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}07`, padding: "1.25rem 1.5rem" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
+                        Recommended interventions
+                      </div>
+                      <div className="space-y-2.5">
+                        {decision.recommendedInterventions.map(iv => (
+                          <div key={iv} className="flex items-start gap-2.5">
+                            <CheckSquare style={{ width: "11px", height: "11px", color: `${GOLD}80`, flexShrink: 0, marginTop: "3px" }} />
+                            <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
+                              {iv}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Escalation routing */}
+                  {(() => {
+                    const rc2 = routeConfig(decision.route, scores);
+                    const tc  = routeColor(decision.route);
+                    return (
+                      <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
+                        <Eyebrow>Constitutional next move</Eyebrow>
+                        <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.70, color: "rgba(255,255,255,0.45)", fontStyle: "italic", marginBottom: "1.25rem" }}>
+                          {rc2.note}
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                          <Link href={rc2.href}
+                            className="inline-flex items-center gap-2.5 transition-all duration-300"
+                            style={{ padding: "11px 22px", border: `1px solid ${tc.border}`, backgroundColor: tc.bg, color: tc.text, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase" }}
+                            onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.opacity = "0.80"; }}
+                            onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.opacity = "1"; }}
+                          >
+                            {rc2.destination} <ArrowRight style={{ width: "11px", height: "11px" }} />
+                          </Link>
+                          {rc2.secondaryHref && (
+                            <Link href={rc2.secondaryHref}
+                              className="inline-flex items-center gap-2.5 transition-all duration-300"
+                              style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.40)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase" }}
+                              onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.65)"; el.style.borderColor = "rgba(255,255,255,0.16)"; }}
+                              onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.40)"; el.style.borderColor = "rgba(255,255,255,0.08)"; }}
+                            >
+                              {rc2.secondaryLabel} <ChevronRight style={{ width: "11px", height: "11px" }} />
+                            </Link>
+                          )}
+                          <button type="button" onClick={() => setVerdict(false)}
+                            style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "transparent", color: "rgba(255,255,255,0.22)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: "pointer" }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.45)"; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.22)"; }}
+                          >
+                            Review answers
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Right — scoring log */}
+                <div className="space-y-4">
+                  {/* Constitutional posture */}
+                  <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+                    <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                      <Eyebrow>Constitutional posture</Eyebrow>
+                    </div>
+                    <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
+                      {[
+                        { label: "Route",         value: decision.route,       color: rc.text },
+                        { label: "Posture",        value: scores.posture,        color: postureColor(scores.posture) },
+                        { label: "Readiness",      value: scores.readinessTier,  color: readinessColor(scores.readinessTier) },
+                        { label: "Authority",      value: scores.authorityType,  color: scores.authorityType === "DIRECT" ? "rgba(110,231,183,0.80)" : scores.authorityType === "PROXY" ? `${GOLD}CC` : "rgba(252,165,165,0.80)" },
+                        { label: "Coherence",      value: `${scores.coherence}%`,  color: undefined },
+                        { label: "Trust",          value: `${scores.trust}%`,      color: undefined },
+                        { label: "Governance",     value: `${scores.governance}%`, color: undefined },
+                        { label: "Seriousness",    value: `${scores.seriousness}%`,color: undefined },
+                        { label: "Failure modes",  value: `${scores.failureModeCount}`, color: undefined },
+                        { label: "Confidence",     value: `${Math.round(decision.confidence * 100)}%`, color: undefined },
+                        { label: "Post. weight",   value: `${decision.postureWeight.toFixed(2)}`, color: undefined },
+                        { label: "Read. weight",   value: `${decision.readinessWeight.toFixed(2)}`, color: undefined },
+                      ].map(({ label, value, color }) => (
+                        <div key={label} className="flex items-center justify-between gap-3 py-2"
+                          style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                            {label}
+                          </span>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", color: color ?? "rgba(255,255,255,0.58)" }}>
+                            {value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Rationale log */}
+                  {decision.rationale.length > 0 && (
+                    <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.005)", padding: "1.25rem" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.85rem" }}>
+                        Scoring rationale
+                      </div>
+                      <div className="space-y-1.5">
+                        {decision.rationale.map(r => (
+                          <p key={r} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", lineHeight: 1.65, color: "rgba(255,255,255,0.25)" }}>
+                            — {r}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+          </motion.div>
+        )}
 
-            <h1 className="mt-6 font-serif text-4xl text-white">Route: {decision?.route}</h1>
-            <p className="mt-4 max-w-3xl text-white/58">
-              This micro-report is self-sufficient as a first gate, but it is designed to hand signal forward into the next layer without rework.
-            </p>
-
-            <div className="mt-8 flex gap-4">
-              <Link
-                href={routeHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-medium text-black transition hover:bg-amber-400"
-              >
-                Continue
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-
-              <button
-                onClick={() => setShow(false)}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-6 py-3 text-sm font-medium text-white/60 transition hover:bg-white/5"
-              >
-                Review answers
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </AnimatePresence>
     </div>
   );
 }

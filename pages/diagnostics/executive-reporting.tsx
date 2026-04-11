@@ -1,294 +1,775 @@
+// pages/diagnostics/executive-reporting.tsx
+// The flagship diagnostic product surface.
+// No fake demo data. No pricing table. No fabricated case studies.
+// The page earns authority by describing the product precisely.
+
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Layout from "@/components/Layout";
 import {
-  Shield,
-  BarChart3,
-  FileText,
+  AlertTriangle,
   ArrowRight,
-  X,
-  CheckCircle2,
-  Target,
+  BarChart3,
+  CheckSquare,
+  ChevronRight,
+  FileText,
+  Lock,
   Scale,
-  Activity,
-  Crown,
+  ShieldCheck,
+  Target,
 } from "lucide-react";
 
-function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(" ");
+import Layout from "@/components/Layout";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+const BASE = "rgb(6 6 9)";
+const VOID = "rgb(3 3 5)";
+const LIFT = "rgb(10 14 20)";
+
+const GRAIN: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  backgroundSize: "180px 180px",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+};
+
+const stagger = (d = 0.09) => ({
+  hidden: {},
+  show: { transition: { staggerChildren: d } },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIMITIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
+function GoldRule({ soft = false }: { soft?: boolean }) {
+  return (
+    <div className={soft
+      ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+      : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/25 to-transparent"
+    } />
+  );
 }
 
-const FADE_UP = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6 },
-};
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span style={{
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontSize: "8.5px",
+        letterSpacing: "0.40em",
+        textTransform: "uppercase",
+        color: `${GOLD}BB`,
+      }}>
+        {children}
+      </span>
+    </div>
+  );
+}
 
-/* ---- Demo data ---- */
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
 
-const DEMO = {
-  org: "Meridian Capital Group",
-  issue: "Board governance breakdown — authority ambiguity across executive committee",
-  posture: "DRIFTING",
-  route: "DIAGNOSTIC",
-  metrics: [
-    { label: "Authority Clarity", value: 68, color: "text-amber-400" },
-    { label: "Execution Trust", value: 41, color: "text-red-400" },
-    { label: "Exposure Score", value: 78, color: "text-red-400" },
-  ],
-  findings: [
-    { title: "Decision-rights ambiguity", desc: "Three board members hold overlapping authority over capital allocation. No single accountable sponsor exists for the transformation programme." },
-    { title: "Trust gap between layers", desc: "Leadership rates execution trust at 68%. Operations teams rate it at 41%. This 27-point gap signals a fundamental perception disconnect." },
-    { title: "Exposure without governance", desc: "Financial exposure is rated 78% but governance integrity sits at 52%. The organisation is carrying consequence without the structural discipline to contain it." },
-  ],
-};
-
-const TIERS = [
+const REPORT_SECTIONS = [
   {
-    name: "Diagnostic Report",
-    price: "2,400",
-    features: ["Constitutional diagnostic", "Domain analysis across 6 dimensions", "Priority stack and failure modes", "PDF output with forensic watermark"],
-    highlighted: false,
+    icon: BarChart3,
+    title: "Constitutional posture",
+    body: "Route, readiness tier, authority classification, org state, and temperature — the complete constitutional reading derived from the intake. Seven scored dimensions rendered as a coherent posture statement.",
   },
   {
-    name: "Executive Reporting",
-    price: "8,500",
-    features: ["Full boardroom-grade report", "Intervention recommendations", "Governance and authority audit", "Quarterly reporting cadence"],
-    highlighted: true,
+    icon: AlertTriangle,
+    title: "Failure mode analysis",
+    body: "Structural failure modes identified through the constitutional scoring engine — not symptomatic observations. Each mode is named, domain-attributed, and severity-classified.",
   },
   {
-    name: "Strategy Room",
-    price: "24,000",
-    features: ["Direct advisory engagement", "Mandate execution and tracking", "Sovereign-grade reporting", "Dedicated institutional strategist"],
-    highlighted: false,
-  },
-];
-
-const CASES = [
-  {
-    pattern: "Governance Trust Gap",
-    text: "A FTSE 250 financial services group identified a 34-point trust gap between board and execution layers. The diagnostic surfaced that strategic intent was coherent at the top but systematically diluted through three layers of translation. Intervention re-sequenced the operating cadence and closed the gap within two quarters.",
+    icon: Target,
+    title: "Domain findings",
+    body: "Three to five board-level findings across governance, authority, execution, trust, and strategy. Each finding carries a headline, a reading drawn from the scoring data, and an observable operational signal.",
   },
   {
-    pattern: "Contested Authority",
-    text: "A private equity-backed technology platform discovered its governance posture was CONTESTED — high execution capacity paired with weak governance discipline. The report revealed that speed was masking structural fragility. A governance reconstruction programme prevented a board-level crisis during the next funding round.",
+    icon: Scale,
+    title: "Strategic domain analysis",
+    body: "Intent vs reality gap analysis across dominant domains. The dissonance score quantifies where declared strategic intent diverges from constitutional operating reality.",
   },
   {
-    pattern: "Authority Ambiguity",
-    text: "A family office managing £400M in assets used the diagnostic to surface a critical authority ambiguity between the principal and the operating committee. Decision rights had never been formally codified. The resulting doctrine eliminated 14 months of recurring escalation friction.",
+    icon: CheckSquare,
+    title: "Priority stack and interventions",
+    body: "The ordered set of corrective actions the constitutional assessment determines necessary, sequenced by impact and addressable by the declared authority.",
+  },
+  {
+    icon: FileText,
+    title: "Executive summary and mandate",
+    body: "A board-grade narrative summary written for a principal or chair. States the structural condition plainly. Closes with a single governed next action — the constitutional mandate.",
   },
 ];
 
-const STEPS = [
-  { icon: FileText, label: "Submit your brief", desc: "A structured intake captures situation gravity, authority clarity, and consequence exposure." },
-  { icon: Activity, label: "Analysis runs", desc: "Constitutional scoring, domain analysis, and governance audit execute against sovereign thresholds." },
-  { icon: BarChart3, label: "Report delivered", desc: "A board-grade intelligence brief with governed recommendations and intervention priorities." },
+const HOW_STEPS = [
+  {
+    n: "01",
+    title: "Declare the matter",
+    body: "A structured intake captures the full diagnostic picture: problem statement, symptoms, desired outcome, constraint, authority scope, evidence quality, financial exposure, and decision question.",
+  },
+  {
+    n: "02",
+    title: "Constitutional scoring",
+    body: "The system derives a constitutional assessment across seven dimensions — clarity, governance, authority, severity, readiness, org state, and route — using the same engine as the Strategy Room.",
+  },
+  {
+    n: "03",
+    title: "Guidance assembled",
+    body: "Constitutional guidance is assembled against the asset registry. Governed recommendations are matched by domain fit, readiness tier, and failure mode signature.",
+  },
+  {
+    n: "04",
+    title: "Brief delivered",
+    body: "A board-grade intelligence brief is rendered immediately: executive summary, domain analysis, findings, priority stack, financial exposure estimate, and escalation route.",
+  },
 ];
 
-/* ---- Page ---- */
+const FIT_CONDITIONS = [
+  "A board or executive team is carrying material consequence without a structural reading of the problem.",
+  "Leadership perceives misalignment but cannot locate where the failure mode actually lives.",
+  "A decision of significant operational, financial, or reputational weight is approaching.",
+  "The authority structure is unclear, contested, or carrying ambiguity that compounds over time.",
+  "Prior advisory or consulting work has not produced lasting structural change.",
+];
+
+const UNFIT_CONDITIONS = [
+  "The problem is not yet articulated with sufficient structural precision for governance-grade analysis.",
+  "The submitting authority does not have direct or sponsoring access to the mandate.",
+  "The situation is exploratory rather than consequential.",
+];
+
+const WHAT_THE_INTAKE_REQUIRES = [
+  { label: "Organisation & role",      desc: "Who is submitting and from what position of authority." },
+  { label: "Problem statement",        desc: "The structural problem, not symptoms. Minimum 120 characters." },
+  { label: "Observed symptoms",        desc: "What is visible on the ground. Minimum 80 characters." },
+  { label: "Desired outcome",          desc: "The decision-grade outcome the situation requires." },
+  { label: "Current constraint",       desc: "What is materially blocking movement right now." },
+  { label: "Authority & governance",   desc: "Authority scope, decision sponsor, stakeholder breadth." },
+  { label: "Financial exposure",       desc: "Revenue band, market exposure, estimated exposure (GBP)." },
+  { label: "Evidence quality",         desc: "How strong and current the evidence base is." },
+  { label: "Decision question",        desc: "The specific decision that needs to be made." },
+  { label: "Cost of inaction",         desc: "What happens structurally if nothing changes." },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function ExecutiveReportingPage() {
-  const [showDemo, setShowDemo] = React.useState(false);
-
   return (
-    <Layout title="Executive Reporting" description="Board-grade executive intelligence briefs for institutional decision-makers.">
+    <Layout
+      title="Executive Reporting | Abraham of London"
+      description="Board-grade executive intelligence briefs. Constitutional diagnosis of structural failure modes, authority ambiguity, and governance weakness — rendered from a disciplined intake."
+      canonicalUrl="/diagnostics/executive-reporting"
+      fullWidth
+      headerTransparent
+    >
       <Head>
-        <meta name="description" content="Board-grade executive intelligence briefs for institutional decision-makers." />
-        <link rel="canonical" href="/diagnostics/executive-reporting" />
+        <meta name="robots" content="index,follow" />
       </Head>
 
-      {/* ---- Hero ---- */}
-      <motion.section {...FADE_UP} className="relative py-20 lg:py-28">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Link href="/diagnostics" className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 hover:text-white/50 transition-colors">
-              Diagnostics
-            </Link>
-            <span className="text-white/20">/</span>
-            <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/50">Executive Reporting</span>
+      <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
+
+        {/* ── HERO ──────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute" style={{
+              left: "-5%", top: "-10%",
+              width: "700px", height: "600px",
+              borderRadius: "50%",
+              background: `radial-gradient(ellipse at center, ${GOLD}09 0%, ${GOLD}03 30%, transparent 65%)`,
+              filter: "blur(140px)",
+            }} />
+            <div className="absolute inset-x-0 bottom-0 h-40"
+              style={{ background: `linear-gradient(to top, ${BASE}, transparent)` }} />
+            <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
           </div>
+          <div className="absolute inset-x-0 top-0 h-px"
+            style={{ background: `linear-gradient(to right, transparent, ${GOLD}22, transparent)` }} />
 
-          <Crown className="h-8 w-8 text-amber-500/40 mx-auto mb-6" />
+          <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+            <div className="pt-36 md:pt-44 lg:pt-52" />
 
-          <h1 className="font-serif text-5xl lg:text-6xl text-white/90 leading-tight tracking-tight">
-            Executive Reporting
-          </h1>
-          <p className="mt-6 text-lg leading-relaxed text-white/45 max-w-2xl mx-auto">
-            Board-grade intelligence briefs that translate diagnostic signal into
-            governed recommendations and institutional mandate.
-          </p>
-
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/diagnostics/executive-reporting/run"
-              className="inline-flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.08] px-8 py-4 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-300 hover:bg-amber-500/[0.15] transition-colors">
-              Run Your Diagnostic <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <button onClick={() => setShowDemo(!showDemo)}
-              className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-white/40 hover:text-white/70 transition-colors">
-              {showDemo ? "Close demo" : "See it in action"}
-            </button>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ---- Demo ---- */}
-      {showDemo && (
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          className="py-12 lg:py-16">
-          <div className="mx-auto max-w-5xl px-6">
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-8 lg:p-10 relative">
-              <button onClick={() => setShowDemo(false)} className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition-colors">
-                <X className="h-5 w-5" />
-              </button>
-
-              <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-amber-400/60 block mb-2">
-                Live Demo — Sample Report
+            {/* Breadcrumb */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.55 }}
+              className="flex items-center gap-2 mb-10"
+            >
+              <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.25)",
+              }}>
+                Diagnostics
+              </Link>
+              <span style={{ color: "rgba(255,255,255,0.12)" }}>/</span>
+              <span style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.40)",
+              }}>
+                Executive Reporting
               </span>
-              <h2 className="font-serif text-2xl text-white/85">{DEMO.org}</h2>
-              <p className="mt-2 text-sm text-white/40">{DEMO.issue}</p>
+            </motion.div>
 
-              <div className="mt-6 flex items-center gap-4">
-                <span className="rounded-full border border-amber-500/20 bg-amber-500/[0.07] px-3 py-1 font-mono text-[8px] uppercase tracking-[0.2em] text-amber-300">
-                  {DEMO.posture}
-                </span>
-                <span className="font-mono text-[8px] text-white/30">Route: {DEMO.route}</span>
-              </div>
+            <div className="grid gap-16 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                {DEMO.metrics.map((m) => (
-                  <div key={m.label} className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-center">
-                    <span className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/30 block mb-2">{m.label}</span>
-                    <span className={cn("font-serif text-3xl", m.color)}>{m.value}%</span>
+              {/* Left — title */}
+              <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
+                <motion.div variants={fadeUp}>
+                  <Eyebrow>Flagship diagnostic · Board-grade intelligence</Eyebrow>
+                </motion.div>
+
+                <motion.h1 variants={fadeUp} style={{
+                  marginTop: "1.5rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(2.8rem, 6.5vw, 6.5rem)",
+                  lineHeight: 0.90,
+                  letterSpacing: "-0.048em",
+                  color: "rgba(255,255,255,0.94)",
+                }}>
+                  Executive
+                  <br />
+                  <span style={{ color: "rgba(255,255,255,0.28)" }}>Intelligence Brief.</span>
+                </motion.h1>
+
+                <motion.p variants={fadeUp} style={{
+                  marginTop: "1.75rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1rem, 1.4vw, 1.22rem)",
+                  lineHeight: 1.72,
+                  color: "rgba(255,255,255,0.42)",
+                  maxWidth: "50ch",
+                }}>
+                  A constitutional diagnosis of structural failure modes, authority
+                  ambiguity, and governance weakness — rendered immediately from a
+                  disciplined intake. Not a framework. Not a template. A governed reading.
+                </motion.p>
+
+                <motion.div variants={fadeUp} style={{ marginTop: "2.5rem" }}>
+                  <div className="flex flex-wrap gap-3">
+                    <Link href="/diagnostics/executive-reporting/run"
+                      className="group inline-flex items-center gap-3 transition-all duration-300"
+                      style={{
+                        padding: "14px 28px",
+                        border: `1px solid ${GOLD}42`,
+                        backgroundColor: `${GOLD}0E`,
+                        color: GOLD,
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "9px",
+                        letterSpacing: "0.30em",
+                        textTransform: "uppercase",
+                      }}
+                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
+                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
+                    >
+                      Run your diagnostic <ArrowRight style={{ width: "12px", height: "12px" }} />
+                    </Link>
+                    <Link href="/diagnostics"
+                      className="inline-flex items-center gap-3 transition-all duration-300"
+                      style={{
+                        padding: "14px 28px",
+                        border: "1px solid rgba(255,255,255,0.09)",
+                        color: "rgba(255,255,255,0.38)",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "9px",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                      }}
+                      onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.65)"; }}
+                      onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.38)"; }}
+                    >
+                      Diagnostic ladder
+                    </Link>
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              </motion.div>
 
-              <div className="mt-8 space-y-4">
-                <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 block">Key Findings</span>
-                {DEMO.findings.map((f, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}
-                    className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
-                    <h3 className="text-sm font-medium text-white/70">{f.title}</h3>
-                    <p className="mt-2 text-xs leading-relaxed text-white/40">{f.desc}</p>
+              {/* Right — report specification */}
+              <motion.div
+                initial={{ opacity: 0, x: 14 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.80, delay: 0.16 }}
+              >
+                <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: LIFT }}>
+                  <div style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: `1px solid ${GOLD}12`,
+                    background: `linear-gradient(to right, ${GOLD}08, transparent)`,
+                  }}>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.40em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}90`,
+                    }}>
+                      Report specification
+                    </span>
+                  </div>
+
+                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                    {[
+                      { label: "Classification",     value: "Diagnostic · Restricted" },
+                      { label: "Generation",         value: "Real-time constitutional synthesis" },
+                      { label: "Constitutional data",value: "7-dimension scoring + posture" },
+                      { label: "Findings",           value: "3–5 board-level domain diagnoses" },
+                      { label: "Priority stack",     value: "Ordered interventions, up to 8" },
+                      { label: "Financial exposure", value: "Modelled from intake data" },
+                      { label: "Domain analysis",    value: "Intent vs reality dissonance" },
+                      { label: "Routing",            value: "STRATEGY · DIAGNOSTIC · REJECT" },
+                      { label: "Storage",            value: "Run record persisted, intake governed" },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="flex items-start justify-between gap-3 px-4 py-2.5">
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.28em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.20)",
+                        }}>
+                          {label}
+                        </span>
+                        <span style={{
+                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                          fontWeight: 300,
+                          fontSize: "0.88rem",
+                          color: "rgba(255,255,255,0.58)",
+                          textAlign: "right",
+                          maxWidth: "55%",
+                        }}>
+                          {value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ padding: "0.85rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div className="flex items-center gap-2">
+                      <Lock style={{ width: "10px", height: "10px", color: `${GOLD}70` }} />
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px",
+                        letterSpacing: "0.26em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.20)",
+                      }}>
+                        Governed · Intake-driven · Not templated
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            <div style={{ paddingBottom: "5rem" }} />
+          </div>
+        </section>
+
+        {/* ── WHAT THE REPORT CONTAINS ──────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE }}>
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} className="mb-12">
+              <Eyebrow>Report contents</Eyebrow>
+              <h2 style={{
+                marginTop: "1.25rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+                lineHeight: 1.0,
+                letterSpacing: "-0.025em",
+                color: "rgba(255,255,255,0.90)",
+              }}>
+                What the brief contains.
+              </h2>
+              <p style={{
+                marginTop: "0.85rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "1.02rem",
+                lineHeight: 1.70,
+                color: "rgba(255,255,255,0.38)",
+                maxWidth: "46ch",
+              }}>
+                Every section is derived from the constitutional assessment of the
+                specific intake. Nothing is generic. Nothing is carried across from
+                a template.
+              </p>
+            </motion.div>
+
+            <motion.div variants={stagger(0.08)} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            >
+              {REPORT_SECTIONS.map(s => {
+                const Icon = s.icon;
+                return (
+                  <motion.div key={s.title} variants={fadeUp}>
+                    <div style={{
+                      border: "1px solid rgba(255,255,255,0.062)",
+                      backgroundColor: "rgb(5 5 7)",
+                      padding: "1.75rem 2rem",
+                      height: "100%",
+                    }}>
+                      <Icon style={{ width: "18px", height: "18px", color: `${GOLD}AA`, marginBottom: "1.25rem" }} />
+                      <h3 style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "1.12rem",
+                        color: "rgba(255,255,255,0.82)",
+                        marginBottom: "0.65rem",
+                      }}>
+                        {s.title}
+                      </h3>
+                      <p style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.90rem",
+                        lineHeight: 1.68,
+                        color: "rgba(255,255,255,0.38)",
+                      }}>
+                        {s.body}
+                      </p>
+                    </div>
                   </motion.div>
-                ))}
-              </div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── WHAT THE INTAKE REQUIRES ──────────────────────────────────── */}
+        <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
+            <div className="grid gap-14 lg:grid-cols-[1fr_1fr] lg:items-start">
+
+              <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
+                <Eyebrow>Intake requirements</Eyebrow>
+                <h2 style={{
+                  marginTop: "1.25rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1.7rem, 2.8vw, 2.5rem)",
+                  lineHeight: 1.0,
+                  letterSpacing: "-0.022em",
+                  color: "rgba(255,255,255,0.88)",
+                }}>
+                  What the intake requires.
+                </h2>
+                <p style={{
+                  marginTop: "0.85rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "1.02rem",
+                  lineHeight: 1.70,
+                  color: "rgba(255,255,255,0.38)",
+                  maxWidth: "42ch",
+                }}>
+                  The intake is the diagnostic instrument. The quality of the output
+                  is determined entirely by the precision of the input. Thin answers
+                  produce thin diagnoses.
+                </p>
+              </motion.div>
+
+              <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} transition={{ delay: 0.10 }}>
+                <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                    {WHAT_THE_INTAKE_REQUIRES.map(({ label, desc }) => (
+                      <div key={label} className="flex items-start gap-4 px-4 py-3">
+                        <div style={{
+                          flexShrink: 0,
+                          width: "4px",
+                          height: "4px",
+                          borderRadius: "50%",
+                          backgroundColor: `${GOLD}55`,
+                          marginTop: "7px",
+                        }} />
+                        <div>
+                          <div style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px",
+                            letterSpacing: "0.28em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.38)",
+                            marginBottom: "0.25rem",
+                          }}>
+                            {label}
+                          </div>
+                          <p style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.88rem",
+                            lineHeight: 1.55,
+                            color: "rgba(255,255,255,0.38)",
+                          }}>
+                            {desc}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
-        </motion.section>
-      )}
+        </section>
 
-      {/* ---- How It Works ---- */}
-      <motion.section {...FADE_UP} className="py-20 lg:py-28 border-t border-white/[0.04]">
-        <div className="mx-auto max-w-5xl px-6">
-          <div className="text-center mb-12">
-            <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">How It Works</span>
-            <h2 className="mt-4 font-serif text-3xl text-white/85">Three steps to institutional clarity</h2>
-          </div>
-          <div className="grid gap-8 md:grid-cols-3">
-            {STEPS.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.03] mb-5">
-                    <Icon className="h-5 w-5 text-amber-500/60" />
+        {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} className="mb-12">
+              <Eyebrow>How it works</Eyebrow>
+              <h2 style={{
+                marginTop: "1.25rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+                lineHeight: 1.0,
+                letterSpacing: "-0.025em",
+                color: "rgba(255,255,255,0.90)",
+              }}>
+                Four steps to institutional clarity.
+              </h2>
+            </motion.div>
+
+            <motion.div variants={stagger(0.09)} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+            >
+              {HOW_STEPS.map(step => (
+                <motion.div key={step.n} variants={fadeUp}>
+                  <div style={{
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: "rgba(255,255,255,0.015)",
+                    padding: "1.75rem",
+                    height: "100%",
+                  }}>
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "2.8rem",
+                      lineHeight: 1,
+                      color: `${GOLD}22`,
+                      marginBottom: "1.25rem",
+                    }}>
+                      {step.n}
+                    </div>
+                    <h3 style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1.10rem",
+                      color: "rgba(255,255,255,0.80)",
+                      marginBottom: "0.65rem",
+                    }}>
+                      {step.title}
+                    </h3>
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.88rem",
+                      lineHeight: 1.68,
+                      color: "rgba(255,255,255,0.38)",
+                    }}>
+                      {step.body}
+                    </p>
                   </div>
-                  <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/25 mb-2">Step {i + 1}</div>
-                  <h3 className="font-serif text-lg text-white/80">{step.label}</h3>
-                  <p className="mt-3 text-xs leading-relaxed text-white/40">{step.desc}</p>
                 </motion.div>
-              );
-            })}
+              ))}
+            </motion.div>
           </div>
-        </div>
-      </motion.section>
+        </section>
 
-      {/* ---- Pricing ---- */}
-      <motion.section {...FADE_UP} className="py-20 lg:py-28 border-t border-white/[0.04]">
-        <div className="mx-auto max-w-5xl px-6">
-          <div className="text-center mb-12">
-            <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">Engagement Tiers</span>
-            <h2 className="mt-4 font-serif text-3xl text-white/85">Choose your level of engagement</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {TIERS.map((tier, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
-                className={cn("rounded-2xl border p-8 flex flex-col",
-                  tier.highlighted ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-white/[0.08] bg-white/[0.02]")}>
-                <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">{tier.name}</span>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="font-serif text-3xl text-white/85">£{tier.price}</span>
-                  <span className="font-mono text-[9px] text-white/30">+ VAT</span>
+        {/* ── FIT CONDITIONS ────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} className="mb-10">
+              <Eyebrow>Fit conditions</Eyebrow>
+              <h2 style={{
+                marginTop: "1.25rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+                lineHeight: 1.0,
+                letterSpacing: "-0.025em",
+                color: "rgba(255,255,255,0.90)",
+              }}>
+                When the brief is appropriate.
+              </h2>
+            </motion.div>
+
+            <div className="grid gap-10 lg:grid-cols-2">
+              <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.38em",
+                  textTransform: "uppercase",
+                  color: "rgba(110,231,183,0.65)",
+                  marginBottom: "1rem",
+                }}>
+                  Appropriate when
                 </div>
-                <ul className="mt-6 space-y-3 flex-1">
-                  {tier.features.map((f, j) => (
-                    <li key={j} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-amber-500/50 mt-0.5 shrink-0" />
-                      <span className="text-xs text-white/45">{f}</span>
-                    </li>
+                <div className="space-y-3">
+                  {FIT_CONDITIONS.map((line, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div style={{
+                        flexShrink: 0, width: "5px", height: "5px", borderRadius: "50%",
+                        backgroundColor: "rgba(110,231,183,0.50)", marginTop: "7px",
+                      }} />
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.62,
+                        color: "rgba(255,255,255,0.55)",
+                      }}>
+                        {line}
+                      </span>
+                    </div>
                   ))}
-                </ul>
-                <Link href={tier.highlighted ? "/diagnostics/executive-reporting/run" : "/diagnostics"}
-                  className={cn("mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.2em] transition-all",
-                    tier.highlighted
-                      ? "border border-amber-500/30 bg-amber-500/[0.08] text-amber-300 hover:bg-amber-500/[0.15]"
-                      : "border border-white/[0.08] text-white/40 hover:text-white/70")}>
-                  {tier.highlighted ? "Get started" : "Learn more"} <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
+                </div>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
 
-      {/* ---- Case Patterns ---- */}
-      <motion.section {...FADE_UP} className="py-20 lg:py-28 border-t border-white/[0.04]">
-        <div className="mx-auto max-w-5xl px-6">
-          <div className="text-center mb-12">
-            <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">Case Patterns</span>
-            <h2 className="mt-4 font-serif text-3xl text-white/85">Structural problems the product has solved</h2>
-          </div>
-          <div className="space-y-6">
-            {CASES.map((c, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8">
-                <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-amber-400/60">{c.pattern}</span>
-                <p className="mt-3 text-sm leading-[1.8] text-white/50">{c.text}</p>
+              <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} transition={{ delay: 0.12 }}>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.38em",
+                  textTransform: "uppercase",
+                  color: "rgba(252,165,165,0.55)",
+                  marginBottom: "1rem",
+                }}>
+                  Not appropriate when
+                </div>
+                <div className="space-y-3 mb-8">
+                  {UNFIT_CONDITIONS.map((line, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div style={{
+                        flexShrink: 0, width: "5px", height: "5px", borderRadius: "50%",
+                        backgroundColor: "rgba(252,165,165,0.40)", marginTop: "7px",
+                      }} />
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.62,
+                        color: "rgba(255,255,255,0.40)",
+                      }}>
+                        {line}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{
+                  padding: "1.25rem 1.5rem",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  backgroundColor: "rgba(255,255,255,0.01)",
+                }}>
+                  <p style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65,
+                    color: "rgba(255,255,255,0.32)", fontStyle: "italic",
+                    marginBottom: "0.85rem",
+                  }}>
+                    If the situation doesn't yet meet these conditions, the
+                    constitutional diagnostic or team assessment are the appropriate
+                    starting points.
+                  </p>
+                  <Link href="/diagnostics"
+                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.25)",
+                    }}
+                  >
+                    View diagnostic ladder <ChevronRight style={{ width: "10px", height: "10px" }} />
+                  </Link>
+                </div>
               </motion.div>
-            ))}
+            </div>
           </div>
-        </div>
-      </motion.section>
+        </section>
 
-      {/* ---- Final CTA ---- */}
-      <motion.section {...FADE_UP} className="py-20 lg:py-28 border-t border-white/[0.04]">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <Shield className="h-8 w-8 text-amber-500/30 mx-auto mb-6" />
-          <h2 className="font-serif text-3xl text-white/85">Ready for institutional clarity?</h2>
-          <p className="mt-4 text-sm text-white/40 max-w-xl mx-auto">
-            Begin with the diagnostic. The system will determine whether you qualify for
-            executive reporting, strategy room engagement, or foundational correction.
-          </p>
-          <Link href="/diagnostics/executive-reporting/run"
-            className="mt-8 inline-flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.08] px-8 py-4 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-300 hover:bg-amber-500/[0.15] transition-colors">
-            Run Your Diagnostic <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-      </motion.section>
+        {/* ── CLOSE ─────────────────────────────────────────────────────── */}
+        <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
+              <div style={{
+                border: `1px solid ${GOLD}20`,
+                backgroundColor: `${GOLD}07`,
+                padding: "2.5rem",
+              }}>
+                <Eyebrow>Begin</Eyebrow>
+                <h2 style={{
+                  marginTop: "1.25rem",
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1.5rem, 2.5vw, 2.2rem)",
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.022em",
+                  color: "rgba(255,255,255,0.88)",
+                  marginBottom: "0.85rem",
+                }}>
+                  Declare the matter. Receive the reading.
+                </h2>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.72,
+                  color: "rgba(255,255,255,0.42)", fontStyle: "italic",
+                  maxWidth: "48ch", marginBottom: "1.75rem",
+                }}>
+                  The system will determine whether the matter qualifies for executive
+                  reporting, strategy room engagement, or foundational correction.
+                  The intake is the instrument.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/diagnostics/executive-reporting/run"
+                    className="inline-flex items-center gap-2.5 transition-all duration-300"
+                    style={{
+                      padding: "13px 26px",
+                      border: `1px solid ${GOLD}42`,
+                      backgroundColor: `${GOLD}10`,
+                      color: `${GOLD}CC`,
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                    }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}60`; el.style.backgroundColor = `${GOLD}18`; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
+                  >
+                    Run diagnostic <ArrowRight style={{ width: "11px", height: "11px" }} />
+                  </Link>
+                  <Link href="/consulting/strategy-room"
+                    className="inline-flex items-center gap-2.5 transition-all duration-300"
+                    style={{
+                      padding: "13px 26px",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.35)",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                    }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.60)"; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.08)"; el.style.color = "rgba(255,255,255,0.35)"; }}
+                  >
+                    Strategy Room
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
-      {/* ---- Escalation Close ---- */}
-      <div className="py-12 border-t border-white/[0.06] text-center">
-        <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/25 mb-4">Next Layer</p>
-        <Link href="/consulting/strategy-room" className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-300/70 hover:text-amber-300 transition-colors">
-          Strategy Room <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
       </div>
     </Layout>
   );

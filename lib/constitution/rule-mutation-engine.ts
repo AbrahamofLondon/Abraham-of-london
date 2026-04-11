@@ -110,10 +110,8 @@ export function resetMutations(): void {
   console.log("[Rule Mutation Engine] All mutations purged.");
 }
 
-// Side-effect: Bootstrap the engine in server-side contexts
-if (typeof window === "undefined") {
-  runRuleMutationEngine();
-}
+// Side-effect removed — call runRuleMutationEngine() explicitly when needed
+// to avoid build-time crashes from tribunal store imports during static analysis.
 
 const engine = {
   getMutation,

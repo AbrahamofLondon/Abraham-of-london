@@ -1,19 +1,18 @@
 // app/api/alignment/enterprise/assessments/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getParticipantByInviteTokenHash,
-  markParticipantCompleted,
-  markParticipantOpened,
-  saveEnterpriseAssessment,
-} from "@/lib/alignment/enterprise-repository";
-import { aggregateEnterpriseCampaign } from "@/lib/alignment/enterprise-aggregation";
-import {
-  hashEnterpriseInviteToken,
-  verifyEnterpriseInviteToken,
-} from "@/lib/alignment/enterprise-invites";
-import { submitEnterpriseAssessmentSchema } from "@/lib/alignment/enterprise-schemas";
-import { scoreEnterpriseAssessment } from "@/lib/alignment/enterprise-score";
-import { adaptEnterpriseAssessmentToConstitution } from "@/lib/alignment/enterprise-constitution-adapter";
+
+// Dynamic imports to avoid build-time reference errors from transitive dependencies
+async function loadModules() {
+  const [repo, agg, invites, schemas, score, adapter] = await Promise.all([
+    import("@/lib/alignment/enterprise-repository"),
+    import("@/lib/alignment/enterprise-aggregation"),
+    import("@/lib/alignment/enterprise-invites"),
+    import("@/lib/alignment/enterprise-schemas"),
+    import("@/lib/alignment/enterprise-score"),
+    import("@/lib/alignment/enterprise-constitution-adapter"),
+  ]);
+  return { ...repo, ...agg, ...invites, ...schemas, ...score, ...adapter };
+}
 
 function errorResponse(message: string, status = 400, details?: unknown) {
   return NextResponse.json({ ok: false, error: message, details }, { status });
@@ -21,6 +20,7 @@ function errorResponse(message: string, status = 400, details?: unknown) {
 
 export async function GET(req: NextRequest) {
   try {
+    const m = await loadModules();
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
@@ -28,13 +28,13 @@ export async function GET(req: NextRequest) {
       return errorResponse("Missing authentication token", 400);
     }
 
-    const payload = verifyEnterpriseInviteToken(token);
+    const payload = m.verifyEnterpriseInviteToken(token);
     if (!payload) {
       return errorResponse("Invite is invalid or expired", 401);
     }
 
-    const participant = await getParticipantByInviteTokenHash(
-      hashEnterpriseInviteToken(token),
+    const participant = await m.getParticipantByInviteTokenHash(
+      m.hashEnterpriseInviteToken(token),
     );
 
     if (!participant) {
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (participant.status === "invited") {
-      await markParticipantOpened(participant.id);
+      await m.markParticipantOpened(participant.id);
     }
 
     return NextResponse.json({
@@ -70,6 +70,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const m = await loadModules();
     const body = await req.json();
     const token = body?.token;
 
@@ -77,20 +78,19 @@ export async function POST(req: NextRequest) {
       return errorResponse("Missing authentication token", 401);
     }
 
-    const payload = verifyEnterpriseInviteToken(token);
+    const payload = m.verifyEnterpriseInviteToken(token);
     if (!payload) {
       return errorResponse("Invite is invalid or expired", 401);
     }
 
-    const participant = await getParticipantByInviteTokenHash(
-      hashEnterpriseInviteToken(token),
+    const participant = await m.getParticipantByInviteTokenHash(
+      m.hashEnterpriseInviteToken(token),
     );
 
     if (!participant) {
       return errorResponse("Identity mismatch or invalid token", 401);
     }
 
-    // Email is on membership, not directly on participant
     const participantEmail = participant.membership?.userEmail;
     if (!participantEmail || participantEmail.toLowerCase() !== payload.email.toLowerCase()) {
       return errorResponse("Invite identity mismatch", 403);
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       return errorResponse("The campaign is currently closed to new entries", 409);
     }
 
-    const validated = submitEnterpriseAssessmentSchema.safeParse({
+    const validated = m.submitEnterpriseAssessmentSchema.safeParse({
       answers: body?.answers,
     });
 
@@ -116,18 +116,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const score = scoreEnterpriseAssessment(validated.data.answers);
-    const constitutional = adaptEnterpriseAssessmentToConstitution(score);
+    const score = m.scoreEnterpriseAssessment(validated.data.answers);
+    const constitutional = m.adaptEnterpriseAssessmentToConstitution(score);
 
-    // ✅ FIX: Pass the object directly, NOT JSON.stringify
-    // The repository's toPrismaJsonValue will handle serialization correctly
-    const assessment = await saveEnterpriseAssessment({
+    const assessment = await m.saveEnterpriseAssessment({
       campaignId: participant.campaignId,
       participantId: participant.id,
       organisationId: participant.campaign.organisationId,
       teamName: participant.membership?.teamName ?? null,
       isExecutive: participant.membership?.isExecutive ?? false,
-      answersJson: validated.data.answers, // Pass object directly, not stringified
+      answersJson: validated.data.answers,
       totalScore: score.totalScore,
       possibleScore: score.possibleScore,
       percentScore: score.percentScore,
@@ -137,14 +135,12 @@ export async function POST(req: NextRequest) {
       domainScores: score.domainScores,
     });
 
-    await markParticipantCompleted(participant.id);
+    await m.markParticipantCompleted(participant.id);
 
-    // Trigger aggregation asynchronously without blocking response
     try {
-      await aggregateEnterpriseCampaign(participant.campaignId);
+      await m.aggregateEnterpriseCampaign(participant.campaignId);
     } catch (aggErr) {
       console.error("[ENTERPRISE_AGGREGATION_ERROR]", aggErr);
-      // Don't fail the request if aggregation fails
     }
 
     return NextResponse.json(

@@ -15,7 +15,12 @@
       "Bash(grep -n \"prisma\\\\.\\\\w\\\\+\\\\.\" C:/Abraham-of-london/app/admin/reports/page.tsx C:/Abraham-of-london/app/api/telemetry/global/route.ts C:/Abraham-of-london/app/actions/deploy-intervention.ts C:/Abraham-of-london/app/api/download/[token]/route.ts C:/Abraham-of-london/app/api/pulse/submit/route.ts)",
       "Bash(grep -n \"import.*Eyebrow\\\\|from.*Eyebrow\" /c/Abraham-of-london/components/**/*.tsx)",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
-      "Bash([ -f \"C:/Abraham-of-london/$route\" ])"
+      "Bash([ -f \"C:/Abraham-of-london/$route\" ])",
+      "Bash(sed 's/\\(.*//')",
+      "Bash(ls:*)",
+      "Bash(npx netlify:*)",
+      "Bash(npm install:*)",
+      "Bash(grep:*)"
     ]
   }
 }
