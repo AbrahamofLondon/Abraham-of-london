@@ -25,7 +25,8 @@
       "Bash(gh run:*)",
       "Bash(winget install:*)",
       "Bash(ls scripts/convert-tailwind-slash-opacity.mjs scripts/vault-master.ts scripts/postcss-guard-dryrun.mjs)",
-      "Bash(ls scripts/audit-assets.js scripts/mdx-integrity-check.mjs scripts/mdx-illegal-jsx-gate.mjs)"
+      "Bash(ls scripts/audit-assets.js scripts/mdx-integrity-check.mjs scripts/mdx-illegal-jsx-gate.mjs)",
+      "Bash(sed:*)"
     ]
   }
 }

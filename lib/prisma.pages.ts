@@ -23,14 +23,32 @@ function createPrismaClient(): PrismaClient {
   });
 }
 
-export const prisma: PrismaClient =
-  global.__prisma_pages__ ?? createPrismaClient();
+// Lazy singleton — PrismaClient is NOT created at import time.
+// This prevents build-time crashes when the query engine binary
+// isn't available (e.g. during Next.js static page collection on Netlify).
+let _prisma: PrismaClient | null = null;
 
-if (process.env.NODE_ENV !== "production") {
-  global.__prisma_pages__ = prisma;
+function ensurePrisma(): PrismaClient {
+  if (_prisma) return _prisma;
+  if (global.__prisma_pages__) {
+    _prisma = global.__prisma_pages__;
+    return _prisma;
+  }
+  _prisma = createPrismaClient();
+  if (process.env.NODE_ENV !== "production") {
+    global.__prisma_pages__ = _prisma;
+  }
+  return _prisma;
 }
 
-export const getPrisma = (): PrismaClient => prisma;
+// Proxy that looks like a PrismaClient but only creates it on first use
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop: string | symbol) {
+    return (ensurePrisma() as any)[prop];
+  },
+});
+
+export const getPrisma = (): PrismaClient => ensurePrisma();
 
 export async function safePrismaQuery<T>(
   label: string,
