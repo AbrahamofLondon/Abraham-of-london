@@ -1,19 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // pages/playbooks/index.tsx
-// Design: Institutional Monumentalism
-// Palette: #060609 canonical base · #C9A96E softGold · sharp 2px panels
-// Typography: Cormorant Garamond display · JetBrains Mono labels
+// Institutional Monumentalism
+// Fixed properly:
+// - removes brittle generic-doc inference
+// - uses Contentlayer's dedicated allPlaybooks collection directly
+// - normalizes slugs consistently with [slug].tsx
+// - filters draft/unpublished entries safely
+// - keeps the same visual language but makes the data path sound
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Workflow, ChevronRight, ScanSearch } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ChevronRight, ScanSearch } from "lucide-react";
+import { allPlaybooks } from "contentlayer/generated";
+import type { Playbook } from "contentlayer/generated";
 
 import Layout from "@/components/Layout";
 import PlaybookCard from "@/components/playbooks/PlaybookCard";
-import { getAllContentlayerDocs } from "@/lib/content/server";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -31,6 +36,10 @@ type PlaybookItem = {
   tags: string[];
 };
 
+type PlaybooksPageProps = {
+  items: PlaybookItem[];
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -45,7 +54,7 @@ const GRAIN: React.CSSProperties = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATA HELPERS
+// HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
 function safeStr(value: unknown, fallback = ""): string {
@@ -60,20 +69,30 @@ function normalizeSlug(value: unknown): string {
 
 function safeStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === "string");
+  return value
+    .map((v) => safeStr(v))
+    .filter(Boolean);
 }
 
-function isPlaybookDoc(doc: Record<string, unknown>): boolean {
-  const type      = safeStr(doc.type).toLowerCase();
-  const kind      = safeStr(doc.kind).toLowerCase();
-  const docKind   = safeStr(doc.docKind).toLowerCase();
-  const collection = safeStr(doc.collection).toLowerCase();
-  const raw       = safeStr((doc._raw as any)?.flattenedPath).toLowerCase();
-  const slug      = safeStr(doc.slug).toLowerCase();
-  return (
-    type === "playbook" || kind === "playbook" || docKind === "playbook" ||
-    collection === "playbooks" || raw.startsWith("playbooks/") || slug.startsWith("playbooks/")
-  );
+function isPublishedPlaybook(doc: Playbook): boolean {
+  const anyDoc = doc as any;
+  return anyDoc?.draft !== true && anyDoc?.published !== false;
+}
+
+function mapPlaybook(doc: Playbook): PlaybookItem {
+  const anyDoc = doc as any;
+
+  return {
+    slug: normalizeSlug(anyDoc.urlSlug || doc.slug),
+    title: safeStr(doc.title, "Untitled Playbook"),
+    description: safeStr(doc.description || anyDoc.summary || anyDoc.excerpt) || null,
+    difficulty: safeStr(anyDoc.difficulty) || null,
+    playbookType: safeStr(anyDoc.playbookType || anyDoc.category || anyDoc.theme) || null,
+    estimatedTime: safeStr(anyDoc.estimatedTime || anyDoc.readingTime) || null,
+    tier: safeStr(anyDoc.tier) || null,
+    phases: safeStringArray(anyDoc.phases),
+    tags: safeStringArray(anyDoc.tags),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,7 +101,11 @@ function isPlaybookDoc(doc: Record<string, unknown>): boolean {
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
+  },
 };
 
 const stagger = (d = 0.09) => ({
@@ -96,10 +119,13 @@ const stagger = (d = 0.09) => ({
 
 function GoldRule({ soft = false }: { soft?: boolean }) {
   return (
-    <div className={soft
-      ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
-      : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent"
-    } />
+    <div
+      className={
+        soft
+          ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+          : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent"
+      }
+    />
   );
 }
 
@@ -107,13 +133,15 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{
-        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "8.5px",
-        letterSpacing: "0.40em",
-        textTransform: "uppercase",
-        color: `${GOLD}BB`,
-      }}>
+      <span
+        style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "8.5px",
+          letterSpacing: "0.40em",
+          textTransform: "uppercase",
+          color: `${GOLD}BB`,
+        }}
+      >
         {children}
       </span>
     </div>
@@ -124,29 +152,23 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 // DATA
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const getStaticProps: GetStaticProps<{ items: PlaybookItem[] }> = async () => {
+export const getStaticProps: GetStaticProps<PlaybooksPageProps> = async () => {
   try {
-    const rawDocs = getAllContentlayerDocs() as Array<Record<string, unknown>>;
-    const items: PlaybookItem[] = rawDocs
-      .filter(isPlaybookDoc)
-      .filter(doc => doc.draft !== true && doc.published !== false)
-      .map(doc => ({
-        slug:          normalizeSlug(doc.urlSlug || doc.slug || doc.slugComputed),
-        title:         safeStr(doc.title, "Untitled Playbook"),
-        description:   safeStr(doc.description || doc.summary || doc.excerpt) || null,
-        difficulty:    safeStr(doc.difficulty) || null,
-        playbookType:  safeStr(doc.playbookType || doc.category || doc.theme) || null,
-        estimatedTime: safeStr(doc.estimatedTime || doc.readingTime) || null,
-        tier:          safeStr(doc.tier) || null,
-        phases:        safeStringArray(doc.phases),
-        tags:          safeStringArray(doc.tags),
-      }))
-      .filter(item => Boolean(item.slug))
+    const items = allPlaybooks
+      .filter(isPublishedPlaybook)
+      .map(mapPlaybook)
+      .filter((item) => Boolean(item.slug))
       .sort((a, b) => a.title.localeCompare(b.title));
 
-    return { props: { items }, revalidate: 1800 };
+    return {
+      props: { items },
+      revalidate: 1800,
+    };
   } catch {
-    return { props: { items: [] }, revalidate: 1800 };
+    return {
+      props: { items: [] },
+      revalidate: 1800,
+    };
   }
 };
 
@@ -154,18 +176,18 @@ export const getStaticProps: GetStaticProps<{ items: PlaybookItem[] }> = async (
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
+const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
+  const reduceMotion = useReducedMotion();
   const [activeType, setActiveType] = React.useState<string>("");
 
-  // Derive unique playbook types for filter
   const types = React.useMemo(() => {
-    const set = new Set(items.map(i => i.playbookType).filter(Boolean) as string[]);
-    return Array.from(set).sort();
+    const set = new Set(items.map((i) => i.playbookType).filter(Boolean) as string[]);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [items]);
 
   const filtered = React.useMemo(() => {
     if (!activeType) return items;
-    return items.filter(i => i.playbookType === activeType);
+    return items.filter((i) => i.playbookType === activeType);
   }, [items, activeType]);
 
   return (
@@ -182,38 +204,40 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
       </Head>
 
       <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
-
         {/* ── HERO ──────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
-          {/* Atmosphere */}
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute" style={{
-              left: "-5%", top: "-10%",
-              width: "700px", height: "600px",
-              borderRadius: "50%",
-              background: `radial-gradient(ellipse at center, ${GOLD}10 0%, ${GOLD}04 30%, transparent 65%)`,
-              filter: "blur(130px)",
-            }} />
-            <div className="absolute inset-x-0 bottom-0 h-40" style={{
-              background: `linear-gradient(to top, ${BASE}, transparent)`,
-            }} />
+            <div
+              className="absolute"
+              style={{
+                left: "-5%",
+                top: "-10%",
+                width: "700px",
+                height: "600px",
+                borderRadius: "50%",
+                background: `radial-gradient(ellipse at center, ${GOLD}10 0%, ${GOLD}04 30%, transparent 65%)`,
+                filter: "blur(130px)",
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-40"
+              style={{ background: `linear-gradient(to top, ${BASE}, transparent)` }}
+            />
             <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
           </div>
 
-          {/* Top gold rule */}
-          <div className="absolute inset-x-0 top-0" style={{
-            height: "1px",
-            background: `linear-gradient(to right, transparent, ${GOLD}25, transparent)`,
-          }} />
+          <div
+            className="absolute inset-x-0 top-0"
+            style={{
+              height: "1px",
+              background: `linear-gradient(to right, transparent, ${GOLD}25, transparent)`,
+            }}
+          />
 
           <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
             <div className="pt-36 md:pt-44 lg:pt-52" />
 
-            <motion.div
-              variants={stagger(0.09)}
-              initial="hidden"
-              animate="show"
-            >
+            <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
               <motion.div variants={fadeUp}>
                 <Eyebrow>Execution systems</Eyebrow>
               </motion.div>
@@ -230,7 +254,8 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                   color: "rgba(255,255,255,0.94)",
                 }}
               >
-                Playbooks<span style={{ color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>.</span>
+                Playbooks
+                <span style={{ color: "rgba(255,255,255,0.28)", fontStyle: "italic" }}>.</span>
               </motion.h1>
 
               <motion.p
@@ -250,47 +275,56 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                 and enforcing execution discipline.
               </motion.p>
 
-              {/* Stats row */}
               <motion.div variants={fadeUp} style={{ marginTop: "2.5rem" }}>
                 <div className="flex flex-wrap items-center gap-6">
                   <div className="flex items-center gap-2.5">
-                    <span style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "2.2rem",
-                      lineHeight: 1,
-                      color: "rgba(255,255,255,0.80)",
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "2.2rem",
+                        lineHeight: 1,
+                        color: "rgba(255,255,255,0.80)",
+                      }}
+                    >
                       {items.length}
                     </span>
-                    <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.34em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.25)",
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px",
+                        letterSpacing: "0.34em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.25)",
+                      }}
+                    >
                       playbooks indexed
                     </span>
                   </div>
+
                   <div className="h-4 w-px bg-white/[0.08]" />
+
                   <div className="flex items-center gap-2.5">
-                    <span style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                      fontWeight: 300,
-                      fontSize: "2.2rem",
-                      lineHeight: 1,
-                      color: "rgba(255,255,255,0.80)",
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "2.2rem",
+                        lineHeight: 1,
+                        color: "rgba(255,255,255,0.80)",
+                      }}
+                    >
                       {types.length}
                     </span>
-                    <span style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.34em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.25)",
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px",
+                        letterSpacing: "0.34em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.25)",
+                      }}
+                    >
                       categories
                     </span>
                   </div>
@@ -304,19 +338,22 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
 
         {/* ── FILTER STRIP ──────────────────────────────────────────────── */}
         {types.length > 1 && (
-          <div style={{
-            backgroundColor: "rgba(0,0,0,0.40)",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
-            backdropFilter: "blur(12px)",
-            position: "sticky",
-            top: 0,
-            zIndex: 40,
-          }}>
+          <div
+            style={{
+              backgroundColor: "rgba(0,0,0,0.40)",
+              borderTop: "1px solid rgba(255,255,255,0.05)",
+              borderBottom: "1px solid rgba(255,255,255,0.05)",
+              backdropFilter: "blur(12px)",
+              position: "sticky",
+              top: 0,
+              zIndex: 40,
+            }}
+          >
             <div className="mx-auto max-w-7xl px-6 lg:px-12">
-              <div className="flex items-center gap-2 overflow-x-auto py-3.5 hide-scrollbar">
-                {["All", ...types].map(type => {
+              <div className="hide-scrollbar flex items-center gap-2 overflow-x-auto py-3.5">
+                {["All", ...types].map((type) => {
                   const isActive = type === "All" ? activeType === "" : activeType === type;
+
                   return (
                     <button
                       key={type}
@@ -329,7 +366,9 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                         fontSize: "7.5px",
                         letterSpacing: "0.32em",
                         textTransform: "uppercase",
-                        border: `1px solid ${isActive ? `${GOLD}35` : "rgba(255,255,255,0.07)"}`,
+                        border: `1px solid ${
+                          isActive ? `${GOLD}35` : "rgba(255,255,255,0.07)"
+                        }`,
                         backgroundColor: isActive ? `${GOLD}0D` : "transparent",
                         color: isActive ? `${GOLD}CC` : "rgba(255,255,255,0.28)",
                         cursor: "pointer",
@@ -342,14 +381,16 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                   );
                 })}
 
-                <div className="ml-auto flex items-center gap-2 shrink-0">
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.30em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.18)",
-                  }}>
+                <div className="ml-auto flex shrink-0 items-center gap-2">
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.30em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.18)",
+                    }}
+                  >
                     {filtered.length} / {items.length}
                   </span>
                 </div>
@@ -361,38 +402,50 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
         {/* ── GRID ──────────────────────────────────────────────────────── */}
         <section style={{ backgroundColor: BASE }}>
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
-
-            {/* Section eyebrow */}
             <div className="mb-10 flex items-center gap-3">
-              <div className="h-px w-8" style={{
-                background: `linear-gradient(to right, ${GOLD}45, transparent)`,
-              }} />
-              <span style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.40em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.22)",
-              }}>
+              <div
+                className="h-px w-8"
+                style={{ background: `linear-gradient(to right, ${GOLD}45, transparent)` }}
+              />
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  letterSpacing: "0.40em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.22)",
+                }}
+              >
                 {activeType ? `${activeType} playbooks` : "All playbooks"}
               </span>
             </div>
 
             {filtered.length === 0 ? (
-              <div style={{
-                border: "1px solid rgba(255,255,255,0.06)",
-                backgroundColor: "rgba(255,255,255,0.01)",
-                padding: "4rem 2rem",
-                textAlign: "center",
-              }}>
-                <ScanSearch style={{ width: "24px", height: "24px", color: "rgba(255,255,255,0.18)", margin: "0 auto 1rem" }} />
-                <p style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                  fontWeight: 300,
-                  fontSize: "1.25rem",
-                  color: "rgba(255,255,255,0.40)",
-                  fontStyle: "italic",
-                }}>
+              <div
+                style={{
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.01)",
+                  padding: "4rem 2rem",
+                  textAlign: "center",
+                }}
+              >
+                <ScanSearch
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    color: "rgba(255,255,255,0.18)",
+                    margin: "0 auto 1rem",
+                  }}
+                />
+                <p
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "1.25rem",
+                    color: "rgba(255,255,255,0.40)",
+                    fontStyle: "italic",
+                  }}
+                >
                   No playbooks indexed yet.
                 </p>
               </div>
@@ -403,7 +456,7 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                 animate="show"
                 className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
               >
-                {filtered.map(item => (
+                {filtered.map((item) => (
                   <motion.div key={item.slug} variants={fadeUp}>
                     <PlaybookCard
                       title={item.title}
@@ -423,27 +476,32 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
         </section>
 
         {/* ── CLOSE ─────────────────────────────────────────────────────── */}
-        <section style={{
-          backgroundColor: VOID,
-          borderTop: "1px solid rgba(255,255,255,0.04)",
-        }}>
+        <section
+          style={{
+            backgroundColor: VOID,
+            borderTop: "1px solid rgba(255,255,255,0.04)",
+          }}
+        >
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12">
             <div className="flex flex-col items-center gap-5 text-center">
               <GoldRule />
-              <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "clamp(1rem, 1.4vw, 1.20rem)",
-                fontStyle: "italic",
-                lineHeight: 1.65,
-                color: "rgba(255,255,255,0.32)",
-                maxWidth: "38ch",
-                marginTop: "1rem",
-              }}>
+              <p
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(1rem, 1.4vw, 1.20rem)",
+                  fontStyle: "italic",
+                  lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.32)",
+                  maxWidth: "38ch",
+                  marginTop: "1rem",
+                }}
+              >
                 If a playbook surfaces a problem that requires direct intervention,
                 the diagnostics system is the appropriate next step.
               </p>
-              <div className="flex flex-wrap justify-center gap-3 mt-2">
+
+              <div className="mt-2 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/diagnostics"
                   className="group inline-flex items-center gap-2 transition-all duration-300"
@@ -457,12 +515,21 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}50`; el.style.backgroundColor = `${GOLD}12`; }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}30`; el.style.backgroundColor = `${GOLD}08`; }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget as HTMLAnchorElement;
+                    el.style.borderColor = `${GOLD}50`;
+                    el.style.backgroundColor = `${GOLD}12`;
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget as HTMLAnchorElement;
+                    el.style.borderColor = `${GOLD}30`;
+                    el.style.backgroundColor = `${GOLD}08`;
+                  }}
                 >
                   Enter diagnostics
                   <ChevronRight style={{ width: "12px", height: "12px" }} />
                 </Link>
+
                 <Link
                   href="/consulting/strategy-room"
                   className="group inline-flex items-center gap-2 transition-all duration-300"
@@ -476,8 +543,16 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}
-                  onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.14)"; el.style.color = "rgba(255,255,255,0.60)"; }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.color = "rgba(255,255,255,0.35)"; }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget as HTMLAnchorElement;
+                    el.style.borderColor = "rgba(255,255,255,0.14)";
+                    el.style.color = "rgba(255,255,255,0.60)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget as HTMLAnchorElement;
+                    el.style.borderColor = "rgba(255,255,255,0.07)";
+                    el.style.color = "rgba(255,255,255,0.35)";
+                  }}
                 >
                   Strategy Room
                 </Link>
@@ -485,7 +560,6 @@ const PlaybooksPage: NextPage<{ items: PlaybookItem[] }> = ({ items }) => {
             </div>
           </div>
         </section>
-
       </div>
     </Layout>
   );

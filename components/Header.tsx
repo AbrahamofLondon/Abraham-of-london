@@ -3,12 +3,23 @@
    Design: Institutional Monumentalism — matches homepage design language
    Typography: JetBrains Mono labels, Cormorant Garamond wordmark
    Gold: #C9A96E softGold (brand) · #F59E0B amber (action only)
+   
+   Session 5 change: Library → Shorts in desktop nav (slot 4).
+   Shorts is the live signal feed — the content most likely to bring
+   visitors back. Library is a reference shelf; it remains in the
+   mobile menu and is reachable via content pages.
+   
+   Shorts subtle highlight: a 1px softGold underline at 0.28 opacity.
+   Below the threshold of conscious registration on first pass.
+   Above the threshold of recognition once the eye settles.
+   The mind perceives rhythm breaks before the eye names them.
 */
+
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router"; // ← Pages Router (not next/navigation)
+import { useRouter } from "next/router";
 import {
   Menu,
   X,
@@ -24,6 +35,7 @@ import {
   Briefcase,
   ScrollText,
   Layers,
+  Zap,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,17 +52,32 @@ type NavItem = {
   label: string;
   sub: string;
   icon: React.ElementType;
+  signal?: true; // marks the live signal item for subtle treatment
 };
 
-const NAV_ITEMS: readonly NavItem[] = [
-  { href: "/canon",       label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
-  { href: "/editorials",  label: "Editorials",  sub: "Publications & Essays",    icon: ScrollText },
-  { href: "/playbooks",   label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
-  { href: "/library",     label: "Library",     sub: "Knowledge Shelf",          icon: BookOpen   },
-  { href: "/diagnostics", label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
-  { href: "/artifacts",   label: "Artifacts",   sub: "Premium Intelligence",     icon: Archive    },
-  { href: "/vault/briefs",label: "Briefs",       sub: "Operational Intelligence", icon: FileText   },
-  { href: "/consulting",  label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
+// Desktop nav — 7 items max for legibility at 8.5px mono
+// Shorts replaces Library in this slot. Library stays in mobile menu.
+const DESKTOP_NAV: readonly NavItem[] = [
+  { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
+  { href: "/editorials",   label: "Editorials",  sub: "Publications & Essays",    icon: ScrollText },
+  { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
+  { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
+  { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
+  { href: "/artifacts",    label: "Artifacts",   sub: "Premium Intelligence",     icon: Archive    },
+  { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
+] as const;
+
+// Mobile menu — full directory including Library
+const MOBILE_NAV: readonly NavItem[] = [
+  { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
+  { href: "/editorials",   label: "Editorials",  sub: "Publications & Essays",    icon: ScrollText },
+  { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
+  { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
+  { href: "/library",      label: "Library",     sub: "Knowledge Shelf",          icon: BookOpen   },
+  { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
+  { href: "/artifacts",    label: "Artifacts",   sub: "Premium Intelligence",     icon: Archive    },
+  { href: "/vault/briefs", label: "Briefs",      sub: "Operational Intelligence", icon: FileText   },
+  { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,10 +101,6 @@ function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GOLD TOKEN (inline — avoids import for a single value)
-// ─────────────────────────────────────────────────────────────────────────────
-
 const GOLD = "#C9A96E";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -88,14 +111,12 @@ export default function Header({
   transparent = false,
   minimal = false,
 }: HeaderProps) {
-  // Pages Router — useRouter from next/router
   const router = useRouter();
   const currentPath = normalizePath(router.asPath);
 
   const [isOpen,   setIsOpen]   = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
 
-  // ── Scroll detection ──────────────────────────────────────────────────────
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
     onScroll();
@@ -103,24 +124,20 @@ export default function Header({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ── Keyboard escape ───────────────────────────────────────────────────────
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // ── Close on route change ─────────────────────────────────────────────────
   React.useEffect(() => { setIsOpen(false); }, [currentPath]);
 
-  // ── Body scroll lock ──────────────────────────────────────────────────────
   React.useEffect(() => {
     const original = document.body.style.overflow;
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = original; };
   }, [isOpen]);
 
-  // ── Header shell appearance ───────────────────────────────────────────────
   const elevated = scrolled || isOpen || !transparent;
 
   return (
@@ -142,27 +159,14 @@ export default function Header({
             aria-label="Abraham of London — home"
             className="group inline-flex shrink-0 items-center gap-4"
           >
-            {/* Mark — square precision emblem */}
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/[0.10] bg-white/[0.04] transition-all duration-300 group-hover:border-white/[0.18] group-hover:bg-white/[0.07]"
-            >
-              {/* Inner gold square — the institutional seal */}
-              <div
-                className="h-3.5 w-3.5"
-                style={{ backgroundColor: `${GOLD}CC` }}
-              />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/[0.10] bg-white/[0.04] transition-all duration-300 group-hover:border-white/[0.18] group-hover:bg-white/[0.07]">
+              <div className="h-3.5 w-3.5" style={{ backgroundColor: `${GOLD}CC` }} />
             </div>
-
-            {/* Logotype */}
             <div className="flex flex-col gap-0.5">
-              <span
-                className="font-['Cormorant_Garamond',Georgia,serif] text-[1.05rem] font-light italic leading-none tracking-[-0.01em] text-white/90 transition-colors group-hover:text-white"
-              >
+              <span className="font-['Cormorant_Garamond',Georgia,serif] text-[1.05rem] font-light italic leading-none tracking-[-0.01em] text-white/90 transition-colors group-hover:text-white">
                 Abraham of London
               </span>
-              <span
-                className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/22 md:block"
-              >
+              <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/22 md:block">
                 Strategy · Canon · Library
               </span>
             </div>
@@ -174,27 +178,44 @@ export default function Header({
             {/* Desktop nav */}
             {!minimal && (
               <nav className="hidden items-center gap-5 md:flex" aria-label="Primary navigation">
-                {NAV_ITEMS.slice(0, 7).map((item) => {
+                {DESKTOP_NAV.map((item) => {
                   const active = isActive(currentPath, item.href);
+
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "font-['JetBrains_Mono',ui-monospace,monospace] text-[8.5px] uppercase tracking-[0.26em] transition-colors duration-300",
-                        active ? "text-[#C9A96E]" : "text-white/38 hover:text-white/65",
+                        "relative font-['JetBrains_Mono',ui-monospace,monospace] text-[8.5px] uppercase tracking-[0.26em] transition-colors duration-300",
+                        active
+                          ? "text-[#C9A96E]"
+                          : item.signal
+                            ? "text-white/48 hover:text-white/72"
+                            : "text-white/38 hover:text-white/65",
                       )}
                       style={active ? { color: GOLD } : {}}
                     >
                       {item.label}
+
+                      {/* Shorts signal underline:
+                          1px softGold at opacity 0.28 — below conscious threshold,
+                          above perceptual recognition. The mind notices rhythm breaks
+                          before the eye names them. */}
+                      {item.signal && !active && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-x-0 -bottom-[5px] block h-px"
+                          style={{ backgroundColor: `${GOLD}47` }}
+                        />
+                      )}
                     </Link>
                   );
                 })}
               </nav>
             )}
 
-            {/* Strategy Room pill — desktop */}
+            {/* Strategy Room — desktop */}
             <Link
               href="/consulting/strategy-room"
               className="hidden items-center gap-2 border border-white/[0.07] bg-white/[0.02] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/35 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-white/58 md:inline-flex"
@@ -203,7 +224,7 @@ export default function Header({
               Strategy Room
             </Link>
 
-            {/* Hamburger — always visible */}
+            {/* Hamburger */}
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
@@ -244,9 +265,7 @@ export default function Header({
 
           {/* Menu header row */}
           <div className="flex items-center justify-between py-4">
-            <span
-              className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.46em] text-white/20"
-            >
+            <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.46em] text-white/20">
               Directory
             </span>
             <button
@@ -262,9 +281,9 @@ export default function Header({
           {/* Hairline */}
           <div className="mt-4 mb-10 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
-          {/* Nav items — monumental scale */}
+          {/* Nav items */}
           <nav className="space-y-0 divide-y divide-white/[0.04]" aria-label="Mobile navigation">
-            {NAV_ITEMS.map((item, idx) => {
+            {MOBILE_NAV.map((item, idx) => {
               const active = isActive(currentPath, item.href);
               const Icon = item.icon;
 
@@ -277,26 +296,25 @@ export default function Header({
                   className="group flex items-center justify-between py-5 transition-all duration-200"
                 >
                   <div className="flex items-center gap-5">
-                    {/* Step number */}
-                    <span
-                      className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.36em] text-white/16 transition-colors group-hover:text-white/28"
-                    >
+                    <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.36em] text-white/16 transition-colors group-hover:text-white/28">
                       {String(idx + 1).padStart(2, "0")}
                     </span>
-
                     <div>
                       <div
                         className={cn(
-                          "font-['Cormorant_Garamond',Georgia,serif] text-[1.9rem] font-light italic leading-none tracking-[-0.02em] transition-colors duration-200 md:text-[2.4rem]",
-                          active ? "text-[#C9A96E]" : "text-white/80 group-hover:text-white",
+                          "font-['Cormorant_Garamond',Georgia,serif] text-[1.9rem] font-light leading-none tracking-[-0.02em] transition-colors duration-200 md:text-[2.4rem]",
+                          // Shorts in mobile menu: very slightly elevated opacity vs other items
+                          active
+                            ? ""
+                            : item.signal
+                              ? "text-white/88 group-hover:text-white"
+                              : "text-white/80 group-hover:text-white",
                         )}
                         style={active ? { color: GOLD } : {}}
                       >
                         {item.label}
                       </div>
-                      <div
-                        className="mt-1 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] text-white/22"
-                      >
+                      <div className="mt-1 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] text-white/22">
                         {item.sub}
                       </div>
                     </div>
@@ -306,14 +324,14 @@ export default function Header({
                     <Icon
                       className={cn(
                         "h-4 w-4 transition-colors",
-                        active ? "text-[#C9A96E]" : "text-white/14 group-hover:text-white/35",
+                        active ? "" : item.signal ? "text-white/22 group-hover:text-white/45" : "text-white/14 group-hover:text-white/35",
                       )}
-                      style={active ? { color: `${GOLD}CC` } : {}}
+                      style={active ? { color: `${GOLD}CC` } : item.signal ? { color: `${GOLD}60` } : {}}
                     />
                     <ChevronRight
                       className={cn(
                         "h-4 w-4 transition-all duration-200 group-hover:translate-x-0.5",
-                        active ? "text-[#C9A96E]" : "text-white/10 group-hover:text-white/30",
+                        active ? "" : "text-white/10 group-hover:text-white/30",
                       )}
                       style={active ? { color: `${GOLD}88` } : {}}
                     />
@@ -355,11 +373,14 @@ export default function Header({
                   className="group flex items-center justify-between py-5"
                 >
                   <div className="flex items-center gap-5">
-                    <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.36em]" style={{ color: `${GOLD}60` }}>
+                    <span
+                      className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.36em]"
+                      style={{ color: `${GOLD}60` }}
+                    >
                       {item.tag}
                     </span>
                     <div>
-                      <div className="font-['Cormorant_Garamond',Georgia,serif] text-[1.9rem] font-light italic leading-none text-white/70 transition-colors group-hover:text-white md:text-[2.4rem]">
+                      <div className="font-['Cormorant_Garamond',Georgia,serif] text-[1.9rem] font-light leading-none text-white/70 transition-colors group-hover:text-white md:text-[2.4rem]">
                         {item.label}
                       </div>
                       <div className="mt-1 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] text-white/20">
@@ -367,7 +388,10 @@ export default function Header({
                       </div>
                     </div>
                   </div>
-                  <Icon className="h-4 w-4 text-white/12 transition-colors group-hover:text-white/32" style={active ? { color: `${GOLD}CC` } : {}} />
+                  <Icon
+                    className="h-4 w-4 text-white/12 transition-colors group-hover:text-white/32"
+                    style={active ? { color: `${GOLD}CC` } : {}}
+                  />
                 </Link>
               );
             })}

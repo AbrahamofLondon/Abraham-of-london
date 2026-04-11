@@ -1,18 +1,24 @@
-import { Prisma } from "@prisma/client";
+// ALL imports are lazy — the Prisma generated client crashes at evaluation time
+// during Next.js static page collection ("lib is not defined" in bundled output).
+let _db: any = null;
+let _Prisma: any = null;
 
-// Lazy-load prisma to prevent build-time crash (PrismaClient constructor
-// runs at import time and fails without DATABASE_URL during static analysis)
-function getDb() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { prisma } = require("@/lib/prisma") as { prisma: import("@prisma/client").PrismaClient };
-  return prisma;
+function getDb(): any {
+  if (!_db) _db = require("@/lib/prisma").prisma;
+  return _db;
 }
 
-// Proxy that lazily initialises on first property access
-const db = new Proxy({} as import("@prisma/client").PrismaClient, {
-  get(_target, prop) {
-    return (getDb() as any)[prop];
-  },
+function getPrisma(): any {
+  if (!_Prisma) _Prisma = require("@prisma/client").Prisma;
+  return _Prisma;
+}
+
+const db = new Proxy({} as any, {
+  get(_, p) { return getDb()[p]; },
+});
+
+const Prisma = new Proxy({} as any, {
+  get(_, p) { return getPrisma()[p]; },
 });
 import type {
   EnterpriseAlignmentBand,
