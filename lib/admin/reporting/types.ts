@@ -1,5 +1,3 @@
-// lib/admin/reporting/types.ts
-
 export type ExecutiveReportState =
   | "ORDERED"
   | "DRIFTING"
@@ -7,16 +5,45 @@ export type ExecutiveReportState =
   | "DISORDERED";
 
 export type ConstitutionalRoute = "REJECT" | "DIAGNOSTIC" | "STRATEGY";
+export type ExecutiveReportPriority =
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH"
+  | "CRITICAL"
+  | "SOVEREIGN";
+export type ExecutiveReportTemperature =
+  | "COLD"
+  | "WARM"
+  | "HOT"
+  | "SCORCHING";
+export type ExecutiveReportAuthorityType = "DIRECT" | "PROXY" | "UNCLEAR";
+export type ExecutiveReportReadinessTier =
+  | "FRAGILE"
+  | "EMERGING"
+  | "STABILIZING"
+  | "EXECUTION_READY"
+  | "SOVEREIGN";
+export type ExecutiveReportMarketRiskBand =
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH"
+  | "CRITICAL";
+export type ExecutiveReportRevenueBand =
+  | "MICRO"
+  | "SMB"
+  | "MID"
+  | "ENTERPRISE"
+  | "WHALE";
 
 export interface ExecutiveReportConstitution {
   route: ConstitutionalRoute;
-  priority: string;
-  temperature: string;
-  orgState: string;
-  readinessTier: string;
-  authorityType: string;
-  revenueBand: string;
-  marketRiskBand: string;
+  priority: ExecutiveReportPriority;
+  temperature: ExecutiveReportTemperature;
+  orgState: ExecutiveReportState;
+  readinessTier: ExecutiveReportReadinessTier;
+  authorityType: ExecutiveReportAuthorityType;
+  revenueBand: ExecutiveReportRevenueBand;
+  marketRiskBand: ExecutiveReportMarketRiskBand;
 
   clarityScore: number;
   authorityScore: number;
@@ -52,14 +79,14 @@ export interface ExecutiveReportGuidance {
 }
 
 export interface ExecutiveReportPdfConstitutionPayload {
-  route: string;
-  priority: string;
-  temperature: string;
-  orgState: string;
-  readinessTier: string;
-  authorityType: string;
-  revenueBand: string;
-  marketRiskBand: string;
+  route: ConstitutionalRoute;
+  priority: ExecutiveReportPriority;
+  temperature: ExecutiveReportTemperature;
+  orgState: ExecutiveReportState;
+  readinessTier: ExecutiveReportReadinessTier;
+  authorityType: ExecutiveReportAuthorityType;
+  revenueBand: ExecutiveReportRevenueBand;
+  marketRiskBand: ExecutiveReportMarketRiskBand;
 
   clarityScore: number;
   authorityScore: number;
@@ -109,7 +136,7 @@ export interface ReturnTypeSerializeExecutiveReportToPdfPayload {
 }
 
 export interface CanonicalExecutiveReportExport {
-  schemaVersion: "canonical-report-v1";
+  schemaVersion: "canonical-report-v2";
   generatedAt: string;
   reportId: string;
   campaign: {
@@ -127,7 +154,7 @@ export interface CanonicalExecutiveReportExport {
     executiveSummary: {
       title: string;
       subtitle: string;
-      state: string;
+      state: ExecutiveReportState;
       headline: string;
       summary: string;
       mandate: string;

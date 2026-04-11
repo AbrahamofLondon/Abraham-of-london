@@ -21,6 +21,8 @@ export type DecisionContextType =
   | "orgState"
   | "marketRiskBand"
   | "revenueBand"
+  | "dominantDomain"
+  | "failureMode"
   | string;
 
 export type DecisionAssetContextRow = {
@@ -32,19 +34,30 @@ export type DecisionAssetContextRow = {
   contextType: DecisionContextType;
   contextValue: string;
 
+  // Performance metrics
   impressions?: number | null;
   clicks?: number | null;
   conversions?: number | null;
   assistedConversions?: number | null;
 
+  // Improvement metrics
   routeImprovements?: number | null;
   readinessImprovements?: number | null;
   clarityGain?: number | null;
   authorityGain?: number | null;
 
+  // Scoring fields (used by buildDecisionSignalProfile)
   contextualWeight?: number | null;
   confidenceScore?: number | null;
   usefulnessScore?: number | null;
+  rankingScore?: number | null;
+  resonanceScore?: number | null;
+  resonanceBand?: string | null;
+  governanceRiskScore?: number | null;
+  constitutionalSource?: boolean | null;
+  totalConversionRate?: number | null;
+  topDriftSeverity?: DriftSeverity | null;
+  drifts?: DriftAlertResult[] | null;
 
   metadata?: Record<string, unknown> | string | null;
   updatedAt?: string | Date | null;
@@ -501,8 +514,33 @@ export function summarizeDecisionSignalProfiles(
   };
 }
 
+// ✅ Helper function to create a minimal context row from constitution data
+export function createContextRowFromConstitution(
+  constitution: any,
+  type: DecisionContextType,
+  value?: string,
+  overrides?: Partial<DecisionAssetContextRow>
+): DecisionAssetContextRow {
+  const contextValue = value || constitution[type] || "UNKNOWN";
+  
+  return {
+    assetId: `constitutional_${type}`,
+    assetTitle: `${type.replace(/([A-Z])/g, ' $1').trim()} Assessment`,
+    assetHref: null,
+    assetKind: "constitution",
+    contextType: type,
+    contextValue,
+    contextualWeight: 1.0,
+    confidenceScore: 0.8,
+    usefulnessScore: 75,
+    constitutionalSource: true,
+    ...overrides,
+  };
+}
+
 export default {
   buildDecisionSignalProfile,
   buildDecisionSignalProfiles,
   summarizeDecisionSignalProfiles,
+  createContextRowFromConstitution,
 };

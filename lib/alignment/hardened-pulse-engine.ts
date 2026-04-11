@@ -11,7 +11,16 @@ export interface PulseAnalysis {
   confidenceScore: number;
   dataIntegrity: 'HIGH' | 'MEDIUM' | 'LOW';
   activeNodes: number;
+  // Backward-compat aliases used by reporting components
+  weightedResonance: number;
+  reliabilityIndex: number;
+  standardError: number;
+  integrityStatus: 'STABLE' | 'UNSTABLE' | 'CRITICAL';
+  nodeCount: number;
 }
+
+/** @deprecated Use PulseAnalysis */
+export type HardenedMetrics = PulseAnalysis;
 
 /**
  * CORE LOGIC: Calculates the mathematical alignment of telemetry nodes.
@@ -22,7 +31,10 @@ export function calculateHardenedMetrics(responses: PulseResponse[]): PulseAnaly
   const n = validResponses.length;
 
   if (n === 0) {
-    return { weightedScore: 0, confidenceScore: 0, dataIntegrity: 'LOW', activeNodes: 0 };
+    return {
+      weightedScore: 0, confidenceScore: 0, dataIntegrity: 'LOW' as const, activeNodes: 0,
+      weightedResonance: 0, reliabilityIndex: 0, standardError: 100, integrityStatus: 'CRITICAL' as const, nodeCount: 0,
+    };
   }
 
   // 2. Calculate Weighted Average: Σ(Resonance * Certainty) / Σ(Certainty)
@@ -43,11 +55,20 @@ export function calculateHardenedMetrics(responses: PulseResponse[]): PulseAnaly
   if (confidenceScore > 75 && n >= 5) integrity = 'HIGH';
   else if (confidenceScore > 40) integrity = 'MEDIUM';
 
+  const integrityStatus: 'STABLE' | 'UNSTABLE' | 'CRITICAL' =
+    integrity === 'HIGH' ? 'STABLE' : integrity === 'MEDIUM' ? 'UNSTABLE' : 'CRITICAL';
+
   return {
     weightedScore,
     confidenceScore,
     dataIntegrity: integrity,
-    activeNodes: n
+    activeNodes: n,
+    // Backward-compat aliases
+    weightedResonance: weightedScore,
+    reliabilityIndex: confidenceScore,
+    standardError: Math.round(100 - confidenceScore),
+    integrityStatus,
+    nodeCount: n,
   };
 }
 

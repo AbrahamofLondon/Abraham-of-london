@@ -69,7 +69,7 @@ export const PDFDataDashboard: React.FC<PDFDataDashboardProps> = ({
   if (requiresAuth && status !== "authenticated") {
     if (status === "loading") return <LoadingState message="Awaiting Verification..." />;
     return (
-      <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden bg-black text-white">
+      <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden bg-[#060609] text-white">
         <div className="aol-grid absolute inset-0" />
         <div className="aol-vignette absolute inset-0" />
         <div className="relative z-10 text-center animate-aolFadeUp">

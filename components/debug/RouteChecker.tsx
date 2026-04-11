@@ -21,7 +21,7 @@ export default function RouteChecker() {
   }
 
   return (
-    <div className="p-8 bg-black border border-emerald-500/20 rounded-xl font-mono text-[10px] text-zinc-400 max-w-4xl mx-auto my-10">
+    <div className="p-8 bg-[#060609] border border-emerald-500/20 rounded-xl font-mono text-[10px] text-zinc-400 max-w-4xl mx-auto my-10">
       <h2 className="text-emerald-500 mb-4 uppercase tracking-widest text-xs">Contentlayer Manifest Trace</h2>
       <div className="overflow-x-auto text-left">
         <table className="w-full border-collapse">

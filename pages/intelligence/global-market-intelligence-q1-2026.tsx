@@ -1,3 +1,10 @@
+// pages/intelligence/global-market-intelligence-q1-2026.tsx
+// The highest-authority intelligence surface on the platform.
+// Design: Sovereign Research Desk — The Economist meets a private briefing room.
+// Every element signals institutional weight. Nothing decorative that doesn't earn its place.
+// Typography: Cormorant Garamond display · JetBrains Mono data labels
+// Palette: Deep navy base (#070E18) · softGold (#C9A96E) accent · precision opacity steps
+
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -14,337 +21,1062 @@ import {
   Building2,
   LineChart,
   Landmark,
+  Presentation,
+  ChevronRight,
+  AlertTriangle,
+  BarChart3,
+  Compass,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
 
-const signalCards = [
-  {
-    icon: TrendingUp,
-    title: "Macro interpretation",
-    body:
-      "A governed reading of how trade friction, policy pressure, and capital selectivity are changing the operating environment.",
-  },
-  {
-    icon: Globe,
-    title: "Jurisdictional positioning",
-    body:
-      "A strategic surface across major economies, framed around resilience, credibility, and optionality rather than noise.",
-  },
-  {
-    icon: Building2,
-    title: "Board utility",
-    body:
-      "Built for executives, boards, allocators, and serious operators who need implication, not commentary.",
-  },
-];
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
 
-const readingLayers = [
+const ROUTES = {
+  publicBrief:          "/artifacts/global-market-outlook-q1-2026-public",
+  institutionalEdition: "/artifacts/global-market-intelligence-report-q1-2026",
+  boardDeck:            "/artifacts/gmi-q1-2026-deck",
+  boardroomPdf:         "/artifacts/intel-2026-q1-pdf",
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD   = "#C9A96E";
+const BASE   = "#070E18";   // deep navy — intelligence desk base
+const LIFT   = "#0B1523";   // lifted surface
+const VOID   = "#040A12";   // deepest layer
+
+const GRAIN: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+  backgroundSize: "180px 180px",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.80, ease: [0.22, 1, 0.36, 1] } },
+};
+
+const stagger = (d = 0.10) => ({
+  hidden: {},
+  show: { transition: { staggerChildren: d } },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIMITIVES
+// ─────────────────────────────────────────────────────────────────────────────
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+function GoldRule({ soft = false }: { soft?: boolean }) {
+  return (
+    <div className={cn("h-px w-full", soft
+      ? "bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+      : "bg-gradient-to-r from-transparent via-[#C9A96E]/32 to-transparent"
+    )} />
+  );
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}60` }} />
+      <span style={{
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontSize: "8px",
+        letterSpacing: "0.42em",
+        textTransform: "uppercase",
+        color: `${GOLD}BB`,
+      }}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA — SCENARIO PROBABILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SCENARIOS = [
+  {
+    id:   "A",
+    label: "De-escalation",
+    prob: 18,
+    body: "Rapid bilateral concessions. Tariffs reduced below ~50%. Requires political will that current signals do not support.",
+    tone: "low",
+  },
+  {
+    id:   "B",
+    label: "Managed fragmentation",
+    prob: 43,
+    body: "Base case. Elevated tariffs persist. Slow supply-chain restructuring. Extended monetary constraint. Markets reprice to new normal.",
+    tone: "base",
+  },
+  {
+    id:   "C",
+    label: "Escalation spiral",
+    prob: 27,
+    body: "Broader retaliation cycles. Secondary sanctions risk. Systemic credit stress. Equity correction deepens beyond Q1 levels.",
+    tone: "high",
+  },
+  {
+    id:   "D",
+    label: "Confidence fracture",
+    prob: 12,
+    body: "Non-linear systemic event. Dollar reserve status questioned. Coordinated institutional response required.",
+    tone: "critical",
+  },
+] as const;
+
+const MACRO_SIGNALS = [
+  { label: "Global growth revised",    value: "~2.5–2.8%",  sub: "IMF revisions Q1",             icon: TrendingUp,  warn: true  },
+  { label: "US recession probability", value: "40–60%",      sub: "12-month window, inst. median", icon: BarChart3,   warn: true  },
+  { label: "S&P 500 correction",       value: "~10–12%",     sub: "From recent highs, early Apr",  icon: LineChart,   warn: true  },
+  { label: "US 10yr yield",            value: "~4.5%",       sub: "Intraday peak, April 2026",     icon: Scale,       warn: false },
+  { label: "US tariffs on China",      value: "145%",        sub: "Effective rate, April 2026",    icon: AlertTriangle, warn: true },
+  { label: "China tariffs on US",      value: "125%",        sub: "Retaliatory rate",              icon: AlertTriangle, warn: true },
+] as const;
+
+const EDITIONS = [
   {
     eyebrow: "Public Brief",
-    title: "Global Market Outlook Q1 2026",
-    body:
-      "A refined public reading for serious readers who want the shape of the quarter without the full institutional edge.",
-    href: "/artifacts/global-market-outlook-q1-2026-public",
-    cta: "Read public brief",
-    icon: FileText,
-    accent:
-      "bg-white text-black hover:opacity-95",
+    title:   "Global Market Outlook Q1 2026",
+    body:    "A refined public reading for serious readers who want the shape of the quarter without the full institutional edge.",
+    href:    ROUTES.publicBrief,
+    cta:     "Read public brief",
+    icon:    FileText,
+    primary: true,
+    gold:    false,
   },
   {
     eyebrow: "Institutional Edition",
-    title: "Global Market Intelligence Report Q1 2026",
-    body:
-      "The full restricted briefing for strategic operators, with stronger framing, deeper implications, and higher decision utility.",
-    href: "/artifacts/global-market-intelligence-report-q1-2026",
-    cta: "Open institutional edition",
-    icon: Lock,
-    accent:
-      "border border-[#C9A96A]/35 text-white hover:bg-white/[0.04]",
+    title:   "Full intelligence briefing",
+    body:    "The restricted document for strategic operators. Stronger framing, deeper implications, board-grade decision utility.",
+    href:    ROUTES.institutionalEdition,
+    cta:     "Institutional edition",
+    icon:    Lock,
+    primary: false,
+    gold:    true,
+  },
+  {
+    eyebrow: "Board Briefing Deck",
+    title:   "Executive presentation",
+    body:    "A premium deck for board presentation flow, executive framing, and rapid internal circulation.",
+    href:    ROUTES.boardDeck,
+    cta:     "Board deck",
+    icon:    Presentation,
+    primary: false,
+    gold:    false,
   },
   {
     eyebrow: "Boardroom PDF",
-    title: "Portable executive copy",
-    body:
-      "A cleaner boardroom edition for premium portability, quick circulation, and leadership review.",
-    href: "/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf",
-    cta: "Open boardroom PDF",
-    icon: Scale,
-    accent:
-      "border border-white/15 text-white hover:bg-white/[0.04]",
+    title:   "Portable executive copy",
+    body:    "A clean boardroom PDF for portability, quick circulation, and leadership review.",
+    href:    ROUTES.boardroomPdf,
+    cta:     "Boardroom PDF",
+    icon:    Scale,
+    primary: false,
+    gold:    false,
   },
-];
+] as const;
 
-const operatorPoints = [
-  "Resilience is now competing directly with growth as a primary valuation variable.",
-  "Policy has become an operating input, not background context.",
-  "Supply-chain design now affects enterprise value and board judgment.",
-  "Serious operators must separate signal from theatrical volatility.",
-];
+// ─────────────────────────────────────────────────────────────────────────────
+// HERO SECTION
+// ─────────────────────────────────────────────────────────────────────────────
 
-const utilityStrips = [
-  {
-    icon: Landmark,
-    title: "For boards",
-    body: "Use as a macro-political context pack for strategy, risk, and capital allocation review.",
-  },
-  {
-    icon: LineChart,
-    title: "For operators",
-    body: "Use to reframe assumptions around pricing, flow, financing, and jurisdictional exposure.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "For serious readers",
-    body: "Use to orient thinking without wading through market theatre and disposable opinion.",
-  },
-];
+function HeroSection() {
+  return (
+    <section className="relative overflow-hidden" style={{ backgroundColor: VOID }}>
+      {/* Atmospheric layers */}
+      <div className="pointer-events-none absolute inset-0">
+        {/* Primary gold nebula */}
+        <div className="absolute" style={{
+          left: "-5%", top: "-8%",
+          width: "800px", height: "600px",
+          borderRadius: "50%",
+          background: `radial-gradient(ellipse at center, ${GOLD}14 0%, ${GOLD}06 28%, ${GOLD}02 50%, transparent 70%)`,
+          filter: "blur(130px)",
+        }} />
+        {/* Cool white nebula right */}
+        <div className="absolute" style={{
+          right: "0%", top: "10%",
+          width: "500px", height: "500px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle at center, rgba(255,255,255,0.04) 0%, transparent 65%)",
+          filter: "blur(110px)",
+        }} />
+        {/* Bottom fill */}
+        <div className="absolute inset-x-0 bottom-0 h-40" style={{
+          background: `linear-gradient(to top, ${BASE}, transparent)`,
+        }} />
+        {/* Grid overlay — barely visible */}
+        <div className="absolute inset-0 opacity-[0.018]" style={{
+          backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.08) 0.5px, transparent 0.5px), linear-gradient(to bottom, rgba(255,255,255,0.06) 0.5px, transparent 0.5px)",
+          backgroundSize: "80px 80px",
+        }} />
+        {/* Grain */}
+        <div className="absolute inset-0 opacity-[0.022]" style={GRAIN} />
+      </div>
+
+      {/* Top gold rule */}
+      <div className="absolute inset-x-0 top-0 h-px" style={{
+        background: `linear-gradient(to right, transparent, ${GOLD}35, transparent)`,
+      }} />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="pt-36 md:pt-44 lg:pt-52" />
+
+        <motion.div
+          variants={stagger(0.09)}
+          initial="hidden"
+          animate="show"
+        >
+          {/* Classification badge */}
+          <motion.div variants={fadeUp}>
+            <div className="inline-flex items-center gap-3 px-4 py-2" style={{
+              border: `1px solid ${GOLD}30`,
+              backgroundColor: `${GOLD}0A`,
+            }}>
+              <ShieldCheck style={{ width: "12px", height: "12px", color: `${GOLD}AA` }} />
+              <span style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px",
+                letterSpacing: "0.42em",
+                textTransform: "uppercase",
+                color: `${GOLD}BB`,
+              }}>
+                GMI-Q1-2026 · Restricted · v2.0.0 · April 8, 2026
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Display title */}
+          <motion.div variants={fadeUp} style={{ marginTop: "2rem" }}>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(2.8rem, 6vw, 6.2rem)",
+              lineHeight: 0.92,
+              letterSpacing: "-0.040em",
+              color: "rgba(255,255,255,0.94)",
+            }}>
+              A disciplined reading
+              <br />
+              <span style={{ color: "rgba(255,255,255,0.38)" }}>of a harder market.</span>
+            </h1>
+          </motion.div>
+
+          {/* Subhead — the thesis in one line */}
+          <motion.p variants={fadeUp} style={{
+            marginTop: "1.5rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "clamp(1.05rem, 1.5vw, 1.30rem)",
+            lineHeight: 1.68,
+            color: "rgba(255,255,255,0.50)",
+            maxWidth: "52ch",
+          }}>
+            Markets are no longer pricing growth within globalisation.
+            They are pricing <em style={{ color: `${GOLD}CC`, fontStyle: "normal" }}>survivability within fragmentation</em>.
+          </motion.p>
+
+          {/* CTA row */}
+          <motion.div variants={fadeUp} style={{ marginTop: "2.5rem" }}>
+            <div className="flex flex-wrap gap-3">
+              <Link href={ROUTES.publicBrief}
+                className="group inline-flex items-center gap-3 transition-all duration-300"
+                style={{
+                  padding: "14px 28px",
+                  backgroundColor: "rgba(255,255,255,0.96)",
+                  color: "rgb(4 10 18)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.30em",
+                  textTransform: "uppercase",
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,1)"}
+                onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.96)"}
+              >
+                Read public brief
+                <ArrowRight style={{ width: "13px", height: "13px" }} />
+              </Link>
+
+              <Link href={ROUTES.institutionalEdition}
+                className="group inline-flex items-center gap-3 transition-all duration-300"
+                style={{
+                  padding: "14px 28px",
+                  border: `1px solid ${GOLD}45`,
+                  backgroundColor: `${GOLD}0E`,
+                  color: GOLD,
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.30em",
+                  textTransform: "uppercase",
+                }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0E`; }}
+              >
+                <Lock style={{ width: "12px", height: "12px" }} />
+                Institutional edition
+              </Link>
+
+              <Link href={ROUTES.boardDeck}
+                className="group inline-flex items-center gap-3 transition-all duration-300"
+                style={{
+                  padding: "14px 28px",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backgroundColor: "rgba(255,255,255,0.02)",
+                  color: "rgba(255,255,255,0.52)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.30em",
+                  textTransform: "uppercase",
+                }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.18)"; el.style.color = "rgba(255,255,255,0.75)"; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.10)"; el.style.color = "rgba(255,255,255,0.52)"; }}
+              >
+                <Presentation style={{ width: "12px", height: "12px" }} />
+                Board deck
+              </Link>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <div className="pb-20 md:pb-24" />
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MACRO SIGNALS STRIP
+// The data board — the kind a CIO would see on their morning screen
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MacroSignalsStrip() {
+  return (
+    <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="grid grid-cols-2 divide-x divide-y md:grid-cols-3 lg:grid-cols-6"
+          style={{ borderColor: "rgba(255,255,255,0.05)" }}
+        >
+          {MACRO_SIGNALS.map((sig) => {
+            const Icon = sig.icon;
+            return (
+              <div key={sig.label} className="px-5 py-6" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Icon style={{
+                    width: "11px", height: "11px",
+                    color: sig.warn ? "rgba(239,68,68,0.65)" : `${GOLD}80`,
+                  }} />
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "6.5px",
+                    letterSpacing: "0.36em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.28)",
+                  }}>
+                    {sig.label}
+                  </span>
+                </div>
+                <div style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontSize: "1.65rem",
+                  fontWeight: 300,
+                  lineHeight: 1,
+                  color: sig.warn ? "rgba(252,165,165,0.90)" : "rgba(255,255,255,0.88)",
+                }}>
+                  {sig.value}
+                </div>
+                <div style={{
+                  marginTop: "0.4rem",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "6.5px",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.20)",
+                }}>
+                  {sig.sub}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE THESIS SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function CoreThesis() {
+  return (
+    <section style={{ backgroundColor: BASE }}>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <div className="grid gap-14 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+
+          {/* Left — the thesis */}
+          <motion.div
+            variants={stagger(0.09)}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <motion.div variants={fadeUp}>
+              <Eyebrow>Q1 2026 Core Thesis</Eyebrow>
+            </motion.div>
+
+            <motion.h2 variants={fadeUp} style={{
+              marginTop: "1.5rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(2rem, 3.5vw, 3.2rem)",
+              lineHeight: 1.0,
+              letterSpacing: "-0.028em",
+              color: "rgba(255,255,255,0.92)",
+            }}>
+              Q1 opened under controlled instability.
+              <br />
+              <span style={{ color: "rgba(255,255,255,0.35)" }}>It closed under structural inflection.</span>
+            </motion.h2>
+
+            <motion.p variants={fadeUp} style={{
+              marginTop: "1.5rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(1rem, 1.2vw, 1.10rem)",
+              lineHeight: 1.75,
+              color: "rgba(255,255,255,0.48)",
+              maxWidth: "46ch",
+            }}>
+              Capital is now pricing four variables simultaneously: survivability under
+              supply chain disruption, strategic optionality across jurisdictions, policy
+              credibility of host economies, and durability of revenue models under trade
+              friction.
+            </motion.p>
+
+            {/* The shift */}
+            <motion.div variants={fadeUp} style={{ marginTop: "2.5rem" }}>
+              <div style={{
+                padding: "1.5rem",
+                border: `1px solid ${GOLD}22`,
+                backgroundColor: `${GOLD}07`,
+              }}>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.38em",
+                  textTransform: "uppercase",
+                  color: `${GOLD}90`,
+                  marginBottom: "1rem",
+                }}>
+                  The structural shift
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    ["Efficiency", "Resilience"],
+                    ["Expansion",  "Preservation"],
+                    ["Integration", "Fragmentation"],
+                  ].map(([from, to]) => (
+                    <div key={from} className="flex items-center gap-2">
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "9px",
+                        color: "rgba(255,255,255,0.28)",
+                        textDecoration: "line-through",
+                        letterSpacing: "0.10em",
+                      }}>{from}</span>
+                      <ArrowRight style={{ width: "10px", height: "10px", color: `${GOLD}60`, flexShrink: 0 }} />
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontSize: "1.05rem",
+                        color: "rgba(255,255,255,0.80)",
+                        fontWeight: 300,
+                      }}>{to}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Operator translation */}
+            <motion.div variants={fadeUp} style={{ marginTop: "1.5rem" }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.38em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.22)",
+                marginBottom: "0.75rem",
+              }}>
+                Operator translation
+              </div>
+              <div className="space-y-2">
+                {[
+                  "Growth assumptions are no longer primary drivers of valuation.",
+                  "Supply chain design is now a capital markets variable.",
+                  "Policy risk directly affects enterprise value.",
+                  "Optionality — not optimisation — is the new strategic premium.",
+                ].map((line, i) => (
+                  <div key={i} className="flex items-start gap-3" style={{
+                    padding: "0.85rem 1rem",
+                    backgroundColor: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                  }}>
+                    <ChevronRight style={{ width: "12px", height: "12px", color: `${GOLD}70`, flexShrink: 0, marginTop: "2px" }} />
+                    <span style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.98rem",
+                      lineHeight: 1.55,
+                      color: "rgba(255,255,255,0.65)",
+                    }}>
+                      {line}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right — scenario framework */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ delay: 0.12 }}
+          >
+            <div style={{
+              border: "1px solid rgba(255,255,255,0.07)",
+              backgroundColor: LIFT,
+              overflow: "hidden",
+            }}>
+              {/* Header */}
+              <div style={{
+                padding: "1.25rem 1.5rem",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                background: `linear-gradient(to right, ${GOLD}08, transparent)`,
+              }}>
+                <Eyebrow>Scenario framework · Q2 2026</Eyebrow>
+              </div>
+
+              {/* Scenarios */}
+              <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                {SCENARIOS.map((sc) => {
+                  const isBase = sc.tone === "base";
+                  const barColor =
+                    sc.tone === "critical" ? "rgba(239,68,68,0.55)"
+                    : sc.tone === "high"   ? "rgba(251,146,60,0.55)"
+                    : sc.tone === "base"   ? `${GOLD}BB`
+                    : "rgba(134,239,172,0.55)";
+
+                  return (
+                    <div
+                      key={sc.id}
+                      style={{
+                        padding: "1.25rem 1.5rem",
+                        backgroundColor: isBase ? `${GOLD}06` : "transparent",
+                        borderLeft: isBase ? `2px solid ${GOLD}60` : "2px solid transparent",
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2.5 mb-1.5">
+                            <span style={{
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "7px",
+                              letterSpacing: "0.36em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.22)",
+                            }}>
+                              Scenario {sc.id}
+                            </span>
+                            {isBase && (
+                              <span style={{
+                                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                                fontSize: "6.5px",
+                                letterSpacing: "0.28em",
+                                textTransform: "uppercase",
+                                padding: "1px 6px",
+                                border: `1px solid ${GOLD}35`,
+                                backgroundColor: `${GOLD}10`,
+                                color: `${GOLD}CC`,
+                              }}>
+                                Base case
+                              </span>
+                            )}
+                          </div>
+                          <div style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "1.05rem",
+                            lineHeight: 1.2,
+                            color: "rgba(255,255,255,0.85)",
+                            marginBottom: "0.6rem",
+                          }}>
+                            {sc.label}
+                          </div>
+                          <p style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "0.875rem",
+                            lineHeight: 1.60,
+                            color: "rgba(255,255,255,0.40)",
+                          }}>
+                            {sc.body}
+                          </p>
+                        </div>
+
+                        {/* Probability circle */}
+                        <div style={{
+                          flexShrink: 0,
+                          textAlign: "center",
+                          padding: "0.75rem",
+                          border: "1px solid rgba(255,255,255,0.07)",
+                          minWidth: "60px",
+                        }}>
+                          <div style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300,
+                            fontSize: "1.6rem",
+                            lineHeight: 1,
+                            color: barColor,
+                          }}>
+                            {sc.prob}
+                          </div>
+                          <div style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "6px",
+                            letterSpacing: "0.26em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.20)",
+                            marginTop: "3px",
+                          }}>
+                            %
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Probability bar */}
+                      <div style={{
+                        marginTop: "0.85rem",
+                        height: "2px",
+                        backgroundColor: "rgba(255,255,255,0.06)",
+                        overflow: "hidden",
+                      }}>
+                        <div style={{
+                          width: `${sc.prob}%`,
+                          height: "100%",
+                          backgroundColor: barColor,
+                          transition: "width 800ms ease",
+                        }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Method note */}
+              <div style={{
+                padding: "1rem 1.5rem",
+                borderTop: "1px solid rgba(255,255,255,0.04)",
+                backgroundColor: "rgba(255,255,255,0.01)",
+              }}>
+                <p style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.18em",
+                  color: "rgba(255,255,255,0.18)",
+                  lineHeight: 1.60,
+                }}>
+                  Derived from market-implied volatility, policy trajectory analysis,
+                  and cross-institution scenario clustering.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EDITION LADDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function EditionLadder() {
+  return (
+    <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+
+        <motion.div
+          variants={stagger(0.08)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+        >
+          <motion.div variants={fadeUp}>
+            <Eyebrow>Reading layers</Eyebrow>
+            <h2 style={{
+              marginTop: "1.25rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+              lineHeight: 1.0,
+              letterSpacing: "-0.025em",
+              color: "rgba(255,255,255,0.90)",
+            }}>
+              Four editions. One standard of seriousness.
+            </h2>
+            <p style={{
+              marginTop: "0.85rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "1.05rem",
+              lineHeight: 1.70,
+              color: "rgba(255,255,255,0.38)",
+              maxWidth: "48ch",
+            }}>
+              Each layer serves a different reading context without diluting the core signal.
+            </p>
+          </motion.div>
+
+          <motion.div variants={fadeUp} style={{ marginTop: "3rem" }}>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {EDITIONS.map((ed, i) => {
+                const Icon = ed.icon;
+                return (
+                  <Link key={ed.eyebrow} href={ed.href} className="group block">
+                    <div
+                      className="h-full transition-all duration-350"
+                      style={{
+                        border: ed.gold
+                          ? `1px solid ${GOLD}28`
+                          : "1px solid rgba(255,255,255,0.06)",
+                        backgroundColor: ed.primary ? "rgba(255,255,255,0.04)" : (ed.gold ? `${GOLD}07` : "rgba(255,255,255,0.015)"),
+                        padding: "1.75rem",
+                        position: "relative",
+                        overflow: "hidden",
+                      }}
+                      onMouseEnter={e => {
+                        const el = e.currentTarget as HTMLDivElement;
+                        el.style.borderColor = ed.gold ? `${GOLD}50` : "rgba(255,255,255,0.12)";
+                        el.style.backgroundColor = ed.gold ? `${GOLD}0F` : "rgba(255,255,255,0.03)";
+                        el.style.transform = "translateY(-2px)";
+                      }}
+                      onMouseLeave={e => {
+                        const el = e.currentTarget as HTMLDivElement;
+                        el.style.borderColor = ed.gold ? `${GOLD}28` : "rgba(255,255,255,0.06)";
+                        el.style.backgroundColor = ed.primary ? "rgba(255,255,255,0.04)" : (ed.gold ? `${GOLD}07` : "rgba(255,255,255,0.015)");
+                        el.style.transform = "translateY(0)";
+                      }}
+                    >
+                      {/* Edition number */}
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "2.8rem",
+                        lineHeight: 1,
+                        color: "rgba(255,255,255,0.06)",
+                        marginBottom: "1rem",
+                      }}>
+                        {String(i + 1).padStart(2, "0")}
+                      </div>
+
+                      {/* Eyebrow */}
+                      <div style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px",
+                        letterSpacing: "0.38em",
+                        textTransform: "uppercase",
+                        color: ed.gold ? `${GOLD}AA` : "rgba(255,255,255,0.24)",
+                        marginBottom: "0.75rem",
+                      }}>
+                        {ed.eyebrow}
+                      </div>
+
+                      <Icon style={{
+                        width: "18px", height: "18px",
+                        color: ed.gold ? `${GOLD}CC` : "rgba(255,255,255,0.28)",
+                        marginBottom: "1rem",
+                      }} />
+
+                      <p style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.92rem",
+                        lineHeight: 1.62,
+                        color: "rgba(255,255,255,0.42)",
+                      }}>
+                        {ed.body}
+                      </p>
+
+                      <div style={{
+                        marginTop: "1.5rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "8px",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                        color: ed.gold ? `${GOLD}BB` : "rgba(255,255,255,0.28)",
+                        transition: "gap 300ms ease",
+                      }}
+                      className="group-hover:[gap:0.75rem]"
+                      >
+                        {ed.cta}
+                        <ArrowRight style={{ width: "11px", height: "11px" }} />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WHO IT'S FOR SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function UtilitySection() {
+  const cards = [
+    {
+      icon: Landmark,
+      title: "For boards",
+      body: "Use as a macro-political context pack for strategy, risk, and capital allocation review. The scenario framework maps directly onto board-level risk oversight.",
+    },
+    {
+      icon: LineChart,
+      title: "For operators",
+      body: "Reframe assumptions around pricing, flow, financing, and jurisdictional exposure. Every jurisdiction reading includes a board instruction.",
+    },
+    {
+      icon: Compass,
+      title: "For serious readers",
+      body: "Orient thinking without wading through market theatre and disposable opinion. Signal without noise. Judgment without prescription.",
+    },
+  ];
+
+  return (
+    <section style={{ backgroundColor: BASE }}>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <motion.div
+          variants={stagger(0.09)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+        >
+          <motion.div variants={fadeUp}>
+            <Eyebrow>Quiet utility</Eyebrow>
+            <h2 style={{
+              marginTop: "1.25rem",
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300,
+              fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+              lineHeight: 1.0,
+              letterSpacing: "-0.025em",
+              color: "rgba(255,255,255,0.90)",
+            }}>
+              Built to support review,
+              <span style={{ color: "rgba(255,255,255,0.32)" }}> not theatre.</span>
+            </h2>
+          </motion.div>
+
+          <motion.div variants={fadeUp}>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {cards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <div key={card.title} style={{
+                    padding: "2rem",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: LIFT,
+                  }}>
+                    <Icon style={{ width: "20px", height: "20px", color: `${GOLD}AA`, marginBottom: "1.25rem" }} />
+                    <h3 style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1.25rem",
+                      color: "rgba(255,255,255,0.85)",
+                      marginBottom: "0.75rem",
+                    }}>
+                      {card.title}
+                    </h3>
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.92rem",
+                      lineHeight: 1.70,
+                      color: "rgba(255,255,255,0.42)",
+                    }}>
+                      {card.body}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CLOSE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function CloseSection() {
+  return (
+    <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+          className="mx-auto max-w-3xl text-center"
+        >
+          {/* Gold mark */}
+          <div className="mx-auto mb-8" style={{
+            width: "40px",
+            height: "1px",
+            background: `linear-gradient(to right, transparent, ${GOLD}50, transparent)`,
+          }} />
+
+          <Eyebrow>Closing position</Eyebrow>
+
+          <h2 style={{
+            marginTop: "1.5rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "clamp(1.6rem, 3vw, 2.6rem)",
+            lineHeight: 1.05,
+            letterSpacing: "-0.025em",
+            color: "rgba(255,255,255,0.88)",
+          }}>
+            Serious readers do not need louder information.
+            <span style={{ color: "rgba(255,255,255,0.32)" }}> They need cleaner judgment.</span>
+          </h2>
+
+          <p style={{
+            marginTop: "1.25rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "1.05rem",
+            lineHeight: 1.72,
+            color: "rgba(255,255,255,0.40)",
+            maxWidth: "42ch",
+            margin: "1.25rem auto 0",
+          }}>
+            The public brief is open. The institutional edition is available.
+            Choose the layer that fits the seriousness of the task.
+          </p>
+
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <Link href={ROUTES.publicBrief}
+              className="inline-flex items-center gap-3 transition-all duration-300"
+              style={{
+                padding: "13px 26px",
+                backgroundColor: "rgba(255,255,255,0.94)",
+                color: "rgb(4 10 18)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+              }}
+              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,1)"}
+              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.94)"}
+            >
+              Public brief
+              <FileText style={{ width: "12px", height: "12px" }} />
+            </Link>
+
+            <Link href={ROUTES.institutionalEdition}
+              className="inline-flex items-center gap-3 transition-all duration-300"
+              style={{
+                padding: "13px 26px",
+                border: `1px solid ${GOLD}45`,
+                backgroundColor: `${GOLD}0D`,
+                color: GOLD,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+              }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}60`; el.style.backgroundColor = `${GOLD}15`; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}45`; el.style.backgroundColor = `${GOLD}0D`; }}
+            >
+              <Lock style={{ width: "12px", height: "12px" }} />
+              Institutional edition
+            </Link>
+
+            <Link href={ROUTES.boardDeck}
+              className="inline-flex items-center gap-3 transition-all duration-300"
+              style={{
+                padding: "13px 26px",
+                border: "1px solid rgba(255,255,255,0.09)",
+                backgroundColor: "rgba(255,255,255,0.02)",
+                color: "rgba(255,255,255,0.45)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+              }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.70)"; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.45)"; }}
+            >
+              <Presentation style={{ width: "12px", height: "12px" }} />
+              Board deck
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 
 const IntelligenceLandingPage: NextPage = () => {
   return (
     <>
       <Head>
         <title>Global Market Intelligence Q1 2026 | Abraham of London</title>
-        <meta
-          name="description"
-          content="A disciplined intelligence surface for the Q1 2026 market environment, with public, institutional, and boardroom reading layers."
-        />
+        <meta name="description" content="A disciplined intelligence surface for the Q1 2026 market environment. Markets are no longer pricing growth within globalisation — they are pricing survivability within fragmentation." />
+        <meta property="og:title" content="Global Market Intelligence Q1 2026 | Abraham of London" />
+        <meta property="og:description" content="A disciplined reading of a harder market. Four editions: public brief, institutional report, board deck, boardroom PDF." />
       </Head>
 
-      <Layout>
-        <main className="min-h-screen bg-[#08131F] text-white">
-          <section className="relative overflow-hidden border-b border-white/10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,169,106,0.13),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.03),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
-            <div className="absolute inset-0 opacity-[0.05] aol-grain" />
-            <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-24 md:px-8 md:pb-28 md:pt-32">
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55 }}
-                className="max-w-5xl"
-              >
-                <div className="inline-flex items-center rounded-full border border-[#C9A96A]/30 bg-white/5 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
-                  Market Intelligence · Q1 2026
-                </div>
-
-                <h1 className="mt-7 max-w-5xl font-serif text-4xl leading-tight text-white/95 md:text-6xl">
-                  A disciplined reading of a harder market.
-                </h1>
-
-                <p className="mt-6 max-w-3xl text-base leading-8 text-white/72 md:text-lg">
-                  This is not built as campaign copy. It is a governed intelligence
-                  surface for readers who value serious interpretation, strategic
-                  texture, and signal over noise.
-                </p>
-
-                <div className="mt-10 flex flex-wrap gap-4">
-                  <Link
-                    href="/artifacts/global-market-outlook-q1-2026-public"
-                    className="inline-flex items-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:opacity-95"
-                  >
-                    Read public brief
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-
-                  <Link
-                    href="/artifacts/global-market-intelligence-report-q1-2026"
-                    className="inline-flex items-center rounded-2xl border border-[#C9A96A]/35 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
-                  >
-                    Institutional edition
-                    <Lock className="ml-2 h-4 w-4 text-[#C9A96A]" />
-                  </Link>
-
-                  <Link
-                    href="/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf"
-                    className="inline-flex items-center rounded-2xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/[0.04]"
-                  >
-                    Boardroom PDF
-                    <Scale className="ml-2 h-4 w-4 text-[#C9A96A]" />
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
-          </section>
-
-          <section className="mx-auto max-w-7xl px-6 py-16 md:px-8">
-            <div className="grid gap-6 md:grid-cols-3">
-              {signalCards.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.title}
-                    className="rounded-[28px] border border-white/10 bg-white/[0.035] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.22)]"
-                  >
-                    <Icon className="h-6 w-6 text-[#C9A96A]" />
-                    <h2 className="mt-5 text-xl font-semibold text-white/95">
-                      {item.title}
-                    </h2>
-                    <p className="mt-3 text-sm leading-7 text-white/70">
-                      {item.body}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="mx-auto max-w-7xl px-6 py-4 md:px-8 md:py-8">
-            <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="rounded-[32px] border border-white/10 bg-white/[0.035] p-8 md:p-10">
-                <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
-                  Product Surface
-                </div>
-
-                <h2 className="mt-4 max-w-3xl font-serif text-3xl leading-tight text-white/95 md:text-4xl">
-                  Three reading layers. One standard of seriousness.
-                </h2>
-
-                <p className="mt-5 max-w-2xl text-sm leading-8 text-white/72 md:text-base">
-                  The public edition exists to orient disciplined readers. The
-                  institutional edition exists to support better review, sharper
-                  framing, and stronger decision quality. The boardroom PDF exists
-                  for cleaner portability where pace matters.
-                </p>
-
-                <div className="mt-8 grid gap-5">
-                  {readingLayers.map((layer) => {
-                    const Icon = layer.icon;
-                    return (
-                      <div
-                        key={layer.title}
-                        className="rounded-[26px] border border-white/10 bg-[#0B1623] p-6"
-                      >
-                        <div className="text-[11px] uppercase tracking-[0.22em] text-[#C9A96A]">
-                          {layer.eyebrow}
-                        </div>
-
-                        <div className="mt-3 flex items-start justify-between gap-4">
-                          <div className="max-w-2xl">
-                            <h3 className="text-xl font-semibold text-white/95">
-                              {layer.title}
-                            </h3>
-                            <p className="mt-3 text-sm leading-7 text-white/70">
-                              {layer.body}
-                            </p>
-                          </div>
-                          <Icon className="mt-1 h-5 w-5 shrink-0 text-[#C9A96A]" />
-                        </div>
-
-                        <div className="mt-6">
-                          <Link
-                            href={layer.href}
-                            className={`inline-flex items-center rounded-2xl px-5 py-3 text-sm font-semibold transition ${layer.accent}`}
-                          >
-                            {layer.cta}
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <aside className="rounded-[32px] border border-white/10 bg-white/[0.035] p-8 md:p-10">
-                <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
-                  Operator Read
-                </div>
-
-                <h2 className="mt-4 font-serif text-2xl leading-tight text-white/95 md:text-3xl">
-                  The quarter changed how serious readers should weight the variables.
-                </h2>
-
-                <div className="mt-8 space-y-4">
-                  {operatorPoints.map((point) => (
-                    <div
-                      key={point}
-                      className="rounded-2xl border border-white/10 bg-[#0B1623] px-4 py-4 text-sm leading-7 text-white/78"
-                    >
-                      {point}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 rounded-[24px] border border-[#C9A96A]/25 bg-[linear-gradient(180deg,rgba(201,169,106,0.08),rgba(255,255,255,0.02))] p-5">
-                  <p className="text-sm leading-7 text-white/80">
-                    The best intelligence product signals confidence by design, not
-                    volume. This page is built to be found naturally, revisited
-                    voluntarily, and trusted gradually.
-                  </p>
-                </div>
-              </aside>
-            </div>
-          </section>
-
-          <section className="mx-auto max-w-7xl px-6 py-16 md:px-8">
-            <div className="mb-8">
-              <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
-                Quiet Utility
-              </div>
-              <h2 className="mt-3 font-serif text-3xl text-white/95 md:text-4xl">
-                Built to support review, not theatre.
-              </h2>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {utilityStrips.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.title}
-                    className="rounded-[28px] border border-white/10 bg-[#0B1623] p-7"
-                  >
-                    <Icon className="h-6 w-6 text-[#C9A96A]" />
-                    <h3 className="mt-5 text-lg font-semibold text-white/95">
-                      {item.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-white/70">
-                      {item.body}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="border-t border-white/10">
-            <div className="mx-auto max-w-7xl px-6 py-20 text-center md:px-8">
-              <div className="mx-auto max-w-3xl">
-                <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
-                  Closing Position
-                </div>
-
-                <h2 className="mt-5 font-serif text-3xl leading-tight text-white/95 md:text-5xl">
-                  Serious readers do not need louder information. They need cleaner judgment.
-                </h2>
-
-                <p className="mt-6 text-base leading-8 text-white/68">
-                  The public brief is open. The institutional edition is available.
-                  The boardroom PDF exists for those who need sharper portability.
-                  Choose the layer that fits the seriousness of the task.
-                </p>
-
-                <div className="mt-10 flex flex-wrap justify-center gap-4">
-                  <Link
-                    href="/artifacts/global-market-outlook-q1-2026-public"
-                    className="inline-flex items-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:opacity-95"
-                  >
-                    Public brief
-                    <FileText className="ml-2 h-4 w-4" />
-                  </Link>
-
-                  <Link
-                    href="/artifacts/global-market-intelligence-report-q1-2026"
-                    className="inline-flex items-center rounded-2xl border border-[#C9A96A]/35 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
-                  >
-                    Institutional edition
-                    <Lock className="ml-2 h-4 w-4 text-[#C9A96A]" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
+      <Layout headerTransparent fullWidth>
+        <HeroSection />
+        <MacroSignalsStrip />
+        <CoreThesis />
+        <EditionLadder />
+        <UtilitySection />
+        <CloseSection />
       </Layout>
     </>
   );

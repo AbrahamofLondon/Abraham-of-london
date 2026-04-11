@@ -1,3 +1,4 @@
+/* app/api/campaigns/[id]/invite/route.ts — NODE AUTHORIZATION PROTOCOL */
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
@@ -68,7 +69,21 @@ export async function POST(
       );
     }
 
-    const campaign = await db.alignmentCampaign.findUnique({
+    /**
+     * ✅ CRITICAL FIX: RESOLVE PRISMA INSTANCE
+     * You cannot call models on 'db'. You must await the client from the wrapper.
+     */
+    const prisma = await db.getPrismaClient();
+
+    if (!prisma) {
+      return NextResponse.json(
+        { ok: false, error: "Database connection failure." },
+        { status: 500 },
+      );
+    }
+
+    // 1. VERIFY CAMPAIGN
+    const campaign = await prisma.alignmentCampaign.findUnique({
       where: { id: campaignId },
       include: {
         organisation: true,
@@ -82,7 +97,8 @@ export async function POST(
       );
     }
 
-    const membership = await db.organisationMembership.upsert({
+    // 2. UPSERT MEMBERSHIP
+    const membership = await prisma.organisationMembership.upsert({
       where: {
         organisationId_email: {
           organisationId: campaign.organisationId,
@@ -105,7 +121,8 @@ export async function POST(
       },
     });
 
-    const existingParticipant = await db.campaignParticipant.findUnique({
+    // 3. CHECK FOR EXISTING PARTICIPANT
+    const existingParticipant = await prisma.campaignParticipant.findUnique({
       where: {
         campaignId_email: {
           campaignId,
@@ -124,10 +141,11 @@ export async function POST(
       );
     }
 
+    // 4. GENERATE TOKENS AND CREATE PARTICIPANT
     const rawInviteToken = createInviteToken();
     const inviteTokenHash = hashToken(rawInviteToken);
 
-    const newParticipant = await db.campaignParticipant.create({
+    const newParticipant = await prisma.campaignParticipant.create({
       data: {
         campaignId,
         membershipId: membership.id,
@@ -141,6 +159,7 @@ export async function POST(
       rawInviteToken,
     )}`;
 
+    // 5. DISPATCH EMAIL VIA RESEND
     if (!process.env.RESEND_API_KEY?.trim()) {
       console.warn(
         "[CAMPAIGN_INVITE] RESEND_API_KEY missing. Participant created but email not sent.",
@@ -168,8 +187,8 @@ export async function POST(
             </h2>
 
             <p style="font-size: 14px; line-height: 1.6; color: #444; margin-bottom: 30px;">
-              You have been authorized as a participating node for the
-              <strong>${campaign.title}</strong> audit under
+              You have been authorized as a participating node for the 
+              <strong>${campaign.title}</strong> audit under 
               <strong>${campaign.organisation?.name || "the organisation"}</strong>.
               Your perspective is required for calibration of the institutional alignment reading.
             </p>

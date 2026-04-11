@@ -1,26 +1,54 @@
 // lib/admin/reporting/executive-report-recommendations.ts
 import { buildDecisionGuidance } from "@/lib/decision/decision-guidance-service";
 
-export function buildExecutiveReportRecommendations(args: {
+function s(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function n(value: unknown, fallback = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
+function arr<T = unknown>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+export function buildExecutiveReportRecommendationsFromReport(args: {
   report: any;
   organisationName?: string;
   participantCount?: number;
 }) {
-  const resonanceDomains = args.report?.resonance?.telemetry?.domains || [];
-  const avgDissonance = args.report?.resonance?.telemetry?.averageDissonance || 0;
-  const burnout = args.report?.hcdAggregate?.overallBurnoutIndex || 0;
+  const resonanceDomains = arr(args.report?.resonance?.telemetry?.domains);
+  const avgDissonance = n(args.report?.resonance?.telemetry?.averageDissonance, 0);
+  const burnout = n(args.report?.hcdAggregate?.overallBurnoutIndex, 0);
+  const summary =
+    s(args.report?.narrative?.summary) ||
+    s(args.report?.narrative?.headline) ||
+    "Executive reporting posture requires governed interpretation.";
 
-  const result = buildDecisionGuidance({
+  const state = s(args.report?.state, "DRIFTING");
+  const authority = args.report?.ogr?.isAuthorizedToExecute ? "DIRECT" : "PROXY";
+  const revenue = Math.max(
+    250000,
+    n(args.report?.financialExposure?.totalExposure, 1000000),
+  );
+
+  return buildDecisionGuidance({
     fusionInput: {
       ruleScore: Math.max(0, 100 - avgDissonance),
       aiScore: Math.max(0, 100 - avgDissonance),
-      aiConfidence: 0.82,
-      revenue: 1_000_000,
-      authority: "DIRECT",
-      urgency: "quarter",
-      problem: args.report?.narrative?.summary || "",
-      sessionDepth: 3,
-      timeOnSite: 600,
+      aiConfidence: 0.84,
+      revenue,
+      authority,
+      urgency: burnout >= 70 ? "month" : "quarter",
+      problem: summary,
+      sessionDepth: Math.max(3, resonanceDomains.length),
+      timeOnSite: 900,
       returnVisitor: true,
     },
     resonance: {
@@ -29,26 +57,30 @@ export function buildExecutiveReportRecommendations(args: {
     },
     hcd: {
       overallBurnoutIndex: burnout,
-      criticalDomains: args.report?.hcdAggregate?.criticalDomains || [],
-      elevatedDomains: args.report?.hcdAggregate?.elevatedDomains || [],
-      riskScore: args.report?.hcdAggregate?.riskScore || "MEDIUM",
+      criticalDomains: arr(args.report?.hcdAggregate?.criticalDomains),
+      elevatedDomains: arr(args.report?.hcdAggregate?.elevatedDomains),
+      riskScore:
+        s(args.report?.hcdAggregate?.riskScore) ||
+        (burnout >= 70 ? "HIGH" : burnout >= 45 ? "MEDIUM" : "LOW"),
     },
     questionnaire: {
       sector: "governance",
-      sponsorRole: "DIRECT",
-      statedProblem: args.report?.narrative?.summary || "",
-      primaryConcern: args.report?.state || "",
+      sponsorRole: authority,
+      statedProblem: summary,
+      primaryConcern: state,
       desiredOutcome: "institutional realignment",
     },
     market: {
-      marketRiskBand: "MEDIUM",
+      marketRiskBand:
+        avgDissonance >= 70 ? "HIGH" : avgDissonance >= 45 ? "MEDIUM" : "LOW",
       sector: "governance",
     },
     options: {
-      assetLimit: 6,
-      minAssetScore: 24,
+      assetLimit: 8,
+      minAssetScore: 18,
     },
   });
-
-  return result;
 }
+
+export const buildExecutiveReportRecommendations =
+  buildExecutiveReportRecommendationsFromReport;

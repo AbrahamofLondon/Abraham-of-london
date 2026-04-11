@@ -59,7 +59,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       {/* ✅ GLOBAL PROVIDER STACK */}
       <Providers>
         <RegistryProvider>
-          <div className="flex min-h-screen flex-col bg-black relative">
+          <div className="flex min-h-screen flex-col bg-[#060609] relative">
             {/* SYSTEM HUD / NAVIGATION */}
             <MemoizedCommandNavigation />
 

@@ -31,120 +31,160 @@ module.exports = {
     },
 
     extend: {
-      transitionDuration: {
-        "4000": "4000ms",
-        "10000": "10000ms",
+      // ── TYPOGRAPHY ──────────────────────────────────────────────────────────
+      // Cormorant Garamond loaded via Google Fonts in _document.tsx
+      // JetBrains Mono loaded via Google Fonts in _document.tsx
+      // CSS vars --font-serif and --font-mono set in globals.css
+      fontFamily: {
+        sans: [
+          "var(--font-sans)",
+          "Inter",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
+        serif: [
+          "var(--font-serif)",
+          "Cormorant Garamond",
+          "ui-serif",
+          "Georgia",
+          "serif",
+        ],
+        mono: [
+          "var(--font-mono)",
+          "JetBrains Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "monospace",
+        ],
       },
 
-      colors: {
-        background: "rgb(var(--aol-bg) / <alpha-value>)",
-        foreground: "rgb(var(--aol-ink) / <alpha-value>)",
-        border: "rgb(255 255 255 / 0.1)",
-        input: "rgb(255 255 255 / 0.1)",
-        ring: "rgb(var(--aol-gold) / <alpha-value>)",
+      // ── FONT SIZES ──────────────────────────────────────────────────────────
+      fontSize: {
+        "4xs": ["0.5rem",   { lineHeight: "0.7rem",  letterSpacing: "0.12em" }],
+        "3xs": ["0.625rem", { lineHeight: "0.85rem", letterSpacing: "0.20em" }],
+        "2xs": ["0.75rem",  { lineHeight: "1rem",    letterSpacing: "0.05em" }],
+      },
 
-        surface: "rgb(15 15 17 / <alpha-value>)",
+      // ── LETTER SPACING ──────────────────────────────────────────────────────
+      letterSpacing: {
+        institutional: "0.28em",
+        command:       "0.34em",
+        forensic:      "0.40em",
+        wide4:         "0.04em",
+        wide8:         "0.08em",
+      },
+
+      // ── COLOURS ─────────────────────────────────────────────────────────────
+      // All CSS variable bindings. Variables defined in globals.css.
+      colors: {
+        // Semantic system tokens
+        background:    "rgb(var(--aol-bg)     / <alpha-value>)",
+        foreground:    "rgb(var(--aol-ink)    / <alpha-value>)",
+        border:        "rgb(255 255 255      / 0.10)",
+        input:         "rgb(255 255 255      / 0.10)",
+        ring:          "rgb(var(--aol-gold)   / <alpha-value>)",
+
+        // Surface scale
+        surface:    "rgb(15 15 17 / <alpha-value>)",
         "surface-2": "rgb(19 19 22 / <alpha-value>)",
         "surface-3": "rgb(24 24 28 / <alpha-value>)",
 
-        card: "rgb(15 15 17 / <alpha-value>)",
+        // Card
+        card:            "rgb(15 15 17 / <alpha-value>)",
         "card-foreground": "rgb(var(--aol-ink) / <alpha-value>)",
 
+        // Full brand namespace
         brand: {
-          obsidian: "rgb(var(--aol-bg) / <alpha-value>)",
-          "obsidian-2": "rgb(var(--aol-bg-2) / <alpha-value>)",
-          charcoal: "rgb(var(--aol-bg-3) / <alpha-value>)",
-          panel: "rgb(var(--aol-panel) / <alpha-value>)",
-          "panel-2": "rgb(var(--aol-panel-2) / <alpha-value>)",
-          "panel-3": "rgb(var(--aol-panel-3) / <alpha-value>)",
-          cream: "rgb(var(--aol-ink) / <alpha-value>)",
-          "cream-dim": "rgb(var(--aol-ink-dim) / <alpha-value>)",
+          obsidian:      "rgb(var(--aol-bg)        / <alpha-value>)",
+          "obsidian-2":  "rgb(var(--aol-bg-2)      / <alpha-value>)",
+          charcoal:      "rgb(var(--aol-bg-3)      / <alpha-value>)",
+          panel:         "rgb(var(--aol-panel)     / <alpha-value>)",
+          "panel-2":     "rgb(var(--aol-panel-2)   / <alpha-value>)",
+          "panel-3":     "rgb(var(--aol-panel-3)   / <alpha-value>)",
+          cream:         "rgb(var(--aol-ink)       / <alpha-value>)",
+          "cream-dim":   "rgb(var(--aol-ink-dim)   / <alpha-value>)",
           "cream-muted": "rgb(var(--aol-ink-muted) / <alpha-value>)",
-          gold: "rgb(var(--aol-gold) / <alpha-value>)",
+          gold:          "rgb(var(--aol-gold)      / <alpha-value>)",
           "gold-strong": "rgb(var(--aol-gold-strong) / <alpha-value>)",
-          "gold-soft": "rgb(var(--aol-gold-soft) / <alpha-value>)",
-          danger: "rgb(var(--aol-danger) / <alpha-value>)",
-          success: "rgb(var(--aol-success) / <alpha-value>)",
-          warning: "rgb(var(--aol-warning) / <alpha-value>)",
+          "gold-soft":   "rgb(var(--aol-gold-soft)   / <alpha-value>)",
+          danger:        "rgb(var(--aol-danger)    / <alpha-value>)",
+          success:       "rgb(var(--aol-success)   / <alpha-value>)",
+          warning:       "rgb(var(--aol-warning)   / <alpha-value>)",
         },
 
-        // ADD THIS LINE — softGold was missing
-        softGold: "rgb(var(--aol-gold) / <alpha-value>)",
-        
-        gold: "rgb(var(--aol-gold) / <alpha-value>)",
-        amber: "rgb(var(--aol-gold-strong) / <alpha-value>)",
-        cream: "rgb(var(--aol-ink) / <alpha-value>)",
-        warmWhite: "rgb(var(--aol-ink) / <alpha-value>)",
-        charcoal: "rgb(var(--aol-bg-3) / <alpha-value>)",
-        "charcoal-light": "rgb(22 22 24 / <alpha-value>)",
-        deepCharcoal: "rgb(var(--aol-bg-2) / <alpha-value>)",
-        softBlack: "rgb(var(--aol-bg) / <alpha-value>)",
-        obsidian: "rgb(var(--aol-bg) / <alpha-value>)",
-        lightGrey: "rgb(255 255 255 / 0.14)",
-        forest: "#0e3b33",
+        // Convenience aliases (used throughout existing components)
+        softGold:       "rgb(var(--aol-gold)        / <alpha-value>)",
+        gold:           "rgb(var(--aol-gold)        / <alpha-value>)",
+        amber:          "rgb(var(--aol-gold-strong)  / <alpha-value>)",
+        cream:          "rgb(var(--aol-ink)          / <alpha-value>)",
+        warmWhite:      "rgb(var(--aol-ink)          / <alpha-value>)",
+        charcoal:       "rgb(var(--aol-bg-3)         / <alpha-value>)",
+        "charcoal-light": "rgb(22 22 24              / <alpha-value>)",
+        deepCharcoal:   "rgb(var(--aol-bg-2)         / <alpha-value>)",
+        softBlack:      "rgb(var(--aol-bg)           / <alpha-value>)",
+        obsidian:       "rgb(var(--aol-bg)           / <alpha-value>)",
+        lightGrey:      "rgb(255 255 255 / 0.14)",
+        forest:         "#0e3b33",
       },
 
-      fontFamily: {
-        sans: ["var(--font-sans)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["var(--font-serif)", "Cormorant Garamond", "ui-serif", "Georgia", "serif"],
-        mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+      // ── TIMING ──────────────────────────────────────────────────────────────
+      transitionDuration: {
+        "400":   "400ms",
+        "4000":  "4000ms",
+        "10000": "10000ms",
       },
 
-      fontSize: {
-        "4xs": ["0.5rem", { lineHeight: "0.7rem", letterSpacing: "0.12em" }],
-        "3xs": ["0.625rem", { lineHeight: "0.85rem", letterSpacing: "0.2em" }],
-        "2xs": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.05em" }],
-      },
-
-      letterSpacing: {
-        institutional: "0.28em",
-        command: "0.34em",
-        forensic: "0.4em",
-      },
-
+      // ── BORDER RADIUS ───────────────────────────────────────────────────────
       borderRadius: {
         "4xl": "2rem",
         "5xl": "2.5rem",
         "6xl": "3.5rem",
       },
 
+      // ── MAX WIDTH ───────────────────────────────────────────────────────────
       maxWidth: {
         "8xl": "96rem",
         "9xl": "112rem",
       },
 
+      // ── MIN HEIGHT ──────────────────────────────────────────────────────────
       minHeight: {
         hero: "620px",
       },
 
+      // ── Z-INDEX ─────────────────────────────────────────────────────────────
       zIndex: {
-        60: "60",
-        70: "70",
-        80: "80",
-        90: "90",
+        60:  "60",
+        70:  "70",
+        80:  "80",
+        90:  "90",
         100: "100",
         110: "110",
       },
 
+      // ── BACKDROP ────────────────────────────────────────────────────────────
       backdropBlur: {
         xs: "2px",
       },
 
+      // ── BACKGROUND IMAGES ───────────────────────────────────────────────────
       backgroundImage: {
-        "gold-radial": "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
-        "premium-card": "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
-        "gold-linear": "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "aol-hairline": "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
+        "gold-radial":    "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
+        "premium-card":   "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
+        "gold-linear":    "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
+        "aol-hairline":   "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
         "aol-hairline-gold": "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "terminal-core": "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
+        "terminal-core":  "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
       },
 
+      // ── BOX SHADOWS ─────────────────────────────────────────────────────────
       boxShadow: {
-        premium: "0 20px 40px -15px rgba(0,0,0,0.80)",
-        card: "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
+        premium:   "0 20px 40px -15px rgba(0,0,0,0.80)",
+        card:      "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
         cardHover: "0 28px 80px -30px rgba(0,0,0,0.82), 0 1px 2px 0 rgba(255,255,255,0.05) inset, 0 0 36px rgba(201,169,106,0.06)",
         "gold-glow": "0 0 40px rgba(201,169,106,0.12)",
-        terminal: "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
+        terminal:  "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
       },
     },
   },

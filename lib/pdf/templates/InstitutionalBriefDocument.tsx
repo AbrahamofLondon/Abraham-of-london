@@ -1,202 +1,226 @@
-/* lib/pdf/templates/InstitutionalBriefDocument.tsx */
+/* lib/pdf/templates/InstitutionalBriefDocument.tsx — V7.3 (Production Ready) */
 import React from "react";
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Document, Page, StyleSheet, View, Text } from "@react-pdf/renderer";
 import type { WatermarkPayload } from "../../intelligence/watermark-delegate";
 
 import BriefCoverPage from "../../../components/print/BriefCoverPage";
 import ForensicMarkLayer from "../../../components/print/ForensicMarkLayer";
 import BriefHeaderBar from "../../../components/print/BriefHeaderBar";
 import BriefFooterBar from "../../../components/print/BriefFooterBar";
-import { InstitutionalBriefInteriorPage } from "../renderers/InstitutionalBriefDocument";
+import ExecutiveSummaryPanel from "../../../components/print/ExecutiveSummaryPanel";
+import KeyJudgementsPanel from "../../../components/print/KeyJudgementsPanel";
+import RenderBriefBody from "../renderers/InstitutionalBriefDocument";   // ← Correct import
 
-interface InstitutionalBriefTemplateProps {
-  config: {
-    id?: string;
-    title?: string;
-    classification?: string;
-    reference?: string;
-    signAs?: string;
-    summary?: string;
-    description?: string;
-    type?: string;
-    version?: string;
-    subtitle?: string;
-    [key: string]: unknown;
-  };
-  content: string;
-  watermark: WatermarkPayload;
-  qrCode?: string;
+/* -------------------------------------------------------------------------- */
+/* Types */
+/* -------------------------------------------------------------------------- */
+type ExpandedPDFConfig = {
+  id?: string;
+  title?: string;
+  subtitle?: string;
   classification?: string;
   reference?: string;
-}
+  type?: string;
+  version?: string;
+  summary?: string;
+  description?: string;
+  signAs?: string;
+  outputPath?: string;
+  tier?: string;
+  [key: string]: unknown;
+};
 
+type BriefDocumentProps = {
+  config?: ExpandedPDFConfig;
+  content?: string;
+  summaryText?: string;
+  watermark?: WatermarkPayload;
+  qrCode?: string;
+  frontmatter?: Record<string, unknown>;
+  sourceMeta?: any;
+};
+
+/* -------------------------------------------------------------------------- */
+/* Design Tokens */
+/* -------------------------------------------------------------------------- */
 const PAPER = "#FCFAF6";
 const INK = "#1A1713";
 const INK_SOFT = "#49443C";
 const INK_MUTE = "#7B7367";
 const BRASS = "#8E7A53";
-const BRASS_SOFT = "#C7B89B";
 const LINE = "#DED5C5";
 const PANEL = "#F5EFE5";
 
 const styles = StyleSheet.create({
   page: {
     backgroundColor: PAPER,
-    paddingTop: 60,
-    paddingBottom: 70,
-    paddingHorizontal: 56,
-    fontFamily: "AoLInter",
     color: INK,
-    fontSize: 10,
+    paddingTop: 58,
+    paddingBottom: 68,
+    paddingHorizontal: 54,
+    fontFamily: "AoLInter",
+    fontSize: 10.1,
     lineHeight: 1.58,
   },
-
   frameTop: {
     position: "absolute",
-    top: 28,
+    top: 30,
     left: 54,
     right: 54,
     height: 1,
     backgroundColor: LINE,
   },
-
   frameBottom: {
     position: "absolute",
-    bottom: 48,
+    bottom: 50,
     left: 54,
     right: 54,
     height: 1,
     backgroundColor: LINE,
   },
-
   masthead: {
     marginTop: 8,
-    marginBottom: 18,
+    marginBottom: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: LINE,
   },
-
   eyebrow: {
-    fontSize: 7.5,
+    fontSize: 7.6,
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     color: BRASS,
-    marginBottom: 8,
+    marginBottom: 6,
   },
-
   title: {
     fontFamily: "AoLSerif",
-    fontSize: 28,
+    fontSize: 27,
     fontWeight: 700,
     color: INK,
-    lineHeight: 1.08,
+    lineHeight: 1.1,
     marginBottom: 8,
   },
-
   subtitle: {
-    fontSize: 10.2,
+    fontSize: 10.4,
     lineHeight: 1.55,
     color: INK_SOFT,
   },
-
   metaRow: {
     marginTop: 14,
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
   },
-
   metaPill: {
-    flexGrow: 1,
+    flex: 1,
     borderWidth: 1,
     borderColor: LINE,
     backgroundColor: PANEL,
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 11,
+    marginRight: 10,
   },
-
+  metaPillLast: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: LINE,
+    backgroundColor: PANEL,
+    paddingVertical: 8,
+    paddingHorizontal: 11,
+  },
   metaLabel: {
-    fontSize: 6.8,
+    fontSize: 6.9,
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: 1.1,
     color: BRASS,
     marginBottom: 3,
   },
-
   metaValue: {
-    fontSize: 8.6,
+    fontSize: 8.8,
     color: INK_SOFT,
-    lineHeight: 1.35,
+    lineHeight: 1.4,
   },
-
   executivePanel: {
-    marginTop: 18,
-    marginBottom: 24,
+    marginTop: 20,
+    marginBottom: 26,
     backgroundColor: PANEL,
     borderWidth: 1,
     borderColor: LINE,
-    paddingVertical: 16,
+    paddingVertical: 17,
     paddingHorizontal: 18,
   },
-
   executiveKicker: {
-    fontSize: 7.5,
+    fontSize: 7.6,
     fontWeight: 700,
     textTransform: "uppercase",
-    letterSpacing: 1.4,
+    letterSpacing: 1.45,
     color: BRASS,
-    marginBottom: 8,
+    marginBottom: 9,
   },
-
   executiveSummary: {
-    fontSize: 10,
-    lineHeight: 1.64,
+    fontSize: 10.1,
+    lineHeight: 1.65,
     color: INK_SOFT,
   },
-
   attestationBlock: {
-    marginTop: 28,
-    paddingTop: 16,
+    marginTop: 32,
+    paddingTop: 18,
     borderTopWidth: 1,
     borderTopColor: LINE,
   },
-
   attestationKicker: {
-    fontSize: 7.4,
+    fontSize: 7.5,
     fontWeight: 700,
     textTransform: "uppercase",
-    letterSpacing: 1.2,
+    letterSpacing: 1.25,
     color: BRASS,
     marginBottom: 8,
   },
-
   attestationText: {
-    fontSize: 8.5,
-    lineHeight: 1.48,
+    fontSize: 8.6,
+    lineHeight: 1.5,
     color: INK_MUTE,
-    marginBottom: 4,
+    marginBottom: 5,
   },
-
   footerStamp: {
-    marginTop: 20,
+    marginTop: 24,
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 1,
     borderTopColor: LINE,
-    paddingTop: 10,
+    paddingTop: 11,
   },
-
   footerText: {
-    fontSize: 7,
+    fontSize: 7.1,
     color: INK_MUTE,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 0.85,
+  },
+  fallbackBox: {
+    marginTop: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: LINE,
+    backgroundColor: PANEL,
+  },
+  fallbackTitle: {
+    fontSize: 8.4,
+    fontWeight: 700,
+    color: BRASS,
+    marginBottom: 6,
+    textTransform: "uppercase",
+  },
+  fallbackText: {
+    fontSize: 9,
+    color: INK_SOFT,
+    lineHeight: 1.5,
   },
 });
 
+/* -------------------------------------------------------------------------- */
+/* Safe Utilities */
+/* -------------------------------------------------------------------------- */
 function safeString(value: unknown, fallback = ""): string {
   if (typeof value === "string") {
     const trimmed = value.trim();
@@ -208,125 +232,101 @@ function safeString(value: unknown, fallback = ""): string {
   return fallback;
 }
 
-function summarize(content: string, fallbackSummary?: string): string {
+function summarize(content: string, fallback?: string): string {
   const cleaned = safeString(content)
     .replace(/```[\s\S]*?```/g, "")
     .replace(/^\s*#{1,6}\s+/gm, "")
-    .replace(/^\s*[-*+]\s+/gm, "")
     .replace(/\r\n/g, "\n")
     .replace(/\n{2,}/g, " ")
-    .replace(/\s+/g, " ")
     .trim();
 
-  const base = safeString(fallbackSummary) || cleaned;
-  if (!base) return "Institutional brief prepared for structured reading and executive judgment.";
-  return base.length > 360 ? `${base.slice(0, 359).trim()}…` : base;
+  const base = safeString(fallback) || cleaned;
+  return base.length > 380 ? `${base.slice(0, 379).trim()}…` : base;
 }
 
-export const InstitutionalBriefDocument: React.FC<InstitutionalBriefTemplateProps> = ({
-  config,
-  content,
-  watermark,
+/* -------------------------------------------------------------------------- */
+/* Main Document */
+/* -------------------------------------------------------------------------- */
+export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
+  config: configProp,
+  content = "",
+  summaryText,
+  watermark = { fingerprint: "institutional", issuedAt: new Date().toISOString(), metadata: {} },
   qrCode,
-  classification,
-  reference,
+  frontmatter,
 }) => {
-  const resolvedClassification =
-    safeString(classification) ||
-    safeString(config.classification) ||
-    "PUBLIC";
+  const mergedConfig = { ...(configProp || {}), ...(frontmatter || {}) };
 
-  const resolvedReference =
-    safeString(reference) ||
-    safeString(config.reference) ||
-    safeString(config.id).slice(0, 8).toUpperCase() ||
-    "UNFILED";
+  const title = safeString(mergedConfig.title, "Institutional Brief");
+  const subtitle = safeString(mergedConfig.subtitle) || 
+    `${safeString(mergedConfig.type, "Institutional Brief")} prepared for disciplined reading.`;
 
-  const title = safeString(config.title, "Institutional Brief");
-  const subtitle =
-    safeString(config.subtitle) ||
-    `${safeString(config.type, "Institutional Brief")} prepared for disciplined reading, executive clarity, and governed action.`;
+  const resolvedContent = safeString(content).trim();
+  const executiveSummary = summarize(resolvedContent, safeString(summaryText) || safeString(mergedConfig.summary));
 
-  const summary = summarize(
-    content,
-    safeString(config.summary) || safeString(config.description),
-  );
-
-  const coverConfig = {
-    ...config,
-    classification: resolvedClassification,
-    reference: resolvedReference,
-  };
+  const classification = safeString(mergedConfig.classification, "PUBLIC").toUpperCase();
+  const reference = safeString(mergedConfig.reference || mergedConfig.id, "UNFILED").toUpperCase();
+  const signAs = safeString(mergedConfig.signAs, "The Architect");
 
   return (
     <Document
       title={title}
       author="Abraham of London"
-      subject="Institutional Brief"
+      subject={subtitle}
       language="en-GB"
-      creator="Abraham of London"
-      producer="Abraham of London"
     >
       <BriefCoverPage
-        config={coverConfig}
+        config={mergedConfig}
         watermark={watermark}
         qrCode={qrCode}
-        classification={resolvedClassification}
-        reference={resolvedReference}
+        classification={classification}
+        reference={reference}
       />
 
       <Page size="A4" style={styles.page}>
         <ForensicMarkLayer watermark={watermark} mode="interior" />
+
         <View style={styles.frameTop} fixed />
         <View style={styles.frameBottom} fixed />
 
         <BriefHeaderBar
           title={title}
-          reference={resolvedReference}
-          classification={resolvedClassification}
+          reference={reference}
+          classification={classification}
         />
 
         <View style={styles.masthead}>
           <Text style={styles.eyebrow}>Institutional Brief</Text>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
+        </View>
 
-          <View style={styles.metaRow}>
-            <View style={styles.metaPill}>
-              <Text style={styles.metaLabel}>Classification</Text>
-              <Text style={styles.metaValue}>{resolvedClassification}</Text>
-            </View>
-
-            <View style={styles.metaPill}>
-              <Text style={styles.metaLabel}>Reference</Text>
-              <Text style={styles.metaValue}>{resolvedReference}</Text>
-            </View>
-
-            <View style={styles.metaPill}>
-              <Text style={styles.metaLabel}>Version</Text>
-              <Text style={styles.metaValue}>{safeString(config.version, "1.0")}</Text>
-            </View>
+        {/* Executive Summary */}
+        {executiveSummary && (
+          <View style={styles.executivePanel}>
+            <ExecutiveSummaryPanel text={executiveSummary} />
           </View>
-        </View>
+        )}
 
-        <View style={styles.executivePanel}>
-          <Text style={styles.executiveKicker}>Executive Summary</Text>
-          <Text style={styles.executiveSummary}>{summary}</Text>
-        </View>
-
-        <InstitutionalBriefInteriorPage content={content} />
+        {/* Main Body - Now using the strong renderer */}
+        {resolvedContent.length > 20 ? (
+          <RenderBriefBody content={resolvedContent} />
+        ) : (
+          <View style={styles.fallbackBox}>
+            <Text style={styles.fallbackTitle}>Content Unavailable</Text>
+            <Text style={styles.fallbackText}>
+              The document resolved successfully, but no body content was available for rendering.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.attestationBlock}>
           <Text style={styles.attestationKicker}>Attestation</Text>
           <Text style={styles.attestationText}>
-            Issued under the authority of {safeString(config.signAs, "The Architect")}.
+            Issued under the authority of {signAs}.
           </Text>
-          <Text style={styles.attestationText}>
-            Classification: {resolvedClassification}
-          </Text>
-          <Text style={styles.attestationText}>
-            Reference: {resolvedReference}
-          </Text>
+          <Text style={styles.attestationText}>Classification: {classification}</Text>
+          <Text style={styles.attestationText}>Reference: {reference}</Text>
         </View>
 
         <View style={styles.footerStamp}>
@@ -337,8 +337,8 @@ export const InstitutionalBriefDocument: React.FC<InstitutionalBriefTemplateProp
 
         <BriefFooterBar
           watermark={watermark}
-          reference={resolvedReference}
-          signAs={safeString(config.signAs, "The Architect")}
+          reference={reference}
+          signAs={signAs}
         />
       </Page>
     </Document>

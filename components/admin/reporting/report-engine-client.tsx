@@ -9,27 +9,30 @@ interface ReportEngineClientProps {
   humanCapitalMetrics: any[];
   financialMetrics: any[];
   operationalMetrics: any[];
+  governanceMetrics?: any[];
 }
 
 /**
  * REPORT ENGINE CLIENT
  * Manages the state of the polymorphic report views.
  */
-export function ReportEngineClient({ 
-  strategicMetrics, 
+export function ReportEngineClient({
+  strategicMetrics,
   humanCapitalMetrics,
   financialMetrics,
-  operationalMetrics
+  operationalMetrics,
+  governanceMetrics = [],
 }: ReportEngineClientProps) {
   const [activeMode, setActiveMode] = useState<MatrixMode>('STRATEGIC');
 
   // Select the appropriate dataset based on the active mode
-  const activeMetrics = {
+  const activeMetrics: any[] = {
     STRATEGIC: strategicMetrics,
     HUMAN_CAPITAL: humanCapitalMetrics,
     FINANCIAL: financialMetrics,
-    OPERATIONAL: operationalMetrics
-  }[activeMode];
+    OPERATIONAL: operationalMetrics,
+    GOVERNANCE: governanceMetrics,
+  }[activeMode] ?? [];
 
   return (
     <div className="space-y-12">

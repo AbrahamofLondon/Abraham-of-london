@@ -30,7 +30,7 @@ export default function BriefsGrid() {
   const [filter, setFilter] = React.useState("ALL");
 
   return (
-    <section className="bg-black py-24 min-h-screen">
+    <section className="bg-[#060609] py-24 min-h-screen">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         
         {/* Registry Header & Intelligence Counter */}
@@ -80,7 +80,7 @@ export default function BriefsGrid() {
             <Link 
               key={brief.id} 
               href={`/vault/briefs/${brief.id.toLowerCase()}`}
-              className="group relative bg-black p-8 transition-all hover:bg-zinc-900/40 overflow-hidden"
+              className="group relative bg-[#060609] p-8 transition-all hover:bg-zinc-900/40 overflow-hidden"
             >
               <div className="flex justify-between items-start mb-12">
                 <span className="text-[9px] font-mono text-amber-500 font-bold tracking-widest">

@@ -1648,6 +1648,85 @@ model StrategyIntake {
   @@map("strategy_intakes")
 }
 
+model ConstitutionalIntakeReport {
+  id                      String   @id @default(cuid())
+  source                  String
+  sessionKey              String?
+  respondentKey           String?
+  email                   String?
+  organisation            String?
+  ipAddress               String?
+  userAgent               String?
+
+  // ✅ Fixed: Removed @db.LongText for SQLite compatibility
+  answersJson             String
+  reportJson              String
+  constitutionalInputJson String
+  decisionJson            String
+  routeSummaryJson        String
+  bridgeJson              String?
+
+  route                   String?
+  confidence              Float?
+  posture                 String?
+  readinessTier           String?
+  authorityType           String?
+  seriousnessScore        Int?
+  completionPercent       Int?
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([sessionKey])
+  @@index([respondentKey])
+  @@index([email])
+  @@index([organisation])
+  @@index([route])
+}
+
+model ExecutiveReportingRun {
+  id                 String   @id @default(cuid())
+  runKey             String   @unique
+  email              String
+  fullName           String?
+  organisation       String?
+  role               String?
+  sector             String?
+  source             String   @default("executive-reporting")
+  status             String   @default("completed")
+  route              String?
+  readinessTier      String?
+  authorityType      String?
+  canonicalSnapshot  Json
+  viewModelSnapshot  Json
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  artifacts          ExecutiveReportingArtifact[]
+}
+
+model ExecutiveReportingArtifact {
+  id                 String   @id @default(cuid())
+  artifactKey        String   @unique
+  runId              String
+  run                ExecutiveReportingRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  kind               String
+  fileName           String?
+  mimeType           String?
+  payload            Json?
+  status             String   @default("authorized")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([runId])
+  @@index([kind])
+  @@index([runId, kind])
+  @@index([status])
+  @@index([createdAt])
+}
+
+
 model StrategyRoomSession {
   id                 String    @id @default(cuid())
   sessionKey         String    @unique

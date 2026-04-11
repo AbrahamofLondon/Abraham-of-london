@@ -128,7 +128,7 @@ const PdfAnalyticsDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black overflow-hidden print:bg-white print:text-black">
+    <div className="min-h-screen bg-[#060609] text-white font-mono selection:bg-white selection:text-black overflow-hidden print:bg-white print:text-black">
       {/* Print Styles */}
       <style jsx global>{`
         @media print {

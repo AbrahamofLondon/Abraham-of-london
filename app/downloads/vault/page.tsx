@@ -43,7 +43,7 @@ const vaultItems = [
 
 export default function VaultPage() {
   return (
-    <main className="min-h-screen bg-black pt-32 pb-20">
+    <main className="min-h-screen bg-[#060609] pt-32 pb-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* --- Archive Header --- */}

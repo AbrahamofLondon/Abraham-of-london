@@ -13,6 +13,7 @@ import {
   doesTokenMatchBinding,
 } from "@/lib/premium/download-token";
 import { generateForensicPayload } from "@/lib/intelligence/forensic-mapping";
+import ReactPDF from "@react-pdf/renderer";
 import { registerFonts } from "@/lib/pdf/register-fonts";
 import InstitutionalBriefDocument from "@/lib/pdf/templates/InstitutionalBriefDocument";
 import type { AccessTier } from "@/lib/access/tier-policy";
@@ -20,7 +21,7 @@ import type { AccessTier } from "@/lib/access/tier-policy";
 /**
  * Warm-start font registration
  */
-registerFonts();
+registerFonts(ReactPDF);
 
 type RouteContext = {
   params: {
@@ -240,7 +241,7 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
   const rawSummary =
     dbEntry?.summary || pdfConfig.description || pdfConfig.summary || "";
 
-  const forensic = generateForensicPayload(pdfConfigRaw, {
+  const forensic = generateForensicPayload(pdfConfigRaw!, {
     userId: userId || "anonymous",
     userTier,
     sessionId,

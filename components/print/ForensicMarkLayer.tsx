@@ -1,4 +1,10 @@
-/* components/print/ForensicMarkLayer.tsx — V4.0 (CURATED FORENSIC GRAVITAS) */
+/* components/print/ForensicMarkLayer.tsx — V5.0
+   ---------------------------------------------------------------------------
+   FORENSIC MARK LAYER
+   Rebuilt for React-PDF stability, restrained luxury, and safer watermarking.
+   No transform-based decorative text. No brittle rotated overlays.
+   --------------------------------------------------------------------------- */
+
 import React from "react";
 import { View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { WatermarkPayload } from "../../lib/intelligence/watermark-delegate";
@@ -20,117 +26,159 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    pointerEvents: "none" as never,
-  },
-
-  diagonalPrimary: {
-    position: "absolute",
-    left: 62,
-    top: 344,
-    transform: "rotate(-31deg)",
-    fontFamily: "Helvetica",
-    fontSize: 8.2,
-    letterSpacing: 1.55,
-    color: DARK_MIST,
-    opacity: 0.105,
-  },
-
-  diagonalSecondary: {
-    position: "absolute",
-    left: 86,
-    top: 388,
-    transform: "rotate(-31deg)",
-    fontFamily: "Helvetica",
-    fontSize: 7.2,
-    letterSpacing: 1.25,
-    color: SILVER,
-    opacity: 0.075,
-  },
-
-  microTopRight: {
-    position: "absolute",
-    top: 12,
-    right: 28,
-    fontFamily: "Helvetica",
-    fontSize: 5.9,
-    color: SILVER,
-    letterSpacing: 0.55,
   },
 
   microTopLeft: {
     position: "absolute",
     top: 12,
     left: 28,
-    fontFamily: "Helvetica",
-    fontSize: 5.9,
+    fontFamily: "AoLInter",
+    fontSize: 5.8,
     color: SILVER,
-    letterSpacing: 0.55,
+    letterSpacing: 0.45,
+  },
+
+  microTopRight: {
+    position: "absolute",
+    top: 12,
+    right: 28,
+    fontFamily: "AoLInter",
+    fontSize: 5.8,
+    color: SILVER,
+    letterSpacing: 0.45,
+    maxWidth: 220,
+    textAlign: "right",
   },
 
   microBottomLeft: {
     position: "absolute",
     bottom: 15,
     left: 28,
-    fontFamily: "Helvetica",
-    fontSize: 5.9,
+    fontFamily: "AoLInter",
+    fontSize: 5.8,
     color: SILVER,
-    letterSpacing: 0.52,
+    letterSpacing: 0.42,
+    maxWidth: 260,
   },
 
   microBottomRight: {
     position: "absolute",
     bottom: 15,
     right: 28,
-    fontFamily: "Helvetica",
-    fontSize: 5.9,
+    fontFamily: "AoLInter",
+    fontSize: 5.8,
     color: SILVER,
-    letterSpacing: 0.52,
+    letterSpacing: 0.42,
+    textAlign: "right",
+  },
+
+  centerBandWrap: {
+  position: "absolute",
+  left: 56,
+  right: 56,
+  top: 356,
+  alignItems: "center",
+},
+
+  centerBandPrimary: {
+    fontFamily: "AoLInter",
+    fontSize: 7.2,
+    color: DARK_MIST,
+    letterSpacing: 1.1,
+    textAlign: "center",
+    opacity: 0.11,
+  },
+
+  centerBandSecondary: {
+    marginTop: 5,
+    fontFamily: "AoLInter",
+    fontSize: 6.4,
+    color: SILVER,
+    letterSpacing: 0.9,
+    textAlign: "center",
+    opacity: 0.08,
   },
 
   coverGhostMark: {
     position: "absolute",
     right: 56,
     bottom: 112,
-    fontFamily: "Times-Italic",
+    fontFamily: "AoLSerif",
     fontSize: 22,
+    fontStyle: "italic",
     color: MIST,
     opacity: 0.14,
-    letterSpacing: 0.25,
+    letterSpacing: 0.2,
   },
 
   interiorGhostMark: {
     position: "absolute",
     right: 54,
     bottom: 104,
-    fontFamily: "Times-Italic",
-    fontSize: 15,
+    fontFamily: "AoLSerif",
+    fontSize: 14.5,
+    fontStyle: "italic",
     color: MIST,
     opacity: 0.09,
-    letterSpacing: 0.2,
+    letterSpacing: 0.15,
   },
 
-  spineToken: {
+  leftRail: {
     position: "absolute",
-    top: 248,
-    left: 8,
-    transform: "rotate(-90deg)",
-    fontFamily: "Helvetica",
-    fontSize: 5.7,
+    top: 224,
+    left: 10,
+    width: 22,
+    alignItems: "center",
+  },
+
+  leftRailLine1: {
+    fontFamily: "AoLInter",
+    fontSize: 5.5,
     color: SOFT_GOLD,
-    letterSpacing: 0.85,
-    opacity: 0.5,
+    letterSpacing: 0.55,
+    textAlign: "center",
+    marginBottom: 3,
+  },
+
+  leftRailLine2: {
+    fontFamily: "AoLInter",
+    fontSize: 5.3,
+    color: SOFT_GOLD,
+    letterSpacing: 0.45,
+    textAlign: "center",
   },
 });
 
 function safeString(value: unknown): string {
   if (typeof value === "string") return value.trim();
   if (value === null || value === undefined) return "";
-  return String(value).trim();
+  try {
+    return String(value).trim();
+  } catch {
+    return "";
+  }
+}
+
+function cleanPdfText(value: unknown, fallback = ""): string {
+  const text = safeString(value) || fallback;
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[‐-‒–—]/g, "-")
+    .replace(/\u00A0/g, " ")
+    .replace(/\t/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max - 1)}…`;
+  const clean = cleanPdfText(value);
+  if (clean.length <= max) return clean;
+  return `${clean.slice(0, Math.max(0, max - 1)).trim()}…`;
 }
 
 function buildShortAuthorityLine(params: {
@@ -139,14 +187,17 @@ function buildShortAuthorityLine(params: {
   sig: string;
   issuer: string;
 }): string {
-  const parts = [
-    params.classification,
-    `TRACE ${params.trace}`,
-    `SIG ${params.sig}`,
-    params.issuer,
-  ].filter(Boolean);
-
-  return parts.join(" · ");
+  return truncate(
+    [
+      params.classification,
+      `TRACE ${params.trace}`,
+      `SIG ${params.sig}`,
+      params.issuer,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    110,
+  );
 }
 
 function buildLongAuthorityLine(params: {
@@ -156,15 +207,18 @@ function buildLongAuthorityLine(params: {
   trace: string;
   sig: string;
 }): string {
-  const parts = [
-    params.brand,
-    params.classification,
-    params.reference,
-    `TRACE ${params.trace}`,
-    `SIG ${params.sig}`,
-  ].filter(Boolean);
-
-  return parts.join(" · ");
+  return truncate(
+    [
+      params.brand,
+      params.classification,
+      params.reference,
+      `TRACE ${params.trace}`,
+      `SIG ${params.sig}`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    180,
+  );
 }
 
 export const ForensicMarkLayer: React.FC<Props> = ({
@@ -172,44 +226,49 @@ export const ForensicMarkLayer: React.FC<Props> = ({
   mode = "interior",
 }) => {
   const metadata = (watermark?.metadata ?? {}) as Record<string, unknown>;
-  const aol = ((metadata.aol as Record<string, unknown> | undefined) ?? {}) as Record<string, unknown>;
-  const issuer = ((aol.issuer as Record<string, unknown> | undefined) ?? {}) as Record<string, unknown>;
-  const context = ((aol.context as Record<string, unknown> | undefined) ?? {}) as Record<string, unknown>;
+  const aol =
+    ((metadata.aol as Record<string, unknown> | undefined) ?? {}) as Record<
+      string,
+      unknown
+    >;
+  const issuer =
+    ((aol.issuer as Record<string, unknown> | undefined) ?? {}) as Record<
+      string,
+      unknown
+    >;
+  const context =
+    ((aol.context as Record<string, unknown> | undefined) ?? {}) as Record<
+      string,
+      unknown
+    >;
 
-  const brand = safeString(issuer.brand) || "Abraham of London";
-  const issuerId = safeString(issuer.issuerId) || "AOL";
-  const trace = safeString(aol.traceId) || "TRACE-NULL";
-  const sig = safeString(aol.sig) || "UNVERIFIED";
-  const classification = safeString(aol.classification).toUpperCase() || "PUBLIC";
+  const brand = cleanPdfText(issuer.brand, "Abraham of London");
+  const issuerId = cleanPdfText(issuer.issuerId, "AOL");
+  const trace = cleanPdfText(aol.traceId, "TRACE-NULL");
+  const sig = cleanPdfText(aol.sig, "UNVERIFIED");
+  const classification = cleanPdfText(aol.classification, "PUBLIC").toUpperCase();
   const reference =
-    safeString(context.reference) ||
-    safeString(context.slug) ||
-    safeString(watermark.overlayToken) ||
+    cleanPdfText(context.reference) ||
+    cleanPdfText(context.slug) ||
+    cleanPdfText(watermark?.overlayToken) ||
     "UNTRACKED";
 
-  const shortLine = truncate(
-    buildShortAuthorityLine({
-      classification,
-      trace,
-      sig,
-      issuer: issuerId,
-    }),
-    110
-  );
+  const shortLine = buildShortAuthorityLine({
+    classification,
+    trace,
+    sig,
+    issuer: issuerId,
+  });
 
-  const longLine = truncate(
-    buildLongAuthorityLine({
-      brand: brand.toUpperCase(),
-      classification,
-      reference,
-      trace,
-      sig,
-    }),
-    180
-  );
+  const longLine = buildLongAuthorityLine({
+    brand: brand.toUpperCase(),
+    classification,
+    reference,
+    trace,
+    sig,
+  });
 
   const ghostMark = mode === "cover" ? "Abraham of London" : "AOL";
-  const spineToken = truncate(`${classification} · ${reference} · ${trace}`, 90);
 
   return (
     <View style={styles.layer} fixed>
@@ -217,19 +276,21 @@ export const ForensicMarkLayer: React.FC<Props> = ({
       <Text style={styles.microTopRight}>{shortLine}</Text>
       <Text style={styles.microBottomLeft}>{longLine}</Text>
       <Text style={styles.microBottomRight}>{classification}</Text>
-      <Text style={styles.spineToken}>{spineToken}</Text>
+
+      <View style={styles.leftRail}>
+        <Text style={styles.leftRailLine1}>{classification}</Text>
+        <Text style={styles.leftRailLine2}>{truncate(reference, 18)}</Text>
+      </View>
+
+      <View style={styles.centerBandWrap}>
+        <Text style={styles.centerBandPrimary}>{longLine}</Text>
+        <Text style={styles.centerBandSecondary}>{shortLine}</Text>
+      </View>
 
       {mode === "cover" ? (
-        <>
-          <Text style={styles.diagonalPrimary}>{longLine}</Text>
-          <Text style={styles.diagonalSecondary}>{shortLine}</Text>
-          <Text style={styles.coverGhostMark}>{ghostMark}</Text>
-        </>
+        <Text style={styles.coverGhostMark}>{ghostMark}</Text>
       ) : (
-        <>
-          <Text style={styles.diagonalPrimary}>{shortLine}</Text>
-          <Text style={styles.interiorGhostMark}>{ghostMark}</Text>
-        </>
+        <Text style={styles.interiorGhostMark}>{ghostMark}</Text>
       )}
     </View>
   );

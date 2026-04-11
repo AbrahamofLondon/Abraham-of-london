@@ -37,7 +37,7 @@ function findBriefBySlug(slug: string) {
  */
 function NotFoundView() {
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-20">
+    <div className="min-h-screen bg-[#060609] text-white flex items-center justify-center px-6 py-20">
       <div className="max-w-xl w-full border border-white/10 bg-white/[0.02] rounded-3xl p-10">
         <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-zinc-500">
           Intelligence Registry

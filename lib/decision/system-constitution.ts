@@ -1,5 +1,3 @@
-// lib/decision/system-constitution.ts
-
 export type CanonRoute = "REJECT" | "DIAGNOSTIC" | "STRATEGY";
 export type CanonOrgState = "ORDERED" | "DRIFTING" | "MISALIGNED" | "DISORDERED";
 export type CanonReadinessTier =
@@ -11,6 +9,8 @@ export type CanonReadinessTier =
 export type CanonAuthorityType = "DIRECT" | "PROXY" | "UNCLEAR";
 export type CanonPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | "SOVEREIGN";
 export type CanonTemperature = "COLD" | "WARM" | "HOT" | "SCORCHING";
+export type CanonMarketRiskBand = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type CanonRevenueBand = "MICRO" | "SMB" | "MID" | "ENTERPRISE" | "WHALE";
 
 export type StrategyRoomFieldType = "text" | "textarea" | "email" | "select";
 
@@ -53,8 +53,8 @@ export interface ConstitutionalAssessment {
   governanceScore: number;
   severityScore: number;
   revenueScore: number;
-  marketRiskBand: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-  revenueBand: "MICRO" | "SMB" | "MID" | "ENTERPRISE" | "WHALE";
+  marketRiskBand: CanonMarketRiskBand;
+  revenueBand: CanonRevenueBand;
   failureModes: string[];
   dominantDomains: string[];
   requiredInterventions: string[];
@@ -68,7 +68,7 @@ export interface ConstitutionalAssetCandidate {
   id: string;
   title: string;
   kind: string;
-  href?: string;
+  href?: string | null;
   metadataConfidence?: number;
   matchScore: number;
   matchReasons: string[];
@@ -281,8 +281,24 @@ const GOVERNANCE_FAILURE_WORDS = [
   "policy",
 ];
 
+const WORLDVIEW_ANCHORS = [
+  "human-purpose",
+  "moral-order",
+  "stewardship",
+  "truth-discipline",
+  "governance",
+] as const;
+
 function safeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeText(value: unknown): string {
+  return safeText(value).toLowerCase();
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function containsAny(text: string, words: string[]): boolean {
@@ -291,32 +307,64 @@ function containsAny(text: string, words: string[]): boolean {
 }
 
 function scoreTextClarity(text: string): number {
-  const len = text.trim().length;
-  if (len >= 550) return 90;
-  if (len >= 350) return 78;
-  if (len >= 220) return 66;
-  if (len >= 120) return 52;
-  if (len >= 60) return 36;
-  return 18;
+  const value = safeText(text);
+  const len = value.length;
+
+  let score = 0;
+
+  if (len >= 600) score += 45;
+  else if (len >= 420) score += 38;
+  else if (len >= 280) score += 30;
+  else if (len >= 160) score += 22;
+  else if (len >= 90) score += 14;
+  else if (len >= 45) score += 8;
+  else score += 2;
+
+  const punctuationSignals =
+    (value.includes(".") ? 1 : 0) +
+    (value.includes(",") ? 1 : 0) +
+    (value.includes(":") ? 1 : 0) +
+    (value.includes(";") ? 1 : 0);
+
+  score += Math.min(8, punctuationSignals * 2);
+
+  if (containsAny(value, ["because", "therefore", "however", "risk", "constraint", "outcome"])) {
+    score += 8;
+  }
+
+  if (containsAny(value, ["urgent", "governance", "authority", "decision", "execution"])) {
+    score += 8;
+  }
+
+  return Math.max(0, Math.min(100, score));
 }
 
-function normalizeRevenueBand(input: string): ConstitutionalAssessment["revenueBand"] {
+function normalizeRevenueBand(input: string): CanonRevenueBand {
   const raw = safeText(input).toUpperCase();
   if (["MICRO", "SMB", "MID", "ENTERPRISE", "WHALE"].includes(raw)) {
-    return raw as ConstitutionalAssessment["revenueBand"];
+    return raw as CanonRevenueBand;
   }
   return "SMB";
 }
 
+function normalizeMarketRiskBand(input: string): CanonMarketRiskBand {
+  const raw = safeText(input).toUpperCase();
+  if (raw === "CRITICAL") return "CRITICAL";
+  if (raw === "HIGH") return "HIGH";
+  if (raw === "MEDIUM") return "MEDIUM";
+  return "LOW";
+}
+
 function classifyAuthorityType(
   authorityRole: string,
-  authorityScope: string
+  authorityScope: string,
 ): CanonAuthorityType {
   const scope = safeText(authorityScope).toUpperCase();
-  const role = authorityRole.toLowerCase();
+  const role = normalizeText(authorityRole);
 
   if (scope === "DIRECT") return "DIRECT";
   if (scope === "PROXY") return "PROXY";
+  if (scope === "UNCLEAR") return "UNCLEAR";
 
   if (DIRECT_ROLE_WORDS.some((w) => role.includes(w))) return "DIRECT";
   if (PROXY_ROLE_WORDS.some((w) => role.includes(w))) return "PROXY";
@@ -324,9 +372,7 @@ function classifyAuthorityType(
   return "UNCLEAR";
 }
 
-function revenueScoreFromBand(
-  band: ConstitutionalAssessment["revenueBand"]
-): number {
+function revenueScoreFromBand(band: CanonRevenueBand): number {
   switch (band) {
     case "WHALE":
       return 95;
@@ -352,33 +398,47 @@ function authorityScoreFromType(type: CanonAuthorityType): number {
   }
 }
 
-function severityScoreFromUrgency(window: string, marketExposure: string): number {
-  const urgency = safeText(window).toUpperCase();
-  const market = safeText(marketExposure).toUpperCase();
+function severityScoreFromUrgency(
+  urgencyWindow: string,
+  marketExposure: string,
+): number {
+  const urgency = safeText(urgencyWindow).toUpperCase();
+  const market = normalizeMarketRiskBand(marketExposure);
 
-  let score = 40;
+  let score = 36;
+
   if (urgency === "IMMEDIATE") score += 28;
   else if (urgency === "NEAR_TERM") score += 18;
   else if (urgency === "MID_TERM") score += 10;
-  else score += 5;
+  else score += 4;
 
   if (market === "CRITICAL") score += 24;
   else if (market === "HIGH") score += 16;
   else if (market === "MEDIUM") score += 8;
 
-  return Math.min(100, score);
+  return Math.max(0, Math.min(100, score));
 }
 
 function inferGovernanceScore(input: ConstitutionalIntake): number {
-  let score = 45;
+  let score = 46;
 
-  if (safeText(input.boardInvolved).toUpperCase() === "YES") score += 10;
-  if (classifyAuthorityType(input.authorityRole, input.authorityScope) !== "UNCLEAR") {
-    score += 14;
-  }
-  if (containsAny(input.problemStatement + " " + input.symptoms, GOVERNANCE_FAILURE_WORDS)) {
-    score -= 12;
-  }
+  const board = safeText(input.boardInvolved).toUpperCase();
+  const authorityType = classifyAuthorityType(input.authorityRole, input.authorityScope);
+  const corpus = [
+    input.problemStatement,
+    input.symptoms,
+    input.currentConstraint,
+    input.desiredOutcome,
+  ]
+    .map(safeText)
+    .join(" ")
+    .toLowerCase();
+
+  if (board === "YES") score += 10;
+  if (authorityType !== "UNCLEAR") score += 14;
+  if (containsAny(corpus, ["mandate", "decision rights", "owner", "sponsor"])) score += 8;
+
+  if (containsAny(corpus, GOVERNANCE_FAILURE_WORDS)) score -= 14;
   if (containsAny(input.currentConstraint, ["authority", "sponsor", "board", "mandate"])) {
     score -= 8;
   }
@@ -397,21 +457,24 @@ function inferOrgState(input: ConstitutionalIntake): CanonOrgState {
     .join(" ")
     .toLowerCase();
 
-  const severe =
-    containsAny(corpus, ["chaos", "collapse", "breakdown", "crisis", "toxic"]) ||
+  const isSevere =
+    containsAny(corpus, ["chaos", "collapse", "breakdown", "crisis", "toxic", "failing"]) ||
     (containsAny(corpus, PURPOSE_FAILURE_WORDS) &&
       containsAny(corpus, EXECUTION_FAILURE_WORDS) &&
       containsAny(corpus, GOVERNANCE_FAILURE_WORDS));
 
-  if (severe) return "DISORDERED";
+  if (isSevere) return "DISORDERED";
+
   if (
-    containsAny(corpus, ["misaligned", "conflict", "trust", "politics", "authority"])
+    containsAny(corpus, ["misaligned", "conflict", "trust", "politics", "authority", "disconnect"])
   ) {
     return "MISALIGNED";
   }
-  if (containsAny(corpus, ["drift", "unclear", "slipping", "slowed"])) {
+
+  if (containsAny(corpus, ["drift", "drifting", "unclear", "slipping", "slowed"])) {
     return "DRIFTING";
   }
+
   return "ORDERED";
 }
 
@@ -420,39 +483,46 @@ function inferReadinessTier(args: {
   authorityType: CanonAuthorityType;
   governanceScore: number;
   orgState: CanonOrgState;
-  revenueBand: ConstitutionalAssessment["revenueBand"];
+  revenueBand: CanonRevenueBand;
 }): CanonReadinessTier {
   const { clarityScore, authorityType, governanceScore, orgState, revenueBand } = args;
 
   if (
-    clarityScore < 38 ||
+    clarityScore < 40 ||
     authorityType === "UNCLEAR" ||
-    governanceScore < 40 ||
+    governanceScore < 42 ||
     orgState === "DISORDERED"
   ) {
     return "FRAGILE";
   }
 
   if (
-    clarityScore < 55 ||
-    governanceScore < 52 ||
+    clarityScore < 56 ||
+    governanceScore < 55 ||
     orgState === "MISALIGNED"
   ) {
     return "EMERGING";
   }
 
-  if (clarityScore < 68 || governanceScore < 65 || orgState === "DRIFTING") {
+  if (
+    clarityScore < 70 ||
+    governanceScore < 68 ||
+    orgState === "DRIFTING"
+  ) {
     return "STABILIZING";
   }
 
-  if (revenueBand === "WHALE" && authorityType === "DIRECT" && governanceScore >= 78) {
+  if (revenueBand === "WHALE" && authorityType === "DIRECT" && governanceScore >= 82) {
     return "SOVEREIGN";
   }
 
   return "EXECUTION_READY";
 }
 
-function inferFailureModes(input: ConstitutionalIntake, orgState: CanonOrgState): string[] {
+function inferFailureModes(
+  input: ConstitutionalIntake,
+  orgState: CanonOrgState,
+): string[] {
   const corpus = [
     input.problemStatement,
     input.symptoms,
@@ -487,7 +557,7 @@ function inferFailureModes(input: ConstitutionalIntake, orgState: CanonOrgState)
     modes.add("Systemic structural disorder");
   }
 
-  if (modes.size === 0) {
+  if (!modes.size) {
     modes.add("Decision-quality weakness");
   }
 
@@ -496,7 +566,7 @@ function inferFailureModes(input: ConstitutionalIntake, orgState: CanonOrgState)
 
 function inferDominantDomains(
   failureModes: string[],
-  input: ConstitutionalIntake
+  input: ConstitutionalIntake,
 ): string[] {
   const domains = new Set<string>();
 
@@ -515,7 +585,6 @@ function inferDominantDomains(
   if (failureModes.some((m) => /execution|operational/i.test(m))) {
     domains.add("OPERATIONAL_CLARITY");
   }
-
   if (safeText(input.boardInvolved).toUpperCase() === "YES") {
     domains.add("GOVERNANCE");
   }
@@ -531,7 +600,7 @@ function inferRequiredInterventions(
     | "readinessTier"
     | "failureModes"
     | "governanceScore"
-  >
+  >,
 ): string[] {
   const set = new Set<string>();
 
@@ -566,7 +635,7 @@ function inferRequiredInterventions(
 
 function inferPriority(args: {
   severityScore: number;
-  revenueBand: ConstitutionalAssessment["revenueBand"];
+  revenueBand: CanonRevenueBand;
   orgState: CanonOrgState;
 }): CanonPriority {
   if (args.revenueBand === "WHALE" && args.severityScore >= 78) return "SOVEREIGN";
@@ -578,7 +647,7 @@ function inferPriority(args: {
 
 function inferTemperature(
   priority: CanonPriority,
-  severityScore: number
+  severityScore: number,
 ): CanonTemperature {
   if (priority === "SOVEREIGN" || severityScore >= 88) return "SCORCHING";
   if (priority === "CRITICAL" || severityScore >= 72) return "HOT";
@@ -597,14 +666,15 @@ function inferRoute(args: {
   desiredOutcome: string;
 }): CanonRoute {
   const totalSubstance =
-    scoreTextClarity(args.problemStatement) + scoreTextClarity(args.desiredOutcome);
+    scoreTextClarity(args.problemStatement) +
+    scoreTextClarity(args.desiredOutcome);
 
-  if (totalSubstance < 70) return "REJECT";
+  if (totalSubstance < 55) return "REJECT";
 
   if (
     args.authorityType === "UNCLEAR" ||
-    args.clarityScore < 45 ||
-    args.governanceScore < 42
+    args.clarityScore < 42 ||
+    args.governanceScore < 40
   ) {
     return "DIAGNOSTIC";
   }
@@ -620,7 +690,10 @@ function inferRoute(args: {
     return "STRATEGY";
   }
 
-  if (args.severityScore >= 70 && args.clarityScore >= 58 && args.authorityType !== "UNCLEAR") {
+  if (
+    args.severityScore >= 72 &&
+    args.clarityScore >= 60
+  ) {
     return "STRATEGY";
   }
 
@@ -632,8 +705,8 @@ function buildNarrativeSummary(assessment: ConstitutionalAssessment): string {
     assessment.route === "STRATEGY"
       ? "The signal is sufficiently coherent for direct strategic engagement."
       : assessment.route === "DIAGNOSTIC"
-      ? "The signal is real, but structural readiness is incomplete and requires diagnostic correction before escalation."
-      : "The signal is currently below decision-grade threshold and should not be escalated.";
+        ? "The signal is real, but structural readiness is incomplete and requires diagnostic correction before escalation."
+        : "The signal is currently below decision-grade threshold and should not be escalated.";
 
   return [
     `This case presents as ${assessment.orgState.toLowerCase()} with ${assessment.readinessTier.toLowerCase()} readiness.`,
@@ -643,29 +716,36 @@ function buildNarrativeSummary(assessment: ConstitutionalAssessment): string {
 }
 
 export function deriveConstitutionalAssessment(
-  intake: ConstitutionalIntake
+  intake: ConstitutionalIntake,
 ): ConstitutionalAssessment {
   const revenueBand = normalizeRevenueBand(intake.revenueBand);
+  const marketRiskBand = normalizeMarketRiskBand(intake.marketExposure);
   const authorityType = classifyAuthorityType(
     intake.authorityRole,
-    intake.authorityScope
+    intake.authorityScope,
   );
-  const clarityScore = Math.min(
-    100,
-    Math.round(
-      (scoreTextClarity(intake.problemStatement) * 0.5 +
-        scoreTextClarity(intake.symptoms) * 0.2 +
-        scoreTextClarity(intake.desiredOutcome) * 0.2 +
-        scoreTextClarity(intake.currentConstraint) * 0.1)
-    )
+
+  const clarityScore = Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(
+        scoreTextClarity(intake.problemStatement) * 0.45 +
+          scoreTextClarity(intake.symptoms) * 0.2 +
+          scoreTextClarity(intake.desiredOutcome) * 0.2 +
+          scoreTextClarity(intake.currentConstraint) * 0.15,
+      ),
+    ),
   );
+
   const governanceScore = inferGovernanceScore(intake);
   const orgState = inferOrgState(intake);
   const severityScore = severityScoreFromUrgency(
     intake.urgencyWindow,
-    intake.marketExposure
+    intake.marketExposure,
   );
   const revenueScore = revenueScoreFromBand(revenueBand);
+
   const readinessTier = inferReadinessTier({
     clarityScore,
     authorityType,
@@ -673,8 +753,12 @@ export function deriveConstitutionalAssessment(
     orgState,
     revenueBand,
   });
+
   const failureModes = inferFailureModes(intake, orgState);
   const dominantDomains = inferDominantDomains(failureModes, intake);
+
+  const authorityScore = authorityScoreFromType(authorityType);
+
   const requiredInterventions = inferRequiredInterventions({
     authorityType,
     orgState,
@@ -682,8 +766,15 @@ export function deriveConstitutionalAssessment(
     failureModes,
     governanceScore,
   });
-  const priority = inferPriority({ severityScore, revenueBand, orgState });
+
+  const priority = inferPriority({
+    severityScore,
+    revenueBand,
+    orgState,
+  });
+
   const temperature = inferTemperature(priority, severityScore);
+
   const route = inferRoute({
     clarityScore,
     authorityType,
@@ -695,16 +786,22 @@ export function deriveConstitutionalAssessment(
     desiredOutcome: intake.desiredOutcome,
   });
 
+  const sponsorTypes = uniqueStrings([authorityType]);
+
+  const worldviewAnchors = [...WORLDVIEW_ANCHORS];
+
   const rationale = [
     `Clarity score: ${clarityScore}`,
     `Authority type: ${authorityType}`,
+    `Authority score: ${authorityScore}`,
     `Governance score: ${governanceScore}`,
     `Org state: ${orgState}`,
     `Readiness tier: ${readinessTier}`,
     `Severity score: ${severityScore}`,
+    `Route: ${route}`,
   ];
 
-  return {
+  const assessment: ConstitutionalAssessment = {
     route,
     orgState,
     readinessTier,
@@ -712,72 +809,30 @@ export function deriveConstitutionalAssessment(
     priority,
     temperature,
     clarityScore,
-    authorityScore: authorityScoreFromType(authorityType),
+    authorityScore,
     governanceScore,
     severityScore,
     revenueScore,
-    marketRiskBand:
-      safeText(intake.marketExposure).toUpperCase() === "CRITICAL"
-        ? "CRITICAL"
-        : safeText(intake.marketExposure).toUpperCase() === "HIGH"
-        ? "HIGH"
-        : safeText(intake.marketExposure).toUpperCase() === "MEDIUM"
-        ? "MEDIUM"
-        : "LOW",
+    marketRiskBand,
     revenueBand,
     failureModes,
     dominantDomains,
     requiredInterventions,
-    sponsorTypes: [authorityType],
-    worldviewAnchors: [
-      "human-purpose",
-      "moral-order",
-      "stewardship",
-      "truth-discipline",
-      "governance",
-    ],
-    narrativeSummary: buildNarrativeSummary({
-      route,
-      orgState,
-      readinessTier,
-      authorityType,
-      priority,
-      temperature,
-      clarityScore,
-      authorityScore: authorityScoreFromType(authorityType),
-      governanceScore,
-      severityScore,
-      revenueScore,
-      marketRiskBand:
-        safeText(intake.marketExposure).toUpperCase() === "CRITICAL"
-          ? "CRITICAL"
-          : safeText(intake.marketExposure).toUpperCase() === "HIGH"
-          ? "HIGH"
-          : safeText(intake.marketExposure).toUpperCase() === "MEDIUM"
-          ? "MEDIUM"
-          : "LOW",
-      revenueBand,
-      failureModes,
-      dominantDomains,
-      requiredInterventions,
-      sponsorTypes: [authorityType],
-      worldviewAnchors: [
-        "human-purpose",
-        "moral-order",
-        "stewardship",
-        "truth-discipline",
-        "governance",
-      ],
-      rationale,
-    }),
+    sponsorTypes,
+    worldviewAnchors,
+    narrativeSummary: "",
     rationale,
   };
+
+  assessment.narrativeSummary = buildNarrativeSummary(assessment);
+
+  return assessment;
 }
 
 export function applyConstitutionalSelectionPolicy(
   assets: ConstitutionalAssetCandidate[],
   assessment: ConstitutionalAssessment,
-  limit = 6
+  limit = 6,
 ): ConstitutionalAssetCandidate[] {
   const sorted = [...assets].sort((a, b) => b.matchScore - a.matchScore);
 
@@ -794,8 +849,9 @@ export function applyConstitutionalSelectionPolicy(
       (a) =>
         a.kind.toLowerCase() === "doctrine" ||
         a.kind.toLowerCase() === "playbook" ||
-        (a.worldviewAnchors || []).length > 0
+        (a.worldviewAnchors || []).length > 0,
     );
+
     if (foundation) {
       selected.push(foundation);
       countsByKind.set(foundation.kind, 1);
@@ -827,14 +883,14 @@ export function applyConstitutionalSelectionPolicy(
 
 export function buildConstitutionalGuidance(
   assessment: ConstitutionalAssessment,
-  assets: ConstitutionalAssetCandidate[]
+  assets: ConstitutionalAssetCandidate[],
 ) {
   const nextAction =
     assessment.route === "STRATEGY"
       ? "Proceed to direct strategic engagement with governance-aware framing."
       : assessment.route === "DIAGNOSTIC"
-      ? "Run structured diagnostic correction before escalation."
-      : "Do not escalate. Require stronger signal, clearer mandate and better articulated decision context.";
+        ? "Run structured diagnostic correction before escalation."
+        : "Do not escalate. Require stronger signal, clearer mandate and better articulated decision context.";
 
   return {
     summary: assessment.narrativeSummary,
@@ -842,7 +898,7 @@ export function buildConstitutionalGuidance(
     recommendations: assets.map((asset) => ({
       id: asset.id,
       title: asset.title,
-      href: asset.href,
+      href: asset.href ?? null,
       kind: asset.kind,
       score: asset.matchScore,
       summary: asset.matchReasons.join(" • "),

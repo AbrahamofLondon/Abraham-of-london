@@ -1,4 +1,10 @@
-/* components/print/BriefCoverPage.tsx — V4.1 (PREMIUM INSTITUTIONAL COVER) */
+/* components/print/BriefCoverPage.tsx — V5.0
+   ---------------------------------------------------------------------------
+   PREMIUM INSTITUTIONAL COVER
+   Rebuilt for stronger React-PDF stability, cleaner hierarchy,
+   safer layout behaviour, and more disciplined luxury presentation.
+   --------------------------------------------------------------------------- */
+
 import React from "react";
 import { Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { PDFRegistryEntry as PDFConfig } from "../../lib/pdf/registry";
@@ -6,7 +12,7 @@ import type { WatermarkPayload } from "../../lib/intelligence/watermark-delegate
 import ForensicMarkLayer from "./ForensicMarkLayer";
 
 /* -------------------------------------------------------------------------- */
-/* Type Definitions                                                           */
+/* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 type Props = {
   config: PDFConfig & {
@@ -25,10 +31,11 @@ type Props = {
 };
 
 /* -------------------------------------------------------------------------- */
-/* Premium Design Tokens — Quiet Luxury                                       */
+/* Design Tokens                                                              */
 /* -------------------------------------------------------------------------- */
 const PAPER = "#FDFBF7";
 const INK = "#1E1C1A";
+const INK_SOFT = "#595249";
 const BRASS = "#9B8A6B";
 const BRASS_SOFT = "#C9BCA0";
 const BRASS_DARK = "#7A6848";
@@ -39,6 +46,116 @@ const DARK_MIST = "#D9D0C0";
 const PANEL = "#F9F6EF";
 const CHIP_BG = "#FDFAF5";
 
+/* -------------------------------------------------------------------------- */
+/* Safety Helpers                                                             */
+/* -------------------------------------------------------------------------- */
+function safeString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || fallback;
+  }
+  if (value === null || value === undefined) return fallback;
+
+  try {
+    const stringified = String(value).trim();
+    return stringified || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function clampText(value: unknown, maxLength: number, fallback = ""): string {
+  const text = safeString(value, fallback);
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
+}
+
+function cleanPdfText(value: unknown, fallback = ""): string {
+  return clampText(
+    safeString(value, fallback)
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+      .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[‐-‒–—]/g, "-")
+      .replace(/\u00A0/g, " ")
+      .replace(/\t/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+    1200,
+    fallback,
+  );
+}
+
+function formatDate(value: unknown): string {
+  const raw = safeString(value);
+  if (!raw) {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(new Date());
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw;
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(parsed);
+}
+
+function deriveIssueDate(config: Props["config"]): string {
+  return formatDate(config.date);
+}
+
+function deriveVersion(config: Props["config"]): string {
+  return cleanPdfText(config.version, "1.0.0");
+}
+
+function deriveTransmission(
+  watermark: WatermarkPayload,
+  config: Props["config"],
+): string {
+  const metadata = watermark?.metadata as Record<string, unknown> | undefined;
+  const aol = (metadata?.aol as Record<string, unknown> | undefined) ?? {};
+
+  const traceId = cleanPdfText(aol.traceId);
+  if (traceId) return traceId;
+
+  const sig = cleanPdfText(aol.sig);
+  if (sig) return sig;
+
+  const institutionalId = cleanPdfText(config.institutionalId);
+  if (institutionalId) return institutionalId;
+
+  const fallbackId = cleanPdfText(config.id).slice(0, 12).toUpperCase();
+  return fallbackId || "UNTRACKED";
+}
+
+function deriveAuthor(config: Props["config"]): string {
+  return cleanPdfText(config.author, "Abraham of London");
+}
+
+function deriveSubtitle(
+  config: Props["config"],
+  explicitSubtitle?: string,
+): string {
+  return cleanPdfText(
+    explicitSubtitle ||
+      config.subtitle ||
+      config.description ||
+      "A governed institutional briefing prepared for disciplined reading, executive interpretation, and controlled circulation.",
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Styles                                                                     */
+/* -------------------------------------------------------------------------- */
 const styles = StyleSheet.create({
   page: {
     backgroundColor: PAPER,
@@ -47,6 +164,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 48,
     color: INK,
     position: "relative",
+    fontFamily: "AoLInter",
   },
 
   outerFrame: {
@@ -73,7 +191,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 46,
+    marginBottom: 42,
   },
 
   identityWrap: {
@@ -81,26 +199,27 @@ const styles = StyleSheet.create({
   },
 
   identityKicker: {
-    fontFamily: "Times-Italic",
+    fontFamily: "AoLSerif",
     fontSize: 9.2,
-    letterSpacing: 0.8,
+    fontStyle: "italic",
+    letterSpacing: 0.6,
     color: BRASS,
     marginBottom: 6,
   },
 
   identityName: {
-    fontFamily: "Times-Bold",
-    fontSize: 27,
+    fontFamily: "AoLSerif",
+    fontSize: 26,
+    fontWeight: 700,
     lineHeight: 1.08,
-    letterSpacing: -0.2,
     color: INK,
   },
 
   identitySubline: {
     marginTop: 7,
-    fontFamily: "Helvetica",
-    fontSize: 9,
-    lineHeight: 1.5,
+    fontFamily: "AoLInter",
+    fontSize: 8.8,
+    lineHeight: 1.48,
     color: SILVER,
     maxWidth: 300,
   },
@@ -111,66 +230,68 @@ const styles = StyleSheet.create({
     backgroundColor: CHIP_BG,
     paddingHorizontal: 14,
     paddingVertical: 6,
-    minWidth: 108,
+    minWidth: 116,
     alignItems: "center",
   },
 
   classificationText: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.9,
-    letterSpacing: 1.9,
+    fontFamily: "AoLInter",
+    fontSize: 7.6,
+    fontWeight: 700,
+    letterSpacing: 1.5,
     textTransform: "uppercase",
-    color: BRASS,
+    color: BRASS_DARK,
   },
 
   body: {
     flex: 1,
-    marginTop: 16,
+    marginTop: 12,
   },
 
   referenceLine: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.8,
-    letterSpacing: 1.45,
+    fontFamily: "AoLInter",
+    fontSize: 7.6,
+    fontWeight: 700,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
     color: SILVER_LIGHT,
-    marginBottom: 22,
+    marginBottom: 20,
   },
 
   title: {
-    fontFamily: "Times-Bold",
-    fontSize: 38,
-    lineHeight: 1.07,
-    letterSpacing: -0.35,
+    fontFamily: "AoLSerif",
+    fontSize: 35,
+    fontWeight: 700,
+    lineHeight: 1.08,
     color: INK,
-    marginBottom: 18,
+    marginBottom: 16,
     maxWidth: 490,
   },
 
   titleRuleWrap: {
-    marginBottom: 22,
+    marginBottom: 20,
   },
 
   titleRule: {
-    width: 78,
-    height: 1.5,
+    width: 76,
+    height: 1.4,
     backgroundColor: BRASS,
     marginBottom: 6,
   },
 
   titleRuleSub: {
-    width: 34,
+    width: 32,
     height: 1,
     backgroundColor: BRASS_SOFT,
   },
 
   subtitle: {
-    fontFamily: "Helvetica",
-    fontSize: 10.8,
-    lineHeight: 1.62,
-    color: SILVER,
+    fontFamily: "AoLInter",
+    fontSize: 10.4,
+    lineHeight: 1.58,
+    color: INK_SOFT,
     maxWidth: 470,
-    marginBottom: 30,
+    marginBottom: 28,
   },
 
   metadataPanel: {
@@ -190,9 +311,10 @@ const styles = StyleSheet.create({
   },
 
   metadataPanelTitle: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.9,
-    letterSpacing: 1.7,
+    fontFamily: "AoLInter",
+    fontSize: 7.5,
+    fontWeight: 700,
+    letterSpacing: 1.4,
     textTransform: "uppercase",
     color: BRASS,
     marginBottom: 11,
@@ -200,23 +322,24 @@ const styles = StyleSheet.create({
 
   metadataRow: {
     flexDirection: "row",
-    marginBottom: 9,
+    marginBottom: 8,
   },
 
   metadataKey: {
     width: 118,
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.2,
-    letterSpacing: 1,
+    fontFamily: "AoLInter",
+    fontSize: 7.1,
+    fontWeight: 700,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
     color: SILVER,
   },
 
   metadataValue: {
     flex: 1,
-    fontFamily: "Helvetica",
-    fontSize: 8.55,
-    lineHeight: 1.42,
+    fontFamily: "AoLInter",
+    fontSize: 8.4,
+    lineHeight: 1.4,
     color: INK,
   },
 
@@ -234,18 +357,19 @@ const styles = StyleSheet.create({
   },
 
   bottomKicker: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.8,
-    letterSpacing: 1.45,
+    fontFamily: "AoLInter",
+    fontSize: 7.4,
+    fontWeight: 700,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
     color: BRASS,
     marginBottom: 6,
   },
 
   bottomText: {
-    fontFamily: "Helvetica",
-    fontSize: 7.9,
-    lineHeight: 1.46,
+    fontFamily: "AoLInter",
+    fontSize: 7.8,
+    lineHeight: 1.44,
     color: SILVER,
   },
 
@@ -254,10 +378,10 @@ const styles = StyleSheet.create({
   },
 
   qrCaption: {
-    fontFamily: "Helvetica",
-    fontSize: 6.8,
+    fontFamily: "AoLInter",
+    fontSize: 6.7,
     color: SILVER_LIGHT,
-    letterSpacing: 0.35,
+    letterSpacing: 0.3,
     marginBottom: 5,
   },
 
@@ -266,79 +390,20 @@ const styles = StyleSheet.create({
     height: 54,
   },
 
-  // Optional: Watermark overlay for cover
-  watermarkOverlay: {
+  monogramWrap: {
     position: "absolute",
-    bottom: 40,
-    right: 40,
-    opacity: 0.03,
-    transform: "rotate(-15deg)",
+    right: 48,
+    bottom: 78,
+    opacity: 0.06,
+  },
+
+  monogram: {
+    fontFamily: "AoLSerif",
+    fontSize: 28,
+    fontStyle: "italic",
+    color: BRASS,
   },
 });
-
-/* -------------------------------------------------------------------------- */
-/* Safe Utilities                                                             */
-/* -------------------------------------------------------------------------- */
-function safeString(value: unknown, fallback = ""): string {
-  if (typeof value === "string") return value;
-  if (value === null || value === undefined) return fallback;
-  try {
-    return String(value);
-  } catch {
-    return fallback;
-  }
-}
-
-function safeDate(value: unknown): Date | null {
-  if (!value) return null;
-  try {
-    const date = new Date(safeString(value));
-    return isNaN(date.getTime()) ? null : date;
-  } catch {
-    return null;
-  }
-}
-
-function deriveIssueDate(config: Props["config"]): string {
-  const explicit = safeString(config.date);
-  if (explicit) return explicit;
-
-  const date = safeDate(config.date);
-  if (date) {
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(date);
-  }
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date());
-}
-
-function deriveVersion(config: Props["config"]): string {
-  return safeString(config.version, "1.0.0");
-}
-
-function deriveTransmission(watermark: WatermarkPayload, config: Props["config"]): string {
-  const metadata = watermark?.metadata as Record<string, unknown> | undefined;
-  const aol = ((metadata?.aol as Record<string, unknown> | undefined) ?? {}) as Record<string, unknown>;
-
-  const traceId = safeString(aol.traceId);
-  if (traceId) return traceId;
-
-  const sig = safeString(aol.sig);
-  if (sig) return sig;
-
-  return safeString(config.institutionalId) || safeString(config.id).slice(0, 8) || "UNTRACKED";
-}
-
-function deriveAuthor(config: Props["config"]): string {
-  return safeString(config.author, "Abraham of London");
-}
 
 /* -------------------------------------------------------------------------- */
 /* Main Component                                                             */
@@ -355,41 +420,42 @@ export const BriefCoverPage: React.FC<Props> = ({
   const version = deriveVersion(config);
   const transmission = deriveTransmission(watermark, config);
   const author = deriveAuthor(config);
-  const displaySubtitle = subtitle || config.subtitle || config.description || "";
+  const displaySubtitle = deriveSubtitle(config, subtitle);
+
+  const safeClassification = cleanPdfText(classification, "PUBLIC");
+  const safeReference = cleanPdfText(reference, "UNFILED");
+  const safeTitle = cleanPdfText(config.title, "Institutional Brief");
+  const circulation = "Controlled distribution within portfolio";
 
   return (
     <Page size="A4" style={styles.page}>
-      {/* Frames */}
       <View style={styles.outerFrame} fixed />
       <View style={styles.innerFrame} fixed />
-      
-      {/* Forensic layer */}
+
       <ForensicMarkLayer watermark={watermark} mode="cover" />
 
-      {/* Optional subtle watermark */}
-      <View style={styles.watermarkOverlay} fixed>
-        <Text style={{ fontFamily: "Times-Italic", fontSize: 42, color: BRASS }}>AOL</Text>
+      <View style={styles.monogramWrap} fixed>
+        <Text style={styles.monogram}>AOL</Text>
       </View>
 
-      {/* Header */}
       <View style={styles.topBand}>
         <View style={styles.identityWrap}>
           <Text style={styles.identityKicker}>{author}</Text>
           <Text style={styles.identityName}>Institutional Briefing Series</Text>
           <Text style={styles.identitySubline}>
-            Portfolio-controlled strategy, doctrine, intelligence, and operating papers
+            Portfolio-controlled strategy, doctrine, intelligence, and operating papers.
           </Text>
         </View>
 
         <View style={styles.classificationChip}>
-          <Text style={styles.classificationText}>{classification}</Text>
+          <Text style={styles.classificationText}>{safeClassification}</Text>
         </View>
       </View>
 
-      {/* Body */}
       <View style={styles.body}>
-        <Text style={styles.referenceLine}>Folio · {reference}</Text>
-        <Text style={styles.title}>{config.title}</Text>
+        <Text style={styles.referenceLine}>Folio · {safeReference}</Text>
+
+        <Text style={styles.title}>{safeTitle}</Text>
 
         <View style={styles.titleRuleWrap}>
           <View style={styles.titleRule} />
@@ -398,14 +464,13 @@ export const BriefCoverPage: React.FC<Props> = ({
 
         {displaySubtitle ? <Text style={styles.subtitle}>{displaySubtitle}</Text> : null}
 
-        {/* Metadata Panel */}
         <View style={styles.metadataPanel}>
           <View style={styles.metadataTopRule} />
           <Text style={styles.metadataPanelTitle}>Control Metadata</Text>
 
           <View style={styles.metadataRow}>
             <Text style={styles.metadataKey}>Reference</Text>
-            <Text style={styles.metadataValue}>{reference}</Text>
+            <Text style={styles.metadataValue}>{safeReference}</Text>
           </View>
 
           <View style={styles.metadataRow}>
@@ -425,12 +490,11 @@ export const BriefCoverPage: React.FC<Props> = ({
 
           <View style={styles.metadataRow}>
             <Text style={styles.metadataKey}>Circulation</Text>
-            <Text style={styles.metadataValue}>Controlled distribution within portfolio</Text>
+            <Text style={styles.metadataValue}>{circulation}</Text>
           </View>
         </View>
       </View>
 
-      {/* Footer */}
       <View style={styles.bottomBand}>
         <View style={styles.bottomLeft}>
           <Text style={styles.bottomKicker}>Institutional Notice</Text>

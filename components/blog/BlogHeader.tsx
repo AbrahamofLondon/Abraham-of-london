@@ -20,7 +20,7 @@ const BlogHeader: React.FC<BlogHeaderProps> = ({
   tags,
 }) => {
   return (
-    <div className="relative bg-black pt-20 pb-12 lg:pt-32 lg:pb-20 overflow-hidden border-b border-white/5">
+    <div className="relative bg-[#060609] pt-20 pb-12 lg:pt-32 lg:pb-20 overflow-hidden border-b border-white/5">
       {/* Background Architectural Mesh */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#1a1510,_#000000)] opacity-60" />
       <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(white,transparent_70%)]" />

@@ -210,7 +210,7 @@ const EnterpriseDiagnosticPage: NextPage = () => {
           sectionId: p.sectionId,
           questionId: p.questionId,
           prompt: p.prompt,
-          value: answers[p.questionId],
+          value: answers[p.questionId]!,
         })),
     [allPrompts, answers],
   );

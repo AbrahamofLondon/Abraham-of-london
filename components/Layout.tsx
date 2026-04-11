@@ -16,10 +16,7 @@ function cn(...inputs: ClassValue[]) {
 
 const VaultSearchOverlay = dynamic(
   () => import("@/components/VaultSearchOverlay").then((m) => m.default),
-  {
-    ssr: false,
-    loading: () => null,
-  }
+  { ssr: false, loading: () => null }
 );
 
 const BASE_URL = (
@@ -83,14 +80,12 @@ export default function Layout({
 
   React.useEffect(() => {
     if (!shouldEnableVaultSearch) return;
-
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setIsSearchOpen(true);
       }
     };
-
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [shouldEnableVaultSearch]);
@@ -103,16 +98,16 @@ export default function Layout({
         {keywords ? <meta name="keywords" content={keywords} /> : null}
         <link rel="canonical" href={canonicalAbs} />
 
-        <meta property="og:type" content={ogType} />
-        <meta property="og:title" content={title} />
+        <meta property="og:type"        content={ogType} />
+        <meta property="og:title"       content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content={ogImageAbs} />
-        <meta property="og:url" content={canonicalAbs} />
+        <meta property="og:image"       content={ogImageAbs} />
+        <meta property="og:url"         content={canonicalAbs} />
 
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
+        <meta name="twitter:card"        content="summary_large_image" />
+        <meta name="twitter:title"       content={title} />
         <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={ogImageAbs} />
+        <meta name="twitter:image"       content={ogImageAbs} />
 
         {structuredData ? (
           <script
@@ -122,35 +117,53 @@ export default function Layout({
         ) : null}
       </Head>
 
-      {/* Explicit stacking context — root layer */}
-      <div className="relative isolate min-h-screen bg-[#050505] text-white">
-        {/* Header layer — higher z-index to stay above content */}
+      {/*
+        ── ROOT STACKING CONTEXT ────────────────────────────────────────────
+        isolate creates a new stacking context so nothing inside can leak
+        above the overlay layer. Background uses the canonical design token
+        #060609 via the CSS variable — keeps it consistent with globals.css.
+      */}
+      <div
+        className="relative isolate min-h-screen text-white"
+        style={{ backgroundColor: "rgb(var(--aol-bg))" }}
+      >
+        {/* Header — z-50 so it floats above page content */}
         <div className="relative z-50">
           <Header transparent={headerTransparent} />
         </div>
 
-        {/* Main content layer — base z-index, content flows naturally */}
+        {/*
+          Main — z-0 baseline. overflow-x-clip prevents horizontal scroll
+          from any absolutely-positioned decorative elements.
+          headerTransparent pages (homepage, diagnostic landing) need pt-0
+          because the hero image fills from top-of-viewport.
+        */}
         <main
           className={cn(
-            "relative z-0 w-full overflow-x-clip bg-[#050505] text-white antialiased",
+            "relative z-0 w-full overflow-x-clip text-white antialiased",
+            // Use CSS variable for background — consistent with globals.css
             headerTransparent ? "pt-0" : "pt-[84px]",
             fullWidth
               ? "min-h-[calc(100vh-84px)]"
               : "mx-auto min-h-[calc(100vh-84px)] max-w-7xl px-6 py-12 lg:px-12 lg:py-20",
-            className
+            className,
           )}
+          style={{ backgroundColor: "rgb(var(--aol-bg))" }}
         >
           {children}
         </main>
 
-        {/* Footer layer — below overlay but above main content when needed */}
+        {/* Footer — z-10, above main content but below overlays */}
         {showFooter ? (
-          <div className="relative z-10">
+          <div className="relative z-10" style={{ backgroundColor: "rgb(var(--aol-bg))" }}>
             <EnhancedFooter />
           </div>
         ) : null}
 
-        {/* Overlay layer — highest z-index when active */}
+        {/*
+          Search overlay — highest z-index, rendered only when active route
+          qualifies. Portal-like: sits above everything including header.
+        */}
         {shouldEnableVaultSearch ? (
           <VaultSearchOverlay
             isOpen={isSearchOpen}

@@ -113,7 +113,7 @@ export default function PdfDashboard() {
     return (
       <>
         <Header minimal />
-        <div className="min-h-screen bg-black flex items-center justify-center pt-24">
+        <div className="min-h-screen bg-[#060609] flex items-center justify-center pt-24">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
             <p className="text-white/60 text-xs uppercase tracking-wider">Initializing telemetry stream...</p>
@@ -128,7 +128,7 @@ export default function PdfDashboard() {
     return (
       <>
         <Header minimal />
-        <div className="min-h-screen bg-black flex items-center justify-center p-4 pt-24">
+        <div className="min-h-screen bg-[#060609] flex items-center justify-center p-4 pt-24">
           <div className="text-center max-w-md">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
             <h1 className="text-white text-lg mb-2">Telemetry Unavailable</h1>
@@ -154,7 +154,7 @@ export default function PdfDashboard() {
     <>
       <Header minimal />
       
-      <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black pt-24 print:pt-0 print:bg-white print:text-black">
+      <div className="min-h-screen bg-[#060609] text-white font-mono selection:bg-white selection:text-black pt-24 print:pt-0 print:bg-white print:text-black">
         <style jsx global>{`
           @media print {
             body {

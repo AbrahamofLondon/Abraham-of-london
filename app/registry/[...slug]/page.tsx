@@ -21,7 +21,7 @@ export default async function RegistryPage({ params }: { params: { slug?: string
   if (!asset) notFound();
 
   return (
-    <main className="min-h-screen bg-black py-20 px-6">
+    <main className="min-h-screen bg-[#060609] py-20 px-6">
       <VaultGuard
         title={asset.title}
         slug={asset.slug}

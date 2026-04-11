@@ -1,9 +1,15 @@
-/* components/print/KeyJudgementsPanel.tsx — V4.1 (PREMIUM INSTITUTIONAL PANEL) */
+/* components/print/KeyJudgementsPanel.tsx — V5.0
+   ---------------------------------------------------------------------------
+   KEY JUDGEMENTS PANEL
+   Rebuilt to feel integral to the folio, not pasted onto it.
+   Cleaner hierarchy, stronger reading rhythm, safer React-PDF behaviour.
+   --------------------------------------------------------------------------- */
+
 import React from "react";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
 /* -------------------------------------------------------------------------- */
-/* Type Definitions                                                           */
+/* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 type Props = {
   items: string[];
@@ -13,75 +19,90 @@ type Props = {
 };
 
 /* -------------------------------------------------------------------------- */
-/* Premium Design Tokens — Quiet Luxury                                       */
+/* Design Tokens                                                              */
 /* -------------------------------------------------------------------------- */
 const INK = "#1E1C1A";
+const INK_SOFT = "#564F46";
+const INK_MUTE = "#7B7367";
 const BRASS = "#9B8A6B";
 const BRASS_SOFT = "#C9BCA0";
-const BRASS_DARK = "#7A6848";
-const SILVER = "#7E7A72";
-const SILVER_LIGHT = "#9E9A92";
-const MIST = "#EDE8DE";
-const PANEL = "#F9F6EF";
-const PANEL_ALT = "#FDFAF5";
+const LINE = "#EDE8DE";
+const PANEL = "#F7F2EA";
+const PANEL_SOFT = "#FCFAF6";
 
+/* -------------------------------------------------------------------------- */
+/* Styles                                                                     */
+/* -------------------------------------------------------------------------- */
 const styles = StyleSheet.create({
   wrap: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
   panel: {
     borderWidth: 1,
-    borderColor: MIST,
+    borderColor: LINE,
     backgroundColor: PANEL,
     paddingTop: 16,
     paddingBottom: 14,
     paddingHorizontal: 20,
   },
 
-  topRule: {
-    height: 1,
-    backgroundColor: BRASS_SOFT,
+  topRail: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 11,
-    width: 48,
   },
 
-  headerRow: {
-    marginBottom: 14,
+  topRulePrimary: {
+    width: 42,
+    height: 1.2,
+    backgroundColor: BRASS,
+    marginRight: 8,
+  },
+
+  topRuleSecondary: {
+    width: 16,
+    height: 1,
+    backgroundColor: BRASS_SOFT,
+  },
+
+  headerBlock: {
+    marginBottom: 12,
   },
 
   kicker: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.8,
-    letterSpacing: 1.9,
+    fontFamily: "AoLInter",
+    fontSize: 7.2,
+    fontWeight: 700,
+    letterSpacing: 1.4,
     textTransform: "uppercase",
     color: BRASS,
-    marginBottom: 6,
+    marginBottom: 5,
   },
 
   title: {
-    fontFamily: "Times-Bold",
-    fontSize: 13,
+    fontFamily: "AoLSerif",
+    fontSize: 12.8,
+    fontWeight: 700,
     color: INK,
-    marginBottom: 4,
+    marginBottom: 5,
   },
 
   subtitle: {
-    fontFamily: "Helvetica",
-    fontSize: 8.4,
-    lineHeight: 1.48,
-    color: SILVER_LIGHT,
-    maxWidth: 380,
+    fontFamily: "AoLInter",
+    fontSize: 8.1,
+    lineHeight: 1.44,
+    color: INK_MUTE,
+    maxWidth: 382,
   },
 
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 0,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 9,
+    paddingBottom: 9,
     borderTopWidth: 1,
-    borderTopColor: MIST,
+    borderTopColor: LINE,
   },
 
   firstRow: {
@@ -95,11 +116,12 @@ const styles = StyleSheet.create({
   },
 
   index: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 8.2,
-    letterSpacing: 0.8,
+    fontFamily: "AoLInter",
+    fontSize: 8,
+    fontWeight: 700,
+    letterSpacing: 0.7,
     color: BRASS,
-    marginTop: 2,
+    marginTop: 1,
   },
 
   textWrap: {
@@ -107,51 +129,61 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontFamily: "Helvetica",
-    fontSize: 9.2,
-    lineHeight: 1.55,
+    fontFamily: "AoLInter",
+    fontSize: 9.05,
+    lineHeight: 1.54,
     color: INK,
   },
 
   emphasis: {
     marginTop: 4,
-    fontFamily: "Helvetica",
-    fontSize: 8,
-    lineHeight: 1.48,
-    color: SILVER,
+    fontFamily: "AoLInter",
+    fontSize: 7.9,
+    lineHeight: 1.44,
+    color: INK_SOFT,
   },
 
   footerBand: {
-    marginTop: 12,
+    marginTop: 10,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: MIST,
-    backgroundColor: PANEL_ALT,
+    borderTopColor: LINE,
+    backgroundColor: PANEL_SOFT,
   },
 
   footerText: {
-    fontFamily: "Helvetica",
-    fontSize: 7.6,
-    lineHeight: 1.42,
-    color: SILVER_LIGHT,
-    letterSpacing: 0.2,
+    fontFamily: "AoLInter",
+    fontSize: 7.4,
+    lineHeight: 1.38,
+    color: INK_MUTE,
+    letterSpacing: 0.12,
   },
 });
 
 /* -------------------------------------------------------------------------- */
-/* Safe Utilities                                                             */
+/* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 function safeString(value: unknown, fallback = ""): string {
   if (typeof value === "string") return value;
   if (value === null || value === undefined) return fallback;
-  return String(value);
+  try {
+    return String(value);
+  } catch {
+    return fallback;
+  }
 }
 
-function normalizeItemText(value: string): string {
-  return safeString(value)
+function cleanPdfText(value: unknown, fallback = ""): string {
+  return safeString(value, fallback)
     .replace(/\r\n/g, " ")
     .replace(/\r/g, " ")
     .replace(/\n+/g, " ")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[‐-‒–—]/g, "-")
+    .replace(/\u00A0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -162,14 +194,12 @@ function capitalizeFirst(str: string): string {
 }
 
 function splitJudgementText(value: string): { main: string; tail: string } {
-  const clean = normalizeItemText(value);
+  const clean = cleanPdfText(value);
   if (!clean) return { main: "", tail: "" };
 
-  // Try to split at natural break points
   const separatorMatch =
-    clean.match(/^(.{25,}?[.:;])\s+(.+)$/) ||
-    clean.match(/^(.{25,}?[—-])\s+(.+)$/) ||
-    clean.match(/^(.{30,}?\.\.\.)\s*(.+)$/);
+    clean.match(/^(.{22,}?[.:;])\s+(.+)$/) ||
+    clean.match(/^(.{22,}?[—-])\s+(.+)$/);
 
   if (separatorMatch) {
     return {
@@ -178,9 +208,8 @@ function splitJudgementText(value: string): { main: string; tail: string } {
     };
   }
 
-  // If the judgement is very long, try to split at the second sentence
-  const sentences = clean.split(/(?<=[.!?])\s+/);
-  if (sentences.length > 1 && sentences[0].length > 40) {
+  const sentences = clean.split(/(?<=[.!?])\s+/).filter(Boolean);
+  if (sentences.length > 1 && sentences[0].length > 36) {
     return {
       main: capitalizeFirst(sentences[0]),
       tail: sentences.slice(1).join(" "),
@@ -194,36 +223,39 @@ function splitJudgementText(value: string): { main: string; tail: string } {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Main Component                                                             */
+/* Component                                                                  */
 /* -------------------------------------------------------------------------- */
-export const KeyJudgementsPanel: React.FC<Props> = ({ 
-  items, 
+export const KeyJudgementsPanel: React.FC<Props> = ({
+  items,
   maxItems = 6,
   showHeader = true,
   showFooter = true,
 }) => {
   const safeItems = (items || [])
-    .map((item) => normalizeItemText(item))
+    .map((item) => cleanPdfText(item))
     .filter((item) => item.length > 0)
     .slice(0, maxItems);
 
   if (safeItems.length === 0) return null;
 
   return (
-    <View style={styles.wrap} wrap={false}>
+    <View style={styles.wrap}>
       <View style={styles.panel}>
-        <View style={styles.topRule} />
+        <View style={styles.topRail}>
+          <View style={styles.topRulePrimary} />
+          <View style={styles.topRuleSecondary} />
+        </View>
 
-        {showHeader && (
-          <View style={styles.headerRow}>
+        {showHeader ? (
+          <View style={styles.headerBlock}>
             <Text style={styles.kicker}>Key Judgements</Text>
             <Text style={styles.title}>Board-Level Reading</Text>
             <Text style={styles.subtitle}>
-              The points below represent the highest-value conclusions requiring
-              disciplined attention and executive clarity.
+              The points below represent the highest-value institutional
+              conclusions requiring deliberate executive attention.
             </Text>
           </View>
-        )}
+        ) : null}
 
         {safeItems.map((item, index) => {
           const parsed = splitJudgementText(item);
@@ -249,15 +281,15 @@ export const KeyJudgementsPanel: React.FC<Props> = ({
           );
         })}
 
-        {showFooter && (
+        {showFooter ? (
           <View style={styles.footerBand}>
             <Text style={styles.footerText}>
-              Judgements are ordered for strategic readability, not necessarily for
-              chronological sequence. Each point represents a distinct institutional
-              reading requiring governance attention.
+              Judgements are ordered for strategic readability rather than
+              chronology. Each point should be read as a distinct governance
+              concern or decision signal.
             </Text>
           </View>
-        )}
+        ) : null}
       </View>
     </View>
   );

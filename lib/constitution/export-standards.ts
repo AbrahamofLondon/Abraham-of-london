@@ -1,6 +1,7 @@
 // lib/constitution/export-standards.ts
 // ─── CONSTITUTIONAL DATA STANDARDS ────────────────────────────────────────────
 
+import crypto from 'crypto';
 import { CanonicalSectionsEnvelope } from '@/lib/decision/canonical-sections';
 import { ConstitutionalDecision } from './rules';
 

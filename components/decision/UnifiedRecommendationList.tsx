@@ -5,6 +5,8 @@ import * as React from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { CanonicalRecommendation } from "@/lib/decision/canonical-sections";
 
+export type UnifiedRecommendationCardData = CanonicalRecommendation;
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }

@@ -1,114 +1,69 @@
-'use client';
+/* components/admin/reporting/intervention-scheduler.tsx */
+"use client";
 
-import React, { useState } from 'react';
-import { Calendar, Clock, Play, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { suggestIntensity, InterventionType } from '@/lib/alignment/scheduler-engine';
+import React from 'react';
+import { 
+  listTribunalCases, 
+  saveTribunalCase 
+} from "@/lib/constitution/observability-store";
+import { Loader2, Zap, AlertTriangle } from "lucide-react";
 
-interface InterventionSchedulerProps {
+export interface InterventionSchedulerProps {
   targetTeam: string;
   delta: number;
   fragilityScore: number;
 }
 
-export function InterventionScheduler({ targetTeam, delta, fragilityScore }: InterventionSchedulerProps) {
-  const [isDeploying, setIsDeploying] = useState(false);
-  const [selectedType, setSelectedType] = useState<InterventionType>('STRATEGIC_PULSE');
-  
-  const intensity = suggestIntensity(delta, fragilityScore);
-
-  const handleDeploy = () => {
-    setIsDeploying(true);
-    // Logic to push to Sovereign DB
-    setTimeout(() => setIsDeploying(false), 2000);
-  };
-
+/**
+ * ✅ NAMED EXPORT: This matches the import in /app/admin/snapshot/page.tsx
+ */
+export function InterventionScheduler({ 
+  targetTeam, 
+  delta, 
+  fragilityScore 
+}: InterventionSchedulerProps) {
   return (
-    <div className="bg-black text-white p-10 border border-neutral-800 shadow-2xl relative overflow-hidden group">
-      {/* Background Pulse */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#8A6A2F]/5 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse" />
-
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-8">
-          <ShieldAlert className="w-5 h-5 text-[#8A6A2F]" />
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/60">Deployment Engine</span>
+    <div className="bg-white border border-neutral-200 p-8 shadow-sm">
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">
+            Deployment Target
+          </h3>
+          <p className="text-xl font-bold tracking-tight">{targetTeam}</p>
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* CONFIGURATION */}
-          <div>
-            <h3 className="text-3xl font-black uppercase tracking-tighter mb-6">
-              Protocol for {targetTeam}
-            </h3>
-            
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-[9px] font-black uppercase tracking-widest text-neutral-500 block mb-2">Intervention Type</span>
-                <select 
-                  className="w-full bg-neutral-900 border border-neutral-700 p-4 text-xs font-bold uppercase tracking-widest focus:border-[#8A6A2F] outline-none"
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value as InterventionType)}
-                >
-                  <option value="STRATEGIC_PULSE">Strategic Pulse (Low Friction)</option>
-                  <option value="COHORT_SYNCHRONIZATION">Cohort Synchronization (Mid Friction)</option>
-                  <option value="DIRECTIVE_REINFORCEMENT">Directive Reinforcement (High Friction)</option>
-                </select>
-              </label>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-neutral-900 p-4 border border-neutral-800">
-                  <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Recommended Intensity</p>
-                  <p className={`text-sm font-black ${intensity === 'HIGH' ? 'text-red-500' : 'text-[#8A6A2F]'}`}>{intensity}</p>
-                </div>
-                <div className="bg-neutral-900 p-4 border border-neutral-800">
-                  <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Dissonance Delta</p>
-                  <p className="text-sm font-black text-white">{delta}%</p>
-                </div>
-              </div>
-            </div>
+        <div className="text-right">
+          <div className="flex items-center gap-2 text-red-600 mb-1 justify-end">
+            <AlertTriangle className="w-3 h-3" />
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              Dissonance Delta
+            </span>
           </div>
-
-          {/* SCHEDULING & ACTION */}
-          <div className="flex flex-col justify-between">
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 text-neutral-400">
-                <Calendar className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Earliest Start: T-Minus 24h</span>
-              </div>
-              <div className="flex items-center gap-4 text-neutral-400">
-                <Clock className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Duration: 14 Day Cycle</span>
-              </div>
-              <p className="text-[11px] text-neutral-500 italic leading-relaxed">
-                This intervention will deploy anonymized re-alignment directives to the cohort's terminal, 
-                monitoring for resonance shifts in real-time.
-              </p>
-            </div>
-
-            <button 
-              onClick={handleDeploy}
-              disabled={isDeploying}
-              className={`mt-8 w-full py-5 text-[11px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 transition-all ${
-                isDeploying ? 'bg-neutral-800 text-neutral-500' : 'bg-[#8A6A2F] text-white hover:bg-[#A6803B] shadow-xl'
-              }`}
-            >
-              {isDeploying ? (
-                <>Synchronizing Nodes... <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" /></>
-              ) : (
-                <>Initialize Protocol <Play className="w-3 h-3 fill-current" /></>
-              )}
-            </button>
-          </div>
+          <p className="text-2xl font-black">{delta}%</p>
         </div>
       </div>
 
-      {/* FOOTER AUDIT */}
-      <div className="mt-10 pt-6 border-t border-white/5 flex justify-between items-center opacity-40">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-          <span className="text-[8px] font-bold uppercase tracking-widest">Sovereign Governance Compliant</span>
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="p-4 bg-neutral-50 border border-neutral-100">
+          <p className="text-[8px] font-black uppercase tracking-widest text-neutral-400 mb-1">
+            Fragility Score
+          </p>
+          <p className="text-lg font-bold">{fragilityScore}/100</p>
         </div>
-        <span className="text-[8px] font-mono uppercase tracking-widest italic">Auth-ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+        <div className="p-4 bg-neutral-50 border border-neutral-100">
+          <p className="text-[8px] font-black uppercase tracking-widest text-neutral-400 mb-1">
+            Status
+          </p>
+          <p className="text-lg font-bold text-amber-600 uppercase tracking-tight">Pending</p>
+        </div>
       </div>
+
+      <button className="w-full flex items-center justify-center gap-3 py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-neutral-800 transition-all">
+        <Zap className="w-3 h-3 text-[#8A6A2F] fill-current" />
+        Initialize Constitutional Correction
+      </button>
     </div>
   );
 }
+
+// Optional: Default export for flexibility, though named is required for your current setup
+export default InterventionScheduler;

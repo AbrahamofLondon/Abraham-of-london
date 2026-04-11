@@ -1,151 +1,180 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
 import { useOGRStore } from "@/store/useOGRStore";
-import { 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  Target, 
-  Zap, 
-  Anchor, 
-  XCircle,
-  TrendingUp
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Anchor,
+  RefreshCw,
+  TrendingUp,
 } from "lucide-react";
 
-export default function ComparisonDelta() {
-  const { 
-    computed, 
-    baseline, 
-    setBaseline, 
-    clearBaseline, 
-    resonanceScore 
-  } = useOGRStore();
+type DeltaMetricProps = {
+  label: string;
+  currentValue: string;
+  baselineValue: string;
+  deltaValue: string;
+  positiveIsBetter?: boolean;
+};
 
-  // Initial State: Lock Button
-  if (!baseline) {
-    return (
-      <button 
-        onClick={setBaseline}
-        className="w-full py-12 border-2 border-dashed border-[#8A6A2F]/20 bg-white/[0.01] hover:bg-[#8A6A2F]/5 hover:border-[#8A6A2F]/40 transition-all group relative overflow-hidden"
-      >
-        <div className="relative z-10 flex flex-col items-center">
-          <Anchor className="w-8 h-8 mb-4 text-[#8A6A2F] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-neutral-500 group-hover:text-[#8A6A2F] transition-colors">
-            Initialize Delta Baseline
-          </span>
-          <p className="text-[8px] text-neutral-700 uppercase mt-2 tracking-tighter">
-            Snapshot current state for strategic comparison
-          </p>
-        </div>
-        {/* Subtle background glow */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#8A6A2F]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </button>
-    );
-  }
+function cn(...parts: Array<string | false | null | undefined>): string {
+  return parts.filter(Boolean).join(" ");
+}
 
-  // Active State: Comparison Math
-  const deltas = {
-    alpha: computed.resonanceAlpha - baseline.resonanceAlpha,
-    certainty: computed.sovereignCertainty - baseline.sovereignCertainty,
-    velocity: computed.velocityMultiplier - baseline.velocityMultiplier,
-  };
+function formatSigned(value: number, decimals = 2): string {
+  const abs = Math.abs(value).toFixed(decimals);
+  return `${value >= 0 ? "+" : "-"}${abs}`;
+}
 
-  const resonanceDiff = resonanceScore - baseline.resonanceScore;
+function DeltaMetric({
+  label,
+  currentValue,
+  baselineValue,
+  deltaValue,
+  positiveIsBetter = true,
+}: DeltaMetricProps) {
+  const numericDelta = Number(deltaValue);
+  const isPositive = numericDelta >= 0;
+  const favorable = positiveIsBetter ? isPositive : !isPositive;
 
   return (
-    <div className="bg-[#0A0C10] border border-[#8A6A2F]/30 p-10 shadow-2xl relative overflow-hidden backdrop-blur-md">
-      {/* Background Watermark */}
-      <Target className="absolute -right-10 -bottom-10 w-48 h-48 text-white/[0.02] rotate-12 pointer-events-none" />
-
-      {/* Header Section */}
-      <div className="flex justify-between items-start mb-10 border-b border-white/10 pb-8">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-3 h-3 text-[#8A6A2F]" />
-            <h3 className="font-serif italic text-2xl text-white tracking-tight">
-              Delta <span className="not-italic font-sans font-bold text-[#8A6A2F]">Projection</span>
-            </h3>
+    <div className="border border-white/[0.08] bg-black/20 p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">
+            {label}
           </div>
-          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">
-            Audit vs. Locked Baseline Snapshot
-          </p>
+          <div className="mt-3 font-serif text-2xl text-white/88">
+            {currentValue}
+          </div>
+          <div className="mt-2 text-[11px] text-white/42">
+            Baseline: {baselineValue}
+          </div>
         </div>
-        <button 
-          onClick={clearBaseline} 
-          className="group flex items-center gap-2 text-[9px] uppercase font-bold text-neutral-500 hover:text-red-500 transition-colors"
+
+        <div
+          className={cn(
+            "inline-flex items-center gap-2 border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]",
+            favorable
+              ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-300"
+              : "border-red-500/20 bg-red-500/5 text-red-300",
+          )}
         >
-          <XCircle className="w-3 h-3 transition-transform group-hover:rotate-90" />
-          Release Lock
-        </button>
-      </div>
-
-      {/* Delta Rows */}
-      <div className="space-y-10 relative z-10">
-        <DeltaRow 
-          label="Alpha Yield Delta" 
-          value={`$${Math.abs(deltas.alpha).toFixed(2)}M`} 
-          isPositive={deltas.alpha >= 0} 
-          sub={`Baseline: $${baseline.resonanceAlpha}M`}
-        />
-        <DeltaRow 
-          label="Sovereign Certainty" 
-          value={`${Math.abs(deltas.certainty).toFixed(2)}%`} 
-          isPositive={deltas.certainty >= 0} 
-          sub={`Baseline: ${baseline.sovereignCertainty}%`}
-        />
-        <DeltaRow 
-          label="Execution Velocity" 
-          value={`${Math.abs(deltas.velocity).toFixed(2)}x`} 
-          isPositive={deltas.velocity >= 0} 
-          sub={`Baseline: ${baseline.velocityMultiplier}x`}
-        />
-      </div>
-
-      {/* Footer Insight */}
-      <div className="mt-12 pt-8 border-t border-white/5 bg-gradient-to-r from-transparent via-[#8A6A2F]/5 to-transparent -mx-10 px-10">
-        <div className="flex items-center gap-4 text-[#8A6A2F]">
-          <div className="relative">
-            <Zap className="w-4 h-4 animate-pulse" />
-            <div className="absolute inset-0 bg-[#8A6A2F]/40 blur-md animate-ping" />
-          </div>
-          <div className="space-y-0.5">
-            <span className="block font-mono text-[10px] uppercase tracking-widest font-bold">
-              Strategic Optimization
-            </span>
-            <span className="block font-mono text-[9px] text-neutral-500 lowercase">
-              {resonanceDiff >= 0 ? 'gained' : 'sacrificed'} {Math.abs(resonanceDiff).toFixed(1)}% core resonance
-            </span>
-          </div>
+          {isPositive ? (
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          ) : (
+            <ArrowDownRight className="h-3.5 w-3.5" />
+          )}
+          {deltaValue}
         </div>
       </div>
     </div>
   );
 }
 
-function DeltaRow({ label, value, isPositive, sub }: any) {
-  return (
-    <div className="flex justify-between items-center group/row">
-      <div className="space-y-1">
-        <span className="block font-mono text-[10px] uppercase text-neutral-400 tracking-[0.1em] group-hover/row:text-white transition-colors">
-          {label}
-        </span>
-        <span className="block font-mono text-[8px] uppercase text-neutral-600 italic tracking-tighter">
-          {sub}
-        </span>
-      </div>
-      <div className={`text-right px-4 py-2 border-l-2 ${
-        isPositive ? 'text-green-500 border-green-500/20 bg-green-500/5' : 'text-red-500 border-red-500/20 bg-red-500/5'
-      }`}>
-        <div className="flex items-center justify-end gap-2">
-          {isPositive ? (
-            <ArrowUpRight className="w-4 h-4 animate-bounce" />
-          ) : (
-            <ArrowDownRight className="w-4 h-4 animate-bounce" />
-          )}
-          <span className="text-3xl font-serif tabular-nums tracking-tighter">
-            {isPositive ? '+' : '-'}{value}
+export default function ComparisonDelta() {
+  const {
+    computed,
+    baseline,
+    setBaseline,
+    clearBaseline,
+    resonanceScore,
+  } = useOGRStore();
+
+  if (!baseline) {
+    return (
+      <button
+        onClick={setBaseline}
+        className={cn(
+          "group relative w-full overflow-hidden border border-dashed border-amber-500/20 bg-white/[0.01] px-6 py-10 transition-all",
+          "hover:border-amber-500/40 hover:bg-amber-500/[0.04]",
+        )}
+      >
+        <div className="relative z-10 flex flex-col items-center">
+          <Anchor className="mb-4 h-7 w-7 text-amber-400/80 transition-transform duration-300 group-hover:scale-105" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.34em] text-white/68">
+            Lock baseline
           </span>
+          <p className="mt-3 max-w-md text-center text-[11px] leading-relaxed text-white/42">
+            Capture the current state as a comparison point for future scenario changes.
+          </p>
         </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-amber-500/[0.03] opacity-0 transition-opacity group-hover:opacity-100" />
+      </button>
+    );
+  }
+
+  const alphaDelta = computed.resonanceAlpha - baseline.resonanceAlpha;
+  const certaintyDelta =
+    computed.sovereignCertainty - baseline.sovereignCertainty;
+  const velocityDelta =
+    computed.velocityMultiplier - baseline.velocityMultiplier;
+  const resonanceDelta = resonanceScore - baseline.resonanceScore;
+
+  return (
+    <div className="relative overflow-hidden border border-white/[0.08] bg-[#0A0C10] p-8 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+      <div className="mb-8 flex flex-col gap-4 border-b border-white/8 pb-6 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-3.5 w-3.5 text-amber-400/80" />
+            <h3 className="font-serif text-2xl text-white">
+              Baseline comparison
+            </h3>
+          </div>
+          <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.22em] text-white/34">
+            Current scenario vs locked baseline
+          </p>
+        </div>
+
+        <button
+          onClick={clearBaseline}
+          className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 transition-colors hover:text-white"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Clear baseline
+        </button>
+      </div>
+
+      <div className="grid gap-4">
+        <DeltaMetric
+          label="Projected Alpha"
+          currentValue={`$${computed.resonanceAlpha.toFixed(2)}M`}
+          baselineValue={`$${baseline.resonanceAlpha.toFixed(2)}M`}
+          deltaValue={`${formatSigned(alphaDelta)}M`}
+          positiveIsBetter
+        />
+
+        <DeltaMetric
+          label="Confidence to Proceed"
+          currentValue={`${computed.sovereignCertainty.toFixed(2)}%`}
+          baselineValue={`${baseline.sovereignCertainty.toFixed(2)}%`}
+          deltaValue={`${formatSigned(certaintyDelta)}%`}
+          positiveIsBetter
+        />
+
+        <DeltaMetric
+          label="Execution Velocity"
+          currentValue={`${computed.velocityMultiplier.toFixed(2)}x`}
+          baselineValue={`${baseline.velocityMultiplier.toFixed(2)}x`}
+          deltaValue={`${formatSigned(velocityDelta)}x`}
+          positiveIsBetter
+        />
+      </div>
+
+      <div className="mt-8 border-t border-white/8 pt-6">
+        <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-amber-300/72">
+          Net resonance movement
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-white/54">
+          {resonanceDelta >= 0 ? "Improved" : "Reduced"} core resonance by{" "}
+          <span className="text-white/84">
+            {Math.abs(resonanceDelta).toFixed(1)}%
+          </span>{" "}
+          relative to the locked baseline.
+        </p>
       </div>
     </div>
   );

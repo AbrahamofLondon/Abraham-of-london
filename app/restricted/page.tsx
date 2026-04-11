@@ -84,7 +84,7 @@ export default function RestrictedAccessPage() {
   
   if (state.success) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#060609] flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="w-6 h-6 text-green-500" />
@@ -97,7 +97,7 @@ export default function RestrictedAccessPage() {
   }
   
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#060609] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="border border-white/10 bg-black/50 p-8">
           <div className="text-center mb-8">

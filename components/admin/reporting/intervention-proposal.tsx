@@ -1,29 +1,15 @@
 "use client";
-
-import React, { useEffect, useMemo, useState, useTransition } from "react";
+import * as React from "react";
 import {
-  ArrowRight,
-  Lock,
-  Activity,
-  TrendingUp,
-  Heart,
-  Briefcase,
-  Gauge,
-  Brain,
   AlertTriangle,
+  CheckCircle2,
+  FileDown,
+  Loader2,
+  Lock,
+  Play,
   ShieldCheck,
   Target,
 } from "lucide-react";
-
-import {
-  generateMandate,
-  type InterventionDomain,
-} from "@/lib/alignment/intervention-engine";
-import {
-  generateHCDMandate,
-  type HCDInterventionDomain,
-} from "@/lib/alignment/human-capital-delta";
-import { mandateProtocol } from "@/app/actions/governance";
 
 export type TelemetryLens =
   | "STRATEGIC"
@@ -32,40 +18,48 @@ export type TelemetryLens =
   | "OPERATIONAL"
   | "GOVERNANCE";
 
-type MetricRecord = {
-  label?: string;
+export type InterventionMetric = {
+  label: string;
   intent?: number | null;
   reality?: number | null;
   burnoutIndex?: number | null;
-  [key: string]: unknown;
 };
 
-type ReportContext = {
+export type ReportContext = {
   state: string;
   priorityStack: string[];
   failureModes: string[];
 };
 
-interface InterventionProposalProps {
-  metrics: MetricRecord[];
+export type InterventionProposalExportPayload = {
   campaignId: string;
-  lens?: TelemetryLens;
-  onLensChange?: (lens: TelemetryLens) => void;
-  reportContext?: ReportContext;
-}
-
-type EnhancedMandate = {
+  lens: TelemetryLens;
+  domain: string;
   title: string;
   description: string;
-  investment_tier: string;
-  urgency: string;
+  urgency: "STANDARD" | "ELEVATED" | "HIGH" | "CRITICAL";
+  effort: "low" | "medium" | "high" | "critical";
+  projectedRecovery: number;
+  reportContext?: ReportContext;
 };
 
-function normalizeString(value: unknown, fallback = ""): string {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+export interface InterventionProposalProps {
+  metrics: InterventionMetric[];
+  campaignId: string;
+  lens?: TelemetryLens;
+  reportContext?: ReportContext;
+  canExport?: boolean;
+  canDeploy?: boolean;
+  onLensChange?: (lens: TelemetryLens) => void;
+  onExport?: (payload: InterventionProposalExportPayload) => Promise<void> | void;
+  onDeploy?: (payload: InterventionProposalExportPayload) => Promise<void> | void;
 }
 
-function normalizeNumber(value: unknown, fallback = 0): number {
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+function n(value: unknown, fallback = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
     const parsed = Number(value);
@@ -74,591 +68,188 @@ function normalizeNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
-function roundTo(value: number, places = 2): number {
-  const factor = 10 ** places;
-  return Math.round(value * factor) / factor;
+function topIssue(metrics: InterventionMetric[], lens: TelemetryLens): InterventionMetric | null {
+  if (!metrics.length) return null;
+  const deltaOf = (metric: InterventionMetric) => {
+    if (lens === "HUMAN_CAPITAL") return Math.max(0, n(metric.burnoutIndex, 0));
+    return Math.max(0, n(metric.intent, 0) - n(metric.reality, 0));
+  };
+  return [...metrics].sort((a, b) => deltaOf(b) - deltaOf(a))[0] ?? null;
 }
 
-function toDomainKey(label: string): string {
-  return normalizeString(label)
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-function getMetricDelta(metric: MetricRecord, lens: TelemetryLens): number {
-  const intent = normalizeNumber(metric.intent, 0);
-  const reality = normalizeNumber(metric.reality, 0);
-  const baselineDelta = Math.max(0, intent - reality);
-
-  if (lens === "HUMAN_CAPITAL") {
-    return Math.max(
-      0,
-      normalizeNumber(metric.burnoutIndex, baselineDelta),
-    );
-  }
-
-  return baselineDelta;
-}
-
-function getTopIssue(
-  metrics: MetricRecord[],
+function buildProposal(
+  metric: InterventionMetric,
   lens: TelemetryLens,
-): MetricRecord | null {
-  if (!Array.isArray(metrics) || metrics.length === 0) return null;
-
-  const sorted = [...metrics].sort(
-    (a, b) => getMetricDelta(b, lens) - getMetricDelta(a, lens),
-  );
-
-  return sorted[0] ?? null;
-}
-
-/**
- * ALIGNMENT ORBIT — Visual Recovery Tracker
- */
-function AlignmentOrbit({
-  raw,
-  current,
-  label = "Resonance",
-}: {
-  raw: number;
-  current: number;
-  label?: string;
-}) {
-  const safeRaw = Math.max(0, raw);
-  const safeCurrent = Math.max(0, current);
-  const recovered = Math.max(0, safeRaw - safeCurrent);
-  const percentage =
-    safeRaw > 0 ? Math.round((recovered / safeRaw) * 100) : 0;
-
-  return (
-    <div className="mt-6 flex items-center justify-between gap-6 border-t border-neutral-100 pt-6">
-      <div className="flex-1">
-        <div className="mb-1.5 flex justify-between items-end">
-          <p className="text-[7px] font-mono uppercase tracking-wider text-neutral-500">
-            {label}
-          </p>
-          <p className="text-[7px] font-mono text-neutral-400">
-            {percentage}% Recovered
-          </p>
-        </div>
-        <div className="relative h-px w-full bg-neutral-200">
-          <div
-            className="absolute top-0 left-0 h-full bg-neutral-500 transition-all duration-1000 ease-in-out"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-        <div className="mt-1.5 flex justify-between">
-          <span className="text-[5px] font-mono uppercase text-neutral-400">
-            Baseline: {Math.round(safeRaw)}%
-          </span>
-          <span className="text-[5px] font-mono uppercase text-neutral-400">
-            Target: Zero
-          </span>
-        </div>
-      </div>
-
-      <div className="flex gap-4">
-        <div className="border-l border-neutral-200 pl-4 text-right">
-          <p className="mb-0.5 text-[5px] font-mono uppercase text-neutral-400">
-            Current Delta
-          </p>
-          <p className="text-base font-light tracking-tight text-neutral-700">
-            {Math.round(safeCurrent)}%
-          </p>
-        </div>
-        <div className="border-l border-neutral-200 pl-4 text-right">
-          <p className="mb-0.5 text-[5px] font-mono uppercase text-neutral-400">
-            Status
-          </p>
-          <p
-            className={`text-[7px] font-mono uppercase tracking-wider ${
-              safeCurrent < 30 ? "text-emerald-600" : "text-neutral-500"
-            }`}
-          >
-            {safeCurrent < 30 ? "Stable" : "Correcting"}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * LENS SELECTOR — Toggle between telemetry modes
- */
-function LensSelector({
-  currentLens,
-  onLensChange,
-}: {
-  currentLens: TelemetryLens;
-  onLensChange: (lens: TelemetryLens) => void;
-}) {
-  const lenses: { value: TelemetryLens; label: string; icon: React.ReactNode }[] =
-    [
-      {
-        value: "STRATEGIC",
-        label: "Strategic",
-        icon: <TrendingUp className="h-2.5 w-2.5" />,
-      },
-      {
-        value: "HUMAN_CAPITAL",
-        label: "Human Capital",
-        icon: <Heart className="h-2.5 w-2.5" />,
-      },
-      {
-        value: "OPERATIONAL",
-        label: "Operational",
-        icon: <Gauge className="h-2.5 w-2.5" />,
-      },
-      {
-        value: "FINANCIAL",
-        label: "Financial",
-        icon: <Briefcase className="h-2.5 w-2.5" />,
-      },
-      {
-        value: "GOVERNANCE",
-        label: "Governance",
-        icon: <Brain className="h-2.5 w-2.5" />,
-      },
-    ];
-
-  return (
-    <div className="flex items-center gap-1 rounded-sm border border-neutral-100 bg-neutral-50/30 p-0.5">
-      {lenses.map((lens) => (
-        <button
-          key={lens.value}
-          onClick={() => onLensChange(lens.value)}
-          className={`flex items-center gap-1 px-2 py-1 text-[6px] font-mono uppercase tracking-wider transition-all ${
-            currentLens === lens.value
-              ? "border border-neutral-200 bg-white text-neutral-800 shadow-sm"
-              : "text-neutral-400 hover:text-neutral-600"
-          }`}
-          type="button"
-        >
-          {lens.icon}
-          <span>{lens.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/**
- * CONTEXT BADGES — Display report context if available
- */
-function ContextBadges({ context }: { context?: ReportContext }) {
-  if (!context) return null;
-
-  const stateConfig =
-    {
-      ORDERED: {
-        label: "ORDERED",
-        color: "text-emerald-600",
-        bg: "bg-emerald-50",
-        icon: ShieldCheck,
-      },
-      DRIFTING: {
-        label: "DRIFTING",
-        color: "text-amber-600",
-        bg: "bg-amber-50",
-        icon: TrendingUp,
-      },
-      MISALIGNED: {
-        label: "MISALIGNED",
-        color: "text-orange-600",
-        bg: "bg-orange-50",
-        icon: AlertTriangle,
-      },
-      DISORDERED: {
-        label: "DISORDERED",
-        color: "text-red-600",
-        bg: "bg-red-50",
-        icon: AlertTriangle,
-      },
-    }[context.state] || {
-      label: context.state,
-      color: "text-neutral-600",
-      bg: "bg-neutral-50",
-      icon: AlertTriangle,
-    };
-
-  const Icon = stateConfig.icon;
-
-  return (
-    <div className="mb-4 flex flex-wrap gap-2">
-      <div className={`flex items-center gap-1.5 px-2 py-1 ${stateConfig.bg}`}>
-        <Icon className={`h-2.5 w-2.5 ${stateConfig.color}`} />
-        <span
-          className={`text-[6px] font-mono uppercase tracking-wider ${stateConfig.color}`}
-        >
-          {stateConfig.label}
-        </span>
-      </div>
-
-      {context.failureModes?.length > 0 ? (
-        <div className="flex items-center gap-1.5 bg-red-50 px-2 py-1">
-          <AlertTriangle className="h-2.5 w-2.5 text-red-500" />
-          <span className="text-[6px] font-mono uppercase tracking-wider text-red-600">
-            {context.failureModes.length} Failure Mode
-            {context.failureModes.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-      ) : null}
-
-      {context.priorityStack?.length > 0 ? (
-        <div className="flex items-center gap-1.5 bg-neutral-100 px-2 py-1">
-          <Target className="h-2.5 w-2.5 text-neutral-500" />
-          <span className="text-[6px] font-mono uppercase tracking-wider text-neutral-600">
-            {context.priorityStack.length} Priorit
-            {context.priorityStack.length !== 1 ? "ies" : "y"}
-          </span>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/**
- * SOVEREIGN KEY AUTHORIZATION OVERLAY
- */
-function SovereignKeyAuth({
-  actionLabel,
-  isPending,
-  onConfirm,
-  onCancel,
-}: {
-  actionLabel: string;
-  isPending: boolean;
-  onConfirm: (key: string) => void;
-  onCancel: () => void;
-}) {
-  const [keyCode, setKeyCode] = useState("");
-  const REQUIRED_KEY = "SOVEREIGN-ALIGN-2026";
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm">
-      <div className="w-full max-w-md border border-neutral-200 bg-white p-8 text-center shadow-2xl">
-        <Lock className="mx-auto mb-5 h-6 w-6 text-neutral-400" />
-        <h3 className="mb-1 text-base font-light tracking-tight text-neutral-800">
-          Authorization Required
-        </h3>
-        <p className="mb-6 text-[7px] font-mono uppercase tracking-wider text-neutral-500">
-          {actionLabel}
-        </p>
-
-        <div className="space-y-4">
-          <input
-            type="text"
-            autoFocus
-            value={keyCode}
-            onChange={(e) => setKeyCode(e.target.value.toUpperCase())}
-            placeholder="Sovereign Key"
-            className="w-full border border-neutral-200 px-4 py-2 text-center text-[9px] font-mono tracking-wider text-neutral-700 placeholder:text-neutral-300 focus:border-neutral-400 focus:outline-none transition-all"
-            disabled={isPending}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={onCancel}
-              disabled={isPending}
-              className="py-2 text-[7px] font-mono uppercase tracking-wider text-neutral-500 border border-neutral-200 hover:bg-neutral-50 transition-all"
-              type="button"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={() => onConfirm(keyCode)}
-              disabled={keyCode !== REQUIRED_KEY || isPending}
-              className={`flex items-center justify-center gap-1.5 py-2 text-[7px] font-mono uppercase tracking-wider transition-all ${
-                keyCode === REQUIRED_KEY && !isPending
-                  ? "bg-neutral-800 text-white hover:bg-neutral-700"
-                  : "cursor-not-allowed bg-neutral-100 text-neutral-400"
-              }`}
-              type="button"
-            >
-              {isPending ? <Activity className="h-2 w-2 animate-spin" /> : "Authorize"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Generate enhanced mandate with context awareness
- */
-function generateEnhancedMandate(
-  domain: string,
-  delta: number,
-  lens: TelemetryLens,
-  context?: ReportContext,
-): EnhancedMandate {
-  const baseMandate =
+  reportContext?: ReportContext,
+): InterventionProposalExportPayload {
+  const domain = metric.label || "Unknown Domain";
+  const rawDelta =
     lens === "HUMAN_CAPITAL"
-      ? generateHCDMandate(
-          domain as HCDInterventionDomain,
-          delta,
-        )
-      : generateMandate(domain as InterventionDomain, delta);
+      ? Math.max(0, n(metric.burnoutIndex, 0))
+      : Math.max(0, n(metric.intent, 0) - n(metric.reality, 0));
 
-  if (!context) {
-    return {
-      ...baseMandate,
-      urgency: "STANDARD",
-    };
-  }
+  let urgency: InterventionProposalExportPayload["urgency"] = "STANDARD";
+  let effort: InterventionProposalExportPayload["effort"] = "medium";
 
-  let urgency = "STANDARD";
-  let title = baseMandate.title;
-  let description = baseMandate.description;
+  if (rawDelta >= 35) { urgency = "CRITICAL"; effort = "critical"; }
+  else if (rawDelta >= 25) { urgency = "HIGH"; effort = "high"; }
+  else if (rawDelta >= 15) { urgency = "ELEVATED"; effort = "medium"; }
 
-  if (context.state === "DISORDERED") {
-    urgency = "CRITICAL";
-    title = `[CRITICAL] ${title}`;
-    description = `${description} The organisation is in a DISORDERED state requiring immediate intervention.`;
-  } else if (context.state === "MISALIGNED") {
-    urgency = "HIGH";
-    description = `${description} Systemic misalignment detected across multiple domains.`;
-  } else if (context.state === "DRIFTING") {
+  if (reportContext?.state === "DISORDERED") {
+    urgency = "CRITICAL"; effort = "critical";
+  } else if (reportContext?.state === "MISALIGNED" && urgency === "STANDARD") {
     urgency = "ELEVATED";
-    description = `${description} Early intervention recommended to prevent further drift.`;
   }
 
-  if (context.failureModes?.length > 0) {
-    description = `${description} Primary failure mode: ${context.failureModes[0]}.`;
-  }
-
-  if (context.priorityStack?.length > 0) {
-    description = `${description} Aligns with top priority: "${context.priorityStack[0]}".`;
-  }
+  const title = `${lens.replace(/_/g, " ")} intervention for ${domain}`;
+  const description = [
+    `The strongest correction candidate is ${domain}.`,
+    `Observed delta indicates a ${urgency.toLowerCase()} intervention posture.`,
+    reportContext?.failureModes?.[0] ? `Primary failure mode: ${reportContext.failureModes[0]}.` : "",
+    reportContext?.priorityStack?.[0] ? `Priority alignment: ${reportContext.priorityStack[0]}.` : "",
+  ].filter(Boolean).join(" ");
 
   return {
-    ...baseMandate,
+    campaignId: "",
+    lens,
+    domain,
     title,
     description,
     urgency,
+    effort,
+    projectedRecovery: Math.max(5, Math.min(95, Math.round(rawDelta * 0.85))),
+    reportContext,
   };
 }
 
+const LENSES: TelemetryLens[] = ["STRATEGIC", "HUMAN_CAPITAL", "FINANCIAL", "OPERATIONAL", "GOVERNANCE"];
+
+/**
+ * ✅ NAMED EXPORT: Added to satisfy imports like:
+ * import { InterventionProposal } from "@/components/admin/reporting/intervention-proposal";
+ */
 export function InterventionProposal({
   metrics,
   campaignId,
   lens = "STRATEGIC",
-  onLensChange,
   reportContext,
+  canExport = false,
+  canDeploy = false,
+  onLensChange,
+  onExport,
+  onDeploy,
 }: InterventionProposalProps) {
-  const [isMounted, setIsMounted] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
-  const [activeLens, setActiveLens] = useState<TelemetryLens>(lens);
-  const [isPending, startTransition] = useTransition();
+  const [activeLens, setActiveLens] = React.useState<TelemetryLens>(lens);
+  const [exporting, setExporting] = React.useState(false);
+  const [deploying, setDeploying] = React.useState(false);
 
-  useEffect(() => {
-    setActiveLens(lens);
-  }, [lens]);
+  React.useEffect(() => setActiveLens(lens), [lens]);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const issue = React.useMemo(() => topIssue(metrics, activeLens), [metrics, activeLens]);
+  
+  if (!issue) {
+    return (
+      <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6 text-white/60">
+        No intervention candidate available.
+      </div>
+    );
+  }
 
-  const topIssue = useMemo(() => getTopIssue(metrics, activeLens), [metrics, activeLens]);
+  const proposal = { ...buildProposal(issue, activeLens, reportContext), campaignId };
 
-  if (!topIssue) return null;
+  const handleExport = async () => {
+    if (!canExport || !onExport) return;
+    setExporting(true);
+    try { await onExport(proposal); } finally { setExporting(false); }
+  };
 
-  const delta = Math.max(0, getMetricDelta(topIssue, activeLens));
-  const issueLabel = normalizeString(topIssue.label, "Unknown Domain");
-  const domain = toDomainKey(issueLabel);
-  const mandate = generateEnhancedMandate(domain, delta, activeLens, reportContext);
-
-  const recoveryProjection = `+${Math.round(
-    delta * (activeLens === "FINANCIAL" ? 0.95 : 0.85),
-  )}%`;
-
-  const currentDissonance = delta;
-  const rawDissonance = roundTo(delta * 1.25, 2);
-
-  const lensStyles =
-    {
-      STRATEGIC: {
-        accent: "border-neutral-500",
-        bg: "bg-neutral-50",
-        text: "text-neutral-500",
-        icon: <TrendingUp className="h-3 w-3" />,
-      },
-      HUMAN_CAPITAL: {
-        accent: "border-blue-500",
-        bg: "bg-blue-50/30",
-        text: "text-blue-500",
-        icon: <Heart className="h-3 w-3" />,
-      },
-      OPERATIONAL: {
-        accent: "border-amber-500",
-        bg: "bg-amber-50/30",
-        text: "text-amber-500",
-        icon: <Gauge className="h-3 w-3" />,
-      },
-      FINANCIAL: {
-        accent: "border-emerald-500",
-        bg: "bg-emerald-50/30",
-        text: "text-emerald-500",
-        icon: <Briefcase className="h-3 w-3" />,
-      },
-      GOVERNANCE: {
-        accent: "border-purple-500",
-        bg: "bg-purple-50/30",
-        text: "text-purple-500",
-        icon: <Brain className="h-3 w-3" />,
-      },
-    }[activeLens];
-
-  const urgencyStyles =
-    {
-      CRITICAL: "border-red-500 bg-red-50 text-red-700",
-      HIGH: "border-orange-500 bg-orange-50 text-orange-700",
-      ELEVATED: "border-amber-500 bg-amber-50 text-amber-700",
-      STANDARD: "border-neutral-500 bg-neutral-50 text-neutral-700",
-    }[mandate.urgency] || "border-neutral-500 bg-neutral-50 text-neutral-700";
-
-  const handleFinalDeployment = (key: string) => {
-    startTransition(async () => {
-      const result = await mandateProtocol({
-        campaignId,
-        domain: issueLabel,
-        action: mandate.title || `${activeLens} Intervention`,
-        recoveryProjection,
-        sovereignKey: key,
-        context: reportContext
-          ? {
-              state: reportContext.state,
-              failureModes: reportContext.failureModes,
-              priorityStack: reportContext.priorityStack,
-            }
-          : undefined,
-      });
-
-      if (result.success) {
-        setShowAuth(false);
-        return;
-      }
-
-      alert(result.error || "Deployment failed");
-    });
+  const handleDeploy = async () => {
+    if (!canDeploy || !onDeploy) return;
+    setDeploying(true);
+    try { await onDeploy(proposal); } finally { setDeploying(false); }
   };
 
   return (
-    <>
-      {showAuth ? (
-        <SovereignKeyAuth
-          actionLabel={mandate.title || `${activeLens} Intervention`}
-          isPending={isPending}
-          onCancel={() => setShowAuth(false)}
-          onConfirm={handleFinalDeployment}
-        />
-      ) : null}
-
-      <div className="overflow-hidden border border-neutral-100 bg-white shadow-sm">
-        <div className="p-6">
-          <div className="mb-5 flex justify-between items-start">
-            <div className="flex items-center gap-3">
-              <div className={`border p-1.5 ${lensStyles.accent} ${lensStyles.bg}`}>
-                {React.cloneElement(lensStyles.icon as React.ReactElement, {
-                  className: `h-3 w-3 ${lensStyles.text}`,
-                })}
-              </div>
-              <div>
-                <span className="block text-[6px] font-mono uppercase tracking-wider text-neutral-400">
-                  Sovereign Mandate
-                </span>
-                <div className="mt-1 h-px w-5 bg-neutral-200" />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <LensSelector
-                currentLens={activeLens}
-                onLensChange={(nextLens) => {
-                  setActiveLens(nextLens);
-                  onLensChange?.(nextLens);
-                }}
-              />
-
-              <span
-                className={`border px-2 py-0.5 text-[5px] font-mono uppercase tracking-wider ${urgencyStyles}`}
-              >
-                {mandate.urgency}
-              </span>
-
-              <span className="border border-neutral-200 px-2 py-0.5 text-[5px] font-mono uppercase tracking-wider text-neutral-500">
-                {mandate.investment_tier || "Standard"}
-              </span>
-            </div>
+    <section className="rounded-[28px] border border-white/10 bg-[#090B10] p-6 text-white shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
+       <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+             <div className="p-2 bg-white/5 rounded-lg">
+                <Target className="w-5 h-5 text-white/80" />
+             </div>
+             <div>
+                <h3 className="text-sm font-medium tracking-tight">Intervention Proposal</h3>
+                <p className="text-[10px] uppercase tracking-widest text-white/40">Sovereign Correction Engine</p>
+             </div>
           </div>
-
-          <ContextBadges context={reportContext} />
-
-          <div className="grid grid-cols-12 items-center gap-6">
-            <div className="col-span-12 lg:col-span-7">
-              <h3 className="mb-3 text-lg font-light italic tracking-tight text-neutral-800 leading-tight">
-                {mandate.title || `${activeLens} Intervention Required`}
-              </h3>
-              <div className="max-w-md">
-                <p className="border-l border-neutral-200 py-1 pl-3 text-[10px] font-light leading-relaxed text-neutral-500">
-                  {mandate.description ||
-                    `Institutional variance of ${delta}% requires immediate recalibration within the ${activeLens.toLowerCase()} domain.`}
-                </p>
-              </div>
-            </div>
-
-            <div className="col-span-12 lg:col-span-5">
-              <div className="border border-neutral-100 bg-neutral-50/30 p-5">
-                <div className="mb-3 flex justify-between items-end">
-                  <div>
-                    <p className="mb-0.5 text-[5px] font-mono uppercase tracking-wider text-neutral-400">
-                      Efficiency Recovery
-                    </p>
-                    <p className="text-lg font-light tracking-tight text-neutral-700">
-                      {recoveryProjection}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mb-4 h-px w-full overflow-hidden bg-neutral-200">
-                  <div
-                    className={`h-full transition-all duration-1000 ease-out ${lensStyles.text.replace(
-                      "text",
-                      "bg",
-                    )}`}
-                    style={{
-                      width: isMounted
-                        ? `${Math.min(100, Math.round(delta * 0.85))}%`
-                        : "0%",
-                    }}
-                  />
-                </div>
-
+          <div className="flex gap-1 p-1 bg-white/5 rounded-xl border border-white/5">
+             {LENSES.map(l => (
                 <button
-                  type="button"
-                  onClick={() => setShowAuth(true)}
-                  className="group flex w-full items-center justify-center gap-1.5 border border-neutral-800 bg-neutral-900 py-2.5 text-[6px] font-mono uppercase tracking-wider text-white transition-all duration-300 hover:bg-black"
+                   key={l}
+                   onClick={() => { setActiveLens(l); onLensChange?.(l); }}
+                   className={cn(
+                      "px-3 py-1.5 text-[10px] font-medium transition-all rounded-lg",
+                      activeLens === l ? "bg-white text-black" : "text-white/40 hover:text-white"
+                   )}
                 >
-                  <span>Deploy Protocol</span>
-                  <ArrowRight className="h-2 w-2 transition-transform group-hover:translate-x-0.5" />
+                   {l.replace("_", " ")}
                 </button>
-              </div>
-            </div>
+             ))}
+          </div>
+       </div>
+
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+             <div>
+                <div className="flex items-center gap-2 mb-2">
+                   <span className={cn(
+                      "px-2 py-0.5 rounded text-[9px] font-bold tracking-tighter",
+                      proposal.urgency === "CRITICAL" ? "bg-red-500 text-white" : "bg-white/10 text-white/60"
+                   )}>
+                      {proposal.urgency}
+                   </span>
+                   <span className="text-white/20">/</span>
+                   <span className="text-[10px] text-white/40 uppercase tracking-widest">Effort: {proposal.effort}</span>
+                </div>
+                <h2 className="text-xl font-semibold leading-tight mb-3">{proposal.title}</h2>
+                <p className="text-sm text-white/60 leading-relaxed">{proposal.description}</p>
+             </div>
+
+             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div className="flex items-center gap-3 text-emerald-400 mb-2">
+                   <ShieldCheck className="w-4 h-4" />
+                   <span className="text-[11px] font-medium uppercase tracking-wider">Projected Outcome</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                   <span className="text-3xl font-bold">+{proposal.projectedRecovery}%</span>
+                   <span className="text-xs text-white/40">Institutional Alignment</span>
+                </div>
+             </div>
           </div>
 
-          <AlignmentOrbit
-            raw={rawDissonance}
-            current={currentDissonance}
-            label={`${activeLens.replace(/_/g, " ")} Delta`}
-          />
-        </div>
-      </div>
-    </>
+          <div className="flex flex-col justify-end gap-3">
+             <button
+                onClick={handleExport}
+                disabled={!canExport || exporting}
+                className="w-full flex items-center justify-center gap-2 py-4 bg-white/5 hover:bg-white/10 disabled:opacity-30 border border-white/10 rounded-2xl text-sm font-medium transition-all"
+             >
+                {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                Export Briefing Document
+             </button>
+             <button
+                onClick={handleDeploy}
+                disabled={!canDeploy || deploying}
+                className="w-full flex items-center justify-center gap-2 py-4 bg-white text-black hover:bg-white/90 disabled:opacity-30 rounded-2xl text-sm font-bold transition-all shadow-lg"
+             >
+                {deploying ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Play className="w-4 h-4 fill-current" />}
+                Deploy Strategic Correction
+             </button>
+          </div>
+       </div>
+    </section>
   );
 }
+
+/**
+ * ✅ DEFAULT EXPORT: Maintained for general imports
+ */
+export default InterventionProposal;

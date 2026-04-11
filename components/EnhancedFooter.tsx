@@ -1,3 +1,9 @@
+/* components/EnhancedFooter.tsx
+   INSTITUTIONAL FOOTER
+   Design: Institutional Monumentalism — matches homepage and header
+   Typography: Cormorant Garamond wordmark + JetBrains Mono labels
+   Gold: #C9A96E softGold (brand) · #F59E0B amber (action CTAs only)
+*/
 "use client";
 
 import * as React from "react";
@@ -10,100 +16,156 @@ import {
   Bookmark,
   Layers,
   Shield,
-  ChevronRight,
-  Terminal,
   ShieldCheck,
-  Vault,
   Crown,
+  Archive,
+  ScrollText,
+  ScanSearch,
+  Briefcase,
+  FileText,
 } from "lucide-react";
 
 import PolicyFooter from "@/components/PolicyFooter";
 
-interface FooterCTAProps {
-  href: string;
-  title: string;
-  label: string;
-  icon: React.ReactNode;
-  hint?: string;
-  tag: string;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
 
-type DirectoryLink = {
-  label: string;
+type FooterLink = { label: string; href: string };
+
+type GatewayCard = {
   href: string;
+  eyebrow: string;
+  title: string;
+  body?: string;
+  icon: React.ElementType;
+  tag: string;
+  gold?: boolean;
 };
 
-function FooterCTA({
-  href,
-  title,
-  label,
-  icon,
-  hint,
-  tag,
-}: FooterCTAProps) {
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN CONSTANTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GOLD = "#C9A96E";
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GATEWAY CARD
+// The footer CTA surface — sharp panels, institutional language
+// ─────────────────────────────────────────────────────────────────────────────
+
+function GatewayCard({ href, eyebrow, title, body, icon: Icon, tag, gold = false }: GatewayCard) {
   return (
     <Link
       href={href}
-      className="group relative flex min-h-[200px] flex-col justify-between overflow-hidden border border-white/10 bg-zinc-900/20 p-6 transition-all duration-500 hover:border-amber-500/40 hover:bg-zinc-900/30"
+      className="group relative flex min-h-[188px] flex-col justify-between overflow-hidden border p-6 transition-all duration-400"
+      style={{
+        borderColor: gold ? `${GOLD}22` : "rgba(255,255,255,0.06)",
+        backgroundColor: gold ? `${GOLD}08` : "rgba(0,0,0,0.30)",
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.borderColor = gold ? `${GOLD}40` : "rgba(255,255,255,0.11)";
+        el.style.backgroundColor = gold ? `${GOLD}12` : "rgba(255,255,255,0.025)";
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.borderColor = gold ? `${GOLD}22` : "rgba(255,255,255,0.06)";
+        el.style.backgroundColor = gold ? `${GOLD}08` : "rgba(0,0,0,0.30)";
+      }}
     >
-      <div className="mb-8 flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="text-amber-500/60 transition-colors group-hover:text-amber-400">
-            {icon}
-          </div>
-          <div className="text-[9px] font-mono font-bold uppercase tracking-[0.4em] text-amber-500/70">
-            {label}
-          </div>
-        </div>
+      {/* Top shimmer */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px transition-opacity duration-400"
+        style={{
+          background: gold
+            ? `linear-gradient(to right, transparent, ${GOLD}35, transparent)`
+            : "linear-gradient(to right, transparent, rgba(255,255,255,0.07), transparent)",
+        }}
+      />
 
-        <div className="text-[8px] font-mono uppercase tracking-widest text-white/10 transition-colors group-hover:text-amber-500/40">
-          {tag}
+      {/* Header row */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Icon
+            className="h-4 w-4 transition-colors duration-300"
+            style={{ color: gold ? `${GOLD}CC` : "rgba(255,255,255,0.25)" }}
+          />
+          <span
+            className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.38em]"
+            style={{ color: gold ? `${GOLD}AA` : "rgba(255,255,255,0.28)" }}
+          >
+            {eyebrow}
+          </span>
         </div>
+        <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[6.5px] uppercase tracking-[0.30em] text-white/12">
+          {tag}
+        </span>
       </div>
 
-      <div className="space-y-2">
-        <div className="font-serif text-xl italic text-white transition-colors group-hover:text-amber-100">
+      {/* Body */}
+      <div className="mt-auto space-y-2">
+        <div
+          className="font-['Cormorant_Garamond',Georgia,serif] text-xl font-light italic leading-snug text-white/80 transition-colors duration-300 group-hover:text-white"
+        >
           {title}
         </div>
-
-        {hint ? (
-          <div className="max-w-[240px] text-[11px] font-light leading-relaxed text-white/30 transition-colors group-hover:text-white/50">
-            {hint}
-          </div>
-        ) : null}
+        {body && (
+          <p className="text-[11px] font-light leading-relaxed text-white/25 transition-colors duration-300 group-hover:text-white/40">
+            {body}
+          </p>
+        )}
       </div>
 
-      <div className="mt-6 flex items-center gap-2 text-[8px] font-mono font-bold uppercase tracking-widest text-white/10 transition-all group-hover:text-amber-500/40">
-        <span>Initialize Access</span>
-        <ChevronRight size={10} />
+      {/* Enter CTA */}
+      <div className="mt-5 flex items-center gap-2">
+        <span
+          className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.34em] text-white/16 transition-colors duration-300 group-hover:text-white/36"
+        >
+          Enter
+        </span>
+        <ArrowRight
+          className="h-3 w-3 text-white/12 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-white/32"
+        />
       </div>
 
-      <div className="absolute bottom-0 left-0 h-px w-0 bg-amber-500/30 transition-all duration-700 group-hover:w-full" />
+      {/* Bottom slide rule */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-px w-0 transition-all duration-600 group-hover:w-full"
+        style={{ background: gold ? `${GOLD}40` : "rgba(255,255,255,0.08)" }}
+      />
     </Link>
   );
 }
 
-function DirectoryColumn({
-  title,
-  links,
-}: {
-  title: string;
-  links: DirectoryLink[];
-}) {
+// ─────────────────────────────────────────────────────────────────────────────
+// DIRECTORY COLUMN
+// ─────────────────────────────────────────────────────────────────────────────
+
+function DirectoryColumn({ title, links }: { title: string; links: FooterLink[] }) {
   return (
-    <div className="space-y-6">
-      <h4 className="border-b border-white/5 pb-2 text-[10px] font-mono font-black uppercase tracking-[0.3em] text-white/20">
-        {title}
-      </h4>
+    <div className="space-y-5">
+      <div className="border-b border-white/[0.04] pb-2.5">
+        <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.38em] text-white/18">
+          {title}
+        </span>
+      </div>
 
       <ul className="space-y-3">
-        {links.map((link, index) => (
-          <li key={`${title}-${link.label}-${link.href}-${index}`}>
+        {links.map((link) => (
+          <li key={`${title}-${link.href}`}>
             <Link
               href={link.href}
-              className="group flex items-center gap-2 text-[11px] font-medium tracking-wide text-white/40 transition-all hover:text-amber-200"
+              className="group flex items-center gap-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[9px] uppercase tracking-[0.22em] text-white/28 transition-colors hover:text-white/62"
             >
-              <div className="h-px w-0 bg-amber-500/50 transition-all group-hover:w-3" />
+              <div
+                className="h-px w-0 bg-[#C9A96E]/50 transition-all duration-300 group-hover:w-3"
+                style={{ backgroundColor: `${GOLD}80` }}
+              />
               {link.label}
             </Link>
           </li>
@@ -113,198 +175,225 @@ function DirectoryColumn({
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FOOTER
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function EnhancedFooter(): React.ReactElement {
   const year = new Date().getFullYear();
 
-  const directory = {
+  // ── Gateway cards — top two rows ─────────────────────────────────────────
+  const primaryGateways: GatewayCard[] = [
+    { href: "/canon",    eyebrow: "Doctrine",   title: "The Canon",   icon: BookOpen,   tag: "DOC·V1" },
+    { href: "/books",    eyebrow: "Works",      title: "Volumes",     icon: Bookmark,   tag: "PUB·V2" },
+    { href: "/library",  eyebrow: "Archive",    title: "Library",     icon: Library,    tag: "LIB·V3" },
+    { href: "/ventures", eyebrow: "Execution",  title: "Ventures",    icon: Building2,  tag: "OPS·V4" },
+  ];
+
+  const secondaryGateways: GatewayCard[] = [
+    {
+      href:    "/consulting/strategy-room",
+      eyebrow: "Qualified access",
+      title:   "Strategy Room",
+      body:    "Controlled entry for qualified operators. Score-based routing. Institutional gatekeeping.",
+      icon:    Crown,
+      tag:     "STRAT·V1",
+      gold:    true,
+    },
+    {
+      href:    "/diagnostics/executive-reporting",
+      eyebrow: "Flagship product",
+      title:   "Executive Reporting",
+      body:    "Board-grade interpretation. Diagnostic signal converted into decision-grade output.",
+      icon:    FileText,
+      tag:     "EXEC·V2",
+    },
+    {
+      href:    "/diagnostics",
+      eyebrow: "Gateway layer",
+      title:   "Diagnostics",
+      body:    "Establish signal, pressure, and fit before forcing a solution.",
+      icon:    ScanSearch,
+      tag:     "DIAG·V3",
+    },
+    {
+      href:    "/vault",
+      eyebrow: "Intelligence",
+      title:   "The Vault",
+      body:    "Controlled assets, premium resources, and execution-grade material.",
+      icon:    Archive,
+      tag:     "SEC·V4",
+    },
+  ];
+
+  // ── Directory links ───────────────────────────────────────────────────────
+  const directory: Record<string, FooterLink[]> = {
     Registry: [
-      { label: "Canon", href: "/canon" },
-      { label: "Books", href: "/books" },
-      { label: "Library", href: "/library" },
-      { label: "Essays", href: "/blog" },
-      { label: "Shorts", href: "/shorts" },
-      { label: "Content", href: "/content" },
-    ] as DirectoryLink[],
-    Architecture: [
-      { label: "Frameworks", href: "/resources/strategic-frameworks" },
-      { label: "Surrender", href: "/resources/surrender-framework" },
-      { label: "Vault", href: "/vault" },
-      { label: "Resources", href: "/resources" },
-    ] as DirectoryLink[],
+      { label: "Canon",      href: "/canon"      },
+      { label: "Books",      href: "/books"      },
+      { label: "Library",    href: "/library"    },
+      { label: "Editorials", href: "/editorials" },
+      { label: "Shorts",     href: "/shorts"     },
+      { label: "Playbooks",  href: "/playbooks"  },
+    ],
+    Products: [
+      { label: "Artifacts",          href: "/artifacts"                           },
+      { label: "Market Intelligence", href: "/intelligence/global-market-intelligence-q1-2026" },
+      { label: "Executive Reporting", href: "/diagnostics/executive-reporting"    },
+      { label: "Vault Briefs",        href: "/vault/briefs"                       },
+    ],
     Engagements: [
-      { label: "Consulting", href: "/consulting" },
+      { label: "Consulting",    href: "/consulting"                },
       { label: "Strategy Room", href: "/consulting/strategy-room" },
-      { label: "Speaking", href: "/speaking" },
-      { label: "Contact", href: "/contact" },
-    ] as DirectoryLink[],
+      { label: "Diagnostics",   href: "/diagnostics"              },
+      { label: "Contact",       href: "/contact"                  },
+    ],
     Governance: [
-      { label: "About", href: "/about" },
+      { label: "About",    href: "/about"    },
       { label: "Security", href: "/security" },
-      { label: "Privacy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
-    ] as DirectoryLink[],
+      { label: "Privacy",  href: "/privacy"  },
+      { label: "Terms",    href: "/terms"    },
+    ],
   };
 
   const policyLinks = [
-    { label: "Privacy", href: "/privacy" },
-    { label: "Terms", href: "/terms" },
+    { label: "Privacy",  href: "/privacy"  },
+    { label: "Terms",    href: "/terms"    },
     { label: "Security", href: "/security" },
-    { label: "Cookies", href: "/cookies" },
+    { label: "Cookies",  href: "/cookies"  },
   ] as const;
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-black pb-8 pt-24">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.02]">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]" />
-      </div>
+    <footer
+      className="relative overflow-hidden border-t border-white/[0.055]"
+      style={{ backgroundColor: "rgb(3 3 5)" }}
+    >
+      {/* Grain */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.028]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "160px 160px",
+        }}
+      />
 
-      <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-12">
-        {/* Top Row: Primary CTAs */}
-        <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-4">
-          <FooterCTA
-            href="/canon"
-            title="The Canon"
-            label="Doctrine"
-            tag="DOC-V1"
-            icon={<BookOpen size={16} />}
-          />
-          <FooterCTA
-            href="/books"
-            title="Volumes"
-            label="Works"
-            tag="PUB-V2"
-            icon={<Bookmark size={16} />}
-          />
-          <FooterCTA
-            href="/library"
-            title="Library"
-            label="Archive"
-            tag="LIB-V3"
-            icon={<Library size={16} />}
-          />
-          <FooterCTA
-            href="/ventures"
-            title="Ventures"
-            label="Execution"
-            tag="OPS-V4"
-            icon={<Building2 size={16} />}
-          />
+      <div className="relative mx-auto max-w-7xl px-6 pb-10 pt-20 lg:px-12">
+
+        {/* ── Row 1: Primary gateway cards ─────────────────────────────────── */}
+        <div className="grid grid-cols-2 gap-px bg-white/[0.04] md:grid-cols-4">
+          {primaryGateways.map((card) => (
+            <GatewayCard key={card.href} {...card} />
+          ))}
         </div>
 
-        {/* Middle Row: Strategy Room & Frameworks */}
-        <div className="mt-px grid grid-cols-1 gap-px border-x border-b border-white/5 bg-white/5 md:grid-cols-4">
-          {/* Strategy Room - New CTA Injection */}
-          <FooterCTA
-            href="/consulting/strategy-room"
-            title="Strategy Room"
-            label="Qualified Access"
-            tag="STRAT-V1"
-            hint="Controlled entry for qualified operators. Score-based routing. Institutional gatekeeping."
-            icon={<Crown size={16} />}
-          />
-          <FooterCTA
-            href="/resources/strategic-frameworks"
-            title="Strategic Frameworks"
-            label="Operating Systems"
-            tag="SYS-F1"
-            hint="Board-grade models, institutional structure, and resilience logic."
-            icon={<Layers size={16} />}
-          />
-          <FooterCTA
-            href="/resources/surrender-framework"
-            title="Surrender Framework"
-            label="Formation"
-            tag="FRM-S2"
-            hint="Personal order, alignment under pressure, and disciplined correction."
-            icon={<Shield size={16} />}
-          />
-          <FooterCTA
-            href="/vault"
-            title="The Vault"
-            label="Intelligence"
-            tag="SEC-V3"
-            hint="Controlled assets, premium resources, and execution-grade material."
-            icon={<Vault size={16} />}
-          />
+        {/* ── Row 2: Secondary gateway cards ───────────────────────────────── */}
+        <div className="mt-px grid grid-cols-2 gap-px bg-white/[0.04] md:grid-cols-4">
+          {secondaryGateways.map((card) => (
+            <GatewayCard key={card.href} {...card} />
+          ))}
         </div>
 
-        {/* Main Footer Content */}
-        <div className="mt-24 grid grid-cols-1 gap-16 border-t border-white/10 pt-16 lg:grid-cols-12">
-          <div className="space-y-10 lg:col-span-5">
+        {/* ── Main footer body ─────────────────────────────────────────────── */}
+        <div className="mt-20 grid gap-16 border-t border-white/[0.04] pt-16 lg:grid-cols-12">
+
+          {/* Left — brand + CTAs */}
+          <div className="space-y-9 lg:col-span-5">
+            {/* Wordmark */}
             <div>
-              <h2 className="font-serif text-4xl italic tracking-tight text-white">
+              <div
+                className="font-['Cormorant_Garamond',Georgia,serif] text-4xl font-light italic leading-none tracking-[-0.02em] text-white/85"
+              >
                 Abraham of London
-              </h2>
-
+              </div>
               <div className="mt-3 flex items-center gap-3">
-                <div className="h-px w-8 bg-amber-500/40" />
-                <span className="text-[9px] font-mono font-bold uppercase tracking-[0.5em] text-amber-500/60">
-                  Governance • Architecture • Execution
+                <div className="h-px w-8" style={{ backgroundColor: `${GOLD}50` }} />
+                <span
+                  className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.50em]"
+                  style={{ color: `${GOLD}88` }}
+                >
+                  Governance · Architecture · Execution
                 </span>
               </div>
             </div>
 
-            <p className="max-w-sm border-l border-white/10 pl-6 text-[12px] font-light italic leading-relaxed text-white/30">
+            {/* Descriptor */}
+            <p
+              className="max-w-sm border-l border-white/[0.06] pl-5 font-['Cormorant_Garamond',Georgia,serif] text-[13px] font-light italic leading-relaxed text-white/28"
+            >
               A platform for disciplined thinking: doctrine, systems, and strategic
               execution arranged for leaders, builders, and institutions that
               intend to endure.
             </p>
 
+            {/* CTAs */}
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center gap-4 bg-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-black transition-all hover:bg-amber-500"
+                className="group inline-flex items-center justify-center gap-3 border border-white/[0.10] bg-white/[0.03] px-6 py-3.5 font-['JetBrains_Mono',ui-monospace,monospace] text-[9px] uppercase tracking-[0.30em] text-white/55 transition-all duration-300 hover:border-white/[0.18] hover:bg-white/[0.06] hover:text-white/85"
               >
-                <Terminal size={14} />
-                Secure Inquiry
-                <ArrowRight size={14} />
+                Secure inquiry
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
 
-              {/* Strategy Room Secondary CTA */}
               <Link
                 href="/consulting/strategy-room"
-                className="inline-flex items-center justify-center gap-4 border border-amber-500/30 bg-amber-500/[0.03] px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-amber-400/80 transition-all hover:border-amber-500/60 hover:bg-amber-500/[0.08] hover:text-amber-300"
+                className="group inline-flex items-center justify-center gap-3 border px-6 py-3.5 font-['JetBrains_Mono',ui-monospace,monospace] text-[9px] uppercase tracking-[0.30em] transition-all duration-300"
+                style={{
+                  borderColor: `${GOLD}30`,
+                  color: `${GOLD}BB`,
+                  backgroundColor: `${GOLD}08`,
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.borderColor = `${GOLD}50`;
+                  el.style.backgroundColor = `${GOLD}14`;
+                  el.style.color = GOLD;
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.borderColor = `${GOLD}30`;
+                  el.style.backgroundColor = `${GOLD}08`;
+                  el.style.color = `${GOLD}BB`;
+                }}
               >
-                <Crown size={14} />
+                <Crown className="h-3.5 w-3.5" />
                 Enter Strategy Room
-                <ArrowRight size={14} />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4 lg:col-span-7">
-            <DirectoryColumn title="Registry" links={directory.Registry} />
-            <DirectoryColumn title="Architecture" links={directory.Architecture} />
-            <DirectoryColumn title="Engagements" links={directory.Engagements} />
-            <DirectoryColumn title="Governance" links={directory.Governance} />
+          {/* Right — directory */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 lg:col-span-7">
+            {Object.entries(directory).map(([title, links]) => (
+              <DirectoryColumn key={title} title={title} links={links} />
+            ))}
           </div>
         </div>
 
-        <div className="mt-24 border-t border-white/5 pt-10">
-          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={14} className="text-amber-500/50" />
-                <span className="text-[9px] font-mono font-bold uppercase tracking-[0.3em] text-white/40">
-                  © {year} ABRAHAM OF LONDON • ALL RIGHTS RESERVED
-                </span>
-              </div>
+        {/* ── Bottom bar ───────────────────────────────────────────────────── */}
+        <div className="mt-20 border-t border-white/[0.04] pt-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
 
-              <div className="hidden h-3 w-px bg-white/10 md:block" />
-
-              <div className="hidden items-center gap-4 md:flex">
-                <span className="text-[8px] font-mono uppercase tracking-[0.2em] text-white/20">
-                  Institutional Registry
-                </span>
-              </div>
+            {/* Copyright */}
+            <div className="flex items-center gap-4">
+              <ShieldCheck className="h-3.5 w-3.5 text-white/16" />
+              <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.32em] text-white/22">
+                © {year} Abraham of London · All rights reserved
+              </span>
+              <div className="hidden h-3 w-px bg-white/[0.07] md:block" />
+              <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.26em] text-white/14 md:block">
+                Institutional registry
+              </span>
             </div>
 
-            <div className="flex items-center gap-8">
-              {policyLinks.map((item, index) => (
+            {/* Policy links */}
+            <div className="flex items-center gap-6">
+              {policyLinks.map((item) => (
                 <Link
-                  key={`${item.label}-${item.href}-${index}`}
+                  key={item.href}
                   href={item.href}
-                  className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-white/20 transition-colors hover:text-amber-500"
+                  className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.26em] text-white/20 transition-colors hover:text-white/48"
                 >
                   {item.label}
                 </Link>
@@ -313,9 +402,11 @@ export default function EnhancedFooter(): React.ReactElement {
           </div>
         </div>
 
-        <div className="mt-12">
+        {/* Policy footer component */}
+        <div className="mt-10">
           <PolicyFooter isDark />
         </div>
+
       </div>
     </footer>
   );

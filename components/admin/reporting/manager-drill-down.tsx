@@ -35,21 +35,21 @@ export function ManagerDrillDown({ rawResponses }: { rawResponses: any[] }) {
 
               <div className="text-center">
                 <p className="text-[6px] font-mono text-neutral-400 uppercase mb-1">Dissonance</p>
-                <p className={`text-xl font-light ${d.status === 'CRITICAL' ? 'text-neutral-600' : 'text-neutral-700'}`}>
-                  {d.dissonance}
+                <p className={`text-xl font-light ${d.trajectory === 'STAGNANT' ? 'text-neutral-600' : 'text-neutral-700'}`}>
+                  {d.friction}
                 </p>
               </div>
             </div>
 
             {/* Status */}
             <div className={`min-w-[140px] px-3 py-2 border flex items-center justify-between ${
-              d.status === 'STABLE' ? 'border-neutral-200 bg-neutral-50' : 
-              d.status === 'FRACTURED' ? 'border-neutral-200 bg-neutral-50' : 
+              d.trajectory === 'IMPROVING' ? 'border-neutral-200 bg-neutral-50' : 
+              d.trajectory === 'DECAYING' ? 'border-neutral-200 bg-neutral-50' : 
               'border-neutral-200 bg-neutral-50'
             }`}>
               <div className="flex items-center gap-1.5">
-                {d.status === 'STABLE' ? <CheckCircle2 className="w-3 h-3 text-neutral-500" /> : <AlertCircle className="w-3 h-3 text-neutral-500" />}
-                <span className="text-[7px] font-mono uppercase tracking-wider text-neutral-600">{d.status}</span>
+                {d.trajectory === 'IMPROVING' ? <CheckCircle2 className="w-3 h-3 text-neutral-500" /> : <AlertCircle className="w-3 h-3 text-neutral-500" />}
+                <span className="text-[7px] font-mono uppercase tracking-wider text-neutral-600">{d.trajectory}</span>
               </div>
               <button className="text-[6px] font-mono uppercase underline text-neutral-400 hover:text-neutral-600">
                 Details

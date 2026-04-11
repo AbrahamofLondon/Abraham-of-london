@@ -1,3 +1,4 @@
+// lib/decision/report-recommendations-builder.ts
 import {
   buildDecisionSignalProfiles,
   type DecisionAssetContextRow,
@@ -52,6 +53,8 @@ export type RecommendationBuildResult = {
   recommendations: RecommendationAsset[];
 };
 
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+
 function normalizeString(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
@@ -78,7 +81,6 @@ function matchesContext(
   return pairs.some(([contextKey, type]) => {
     const wanted = normalizeString(context[contextKey]);
     if (!wanted) return false;
-
     return (
       normalizeString(profile.contextType).toLowerCase() === type.toLowerCase() &&
       normalizeString(profile.contextValue).toLowerCase() === wanted.toLowerCase()
@@ -91,21 +93,9 @@ function buildReasons(
   context: RecommendationContext,
 ): RecommendationReason[] {
   const reasons: RecommendationReason[] = [
-    {
-      code: "RANKING_SCORE",
-      label: "Ranking score",
-      value: profile.rankingScore,
-    },
-    {
-      code: "RESONANCE_BAND",
-      label: "Resonance band",
-      value: profile.resonanceBand,
-    },
-    {
-      code: "USEFULNESS_SCORE",
-      label: "Usefulness score",
-      value: profile.usefulnessScore,
-    },
+    { code: "RANKING_SCORE", label: "Ranking score", value: profile.rankingScore },
+    { code: "RESONANCE_BAND", label: "Resonance band", value: profile.resonanceBand },
+    { code: "USEFULNESS_SCORE", label: "Usefulness score", value: profile.usefulnessScore },
   ];
 
   if (matchesContext(profile, context)) {
@@ -117,11 +107,7 @@ function buildReasons(
   }
 
   if (profile.constitutionalSource) {
-    reasons.push({
-      code: "CONSTITUTIONAL_SOURCE",
-      label: "Constitutional source",
-      value: true,
-    });
+    reasons.push({ code: "CONSTITUTIONAL_SOURCE", label: "Constitutional source", value: true });
   }
 
   if (profile.totalConversionRate > 0) {
@@ -164,13 +150,16 @@ function scoreCandidate(
   const contextBonus = matchesContext(profile, context) ? 12 : 0;
   const constitutionalBonus = profile.constitutionalSource ? 4 : 0;
   const riskPenalty = profile.governanceRiskScore * 0.12;
-
-  return roundTo(
-    profile.rankingScore + contextBonus + constitutionalBonus - riskPenalty,
-    4,
-  );
+  return roundTo(profile.rankingScore + contextBonus + constitutionalBonus - riskPenalty, 4);
 }
 
+// ── PRIMARY EXPORT ────────────────────────────────────────────────────────────
+
+/**
+ * buildDecisionRecommendations
+ * Expects: DecisionAssetContextRow[]
+ * Synchronous — do NOT await.
+ */
 export function buildDecisionRecommendations(
   rows: DecisionAssetContextRow[],
   context: RecommendationContext = {},
@@ -179,53 +168,46 @@ export function buildDecisionRecommendations(
   const profiles = buildDecisionSignalProfiles(rows);
 
   const ranked = [...profiles]
-    .map((profile) => ({
-      profile,
-      candidateScore: scoreCandidate(profile, context),
-    }))
+    .map((profile) => ({ profile, candidateScore: scoreCandidate(profile, context) }))
     .sort((a, b) => b.candidateScore - a.candidateScore)
     .slice(0, Math.max(1, limit));
 
-  const recommendations: RecommendationAsset[] = ranked.map(
-    ({ profile }, index) => ({
-      assetId: profile.assetId,
-      assetTitle: profile.assetTitle,
-      assetHref: profile.assetHref,
-      assetKind: profile.assetKind,
-      contextType: profile.contextType,
-      contextValue: profile.contextValue,
-      rankingScore: profile.rankingScore,
-      resonanceScore: profile.resonanceScore,
-      resonanceBand: profile.resonanceBand,
-      confidenceScore: profile.confidenceScore,
-      usefulnessScore: profile.usefulnessScore,
-      governanceRiskScore: profile.governanceRiskScore,
-      priority: priorityFor(index),
-      reasons: buildReasons(profile, context),
-      constitutionalSource: profile.constitutionalSource,
-      drifts: profile.drifts,
-    }),
-  );
+  const recommendations: RecommendationAsset[] = ranked.map(({ profile }, index) => ({
+    assetId: profile.assetId,
+    assetTitle: profile.assetTitle,
+    assetHref: profile.assetHref,
+    assetKind: profile.assetKind,
+    contextType: profile.contextType,
+    contextValue: profile.contextValue,
+    rankingScore: profile.rankingScore,
+    resonanceScore: profile.resonanceScore,
+    resonanceBand: profile.resonanceBand,
+    confidenceScore: profile.confidenceScore,
+    usefulnessScore: profile.usefulnessScore,
+    governanceRiskScore: profile.governanceRiskScore,
+    priority: priorityFor(index),
+    reasons: buildReasons(profile, context),
+    constitutionalSource: profile.constitutionalSource,
+    drifts: profile.drifts,
+  }));
 
   return {
     generatedAt: new Date().toISOString(),
     summary: {
       totalCandidates: profiles.length,
-      primaryCount: recommendations.filter((item) => item.priority === "PRIMARY")
-        .length,
-      secondaryCount: recommendations.filter(
-        (item) => item.priority === "SECONDARY",
-      ).length,
-      tertiaryCount: recommendations.filter((item) => item.priority === "TERTIARY")
-        .length,
+      primaryCount: recommendations.filter((r) => r.priority === "PRIMARY").length,
+      secondaryCount: recommendations.filter((r) => r.priority === "SECONDARY").length,
+      tertiaryCount: recommendations.filter((r) => r.priority === "TERTIARY").length,
     },
     recommendations,
   };
 }
 
 /**
- * Backward-compatible alias for older report routes.
- * This keeps existing imports working while the codebase converges on one SSOT name.
+ * buildExecutiveReportRecommendations
+ * Alias of buildDecisionRecommendations — same signature.
+ * Accepts: DecisionAssetContextRow[]
+ * Synchronous — do NOT await.
  */
 export function buildExecutiveReportRecommendations(
   rows: DecisionAssetContextRow[],

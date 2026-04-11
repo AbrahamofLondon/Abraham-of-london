@@ -1,4 +1,9 @@
-/* lib/pdf/renderers/brief-parser.ts — INSTITUTIONAL BRIEF PARSER V3.1 */
+/* lib/pdf/renderers/brief-parser.ts — INSTITUTIONAL BRIEF PARSER V4.0
+   ---------------------------------------------------------------------------
+   Rebuilt parser for premium PDF output.
+   Handles directives, markdown tables, headings, lists, dividers, and
+   paragraph grouping with stronger sanitisation and safer structure.
+   --------------------------------------------------------------------------- */
 
 import type {
   BriefBlock,
@@ -7,39 +12,95 @@ import type {
 } from "./brief-types";
 
 /* --------------------------------------------------------------------------
-   UTILITY HELPERS
+   Utility Helpers
 -------------------------------------------------------------------------- */
 
 function safeString(value: unknown): string {
   if (typeof value === "string") return value;
-  return value ? String(value) : "";
+  return value == null ? "" : String(value);
 }
 
 function normalizeNewlines(value: string): string {
   return safeString(value).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }
 
+function sanitizeText(value: string): string {
+  return safeString(value)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[‐-‒–—]/g, "-")
+    .replace(/\u00A0/g, " ")
+    .replace(/\t/g, " ");
+}
+
 function cleanText(text: string): string {
-  return safeString(text)
+  return sanitizeText(text)
     .replace(/[ \t]+/g, " ")
-    .replace(/<[^>]+>/g, "") // Strip MDX/HTML tags
+    .replace(/<[^>]+>/g, "")
     .trim();
 }
 
-function parseKeyValueLine(line: string): { key: string; value: string } | null {
+function clampText(text: string, maxLength: number): string {
+  const clean = cleanText(text);
+  if (clean.length <= maxLength) return clean;
+  return `${clean.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
+}
+
+function parseKeyValueLine(
+  line: string,
+): { key: string; value: string } | null {
   const match = line.match(/^([A-Za-z0-9 _-]+)\s*:\s*(.+)$/);
-  return match ? { key: match[1].trim().toLowerCase(), value: match[2].trim() } : null;
+  return match
+    ? {
+        key: match[1].trim().toLowerCase(),
+        value: match[2].trim(),
+      }
+    : null;
+}
+
+function isBlank(line: string): boolean {
+  return cleanText(line) === "";
+}
+
+function isDivider(line: string): boolean {
+  const trimmed = cleanText(line);
+  return trimmed === "---" || trimmed === "***" || trimmed === "___";
+}
+
+function isListLine(line: string): boolean {
+  return /^[-*•]\s+/.test(cleanText(line));
+}
+
+function isOrderedListLine(line: string): boolean {
+  return /^\d+\.\s+/.test(cleanText(line));
+}
+
+function isHeadingLine(line: string): boolean {
+  return /^(#{1,3})\s+/.test(cleanText(line));
+}
+
+function isLikelyTableSeparator(line: string): boolean {
+  return /^\|?[\-:\s|]+\|?$/.test(cleanText(line));
+}
+
+function splitTableRow(line: string): string[] {
+  return safeString(line)
+    .split("|")
+    .map((cell) => clampText(cell, 260))
+    .filter((cell) => cell.length > 0);
 }
 
 /* --------------------------------------------------------------------------
-   DIRECTIVE PARSERS (:::block)
+   Directive Parsers
 -------------------------------------------------------------------------- */
 
 function tryParseDirective(
   lines: string[],
-  index: number
+  index: number,
 ): { block: BriefBlock | null; nextIndex: number } | null {
-  const first = lines[index]?.trim();
+  const first = cleanText(lines[index] || "");
   if (!first.startsWith(":::")) return null;
 
   const type = first.replace(/^:::/, "").trim().toLowerCase();
@@ -47,53 +108,66 @@ function tryParseDirective(
   let i = index + 1;
 
   while (i < lines.length) {
-    const line = lines[i].trim();
+    const line = cleanText(lines[i] || "");
     if (line === ":::") break;
-    bodyLines.push(lines[i]);
+    bodyLines.push(lines[i] || "");
     i += 1;
   }
 
-  // Handle Table Directive (Common in Audit Practices)
   if (type === "table") {
     let caption = "";
     const dataRows: string[][] = [];
 
-    bodyLines.forEach(line => {
-      const kv = parseKeyValueLine(line);
+    bodyLines.forEach((line) => {
+      const kv = parseKeyValueLine(cleanText(line));
       if (kv && kv.key === "caption") {
-        caption = kv.value;
+        caption = clampText(kv.value, 180);
       } else if (line.includes("|")) {
-        const cells = line.split("|").map(c => cleanText(c)).filter(Boolean);
+        const cells = splitTableRow(line);
         if (cells.length > 0) dataRows.push(cells);
       }
     });
 
+    const headers = dataRows[0] || [];
+    const rows = dataRows.slice(1);
+
     return {
-      block: {
-        type: "table",
-        headers: dataRows[0] || [],
-        rows: dataRows.slice(1),
-        caption: caption || undefined,
-      },
+      block:
+        headers.length > 0
+          ? {
+              type: "table",
+              headers,
+              rows,
+              caption: caption || undefined,
+            }
+          : null,
       nextIndex: i,
     };
   }
 
-  // Handle Callout/Alert Directive
   if (type === "callout" || type === "alert") {
     let title = "";
     let tone: BriefTone = "note";
     const content: string[] = [];
 
-    bodyLines.forEach(line => {
-      const kv = parseKeyValueLine(line);
-      if (kv && kv.key === "title") title = kv.value;
+    bodyLines.forEach((line) => {
+      const kv = parseKeyValueLine(cleanText(line));
+      if (kv && kv.key === "title") title = clampText(kv.value, 80);
       else if (kv && kv.key === "tone") tone = kv.value as BriefTone;
       else content.push(line);
     });
 
+    const text = clampText(content.join(" "), 1200);
+
     return {
-      block: { type: "callout", title: title || undefined, tone, text: cleanText(content.join(" ")) },
+      block: text
+        ? {
+            type: "callout",
+            title: title || undefined,
+            tone,
+            text,
+          }
+        : null,
       nextIndex: i,
     };
   }
@@ -102,30 +176,46 @@ function tryParseDirective(
 }
 
 /* --------------------------------------------------------------------------
-   STANDARD MARKDOWN PARSERS
+   Markdown Table Parser
 -------------------------------------------------------------------------- */
 
-function tryParseMarkdownTable(lines: string[], index: number): { block: BriefBlock; nextIndex: number } | null {
-  const row1 = lines[index]?.trim();
-  const row2 = lines[index + 1]?.trim();
-  if (!row1?.includes("|") || !row2?.includes("|") || !row2.match(/^[:|\-\s]+$/)) return null;
+function tryParseMarkdownTable(
+  lines: string[],
+  index: number,
+): { block: BriefBlock; nextIndex: number } | null {
+  const row1 = cleanText(lines[index] || "");
+  const row2 = cleanText(lines[index + 1] || "");
+
+  if (!row1.includes("|") || !row2.includes("|") || !isLikelyTableSeparator(row2)) {
+    return null;
+  }
 
   const rows: string[][] = [];
   let i = index;
-  while (i < lines.length && lines[i].trim().includes("|")) {
-    const cells = lines[i].split("|").map(c => cleanText(c)).filter(Boolean);
-    if (cells.length > 0) rows.push(cells);
+
+  while (i < lines.length && cleanText(lines[i] || "").includes("|")) {
+    const current = cleanText(lines[i] || "");
+    if (!isLikelyTableSeparator(current)) {
+      const cells = splitTableRow(current);
+      if (cells.length > 0) rows.push(cells);
+    }
     i++;
   }
 
+  if (rows.length === 0) return null;
+
   return {
-    block: { type: "table", headers: rows[0], rows: rows.slice(2) }, // slice(2) skips header + divider
+    block: {
+      type: "table",
+      headers: rows[0] || [],
+      rows: rows.slice(1),
+    },
     nextIndex: i - 1,
   };
 }
 
 /* --------------------------------------------------------------------------
-   MAIN ORCHESTRATOR
+   Main Orchestrator
 -------------------------------------------------------------------------- */
 
 export function parseBriefBody(content: string): ParsedBriefDocument {
@@ -134,10 +224,19 @@ export function parseBriefBody(content: string): ParsedBriefDocument {
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i].trim();
-    if (!line) { i++; continue; }
+    const line = cleanText(lines[i] || "");
 
-    // 1. Check for Directives (:::table, etc.)
+    if (!line) {
+      i++;
+      continue;
+    }
+
+    if (isDivider(line)) {
+      blocks.push({ type: "divider" });
+      i++;
+      continue;
+    }
+
     const directive = tryParseDirective(lines, i);
     if (directive) {
       if (directive.block) blocks.push(directive.block);
@@ -145,7 +244,6 @@ export function parseBriefBody(content: string): ParsedBriefDocument {
       continue;
     }
 
-    // 2. Check for Markdown Tables
     const table = tryParseMarkdownTable(lines, i);
     if (table) {
       blocks.push(table.block);
@@ -153,33 +251,75 @@ export function parseBriefBody(content: string): ParsedBriefDocument {
       continue;
     }
 
-    // 3. Headings
     const headingMatch = line.match(/^(#{1,3})\s+(.*)/);
     if (headingMatch) {
       blocks.push({
         type: "heading",
         level: headingMatch[1].length as 1 | 2 | 3,
-        text: cleanText(headingMatch[2])
+        text: clampText(headingMatch[2], 240),
       });
       i++;
       continue;
     }
 
-    // 4. Lists (Unordered & Ordered)
-    if (/^[-*•]\s+/.test(line) || /^\d+\.\s+/.test(line)) {
-      const isOrdered = /^\d+\.\s+/.test(line);
+    if (isListLine(line) || isOrderedListLine(line)) {
+      const ordered = isOrderedListLine(line);
       const items: string[] = [];
-      while (i < lines.length && (isOrdered ? /^\d+\.\s+/.test(lines[i].trim()) : /^[-*•]\s+/.test(lines[i].trim()))) {
-        items.push(cleanText(lines[i].trim().replace(/^([-*•]|\d+\.)\s+/, "")));
+
+      while (
+        i < lines.length &&
+        (ordered
+          ? isOrderedListLine(lines[i] || "")
+          : isListLine(lines[i] || ""))
+      ) {
+        const raw = cleanText(lines[i] || "");
+        items.push(
+          clampText(raw.replace(/^([-*•]|\d+\.)\s+/, ""), 800),
+        );
         i++;
       }
-      blocks.push({ type: "list", items, ordered: isOrdered });
+
+      if (items.length > 0) {
+        blocks.push({
+          type: "list",
+          items,
+          ordered,
+        });
+      }
       continue;
     }
 
-    // 5. Paragraphs (Fallback)
-    blocks.push({ type: "paragraph", text: cleanText(line) });
-    i++;
+    const paragraphLines: string[] = [line];
+    let j = i + 1;
+
+    while (j < lines.length) {
+      const next = cleanText(lines[j] || "");
+
+      if (
+        !next ||
+        isHeadingLine(next) ||
+        isDivider(next) ||
+        next.startsWith(":::") ||
+        isListLine(next) ||
+        isOrderedListLine(next) ||
+        (next.includes("|") && isLikelyTableSeparator(cleanText(lines[j + 1] || "")))
+      ) {
+        break;
+      }
+
+      paragraphLines.push(next);
+      j++;
+    }
+
+    const paragraph = clampText(paragraphLines.join(" "), 2200);
+    if (paragraph) {
+      blocks.push({
+        type: "paragraph",
+        text: paragraph,
+      });
+    }
+
+    i = j;
   }
 
   return { blocks };

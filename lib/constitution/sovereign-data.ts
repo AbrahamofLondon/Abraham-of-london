@@ -38,7 +38,7 @@ export class SovereignDataEncryption {
       .digest();
 
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(this.algorithm, campaignKey, iv);
+    const cipher = crypto.createCipheriv(this.algorithm, campaignKey, iv) as crypto.CipherGCM;
 
     let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'base64');
     encrypted += cipher.final('base64');
@@ -66,7 +66,7 @@ export class SovereignDataEncryption {
 
     const iv = Buffer.from(container.iv, 'base64');
     const authTag = Buffer.from(container.authTag, 'base64');
-    const decipher = crypto.createDecipheriv(this.algorithm, campaignKey, iv);
+    const decipher = crypto.createDecipheriv(this.algorithm, campaignKey, iv) as crypto.DecipherGCM;
     decipher.setAuthTag(authTag);
 
     let decrypted = decipher.update(container.encryptedData, 'base64', 'utf8');

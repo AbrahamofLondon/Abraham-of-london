@@ -79,7 +79,7 @@ export default function StrategyRoomIntegration() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden border-t border-white/[0.06] bg-[#070707] py-24 sm:py-28">
+    <section className="relative overflow-hidden border-t border-white/[0.06] bg-[#060609] py-24 sm:py-28">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(201,169,106,0.10),transparent_40%),radial-gradient(ellipse_at_12%_88%,rgba(255,255,255,0.04),transparent_32%)]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">

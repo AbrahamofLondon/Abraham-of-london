@@ -2,38 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   CSS DESIGN TOKENS
+   Single source of truth for all colour, typography, and surface variables.
+   Tailwind config reads from these via rgb(var(--token) / alpha) syntax.
+   ============================================================================ */
+
 :root {
-  --aol-dark: #0b0b0b;
+  /* ── Base palette ────────────────────────────────────────────────────────── */
+  /* Background scale — darkest to slightly lifted */
+  --aol-bg:    6 6 9;       /* #060609 — canonical base */
+  --aol-bg-2:  9 9 12;      /* #09090C — slightly lifted */
+  --aol-bg-3:  14 14 18;    /* #0E0E12 — panel background */
+
+  /* Panel surfaces */
+  --aol-panel:   0 0 0;           /* pure black for deep panels */
+  --aol-panel-2: 10 10 14;        /* #0A0A0E */
+  --aol-panel-3: 16 16 20;        /* #101014 */
+
+  /* Ink / text */
+  --aol-ink:       242 241 238;   /* #F2F1EE — warm white */
+  --aol-ink-dim:   242 241 238;   /* used with opacity in components */
+  --aol-ink-muted: 242 241 238;   /* used with opacity in components */
+
+  /* Gold accent — the single accent colour */
+  --aol-gold:        201 169 110; /* #C9A96E — softGold, primary accent */
+  --aol-gold-strong: 245 158 11;  /* #F59E0B — amber-500, high-emphasis accent */
+  --aol-gold-soft:   184 155 110; /* #B89B6E — muted gold for subtle use */
+
+  /* Semantic status */
+  --aol-danger:  239 68 68;   /* red-500 */
+  --aol-success: 34 197 94;   /* green-500 */
+  --aol-warning: 234 179 8;   /* yellow-500 */
+
+  /* Legacy / convenience */
+  --aol-dark:   #0b0b0b;
   --aol-darker: #060606;
-  --aol-ink: #f2f1ee;
-  --aol-ink-dim: rgba(242, 241, 238, 0.82);
-  --aol-ink-muted: rgba(242, 241, 238, 0.68);
-  --aol-gold: #b89b6e;
-  --aol-gold-strong: #f59e0b;
-  --aol-border: rgba(255, 255, 255, 0.12);
+  --aol-border: rgba(255, 255, 255, 0.10);
   --aol-surface: rgba(255, 255, 255, 0.04);
   --aol-surface-2: rgba(255, 255, 255, 0.06);
   --aol-watermark: "";
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+  /* These are picked up by Tailwind fontFamily config */
+  --font-serif: "Cormorant Garamond";
+  --font-mono:  "JetBrains Mono";
+  --font-sans:  "Inter";
+
+  /* Legacy font family vars used in older components */
+  --font-family-serif: "Cormorant Garamond", Georgia, serif;
+  --font-family-mono:  "JetBrains Mono", ui-monospace, monospace;
+  --font-family-sans:  Inter, ui-sans-serif, system-ui, sans-serif;
 }
+
+/* ============================================================================
+   BASE LAYER
+   ============================================================================ */
 
 @layer base {
   html {
     min-height: 100%;
     scroll-behavior: smooth;
-    background-color: var(--aol-dark);
-    color: var(--aol-ink);
+    /* Use the canonical base colour */
+    background-color: rgb(var(--aol-bg));
+    color: rgb(var(--aol-ink));
   }
 
   body {
     min-height: 100%;
     margin: 0;
-    background-color: var(--aol-dark);
-    color: var(--aol-ink);
-    font-family: var(--font-family-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+    background-color: rgb(var(--aol-bg));
+    color: rgb(var(--aol-ink));
+    /* Prefer CSS var; fall back through the stack */
+    font-family: var(--font-family-sans);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply antialiased;
   }
 
   #__next {
@@ -51,19 +95,12 @@
     border-color: var(--aol-border);
   }
 
-  img,
-  picture,
-  video,
-  canvas,
-  svg {
+  img, picture, video, canvas, svg {
     display: block;
     max-width: 100%;
   }
 
-  button,
-  input,
-  textarea,
-  select {
+  button, input, textarea, select {
     font: inherit;
   }
 
@@ -84,57 +121,105 @@
   }
 
   :focus-visible {
-    outline: 2px solid rgba(184, 155, 110, 0.45);
+    outline: 2px solid rgba(201, 169, 110, 0.40);
     outline-offset: 3px;
-    border-radius: 12px;
+    border-radius: 4px;
   }
 
   ::selection {
-    background: rgba(184, 155, 110, 0.30);
-    color: var(--aol-ink);
+    background: rgba(201, 169, 110, 0.28);
+    color: rgb(var(--aol-ink));
   }
 
-  h1,
+  /* Headings inherit the serif font stack */
+  h1, h2, h3, h4, h5, h6,
   .h1-premium {
-    font-family: var(--font-family-serif), "Cormorant Garamond", Georgia, serif;
-    color: var(--aol-ink);
+    font-family: var(--font-family-serif);
+    color: rgb(var(--aol-ink));
     line-height: 1.1;
-    letter-spacing: -0.03em;
-    @apply tracking-tight;
+    letter-spacing: -0.025em;
   }
 
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-family-serif), "Cormorant Garamond", Georgia, serif;
-    color: var(--aol-ink);
+  /* Smooth range inputs */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: rgb(var(--aol-gold));
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    transition: transform 150ms ease;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: rgb(var(--aol-gold));
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
   }
 }
 
+/* ============================================================================
+   COMPONENT LAYER
+   ============================================================================ */
+
 @layer components {
+
+  /* ── Grain textures ─────────────────────────────────────────────────────── */
+
+  /* Full-page grain overlay — added to _app or Layout as a fixed element */
   .aol-grain-overlay {
-    @apply fixed inset-0 pointer-events-none z-[100] mix-blend-overlay;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: overlay;
     opacity: 0.015;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 128px 128px;
   }
 
+  /* Inline grain — added directly to section divs */
   .aol-grain {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 128px 128px;
-    opacity: 0.012;
+    opacity: 0.030;
     mix-blend-mode: overlay;
     pointer-events: none;
   }
 
+  /* ── Navigation ─────────────────────────────────────────────────────────── */
+
   .nav-pill-premium {
-    @apply rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[9px] font-mono uppercase backdrop-blur-md;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    font-size: 9px;
+    font-family: var(--font-family-mono);
+    text-transform: uppercase;
+    backdrop-filter: blur(12px);
     letter-spacing: 0.34em;
-    color: var(--aol-ink-dim);
+    color: rgba(242, 241, 238, 0.82);
     transition:
       color 300ms ease,
       border-color 300ms ease,
@@ -143,59 +228,48 @@
   }
 
   .nav-pill-premium:hover {
-    color: var(--aol-gold);
-    border-color: rgba(184, 155, 110, 0.3);
+    color: rgb(var(--aol-gold));
+    border-color: rgba(201, 169, 110, 0.30);
     background: rgba(255, 255, 255, 0.07);
     transform: translateY(-1px);
   }
 
+  /* ── Cards ──────────────────────────────────────────────────────────────── */
+
   .architecture-card {
-    @apply rounded-3xl border border-white/10 backdrop-blur-sm;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(8px);
     background-image: linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.05) 0%,
       rgba(255, 255, 255, 0.01) 100%
     );
     box-shadow:
-      0 10px 30px -15px rgba(0, 0, 0, 0.7),
-      0 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
+      0 10px 30px -15px rgba(0, 0, 0, 0.70),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition:
+      border-color 300ms ease,
+      box-shadow 300ms ease;
   }
 
   .architecture-card:hover {
-    border-color: rgba(184, 155, 110, 0.22);
+    border-color: rgba(201, 169, 110, 0.22);
     box-shadow:
       0 18px 40px -18px rgba(0, 0, 0, 0.78),
-      0 1px 2px 0 rgba(255, 255, 255, 0.06) inset,
-      0 0 40px rgba(184, 155, 110, 0.08);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 40px rgba(201, 169, 110, 0.08);
   }
 
-  .hairline-premium {
-    height: 1px;
-    width: 100%;
-    background-image: linear-gradient(
-      to right,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent
-    );
-  }
-
-  .hairline-gold {
-    height: 1px;
-    width: 100%;
-    background-image: linear-gradient(
-      to right,
-      transparent,
-      rgba(184, 155, 110, 0.3),
-      transparent
-    );
-  }
-
+  /* Deep glass card used across diagnostic pages */
   .city-gate-card {
-    @apply rounded-[28px] border border-white/10 bg-black/40 backdrop-blur-md;
+    border-radius: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(0, 0, 0, 0.40);
+    backdrop-filter: blur(12px);
     box-shadow:
-      0 20px 40px -15px rgba(0, 0, 0, 0.8),
-      0 1px 1px 0 rgba(255, 255, 255, 0.04) inset;
+      0 20px 40px -15px rgba(0, 0, 0, 0.80),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     position: relative;
     overflow: hidden;
   }
@@ -207,10 +281,9 @@
     pointer-events: none;
     background: radial-gradient(
       circle at center,
-      rgba(184, 155, 110, 0.08) 0%,
-      transparent 72%
+      rgba(201, 169, 110, 0.07) 0%,
+      transparent 70%
     );
-    opacity: 0.9;
   }
 
   .city-gate-card::after {
@@ -219,21 +292,47 @@
     inset-inline: 0;
     top: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.11);
     pointer-events: none;
   }
+
+  /* ── Hairlines ──────────────────────────────────────────────────────────── */
+
+  .hairline-premium {
+    height: 1px;
+    width: 100%;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 255, 255, 0.10),
+      transparent
+    );
+  }
+
+  .hairline-gold {
+    height: 1px;
+    width: 100%;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      rgba(201, 169, 110, 0.30),
+      transparent
+    );
+  }
+
+  /* ── MDX content ────────────────────────────────────────────────────────── */
 
   .aol-mdx-content {
     position: relative;
     z-index: 10;
-    color: var(--aol-ink);
+    color: rgb(var(--aol-ink));
     font-size: 16px;
-    line-height: 1.8;
+    line-height: 1.80;
   }
 
   .aol-mdx-content p,
   .aol-mdx-content li {
-    color: var(--aol-ink-dim);
+    color: rgba(242, 241, 238, 0.82);
   }
 
   .aol-mdx-content h1,
@@ -242,10 +341,10 @@
   .aol-mdx-content h4,
   .aol-mdx-content h5,
   .aol-mdx-content h6 {
-    color: var(--aol-ink);
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-    font-family: var(--font-family-serif), serif;
+    color: rgb(var(--aol-ink));
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+    font-family: var(--font-family-serif);
   }
 
   .aol-mdx-content a {
@@ -257,7 +356,7 @@
 
   .aol-mdx-content a:hover {
     color: #f3d98c;
-    text-decoration-color: rgba(230, 199, 122, 0.7);
+    text-decoration-color: rgba(230, 199, 122, 0.70);
   }
 
   .aol-mdx-content code {
@@ -266,28 +365,34 @@
     padding: 0.15rem 0.35rem;
     border-radius: 0.4rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
+    font-family: var(--font-family-mono);
+    font-size: 0.875em;
   }
 
   .aol-mdx-content pre {
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.70);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0.9rem;
-    padding: 1rem;
+    padding: 1.25rem;
     overflow: auto;
+    font-family: var(--font-family-mono);
   }
 
   .aol-mdx-content blockquote {
-    border-left: 2px solid rgba(184, 155, 110, 0.35);
-    padding-left: 1rem;
-    color: var(--aol-ink-muted);
+    border-left: 2px solid rgba(201, 169, 110, 0.35);
+    padding-left: 1.25rem;
+    color: rgba(242, 241, 238, 0.68);
+    font-style: italic;
   }
 
+  /* ── Debug trace ────────────────────────────────────────────────────────── */
+
   .forensic-trace {
-    font-family: var(--font-family-mono), monospace;
+    font-family: var(--font-family-mono);
     font-size: 10px;
     letter-spacing: 0.05em;
-    color: var(--aol-ink-muted);
-    border: 1px dashed var(--aol-border);
+    color: rgba(242, 241, 238, 0.68);
+    border: 1px dashed rgba(255, 255, 255, 0.10);
     background: rgba(255, 255, 255, 0.02);
     padding: 1rem;
     margin-top: 2rem;
@@ -295,41 +400,44 @@
   }
 }
 
+/* ============================================================================
+   UTILITY LAYER
+   ============================================================================ */
+
 @layer utilities {
-  .no-underline,
-  .no-underline * {
-    text-decoration: none !important;
-  }
+  /* Text */
+  .text-premium-dim   { color: rgba(242, 241, 238, 0.82); }
+  .text-premium-muted { color: rgba(242, 241, 238, 0.68); }
 
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+  /* Surfaces */
+  .bg-premium-surface   { background: rgba(255, 255, 255, 0.04); }
+  .bg-premium-surface-2 { background: rgba(255, 255, 255, 0.06); }
+  .border-premium       { border-color: rgba(255, 255, 255, 0.10); }
 
+  /* Scrollbar suppression */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .text-premium-dim {
-    color: var(--aol-ink-dim);
-  }
+  /* Underline suppression */
+  .no-underline,
+  .no-underline * { text-decoration: none !important; }
 
-  .text-premium-muted {
-    color: var(--aol-ink-muted);
-  }
-
-  .bg-premium-surface {
-    background: var(--aol-surface);
-  }
-
-  .bg-premium-surface-2 {
-    background: var(--aol-surface-2);
-  }
-
-  .border-premium {
-    border-color: var(--aol-border);
-  }
+  /* ── Canonical background colours ────────────────────────────────────────
+     These utility classes let any component reach for the design system
+     background without knowing the raw hex value.
+  ─────────────────────────────────────────────────────────────────────── */
+  .bg-base   { background-color: rgb(var(--aol-bg)); }
+  .bg-void   { background-color: rgb(3 3 5); }        /* #030305 — deepest */
+  .bg-lifted { background-color: rgb(var(--aol-bg-2)); }
+  .bg-panel  { background-color: rgb(var(--aol-bg-3)); }
 }
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
 
 @media print {
   body {
@@ -337,9 +445,7 @@
     color: black !important;
   }
 
-  .print-hidden {
-    display: none !important;
-  }
+  .print-hidden { display: none !important; }
 
   a[href]::after {
     content: " (" attr(href) ")";
@@ -378,7 +484,7 @@
     left: 1cm;
     font-family: monospace;
     font-size: 6pt;
-    color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.20);
     z-index: 9999;
     opacity: 0.5;
     letter-spacing: 1px;

@@ -8,7 +8,7 @@ export default function CanonicalEssayLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="bg-black text-white min-h-screen">
+    <main className="bg-[#060609] text-white min-h-screen">
       <div className="max-w-3xl mx-auto px-6 py-20">
         <article className="prose prose-invert prose-lg max-w-none">
           {children}

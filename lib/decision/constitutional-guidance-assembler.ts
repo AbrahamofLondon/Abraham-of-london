@@ -1,5 +1,3 @@
-// lib/decision/constitutional-guidance-assembler.ts
-
 import { deriveConstitutionalAssessment } from "@/lib/decision/system-constitution";
 import { applyRecommendationGovernance } from "@/lib/decision/recommendation-governance";
 import type {
@@ -23,6 +21,9 @@ type AssetKind =
 export type ConstitutionalAssemblerInput = {
   intake?: Record<string, unknown>;
   constitution?: ExecutiveReportConstitution;
+  assetLimit?: number;
+  minAssetScore?: number;
+  source?: string;
   options?: {
     assetLimit?: number;
     minAssetScore?: number;
@@ -31,6 +32,9 @@ export type ConstitutionalAssemblerInput = {
     includeDiagnostics?: boolean;
   };
 };
+
+/** @deprecated Use ConstitutionalAssemblerOutput */
+export type UnifiedGuidancePayload = ConstitutionalAssemblerOutput;
 
 export type ConstitutionalAssemblerOutput = {
   ok: true;
@@ -43,6 +47,8 @@ export type ConstitutionalAssemblerOutput = {
     governanceSuppressedCount: number;
     adaptiveAssetsLoaded: number;
     contextualAssetsLoaded: number;
+    selectedKinds: string[];
+    diversitySatisfied: boolean;
   };
 };
 
@@ -202,42 +208,32 @@ async function loadAssetCatalog(): Promise<CatalogItem[]> {
   return items;
 }
 
-function buildConstitutionFromIntake(intake: Record<string, unknown>): ExecutiveReportConstitution {
+function buildConstitutionFromIntake(
+  intake: Record<string, unknown>,
+): ExecutiveReportConstitution {
   const derived = deriveConstitutionalAssessment(intake as any);
 
   return {
-    route: safeString(derived.route, "DIAGNOSTIC"),
-    priority: safeString(derived.priority, "MEDIUM"),
-    temperature: safeString(derived.temperature, "WARM"),
-    orgState: safeString(derived.orgState, "DRIFTING"),
-    readinessTier: safeString(derived.readinessTier, "EMERGING"),
-    authorityType: safeString(derived.authorityType, "UNCLEAR"),
-    revenueBand: safeString(derived.revenueBand, "SMB"),
-    marketRiskBand: safeString(derived.marketRiskBand, "MODERATE"),
+    route: safeString(derived.route, "DIAGNOSTIC") as import("@/lib/admin/reporting/types").ConstitutionalRoute,
+    priority: safeString(derived.priority, "MEDIUM") as import("@/lib/admin/reporting/types").ExecutiveReportPriority,
+    temperature: safeString(derived.temperature, "WARM") as import("@/lib/admin/reporting/types").ExecutiveReportTemperature,
+    orgState: safeString(derived.orgState, "DRIFTING") as import("@/lib/admin/reporting/types").ExecutiveReportState,
+    readinessTier: safeString(derived.readinessTier, "EMERGING") as import("@/lib/admin/reporting/types").ExecutiveReportReadinessTier,
+    authorityType: safeString(derived.authorityType, "UNCLEAR") as import("@/lib/admin/reporting/types").ExecutiveReportAuthorityType,
+    revenueBand: safeString(derived.revenueBand, "SMB") as import("@/lib/admin/reporting/types").ExecutiveReportRevenueBand,
+    marketRiskBand: safeString(derived.marketRiskBand, "MODERATE") as import("@/lib/admin/reporting/types").ExecutiveReportMarketRiskBand,
     clarityScore: safeNumber(derived.clarityScore, 50),
     authorityScore: safeNumber(derived.authorityScore, 50),
     governanceScore: safeNumber(derived.governanceScore, 50),
     severityScore: safeNumber(derived.severityScore, 50),
     revenueScore: safeNumber(derived.revenueScore, 50),
-    dominantDomains: Array.isArray(derived.dominantDomains)
-      ? uniqueStrings(derived.dominantDomains)
-      : [],
-    failureModes: Array.isArray(derived.failureModes)
-      ? uniqueStrings(derived.failureModes)
-      : [],
-    requiredInterventions: Array.isArray(derived.requiredInterventions)
-      ? uniqueStrings(derived.requiredInterventions)
-      : [],
-    sponsorTypes: Array.isArray(derived.sponsorTypes)
-      ? uniqueStrings(derived.sponsorTypes)
-      : [],
-    worldviewAnchors: Array.isArray(derived.worldviewAnchors)
-      ? uniqueStrings(derived.worldviewAnchors)
-      : [],
+    dominantDomains: uniqueStrings(derived.dominantDomains || []),
+    failureModes: uniqueStrings(derived.failureModes || []),
+    requiredInterventions: uniqueStrings(derived.requiredInterventions || []),
+    sponsorTypes: uniqueStrings(derived.sponsorTypes || []),
+    worldviewAnchors: uniqueStrings(derived.worldviewAnchors || []),
     narrativeSummary: safeString(derived.narrativeSummary, ""),
-    rationale: Array.isArray(derived.rationale)
-      ? uniqueStrings(derived.rationale)
-      : [],
+    rationale: uniqueStrings(derived.rationale || []),
   };
 }
 
@@ -259,7 +255,10 @@ function keywordBag(constitution: ExecutiveReportConstitution): string[] {
   ]);
 }
 
-function scoreAsset(asset: CatalogItem, constitution: ExecutiveReportConstitution): MatchedAsset {
+function scoreAsset(
+  asset: CatalogItem,
+  constitution: ExecutiveReportConstitution,
+): MatchedAsset {
   const haystack = normalizeText(
     [
       asset.title,
@@ -267,7 +266,7 @@ function scoreAsset(asset: CatalogItem, constitution: ExecutiveReportConstitutio
       asset.category,
       ...(asset.tags || []),
       asset.body || "",
-    ].join(" ")
+    ].join(" "),
   );
 
   const reasons: string[] = [];
@@ -287,22 +286,22 @@ function scoreAsset(asset: CatalogItem, constitution: ExecutiveReportConstitutio
 
   if (constitution.route === "STRATEGY") {
     if (asset.kind === "strategy" || asset.kind === "playbook") {
-      score += 14;
+      score += 16;
       reasons.push("Preferred for strategy route");
     }
-    if (asset.kind === "download" || asset.kind === "brief") {
+    if (asset.kind === "brief" || asset.kind === "intelligence") {
       score += 6;
-      reasons.push("Useful support asset for strategy route");
+      reasons.push("Supports strategy escalation");
     }
   }
 
   if (constitution.route === "DIAGNOSTIC") {
     if (asset.kind === "playbook" || asset.kind === "download") {
-      score += 14;
+      score += 16;
       reasons.push("Preferred for diagnostic route");
     }
     if (asset.kind === "brief" || asset.kind === "intelligence") {
-      score += 7;
+      score += 8;
       reasons.push("Supports diagnostic clarification");
     }
   }
@@ -313,14 +312,14 @@ function scoreAsset(asset: CatalogItem, constitution: ExecutiveReportConstitutio
       reasons.push("Corrective asset suitable before escalation");
     }
     if (asset.kind === "strategy") {
-      score -= 18;
+      score -= 20;
       reasons.push("Strategy asset penalized for reject route");
     }
   }
 
   if (constitution.readinessTier === "FRAGILE") {
     if (asset.kind === "download" || asset.kind === "playbook") {
-      score += 8;
+      score += 10;
       reasons.push("Stabilization asset for fragile readiness");
     }
   }
@@ -382,16 +381,32 @@ function scoreAsset(asset: CatalogItem, constitution: ExecutiveReportConstitutio
   };
 }
 
+function dedupeRecommendations(
+  recommendations: ExecutiveReportRecommendation[],
+): ExecutiveReportRecommendation[] {
+  const seen = new Set<string>();
+  const out: ExecutiveReportRecommendation[] = [];
+
+  for (const item of recommendations) {
+    const key = `${item.id}::${item.title}::${item.kind}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+
+  return out;
+}
+
 function summarizeGuidance(
   constitution: ExecutiveReportConstitution,
-  recommendations: ExecutiveReportRecommendation[]
+  recommendations: ExecutiveReportRecommendation[],
 ): ExecutiveReportGuidance {
   const nextAction =
     constitution.route === "STRATEGY"
       ? "Proceed to controlled strategy engagement with governance discipline and explicit decision ownership."
       : constitution.route === "DIAGNOSTIC"
-      ? "Begin diagnostic correction before escalation, using the highest-fit assets first."
-      : "Do not escalate. Stabilize readiness, authority clarity and structural weakness before any strategy access.";
+        ? "Begin diagnostic correction before escalation, using the highest-fit assets first."
+        : "Do not escalate. Stabilize readiness, authority clarity and structural weakness before any strategy access.";
 
   const summary =
     constitution.narrativeSummary ||
@@ -399,70 +414,71 @@ function summarizeGuidance(
 
   return {
     summary,
-    rationale: constitution.rationale,
+    rationale: uniqueStrings(constitution.rationale || []),
     nextAction,
-    recommendations,
+    recommendations: dedupeRecommendations(recommendations),
   };
 }
 
 export async function assembleConstitutionalGuidance(
-  input: ConstitutionalAssemblerInput
+  input: ConstitutionalAssemblerInput,
 ): Promise<ConstitutionalAssemblerOutput> {
-  const constitution = input.constitution || buildConstitutionFromIntake(input.intake || {});
-  const options = {
-    assetLimit: input.options?.assetLimit ?? 6,
-    minAssetScore: input.options?.minAssetScore ?? 12,
-    maxPerKind: input.options?.maxPerKind ?? 2,
-    minDiversityKinds: input.options?.minDiversityKinds ?? 2,
-    includeDiagnostics: input.options?.includeDiagnostics ?? false,
-  };
+  const constitution =
+    input.constitution || buildConstitutionFromIntake(input.intake || {});
+
+  const assetLimit =
+    input.options?.assetLimit ?? input.assetLimit ?? 6;
+
+  const minAssetScore =
+    input.options?.minAssetScore ?? input.minAssetScore ?? 12;
+
+  const maxPerKind = input.options?.maxPerKind ?? 2;
+  const minDiversityKinds = input.options?.minDiversityKinds ?? 2;
 
   const assetCatalog = await loadAssetCatalog();
-  const scoredAssets: MatchedAsset[] = [];
 
-  for (const asset of assetCatalog) {
-    const scored = scoreAsset(asset, constitution);
-    if (scored.matchScore >= options.minAssetScore) {
-      scoredAssets.push(scored);
-    }
-  }
+  const scoredAssets = assetCatalog
+    .map((asset) => scoreAsset(asset, constitution))
+    .filter((asset) => asset.matchScore >= minAssetScore)
+    .sort((a, b) => b.matchScore - a.matchScore);
 
-  scoredAssets.sort((a, b) => b.matchScore - a.matchScore);
-
-  const selectedAssets: MatchedAsset[] = [];
-  const kindCount = new Map<string, number>();
-
-  for (const asset of scoredAssets) {
-    if (selectedAssets.length >= options.assetLimit) break;
-
-    const currentKindCount = kindCount.get(asset.kind) || 0;
-    if (currentKindCount >= options.maxPerKind) continue;
-
-    selectedAssets.push(asset);
-    kindCount.set(asset.kind, currentKindCount + 1);
-  }
-
-  const uniqueKinds = new Set(selectedAssets.map((a) => a.kind)).size;
-  const diversityMet = uniqueKinds >= options.minDiversityKinds;
-
-  const governanceResult = await applyRecommendationGovernance({
-    recommendations: selectedAssets.map((asset) => ({
+  const preliminaryRecommendations: ExecutiveReportRecommendation[] =
+    scoredAssets.map((asset) => ({
       id: asset.id,
       title: asset.title,
       href: asset.href,
       kind: asset.kind,
       score: asset.matchScore,
-      summary: asset.description || "",
-      reasons: asset.matchReasons,
-    })),
-    constitution,
-  });
+      summary: safeString(asset.description, "Governed recommendation."),
+      reasons: uniqueStrings(asset.matchReasons),
+    }));
 
-  const finalRecommendations = diversityMet
-    ? governanceResult.filtered
-    : governanceResult.filtered.slice(0, Math.max(2, options.assetLimit - 2));
+  const governanceResult = applyRecommendationGovernance(
+    scoredAssets,
+    constitution as any,
+  );
 
-  const guidance = summarizeGuidance(constitution, finalRecommendations);
+  const kindCounts = new Map<string, number>();
+  const selected: ExecutiveReportRecommendation[] = [];
+
+  for (const item of governanceResult.governed) {
+    if (selected.length >= assetLimit) break;
+
+    const currentKindCount = kindCounts.get(item.kind) || 0;
+    if (currentKindCount >= maxPerKind) continue;
+
+    selected.push(item as any);
+    kindCounts.set(item.kind, currentKindCount + 1);
+  }
+
+  const selectedKinds = [...new Set(selected.map((item) => item.kind))];
+  const diversitySatisfied = selectedKinds.length >= minDiversityKinds;
+
+  const finalRecommendations = diversitySatisfied
+    ? selected
+    : (governanceResult.governed.slice(0, Math.max(2, assetLimit)) as any[]);
+
+  const guidance = summarizeGuidance(constitution, finalRecommendations as any);
 
   return {
     ok: true,
@@ -471,10 +487,12 @@ export async function assembleConstitutionalGuidance(
     diagnostics: {
       assetPoolSize: assetCatalog.length,
       matchedAssetCount: scoredAssets.length,
-      governanceRuleCount: governanceResult.appliedRules,
-      governanceSuppressedCount: governanceResult.suppressedCount,
-      adaptiveAssetsLoaded: selectedAssets.length,
+      governanceRuleCount: governanceResult.decisions.length,
+      governanceSuppressedCount: governanceResult.suppressed.length,
+      adaptiveAssetsLoaded: scoredAssets.length,
       contextualAssetsLoaded: finalRecommendations.length,
+      selectedKinds,
+      diversitySatisfied,
     },
   };
 }

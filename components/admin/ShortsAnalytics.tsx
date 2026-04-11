@@ -26,7 +26,7 @@ export default function ShortsAnalytics({ data }: AnalyticsProps) {
   const maxLikes = Math.max(...data.map(d => d.likes), 1);
 
   return (
-    <div className="space-y-8 p-8 bg-black text-cream min-h-screen">
+    <div className="space-y-8 p-8 bg-[#060609] text-cream min-h-screen">
       <header className="flex justify-between items-end border-b border-white/10 pb-8">
         <div>
           <h2 className="font-serif text-3xl font-bold text-white">Engagement Pulse</h2>

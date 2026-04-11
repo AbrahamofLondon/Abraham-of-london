@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { buildExecutiveReportFromCampaign } from "@/lib/admin/reporting/executive-report-service";
-import { buildExecutiveReportRecommendations } from "@/lib/decision/report-recommendations-builder";
+import { buildExecutiveReportRecommendationsFromReport } from "@/lib/admin/reporting/executive-report-recommendations";
 
 type RouteContext = {
   params: Promise<{
@@ -66,17 +66,16 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   // Build decision layer recommendations from the report
-  const decisionLayer = await buildExecutiveReportRecommendations({
+  const decisionLayer = await buildExecutiveReportRecommendationsFromReport({
     report: result.payload.report,
-    organisationName: result.payload.organisationName,
-    participantCount: result.payload.completedParticipantCount || result.payload.participantCount,
-    campaignTitle: result.payload.campaignTitle,
+    organisationName: result.payload.context.organisationName,
+    participantCount: result.payload.context.completedParticipantCount,
   });
 
   return NextResponse.json({
     ok: true,
     payload: result.payload,
-    audit: result.audit ?? null,
-    decisionLayer, // ✅ Added decision intelligence layer
+    audit: null,
+    decisionLayer,
   });
 }

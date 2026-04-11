@@ -1,932 +1,577 @@
-'use client';
+"use client";
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { 
-  Zap, MessageSquare, ArrowUpRight, Copy, Check, AlertTriangle, Scale, 
-  Shield, Target, Compass, Brain, Gavel, Globe, Heart, Users, Lock,
-  ShieldCheck, FileText, Clock, Key, Fingerprint, Eye, FileSignature,
-  TrendingUp, AlertOctagon, CheckCircle, XCircle, Loader2, Activity
-} from 'lucide-react';
-import { DomainDiagnostic } from '@/lib/alignment/domain-diagnostic';
-import { toast } from 'sonner';
-
-// ─── Constitutional Types ─────────────────────────────────────────────────────
-
+import * as React from "react";
 import {
-  evaluateConstitutionalRoute,
-  type ConstitutionalRoute,
-  type AuthorityType,
-  type ReadinessTier,
-  type OrgPosture,
-  type ConstitutionalDecision,
-} from '@/lib/constitution/rules';
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Compass,
+  Copy,
+  Eye,
+  FileSignature,
+  Gauge,
+  Gavel,
+  Heart,
+  Loader2,
+  Lock,
+  ShieldCheck,
+  Target,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
-import {
-  validateAuthority,
-  validateThreshold,
-  type ConstitutionalAuthority,
-  type AuthorityLevel,
-  type AuditEntry,
-} from '@/lib/constitution/constitutional-authority';
+export type ConstitutionalRoute = "REJECT" | "DIAGNOSTIC" | "STRATEGY";
+export type AuthorityType = "DIRECT" | "PROXY" | "UNCLEAR";
+export type ReadinessTier =
+  | "FRAGILE"
+  | "EMERGING"
+  | "STABILIZING"
+  | "EXECUTION_READY"
+  | "SOVEREIGN";
+export type AuthorityLevel =
+  | "OBSERVER"
+  | "PARTICIPANT"
+  | "DELEGATE"
+  | "AUTHORITY"
+  | "SOVEREIGN";
 
-import { SovereignDataEncryption, type SovereignDataContainer } from '@/lib/constitution/sovereign-data';
+export type ConstitutionalDecisionLite = {
+  route: ConstitutionalRoute;
+  confidence: number;
+  disqualifiersTriggered?: string[];
+  recommendedInterventions?: string[];
+};
 
-// ─── Alignment Types ─────────────────────────────────────────────────────────
+export type ConstitutionalAuthorityLite = {
+  userId: string;
+  authorityLevel: AuthorityLevel;
+  scope: string[];
+};
 
-import {
-  ALIGNMENT_DOMAIN_LABELS,
-  ALIGNMENT_DOMAIN_ORDER,
-  type AlignmentDomain,
-  PURPOSE_ALIGNMENT_QUESTIONS,
-} from '@/lib/alignment/checklist';
+export type DomainDiagnosticLite = {
+  domain: string;
+  score: number;
+  effortIndex: number;
+  trajectory: "IMPROVING" | "STABLE" | "DECAYING";
+  interventionScript: string;
+};
 
-// ─── Extended Types ─────────────────────────────────────────────────────────
-
-export interface EnhancedDomainDiagnostic extends DomainDiagnostic {
+export type EnhancedInterventionDiagnostic = DomainDiagnosticLite & {
   constitutionalImpact: {
     routeImpact: number;
-    disqualifierRelevance: string[];
-    recommendedInterventionPriority: 'immediate' | 'short-term' | 'medium-term' | 'strategic';
     constitutionalRouteAlignment: ConstitutionalRoute;
     authorityTypeRequired: AuthorityType;
     readinessTierRequired: ReadinessTier;
     authorityLevelRequired: AuthorityLevel;
+    recommendedInterventionPriority:
+      | "immediate"
+      | "short-term"
+      | "medium-term"
+      | "strategic";
+    disqualifierRelevance: string[];
   };
-  questionsCompleted: number;
-  questionsTotal: number;
-  weakestQuestions: string[];
-  strongestQuestions: string[];
-  questionIds: string[];
   domainSpecificGuidance: string;
-  precedentCases: string[];
   estimatedTimeline: string;
-  resourceRequirements: {
-    effort: 'low' | 'medium' | 'high' | 'critical';
-    expertise: string[];
-    externalSupport: boolean;
-    authorityRequired: AuthorityLevel;
-  };
-  auditTrail?: AuditEntry[];
-  sovereignDataHash?: string;
-  signatureRequired: boolean;
-  quorumRequired: number;
   recommendedAction: string;
-}
+  signatureRequired: boolean;
+};
 
-interface InterventionCopilotProps {
-  diagnostics: DomainDiagnostic[];
-  constitutionalDecision?: ConstitutionalDecision;
-  constitutionalAuthority?: ConstitutionalAuthority;
-  completedQuestions?: Record<AlignmentDomain, number>;
-  totalQuestionsPerDomain?: Record<AlignmentDomain, number>;
+export type InterventionCopilotProps = {
+  diagnostics: EnhancedInterventionDiagnostic[];
   campaignId: string;
-  organisationType?: 'corporation' | 'foundation' | 'sovereign' | 'partnership';
-  governanceModel?: AuthorityType;
+  constitutionalDecision?: ConstitutionalDecisionLite | null;
+  constitutionalAuthority?: ConstitutionalAuthorityLite | null;
   participantCount?: number;
   threshold?: number;
   onCopyScript?: (domain: string, script: string) => void;
   onRequestDetail?: (domain: string) => void;
-  onCreateIntervention?: (domain: string, intervention: string, signature?: string) => Promise<void>;
-  onVerifyAuthority?: () => Promise<boolean>;
-  onAuditAction?: (action: string, domain: string) => Promise<void>;
-}
-
-// ─── Domain Icons & Guidance ─────────────────────────────────────────────────
-
-const DOMAIN_ICONS: Record<AlignmentDomain, React.ElementType> = {
-  mandate: Shield,
-  decision: Gavel,
-  environment: Globe,
-  behaviour: Users,
-  'emotional-order': Heart,
-  legacy: Compass,
-} as const;
-
-const DOMAIN_GUIDANCE: Record<AlignmentDomain, string> = {
-  mandate: "Focus on clarifying the core purpose and decision authority. Ensure the mandate is explicit, documented, and understood across the organisation.",
-  decision: "Establish clear decision-making protocols. Identify who has authority for which decisions and ensure accountability mechanisms are in place.",
-  environment: "Map the operational context and market dynamics. Understand external pressures and align internal capabilities with external demands.",
-  behaviour: "Observe and document behavioural patterns. Identify misalignments between stated values and actual practices.",
-  'emotional-order': "Assess psychological safety and emotional resilience. Address underlying tensions before they become systemic issues.",
-  legacy: "Evaluate historical patterns and institutional memory. Ensure past lessons inform current strategy without constraining necessary evolution.",
+  onCreateIntervention?: (
+    domain: string,
+    intervention: string,
+    meta: {
+      campaignId: string;
+      requiresSignature: boolean;
+      authorityRequired: AuthorityLevel;
+    },
+  ) => Promise<void> | void;
 };
-
-const PRECEDENT_CASES: Record<AlignmentDomain, string[]> = {
-  mandate: [
-    "Fortune 500: Clarified mandate → 40% reduction in strategic drift",
-    "Public Sector: Documented authority → 65% faster decision cycles",
-  ],
-  decision: [
-    "Tech Scale-up: Proxy authority model → 3x execution speed",
-    "Financial Services: Direct authority → 90% compliance rate",
-  ],
-  environment: [
-    "Manufacturing: Market mapping → 30% better risk anticipation",
-    "Retail: Competitive analysis → 25% market share gain",
-  ],
-  behaviour: [
-    "Healthcare: Pattern documentation → 50% reduction in conflicts",
-    "Professional Services: Value alignment → 35% retention increase",
-  ],
-  'emotional-order': [
-    "Creative Agency: Safety protocols → 80% lower turnover",
-    "Non-profit: Resilience program → 45% burnout reduction",
-  ],
-  legacy: [
-    "Family Office: Memory architecture → preserved while evolving",
-    "Institution: Pattern recognition → avoided repeat failures",
-  ],
-};
-
-// ─── UI Helpers ───────────────────────────────────────────────────────────
 
 function cn(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ');
+  return parts.filter(Boolean).join(" ");
 }
 
-function CopyButton({ text, onCopy }: { text: string; onCopy?: (text: string) => void }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      onCopy?.(text);
-      setTimeout(() => setCopied(false), 2000);
-      toast.success('Intervention script copied to clipboard');
-    } catch (err) {
-      console.error('Failed to copy:', err);
-      toast.error('Failed to copy script');
-    }
-  }, [text, onCopy]);
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="flex-1 border border-white/10 bg-white/5 text-white/60 text-[7px] font-mono uppercase tracking-wider py-2 flex items-center justify-center gap-1.5 hover:bg-white/10 hover:text-white/80 transition-all"
-    >
-      {copied ? (
-        <>
-          <Check className="w-2.5 h-2.5" /> Copied
-        </>
-      ) : (
-        <>
-          <Copy className="w-2.5 h-2.5" /> Copy Script
-        </>
-      )}
-    </button>
-  );
-}
-
-function getPriorityColor(priority: EnhancedDomainDiagnostic['constitutionalImpact']['recommendedInterventionPriority']) {
+function priorityTone(
+  priority: EnhancedInterventionDiagnostic["constitutionalImpact"]["recommendedInterventionPriority"],
+) {
   switch (priority) {
-    case 'immediate':
-      return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20', icon: AlertOctagon };
-    case 'short-term':
-      return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: Zap };
-    case 'medium-term':
-      return { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', icon: Target };
-    case 'strategic':
-      return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', icon: TrendingUp };
+    case "immediate":
+      return {
+        badge: "border-red-400/20 bg-red-500/10 text-red-300",
+        rail: "from-red-500 to-red-600",
+        label: "Immediate",
+      };
+    case "short-term":
+      return {
+        badge: "border-amber-400/20 bg-amber-500/10 text-amber-300",
+        rail: "from-amber-500 to-amber-600",
+        label: "Short-Term",
+      };
+    case "medium-term":
+      return {
+        badge: "border-blue-400/20 bg-blue-500/10 text-blue-300",
+        rail: "from-blue-500 to-blue-600",
+        label: "Medium-Term",
+      };
+    case "strategic":
     default:
-      return { bg: 'bg-white/5', text: 'text-white/40', border: 'border-white/10', icon: Shield };
+      return {
+        badge: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
+        rail: "from-emerald-500 to-emerald-600",
+        label: "Strategic",
+      };
   }
 }
 
-function getAuthorityLevelRequired(score: number, completionRate: number): AuthorityLevel {
-  if (score < 30 || completionRate < 40) return 'SOVEREIGN';
-  if (score < 50 || completionRate < 60) return 'AUTHORITY';
-  if (score < 70) return 'DELEGATE';
-  if (score < 85) return 'PARTICIPANT';
-  return 'OBSERVER';
+function getDomainIcon(domain: string) {
+  const key = domain.toLowerCase();
+
+  if (key.includes("mandate")) return ShieldCheck;
+  if (key.includes("decision")) return Gavel;
+  if (key.includes("environment")) return Compass;
+  if (key.includes("behaviour") || key.includes("behavior")) return Users;
+  if (key.includes("emotion")) return Heart;
+  if (key.includes("legacy")) return Target;
+  return Gauge;
 }
 
-function getAuthorityTypeRequired(score: number, completionRate: number): AuthorityType {
-  if (score < 40 || completionRate < 60) return 'DIRECT';
-  if (score < 70) return 'PROXY';
-  return 'UNCLEAR';
+function canAct(
+  current: AuthorityLevel | undefined,
+  required: AuthorityLevel,
+): boolean {
+  const levels: Record<AuthorityLevel, number> = {
+    OBSERVER: 0,
+    PARTICIPANT: 1,
+    DELEGATE: 2,
+    AUTHORITY: 3,
+    SOVEREIGN: 4,
+  };
+
+  return levels[current || "OBSERVER"] >= levels[required];
 }
 
-function getReadinessTierRequired(score: number, trajectory: string): ReadinessTier {
-  if (score < 30 || trajectory === 'DECAYING') return 'FRAGILE';
-  if (score < 50) return 'EMERGING';
-  if (score < 70) return 'STABILIZING';
-  if (score < 85) return 'EXECUTION_READY';
-  return 'SOVEREIGN';
+function thresholdValid(participantCount: number, threshold: number) {
+  return participantCount >= threshold;
 }
 
-async function generateConstitutionalSignature(
-  campaignId: string,
-  domain: string,
-  authority?: ConstitutionalAuthority,
-): Promise<string> {
-  const timestamp = Date.now();
-  const payload = `${campaignId}:${domain}:${timestamp}:${authority?.userId || 'unknown'}`;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(payload);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hash));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return `${authority?.userId || 'system'}:${hashHex.slice(0, 16)}:${timestamp}`;
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-export function InterventionCopilot({ 
-  diagnostics, 
+export default function InterventionCopilot({
+  diagnostics,
+  campaignId,
   constitutionalDecision,
   constitutionalAuthority,
-  completedQuestions = {},
-  totalQuestionsPerDomain = {},
-  campaignId,
-  organisationType = 'corporation',
-  governanceModel = 'UNCLEAR',
   participantCount = 0,
   threshold = 5,
   onCopyScript,
   onRequestDetail,
   onCreateIntervention,
-  onVerifyAuthority,
-  onAuditAction,
 }: InterventionCopilotProps) {
-  const [signing, setSigning] = useState<Record<string, boolean>>({});
-  const [thresholdValid, setThresholdValid] = useState<{ valid: boolean; reason?: string }>({ valid: true });
+  const [workingDomain, setWorkingDomain] = React.useState<string | null>(null);
 
-  // Validate threshold on mount
-  useEffect(() => {
-    const validation = validateThreshold(participantCount, threshold);
-    setThresholdValid(validation);
-    
-    if (!validation.valid) {
-      toast.warning(validation.reason || 'Threshold not met', {
-        duration: 5000,
-        description: 'Constitutional authority may be limited until threshold is met.',
-      });
+  const validThreshold = thresholdValid(participantCount, threshold);
+
+  const sorted = React.useMemo(() => {
+    const order = {
+      immediate: 0,
+      "short-term": 1,
+      "medium-term": 2,
+      strategic: 3,
+    } as const;
+
+    return [...diagnostics].sort((a, b) => {
+      const p =
+        order[a.constitutionalImpact.recommendedInterventionPriority] -
+        order[b.constitutionalImpact.recommendedInterventionPriority];
+      if (p !== 0) return p;
+      return b.constitutionalImpact.routeImpact - a.constitutionalImpact.routeImpact;
+    });
+  }, [diagnostics]);
+
+  const summary = React.useMemo(() => {
+    return {
+      immediate: diagnostics.filter(
+        (d) => d.constitutionalImpact.recommendedInterventionPriority === "immediate",
+      ).length,
+      shortTerm: diagnostics.filter(
+        (d) => d.constitutionalImpact.recommendedInterventionPriority === "short-term",
+      ).length,
+      strategic: diagnostics.filter(
+        (d) => d.constitutionalImpact.recommendedInterventionPriority === "strategic",
+      ).length,
+    };
+  }, [diagnostics]);
+
+  const handleCopy = async (domain: string, script: string) => {
+    try {
+      await navigator.clipboard.writeText(script);
+      onCopyScript?.(domain, script);
+    } catch {
+      // no-op
     }
-  }, [participantCount, threshold]);
+  };
 
-  // Validate inputs
-  if (!diagnostics || diagnostics.length === 0) {
+  const handleCreate = async (item: EnhancedInterventionDiagnostic) => {
+    if (!onCreateIntervention) return;
+    if (workingDomain) return;
+
+    const allowed = canAct(
+      constitutionalAuthority?.authorityLevel,
+      item.constitutionalImpact.authorityLevelRequired,
+    );
+
+    if (!allowed) return;
+    if (item.signatureRequired && !validThreshold) return;
+
+    setWorkingDomain(item.domain);
+
+    try {
+      await onCreateIntervention(item.domain, item.interventionScript, {
+        campaignId,
+        requiresSignature: item.signatureRequired,
+        authorityRequired: item.constitutionalImpact.authorityLevelRequired,
+      });
+    } finally {
+      setWorkingDomain(null);
+    }
+  };
+
+  if (!diagnostics?.length) {
     return (
-      <div className="space-y-5">
-        <div className="flex justify-between items-end">
-          <div>
-            <h3 className="text-base font-light tracking-tight text-white">Intervention Strategy</h3>
-            <p className="text-[7px] font-mono text-white/30 uppercase tracking-wider mt-1">
-              Constitutional Prescriptive Actions
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {!thresholdValid.valid && (
-              <div className="flex items-center gap-1.5 text-red-400">
-                <AlertTriangle className="w-2.5 h-2.5" />
-                <span className="text-[6px] font-mono">THRESHOLD NOT MET</span>
-              </div>
-            )}
-            <span className="text-[6px] font-mono border border-white/10 bg-white/5 text-white/40 px-2 py-1 uppercase tracking-wider">
-              Constitutional AI
-            </span>
-          </div>
+      <section className="rounded-[28px] border border-white/10 bg-[#090B0F] p-8 text-white">
+        <div className="text-center">
+          <AlertTriangle className="mx-auto h-8 w-8 text-amber-400/70" />
+          <h3 className="mt-4 text-xl font-medium text-white/90">
+            No intervention intelligence available
+          </h3>
+          <p className="mt-3 text-sm text-white/52">
+            Complete the diagnostic stages first so the system has enough signal to
+            produce intervention-grade outputs.
+          </p>
         </div>
-        <div className="border border-amber-500/20 bg-amber-500/10 rounded-lg p-6 text-center">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-3" />
-          <p className="text-xs text-amber-400">No diagnostic data available</p>
-          <p className="text-[10px] text-amber-400/70 mt-1">Complete the alignment assessment to generate interventions</p>
-        </div>
-      </div>
+      </section>
     );
   }
 
-  // Enhance diagnostics with constitutional context
-  const enhancedDiagnostics = useMemo((): EnhancedDomainDiagnostic[] => {
-    return diagnostics.map((diag) => {
-      const domain = diag.domain as AlignmentDomain;
-      const questionsCompleted = completedQuestions[domain] || 0;
-      const questionsTotal = totalQuestionsPerDomain[domain] || 3;
-      const completionRate = questionsTotal > 0 ? (questionsCompleted / questionsTotal) * 100 : 0;
-
-      const domainQuestions = PURPOSE_ALIGNMENT_QUESTIONS.filter(q => q.domain === domain);
-      const questionIds = domainQuestions.map(q => q.id);
-      
-      // Determine constitutional impact based on domain score and completion
-      let routeImpact = 0;
-      const disqualifierRelevance: string[] = [];
-      let recommendedInterventionPriority: EnhancedDomainDiagnostic['constitutionalImpact']['recommendedInterventionPriority'] = 'medium-term';
-      let constitutionalRouteAlignment: ConstitutionalRoute = 'DIAGNOSTIC';
-      let signatureRequired = false;
-      let quorumRequired = 0;
-      let recommendedAction = '';
-
-      // Score-based impact (0-100 scale)
-      if (diag.score < 30) {
-        routeImpact = 85;
-        recommendedInterventionPriority = 'immediate';
-        constitutionalRouteAlignment = 'REJECT';
-        signatureRequired = true;
-        quorumRequired = Math.ceil(participantCount * 0.5);
-        disqualifierRelevance.push('Critical resonance deficiency');
-        disqualifierRelevance.push('Constitutional threshold violation');
-        recommendedAction = 'IMMEDIATE INTERVENTION REQUIRED';
-      } else if (diag.score < 50) {
-        routeImpact = 65;
-        recommendedInterventionPriority = 'short-term';
-        constitutionalRouteAlignment = 'DIAGNOSTIC';
-        signatureRequired = true;
-        quorumRequired = Math.ceil(participantCount * 0.3);
-        disqualifierRelevance.push('Significant misalignment detected');
-        disqualifierRelevance.push('Diagnostic intervention required');
-        recommendedAction = 'DIAGNOSTIC INTERVENTION';
-      } else if (diag.score < 70) {
-        routeImpact = 40;
-        recommendedInterventionPriority = 'medium-term';
-        constitutionalRouteAlignment = 'DIAGNOSTIC';
-        signatureRequired = false;
-        disqualifierRelevance.push('Moderate drift observed');
-        recommendedAction = 'CORRECTIVE ACTION';
-      } else {
-        routeImpact = 15;
-        constitutionalRouteAlignment = 'STRATEGY';
-        recommendedInterventionPriority = diag.trajectory === 'IMPROVING' ? 'strategic' : 'medium-term';
-        signatureRequired = false;
-        disqualifierRelevance.push('Within strategic tolerance');
-        recommendedAction = 'STRATEGIC ALIGNMENT';
-      }
-
-      // Adjust for completion rate
-      if (completionRate < 50) {
-        routeImpact += 20;
-        disqualifierRelevance.push(`Incomplete domain data (${questionsCompleted}/${questionsTotal})`);
-        if (recommendedInterventionPriority !== 'immediate') {
-          recommendedInterventionPriority = 'short-term';
-        }
-      }
-
-      // Adjust for trajectory
-      if (diag.trajectory === 'DECAYING') {
-        routeImpact += 15;
-        disqualifierRelevance.push('Negative trajectory detected');
-        disqualifierRelevance.push('Immediate intervention required');
-        if (recommendedInterventionPriority !== 'immediate') {
-          recommendedInterventionPriority = 'short-term';
-        }
-      }
-
-      // Determine authority level required
-      const authorityLevelRequired = getAuthorityLevelRequired(diag.score, completionRate);
-      const authorityTypeRequired = getAuthorityTypeRequired(diag.score, completionRate);
-      const readinessTierRequired = getReadinessTierRequired(diag.score, diag.trajectory);
-
-      // Find weakest and strongest questions
-      const weakestQuestions: string[] = [];
-      const strongestQuestions: string[] = [];
-
-      if (diag.questions) {
-        const sortedQuestions = [...diag.questions].sort((a, b) => (a.answered ? 0 : 1) - (b.answered ? 0 : 1));
-        weakestQuestions.push(...sortedQuestions.filter(q => !q.answered).slice(0, 2).map(q => q.text.substring(0, 60)));
-        strongestQuestions.push(...sortedQuestions.filter(q => q.answered).slice(0, 2).map(q => q.text.substring(0, 60)));
-      }
-
-      // Determine estimated timeline based on priority
-      let estimatedTimeline = '';
-      let resourceRequirements: EnhancedDomainDiagnostic['resourceRequirements'] = {
-        effort: 'medium',
-        expertise: [],
-        externalSupport: false,
-        authorityRequired: authorityLevelRequired,
-      };
-
-      switch (recommendedInterventionPriority) {
-        case 'immediate':
-          estimatedTimeline = '24-72 hours';
-          resourceRequirements = { 
-            effort: 'critical', 
-            expertise: ['Executive', 'Governance'], 
-            externalSupport: true,
-            authorityRequired: 'SOVEREIGN',
-          };
-          break;
-        case 'short-term':
-          estimatedTimeline = '1-2 weeks';
-          resourceRequirements = { 
-            effort: 'high', 
-            expertise: ['Strategy', 'Operations'], 
-            externalSupport: false,
-            authorityRequired: 'AUTHORITY',
-          };
-          break;
-        case 'medium-term':
-          estimatedTimeline = '2-4 weeks';
-          resourceRequirements = { 
-            effort: 'medium', 
-            expertise: ['Domain Expert'], 
-            externalSupport: false,
-            authorityRequired: 'DELEGATE',
-          };
-          break;
-        case 'strategic':
-          estimatedTimeline = '1-3 months';
-          resourceRequirements = { 
-            effort: 'low', 
-            expertise: ['Advisory'], 
-            externalSupport: false,
-            authorityRequired: 'PARTICIPANT',
-          };
-          break;
-      }
-
-      return {
-        ...diag,
-        constitutionalImpact: {
-          routeImpact: Math.min(routeImpact, 100),
-          disqualifierRelevance,
-          recommendedInterventionPriority,
-          constitutionalRouteAlignment,
-          authorityTypeRequired,
-          readinessTierRequired,
-          authorityLevelRequired,
-        },
-        questionsCompleted,
-        questionsTotal,
-        weakestQuestions,
-        strongestQuestions,
-        questionIds,
-        domainSpecificGuidance: DOMAIN_GUIDANCE[domain] || "Focus on strengthening this domain through targeted interventions.",
-        precedentCases: PRECEDENT_CASES[domain] || [],
-        estimatedTimeline,
-        resourceRequirements,
-        signatureRequired,
-        quorumRequired,
-        recommendedAction,
-      };
-    });
-  }, [diagnostics, completedQuestions, totalQuestionsPerDomain, participantCount]);
-
-  // Sort by constitutional priority and impact
-  const sortedDiagnostics = useMemo(() => {
-    const priorityOrder = { immediate: 0, 'short-term': 1, 'medium-term': 2, strategic: 3 };
-    return [...enhancedDiagnostics].sort((a, b) => {
-      const priorityDiff = priorityOrder[a.constitutionalImpact.recommendedInterventionPriority] - 
-                          priorityOrder[b.constitutionalImpact.recommendedInterventionPriority];
-      if (priorityDiff !== 0) return priorityDiff;
-      return b.constitutionalImpact.routeImpact - a.constitutionalImpact.routeImpact;
-    });
-  }, [enhancedDiagnostics]);
-
-  // Generate constitutional summary
-  const constitutionalSummary = useMemo(() => {
-    if (!constitutionalDecision) return null;
-    
-    const summary = {
-      route: constitutionalDecision.route,
-      confidence: constitutionalDecision.confidence,
-      disqualifiers: constitutionalDecision.disqualifiersTriggered || [],
-      interventions: constitutionalDecision.recommendedInterventions || [],
-    };
-    
-    return summary;
-  }, [constitutionalDecision]);
-
-  // Check authority for actions
-  const canCreateIntervention = useMemo(() => {
-    if (!constitutionalAuthority) return false;
-    const authorityCheck = validateAuthority(
-      { type: 'SUBMIT', payload: { campaignId }, authoritySignature: '', id: '', timestamp: '' } as any,
-      constitutionalAuthority,
-      'PARTICIPANT'
-    );
-    return authorityCheck.valid;
-  }, [constitutionalAuthority, campaignId]);
-
-  // Calculate overall constitutional posture
-  const overallPosture = useMemo(() => {
-    const avgScore = diagnostics.reduce((sum, d) => sum + d.score, 0) / diagnostics.length;
-    const hasCritical = enhancedDiagnostics.some(d => d.constitutionalImpact.recommendedInterventionPriority === 'immediate');
-    const hasThresholdViolation = !thresholdValid.valid;
-    
-    if (hasThresholdViolation) return { label: 'THRESHOLD NOT MET', color: 'text-red-400', bg: 'bg-red-500/10', icon: AlertOctagon };
-    if (hasCritical) return { label: 'CRITICAL INTERVENTION REQUIRED', color: 'text-red-400', bg: 'bg-red-500/10', icon: AlertTriangle };
-    if (avgScore < 50) return { label: 'DIAGNOSTIC MODE ACTIVE', color: 'text-amber-400', bg: 'bg-amber-500/10', icon: Activity };
-    if (avgScore < 70) return { label: 'STABILIZING', color: 'text-blue-400', bg: 'bg-blue-500/10', icon: TrendingUp };
-    return { label: 'STRATEGY READY', color: 'text-emerald-400', bg: 'bg-emerald-500/10', icon: CheckCircle };
-  }, [diagnostics, enhancedDiagnostics, thresholdValid]);
-
-  // Handler for create intervention with signing
-  const handleCreateIntervention = useCallback(async (domain: string, intervention: string) => {
-    if (!canCreateIntervention) {
-      toast.error('Insufficient constitutional authority', {
-        description: `This action requires ${constitutionalAuthority?.authorityLevel || 'PARTICIPANT'} level authority.`,
-      });
-      return;
-    }
-
-    if (!thresholdValid.valid) {
-      toast.error('Threshold not met', {
-        description: thresholdValid.reason || 'Minimum participant count not reached.',
-      });
-      return;
-    }
-
-    setSigning(prev => ({ ...prev, [domain]: true }));
-
-    try {
-      if (onVerifyAuthority) {
-        const verified = await onVerifyAuthority();
-        if (!verified) {
-          throw new Error('Authority verification failed');
-        }
-      }
-
-      const signature = await generateConstitutionalSignature(campaignId, domain, constitutionalAuthority);
-      
-      if (onCreateIntervention) {
-        await onCreateIntervention(domain, intervention, signature);
-      }
-
-      if (onAuditAction) {
-        await onAuditAction('CREATE_INTERVENTION', domain);
-      }
-
-      toast.success('Intervention created', {
-        description: `Constitutional intervention for ${domain} has been recorded.`,
-      });
-    } catch (error) {
-      console.error('Failed to create intervention:', error);
-      toast.error('Failed to create intervention', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred',
-      });
-    } finally {
-      setSigning(prev => ({ ...prev, [domain]: false }));
-    }
-  }, [canCreateIntervention, thresholdValid, campaignId, constitutionalAuthority, onCreateIntervention, onVerifyAuthority, onAuditAction]);
-
-  const overallIcon = overallPosture.icon || Shield;
-
   return (
-    <div className="space-y-5">
-      <div className="flex justify-between items-end">
-        <div>
-          <h3 className="text-base font-light tracking-tight text-white">Intervention Strategy</h3>
-          <p className="text-[7px] font-mono text-white/30 uppercase tracking-wider mt-1">
-            Constitutional Prescriptive Actions
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {constitutionalAuthority && (
-            <div className="flex items-center gap-1.5">
-              <Fingerprint className="w-2.5 h-2.5 text-white/40" />
-              <span className="text-[6px] font-mono border border-white/10 bg-white/5 text-white/40 px-2 py-1 uppercase tracking-wider">
-                {constitutionalAuthority.authorityLevel}
-              </span>
+    <section className="overflow-hidden rounded-[28px] border border-white/10 bg-[#090B0F] text-white shadow-[0_24px_70px_rgba(0,0,0,0.34)]">
+      <div className="border-b border-white/10 px-6 py-6 md:px-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.22em] text-[#C9A96A]/82">
+              <Target className="h-4 w-4" />
+              Intervention Copilot
             </div>
-          )}
-          
-          {!thresholdValid.valid && (
-            <div className="flex items-center gap-1.5 text-red-400">
-              <AlertTriangle className="w-2.5 h-2.5" />
-              <span className="text-[6px] font-mono">THRESHOLD NOT MET</span>
-            </div>
-          )}
-          
-          <div className={`px-2 py-1 rounded ${overallPosture.bg}`}>
-            <div className={`flex items-center gap-1 text-[6px] font-mono uppercase tracking-wider ${overallPosture.color}`}>
-              <overallIcon className="w-2.5 h-2.5" />
-              {overallPosture.label}
-            </div>
+
+            <h2 className="mt-3 font-serif text-2xl text-white/95 md:text-3xl">
+              Prescriptive actions ranked by constitutional weight
+            </h2>
+
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/58">
+              This is the report’s orchestration layer. It does not merely display
+              dissonance. It turns the strongest diagnosis into ranked intervention
+              actions with authority expectations, route implications, and execution posture.
+            </p>
           </div>
-          
-          {constitutionalSummary && (
-            <div className="flex items-center gap-1.5">
-              <Scale className="w-2.5 h-2.5 text-white/40" />
-              <span className="text-[6px] font-mono border border-white/10 bg-white/5 text-white/40 px-2 py-1 uppercase tracking-wider">
-                {constitutionalSummary.route} · {(constitutionalSummary.confidence * 100).toFixed(0)}%
+
+          <div className="flex flex-wrap items-center gap-2">
+            {constitutionalAuthority ? (
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-white/60">
+                Authority: {constitutionalAuthority.authorityLevel}
               </span>
-            </div>
-          )}
-          
-          <span className="text-[6px] font-mono border border-white/10 bg-white/5 text-white/40 px-2 py-1 uppercase tracking-wider">
-            Constitutional AI v2
-          </span>
+            ) : null}
+
+            {constitutionalDecision ? (
+              <span className="rounded-full border border-[#C9A96A]/20 bg-[#C9A96A]/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.16em] text-[#E6D1A1]">
+                Route: {constitutionalDecision.route} · {Math.round(constitutionalDecision.confidence * 100)}%
+              </span>
+            ) : null}
+
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.16em]",
+                validThreshold
+                  ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300"
+                  : "border-red-400/20 bg-red-500/10 text-red-300",
+              )}
+            >
+              Threshold {participantCount}/{threshold}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Organisation Context */}
-      <div className="border border-white/10 bg-black/30 rounded-lg p-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Brain className="w-3 h-3 text-amber-400/60" />
-          <span className="text-[7px] font-mono uppercase tracking-wider text-white/40">Constitutional Context</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-[9px] text-white/60">
-          <div>
-            <span className="text-white/30">Type:</span>{' '}
-            <span className="text-white/70 font-medium">{organisationType.toUpperCase()}</span>
-          </div>
-          <div>
-            <span className="text-white/30">Governance:</span>{' '}
-            <span className="text-white/70 font-medium">{governanceModel}</span>
-          </div>
-          <div>
-            <span className="text-white/30">Participants:</span>{' '}
-            <span className="text-white/70 font-medium">{participantCount}</span>
-            <span className="text-white/30 text-[8px] ml-1">/ {threshold} threshold</span>
-          </div>
-          <div>
-            <span className="text-white/30">Authority:</span>{' '}
-            <span className="text-white/70 font-medium">{constitutionalAuthority?.authorityLevel || 'NONE'}</span>
-          </div>
-          {campaignId && (
-            <div className="col-span-2">
-              <span className="text-white/30">Campaign:</span>{' '}
-              <span className="text-white/50 font-mono text-[8px]">{campaignId.slice(0, 8)}...</span>
-              <Key className="w-2.5 h-2.5 inline ml-1 text-white/30" />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Constitutional Context Alert */}
-      {constitutionalSummary && constitutionalSummary.disqualifiers.length > 0 && (
-        <div className="border border-amber-500/20 bg-amber-500/10 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="text-[8px] font-mono uppercase tracking-wider text-amber-400 mb-1">
-                Constitutional Disqualifiers Active
-              </p>
-              <ul className="space-y-0.5">
-                {constitutionalSummary.disqualifiers.slice(0, 2).map((d, idx) => (
-                  <li key={idx} className="text-[9px] text-amber-400/80">
-                    • {d}
-                  </li>
+      {constitutionalDecision?.disqualifiersTriggered?.length ? (
+        <div className="border-b border-white/10 bg-amber-500/[0.05] px-6 py-4 md:px-8">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-300" />
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-amber-300/84">
+                Active constitutional disqualifiers
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {constitutionalDecision.disqualifiersTriggered.slice(0, 4).map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-[10px] text-amber-200/86"
+                  >
+                    {item}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
-      <div className="grid grid-cols-1 gap-3">
-        {sortedDiagnostics.map((item) => {
-          const priorityStyle = getPriorityColor(item.constitutionalImpact.recommendedInterventionPriority);
-          const PriorityIcon = priorityStyle.icon;
-          const DomainIcon = DOMAIN_ICONS[item.domain as AlignmentDomain] || Shield;
-          const isSigning = signing[item.domain];
+      <div className="space-y-4 px-6 py-6 md:px-8">
+        {sorted.map((item) => {
+          const tone = priorityTone(
+            item.constitutionalImpact.recommendedInterventionPriority,
+          );
+          const Icon = getDomainIcon(item.domain);
+          const canCreate = canAct(
+            constitutionalAuthority?.authorityLevel,
+            item.constitutionalImpact.authorityLevelRequired,
+          );
+          const blockedByThreshold = item.signatureRequired && !validThreshold;
+          const busy = workingDomain === item.domain;
 
           return (
-            <div key={item.domain} className="border border-white/10 bg-black/20 hover:border-white/20 transition-all overflow-hidden rounded-lg">
-              <div className="flex flex-col lg:flex-row">
-                
-                {/* Left: Signal */}
-                <div className="p-5 lg:w-1/3 border-b lg:border-b-0 lg:border-r border-white/10 bg-white/5">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-2">
-                      <DomainIcon className="w-3 h-3 text-amber-400/60" />
+            <article
+              key={item.domain}
+              className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.03]"
+            >
+              <div className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${tone.rail}`} />
+
+              <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+                <div className="border-b border-white/10 bg-black/20 p-5 lg:border-b-0 lg:border-r lg:p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
+                        <Icon className="h-4.5 w-4.5 text-[#C9A96A]" />
+                      </div>
+
                       <div>
-                        <span className="text-[7px] font-mono uppercase tracking-wider text-white/40">
-                          {ALIGNMENT_DOMAIN_LABELS[item.domain as AlignmentDomain] || item.domain}
-                        </span>
-                        {item.questionsTotal > 0 && (
-                          <div className="text-[6px] font-mono text-white/20 mt-0.5">
-                            {item.questionsCompleted}/{item.questionsTotal} questions
-                          </div>
-                        )}
+                        <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/34">
+                          {item.domain}
+                        </div>
+                        <div className="mt-2 text-3xl font-light text-white/92">
+                          {Math.round(item.score)}%
+                        </div>
+                        <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.14em] text-white/32">
+                          resonance score
+                        </div>
                       </div>
                     </div>
-                    <div className={`${item.trajectory === 'IMPROVING' ? 'text-emerald-400' : item.trajectory === 'DECAYING' ? 'text-red-400' : 'text-white/30'}`}>
-                      <ArrowUpRight className={`w-3 h-3 ${item.trajectory === 'DECAYING' ? 'rotate-90' : ''}`} />
-                    </div>
+
+                    <span
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-[0.16em]",
+                        tone.badge,
+                      )}
+                    >
+                      {tone.label}
+                    </span>
                   </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-light text-white">{item.score}%</span>
-                    <span className="text-[7px] font-mono text-white/30 uppercase">Resonance</span>
-                  </div>
-                  <div className="mt-4 space-y-1.5">
-                    <div className="flex justify-between text-[7px] font-mono uppercase">
-                      <span className="text-white/40">Effort</span>
-                      <span className="text-white/50">{item.effortIndex}%</span>
-                    </div>
-                    <div className="h-1 w-full bg-white/10">
-                      <div 
-                        className="h-full bg-amber-400/60 transition-all duration-700" 
-                        style={{ width: `${item.effortIndex}%` }} 
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Constitutional requirements */}
-                  <div className="mt-3 pt-3 border-t border-white/10 space-y-1">
-                    <div className="flex justify-between text-[6px] font-mono">
-                      <span className="text-white/30">Authority Required:</span>
-                      <span className="text-white/50">{item.resourceRequirements.authorityRequired}</span>
-                    </div>
-                    <div className="flex justify-between text-[6px] font-mono">
-                      <span className="text-white/30">Readiness Required:</span>
-                      <span className="text-white/50">{item.constitutionalImpact.readinessTierRequired}</span>
-                    </div>
-                    <div className="flex justify-between text-[6px] font-mono">
-                      <span className="text-white/30">Timeline:</span>
-                      <span className="text-white/50">{item.estimatedTimeline}</span>
-                    </div>
-                    {item.signatureRequired && (
-                      <div className="flex justify-between text-[6px] font-mono">
-                        <span className="text-amber-400/70">Signature Required:</span>
-                        <span className="text-amber-400/50">Quorum: {item.quorumRequired}</span>
+
+                  <div className="mt-5 space-y-3">
+                    <div className="rounded-[18px] border border-white/10 bg-white/[0.03] p-3">
+                      <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+                        Route alignment
                       </div>
-                    )}
-                  </div>
-                  
-                  {/* Constitutional impact indicator */}
-                  {item.constitutionalImpact.routeImpact > 50 && (
-                    <div className="mt-2 pt-2 border-t border-white/10">
-                      <div className="flex items-center gap-1">
-                        <AlertTriangle className="w-2 h-2 text-amber-400" />
-                        <span className="text-[6px] font-mono text-amber-400/70 uppercase tracking-wider">
-                          Constitutional Impact: {item.constitutionalImpact.routeImpact}%
-                        </span>
+                      <div className="mt-2 text-sm text-white/76">
+                        {item.constitutionalImpact.constitutionalRouteAlignment}
                       </div>
                     </div>
-                  )}
+
+                    <div className="rounded-[18px] border border-white/10 bg-white/[0.03] p-3">
+                      <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+                        Authority / readiness
+                      </div>
+                      <div className="mt-2 text-sm text-white/76">
+                        {item.constitutionalImpact.authorityLevelRequired} ·{" "}
+                        {item.constitutionalImpact.readinessTierRequired}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[18px] border border-white/10 bg-white/[0.03] p-3">
+                      <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+                        Timeline
+                      </div>
+                      <div className="mt-2 text-sm text-white/76">
+                        {item.estimatedTimeline}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Right: Intervention */}
-                <div className="p-5 lg:w-2/3 flex flex-col justify-between space-y-3">
-                  <div>
-                    <div className={`flex items-center gap-1.5 mb-2 ${priorityStyle.text}`}>
-                      <PriorityIcon className="w-2.5 h-2.5" />
-                      <span className="text-[7px] font-mono uppercase tracking-wider">
-                        {item.constitutionalImpact.recommendedInterventionPriority.toUpperCase()} · {item.recommendedAction}
-                      </span>
-                      {item.signatureRequired && (
-                        <span className="ml-2 text-[6px] font-mono bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">
-                          SIGNATURE REQUIRED
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[10px] leading-relaxed text-white/60 mb-3">
-                      {item.interventionScript}
-                    </p>
-                    
-                    {/* Domain-specific guidance */}
-                    <div className="mt-2 p-2 border border-white/10 bg-black/30 rounded">
-                      <p className="text-[6px] font-mono uppercase text-white/30 mb-1">
-                        Domain Guidance
-                      </p>
-                      <p className="text-[8px] text-white/50">
-                        {item.domainSpecificGuidance}
-                      </p>
-                    </div>
-                    
-                    {/* Weakest questions context */}
-                    {item.weakestQuestions.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-white/10">
-                        <p className="text-[6px] font-mono uppercase text-white/30 mb-1">
-                          Critical Gaps
-                        </p>
-                        <ul className="space-y-0.5">
-                          {item.weakestQuestions.slice(0, 1).map((q, idx) => (
-                            <li key={idx} className="text-[8px] text-white/40 italic">
-                              "{q.length > 50 ? q.substring(0, 50) + '...' : q}"
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Precedent Cases */}
-                    {item.precedentCases.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-white/10">
-                        <p className="text-[6px] font-mono uppercase text-white/30 mb-1">
-                          Precedent Cases
-                        </p>
-                        <ul className="space-y-0.5">
-                          {item.precedentCases.slice(0, 2).map((case_, idx) => (
-                            <li key={idx} className="text-[7px] text-white/40">
-                              • {case_}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Resource Requirements */}
-                    <div className="mt-2 flex gap-2 text-[6px] font-mono">
-                      <span className={`px-1.5 py-0.5 rounded ${
-                        item.resourceRequirements.effort === 'critical' ? 'bg-red-500/20 text-red-400' :
-                        item.resourceRequirements.effort === 'high' ? 'bg-amber-500/20 text-amber-400' :
-                        item.resourceRequirements.effort === 'medium' ? 'bg-blue-500/20 text-blue-400' :
-                        'bg-emerald-500/20 text-emerald-400'
-                      }`}>
-                        Effort: {item.resourceRequirements.effort.toUpperCase()}
-                      </span>
-                      {item.resourceRequirements.externalSupport && (
-                        <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">
-                          External Support
-                        </span>
-                      )}
-                    </div>
+                <div className="p-5 lg:p-6">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/34">
+                    Recommended action
                   </div>
 
-                  <div className="flex gap-2">
-                    <CopyButton 
-                      text={item.interventionScript} 
-                      onCopy={onCopyScript?.bind(null, item.domain, item.interventionScript)}
-                    />
-                    <button 
-                      onClick={() => onRequestDetail?.(item.domain)}
-                      className="flex-1 border border-white/10 text-[7px] font-mono uppercase tracking-wider py-2 hover:border-white/20 hover:bg-white/5 transition-all text-white/60 hover:text-white/80"
+                  <h3 className="mt-2 text-xl font-medium text-white/94">
+                    {item.recommendedAction}
+                  </h3>
+
+                  <p className="mt-4 text-sm leading-7 text-white/58">
+                    {item.domainSpecificGuidance}
+                  </p>
+
+                  <div className="mt-4 rounded-[18px] border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+                      Intervention script
+                    </div>
+                    <p className="mt-3 text-sm leading-7 text-white/68">
+                      {item.interventionScript}
+                    </p>
+                  </div>
+
+                  {item.constitutionalImpact.disqualifierRelevance?.length ? (
+                    <div className="mt-4">
+                      <div className="mb-2 text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+                        Why this moved up the stack
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {item.constitutionalImpact.disqualifierRelevance
+                          .slice(0, 3)
+                          .map((reason) => (
+                            <span
+                              key={reason}
+                              className="rounded-full border border-red-400/14 bg-red-500/8 px-3 py-1 text-[10px] text-red-200/82"
+                            >
+                              {reason}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(item.domain, item.interventionScript)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-[10px] font-mono uppercase tracking-[0.16em] text-white/64 transition hover:bg-white/[0.06] hover:text-white"
                     >
-                      View Data
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy script
                     </button>
-                    {onCreateIntervention && (
-                      <button 
-                        onClick={() => handleCreateIntervention(item.domain, item.interventionScript)}
-                        disabled={isSigning || !canCreateIntervention || (!thresholdValid.valid && item.signatureRequired)}
+
+                    <button
+                      type="button"
+                      onClick={() => onRequestDetail?.(item.domain)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-[10px] font-mono uppercase tracking-[0.16em] text-white/64 transition hover:bg-white/[0.06] hover:text-white"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      View detail
+                    </button>
+
+                    {onCreateIntervention ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCreate(item)}
+                        disabled={!canCreate || blockedByThreshold || busy}
                         className={cn(
-                          "flex-1 text-[7px] font-mono uppercase tracking-wider py-2 transition-all",
-                          canCreateIntervention && (!item.signatureRequired || thresholdValid.valid)
-                            ? "border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400"
-                            : "border border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+                          "inline-flex items-center justify-center gap-2 rounded-full border px-4 py-3 text-[10px] font-mono uppercase tracking-[0.16em] transition",
+                          !canCreate || blockedByThreshold || busy
+                            ? "cursor-not-allowed border-white/10 bg-white/[0.04] text-white/28"
+                            : "border-[#C9A96A]/22 bg-[#C9A96A]/12 text-[#E6D1A1] hover:bg-[#C9A96A]/18",
                         )}
                       >
-                        {isSigning ? (
+                        {busy ? (
                           <>
-                            <Loader2 className="w-2.5 h-2.5 animate-spin inline mr-1" />
-                            Signing...
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Creating task
                           </>
                         ) : (
                           <>
-                            <FileSignature className="w-2.5 h-2.5 inline mr-1" />
-                            Create Task
+                            <FileSignature className="h-3.5 w-3.5" />
+                            Create task
                           </>
                         )}
                       </button>
-                    )}
+                    ) : null}
                   </div>
-                </div>
 
+                  {item.signatureRequired || !canCreate || blockedByThreshold ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {item.signatureRequired ? (
+                        <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-amber-300">
+                          Signature-governed
+                        </span>
+                      ) : null}
+
+                      {!canCreate ? (
+                        <span className="rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-red-300">
+                          Authority insufficient
+                        </span>
+                      ) : null}
+
+                      {blockedByThreshold ? (
+                        <span className="rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.14em] text-red-300">
+                          Quorum threshold not met
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            </div>
+            </article>
           );
         })}
       </div>
 
-      {/* Constitutional Recommendations Footer */}
-      {constitutionalSummary && constitutionalSummary.interventions.length > 0 && (
-        <div className="mt-4 p-4 border border-white/10 bg-black/30 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Scale className="w-3 h-3 text-amber-400/60" />
-            <span className="text-[7px] font-mono uppercase tracking-wider text-white/40">
-              Constitutional Recommendations
-            </span>
+      <div className="border-t border-white/10 bg-white/[0.02] px-6 py-4 md:px-8">
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-[18px] border border-white/10 bg-white/[0.03] p-4">
+            <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+              Immediate interventions
+            </div>
+            <div className="mt-2 text-2xl font-light text-white/92">{summary.immediate}</div>
           </div>
-          <ul className="space-y-1">
-            {constitutionalSummary.interventions.slice(0, 3).map((intervention, idx) => (
-              <li key={idx} className="text-[9px] text-white/50 flex items-start gap-2">
-                <span className="text-amber-400/50">•</span>
-                {intervention}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
-      {/* Global Resource Summary */}
-      <div className="mt-4 p-4 border border-white/10 bg-black/30 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Target className="w-3 h-3 text-amber-400/60" />
-          <span className="text-[7px] font-mono uppercase tracking-wider text-white/40">
-            Intervention Summary
-          </span>
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-[8px] text-white/50">
-          <div>
-            <span className="text-white/30">Immediate:</span>{' '}
-            <span className="text-white/70 font-medium">
-              {enhancedDiagnostics.filter(d => d.constitutionalImpact.recommendedInterventionPriority === 'immediate').length}
-            </span>
+          <div className="rounded-[18px] border border-white/10 bg-white/[0.03] p-4">
+            <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+              Short-term interventions
+            </div>
+            <div className="mt-2 text-2xl font-light text-white/92">{summary.shortTerm}</div>
           </div>
-          <div>
-            <span className="text-white/30">Short-term:</span>{' '}
-            <span className="text-white/70 font-medium">
-              {enhancedDiagnostics.filter(d => d.constitutionalImpact.recommendedInterventionPriority === 'short-term').length}
-            </span>
-          </div>
-          <div>
-            <span className="text-white/30">Strategic:</span>{' '}
-            <span className="text-white/70 font-medium">
-              {enhancedDiagnostics.filter(d => d.constitutionalImpact.recommendedInterventionPriority === 'strategic').length}
-            </span>
+
+          <div className="rounded-[18px] border border-white/10 bg-white/[0.03] p-4">
+            <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/32">
+              Strategic interventions
+            </div>
+            <div className="mt-2 text-2xl font-light text-white/92">{summary.strategic}</div>
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-white/10 text-[6px] text-white/30">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-2.5 h-2.5" />
-            <span>
-              Constitutional Authority: {constitutionalAuthority?.authorityLevel || 'NONE'} · 
-              Interventions require {constitutionalAuthority?.authorityLevel === 'SOVEREIGN' ? 'any' : 'signature'} level approval
-            </span>
+
+        {constitutionalDecision?.recommendedInterventions?.length ? (
+          <div className="mt-4 rounded-[18px] border border-white/10 bg-black/20 p-4">
+            <div className="mb-2 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.16em] text-white/34">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#C9A96A]" />
+              Constitutional recommendations
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {constitutionalDecision.recommendedInterventions.slice(0, 4).map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] text-white/60"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
-    </div>
+    </section>
   );
 }

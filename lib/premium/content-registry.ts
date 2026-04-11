@@ -35,6 +35,10 @@ export type PremiumContentItem = {
     allowedTiers?: string[];
     coverImage?: string;
     productLine?: string;
+    editionType?: "public-surface" | "institutional-pdf" | "board-deck";
+    surfaceHref?: string;
+    directDownloadHref?: string;
+    relatedIds?: string[];
   };
 };
 
@@ -53,6 +57,12 @@ export type ContentRegistryStats = {
   totalSizeMB: number;
   latestItem?: PremiumContentItem;
 };
+
+const GMI_RELATED_IDS = [
+  "global-market-outlook-q1-2026-public",
+  "global-market-intelligence-report-q1-2026",
+  "global-market-intelligence-board-deck-q1-2026",
+] as const;
 
 const PREMIUM_CONTENT: PremiumContentItem[] = [
   {
@@ -104,23 +114,73 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
   },
 
   {
-    id: "intel-2026-q1-report",
-    title: "Global Market Intelligence Report Q1 2026",
-    subtitle: "Institutional Briefing for Strategic Operators",
+    id: "global-market-outlook-q1-2026-public",
+    title: "Global Market Outlook Q1 2026",
+    subtitle: "Public Surface Edition",
     description:
-      "Primary long-form institutional report for Q1 2026 covering global market movements, macro strain, capital flows, regional posture, and board-level strategic interpretation.",
+      "Public-facing market outlook for Q1 2026 designed as the discoverable intelligence surface: readable, elegant, and commercially useful without overexposing the deeper institutional layer.",
+    category: "market-intelligence",
+    categorySlug: "market-intel",
+    confidentialLevel: "low",
+    featured: true,
+    fileSize: "Surface Edition",
+    tags: [
+      "global",
+      "market-outlook",
+      "public",
+      "quarterly",
+      "macro",
+      "market-intelligence",
+      "surface-edition",
+    ],
+    asset: {
+      relativePath: "reports/intel-2026-q1.pdf",
+      mimeType: "application/pdf",
+      filename: "intel-2026-q1.pdf",
+      pageCount: 24,
+    },
+    metadata: {
+      author: "Abraham of London Intelligence",
+      createdAt: "2026-04-08",
+      version: "1.0.0",
+      docId: "GMO-Q1-2026-P",
+      classification: "PUBLIC",
+      watermarkRequired: false,
+      maxDownloads: 100,
+      allowedTiers: [
+        "public",
+        "member",
+        "architect",
+        "owner",
+        "client",
+        "inner-circle",
+      ],
+      productLine: "Market Outlook",
+      editionType: "public-surface",
+      surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
+      directDownloadHref: "/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf",
+      coverImage:
+        "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg",
+      relatedIds: [...GMI_RELATED_IDS],
+    },
+  },
+
+  {
+    id: "global-market-intelligence-report-q1-2026",
+    title: "Global Market Intelligence Report Q1 2026",
+    subtitle: "Institutional PDF Edition",
+    description:
+      "Primary institutional PDF edition for Q1 2026 covering macro strain, capital flows, regional posture, and board-level strategic interpretation for serious operators.",
     category: "market-intelligence",
     categorySlug: "market-intel",
     confidentialLevel: "high",
     featured: false,
-    fileSize: "14.6 MB",
-    fileSizeBytes: 15_309_824,
+    fileSize: "5.5 MB",
+    fileSizeBytes: 5_813_385,
     expiresAt: "2026-12-31",
     tags: [
       "global",
-      "exclusive",
       "quarterly",
-      "forecast",
       "report",
       "pdf",
       "macro",
@@ -129,116 +189,75 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       "market-intelligence",
     ],
     asset: {
-      relativePath: "reports/global-market-intelligence-report-q1-2026.pdf",
+      relativePath: "reports/intel-2026-q1.pdf",
       mimeType: "application/pdf",
-      filename: "global-market-intelligence-report-q1-2026.pdf",
+      filename: "intel-2026-q1.pdf",
       pageCount: 42,
     },
     metadata: {
       author: "Abraham of London Intelligence",
-      createdAt: "2026-01-15",
-      version: "1.2.0",
+      createdAt: "2026-03-16",
+      version: "1.1.0",
       docId: "GMI-Q1-2026",
       classification: "RESTRICTED",
       watermarkRequired: true,
       maxDownloads: 5,
-      allowedTiers: ["architect", "owner"],
-      productLine: "Market Intelligence Report",
+      allowedTiers: ["architect", "owner", "inner-circle"],
+      productLine: "Institutional PDF Edition",
+      editionType: "institutional-pdf",
+      surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
+      directDownloadHref: "/api/premium/content/download/global-market-intelligence-report-q1-2026",
       coverImage:
         "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg",
+      relatedIds: [...GMI_RELATED_IDS],
     },
   },
 
   {
-    id: "intel-2026-q1-board-deck",
+    id: "global-market-intelligence-board-deck-q1-2026",
     title: "Global Market Intelligence Q1 2026 — Board Briefing Deck",
-    subtitle: "Executive Presentation Companion",
+    subtitle: "Executive Presentation Edition",
     description:
-      "Primary board-format artifact for Q1 2026: a premium 16:9 institutional briefing deck covering global market movements, capital flows, regional risk posture, and board-level scenario framing.",
+      "The updated premium board deck edition for Q1 2026, structured for executive presentation, institutional review, and leadership discussion.",
     category: "board-briefings",
     categorySlug: "board-briefings",
     confidentialLevel: "high",
     featured: false,
-    fileSize: "33.8 MB",
-    fileSizeBytes: 35_476_916,
+    fileSize: "337 KB",
+    fileSizeBytes: 345_518,
     expiresAt: "2026-12-31",
     tags: [
       "global",
-      "exclusive",
       "quarterly",
-      "forecast",
       "board-briefing",
       "deck",
       "pptx",
-      "macro",
-      "capital-flows",
-      "market-intelligence",
       "presentation",
+      "macro",
+      "market-intelligence",
     ],
     asset: {
-      relativePath:
-        "reports/global-market-intelligence-report-q1-2026-board-briefing.pptx",
+      relativePath: "reports/GMI-Q1-2026-Deck.pptx",
       mimeType:
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      filename: "global-market-intelligence-report-q1-2026-board-briefing.pptx",
+      filename: "GMI-Q1-2026-Deck.pptx",
     },
     metadata: {
       author: "Abraham of London Intelligence",
-      createdAt: "2026-01-15",
-      version: "1.2.0",
+      createdAt: "2026-04-08",
+      version: "2.0.0",
       docId: "GMI-Q1-2026-D",
       classification: "RESTRICTED",
       watermarkRequired: false,
       maxDownloads: 5,
-      allowedTiers: ["architect", "owner"],
+      allowedTiers: ["architect", "owner", "inner-circle"],
       productLine: "Board Briefing Deck",
+      editionType: "board-deck",
+      surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
+      directDownloadHref: "/api/premium/content/download/global-market-intelligence-board-deck-q1-2026",
       coverImage:
         "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg",
-    },
-  },
-
-  {
-    id: "intel-2026-q1-appendix",
-    title: "Global Market Intelligence Report Q1 2026 — Appendix Volume",
-    subtitle: "Source Notes, Definitions, and Regional Scorecards",
-    description:
-      "Appendix volume accompanying the Q1 2026 institutional report, containing source notes, terminology, regional scorecards, and deeper reference material for internal challenge and auditability.",
-    category: "market-intelligence",
-    categorySlug: "market-intel",
-    confidentialLevel: "medium",
-    featured: false,
-    fileSize: "6.2 MB",
-    fileSizeBytes: 6_501_376,
-    expiresAt: "2026-12-31",
-    tags: [
-      "appendix",
-      "source-notes",
-      "definitions",
-      "regional-scorecards",
-      "pdf",
-      "market-intelligence",
-      "institutional",
-      "reference",
-    ],
-    asset: {
-      relativePath:
-        "reports/global-market-intelligence-report-q1-2026-appendix.pdf",
-      mimeType: "application/pdf",
-      filename: "global-market-intelligence-report-q1-2026-appendix.pdf",
-      pageCount: 18,
-    },
-    metadata: {
-      author: "Abraham of London Intelligence",
-      createdAt: "2026-01-15",
-      version: "1.2.0",
-      docId: "GMI-Q1-2026-A",
-      classification: "CONFIDENTIAL",
-      watermarkRequired: true,
-      maxDownloads: 5,
-      allowedTiers: ["architect", "owner"],
-      productLine: "Appendix Volume",
-      coverImage:
-        "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg",
+      relatedIds: [...GMI_RELATED_IDS],
     },
   },
 ];
@@ -283,6 +302,15 @@ export function getPremiumContentByTag(tag: string): PremiumContentItem[] {
   return PREMIUM_CONTENT.filter((item) =>
     item.tags.some((value) => value.toLowerCase().includes(normalizedTag)),
   );
+}
+
+export function getRelatedPremiumContent(id: string): PremiumContentItem[] {
+  const item = getPremiumContentById(id);
+  if (!item?.metadata?.relatedIds?.length) return [];
+  return item.metadata.relatedIds
+    .filter((relatedId) => relatedId !== id)
+    .map((relatedId) => getPremiumContentById(relatedId))
+    .filter((value): value is PremiumContentItem => Boolean(value));
 }
 
 export function searchPremiumContent(query: string): PremiumContentItem[] {
@@ -421,6 +449,7 @@ export default {
   getByCategory: getPremiumContentByCategory,
   getByTier: getPremiumContentByTier,
   getByTag: getPremiumContentByTag,
+  getRelated: getRelatedPremiumContent,
   search: searchPremiumContent,
   categories: getPremiumCategories,
   stats: getContentRegistryStats,

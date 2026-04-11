@@ -27,7 +27,7 @@ export default function RegistryView({ initialDocs, categories }: RegistryViewPr
   }, [filter, searchQuery, initialDocs]);
 
   return (
-    <section className="bg-black min-h-screen pt-32 pb-20 px-6">
+    <section className="bg-[#060609] min-h-screen pt-32 pb-20 px-6">
       <div className="max-w-7xl mx-auto">
         
         {/* 1. ARCHIVE HEADER */}
@@ -81,7 +81,7 @@ export default function RegistryView({ initialDocs, categories }: RegistryViewPr
               <Link 
                 href={doc.href} 
                 key={doc.slug}
-                className="group bg-black p-8 hover:bg-zinc-950 transition-all flex flex-col justify-between min-h-[320px] relative overflow-hidden"
+                className="group bg-[#060609] p-8 hover:bg-zinc-950 transition-all flex flex-col justify-between min-h-[320px] relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
                   <span className="font-mono text-[40px] text-white">/</span>

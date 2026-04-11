@@ -1,13 +1,13 @@
 // app/api/strategy-room/session/init/route.ts
-
 import { NextResponse } from "next/server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
 import { prisma } from "@/lib/prisma.server";
+import { randomUUID } from "crypto";
 
 function makeSessionKey(): string {
-  return `sr_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+  return `sr_${randomUUID().replace(/-/g, "")}`;
 }
 
 export async function POST(request: Request) {

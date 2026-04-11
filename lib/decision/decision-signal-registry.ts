@@ -307,7 +307,7 @@ export function buildDecisionSignalRegistry(
     driftCandidates.length > 1
       ? detectDriftAlerts(driftCandidates)
       : driftCandidates.length === 1
-        ? [detectDriftAlert(driftCandidates[0])].filter(
+        ? [detectDriftAlert(driftCandidates[0]!)].filter(
             (item): item is DriftAlertResult => Boolean(item),
           )
         : [];

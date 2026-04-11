@@ -1,4 +1,6 @@
-// lib/constitution/rules.ts
+/* lib/constitution/rules.ts — V2.2 (Production Grade, Mutation-Aware, Sovereign) */
+import { getMutation } from "./rule-mutation-engine";
+import { getOperatorScore } from "./operator-score";
 
 export type ConstitutionalRoute = "REJECT" | "DIAGNOSTIC" | "STRATEGY";
 export type AuthorityType = "DIRECT" | "PROXY" | "UNCLEAR";
@@ -11,67 +13,81 @@ export type ReadinessTier =
 export type OrgPosture = "ORDERED" | "DRIFTING" | "MISALIGNED" | "DISORDERED";
 
 export interface ConstitutionInput {
-  clarityScore: number; // 0..100
+  clarityScore: number;
   authorityType: AuthorityType;
   readinessTier: ReadinessTier;
   posture: OrgPosture;
-  failureModeCount: number; // >= 0
-  failureModeSeverity: number; // 0..10
-  narrativeCoherence: number; // 0..100
-  interventionReadiness: number; // 0..100
-
-  /**
-   * Governance and mandate signals.
-   * Defaults are conservative and safe.
-   */
+  failureModeCount: number;
+  failureModeSeverity: number;
+  narrativeCoherence: number;
+  interventionReadiness: number;
   mandateFit?: boolean;
-  seriousnessScore?: number; // 0..100
+  seriousnessScore?: number;
   operatorOverrideRequested?: boolean;
-
-  /**
-   * Optional forward-compatibility inputs.
-   * They are intentionally not required so this core stays lightweight.
-   */
-  trustCondition?: number; // 0..100
-  governanceDiscipline?: number; // 0..100
+  operatorKey?: string;
+  trustCondition?: number;
+  governanceDiscipline?: number;
 }
 
 export interface ConstitutionalDecision {
   route: ConstitutionalRoute;
-  confidence: number; // 0.0..1.0
+  confidence: number; // 0.0 - 1.0
   disqualifiersTriggered: string[];
   recommendedInterventions: string[];
   rationale: string[];
   postureWeight: number;
   readinessWeight: number;
   escalationAllowed: boolean;
+  operatorInfluence?: {
+    originalRoute: ConstitutionalRoute;
+    originalConfidence: number;
+    operatorScore: number;
+    penaltyApplied: boolean;
+  };
 }
 
 export const CONSTITUTIONAL_THRESHOLDS = {
   clarityWeak: 35,
   clarityReject: 20,
   clarityStrategy: 65,
-
   coherenceCritical: 25,
   coherenceStrategy: 50,
-
   readinessDiagnostic: 40,
   readinessStrategy: 60,
-
   failureModeHighCount: 3,
   failureModeRejectCount: 5,
   failureSeverityHigh: 6,
   failureSeverityCritical: 8,
-
   seriousnessMinimum: 35,
   seriousnessReject: 20,
-
   confidenceMin: 0.1,
   confidenceMax: 1.0,
   confidenceStrategy: 0.9,
   confidenceDiagnosticBase: 0.62,
   confidenceStrategyFloor: 0.55,
 } as const;
+
+type MutatedThresholds = {
+  clarityWeak: number;
+  clarityReject: number;
+  clarityStrategy: number;
+  coherenceCritical: number;
+  coherenceStrategy: number;
+  readinessDiagnostic: number;
+  readinessStrategy: number;
+  failureModeHighCount: number;
+  failureModeRejectCount: number;
+  failureSeverityHigh: number;
+  failureSeverityCritical: number;
+  seriousnessMinimum: number;
+  seriousnessReject: number;
+  confidenceMin: number;
+  confidenceMax: number;
+  confidenceStrategy: number;
+  confidenceDiagnosticBase: number;
+  confidenceStrategyFloor: number;
+  authorityStrictness: number;
+};
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
@@ -83,8 +99,8 @@ function integerOrZero(value: number): number {
   return Math.max(0, Math.floor(value));
 }
 
-function uniq(values: string[]): string[] {
-  return Array.from(new Set(values.filter(Boolean)));
+function uniq<T>(arr: T[]): T[] {
+  return Array.from(new Set(arr.filter(Boolean)));
 }
 
 function isStrategyTier(tier: ReadinessTier): boolean {
@@ -96,71 +112,80 @@ function isFragileTier(tier: ReadinessTier): boolean {
 }
 
 function postureWeight(posture: OrgPosture): number {
-  switch (posture) {
-    case "ORDERED":
-      return 1.0;
-    case "DRIFTING":
-      return 0.9;
-    case "MISALIGNED":
-      return 0.8;
-    case "DISORDERED":
-      return 0.65;
-    default:
-      return 0.75;
-  }
+  const weights: Record<OrgPosture, number> = {
+    ORDERED: 1.0,
+    DRIFTING: 0.9,
+    MISALIGNED: 0.8,
+    DISORDERED: 0.65,
+  };
+  return weights[posture] ?? 0.75;
 }
 
-function readinessWeight(readinessTier: ReadinessTier): number {
-  switch (readinessTier) {
-    case "FRAGILE":
-      return 0.55;
-    case "EMERGING":
-      return 0.68;
-    case "STABILIZING":
-      return 0.8;
-    case "EXECUTION_READY":
-      return 0.93;
-    case "SOVEREIGN":
-      return 1.0;
-    default:
-      return 0.7;
-  }
+function readinessWeight(tier: ReadinessTier): number {
+  const weights: Record<ReadinessTier, number> = {
+    FRAGILE: 0.55,
+    EMERGING: 0.68,
+    STABILIZING: 0.8,
+    EXECUTION_READY: 0.93,
+    SOVEREIGN: 1.0,
+  };
+  return weights[tier] ?? 0.7;
 }
 
-function addIntervention(target: string[], condition: boolean, text: string): void {
-  if (condition) target.push(text);
-}
-
-function addDisqualifier(target: string[], condition: boolean, text: string): void {
-  if (condition) target.push(text);
-}
-
-function normaliseInput(raw: ConstitutionInput): Required<ConstitutionInput> {
+function getThresholds(): MutatedThresholds {
+  const base = CONSTITUTIONAL_THRESHOLDS;
   return {
-    clarityScore: clamp(raw.clarityScore, 0, 100),
-    authorityType: raw.authorityType,
-    readinessTier: raw.readinessTier,
-    posture: raw.posture,
-    failureModeCount: integerOrZero(raw.failureModeCount),
-    failureModeSeverity: clamp(raw.failureModeSeverity, 0, 10),
-    narrativeCoherence: clamp(raw.narrativeCoherence, 0, 100),
-    interventionReadiness: clamp(raw.interventionReadiness, 0, 100),
-    mandateFit: raw.mandateFit ?? true,
-    seriousnessScore: clamp(raw.seriousnessScore ?? 100, 0, 100),
-    operatorOverrideRequested: raw.operatorOverrideRequested ?? false,
-    trustCondition: clamp(raw.trustCondition ?? 50, 0, 100),
-    governanceDiscipline: clamp(raw.governanceDiscipline ?? 50, 0, 100),
+    clarityWeak: clamp(Number(getMutation("CLARITY_MIN")?.value ?? base.clarityWeak), 0, 100),
+    clarityReject: base.clarityReject,
+    clarityStrategy: base.clarityStrategy,
+    coherenceCritical: base.coherenceCritical,
+    coherenceStrategy: base.coherenceStrategy,
+    readinessDiagnostic: base.readinessDiagnostic,
+    readinessStrategy: base.readinessStrategy,
+    failureModeHighCount: integerOrZero(base.failureModeHighCount),
+    failureModeRejectCount: integerOrZero(base.failureModeRejectCount),
+    failureSeverityHigh: clamp(base.failureSeverityHigh, 0, 10),
+    failureSeverityCritical: clamp(base.failureSeverityCritical, 0, 10),
+    seriousnessMinimum: base.seriousnessMinimum,
+    seriousnessReject: base.seriousnessReject,
+    confidenceMin: clamp(base.confidenceMin, 0, 1),
+    confidenceMax: clamp(base.confidenceMax, 0, 1),
+    confidenceStrategy: clamp(base.confidenceStrategy, 0, 1),
+    confidenceDiagnosticBase: clamp(base.confidenceDiagnosticBase, 0, 1),
+    confidenceStrategyFloor: clamp(base.confidenceStrategyFloor, 0, 1),
+    authorityStrictness: Math.max(1, Number(getMutation("AUTHORITY_STRICTNESS")?.value ?? 1)),
   };
 }
 
-/**
- * Constitutional routing kernel.
- * Deterministic, auditable, low-surprise.
- * Built to preserve trust, explainability and escalation discipline.
- */
-export function evaluateConstitutionalRoute(rawInput: ConstitutionInput): ConstitutionalDecision {
-  const t = CONSTITUTIONAL_THRESHOLDS;
-  const input = normaliseInput(rawInput);
+function degradeRoute(route: ConstitutionalRoute): ConstitutionalRoute {
+  if (route === "STRATEGY") return "DIAGNOSTIC";
+  if (route === "DIAGNOSTIC") return "REJECT";
+  return "REJECT";
+}
+
+/* ======================================================================== */
+/* CONSTITUTIONAL ROUTING KERNEL — SOVEREIGN, DETERMINISTIC, EXPLAINABLE     */
+/* ======================================================================== */
+export function evaluateConstitutionalRoute(
+  rawInput: ConstitutionInput
+): ConstitutionalDecision {
+  const t = getThresholds();
+  const input = {
+    clarityScore: clamp(rawInput.clarityScore ?? 0, 0, 100),
+    authorityType: rawInput.authorityType ?? "UNCLEAR",
+    readinessTier: rawInput.readinessTier ?? "EMERGING",
+    posture: rawInput.posture ?? "MISALIGNED",
+    failureModeCount: integerOrZero(rawInput.failureModeCount),
+    failureModeSeverity: clamp(rawInput.failureModeSeverity ?? 0, 0, 10),
+    narrativeCoherence: clamp(rawInput.narrativeCoherence ?? 0, 0, 100),
+    interventionReadiness: clamp(rawInput.interventionReadiness ?? 0, 0, 100),
+    mandateFit: rawInput.mandateFit ?? true,
+    seriousnessScore: clamp(rawInput.seriousnessScore ?? 50, 0, 100),
+    operatorOverrideRequested: rawInput.operatorOverrideRequested ?? false,
+    operatorKey: (rawInput.operatorKey ?? "").trim() || "anonymous",
+    trustCondition: clamp(rawInput.trustCondition ?? 50, 0, 100),
+    governanceDiscipline: clamp(rawInput.governanceDiscipline ?? 50, 0, 100),
+  };
 
   const disqualifiers: string[] = [];
   const interventions: string[] = [];
@@ -173,268 +198,132 @@ export function evaluateConstitutionalRoute(rawInput: ConstitutionInput): Consti
   let confidence = t.confidenceDiagnosticBase;
   let escalationAllowed = true;
 
-  // Law 12 — rejection for mandate mismatch
+  const originalRoute = route;
+  const originalConfidence = confidence;
+
+  // 1. Mandate & Seriousness Gates (Hard Disqualifiers)
   if (!input.mandateFit) {
-    addDisqualifier(disqualifiers, true, "Obvious mismatch with advisory mandate");
-    rationale.push("Mandate mismatch makes escalation unconstitutional.");
+    disqualifiers.push("Mandate mismatch");
+    rationale.push("Clear mismatch with advisory mandate — rejection required.");
     route = "REJECT";
     confidence = 0.15;
     escalationAllowed = false;
   }
 
-  // Law 12 — rejection for unserious or cosmetic signal
-  if (
-    input.seriousnessScore < t.seriousnessReject ||
-    (input.seriousnessScore < t.seriousnessMinimum &&
-      input.clarityScore < t.clarityWeak &&
-      input.narrativeCoherence < t.coherenceStrategy)
-  ) {
-    addDisqualifier(disqualifiers, true, "Submission lacks serious decision-grade intent");
-    rationale.push("The signal is too cosmetic, weak or performative for governed escalation.");
+  if (input.seriousnessScore < t.seriousnessReject) {
+    disqualifiers.push("Below minimum seriousness threshold");
+    rationale.push("Signal lacks decision-grade intent.");
     route = "REJECT";
-    confidence = Math.min(confidence, 0.16);
+    confidence = 0.16;
     escalationAllowed = false;
   }
 
-  // Law 1 / Law 3 — minimum decision-grade substance
-  if (input.clarityScore < t.clarityReject && input.narrativeCoherence < t.coherenceCritical) {
-    addDisqualifier(disqualifiers, true, "Submission lacks minimum decision-grade substance");
-    rationale.push("Signal collapses below constitutional minimum for meaningful routing.");
+  // 2. Clarity & Coherence Collapse
+  if (input.clarityScore < t.clarityReject || input.narrativeCoherence < t.coherenceCritical) {
+    disqualifiers.push("Critical clarity/coherence failure");
+    rationale.push("Signal collapses below constitutional minimum for any escalation.");
     route = "REJECT";
-    confidence = Math.min(confidence, 0.15);
+    confidence = 0.18;
     escalationAllowed = false;
   } else if (input.clarityScore < t.clarityWeak) {
-    addDisqualifier(disqualifiers, true, "Clarity score below constitutional minimum (<35)");
-    rationale.push("Intake is too shallow for confident escalation.");
-    confidence = Math.min(confidence, 0.25);
-  }
-
-  // Law 2 — authority must be explicit
-  if (input.authorityType === "UNCLEAR") {
-    addDisqualifier(disqualifiers, true, "Authority type is UNCLEAR – escalation blocked");
-    rationale.push("Authority is unclear, so premium escalation is blocked.");
-    route = route === "REJECT" ? "REJECT" : "DIAGNOSTIC";
-    confidence = Math.min(confidence, 0.3);
-    escalationAllowed = false;
-  }
-
-  // Law 8 — structural strain
-  if (
-    input.failureModeCount >= t.failureModeHighCount &&
-    input.failureModeSeverity >= t.failureSeverityHigh
-  ) {
-    addDisqualifier(
-      disqualifiers,
-      true,
-      "High-severity failure density indicates structural strain",
-    );
-    rationale.push("Failure density and severity indicate architectural disorder.");
-    confidence = Math.min(confidence, 0.4);
-  }
-
-  // Critical incoherence
-  if (input.narrativeCoherence < t.coherenceCritical) {
-    addDisqualifier(disqualifiers, true, "Critical narrative incoherence detected");
-
-    if (
-      input.failureModeCount >= t.failureModeRejectCount ||
-      input.clarityScore < t.clarityReject ||
-      input.failureModeSeverity >= t.failureSeverityCritical
-    ) {
-      route = "REJECT";
-      confidence = Math.min(confidence, 0.2);
-      escalationAllowed = false;
-      rationale.push("Critical incoherence combined with severe strain creates rejection risk.");
-    } else {
-      route = route === "REJECT" ? "REJECT" : "DIAGNOSTIC";
-      confidence = Math.min(confidence, 0.22);
-      rationale.push("Incoherence requires diagnostic containment before any escalation.");
-    }
-  }
-
-  // Law 13 / 14 — disorder without foundation must not escalate
-  if (input.posture === "DISORDERED" && input.narrativeCoherence < t.coherenceStrategy) {
-    addDisqualifier(
-      disqualifiers,
-      true,
-      "Disordered posture without sufficient constitutional foundation",
-    );
-    rationale.push("Disordered posture with weak coherence cannot escalate to STRATEGY.");
-    route = route === "REJECT" ? "REJECT" : "DIAGNOSTIC";
-    confidence = Math.min(confidence, 0.35);
-    escalationAllowed = false;
-  }
-
-  if (
-    input.posture === "DISORDERED" &&
-    (!isStrategyTier(input.readinessTier) || input.authorityType !== "DIRECT")
-  ) {
-    addDisqualifier(
-      disqualifiers,
-      true,
-      "Disordered posture lacks the minimum constitutional conditions for STRATEGY",
-    );
-    rationale.push("Disordered cases require stronger authority and readiness before escalation.");
-    route = route === "REJECT" ? "REJECT" : "DIAGNOSTIC";
-    confidence = Math.min(confidence, 0.35);
-  }
-
-  // Fragile proxy cases must not be oversold
-  if (
-    input.authorityType === "PROXY" &&
-    isFragileTier(input.readinessTier) &&
-    input.failureModeSeverity >= t.failureSeverityHigh
-  ) {
-    addDisqualifier(
-      disqualifiers,
-      true,
-      "Proxy authority under fragile conditions blocks premium escalation",
-    );
-    rationale.push("Proxy authority under fragility requires diagnostic discipline.");
-    route = route === "REJECT" ? "REJECT" : "DIAGNOSTIC";
+    disqualifiers.push("Clarity below live threshold");
+    rationale.push(`Clarity (${input.clarityScore}) below constitutional floor.`);
+    route = "DIAGNOSTIC";
     confidence = Math.min(confidence, 0.32);
+  }
+
+  // 3. Authority Gate
+  const authorityStrict = t.authorityStrictness > 1;
+  if (input.authorityType === "UNCLEAR" || (authorityStrict && input.authorityType !== "DIRECT")) {
+    disqualifiers.push("Insufficient authority");
+    rationale.push(authorityStrict 
+      ? "Authority strictness elevated — DIRECT required." 
+      : "Authority type unclear.");
+    route = route === "REJECT" ? "REJECT" : "DIAGNOSTIC";
+    confidence = Math.min(confidence, 0.35);
     escalationAllowed = false;
   }
 
-  // Governance and trust shape confidence, but do not silently overrule route.
-  if (input.governanceDiscipline < 40) {
-    addIntervention(interventions, true, "Restore governance discipline");
-    confidence = Math.min(confidence, 0.55);
-    rationale.push("Weak governance discipline reduces safe escalation confidence.");
+  // 4. Structural Failure Density
+  if (input.failureModeCount >= t.failureModeRejectCount || 
+      input.failureModeSeverity >= t.failureSeverityCritical) {
+    disqualifiers.push("Severe structural failure density");
+    rationale.push("Failure count/severity exceeds constitutional tolerance.");
+    route = "REJECT";
+    confidence = 0.22;
+    escalationAllowed = false;
   }
 
-  if (input.trustCondition < 40) {
-    addIntervention(interventions, true, "Repair trust before scale");
-    confidence = Math.min(confidence, 0.54);
-    rationale.push("Trust erosion weakens intervention fit and escalation safety.");
+  // 5. Posture & Readiness Brakes
+  if (input.posture === "DISORDERED" && !isStrategyTier(input.readinessTier)) {
+    disqualifiers.push("Disordered posture without sovereign readiness");
+    rationale.push("Disordered state requires diagnostic containment.");
+    route = "DIAGNOSTIC";
+    confidence = Math.min(confidence, 0.38);
+    escalationAllowed = false;
   }
 
-  // Posture-aware intervention shaping
-  addIntervention(
-    interventions,
-    input.posture === "DRIFTING",
-    "Restore governance cadence before escalation",
-  );
-  addIntervention(
-    interventions,
-    input.posture === "MISALIGNED",
-    "Re-sequence strategic priorities and decision ownership",
-  );
-  addIntervention(
-    interventions,
-    input.posture === "DISORDERED",
-    "Rebuild foundational order before premium escalation",
-  );
-
-  // Readiness-aware intervention shaping
-  addIntervention(
-    interventions,
-    input.readinessTier === "FRAGILE",
-    "Stabilise governance and authority posture",
-  );
-  addIntervention(
-    interventions,
-    input.readinessTier === "EMERGING",
-    "Strengthen execution discipline before escalation",
-  );
-  addIntervention(
-    interventions,
-    input.readinessTier === "STABILIZING",
-    "Tighten operating cadence and escalation order",
-  );
-
-  // Failure / clarity interventions
-  addIntervention(
-    interventions,
-    input.failureModeCount > 2,
-    "Clarify sponsor and decision owner",
-  );
-  addIntervention(
-    interventions,
-    input.narrativeCoherence < t.coherenceStrategy,
-    "Restore narrative coherence",
-  );
-  addIntervention(
-    interventions,
-    input.authorityType === "PROXY",
-    "Confirm mandate and decision boundaries",
-  );
-  addIntervention(
-    interventions,
-    input.failureModeSeverity >= 7,
-    "Repair trust and governance before scale",
-  );
-  addIntervention(
-    interventions,
-    input.interventionReadiness < t.readinessStrategy,
-    "Increase intervention readiness before strategic escalation",
-  );
-
-  // Strategy gate
-  const canPromoteToStrategy =
+  // 6. Strategy Promotion Gate
+  const canGoStrategy =
     input.clarityScore >= t.clarityStrategy &&
     input.authorityType === "DIRECT" &&
     isStrategyTier(input.readinessTier) &&
     input.interventionReadiness >= t.readinessStrategy &&
-    input.failureModeCount <= 2 &&
     input.narrativeCoherence >= t.coherenceStrategy &&
+    input.failureModeCount <= 2 &&
     input.posture !== "DISORDERED" &&
-    input.mandateFit === true &&
-    input.seriousnessScore >= t.seriousnessMinimum &&
-    disqualifiers.length === 0 &&
-    escalationAllowed;
+    input.mandateFit &&
+    disqualifiers.length === 0;
 
-  if (canPromoteToStrategy) {
+  if (canGoStrategy) {
     route = "STRATEGY";
     confidence = t.confidenceStrategy * pWeight * rWeight;
-    rationale.push("Case satisfies constitutional strategy conditions.");
-  } else if (
-    route !== "REJECT" &&
-    input.clarityScore >= 45 &&
-    input.authorityType !== "UNCLEAR" &&
-    input.interventionReadiness >= t.readinessDiagnostic
-  ) {
-    route = "DIAGNOSTIC";
-    confidence = Math.max(confidence, 0.58 * pWeight * Math.max(rWeight, 0.8));
-    rationale.push("Signal is real, but not yet safe for strategy-grade escalation.");
+    rationale.push("All constitutional conditions for STRATEGY route satisfied.");
   }
 
-  // Confidence is a gate, not a decoration
-  if (route === "STRATEGY" && confidence < t.confidenceStrategyFloor) {
-    route = "DIAGNOSTIC";
-    escalationAllowed = false;
-    rationale.push("Confidence fell below constitutional strategy floor, so route degraded.");
+  // 7. Operator Influence (can only degrade, never upgrade)
+  const operator = getOperatorScore(input.operatorKey);
+  let operatorInfluenceApplied = false;
+
+  if (operator.score < 40) {
+    const degraded = degradeRoute(route);
+    if (degraded !== route) {
+      route = degraded;
+      confidence *= 0.68;
+      operatorInfluenceApplied = true;
+      rationale.push(`Operator score (${operator.score}) degraded route.`);
+    } else {
+      confidence *= 0.82;
+      operatorInfluenceApplied = true;
+      rationale.push(`Operator score reduced confidence.`);
+    }
   }
 
-  // Operator override requests do not change route.
-  if (input.operatorOverrideRequested) {
-    rationale.push("Override request noted, but constitutional routing remained sovereign.");
-  }
+  // Final safety clamps
+  confidence = clamp(confidence, t.confidenceMin, t.confidenceMax);
+  escalationAllowed = route === "STRATEGY";
 
-  if (route === "STRATEGY") {
-    addIntervention(interventions, true, "Define strategic priorities and escalation order");
-  }
-
-  if (route === "DIAGNOSTIC") {
-    addIntervention(interventions, true, "Surface foundational diagnostic and governance assets");
-  }
-
+  // Default interventions if none generated
   if (interventions.length === 0) {
     interventions.push("Maintain constitutional discipline and monitor signal quality");
   }
 
-  if (rationale.length === 0) {
-    rationale.push("Route assigned according to constitutional thresholds.");
-  }
-
   return {
     route,
-    confidence: clamp(confidence, t.confidenceMin, t.confidenceMax),
+    confidence,
     disqualifiersTriggered: uniq(disqualifiers),
     recommendedInterventions: uniq(interventions),
-    rationale: uniq(rationale),
+    rationale: uniq(rationale.length ? rationale : ["Route assigned according to constitutional thresholds."]),
     postureWeight: pWeight,
     readinessWeight: rWeight,
-    escalationAllowed: route === "STRATEGY",
+    escalationAllowed,
+    operatorInfluence: operatorInfluenceApplied
+      ? {
+          originalRoute,
+          originalConfidence: clamp(originalConfidence, t.confidenceMin, t.confidenceMax),
+          operatorScore: operator.score,
+          penaltyApplied: true,
+        }
+      : undefined,
   };
 }

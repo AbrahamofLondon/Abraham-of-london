@@ -1,5 +1,3 @@
-// lib/decision/decision-guidance-service.ts
-
 import { db } from "@/lib/db";
 import {
   applyRecommendationGovernance,
@@ -11,17 +9,17 @@ import {
   type ContextualPerformanceOverlay,
   type MatchedAsset,
 } from "@/lib/decision/asset-matcher";
+import { getAllDecisionAssetsFromContent } from "@/lib/decision/content-asset-adapter";
 import {
-  getAllDecisionAssetsFromContent,
-} from "@/lib/decision/content-asset-adapter";
-import {
-  applyConstitutionalSelectionPolicy,
-  buildConstitutionalGuidance,
   deriveConstitutionalAssessment,
   type ConstitutionalAssessment,
-  type ConstitutionalAssetCandidate,
   type ConstitutionalIntake,
 } from "@/lib/decision/system-constitution";
+import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
+import type {
+  ExecutiveReportConstitution,
+  ExecutiveReportGuidance,
+} from "@/lib/admin/reporting/types";
 
 export interface ConstitutionalDecisionGuidanceRequest {
   intake: ConstitutionalIntake;
@@ -34,14 +32,22 @@ export interface ConstitutionalDecisionGuidanceRequest {
 export interface ConstitutionalDecisionGuidanceResponse {
   constitution: ConstitutionalAssessment;
   matchedAssets: MatchedAsset[];
-  governedAssets: ConstitutionalAssetCandidate[];
+  governedAssets: Array<{
+    id: string;
+    title: string;
+    href?: string | null;
+    kind: string;
+    score: number;
+    summary: string;
+    reasons: string[];
+  }>;
   guidance: {
     summary: string;
     rationale: string[];
     recommendations: Array<{
       id: string;
       title: string;
-      href?: string;
+      href?: string | null;
       kind: string;
       score: number;
       summary: string;
@@ -98,7 +104,7 @@ async function getContextualPerformanceMap(): Promise<
     return rows.reduce(
       (acc: Record<string, ContextualPerformanceOverlay[]>, row: any) => {
         if (!acc[row.assetId]) acc[row.assetId] = [];
-        acc[row.assetId].push({
+        acc[row.assetId]!.push({
           assetId: row.assetId,
           contextType: row.contextType,
           contextValue: row.contextValue,
@@ -108,7 +114,7 @@ async function getContextualPerformanceMap(): Promise<
         });
         return acc;
       },
-      {}
+      {},
     );
   } catch {
     return {};
@@ -127,10 +133,57 @@ async function getGovernanceRules(): Promise<GovernanceRule[]> {
   }
 }
 
+function toExecutiveConstitution(
+  assessment: ConstitutionalAssessment,
+): ExecutiveReportConstitution {
+  return {
+    route: assessment.route,
+    priority: assessment.priority,
+    temperature: assessment.temperature,
+    orgState: assessment.orgState,
+    readinessTier: assessment.readinessTier,
+    authorityType: assessment.authorityType,
+    revenueBand: assessment.revenueBand,
+    marketRiskBand: assessment.marketRiskBand,
+    clarityScore: assessment.clarityScore,
+    authorityScore: assessment.authorityScore,
+    governanceScore: assessment.governanceScore,
+    severityScore: assessment.severityScore,
+    revenueScore: assessment.revenueScore,
+    dominantDomains: assessment.dominantDomains,
+    failureModes: assessment.failureModes,
+    requiredInterventions: assessment.requiredInterventions,
+    sponsorTypes: assessment.sponsorTypes,
+    worldviewAnchors: assessment.worldviewAnchors,
+    narrativeSummary: assessment.narrativeSummary,
+    rationale: assessment.rationale,
+  };
+}
+
+function mapAssemblerGuidance(
+  guidance: ExecutiveReportGuidance,
+): ConstitutionalDecisionGuidanceResponse["guidance"] {
+  return {
+    summary: guidance.summary,
+    rationale: guidance.rationale,
+    nextAction: guidance.nextAction,
+    recommendations: guidance.recommendations.map((item) => ({
+      id: item.id,
+      title: item.title,
+      href: item.href ?? null,
+      kind: item.kind,
+      score: item.score,
+      summary: item.summary,
+      reasons: item.reasons,
+    })),
+  };
+}
+
 export async function buildDecisionGuidance(
-  request: ConstitutionalDecisionGuidanceRequest
+  request: ConstitutionalDecisionGuidanceRequest,
 ): Promise<ConstitutionalDecisionGuidanceResponse> {
   const constitution = deriveConstitutionalAssessment(request.intake);
+
   const assets = getAllDecisionAssetsFromContent();
 
   const [performanceMap, contextualPerformanceMap, governanceRules] =
@@ -156,43 +209,52 @@ export async function buildDecisionGuidance(
   };
 
   const matchedAssets = matchDecisionAssets(assets as any, pseudoContext as any, {
-    limit: Math.max((request.options?.assetLimit ?? 6) * 2, 12),
-    minScore: request.options?.minAssetScore ?? 18,
+    limit: Math.max((request.options?.assetLimit ?? 6) * 3, 18),
+    minScore: Math.max(10, request.options?.minAssetScore ?? 18),
     performanceMap,
     contextualPerformanceMap,
   });
 
-  const governed = applyRecommendationGovernance(
-    matchedAssets,
-    pseudoContext as any,
-    {
-      rules: governanceRules,
+  const governed = applyRecommendationGovernance(matchedAssets, pseudoContext as any, {
+    rules: governanceRules,
+    maxPerKind: 3,
+    minDiversityKinds: 2,
+  });
+
+  const assembler = await assembleConstitutionalGuidance({
+    intake: request.intake as any,
+    constitution: toExecutiveConstitution(constitution),
+    assetLimit: request.options?.assetLimit ?? 6,
+    minAssetScore: request.options?.minAssetScore ?? 18,
+    options: {
+      assetLimit: request.options?.assetLimit ?? 6,
+      minAssetScore: request.options?.minAssetScore ?? 18,
       maxPerKind: 2,
       minDiversityKinds: 2,
-    }
-  );
+    },
+  });
 
-  const constitutionalAssets = applyConstitutionalSelectionPolicy(
-    governed.governed as ConstitutionalAssetCandidate[],
-    constitution,
-    request.options?.assetLimit ?? 6
-  );
-
-  const guidance = buildConstitutionalGuidance(
-    constitution,
-    constitutionalAssets
-  );
+  const governedAssets = assembler.guidance.recommendations.map((item) => ({
+    id: item.id,
+    title: item.title,
+    href: item.href ?? null,
+    kind: item.kind,
+    score: item.score,
+    summary: item.summary,
+    reasons: item.reasons,
+  }));
 
   return {
     constitution,
     matchedAssets,
-    governedAssets: constitutionalAssets,
-    guidance,
+    governedAssets,
+    guidance: mapAssemblerGuidance(assembler.guidance),
     diagnostics: {
       assetPoolSize: assets.length,
-      matchedAssetCount: constitutionalAssets.length,
-      governanceRuleCount: governanceRules.length,
-      governanceSuppressedCount: governed.suppressed.length,
+      matchedAssetCount: governedAssets.length,
+      governanceRuleCount: governanceRules.length + assembler.diagnostics.governanceRuleCount,
+      governanceSuppressedCount:
+        governed.suppressed.length + assembler.diagnostics.governanceSuppressedCount,
       adaptiveAssetsLoaded: Object.keys(performanceMap).length,
       contextualAssetsLoaded: Object.keys(contextualPerformanceMap).length,
     },

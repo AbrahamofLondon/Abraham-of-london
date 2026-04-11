@@ -37,6 +37,7 @@ interface Venture {
   domain: string[];
   established: string;
   url: string;
+  isInternal?: boolean;
   status: VentureStatus;
   metrics?: {
     founded: string;
@@ -128,7 +129,8 @@ const ventures: Venture[] = [
     descriptionShort: "High-stakes dialogue architecture",
     domain: ["Discourse Architecture", "Knowledge Management", "Strategic Dialogue"],
     established: "2025",
-    url: "https://alomarada.com/chatham-rooms",
+    url: "/chatham-rooms", // ✅ FIXED: Points to internal page, not external URL
+    isInternal: true,
     status: "Operational",
     metrics: {
       founded: "2025",
@@ -276,15 +278,25 @@ function VentureCard({ venture, index }: { venture: Venture; index: number }) {
             </span>
           </div>
 
-          <a
-            href={venture.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group/link inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/42 transition-colors duration-300 hover:text-amber-300"
-          >
-            <span>Visit Platform</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
-          </a>
+          {venture.isInternal ? (
+            <Link
+              href={venture.url}
+              className="group/link inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/42 transition-colors duration-300 hover:text-amber-300"
+            >
+              <span>Enter Platform</span>
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
+            </Link>
+          ) : (
+            <a
+              href={venture.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/link inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/42 transition-colors duration-300 hover:text-amber-300"
+            >
+              <span>Visit Platform</span>
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
+            </a>
+          )}
         </div>
       </div>
     </article>

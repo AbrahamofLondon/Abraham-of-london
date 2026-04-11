@@ -1,9 +1,9 @@
 // app/api/constitutional/appeal/route.ts
-// ─── CONSTITUTIONAL APPEAL ENDPOINT ───────────────────────────────────────────
+// --- CONSTITUTIONAL APPEAL ENDPOINT ---
 
 import { NextResponse } from 'next/server';
-import { createAppeal, validateAuthority } from '@/lib/constitution/constitutional-authority';
-import { db } from '@/lib/db';
+import { createAppeal, type ConstitutionalAction } from '@/lib/constitution/constitutional-authority';
+import { safePrismaQuery } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -17,10 +17,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Fetch the action being appealed
-    const action = await db.constitutionalAction.findUnique({
-      where: { id: actionId },
-    });
+    // Fetch the action being appealed — constitutionalAction model may not be provisioned yet
+    const action = await safePrismaQuery<ConstitutionalAction>((p: any) =>
+      p.constitutionalAction?.findUnique({ where: { id: actionId } })
+    );
 
     if (!action) {
       return NextResponse.json(
@@ -33,21 +33,20 @@ export async function POST(request: Request) {
     const appeal = createAppeal(action, userId, reason, evidence);
 
     // Store in database
-    await db.constitutionalAppeal.create({
-      data: {
-        id: appeal.id,
-        actionId: appeal.actionId,
-        appellantId: appeal.appellantId,
-        reason: appeal.reason,
-        evidence: appeal.evidence,
-        status: appeal.status,
-        filedAt: appeal.filedAt,
-        escalationPath: appeal.escalationPath,
-      },
-    });
-
-    // Notify review board (would use email/webhook in production)
-    await notifyReviewBoard(appeal);
+    await safePrismaQuery((p: any) =>
+      p.constitutionalAppeal?.create({
+        data: {
+          id: appeal.id,
+          actionId: appeal.actionId,
+          appellantId: appeal.appellantId,
+          reason: appeal.reason,
+          evidence: appeal.evidence,
+          status: appeal.status,
+          filedAt: appeal.filedAt,
+          escalationPath: appeal.escalationPath,
+        },
+      })
+    );
 
     return NextResponse.json({
       ok: true,

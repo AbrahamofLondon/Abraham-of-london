@@ -558,7 +558,7 @@ const DirectionalIntegrityPage: NextPage = () => {
                     transition={{ duration: 0.6, delay: index * 0.06 }}
                     className={[
                       "border p-6",
-                      item.active
+                      ('active' in item && item.active)
                         ? "border-amber-500/20 bg-amber-500/[0.04]"
                         : "border-white/[0.08] bg-white/[0.02]",
                     ].join(" ")}
@@ -575,7 +575,7 @@ const DirectionalIntegrityPage: NextPage = () => {
                       href={item.href}
                       className="mt-6 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/72 transition-colors hover:text-amber-300"
                     >
-                      <span>{item.active ? "Current step" : "Open step"}</span>
+                      <span>{('active' in item && item.active) ? "Current step" : "Open step"}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </motion.div>

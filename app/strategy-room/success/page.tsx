@@ -43,7 +43,7 @@ export default function StrategySuccessPage() {
   // Prevent Hydration Mismatch
   if (!mounted || !isReady || loading) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center font-mono space-y-4">
+      <div className="min-h-screen bg-[#060609] flex flex-col items-center justify-center font-mono space-y-4">
         <Loader2 className="animate-spin text-amber-500" size={24} />
         <div className="text-zinc-500 uppercase tracking-[0.4em] text-[10px]">
           Decrypting_Strategic_Output...
@@ -55,7 +55,7 @@ export default function StrategySuccessPage() {
   // Handle case where ID exists but no data returned
   if (!data) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center font-mono space-y-4">
+      <div className="min-h-screen bg-[#060609] flex flex-col items-center justify-center font-mono space-y-4">
         <AlertTriangle className="text-red-500" size={24} />
         <div className="text-zinc-500 uppercase tracking-[0.4em] text-[10px]">
           Dossier_Not_Found
@@ -71,7 +71,7 @@ export default function StrategySuccessPage() {
   const isHighRisk = score < 40;
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12 font-mono">
+    <div className="min-h-screen bg-[#060609] text-white p-6 md:p-12 font-mono">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -1,8 +1,23 @@
 /* lib/admin/reporting/executive-report-serializer.ts
    ---------------------------------------------------------------------------
    EXECUTIVE REPORT SERIALIZER
-   Canonical serializer for JSON exports, admin APIs, and PDF payloads
+   FIXED: Added back serializeExecutiveReportToJson for the API route
    --------------------------------------------------------------------------- */
+
+import { 
+  type ConstitutionalRoute,
+  type ExecutiveReportPriority,
+  type ExecutiveReportTemperature,
+  type ExecutiveReportState,
+  type ExecutiveReportReadinessTier,
+  type ExecutiveReportAuthorityType,
+  type ExecutiveReportRevenueBand,
+  type ExecutiveReportMarketRiskBand,
+  type ExecutiveReportRecommendation,
+  type ExecutiveReportPdfConstitutionPayload,
+  type ReturnTypeSerializeExecutiveReportToPdfPayload,
+  type CanonicalExecutiveReportExport,
+} from "@/lib/admin/reporting/types";
 
 export type SerializableRecord = Record<string, unknown>;
 
@@ -12,6 +27,8 @@ type SerializeInput = {
   guidance?: any;
   campaign?: any;
 };
+
+// --- Helper Utilities ---
 
 function safeArray<T = unknown>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
@@ -31,272 +48,349 @@ function safeNumber(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-function pickConstitution(report: any, constitution?: any, guidance?: any) {
+// --- Type-Safe Casting Helpers ---
+
+function toConstitutionalRoute(value: unknown): ConstitutionalRoute {
+  const str = safeString(value).toUpperCase();
+  if (str === "STRATEGY") return "STRATEGY";
+  if (str === "REJECT") return "REJECT";
+  return "DIAGNOSTIC";
+}
+
+function toExecutiveReportPriority(value: unknown): ExecutiveReportPriority {
+  const str = safeString(value).toUpperCase();
+  if (str === "CRITICAL") return "CRITICAL";
+  if (str === "SOVEREIGN") return "SOVEREIGN";
+  if (str === "HIGH") return "HIGH";
+  if (str === "MEDIUM") return "MEDIUM";
+  if (str === "LOW") return "LOW";
+  return "MEDIUM";
+}
+
+function toExecutiveReportTemperature(value: unknown): ExecutiveReportTemperature {
+  const str = safeString(value).toUpperCase();
+  if (str === "SCORCHING") return "SCORCHING";
+  if (str === "HOT") return "HOT";
+  if (str === "WARM") return "WARM";
+  if (str === "COLD") return "COLD";
+  return "WARM";
+}
+
+function toExecutiveReportState(value: unknown): ExecutiveReportState {
+  const str = safeString(value).toUpperCase();
+  if (str === "ORDERED") return "ORDERED";
+  if (str === "DRIFTING") return "DRIFTING";
+  if (str === "MISALIGNED") return "MISALIGNED";
+  if (str === "DISORDERED") return "DISORDERED";
+  return "DRIFTING";
+}
+
+function toExecutiveReportReadinessTier(value: unknown): ExecutiveReportReadinessTier {
+  const str = safeString(value).toUpperCase();
+  if (str === "FRAGILE") return "FRAGILE";
+  if (str === "EMERGING") return "EMERGING";
+  if (str === "STABILIZING") return "STABILIZING";
+  if (str === "EXECUTION_READY") return "EXECUTION_READY";
+  if (str === "SOVEREIGN") return "SOVEREIGN";
+  return "EMERGING";
+}
+
+function toExecutiveReportAuthorityType(value: unknown): ExecutiveReportAuthorityType {
+  const str = safeString(value).toUpperCase();
+  if (str === "DIRECT") return "DIRECT";
+  if (str === "PROXY") return "PROXY";
+  return "UNCLEAR";
+}
+
+function toExecutiveReportRevenueBand(value: unknown): ExecutiveReportRevenueBand {
+  const str = safeString(value).toUpperCase();
+  if (str === "MICRO") return "MICRO";
+  if (str === "SMB") return "SMB";
+  if (str === "MID") return "MID";
+  if (str === "ENTERPRISE") return "ENTERPRISE";
+  if (str === "WHALE") return "WHALE";
+  return "MID";
+}
+
+function toExecutiveReportMarketRiskBand(value: unknown): ExecutiveReportMarketRiskBand {
+  const str = safeString(value).toUpperCase();
+  if (str === "CRITICAL") return "CRITICAL";
+  if (str === "HIGH") return "HIGH";
+  if (str === "MEDIUM") return "MEDIUM";
+  if (str === "LOW") return "LOW";
+  return "MEDIUM";
+}
+
+// --- Data Pickers ---
+
+function pickConstitution(report: any, constitution?: any, guidance?: any): ExecutiveReportPdfConstitutionPayload {
   const reportConstitution = safeObject(report?.constitution);
   const input = safeObject(constitution);
   const guidanceConstitution = safeObject(guidance?.constitution);
 
   return {
-    route:
-      safeString(input.route) ||
-      safeString(guidanceConstitution.route) ||
-      safeString(reportConstitution.route) ||
-      safeString(report?.state) ||
-      "DIAGNOSTIC",
-
-    orgState:
-      safeString(input.orgState) ||
-      safeString(guidanceConstitution.orgState) ||
-      safeString(reportConstitution.orgState) ||
-      safeString(report?.state) ||
-      "DRIFTING",
-
-    readinessTier:
-      safeString(input.readinessTier) ||
-      safeString(guidanceConstitution.readinessTier) ||
-      safeString(reportConstitution.readinessTier) ||
-      "EMERGING",
-
-    authorityType:
-      safeString(input.authorityType) ||
-      safeString(guidanceConstitution.authorityType) ||
-      safeString(reportConstitution.authorityType) ||
-      "UNKNOWN",
-
-    priority:
-      safeString(input.priority) ||
-      safeString(guidanceConstitution.priority) ||
-      safeString(reportConstitution.priority) ||
-      "HIGH",
-
-    temperature:
-      safeString(input.temperature) ||
-      safeString(guidanceConstitution.temperature) ||
-      safeString(reportConstitution.temperature) ||
-      "HOT",
-
-    clarityScore:
-      safeNumber(input.clarityScore, safeNumber(guidanceConstitution.clarityScore, safeNumber(reportConstitution.clarityScore, 0))),
-    authorityScore:
-      safeNumber(input.authorityScore, safeNumber(guidanceConstitution.authorityScore, safeNumber(reportConstitution.authorityScore, 0))),
-    governanceScore:
-      safeNumber(input.governanceScore, safeNumber(guidanceConstitution.governanceScore, safeNumber(reportConstitution.governanceScore, 0))),
-    severityScore:
-      safeNumber(input.severityScore, safeNumber(guidanceConstitution.severityScore, safeNumber(reportConstitution.severityScore, 0))),
-    revenueScore:
-      safeNumber(input.revenueScore, safeNumber(guidanceConstitution.revenueScore, safeNumber(reportConstitution.revenueScore, 0))),
-
-    revenueBand:
-      safeString(input.revenueBand) ||
-      safeString(guidanceConstitution.revenueBand) ||
-      safeString(reportConstitution.revenueBand) ||
-      "UNSPECIFIED",
-
-    marketRiskBand:
-      safeString(input.marketRiskBand) ||
-      safeString(guidanceConstitution.marketRiskBand) ||
-      safeString(reportConstitution.marketRiskBand) ||
-      "MODERATE",
-
-    failureModes:
-      safeArray<string>(input.failureModes).length
-        ? safeArray<string>(input.failureModes)
-        : safeArray<string>(guidanceConstitution.failureModes).length
-        ? safeArray<string>(guidanceConstitution.failureModes)
-        : safeArray<string>(reportConstitution.failureModes),
-
-    dominantDomains:
-      safeArray<string>(input.dominantDomains).length
-        ? safeArray<string>(input.dominantDomains)
-        : safeArray<string>(guidanceConstitution.dominantDomains).length
-        ? safeArray<string>(guidanceConstitution.dominantDomains)
-        : safeArray<string>(reportConstitution.dominantDomains),
-
-    requiredInterventions:
-      safeArray<string>(input.requiredInterventions).length
-        ? safeArray<string>(input.requiredInterventions)
-        : safeArray<string>(guidanceConstitution.requiredInterventions).length
-        ? safeArray<string>(guidanceConstitution.requiredInterventions)
-        : safeArray<string>(reportConstitution.requiredInterventions),
-
-    sponsorTypes:
-      safeArray<string>(input.sponsorTypes).length
-        ? safeArray<string>(input.sponsorTypes)
-        : safeArray<string>(guidanceConstitution.sponsorTypes).length
-        ? safeArray<string>(guidanceConstitution.sponsorTypes)
-        : safeArray<string>(reportConstitution.sponsorTypes),
-
-    worldviewAnchors:
-      safeArray<string>(input.worldviewAnchors).length
-        ? safeArray<string>(input.worldviewAnchors)
-        : safeArray<string>(guidanceConstitution.worldviewAnchors).length
-        ? safeArray<string>(guidanceConstitution.worldviewAnchors)
-        : safeArray<string>(reportConstitution.worldviewAnchors),
-
-    narrativeSummary:
-      safeString(input.narrativeSummary) ||
-      safeString(guidanceConstitution.narrativeSummary) ||
-      safeString(reportConstitution.narrativeSummary) ||
-      safeString(report?.narrative?.summary) ||
-      safeString(report?.narrative?.headline),
-
-    rationale:
-      safeArray<string>(input.rationale).length
-        ? safeArray<string>(input.rationale)
-        : safeArray<string>(guidanceConstitution.rationale).length
-        ? safeArray<string>(guidanceConstitution.rationale)
-        : safeArray<string>(reportConstitution.rationale),
+    route: toConstitutionalRoute(
+      input.route ||
+      guidanceConstitution.route ||
+      reportConstitution.route ||
+      report?.state
+    ),
+    priority: toExecutiveReportPriority(
+      input.priority ||
+      guidanceConstitution.priority ||
+      reportConstitution.priority
+    ),
+    temperature: toExecutiveReportTemperature(
+      input.temperature ||
+      guidanceConstitution.temperature ||
+      reportConstitution.temperature
+    ),
+    orgState: toExecutiveReportState(
+      input.orgState ||
+      guidanceConstitution.orgState ||
+      reportConstitution.orgState
+    ),
+    readinessTier: toExecutiveReportReadinessTier(
+      input.readinessTier ||
+      guidanceConstitution.readinessTier ||
+      reportConstitution.readinessTier
+    ),
+    authorityType: toExecutiveReportAuthorityType(
+      input.authorityType ||
+      guidanceConstitution.authorityType ||
+      reportConstitution.authorityType
+    ),
+    revenueBand: toExecutiveReportRevenueBand(
+      input.revenueBand ||
+      guidanceConstitution.revenueBand ||
+      reportConstitution.revenueBand
+    ),
+    marketRiskBand: toExecutiveReportMarketRiskBand(
+      input.marketRiskBand ||
+      guidanceConstitution.marketRiskBand ||
+      reportConstitution.marketRiskBand
+    ),
+    clarityScore: safeNumber(input.clarityScore, 0),
+    authorityScore: safeNumber(input.authorityScore, 0),
+    governanceScore: safeNumber(input.governanceScore, 0),
+    severityScore: safeNumber(input.severityScore, 0),
+    revenueScore: safeNumber(input.revenueScore, 0),
+    dominantDomains: safeArray<string>(input.dominantDomains),
+    failureModes: safeArray<string>(input.failureModes),
+    requiredInterventions: safeArray<string>(input.requiredInterventions),
+    sponsorTypes: safeArray<string>(input.sponsorTypes),
+    worldviewAnchors: safeArray<string>(input.worldviewAnchors),
+    narrativeSummary: safeString(input.narrativeSummary) || safeString(report?.narrative?.summary),
+    rationale: safeArray<string>(input.rationale),
   };
 }
 
-function pickRecommendations(guidance?: any, report?: any) {
-  const guidanceRecommendations = safeArray<any>(guidance?.recommendations);
-  const reportRecommendations = safeArray<any>(report?.recommendations);
-
-  const source =
-    guidanceRecommendations.length > 0
-      ? guidanceRecommendations
-      : reportRecommendations;
-
-  return source.map((item: any) => ({
+function buildRecommendations(report: any): ExecutiveReportRecommendation[] {
+  const rawRecommendations = safeArray<any>(report?.recommendations);
+  return rawRecommendations.map((item: any) => ({
     id: safeString(item?.id),
     title: safeString(item?.title),
     href: safeString(item?.href) || null,
-    kind: safeString(item?.kind) || "asset",
-    score: safeNumber(item?.score),
+    kind: safeString(item?.kind, "recommendation"),
+    score: safeNumber(item?.score, 0),
     summary: safeString(item?.summary),
     reasons: safeArray<string>(item?.reasons),
   }));
 }
 
-function buildSections(report: any, constitution: any, guidance?: any) {
-  const recommendations = pickRecommendations(guidance, report);
+function formatCurrency(value: number): string {
+  if (value >= 1_000_000_000) return `£${(value / 1_000_000_000).toFixed(1)}B`;
+  if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `£${(value / 1_000).toFixed(1)}K`;
+  return `£${value.toFixed(0)}`;
+}
+
+// --- Primary Exports ---
+
+export function serializeExecutiveReportToJson(input: SerializeInput): { ok: boolean; canonical: CanonicalExecutiveReportExport } {
+  const report = safeObject(input.report);
+  const campaign = safeObject(input.campaign);
+  const constitution = pickConstitution(report, input.constitution, input.guidance);
+  const recommendations = buildRecommendations(report);
+
+  // Build domains from report resonance telemetry
+  const domains = safeArray<any>(report?.resonance?.telemetry?.domains).map((d) => ({
+    label: safeString(d?.label),
+    intent: safeNumber(d?.intent),
+    reality: safeNumber(d?.reality),
+    dissonance: safeNumber(d?.dissonance),
+  }));
+
+  // Build priority stack
+  const priorityItems = safeArray<string>(report?.priorityStack);
+
+  // Build failure modes
+  const failureModeItems = safeArray<string>(report?.failureModes);
+
+  // Build required interventions
+  const requiredInterventionItems = constitution.requiredInterventions;
+
+  // Build dominant domains
+  const dominantDomainItems = constitution.dominantDomains;
+
+  // Build worldview anchors
+  const worldviewAnchorItems = constitution.worldviewAnchors;
+
+  // Build sponsor types
+  const sponsorTypeItems = constitution.sponsorTypes;
+
+  // Build rationale
+  const rationaleItems = constitution.rationale;
+
+  // Build financial exposure
+  const financialExposure = safeObject(report?.financialExposure);
+  const replacementCost = safeNumber(financialExposure.replacementCost, 0);
+  const executionLoss = safeNumber(financialExposure.executionLoss, 0);
+  const totalExposure = safeNumber(financialExposure.totalExposure, 0);
+
+  // Build integrity metrics
+  const ogr = safeObject(report?.ogr);
+  const resonanceTelemetry = safeObject(report?.resonance?.telemetry);
+  const hcdAggregate = safeObject(report?.hcdAggregate);
+
+  const executiveSummaryState = constitution.orgState;
+  const headline = safeString(report?.narrative?.headline, "");
+  const summary = safeString(report?.narrative?.summary, "");
+  const mandate = safeString(report?.narrative?.mandate, "");
+
+  // Build governed recommendations
+  const guidanceSummary = safeString(input.guidance?.summary, "");
+  const nextAction = safeString(input.guidance?.nextAction, "");
+  const guidanceRationale = safeArray<string>(input.guidance?.rationale);
+
+  const canonical: CanonicalExecutiveReportExport = {
+    schemaVersion: "canonical-report-v2",
+    generatedAt: new Date().toISOString(),
+    reportId: safeString(campaign.id),
+    campaign: {
+      id: safeString(campaign.id),
+      title: safeString(campaign.title),
+      organisationName: safeString(campaign.organisationName),
+      generatedAt: safeString(campaign.generatedAt),
+    },
+    registry: {
+      model: "executive-reporting-v2",
+      node: "canonical",
+      protocol: "constitutional",
+    },
+    sections: {
+      executiveSummary: {
+        title: safeString(report?.title, "Executive Intelligence Brief"),
+        subtitle: safeString(report?.subtitle, ""),
+        state: executiveSummaryState,
+        headline,
+        summary,
+        mandate,
+      },
+      constitutionalPosture: constitution,
+      strategicDomainAnalysis: {
+        averageDissonance: safeNumber(resonanceTelemetry?.averageDissonance, 0),
+        domains,
+      },
+      financialExposure: {
+        replacementCost,
+        executionLoss,
+        totalExposure,
+        replacementCostFormatted: formatCurrency(replacementCost),
+        executionLossFormatted: formatCurrency(executionLoss),
+        totalExposureFormatted: formatCurrency(totalExposure),
+      },
+      integritySnapshot: {
+        sovereignCertainty: safeNumber(ogr?.sovereignCertainty, 0),
+        burnoutIndex: safeNumber(hcdAggregate?.overallBurnoutIndex, 0),
+        averageDissonance: safeNumber(resonanceTelemetry?.averageDissonance, 0),
+        authorized: Boolean(ogr?.isAuthorizedToExecute),
+      },
+      governedRecommendations: {
+        summary: guidanceSummary,
+        nextAction,
+        rationale: guidanceRationale,
+        recommendations,
+      },
+      priorityStack: {
+        items: priorityItems,
+      },
+      failureModes: {
+        items: failureModeItems,
+      },
+      requiredInterventions: {
+        items: requiredInterventionItems,
+      },
+      dominantDomains: {
+        items: dominantDomainItems,
+      },
+      worldviewAnchors: {
+        items: worldviewAnchorItems,
+      },
+      sponsorTypes: {
+        items: sponsorTypeItems,
+      },
+      rationale: {
+        items: rationaleItems,
+      },
+    },
+  };
 
   return {
-    executiveSummary: {
-      title: safeString(report?.title) || "Executive Intelligence Brief",
-      subtitle: safeString(report?.subtitle) || "",
-      state: safeString(report?.state) || constitution.orgState || "DRIFTING",
-      headline:
-        safeString(report?.narrative?.headline) ||
-        safeString(constitution.narrativeSummary) ||
-        "Strategic review generated.",
-      summary:
-        safeString(report?.narrative?.summary) ||
-        safeString(constitution.narrativeSummary) ||
-        "",
-      mandate: safeString(report?.narrative?.mandate) || "",
-      generatedAt:
-        safeString(report?.generatedAt) || new Date().toISOString(),
-      route: constitution.route,
-    },
+    ok: true,
+    canonical,
+  };
+}
 
-    constitutionalPosture: {
-      ...constitution,
-    },
+export function serializeExecutiveReportToPdfPayload(input: SerializeInput): ReturnTypeSerializeExecutiveReportToPdfPayload {
+  const report = safeObject(input.report);
+  const constitution = pickConstitution(report, input.constitution, input.guidance);
+  const recommendations = buildRecommendations(report);
 
-    strategicDomainAnalysis: {
-      averageDissonance: safeNumber(report?.resonance?.telemetry?.averageDissonance),
-      domains: safeArray<any>(report?.resonance?.telemetry?.domains).map((d) => ({
-        label: safeString(d?.label),
-        intent: safeNumber(d?.intent),
-        reality: safeNumber(d?.reality),
-        dissonance: safeNumber(
-          d?.dissonance,
-          Math.abs(safeNumber(d?.intent) - safeNumber(d?.reality))
-        ),
-      })),
-    },
+  const domains = safeArray<any>(report?.resonance?.telemetry?.domains).map((d) => ({
+    label: safeString(d?.label),
+    intent: safeNumber(d?.intent),
+    reality: safeNumber(d?.reality),
+    dissonance: safeNumber(d?.dissonance),
+  }));
 
-    humanCapital: {
-      aggregate: safeObject(report?.hcdAggregate),
-      matrix: safeArray<any>(report?.hcd).map((r) => ({
-        label: safeString(r?.label),
-        potential: safeNumber(r?.potential),
-        extraction: safeNumber(r?.extraction),
-        burnoutIndex: safeNumber(r?.burnoutIndex),
-        wellbeing: safeNumber(r?.wellbeing),
-        attritionRisk: safeString(r?.attritionRisk),
-      })),
-    },
+  const priorities = safeArray<string>(report?.priorityStack);
+  const failureModes = safeArray<string>(report?.failureModes);
 
-    financialExposure: {
-      replacementCost: safeNumber(report?.financialExposure?.replacementCost),
-      executionLoss: safeNumber(report?.financialExposure?.executionLoss),
-      totalExposure: safeNumber(report?.financialExposure?.totalExposure),
-    },
+  const financialExposure = safeObject(report?.financialExposure);
+  const replacementCost = safeNumber(financialExposure.replacementCost, 0);
+  const executionLoss = safeNumber(financialExposure.executionLoss, 0);
+  const totalExposure = safeNumber(financialExposure.totalExposure, 0);
 
-    priorities: safeArray<string>(report?.priorityStack),
-    failureModes: safeArray<string>(report?.failureModes),
+  const ogr = safeObject(report?.ogr);
+  const resonanceTelemetry = safeObject(report?.resonance?.telemetry);
+  const hcdAggregate = safeObject(report?.hcdAggregate);
+
+  return {
+    title: safeString(report?.title, "Executive Intelligence Brief"),
+    subtitle: safeString(report?.subtitle, ""),
+    generatedAt: safeString(report?.generatedAt, new Date().toISOString()),
+    state: constitution.orgState,
+    headline: safeString(report?.narrative?.headline, ""),
+    summary: safeString(report?.narrative?.summary, ""),
+    mandate: safeString(report?.narrative?.mandate, ""),
+    priorities,
+    failureModes,
+    domains,
+    exposure: {
+      replacementCost: String(replacementCost),
+      executionLoss: String(executionLoss),
+      totalExposure: String(totalExposure),
+    },
+    integrity: {
+      sovereignCertainty: safeNumber(ogr?.sovereignCertainty, 0),
+      averageDissonance: safeNumber(resonanceTelemetry?.averageDissonance, 0),
+      burnoutIndex: safeNumber(hcdAggregate?.overallBurnoutIndex, 0),
+      authorized: Boolean(ogr?.isAuthorizedToExecute),
+    },
+    constitution,
     recommendations,
   };
 }
 
-export function serializeExecutiveReportToJson(input: SerializeInput) {
-  const report = safeObject(input.report);
-  const campaign = safeObject(input.campaign);
-  const guidance = safeObject(input.guidance);
-  const constitution = pickConstitution(report, input.constitution, guidance);
-  const sections = buildSections(report, constitution, guidance);
-
-  return {
-    ok: true,
-    canonical: {
-      version: "1.0",
-      generatedAt: new Date().toISOString(),
-      campaign: {
-        id: safeString(campaign.id),
-        title: safeString(campaign.title),
-        organisationName: safeString(campaign.organisationName),
-        generatedAt: safeString(campaign.generatedAt),
-      },
-      constitution,
-      sections,
-    },
-  };
-}
-
-export function serializeExecutiveReportToPdfPayload(input: SerializeInput) {
-  const json = serializeExecutiveReportToJson(input);
-  const canonical = json.canonical;
-
-  return {
-    title: canonical.sections.executiveSummary.title,
-    subtitle: canonical.sections.executiveSummary.subtitle,
-    generatedAt: canonical.sections.executiveSummary.generatedAt,
-    state: canonical.sections.executiveSummary.state,
-    headline: canonical.sections.executiveSummary.headline,
-    summary: canonical.sections.executiveSummary.summary,
-    mandate: canonical.sections.executiveSummary.mandate,
-    constitution: canonical.constitution,
-    sections: canonical.sections,
-    integrity: {
-      sovereignCertainty: safeNumber(input.report?.ogr?.sovereignCertainty),
-      averageDissonance: safeNumber(
-        input.report?.resonance?.telemetry?.averageDissonance
-      ),
-      burnoutIndex: safeNumber(input.report?.hcdAggregate?.overallBurnoutIndex),
-      authorized: Boolean(input.report?.ogr?.isAuthorizedToExecute),
-    },
-    exposure: {
-      replacementCost: String(
-        canonical.sections.financialExposure.replacementCost ?? 0
-      ),
-      executionLoss: String(
-        canonical.sections.financialExposure.executionLoss ?? 0
-      ),
-      totalExposure: String(
-        canonical.sections.financialExposure.totalExposure ?? 0
-      ),
-    },
-    domains: canonical.sections.strategicDomainAnalysis.domains.map((d: any) => ({
-      label: d.label,
-      intent: d.intent,
-      reality: d.reality,
-      dissonance: d.dissonance,
-    })),
-    priorities: canonical.sections.priorities,
-    failureModes: canonical.sections.failureModes,
-    recommendations: canonical.sections.recommendations,
-  };
-}
+export type ReturnTypeSerializeExecutiveReportToPdfPayload = ReturnType<typeof serializeExecutiveReportToPdfPayload>;

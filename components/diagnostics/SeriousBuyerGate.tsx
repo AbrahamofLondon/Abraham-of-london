@@ -46,8 +46,11 @@ const PATHS: GatePath[] = [
 
 export default function SeriousBuyerGate() {
   return (
-    <section className="border border-amber-500/30 bg-amber-500/[0.03] p-8 md:p-10">
-      <div className="mx-auto max-w-5xl text-center">
+    <section className="relative overflow-hidden border border-amber-500/30 bg-amber-500/[0.03] p-8 md:p-10 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.8)]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.06),transparent_55%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+      <div className="relative mx-auto max-w-5xl text-center">
         <div className="inline-flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-amber-400/70" />
           <span className="font-mono text-[9px] uppercase tracking-[0.26em] text-amber-300/78">
@@ -55,7 +58,7 @@ export default function SeriousBuyerGate() {
           </span>
         </div>
 
-        <h2 className="mt-6 font-serif text-4xl text-white md:text-5xl">
+        <h2 className="mt-6 max-w-[18ch] mx-auto font-serif text-4xl leading-tight text-white md:text-5xl">
           This system is not built for casual exploration
         </h2>
 
@@ -73,7 +76,7 @@ export default function SeriousBuyerGate() {
               <div
                 key={item.title}
                 className={cn(
-                  "border p-5 text-left",
+                  "border p-5 text-left shadow-[0_20px_80px_-50px_rgba(0,0,0,0.7)]",
                   item.primary
                     ? "border-amber-500/24 bg-amber-500/[0.05]"
                     : "border-white/[0.08] bg-black/20",
@@ -96,7 +99,7 @@ export default function SeriousBuyerGate() {
                   </div>
                 </div>
 
-                <h3 className="mt-4 font-serif text-2xl text-white">
+                <h3 className="mt-4 max-w-[14ch] font-serif text-2xl leading-tight text-white">
                   {item.title}
                 </h3>
 

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(grep -E \"\\\\.tsx?$\")",
+      "Bash(find /c/Abraham-of-london/pages/diagnostics -name \"*.tsx\" -exec wc -l {} \\\\;)",
+      "Bash(awk '{sum+=$1} END {print \"Total lines in pages/diagnostics:\", sum}')",
+      "Bash(ls C:/Abraham-of-london/lib/alignment/hcd-engine.*)",
+      "Bash(xargs grep:*)",
+      "Bash(npm run:*)",
+      "Bash(sed 's/\\([^\\)]*\\).*//')",
+      "Bash(timeout 360 bash -c 'while [ ! -f /tmp/build_done ]; do sleep 5; done')",
+      "Bash(tasklist)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(grep -n \"prisma\\\\.\\\\w\\\\+\\\\.\" C:/Abraham-of-london/app/admin/reports/page.tsx C:/Abraham-of-london/app/api/telemetry/global/route.ts C:/Abraham-of-london/app/actions/deploy-intervention.ts C:/Abraham-of-london/app/api/download/[token]/route.ts C:/Abraham-of-london/app/api/pulse/submit/route.ts)"
+    ]
+  }
+}

@@ -118,7 +118,7 @@ export default function DirectorateOversight({
   return (
     <>
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-white/10 bg-black">
+      <section className="relative overflow-hidden border-b border-white/10 bg-[#060609]">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 aol-vignette" />
           <div className="absolute inset-0 aol-grain opacity-[0.10]" />

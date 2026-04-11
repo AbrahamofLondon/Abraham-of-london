@@ -31,7 +31,7 @@ export default function AppShell({
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-black text-white">
+    <div className="relative min-h-screen bg-[#060609] text-white">
       <Header />
 
       <div className="relative z-10 min-h-screen">

@@ -157,7 +157,7 @@ export default function CardDisplay({
               </div>
 
               {/* Image container */}
-              <div className="relative aspect-[16/9] w-full overflow-hidden bg-black">
+              <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#060609]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image}

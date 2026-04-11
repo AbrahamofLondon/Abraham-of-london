@@ -11,13 +11,13 @@ import {
   Crown,
   CheckCircle2,
   Scale,
-  Activity,
   Eye,
   Landmark,
   Calendar,
   Clock,
   Download,
   TrendingUp,
+  Lock,
 } from "lucide-react";
 
 function cn(...parts: Array<string | false | null | undefined>): string {
@@ -81,26 +81,26 @@ type BuyerFitItem = {
 const BUYER_FIT: BuyerFitItem[] = [
   {
     icon: Building2,
-    title: "Founders & leadership teams",
-    body: "Execution is active, but clarity, trust, and interpretation are starting to decay.",
+    title: "Founders and leadership teams",
+    body: "For situations where execution continues, but trust, clarity, and decision quality are beginning to erode.",
   },
   {
     icon: ShieldCheck,
-    title: "Boards & operators",
-    body: "A sharper reading is required before corrective action, escalation, or mandate work.",
+    title: "Boards and senior operators",
+    body: "For environments that need disciplined interpretation before escalation, correction, or mandate work.",
   },
   {
     icon: Landmark,
     title: "Institutions under exposure",
-    body: "The cost of misreading the situation is already reputational, operational, or political.",
+    body: "For cases where the cost of misreading the situation is already operational, reputational, or political.",
   },
 ];
 
 const CORE_PROOFS = [
-  "Narrative + matrix + exposure in one disciplined artifact",
-  "Bridges raw diagnostic signal into a decision-grade reading",
-  "Useful before advisory, during correction, and under pressure",
-  "Makes Strategy Room feel justified rather than prematurely pushed",
+  "Narrative, matrix, exposure, and correction priority in one disciplined artifact",
+  "Built to convert raw signal into readable executive judgment",
+  "Useful before advisory, during instability, and under live pressure",
+  "Strong enough to make Strategy Room feel earned rather than prematurely sold",
 ];
 
 type QuarterlyReport = {
@@ -116,32 +116,211 @@ type QuarterlyReport = {
   keyFindings?: string[];
 };
 
-type ExecutiveReportingFlagshipProps = {
+interface ExecutiveReportingFlagshipProps {
   latestReport?: QuarterlyReport | null;
   compact?: boolean;
-  className?: string;
-};
+}
 
 export default function ExecutiveReportingFlagship({
-  latestReport = null,
+  latestReport,
   compact = false,
-  className = "",
 }: ExecutiveReportingFlagshipProps) {
   const reduceMotion = useReducedMotion();
 
   const getQuarterDisplay = () => {
     if (!latestReport) return null;
-    return `${latestReport.quarter.toUpperCase()} ${latestReport.year}`;
+    return `${String(latestReport.quarter).toUpperCase()} ${latestReport.year}`;
   };
 
+  if (compact) {
+    return (
+      <section className="relative border-t border-white/5 bg-[#070707] py-20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(245,158,11,0.05),transparent_42%),radial-gradient(ellipse_at_82%_36%,rgba(255,255,255,0.03),transparent_55%)]" />
+        <div className="absolute inset-0 aol-grain opacity-[0.04]" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+          <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
+            <motion.div
+              initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.65 }}
+            >
+              <RailLabel>Flagship interpretation layer</RailLabel>
+
+              <div className="mt-6 inline-flex items-center gap-3 border border-amber-500/18 bg-amber-500/[0.05] px-4 py-2">
+                <Crown className="h-4 w-4 text-amber-400/70" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber-300/78">
+                  Executive Reporting
+                </span>
+              </div>
+
+              <h2 className="mt-8 max-w-[14ch] font-serif text-4xl font-light leading-[0.98] tracking-[-0.03em] text-white md:text-5xl">
+                A disciplined middle
+                <span className="mt-2 block text-white/56">
+                  between signal and mandate
+                </span>
+              </h2>
+
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/56">
+                Executive Reporting sits between raw diagnostics and private intervention.
+                It is built for buyers who need a sharper reading before they commit to
+                heavier action.
+              </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                {[
+                  "Decision-grade executive output",
+                  "Readable by boards and operators",
+                  "Stronger than a dashboard",
+                  "More disciplined than ambient commentary",
+                ].map((line) => (
+                  <div
+                    key={line}
+                    className="flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-black/20 px-4 py-4"
+                  >
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" />
+                    <span className="text-sm leading-relaxed text-white/56">
+                      {line}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href="/diagnostics/executive-reporting"
+                  className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
+                >
+                  <span>Open executive reporting</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+
+                <Link
+                  href="/diagnostics"
+                  className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
+                >
+                  <span>Begin with diagnostics</span>
+                  <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.65, delay: 0.08 }}
+            >
+              <Surface className="h-full p-8 md:p-10">
+                <div className="mb-8 flex items-center justify-between">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-white/24">
+                    Current relevance
+                  </span>
+                  <Scale className="h-4 w-4 text-amber-500/50" />
+                </div>
+
+                {latestReport ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-amber-400/70" />
+                      <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-amber-400/52">
+                        Latest intelligence release
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 font-serif text-2xl text-white">
+                      {latestReport.title}
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-relaxed text-white/50">
+                      {latestReport.description}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap items-center gap-4 text-[10px] font-mono text-white/35">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3" />
+                        <span>{getQuarterDisplay()}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3 w-3" />
+                        <span>{latestReport.readingTime} min read</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 space-y-3">
+                      {(latestReport.keyFindings || [])
+                        .slice(0, 3)
+                        .map((finding, idx) => (
+                          <div
+                            key={`${finding}-${idx}`}
+                            className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4"
+                          >
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/60" />
+                            <span className="text-sm leading-relaxed text-white/56">
+                              {finding}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                      <Link
+                        href={`/artifacts/${latestReport.slug}`}
+                        className="inline-flex items-center justify-center gap-2 border border-amber-500/30 bg-amber-500/[0.08] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/[0.14]"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Open report
+                      </Link>
+
+                      {latestReport.pdfUrl ? (
+                        <a
+                          href={latestReport.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 border border-white/12 bg-white/[0.05] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white/70 transition hover:bg-white/[0.08]"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          PDF
+                        </a>
+                      ) : null}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-serif text-2xl text-white">
+                      A cleaner product layer for serious buyers
+                    </h3>
+                    <p className="mt-4 text-sm leading-relaxed text-white/56">
+                      Executive Reporting strengthens the buyer journey by creating
+                      a serious interpretive layer before private escalation.
+                    </p>
+
+                    <div className="mt-8 rounded-2xl border border-amber-500/16 bg-amber-500/[0.04] p-5">
+                      <div className="flex items-start gap-3">
+                        <Lock className="mt-0.5 h-4 w-4 text-amber-400/68" />
+                        <div>
+                          <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-amber-300/72">
+                            Commercial role
+                          </div>
+                          <p className="mt-2 text-sm leading-relaxed text-white/56">
+                            Premium enough to matter. Restrained enough to build trust.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </Surface>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section
-      className={cn(
-        "relative border-t border-white/5 bg-[#070707]",
-        compact ? "py-16" : "py-24",
-        className,
-      )}
-    >
+    <section className="relative border-t border-white/5 bg-[#070707] py-24">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(245,158,11,0.06),transparent_42%),radial-gradient(ellipse_at_82%_36%,rgba(255,255,255,0.04),transparent_55%)]" />
       <div className="absolute inset-0 aol-grain opacity-[0.04]" />
 
@@ -154,17 +333,17 @@ export default function ExecutiveReportingFlagship({
             transition={{ duration: 0.65 }}
             className="max-w-4xl"
           >
-            <RailLabel>Executive Reporting</RailLabel>
+            <RailLabel>Flagship bridge product</RailLabel>
 
             <div className="mt-6 inline-flex items-center gap-3 border border-amber-500/18 bg-amber-500/[0.05] px-4 py-2">
               <Crown className="h-4 w-4 text-amber-400/70" />
               <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber-300/78">
-                Flagship advisory product
+                Executive Reporting
               </span>
             </div>
 
             <h2 className="mt-8 max-w-[13ch] font-serif text-4xl font-light leading-[0.96] tracking-[-0.03em] text-white md:text-5xl lg:text-[4.1rem]">
-              The flagship bridge between
+              The disciplined bridge between
               <span className="mt-2 block text-white/58">
                 signal and intervention
               </span>
@@ -174,16 +353,15 @@ export default function ExecutiveReportingFlagship({
               Executive Reporting is the premium bridge between raw diagnostic
               signal and full advisory mandate. It exists for founders, boards,
               leadership teams, and institutions that need disciplined
-              interpretation before escalation, not vague dashboards after the
-              fact.
+              interpretation before escalation.
             </p>
 
-            {latestReport ? (
+            {latestReport && (
               <div className="mt-8 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-6">
                 <div className="mb-3 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-amber-400/70" />
                   <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-amber-400/50">
-                    Current intelligence companion
+                    Latest quarterly release
                   </span>
                 </div>
 
@@ -191,7 +369,7 @@ export default function ExecutiveReportingFlagship({
                   {latestReport.title}
                 </h3>
 
-                <p className="mt-2 text-sm text-white/50">
+                <p className="mt-2 text-sm leading-relaxed text-white/50">
                   {latestReport.description}
                 </p>
 
@@ -206,18 +384,18 @@ export default function ExecutiveReportingFlagship({
                   </div>
                 </div>
 
-                {latestReport.keyFindings && latestReport.keyFindings.length > 0 ? (
-                  <div className="mt-4 space-y-1.5">
+                {(latestReport.keyFindings || []).length > 0 ? (
+                  <div className="mt-4 space-y-2">
                     <p className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/30">
-                      Related signals
+                      Key findings
                     </p>
-                    <ul className="space-y-1">
-                      {latestReport.keyFindings.slice(0, 2).map((finding, idx) => (
+                    <ul className="space-y-2">
+                      {latestReport.keyFindings!.slice(0, 2).map((finding, idx) => (
                         <li
                           key={`${finding}-${idx}`}
-                          className="flex items-start gap-2 text-[11px] text-white/45"
+                          className="flex items-start gap-2 text-[11px] leading-relaxed text-white/45"
                         >
-                          <span className="mt-1 h-1 w-1 rounded-full bg-amber-400/50" />
+                          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-amber-400/50" />
                           {finding}
                         </li>
                       ))}
@@ -231,7 +409,7 @@ export default function ExecutiveReportingFlagship({
                     className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-amber-500/12 px-4 py-2 text-[9px] font-mono uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/18"
                   >
                     <Eye className="h-3 w-3" />
-                    Read report
+                    Open report
                   </Link>
 
                   {latestReport.pdfUrl ? (
@@ -247,7 +425,7 @@ export default function ExecutiveReportingFlagship({
                   ) : null}
                 </div>
               </div>
-            ) : null}
+            )}
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {CORE_PROOFS.map((line) => (
@@ -283,11 +461,11 @@ export default function ExecutiveReportingFlagship({
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
-                href="#sample-report"
+                href="/diagnostics/executive-reporting"
                 className="group inline-flex items-center justify-center gap-3 bg-amber-500 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-400"
               >
-                <span>View sample output</span>
-                <FileText className="h-4 w-4 transition-transform group-hover:scale-105" />
+                <span>View flagship product</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
 
               <Link
@@ -295,14 +473,6 @@ export default function ExecutiveReportingFlagship({
                 className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
               >
                 <span>Begin with diagnostics</span>
-                <Activity className="h-4 w-4 opacity-60 transition-transform group-hover:scale-105" />
-              </Link>
-
-              <Link
-                href="/consulting/strategy-room"
-                className="group inline-flex items-center justify-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80 transition-colors hover:border-white/20 hover:bg-white/[0.04] hover:text-white"
-              >
-                <span>Enter Strategy Room</span>
                 <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -358,10 +528,11 @@ export default function ExecutiveReportingFlagship({
                   <Eye className="mt-0.5 h-4 w-4 text-amber-400/68" />
                   <div>
                     <div className="font-mono text-[8px] uppercase tracking-[0.22em] text-amber-300/72">
-                      Structured interpretation
+                      Commercial logic
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-white/56">
-                      A disciplined reading before escalation. Not advisory. Not a dashboard. A bridge.
+                      The buyer should feel restraint before pressure. That
+                      restraint is part of what makes the advisory path more credible.
                     </p>
                   </div>
                 </div>
@@ -372,7 +543,8 @@ export default function ExecutiveReportingFlagship({
                   Positioning
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-white/58">
-                  A defensible premium niche between shallow diagnostics and full advisory retainers.
+                  A defensible premium niche between shallow diagnostics and full
+                  advisory retainers.
                 </p>
               </div>
             </Surface>

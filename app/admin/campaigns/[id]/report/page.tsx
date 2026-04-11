@@ -172,7 +172,13 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
       ? guidance.recommendations.map((item: any, index: number) => ({
           id: item.id || `report-rec-${index + 1}`,
           title: item.title || item.label || item.name || "Recommendation",
+          kind: item.kind || item.type || "advisory",
           type: item.type || item.kind || "advisory",
+          summary:
+            item.summary ||
+            item.description ||
+            item.rationale ||
+            "Recommended action generated from the report engine.",
           description:
             item.description ||
             item.summary ||
@@ -188,7 +194,7 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
                   : "low"
               : "medium"),
           href: item.href || item.url || undefined,
-          score: typeof item.score === "number" ? item.score : undefined,
+          score: typeof item.score === "number" ? item.score : 0,
           reasons: Array.isArray(item.reasons) ? item.reasons : [],
         }))
       : [],

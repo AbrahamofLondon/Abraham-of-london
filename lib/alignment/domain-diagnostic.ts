@@ -53,6 +53,9 @@ function getAction(mean: number, stdDev: number): string {
   return "STABILIZE PROCESS";
 }
 
+/** @deprecated Use analyzeDomainTactics */
+export const analyzeDomainVariance = analyzeDomainTactics;
+
 function getScript(domain: string, mean: number, stdDev: number): string {
   if (stdDev > 18) return `Team, we have a diversity of perspective on ${domain}. I want to surface the conflicting views today to find a unified path forward.`;
   if (mean < 40) return `We are currently under-performing in ${domain}. This isn't a lack of effort, but a lack of shared infrastructure. Let's rebuild the baseline.`;

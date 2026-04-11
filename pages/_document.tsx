@@ -43,11 +43,25 @@ export default class MyDocument extends Document {
           <meta name="theme-color" content="#854d0e" />
           <meta name="aol:fingerprint" content={BUILD_FINGERPRINT} />
           <meta name="aol:channel" content={BUILD_CHANNEL} />
-
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" href="/favicon.ico" />
-        </Head>
 
+          {/* ── PREMIUM TYPOGRAPHY ────────────────────────────────────────
+              Cormorant Garamond — institutional serif with genuine character
+              JetBrains Mono     — precision mono for labels and data
+              Both loaded from Google Fonts with display=swap for performance
+          ─────────────────────────────────────────────────────────────── */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&display=swap"
+            rel="stylesheet"
+          />
+        </Head>
         <body
           className="antialiased selection:bg-amber-500/30 selection:text-white"
           suppressHydrationWarning

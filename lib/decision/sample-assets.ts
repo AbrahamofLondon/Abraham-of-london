@@ -1,5 +1,5 @@
 // lib/decision/sample-assets.ts
-import type { DecisionAsset } from "@/lib/decision/asset-matcher";
+import type { DecisionAsset } from "@/lib/decision/content-asset-adapter";
 
 export const SAMPLE_DECISION_ASSETS: DecisionAsset[] = [
   {
