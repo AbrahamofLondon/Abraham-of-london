@@ -81,14 +81,32 @@ module.exports = {
         // Semantic system tokens
         background:    "rgb(var(--aol-bg)     / <alpha-value>)",
         foreground:    "rgb(var(--aol-ink)    / <alpha-value>)",
-        border:        "rgb(255 255 255      / 0.10)",
-        input:         "rgb(255 255 255      / 0.10)",
+        border:        "rgb(255 255 255      / 0.12)",
+        input:         "rgb(255 255 255      / 0.12)",
         ring:          "rgb(var(--aol-gold)   / <alpha-value>)",
 
         // Surface scale
-        surface:    "rgb(15 15 17 / <alpha-value>)",
-        "surface-2": "rgb(19 19 22 / <alpha-value>)",
-        "surface-3": "rgb(24 24 28 / <alpha-value>)",
+        surface:    "rgb(14 14 18 / <alpha-value>)",
+        "surface-2": "rgb(9 9 12 / <alpha-value>)",
+        "surface-3": "rgb(6 6 9 / <alpha-value>)",
+
+        aol: {
+          void: "rgb(3 3 5 / <alpha-value>)",
+          base: "rgb(6 6 9 / <alpha-value>)",
+          lifted: "rgb(9 9 12 / <alpha-value>)",
+          panel: "rgb(14 14 18 / <alpha-value>)",
+          heading: "rgb(255 255 255 / 0.94)",
+          body: "rgb(255 255 255 / 0.85)",
+          muted: "rgb(255 255 255 / 0.66)",
+          dim: "rgb(255 255 255 / 0.48)",
+          faint: "rgb(255 255 255 / 0.34)",
+          gold: "rgb(201 169 110 / <alpha-value>)",
+          amber: "rgb(245 158 11 / <alpha-value>)",
+          "border-subtle": "rgb(255 255 255 / 0.08)",
+          "border-panel": "rgb(255 255 255 / 0.12)",
+          "border-strong": "rgb(255 255 255 / 0.18)",
+          "border-gold": "rgb(201 169 110 / 0.24)",
+        },
 
         // Card
         card:            "rgb(15 15 17 / <alpha-value>)",
@@ -124,7 +142,7 @@ module.exports = {
         deepCharcoal:   "rgb(var(--aol-bg-2)         / <alpha-value>)",
         softBlack:      "rgb(var(--aol-bg)           / <alpha-value>)",
         obsidian:       "rgb(var(--aol-bg)           / <alpha-value>)",
-        lightGrey:      "rgb(255 255 255 / 0.14)",
+        lightGrey:      "rgb(255 255 255 / 0.18)",
         forest:         "#0e3b33",
       },
 
@@ -170,21 +188,23 @@ module.exports = {
 
       // ── BACKGROUND IMAGES ───────────────────────────────────────────────────
       backgroundImage: {
-        "gold-radial":    "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
-        "premium-card":   "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
-        "gold-linear":    "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "aol-hairline":   "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
-        "aol-hairline-gold": "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "terminal-core":  "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
+        "gold-radial":    "radial-gradient(circle at center, rgba(201,169,106,0.12) 0%, transparent 70%)",
+        "premium-card":   "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
+        "gold-linear":    "linear-gradient(to right, transparent, rgba(201,169,106,0.34), transparent)",
+        "aol-hairline":   "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)",
+        "aol-hairline-gold": "linear-gradient(to right, transparent, rgba(201,169,106,0.34), transparent)",
+        "terminal-core":  "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.05), transparent 28%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
       },
 
       // ── BOX SHADOWS ─────────────────────────────────────────────────────────
       boxShadow: {
-        premium:   "0 20px 40px -15px rgba(0,0,0,0.80)",
-        card:      "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
-        cardHover: "0 28px 80px -30px rgba(0,0,0,0.82), 0 1px 2px 0 rgba(255,255,255,0.05) inset, 0 0 36px rgba(201,169,106,0.06)",
+        premium:   "0 20px 40px -15px rgba(0,0,0,0.88)",
+        card:      "0 24px 72px -30px rgba(0,0,0,0.84)",
+        cardHover: "0 28px 84px -30px rgba(0,0,0,0.9), 0 0 32px rgba(201,169,106,0.05)",
         "gold-glow": "0 0 40px rgba(201,169,106,0.12)",
         terminal:  "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
+        "aol-panel": "0 32px 100px -50px rgba(0,0,0,0.98)",
+        "aol-panel-gold": "0 32px 100px -50px rgba(0,0,0,0.98), 0 0 90px -35px rgba(201,169,106,0.18)",
       },
     },
   },
