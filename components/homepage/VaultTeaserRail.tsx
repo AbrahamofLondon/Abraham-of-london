@@ -1,130 +1,218 @@
 "use client";
 
+/* components/homepage/VaultTeaserRail.tsx
+   Design: Institutional Monumentalism — sharp panels, softGold, correct weight system
+
+   Previous version had:
+   - "Secure Repository" with ShieldCheck — the vault is not a security system
+   - "Inspect Artefact" CTA — no institution calls documents "artefacts" in promotional copy
+   - "Standard Issue: Templates • Playbooks • Guides" with animate-pulse dot
+   - bg-white text-black hover:bg-amber-500 primary CTA — wrong pattern
+   - bg-zinc-900/20 wrong token, font-black / font-bold / italic h4 throughout
+   - Grid tag labels like "OS-V1", "GOV-CORE", "ASSET-09" — invented bureaucracy
+
+   Rebuilt: Three vault categories presented factually. What each contains.
+   Sharp platform card system. The content is the signal.
+*/
+
 import * as React from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Lock,
-  FileText,
-  Workflow,
-  Scale,
-  Zap,
-  ShieldCheck,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Workflow, Scale, FileText, Lock } from "lucide-react";
+
+const GOLD = "#C9A96E";
+
+const ITEMS = [
+  {
+    icon: Workflow,
+    title: "Operating Cadence",
+    body: "Weekly rhythms, governance tempo, and meeting structures for disciplined execution.",
+  },
+  {
+    icon: Scale,
+    title: "Governance Artefacts",
+    body: "Decision rights, accountability rails, and structural controls for serious leadership environments.",
+  },
+  {
+    icon: FileText,
+    title: "Deployable Packs",
+    body: "Templates, frameworks, and institutional objects designed to move directly into operating environments.",
+  },
+];
 
 export default function VaultTeaserRail(): React.ReactElement {
-  const items = [
-    {
-      icon: <Workflow className="h-4 w-4" />,
-      title: "Operating Cadence",
-      body: "Weekly rhythms, governance tempo, and meeting structures designed for disciplined execution.",
-      tag: "OS-V1",
-    },
-    {
-      icon: <Scale className="h-4 w-4" />,
-      title: "Governance Artefacts",
-      body: "Decision rights, accountability rails, and structural controls for serious leadership environments.",
-      tag: "GOV-CORE",
-    },
-    {
-      icon: <FileText className="h-4 w-4" />,
-      title: "Deployable Packs",
-      body: "Institutional objects designed to move from page to operating environment without translation drama.",
-      tag: "ASSET-09",
-    },
-  ];
-
   return (
-    <section className="relative overflow-hidden border-t border-white/10 bg-black py-20">
-      <div className="absolute inset-0 pointer-events-none opacity-[0.02]">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px]" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="grid gap-16 lg:grid-cols-12">
-          <div className="flex flex-col justify-center lg:col-span-5">
-            <div className="mb-8 flex items-center gap-3">
-              <ShieldCheck className="h-4 w-4 text-amber-500" />
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-amber-500">
-                Secure Repository
-              </span>
-            </div>
-
-            <h3 className="mb-8 font-serif text-5xl leading-none tracking-tight text-white">
-              The work <br />
-              <span className="italic text-white/20 not-italic">behind the words.</span>
-            </h3>
-
-            <p className="mb-10 max-w-sm border-l border-white/10 pl-6 text-sm font-light italic leading-relaxed text-white/40">
-              A curated repository of high-signal institutional artefacts. These are not resources
-              to be merely read. They are tools to be deployed.
-            </p>
-
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/vault"
-                className="group inline-flex items-center justify-center gap-4 bg-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-amber-500"
-              >
-                <Lock className="h-3 w-3" />
-                Open Vault
-                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-              </Link>
-
-              <Link
-                href="/resources/strategic-frameworks"
-                className="inline-flex items-center justify-center gap-4 border border-white/20 px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/60 transition-all hover:border-white hover:text-white"
-              >
-                Systems Preview
-              </Link>
-            </div>
+    <div>
+      {/* Section header */}
+      <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end" style={{ marginBottom: "2rem" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+            <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+              color: `${GOLD}BF`,
+            }}>
+              Vault
+            </span>
           </div>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300, fontSize: "clamp(1.6rem, 2.8vw, 2.4rem)",
+            lineHeight: 1.0, letterSpacing: "-0.025em",
+            color: "rgba(255,255,255,0.88)",
+          }}>
+            Deployable assets.
+            <span style={{ color: "rgba(255,255,255,0.30)", display: "block" }}>
+              Templates, frameworks, governance tools.
+            </span>
+          </h2>
+        </div>
 
-          <div className="space-y-4 lg:col-span-7">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {items.map((item, idx) => (
-                <div
-                  key={item.title}
-                  className={`group relative border border-white/10 bg-zinc-900/20 p-8 transition-all duration-500 hover:border-amber-500/40 ${
-                    idx === 2 ? "sm:col-span-2" : ""
-                  }`}
-                >
-                  <div className="mb-12 flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center border border-white/10 bg-white/5 text-white/40 transition-all group-hover:border-amber-500/20 group-hover:text-amber-500">
-                      {item.icon}
-                    </div>
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-white/20">
-                      {item.tag}
-                    </span>
-                  </div>
-
-                  <h4 className="mb-2 text-lg font-serif italic text-white transition-colors group-hover:text-amber-100">
-                    {item.title}
-                  </h4>
-                  <p className="text-[12px] font-light leading-relaxed text-white/40 transition-colors group-hover:text-white/60">
-                    {item.body}
-                  </p>
-
-                  <div className="mt-6 flex items-center gap-2 text-[8px] font-mono font-bold uppercase tracking-widest text-white/10 transition-all group-hover:text-amber-500/40">
-                    <span>Inspect Artefact</span>
-                    <ChevronRight size={10} />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between border border-amber-500/10 bg-amber-500/[0.02] p-6">
-              <div className="flex items-center gap-4">
-                <Zap className="h-3 w-3 text-amber-500/50" />
-                <span className="text-[9px] font-mono font-bold uppercase tracking-[0.3em] text-white/30">
-                  Standard Issue: Templates • Playbooks • Guides
-                </span>
-              </div>
-              <div className="h-1 w-1 animate-pulse rounded-full bg-amber-500" />
-            </div>
-          </div>
+        <div style={{ flexShrink: 0 }}>
+          <Link
+            href="/vault"
+            className="group inline-flex items-center gap-2 transition-all duration-300"
+            style={{
+              padding: "12px 22px",
+              border: `1px solid ${GOLD}40`,
+              backgroundColor: `${GOLD}0C`,
+              color: GOLD,
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+            }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}62`; el.style.backgroundColor = `${GOLD}14`; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}40`; el.style.backgroundColor = `${GOLD}0C`; }}
+          >
+            <Lock style={{ width: "12px", height: "12px" }} />
+            Open vault
+            <ArrowRight style={{ width: "12px", height: "12px" }} className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
-    </section>
+
+      {/* Cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {ITEMS.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <Link key={item.title} href="/vault" className="group block outline-none">
+              <div
+                className="relative overflow-hidden h-full transition-all duration-400"
+                style={{ backgroundColor: "rgb(5 5 7)", border: "1px solid rgba(255,255,255,0.062)" }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.borderColor = `${GOLD}20`;
+                  el.style.transform = "translateY(-2px)";
+                  el.style.boxShadow = "0 24px 60px -20px rgba(0,0,0,0.65)";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.borderColor = "rgba(255,255,255,0.062)";
+                  el.style.transform = "translateY(0)";
+                  el.style.boxShadow = "none";
+                }}
+              >
+                {/* Gold thread on hover */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{ background: `linear-gradient(to right, transparent, ${GOLD}28, transparent)` }}
+                />
+
+                <div className="relative z-10 flex h-full flex-col p-7">
+                  {/* Icon */}
+                  <div style={{
+                    width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center",
+                    border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)",
+                    marginBottom: "2rem",
+                    transition: "border-color 300ms ease",
+                  }}
+                  className="group-hover:[border-color:rgba(201,169,110,0.25)]"
+                  >
+                    <Icon
+                      style={{ width: "15px", height: "15px", color: "rgba(255,255,255,0.32)" }}
+                      className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.70)]"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div style={{ marginBottom: "auto" }}>
+                    <h4
+                      className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,1)]"
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1.22rem", lineHeight: 1.10,
+                        letterSpacing: "-0.018em", color: "rgba(255,255,255,0.82)",
+                        marginBottom: "0.65rem",
+                      }}
+                    >
+                      {item.title}
+                    </h4>
+                    <p
+                      className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,0.48)]"
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65,
+                        color: "rgba(255,255,255,0.34)",
+                      }}
+                    >
+                      {item.body}
+                    </p>
+                  </div>
+
+                  {/* CTA */}
+                  <div style={{
+                    marginTop: "1.5rem", paddingTop: "1.25rem",
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    display: "flex", alignItems: "center", gap: "0.4rem",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.18)",
+                  }}>
+                    <span className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]">
+                      View
+                    </span>
+                    <ChevronRight
+                      style={{ width: "10px", height: "10px" }}
+                      className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Footer strip */}
+      <div
+        style={{
+          marginTop: "1rem", padding: "1rem 1.25rem",
+          border: `1px solid ${GOLD}18`,
+          backgroundColor: `${GOLD}05`,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexWrap: "wrap", gap: "0.5rem",
+        }}
+      >
+        <span style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.22)",
+        }}>
+          Templates · Playbooks · Frameworks · Governance tools
+        </span>
+        <Link
+          href="/resources/strategic-frameworks"
+          className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
+          style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase",
+            color: `${GOLD}90`,
+          }}
+        >
+          Preview
+          <ChevronRight style={{ width: "10px", height: "10px" }} />
+        </Link>
+      </div>
+    </div>
   );
 }

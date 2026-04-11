@@ -5,6 +5,10 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, FileText, Crown, ShieldCheck } from "lucide-react";
 
+const GOLD = "#C9A96E";
+const LIFT = "rgb(10 14 20)";
+const CARD = "rgb(5 5 7)";
+
 type RouteCard = {
   title: string;
   body: string;
@@ -17,16 +21,14 @@ type RouteCard = {
 const ROUTES: RouteCard[] = [
   {
     title: "Start with diagnostics",
-    body:
-      "For situations that still need disciplined reading before any advisory path is justified.",
+    body: "For situations that still need disciplined reading before any advisory path is justified.",
     href: "/diagnostics",
     cta: "Open diagnostics",
     icon: ShieldCheck,
   },
   {
     title: "View executive reporting",
-    body:
-      "For buyers who already know the matter is serious and want a premium report before intervention.",
+    body: "For buyers who already know the matter is serious and want a premium report before intervention.",
     href: "/diagnostics/executive-reporting",
     cta: "View flagship product",
     icon: FileText,
@@ -34,8 +36,7 @@ const ROUTES: RouteCard[] = [
   },
   {
     title: "Enter Strategy Room",
-    body:
-      "For matters where the consequence is already material and structured private intervention is warranted.",
+    body: "For matters where the consequence is already material and structured private intervention is warranted.",
     href: "/consulting/strategy-room",
     cta: "Request mandate review",
     icon: Crown,
@@ -57,33 +58,68 @@ export default function StrategyRoomEntryRouter() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: index * 0.08 }}
-            className={[
-              "border p-8 transition-colors duration-500",
-              item.emphasis
-                ? "border-amber-500/24 bg-amber-500/[0.03]"
-                : "border-white/[0.08] bg-white/[0.02]",
-            ].join(" ")}
+            style={{
+              border: item.emphasis
+                ? `1px solid ${GOLD}22`
+                : "1px solid rgba(255,255,255,0.08)",
+              backgroundColor: item.emphasis ? `${GOLD}04` : LIFT,
+              padding: "2rem",
+            }}
           >
             <div className="flex items-center justify-between gap-4">
-              <Icon className="h-5 w-5 text-amber-400/68" />
+              <Icon className="h-5 w-5" style={{ color: `${GOLD}75` }} />
               {item.emphasis ? (
-                <span className="rounded-full border border-amber-500/20 bg-amber-500/[0.06] px-3 py-1 font-mono text-[8px] uppercase tracking-[0.2em] text-amber-300/74">
+                <span
+                  style={{
+                    border: `1px solid ${GOLD}18`,
+                    backgroundColor: `${GOLD}08`,
+                    padding: "4px 10px",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.20em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}B8`,
+                  }}
+                >
                   Best first serious move
                 </span>
               ) : null}
             </div>
 
-            <h3 className="mt-6 font-serif text-2xl text-white">
+            <h3
+              style={{
+                marginTop: "1.5rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "1.8rem",
+                lineHeight: 1.05,
+                color: "rgba(255,255,255,0.92)",
+              }}
+            >
               {item.title}
             </h3>
 
-            <p className="mt-4 text-sm leading-relaxed text-white/50">
+            <p
+              style={{
+                marginTop: "1rem",
+                fontSize: "0.92rem",
+                lineHeight: 1.75,
+                color: "rgba(255,255,255,0.50)",
+              }}
+            >
               {item.body}
             </p>
 
             <Link
               href={item.href}
-              className="group mt-8 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-400/70 transition-colors hover:text-amber-300"
+              className="group mt-8 inline-flex items-center gap-2 transition-colors"
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "10px",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: `${GOLD}B0`,
+              }}
             >
               <span>{item.cta}</span>
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
