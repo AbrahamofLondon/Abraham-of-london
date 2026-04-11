@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/admin/audit/page.tsx
 import { getPrisma } from "@/lib/prisma.server";
 import { Shield, Clock, User, AlertCircle, Database } from "lucide-react";

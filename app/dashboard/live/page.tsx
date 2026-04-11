@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/dashboard/live/page.tsx
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";

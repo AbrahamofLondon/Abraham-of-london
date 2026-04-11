@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /* app/audit/[id]/success/page.tsx — TELEMETRY_STABILIZED_VIEW */
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";

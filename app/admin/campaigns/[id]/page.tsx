@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /* app/admin/campaigns/[id]/page.tsx — INSTITUTIONAL CAMPAIGN REGISTRY */
 import { db } from "@/lib/db";
 import {

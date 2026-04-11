@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createCampaignInvitesSchema } from "@/lib/alignment/enterprise-schemas";
 import {

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /* app/api/campaigns/[id]/nudge/route.ts — SOVEREIGN NUDGE DISPATCHER */
 
 import { db } from "@/lib/db";

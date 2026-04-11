@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/constitutional/appeal/route.ts
 // --- CONSTITUTIONAL APPEAL ENDPOINT ---
 

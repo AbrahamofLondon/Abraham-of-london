@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getEnterpriseDashboardView } from "@/lib/alignment/enterprise-repository";
 import { STRATEGIC_INTERVENTIONS } from "@/lib/alignment/enterprise-recommendations";

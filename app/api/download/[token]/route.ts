@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /* app/api/download/[token]/route.ts — STRICT-TYPED MASTER VAULT */
 import { NextRequest, NextResponse } from "next/server";
 import React from "react";

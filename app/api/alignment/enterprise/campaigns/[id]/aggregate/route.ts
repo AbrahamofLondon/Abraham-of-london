@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { aggregateEnterpriseCampaign } from "@/lib/alignment/enterprise-aggregation";
 
-/**
- * Enterprise Aggregation Endpoint
- * Triggers the geometric and statistical processing for a specific campaign.
- */
+// Force dynamic rendering — prevents Next.js from trying to statically
+// analyze/execute this route at build time, which crashes because the
+// enterprise-aggregation chain imports PrismaClient which needs DATABASE_URL.
+export const dynamic = "force-dynamic";
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Destructure from the awaited params for Next.js 15+ compatibility
   const { id } = await params;
 
   try {
@@ -20,8 +19,13 @@ export async function POST(
       );
     }
 
+    // Dynamic import to avoid build-time evaluation
+    const { aggregateEnterpriseCampaign } = await import(
+      "@/lib/alignment/enterprise-aggregation"
+    );
+
     const result = await aggregateEnterpriseCampaign(id);
-    
+
     return NextResponse.json(result);
   } catch (error) {
     console.error("[Aggregate] Error:", error);

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/actions/deploy-intervention.ts
 "use server";
 

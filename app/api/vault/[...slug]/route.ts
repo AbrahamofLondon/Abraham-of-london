@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/vault/[...slug]/route.ts — VAULT REGISTRY RETRIEVAL (Node runtime)
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

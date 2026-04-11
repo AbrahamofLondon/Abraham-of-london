@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/executive-reporting/export/boardroom-pdf/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";

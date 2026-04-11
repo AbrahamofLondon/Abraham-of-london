@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/admin/decision/efficacy/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";

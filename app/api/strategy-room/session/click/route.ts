@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/click/route.ts
 
 import { NextResponse } from "next/server";

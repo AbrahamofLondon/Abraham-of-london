@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /* app/api/audit/[id]/submit/route.ts — STABILIZED DYNAMIC INGESTION */
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";

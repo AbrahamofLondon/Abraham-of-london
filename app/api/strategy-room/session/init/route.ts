@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/strategy-room/session/init/route.ts
 import { NextResponse } from "next/server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";

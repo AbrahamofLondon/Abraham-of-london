@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/constitutional/export/route.ts
 // --- CONSTITUTIONAL EXPORT ENDPOINT ---
 

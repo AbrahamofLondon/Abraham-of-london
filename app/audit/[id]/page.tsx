@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /* app/audit/[id]/page.tsx — SOVEREIGN TELEMETRY NODE */
 import { db } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";

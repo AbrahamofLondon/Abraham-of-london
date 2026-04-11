@@ -1,5 +1,7 @@
+export const dynamic = "force-dynamic";
 // app/api/executive-reporting/run/route.ts
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma.server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
@@ -7,6 +9,29 @@ import { buildExecutiveReportViewModel } from "@/lib/admin/reporting/executive-r
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 
 type AnyRecord = Record<string, unknown>;
+
+type ExecutiveReportingRoute = "STRATEGY" | "DIAGNOSTIC" | "REJECT";
+type EvidenceQuality = "HIGH" | "MEDIUM" | "LOW";
+type RiskScore = "LOW" | "MEDIUM" | "HIGH";
+
+type ExecutiveReportingRunSuccess = {
+  ok: true;
+  runKey: string;
+  route: ExecutiveReportingRoute;
+  canonical: unknown;
+  viewModel: unknown;
+  entitlements: unknown;
+  diagnostics: unknown;
+};
+
+type ExecutiveReportingRunFailure = {
+  ok: false;
+  error: string;
+};
+
+type ExecutiveReportingRunResponse =
+  | ExecutiveReportingRunSuccess
+  | ExecutiveReportingRunFailure;
 
 function s(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -23,9 +48,7 @@ function n(value: unknown, fallback = 0): number {
 }
 
 function arr(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.map((item) => s(item)).filter(Boolean)
-    : [];
+  return Array.isArray(value) ? value.map((item) => s(item)).filter(Boolean) : [];
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -43,7 +66,24 @@ function getObject(value: unknown): AnyRecord {
     : {};
 }
 
-function inferRiskScore(severityScore: number, evidenceQuality: string): "LOW" | "MEDIUM" | "HIGH" {
+function toEvidenceQuality(value: unknown): EvidenceQuality {
+  const normalized = s(value, "MEDIUM").toUpperCase();
+  if (normalized === "HIGH") return "HIGH";
+  if (normalized === "LOW") return "LOW";
+  return "MEDIUM";
+}
+
+function toRoute(value: unknown): ExecutiveReportingRoute {
+  const normalized = s(value, "DIAGNOSTIC").toUpperCase();
+  if (normalized === "STRATEGY") return "STRATEGY";
+  if (normalized === "REJECT") return "REJECT";
+  return "DIAGNOSTIC";
+}
+
+function inferRiskScore(
+  severityScore: number,
+  evidenceQuality: EvidenceQuality,
+): RiskScore {
   let adjusted = severityScore;
 
   if (evidenceQuality === "HIGH") adjusted += 6;
@@ -56,7 +96,7 @@ function inferRiskScore(severityScore: number, evidenceQuality: string): "LOW" |
 
 function buildNarrativeHeadline(input: {
   organisation: string;
-  route: string;
+  route: ExecutiveReportingRoute;
   orgState: string;
   stakeholderBreadth: string;
   marketExposure: string;
@@ -72,11 +112,17 @@ function buildNarrativeHeadline(input: {
     return `${organisation} does not yet present a decision-grade case for executive escalation.`;
   }
 
-  if (input.stakeholderBreadth === "BOARD" || input.stakeholderBreadth === "INSTITUTIONAL") {
+  if (
+    input.stakeholderBreadth === "BOARD" ||
+    input.stakeholderBreadth === "INSTITUTIONAL"
+  ) {
     return `${organisation} presents a ${state.toLowerCase()} condition with broad stakeholder consequence requiring disciplined executive interpretation.`;
   }
 
-  if (input.marketExposure === "CRITICAL" || input.marketExposure === "HIGH") {
+  if (
+    input.marketExposure === "CRITICAL" ||
+    input.marketExposure === "HIGH"
+  ) {
     return `${organisation} is operating under visible structural strain with market-facing consequence.`;
   }
 
@@ -91,19 +137,21 @@ function buildNarrativeSummary(input: {
   decisionQuestion: string;
   whatHappensIfNothingChanges: string;
   priorAttemptOutcome: string;
-  evidenceQuality: string;
+  evidenceQuality: EvidenceQuality;
 }): string {
   const constitutionalNarrative = s(input.constitution.narrativeSummary);
   if (constitutionalNarrative) {
     const additions: string[] = [];
 
     if (input.priorAttemptOutcome && input.priorAttemptOutcome !== "NONE") {
-      additions.push(`Prior correction history is non-trivial (${input.priorAttemptOutcome.toLowerCase()}).`);
+      additions.push(
+        `Prior correction history is non-trivial (${input.priorAttemptOutcome.toLowerCase()}).`,
+      );
     }
 
-    if (input.evidenceQuality) {
-      additions.push(`Evidence quality is assessed as ${input.evidenceQuality.toLowerCase()}.`);
-    }
+    additions.push(
+      `Evidence quality is assessed as ${input.evidenceQuality.toLowerCase()}.`,
+    );
 
     if (input.decisionQuestion) {
       additions.push(`The immediate decision need is: ${input.decisionQuestion}`);
@@ -141,7 +189,9 @@ function buildNarrativeMandate(input: {
     mandateBits.push("Prepare output for leadership or board-level review.");
   }
   if (input.decisionWindow) {
-    mandateBits.push(`Decision window: ${input.decisionWindow.replace(/_/g, " ").toLowerCase()}.`);
+    mandateBits.push(
+      `Decision window: ${input.decisionWindow.replace(/_/g, " ").toLowerCase()}.`,
+    );
   }
 
   return mandateBits.join(" ").trim() || "Proceed according to governed recommendation sequence.";
@@ -164,9 +214,12 @@ function toTelemetryDomains(input: {
   const history = getObject(intake.history);
   const governance = getObject(intake.governance);
 
-  const evidenceQuality = s(history.evidenceQuality, "MEDIUM");
+  const evidenceQuality = toEvidenceQuality(history.evidenceQuality);
   const marketExposure = s(economics.marketExposure, "MEDIUM");
-  const authorityScope = s(governance.authorityScope, s(constitution.authorityType, "UNCLEAR"));
+  const authorityScope = s(
+    governance.authorityScope,
+    s(constitution.authorityType, "UNCLEAR"),
+  );
 
   const exposurePenalty =
     marketExposure === "CRITICAL"
@@ -351,24 +404,27 @@ function validateIntake(intake: AnyRecord): string | null {
   return null;
 }
 
-export async function POST(request: Request) {
+function jsonFailure(
+  error: string,
+  status: number,
+): NextResponse<ExecutiveReportingRunResponse> {
+  return NextResponse.json({ ok: false, error }, { status });
+}
+
+export async function POST(
+  request: Request,
+): Promise<NextResponse<ExecutiveReportingRunResponse>> {
   try {
     const body = await request.json();
     const intake = getObject(body?.intake);
 
-    if (!intake || Object.keys(intake).length === 0) {
-      return NextResponse.json(
-        { ok: false, error: "Invalid intake payload." },
-        { status: 400 },
-      );
+    if (Object.keys(intake).length === 0) {
+      return jsonFailure("Invalid intake payload.", 400);
     }
 
     const validationError = validateIntake(intake);
     if (validationError) {
-      return NextResponse.json(
-        { ok: false, error: validationError },
-        { status: 400 },
-      );
+      return jsonFailure(validationError, 400);
     }
 
     const email = s(intake.email).toLowerCase();
@@ -384,8 +440,8 @@ export async function POST(request: Request) {
       },
     });
 
-    const constitution = assembled.constitution;
-    const guidance = assembled.guidance;
+    const constitution = getObject(assembled.constitution);
+    const guidance = getObject(assembled.guidance);
 
     const governance = getObject(intake.governance);
     const economics = getObject(intake.economics);
@@ -410,9 +466,12 @@ export async function POST(request: Request) {
       intake,
     });
 
+    const evidenceQuality = toEvidenceQuality(history.evidenceQuality);
+    const route = toRoute(constitution.route);
+
     const riskScore = inferRiskScore(
       n(constitution.severityScore, 0),
-      s(history.evidenceQuality, "MEDIUM"),
+      evidenceQuality,
     );
 
     const canonical = buildCanonicalReportContract({
@@ -421,7 +480,7 @@ export async function POST(request: Request) {
         narrative: {
           headline: buildNarrativeHeadline({
             organisation: s(intake.organisation, "Prospective Organisation"),
-            route: s(constitution.route, "DIAGNOSTIC"),
+            route,
             orgState: s(constitution.orgState, "DRIFTING"),
             stakeholderBreadth: s(governance.stakeholderBreadth, "LOCAL"),
             marketExposure: s(economics.marketExposure, "MEDIUM"),
@@ -434,7 +493,7 @@ export async function POST(request: Request) {
             decisionQuestion: s(decisionNeed.decisionQuestion),
             whatHappensIfNothingChanges: s(decisionNeed.whatHappensIfNothingChanges),
             priorAttemptOutcome: s(history.priorAttemptOutcome),
-            evidenceQuality: s(history.evidenceQuality, "MEDIUM"),
+            evidenceQuality,
           }),
           mandate: buildNarrativeMandate({
             guidance,
@@ -470,7 +529,7 @@ export async function POST(request: Request) {
         }),
         ogr: {
           sovereignCertainty: clamp(n(constitution.clarityScore, 0), 0, 100),
-          isAuthorizedToExecute: s(constitution.route) === "STRATEGY",
+          isAuthorizedToExecute: route === "STRATEGY",
         },
       },
       constitution,
@@ -501,17 +560,18 @@ export async function POST(request: Request) {
         sector: s(intake.sector) || null,
         source: "executive-reporting",
         status: "completed",
-        route: s(constitution.route) || null,
+        route: route || null,
         readinessTier: s(constitution.readinessTier) || null,
         authorityType: s(constitution.authorityType) || null,
-        canonicalSnapshot: canonical as any,
-        viewModelSnapshot: viewModel as any,
+        canonicalSnapshot: canonical as Prisma.InputJsonValue,
+        viewModelSnapshot: viewModel as Prisma.InputJsonValue,
       },
     });
 
     return NextResponse.json({
       ok: true,
       runKey: run.runKey,
+      route,
       canonical,
       viewModel,
       entitlements,
@@ -519,10 +579,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("[EXECUTIVE_REPORTING_RUN_ERROR]", error);
-
-    return NextResponse.json(
-      { ok: false, error: "Failed to generate executive report." },
-      { status: 500 },
-    );
+    return jsonFailure("Failed to generate executive report.", 500);
   }
 }

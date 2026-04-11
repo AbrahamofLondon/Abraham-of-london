@@ -20,7 +20,8 @@
       "Bash(ls:*)",
       "Bash(npx netlify:*)",
       "Bash(npm install:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build)"
     ]
   }
 }

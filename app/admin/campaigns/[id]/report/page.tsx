@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/admin/campaigns/[id]/report/page.tsx
 import Link from "next/link";
 import {

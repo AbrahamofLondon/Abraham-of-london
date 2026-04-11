@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/alignment/enterprise/campaigns/[id]/close/route.ts
 import { NextResponse } from "next/server";
 import { updateCampaignStatus } from "@/lib/alignment/enterprise-repository";

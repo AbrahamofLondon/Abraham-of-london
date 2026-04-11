@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createOrganisationSchema } from "@/lib/alignment/enterprise-schemas";
 import { createOrganisation } from "@/lib/alignment/enterprise-repository";

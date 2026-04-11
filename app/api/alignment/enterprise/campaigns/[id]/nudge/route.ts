@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getCampaignById } from "@/lib/alignment/enterprise-repository";
 import { sendCampaignNudgeEmail } from "@/lib/mail";

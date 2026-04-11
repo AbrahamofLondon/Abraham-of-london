@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 app/enterprise/alignment/campaigns/[campaignId]/page.tsx
 
 import { getEnterpriseDashboardView } from "@/lib/alignment/enterprise-repository";

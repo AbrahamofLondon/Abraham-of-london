@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/admin/decision/signal-registry/route.ts
 
 import { NextRequest, NextResponse } from "next/server";

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/constitutional/audit/route.ts
 // --- AUDIT TRAIL ENDPOINT ---
 

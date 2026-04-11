@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/api/interactions/toggle/route.ts — HARDENED (App Router, Typed, Resilient)
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
