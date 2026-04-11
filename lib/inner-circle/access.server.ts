@@ -1,8 +1,8 @@
-/* lib/inner-circle/access.server.ts — Standardized Redis Access (SSOT) */
+/* lib/inner-circle/access.server.ts — Canonical Inner Circle access reader */
 
 import tiers, { type AccessTier } from "@/lib/access/tiers";
-// ✅ FIXED: Changed from .postgres to .redis to ensure session consistency
-import { verifySession } from "@/lib/server/auth/tokenStore.redis";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 
 export type InnerCircleAccessReason =
   | "no_request"
@@ -21,6 +21,9 @@ export type InnerCircleAccess = {
 };
 
 type RequestLike = {
+  cookies?:
+    | Record<string, string | undefined>
+    | { get?: (key: string) => string | { value?: string } | null | undefined };
   headers?:
     | { cookie?: string | undefined; [k: string]: any }
     | { get?: (key: string) => string | null | undefined; [k: string]: any }
@@ -46,8 +49,6 @@ function parseCookieHeader(cookieHeader: string | undefined | null): Record<stri
   return out;
 }
 
-const ACCESS_COOKIE_KEYS = ["aol_access", "innerCircleAccess", "inner_circle_access"];
-
 function getCookieHeader(req: RequestLike): string {
   const headers: any = req?.headers;
   return (
@@ -58,12 +59,39 @@ function getCookieHeader(req: RequestLike): string {
 }
 
 function extractSessionIdFromReq(req: RequestLike): string | null {
-  const cookies = parseCookieHeader(getCookieHeader(req));
-  for (const k of ACCESS_COOKIE_KEYS) {
-    const v = cookies[k];
-    if (v && typeof v === "string" && v.length <= 2048) return v;
+  const directCookies = req?.cookies;
+
+  if (
+    directCookies &&
+    typeof directCookies === "object" &&
+    typeof (directCookies as { get?: unknown }).get !== "function"
+  ) {
+    const cookieRecord = directCookies as Record<string, string | undefined>;
+    const directSessionId =
+      cookieRecord.aol_access ||
+      cookieRecord.aol_session ||
+      cookieRecord.innerCircleAccess ||
+      cookieRecord.inner_circle_access ||
+      null;
+
+    if (typeof directSessionId === "string" && directSessionId.trim()) {
+      return directSessionId.trim();
+    }
   }
-  return null;
+
+  const headerCookies = parseCookieHeader(getCookieHeader(req));
+  const headerSessionId =
+    headerCookies.aol_access ||
+    headerCookies.aol_session ||
+    headerCookies.innerCircleAccess ||
+    headerCookies.inner_circle_access ||
+    null;
+
+  if (typeof headerSessionId === "string" && headerSessionId.trim()) {
+    return headerSessionId.trim();
+  }
+
+  return readAccessCookie(req as any);
 }
 
 function mapVerifyReason(reason?: string): InnerCircleAccessReason {
@@ -103,7 +131,6 @@ export async function getInnerCircleAccess(
     const sessionId = extractSessionIdFromReq(reqOrParams as RequestLike);
     if (!sessionId) return { hasAccess: false, reason: "requires_auth", tier: "public" };
 
-    // Standardized Redis Verification
     const v = await verifySession(sessionId);
 
     if (!v.ok) return { hasAccess: false, reason: "internal_error", tier: "public" };

@@ -69,10 +69,27 @@ function cookieBase() {
   };
 }
 
+function sanitizeReturnTo(value: unknown): string {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
+    return "/dashboard";
+  }
+  return raw;
+}
+
+function hasValidSovereignCookies(request: Request): boolean {
+  const cookieHeader = request.headers.get("cookie") || "";
+  return (
+    cookieHeader.includes(`${PRIMARY_COOKIE_NAME}=`) ||
+    cookieHeader.includes(`${COMPAT_COOKIE_NAME}=`)
+  );
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const providedKey = normalizeKey((body as { key?: unknown })?.key);
+    const returnTo = sanitizeReturnTo((body as { returnTo?: unknown })?.returnTo);
 
     const configuredKeys = getConfiguredKeys();
     const sessionSecret = String(process.env.OGR_SESSION_SECRET || "").trim();
@@ -106,7 +123,7 @@ export async function POST(request: Request) {
       secret: sessionSecret,
     });
 
-    const response = NextResponse.json({ ok: true });
+    const response = NextResponse.json({ ok: true, returnTo });
 
     response.cookies.set({
       name: PRIMARY_COOKIE_NAME,
@@ -130,13 +147,9 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json(
-    {
-      ok: false,
-      error: "METHOD_NOT_ALLOWED",
-      message: "Use POST to initialize sovereign authentication.",
-    },
-    { status: 405 },
-  );
+export async function GET(request: Request) {
+  return NextResponse.json({
+    ok: true,
+    authenticated: hasValidSovereignCookies(request),
+  });
 }

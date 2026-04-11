@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials) {
+      async authorize(credentials, _req): Promise<User | null> {
         try {
           const email =
             typeof credentials?.email === "string" ? credentials.email.trim() : "";
@@ -149,14 +149,16 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
           });
 
-          return {
+          const authUser: AuthUser = {
             id: user.id,
-            email: user.email,
+            email: user.email ?? email,
             name: user.name ?? "User",
             role: String(user.role ?? "member"),
-            tier: user.tier ?? "member",
+            tier: normalizeUserTier(user.tier ?? "member"),
             aol: aolClaims,
           };
+
+          return authUser;
         } catch (error) {
           logger.error("[AUTH] Credentials authorization error", {
             error: error instanceof Error ? error.message : "Unknown error",
@@ -272,11 +274,8 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-  signIn: "/admin/login",
-  error: "/admin/error",
-  verifyRequest: "/admin/verify",
-  newUser: "/admin/welcome",
-},
+    signIn: "/admin/login",
+  },
 
   session: {
     strategy: "jwt",
