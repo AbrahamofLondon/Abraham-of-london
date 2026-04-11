@@ -1,3 +1,5 @@
+// lib/admin/reporting/types.ts
+
 export type ExecutiveReportState =
   | "ORDERED"
   | "DRIFTING"
@@ -5,35 +7,66 @@ export type ExecutiveReportState =
   | "DISORDERED";
 
 export type ConstitutionalRoute = "REJECT" | "DIAGNOSTIC" | "STRATEGY";
+
 export type ExecutiveReportPriority =
   | "LOW"
   | "MEDIUM"
   | "HIGH"
   | "CRITICAL"
   | "SOVEREIGN";
+
 export type ExecutiveReportTemperature =
   | "COLD"
   | "WARM"
   | "HOT"
   | "SCORCHING";
+
 export type ExecutiveReportAuthorityType = "DIRECT" | "PROXY" | "UNCLEAR";
+
 export type ExecutiveReportReadinessTier =
   | "FRAGILE"
   | "EMERGING"
   | "STABILIZING"
   | "EXECUTION_READY"
   | "SOVEREIGN";
+
 export type ExecutiveReportMarketRiskBand =
   | "LOW"
   | "MEDIUM"
   | "HIGH"
   | "CRITICAL";
+
 export type ExecutiveReportRevenueBand =
   | "MICRO"
   | "SMB"
   | "MID"
   | "ENTERPRISE"
   | "WHALE";
+
+export type ExecutiveReportClassification = "RESTRICTED";
+
+export interface ExecutiveReportDomainReading {
+  label: string;
+  intent: number;
+  reality: number;
+  dissonance: number;
+}
+
+export interface ExecutiveReportFinancialExposure {
+  replacementCost: number;
+  executionLoss: number;
+  totalExposure: number;
+  replacementCostFormatted: string;
+  executionLossFormatted: string;
+  totalExposureFormatted: string;
+}
+
+export interface ExecutiveReportIntegritySnapshot {
+  sovereignCertainty: number;
+  burnoutIndex: number;
+  averageDissonance: number;
+  authorized: boolean;
+}
 
 export interface ExecutiveReportConstitution {
   route: ConstitutionalRoute;
@@ -114,23 +147,13 @@ export interface ReturnTypeSerializeExecutiveReportToPdfPayload {
   mandate: string;
   priorities: string[];
   failureModes: string[];
-  domains: Array<{
-    label: string;
-    intent: number;
-    reality: number;
-    dissonance: number;
-  }>;
+  domains: ExecutiveReportDomainReading[];
   exposure: {
     replacementCost: string;
     executionLoss: string;
     totalExposure: string;
   };
-  integrity: {
-    sovereignCertainty: number;
-    averageDissonance: number;
-    burnoutIndex: number;
-    authorized: boolean;
-  };
+  integrity: ExecutiveReportIntegritySnapshot;
   constitution: ExecutiveReportPdfConstitutionPayload;
   recommendations: ExecutiveReportRecommendation[];
 }
@@ -162,27 +185,10 @@ export interface CanonicalExecutiveReportExport {
     constitutionalPosture: ExecutiveReportConstitution;
     strategicDomainAnalysis: {
       averageDissonance: number;
-      domains: Array<{
-        label: string;
-        intent: number;
-        reality: number;
-        dissonance: number;
-      }>;
+      domains: ExecutiveReportDomainReading[];
     };
-    financialExposure: {
-      replacementCost: number;
-      executionLoss: number;
-      totalExposure: number;
-      replacementCostFormatted: string;
-      executionLossFormatted: string;
-      totalExposureFormatted: string;
-    };
-    integritySnapshot: {
-      sovereignCertainty: number;
-      burnoutIndex: number;
-      averageDissonance: number;
-      authorized: boolean;
-    };
+    financialExposure: ExecutiveReportFinancialExposure;
+    integritySnapshot: ExecutiveReportIntegritySnapshot;
     governedRecommendations: {
       summary: string;
       nextAction: string;
@@ -213,21 +219,25 @@ export interface CanonicalExecutiveReportExport {
   };
 }
 
+export interface ExecutiveReportCampaignContext {
+  campaignId: string;
+  organisationName: string;
+  completedParticipantCount: number;
+  correctionNodeCount: number;
+}
+
+export interface ExecutiveReportCampaignPayload {
+  id: string;
+  title: string;
+  organisationName: string;
+  generatedAt: string;
+  correctionNodes?: unknown[];
+}
+
 export interface ExecutiveReportApiPayload {
-  report: any;
-  campaign: {
-    id: string;
-    title: string;
-    organisationName: string;
-    generatedAt: string;
-    correctionNodes?: any[];
-  };
-  context: {
-    campaignId: string;
-    organisationName: string;
-    completedParticipantCount: number;
-    correctionNodeCount: number;
-  };
+  report: unknown;
+  campaign: ExecutiveReportCampaignPayload;
+  context: ExecutiveReportCampaignContext;
   constitution: ExecutiveReportConstitution;
   guidance: ExecutiveReportGuidance;
   jsonPayload: CanonicalExecutiveReportExport;

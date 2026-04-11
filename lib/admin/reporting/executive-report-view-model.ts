@@ -26,6 +26,14 @@ export interface ExecutiveReportAssetView {
   transformationStage?: string[];
 }
 
+export interface ExecutiveReportFindingView {
+  domain: string;
+  severity: string;
+  headline: string;
+  reading: string;
+  signal: string;
+}
+
 export interface ExecutiveReportViewModel {
   header: {
     reportId: string;
@@ -81,6 +89,11 @@ export interface ExecutiveReportViewModel {
     matchedAssets: ExecutiveReportAssetView[];
     recommendations: ExecutiveReportRecommendationView[];
   };
+
+  // UI convenience fields
+  findings: ExecutiveReportFindingView[];
+  boardActions: string[];
+  nextAction: string;
 }
 
 function safeString(value: unknown, fallback = ""): string {
@@ -103,10 +116,30 @@ function safeArray(value: unknown): string[] {
     : [];
 }
 
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))];
+}
+
 function scoreToPriority(score: number): "high" | "medium" | "low" {
   if (score >= 75) return "high";
   if (score >= 45) return "medium";
   return "low";
+}
+
+function severityFromScore(score: number): string {
+  if (score >= 80) return "CRITICAL";
+  if (score >= 60) return "HIGH";
+  if (score >= 40) return "MEDIUM";
+  return "LOW";
+}
+
+function titleCase(value: string): string {
+  return value
+    .toLowerCase()
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function inferAudience(route: string, authorityType: string): string[] {
@@ -171,6 +204,14 @@ export function buildExecutiveReportViewModel(
   const sections = canonical.sections;
   const constitution = sections.constitutionalPosture;
 
+  const route = safeString(constitution.route, "DIAGNOSTIC");
+  const state = safeString(sections.executiveSummary.state, constitution.orgState);
+  const authorityType = safeString(constitution.authorityType, "UNCLEAR");
+
+  const commercialUseCases = inferCommercialUseCases(state, route);
+  const audience = inferAudience(route, authorityType);
+  const transformationStage = inferTransformationStage(route, state);
+
   const matchedAssets: ExecutiveReportAssetView[] =
     sections.governedRecommendations.recommendations.map((item) => ({
       id: item.id,
@@ -179,15 +220,9 @@ export function buildExecutiveReportViewModel(
       confidence: item.score,
       href: item.href ?? null,
       worldviewAnchors: sections.worldviewAnchors.items,
-      commercialUseCases: inferCommercialUseCases(
-        sections.executiveSummary.state,
-        constitution.route,
-      ),
-      audience: inferAudience(constitution.route, constitution.authorityType),
-      transformationStage: inferTransformationStage(
-        constitution.route,
-        sections.executiveSummary.state,
-      ),
+      commercialUseCases,
+      audience,
+      transformationStage,
     }));
 
   const recommendationViews: ExecutiveReportRecommendationView[] =
@@ -204,11 +239,71 @@ export function buildExecutiveReportViewModel(
     }));
 
   const confidence = Math.round(
-    (safeNumber(sections.integritySnapshot.sovereignCertainty, 0) * 0.35) +
-      ((100 - safeNumber(sections.strategicDomainAnalysis.averageDissonance, 0)) * 0.25) +
-      (safeNumber(constitution.governanceScore, 0) * 0.2) +
-      (safeNumber(constitution.authorityScore, 0) * 0.2),
+    safeNumber(sections.integritySnapshot.sovereignCertainty, 0) * 0.35 +
+      (100 - safeNumber(sections.strategicDomainAnalysis.averageDissonance, 0)) * 0.25 +
+      safeNumber(constitution.governanceScore, 0) * 0.2 +
+      safeNumber(constitution.authorityScore, 0) * 0.2,
   );
+
+  const failureModes = sections.failureModes.items;
+  const dominantDomains = sections.dominantDomains.items;
+  const severity = severityFromScore(safeNumber(constitution.severityScore, 0));
+
+  const findings: ExecutiveReportFindingView[] = [
+    ...failureModes.slice(0, 3).map((mode) => ({
+      domain: "Failure Mode",
+      severity,
+      headline: titleCase(mode),
+      reading: `${titleCase(mode)} is materially present in the constitutional reading and is contributing to structural drag.`,
+      signal: "Observed in the constitutional failure pattern.",
+    })),
+    ...(safeNumber(constitution.governanceScore, 0) > 0
+      ? [
+          {
+            domain: "Governance",
+            severity: severityFromScore(100 - safeNumber(constitution.governanceScore, 0)),
+            headline:
+              safeNumber(constitution.governanceScore, 0) < 50
+                ? "Governance structure is under strain"
+                : "Governance remains functional but exposed",
+            reading:
+              safeNumber(constitution.governanceScore, 0) < 50
+                ? "Governance quality is weak relative to the seriousness of the matter, increasing the likelihood of delayed or distorted correction."
+                : "Governance is not the primary point of collapse, but it is carrying visible pressure from the wider condition.",
+            signal: `Governance score: ${safeNumber(constitution.governanceScore, 0)}/100`,
+          },
+        ]
+      : []),
+    ...(safeNumber(constitution.clarityScore, 0) > 0
+      ? [
+          {
+            domain: "Clarity",
+            severity: severityFromScore(100 - safeNumber(constitution.clarityScore, 0)),
+            headline:
+              safeNumber(constitution.clarityScore, 0) < 50
+                ? "Decision clarity is insufficient"
+                : "Decision clarity is present but not fully consolidated",
+            reading:
+              safeNumber(constitution.clarityScore, 0) < 50
+                ? "The organisation does not yet hold the matter with sufficient precision, which increases ambiguity in the decision path."
+                : "There is enough clarity to act, but not enough to proceed carelessly.",
+            signal: `Clarity score: ${safeNumber(constitution.clarityScore, 0)}/100`,
+          },
+        ]
+      : []),
+  ].slice(0, 5);
+
+  const boardActions = uniqueStrings([
+    ...sections.priorityStack.items,
+    ...sections.requiredInterventions.items,
+    ...recommendationViews.map((item) => item.title),
+  ]).slice(0, 8);
+
+  const nextAction =
+    safeString(sections.governedRecommendations.nextAction) ||
+    safeString(sections.executiveSummary.mandate) ||
+    boardActions[0] ||
+    "Proceed according to governed recommendation sequence.";
 
   return {
     header: {
@@ -218,20 +313,20 @@ export function buildExecutiveReportViewModel(
       subtitle: sections.executiveSummary.subtitle,
       generatedAt: canonical.generatedAt,
       classification: "RESTRICTED",
-      route: constitution.route,
-      authorityType: constitution.authorityType,
-      readinessTier: constitution.readinessTier,
+      route,
+      authorityType,
+      readinessTier: safeString(constitution.readinessTier, "EMERGING"),
       confidence,
     },
     summary: {
-      state: sections.executiveSummary.state,
+      state,
       headline: sections.executiveSummary.headline,
       summary: sections.executiveSummary.summary,
       mandate: sections.executiveSummary.mandate,
-      failureModes: sections.failureModes.items,
+      failureModes,
       priorityStack: sections.priorityStack.items,
       requiredInterventions: sections.requiredInterventions.items,
-      dominantDomains: sections.dominantDomains.items,
+      dominantDomains,
       rationale: sections.rationale.items,
     },
     telemetry: {
@@ -252,19 +347,16 @@ export function buildExecutiveReportViewModel(
     constitution,
     recommendations: {
       summary: sections.governedRecommendations.summary,
-      nextAction: sections.governedRecommendations.nextAction,
+      nextAction,
       worldviewAnchors: sections.worldviewAnchors.items,
-      commercialUseCases: inferCommercialUseCases(
-        sections.executiveSummary.state,
-        constitution.route,
-      ),
-      audience: inferAudience(constitution.route, constitution.authorityType),
-      transformationStage: inferTransformationStage(
-        constitution.route,
-        sections.executiveSummary.state,
-      ),
+      commercialUseCases,
+      audience,
+      transformationStage,
       matchedAssets,
       recommendations: recommendationViews,
     },
+    findings,
+    boardActions,
+    nextAction,
   };
 }

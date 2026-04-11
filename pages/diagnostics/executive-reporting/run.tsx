@@ -44,87 +44,117 @@ type ExecutiveReportingIntakeForm = {
   whatHappensIfNothingChanges: string;
 };
 
-type CanonicalDomain = {
-  label?: string;
-  intent?: number;
-  reality?: number;
-  dissonance?: number;
-};
-
-type CanonicalRecommendation = {
-  id?: string;
-  title?: string;
+type ExecutiveReportRecommendationView = {
+  id: string;
+  title: string;
+  type: string;
+  kind: string;
+  description: string;
+  priority: "high" | "medium" | "low";
   href?: string | null;
-  kind?: string;
-  score?: number;
-  summary?: string;
-  reasons?: string[];
+  score: number;
+  reasons: string[];
 };
 
-type CanonicalConstitution = {
-  route?: string;
-  priority?: string;
-  temperature?: string;
-  orgState?: string;
-  readinessTier?: string;
-  authorityType?: string;
-  revenueBand?: string;
-  marketRiskBand?: string;
-  clarityScore?: number;
-  authorityScore?: number;
-  governanceScore?: number;
-  severityScore?: number;
-  revenueScore?: number;
-  dominantDomains?: string[];
-  failureModes?: string[];
-  requiredInterventions?: string[];
-  sponsorTypes?: string[];
+type ExecutiveReportAssetView = {
+  id: string;
+  title: string;
+  kind: string;
+  confidence: number;
+  href?: string | null;
   worldviewAnchors?: string[];
-  narrativeSummary?: string;
-  rationale?: string[];
+  commercialUseCases?: string[];
+  audience?: string[];
+  transformationStage?: string[];
 };
 
-type CanonicalSections = {
-  executiveSummary?: {
-    title?: string;
-    subtitle?: string;
-    state?: string;
+type ExecutiveReportViewModel = {
+  header: {
+    reportId: string;
+    organisationName: string;
+    title: string;
+    subtitle: string;
+    generatedAt: string;
+    classification: string;
+    route: string;
+    authorityType: string;
+    readinessTier: string;
+    confidence: number;
+  };
+  summary: {
+    state: string;
+    headline: string;
+    summary: string;
+    mandate: string;
+    failureModes: string[];
+    priorityStack: string[];
+    requiredInterventions: string[];
+    dominantDomains: string[];
+    rationale: string[];
+  };
+  telemetry: {
+    averageDissonance: number;
+    burnoutIndex: number;
+    sovereignCertainty: number;
+    authorized: boolean;
+    domains: Array<{
+      label: string;
+      intent: number;
+      reality: number;
+      dissonance: number;
+    }>;
+  };
+  financialExposure: {
+    replacementCost: number;
+    executionLoss: number;
+    totalExposure: number;
+    replacementCostFormatted: string;
+    executionLossFormatted: string;
+    totalExposureFormatted: string;
+  };
+  constitution: {
+    route: string;
+    priority: string;
+    temperature: string;
+    orgState: string;
+    readinessTier: string;
+    authorityType: string;
+    revenueBand: string;
+    marketRiskBand: string;
+    clarityScore: number;
+    authorityScore: number;
+    governanceScore: number;
+    severityScore: number;
+    revenueScore: number;
+    dominantDomains: string[];
+    failureModes: string[];
+    requiredInterventions: string[];
+    sponsorTypes: string[];
+    worldviewAnchors: string[];
+    narrativeSummary: string;
+    rationale: string[];
+  };
+  recommendations: {
+    summary: string;
+    nextAction: string;
+    worldviewAnchors: string[];
+    commercialUseCases: string[];
+    audience: string[];
+    transformationStage: string[];
+    matchedAssets: ExecutiveReportAssetView[];
+    recommendations: ExecutiveReportRecommendationView[];
+  };
+
+  // legacy-friendly extras
+  findings?: Array<{
+    domain?: string;
+    severity?: string;
     headline?: string;
-    summary?: string;
-    mandate?: string;
-  };
-  constitutionalPosture?: CanonicalConstitution;
-  strategicDomainAnalysis?: {
-    averageDissonance?: number;
-    domains?: CanonicalDomain[];
-  };
-  financialExposure?: {
-    replacementCost?: number;
-    executionLoss?: number;
-    totalExposure?: number;
-    replacementCostFormatted?: string;
-    executionLossFormatted?: string;
-    totalExposureFormatted?: string;
-  };
-  integritySnapshot?: {
-    sovereignCertainty?: number;
-    burnoutIndex?: number;
-    averageDissonance?: number;
-    authorized?: boolean;
-  };
-  governedRecommendations?: {
-    summary?: string;
-    nextAction?: string;
-    rationale?: string[];
-    recommendations?: CanonicalRecommendation[];
-  };
-  priorityStack?: { items?: string[] };
-  failureModes?: { items?: string[] };
-  requiredInterventions?: { items?: string[] };
-  dominantDomains?: { items?: string[] };
-  worldviewAnchors?: { items?: string[] };
-  sponsorTypes?: { items?: string[] };
-  rationale?: { items?: string[] };
+    reading?: string;
+    signal?: string;
+  }>;
+  boardActions?: string[];
+  nextAction?: string;
 };
 
 type CanonicalReport = {
@@ -142,21 +172,82 @@ type CanonicalReport = {
     node?: string;
     protocol?: string;
   };
-  sections?: CanonicalSections;
-};
-
-type ViewModelFinding = {
-  domain?: string;
-  severity?: string;
-  headline?: string;
-  reading?: string;
-  signal?: string;
-};
-
-type ExecutiveReportViewModel = {
-  findings?: ViewModelFinding[];
-  boardActions?: string[];
-  nextAction?: string;
+  sections?: {
+    executiveSummary?: {
+      title?: string;
+      subtitle?: string;
+      state?: string;
+      headline?: string;
+      summary?: string;
+      mandate?: string;
+    };
+    constitutionalPosture?: {
+      route?: string;
+      priority?: string;
+      temperature?: string;
+      orgState?: string;
+      readinessTier?: string;
+      authorityType?: string;
+      revenueBand?: string;
+      marketRiskBand?: string;
+      clarityScore?: number;
+      authorityScore?: number;
+      governanceScore?: number;
+      severityScore?: number;
+      revenueScore?: number;
+      dominantDomains?: string[];
+      failureModes?: string[];
+      requiredInterventions?: string[];
+      sponsorTypes?: string[];
+      worldviewAnchors?: string[];
+      narrativeSummary?: string;
+      rationale?: string[];
+    };
+    strategicDomainAnalysis?: {
+      averageDissonance?: number;
+      domains?: Array<{
+        label?: string;
+        intent?: number;
+        reality?: number;
+        dissonance?: number;
+      }>;
+    };
+    financialExposure?: {
+      replacementCost?: number;
+      executionLoss?: number;
+      totalExposure?: number;
+      replacementCostFormatted?: string;
+      executionLossFormatted?: string;
+      totalExposureFormatted?: string;
+    };
+    integritySnapshot?: {
+      sovereignCertainty?: number;
+      burnoutIndex?: number;
+      averageDissonance?: number;
+      authorized?: boolean;
+    };
+    governedRecommendations?: {
+      summary?: string;
+      nextAction?: string;
+      rationale?: string[];
+      recommendations?: Array<{
+        id?: string;
+        title?: string;
+        href?: string | null;
+        kind?: string;
+        score?: number;
+        summary?: string;
+        reasons?: string[];
+      }>;
+    };
+    priorityStack?: { items?: string[] };
+    failureModes?: { items?: string[] };
+    requiredInterventions?: { items?: string[] };
+    dominantDomains?: { items?: string[] };
+    worldviewAnchors?: { items?: string[] };
+    sponsorTypes?: { items?: string[] };
+    rationale?: { items?: string[] };
+  };
 };
 
 type ExecutiveReportingResult =
@@ -231,11 +322,21 @@ function safeBoolean(value: unknown, fallback = false): boolean {
 }
 
 function safeStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((v) => safeString(v)).filter(Boolean) : [];
+  return Array.isArray(value) ? value.map((item) => safeString(item)).filter(Boolean) : [];
 }
 
 function fmtPercent(value: number | undefined): string {
   return typeof value === "number" && Number.isFinite(value) ? `${Math.round(value)}/100` : "—";
+}
+
+function formatDate(value: string): string {
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(dt);
 }
 
 function GoldRule({ soft = false }: { soft?: boolean }) {
@@ -480,17 +581,6 @@ function routeColor(r: string): { border: string; bg: string; text: string } {
   }
 }
 
-function resolveRoute(result: Extract<ExecutiveReportingResult, { ok: true }>): string {
-  return result.route ?? result.canonical?.sections?.constitutionalPosture?.route ?? "DIAGNOSTIC";
-}
-
-function resolveHeadline(result: Extract<ExecutiveReportingResult, { ok: true }>): string {
-  return (
-    result.canonical?.sections?.executiveSummary?.headline ??
-    "Executive intelligence brief generated."
-  );
-}
-
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
     <div
@@ -530,33 +620,25 @@ function ResultSurface({
   result: Extract<ExecutiveReportingResult, { ok: true }>;
   onRerun: () => void;
 }) {
-  const sections = result.canonical?.sections;
-  const execSumm = sections?.executiveSummary;
-  const posture = sections?.constitutionalPosture;
-  const strategic = sections?.strategicDomainAnalysis;
-  const integrity = sections?.integritySnapshot;
-  const governed = sections?.governedRecommendations;
-  const financial = sections?.financialExposure;
-  const priority = sections?.priorityStack?.items ?? [];
-  const failModes = sections?.failureModes?.items ?? [];
-  const requiredInterventions = sections?.requiredInterventions?.items ?? [];
-  const dominantDomains = sections?.dominantDomains?.items ?? [];
-  const rationale = sections?.rationale?.items ?? [];
-  const worldviewAnchors = sections?.worldviewAnchors?.items ?? [];
-  const sponsorTypes = sections?.sponsorTypes?.items ?? [];
-
-  const findings = result.viewModel?.findings ?? [];
-  const actions = result.viewModel?.boardActions ?? [];
-  const nextAction =
-    result.viewModel?.nextAction ??
-    governed?.nextAction ??
-    execSumm?.mandate ??
-    "Proceed according to governed recommendation sequence.";
-
-  const route = resolveRoute(result);
+  const vm = result.viewModel;
+  const canonical = result.canonical;
+  const header = vm?.header;
+  const summary = vm?.summary;
+  const telemetry = vm?.telemetry;
+  const financialExposure = vm?.financialExposure;
+  const constitution = vm?.constitution;
+  const recommendations = vm?.recommendations;
+  const findings = vm?.findings ?? [];
+  const boardActions = vm?.boardActions ?? summary?.priorityStack ?? [];
+  const nextAction = vm?.nextAction ?? recommendations?.nextAction ?? summary?.mandate ?? "";
+  const route = header?.route ?? result.route ?? constitution?.route ?? "DIAGNOSTIC";
   const rc = routeColor(route);
-  const domains = strategic?.domains ?? [];
   const entitlements = result.entitlements;
+
+  const dominantDomains = summary?.dominantDomains ?? constitution?.dominantDomains ?? [];
+  const failureModes = summary?.failureModes ?? constitution?.failureModes ?? [];
+  const requiredInterventions =
+    summary?.requiredInterventions ?? constitution?.requiredInterventions ?? [];
 
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
@@ -576,8 +658,9 @@ function ResultSurface({
                 maxWidth: "18ch",
               }}
             >
-              {resolveHeadline(result)}
+              {summary?.headline ?? canonical?.sections?.executiveSummary?.headline ?? "Executive intelligence brief generated."}
             </h1>
+
             <p
               style={{
                 marginTop: "0.75rem",
@@ -586,12 +669,12 @@ function ResultSurface({
                 fontSize: "0.98rem",
                 lineHeight: 1.68,
                 color: "rgba(255,255,255,0.36)",
-                maxWidth: "54ch",
+                maxWidth: "56ch",
               }}
             >
-              {execSumm?.subtitle
-                ? `${execSumm.subtitle} · ${safeString(execSumm.state, posture?.orgState ?? "DRIFTING")}`
-                : safeString(execSumm?.state, posture?.orgState ?? "DRIFTING")}
+              {[header?.organisationName, summary?.state, header?.classification]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
           </div>
 
@@ -611,6 +694,21 @@ function ResultSurface({
               {route}
             </span>
 
+            {header?.readinessTier && (
+              <span
+                style={{
+                  padding: "5px 14px",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.20em",
+                  color: "rgba(255,255,255,0.28)",
+                }}
+              >
+                {header.readinessTier}
+              </span>
+            )}
+
             <span
               style={{
                 padding: "5px 14px",
@@ -628,7 +726,7 @@ function ResultSurface({
 
         <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
           <div className="space-y-6">
-            {(execSumm?.summary || execSumm?.mandate) && (
+            {(summary?.summary || summary?.mandate) && (
               <div
                 style={{
                   border: `1px solid ${GOLD}20`,
@@ -649,7 +747,7 @@ function ResultSurface({
                   Executive summary
                 </div>
 
-                {execSumm?.summary && (
+                {summary?.summary && (
                   <p
                     style={{
                       fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -659,11 +757,11 @@ function ResultSurface({
                       color: "rgba(255,255,255,0.70)",
                     }}
                   >
-                    {execSumm.summary}
+                    {summary.summary}
                   </p>
                 )}
 
-                {execSumm?.mandate && (
+                {summary?.mandate && (
                   <p
                     style={{
                       marginTop: "1rem",
@@ -677,7 +775,7 @@ function ResultSurface({
                       paddingTop: "1rem",
                     }}
                   >
-                    {execSumm.mandate}
+                    {summary.mandate}
                   </p>
                 )}
               </div>
@@ -791,7 +889,7 @@ function ResultSurface({
               </div>
             )}
 
-            {domains.length > 0 && (
+            {telemetry?.domains && telemetry.domains.length > 0 && (
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
                   style={{
@@ -813,8 +911,8 @@ function ResultSurface({
                 </div>
 
                 <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {domains.slice(0, 5).map((d, i) => (
-                    <div key={`${safeString(d.label, "Domain")}-${i}`} style={{ padding: "0.95rem 1.25rem" }}>
+                  {telemetry.domains.slice(0, 5).map((d, i) => (
+                    <div key={`${d.label}-${i}`} style={{ padding: "0.95rem 1.25rem" }}>
                       <div className="mb-2 flex items-center justify-between gap-3">
                         <span
                           style={{
@@ -825,7 +923,7 @@ function ResultSurface({
                             color: `${GOLD}B0`,
                           }}
                         >
-                          {safeString(d.label, "Domain")}
+                          {d.label}
                         </span>
                         <span
                           style={{
@@ -835,7 +933,7 @@ function ResultSurface({
                             color: "rgba(255,255,255,0.38)",
                           }}
                         >
-                          Dissonance {safeNumber(d.dissonance, 0)}
+                          Dissonance {Math.round(d.dissonance)}
                         </span>
                       </div>
 
@@ -848,9 +946,9 @@ function ResultSurface({
                           color: "rgba(255,255,255,0.50)",
                         }}
                       >
-                        <div>Intent {safeNumber(d.intent, 0)}</div>
-                        <div>Reality {safeNumber(d.reality, 0)}</div>
-                        <div>Gap {safeNumber(d.dissonance, 0)}</div>
+                        <div>Intent {Math.round(d.intent)}</div>
+                        <div>Reality {Math.round(d.reality)}</div>
+                        <div>Gap {Math.round(d.dissonance)}</div>
                       </div>
                     </div>
                   ))}
@@ -858,7 +956,7 @@ function ResultSurface({
               </div>
             )}
 
-            {actions.length > 0 && (
+            {boardActions.length > 0 && (
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
                   style={{
@@ -880,12 +978,12 @@ function ResultSurface({
                 </div>
 
                 <div style={{ padding: "1rem 1.25rem" }}>
-                  {actions.map((a, i) => (
+                  {boardActions.map((a, i) => (
                     <div
                       key={`${a}-${i}`}
                       className="flex items-start gap-3 py-2.5"
                       style={{
-                        borderBottom: i < actions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                        borderBottom: i < boardActions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                       }}
                     >
                       <CheckSquare
@@ -914,7 +1012,7 @@ function ResultSurface({
               </div>
             )}
 
-            {governed?.recommendations && governed.recommendations.length > 0 && (
+            {recommendations?.recommendations && recommendations.recommendations.length > 0 && (
               <div
                 style={{
                   border: "1px solid rgba(255,255,255,0.06)",
@@ -941,8 +1039,8 @@ function ResultSurface({
                 </div>
 
                 <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {governed.recommendations.slice(0, 4).map((rec, i) => (
-                    <div key={`${rec.id ?? rec.title ?? "recommendation"}-${i}`} style={{ padding: "1rem 1.25rem" }}>
+                  {recommendations.recommendations.slice(0, 4).map((rec, i) => (
+                    <div key={`${rec.id}-${i}`} style={{ padding: "1rem 1.25rem" }}>
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p
@@ -954,7 +1052,7 @@ function ResultSurface({
                               marginBottom: "0.25rem",
                             }}
                           >
-                            {safeString(rec.title, "Untitled recommendation")}
+                            {rec.title}
                           </p>
 
                           <div
@@ -967,28 +1065,25 @@ function ResultSurface({
                               marginBottom: "0.45rem",
                             }}
                           >
-                            {safeString(rec.kind, "guidance")}
-                            {typeof rec.score === "number" ? ` · Score ${Math.round(rec.score)}` : ""}
+                            {rec.kind} · {rec.priority} · Score {Math.round(rec.score)}
                           </div>
 
-                          {safeString(rec.summary) && (
-                            <p
-                              style={{
-                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                                fontWeight: 300,
-                                fontSize: "0.9rem",
-                                lineHeight: 1.6,
-                                color: "rgba(255,255,255,0.44)",
-                                marginBottom: safeStringArray(rec.reasons).length ? "0.5rem" : 0,
-                              }}
-                            >
-                              {safeString(rec.summary)}
-                            </p>
-                          )}
+                          <p
+                            style={{
+                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                              fontWeight: 300,
+                              fontSize: "0.9rem",
+                              lineHeight: 1.6,
+                              color: "rgba(255,255,255,0.44)",
+                              marginBottom: rec.reasons.length ? "0.5rem" : 0,
+                            }}
+                          >
+                            {rec.description}
+                          </p>
 
-                          {safeStringArray(rec.reasons).length > 0 && (
+                          {rec.reasons.length > 0 && (
                             <div className="flex flex-wrap gap-2">
-                              {safeStringArray(rec.reasons).slice(0, 3).map((reason) => (
+                              {rec.reasons.slice(0, 3).map((reason) => (
                                 <span
                                   key={reason}
                                   style={{
@@ -1011,6 +1106,103 @@ function ResultSurface({
                         {rec.href && (
                           <Link
                             href={rec.href}
+                            className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-70"
+                            style={{
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "7px",
+                              letterSpacing: "0.24em",
+                              textTransform: "uppercase",
+                              color: `${GOLD}AA`,
+                            }}
+                          >
+                            Open
+                            <ArrowRight style={{ width: "10px", height: "10px" }} />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {recommendations?.matchedAssets && recommendations.matchedAssets.length > 0 && (
+              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    Matched assets
+                  </span>
+                </div>
+
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                  {recommendations.matchedAssets.slice(0, 4).map((asset, i) => (
+                    <div key={`${asset.id}-${i}`} style={{ padding: "1rem 1.25rem" }}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p
+                            style={{
+                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                              fontWeight: 300,
+                              fontSize: "0.98rem",
+                              color: "rgba(255,255,255,0.76)",
+                              marginBottom: "0.25rem",
+                            }}
+                          >
+                            {asset.title}
+                          </p>
+
+                          <div
+                            style={{
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "6.5px",
+                              letterSpacing: "0.26em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.22)",
+                              marginBottom: "0.45rem",
+                            }}
+                          >
+                            {asset.kind} · Confidence {Math.round(asset.confidence)}
+                          </div>
+
+                          {asset.commercialUseCases && asset.commercialUseCases.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {asset.commercialUseCases.slice(0, 3).map((tag) => (
+                                <span
+                                  key={tag}
+                                  style={{
+                                    padding: "3px 7px",
+                                    border: `1px solid ${GOLD}22`,
+                                    backgroundColor: `${GOLD}08`,
+                                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                                    fontSize: "6px",
+                                    letterSpacing: "0.16em",
+                                    textTransform: "uppercase",
+                                    color: `${GOLD}BE`,
+                                  }}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {asset.href && (
+                          <Link
+                            href={asset.href}
                             className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-70"
                             style={{
                               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -1068,7 +1260,39 @@ function ResultSurface({
           </div>
 
           <div className="space-y-4">
-            {posture && (
+            {header && (
+              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    Report header
+                  </span>
+                </div>
+                <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
+                  <MetricRow label="Report ID" value={header.reportId} />
+                  <MetricRow label="Organisation" value={header.organisationName} />
+                  <MetricRow label="Route" value={header.route} />
+                  <MetricRow label="Authority" value={header.authorityType} />
+                  <MetricRow label="Readiness tier" value={header.readinessTier} />
+                  <MetricRow label="Confidence" value={fmtPercent(header.confidence)} />
+                  <MetricRow label="Generated" value={formatDate(header.generatedAt)} />
+                </div>
+              </div>
+            )}
+
+            {constitution && (
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
                   style={{
@@ -1089,21 +1313,20 @@ function ResultSurface({
                   </span>
                 </div>
                 <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                  <MetricRow label="Route" value={safeString(posture.route, "—")} />
-                  <MetricRow label="Org state" value={safeString(posture.orgState, "—")} />
-                  <MetricRow label="Readiness tier" value={safeString(posture.readinessTier, "—")} />
-                  <MetricRow label="Authority" value={safeString(posture.authorityType, "—")} />
-                  <MetricRow label="Priority" value={safeString(posture.priority, "—")} />
-                  <MetricRow label="Temperature" value={safeString(posture.temperature, "—")} />
-                  <MetricRow label="Clarity score" value={fmtPercent(posture.clarityScore)} />
-                  <MetricRow label="Authority score" value={fmtPercent(posture.authorityScore)} />
-                  <MetricRow label="Governance score" value={fmtPercent(posture.governanceScore)} />
-                  <MetricRow label="Severity score" value={fmtPercent(posture.severityScore)} />
+                  <MetricRow label="Org state" value={constitution.orgState} />
+                  <MetricRow label="Priority" value={constitution.priority} />
+                  <MetricRow label="Temperature" value={constitution.temperature} />
+                  <MetricRow label="Clarity score" value={fmtPercent(constitution.clarityScore)} />
+                  <MetricRow label="Authority score" value={fmtPercent(constitution.authorityScore)} />
+                  <MetricRow label="Governance score" value={fmtPercent(constitution.governanceScore)} />
+                  <MetricRow label="Severity score" value={fmtPercent(constitution.severityScore)} />
+                  <MetricRow label="Revenue band" value={constitution.revenueBand} />
+                  <MetricRow label="Market risk band" value={constitution.marketRiskBand} />
                 </div>
               </div>
             )}
 
-            {integrity && (
+            {telemetry && (
               <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06` }}>
                 <div
                   style={{
@@ -1124,27 +1347,15 @@ function ResultSurface({
                   </span>
                 </div>
                 <div style={{ padding: "0.75rem 1.25rem" }}>
-                  <MetricRow
-                    label="Sovereign certainty"
-                    value={fmtPercent(integrity.sovereignCertainty)}
-                  />
-                  <MetricRow
-                    label="Burnout index"
-                    value={fmtPercent(integrity.burnoutIndex)}
-                  />
-                  <MetricRow
-                    label="Average dissonance"
-                    value={typeof integrity.averageDissonance === "number" ? String(Math.round(integrity.averageDissonance)) : "—"}
-                  />
-                  <MetricRow
-                    label="Authorized"
-                    value={safeBoolean(integrity.authorized) ? "YES" : "NO"}
-                  />
+                  <MetricRow label="Sovereign certainty" value={fmtPercent(telemetry.sovereignCertainty)} />
+                  <MetricRow label="Burnout index" value={fmtPercent(telemetry.burnoutIndex)} />
+                  <MetricRow label="Average dissonance" value={String(Math.round(telemetry.averageDissonance))} />
+                  <MetricRow label="Authorized" value={telemetry.authorized ? "YES" : "NO"} />
                 </div>
               </div>
             )}
 
-            {financial && (
+            {financialExposure && (
               <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06` }}>
                 <div
                   style={{
@@ -1165,14 +1376,14 @@ function ResultSurface({
                   </span>
                 </div>
                 <div style={{ padding: "0.75rem 1.25rem" }}>
-                  <MetricRow label="Replacement cost" value={safeString(financial.replacementCostFormatted, "—")} />
-                  <MetricRow label="Execution loss" value={safeString(financial.executionLossFormatted, "—")} />
-                  <MetricRow label="Total exposure" value={safeString(financial.totalExposureFormatted, "—")} />
+                  <MetricRow label="Replacement cost" value={financialExposure.replacementCostFormatted} />
+                  <MetricRow label="Execution loss" value={financialExposure.executionLossFormatted} />
+                  <MetricRow label="Total exposure" value={financialExposure.totalExposureFormatted} />
                 </div>
               </div>
             )}
 
-            {priority.length > 0 && (
+            {summary?.priorityStack && summary.priorityStack.length > 0 && (
               <div
                 style={{
                   border: "1px solid rgba(255,255,255,0.06)",
@@ -1198,12 +1409,12 @@ function ResultSurface({
                   </span>
                 </div>
                 <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                  {priority.slice(0, 6).map((item, i) => (
+                  {summary.priorityStack.slice(0, 6).map((item, i) => (
                     <div
                       key={`${item}-${i}`}
                       className="flex items-start gap-2.5 py-2"
                       style={{
-                        borderBottom: i < priority.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                        borderBottom: i < summary.priorityStack.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                       }}
                     >
                       <span
@@ -1283,7 +1494,7 @@ function ResultSurface({
               </div>
             )}
 
-            {failModes.length > 0 && (
+            {failureModes.length > 0 && (
               <div
                 style={{
                   border: "1px solid rgba(252,165,165,0.12)",
@@ -1304,7 +1515,7 @@ function ResultSurface({
                   Failure modes
                 </div>
 
-                {failModes.map((m, i) => (
+                {failureModes.map((m, i) => (
                   <div key={`${m}-${i}`} className="flex items-start gap-2.5 py-1.5">
                     <AlertTriangle
                       style={{
@@ -1332,9 +1543,10 @@ function ResultSurface({
             )}
 
             {(dominantDomains.length > 0 ||
-              sponsorTypes.length > 0 ||
-              worldviewAnchors.length > 0 ||
-              rationale.length > 0 ||
+              recommendations?.audience?.length ||
+              recommendations?.commercialUseCases?.length ||
+              recommendations?.transformationStage?.length ||
+              summary?.rationale?.length ||
               entitlements) && (
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
@@ -1392,7 +1604,7 @@ function ResultSurface({
                     </>
                   )}
 
-                  {sponsorTypes.length > 0 && (
+                  {recommendations?.audience?.length ? (
                     <>
                       <div
                         style={{
@@ -1404,10 +1616,10 @@ function ResultSurface({
                           marginBottom: "0.55rem",
                         }}
                       >
-                        Sponsor types
+                        Audience
                       </div>
                       <div className="mb-4 flex flex-wrap gap-2">
-                        {sponsorTypes.slice(0, 4).map((item) => (
+                        {recommendations.audience.slice(0, 4).map((item) => (
                           <span
                             key={item}
                             style={{
@@ -1425,9 +1637,9 @@ function ResultSurface({
                         ))}
                       </div>
                     </>
-                  )}
+                  ) : null}
 
-                  {worldviewAnchors.length > 0 && (
+                  {recommendations?.commercialUseCases?.length ? (
                     <>
                       <div
                         style={{
@@ -1439,10 +1651,10 @@ function ResultSurface({
                           marginBottom: "0.55rem",
                         }}
                       >
-                        Worldview anchors
+                        Commercial use cases
                       </div>
                       <div className="mb-4 flex flex-wrap gap-2">
-                        {worldviewAnchors.slice(0, 4).map((item) => (
+                        {recommendations.commercialUseCases.slice(0, 4).map((item) => (
                           <span
                             key={item}
                             style={{
@@ -1460,9 +1672,44 @@ function ResultSurface({
                         ))}
                       </div>
                     </>
-                  )}
+                  ) : null}
 
-                  {rationale.length > 0 && (
+                  {recommendations?.transformationStage?.length ? (
+                    <>
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.30em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.24)",
+                          marginBottom: "0.55rem",
+                        }}
+                      >
+                        Transformation stage
+                      </div>
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {recommendations.transformationStage.slice(0, 4).map((item) => (
+                          <span
+                            key={item}
+                            style={{
+                              padding: "4px 8px",
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "6px",
+                              letterSpacing: "0.18em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.26)",
+                            }}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+
+                  {summary?.rationale?.length ? (
                     <>
                       <div
                         style={{
@@ -1477,7 +1724,7 @@ function ResultSurface({
                         Rationale
                       </div>
                       <div className="space-y-2">
-                        {rationale.slice(0, 4).map((item, i) => (
+                        {summary.rationale.slice(0, 4).map((item, i) => (
                           <div key={`${item}-${i}`} className="flex items-start gap-2.5">
                             <Scale
                               style={{
@@ -1503,10 +1750,10 @@ function ResultSurface({
                         ))}
                       </div>
                     </>
-                  )}
+                  ) : null}
 
                   {entitlements && (
-                    <div style={{ marginTop: rationale.length ? "1rem" : 0 }}>
+                    <div style={{ marginTop: summary?.rationale?.length ? "1rem" : 0 }}>
                       <GoldRule soft />
                       <div style={{ marginTop: "1rem" }}>
                         <div

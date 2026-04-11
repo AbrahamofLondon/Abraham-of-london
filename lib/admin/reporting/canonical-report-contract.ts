@@ -1,3 +1,5 @@
+// lib/admin/reporting/canonical-report-contract.ts
+
 import type {
   ExecutiveReportConstitution,
   ExecutiveReportGuidance,
@@ -31,9 +33,7 @@ function safeBoolean(value: unknown, fallback = false): boolean {
 
 function safeStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return value
-    .map((item) => safeString(item))
-    .filter(Boolean);
+  return value.map((item) => safeString(item)).filter(Boolean);
 }
 
 function uniqueStrings(values: string[]): string[] {
@@ -191,16 +191,9 @@ export function buildCanonicalReportContract(
   const constitution = args.constitution;
   const guidance = args.guidance;
 
-  const generatedAt = safeString(
-    args.campaign?.generatedAt,
-    new Date().toISOString(),
-  );
-
+  const generatedAt = safeString(args.campaign?.generatedAt, new Date().toISOString());
   const campaignId = safeString(args.campaign?.id, "executive-report");
-  const campaignTitle = safeString(
-    args.campaign?.title,
-    "Executive Reporting Run",
-  );
+  const campaignTitle = safeString(args.campaign?.title, "Executive Reporting Run");
   const organisationName = safeString(
     args.campaign?.organisationName,
     "Unknown organisation",
@@ -247,13 +240,9 @@ export function buildCanonicalReportContract(
     revenueScore: safeNumber(constitution?.revenueScore, 50),
     dominantDomains: uniqueStrings(safeStringArray(constitution?.dominantDomains)),
     failureModes: uniqueStrings(safeStringArray(constitution?.failureModes)),
-    requiredInterventions: uniqueStrings(
-      safeStringArray(constitution?.requiredInterventions),
-    ),
+    requiredInterventions: uniqueStrings(safeStringArray(constitution?.requiredInterventions)),
     sponsorTypes: uniqueStrings(safeStringArray(constitution?.sponsorTypes)),
-    worldviewAnchors: uniqueStrings(
-      safeStringArray(constitution?.worldviewAnchors),
-    ),
+    worldviewAnchors: uniqueStrings(safeStringArray(constitution?.worldviewAnchors)),
     narrativeSummary: safeString(
       constitution?.narrativeSummary,
       safeString(report?.narrative?.summary),
@@ -305,8 +294,7 @@ export function buildCanonicalReportContract(
         ),
         mandate: safeString(
           report?.narrative?.mandate,
-          guidance.nextAction ||
-            "Restore structural order and execution discipline.",
+          guidance.nextAction || "Restore structural order and execution discipline.",
         ),
       },
 
@@ -343,10 +331,7 @@ export function buildCanonicalReportContract(
       },
 
       governedRecommendations: {
-        summary: safeString(
-          guidance?.summary,
-          normalizedConstitution.narrativeSummary,
-        ),
+        summary: safeString(guidance?.summary, normalizedConstitution.narrativeSummary),
         nextAction: safeString(
           guidance?.nextAction,
           "Proceed according to governed recommendation sequence.",
@@ -368,21 +353,15 @@ export function buildCanonicalReportContract(
       },
 
       dominantDomains: {
-        items: uniqueStrings(
-          safeStringArray(normalizedConstitution.dominantDomains),
-        ),
+        items: uniqueStrings(safeStringArray(normalizedConstitution.dominantDomains)),
       },
 
       worldviewAnchors: {
-        items: uniqueStrings(
-          safeStringArray(normalizedConstitution.worldviewAnchors),
-        ),
+        items: uniqueStrings(safeStringArray(normalizedConstitution.worldviewAnchors)),
       },
 
       sponsorTypes: {
-        items: uniqueStrings(
-          safeStringArray(normalizedConstitution.sponsorTypes),
-        ),
+        items: uniqueStrings(safeStringArray(normalizedConstitution.sponsorTypes)),
       },
 
       rationale: {
