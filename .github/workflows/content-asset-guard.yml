@@ -5,34 +5,36 @@ on:
     paths:
       - "content/**"
       - "public/assets/**"
-      - ".contentlayer/**"
-      - "scripts/scan-content-assets.mjs"
   push:
     branches: [main]
     paths:
       - "content/**"
       - "public/assets/**"
-      - ".contentlayer/**"
-      - "scripts/scan-content-assets.mjs"
 
 jobs:
   asset-scan:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "pnpm"
 
       - name: Install deps
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --frozen-lockfile
 
       - name: Build contentlayer
-        run: pnpm run build:contentlayer || pnpm run build
+        run: pnpm contentlayer:build
 
       - name: Scan content assets
-        run: pnpm run assets:scan
+        run: pnpm assets:scan

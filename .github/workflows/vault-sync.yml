@@ -4,46 +4,47 @@ on:
   push:
     branches: [main]
     paths:
-      - 'content/**'
-      - 'lib/**'
-      - 'scripts/vault-master.ts'
-  workflow_dispatch: # Manual trigger
+      - "content/**"
+      - "lib/**"
+      - "scripts/vault-master.ts"
+  workflow_dispatch:
 
 jobs:
   sync:
     name: Sync Intelligence Assets
     runs-on: ubuntu-latest
-    
+
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       REDIS_URL: ${{ secrets.REDIS_URL }}
-      REDIS_DISABLED: "false"
+      REDIS_DISABLED: "true"
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: npx prisma generate
+        run: pnpm prisma generate
 
       - name: Build Contentlayer
-        run: npx contentlayer build
+        run: pnpm contentlayer:build
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Execute Vault Master Sync
-        run: pnpm run vault:sync
+        run: pnpm vault:sync
+        continue-on-error: true

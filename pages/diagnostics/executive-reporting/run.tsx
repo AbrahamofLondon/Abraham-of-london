@@ -10,6 +10,10 @@ import {
   ArrowRight,
   CheckSquare,
   ChevronRight,
+  Lock,
+  Scale,
+  ShieldCheck,
+  Target,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -40,53 +44,104 @@ type ExecutiveReportingIntakeForm = {
   whatHappensIfNothingChanges: string;
 };
 
-type CanonicalPosture = {
+type CanonicalDomain = {
+  label?: string;
+  intent?: number;
+  reality?: number;
+  dissonance?: number;
+};
+
+type CanonicalRecommendation = {
+  id?: string;
+  title?: string;
+  href?: string | null;
+  kind?: string;
+  score?: number;
+  summary?: string;
+  reasons?: string[];
+};
+
+type CanonicalConstitution = {
   route?: string;
+  priority?: string;
+  temperature?: string;
   orgState?: string;
   readinessTier?: string;
   authorityType?: string;
-  priority?: string;
-  temperature?: string;
+  revenueBand?: string;
+  marketRiskBand?: string;
   clarityScore?: number;
+  authorityScore?: number;
   governanceScore?: number;
   severityScore?: number;
+  revenueScore?: number;
+  dominantDomains?: string[];
   failureModes?: string[];
   requiredInterventions?: string[];
+  sponsorTypes?: string[];
+  worldviewAnchors?: string[];
   narrativeSummary?: string;
-};
-
-type CanonicalExecutiveSummary = {
-  headline?: string;
-  summary?: string;
-  mandate?: string;
-};
-
-type CanonicalGovernedRecommendations = {
-  recommendations?: Array<{
-    title: string;
-    href?: string | null;
-    kind: string;
-    score: number;
-  }>;
-  nextAction?: string;
-};
-
-type CanonicalFinancialExposure = {
-  replacementCostFormatted?: string;
-  executionLossFormatted?: string;
-  totalExposureFormatted?: string;
+  rationale?: string[];
 };
 
 type CanonicalSections = {
-  constitutionalPosture?: CanonicalPosture;
-  executiveSummary?: CanonicalExecutiveSummary;
-  governedRecommendations?: CanonicalGovernedRecommendations;
-  financialExposure?: CanonicalFinancialExposure;
+  executiveSummary?: {
+    title?: string;
+    subtitle?: string;
+    state?: string;
+    headline?: string;
+    summary?: string;
+    mandate?: string;
+  };
+  constitutionalPosture?: CanonicalConstitution;
+  strategicDomainAnalysis?: {
+    averageDissonance?: number;
+    domains?: CanonicalDomain[];
+  };
+  financialExposure?: {
+    replacementCost?: number;
+    executionLoss?: number;
+    totalExposure?: number;
+    replacementCostFormatted?: string;
+    executionLossFormatted?: string;
+    totalExposureFormatted?: string;
+  };
+  integritySnapshot?: {
+    sovereignCertainty?: number;
+    burnoutIndex?: number;
+    averageDissonance?: number;
+    authorized?: boolean;
+  };
+  governedRecommendations?: {
+    summary?: string;
+    nextAction?: string;
+    rationale?: string[];
+    recommendations?: CanonicalRecommendation[];
+  };
   priorityStack?: { items?: string[] };
   failureModes?: { items?: string[] };
+  requiredInterventions?: { items?: string[] };
+  dominantDomains?: { items?: string[] };
+  worldviewAnchors?: { items?: string[] };
+  sponsorTypes?: { items?: string[] };
+  rationale?: { items?: string[] };
 };
 
 type CanonicalReport = {
+  schemaVersion?: string;
+  generatedAt?: string;
+  reportId?: string;
+  campaign?: {
+    id?: string;
+    title?: string;
+    organisationName?: string;
+    generatedAt?: string;
+  };
+  registry?: {
+    model?: string;
+    node?: string;
+    protocol?: string;
+  };
   sections?: CanonicalSections;
 };
 
@@ -111,7 +166,13 @@ type ExecutiveReportingResult =
       route?: "STRATEGY" | "DIAGNOSTIC" | "REJECT";
       canonical?: CanonicalReport;
       viewModel?: ExecutiveReportViewModel;
-      entitlements?: any;
+      entitlements?: {
+        hasAccess?: boolean;
+        status?: string;
+        tier?: string;
+        remainingRuns?: number | null;
+        [key: string]: unknown;
+      };
       diagnostics?: any;
     }
   | {
@@ -156,6 +217,26 @@ const INITIAL: ExecutiveReportingIntakeForm = {
   decisionQuestion: "",
   whatHappensIfNothingChanges: "",
 };
+
+function safeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function safeNumber(value: unknown, fallback = 0): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function safeBoolean(value: unknown, fallback = false): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function safeStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((v) => safeString(v)).filter(Boolean) : [];
+}
+
+function fmtPercent(value: number | undefined): string {
+  return typeof value === "number" && Number.isFinite(value) ? `${Math.round(value)}/100` : "—";
+}
 
 function GoldRule({ soft = false }: { soft?: boolean }) {
   return (
@@ -400,10 +481,45 @@ function routeColor(r: string): { border: string; bg: string; text: string } {
 }
 
 function resolveRoute(result: Extract<ExecutiveReportingResult, { ok: true }>): string {
+  return result.route ?? result.canonical?.sections?.constitutionalPosture?.route ?? "DIAGNOSTIC";
+}
+
+function resolveHeadline(result: Extract<ExecutiveReportingResult, { ok: true }>): string {
   return (
-    result.route ??
-    result.canonical?.sections?.constitutionalPosture?.route ??
-    "DIAGNOSTIC"
+    result.canonical?.sections?.executiveSummary?.headline ??
+    "Executive intelligence brief generated."
+  );
+}
+
+function MetricRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      className="flex items-center justify-between gap-3 py-2"
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+    >
+      <span
+        style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "6.5px",
+          letterSpacing: "0.30em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.20)",
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+          fontSize: "7.5px",
+          letterSpacing: "0.10em",
+          color: "rgba(255,255,255,0.60)",
+          textAlign: "right",
+        }}
+      >
+        {value}
+      </span>
+    </div>
   );
 }
 
@@ -414,48 +530,33 @@ function ResultSurface({
   result: Extract<ExecutiveReportingResult, { ok: true }>;
   onRerun: () => void;
 }) {
-  const posture = result.canonical?.sections?.constitutionalPosture;
-  const execSumm = result.canonical?.sections?.executiveSummary;
-  const governed = result.canonical?.sections?.governedRecommendations;
-  const financial = result.canonical?.sections?.financialExposure;
-  const priority = result.canonical?.sections?.priorityStack?.items ?? [];
-  const failModes = result.canonical?.sections?.failureModes?.items ?? [];
+  const sections = result.canonical?.sections;
+  const execSumm = sections?.executiveSummary;
+  const posture = sections?.constitutionalPosture;
+  const strategic = sections?.strategicDomainAnalysis;
+  const integrity = sections?.integritySnapshot;
+  const governed = sections?.governedRecommendations;
+  const financial = sections?.financialExposure;
+  const priority = sections?.priorityStack?.items ?? [];
+  const failModes = sections?.failureModes?.items ?? [];
+  const requiredInterventions = sections?.requiredInterventions?.items ?? [];
+  const dominantDomains = sections?.dominantDomains?.items ?? [];
+  const rationale = sections?.rationale?.items ?? [];
+  const worldviewAnchors = sections?.worldviewAnchors?.items ?? [];
+  const sponsorTypes = sections?.sponsorTypes?.items ?? [];
+
   const findings = result.viewModel?.findings ?? [];
   const actions = result.viewModel?.boardActions ?? [];
-  const nextAction = result.viewModel?.nextAction ?? governed?.nextAction;
+  const nextAction =
+    result.viewModel?.nextAction ??
+    governed?.nextAction ??
+    execSumm?.mandate ??
+    "Proceed according to governed recommendation sequence.";
+
   const route = resolveRoute(result);
   const rc = routeColor(route);
-
-  function MetricRow({ label, value }: { label: string; value: string }) {
-    return (
-      <div
-        className="flex items-center justify-between gap-3 py-2"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-      >
-        <span
-          style={{
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "6.5px",
-            letterSpacing: "0.30em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.20)",
-          }}
-        >
-          {label}
-        </span>
-        <span
-          style={{
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7.5px",
-            letterSpacing: "0.10em",
-            color: "rgba(255,255,255,0.60)",
-          }}
-        >
-          {value}
-        </span>
-      </div>
-    );
-  }
+  const domains = strategic?.domains ?? [];
+  const entitlements = result.entitlements;
 
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
@@ -472,10 +573,26 @@ function ResultSurface({
                 lineHeight: 1.0,
                 letterSpacing: "-0.025em",
                 color: "rgba(255,255,255,0.92)",
+                maxWidth: "18ch",
               }}
             >
-              {execSumm?.headline ?? "Constitutional brief generated."}
+              {resolveHeadline(result)}
             </h1>
+            <p
+              style={{
+                marginTop: "0.75rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "0.98rem",
+                lineHeight: 1.68,
+                color: "rgba(255,255,255,0.36)",
+                maxWidth: "54ch",
+              }}
+            >
+              {execSumm?.subtitle
+                ? `${execSumm.subtitle} · ${safeString(execSumm.state, posture?.orgState ?? "DRIFTING")}`
+                : safeString(execSumm?.state, posture?.orgState ?? "DRIFTING")}
+            </p>
           </div>
 
           <div className="mt-1 flex shrink-0 flex-wrap items-center gap-2.5">
@@ -578,7 +695,7 @@ function ResultSurface({
                     marginBottom: "0.85rem",
                   }}
                 >
-                  Domain findings ({findings.length})
+                  Board-level findings ({findings.length})
                 </div>
 
                 <div className="space-y-3">
@@ -674,6 +791,73 @@ function ResultSurface({
               </div>
             )}
 
+            {domains.length > 0 && (
+              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    Strategic domain analysis
+                  </span>
+                </div>
+
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                  {domains.slice(0, 5).map((d, i) => (
+                    <div key={`${safeString(d.label, "Domain")}-${i}`} style={{ padding: "0.95rem 1.25rem" }}>
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <span
+                          style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "7px",
+                            letterSpacing: "0.30em",
+                            textTransform: "uppercase",
+                            color: `${GOLD}B0`,
+                          }}
+                        >
+                          {safeString(d.label, "Domain")}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "6.5px",
+                            letterSpacing: "0.18em",
+                            color: "rgba(255,255,255,0.38)",
+                          }}
+                        >
+                          Dissonance {safeNumber(d.dissonance, 0)}
+                        </span>
+                      </div>
+
+                      <div
+                        className="grid gap-3 sm:grid-cols-3"
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "7px",
+                          letterSpacing: "0.18em",
+                          color: "rgba(255,255,255,0.50)",
+                        }}
+                      >
+                        <div>Intent {safeNumber(d.intent, 0)}</div>
+                        <div>Reality {safeNumber(d.reality, 0)}</div>
+                        <div>Gap {safeNumber(d.dissonance, 0)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {actions.length > 0 && (
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
@@ -701,8 +885,7 @@ function ResultSurface({
                       key={`${a}-${i}`}
                       className="flex items-start gap-3 py-2.5"
                       style={{
-                        borderBottom:
-                          i < actions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                        borderBottom: i < actions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                       }}
                     >
                       <CheckSquare
@@ -725,6 +908,123 @@ function ResultSurface({
                       >
                         {a}
                       </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {governed?.recommendations && governed.recommendations.length > 0 && (
+              <div
+                style={{
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.01)",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.18)",
+                    }}
+                  >
+                    Governed recommendations
+                  </span>
+                </div>
+
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                  {governed.recommendations.slice(0, 4).map((rec, i) => (
+                    <div key={`${rec.id ?? rec.title ?? "recommendation"}-${i}`} style={{ padding: "1rem 1.25rem" }}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p
+                            style={{
+                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                              fontWeight: 300,
+                              fontSize: "0.98rem",
+                              color: "rgba(255,255,255,0.76)",
+                              marginBottom: "0.25rem",
+                            }}
+                          >
+                            {safeString(rec.title, "Untitled recommendation")}
+                          </p>
+
+                          <div
+                            style={{
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "6.5px",
+                              letterSpacing: "0.26em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.22)",
+                              marginBottom: "0.45rem",
+                            }}
+                          >
+                            {safeString(rec.kind, "guidance")}
+                            {typeof rec.score === "number" ? ` · Score ${Math.round(rec.score)}` : ""}
+                          </div>
+
+                          {safeString(rec.summary) && (
+                            <p
+                              style={{
+                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                                fontWeight: 300,
+                                fontSize: "0.9rem",
+                                lineHeight: 1.6,
+                                color: "rgba(255,255,255,0.44)",
+                                marginBottom: safeStringArray(rec.reasons).length ? "0.5rem" : 0,
+                              }}
+                            >
+                              {safeString(rec.summary)}
+                            </p>
+                          )}
+
+                          {safeStringArray(rec.reasons).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {safeStringArray(rec.reasons).slice(0, 3).map((reason) => (
+                                <span
+                                  key={reason}
+                                  style={{
+                                    padding: "3px 7px",
+                                    border: "1px solid rgba(255,255,255,0.08)",
+                                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                                    fontSize: "6px",
+                                    letterSpacing: "0.16em",
+                                    textTransform: "uppercase",
+                                    color: "rgba(255,255,255,0.24)",
+                                  }}
+                                >
+                                  {reason}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {rec.href && (
+                          <Link
+                            href={rec.href}
+                            className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-70"
+                            style={{
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "7px",
+                              letterSpacing: "0.24em",
+                              textTransform: "uppercase",
+                              color: `${GOLD}AA`,
+                            }}
+                          >
+                            Open
+                            <ArrowRight style={{ width: "10px", height: "10px" }} />
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -765,85 +1065,6 @@ function ResultSurface({
                 </p>
               </div>
             )}
-
-            {(governed?.recommendations?.length ?? 0) > 0 && (
-              <div
-                style={{
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  backgroundColor: "rgba(255,255,255,0.01)",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.18)",
-                    }}
-                  >
-                    Governed recommendations
-                  </span>
-                </div>
-
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {governed.recommendations!.slice(0, 4).map((rec, i) => (
-                    <div key={`${rec.title}-${i}`} style={{ padding: "0.85rem 1.25rem" }}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p
-                            style={{
-                              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                              fontWeight: 300,
-                              fontSize: "0.95rem",
-                              color: "rgba(255,255,255,0.70)",
-                              marginBottom: "0.25rem",
-                            }}
-                          >
-                            {rec.title}
-                          </p>
-
-                          <span
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "6.5px",
-                              letterSpacing: "0.26em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.22)",
-                            }}
-                          >
-                            {rec.kind}
-                          </span>
-                        </div>
-
-                        {rec.href && (
-                          <Link
-                            href={rec.href}
-                            className="inline-flex shrink-0 items-center gap-1 transition-opacity hover:opacity-70"
-                            style={{
-                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                              fontSize: "7px",
-                              letterSpacing: "0.24em",
-                              textTransform: "uppercase",
-                              color: `${GOLD}AA`,
-                            }}
-                          >
-                            Open
-                            <ArrowRight style={{ width: "10px", height: "10px" }} />
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="space-y-4">
@@ -867,32 +1088,58 @@ function ResultSurface({
                     Constitutional posture
                   </span>
                 </div>
-
                 <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
-                  {[
-                    { label: "Route", value: posture.route ?? "—" },
-                    { label: "Org state", value: posture.orgState ?? "—" },
-                    { label: "Readiness tier", value: posture.readinessTier ?? "—" },
-                    { label: "Authority", value: posture.authorityType ?? "—" },
-                    { label: "Priority", value: posture.priority ?? "—" },
-                    { label: "Temperature", value: posture.temperature ?? "—" },
-                    {
-                      label: "Clarity score",
-                      value: posture.clarityScore != null ? `${posture.clarityScore}/100` : "—",
-                    },
-                    {
-                      label: "Governance score",
-                      value:
-                        posture.governanceScore != null ? `${posture.governanceScore}/100` : "—",
-                    },
-                    {
-                      label: "Severity score",
-                      value:
-                        posture.severityScore != null ? `${posture.severityScore}/100` : "—",
-                    },
-                  ].map(({ label, value }) => (
-                    <MetricRow key={label} label={label} value={value} />
-                  ))}
+                  <MetricRow label="Route" value={safeString(posture.route, "—")} />
+                  <MetricRow label="Org state" value={safeString(posture.orgState, "—")} />
+                  <MetricRow label="Readiness tier" value={safeString(posture.readinessTier, "—")} />
+                  <MetricRow label="Authority" value={safeString(posture.authorityType, "—")} />
+                  <MetricRow label="Priority" value={safeString(posture.priority, "—")} />
+                  <MetricRow label="Temperature" value={safeString(posture.temperature, "—")} />
+                  <MetricRow label="Clarity score" value={fmtPercent(posture.clarityScore)} />
+                  <MetricRow label="Authority score" value={fmtPercent(posture.authorityScore)} />
+                  <MetricRow label="Governance score" value={fmtPercent(posture.governanceScore)} />
+                  <MetricRow label="Severity score" value={fmtPercent(posture.severityScore)} />
+                </div>
+              </div>
+            )}
+
+            {integrity && (
+              <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06` }}>
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: `1px solid ${GOLD}10`,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: `${GOLD}90`,
+                    }}
+                  >
+                    Integrity snapshot
+                  </span>
+                </div>
+                <div style={{ padding: "0.75rem 1.25rem" }}>
+                  <MetricRow
+                    label="Sovereign certainty"
+                    value={fmtPercent(integrity.sovereignCertainty)}
+                  />
+                  <MetricRow
+                    label="Burnout index"
+                    value={fmtPercent(integrity.burnoutIndex)}
+                  />
+                  <MetricRow
+                    label="Average dissonance"
+                    value={typeof integrity.averageDissonance === "number" ? String(Math.round(integrity.averageDissonance)) : "—"}
+                  />
+                  <MetricRow
+                    label="Authorized"
+                    value={safeBoolean(integrity.authorized) ? "YES" : "NO"}
+                  />
                 </div>
               </div>
             )}
@@ -917,15 +1164,10 @@ function ResultSurface({
                     Financial exposure estimate
                   </span>
                 </div>
-
                 <div style={{ padding: "0.75rem 1.25rem" }}>
-                  {[
-                    { label: "Replacement cost", value: financial.replacementCostFormatted ?? "—" },
-                    { label: "Execution loss", value: financial.executionLossFormatted ?? "—" },
-                    { label: "Total exposure", value: financial.totalExposureFormatted ?? "—" },
-                  ].map(({ label, value }) => (
-                    <MetricRow key={label} label={label} value={value} />
-                  ))}
+                  <MetricRow label="Replacement cost" value={safeString(financial.replacementCostFormatted, "—")} />
+                  <MetricRow label="Execution loss" value={safeString(financial.executionLossFormatted, "—")} />
+                  <MetricRow label="Total exposure" value={safeString(financial.totalExposureFormatted, "—")} />
                 </div>
               </div>
             )}
@@ -955,15 +1197,13 @@ function ResultSurface({
                     Priority stack
                   </span>
                 </div>
-
                 <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
                   {priority.slice(0, 6).map((item, i) => (
                     <div
                       key={`${item}-${i}`}
                       className="flex items-start gap-2.5 py-2"
                       style={{
-                        borderBottom:
-                          i < priority.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                        borderBottom: i < priority.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                       }}
                     >
                       <span
@@ -993,6 +1233,53 @@ function ResultSurface({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {requiredInterventions.length > 0 && (
+              <div
+                style={{
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  backgroundColor: "rgba(255,255,255,0.01)",
+                  padding: "1rem 1.25rem",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.36em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.18)",
+                    marginBottom: "0.75rem",
+                  }}
+                >
+                  Required interventions
+                </div>
+                {requiredInterventions.slice(0, 6).map((m, i) => (
+                  <div key={`${m}-${i}`} className="flex items-start gap-2.5 py-1.5">
+                    <Target
+                      style={{
+                        width: "11px",
+                        height: "11px",
+                        color: `${GOLD}75`,
+                        flexShrink: 0,
+                        marginTop: "3px",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontSize: "0.88rem",
+                        lineHeight: 1.55,
+                        color: "rgba(255,255,255,0.50)",
+                      }}
+                    >
+                      {m}
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -1043,6 +1330,241 @@ function ResultSurface({
                 ))}
               </div>
             )}
+
+            {(dominantDomains.length > 0 ||
+              sponsorTypes.length > 0 ||
+              worldviewAnchors.length > 0 ||
+              rationale.length > 0 ||
+              entitlements) && (
+              <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
+                <div
+                  style={{
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.38em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    Diagnostic metadata
+                  </span>
+                </div>
+                <div style={{ padding: "1rem 1.25rem" }}>
+                  {dominantDomains.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.30em",
+                          textTransform: "uppercase",
+                          color: `${GOLD}9A`,
+                          marginBottom: "0.55rem",
+                        }}
+                      >
+                        Dominant domains
+                      </div>
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {dominantDomains.slice(0, 5).map((item) => (
+                          <span
+                            key={item}
+                            style={{
+                              padding: "4px 8px",
+                              border: `1px solid ${GOLD}22`,
+                              backgroundColor: `${GOLD}08`,
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "6px",
+                              letterSpacing: "0.18em",
+                              textTransform: "uppercase",
+                              color: `${GOLD}BE`,
+                            }}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {sponsorTypes.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.30em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.24)",
+                          marginBottom: "0.55rem",
+                        }}
+                      >
+                        Sponsor types
+                      </div>
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {sponsorTypes.slice(0, 4).map((item) => (
+                          <span
+                            key={item}
+                            style={{
+                              padding: "4px 8px",
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "6px",
+                              letterSpacing: "0.18em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.26)",
+                            }}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {worldviewAnchors.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.30em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.24)",
+                          marginBottom: "0.55rem",
+                        }}
+                      >
+                        Worldview anchors
+                      </div>
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {worldviewAnchors.slice(0, 4).map((item) => (
+                          <span
+                            key={item}
+                            style={{
+                              padding: "4px 8px",
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                              fontSize: "6px",
+                              letterSpacing: "0.18em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.26)",
+                            }}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {rationale.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                          fontSize: "6.5px",
+                          letterSpacing: "0.30em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.24)",
+                          marginBottom: "0.65rem",
+                        }}
+                      >
+                        Rationale
+                      </div>
+                      <div className="space-y-2">
+                        {rationale.slice(0, 4).map((item, i) => (
+                          <div key={`${item}-${i}`} className="flex items-start gap-2.5">
+                            <Scale
+                              style={{
+                                width: "11px",
+                                height: "11px",
+                                color: "rgba(255,255,255,0.22)",
+                                flexShrink: 0,
+                                marginTop: "4px",
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                                fontWeight: 300,
+                                fontSize: "0.87rem",
+                                lineHeight: 1.55,
+                                color: "rgba(255,255,255,0.44)",
+                              }}
+                            >
+                              {item}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {entitlements && (
+                    <div style={{ marginTop: rationale.length ? "1rem" : 0 }}>
+                      <GoldRule soft />
+                      <div style={{ marginTop: "1rem" }}>
+                        <div
+                          style={{
+                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                            fontSize: "6.5px",
+                            letterSpacing: "0.30em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.24)",
+                            marginBottom: "0.55rem",
+                          }}
+                        >
+                          Access status
+                        </div>
+                        <div className="space-y-1.5">
+                          {"status" in entitlements && (
+                            <div
+                              style={{
+                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                                fontWeight: 300,
+                                fontSize: "0.9rem",
+                                color: "rgba(255,255,255,0.50)",
+                              }}
+                            >
+                              Status: {safeString(entitlements.status, "active")}
+                            </div>
+                          )}
+                          {"tier" in entitlements && (
+                            <div
+                              style={{
+                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                                fontWeight: 300,
+                                fontSize: "0.9rem",
+                                color: "rgba(255,255,255,0.50)",
+                              }}
+                            >
+                              Tier: {safeString(entitlements.tier, "standard")}
+                            </div>
+                          )}
+                          {"remainingRuns" in entitlements && entitlements.remainingRuns != null && (
+                            <div
+                              style={{
+                                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                                fontWeight: 300,
+                                fontSize: "0.9rem",
+                                color: "rgba(255,255,255,0.50)",
+                              }}
+                            >
+                              Remaining runs: {String(entitlements.remainingRuns)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1088,6 +1610,14 @@ function ResultSurface({
                     letterSpacing: "0.26em",
                     textTransform: "uppercase",
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = `${GOLD}60`;
+                    e.currentTarget.style.backgroundColor = `${GOLD}18`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = `${GOLD}35`;
+                    e.currentTarget.style.backgroundColor = `${GOLD}0D`;
+                  }}
                 >
                   Strategy Room
                   <ArrowRight style={{ width: "11px", height: "11px" }} />
@@ -1107,6 +1637,14 @@ function ResultSurface({
                     fontSize: "8px",
                     letterSpacing: "0.26em",
                     textTransform: "uppercase",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = `${GOLD}4A`;
+                    e.currentTarget.style.backgroundColor = `${GOLD}12`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = `${GOLD}28`;
+                    e.currentTarget.style.backgroundColor = `${GOLD}08`;
                   }}
                 >
                   Diagnostic ladder
@@ -1150,9 +1688,11 @@ function ResultSurface({
 function ExecutiveReportingIntake({
   onGenerating,
   onResult,
+  onError,
 }: {
   onGenerating: () => void;
   onResult: (r: Extract<ExecutiveReportingResult, { ok: true }>) => void;
+  onError: () => void;
 }) {
   const [form, setForm] = React.useState<ExecutiveReportingIntakeForm>(INITIAL);
   const [isSubmitting, setSubmitting] = React.useState(false);
@@ -1223,6 +1763,7 @@ function ExecutiveReportingIntake({
       if (!data.ok) {
         setError(data.error ?? "Report generation failed. Check the form and try again.");
         setSubmitting(false);
+        onError();
         return;
       }
 
@@ -1231,14 +1772,9 @@ function ExecutiveReportingIntake({
     } catch {
       setError("Network error. Please try again.");
       setSubmitting(false);
+      onError();
     }
   }
-
-  React.useEffect(() => {
-    if (error) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [error]);
 
   return (
     <div style={{ backgroundColor: BASE }}>
@@ -1270,7 +1806,7 @@ function ExecutiveReportingIntake({
             }}
           >
             The intake is the diagnostic instrument. Thin answers produce thin diagnoses.
-            Every field exists because it drives the constitutional assessment.
+            Precision increases signal. Signal increases quality of judgment.
           </p>
         </div>
 
@@ -1280,19 +1816,19 @@ function ExecutiveReportingIntake({
               <GroupHeader label="Identity" />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Full name" required>
-                  <Input name="fullName" value={form.fullName} onChange={handleChange} />
+                  <Input name="fullName" value={form.fullName} onChange={handleChange} placeholder="Full name" />
                 </Field>
                 <Field label="Email address" required>
-                  <Input name="email" value={form.email} onChange={handleChange} type="email" />
+                  <Input name="email" value={form.email} onChange={handleChange} type="email" placeholder="you@organisation.com" />
                 </Field>
                 <Field label="Organisation" required>
-                  <Input name="organisation" value={form.organisation} onChange={handleChange} />
+                  <Input name="organisation" value={form.organisation} onChange={handleChange} placeholder="Institution or company name" />
                 </Field>
                 <Field label="Role" required>
-                  <Input name="role" value={form.role} onChange={handleChange} />
+                  <Input name="role" value={form.role} onChange={handleChange} placeholder="Founder, CEO, Chair, Director..." />
                 </Field>
                 <Field label="Sector">
-                  <Input name="sector" value={form.sector} onChange={handleChange} />
+                  <Input name="sector" value={form.sector} onChange={handleChange} placeholder="Sector or operating context" />
                 </Field>
               </div>
             </div>
@@ -1306,11 +1842,17 @@ function ExecutiveReportingIntake({
                     value={form.problemStatement}
                     onChange={handleChange}
                     rows={6}
-                    placeholder="State the actual structural problem. Minimum 120 characters."
+                    placeholder="State the structural problem, not just the symptoms. Minimum 120 characters."
                   />
                 </Field>
                 <Field label="Observed symptoms" required>
-                  <Textarea name="symptoms" value={form.symptoms} onChange={handleChange} rows={5} />
+                  <Textarea
+                    name="symptoms"
+                    value={form.symptoms}
+                    onChange={handleChange}
+                    rows={5}
+                    placeholder="Describe what is visible on the ground."
+                  />
                 </Field>
                 <Field label="Desired outcome" required>
                   <Textarea
@@ -1318,6 +1860,7 @@ function ExecutiveReportingIntake({
                     value={form.desiredOutcome}
                     onChange={handleChange}
                     rows={3}
+                    placeholder="What decision-grade outcome is required?"
                   />
                 </Field>
                 <Field label="Current constraint" required>
@@ -1326,6 +1869,7 @@ function ExecutiveReportingIntake({
                     value={form.currentConstraint}
                     onChange={handleChange}
                     rows={3}
+                    placeholder="What is materially preventing movement?"
                   />
                 </Field>
               </div>
@@ -1351,6 +1895,7 @@ function ExecutiveReportingIntake({
                     name="sponsorNameOrSeat"
                     value={form.sponsorNameOrSeat}
                     onChange={handleChange}
+                    placeholder="Name or position of decision sponsor"
                   />
                 </Field>
                 <Field label="Board involved">
@@ -1418,6 +1963,7 @@ function ExecutiveReportingIntake({
                     value={form.estimatedExposureGBP}
                     onChange={handleChange}
                     type="number"
+                    placeholder="e.g. 500000"
                   />
                 </Field>
                 <Field label="Decision window">
@@ -1439,6 +1985,7 @@ function ExecutiveReportingIntake({
                     value={form.headcountAffected}
                     onChange={handleChange}
                     type="number"
+                    placeholder="Number of people affected"
                   />
                 </Field>
               </div>
@@ -1465,6 +2012,7 @@ function ExecutiveReportingIntake({
                     value={form.evidenceNotes}
                     onChange={handleChange}
                     rows={4}
+                    placeholder="Describe the evidence base and its quality."
                   />
                 </Field>
                 <Field label="Prior correction attempts">
@@ -1492,6 +2040,7 @@ function ExecutiveReportingIntake({
                     value={form.decisionQuestion}
                     onChange={handleChange}
                     rows={3}
+                    placeholder="What specific decision needs to be made?"
                   />
                 </Field>
                 <Field label="Cost of inaction" required>
@@ -1500,6 +2049,7 @@ function ExecutiveReportingIntake({
                     value={form.whatHappensIfNothingChanges}
                     onChange={handleChange}
                     rows={3}
+                    placeholder="What compounds if nothing changes?"
                   />
                 </Field>
               </div>
@@ -1557,6 +2107,18 @@ function ExecutiveReportingIntake({
                 textTransform: "uppercase",
                 cursor: isSubmitting ? "not-allowed" : "pointer",
               }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) {
+                  e.currentTarget.style.borderColor = `${GOLD}65`;
+                  e.currentTarget.style.backgroundColor = `${GOLD}18`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSubmitting) {
+                  e.currentTarget.style.borderColor = `${GOLD}42`;
+                  e.currentTarget.style.backgroundColor = `${GOLD}10`;
+                }
+              }}
             >
               {isSubmitting ? (
                 <>
@@ -1602,6 +2164,11 @@ export default function ExecutiveReportingRunPage() {
 
   function handleGenerating() {
     setPageState("generating");
+  }
+
+  function handleError() {
+    setPageState("intake");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleResult(r: Extract<ExecutiveReportingResult, { ok: true }>) {
@@ -1663,11 +2230,7 @@ export default function ExecutiveReportingRunPage() {
                   color: "rgba(255,255,255,0.20)",
                 }}
               >
-                {pageState === "result"
-                  ? "Brief"
-                  : pageState === "generating"
-                    ? "Generating"
-                    : "Intake"}
+                {pageState === "result" ? "Brief" : pageState === "generating" ? "Generating" : "Intake"}
               </span>
             </div>
           </div>
@@ -1733,9 +2296,34 @@ export default function ExecutiveReportingRunPage() {
                       maxWidth: "46ch",
                     }}
                   >
-                    The intake is the diagnostic instrument. Every field drives the
-                    constitutional assessment. Thin answers produce thin diagnoses.
+                    The intake is the diagnostic instrument. Every field drives the constitutional
+                    reading. Thin answers produce thin diagnoses.
                   </p>
+
+                  <div
+                    style={{
+                      marginTop: "1.4rem",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.6rem",
+                      padding: "8px 12px",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      backgroundColor: "rgba(255,255,255,0.02)",
+                    }}
+                  >
+                    <Lock style={{ width: "12px", height: "12px", color: `${GOLD}85` }} />
+                    <span
+                      style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "6.5px",
+                        letterSpacing: "0.24em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.24)",
+                      }}
+                    >
+                      Governed intake · Board-grade output
+                    </span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -1743,6 +2331,7 @@ export default function ExecutiveReportingRunPage() {
             <ExecutiveReportingIntake
               onGenerating={handleGenerating}
               onResult={handleResult}
+              onError={handleError}
             />
           </>
         )}
@@ -1789,7 +2378,7 @@ export default function ExecutiveReportingRunPage() {
                   fontStyle: "italic",
                 }}
               >
-                Scoring domains, identifying failure modes, synthesising brief.
+                Scoring posture, pressure, exposure, and governed correction path.
               </p>
             </div>
           </div>

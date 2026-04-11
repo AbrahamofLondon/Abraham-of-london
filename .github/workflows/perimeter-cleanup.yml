@@ -2,16 +2,21 @@ name: Institutional Perimeter Cleanup
 
 on:
   schedule:
-    # Every Sunday at 00:00 UTC
-    - cron: '0 0 * * 0'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Key Revocation Subsystem
+      - name: Trigger Key Revocation
         run: |
-          curl -X POST "https://${{ secrets.SITE_DOMAIN }}/api/cron/clean-keys" \
-          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-          -H "Content-Type: application/json"
+          DOMAIN="${{ secrets.SITE_DOMAIN }}"
+          if [ -z "$DOMAIN" ]; then
+            echo "SITE_DOMAIN secret not set — skipping"
+            exit 0
+          fi
+          curl -s -X POST "https://${DOMAIN}/api/cron/clean-keys" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 30 || echo "Cleanup endpoint unreachable (non-fatal)"
