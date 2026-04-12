@@ -125,7 +125,7 @@ async function loadContentlayerGenerated(): Promise<any | null> {
     return await import("contentlayer/generated");
   } catch {
     try {
-      return await import("../../.contentlayer/generated/index.mjs");
+      return await import("contentlayer/generated");
     } catch {
       return null;
     }
