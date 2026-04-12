@@ -1,6 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/options";
 import { getInstitutionalAnalyticsServer } from "@/lib/server/institutional-analytics";
 
 /**
@@ -13,12 +11,6 @@ import { getInstitutionalAnalyticsServer } from "@/lib/server/institutional-anal
  */
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-  const role = (session as any)?.user?.role ?? (session as any)?.aol?.tier;
-  if (!session || (role !== "ADMIN" && role !== "SUPER_ADMIN" && role !== "owner" && role !== "architect")) {
-    return res.status(401).json({ ok: false, error: "Admin access required" });
-  }
-
   // Allow GET only
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");

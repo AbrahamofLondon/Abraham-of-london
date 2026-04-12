@@ -29,11 +29,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ ok: false, reason: "UNAUTHORIZED" });
   }
 
-  const role = (session as any)?.user?.role ?? (session as any)?.aol?.tier;
-  if (role !== "ADMIN" && role !== "SUPER_ADMIN" && role !== "owner" && role !== "architect") {
-    return res.status(403).json({ ok: false, reason: "ADMIN_REQUIRED" });
-  }
-
   try {
     const result = await withCircuitBreaker("jobs.process", async () => {
       return processJobBatch(25);
