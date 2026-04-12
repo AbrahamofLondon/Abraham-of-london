@@ -4,16 +4,18 @@ docKind: Brief
 accessLevel: public
 accessTier: public
 title: "Governance Diagnostic Toolkit"
-subtitle: "Identifying Structural Rot in Personal and Institutional Systems"
-description: "A high-leverage diagnostic framework to identify where governance has failed and how to restore the Trellis of Order."
+subtitle: "A Practical Framework for Finding Structural Disorder Before It Becomes Failure"
+description: "A practical diagnostic brief for leaders who need to identify where governance is failing inside a person, team, or institution. It focuses on decision rights, operating cadence, documented truth, and the structural conditions required to restore order."
 date: "2026-02-24"
-version: "1.0.5"
+version: "1.1.0"
+lastUpdated: "2026-04-12"
 category: governance
 tags:
-  - audit
-  - systems
-  - leadership
+  - governance
   - diagnostic
+  - leadership
+  - systems
+  - decision-rights
 institutionalId: CB-GOV-DIAG-077
 status: canonical
 slug: /briefs/governance-diagnostic-toolkit
@@ -22,9 +24,11 @@ decisionMetadata:
   assetKind: brief
   appliesTo:
     - DIAGNOSTIC
+    - ADVISORY
   sectors:
     - governance
     - leadership
+    - operations
   revenueBands:
     - MICRO
     - SMB
@@ -33,6 +37,7 @@ decisionMetadata:
   orgStates:
     - DRIFTING
     - MISALIGNED
+    - DISORDERED
   readinessTiers:
     - DIAGNOSTIC
     - ADVISORY
@@ -40,13 +45,16 @@ decisionMetadata:
     - Governance breakdown
     - Decision-rights ambiguity
     - Systemic structural disorder
+    - Operating cadence decay
   dominantDomains:
     - GOVERNANCE
-    - LEADERSHIP_TRUST
     - DECISION_QUALITY
+    - LEADERSHIP_TRUST
+    - OPERATIONAL_CLARITY
   requiredInterventions:
     - Clarify decision owner and sponsor
     - Restore governance discipline
+    - Tighten operating cadence
     - Run guided diagnostic before escalation
   marketRiskBands:
     - MEDIUM
@@ -60,62 +68,223 @@ decisionMetadata:
     - diagnostic
     - systems
     - leadership
+    - decision-rights
   worldviewAnchors:
-    - moral-order
     - stewardship
+    - moral-order
+    - truth-discipline
   commercialUseCases:
     - founder-diagnostic
+    - executive-alignment
     - culture-realignment
+    - operating-model-review
   audience:
     - founders
     - executives
     - boards
+    - institution-builders
   transformationStage:
     - assess
     - diagnose
+    - realign
   notes: >
-    A diagnostic framework for evaluating personal and institutional governance
-    systems. Provides a three-point diagnostic for jurisdiction of responsibility
-    and an institutional debt scorecard covering communication, cadence,
-    financials, and security.
+    A practical governance diagnostic focused on structural order rather than
+    sentiment. Helps leaders identify breakdowns in authority, rhythm,
+    documentation, accountability, and enforcement before those breakdowns
+    become expensive failures.
 ---
 
-# Governance Diagnostic Toolkit
+import DocumentHeader from "@/components/mdx/DocumentHeader";
+import BriefAlert from "@/components/mdx/BriefAlert";
+import DocumentFooter from "@/components/mdx/DocumentFooter";
 
-{"Governance is the art of maintaining order under pressure. When systems fail, it is rarely a failure of effort; it is almost always a failure of boundary."}
+**Lexicon**: [Governance](/lexicon/governance) · [Responsibility](/lexicon/responsibility) · [Sovereignty](/lexicon/sovereignty)
 
-## I. The Three-Point Diagnostic
+<DocumentHeader
+  title="Governance Diagnostic Toolkit"
+  subtitle="A Practical Framework for Finding Structural Disorder Before It Becomes Failure"
+  description="A practical diagnostic brief for leaders who need to identify where governance is failing inside a person, team, or institution. It focuses on decision rights, operating cadence, documented truth, and the structural conditions required to restore order."
+/>
 
-Use this framework to evaluate your current "Jurisdiction of [Responsibility](/vault/lexicon/responsibility)."
+<BriefAlert variant="strategy" icon="🧱">
+**Diagnostic Rule**: Disorder is rarely caused by low effort alone. More often it is caused by unclear ownership, weak boundaries, undocumented truth, and standards without enforcement.
+</BriefAlert>
 
-<ResponsibilityGrid>
-  <ResponsibilityLink href="/vault/lexicon/responsibility" icon="🕯️" title="The Altar (Internal)">
-    **Domain**: Soul, mind, conscience.
-    **Protocol**: **The First Hour.** Silence, Scripture, prayer, and decisive clarity.
-  </ResponsibilityLink>
+## I. What This Toolkit Is For
 
-  <ResponsibilityLink href="/vault/lexicon/responsibility" icon="🧱" title="The Wall (Physical)">
-    **Domain**: Body, environment, household order.
-    **Protocol**: Tactical exertion **3× weekly**, controlled nutrition.
-  </ResponsibilityLink>
+Governance problems are often misdiagnosed as:
 
-  <ResponsibilityLink href="/vault/lexicon/responsibility" icon="⚒️" title="The Forge (Vocational)">
-    **Domain**: Mission, craft, calling.
-    **Protocol**: Deep Work blocks, ruthless distraction elimination.
-  </ResponsibilityLink>
-</ResponsibilityGrid>
+- motivation problems
+- culture problems
+- communication problems
+- talent problems
 
-## II. The Institutional Debt Scorecard
+Sometimes they are those things.
 
-Rate each category from 1 (Chaos) to 10 ([Sovereignty](/vault/lexicon/sovereignty)).
+More often, those are downstream symptoms of a simpler issue: the system does not clearly govern who decides, what counts as done, how truth moves, and what happens when standards are missed.
 
-1. **Communication**: Are decisions dated and stored in a Single Source of Truth?
-2. **Cadence**: Does the team/household meet on a predictable, high-leverage rhythm?
-3. **Financials**: Is there a clear runway and a debt burn-down plan?
-4. **Security**: Are keys, secrets, and boundaries rotated and audited quarterly?
+This toolkit exists to help leaders identify that condition early.
 
----
+## II. The Core Thesis
 
-<Note tone="caution" title="The Diagnostic Rule">
-  {"If you cannot measure the drift, you cannot manage the restoration. Always start with the data, not the vibes."}
-</Note>
+Governance is the discipline of maintaining order under pressure.
+
+Where governance is strong:
+
+- responsibility is visible
+- authority is lawful
+- truth is documented
+- cadence is reliable
+- consequences are real
+
+Where governance is weak:
+
+- ownership drifts
+- decisions become political
+- meetings replace memory
+- standards become suggestions
+- everybody works harder while fewer things truly improve
+
+## III. The Five-Part Diagnostic
+
+### 1. Decision Rights
+
+Ask:
+
+- Who owns the outcome?
+- Who has the authority to alter the process?
+- Who must be consulted?
+- Who merely needs visibility?
+
+Red flags:
+
+- responsibility without authority
+- too many approvers
+- shadow decision-makers
+- escalation by personality rather than rule
+
+### 2. Documented Truth
+
+Ask:
+
+- Are decisions written down and dated?
+- Is there a single source of truth for key operating decisions?
+- Can someone new reconstruct why the institution chose its current path?
+
+Red flags:
+
+- essential decisions trapped in meetings, chats, or memory
+- repeated arguments because there is no durable record
+- dependence on one person who "just knows how it works"
+
+### 3. Operating Cadence
+
+Ask:
+
+- Is there a stable rhythm for review, escalation, and follow-through?
+- Are the right issues revisited at the right intervals?
+- Does the rhythm create clarity, or only ritual?
+
+Red flags:
+
+- meetings with no decision output
+- inconsistent review frequency
+- crisis becoming the only real governance mechanism
+
+### 4. Enforcement Discipline
+
+Ask:
+
+- What happens when standards are missed?
+- Is drift noticed quickly?
+- Are exceptions governed or merely tolerated?
+
+Red flags:
+
+- standards that carry no consequence
+- high performers exempt from basic discipline
+- recurring failures treated as one-off incidents
+
+### 5. Resource and Risk Stewardship
+
+Ask:
+
+- Are key assets, secrets, budgets, and dependencies reviewed with seriousness?
+- Is there clear ownership of operational risk?
+- Are there known single points of failure?
+
+Red flags:
+
+- no review cadence for key dependencies
+- invisible security debt
+- financial ambiguity treated as acceptable background noise
+
+## IV. How to Use the Toolkit
+
+This toolkit works best when leaders score each area plainly rather than performatively.
+
+Use a simple scale:
+
+- `1-3`: unstable or unclear
+- `4-6`: functional but drifting
+- `7-8`: strong but improvable
+- `9-10`: lawful, visible, and repeatable
+
+The goal is not self-flattery. The goal is diagnosis.
+
+## V. What the Scores Mean
+
+### If Decision Rights are weak
+
+Do not start with motivation work. Start with ownership and sponsor clarity.
+
+### If Documented Truth is weak
+
+Do not start with better meetings. Start with records, decision logs, and operating memory.
+
+### If Operating Cadence is weak
+
+Do not add more communication. Build a rhythm that forces review and closure.
+
+### If Enforcement is weak
+
+Do not draft new values language. Restore consequences and escalation standards.
+
+### If Stewardship is weak
+
+Do not talk about vision while the institution is leaking integrity through neglected essentials.
+
+## VI. Strategic Implication
+
+This diagnostic should be run before expensive intervention design.
+
+Too many institutions attempt:
+
+- rebrands
+- restructures
+- hiring pushes
+- strategy off-sites
+- culture programmes
+
+before establishing whether the real issue is simply weak governance.
+
+If governance is weak, scaling only enlarges the problem.
+
+## VII. Closing Judgment
+
+You do not need a complicated theory to know whether governance is drifting.
+
+You need clear answers to basic questions:
+
+- Who decides?
+- What is recorded?
+- What repeats?
+- What gets enforced?
+- What is being stewarded?
+
+Where those answers are weak, the institution is not suffering from bad luck. It is suffering from ungoverned structure.
+
+<DocumentFooter>
+**Version**: 1.1.0 | **Institutional ID**: CB-GOV-DIAG-077
+**Part of the Abraham of London Portfolio** · [Back to Resources](/resources)
+</DocumentFooter>
