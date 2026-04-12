@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fuseScores } from './deal-fusion';
+import { fuseScores } from '../deal-fusion';
 
 describe('DEAL FUSION ENGINE v3.0 — Institutional Validation', () => {
 
