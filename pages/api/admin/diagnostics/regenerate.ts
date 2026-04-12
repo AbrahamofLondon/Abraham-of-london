@@ -1,11 +1,19 @@
 // pages/api/admin/diagnostics/regenerate.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth/options";
 import { writeDiagnosticAudit } from "@/lib/server/diagnostics/audit";
 import { enqueue } from "@/lib/jobs/queue";
 import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
+
+  const session = await getServerSession(req, res, authOptions);
+  const role = (session as any)?.user?.role ?? (session as any)?.aol?.tier;
+  if (!session || (role !== "ADMIN" && role !== "SUPER_ADMIN" && role !== "owner" && role !== "architect")) {
+    return res.status(401).json({ ok: false, error: "Admin access required" });
+  }
 
   const { diagnosticRef, artifactId } = req.body || {};
   if (!diagnosticRef) return res.status(400).json({ ok: false, reason: "REF_REQUIRED" });

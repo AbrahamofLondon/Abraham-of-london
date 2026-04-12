@@ -38,15 +38,10 @@ export async function checkUnifiedAuth(ctx: GetServerSidePropsContext): Promise<
                         ctx.req.cookies['__Secure-next-auth.session-token'];
     
     if (sessionToken) {
-      // You should validate the session token properly here
-      // This is a simplified version
-      user = {
-        id: 'temporary-id',
-        email: 'user@example.com',
-        name: 'User',
-        role: 'admin' as UserRole,
-        permissions: ['access:admin']
-      };
+      // QUARANTINED: This helper does not perform real session validation.
+      // It previously returned a fabricated admin identity for any session cookie.
+      // Now fails closed — returns null (unauthenticated) until properly implemented.
+      user = null;
     }
   } catch (error) {
     console.error('Admin session check failed:', error);
