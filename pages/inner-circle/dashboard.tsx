@@ -346,8 +346,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       // Step 1: Get grants for this user
       const grants = await prisma.diagnosticArtifactAccessGrant.findMany({
         where: { granteeEmail: userEmail },
-        select: { artifactId: true, grantedAt: true },
-        orderBy: { grantedAt: "desc" },
+        select: { artifactId: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
       });
 
       if (grants.length > 0) {
@@ -362,9 +362,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         diagnostics = artifacts.map((artifact) => ({
           diagnosticRef: artifact.diagnosticRef,
-          title: artifact.title || "Diagnostic Report",
+          title: artifact.fileName || "Diagnostic Report",
           kind: "diagnostic",
-          excerpt: artifact.narrative?.substring(0, 200) || "Structured diagnostic report.",
+          excerpt: "Structured diagnostic report.",
           href: `/inner-circle/reports/${encodeURIComponent(artifact.diagnosticRef)}`,
           date: artifact.createdAt
             ? new Date(artifact.createdAt).toLocaleDateString("en-GB", {
@@ -373,23 +373,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
               })
             : "2026",
           readTime: artifact.version ? `v${artifact.version}` : "draft",
-          reportStatus: artifact.status === "issued" ? "generated" : "pending",
+          reportStatus: artifact.isRevoked ? "pending" : "generated",
         }));
       }
     }
 
     // ✅ CONTENT QUERY ALIGNED TO SCHEMA (uses summary, not excerpt)
     const content = allBriefs
-      .filter((b) => b.status === "published" || process.env.NODE_ENV === "development")
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .map((b) => ({
-        title: b.title,
-        kind: b.category || "Briefing",
-        excerpt: b.summary || b.excerpt || "Institutional strategic summary.",
-        href: `/inner-circle/briefs/${b._raw.flattenedPath}`,
-        date: b.date ? new Date(b.date).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : "2026",
-        readTime: b.readingTime?.text || "12m",
-      }));
+      .filter((b) => (b as any).status === "published" || process.env.NODE_ENV === "development")
+      .sort((a, b) => new Date(String((b as any).date ?? "")).getTime() - new Date(String((a as any).date ?? "")).getTime())
+      .map((b) => {
+        const ab = b as any;
+        return {
+          title: String(ab.title ?? ""),
+          kind: String(ab.category ?? "Briefing"),
+          excerpt: String(ab.summary ?? ab.excerpt ?? "Institutional strategic summary."),
+          href: `/inner-circle/briefs/${ab._raw?.flattenedPath ?? ""}`,
+          date: ab.date ? new Date(ab.date).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : "2026",
+          readTime: ab.readingTime?.text ?? "12m",
+        };
+      });
 
     return {
       props: {

@@ -44,7 +44,7 @@ function getBriefBySlug(slug: string) {
 }
 
 const BriefDetailPage: NextPage<Props> = ({ brief, accessTier }) => {
-  const title = safeString(brief?.title, "Untitled Brief");
+  const title = safeString(brief?.title) || "Untitled Brief";
   const subtitle = safeString(brief?.subtitle);
   const bodyCode = safeString(brief?.body?.code);
 
@@ -152,7 +152,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   return {
     props: {
       brief: JSON.parse(JSON.stringify(brief)),
-      accessTier: safeString(ctx.tier, "inner-circle"),
+      accessTier: safeString(ctx.tier) || "inner-circle",
     },
   };
 };
