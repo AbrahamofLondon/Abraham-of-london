@@ -15,7 +15,6 @@ import {
   type ExecutiveReportMarketRiskBand,
   type ExecutiveReportRecommendation,
   type ExecutiveReportPdfConstitutionPayload,
-  type ReturnTypeSerializeExecutiveReportToPdfPayload,
   type CanonicalExecutiveReportExport,
 } from "@/lib/admin/reporting/types";
 
@@ -208,7 +207,7 @@ function formatCurrency(value: number): string {
 // --- Primary Exports ---
 
 export function serializeExecutiveReportToJson(input: SerializeInput): { ok: boolean; canonical: CanonicalExecutiveReportExport } {
-  const report = safeObject(input.report);
+  const report: Record<string, unknown> & { resonance?: { telemetry?: Record<string, unknown> }; narrative?: Record<string, unknown> } = input.report ?? {};
   const campaign = safeObject(input.campaign);
   const constitution = pickConstitution(report, input.constitution, input.guidance);
   const recommendations = buildRecommendations(report);
@@ -342,8 +341,8 @@ export function serializeExecutiveReportToJson(input: SerializeInput): { ok: boo
   };
 }
 
-export function serializeExecutiveReportToPdfPayload(input: SerializeInput): ReturnTypeSerializeExecutiveReportToPdfPayload {
-  const report = safeObject(input.report);
+export function serializeExecutiveReportToPdfPayload(input: SerializeInput) {
+  const report: Record<string, unknown> & { resonance?: { telemetry?: Record<string, unknown> }; narrative?: Record<string, unknown> } = input.report ?? {};
   const constitution = pickConstitution(report, input.constitution, input.guidance);
   const recommendations = buildRecommendations(report);
 

@@ -171,7 +171,7 @@ function extractVolumeNumber(title: string): number | null {
     let prev = 0;
 
     for (let i = roman.length - 1; i >= 0; i--) {
-      const ch = roman[i];
+      const ch = roman[i] ?? "";
       const cur = values[ch] ?? 0;
       total += cur < prev ? -cur : cur;
       prev = cur;
@@ -681,7 +681,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     const rawDocs = getAllCanons() || [];
     const seenSlugs = new Set<string>();
 
-    const items: CanonItem[] = rawDocs
+    const items = (rawDocs
       .filter((doc: any) => !doc?.draft)
       .map((doc: any) => {
         const raw =
@@ -726,13 +726,13 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           originalFilename: filename,
         };
       })
-      .filter((item): item is CanonItem => Boolean(item))
+      .filter((item) => item !== null)
       .sort((a, b) => {
-        const av = a.volumeNumber ?? 999;
-        const bv = b.volumeNumber ?? 999;
+        const av = (a as CanonItem).volumeNumber ?? 999;
+        const bv = (b as CanonItem).volumeNumber ?? 999;
         if (av !== bv) return av - bv;
-        return a.title.localeCompare(b.title);
-      });
+        return (a as CanonItem).title.localeCompare((b as CanonItem).title);
+      })) as CanonItem[];
 
     const counts = items.reduce(
       (acc, item) => {

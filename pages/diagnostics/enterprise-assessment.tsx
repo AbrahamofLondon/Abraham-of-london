@@ -126,9 +126,9 @@ type EnterpriseReading = {
 };
 
 function sectionPct(answers: Record<string, DiagnosticAnswerValue>, blockId: string): number {
-  const vals = [0, 1, 2].map(i => answers[`${blockId}-${i}`] ?? 0).filter(v => v > 0);
+  const vals: number[] = [0, 1, 2].map(i => answers[`${blockId}-${i}`] ?? 0).filter(v => v > 0);
   if (!vals.length) return 0;
-  return Math.round((vals.reduce((s, v) => s + v, 0) / (vals.length * 5)) * 100);
+  return Math.round((vals.reduce((s: number, v: number) => s + v, 0) / (vals.length * 5)) * 100);
 }
 
 function deriveReading(
@@ -139,7 +139,11 @@ function deriveReading(
   const scores: Record<string, number> = {};
   for (const b of BLOCKS) scores[b.id] = sectionPct(answers, b.id);
 
-  const { leadership, governance, execution, risk } = scores as Record<string, number>;
+  const scoreMap = scores as Record<string, number>;
+  const leadership = scoreMap["leadership"] ?? 0;
+  const governance = scoreMap["governance"] ?? 0;
+  const execution  = scoreMap["execution"]  ?? 0;
+  const risk       = scoreMap["risk"]       ?? 0;
   const weakest = Object.entries(scores).sort((a, b) => a[1] - b[1])[0]!;
 
   // Band
@@ -517,7 +521,7 @@ export default function EnterpriseAssessmentPage() {
   }, []);
 
   const allPrompts = BLOCKS.flatMap(b => b.prompts.map((_, i) => `${b.id}-${i}`));
-  const answeredCount = allPrompts.filter(k => answers[k] > 0).length;
+  const answeredCount = allPrompts.filter(k => (answers[k] ?? 0) > 0).length;
   const complete = answeredCount === allPrompts.length;
 
   const answerList: DiagnosticAnswer[] = BLOCKS.flatMap(b =>
@@ -555,7 +559,7 @@ export default function EnterpriseAssessmentPage() {
       respondent: { name: identity.name || null, email: identity.email || null, organisation: identity.organisation || null, role: identity.role || null },
       answers: answerList, notes: identity.notes || null,
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
-      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/consulting/strategy-room" : "/diagnostics/executive-reporting", nextRoute: reading?.route ?? "EXECUTIVE_REPORTING", teamAlignmentPct },
+      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/consulting/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
     });
     setSubmitResult(res); setIsSubmitting(false);
   }

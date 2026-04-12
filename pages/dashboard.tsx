@@ -58,7 +58,7 @@ const SovereignDashboard = dynamic(
 const BillingEntitlementsPanel = dynamic(
   () =>
     import("@/components/dashboard/BillingEntitlementsPanel").then(
-      (mod) => mod.BillingEntitlementsPanel
+      (mod) => mod.default
     ),
   {
     ssr: false,
@@ -69,7 +69,7 @@ const BillingEntitlementsPanel = dynamic(
 const DiagnosticLineagePanel = dynamic(
   () =>
     import("@/components/dashboard/DiagnosticLineagePanel").then(
-      (mod) => mod.DiagnosticLineagePanel
+      (mod) => mod.default
     ),
   {
     ssr: false,
@@ -223,7 +223,7 @@ function resolveAuthenticatedEmail(session: any): string {
   ];
 
   if (process.env.NODE_ENV === "development") {
-    return allowedFallbacks[1];
+    return allowedFallbacks[1]!;
   }
 
   throw new Error("AUTH_EMAIL_MISSING");
@@ -603,7 +603,7 @@ export default function UnifiedDashboard({
               entitlements={entitlements}
             />
             <DiagnosticLineagePanel events={lineageEvents} />
-            <MyReportsPanel reports={reports} />
+            <MyReportsPanel />
           </div>
 
           {aol.isInternal ? (
@@ -764,7 +764,7 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
 
     const artifactsById = new Map(artifactsRaw.map((a) => [a.id, a]));
 
-    const reports: ReportItem[] = grantsRaw
+    const reports: ReportItem[] = (grantsRaw
       .map((grant) => {
         const artifact = artifactsById.get(grant.artifactId);
         if (!artifact) return null;
@@ -777,11 +777,11 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
           createdAt: artifact.createdAt.toISOString(),
           downloadUrl: `/api/diagnostics/reports/download/${artifact.id}`,
           status: grant.status,
-          kind: artifact.kind,
+          kind: String(artifact.kind),
           retentionClass: artifact.retentionClass,
         };
       })
-      .filter((item): item is ReportItem => Boolean(item));
+      .filter((item) => item !== null) as ReportItem[]);
 
     const lineageEventsRaw =
       diagnosticRefs.length > 0

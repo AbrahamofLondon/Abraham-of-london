@@ -45,7 +45,14 @@ import { joinHref, normalizeSlug } from "@/lib/content/shared";
 import { sanitizeData } from "@/lib/content/server";
 import { getPublicationCatalogue, getPublicationBySlug } from "@/lib/editorial/catalogue";
 import type { PublicationRecord } from "@/lib/editorial/types";
-import type { PublicationItem } from "@/lib/editorial/server-readers";
+import type { PublicationItem as _PublicationItemBase } from "@/lib/editorial/server-readers";
+
+// Extend the base type with optional fields used by publicationToItem
+type PublicationItem = _PublicationItemBase & {
+  previewHref?: string | null;
+  epubHref?: string | null;
+  citationHref?: string;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -378,17 +385,17 @@ class ModuleBoundary extends React.Component<
   { label: string; children: React.ReactNode },
   { hasError: boolean }
 > {
-  state = { hasError: false };
+  override state = { hasError: false };
 
   static getDerivedStateFromError() {
     return { hasError: true };
   }
 
-  componentDidCatch(err: any) {
+  override componentDidCatch(err: any) {
     console.error(`[Homepage/${this.props.label}]`, err);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
@@ -2266,14 +2273,14 @@ function parseFrontmatter(content: string): Record<string, any> {
   const result: Record<string, any> = {};
   let currentArrayKey: string | null = null;
 
-  for (const rawLine of match[1].split("\n")) {
+  for (const rawLine of (match[1] ?? "").split("\n")) {
     const line = rawLine.replace(/\r/g, "");
     if (!line.trim()) continue;
 
     const arrayItemMatch = line.match(/^\s*-\s+(.*)$/);
     if (arrayItemMatch && currentArrayKey) {
       if (!Array.isArray(result[currentArrayKey])) result[currentArrayKey] = [];
-      result[currentArrayKey].push(arrayItemMatch[1].trim().replace(/^['"]|['"]$/g, ""));
+      result[currentArrayKey].push((arrayItemMatch[1] ?? "").trim().replace(/^['"]|['"]$/g, ""));
       continue;
     }
 
@@ -2283,7 +2290,8 @@ function parseFrontmatter(content: string): Record<string, any> {
       continue;
     }
 
-    const [, key, rawValue] = keyMatch;
+    const key: string = keyMatch[1]!;
+    const rawValue: string = keyMatch[2] ?? "";
     const value = rawValue.trim();
 
     if (!value) {
