@@ -25,15 +25,11 @@ function assertAdmin(req: NextApiRequest) {
   if (!expected) {
     throw new Error("Server misconfigured: INNER_CIRCLE_ADMIN_SECRET not set");
   }
+  // Secret accepted via header only. Query-param secret acceptance removed for security.
   const headerSecret = req.headers["x-admin-secret"];
-  const providedFromHeader = Array.isArray(headerSecret)
+  const provided = Array.isArray(headerSecret)
     ? headerSecret[0]
     : headerSecret;
-  const providedFromQuery =
-    typeof req.query.adminSecret === "string"
-      ? req.query.adminSecret
-      : undefined;
-  const provided = providedFromHeader || providedFromQuery;
   if (!provided || provided !== expected) {
     throw new Error("Unauthorized");
   }
