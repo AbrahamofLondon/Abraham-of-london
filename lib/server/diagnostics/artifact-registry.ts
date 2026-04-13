@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible (see Next.js docs)
 
 /* lib/server/diagnostics/artifact-registry.ts */
 /* eslint-disable @typescript-eslint/no-explicit-any */

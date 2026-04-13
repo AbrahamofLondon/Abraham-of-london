@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 /* lib/server/diagnostics/report-archive.ts */
 
