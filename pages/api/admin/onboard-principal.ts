@@ -38,7 +38,7 @@ function toDbTier(input: unknown): DbAccessTier {
   const normalized = normalizeUserTier(input);
 
   switch (normalized) {
-    case "inner-circle":
+    case "inner_circle":
       return "inner_circle";
     case "public":
     case "member":
@@ -137,11 +137,16 @@ export default async function handler(
 
       const keyData = await generatePrincipalKey(member.id);
 
-      // ✅ This now works because ONBOARDED exists in the schema
+      // PROVISIONAL MAPPING: the schema InquiryStatus enum is
+      // (PENDING|REVIEWING|CONTACTED|CLOSED). The original code referenced
+      // InquiryStatus.ONBOARDED which does not exist. Mapping to CLOSED as the
+      // closest "workflow complete" semantic — the inquiry is closed because
+      // the principal is now onboarded as a member. Reversible if the schema
+      // is later extended with a dedicated ONBOARDED value (C15-class).
       await tx.strategyInquiry.update({
         where: { id: inquiryId },
         data: {
-          status: InquiryStatus.ONBOARDED,
+          status: InquiryStatus.CLOSED,
           memberId: member.id,
         },
       });

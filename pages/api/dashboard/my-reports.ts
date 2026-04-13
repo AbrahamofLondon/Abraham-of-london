@@ -12,19 +12,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const email = session.user.email.toLowerCase();
 
+  // Schema alignment: DiagnosticArtifact has no `subjectEmail` / `artifactType`
+  // / `regeneratedAt` / `storagePath` columns. The user→artifact chain runs
+  // through the parent DiagnosticRecord (`diagnostic.userEmail`). The artifact
+  // type discriminator is `kind` (DiagnosticArtifactKind enum). The storage
+  // location is `objectKey`. There is no regeneratedAt column.
   const reports = await prisma.diagnosticArtifact.findMany({
-    where: { subjectEmail: email },
+    where: { diagnostic: { userEmail: email } },
     orderBy: { createdAt: "desc" },
     take: 50,
     select: {
       id: true,
-      artifactType: true,
+      kind: true,
       version: true,
       createdAt: true,
-      regeneratedAt: true,
       revokedAt: true,
       retentionClass: true,
-      storagePath: true,
+      objectKey: true,
     },
   });
 
@@ -33,7 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     reports: reports.map((r) => ({
       ...r,
       createdAt: r.createdAt.toISOString(),
-      regeneratedAt: r.regeneratedAt?.toISOString() || null,
       revokedAt: r.revokedAt?.toISOString() || null,
     })),
   });

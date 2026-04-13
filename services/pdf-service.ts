@@ -131,6 +131,9 @@ function normalizeDashboardPDFItem(raw: any): PDFItem {
 
   const downloadCount = Number.isFinite(Number(raw?.downloadCount)) ? Number(raw.downloadCount) : 0;
 
+  const tier =
+    typeof raw?.tier === "string" && raw.tier.trim() ? raw.tier : "public";
+
   // Return as Dashboard PDFItem (not Canon)
   return {
     id,
@@ -138,6 +141,7 @@ function normalizeDashboardPDFItem(raw: any): PDFItem {
     description,
     category,
     type: type as any, // keep flexible; aligns to API
+    tier,
     exists,
 
     isGenerating,

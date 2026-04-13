@@ -532,8 +532,15 @@ export async function POST(
           isAuthorizedToExecute: route === "STRATEGY",
         },
       },
-      constitution,
-      guidance,
+      // Pass the typed assembler outputs directly into buildCanonicalReportContract.
+      // The local `constitution`/`guidance` consts are AnyRecord (intentionally
+      // widened via getObject() above) for consumption by AnyRecord-typed local
+      // helpers throughout this file. The canonical builder needs the strict
+      // ExecutiveReportConstitution / ExecutiveReportGuidance shape per the
+      // ConstitutionalAssemblerOutput contract — the typed versions are still
+      // available on `assembled` and are used directly here.
+      constitution: assembled.constitution,
+      guidance: assembled.guidance,
       campaign: {
         id: runKey,
         title: "Executive Reporting Run",
@@ -563,8 +570,8 @@ export async function POST(
         route: route || null,
         readinessTier: s(constitution.readinessTier) || null,
         authorityType: s(constitution.authorityType) || null,
-        canonicalSnapshot: canonical as Prisma.InputJsonValue,
-        viewModelSnapshot: viewModel as Prisma.InputJsonValue,
+        canonicalSnapshot: canonical as unknown as Prisma.InputJsonValue,
+        viewModelSnapshot: viewModel as unknown as Prisma.InputJsonValue,
       },
     });
 

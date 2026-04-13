@@ -261,3 +261,7 @@ ehthumbs.db
 
 # HubSpot config file
 hubspot.config.yml
+
+briefs-contamination.patch
+bucket-*.txt
+changed-*.txt

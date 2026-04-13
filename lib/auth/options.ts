@@ -149,12 +149,18 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
           });
 
+          // Tier normalization at the Prisma→app boundary.
+          // The Prisma `AccessTier` enum is the 5-value DB taxonomy;
+          // the app-side `AccessTier` (and NextAuth User augmentation) is the
+          // 9-value canonical taxonomy. `normalizeUserTier` is the project's
+          // canonical SSOT mapper for this exact transition. Using it here
+          // collapses C19 — auth callback no longer carries C1 contagion.
           return {
             id: user.id,
             email: user.email,
             name: user.name ?? "User",
             role: String(user.role ?? "member"),
-            tier: user.tier ?? "member",
+            tier: normalizeUserTier(user.tier ?? "member"),
             aol: aolClaims,
           };
         } catch (error) {

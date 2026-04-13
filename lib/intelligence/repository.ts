@@ -85,7 +85,10 @@ export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
         content?.contentType === ContentType.Dossier
           ? DownloadContentType.PDF
           : DownloadContentType.PDF,
-      eventType: DownloadEventType.VIEW,
+      // PROVISIONAL MAPPING: schema DownloadEventType is (PREVIEW|DOWNLOAD|PRINT)
+      // — no VIEW value. Mapping VIEW → PREVIEW as the closest non-binding
+      // read-only event semantic. Reversible if schema is later extended (C17).
+      eventType: DownloadEventType.PREVIEW,
       deliveryMode: DownloadDeliveryMode.DIRECT,
 
       contentId: content?.id ?? undefined,

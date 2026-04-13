@@ -30,12 +30,12 @@ function mapStripeTierToAccessTier(membershipTier: unknown): AccessTier {
 
   const explicit: Record<string, AccessTier> = {
     free: "member",
-    premium: "inner-circle",
+    premium: "inner_circle",
     enterprise: "client",
     elite: "legacy",
     basic: "member",
     standard: "member",
-    pro: "inner-circle",
+    pro: "inner_circle",
     business: "client",
   };
 
@@ -139,15 +139,27 @@ export default async function handler(
 
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object as Stripe.Subscription;
+      const targetCustomerId =
+        typeof subscription.customer === "string" ? subscription.customer : null;
 
-      const user = await prisma.innerCircleMember.findFirst({
-        where: {
-          metadata: {
-            path: ["stripeCustomerId"],
-            equals: subscription.customer as string,
-          },
-        },
+      // Engineering workaround for C3: InnerCircleMember.metadata is `String?`
+      // (not `Json?`), so Prisma's JSON `path` filter is unsupported on this
+      // schema. Load candidates with non-null metadata and parse-and-filter in
+      // memory instead. The Inner Circle population is bounded; acceptable for
+      // a webhook handler.
+      const candidates = await prisma.innerCircleMember.findMany({
+        where: { metadata: { not: null } },
       });
+      const user = targetCustomerId
+        ? candidates.find((m) => {
+            try {
+              const meta = JSON.parse(m.metadata ?? "{}");
+              return meta?.stripeCustomerId === targetCustomerId;
+            } catch {
+              return false;
+            }
+          }) ?? null
+        : null;
 
       if (user) {
         await prisma.innerCircleMember.update({
@@ -173,18 +185,26 @@ export default async function handler(
     if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object as Stripe.Subscription;
       const priceId = subscription.items.data[0]?.price.id;
+      const targetCustomerId =
+        typeof subscription.customer === "string" ? subscription.customer : null;
 
-      const user = await prisma.innerCircleMember.findFirst({
-        where: {
-          metadata: {
-            path: ["stripeCustomerId"],
-            equals: subscription.customer as string,
-          },
-        },
+      // Same C3 workaround as the deleted handler above: in-memory parse-and-filter.
+      const candidates = await prisma.innerCircleMember.findMany({
+        where: { metadata: { not: null } },
       });
+      const user = targetCustomerId
+        ? candidates.find((m) => {
+            try {
+              const meta = JSON.parse(m.metadata ?? "{}");
+              return meta?.stripeCustomerId === targetCustomerId;
+            } catch {
+              return false;
+            }
+          }) ?? null
+        : null;
 
       if (user && priceId) {
-        const tier: AccessTier = "inner-circle";
+        const tier: AccessTier = "inner_circle";
 
         await prisma.innerCircleMember.update({
           where: { id: user.id },
