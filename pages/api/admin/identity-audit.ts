@@ -41,6 +41,15 @@ export default async function handler(
 
   try {
     // 2. DATA INTEGRITY JOIN (Prisma Logic)
+    //
+    // Persisted identity is InnerCircleMember and there is no second User
+    // model, so there is no second tier column to drift from. This audit
+    // endpoint originally compared InnerCircleMember.tier against
+    // member.user.tier to detect drift; under single-source identity, drift
+    // is impossible by construction. The response contract is preserved
+    // (innerCircleTier, globalUserTier, syncStatus, driftCount all still
+    // present) so consumers do not break; globalUserTier is populated from
+    // the same source as innerCircleTier and syncStatus is always "synced".
     const activeSessions = await prisma.session.findMany({
       where: { status: "active" },
       include: {
@@ -49,8 +58,6 @@ export default async function handler(
             id: true,
             email: true,
             tier: true,
-            userId: true,
-            user: { select: { tier: true } },
           },
         },
       },
@@ -58,22 +65,17 @@ export default async function handler(
       take: 100, // Safety limit for audit view
     });
 
-    let driftCount = 0;
+    const driftCount = 0;
 
     const details: AuditRow[] = activeSessions.map((s) => {
-      const member = (s as any).member;
-      const icTier = normalizeUserTier(member?.tier ?? "public");
-      const globalTier = normalizeUserTier(member?.user?.tier ?? "public");
-      
-      const isSynced = icTier === globalTier;
-      if (!isSynced) driftCount++;
+      const icTier = normalizeUserTier(s.member?.tier ?? "public");
 
       return {
         sessionId: `${s.sessionId.slice(0, 12)}...`,
-        email: member?.email || "anonymous",
+        email: s.member?.email || "anonymous",
         innerCircleTier: icTier,
-        globalUserTier: globalTier,
-        syncStatus: isSynced ? "synced" : "drift_detected",
+        globalUserTier: icTier,
+        syncStatus: "synced",
         lastSeen: s.createdAt.toISOString(),
       };
     });
