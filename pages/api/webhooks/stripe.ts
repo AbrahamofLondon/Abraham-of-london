@@ -39,7 +39,7 @@ function mapStripeTierToAccessTier(membershipTier: unknown): AccessTier {
     business: "client",
   };
 
-  return explicit[raw] ?? normalizeUserTier(raw);
+  return normalizeUserTier(explicit[raw] ?? raw);
 }
 
 function mergeMetadata(
