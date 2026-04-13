@@ -1,8 +1,19 @@
 /* pages/api/admin/security/resolve-appeal.ts — Institutional Tier Escalation */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma.server";
+import { AccessTier } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
+
+/**
+ * Runtime narrower: confirms a string is a member of the current Prisma
+ * AccessTier enum. Used to honestly gate tier writes to InnerCircleMember
+ * without casts. The set this validates against expands when
+ * SCHEMA-PR-CHAIN-CHECKLIST-01 PR 1 lands.
+ */
+function isDbAccessTier(value: string): value is AccessTier {
+  return (Object.values(AccessTier) as string[]).includes(value);
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -31,15 +42,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const requestedTier = _parsedMeta?.requiredTier;
     const targetUserId = originalEvent.actorId;
 
-    // 3. Atomic Transaction: Update User + Close Audit Log
+    // 3. Atomic Transaction: Update InnerCircleMember tier + close Audit Log
     await prisma.$transaction(async (tx) => {
       if (approved && requestedTier) {
-        // Update the actual user tier
-        // Note: Replace 'user' with 'innerCircleMember' if that is your primary table
-        await tx.user.update({
-          where: { id: targetUserId },
-          data: { role: requestedTier.toLowerCase() }, 
-        });
+        // Persisted identity is InnerCircleMember. The original code wrote
+        // the requested value into a "role" field on a non-existent User
+        // model; every other signal in this handler (action name
+        // MEMBER_TIER_MODIFIED, variable name requestedTier, response copy
+        // "elevated to", audit log previousTier/newTier) indicates the
+        // intended target is the tier column, not role. Correcting to tier
+        // with runtime narrowing against the current Prisma AccessTier enum.
+        const normalized = String(requestedTier).toLowerCase();
+        if (isDbAccessTier(normalized)) {
+          await tx.innerCircleMember.update({
+            where: { id: targetUserId },
+            data: { tier: normalized },
+          });
+        }
       }
 
       // Update the Audit Log to reflect the decision
