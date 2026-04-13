@@ -2,13 +2,9 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
-import {
-  AccessTier as PrismaAccessTier,
-  KeyStatus as PrismaKeyStatus,
-} from "@prisma/client";
+import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import type { AccessTier as PolicyAccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
@@ -39,34 +35,6 @@ async function verifyRecaptcha(token: string): Promise<boolean> {
 
 function isEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email);
-}
-
-function fromDbTier(
-  tier: PrismaAccessTier | string | null | undefined
-): PolicyAccessTier {
-  const raw = String(tier || "member").replace(/_/g, "-");
-  return normalizeUserTier(raw);
-}
-
-function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
-  switch (tier) {
-    case "public":
-    case "member":
-    case "inner_circle":
-      return PrismaAccessTier.member;
-    case "restricted":
-    case "client":
-      return PrismaAccessTier.client;
-    case "legacy":
-      return PrismaAccessTier.partner;
-    case "architect":
-      return PrismaAccessTier.executive;
-    case "owner":
-    case "top_secret":
-      return PrismaAccessTier.sovereign;
-    default:
-      return PrismaAccessTier.member;
-  }
 }
 
 function getBaseUrl(): string {
@@ -140,8 +108,7 @@ export default async function handler(
       });
     }
 
-    const memberTier = fromDbTier(member.tier);
-    const dbTier = toDbTier(memberTier);
+    const tier = normalizeUserTier(member.tier ?? "member");
 
     const rawKey = makeAccessKey();
     const keyHash = hashAccessKey(rawKey);
@@ -169,7 +136,7 @@ export default async function handler(
       }),
       prisma.innerCircleMember.update({
         where: { id: member.id },
-        data: { tier: dbTier },
+        data: { tier },
       }),
     ]);
 

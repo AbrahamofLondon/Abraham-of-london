@@ -73,7 +73,7 @@ function toDbTier(raw: unknown): DbAccessTier {
       return "public";
     case "member":
       return "member";
-    case "inner-circle":
+    case "inner_circle":
       return "inner_circle";
     case "restricted": 
       return "restricted";
@@ -85,7 +85,7 @@ function toDbTier(raw: unknown): DbAccessTier {
       return "architect";
     case "owner":
       return "owner";
-    case "top-secret":
+    case "top_secret":
       return "top_secret";
     default:
       return "public";
@@ -350,8 +350,8 @@ export async function searchVault(query: string): Promise<VaultAsset[]> {
     const results = await prisma.contentMetadata.findMany({
       where: {
         OR: [
-          { title: { contains: q, mode: "insensitive" } },
-          { slug: { contains: q, mode: "insensitive" } },
+          { title: { contains: q } },
+          { slug: { contains: q } },
         ],
       },
       orderBy: { updatedAt: "desc" },

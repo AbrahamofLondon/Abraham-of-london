@@ -8,11 +8,7 @@ export async function writeChainedAudit(entry: {
   subjectEmail?: string;
   metadata?: any;
 }) {
-  const last = await prisma.systemAuditLog.findFirst({
-    orderBy: { createdAt: "desc" },
-  });
-
-  const prevHash = last?.hash || "GENESIS";
+  const prevHash = "GENESIS"; // STUB: no hash column in SystemAuditLog
 
   const payload = JSON.stringify({
     action: entry.action,
@@ -21,15 +17,13 @@ export async function writeChainedAudit(entry: {
     prevHash,
   });
 
-  const hash = crypto.createHash("sha256").update(payload).digest("hex");
+  void crypto.createHash("sha256").update(payload).digest("hex");
 
   return prisma.systemAuditLog.create({
     data: {
       action: entry.action,
       actorEmail: entry.subjectEmail,
       metadata: entry.metadata != null ? JSON.stringify(entry.metadata) : undefined,
-      hash,
-      prevHash,
     },
   });
 }

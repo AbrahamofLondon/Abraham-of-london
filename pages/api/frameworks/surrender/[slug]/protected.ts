@@ -133,8 +133,8 @@ async function handler(
     res,
     {
       ok: true,
-      tier: access?.tier ?? "inner-circle",
-      requiredTier: "inner-circle",
+      tier: access?.tier ?? "inner_circle",
+      requiredTier: "inner_circle",
       slugResolved,
       bodyCode,
     },
@@ -144,7 +144,7 @@ async function handler(
 
 export default withInnerCircleAccess(handler, {
   requireAuth: true,
-  requiredTier: "inner-circle",
+  requiredTier: "inner_circle",
 });
 
 export const config = {

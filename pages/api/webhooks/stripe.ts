@@ -112,6 +112,7 @@ export default async function handler(
       await prisma.innerCircleMember.update({
         where: { id: userId },
         data: {
+          // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
           tier,
           status: "active",
           metadata: JSON.stringify(mergeMetadata(existingUser?.metadata, {
@@ -165,6 +166,7 @@ export default async function handler(
         await prisma.innerCircleMember.update({
           where: { id: user.id },
           data: {
+            // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
             tier: "member",
             status: "active",
             metadata: JSON.stringify(mergeMetadata(user.metadata, {
@@ -208,7 +210,10 @@ export default async function handler(
 
         await prisma.innerCircleMember.update({
           where: { id: user.id },
-          data: { tier },
+          data: {
+            // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
+            tier,
+          },
         });
 
         await auditLogger.log({

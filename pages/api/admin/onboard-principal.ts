@@ -35,6 +35,7 @@ type ApiResponse =
     };
 
 function toDbTier(input: unknown): DbAccessTier {
+  // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
   const normalized = normalizeUserTier(input);
 
   switch (normalized) {
@@ -129,6 +130,7 @@ export default async function handler(
           email: inquiry.email,
           name: inquiry.name,
           role: "MEMBER",
+          // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
           tier: dbTier,
           status: "active",
           emailHash: inquiry.email,

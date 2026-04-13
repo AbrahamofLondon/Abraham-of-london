@@ -124,6 +124,7 @@ export async function updateMemberTier(params: { id: string; newTier: AccessTier
   const updated = await prisma.innerCircleMember.update({
     where: { id: params.id },
     data: {
+      // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
       tier,
       metadata: { ...meta, tierHistory: history },
     } as any, // Cast to any ensures build passes if schema is mid-sync

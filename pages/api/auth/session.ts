@@ -37,7 +37,7 @@ function permissionsForTier(tierInput: unknown): Permission[] {
     return [...base, "downloads:read", "downloads:premium", "inner-circle:access"];
   }
 
-  if (hasAccess(tier, "inner-circle")) {
+  if (hasAccess(tier, "inner_circle")) {
     return [...base, "downloads:read", "inner-circle:access"];
   }
 
