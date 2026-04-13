@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 // lib/server/diagnostics/watermark.ts
 import crypto from "crypto";
@@ -27,3 +27,4 @@ export function buildWatermarkLines(input: ReportWatermarkPayload) {
     `Generated ${input.generatedAtISO}`,
   ];
 }
+

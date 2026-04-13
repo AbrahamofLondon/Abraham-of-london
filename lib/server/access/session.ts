@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 import crypto from "crypto";
 import type { NextApiRequest, NextApiResponse } from "next";

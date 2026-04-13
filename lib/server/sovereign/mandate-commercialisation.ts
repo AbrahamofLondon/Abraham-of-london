@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 import { grantEntitlement } from "@/lib/server/billing/entitlements";
 import type { ProductCode } from "@/lib/server/billing/entitlements";

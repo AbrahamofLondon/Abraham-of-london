@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 // lib/server/diagnostics/signing.ts
 import crypto from "crypto";
@@ -30,3 +30,4 @@ export function verifyPayload(body: string, sig: string) {
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
+

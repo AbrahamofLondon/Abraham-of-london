@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 /* ============================================================================
    FILE: lib/server/diagnostics/retention.ts
@@ -47,3 +47,4 @@ export async function runDiagnosticsRetentionSweep() {
     runAt: now.toISOString(),
   };
 }
+

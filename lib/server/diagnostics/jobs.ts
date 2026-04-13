@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 /* lib/server/diagnostics/jobs.ts */
 
@@ -80,3 +80,4 @@ export async function processPendingDiagnosticReports(): Promise<{
     results: out,
   };
 }
+

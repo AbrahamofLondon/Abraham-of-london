@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 import { hasEntitlement, PRODUCT_CODES } from "@/lib/server/billing/entitlements";
 
 export async function getExecutiveReportAccess(email: string) {

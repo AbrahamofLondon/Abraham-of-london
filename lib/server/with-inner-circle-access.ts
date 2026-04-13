@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 // lib/server/with-inner-circle-access.ts
 /**
@@ -144,3 +144,4 @@ export function withInnerCircleAccess(
 }
 
 export default withInnerCircleAccess;
+

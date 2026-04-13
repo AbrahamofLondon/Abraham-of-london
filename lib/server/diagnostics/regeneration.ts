@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 import { prisma } from "@/lib/prisma.server";
 import { archiveDiagnosticPdf } from "./report-archive";
 import { getDiagnosticRecordByRef } from "./store";

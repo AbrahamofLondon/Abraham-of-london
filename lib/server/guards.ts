@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 // lib/server/guards.ts
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -125,3 +125,4 @@ export default {
   requireRateLimit,
   requireAdmin,
 };
+

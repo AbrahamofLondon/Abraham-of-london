@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 /* lib/server/rate-limit-unified.ts — EDGE-SAFE (FULL REPLACEMENT) */
 // Fixes: "@upstash/redis/nodejs.mjs uses process.version" Edge failure.
@@ -278,3 +278,4 @@ export default {
   resetRateLimit,
   unblock,
 };
+
