@@ -1,19 +1,24 @@
 // lib/pdf/ensure-fonts.ts
 import registerInstitutionalFonts from "./register-fonts";
+import type { ReactPdfModuleLike } from "./register-fonts";
 
 let fontsRegistered = false;
 
-export function ensureFontsRegistered(): void {
+export async function ensureFontsRegistered(
+  ReactPDF: ReactPdfModuleLike,
+  projectRoot: string = process.cwd(),
+): Promise<void> {
   if (fontsRegistered) {
     return;
   }
 
   try {
-    registerInstitutionalFonts();
+    registerInstitutionalFonts(ReactPDF, projectRoot);
     fontsRegistered = true;
     console.log("✅ [ensureFontsRegistered] Fonts registered successfully");
-  } catch (err: any) {
-    console.error("❌ [ensureFontsRegistered] CRITICAL font registration failure:", err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("❌ [ensureFontsRegistered] CRITICAL font registration failure:", message);
     throw err;
   }
 }

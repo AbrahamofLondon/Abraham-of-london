@@ -23,8 +23,11 @@ export class VolatilityEngine {
     const returns: number[] = [];
 
     for (let i = 1; i < values.length; i++) {
+      const current = values[i];
+      const previous = values[i - 1];
+      if (current === undefined || previous === undefined) continue;
       // Use log returns to handle market percentage shifts
-      const logReturn = Math.log(values[i] / (values[i - 1] || 1));
+      const logReturn = Math.log(current / (previous || 1));
       returns.push(logReturn);
     }
 

@@ -273,6 +273,15 @@ type ExecutiveReportingResult =
 
 type PageState = "intake" | "generating" | "result";
 
+type UpstreamLadderContext = {
+  sourceKey: string;
+  sourceLabel: string;
+  route: string | null;
+  band: string | null;
+  summary: string | null;
+  metrics: Array<{ label: string; value: string }>;
+};
+
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
 const VOID = "rgb(3 3 5)";
@@ -584,16 +593,16 @@ function routeColor(r: string): { border: string; bg: string; text: string } {
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
     <div
-      className="flex items-center justify-between gap-3 py-2"
-      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+      className="flex items-center justify-between gap-4 py-3.5"
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}
     >
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "6.5px",
+          fontSize: "7.25px",
           letterSpacing: "0.30em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.20)",
+          color: "rgba(255,255,255,0.48)",
         }}
       >
         {label}
@@ -601,9 +610,9 @@ function MetricRow({ label, value }: { label: string; value: string }) {
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
+          fontSize: "8.25px",
           letterSpacing: "0.10em",
-          color: "rgba(255,255,255,0.60)",
+          color: "rgba(255,255,255,0.86)",
           textAlign: "right",
         }}
       >
@@ -611,6 +620,121 @@ function MetricRow({ label, value }: { label: string; value: string }) {
       </span>
     </div>
   );
+}
+
+function readUpstreamLadderContext(): UpstreamLadderContext | null {
+  if (typeof window === "undefined") return null;
+
+  const keys = [
+    "enterprise-assessment-result",
+    "team-assessment-result",
+    "purpose-alignment-result",
+  ] as const;
+
+  for (const key of keys) {
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) continue;
+
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const metrics: Array<{ label: string; value: string }> = [];
+
+      if (key === "enterprise-assessment-result") {
+        const route = safeString(parsed.route || parsed.nextRoute, "");
+        const totalPct =
+          typeof parsed.totalPct === "number"
+            ? parsed.totalPct
+            : typeof parsed.pct === "number"
+              ? parsed.pct
+              : null;
+        const teamAlignmentPct =
+          typeof parsed.teamAlignmentPct === "number" ? parsed.teamAlignmentPct : null;
+
+        if (typeof totalPct === "number") {
+          metrics.push({ label: "Enterprise score", value: `${Math.round(totalPct)}%` });
+        }
+        if (typeof teamAlignmentPct === "number") {
+          metrics.push({ label: "Team reality", value: `${Math.round(teamAlignmentPct)}%` });
+        }
+
+        return {
+          sourceKey: key,
+          sourceLabel: "Enterprise Assessment",
+          route: route || null,
+          band: safeString(parsed.band, "") || null,
+          summary:
+            safeString(parsed.orgState, "") ||
+            safeString(parsed.state, "") ||
+            safeString(parsed.summary, "") ||
+            null,
+          metrics,
+        };
+      }
+
+      if (key === "team-assessment-result") {
+        const overallLeader =
+          typeof parsed.overallLeader === "number" ? parsed.overallLeader : null;
+        const overallReality =
+          typeof parsed.overallReality === "number" ? parsed.overallReality : null;
+        const overallGap =
+          typeof parsed.overallGap === "number" ? parsed.overallGap : null;
+        const fragilityStatus = safeString(parsed.fragilityStatus, "");
+        const route = safeString(parsed.nextRoute || parsed.route, "");
+
+        if (typeof overallReality === "number") {
+          metrics.push({ label: "Team reality", value: `${Math.round(overallReality)}%` });
+        }
+        if (typeof overallLeader === "number") {
+          metrics.push({ label: "Leader reading", value: `${Math.round(overallLeader)}%` });
+        }
+        if (typeof overallGap === "number") {
+          metrics.push({ label: "Gap", value: `${Math.round(overallGap)} pts` });
+        }
+
+        return {
+          sourceKey: key,
+          sourceLabel: "Team Assessment",
+          route: route || null,
+          band: fragilityStatus || null,
+          summary: safeString(parsed.readingSummary || parsed.summary, "") || null,
+          metrics,
+        };
+      }
+
+      const percent = typeof parsed.percent === "number" ? parsed.percent : null;
+      const totalScore =
+        typeof parsed.totalScore === "number" ? parsed.totalScore : null;
+      const possibleScore =
+        typeof parsed.possibleScore === "number" ? parsed.possibleScore : null;
+
+      if (typeof percent === "number") {
+        metrics.push({ label: "Purpose alignment", value: `${Math.round(percent)}%` });
+      }
+      if (
+        typeof totalScore === "number" &&
+        typeof possibleScore === "number" &&
+        possibleScore > 0
+      ) {
+        metrics.push({ label: "Score", value: `${totalScore}/${possibleScore}` });
+      }
+
+      return {
+        sourceKey: key,
+        sourceLabel: "Purpose Alignment",
+        route: safeString(parsed.route, "") || null,
+        band: safeString(parsed.band, "") || null,
+        summary:
+          safeString(parsed.summary, "") ||
+          safeString(parsed.narrative, "") ||
+          null,
+        metrics,
+      };
+    } catch {
+      // Ignore malformed sessionStorage payloads and continue down the ladder.
+    }
+  }
+
+  return null;
 }
 
 function ResultSurface({
@@ -910,9 +1034,9 @@ function ResultSurface({
                   </span>
                 </div>
 
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
                   {telemetry.domains.slice(0, 5).map((d, i) => (
-                    <div key={`${d.label}-${i}`} style={{ padding: "0.95rem 1.25rem" }}>
+                    <div key={`${d.label}-${i}`} style={{ padding: "1.2rem 1.25rem" }}>
                       <div className="mb-2 flex items-center justify-between gap-3">
                         <span
                           style={{
@@ -920,7 +1044,7 @@ function ResultSurface({
                             fontSize: "7px",
                             letterSpacing: "0.30em",
                             textTransform: "uppercase",
-                            color: `${GOLD}B0`,
+                            color: "rgba(255,255,255,0.50)",
                           }}
                         >
                           {d.label}
@@ -930,7 +1054,7 @@ function ResultSurface({
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                             fontSize: "6.5px",
                             letterSpacing: "0.18em",
-                            color: "rgba(255,255,255,0.38)",
+                            color: "rgba(255,255,255,0.62)",
                           }}
                         >
                           Dissonance {Math.round(d.dissonance)}
@@ -941,9 +1065,9 @@ function ResultSurface({
                         className="grid gap-3 sm:grid-cols-3"
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
-                          letterSpacing: "0.18em",
-                          color: "rgba(255,255,255,0.50)",
+                            fontSize: "7px",
+                            letterSpacing: "0.18em",
+                          color: "rgba(255,255,255,0.78)",
                         }}
                       >
                         <div>Intent {Math.round(d.intent)}</div>
@@ -960,8 +1084,8 @@ function ResultSurface({
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
                   style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    padding: "1rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.14)",
                   }}
                 >
                   <span
@@ -970,7 +1094,7 @@ function ResultSurface({
                       fontSize: "7px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
+                      color: "rgba(255,255,255,0.48)",
                     }}
                   >
                     Board actions
@@ -981,9 +1105,9 @@ function ResultSurface({
                   {boardActions.map((a, i) => (
                     <div
                       key={`${a}-${i}`}
-                      className="flex items-start gap-3 py-2.5"
+                      className="flex items-start gap-3 py-4"
                       style={{
-                        borderBottom: i < boardActions.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                        borderBottom: i < boardActions.length - 1 ? "1px solid rgba(255,255,255,0.12)" : "none",
                       }}
                     >
                       <CheckSquare
@@ -1001,7 +1125,7 @@ function ResultSurface({
                           fontWeight: 300,
                           fontSize: "0.97rem",
                           lineHeight: 1.60,
-                          color: "rgba(255,255,255,0.65)",
+                          color: "rgba(255,255,255,0.82)",
                         }}
                       >
                         {a}
@@ -1021,8 +1145,8 @@ function ResultSurface({
               >
                 <div
                   style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    padding: "1rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.14)",
                   }}
                 >
                   <span
@@ -1031,16 +1155,16 @@ function ResultSurface({
                       fontSize: "7px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.18)",
+                      color: "rgba(255,255,255,0.48)",
                     }}
                   >
                     Governed recommendations
                   </span>
                 </div>
 
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
                   {recommendations.recommendations.slice(0, 4).map((rec, i) => (
-                    <div key={`${rec.id}-${i}`} style={{ padding: "1rem 1.25rem" }}>
+                    <div key={`${rec.id}-${i}`} style={{ padding: "1.2rem 1.25rem" }}>
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p
@@ -1061,7 +1185,7 @@ function ResultSurface({
                               fontSize: "6.5px",
                               letterSpacing: "0.26em",
                               textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.22)",
+                              color: "rgba(255,255,255,0.46)",
                               marginBottom: "0.45rem",
                             }}
                           >
@@ -1074,7 +1198,7 @@ function ResultSurface({
                               fontWeight: 300,
                               fontSize: "0.9rem",
                               lineHeight: 1.6,
-                              color: "rgba(255,255,255,0.44)",
+                              color: "rgba(255,255,255,0.72)",
                               marginBottom: rec.reasons.length ? "0.5rem" : 0,
                             }}
                           >
@@ -1087,13 +1211,13 @@ function ResultSurface({
                                 <span
                                   key={reason}
                                   style={{
-                                    padding: "3px 7px",
-                                    border: "1px solid rgba(255,255,255,0.08)",
+                                    padding: "4px 8px",
+                                    border: "1px solid rgba(255,255,255,0.16)",
                                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                                     fontSize: "6px",
                                     letterSpacing: "0.16em",
                                     textTransform: "uppercase",
-                                    color: "rgba(255,255,255,0.24)",
+                                    color: "rgba(255,255,255,0.56)",
                                   }}
                                 >
                                   {reason}
@@ -1130,8 +1254,8 @@ function ResultSurface({
               <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
                 <div
                   style={{
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    padding: "1rem 1.25rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.14)",
                   }}
                 >
                   <span
@@ -1140,16 +1264,16 @@ function ResultSurface({
                       fontSize: "7px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
+                      color: "rgba(255,255,255,0.48)",
                     }}
                   >
                     Matched assets
                   </span>
                 </div>
 
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
                   {recommendations.matchedAssets.slice(0, 4).map((asset, i) => (
-                    <div key={`${asset.id}-${i}`} style={{ padding: "1rem 1.25rem" }}>
+                    <div key={`${asset.id}-${i}`} style={{ padding: "1.2rem 1.25rem" }}>
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p
@@ -1170,7 +1294,7 @@ function ResultSurface({
                               fontSize: "6.5px",
                               letterSpacing: "0.26em",
                               textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.22)",
+                              color: "rgba(255,255,255,0.46)",
                               marginBottom: "0.45rem",
                             }}
                           >
@@ -1183,14 +1307,14 @@ function ResultSurface({
                                 <span
                                   key={tag}
                                   style={{
-                                    padding: "3px 7px",
-                                    border: `1px solid ${GOLD}22`,
-                                    backgroundColor: `${GOLD}08`,
+                                    padding: "4px 8px",
+                                    border: "1px solid rgba(255,255,255,0.16)",
+                                    backgroundColor: "rgba(255,255,255,0.04)",
                                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                                     fontSize: "6px",
                                     letterSpacing: "0.16em",
                                     textTransform: "uppercase",
-                                    color: `${GOLD}BE`,
+                                    color: "rgba(255,255,255,0.62)",
                                   }}
                                 >
                                   {tag}
@@ -1561,7 +1685,7 @@ function ResultSurface({
                       fontSize: "7px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
+                      color: "rgba(255,255,255,0.44)",
                     }}
                   >
                     Diagnostic metadata
@@ -1612,7 +1736,7 @@ function ResultSurface({
                           fontSize: "6.5px",
                           letterSpacing: "0.30em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
+                          color: "rgba(255,255,255,0.44)",
                           marginBottom: "0.55rem",
                         }}
                       >
@@ -1624,12 +1748,12 @@ function ResultSurface({
                             key={item}
                             style={{
                               padding: "4px 8px",
-                              border: "1px solid rgba(255,255,255,0.08)",
+                              border: "1px solid rgba(255,255,255,0.14)",
                               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                               fontSize: "6px",
                               letterSpacing: "0.18em",
                               textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.26)",
+                              color: "rgba(255,255,255,0.50)",
                             }}
                           >
                             {item}
@@ -1647,7 +1771,7 @@ function ResultSurface({
                           fontSize: "6.5px",
                           letterSpacing: "0.30em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
+                          color: "rgba(255,255,255,0.44)",
                           marginBottom: "0.55rem",
                         }}
                       >
@@ -1659,12 +1783,12 @@ function ResultSurface({
                             key={item}
                             style={{
                               padding: "4px 8px",
-                              border: "1px solid rgba(255,255,255,0.08)",
+                              border: "1px solid rgba(255,255,255,0.14)",
                               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                               fontSize: "6px",
                               letterSpacing: "0.18em",
                               textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.26)",
+                              color: "rgba(255,255,255,0.50)",
                             }}
                           >
                             {item}
@@ -1682,7 +1806,7 @@ function ResultSurface({
                           fontSize: "6.5px",
                           letterSpacing: "0.30em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
+                          color: "rgba(255,255,255,0.44)",
                           marginBottom: "0.55rem",
                         }}
                       >
@@ -1694,12 +1818,12 @@ function ResultSurface({
                             key={item}
                             style={{
                               padding: "4px 8px",
-                              border: "1px solid rgba(255,255,255,0.08)",
+                              border: "1px solid rgba(255,255,255,0.14)",
                               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                               fontSize: "6px",
                               letterSpacing: "0.18em",
                               textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.26)",
+                              color: "rgba(255,255,255,0.50)",
                             }}
                           >
                             {item}
@@ -1717,7 +1841,7 @@ function ResultSurface({
                           fontSize: "6.5px",
                           letterSpacing: "0.30em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
+                          color: "rgba(255,255,255,0.44)",
                           marginBottom: "0.65rem",
                         }}
                       >
@@ -1730,7 +1854,7 @@ function ResultSurface({
                               style={{
                                 width: "11px",
                                 height: "11px",
-                                color: "rgba(255,255,255,0.22)",
+                                color: "rgba(255,255,255,0.42)",
                                 flexShrink: 0,
                                 marginTop: "4px",
                               }}
@@ -1741,7 +1865,7 @@ function ResultSurface({
                                 fontWeight: 300,
                                 fontSize: "0.87rem",
                                 lineHeight: 1.55,
-                                color: "rgba(255,255,255,0.44)",
+                                color: "rgba(255,255,255,0.70)",
                               }}
                             >
                               {item}
@@ -1944,6 +2068,15 @@ function ExecutiveReportingIntake({
   const [form, setForm] = React.useState<ExecutiveReportingIntakeForm>(INITIAL);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [upstreamContext, setUpstreamContext] = React.useState<UpstreamLadderContext | null>(null);
+
+  React.useEffect(() => {
+    try {
+      setUpstreamContext(readUpstreamLadderContext());
+    } catch {
+      setUpstreamContext(null);
+    }
+  }, []);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -1988,6 +2121,16 @@ function ExecutiveReportingIntake({
       },
       diagnosticsMeta: {
         signalReadinessScore: 0,
+        upstreamLadderContext: upstreamContext
+          ? {
+              sourceKey: upstreamContext.sourceKey,
+              sourceLabel: upstreamContext.sourceLabel,
+              route: upstreamContext.route,
+              band: upstreamContext.band,
+              summary: upstreamContext.summary,
+              metrics: upstreamContext.metrics,
+            }
+          : null,
       },
     };
   }
@@ -2056,6 +2199,76 @@ function ExecutiveReportingIntake({
             Precision increases signal. Signal increases quality of judgment.
           </p>
         </div>
+
+        {upstreamContext && (
+          <div
+            style={{
+              marginBottom: "2rem",
+              padding: "1rem 1.2rem",
+              border: "1px solid rgba(255,255,255,0.14)",
+              backgroundColor: "rgb(14 14 18)",
+            }}
+          >
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.32em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}AA`,
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  Upstream ladder context
+                </div>
+                <p
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300,
+                    fontSize: "1rem",
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.80)",
+                    margin: 0,
+                  }}
+                >
+                  Carrying forward the latest available reading from {upstreamContext.sourceLabel}.
+                </p>
+                {(upstreamContext.route || upstreamContext.band || upstreamContext.summary) && (
+                  <p
+                    style={{
+                      marginTop: "0.55rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.92rem",
+                      lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.62)",
+                    }}
+                  >
+                    {[upstreamContext.route, upstreamContext.band, upstreamContext.summary]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
+              </div>
+
+              {upstreamContext.metrics.length > 0 && (
+                <div
+                  style={{
+                    minWidth: "260px",
+                    borderLeft: "1px solid rgba(255,255,255,0.12)",
+                    paddingLeft: "1rem",
+                  }}
+                >
+                  {upstreamContext.metrics.map((metric) => (
+                    <MetricRow key={metric.label} label={metric.label} value={metric.value} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-10">

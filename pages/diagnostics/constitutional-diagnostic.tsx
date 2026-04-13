@@ -184,13 +184,13 @@ export default function ConstitutionalDiagnosticPage() {
                   className="space-y-4"
                 >
                   {/* Instrument specification */}
-                  <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: LIFT }}>
-                    <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${GOLD}12`, background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                  <div style={{ border: "1px solid rgba(255,255,255,0.14)", backgroundColor: LIFT }}>
+                    <div style={{ padding: "0.95rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
                         Instrument specification
                       </span>
                     </div>
-                    <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                    <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
                       {[
                         { label: "Questions",      value: "10 dual-axis statements" },
                         { label: "Scoring",        value: "Resonance × certainty weight" },
@@ -201,11 +201,11 @@ export default function ConstitutionalDiagnosticPage() {
                         { label: "Duration",       value: "4–7 minutes" },
                         { label: "Login required", value: "No" },
                       ].map(({ label, value }) => (
-                        <div key={label} className="flex items-start justify-between gap-3 px-4 py-2.5">
-                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+                        <div key={label} className="flex items-start justify-between gap-4 px-4 py-3.5">
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
                             {label}
                           </span>
-                          <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.58)", textAlign: "right", maxWidth: "55%" }}>
+                          <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.58, color: "rgba(255,255,255,0.82)", textAlign: "right", maxWidth: "56%" }}>
                             {value}
                           </span>
                         </div>

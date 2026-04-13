@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 // app/dashboard/live/page.tsx
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { redirect } from "@/lib/navigation-shim";
 
 import { OGRLiveTerminalClient } from "@/components/ogr/live-terminal-client";
 import { db } from "@/lib/db";

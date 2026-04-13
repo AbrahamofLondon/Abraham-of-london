@@ -14,6 +14,8 @@ import {
 import { toast } from "sonner";
 import { ContagionMap } from "@/components/admin/reporting/contagion-map";
 import { TerminalConstitutionSurface } from "@/components/ogr/TerminalConstitutionSurface";
+import type { CanonicalSectionsEnvelope } from "@/lib/decision/canonical-sections";
+import { normalizeCanonicalSectionsSnapshot } from "@/lib/strategy-room/canonical-snapshot";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,96 +39,7 @@ interface OGRLiveTerminalClientProps {
   initialCampaigns?: CampaignBrief[];
 }
 
-// ─── Canonical Contract Types ────────────────────────────────────────────────
-// Following the canonical order:
-// executiveSummary, constitutionalPosture, strategicDomainAnalysis,
-// financialExposure, integritySnapshot, governedRecommendations,
-// priorityStack, failureModes, requiredInterventions, dominantDomains,
-// worldviewAnchors, sponsorTypes, rationale
-
-interface CanonicalSection {
-  executiveSummary?: {
-    route: string;
-    state: string;
-    narrative: string;
-  };
-  constitutionalPosture?: {
-    route: string;
-    orgState: string;
-    readinessTier: string;
-    authorityType: string;
-    priority: string;
-    temperature: string;
-    marketRiskBand: string;
-    revenueBand: string;
-    clarityScore?: number;
-    authorityScore?: number;
-    governanceScore?: number;
-    severityScore?: number;
-    revenueScore?: number;
-    dominantDomains: string[];
-    failureModes: string[];
-    requiredInterventions: string[];
-    sponsorTypes?: string[];
-    worldviewAnchors?: string[];
-    narrativeSummary: string;
-    rationale?: string[];
-  };
-  strategicDomainAnalysis?: {
-    temperature: string;
-    domains: Array<{
-      domain: string;
-      intentScore: number;
-      realityScore: number;
-      dissonance: number;
-    }>;
-  };
-  financialExposure?: {
-    marketRiskBand: string;
-    revenueBand: string;
-    revenueScore: number;
-  };
-  integritySnapshot?: {
-    clarityScore: number;
-    authorityScore: number;
-    governanceScore: number;
-  };
-  governedRecommendations?: {
-    readinessTier: string;
-    authorityType: string;
-    summary: string;
-    nextAction: string;
-    recommendations: Array<{
-      id: string;
-      title: string;
-      href?: string | null;
-      kind: string;
-      score: number;
-      summary: string;
-      reasons: string[];
-    }>;
-  };
-  priorityStack?: Array<{
-    priority: string;
-    domain: string;
-    urgency: number;
-  }>;
-  failureModes?: Array<{
-    mode: string;
-    severity: number;
-    probability: number;
-  }>;
-  requiredInterventions?: string[];
-  dominantDomains?: string[];
-  worldviewAnchors?: string[];
-  sponsorTypes?: string[];
-  rationale?: string[];
-}
-
-interface CanonicalEnvelope {
-  ok: boolean;
-  sections: CanonicalSection;
-}
+type CanonicalEnvelope = CanonicalSectionsEnvelope;
 
 // ─── Utilities & sub-components ───────────────────────────────────────────────
 
@@ -294,12 +207,8 @@ export function OGRLiveTerminalClient({
       setCanonical(data);
 
       // Extract route from canonical order: constitutionalPosture or executiveSummary
-      const route = data.sections.constitutionalPosture?.route || 
-                    data.sections.executiveSummary?.route || 
-                    "IDLE";
-      const readinessTier = data.sections.constitutionalPosture?.readinessTier || 
-                           data.sections.governedRecommendations?.readinessTier || 
-                           "UNKNOWN";
+      const route = data.sections.constitutionalPosture?.route || "IDLE";
+      const readinessTier = data.sections.constitutionalPosture?.readinessTier || "UNKNOWN";
       const orgState = data.sections.constitutionalPosture?.orgState || 
                       data.sections.executiveSummary?.state || 
                       "IDLE";
@@ -341,9 +250,7 @@ export function OGRLiveTerminalClient({
   }
 
   // Extract display values following canonical order
-  const route = canonical?.sections.constitutionalPosture?.route || 
-                canonical?.sections.executiveSummary?.route || 
-                "IDLE";
+  const route = canonical?.sections.constitutionalPosture?.route || "IDLE";
   
   const summary = canonical?.sections.governedRecommendations?.summary ||
                   canonical?.sections.constitutionalPosture?.narrativeSummary ||
@@ -352,10 +259,15 @@ export function OGRLiveTerminalClient({
   const nextAction = canonical?.sections.governedRecommendations?.nextAction ||
                      "Select campaigns and issue constitutional posture.";
 
-  const recommendations = canonical?.sections.governedRecommendations?.recommendations || [];
-  const constitutionForSurface = canonical?.sections.constitutionalPosture || null;
-  const dominantDomains = canonical?.sections.dominantDomains || 
-                          canonical?.sections.constitutionalPosture?.dominantDomains || [];
+  const canonicalSectionsForSurface =
+    normalizeCanonicalSectionsSnapshot({
+      sections: canonical?.sections ?? null,
+      source: "ogr-live-terminal-client",
+    })?.sections ?? null;
+  const dominantDomains =
+    canonical?.sections.dominantDomains?.items ??
+    canonical?.sections.constitutionalPosture?.dominantDomains ??
+    [];
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -534,18 +446,8 @@ export function OGRLiveTerminalClient({
             </div>
 
             {/* Constitutional surface — using canonical contract */}
-            {canonical ? (
-              <TerminalConstitutionSurface
-                constitution={constitutionForSurface}
-                recommendations={recommendations}
-                nextAction={nextAction}
-                priorityStack={canonical.sections.priorityStack}
-                failureModes={canonical.sections.failureModes}
-                requiredInterventions={canonical.sections.requiredInterventions}
-                worldviewAnchors={canonical.sections.worldviewAnchors}
-                sponsorTypes={canonical.sections.sponsorTypes}
-                rationale={canonical.sections.rationale}
-              />
+            {canonicalSectionsForSurface ? (
+              <TerminalConstitutionSurface sections={canonicalSectionsForSurface} />
             ) : null}
 
             {/* Market / contagion map — only when MARKET view is active */}

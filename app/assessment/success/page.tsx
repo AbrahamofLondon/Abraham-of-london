@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from '@/lib/navigation-shim';
 import { ShieldCheck, Trophy, ArrowRight, Share2, Download, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 

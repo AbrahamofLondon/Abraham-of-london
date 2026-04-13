@@ -2,6 +2,13 @@
 import React, { createContext, useContext, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { AnalyticsEvent } from '@/types/pdf-dashboard';
 
+interface EnrichedAnalyticsEvent extends AnalyticsEvent {
+  userTraits?: Record<string, any>;
+  url?: string;
+  referrer?: string;
+  userAgent?: string;
+}
+
 interface AnalyticsContextType {
   trackEvent: (event: AnalyticsEvent) => void;
   trackError: (error: Error | string, details?: any) => void;
@@ -25,21 +32,21 @@ export function AnalyticsProvider({
   debug = process.env.NODE_ENV === 'development',
   endpoint = '/api/analytics/event'
 }: AnalyticsProviderProps) {
-  const queueRef = useRef<AnalyticsEvent[]>([]);
+  const queueRef = useRef<EnrichedAnalyticsEvent[]>([]);
   const userIdRef = useRef<string | null>(null);
   const userTraitsRef = useRef<Record<string, any>>({});
 
   // Helper to send events
-  const sendEvent = useCallback(async (event: AnalyticsEvent) => {
+  const sendEvent = useCallback(async (event: AnalyticsEvent | EnrichedAnalyticsEvent) => {
     if (!enabled) return;
     
     if (debug) {
       console.log('📊 Analytics Event:', event);
     }
     
-    const enrichedEvent = {
+    const enrichedEvent: EnrichedAnalyticsEvent = {
       ...event,
-      userId: userIdRef.current,
+      userId: userIdRef.current ?? undefined,
       userTraits: userTraitsRef.current,
       timestamp: event.timestamp || new Date().toISOString(),
       url: typeof window !== 'undefined' ? window.location.href : '',

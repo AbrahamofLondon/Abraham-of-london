@@ -320,9 +320,9 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 
   function MRow({ label, value }: { label: string; value: string }) {
     return (
-      <div className="flex items-center justify-between gap-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{label}</span>
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.58)" }}>{value}</span>
+      <div className="flex items-center justify-between gap-4 py-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.14)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.25px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.48)" }}>{label}</span>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.25px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.86)" }}>{value}</span>
       </div>
     );
   }
@@ -456,8 +456,8 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 
         {/* Right */}
         <div className="space-y-4">
-          <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-            <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}><span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Enterprise metrics</span></div>
+          <div style={{ border: "1px solid rgba(255,255,255,0.16)", backgroundColor: LIFT }}>
+            <div style={{ padding: "0.95rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.14)" }}><span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.48)" }}>Enterprise metrics</span></div>
             <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
               <MRow label="Overall score"    value={`${totalScore}/${maxScore}`} />
               <MRow label="Overall pct"      value={`${totalPct}%`} />

@@ -4,10 +4,10 @@ import { getAllCombinedDocs } from "@/lib/content/server";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const docs = allDocuments.filter((d) => 
-    d._raw.sourceFilePath.startsWith("strategies/") || 
-    d.type === "Strategy"
-  );
+  const docs = getAllCombinedDocs().filter((d) => {
+    const sourceFilePath = d._raw?.sourceFilePath ?? "";
+    return sourceFilePath.startsWith("strategies/") || d.type === "Strategy";
+  });
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

@@ -16,7 +16,6 @@ registerJobHandler("diagnostic.report.regenerate", async (payload) => {
   await prisma.diagnosticArtifact.update({
     where: { id: artifact.id },
     data: {
-      regeneratedAt: new Date(),
       version: `${artifact.version || "v1"}-regen`,
     },
   });

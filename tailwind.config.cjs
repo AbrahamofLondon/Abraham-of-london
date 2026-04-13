@@ -81,18 +81,30 @@ module.exports = {
         // Semantic system tokens
         background:    "rgb(var(--aol-bg)     / <alpha-value>)",
         foreground:    "rgb(var(--aol-ink)    / <alpha-value>)",
-        border:        "rgb(255 255 255      / 0.10)",
-        input:         "rgb(255 255 255      / 0.10)",
+        border:        "rgb(255 255 255      / 0.14)",
+        input:         "rgb(255 255 255      / 0.14)",
         ring:          "rgb(var(--aol-gold)   / <alpha-value>)",
 
         // Surface scale
-        surface:    "rgb(15 15 17 / <alpha-value>)",
-        "surface-2": "rgb(19 19 22 / <alpha-value>)",
-        "surface-3": "rgb(24 24 28 / <alpha-value>)",
+        surface:    "rgb(var(--aol-bg-3) / <alpha-value>)",
+        "surface-2": "rgb(18 18 22 / <alpha-value>)",
+        "surface-3": "rgb(24 24 30 / <alpha-value>)",
 
         // Card
-        card:            "rgb(15 15 17 / <alpha-value>)",
+        card:            "rgb(var(--aol-bg-3) / <alpha-value>)",
         "card-foreground": "rgb(var(--aol-ink) / <alpha-value>)",
+        aol: {
+          base: "rgb(var(--aol-bg) / <alpha-value>)",
+          void: "rgb(3 3 5 / <alpha-value>)",
+          panel: "rgb(var(--aol-bg-3) / <alpha-value>)",
+          heading: "rgb(255 255 255 / 0.94)",
+          body: "rgb(255 255 255 / 0.84)",
+          muted: "rgb(255 255 255 / 0.68)",
+          dim: "rgb(255 255 255 / 0.46)",
+          faint: "rgb(255 255 255 / 0.36)",
+          "border": "rgb(255 255 255 / 0.14)",
+          "border-strong": "rgb(255 255 255 / 0.20)",
+        },
 
         // Full brand namespace
         brand: {
@@ -170,20 +182,20 @@ module.exports = {
 
       // ── BACKGROUND IMAGES ───────────────────────────────────────────────────
       backgroundImage: {
-        "gold-radial":    "radial-gradient(circle at center, rgba(201,169,106,0.15) 0%, transparent 70%)",
-        "premium-card":   "linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.018) 100%)",
-        "gold-linear":    "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "aol-hairline":   "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)",
-        "aol-hairline-gold": "linear-gradient(to right, transparent, rgba(201,169,106,0.30), transparent)",
-        "terminal-core":  "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.06), transparent 32%), linear-gradient(180deg, rgba(9,9,10,0.98), rgba(4,4,5,1))",
+        "gold-radial":    "radial-gradient(circle at center, rgba(201,169,106,0.10) 0%, transparent 70%)",
+        "premium-card":   "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.00) 100%)",
+        "gold-linear":    "linear-gradient(to right, transparent, rgba(201,169,106,0.36), transparent)",
+        "aol-hairline":   "linear-gradient(to right, transparent, rgba(255,255,255,0.14), transparent)",
+        "aol-hairline-gold": "linear-gradient(to right, transparent, rgba(201,169,106,0.36), transparent)",
+        "terminal-core":  "radial-gradient(circle at 50% 0%, rgba(201,169,106,0.04), transparent 32%), linear-gradient(180deg, rgba(12,12,14,0.99), rgba(6,6,9,1))",
       },
 
       // ── BOX SHADOWS ─────────────────────────────────────────────────────────
       boxShadow: {
-        premium:   "0 20px 40px -15px rgba(0,0,0,0.80)",
-        card:      "0 20px 60px -24px rgba(0,0,0,0.74), 0 1px 1px 0 rgba(255,255,255,0.045) inset",
-        cardHover: "0 28px 80px -30px rgba(0,0,0,0.82), 0 1px 2px 0 rgba(255,255,255,0.05) inset, 0 0 36px rgba(201,169,106,0.06)",
-        "gold-glow": "0 0 40px rgba(201,169,106,0.12)",
+        premium:   "0 20px 48px -24px rgba(0,0,0,0.90)",
+        card:      "0 24px 72px -34px rgba(0,0,0,0.92), 0 1px 0 0 rgba(255,255,255,0.04) inset",
+        cardHover: "0 30px 84px -36px rgba(0,0,0,0.94), 0 1px 0 0 rgba(255,255,255,0.05) inset, 0 0 28px rgba(201,169,106,0.05)",
+        "gold-glow": "0 0 28px rgba(201,169,106,0.10)",
         terminal:  "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
       },
     },

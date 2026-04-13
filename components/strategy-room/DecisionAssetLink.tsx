@@ -4,7 +4,6 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  trackAssetClick,
   trackConversion,
   trackFollowup,
 } from "@/lib/strategy-room/client-trackers";
@@ -20,7 +19,7 @@ type AssetRef = {
 };
 
 type FollowupPayload = {
-  routeAfter?: string;
+  routeAfter?: "REJECT" | "DIAGNOSTIC" | "STRATEGY";
   readinessTierAfter?: string;
   authorityTypeAfter?: string;
   clarityDelta?: number;
@@ -100,7 +99,14 @@ export function DecisionAssetLink({
 
   const handleClick = React.useCallback(() => {
     try {
-      trackAssetClick(trackingPayload);
+      trackConversion({
+        sessionKey,
+        conversionType: "asset_click",
+        metadata: {
+          ...trackingPayload,
+          source: "decision_asset_link",
+        },
+      });
     } catch (error) {
       console.error("[DecisionAssetLink] trackAssetClick failed:", error);
     }
@@ -110,12 +116,8 @@ export function DecisionAssetLink({
         trackConversion({
           sessionKey,
           conversionType: conversionTypeOnClick,
-          assetId: String(asset.id),
-          assetTitle: String(asset.title),
-          assetHref: href,
-          assetKind: asset.kind,
           metadata: {
-            rank,
+            ...trackingPayload,
             source: "decision_asset_link",
           },
         });
@@ -124,11 +126,24 @@ export function DecisionAssetLink({
       }
     }
 
-    if (followupOnClick) {
+    if (
+      followupOnClick &&
+      followupOnClick.routeAfter &&
+      followupOnClick.readinessTierAfter &&
+      followupOnClick.authorityTypeAfter &&
+      typeof followupOnClick.clarityDelta === "number" &&
+      typeof followupOnClick.authorityDelta === "number" &&
+      typeof followupOnClick.convertedAfterGuidance === "boolean"
+    ) {
       try {
         trackFollowup({
           sessionKey,
-          ...followupOnClick,
+          routeAfter: followupOnClick.routeAfter,
+          readinessTierAfter: followupOnClick.readinessTierAfter,
+          authorityTypeAfter: followupOnClick.authorityTypeAfter,
+          clarityDelta: followupOnClick.clarityDelta,
+          authorityDelta: followupOnClick.authorityDelta,
+          convertedAfterGuidance: followupOnClick.convertedAfterGuidance,
           metadata: {
             ...(followupOnClick.metadata || {}),
             assetId: String(asset.id),

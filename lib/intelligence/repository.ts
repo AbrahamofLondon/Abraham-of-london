@@ -83,10 +83,10 @@ export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
       title: content?.title ?? undefined,
       contentType:
         content?.contentType === ContentType.Dossier
-          ? DownloadContentType.DOSSIER
-          : DownloadContentType.BRIEF,
-      eventType: DownloadEventType.VIEW,
-      deliveryMode: DownloadDeliveryMode.INLINE,
+          ? DownloadContentType.PDF
+          : DownloadContentType.MARKDOWN,
+      eventType: DownloadEventType.PREVIEW,
+      deliveryMode: DownloadDeliveryMode.DIRECT,
 
       contentId: content?.id ?? undefined,
       memberId,
@@ -100,7 +100,7 @@ export async function logIntelligenceAccess(data: IntelligenceAccessLogInput) {
       latencyMs: 0,
       processedAt: new Date(),
 
-      metadata: { source: "web_vault" },
+      metadata: JSON.stringify({ source: "web_vault" }),
     },
   });
 }

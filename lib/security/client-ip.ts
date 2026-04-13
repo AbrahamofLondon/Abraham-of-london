@@ -5,7 +5,8 @@ import type { NextApiRequest } from "next";
 export function getClientIp(req: NextApiRequest): string {
   const xff = req.headers["x-forwarded-for"];
   if (typeof xff === "string" && xff.trim()) {
-    return xff.split(",")[0].trim();
+    const first = xff.split(",")[0];
+    if (first?.trim()) return first.trim();
   }
 
   const xrip = req.headers["x-real-ip"];

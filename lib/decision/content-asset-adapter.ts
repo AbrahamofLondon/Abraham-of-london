@@ -234,7 +234,7 @@ function inferDominantDomains(corpus: string): DominantDomain[] {
   );
 }
 
-function inferMetadataConfidence(args: {
+export function inferMetadataConfidence(args: {
   hasExplicitMetadata: boolean;
   fieldCount: number;
   warningsCount: number;

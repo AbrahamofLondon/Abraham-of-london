@@ -1,5 +1,4 @@
 export const dynamic = "force-dynamic";
-app/enterprise/alignment/campaigns/[campaignId]/page.tsx
 
 import { getEnterpriseDashboardView } from "@/lib/alignment/enterprise-repository";
 import { buildEnterpriseNarrative } from "@/lib/alignment/enterprise-report-language";
@@ -40,6 +39,7 @@ export default async function EnterpriseCampaignDashboardPage({
 
   const narrative = buildEnterpriseNarrative(dashboard);
   const snapshot = dashboard.organisationSnapshot;
+  type TeamSnapshot = (typeof dashboard.teamSnapshots)[number];
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -136,7 +136,7 @@ export default async function EnterpriseCampaignDashboardPage({
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {dashboard.teamSnapshots.map((team) => (
+          {dashboard.teamSnapshots.map((team: TeamSnapshot) => (
             <div key={team.teamName} className="rounded-[22px] border bg-[#FCFBF7] p-5">
               <div className="text-sm font-semibold text-neutral-950">{team.teamName}</div>
               <div className="mt-4 text-3xl font-semibold text-neutral-950">{team.percentScore}%</div>
@@ -150,7 +150,7 @@ export default async function EnterpriseCampaignDashboardPage({
 
       <EnterpriseAdvisoryCTA
         title={narrative.advisoryCtaTitle}
-        body={narrative.advisoryCtaBody}
+        description={narrative.advisoryCtaBody}
       />
     </main>
   );

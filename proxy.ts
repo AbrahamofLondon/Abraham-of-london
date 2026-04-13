@@ -838,6 +838,14 @@ async function validateConstitutionalAuthority(
   const requiredLevel = authorityLevels[config.minAuthority];
   const currentLevel = authorityLevels[authority.authorityLevel];
 
+  if (currentLevel === undefined || requiredLevel === undefined) {
+    return {
+      valid: false,
+      reason: "Unable to resolve authority level",
+      requiredLevel: config.minAuthority,
+    };
+  }
+
   if (currentLevel < requiredLevel) {
     return {
       valid: false,

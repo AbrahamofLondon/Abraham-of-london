@@ -6,13 +6,14 @@ import { prisma } from "@/lib/prisma";
 import { auditLogger } from "@/lib/audit/audit-logger";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
+import type { AccessTier as DbAccessTier } from "@prisma/client";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
 
 const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
+      apiVersion: "2026-02-25.clover",
     })
   : null;
 
@@ -25,21 +26,35 @@ export const config = {
   },
 };
 
-function mapStripeTierToAccessTier(membershipTier: unknown): AccessTier {
+function mapStripeTierToAccessTier(membershipTier: unknown): DbAccessTier {
   const raw = String(membershipTier ?? "").trim().toLowerCase();
 
-  const explicit: Record<string, AccessTier> = {
+  const explicit: Record<string, DbAccessTier> = {
     free: "member",
-    premium: "inner-circle",
+    premium: "inner_circle",
     enterprise: "client",
     elite: "legacy",
     basic: "member",
     standard: "member",
-    pro: "inner-circle",
+    pro: "inner_circle",
     business: "client",
   };
 
-  return explicit[raw] ?? normalizeUserTier(raw);
+  const normalized = explicit[raw] ?? normalizeUserTier(raw);
+  switch (normalized) {
+    case "public":
+    case "member":
+    case "inner_circle":
+    case "restricted":
+    case "client":
+    case "legacy":
+    case "architect":
+    case "owner":
+    case "top_secret":
+      return normalized;
+    default:
+      return "member";
+  }
 }
 
 function mergeMetadata(
@@ -55,6 +70,48 @@ function mergeMetadata(
     ...base,
     ...patch,
   };
+}
+
+function readMetadataRecord(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  if (typeof value !== "string" || !value.trim()) {
+    return {};
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+async function findMemberByStripeCustomerId(customerId: string) {
+  const candidates = await prisma.innerCircleMember.findMany({
+    where: {
+      metadata: {
+        not: null,
+      },
+    },
+    select: {
+      id: true,
+      metadata: true,
+      tier: true,
+      status: true,
+    },
+  });
+
+  return (
+    candidates.find((candidate) => {
+      const metadata = readMetadataRecord(candidate.metadata);
+      return metadata.stripeCustomerId === customerId;
+    }) ?? null
+  );
 }
 
 export default async function handler(
@@ -126,7 +183,7 @@ export default async function handler(
 
       await auditLogger.log({
         action: "membership_elevation_success",
-        userId,
+        actorId: userId,
         details: {
           email: userEmail,
           sessionId: session.id,
@@ -139,15 +196,10 @@ export default async function handler(
 
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object as Stripe.Subscription;
+      const customerId =
+        typeof subscription.customer === "string" ? subscription.customer : null;
 
-      const user = await prisma.innerCircleMember.findFirst({
-        where: {
-          metadata: {
-            path: ["stripeCustomerId"],
-            equals: subscription.customer as string,
-          },
-        },
-      });
+      const user = customerId ? await findMemberByStripeCustomerId(customerId) : null;
 
       if (user) {
         await prisma.innerCircleMember.update({
@@ -163,8 +215,8 @@ export default async function handler(
 
         await auditLogger.log({
           action: "membership_revoked_expiry",
-          userId: user.id,
-          details: { customerId: subscription.customer },
+          actorId: user.id,
+          details: { customerId },
           severity: "warning",
         });
       }
@@ -173,18 +225,13 @@ export default async function handler(
     if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object as Stripe.Subscription;
       const priceId = subscription.items.data[0]?.price.id;
+      const customerId =
+        typeof subscription.customer === "string" ? subscription.customer : null;
 
-      const user = await prisma.innerCircleMember.findFirst({
-        where: {
-          metadata: {
-            path: ["stripeCustomerId"],
-            equals: subscription.customer as string,
-          },
-        },
-      });
+      const user = customerId ? await findMemberByStripeCustomerId(customerId) : null;
 
       if (user && priceId) {
-        const tier: AccessTier = "inner-circle";
+        const tier: DbAccessTier = "inner_circle";
 
         await prisma.innerCircleMember.update({
           where: { id: user.id },
@@ -193,8 +240,8 @@ export default async function handler(
 
         await auditLogger.log({
           action: "membership_updated",
-          userId: user.id,
-          details: { customerId: subscription.customer, priceId, tier },
+          actorId: user.id,
+          details: { customerId, priceId, tier },
           severity: "info",
         });
       }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/lib/navigation-shim';
 import { 
   Activity, 
   BarChart3, 
@@ -130,7 +130,7 @@ const PdfAnalyticsDashboard = () => {
   return (
     <div className="min-h-screen bg-[#060609] text-white font-mono selection:bg-white selection:text-black overflow-hidden print:bg-white print:text-black">
       {/* Print Styles */}
-      <style jsx global>{`
+      <style>{`
         @media print {
           body {
             background: white !important;

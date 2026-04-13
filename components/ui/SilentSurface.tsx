@@ -28,31 +28,26 @@ const SilentSurface = React.forwardRef<HTMLDivElement, SilentSurfaceProps>(
         ref={ref}
         className={cn(
           // Base styles
-          "relative overflow-hidden transition-all duration-700",
+          "relative overflow-hidden transition-all duration-500",
           
           // Background and border
-          "border border-white/[0.04]",
-          "bg-gradient-to-b from-white/[0.02] to-white/[0.01]",
+          "border border-white/[0.14]",
+          "bg-[#0E0E12]",
           
-          // Glass effect
-          glass && "backdrop-blur-[2px]",
+          // Glass effect is intentionally flattened for readability
+          glass && "bg-[#111116]",
           
           // Muted variant
           muted 
-            ? "bg-white/[0.008] border-white/[0.02]" 
-            : "bg-white/[0.02] border-white/[0.04]",
+            ? "bg-[#0A0A0E] border-white/[0.12]" 
+            : "bg-[#0E0E12] border-white/[0.14]",
           
           // Hover effects
           hover && [
             "group/surface",
-            "hover:border-white/[0.08]",
-            "hover:bg-white/[0.03]",
-            "hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]",
-            "hover:shadow-[#D4AF37]/[0.05]",
-            "before:absolute before:inset-0",
-            "before:bg-gradient-to-r before:from-transparent before:via-white/[0.01] before:to-transparent",
-            "before:translate-x-[-100%] before:transition-transform before:duration-1000",
-            "group-hover/surface:before:translate-x-[100%]",
+            "hover:border-white/[0.20]",
+            "hover:bg-[#121216]",
+            "hover:shadow-[0_24px_72px_-36px_rgba(0,0,0,0.94)]",
           ],
           
           // Interactive cursor
@@ -62,32 +57,14 @@ const SilentSurface = React.forwardRef<HTMLDivElement, SilentSurfaceProps>(
         )}
         {...props}
       >
-        {/* Subtle inner glow on hover */}
-        {hover && (
-          <>
-            <div 
-              className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover/surface:opacity-100"
-              style={{
-                background: `radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.03) 0%, transparent 50%)`,
-              }}
-            />
-            <div 
-              className="absolute inset-0 opacity-0 transition-opacity duration-1000 group-hover/surface:opacity-100"
-              style={{
-                background: `linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.01) 50%, transparent 100%)`,
-              }}
-            />
-          </>
-        )}
-        
         {/* Content */}
         <div className="relative z-10">{children}</div>
         
         {/* Corner accents */}
-        <div className="absolute top-0 left-0 h-px w-12 bg-gradient-to-r from-transparent to-white/[0.08]" />
-        <div className="absolute top-0 right-0 h-px w-12 bg-gradient-to-l from-transparent to-white/[0.08]" />
-        <div className="absolute bottom-0 left-0 h-px w-12 bg-gradient-to-r from-transparent to-white/[0.04]" />
-        <div className="absolute bottom-0 right-0 h-px w-12 bg-gradient-to-l from-transparent to-white/[0.04]" />
+        <div className="absolute top-0 left-0 h-px w-12 bg-gradient-to-r from-transparent to-white/[0.16]" />
+        <div className="absolute top-0 right-0 h-px w-12 bg-gradient-to-l from-transparent to-white/[0.16]" />
+        <div className="absolute bottom-0 left-0 h-px w-12 bg-gradient-to-r from-transparent to-white/[0.08]" />
+        <div className="absolute bottom-0 right-0 h-px w-12 bg-gradient-to-l from-transparent to-white/[0.08]" />
       </div>
     );
   }

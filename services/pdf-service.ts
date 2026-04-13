@@ -128,16 +128,17 @@ function normalizeDashboardPDFItem(raw: any): PDFItem {
   const metadata = isObject(raw?.metadata) ? (raw.metadata as AnyRecord) : {};
 
   const outputPath = typeof raw?.outputPath === "string" ? raw.outputPath : "";
+  const tier = typeof raw?.tier === "string" ? raw.tier : "public";
 
   const downloadCount = Number.isFinite(Number(raw?.downloadCount)) ? Number(raw.downloadCount) : 0;
 
-  // Return as Dashboard PDFItem (not Canon)
-  return {
+  const normalized: PDFItem = {
     id,
     title,
     description,
     category,
-    type: type as any, // keep flexible; aligns to API
+    type: type as PDFItem["type"],
+    tier,
     exists,
 
     isGenerating,
@@ -155,9 +156,10 @@ function normalizeDashboardPDFItem(raw: any): PDFItem {
     status,
     metadata,
     outputPath,
-
     downloadCount,
-  } as PDFItem;
+  };
+
+  return normalized;
 }
 
 function normalizePagination(raw: any, fallbackPage: number, fallbackLimit: number, fallbackTotal: number): Pagination {

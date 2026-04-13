@@ -14,8 +14,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronRight, ScanSearch } from "lucide-react";
-import { allPlaybooks } from "contentlayer/generated";
-import type { Playbook } from "contentlayer/generated";
+import { allPlaybooks } from "@/.contentlayer/generated";
+import type { Playbook } from "@/.contentlayer/generated";
 
 import Layout from "@/components/Layout";
 import PlaybookCard from "@/components/playbooks/PlaybookCard";
@@ -157,8 +157,8 @@ export const getStaticProps: GetStaticProps<PlaybooksPageProps> = async () => {
     const items = allPlaybooks
       .filter(isPublishedPlaybook)
       .map(mapPlaybook)
-      .filter((item) => Boolean(item.slug))
-      .sort((a, b) => a.title.localeCompare(b.title));
+      .filter((item: PlaybookItem) => Boolean(item.slug))
+      .sort((a: PlaybookItem, b: PlaybookItem) => a.title.localeCompare(b.title));
 
     return {
       props: { items },

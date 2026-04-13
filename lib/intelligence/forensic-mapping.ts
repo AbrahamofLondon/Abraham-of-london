@@ -1,5 +1,5 @@
 /* lib/intelligence/forensic-mapping.ts — V1.0 (INSTITUTIONAL TRACE) */
-import { crypto } from "crypto";
+import { createHash } from "crypto";
 import type { WatermarkPayload } from "./watermark-delegate";
 import type { PDFRegistryEntry } from "../pdf/registry.static";
 
@@ -18,30 +18,32 @@ export function generateForensicPayload(
   config: PDFRegistryEntry,
   context: ForensicContext
 ): WatermarkPayload {
-  // 1. Create a unique Trace ID for this specific download event
   const traceId = `TRC-${context.sessionId.slice(0, 8)}-${config.id.slice(0, 4)}`.toUpperCase();
-
-  // 2. Generate a "Verification Signature" 
-  // In a production environment, this would use a private key. 
-  // Here we use a high-entropy hash of the transmission metadata.
   const signatureData = `${context.userId}|${config.id}|${context.sessionId}|${new Date().toISOString()}`;
-  const sig = crypto
-    .createHash("sha256")
+  const sig = createHash("sha256")
     .update(signatureData)
     .digest("hex")
     .slice(0, 16)
     .toUpperCase();
+  const origin = context.ipAddress || "INTERNAL";
 
   return {
-    documentId: config.id,
-    overlayToken: sig, // Displayed as "Verification"
-    timestamp: new Date().toISOString(),
+    visibleFooter: `PROPRIETARY INTELLIGENCE // TRACE ${traceId} // SIG ${sig} // ${String(config.id).toUpperCase()}`,
+    overlayToken: sig,
+    overlayHints: {
+      rotationDeg: -35,
+      opacity: 0.08,
+      fontSize: 34,
+      letterSpacing: 1.2,
+    },
     metadata: {
       aol: {
-        traceId: traceId,   // Displayed as "Transmission"
-        sig: sig,
+        traceId,
+        sig,
         tier: context.userTier,
-        origin: context.ipAddress || "INTERNAL",
+        origin,
+        documentId: config.id,
+        sessionId: context.sessionId,
       },
       identity: {
         subject: context.userId,

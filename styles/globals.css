@@ -191,7 +191,7 @@
     pointer-events: none;
     z-index: 100;
     mix-blend-mode: overlay;
-    opacity: 0.015;
+    opacity: 0.010;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 128px 128px;
@@ -202,7 +202,7 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 128px 128px;
-    opacity: 0.030;
+    opacity: 0.016;
     mix-blend-mode: overlay;
     pointer-events: none;
   }
@@ -211,26 +211,27 @@
 
   .nav-pill-premium {
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(14, 14, 18, 0.96);
     padding: 0.5rem 1rem;
     font-size: 9px;
     font-family: var(--font-family-mono);
     text-transform: uppercase;
-    backdrop-filter: blur(12px);
     letter-spacing: 0.34em;
-    color: rgba(242, 241, 238, 0.82);
+    color: rgba(242, 241, 238, 0.86);
     transition:
       color 300ms ease,
       border-color 300ms ease,
       background-color 300ms ease,
-      transform 300ms ease;
+      transform 300ms ease,
+      box-shadow 300ms ease;
   }
 
   .nav-pill-premium:hover {
     color: rgb(var(--aol-gold));
-    border-color: rgba(201, 169, 110, 0.30);
-    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(201, 169, 110, 0.26);
+    background: rgba(18, 18, 22, 0.98);
+    box-shadow: 0 16px 36px -24px rgba(0, 0, 0, 0.9);
     transform: translateY(-1px);
   }
 
@@ -238,37 +239,36 @@
 
   .architecture-card {
     border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgb(var(--aol-bg-3));
     background-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.01) 100%
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.00) 100%
     );
     box-shadow:
-      0 10px 30px -15px rgba(0, 0, 0, 0.70),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      0 20px 48px -30px rgba(0, 0, 0, 0.92),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     transition:
       border-color 300ms ease,
       box-shadow 300ms ease;
   }
 
   .architecture-card:hover {
-    border-color: rgba(201, 169, 110, 0.22);
+    border-color: rgba(201, 169, 110, 0.24);
     box-shadow:
-      0 18px 40px -18px rgba(0, 0, 0, 0.78),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 0 40px rgba(201, 169, 110, 0.08);
+      0 28px 64px -34px rgba(0, 0, 0, 0.96),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 0 28px rgba(201, 169, 110, 0.06);
   }
 
   /* Deep glass card used across diagnostic pages */
   .city-gate-card {
     border-radius: 1.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(0, 0, 0, 0.40);
-    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgb(var(--aol-bg-3));
     box-shadow:
-      0 20px 40px -15px rgba(0, 0, 0, 0.80),
+      0 28px 64px -30px rgba(0, 0, 0, 0.94),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
     position: relative;
     overflow: hidden;
@@ -281,7 +281,7 @@
     pointer-events: none;
     background: radial-gradient(
       circle at center,
-      rgba(201, 169, 110, 0.07) 0%,
+      rgba(201, 169, 110, 0.03) 0%,
       transparent 70%
     );
   }
@@ -292,7 +292,7 @@
     inset-inline: 0;
     top: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.11);
+    background: rgba(255, 255, 255, 0.15);
     pointer-events: none;
   }
 
@@ -304,7 +304,7 @@
     background-image: linear-gradient(
       to right,
       transparent,
-      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.14),
       transparent
     );
   }
@@ -315,7 +315,7 @@
     background-image: linear-gradient(
       to right,
       transparent,
-      rgba(201, 169, 110, 0.30),
+      rgba(201, 169, 110, 0.36),
       transparent
     );
   }

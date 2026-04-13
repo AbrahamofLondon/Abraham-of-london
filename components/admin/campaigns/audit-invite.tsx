@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { UserPlus, Loader2, X, ShieldCheck, FileUp, Download } from 'lucide-react';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/lib/navigation-shim';
 
 interface AuditInviteProps {
   campaignId: string;

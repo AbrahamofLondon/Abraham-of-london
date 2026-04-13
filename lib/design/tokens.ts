@@ -37,12 +37,12 @@ export const colors = {
     lifted:  "#09090C",
     /** #0E0E12 — panel/card background */
     panel:   "#0E0E12",
-    /** rgba overlay for glass panels */
-    glass:   "rgba(0, 0, 0, 0.40)",
-    /** rgba overlay for deep glass cards */
-    deep:    "rgba(0, 0, 0, 0.55)",
-    /** rgba overlay for subtle surface tints */
-    surface: "rgba(255, 255, 255, 0.02)",
+    /** near-solid dark surface, use only where separation is required */
+    glass:   "rgba(14, 14, 18, 0.92)",
+    /** deeper near-solid dark surface for elevated shells */
+    deep:    "rgba(8, 8, 10, 0.96)",
+    /** subtle neutral surface tint, not a haze layer */
+    surface: "rgba(255, 255, 255, 0.03)",
   },
 
   // Gold — the single brand accent, two roles
@@ -61,32 +61,32 @@ export const colors = {
   text: {
     /** #FFFFFF — full white, primary text */
     primary: "#FFFFFF",
-    /** rgba white at 85% — slightly warm, body copy */
-    body:    "rgba(255, 255, 255, 0.85)",
-    /** rgba white at 55% — secondary text, descriptions */
-    muted:   "rgba(255, 255, 255, 0.55)",
-    /** rgba white at 38% — tertiary text, captions */
-    dim:     "rgba(255, 255, 255, 0.38)",
-    /** rgba white at 22% — labels, eyebrow tags */
-    faint:   "rgba(255, 255, 255, 0.22)",
+    /** rgba white at 84% — default body copy on dark surfaces */
+    body:    "rgba(255, 255, 255, 0.84)",
+    /** rgba white at 68% — secondary text, descriptions */
+    muted:   "rgba(255, 255, 255, 0.68)",
+    /** rgba white at 46% — tertiary text, labels with meaning */
+    dim:     "rgba(255, 255, 255, 0.46)",
+    /** rgba white at 36% — metadata only, never for core body copy */
+    faint:   "rgba(255, 255, 255, 0.36)",
   },
 
   // Borders
   border: {
-    /** rgba white at 7% — default panel border */
-    subtle:  "rgba(255, 255, 255, 0.07)",
-    /** rgba white at 10% — standard border */
-    default: "rgba(255, 255, 255, 0.10)",
-    /** rgba white at 14% — hover/active border */
-    strong:  "rgba(255, 255, 255, 0.14)",
-    /** softGold at 18% — gold panel border */
-    gold:    "rgba(201, 169, 110, 0.18)",
-    /** softGold at 30% — gold rule/hairline */
-    goldRule: "rgba(201, 169, 110, 0.30)",
-    /** amber at 20% — action element border */
-    amber:   "rgba(245, 158, 11, 0.20)",
-    /** amber at 25% — hover amber border */
-    amberStrong: "rgba(245, 158, 11, 0.25)",
+    /** rgba white at 12% — minimum readable panel border */
+    subtle:  "rgba(255, 255, 255, 0.12)",
+    /** rgba white at 14% — standard border */
+    default: "rgba(255, 255, 255, 0.14)",
+    /** rgba white at 20% — hover/active border */
+    strong:  "rgba(255, 255, 255, 0.20)",
+    /** softGold at 24% — gold panel border */
+    gold:    "rgba(201, 169, 110, 0.24)",
+    /** softGold at 36% — gold rule/hairline */
+    goldRule: "rgba(201, 169, 110, 0.36)",
+    /** amber at 26% — action element border */
+    amber:   "rgba(245, 158, 11, 0.26)",
+    /** amber at 34% — hover amber border */
+    amberStrong: "rgba(245, 158, 11, 0.34)",
   },
 
   // Status

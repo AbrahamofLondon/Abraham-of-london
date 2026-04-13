@@ -12,7 +12,6 @@ export async function regenerateReport(payload: {
   await prisma.diagnosticArtifact.update({
     where: { id: artifact.id },
     data: {
-      regeneratedAt: new Date(),
       version: `${artifact.version}-regen`,
     },
   });

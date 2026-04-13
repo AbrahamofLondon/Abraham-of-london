@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
-import { InquiryStatus } from "@prisma/client";
+import { InquiryStatus, type AccessTier as PrismaAccessTier } from "@prisma/client";
 import { generatePrincipalKey } from "@/lib/auth/key-generator";
 import { sendOnboardingWelcome } from "@/lib/intelligence/notification-delegate";
 import { getServerSession } from "next-auth";
@@ -14,14 +14,7 @@ import {
   getTierLabel,
 } from "@/lib/access/tier-policy";
 
-type DbAccessTier =
-  | "public"
-  | "member"
-  | "inner_circle"
-  | "client"
-  | "legacy"
-  | "architect"
-  | "owner";
+type DbAccessTier = PrismaAccessTier;
 
 type ApiResponse =
   | {
@@ -38,8 +31,10 @@ function toDbTier(input: unknown): DbAccessTier {
   const normalized = normalizeUserTier(input);
 
   switch (normalized) {
-    case "inner-circle":
+    case "inner_circle":
       return "inner_circle";
+    case "restricted":
+    case "top_secret":
     case "public":
     case "member":
     case "client":
@@ -141,7 +136,8 @@ export default async function handler(
       await tx.strategyInquiry.update({
         where: { id: inquiryId },
         data: {
-          status: InquiryStatus.ONBOARDED,
+          // Closest existing schema state: onboarding closes the inquiry lifecycle.
+          status: InquiryStatus.CLOSED,
           memberId: member.id,
         },
       });
@@ -149,7 +145,7 @@ export default async function handler(
       await tx.systemAuditLog.create({
         data: {
           action: "PRINCIPAL_ONBOARDED",
-          severity: "high",
+          severity: "info",
           actorId: actor.id,
           actorEmail: actor.email,
           resourceId: member.id,
@@ -158,7 +154,7 @@ export default async function handler(
           status: "success",
           category: "admin",
           subCategory: "onboarding",
-          metadata: {
+          metadata: JSON.stringify({
             inquiryId,
             originalTier: String(assignedTier),
             normalizedTier,
@@ -166,7 +162,7 @@ export default async function handler(
             tierLabel: getTierLabel(normalizedTier),
             onboardedBy: actor.id,
             onboardedAt: new Date().toISOString(),
-          },
+          }),
         },
       });
 

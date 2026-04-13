@@ -1,9 +1,46 @@
 // lib/server/diagnostics/export-pdf.ts
 import "server-only";
-import PDFDocument from "pdfkit";
 import { signPayload } from "./signing";
 import { buildWatermarkLines } from "./watermark";
 import type { ReportWatermarkPayload } from "./types";
+
+type PdfChunk = Buffer | Uint8Array | string;
+
+type PdfDocumentLike = {
+  y: number;
+  on: (
+    event: "data" | "end" | "error",
+    handler: ((chunk: PdfChunk) => void) | (() => void) | ((error: unknown) => void),
+  ) => void;
+  save: () => PdfDocumentLike;
+  rotate: (angle: number, options: { origin: [number, number] }) => PdfDocumentLike;
+  fillColor: (color: string) => PdfDocumentLike;
+  opacity: (value: number) => PdfDocumentLike;
+  fontSize: (size: number) => PdfDocumentLike;
+  text: (
+    text: string,
+    xOrOptions?:
+      | number
+      | { width?: number; align?: string; underline?: boolean; lineGap?: number },
+    yOrOptions?:
+      | number
+      | { width?: number; align?: string; underline?: boolean; lineGap?: number },
+    options?: { width?: number; align?: string; underline?: boolean; lineGap?: number },
+  ) => PdfDocumentLike;
+  restore: () => PdfDocumentLike;
+  moveDown: (lines?: number) => PdfDocumentLike;
+  rect: (x: number, y: number, width: number, height: number) => PdfDocumentLike;
+  strokeColor: (color: string) => PdfDocumentLike;
+  stroke: () => PdfDocumentLike;
+  moveTo: (x: number, y: number) => PdfDocumentLike;
+  lineTo: (x: number, y: number) => PdfDocumentLike;
+  end: () => void;
+};
+
+type PdfDocumentConstructor = new (options: {
+  margin: number;
+  size: string;
+}) => PdfDocumentLike;
 
 export async function renderDiagnosticPdf(input: {
   title: string;
@@ -17,11 +54,17 @@ export async function renderDiagnosticPdf(input: {
   viewerEmail?: string | null;
   entitlementKey?: string | null;
 }) {
+  const pdfkitModulePath = "pdfkit";
+  const imported = (await import(pdfkitModulePath)) as {
+    default: PdfDocumentConstructor;
+  };
+  const PDFKit = imported.default;
+
   return new Promise<Buffer>((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 48, size: "A4" });
+    const doc = new PDFKit({ margin: 48, size: "A4" });
     const chunks: Buffer[] = [];
 
-    doc.on("data", (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+    doc.on("data", (c: PdfChunk) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 

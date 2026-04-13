@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/lib/navigation-shim';
 import { Zap, ShieldCheck, ArrowRight, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 

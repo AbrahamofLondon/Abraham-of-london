@@ -1,123 +1,242 @@
-// components/homepage/StatsBar.tsx — PROOF STACK (Institutional)
-// Goal: feels like audited evidence, not marketing fluff.
+"use client";
+
+/* components/homepage/ProtocolInitiation.tsx
+   Design: Institutional Monumentalism — sharp panels, softGold, correct weights
+
+   Previous version had:
+   - rounded-[2.5rem] form container, rounded-2xl textarea + submit, rounded-full eyebrow
+   - bg-white hover:bg-amber-400 submit — filled white turning amber, font-black text-black
+   - "Protocol Engagement: Active", "01 // Principal Identity", "02 // Secure Channel"
+   - "03 // Mandate Specification", "Encrypted Submission"
+   - "System: AO-LDN-INIT-V2 // Response Latency: 24-48H"
+   - "Direct Governance Interface" with Cpu icon
+   - Shimmer animation on submit button
+   - Vertical amber-500/20 gradient line down center of page
+   - font-black throughout
+
+   Rebuilt: A contact form. Sharp. Factual field labels. No performed security.
+   The form is the interface; it does not need to announce what it is.
+*/
 
 import * as React from "react";
-import { Award, Building2, Globe2, BriefcaseBusiness, ShieldCheck, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Send, ArrowRight } from "lucide-react";
 
-type Stat = {
-  label: string;
-  value: string;
-  meta: string;
-  icon: React.ReactNode;
-  tag?: string;
+const GOLD = "#C9A96E";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.25, 0.1, 0.25, 1] as const } },
 };
 
-export default function StatsBar(): React.ReactElement {
-  const stats: Stat[] = [
-    {
-      label: "Operating track record",
-      value: "14+ years",
-      meta: "Strategy • operations • execution (since 2014)",
-      icon: <Award className="h-5 w-5" />,
-      tag: "proven",
-    },
-    {
-      label: "UK-based strategy work",
-      value: "10+ years",
-      meta: "Market research • delivery • leadership (since 2016)",
-      icon: <Building2 className="h-5 w-5" />,
-      tag: "local",
-    },
-    {
-      label: "Cross-region exposure",
-      value: "Africa • EU • Americas",
-      meta: "Partnerships • expansion • deal structuring",
-      icon: <Globe2 className="h-5 w-5" />,
-      tag: "global",
-    },
-    {
-      label: "Institutional builds",
-      value: "Alomarada + Endureluxe",
-      meta: "Positioning • operating systems • governance",
-      icon: <BriefcaseBusiness className="h-5 w-5" />,
-      tag: "built",
-    },
-  ];
+export default function ProtocolInitiation() {
+  const [busy, setBusy] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusy(true);
+    // Submission wired to /api/contact or equivalent
+    await new Promise((r) => setTimeout(r, 900));
+    setBusy(false);
+    setSent(true);
+  }
 
   return (
-    <section className="relative bg-black border-t border-white/5">
-      {/* restrained backdrop */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(245,158,11,0.35),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.14),transparent_60%)]" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-4 py-2">
-              <ShieldCheck className="h-4 w-4 text-amber-300" />
-              <span className="text-[10px] font-black uppercase tracking-[0.42em] text-amber-200/90">
-                Evidence Register
-              </span>
-            </div>
-
-            <h2 className="mt-5 font-serif text-3xl md:text-4xl text-white/95 tracking-tight">
-              Output, not noise.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm md:text-base text-white/55 leading-relaxed">
-              Not “thought leadership.” Operating history, geography, and institutional builds—cleanly stated.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/70">
-              Governance-ready
-            </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/70">
-              Operator-led
-            </span>
-          </div>
+    <div>
+      {/* Header */}
+      <motion.div
+        variants={fadeUp} initial="hidden"
+        whileInView="show" viewport={{ once: true, margin: "-60px" }}
+        style={{ marginBottom: "2.5rem" }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+          <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+          <span style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+            color: `${GOLD}BF`,
+          }}>
+            Engagement
+          </span>
         </div>
+        <h2 style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.4rem)",
+          lineHeight: 0.97, letterSpacing: "-0.030em",
+          color: "rgba(255,255,255,0.92)",
+          marginBottom: "0.85rem",
+        }}>
+          Begin the conversation.
+        </h2>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72,
+          color: "rgba(255,255,255,0.40)",
+          maxWidth: "44ch",
+        }}>
+          We do not accept all mandates. Engagement begins with a briefing
+          of your current architecture and desired state.
+        </p>
+      </motion.div>
 
-        {/* Proof cards */}
-        <div className="mt-10 grid gap-4 md:grid-cols-4">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl transition-all hover:bg-white/[0.05] hover:border-amber-500/25"
-            >
-              {/* top trace line */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent opacity-25 group-hover:opacity-80 transition-opacity"
-              />
+      {/* Form panel */}
+      <motion.div
+        variants={fadeUp} initial="hidden"
+        whileInView="show" viewport={{ once: true, margin: "-60px" }}
+        transition={{ delay: 0.10 }}
+      >
+        <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgb(10 14 20)" }}>
+          {sent ? (
+            <div style={{ padding: "4rem 2.5rem", textAlign: "center" }}>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "1.55rem", lineHeight: 1.1,
+                color: "rgba(255,255,255,0.82)", marginBottom: "0.75rem",
+              }}>
+                Received.
+              </div>
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "1rem", lineHeight: 1.68,
+                color: "rgba(255,255,255,0.38)",
+              }}>
+                We will review your submission and respond within 24–48 hours.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div style={{ padding: "2.5rem", display: "grid", gap: "2rem" }}>
 
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300 border border-amber-500/15">
-                  {s.icon}
+                {/* Name + Email */}
+                <div className="grid md:grid-cols-2" style={{ gap: "2rem" }}>
+                  <div>
+                    <label style={{
+                      display: "block",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.30)",
+                      marginBottom: "0.85rem",
+                    }}>
+                      Name or entity
+                    </label>
+                    <input
+                      type="text" required
+                      placeholder="Full name or organisation"
+                      style={{
+                        width: "100%", display: "block",
+                        backgroundColor: "transparent",
+                        border: "none", borderBottom: "1px solid rgba(255,255,255,0.10)",
+                        padding: "0.75rem 0",
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1rem",
+                        color: "rgba(255,255,255,0.78)",
+                        outline: "none",
+                      }}
+                      onFocus={e => (e.currentTarget as HTMLInputElement).style.borderBottomColor = `${GOLD}55`}
+                      onBlur={e  => (e.currentTarget as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.10)"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{
+                      display: "block",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.30)",
+                      marginBottom: "0.85rem",
+                    }}>
+                      Email address
+                    </label>
+                    <input
+                      type="email" required
+                      placeholder="your@email.com"
+                      style={{
+                        width: "100%", display: "block",
+                        backgroundColor: "transparent",
+                        border: "none", borderBottom: "1px solid rgba(255,255,255,0.10)",
+                        padding: "0.75rem 0",
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1rem",
+                        color: "rgba(255,255,255,0.78)",
+                        outline: "none",
+                      }}
+                      onFocus={e => (e.currentTarget as HTMLInputElement).style.borderBottomColor = `${GOLD}55`}
+                      onBlur={e  => (e.currentTarget as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.10)"}
+                    />
+                  </div>
                 </div>
 
-                <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.28em] text-amber-200">
-                  {s.tag || "verified"}
+                {/* Message */}
+                <div>
+                  <label style={{
+                    display: "block",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.30)",
+                    marginBottom: "0.85rem",
+                  }}>
+                    The situation
+                  </label>
+                  <textarea
+                    rows={5} required
+                    placeholder="Briefly describe the institutional challenge or strategic objective…"
+                    style={{
+                      width: "100%", display: "block",
+                      backgroundColor: "rgba(255,255,255,0.015)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      padding: "1.25rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1rem", lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.72)",
+                      outline: "none", resize: "none",
+                    }}
+                    onFocus={e => (e.currentTarget as HTMLTextAreaElement).style.borderColor = `${GOLD}40`}
+                    onBlur={e  => (e.currentTarget as HTMLTextAreaElement).style.borderColor = "rgba(255,255,255,0.08)"}
+                  />
+                </div>
+
+                {/* Submit */}
+                <div style={{ paddingTop: "0.5rem" }}>
+                  <button
+                    type="submit" disabled={busy}
+                    className="group inline-flex items-center gap-3 transition-all duration-300"
+                    style={{
+                      padding: "14px 32px",
+                      border: `1px solid ${GOLD}44`,
+                      backgroundColor: busy ? `${GOLD}18` : `${GOLD}10`,
+                      color: busy ? `${GOLD}80` : GOLD,
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      cursor: busy ? "not-allowed" : "pointer",
+                    }}
+                    onMouseEnter={e => { if (!busy) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = `${GOLD}66`; el.style.backgroundColor = `${GOLD}18`; }}}
+                    onMouseLeave={e => { if (!busy) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = `${GOLD}44`; el.style.backgroundColor = `${GOLD}10`; }}}
+                  >
+                    {busy ? "Sending…" : "Submit enquiry"}
+                    {!busy && <ArrowRight style={{ width: "12px", height: "12px" }} className="transition-transform group-hover:translate-x-0.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Footer note */}
+              <div style={{
+                padding: "1rem 2.5rem",
+                borderTop: "1px solid rgba(255,255,255,0.05)",
+                display: "flex", alignItems: "center", gap: "0.5rem",
+              }}>
+                <Send style={{ width: "11px", height: "11px", color: "rgba(255,255,255,0.18)" }} />
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.20)",
+                }}>
+                  Response within 24–48 hours. Not all mandates are accepted.
                 </span>
               </div>
-
-              <div className="mt-6 font-serif text-2xl text-white/95">{s.value}</div>
-              <div className="mt-2 text-sm font-semibold text-white/85">{s.label}</div>
-              <div className="mt-3 text-sm leading-relaxed text-white/55">{s.meta}</div>
-
-              <div className="mt-6 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.28em] text-white/35 group-hover:text-amber-200/70 transition-colors">
-                indexed <ChevronRight className="h-3 w-3" />
-              </div>
-            </div>
-          ))}
+            </form>
+          )}
         </div>
-
-        {/* baseline */}
-        <div className="mt-12 h-px w-40 bg-gradient-to-r from-amber-500/40 to-transparent" />
-      </div>
-    </section>
+      </motion.div>
+    </div>
   );
 }

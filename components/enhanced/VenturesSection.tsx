@@ -1,5 +1,25 @@
 "use client";
 
+/* components/enhanced/VentureSection.tsx (EnhancedVenturesSection)
+   Design: Institutional Monumentalism — sharp panels, softGold, correct weights
+
+   Previous version had:
+   - rounded-3xl cards, rounded-2xl icon containers, rounded-full bottom rail
+   - Three accent systems: amber / blue / neutral — blue-400/500 decorative colour
+   - font-extrabold on every label, overline, and meta field
+   - bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 primary CTA
+   - hover:scale-[1.02] on CTA — scaling CTAs performs anxiety
+   - "dossier" label on every card — self-narrating category
+   - "Choose a file. Open it." headline — file cabinet metaphor
+   - "built like a library and used like a war room" — mixed metaphors
+   - text-gray-200/300/400 — wrong token system
+   - Technical grid background at opacity-15
+   - Amber/blue dual radial backdrop
+
+   Rebuilt: Six destination cards. What each contains. Where it leads.
+   Sharp card system. One colour system (softGold). No accent variants.
+*/
+
 import * as React from "react";
 import Link from "next/link";
 import {
@@ -7,219 +27,286 @@ import {
   BookOpen,
   Briefcase,
   Compass,
-  Cpu,
   Globe,
   Landmark,
-  Shield,
   Target,
-  Database, // Changed from Vault
+  Database,
   Workflow,
+  Cpu,
+  Shield,
 } from "lucide-react";
 
-type Dossier = {
+const GOLD = "#C9A96E";
+
+type Destination = {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  Icon: React.ElementType;
   href: string;
-  meta: string;
-  accent?: "amber" | "blue" | "neutral";
+  tag: string;
 };
 
-const cx = (...parts: Array<string | false | null | undefined>) =>
-  parts.filter(Boolean).join(" ");
+const DESTINATIONS: Destination[] = [
+  {
+    Icon:        Landmark,
+    title:       "Institutional Advisory",
+    tag:         "Consulting",
+    description: "Governance-grade strategy for founders, leadership teams, and private institutions — built to hold under pressure.",
+    href:        "/consulting",
+  },
+  {
+    Icon:        Target,
+    title:       "Strategic Frameworks",
+    tag:         "Library",
+    description: "Models, matrices, and decision tools engineered for use. Deploy the system.",
+    href:        "/resources/strategic-frameworks",
+  },
+  {
+    Icon:        BookOpen,
+    title:       "The Canon",
+    tag:         "Doctrine",
+    description: "A coherent architecture: purpose, morality, governance, and institutional design — structured for use.",
+    href:        "/canon",
+  },
+  {
+    Icon:        Database,
+    title:       "The Vault",
+    tag:         "Deployables",
+    description: "Templates, operator packs, and execution artifacts. Practical, clean, and deployable.",
+    href:        "/downloads/vault",
+  },
+  {
+    Icon:        Compass,
+    title:       "Strategy",
+    tag:         "Method",
+    description: "Positioning, systems, and decision discipline — a public library of methods that hold under pressure.",
+    href:        "/strategy",
+  },
+  {
+    Icon:        Workflow,
+    title:       "Ventures",
+    tag:         "Portfolio",
+    description: "Practical deployment across multiple vectors — systems shipped, products built, institutions formed.",
+    href:        "/ventures",
+  },
+];
+
+const BOTTOM_RAIL = [
+  { href: "/resources", label: "Resources", Icon: Cpu    },
+  { href: "/shorts",    label: "Shorts",    Icon: BookOpen },
+  { href: "/strategy",  label: "Strategy",  Icon: Compass  },
+  { href: "/canon",     label: "Canon",     Icon: Globe    },
+];
 
 export default function EnhancedVenturesSection() {
-  const dossiers: Dossier[] = [
-    {
-      title: "Institutional Advisory",
-      description:
-        "Governance-grade strategy for founders, leadership teams, and private institutions — built to hold under pressure.",
-      icon: <Landmark className="h-6 w-6" />,
-      href: "/consulting",
-      meta: "Engagements • advisory • delivery",
-      accent: "amber",
-    },
-    {
-      title: "Strategic Frameworks",
-      description:
-        "Models, matrices, and decision tools engineered for use — not applause. Deploy the system.",
-      icon: <Target className="h-6 w-6" />,
-      href: "/resources/strategic-frameworks",
-      meta: "Framework library • matrices • models",
-      accent: "amber",
-    },
-    {
-      title: "The Canon",
-      description:
-        "A coherent architecture: purpose, morality, governance, and institutional design — structured like a library, used like a weapon.",
-      icon: <BookOpen className="h-6 w-6" />,
-      href: "/canon",
-      meta: "Volumes • thesis • operator manuals",
-      accent: "neutral",
-    },
-    {
-      title: "The Vault",
-      description:
-        "Templates, operator packs, and execution artefacts. Practical, clean, and brutally deployable.",
-      icon: <Database className="h-6 w-6" />, // Changed from Vault to Database
-      href: "/downloads/vault",
-      meta: "Packs • templates • operating assets",
-      accent: "amber",
-    },
-    {
-      title: "Strategy",
-      description:
-        "Positioning, systems, and decision discipline — a public library of methods that don’t crumble when reality shows up.",
-      icon: <Compass className="h-6 w-6" />,
-      href: "/strategy",
-      meta: "Positioning • governance • execution",
-      accent: "blue",
-    },
-    {
-      title: "Ventures",
-      description:
-        "Practical deployment across multiple vectors — systems shipped, products built, institutions formed.",
-      icon: <Workflow className="h-6 w-6" />,
-      href: "/ventures",
-      meta: "Portfolio • deployments • case notes",
-      accent: "neutral",
-    },
-  ];
-
-  const accentClass = (accent?: Dossier["accent"]) => {
-    if (accent === "amber") {
-      return "border-amber-400/20 hover:border-amber-400/35 hover:shadow-amber-500/10";
-    }
-    if (accent === "blue") {
-      return "border-blue-400/15 hover:border-blue-400/25 hover:shadow-blue-500/10";
-    }
-    return "border-white/10 hover:border-white/20 hover:shadow-white/10";
-  };
-
-  const iconBg = (accent?: Dossier["accent"]) => {
-    if (accent === "amber") return "bg-amber-500/10 text-amber-300";
-    if (accent === "blue") return "bg-blue-500/10 text-blue-200";
-    return "bg-white/5 text-gray-200";
-  };
-
   return (
-    <section className="relative overflow-hidden bg-black py-12">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_20%,rgba(245,158,11,0.10),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(59,130,246,0.08),transparent_55%)]" />
-        <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:84px_84px]" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      {/* Header */}
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "1.25rem" }}>
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.45em] text-amber-300">
-              Portfolio dossiers
-            </p>
-            <h2 className="mt-3 font-serif text-3xl font-light text-amber-100 sm:text-4xl">
-              Choose a file. Open it.
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+              <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+              <span style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+                color: `${GOLD}BF`,
+              }}>
+                Platform destinations
+              </span>
+            </div>
+            <h2 style={{
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300, fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
+              lineHeight: 1.0, letterSpacing: "-0.025em",
+              color: "rgba(255,255,255,0.90)",
+              marginBottom: "0.65rem",
+            }}>
+              Six destinations. Each with a distinct function.
             </h2>
-            <p className="mt-3 max-w-2xl text-sm font-light leading-relaxed text-gray-300">
-              No “coming soon”. No placeholders. Each item is a live destination —
-              built like a library and used like a war room.
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+              fontWeight: 300, fontSize: "0.98rem", lineHeight: 1.68,
+              color: "rgba(255,255,255,0.36)",
+              maxWidth: "44ch",
+            }}>
+              No placeholders. Each item is a live destination.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          {/* Header CTAs */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", flexShrink: 0 }}>
             <Link
               href="/consulting"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-7 py-4 text-sm font-extrabold text-black shadow-2xl shadow-amber-900/25 transition-all hover:scale-[1.02]"
+              className="group inline-flex items-center gap-2 transition-all duration-300"
+              style={{
+                padding: "11px 22px",
+                border: `1px solid ${GOLD}42`,
+                backgroundColor: `${GOLD}0E`,
+                color: GOLD,
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+              }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}62`; el.style.backgroundColor = `${GOLD}16`; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
             >
-              <Briefcase className="h-5 w-5" />
+              <Briefcase style={{ width: "12px", height: "12px" }} />
               Engage
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight style={{ width: "11px", height: "11px" }} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
-
             <Link
               href="/downloads/vault"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-200 transition-all hover:border-white/20 hover:bg-white/10"
+              className="inline-flex items-center gap-2 transition-all duration-300"
+              style={{
+                padding: "11px 22px",
+                border: "1px solid rgba(255,255,255,0.09)",
+                backgroundColor: "rgba(255,255,255,0.02)",
+                color: "rgba(255,255,255,0.45)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+              }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.18)"; el.style.color = "rgba(255,255,255,0.70)"; }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.45)"; }}
             >
-              <Shield className="h-5 w-5 text-amber-300" />
+              <Shield style={{ width: "12px", height: "12px" }} />
               Vault
-              <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
-
-        {/* Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {dossiers.map((d) => (
-            <Link
-              key={d.title}
-              href={d.href}
-              className={cx(
-                "group relative overflow-hidden rounded-3xl border bg-white/[0.03] p-7 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.05] hover:shadow-xl",
-                accentClass(d.accent)
-              )}
-            >
-              <div className="flex items-start justify-between gap-6">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-400">
-                    dossier
-                  </p>
-                  <h3 className="mt-3 font-serif text-2xl font-semibold text-amber-100">
-                    {d.title}
-                  </h3>
-                  <p className="mt-3 text-sm font-light leading-relaxed text-gray-300">
-                    {d.description}
-                  </p>
-                  <p className="mt-5 text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
-                    {d.meta}
-                  </p>
-                </div>
-
-                <div
-                  className={cx(
-                    "flex h-14 w-14 items-center justify-center rounded-2xl",
-                    iconBg(d.accent)
-                  )}
-                >
-                  {d.icon}
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-gray-500">
-                  open file
-                </span>
-                <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
-                  View{" "}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </span>
-              </div>
-
-              {/* Sheen */}
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.07),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            </Link>
-          ))}
-        </div>
-
-        {/* Compact bottom rail */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          {[
-            { href: "/resources", label: "Resources", icon: <Cpu className="h-4 w-4" /> },
-            { href: "/shorts", label: "Shorts", icon: <BookOpen className="h-4 w-4" /> },
-            { href: "/strategy", label: "Strategy", icon: <Compass className="h-4 w-4" /> },
-            { href: "/canon", label: "Canon", icon: <Globe className="h-4 w-4" /> },
-          ].map((x) => (
-            <Link
-              key={x.href}
-              href={x.href}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[10px] font-extrabold uppercase tracking-[0.25em] text-gray-200 transition-all hover:border-white/20 hover:bg-white/10"
-            >
-              <span className="text-amber-300">{x.icon}</span>
-              {x.label}
-            </Link>
-          ))}
-        </div>
       </div>
-    </section>
+
+      {/* Destination cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {DESTINATIONS.map((dest) => {
+          const { Icon } = dest;
+          return (
+            <Link key={dest.title} href={dest.href} className="group block h-full outline-none">
+              <div
+                className="relative overflow-hidden h-full transition-all duration-400"
+                style={{ backgroundColor: "rgb(5 5 7)", border: "1px solid rgba(255,255,255,0.062)" }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.borderColor = `${GOLD}20`;
+                  el.style.transform = "translateY(-2px)";
+                  el.style.boxShadow = "0 24px 60px -20px rgba(0,0,0,0.65)";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.borderColor = "rgba(255,255,255,0.062)";
+                  el.style.transform = "translateY(0)";
+                  el.style.boxShadow = "none";
+                }}
+              >
+                {/* Gold thread on hover */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{ background: `linear-gradient(to right, transparent, ${GOLD}28, transparent)` }}
+                />
+
+                <div className="relative z-10 flex h-full flex-col p-7">
+                  {/* Icon + tag */}
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+                    <div style={{
+                      width: "36px", height: "36px",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      backgroundColor: "rgba(255,255,255,0.018)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                    className="group-hover:[border-color:rgba(201,169,110,0.22)] transition-all duration-300"
+                    >
+                      <Icon
+                        style={{ width: "15px", height: "15px", color: "rgba(255,255,255,0.32)" }}
+                        className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.70)]"
+                      />
+                    </div>
+                    <span style={{
+                      padding: "3px 10px",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      backgroundColor: "rgba(255,255,255,0.018)",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.28)",
+                    }}>
+                      {dest.tag}
+                    </span>
+                  </div>
+
+                  {/* Title + description */}
+                  <h3
+                    className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,1)]"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1.42rem", lineHeight: 1.08,
+                      letterSpacing: "-0.020em", color: "rgba(255,255,255,0.84)",
+                      marginBottom: "0.65rem",
+                    }}
+                  >
+                    {dest.title}
+                  </h3>
+
+                  <p
+                    className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,0.52)]"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.36)",
+                      marginBottom: "auto",
+                    }}
+                  >
+                    {dest.description}
+                  </p>
+
+                  {/* Footer */}
+                  <div style={{
+                    marginTop: "1.5rem", paddingTop: "1.15rem",
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                  }}>
+                    <span
+                      className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.75)]"
+                      style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.20)",
+                      }}
+                    >
+                      Open
+                    </span>
+                    <ArrowRight
+                      style={{ width: "13px", height: "13px", color: "rgba(255,255,255,0.18)" }}
+                      className="transition-all duration-300 group-hover:translate-x-0.5 group-hover:[color:rgba(201,169,110,0.65)]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Bottom rail — sharp, no rounded-full */}
+      <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        {BOTTOM_RAIL.map(({ href, label, Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="inline-flex items-center gap-2 transition-all duration-300"
+            style={{
+              padding: "7px 16px",
+              border: "1px solid rgba(255,255,255,0.07)",
+              backgroundColor: "rgba(255,255,255,0.015)",
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+              color: "rgba(255,255,255,0.35)",
+            }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.14)"; el.style.color = "rgba(255,255,255,0.62)"; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.07)"; el.style.color = "rgba(255,255,255,0.35)"; }}
+          >
+            <Icon style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
+            {label}
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }

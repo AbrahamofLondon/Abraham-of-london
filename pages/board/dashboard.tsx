@@ -136,13 +136,20 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async ({ r
       prisma.strategyIntake.count({
         where: {
           status: {
-            in: ["PENDING", "PENDING_DIRECTORATE_REVIEW"],
+            in: [
+              "PENDING",
+              // C16: provisional — restore to PENDING_DIRECTORATE_REVIEW when StrategyIntakeStatus schema extension is applied
+              "IN_REVIEW",
+            ],
           },
         },
       }),
 
       prisma.strategyIntake.count({
-        where: { status: "ACCEPTED" },
+        where: {
+          // C16: provisional — restore to ACCEPTED when StrategyIntakeStatus schema extension is applied
+          status: "ANALYZED",
+        },
       }),
 
       prisma.downloadAuditEvent.count({
@@ -651,18 +658,22 @@ const BoardDashboard: NextPage<DashboardProps> = ({
                       <div
                         key={intake.id}
                         className={`group relative overflow-hidden rounded-xl border p-5 transition-all ${
-                          intake.status === "ACCEPTED"
+                          // C16: provisional — restore to ACCEPTED when StrategyIntakeStatus schema extension is applied
+                          intake.status === "ANALYZED"
                             ? "border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent"
-                            : intake.status === "REJECTED"
+                            // C16: provisional — restore to REJECTED when StrategyIntakeStatus schema extension is applied
+                            : intake.status === "ARCHIVED"
                               ? "border-red-500/20 bg-gradient-to-r from-red-500/5 to-transparent"
                               : "border-white/10 bg-gradient-to-r from-white/5 to-transparent"
                         }`}
                       >
                         <div
                           className={`absolute bottom-0 left-0 top-0 w-1 ${
-                            intake.status === "ACCEPTED"
+                            // C16: provisional — restore to ACCEPTED when StrategyIntakeStatus schema extension is applied
+                            intake.status === "ANALYZED"
                               ? "bg-amber-500"
-                              : intake.status === "REJECTED"
+                              // C16: provisional — restore to REJECTED when StrategyIntakeStatus schema extension is applied
+                              : intake.status === "ARCHIVED"
                                 ? "bg-red-500"
                                 : "bg-gray-600"
                           }`}
@@ -685,17 +696,26 @@ const BoardDashboard: NextPage<DashboardProps> = ({
                                 </div>
                                 <span
                                   className={`rounded-lg px-3 py-1.5 text-xs font-black uppercase ${
-                                    intake.status === "ACCEPTED"
+                                    // C16: provisional — restore to ACCEPTED when StrategyIntakeStatus schema extension is applied
+                                    intake.status === "ANALYZED"
                                       ? "bg-amber-500 text-black"
-                                      : intake.status === "REJECTED"
+                                      // C16: provisional — restore to REJECTED when StrategyIntakeStatus schema extension is applied
+                                      : intake.status === "ARCHIVED"
                                         ? "bg-red-500/20 text-red-400"
                                         : intake.status === "PENDING" ||
-                                            intake.status === "PENDING_DIRECTORATE_REVIEW"
+                                            // C16: provisional — restore to PENDING_DIRECTORATE_REVIEW when StrategyIntakeStatus schema extension is applied
+                                            intake.status === "IN_REVIEW"
                                           ? "bg-yellow-500/20 text-yellow-400"
                                           : "bg-gray-800 text-gray-400"
                                   }`}
                                 >
-                                  {intake.status}
+                                  {intake.status === "ANALYZED"
+                                    ? "ANALYZED"
+                                    : intake.status === "IN_REVIEW"
+                                      ? "IN REVIEW"
+                                      : intake.status === "ARCHIVED"
+                                        ? "ARCHIVED"
+                                        : intake.status}
                                 </span>
                               </div>
 

@@ -1,5 +1,7 @@
 // ALL imports are lazy — the Prisma generated client crashes at evaluation time
 // during Next.js static page collection ("lib is not defined" in bundled output).
+import type { Prisma } from "@prisma/client";
+
 let _db: any = null;
 let _Prisma: any = null;
 
@@ -17,7 +19,7 @@ const db = new Proxy({} as any, {
   get(_, p) { return getDb()[p]; },
 });
 
-const Prisma = new Proxy({} as any, {
+const PrismaRuntime = new Proxy({} as any, {
   get(_, p) { return getPrisma()[p]; },
 });
 import type {
@@ -295,7 +297,7 @@ export async function saveEnterpriseAssessment(
     throw new Error("Invalid assessment payload: missing identifiers");
   }
 
-  return db.$transaction(async (tx) => {
+  return db.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.enterpriseAssessment.deleteMany({
       where: { participantId: data.participantId },
     });
@@ -337,7 +339,15 @@ export async function loadCampaignAssessments(campaignId: string) {
     orderBy: { submittedAt: "desc" },
   });
 
-  return assessments.map((assessment) => ({
+  return assessments.map((assessment: Prisma.EnterpriseAssessmentGetPayload<{
+    include: {
+      participant: {
+        include: {
+          membership: true;
+        };
+      };
+    };
+  }>) => ({
     percentScore: normalizeNumber(assessment.percentScore, 0),
     totalScore: normalizeNumber(assessment.totalScore, 0),
     possibleScore: normalizeNumber(assessment.possibleScore, 100),
@@ -401,7 +411,7 @@ export async function replaceTeamSnapshots(
   campaignId: string,
   snapshots: TeamSnapshotPersistenceInput[]
 ) {
-  return db.$transaction(async (tx) => {
+  return db.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.teamAssessmentSnapshot.deleteMany({
       where: { campaignId },
     });
@@ -490,7 +500,7 @@ export async function getTeamSnapshots(campaignId: string) {
     orderBy: { teamName: "asc" },
   });
 
-  return rows.map((row) => ({
+  return rows.map((row: Prisma.TeamAssessmentSnapshotGetPayload<object>) => ({
     teamName: row.teamName,
     respondentCount: row.respondentCount,
     totalScore: row.totalScore,

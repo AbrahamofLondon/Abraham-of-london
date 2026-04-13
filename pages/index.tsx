@@ -162,8 +162,8 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
       className={cn(
         "h-px w-full",
         soft
-          ? "bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
-          : "bg-gradient-to-r from-transparent via-[#C9A96E]/22 to-transparent",
+          ? "bg-gradient-to-r from-transparent via-white/[0.12] to-transparent"
+          : "bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent",
       )}
     />
   );
@@ -187,7 +187,7 @@ function Eyebrow({
           fontSize: "8px",
           letterSpacing: "0.40em",
           textTransform: "uppercase",
-          color: dim ? "rgba(255,255,255,0.22)" : `${GOLD}BF`,
+          color: dim ? "rgba(255,255,255,0.40)" : `${GOLD}BF`,
         }}
       >
         {children}
@@ -215,8 +215,8 @@ function Panel({
     <div
       className={cn("relative overflow-hidden border", className)}
       style={{
-        borderColor: gold ? `${GOLD}18` : "rgba(255,255,255,0.065)",
-        backgroundColor: gold ? `${GOLD}06` : surface === "lift" ? LIFT : CARD,
+        borderColor: gold ? `${GOLD}24` : "rgba(255,255,255,0.14)",
+        backgroundColor: gold ? "rgb(14 14 18)" : surface === "lift" ? "rgb(14 14 18)" : "rgb(10 10 14)",
         boxShadow: gold
           ? "0 0 90px -35px rgba(201,169,110,0.16)"
           : "0 32px 100px -50px rgba(0,0,0,0.98)",
@@ -226,11 +226,10 @@ function Panel({
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background: gold
-            ? `linear-gradient(to right, transparent, ${GOLD}25, transparent)`
-            : "linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)",
+            ? `linear-gradient(to right, transparent, ${GOLD}30, transparent)`
+            : "linear-gradient(to right, transparent, rgba(255,255,255,0.14), transparent)",
         }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.016),transparent_55%)]" />
       <div className="relative z-10">{children}</div>
     </div>
   );
@@ -261,12 +260,12 @@ function Section({
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 70% 50% at 20% 0%, rgba(201,169,110,0.05) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 30%, rgba(255,255,255,0.02) 0%, transparent 55%)",
+              "radial-gradient(ellipse 70% 50% at 20% 0%, rgba(201,169,110,0.03) 0%, transparent 60%)",
           }}
         />
       )}
 
-      <div className="pointer-events-none absolute inset-0 opacity-[0.030]" style={GRAIN_STYLE} />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.014]" style={GRAIN_STYLE} />
       <div className="pointer-events-none absolute inset-x-0 top-0">
         <GoldRule soft />
       </div>
@@ -286,7 +285,7 @@ function Section({
                 fontSize: "7.5px",
                 letterSpacing: "0.46em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.20)",
+                color: "rgba(255,255,255,0.34)",
               }}
             >
               {cap}
@@ -335,7 +334,7 @@ function SectionHeader({
         {title}
       </h2>
       {description && (
-        <p className={cn("mt-5 text-[15px] leading-[1.8] text-white/42", center && "mx-auto max-w-2xl")}>
+        <p className={cn("mt-5 text-[15px] leading-[1.8] text-white/70", center && "mx-auto max-w-2xl")}>
           {description}
         </p>
       )}
@@ -391,7 +390,7 @@ class ModuleBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+        <div style={{ border: "1px solid rgba(255,255,255,0.14)", backgroundColor: "rgb(14 14 18)", padding: "1.25rem" }}>
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-4 w-4 text-white/20" />
             <span
@@ -400,7 +399,7 @@ class ModuleBoundary extends React.Component<
                 fontSize: "8px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.25)",
+                color: "rgba(255,255,255,0.42)",
               }}
             >
               {this.props.label} unavailable
@@ -453,7 +452,7 @@ function HeroSection({
           fill
           priority
           sizes="100vw"
-          quality={90}
+          quality={85}
           className="object-cover object-[30%_center]"
         />
         <div
@@ -466,9 +465,9 @@ function HeroSection({
         />
         <div
           className="absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 55% 70% at 15% 30%, rgba(201,169,110,0.07) 0%, transparent 60%)` }}
+          style={{ background: `radial-gradient(ellipse 55% 70% at 15% 30%, rgba(201,169,110,0.04) 0%, transparent 60%)` }}
         />
-        <div className="absolute inset-0 opacity-[0.040]" style={GRAIN_STYLE} />
+        <div className="absolute inset-0 opacity-[0.016]" style={GRAIN_STYLE} />
       </motion.div>
 
       <div
@@ -492,7 +491,7 @@ function HeroSection({
                   <span className="text-white" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)" }}>
                     Abraham
                   </span>
-                  <span className="italic text-white/28" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
+                  <span className="italic text-white/42" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
                     of
                   </span>
                 </div>
@@ -507,11 +506,11 @@ function HeroSection({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.86, delay: 0.38 }}
-              className="mt-9 font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/45"
+              className="mt-9 font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/76"
               style={{ fontSize: "clamp(1.05rem, 2vw, 1.35rem)" }}
             >
               Doctrine, diagnostics, executive intelligence, and selective advisory
-              <span className="block text-white/22">organised into one governed platform.</span>
+              <span className="block text-white/52">organised into one governed platform.</span>
             </motion.p>
 
             <motion.div
@@ -1132,29 +1131,29 @@ function FlagshipAdvisory() {
                   fontSize: "7px",
                   letterSpacing: "0.36em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
+                  color: "rgba(255,255,255,0.46)",
                   marginBottom: "1rem",
                 }}
               >
                 Report output fields
               </div>
 
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}>
                 {reportFields.map((field, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-3 py-2.5"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                    className="flex items-start gap-4 py-3.5"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}
                   >
                     <span
                       style={{
-                        minWidth: "96px",
+                        minWidth: "112px",
                         marginTop: "0.15rem",
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px",
+                        fontSize: "7.25px",
                         letterSpacing: "0.22em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.20)",
+                        color: "rgba(255,255,255,0.48)",
                       }}
                     >
                       {field.label}
@@ -1162,9 +1161,9 @@ function FlagshipAdvisory() {
                     <span
                       className="font-['Cormorant_Garamond',Georgia,serif] italic"
                       style={{
-                        fontSize: "11.5px",
-                        lineHeight: 1.7,
-                        color: "rgba(255,255,255,0.40)",
+                        fontSize: "12.75px",
+                        lineHeight: 1.8,
+                        color: "rgba(255,255,255,0.78)",
                       }}
                     >
                       {field.value}

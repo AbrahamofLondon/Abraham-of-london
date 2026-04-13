@@ -154,8 +154,8 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
     <div
       className={
         soft
-          ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
-          : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/22 to-transparent"
+          ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.12] to-transparent"
+          : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent"
       }
     />
   );
@@ -201,7 +201,7 @@ function StatCell({ value, label }: { value: string; label: string }) {
           fontSize: "7px",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.25)",
+          color: "rgba(255,255,255,0.40)",
           marginTop: "0.35rem",
         }}
       >
@@ -216,19 +216,19 @@ function ClassificationStrip() {
     {
       label: "Strategy",
       color: "rgba(110,231,183,0.70)",
-      bg: "rgba(110,231,183,0.06)",
+      bg: "rgb(10 14 20)",
       border: "rgba(110,231,183,0.18)",
     },
     {
       label: "Diagnostic",
       color: `${GOLD}CC`,
-      bg: `${GOLD}08`,
+      bg: "rgb(14 14 18)",
       border: `${GOLD}22`,
     },
     {
       label: "Reject",
       color: "rgba(252,165,165,0.70)",
-      bg: "rgba(252,165,165,0.05)",
+      bg: "rgb(18 10 10)",
       border: "rgba(252,165,165,0.18)",
     },
   ];
@@ -241,7 +241,7 @@ function ClassificationStrip() {
           fontSize: "6.5px",
           letterSpacing: "0.30em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.18)",
+          color: "rgba(255,255,255,0.40)",
           marginBottom: "0.6rem",
         }}
       >
@@ -391,7 +391,7 @@ function LayerRow({
                   fontSize: "7px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.22)",
+                  color: "rgba(255,255,255,0.40)",
                 }}
               >
                 {layer.domain} · {layer.duration}
@@ -407,7 +407,7 @@ function LayerRow({
                   fontSize: "7.5px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.20)",
+                  color: "rgba(255,255,255,0.36)",
                 }}
               >
                 {isOpen ? "Collapse" : "Expand"}
@@ -417,8 +417,8 @@ function LayerRow({
                 style={{
                   width: "28px",
                   height: "28px",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  backgroundColor: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  backgroundColor: "rgb(10 10 14)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -428,7 +428,7 @@ function LayerRow({
                 }}
               >
                 <ChevronRight
-                  style={{ width: "12px", height: "12px", color: "rgba(255,255,255,0.35)" }}
+                  style={{ width: "12px", height: "12px", color: "rgba(255,255,255,0.58)" }}
                 />
               </div>
             </div>
@@ -444,7 +444,7 @@ function LayerRow({
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.32 }}
               style={{
-                borderTop: "1px solid rgba(255,255,255,0.05)",
+                borderTop: "1px solid rgba(255,255,255,0.12)",
                 overflow: "hidden",
               }}
             >
@@ -470,7 +470,7 @@ function LayerRow({
                         fontWeight: 300,
                         fontSize: "0.94rem",
                         lineHeight: 1.7,
-                        color: "rgba(255,255,255,0.36)",
+                        color: "rgba(255,255,255,0.56)",
                         marginBottom: "1.25rem",
                         fontStyle: "italic",
                       }}
@@ -481,8 +481,8 @@ function LayerRow({
                     <div
                       style={{
                         padding: "0.75rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.05)",
-                        backgroundColor: "rgba(255,255,255,0.01)",
+                        border: "1px solid rgba(255,255,255,0.14)",
+                        backgroundColor: "rgb(10 10 14)",
                         display: "inline-flex",
                         alignItems: "center",
                         gap: "0.75rem",
@@ -494,7 +494,7 @@ function LayerRow({
                           fontSize: "6.5px",
                           letterSpacing: "0.28em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.22)",
+                          color: "rgba(255,255,255,0.40)",
                         }}
                       >
                         Gate
@@ -504,7 +504,7 @@ function LayerRow({
                           fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
                           fontWeight: 300,
                           fontSize: "0.88rem",
-                          color: "rgba(255,255,255,0.45)",
+                          color: "rgba(255,255,255,0.72)",
                           fontStyle: "italic",
                         }}
                       >
@@ -551,7 +551,7 @@ function LayerRow({
                           fontSize: "6.5px",
                           letterSpacing: "0.22em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.22)",
+                        color: "rgba(255,255,255,0.42)",
                         }}
                       >
                         {layer.routeHint}

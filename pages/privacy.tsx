@@ -75,7 +75,7 @@ const PrivacyPage: NextPage = () => {
                 Primary Controller for information processed via this site.
               </p>
               <p className="text-sm font-mono text-amber-500/80">
-                Liaison: {siteConfig.email}
+                Liaison: {siteConfig.contact?.email ?? "info@abrahamoflondon.org"}
               </p>
             </section>
 

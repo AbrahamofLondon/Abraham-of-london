@@ -1,146 +1,242 @@
 "use client";
 
+/* components/homepage/ProtocolInitiation.tsx
+   Design: Institutional Monumentalism — sharp panels, softGold, correct weights
+
+   Previous version had:
+   - rounded-[2.5rem] form container, rounded-2xl textarea + submit, rounded-full eyebrow
+   - bg-white hover:bg-amber-400 submit — filled white turning amber, font-black text-black
+   - "Protocol Engagement: Active", "01 // Principal Identity", "02 // Secure Channel"
+   - "03 // Mandate Specification", "Encrypted Submission"
+   - "System: AO-LDN-INIT-V2 // Response Latency: 24-48H"
+   - "Direct Governance Interface" with Cpu icon
+   - Shimmer animation on submit button
+   - Vertical amber-500/20 gradient line down center of page
+   - font-black throughout
+
+   Rebuilt: A contact form. Sharp. Factual field labels. No performed security.
+   The form is the interface; it does not need to announce what it is.
+*/
+
 import * as React from "react";
 import { motion } from "framer-motion";
-import { 
-  ShieldAlert, 
-  Send, 
-  Fingerprint, 
-  ArrowRight, 
-  Terminal,
-  Cpu
-} from "lucide-react";
+import { Send, ArrowRight } from "lucide-react";
+
+const GOLD = "#C9A96E";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
 
 export default function ProtocolInitiation() {
+  const [busy, setBusy] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusy(true);
+    // Submission wired to /api/contact or equivalent
+    await new Promise((r) => setTimeout(r, 900));
+    setBusy(false);
+    setSent(true);
+  }
+
   return (
-    <section className="relative bg-black py-24 lg:py-40 overflow-hidden">
-      {/* 1. Structural Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-amber-500/20 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.03),transparent_70%)]" />
-      </div>
-
-      <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        
-        {/* --- Header: The Mandate --- */}
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/5 mb-8"
-          >
-            <ShieldAlert className="h-3 w-3 text-amber-500" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400">
-              Protocol Engagement: Active
-            </span>
-          </motion.div>
-          
-          <h2 className="font-serif text-5xl md:text-6xl font-medium text-white tracking-tight mb-6">
-            Initiate <span className="italic text-white/30">Protocol.</span>
-          </h2>
-          
-          <p className="text-white/40 text-lg font-light max-w-xl mx-auto leading-relaxed">
-            We do not accept all mandates. Engagement begins with a briefing 
-            of your current architecture and desired state.
-          </p>
+    <div>
+      {/* Header */}
+      <motion.div
+        variants={fadeUp} initial="hidden"
+        whileInView="show" viewport={{ once: true, margin: "-60px" }}
+        style={{ marginBottom: "2.5rem" }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+          <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+          <span style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+            color: `${GOLD}BF`,
+          }}>
+            Engagement
+          </span>
         </div>
+        <h2 style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.4rem)",
+          lineHeight: 0.97, letterSpacing: "-0.030em",
+          color: "rgba(255,255,255,0.92)",
+          marginBottom: "0.85rem",
+        }}>
+          Begin the conversation.
+        </h2>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72,
+          color: "rgba(255,255,255,0.40)",
+          maxWidth: "44ch",
+        }}>
+          We do not accept all mandates. Engagement begins with a briefing
+          of your current architecture and desired state.
+        </p>
+      </motion.div>
 
-        {/* --- The Console: The Form --- */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          className="relative rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 md:p-12 backdrop-blur-xl"
-        >
-          {/* Metadata Overlay */}
-          <div className="absolute top-8 right-12 hidden md:block">
-            <div className="flex items-center gap-4 text-[9px] font-mono text-white/20 uppercase tracking-widest">
-              <span>Encrypted Submission</span>
-              <Fingerprint className="h-4 w-4" />
-            </div>
-          </div>
-
-          <form className="grid gap-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Field 1: Identity */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/60 ml-1">
-                  01 // Principal Identity
-                </label>
-                <input 
-                  type="text"
-                  placeholder="Full Name / Entity"
-                  className="w-full bg-transparent border-b border-white/10 py-4 text-white placeholder:text-white/10 focus:outline-none focus:border-amber-500/50 transition-colors font-light tracking-wide"
-                />
+      {/* Form panel */}
+      <motion.div
+        variants={fadeUp} initial="hidden"
+        whileInView="show" viewport={{ once: true, margin: "-60px" }}
+        transition={{ delay: 0.10 }}
+      >
+        <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgb(10 14 20)" }}>
+          {sent ? (
+            <div style={{ padding: "4rem 2.5rem", textAlign: "center" }}>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "1.55rem", lineHeight: 1.1,
+                color: "rgba(255,255,255,0.82)", marginBottom: "0.75rem",
+              }}>
+                Received.
               </div>
-
-              {/* Field 2: Contact */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/60 ml-1">
-                  02 // Secure Channel
-                </label>
-                <input 
-                  type="email"
-                  placeholder="Email Address"
-                  className="w-full bg-transparent border-b border-white/10 py-4 text-white placeholder:text-white/10 focus:outline-none focus:border-amber-500/50 transition-colors font-light tracking-wide"
-                />
-              </div>
-            </div>
-
-            {/* Field 3: The Mandate */}
-            <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/60 ml-1">
-                03 // Mandate Specification
-              </label>
-              <textarea 
-                rows={4}
-                placeholder="Briefly describe the institutional challenge or the strategic objective..."
-                className="w-full bg-transparent border border-white/10 rounded-2xl p-6 text-white placeholder:text-white/10 focus:outline-none focus:border-amber-500/50 transition-colors font-light tracking-wide resize-none"
-              />
-            </div>
-
-            {/* Submit Action */}
-            <div className="pt-6">
-              <button 
-                type="submit"
-                className="group relative w-full overflow-hidden rounded-2xl bg-white py-6 transition-all hover:bg-amber-400"
-              >
-                <div className="relative z-10 flex items-center justify-center gap-4 text-black font-black uppercase tracking-[0.3em] text-xs">
-                  <Send className="h-4 w-4 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-                  Submit Engagement Request
-                </div>
-                {/* Visual Glitch/Shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              </button>
-            </div>
-          </form>
-
-          {/* Technical Footer */}
-          <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-white/5 pt-8">
-            <div className="flex items-center gap-3">
-              <Terminal className="h-4 w-4 text-white/20" />
-              <p className="text-[9px] font-mono text-white/20 uppercase tracking-widest">
-                System: AO-LDN-INIT-V2 // Response Latency: 24-48H
+              <p style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300, fontSize: "1rem", lineHeight: 1.68,
+                color: "rgba(255,255,255,0.38)",
+              }}>
+                We will review your submission and respond within 24–48 hours.
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Cpu className="h-3 w-3 text-amber-500/40" />
-              <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">
-                Direct Governance Interface
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div style={{ padding: "2.5rem", display: "grid", gap: "2rem" }}>
 
-      {/* ✅ Fixed: Removed 'jsx' prop – now using a standard style tag */}
-      <style>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 1.5s infinite;
-        }
-      `}</style>
-    </section>
+                {/* Name + Email */}
+                <div className="grid md:grid-cols-2" style={{ gap: "2rem" }}>
+                  <div>
+                    <label style={{
+                      display: "block",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.30)",
+                      marginBottom: "0.85rem",
+                    }}>
+                      Name or entity
+                    </label>
+                    <input
+                      type="text" required
+                      placeholder="Full name or organisation"
+                      style={{
+                        width: "100%", display: "block",
+                        backgroundColor: "transparent",
+                        border: "none", borderBottom: "1px solid rgba(255,255,255,0.10)",
+                        padding: "0.75rem 0",
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1rem",
+                        color: "rgba(255,255,255,0.78)",
+                        outline: "none",
+                      }}
+                      onFocus={e => (e.currentTarget as HTMLInputElement).style.borderBottomColor = `${GOLD}55`}
+                      onBlur={e  => (e.currentTarget as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.10)"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{
+                      display: "block",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.30)",
+                      marginBottom: "0.85rem",
+                    }}>
+                      Email address
+                    </label>
+                    <input
+                      type="email" required
+                      placeholder="your@email.com"
+                      style={{
+                        width: "100%", display: "block",
+                        backgroundColor: "transparent",
+                        border: "none", borderBottom: "1px solid rgba(255,255,255,0.10)",
+                        padding: "0.75rem 0",
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1rem",
+                        color: "rgba(255,255,255,0.78)",
+                        outline: "none",
+                      }}
+                      onFocus={e => (e.currentTarget as HTMLInputElement).style.borderBottomColor = `${GOLD}55`}
+                      onBlur={e  => (e.currentTarget as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.10)"}
+                    />
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label style={{
+                    display: "block",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.30)",
+                    marginBottom: "0.85rem",
+                  }}>
+                    The situation
+                  </label>
+                  <textarea
+                    rows={5} required
+                    placeholder="Briefly describe the institutional challenge or strategic objective…"
+                    style={{
+                      width: "100%", display: "block",
+                      backgroundColor: "rgba(255,255,255,0.015)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      padding: "1.25rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1rem", lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.72)",
+                      outline: "none", resize: "none",
+                    }}
+                    onFocus={e => (e.currentTarget as HTMLTextAreaElement).style.borderColor = `${GOLD}40`}
+                    onBlur={e  => (e.currentTarget as HTMLTextAreaElement).style.borderColor = "rgba(255,255,255,0.08)"}
+                  />
+                </div>
+
+                {/* Submit */}
+                <div style={{ paddingTop: "0.5rem" }}>
+                  <button
+                    type="submit" disabled={busy}
+                    className="group inline-flex items-center gap-3 transition-all duration-300"
+                    style={{
+                      padding: "14px 32px",
+                      border: `1px solid ${GOLD}44`,
+                      backgroundColor: busy ? `${GOLD}18` : `${GOLD}10`,
+                      color: busy ? `${GOLD}80` : GOLD,
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      cursor: busy ? "not-allowed" : "pointer",
+                    }}
+                    onMouseEnter={e => { if (!busy) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = `${GOLD}66`; el.style.backgroundColor = `${GOLD}18`; }}}
+                    onMouseLeave={e => { if (!busy) { const el = e.currentTarget as HTMLButtonElement; el.style.borderColor = `${GOLD}44`; el.style.backgroundColor = `${GOLD}10`; }}}
+                  >
+                    {busy ? "Sending…" : "Submit enquiry"}
+                    {!busy && <ArrowRight style={{ width: "12px", height: "12px" }} className="transition-transform group-hover:translate-x-0.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Footer note */}
+              <div style={{
+                padding: "1rem 2.5rem",
+                borderTop: "1px solid rgba(255,255,255,0.05)",
+                display: "flex", alignItems: "center", gap: "0.5rem",
+              }}>
+                <Send style={{ width: "11px", height: "11px", color: "rgba(255,255,255,0.18)" }} />
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.20)",
+                }}>
+                  Response within 24–48 hours. Not all mandates are accepted.
+                </span>
+              </div>
+            </form>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
 }

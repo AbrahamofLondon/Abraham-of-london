@@ -16,6 +16,7 @@ import {
 
 import Layout from "@/components/Layout";
 import { TIER_DIRECTIVES } from "@/lib/resources/tier-metadata";
+import type { DisplayTier } from "@/lib/resources/tier-metadata";
 
 // Canonical tier labeling + normalization (SSOT)
 import tiers from "@/lib/access/tiers";
@@ -98,7 +99,7 @@ function requiredTierFromFramework(fw: Framework): AccessTier {
   if (set.has("architect") || set.has("founder") || set.has("board")) return "architect";
   if (set.has("legacy")) return "legacy";
   if (set.has("client")) return "client";
-  if (set.has("inner-circle") || set.has("inner circle")) return "inner-circle";
+  if (set.has("inner-circle") || set.has("inner circle")) return "inner_circle";
   if (set.has("member")) return "member";
   return "public";
 }
@@ -245,7 +246,7 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({ frameworks, categ
   }, [frameworks, searchQuery, selectedCategory]);
 
   const activeDirective = React.useMemo(() => {
-    return TIER_DIRECTIVES[selectedCategory] || null;
+    return isDisplayTier(selectedCategory) ? TIER_DIRECTIVES[selectedCategory] : null;
   }, [selectedCategory]);
 
   return (
@@ -516,3 +517,6 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
 };
 
 export default StrategicFrameworksLibraryPage;
+function isDisplayTier(value: string): value is DisplayTier {
+  return value in TIER_DIRECTIVES;
+}

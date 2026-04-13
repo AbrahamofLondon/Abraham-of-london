@@ -50,8 +50,8 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
     <div
       className={
         soft
-          ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
-          : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/22 to-transparent"
+          ? "h-px w-full bg-gradient-to-r from-transparent via-white/[0.12] to-transparent"
+          : "h-px w-full bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent"
       }
     />
   );
@@ -255,15 +255,14 @@ export default function ExecutiveReportingPage() {
                 width: "760px",
                 height: "620px",
                 borderRadius: "50%",
-                background: `radial-gradient(ellipse at center, ${GOLD}09 0%, ${GOLD}03 32%, transparent 68%)`,
-                filter: "blur(150px)",
+                background: `radial-gradient(ellipse at center, ${GOLD}05 0%, transparent 68%)`,
               }}
             />
             <div
               className="absolute inset-x-0 bottom-0 h-40"
               style={{ background: `linear-gradient(to top, ${BASE}, transparent)` }}
             />
-            <div className="absolute inset-0 opacity-[0.020]" style={GRAIN} />
+            <div className="absolute inset-0 opacity-[0.012]" style={GRAIN} />
           </div>
 
           <div
@@ -288,7 +287,7 @@ export default function ExecutiveReportingPage() {
                   fontSize: "8px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.25)",
+                  color: "rgba(255,255,255,0.40)",
                 }}
               >
                 Diagnostics
@@ -327,7 +326,7 @@ export default function ExecutiveReportingPage() {
                 >
                   Executive
                   <br />
-                  <span style={{ color: "rgba(255,255,255,0.30)" }}>Reporting.</span>
+                  <span style={{ color: "rgba(255,255,255,0.52)" }}>Reporting.</span>
                 </motion.h1>
 
                 <motion.p
@@ -338,7 +337,7 @@ export default function ExecutiveReportingPage() {
                     fontWeight: 300,
                     fontSize: "clamp(1.02rem, 1.4vw, 1.24rem)",
                     lineHeight: 1.72,
-                    color: "rgba(255,255,255,0.46)",
+                    color: "rgba(255,255,255,0.78)",
                     maxWidth: "50ch",
                   }}
                 >
@@ -356,7 +355,7 @@ export default function ExecutiveReportingPage() {
                     fontWeight: 300,
                     fontSize: "0.98rem",
                     lineHeight: 1.72,
-                    color: "rgba(255,255,255,0.33)",
+                    color: "rgba(255,255,255,0.56)",
                     maxWidth: "55ch",
                     fontStyle: "italic",
                   }}
@@ -368,8 +367,8 @@ export default function ExecutiveReportingPage() {
                 <motion.div variants={fadeUp} style={{ marginTop: "2.25rem", maxWidth: "56ch" }}>
                   <div
                     style={{
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      backgroundColor: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      backgroundColor: "rgb(14 14 18)",
                       padding: "1rem 1.2rem",
                     }}
                   >
@@ -379,7 +378,7 @@ export default function ExecutiveReportingPage() {
                         fontWeight: 300,
                         fontSize: "0.94rem",
                         lineHeight: 1.65,
-                        color: "rgba(255,255,255,0.44)",
+                        color: "rgba(255,255,255,0.72)",
                         margin: 0,
                       }}
                     >
@@ -397,8 +396,8 @@ export default function ExecutiveReportingPage() {
                       className="inline-flex items-center gap-3 transition-all duration-300"
                       style={{
                         padding: "14px 28px",
-                        border: `1px solid ${GOLD}42`,
-                        backgroundColor: `${GOLD}10`,
+                        border: `1px solid ${GOLD}32`,
+                        backgroundColor: "rgb(14 14 18)",
                         color: GOLD,
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                         fontSize: "9px",
@@ -407,13 +406,13 @@ export default function ExecutiveReportingPage() {
                       }}
                       onMouseEnter={(e) => {
                         const el = e.currentTarget as HTMLAnchorElement;
-                        el.style.borderColor = `${GOLD}65`;
-                        el.style.backgroundColor = `${GOLD}18`;
+                        el.style.borderColor = `${GOLD}48`;
+                        el.style.backgroundColor = "rgb(18 18 22)";
                       }}
                       onMouseLeave={(e) => {
                         const el = e.currentTarget as HTMLAnchorElement;
-                        el.style.borderColor = `${GOLD}42`;
-                        el.style.backgroundColor = `${GOLD}10`;
+                        el.style.borderColor = `${GOLD}32`;
+                        el.style.backgroundColor = "rgb(14 14 18)";
                       }}
                     >
                       Run executive reporting
@@ -425,8 +424,8 @@ export default function ExecutiveReportingPage() {
                       className="inline-flex items-center gap-3 transition-all duration-300"
                       style={{
                         padding: "14px 28px",
-                        border: "1px solid rgba(255,255,255,0.09)",
-                        color: "rgba(255,255,255,0.38)",
+                        border: "1px solid rgba(255,255,255,0.14)",
+                        color: "rgba(255,255,255,0.78)",
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                         fontSize: "9px",
                         letterSpacing: "0.28em",
@@ -468,23 +467,23 @@ export default function ExecutiveReportingPage() {
                         fontSize: "7px",
                         letterSpacing: "0.40em",
                         textTransform: "uppercase",
-                        color: `${GOLD}90`,
+                        color: "rgba(255,255,255,0.46)",
                       }}
                     >
                       Product specification
                     </span>
                   </div>
 
-                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
                     {REPORT_SPEC_ROWS.map(({ label, value }) => (
-                      <div key={label} className="flex items-start justify-between gap-3 px-4 py-2.5">
+                      <div key={label} className="flex items-start justify-between gap-4 px-4 py-3.5">
                         <span
                           style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "6.5px",
+                            fontSize: "7px",
                             letterSpacing: "0.28em",
                             textTransform: "uppercase",
-                            color: "rgba(255,255,255,0.20)",
+                            color: "rgba(255,255,255,0.46)",
                           }}
                         >
                           {label}
@@ -493,10 +492,11 @@ export default function ExecutiveReportingPage() {
                           style={{
                             fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
                             fontWeight: 300,
-                            fontSize: "0.9rem",
-                            color: "rgba(255,255,255,0.58)",
+                            fontSize: "0.98rem",
+                            lineHeight: 1.58,
+                            color: "rgba(255,255,255,0.82)",
                             textAlign: "right",
-                            maxWidth: "58%",
+                            maxWidth: "56%",
                           }}
                         >
                           {value}
@@ -507,8 +507,8 @@ export default function ExecutiveReportingPage() {
 
                   <div
                     style={{
-                      padding: "0.9rem 1.25rem",
-                      borderTop: "1px solid rgba(255,255,255,0.04)",
+                      padding: "1rem 1.25rem",
+                      borderTop: "1px solid rgba(255,255,255,0.12)",
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -519,7 +519,7 @@ export default function ExecutiveReportingPage() {
                           fontSize: "7px",
                           letterSpacing: "0.26em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.20)",
+                          color: "rgba(255,255,255,0.48)",
                         }}
                       >
                         Governed · Intake-driven · Persisted by run

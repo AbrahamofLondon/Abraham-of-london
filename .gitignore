@@ -117,6 +117,9 @@ temp/
 *.lock
 *.part
 *.crdownload
+# bucket-*.txt
+# changed-*.txt  
+# briefs-contamination.patch 
 
 # ------------------------------
 # IDE / editor

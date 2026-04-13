@@ -15,8 +15,8 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { allPlaybooks } from "contentlayer/generated";
-import type { Playbook } from "contentlayer/generated";
+import { allPlaybooks } from "@/.contentlayer/generated";
+import type { Playbook } from "@/.contentlayer/generated";
 import {
   ArrowLeft,
   ArrowRight,
@@ -77,6 +77,10 @@ const fadeUp = {
 
 function safeString(value: unknown): string {
   return typeof value === "string" ? value : value == null ? "" : String(value);
+}
+
+function safeStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((item) => safeString(item)).filter(Boolean) : [];
 }
 
 function normalizeSlug(input: unknown): string {
@@ -147,10 +151,10 @@ function titleCase(input?: string): string {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = allPlaybooks
-    .map((p) => normalizeSlug(p.slug))
-    .filter(Boolean)
-    .filter((slug) => !slug.includes("/"))
-    .map((slug) => ({ params: { slug } }));
+    .map((p: Playbook) => normalizeSlug(p.slug))
+    .filter((slug: string) => Boolean(slug))
+    .filter((slug: string) => !slug.includes("/"))
+    .map((slug: string) => ({ params: { slug } }));
 
   return {
     paths,
@@ -161,8 +165,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params }) => {
   const slug = normalizeSlug(params?.slug);
 
-  const stablePlaybooks = [...allPlaybooks].filter((p) => normalizeSlug(p.slug));
-  const playbook = stablePlaybooks.find((p) => normalizeSlug(p.slug) === slug);
+  const stablePlaybooks = [...allPlaybooks].filter((p: Playbook) => normalizeSlug(p.slug));
+  const playbook = stablePlaybooks.find((p: Playbook) => normalizeSlug(p.slug) === slug);
 
   if (!playbook) {
     return { notFound: true };
@@ -454,9 +458,9 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                   </div>
                 )}
 
-                {playbook.tags?.length > 0 && (
+                {safeStringArray(playbook.tags).length > 0 && (
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {playbook.tags.slice(0, 6).map((tag) => (
+                    {safeStringArray(playbook.tags).slice(0, 6).map((tag: string) => (
                       <span
                         key={tag}
                         style={{
@@ -483,7 +487,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                 transition={{ duration: 0.75, delay: 0.14 }}
                 className="space-y-3"
               >
-                {playbook.phases?.length > 0 && (
+                {safeStringArray(playbook.phases).length > 0 && (
                   <div
                     style={{
                       border: "1px solid rgba(255,255,255,0.07)",
@@ -513,7 +517,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                       </div>
                     </div>
                     <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                      {playbook.phases.map((phase, i) => (
+                      {safeStringArray(playbook.phases).map((phase: string, i: number) => (
                         <div
                           key={`${phase}-${i}`}
                           className="flex items-center gap-3"
@@ -547,7 +551,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                   </div>
                 )}
 
-                {playbook.signals?.length > 0 && (
+                {safeStringArray(playbook.signals).length > 0 && (
                   <div
                     style={{
                       border: "1px solid rgba(255,255,255,0.06)",
@@ -578,13 +582,13 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                       </div>
                     </div>
                     <div style={{ padding: "0.75rem 1.25rem" }}>
-                      {playbook.signals.map((signal, i) => (
+                      {safeStringArray(playbook.signals).map((signal: string, i: number) => (
                         <div
                           key={`${signal}-${i}`}
                           className="flex items-start gap-2.5 py-2"
                           style={{
                             borderBottom:
-                              i < playbook.signals.length - 1
+                              i < safeStringArray(playbook.signals).length - 1
                                 ? "1px solid rgba(255,255,255,0.04)"
                                 : "none",
                           }}
@@ -616,7 +620,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                   </div>
                 )}
 
-                {playbook.outputs?.length > 0 && (
+                {safeStringArray(playbook.outputs).length > 0 && (
                   <div
                     style={{
                       border: `1px solid ${GOLD}18`,
@@ -645,7 +649,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                       </div>
                     </div>
                     <div style={{ padding: "0.75rem 1.25rem" }}>
-                      {playbook.outputs.map((output, i) => (
+                      {safeStringArray(playbook.outputs).map((output: string, i: number) => (
                         <div
                           key={`${output}-${i}`}
                           className="flex items-start gap-2.5 py-1.5"
@@ -676,7 +680,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                   </div>
                 )}
 
-                {playbook.prerequisites?.length > 0 && (
+                {safeStringArray(playbook.prerequisites).length > 0 && (
                   <div
                     style={{
                       border: "1px solid rgba(255,255,255,0.05)",
@@ -696,7 +700,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, adjac
                     >
                       Prerequisites
                     </div>
-                    {playbook.prerequisites.map((req, i) => (
+                    {safeStringArray(playbook.prerequisites).map((req: string, i: number) => (
                       <div
                         key={`${req}-${i}`}
                         className="flex items-start gap-2 py-1.5"
