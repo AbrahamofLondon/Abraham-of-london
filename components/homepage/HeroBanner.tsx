@@ -1,147 +1,160 @@
 "use client";
 
+/* components/homepage/HeroBanner.tsx
+   Design: Institutional Monumentalism — sharp panels, softGold, correct weights
+
+   Previous version had:
+   - rounded-full on every badge, signal card, and rail item hover
+   - rounded-[22px] on signal cards and floating support cards
+   - font-black/semibold throughout
+   - bg-[#F4EFE6] filled CTA (off-white) — wrong pattern
+   - "Index_1/DOC-01", "SEC-03", "PTR-04", "SIG-05" rail reference codes
+   - "Institutional OS", "Active Dossier", "Secure File // AOFL-09"
+   - "Status: Operational" — performed system status
+   - emerald-400 rounded-full pulsing live indicator
+   - Vertical perimeter lines flanking the entire page
+   - #0E0E12 — non-canonical token (close to but not LIFT)
+
+   Rebuilt: Left rail navigation, main title, right image block.
+   All invented classification codes removed. Sharp throughout.
+   Button import preserved — wraps the existing ui/Button component.
+*/
+
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Button from "@/components/ui/Button";
-import {
-  Terminal,
-  Shield,
-  ArrowRight,
-  ChevronRight,
-  FileText,
-  BriefcaseBusiness,
-  Sparkles,
-} from "lucide-react";
+import { Shield, ArrowRight, ChevronRight, FileText, BriefcaseBusiness, Sparkles } from "lucide-react";
+
+const GOLD = "#C9A96E";
+const LIFT = "rgb(10 14 20)";
 
 const RAIL_LINKS = [
-  { href: "/canon", label: "Canon", tag: "DOC-01", desc: "Doctrine & Method" },
-  { href: "/blog", label: "Essays", tag: "INT-02", desc: "Literary Intelligence" },
-  { href: "/vault/briefs", label: "Briefs", tag: "SEC-03", desc: "Vault Intelligence" },
-  { href: "/ventures", label: "Ventures", tag: "PTR-04", desc: "Execution Arms" },
-  { href: "/shorts", label: "Shorts", tag: "SIG-05", desc: "Short-form Signal" },
+  { href: "/canon",       label: "Canon",    desc: "Doctrine & method"        },
+  { href: "/blog",        label: "Essays",   desc: "Literary intelligence"    },
+  { href: "/vault/briefs",label: "Briefs",   desc: "Vault intelligence"       },
+  { href: "/ventures",    label: "Ventures", desc: "Execution arms"           },
+  { href: "/shorts",      label: "Shorts",   desc: "Short-form signal"        },
 ];
 
 const SIGNALS = [
-  {
-    label: "Doctrine",
-    value: "Canon",
-    icon: FileText,
-  },
-  {
-    label: "Execution",
-    value: "Ventures",
-    icon: BriefcaseBusiness,
-  },
-  {
-    label: "Intelligence",
-    value: "Vault",
-    icon: Shield,
-  },
+  { label: "Doctrine",     value: "Canon",    Icon: FileText        },
+  { label: "Execution",    value: "Ventures", Icon: BriefcaseBusiness },
+  { label: "Intelligence", value: "Vault",    Icon: Shield          },
 ];
 
-export const HeroBanner = ({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) => {
+export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   const { scrollY } = useScroll();
-
-  const yMain = useTransform(scrollY, [0, 600], [0, -48]);
+  const yMain  = useTransform(scrollY, [0, 600], [0, -48]);
   const yImage = useTransform(scrollY, [0, 600], [0, 34]);
-  const railY = useTransform(scrollY, [0, 600], [0, -18]);
+  const railY  = useTransform(scrollY, [0, 600], [0, -18]);
   const opacity = useTransform(scrollY, [0, 420], [1, 0.18]);
 
   const titleWords = React.useMemo(() => title.split(" "), [title]);
 
   return (
-    <section className="relative isolate min-h-screen overflow-hidden bg-[#05070B] pt-28 text-white lg:pt-36">
-      {/* Background foundation */}
+    <section
+      className="relative isolate min-h-screen overflow-hidden pt-28 text-white lg:pt-36"
+      style={{ backgroundColor: "rgb(6 6 9)" }}
+    >
+      {/* Background */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,106,0.12),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(201,169,106,0.07),transparent_20%),linear-gradient(180deg,#07090d_0%,#05070b_45%,#040508_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:72px_72px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%,transparent_82%,rgba(255,255,255,0.02))]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/45 to-transparent" />
+        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at top left, ${GOLD}08, transparent 30%), linear-gradient(180deg, rgb(6 6 9) 0%, rgb(6 6 9) 55%, rgb(3 3 5) 100%)` }} />
+        <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${GOLD}36, transparent)` }} />
       </div>
-
-      {/* Vertical perimeter lines */}
-      <div className="pointer-events-none absolute inset-y-0 left-6 hidden w-px bg-white/6 lg:block xl:left-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-6 hidden w-px bg-white/6 lg:block xl:right-10" />
 
       <motion.div
         style={{ opacity }}
         className="relative z-10 mx-auto max-w-[1600px] px-6 lg:px-10 2xl:px-14"
       >
-        {/* Top command bar */}
-        <div className="mb-10 flex flex-col gap-4 border-b border-white/8 pb-6 lg:mb-14 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#C9A96A]/30 bg-[#C9A96A]/8">
-              <Terminal className="h-4 w-4 text-[#D4B06A]" />
-            </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[#D4B06A]">
-                Institutional OS
-              </span>
-              <span className="hidden text-white/20 lg:inline">/</span>
-              <span className="text-[10px] uppercase tracking-[0.28em] text-white/38">
-                Strategic Architecture Platform
-              </span>
-            </div>
+        {/* Top bar */}
+        <div style={{
+          marginBottom: "3rem",
+          display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between",
+          gap: "1rem",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          paddingBottom: "1.5rem",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+              color: `${GOLD}BB`,
+            }}>
+              Institutional platform
+            </span>
+            <span style={{ color: "rgba(255,255,255,0.20)", margin: "0 0.25rem" }}>/</span>
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+              color: "rgba(255,255,255,0.45)",
+            }}>
+              Strategic architecture
+            </span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.24em] text-white/36">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Live Platform
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-              London
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-              2026 Edition
-            </span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+            {["London", "2026 Edition"].map((tag) => (
+              <span key={tag} style={{
+                display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                padding: "4px 12px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                backgroundColor: "rgba(255,255,255,0.018)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.45)",
+              }}>
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-14">
-          {/* Left rail */}
-          <motion.aside
-            style={{ y: railY }}
-            className="hidden lg:col-span-2 lg:flex"
-          >
-            <div className="flex w-full flex-col justify-between border-r border-white/8 pr-7 xl:pr-9">
+
+          {/* ── Left rail ──────────────────────────────────────────────── */}
+          <motion.aside style={{ y: railY }} className="hidden lg:col-span-2 lg:flex">
+            <div style={{
+              width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between",
+              borderRight: "1px solid rgba(255,255,255,0.08)", paddingRight: "1.75rem",
+            }}>
               <div>
-                <div className="mb-6">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/32">
-                    Navigation Index
-                  </p>
-                  <div className="mt-3 h-px w-16 bg-gradient-to-r from-[#C9A96A]/60 to-transparent" />
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.30)",
+                  }}>
+                    Navigation
+                  </span>
+                  <div style={{ marginTop: "0.6rem", height: "1px", width: "3rem", background: `linear-gradient(to right, ${GOLD}55, transparent)` }} />
                 </div>
 
-                <nav className="space-y-5" aria-label="Hero rail navigation">
-                  {RAIL_LINKS.map((item, idx) => (
-                    <Link
-                      key={item.tag}
-                      href={item.href}
-                      className="group block transition-transform duration-200 hover:translate-x-1"
-                    >
-                      <div className="mb-1 flex items-center gap-2 text-[9px] font-medium uppercase tracking-[0.22em] text-[#C9A96A]/60 group-hover:text-[#D4B06A]">
-                        <span>Index_{idx + 1}</span>
-                        <span className="text-white/18">/</span>
-                        <span>{item.tag}</span>
-                      </div>
-
-                      <div className="flex items-end justify-between gap-3">
-                        <h3 className="font-serif text-[1.65rem] leading-none tracking-tight text-white/92 transition-colors group-hover:text-[#F2E7D0]">
+                <nav style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }} aria-label="Hero rail navigation">
+                  {RAIL_LINKS.map((item) => (
+                    <Link key={item.href} href={item.href} className="group block transition-transform duration-200 hover:translate-x-0.5">
+                      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                        <span
+                          className="transition-colors duration-200 group-hover:[color:rgba(242,231,208,1)]"
+                          style={{
+                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                            fontWeight: 300, fontSize: "1.55rem", lineHeight: 1.0, letterSpacing: "-0.018em",
+                            color: "rgba(255,255,255,0.82)",
+                          }}
+                        >
                           {item.label}
-                        </h3>
-                        <ChevronRight className="h-4 w-4 translate-y-[-2px] text-white/18 transition-all group-hover:translate-x-0.5 group-hover:text-[#D4B06A]" />
+                        </span>
+                        <ChevronRight
+                          style={{ width: "13px", height: "13px", color: "rgba(255,255,255,0.15)", flexShrink: 0, marginBottom: "2px" }}
+                          className="transition-all group-hover:translate-x-0.5 group-hover:[color:rgba(201,169,110,0.75)]"
+                        />
                       </div>
-
-                      <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-white/24 group-hover:text-white/40">
+                      <p style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.28)",
+                      }} className="transition-colors group-hover:[color:rgba(255,255,255,0.50)]">
                         {item.desc}
                       </p>
                     </Link>
@@ -149,43 +162,55 @@ export const HeroBanner = ({
                 </nav>
               </div>
 
-              <div className="mt-10 border-t border-white/8 pt-5">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-white/30">
-                  Signal
-                </p>
-                <p className="mt-2 max-w-[15rem] text-sm leading-6 text-white/48">
+              <div style={{ marginTop: "2.5rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "1.25rem" }}>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.40)",
+                  maxWidth: "15rem",
+                }}>
                   Doctrine, intelligence, and execution under one operating frame.
                 </p>
               </div>
             </div>
           </motion.aside>
 
-          {/* Main content */}
-          <motion.div
-            style={{ y: yMain }}
-            className="lg:col-span-6 xl:col-span-6"
-          >
+          {/* ── Main content ───────────────────────────────────────────── */}
+          <motion.div style={{ y: yMain }} className="lg:col-span-6 xl:col-span-6">
             <div className="max-w-4xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C9A96A]/25 bg-[#C9A96A]/8 px-4 py-2">
-                <Sparkles className="h-3.5 w-3.5 text-[#D4B06A]" />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#D4B06A]">
+
+              {/* Platform eyebrow — sharp, no rounded-full */}
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: "0.6rem",
+                padding: "5px 14px",
+                border: `1px solid ${GOLD}25`,
+                backgroundColor: `${GOLD}08`,
+                marginBottom: "1.75rem",
+              }}>
+                <Sparkles style={{ width: "12px", height: "12px", color: `${GOLD}BB` }} />
+                <span style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px", letterSpacing: "0.30em", textTransform: "uppercase",
+                  color: `${GOLD}CC`,
+                }}>
                   Abraham of London
                 </span>
               </div>
 
-              <h1 className="max-w-5xl font-serif text-[3.3rem] font-medium leading-[0.92] tracking-[-0.04em] text-white sm:text-[4.5rem] md:text-[5.4rem] lg:text-[6.15rem] xl:text-[7rem]">
+              {/* Title */}
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "clamp(3rem, 7vw, 7rem)",
+                lineHeight: 0.92, letterSpacing: "-0.04em",
+                color: "rgba(255,255,255,0.95)",
+              }}>
                 {titleWords.map((word, i) => {
-                  const normalized = word.toLowerCase().replace(/[^\w]/g, "");
-                  const isLondon = normalized === "london";
-
+                  const norm = word.toLowerCase().replace(/[^\w]/g, "");
                   return (
                     <span
                       key={`${word}-${i}`}
-                      className={
-                        isLondon
-                          ? "font-light italic text-[#C9A96A]"
-                          : "text-white"
-                      }
+                      style={norm === "london" ? { fontStyle: "italic", color: GOLD } : {}}
                     >
                       {word}{" "}
                     </span>
@@ -193,175 +218,217 @@ export const HeroBanner = ({
                 })}
               </h1>
 
+              {/* Subtitle */}
               {subtitle && (
-                <div className="mt-8 max-w-2xl border-l border-[#C9A96A]/35 pl-6 lg:pl-8">
-                  <p className="text-lg leading-8 text-white/58 md:text-[1.18rem] md:leading-9">
+                <div style={{
+                  marginTop: "2rem",
+                  borderLeft: `1px solid ${GOLD}35`,
+                  paddingLeft: "1.5rem",
+                  maxWidth: "44ch",
+                }}>
+                  <p style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                    fontWeight: 300, fontSize: "1.18rem", lineHeight: 1.72,
+                    color: "rgba(255,255,255,0.72)",
+                  }}>
                     {subtitle}
                   </p>
                 </div>
               )}
 
-              {/* CTA lane */}
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+              {/* CTAs */}
+              <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                 <Button
                   href="/canon"
-                  className="group inline-flex items-center justify-center gap-3 rounded-none border border-[#C9A96A]/30 bg-[#F4EFE6] px-8 py-4 text-[11px] font-black uppercase tracking-[0.26em] text-black transition-all duration-200 hover:bg-[#C9A96A] hover:text-black"
+                  className="group inline-flex items-center justify-center gap-3 border px-8 py-4 font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-[0.26em] transition-all duration-200"
+                  style={{ borderColor: `${GOLD}38`, backgroundColor: "rgba(255,255,255,0.94)", color: "rgb(6 6 9)" }}
                 >
                   Explore Canon
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
 
                 <Button
                   href="/vault"
-                  className="group inline-flex items-center justify-center gap-3 rounded-none border border-white/12 bg-white/[0.04] px-8 py-4 text-[11px] font-black uppercase tracking-[0.26em] text-white transition-all duration-200 hover:border-[#C9A96A]/40 hover:bg-white/[0.07]"
+                  className="group inline-flex items-center justify-center gap-3 border border-white/[0.09] px-8 py-4 font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-[0.26em] text-white/75 transition-all duration-200 hover:border-white/[0.18] hover:text-white"
+                  style={{ backgroundColor: LIFT }}
                 >
-                  <Shield className="h-4 w-4 text-[#D4B06A]" />
+                  <Shield className="h-4 w-4" style={{ color: `${GOLD}BB` }} />
                   Open Vault
                 </Button>
 
                 <Button
                   href="/ventures"
-                  className="group inline-flex items-center justify-center gap-3 rounded-none border border-white/10 bg-transparent px-8 py-4 text-[11px] font-black uppercase tracking-[0.26em] text-white/78 transition-all duration-200 hover:border-white/20 hover:text-white"
+                  className="inline-flex items-center justify-center gap-3 border border-white/[0.07] bg-transparent px-8 py-4 font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-[0.26em] text-white/60 transition-all duration-200 hover:border-white/[0.14] hover:text-white/85"
                 >
                   Strategic Ventures
                 </Button>
               </div>
 
-              {/* Metrics / signal row */}
-              <div className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {SIGNALS.map((item) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <div
-                      key={item.label}
-                      className="group rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4 backdrop-blur-sm transition-all duration-200 hover:border-[#C9A96A]/20 hover:bg-white/[0.045]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-4 w-4 text-[#D4B06A]" />
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/34">
-                          {item.label}
-                        </span>
-                      </div>
-                      <p className="mt-3 font-serif text-2xl text-white/92">
-                        {item.value}
-                      </p>
+              {/* Signal row — sharp tiles */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 mt-10">
+                {SIGNALS.map(({ label, value, Icon }) => (
+                  <div
+                    key={label}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      backgroundColor: LIFT,
+                      padding: "1rem 1.25rem",
+                      transition: "border-color 300ms ease",
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.borderColor = `${GOLD}22`}
+                    onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.07)"}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.65rem" }}>
+                      <Icon style={{ width: "13px", height: "13px", color: `${GOLD}AA` }} />
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.38)",
+                      }}>
+                        {label}
+                      </span>
                     </div>
-                  );
-                })}
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1.5rem", lineHeight: 1.0,
+                      color: "rgba(255,255,255,0.85)",
+                    }}>
+                      {value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </motion.div>
 
-          {/* Right visual command block */}
-          <motion.div
-            style={{ y: yImage }}
-            className="lg:col-span-4 xl:col-span-4"
-          >
+          {/* ── Right image block ──────────────────────────────────────── */}
+          <motion.div style={{ y: yImage }} className="lg:col-span-4 xl:col-span-4">
             <div className="relative mx-auto max-w-[34rem] lg:mx-0">
-              <div className="relative overflow-hidden border border-white/10 bg-[#0A0D12] shadow-[0_30px_80px_rgba(0,0,0,0.38)]">
-                <div className="absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-[#C9A96A]/45 to-transparent" />
 
-                <div className="relative aspect-[4/5]">
+              {/* Main image panel */}
+              <div
+                className="relative overflow-hidden"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backgroundColor: LIFT,
+                  boxShadow: "0 32px 84px rgba(0,0,0,0.52)",
+                }}
+              >
+                <div className="absolute inset-x-0 top-0 z-20 h-px" style={{ background: `linear-gradient(to right, transparent, ${GOLD}45, transparent)` }} />
+
+                <div className="relative" style={{ aspectRatio: "4/5" }}>
                   <Image
                     src="/assets/images/abraham-of-london-banner.webp"
                     alt="Abraham of London institutional portrait"
-                    fill
-                    priority
-                    className="object-cover object-center opacity-[0.84]"
+                    fill priority
+                    className="object-cover object-center"
+                    style={{ opacity: 0.84 }}
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0.28)_40%,rgba(0,0,0,0.66)_100%)]" />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
-                  <div className="absolute inset-[18px] border border-white/8" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.16) 40%, rgba(0,0,0,0.60) 100%)" }} />
+                  <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.09)" }} />
+                  {/* Inner frame — decorative precision border */}
+                  <div className="absolute inset-[18px]" style={{ border: "1px solid rgba(255,255,255,0.09)" }} />
                 </div>
 
-                {/* Top file strip */}
-                <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 backdrop-blur-md">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/72">
-                    Active Dossier
-                  </span>
+                {/* Platform label — top left */}
+                <div style={{
+                  position: "absolute", top: "1.25rem", left: "1.25rem", zIndex: 20,
+                  display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                  padding: "4px 12px",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backgroundColor: "rgba(6,6,9,0.92)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.70)",
+                }}>
+                  Selected works
                 </div>
 
-                {/* Bottom command card */}
-                <div className="absolute inset-x-0 bottom-0 z-20 p-5">
-                  <div className="border border-white/10 bg-black/58 p-4 backdrop-blur-md">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.22em] text-[#D4B06A]">
-                          Secure File // AOFL-09
-                        </p>
-                        <h3 className="mt-2 font-serif text-2xl leading-tight text-white">
-                          Strategic leadership,
-                          <br />
-                          doctrine, and execution.
-                        </h3>
-                      </div>
-
-                      <div className="hidden shrink-0 border-l border-white/10 pl-4 sm:block">
-                        <p className="text-[10px] uppercase tracking-[0.22em] text-white/30">
-                          Status
-                        </p>
-                        <p className="mt-2 text-sm text-white/72">Operational</p>
-                      </div>
+                {/* Bottom card */}
+                <div style={{ position: "absolute", inset: 0, bottom: 0, top: "auto", zIndex: 20, padding: "1.25rem" }}>
+                  <div style={{
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    backgroundColor: "rgba(6,6,9,0.92)",
+                    padding: "1rem 1.25rem",
+                    display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem",
+                  }}>
+                    <div>
+                      <p style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        color: `${GOLD}AA`, marginBottom: "0.5rem",
+                      }}>
+                        Platform
+                      </p>
+                      <h3 style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300, fontSize: "1.22rem", lineHeight: 1.15,
+                        color: "rgba(255,255,255,0.88)",
+                      }}>
+                        Strategic leadership,<br />doctrine, and execution.
+                      </h3>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Floating support card */}
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/34">
-                    Position
-                  </p>
-                  <p className="mt-2 font-serif text-xl text-white/92">
-                    Advisory-led platform
-                  </p>
-                </div>
-
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/34">
-                    Mandate
-                  </p>
-                  <p className="mt-2 font-serif text-xl text-white/92">
-                    Build what endures
-                  </p>
-                </div>
+              {/* Two support tiles — sharp, no rounded */}
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                {[
+                  { label: "Position", value: "Advisory-led platform" },
+                  { label: "Mandate",  value: "Build what endures"    },
+                ].map((item) => (
+                  <div key={item.label} style={{
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    backgroundColor: LIFT,
+                    padding: "0.85rem 1rem",
+                  }}>
+                    <p style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.32)", marginBottom: "0.35rem",
+                    }}>
+                      {item.label}
+                    </p>
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.15,
+                      color: "rgba(255,255,255,0.78)",
+                    }}>
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Lower command strip */}
-        <div className="mt-14 border-t border-white/8 pt-6 lg:mt-16">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D4B06A]">
-                Doctrine
-              </p>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-white/50">
-                Structured thought, articulated principles, and written architecture.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D4B06A]">
-                Intelligence
-              </p>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-white/50">
-                Essays, briefs, and distilled signals for leaders and builders.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D4B06A]">
-                Execution
-              </p>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-white/50">
-                Ventures, systems, and strategic assets designed for durable impact.
-              </p>
-            </div>
+        {/* Lower three-column strip */}
+        <div style={{ marginTop: "3.5rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "1.5rem" }}>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              { label: "Doctrine",     body: "Structured thought, articulated principles, and written architecture." },
+              { label: "Intelligence", body: "Essays, briefs, and distilled signals for leaders and builders."       },
+              { label: "Execution",    body: "Ventures, systems, and strategic assets designed for durable impact."  },
+            ].map((col) => (
+              <div key={col.label}>
+                <p style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                  color: `${GOLD}BB`, marginBottom: "0.6rem",
+                }}>
+                  {col.label}
+                </p>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                  fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.68,
+                  color: "rgba(255,255,255,0.50)",
+                }}>
+                  {col.body}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </motion.div>

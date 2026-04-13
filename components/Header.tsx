@@ -147,7 +147,7 @@ export default function Header({
         className={cn(
           "fixed inset-x-0 top-0 z-[100] w-full transition-all duration-500",
           elevated
-            ? "border-b border-white/[0.06] bg-black/80 py-3.5 backdrop-blur-xl"
+            ? "border-b border-white/[0.12] bg-[#060609]/95 py-3.5"
             : "bg-transparent py-5",
         )}
       >
@@ -159,14 +159,14 @@ export default function Header({
             aria-label="Abraham of London — home"
             className="group inline-flex shrink-0 items-center gap-4"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/[0.10] bg-white/[0.04] transition-all duration-300 group-hover:border-white/[0.18] group-hover:bg-white/[0.07]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/[0.14] bg-[#0E0E12] transition-all duration-300 group-hover:border-white/[0.22] group-hover:bg-[#121216]">
               <div className="h-3.5 w-3.5" style={{ backgroundColor: `${GOLD}CC` }} />
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="font-['Cormorant_Garamond',Georgia,serif] text-[1.05rem] font-light italic leading-none tracking-[-0.01em] text-white/90 transition-colors group-hover:text-white">
                 Abraham of London
               </span>
-              <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/22 md:block">
+              <span className="hidden font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.32em] text-white/38 md:block">
                 Strategy · Canon · Library
               </span>
             </div>
@@ -191,8 +191,8 @@ export default function Header({
                         active
                           ? "text-[#C9A96E]"
                           : item.signal
-                            ? "text-white/48 hover:text-white/72"
-                            : "text-white/38 hover:text-white/65",
+                            ? "text-white/64 hover:text-white/82"
+                            : "text-white/58 hover:text-white/82",
                       )}
                       style={active ? { color: GOLD } : {}}
                     >
@@ -218,7 +218,7 @@ export default function Header({
             {/* Strategy Room — desktop */}
             <Link
               href="/consulting/strategy-room"
-              className="hidden items-center gap-2 border border-white/[0.07] bg-white/[0.02] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/35 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-white/58 md:inline-flex"
+              className="hidden items-center gap-2 border border-white/[0.14] bg-[#0E0E12] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/62 transition-all duration-300 hover:border-white/[0.22] hover:bg-[#121216] hover:text-white md:inline-flex"
             >
               <Crown className="h-3 w-3" style={{ color: `${GOLD}90` }} />
               Strategy Room
@@ -228,7 +228,7 @@ export default function Header({
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
-              className="flex h-10 w-10 items-center justify-center border border-white/[0.08] bg-white/[0.02] text-white/65 transition-all duration-300 hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white"
+              className="flex h-10 w-10 items-center justify-center border border-white/[0.14] bg-[#0E0E12] text-white/82 transition-all duration-300 hover:border-white/[0.22] hover:bg-[#121216] hover:text-white"
               aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
               aria-controls="site-mobile-menu"

@@ -28,16 +28,16 @@ const ICONS: Record<AssessmentId, React.ComponentType<{ style?: React.CSSPropert
 
 function stepConfig(isFlagship: boolean) {
   if (isFlagship) return {
-    border:     `${GOLD}28`, borderHover: `${GOLD}50`,
-    iconColor:  `${GOLD}AA`, numColor: `${GOLD}20`,
-    badgeBorder:`${GOLD}22`, badgeBg: `${GOLD}08`, badgeText: `${GOLD}CC`,
+    border:     `${GOLD}32`, borderHover: `${GOLD}54`,
+    iconColor:  `${GOLD}AA`, numColor: `${GOLD}36`,
+    badgeBorder:`${GOLD}24`, badgeBg: "rgb(14 14 18)", badgeText: `${GOLD}CC`,
     ctaColor:   `${GOLD}BB`, ctaHover: GOLD,
   };
   return {
-    border:     "rgba(255,255,255,0.062)", borderHover: "rgba(255,255,255,0.120)",
-    iconColor:  "rgba(255,255,255,0.45)", numColor: "rgba(255,255,255,0.08)",
-    badgeBorder:"rgba(255,255,255,0.09)", badgeBg: "rgba(255,255,255,0.02)", badgeText: "rgba(255,255,255,0.38)",
-    ctaColor:   "rgba(255,255,255,0.40)", ctaHover: "rgba(255,255,255,0.70)",
+    border:     "rgba(255,255,255,0.14)", borderHover: "rgba(255,255,255,0.22)",
+    iconColor:  "rgba(255,255,255,0.64)", numColor: "rgba(255,255,255,0.18)",
+    badgeBorder:"rgba(255,255,255,0.14)", badgeBg: "rgb(14 14 18)", badgeText: "rgba(255,255,255,0.58)",
+    ctaColor:   "rgba(255,255,255,0.72)", ctaHover: "rgba(255,255,255,0.92)",
   };
 }
 
@@ -60,7 +60,7 @@ export default function AssessmentSuiteLadder() {
               className="group relative flex flex-col overflow-hidden"
               style={{
                 border:          `1px solid ${isHovered ? cfg.borderHover : cfg.border}`,
-                backgroundColor: "rgb(5 5 7)",
+                backgroundColor: "rgb(14 14 18)",
                 transform:       isHovered ? "translateY(-2px)" : "translateY(0)",
                 transition:      "border-color 300ms ease, transform 300ms ease, box-shadow 300ms ease",
                 boxShadow:       isHovered ? "0 20px 60px -20px rgba(0,0,0,0.65)" : "none",
@@ -70,7 +70,7 @@ export default function AssessmentSuiteLadder() {
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${GOLD}30, transparent)`, opacity: isHovered ? 1 : 0, transition: "opacity 300ms ease" }} />
 
               {/* Flagship ambient */}
-              {isFlagship && <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse at top right, ${GOLD}06, transparent 60%)` }} />}
+              {isFlagship && <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse at top right, ${GOLD}03, transparent 60%)` }} />}
 
               <div className="relative z-10 flex flex-1 flex-col" style={{ padding: "1.75rem 2rem" }}>
 
@@ -79,7 +79,7 @@ export default function AssessmentSuiteLadder() {
                   <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "2.8rem", lineHeight: 1, letterSpacing: "-0.04em", color: cfg.numColor, transition: "color 300ms ease" }}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div style={{ width: "38px", height: "38px", border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", display: "flex", alignItems: "center", justifyContent: "center", transition: "border-color 300ms ease" }}>
+                  <div style={{ width: "38px", height: "38px", border: "1px solid rgba(255,255,255,0.14)", backgroundColor: "rgb(10 10 14)", display: "flex", alignItems: "center", justifyContent: "center", transition: "border-color 300ms ease" }}>
                     <Icon style={{ width: "18px", height: "18px", color: cfg.iconColor }} />
                   </div>
                 </div>
@@ -97,18 +97,18 @@ export default function AssessmentSuiteLadder() {
                 </h3>
 
                 {/* Strapline */}
-                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65, color: "rgba(255,255,255,0.38)", flex: 1, marginBottom: "1.25rem" }}>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65, color: "rgba(255,255,255,0.72)", flex: 1, marginBottom: "1.25rem" }}>
                   {item.strapline}
                 </p>
 
                 {/* Divider */}
-                <div style={{ height: "1px", background: "linear-gradient(to right, rgba(255,255,255,0.06), transparent)", marginBottom: "1rem" }} />
+                <div style={{ height: "1px", background: "linear-gradient(to right, rgba(255,255,255,0.14), transparent)", marginBottom: "1rem" }} />
 
                 {/* Output */}
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.35rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", marginBottom: "0.35rem" }}>
                   Output
                 </div>
-                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)", marginBottom: "1.25rem" }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.55, color: "rgba(255,255,255,0.68)", marginBottom: "1.25rem" }}>
                   {item.output}
                 </div>
 
@@ -120,18 +120,18 @@ export default function AssessmentSuiteLadder() {
               </div>
 
               {/* Bottom shimmer */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent)" }} />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.10), transparent)" }} />
             </Link>
           );
         })}
       </div>
 
       <div className="flex items-center justify-center gap-4 mt-8">
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent)" }} />
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)" }} />
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
           Each layer hands signal to the next without rework
         </span>
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent)" }} />
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)" }} />
       </div>
     </div>
   );
