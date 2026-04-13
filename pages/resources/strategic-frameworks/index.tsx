@@ -98,7 +98,7 @@ function requiredTierFromFramework(fw: Framework): AccessTier {
   if (set.has("architect") || set.has("founder") || set.has("board")) return "architect";
   if (set.has("legacy")) return "legacy";
   if (set.has("client")) return "client";
-  if (set.has("inner-circle") || set.has("inner circle")) return "inner-circle";
+  if (set.has("inner-circle") || set.has("inner circle") || set.has("inner_circle")) return "inner_circle";
   if (set.has("member")) return "member";
   return "public";
 }
@@ -245,7 +245,7 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({ frameworks, categ
   }, [frameworks, searchQuery, selectedCategory]);
 
   const activeDirective = React.useMemo(() => {
-    return TIER_DIRECTIVES[selectedCategory] || null;
+    return (TIER_DIRECTIVES as Record<string, import("@/lib/resources/tier-metadata").TierDirective | undefined>)[selectedCategory] ?? null;
   }, [selectedCategory]);
 
   return (

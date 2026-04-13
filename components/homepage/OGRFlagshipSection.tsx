@@ -404,7 +404,7 @@ export default function OGRFlagshipSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6 }}
                 >
-                  <PathCard item={SUPPORT_PATHS[0]} />
+                  <PathCard item={SUPPORT_PATHS[0]!} />
                 </motion.div>
 
                 <motion.div
@@ -413,7 +413,7 @@ export default function OGRFlagshipSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.08 }}
                 >
-                  <PathCard item={SUPPORT_PATHS[1]} />
+                  <PathCard item={SUPPORT_PATHS[1]!} />
                 </motion.div>
               </div>
             </div>
@@ -426,7 +426,7 @@ export default function OGRFlagshipSection() {
                 transition={{ duration: 0.65, delay: 0.12 }}
                 className="h-full"
               >
-                <PathCard item={SUPPORT_PATHS[2]} />
+                <PathCard item={SUPPORT_PATHS[2]!} />
               </motion.div>
             </div>
           </div>

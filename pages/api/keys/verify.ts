@@ -66,13 +66,13 @@ export default async function handler(
         prisma.systemAuditLog.deleteMany({
           where: {
             createdAt: { lt: cutoff },
-            severity: { in: ["info", "warning"] },
+            severity: { in: ["info", "warn"] },
           },
         }),
         prisma.securityLog.deleteMany({
           where: {
             createdAt: { lt: cutoff },
-            severity: { in: ["info", "warning"] },
+            severity: { in: ["info", "warn"] },
           },
         }),
         prisma.apiLog.deleteMany({

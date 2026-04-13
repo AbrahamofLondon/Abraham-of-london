@@ -538,7 +538,6 @@ const ShortsSlugPage: NextPage<Props> = ({
       description={description}
       fullWidth
       headerTransparent={false}
-      minimalHeader
       showFooter
       enableVaultSearch={false}
     >
@@ -639,7 +638,10 @@ const ShortsSlugPage: NextPage<Props> = ({
             </div>
 
             <div className="mx-auto max-w-3xl px-6 py-8">
-              <ShortNavigation prevSlug={prevShort?.slug} nextSlug={nextShort?.slug} />
+              <ShortNavigation
+                previousShort={prevShort ? { id: prevShort.slug, title: prevShort.title, slug: prevShort.slug } : undefined}
+                nextShort={nextShort ? { id: nextShort.slug, title: nextShort.title, slug: nextShort.slug } : undefined}
+              />
             </div>
           </>
         ) : null}
@@ -650,7 +652,19 @@ const ShortsSlugPage: NextPage<Props> = ({
               <h2 className="mb-8 text-center font-serif text-xl text-white/40">
                 More Shorts
               </h2>
-              <RelatedShorts shorts={relatedShorts} />
+              <RelatedShorts
+                shorts={relatedShorts.map((s) => ({
+                  id: s.slug,
+                  title: s.title,
+                  excerpt: s.excerpt ?? "",
+                  duration: "",
+                  category: "",
+                  viewCount: 0,
+                  image: "",
+                  slug: s.slug,
+                }))}
+                currentShortId={canonicalSlug}
+              />
             </div>
           </div>
         ) : null}

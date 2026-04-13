@@ -39,11 +39,11 @@ export async function POST(req: Request) {
         organisation,
         dependencyLevel: dependencyLevel || "unknown",
         volatility: volatility || "unknown",
-        payload: {
+        payload: JSON.stringify({
           ...safeBody,
           source: safeBody.source || "strategy_room_submit_app",
           submittedAt: new Date().toISOString(),
-        },
+        }),
         emailHash,
       },
     });

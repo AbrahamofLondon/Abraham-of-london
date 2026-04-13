@@ -203,15 +203,15 @@ function splitJudgementText(value: string): { main: string; tail: string } {
 
   if (separatorMatch) {
     return {
-      main: capitalizeFirst(separatorMatch[1].trim()),
-      tail: capitalizeFirst(separatorMatch[2].trim()),
+      main: capitalizeFirst((separatorMatch[1] ?? "").trim()),
+      tail: capitalizeFirst((separatorMatch[2] ?? "").trim()),
     };
   }
 
   const sentences = clean.split(/(?<=[.!?])\s+/).filter(Boolean);
-  if (sentences.length > 1 && sentences[0].length > 36) {
+  if (sentences.length > 1 && (sentences[0] ?? "").length > 36) {
     return {
-      main: capitalizeFirst(sentences[0]),
+      main: capitalizeFirst(sentences[0] ?? ""),
       tail: sentences.slice(1).join(" "),
     };
   }
@@ -263,7 +263,7 @@ export const KeyJudgementsPanel: React.FC<Props> = ({
           return (
             <View
               key={`${index}-${item.slice(0, 28)}`}
-              style={[styles.row, index === 0 ? styles.firstRow : undefined]}
+              style={index === 0 ? [styles.row, styles.firstRow] : styles.row}
             >
               <View style={styles.indexWrap}>
                 <Text style={styles.index}>

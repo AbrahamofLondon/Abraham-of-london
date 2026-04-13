@@ -202,7 +202,7 @@ function normalizeFrameworkTiers(input: unknown): ContentTier[] {
   const allowed = new Set<ContentTier>([
     "public",
     "member",
-    "inner-circle",
+    "inner_circle",
     "client",
     "legacy",
     "architect",
@@ -212,7 +212,7 @@ function normalizeFrameworkTiers(input: unknown): ContentTier[] {
   if (!Array.isArray(input) || input.length === 0) return ["public"];
   const normalized = input
     .map((v) => String(v).trim().toLowerCase())
-    .map((v) => (v === "inner_circle" ? "inner-circle" : v))
+    .map((v) => (v === "inner-circle" ? "inner_circle" : v))
     .filter((v): v is ContentTier => allowed.has(v as ContentTier));
   return normalized.length > 0 ? Array.from(new Set(normalized)) : ["public"];
 }
@@ -274,10 +274,10 @@ async function writeAudit(params: {
       data: {
         slug: params.slug,
         title: params.title ?? undefined,
-        contentType: DownloadContentType.FRAMEWORK,
+        contentType: DownloadContentType.ASSET,
         eventType:
           params.success ? DownloadEventType.DOWNLOAD : DownloadEventType.PREVIEW,
-        deliveryMode: DownloadDeliveryMode.INLINE,
+        deliveryMode: DownloadDeliveryMode.DIRECT,
 
         frameworkId: params.frameworkId ?? undefined,
         memberId: params.ctx.memberId ?? undefined,
@@ -300,9 +300,9 @@ async function writeAudit(params: {
         errorCode: params.errorCode ?? undefined,
         errorDetail: params.errorDetail ?? undefined,
 
-        metadata: {
+        metadata: JSON.stringify({
           route: "pages/api/private/frameworks/[slug]",
-        },
+        }),
       },
     });
   } catch (error) {

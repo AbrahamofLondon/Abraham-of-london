@@ -4,16 +4,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
-import type { AoLTier } from '@/types/next-auth';
+import type { AccessTier } from '@/lib/access/tier-policy';
 
 /**
  * LOCAL TYPE OVERRIDE
  * Ensures the 'aol' property is recognized on the Session object
  * during strict build-time type checking.
  */
-interface ExtendedSession extends Session {
+type ExtendedSession = Session & {
   aol?: {
-    tier: AoLTier;
+    tier: AccessTier;
     innerCircleAccess: boolean;
     isInternal: boolean;
     allowPrivate: boolean;
@@ -21,14 +21,14 @@ interface ExtendedSession extends Session {
     emailHash?: string | null;
     flags?: string[];
   };
-}
+};
 
 interface AuthContextType {
   user: any | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   aol?: ExtendedSession['aol'];
-  tier: AoLTier;
+  tier: AccessTier;
   innerCircleAccess: boolean;
   isInternal: boolean;
   allowPrivate: boolean;
@@ -99,7 +99,7 @@ export const useAuth = () => {
 
 // --- Strategic Helper Hooks ---
 
-export const useTier = (): AoLTier => {
+export const useTier = (): AccessTier => {
   const { tier } = useAuth();
   return tier;
 };

@@ -4,6 +4,7 @@ import * as React from "react";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import AccessGate from "@/components/AccessGate";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
+import type { AccessTier } from "@/lib/access/tier-policy";
 
 type ClientUnlockRendererProps = {
   initialCode: string | null;
@@ -32,7 +33,7 @@ function buildDefaultEndpoint(slug: string): string {
   const s = normalizeSlug(slug);
   if (!s) return "/api/content";
 
-  const [head, ...rest] = s.split("/");
+  const [head = "", ...rest] = s.split("/");
   const tail = rest.join("/");
 
   switch (head.toLowerCase()) {
@@ -125,8 +126,8 @@ export default function ClientUnlockRenderer({
     return (
       <div>
         <AccessGate
-          title={title}
-          requiredTier={requiredTier}
+          title={title ?? ""}
+          requiredTier={requiredTier as AccessTier}
           onUnlocked={unlock}
           message={message}
           onGoToJoin={onGoToJoin}

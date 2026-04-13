@@ -52,12 +52,12 @@ function parseKeyValueLine(
   line: string,
 ): { key: string; value: string } | null {
   const match = line.match(/^([A-Za-z0-9 _-]+)\s*:\s*(.+)$/);
-  return match
-    ? {
-        key: match[1].trim().toLowerCase(),
-        value: match[2].trim(),
-      }
-    : null;
+  if (!match) return null;
+  const [, rawKey = "", rawValue = ""] = match;
+  return {
+    key: rawKey.trim().toLowerCase(),
+    value: rawValue.trim(),
+  };
 }
 
 function isBlank(line: string): boolean {
@@ -253,10 +253,11 @@ export function parseBriefBody(content: string): ParsedBriefDocument {
 
     const headingMatch = line.match(/^(#{1,3})\s+(.*)/);
     if (headingMatch) {
+      const [, hashes = "", headingText = ""] = headingMatch;
       blocks.push({
         type: "heading",
-        level: headingMatch[1].length as 1 | 2 | 3,
-        text: clampText(headingMatch[2], 240),
+        level: hashes.length as 1 | 2 | 3,
+        text: clampText(headingText, 240),
       });
       i++;
       continue;

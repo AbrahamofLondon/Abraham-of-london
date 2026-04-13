@@ -41,13 +41,13 @@ const ContactFormContent = ({
     try {
       const gRecaptchaToken = await executeRecaptcha("contact_form");
       const formData = new FormData(event.currentTarget);
-      const payload = {
+      const payload: Record<string, unknown> & { gRecaptchaToken: string } = {
         ...Object.fromEntries(formData.entries()),
         gRecaptchaToken,
       };
 
       // Honeypot protection
-      if (payload.website || payload.middleName) {
+      if (payload["website"] || payload["middleName"]) {
         // Silently fail for bots
         setSubmitStatus('success');
         return;
@@ -85,8 +85,8 @@ const ContactFormContent = ({
               </div>
               <div>
                 <h3 className={`font-semibold mb-1 ${primaryTextClass}`}>Email</h3>
-                <a href={`mailto:${siteConfig.email}`} className={`hover:underline transition-colors ${accentTextClass}`}>
-                  {siteConfig.email}
+                <a href={`mailto:${siteConfig.contact?.email ?? ""}`} className={`hover:underline transition-colors ${accentTextClass}`}>
+                  {siteConfig.contact?.email ?? ""}
                 </a>
               </div>
             </div>

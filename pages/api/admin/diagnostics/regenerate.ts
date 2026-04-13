@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  const job = await enqueue({
+  const jobId = enqueue({
     type: "report.regenerate",
     payload: { artifactId: targetArtifactId, diagnosticRef },
     maxAttempts: 5,
@@ -35,8 +35,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     diagnosticRef,
     action: "regeneration_queued",
     actor: "admin",
-    metadata: { jobId: job.id, artifactId: targetArtifactId },
+    metadata: { jobId, artifactId: targetArtifactId },
   });
 
-  return res.json({ ok: true, jobId: job.id });
+  return res.json({ ok: true, jobId });
 }

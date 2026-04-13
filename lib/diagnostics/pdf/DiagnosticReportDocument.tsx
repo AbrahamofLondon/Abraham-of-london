@@ -61,7 +61,7 @@ export default function DiagnosticReportDocument({
           <Text style={styles.row}>Score: {record.score}%</Text>
           <Text style={styles.row}>Severity: {record.severity}</Text>
           <Text style={styles.row}>Verdict: {record.verdict}</Text>
-          <Text style={styles.row}>Created: {new Date(record.createdAt).toLocaleString("en-GB")}</Text>
+          <Text style={styles.row}>Created: {record.createdAt ? new Date(record.createdAt).toLocaleString("en-GB") : "N/A"}</Text>
         </View>
 
         <View style={styles.section}>

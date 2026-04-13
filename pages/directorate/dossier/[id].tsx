@@ -383,7 +383,7 @@ export const getServerSideProps: GetServerSideProps<DossierProps> = async (
 
   const prisma = prismaModule.default ?? prismaModule.prisma;
 
-  const rawIntake = await prisma.strategyRoomIntake.findUnique({
+  const rawIntake = await prisma.strategyIntake.findUnique({
     where: { id },
     select: {
       id: true,

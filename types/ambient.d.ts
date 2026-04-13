@@ -6,6 +6,12 @@
 declare module "@/lib/siteConfig" {
   export type SocialLink = { label: string; href: string; external?: boolean };
 
+  export type ContactInfo = {
+    email: string;
+    phone: string;
+    address?: string;
+  };
+
   export type SiteConfig = {
     siteUrl: string;
     title?: string;
@@ -15,9 +21,11 @@ declare module "@/lib/siteConfig" {
     ogImage?: string;
     twitterImage?: string;
     socialLinks?: SocialLink[];
+    contact?: ContactInfo;
   };
 
   export const siteConfig: SiteConfig;
+  export const contact: ContactInfo;
   export function absUrl(path: string): string;
   export function getPageTitle(pageTitle?: string): string;
 }

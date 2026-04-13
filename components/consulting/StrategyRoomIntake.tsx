@@ -244,17 +244,35 @@ URGENCY: ${form.urgencyWindow} | Market Exposure: ${form.marketExposure}
 Board Involvement: ${form.boardInvolvement}
   `;
 
+  const urgencyScore = profile.urgencyScore;
+  const consequenceScore = profile.consequenceScore;
+  const clarityScore = Math.round((urgencyScore + consequenceScore) / 2);
+
+  let authorityType: import("@/lib/constitution/rules").AuthorityType = "UNCLEAR";
+  if (profile.authorityClarity === "high") authorityType = "DIRECT";
+  else if (profile.authorityClarity === "moderate") authorityType = "PROXY";
+  else authorityType = "UNCLEAR";
+
+  let readinessTier: import("@/lib/constitution/rules").ReadinessTier = "FRAGILE";
+  if (clarityScore >= 80) readinessTier = "SOVEREIGN";
+  else if (clarityScore >= 60) readinessTier = "EXECUTION_READY";
+  else if (clarityScore >= 40) readinessTier = "STABILIZING";
+  else if (clarityScore >= 20) readinessTier = "EMERGING";
+
+  let posture: import("@/lib/constitution/rules").OrgPosture = "ORDERED";
+  if (consequenceScore >= 80) posture = "DISORDERED";
+  else if (consequenceScore >= 60) posture = "MISALIGNED";
+  else if (consequenceScore >= 40) posture = "DRIFTING";
+
   return {
-    mandateText,
-    role: form.authorityRole,
-    jurisdiction: "international",
-    organisationType: form.sector === "sovereign" ? "sovereign" : "corporation",
-    annualRevenueBand: form.revenueBand,
-    authorityClarity: profile.authorityClarity,
-    urgencyScore: profile.urgencyScore,
-    consequenceScore: profile.consequenceScore,
-    governanceInvolvement: profile.governanceInvolvement,
-    constraintClarity: profile.constraintClarity,
+    clarityScore,
+    authorityType,
+    readinessTier,
+    posture,
+    failureModeCount: 0,
+    failureModeSeverity: Math.floor((100 - clarityScore) / 10),
+    narrativeCoherence: clarityScore,
+    interventionReadiness: clarityScore,
   };
 }
 

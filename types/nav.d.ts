@@ -37,18 +37,6 @@ declare interface Pagination {
   hasPrev: boolean;
 }
 
-// Router types for Next.js navigation
-declare module "next/navigation" {
-  export interface useRouter {
-    push: (href: string) => void;
-    replace: (href: string) => void;
-    back: () => void;
-    forward: () => void;
-    refresh: () => void;
-    prefetch: (href: string) => void;
-  }
-}
-
 // Extended Document for navigation helpers
 declare interface Document {
   nav?: {

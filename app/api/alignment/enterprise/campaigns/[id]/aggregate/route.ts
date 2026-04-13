@@ -1,10 +1,9 @@
-export const dynamic = "force-dynamic";
-import { NextRequest, NextResponse } from "next/server";
-
 // Force dynamic rendering — prevents Next.js from trying to statically
 // analyze/execute this route at build time, which crashes because the
 // enterprise-aggregation chain imports PrismaClient which needs DATABASE_URL.
 export const dynamic = "force-dynamic";
+
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,

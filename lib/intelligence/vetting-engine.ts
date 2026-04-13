@@ -85,21 +85,28 @@ export async function vetStrategyInquiry(inquiryId: string) {
 
   const { priorityScore, recommendedStatus } = computeVetting(inquiry.email, inquiry.intent);
 
-  const existingMeta =
-    inquiry.metadata && typeof inquiry.metadata === "object"
-      ? (inquiry.metadata as Record<string, unknown>)
-      : {};
+  let existingMeta: Record<string, unknown> = {};
+  if (typeof inquiry.metadata === "string" && inquiry.metadata) {
+    try {
+      const parsed = JSON.parse(inquiry.metadata);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        existingMeta = parsed as Record<string, unknown>;
+      }
+    } catch {
+      // ignore malformed metadata; start fresh
+    }
+  }
 
   const updatedInquiry = await prisma.strategyInquiry.update({
     where: { id: inquiryId },
     data: {
       status: recommendedStatus,
-      metadata: {
+      metadata: JSON.stringify({
         ...existingMeta,
         priorityScore,
         vettedAt: new Date().toISOString(),
         analysisVersion: "V5-INTEGRATED",
-      },
+      }),
     },
   });
 

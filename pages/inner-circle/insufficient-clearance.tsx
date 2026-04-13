@@ -176,7 +176,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     
     await auditLogger.log({
       action: isLockdown ? "LOCKDOWN_INTERCEPT" : "ACCESS_DENIED",
-      severity: isLockdown ? "critical" : "high",
+      severity: isLockdown ? "critical" : "error",
       actorId: token?.sub || null,
       actorEmail: token?.email || null,
       actorType: token ? "user" : "anonymous",

@@ -50,7 +50,7 @@ export function hasInternalFlag(flags: string[]): boolean {
 export function mapMemberTierToAccessTier(dbTier: string | null, flags: string[]): AccessTier {
   // Internal flags override to highest tier
   if (hasInternalFlag(flags)) {
-    return "top-secret";
+    return "top_secret";
   }
 
   // Let SSOT alias map handle everything else
@@ -75,7 +75,7 @@ export function resolveAccessTier(input: unknown, flags?: unknown): AccessTier {
 
   // If flags contain internal markers, treat as top-secret
   const f = Array.isArray(flags) ? flags.map((x) => String(x).toLowerCase()) : [];
-  if (f.some((x) => INTERNAL_MARKERS.includes(x))) return "top-secret";
+  if (f.some((x) => INTERNAL_MARKERS.includes(x))) return "top_secret";
 
   // Let SSOT alias map handle everything else
   return normalizeUserTier(raw);
@@ -118,15 +118,15 @@ export function hasTierLevel(userTier: unknown, required: AccessTier): boolean {
 export function getAccessibleTiers(userTier: unknown): AccessTier[] {
   const u = normalizeUserTier(userTier);
   const order: AccessTier[] = [
-    "public", 
-    "member", 
-    "inner-circle",
-    "restricted",      // ✅ Added
-    "client", 
-    "legacy", 
-    "architect", 
+    "public",
+    "member",
+    "inner_circle",
+    "restricted",
+    "client",
+    "legacy",
+    "architect",
     "owner",
-    "top-secret"
+    "top_secret",
   ];
   const userIndex = order.indexOf(u);
   
@@ -141,15 +141,15 @@ export function getClearanceLabel(tier: AccessTier | unknown): string {
   const normalized = normalizeUserTier(tier);
   
   const labels: Record<AccessTier, string> = {
-    'public': 'Public // Level 0',
-    'member': 'Member // Level 1',
-    'inner-circle': 'Inner Circle // Level 2',
-    'restricted': 'Restricted // Level 3',    // ✅ Added
-    'client': 'Client // Level 4',
-    'legacy': 'Legacy // Level 5',
-    'architect': 'Architect // Level 6',
-    'owner': 'Owner // Level 7',
-    'top-secret': 'Top Secret // Level 8',
+    public: 'Public // Level 0',
+    member: 'Member // Level 1',
+    inner_circle: 'Inner Circle // Level 2',
+    restricted: 'Restricted // Level 3',
+    client: 'Client // Level 4',
+    legacy: 'Legacy // Level 5',
+    architect: 'Architect // Level 6',
+    owner: 'Owner // Level 7',
+    top_secret: 'Top Secret // Level 8',
   };
   
   return labels[normalized] || `Level ${getTierLevel(normalized)}`;
@@ -160,15 +160,15 @@ export function getClearanceLabel(tier: AccessTier | unknown): string {
  */
 export function getTierLevel(tier: AccessTier): number {
   const levels: Record<AccessTier, number> = {
-    'public': 0,
-    'member': 1,
-    'inner-circle': 2,
-    'restricted': 3,      // ✅ Added
-    'client': 4,
-    'legacy': 5,
-    'architect': 6,
-    'owner': 7,
-    'top-secret': 8,
+    public: 0,
+    member: 1,
+    inner_circle: 2,
+    restricted: 3,
+    client: 4,
+    legacy: 5,
+    architect: 6,
+    owner: 7,
+    top_secret: 8,
   };
   return levels[tier] || 0;
 }
@@ -180,15 +180,15 @@ export function getTierBadgeClasses(tier: AccessTier | unknown): string {
   const normalized = normalizeUserTier(tier);
   
   const classes: Record<AccessTier, string> = {
-    'public': 'bg-zinc-900 text-zinc-400 border-zinc-800',
-    'member': 'bg-blue-950/30 text-blue-400 border-blue-900',
-    'inner-circle': 'bg-purple-950/30 text-purple-400 border-purple-900',
-    'restricted': 'bg-orange-950/30 text-orange-400 border-orange-900',      // ✅ Added
-    'client': 'bg-emerald-950/30 text-emerald-400 border-emerald-900',
-    'legacy': 'bg-amber-950/30 text-amber-400 border-amber-900',
-    'architect': 'bg-rose-950/30 text-rose-400 border-rose-900',
-    'owner': 'bg-zinc-800 text-zinc-300 border-zinc-700',
-    'top-secret': 'bg-red-950/50 text-red-400 border-red-800 font-bold',
+    public: 'bg-zinc-900 text-zinc-400 border-zinc-800',
+    member: 'bg-blue-950/30 text-blue-400 border-blue-900',
+    inner_circle: 'bg-purple-950/30 text-purple-400 border-purple-900',
+    restricted: 'bg-orange-950/30 text-orange-400 border-orange-900',
+    client: 'bg-emerald-950/30 text-emerald-400 border-emerald-900',
+    legacy: 'bg-amber-950/30 text-amber-400 border-amber-900',
+    architect: 'bg-rose-950/30 text-rose-400 border-rose-900',
+    owner: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+    top_secret: 'bg-red-950/50 text-red-400 border-red-800 font-bold',
   };
   
   return classes[normalized] || classes.public;
@@ -201,15 +201,15 @@ export function getTierIcon(tier: AccessTier | unknown): string {
   const normalized = normalizeUserTier(tier);
   
   const icons: Record<AccessTier, string> = {
-    'public': '🌐',
-    'member': '🔑',
-    'inner-circle': '⚡',
-    'restricted': '🔒',      // ✅ Added (lock for restricted)
-    'client': '💼',
-    'legacy': '🏛️',
-    'architect': '🏗️',
-    'owner': '👑',
-    'top-secret': '🔥',
+    public: '🌐',
+    member: '🔑',
+    inner_circle: '⚡',
+    restricted: '🔒',
+    client: '💼',
+    legacy: '🏛️',
+    architect: '🏗️',
+    owner: '👑',
+    top_secret: '🔥',
   };
   
   return icons[normalized] || '🔒';
@@ -239,9 +239,9 @@ export function getHighestTier(tiers: (AccessTier | unknown)[]): AccessTier {
  */
 export function isRestricted(tier: AccessTier | unknown): boolean {
   const normalized = normalizeUserTier(tier);
-  return normalized === 'restricted' || normalized === 'client' || 
-         normalized === 'legacy' || normalized === 'architect' || 
-         normalized === 'owner' || normalized === 'top-secret';
+  return normalized === 'restricted' || normalized === 'client' ||
+         normalized === 'legacy' || normalized === 'architect' ||
+         normalized === 'owner' || normalized === 'top_secret';
 }
 
 /**
@@ -249,7 +249,7 @@ export function isRestricted(tier: AccessTier | unknown): boolean {
  */
 export function isTopSecret(tier: AccessTier | unknown): boolean {
   const normalized = normalizeUserTier(tier);
-  return normalized === 'top-secret';
+  return normalized === 'top_secret';
 }
 
 /**
@@ -259,15 +259,15 @@ export function getTierColor(tier: AccessTier | unknown): string {
   const normalized = normalizeUserTier(tier);
   
   const colors: Record<AccessTier, string> = {
-    'public': '#71717a',      // zinc-500
-    'member': '#3b82f6',      // blue-500
-    'inner-circle': '#a855f7', // purple-500
-    'restricted': '#f97316',   // orange-500  ✅ Added
-    'client': '#10b981',      // emerald-500
-    'legacy': '#f59e0b',      // amber-500
-    'architect': '#f43f5e',   // rose-500
-    'owner': '#f4f4f5',       // zinc-100
-    'top-secret': '#ef4444',  // red-500
+    public: '#71717a',      // zinc-500
+    member: '#3b82f6',      // blue-500
+    inner_circle: '#a855f7', // purple-500
+    restricted: '#f97316',   // orange-500
+    client: '#10b981',      // emerald-500
+    legacy: '#f59e0b',      // amber-500
+    architect: '#f43f5e',   // rose-500
+    owner: '#f4f4f5',       // zinc-100
+    top_secret: '#ef4444',  // red-500
   };
   
   return colors[normalized] || colors.public;

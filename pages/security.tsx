@@ -164,7 +164,8 @@ const SecurityPage: NextPage = () => {
         </div>
       </main>
 
-      <style jsx global>{`
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <style {...({ jsx: true, global: true } as any)}>{`
         body { background-color: #000; }
       `}</style>
     </Layout>

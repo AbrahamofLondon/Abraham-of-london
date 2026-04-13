@@ -224,7 +224,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 const VenturePage: NextPage<{ venture: Venture }> = ({ venture }) => {
-  const PrimaryIcon = domainIcons[venture.domain[0]] || Briefcase;
+  const PrimaryIcon = (venture.domain[0] ? domainIcons[venture.domain[0]] : undefined) || Briefcase;
   const status = statusColors[venture.status];
 
   return (

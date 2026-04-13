@@ -136,13 +136,13 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async ({ r
       prisma.strategyIntake.count({
         where: {
           status: {
-            in: ["PENDING", "PENDING_DIRECTORATE_REVIEW"],
+            in: ["PENDING", "IN_REVIEW"],
           },
         },
       }),
 
       prisma.strategyIntake.count({
-        where: { status: "ACCEPTED" },
+        where: { status: "ANALYZED" },
       }),
 
       prisma.downloadAuditEvent.count({

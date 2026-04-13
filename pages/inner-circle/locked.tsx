@@ -26,7 +26,7 @@ const LockedPage: React.FC = () => {
   const searchParams = useSearchParams();
 
   const returnTo = React.useMemo(() => {
-    const target = searchParams.get("returnTo") || searchParams.get("callbackUrl");
+    const target = searchParams?.get("returnTo") || searchParams?.get("callbackUrl") || null;
     return sanitizeLocalPath(target, "/inner-circle/dashboard");
   }, [searchParams]);
 

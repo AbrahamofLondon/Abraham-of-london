@@ -12,7 +12,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
 
 const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
+      apiVersion: "2023-10-16" as Stripe.LatestApiVersion,
     })
   : null;
 
@@ -114,19 +114,19 @@ export default async function handler(
         data: {
           tier,
           status: "active",
-          metadata: mergeMetadata(existingUser?.metadata, {
+          metadata: JSON.stringify(mergeMetadata(existingUser?.metadata, {
             stripeCustomerId: typeof session.customer === "string" ? session.customer : null,
             stripeSessionId: session.id,
             membershipTier: membershipTierRaw,
             upgradedAt: new Date().toISOString(),
-          }),
+          })),
           updatedAt: new Date(),
         },
       });
 
       await auditLogger.log({
         action: "membership_elevation_success",
-        userId,
+        actorId: userId,
         details: {
           email: userEmail,
           sessionId: session.id,
@@ -155,17 +155,17 @@ export default async function handler(
           data: {
             tier: "member",
             status: "active",
-            metadata: mergeMetadata(user.metadata, {
+            metadata: JSON.stringify(mergeMetadata(user.metadata, {
               subscriptionCancelledAt: new Date().toISOString(),
-            }),
+            })),
           },
         });
 
         await auditLogger.log({
           action: "membership_revoked_expiry",
-          userId: user.id,
+          actorId: user.id,
           details: { customerId: subscription.customer },
-          severity: "warning",
+          severity: "warn",
         });
       }
     }
@@ -193,7 +193,7 @@ export default async function handler(
 
         await auditLogger.log({
           action: "membership_updated",
-          userId: user.id,
+          actorId: user.id,
           details: { customerId: subscription.customer, priceId, tier },
           severity: "info",
         });

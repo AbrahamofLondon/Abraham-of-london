@@ -46,7 +46,7 @@ const aolSerif = Cormorant_Garamond({
 
 type ProviderComposerProps = {
   children: ReactNode;
-  session?: AppProps["pageProps"] extends { session?: infer S } ? S : unknown;
+  session?: import("next-auth").Session | null;
   enablePdfDashboard: boolean;
 };
 
@@ -80,7 +80,7 @@ export default function MyApp({
 }: AppProps): React.ReactElement {
   const router = useRouter();
   const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  const session = (pageProps as { session?: unknown }).session;
+  const session = (pageProps as { session?: import("next-auth").Session | null }).session;
 
   const enablePdfDashboard = useMemo(() => {
     const guardedPaths = ["/vault", "/inner-circle", "/admin", "/pdf-dashboard"];

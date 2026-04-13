@@ -1,40 +1,15 @@
 import NextAuth, {
-  type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { Resend } from "resend";
 
-import { normalizeUserTier, type AccessTier } from "@/lib/access/tier-policy";
+import { normalizeUserTier } from "@/lib/access/tier-policy";
 
-const resend = new Resend(process.env.RESEND_API_KEY?.trim() || "");
-
-const MAIL_FROM =
-  process.env.EMAIL_FROM?.trim() ||
-  process.env.MAIL_FROM?.trim() ||
-  "Abraham of London <info@abrahamoflondon.org>";
-
+// Augment User with fields provided by the auth flow.
+// Session and JWT are already augmented globally in types/next-auth.d.ts.
 declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      role: string;
-      tier: AccessTier;
-    } & DefaultSession["user"];
-    aol: {
-      tier: AccessTier;
-      innerCircleAccess: boolean;
-      isInternal: boolean;
-      allowPrivate: boolean;
-      memberId: string | null;
-      emailHash: string | null;
-      flags: string[];
-    };
-  }
-
   interface User {
-    role?: string;
-    tier?: string;
     innerCircleAccess?: boolean;
     isInternal?: boolean;
     allowPrivate?: boolean;
@@ -44,21 +19,12 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    role: string;
-    aol: {
-      tier: AccessTier;
-      innerCircleAccess: boolean;
-      isInternal: boolean;
-      allowPrivate: boolean;
-      memberId: string | null;
-      emailHash: string | null;
-      flags: string[];
-    };
-  }
-}
+const resend = new Resend(process.env.RESEND_API_KEY?.trim() || "");
+
+const MAIL_FROM =
+  process.env.EMAIL_FROM?.trim() ||
+  process.env.MAIL_FROM?.trim() ||
+  "Abraham of London <info@abrahamoflondon.org>";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -124,13 +90,13 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.tier = token.aol.tier;
+        if (token.id) session.user.id = token.id;
+        if (token.role) session.user.role = token.role;
 
-        session.aol = {
-          ...token.aol,
-        };
+        if (token.aol) {
+          session.user.tier = token.aol.tier;
+          session.aol = { ...token.aol };
+        }
       }
 
       return session;

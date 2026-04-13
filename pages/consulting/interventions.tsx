@@ -603,7 +603,7 @@ export default function InterventionConsole() {
     const c: Record<string, number> = {};
     for (const s of INTERVENTION_STATUSES) c[s] = 0;
     for (const item of list) {
-      if (c[item.status] !== undefined) c[item.status]++;
+      if (c[item.status] !== undefined) c[item.status] = (c[item.status] ?? 0) + 1;
     }
     return c;
   }, [list]);

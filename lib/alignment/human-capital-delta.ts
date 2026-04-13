@@ -158,20 +158,27 @@ export function aggregateHCDMetrics(results: HCDResult[]) {
   };
 }
 
+export type HCDAggregate = ReturnType<typeof aggregateHCDMetrics>;
+export type HCDContagion = {
+  source: string;
+  target: string;
+  contagionRisk: number;
+};
+
 export function calculateHCDContagion(
   results: HCDResult[],
   domains: string[]
-): Array<{ source: string; target: string; contagionRisk: number }> {
+): HCDContagion[] {
   const contagion: Array<{ source: string; target: string; contagionRisk: number }> = [];
   
   for (let i = 0; i < results.length; i++) {
     for (let j = i + 1; j < results.length; j++) {
-      const avgRisk = (results[i].delta + results[j].delta) / 2;
+      const avgRisk = (results[i]!.delta + results[j]!.delta) / 2;
       const contagionRisk = Math.min(100, avgRisk * 0.7);
-      
+
       contagion.push({
-        source: results[i].label || results[i].domain,
-        target: results[j].label || results[j].domain,
+        source: results[i]!.label || results[i]!.domain,
+        target: results[j]!.label || results[j]!.domain,
         contagionRisk,
       });
     }

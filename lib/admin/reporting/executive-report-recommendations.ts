@@ -1,5 +1,6 @@
 // lib/admin/reporting/executive-report-recommendations.ts
 import { buildDecisionGuidance } from "@/lib/decision/decision-guidance-service";
+import type { ConstitutionalIntake } from "@/lib/decision/system-constitution";
 
 function s(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -38,43 +39,26 @@ export function buildExecutiveReportRecommendationsFromReport(args: {
     n(args.report?.financialExposure?.totalExposure, 1000000),
   );
 
+  const intake: ConstitutionalIntake = {
+    fullName: s(args.organisationName, "Executive Requestor"),
+    email: "",
+    organisation: s(args.organisationName, "Unknown Organisation"),
+    sector: "governance",
+    revenueBand: revenue >= 1_000_000 ? "ENTERPRISE" : revenue >= 250_000 ? "MID" : "SMB",
+    authorityRole: authority,
+    authorityScope: authority,
+    urgencyWindow: burnout >= 70 ? "month" : "quarter",
+    problemStatement: summary,
+    symptoms: `avgDissonance=${avgDissonance} burnout=${burnout} criticalDomains=${arr(args.report?.hcdAggregate?.criticalDomains).length}`,
+    desiredOutcome: "institutional realignment",
+    currentConstraint: state,
+    marketExposure:
+      avgDissonance >= 70 ? "HIGH" : avgDissonance >= 45 ? "MEDIUM" : "LOW",
+    boardInvolved: "unknown",
+  };
+
   return buildDecisionGuidance({
-    fusionInput: {
-      ruleScore: Math.max(0, 100 - avgDissonance),
-      aiScore: Math.max(0, 100 - avgDissonance),
-      aiConfidence: 0.84,
-      revenue,
-      authority,
-      urgency: burnout >= 70 ? "month" : "quarter",
-      problem: summary,
-      sessionDepth: Math.max(3, resonanceDomains.length),
-      timeOnSite: 900,
-      returnVisitor: true,
-    },
-    resonance: {
-      averageDissonance: avgDissonance,
-      domains: resonanceDomains,
-    },
-    hcd: {
-      overallBurnoutIndex: burnout,
-      criticalDomains: arr(args.report?.hcdAggregate?.criticalDomains),
-      elevatedDomains: arr(args.report?.hcdAggregate?.elevatedDomains),
-      riskScore:
-        s(args.report?.hcdAggregate?.riskScore) ||
-        (burnout >= 70 ? "HIGH" : burnout >= 45 ? "MEDIUM" : "LOW"),
-    },
-    questionnaire: {
-      sector: "governance",
-      sponsorRole: authority,
-      statedProblem: summary,
-      primaryConcern: state,
-      desiredOutcome: "institutional realignment",
-    },
-    market: {
-      marketRiskBand:
-        avgDissonance >= 70 ? "HIGH" : avgDissonance >= 45 ? "MEDIUM" : "LOW",
-      sector: "governance",
-    },
+    intake,
     options: {
       assetLimit: 8,
       minAssetScore: 18,

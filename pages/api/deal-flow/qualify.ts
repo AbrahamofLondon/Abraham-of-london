@@ -58,7 +58,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     urgency: String(urgency),
   });
 
-  const fusedRoute = fuseScores(ruleScore, ai.aiScore);
+  const fusion = fuseScores({
+    ruleScore,
+    aiScore: ai.score,
+    aiConfidence: ai.confidence,
+    revenue: rev,
+    authority,
+    urgency: String(urgency),
+    problem: String(problem),
+    sessionDepth: Number(sessionDepth || 0),
+    timeOnSite: Number(timeOnSite || 0),
+    returnVisitor: Boolean(returnVisitor),
+  });
 
   const prediction = predictDealOutcome({
     name,
@@ -68,14 +79,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     urgency,
     authority,
     ruleScore,
-    aiScore: ai.aiScore,
+    aiScore: ai.score,
     aiConfidence: ai.confidence,
-    aiIntent: ai.intent,
-    aiDealQuality: ai.dealQuality,
+    aiIntent: null,
+    aiDealQuality: null,
     sessionDepth: Number(sessionDepth || 0),
     timeOnSite: Number(timeOnSite || 0),
     returnVisitor: Boolean(returnVisitor),
-    route: fusedRoute,
+    route: fusion.route,
     status: "NEW",
   });
 
@@ -84,7 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ? "STRATEGY"
       : prediction.nextBestAction === "SEND_TO_DIAGNOSTIC"
       ? "DIAGNOSTIC"
-      : fusedRoute === "STRATEGY"
+      : fusion.route === "STRATEGY"
       ? "DIAGNOSTIC"
       : "REJECT";
 
@@ -104,11 +115,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       score: ruleScore,
       route: finalRoute,
 
-      aiScore: ai.aiScore,
+      aiScore: ai.score,
       aiConfidence: ai.confidence,
-      aiIntent: ai.intent,
-      aiDealQuality: ai.dealQuality,
-      aiSummary: ai.summary,
+      aiIntent: null,
+      aiDealQuality: null,
+      aiSummary: null,
 
       sessionDepth: Number(sessionDepth || 0),
       timeOnSite: Number(timeOnSite || 0),
@@ -136,7 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     timestamp: new Date().toISOString(),
     id: submission.id,
     ruleScore,
-    aiScore: ai.aiScore,
+    aiScore: ai.score,
     finalRoute,
     winProbability: prediction.winProbability,
     expectedRevenue: prediction.expectedRevenue,
@@ -147,7 +158,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ok: true,
     route: finalRoute,
     score: ruleScore,
-    aiScore: ai.aiScore,
+    aiScore: ai.score,
     submissionId: submission.id,
     predictive: {
       winProbability: prediction.winProbability,

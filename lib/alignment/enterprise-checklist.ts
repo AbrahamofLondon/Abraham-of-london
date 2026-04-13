@@ -1,4 +1,4 @@
-lib/alignment/enterprise-checklist.ts
+// lib/alignment/enterprise-checklist.ts
 
 import type { EnterpriseQuestion } from "./enterprise-types";
 

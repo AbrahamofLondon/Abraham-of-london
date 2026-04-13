@@ -77,4 +77,4 @@ export async function processPendingDiagnosticReports(): Promise<{
     processed: pending.length,
     results: out,
   };
-}s
+}

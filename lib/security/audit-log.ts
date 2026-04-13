@@ -38,7 +38,7 @@ export async function writeSecurityAudit(event: {
         category: event.category || "security",
         subCategory: event.subCategory || null,
         errorMessage: event.errorMessage || null,
-        metadata: event.metadata || {},
+        metadata: JSON.stringify(event.metadata || {}),
       },
     });
   } catch (error) {

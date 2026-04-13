@@ -50,24 +50,20 @@ function fromDbTier(
 
 function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
   switch (tier) {
-    case "inner-circle":
-      return PrismaAccessTier.inner_circle;
-    case "top-secret":
-      return PrismaAccessTier.top_secret;
     case "public":
-      return PrismaAccessTier.public;
     case "member":
+    case "inner_circle":
       return PrismaAccessTier.member;
     case "restricted":
-      return PrismaAccessTier.restricted;
     case "client":
       return PrismaAccessTier.client;
     case "legacy":
-      return PrismaAccessTier.legacy;
+      return PrismaAccessTier.partner;
     case "architect":
-      return PrismaAccessTier.architect;
+      return PrismaAccessTier.executive;
     case "owner":
-      return PrismaAccessTier.owner;
+    case "top_secret":
+      return PrismaAccessTier.sovereign;
     default:
       return PrismaAccessTier.member;
   }
@@ -87,7 +83,7 @@ function getBaseUrl(): string {
 function getRequestIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.trim()) {
-    return forwarded.split(",")[0].trim();
+    return (forwarded.split(",")[0] ?? "").trim();
   }
   if (Array.isArray(forwarded) && forwarded[0]) {
     return forwarded[0];

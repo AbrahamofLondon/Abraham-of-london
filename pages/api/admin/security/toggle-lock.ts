@@ -46,11 +46,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           status: "success",
           severity: "critical",
           category: "SYSTEM_OVERRIDE",
-          metadata: { 
-            locked, 
-            reason: reason || "Manual override", 
-            timestamp: new Date().toISOString() 
-          },
+          metadata: JSON.stringify({
+            locked,
+            reason: reason || "Manual override",
+            timestamp: new Date().toISOString(),
+          }),
         },
       })
     ]);

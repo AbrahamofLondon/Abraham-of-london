@@ -287,7 +287,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const prisma = prismaModule.default ?? prismaModule.prisma;
 
-  const data = await prisma.strategyRoomIntake.findMany({
+  const data = await prisma.strategyIntake.findMany({
     orderBy: { createdAt: "desc" },
     select: {
       id: true,

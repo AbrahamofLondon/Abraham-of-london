@@ -99,8 +99,7 @@ export default function OGRCoherenceLock({ organisationName = "The Institution" 
           </div>
 
           {!metrics.isLocked && (
-            <button 
-              onClick={handleDownloadAccord}
+            <button
               className="px-16 py-4 bg-[#2C2416] text-white font-mono text-[10px] uppercase tracking-[0.4em] hover:bg-[#8A6A2F] transition-all duration-700 shadow-2xl relative z-10 overflow-hidden"
               onClick={handleFinalLock}
               disabled={loading}

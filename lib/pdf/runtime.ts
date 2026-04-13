@@ -228,13 +228,13 @@ export function getPDFTierLabel(pdfTier: string | AccessTier): string {
 const TIER_RANK: Record<AccessTier, number> = {
   public: 0,
   member: 1,
-  "inner-circle": 2,
-  "restricted": 3,     // ✅ Add this line
+  inner_circle: 2,
+  restricted: 3,
   client: 4,
   legacy: 5,
   architect: 6,
   owner: 7,
-  "top-secret": 8,
+  top_secret: 8,
 };
 
 export function getTierRank(tier: string | AccessTier): number {

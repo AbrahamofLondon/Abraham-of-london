@@ -81,9 +81,9 @@ export default async function handler(
   if (!sessionId) {
     try {
       await AuditService.recordSecurityEvent({
-        event: "login_failed",
+        event: "LOGIN_FAILURE",
         action: "unauthorized_access_attempt",
-        severity: "high",
+        severity: "error",
         details: { briefId, note: "missing_session_cookie", ip },
       });
     } catch {
@@ -102,9 +102,9 @@ export default async function handler(
   if (!decision.ok) {
     try {
       await AuditService.recordSecurityEvent({
-        event: "admin_action",
+        event: "UNAUTHORIZED_ACCESS",
         action: "insufficient_clearance_attempt",
-        severity: "warning",
+        severity: "warn",
         memberId: memberId || undefined,
         ip,
         userAgent,
@@ -162,9 +162,9 @@ export default async function handler(
     await AuditService.recordDownload({
       slug: brief.id,
       title: content?.title ?? brief.title ?? brief.id,
-      contentType: DownloadContentType.BRIEF,
+      contentType: DownloadContentType.PDF,
       eventType: DownloadEventType.PREVIEW,
-      deliveryMode: DownloadDeliveryMode.TOKEN,
+      deliveryMode: DownloadDeliveryMode.SECURE_LINK,
 
       contentId: content?.id,
       memberId: memberId || undefined,

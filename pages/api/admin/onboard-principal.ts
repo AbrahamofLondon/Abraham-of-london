@@ -149,7 +149,7 @@ export default async function handler(
       await tx.systemAuditLog.create({
         data: {
           action: "PRINCIPAL_ONBOARDED",
-          severity: "high",
+          severity: "error",
           actorId: actor.id,
           actorEmail: actor.email,
           resourceId: member.id,
@@ -158,7 +158,7 @@ export default async function handler(
           status: "success",
           category: "admin",
           subCategory: "onboarding",
-          metadata: {
+          metadata: JSON.stringify({
             inquiryId,
             originalTier: String(assignedTier),
             normalizedTier,
@@ -166,7 +166,7 @@ export default async function handler(
             tierLabel: getTierLabel(normalizedTier),
             onboardedBy: actor.id,
             onboardedAt: new Date().toISOString(),
-          },
+          }),
         },
       });
 

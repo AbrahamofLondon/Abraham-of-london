@@ -110,7 +110,18 @@ const ClientDashboardPage: NextPage<Props> = ({ user, diagnostics, reports }) =>
             <div className="mb-6 text-[10px] font-black uppercase tracking-[0.24em] text-gray-500">
               Report queue
             </div>
-            <ClientReportList reports={reports} />
+            <ClientReportList reports={reports.map((r) => ({
+              id: r.id,
+              reference: r.id,
+              title: r.diagnosticType ?? r.reportTier ?? "Report",
+              packageKey: r.reportTier ?? "",
+              amountGbp: r.amount ?? 0,
+              status: r.status,
+              createdAt: r.createdAt,
+              paidAt: null,
+              deliveredAt: null,
+              reportUrl: null,
+            }))} />
           </section>
         </div>
       </main>

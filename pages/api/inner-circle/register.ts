@@ -22,22 +22,20 @@ function isEmail(email: string): boolean {
 
 function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
   switch (tier) {
-    case "inner-circle":
-      return PrismaAccessTier.inner_circle;
-    case "top-secret":
-      return PrismaAccessTier.top_secret;
     case "public":
-      return PrismaAccessTier.public;
     case "member":
+    case "inner_circle":
       return PrismaAccessTier.member;
+    case "restricted":
     case "client":
       return PrismaAccessTier.client;
     case "legacy":
-      return PrismaAccessTier.legacy;
+      return PrismaAccessTier.partner;
     case "architect":
-      return PrismaAccessTier.architect;
+      return PrismaAccessTier.executive;
     case "owner":
-      return PrismaAccessTier.owner;
+    case "top_secret":
+      return PrismaAccessTier.sovereign;
     default:
       return PrismaAccessTier.member;
   }

@@ -300,15 +300,22 @@ async function handler(
 
     const deliveredChecksum = await computeBufferSha256(markedBuffer);
 
-    const existingMetadata =
-      verified.token.metadata && typeof verified.token.metadata === "object"
-        ? verified.token.metadata
-        : {};
+    let existingMetadata: Record<string, unknown> = {};
+    if (typeof verified.token.metadata === "string" && verified.token.metadata) {
+      try {
+        const parsed = JSON.parse(verified.token.metadata);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          existingMetadata = parsed as Record<string, unknown>;
+        }
+      } catch {
+        // ignore malformed metadata; start fresh
+      }
+    }
 
     await prisma.premiumDownloadToken.updateMany({
       where: { tokenId: verified.payload.tid },
       data: {
-        metadata: {
+        metadata: JSON.stringify({
           ...existingMetadata,
           watermarkId: watermarkPayload.watermarkId,
           publicMarker: watermarkPayload.publicMarker,
@@ -320,7 +327,7 @@ async function handler(
           deliveredAt: new Date().toISOString(),
           fingerprint: fingerprint.profileId,
           traceId: fingerprint.traceId,
-        },
+        }),
       },
     });
 

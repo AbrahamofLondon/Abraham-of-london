@@ -2,11 +2,11 @@
 // REMOVED: import "server-only"; (Incompatible with Pages Router)
 
 import { prisma } from "@/lib/prisma.server";
-import type { AuditSeverity, Prisma } from "@prisma/client";
+import type { AuditSeverity } from "@prisma/client";
 
 export interface AuditLogInput {
   action: string;
-  severity?: "info" | "warning" | "high" | "critical";
+  severity?: "debug" | "info" | "warn" | "error" | "critical";
   actorId?: string | null;
   actorEmail?: string | null;
   actorType?: string;
@@ -29,8 +29,11 @@ export interface AuditLogInput {
 function toDbSeverity(s?: string): AuditSeverity {
   switch (s) {
     case "critical": return "critical";
-    case "high": return "high";
-    case "warning": return "warning";
+    case "high":
+    case "error": return "error";
+    case "warning":
+    case "warn": return "warn";
+    case "debug": return "debug";
     default: return "info";
   }
 }
@@ -63,8 +66,8 @@ export const auditLogger = {
           category: input.category ?? null,
           subCategory: input.subCategory ?? null,
           errorMessage: input.errorMessage ?? null,
-          metadata: (input.metadata as Prisma.InputJsonValue) ?? {},
-          tags: (input.tags as Prisma.InputJsonValue) ?? [],
+          metadata: JSON.stringify(input.metadata ?? {}),
+          tags: JSON.stringify(input.tags ?? []),
         },
       });
     } catch (error) {

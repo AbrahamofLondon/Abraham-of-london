@@ -146,14 +146,33 @@ export async function GET(_request: Request, context: RouteContext) {
       );
     }
 
+    const normalizedDomains =
+      report.resonance?.telemetry?.domains?.map((d) => ({
+        label: d.label ?? d.domain ?? "",
+        intent: d.intent ?? 0,
+        reality: d.reality ?? 0,
+        dissonance: d.dissonance ?? 0,
+      })) ?? [];
+
+    const pdfPayload = {
+      ...report,
+      resonance: {
+        ...report.resonance,
+        telemetry: {
+          averageDissonance: report.resonance?.telemetry?.averageDissonance,
+          domains: normalizedDomains,
+        },
+      },
+    };
+
     const pdfElement = React.createElement(ExecutiveReportPdfDocument, {
-      payload: report,
+      payload: pdfPayload,
       constitution,
       guidance,
       campaign,
       metadata: {
         generatedAt: new Date().toISOString(),
-        reportState: report.state,
+        reportState: report.state ?? "UNKNOWN",
         integrityIndex:
           100 - (report.resonance?.telemetry?.averageDissonance || 0),
         participantCount: reportContext.completedParticipantCount || 0,
@@ -176,7 +195,7 @@ export async function GET(_request: Request, context: RouteContext) {
         "Cache-Control": "private, no-cache, no-store, must-revalidate",
         "Content-Length": String(pdfBuffer.byteLength),
         "X-Generation-Time-Ms": generationTimeMs.toString(),
-        "X-Report-State": report.state,
+        "X-Report-State": report.state ?? "UNKNOWN",
         "X-Report-Version": "2.1.0",
         "X-Constitutional-Route": constitutionalCheck.route,
         "X-Constitutional-Confidence": constitutionalCheck.confidence.toFixed(2),

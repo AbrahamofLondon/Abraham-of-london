@@ -19,8 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const result = await prisma.$transaction([
-      // 1. Update the User's Tier
-      prisma.user.update({
+      // 1. Update the Member's Tier
+      prisma.innerCircleMember.update({
         where: { id: userId },
         data: { tier: newTier }
       }),

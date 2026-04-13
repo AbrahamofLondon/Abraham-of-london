@@ -2,7 +2,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
-import { grantEntitlement } from "@/lib/server/billing/entitlements";
+import {
+  grantEntitlement,
+  PRODUCT_CODES,
+  type ProductCode,
+} from "@/lib/server/billing/entitlements";
+
+const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
+
+function isProductCode(value: string): value is ProductCode {
+  return VALID_PRODUCT_CODES.has(value);
+}
 
 export const config = {
   api: {
@@ -36,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const productCode = String(session.metadata?.productCode || "");
     const tier = String(session.metadata?.tier || "report-basic");
 
-    if (email && productCode) {
+    if (email && productCode && isProductCode(productCode)) {
       await grantEntitlement({
         email,
         productCode,
@@ -44,6 +54,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         source: "stripe",
         externalRef: session.id,
       });
+    } else if (email && productCode) {
+      console.warn(
+        `[BILLING_WEBHOOK] Rejected unknown productCode from Stripe metadata: ${productCode}`,
+      );
     }
   }
 

@@ -101,25 +101,25 @@ async function getAnalyticsData(): Promise<StrategicHealthReport | null> {
         },
       }),
 
-      prisma.pageView.groupBy({
-        by: ["slug"],
-        _count: { slug: true },
+      (prisma.pageView.groupBy as any)({
+        by: ["path"],
+        _count: { path: true },
         where: {
-          viewedAt: { gte: thirtyDaysAgo },
-          slug: { not: null },
+          createdAt: { gte: thirtyDaysAgo },
+          path: { not: null },
         },
         orderBy: {
-          _count: { slug: "desc" },
+          _count: { path: "desc" },
         },
         take: 10,
       }),
 
-      prisma.systemAuditLog.groupBy({
+      (prisma.systemAuditLog.groupBy as any)({
         by: ["action"],
         _count: { action: true },
         where: {
           createdAt: { gte: thirtyDaysAgo },
-          severity: { in: ["warning", "high", "critical"] },
+          severity: { in: ["warn", "error", "critical"] },
         },
         orderBy: {
           _count: { action: "desc" },
@@ -145,12 +145,12 @@ async function getAnalyticsData(): Promise<StrategicHealthReport | null> {
       }),
     ]);
 
-    const engagement: EngagementRow[] = pageViewRows.map((item) => ({
-      shortSlug: item.slug || "unknown",
-      viewCount: item._count.slug,
+    const engagement: EngagementRow[] = pageViewRows.map((item: any) => ({
+      shortSlug: item.path || "unknown",
+      viewCount: item._count.path,
     }));
 
-    const auditTrends: AuditTrendRow[] = auditData.map((item) => ({
+    const auditTrends: AuditTrendRow[] = (auditData as any[]).map((item: any) => ({
       action: item.action,
       _count: item._count.action,
     }));
@@ -344,7 +344,12 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
   const keyRatio =
     summary.totalMembers > 0 ? summary.activeKeys / summary.totalMembers : 0;
 
-  const trend = {
+  const trend: {
+    members: "normal" | "high" | "low" | "critical";
+    keys: "normal" | "high" | "low" | "critical";
+    intakes: "normal" | "high" | "low" | "critical";
+    breaches: "normal" | "high" | "low" | "critical";
+  } = {
     members: summary.totalMembers > 100 ? "high" : "normal",
     keys: keyRatio < 0.3 ? "low" : keyRatio > 0.8 ? "high" : "normal",
     intakes:
@@ -489,7 +494,7 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
                         fontSize: "12px",
                         marginBottom: "4px",
                       }}
-                      formatter={(value: number) => [`${value} views`, "Views"]}
+                      formatter={((value: number) => [`${value} views`, "Views"]) as any}
                     />
                     <Bar
                       dataKey="viewCount"
@@ -530,8 +535,8 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      label={(props: any) =>
+                        `${String(props.name ?? "")}: ${((props.percent ?? 0) * 100).toFixed(0)}%`
                       }
                       outerRadius={80}
                       dataKey="value"
@@ -544,7 +549,7 @@ const BoardIntelligence: NextPage<Props> = ({ report, error }) => {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => [`${value} views`, "Views"]}
+                      formatter={((value: number) => [`${value} views`, "Views"]) as any}
                       contentStyle={{
                         backgroundColor: "#111827",
                         border: "1px solid #374151",

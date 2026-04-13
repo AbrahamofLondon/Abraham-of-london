@@ -47,18 +47,18 @@ export default function EnterpriseIntelligenceDashboard({ view }: Props) {
         
         {/* Structural Mapping (Radar) */}
         <div className="lg:col-span-5 h-[460px]">
-          <PurposeAlignmentRadarChart 
-            title="Structural Fragility Mapping"
-            data={organisationSnapshot?.domainScores ?? []}
-            fragilitySignal={organisationSnapshot?.fragilitySignal}
-            dissonanceArea={organisationSnapshot?.dissonanceArea}
+          <PurposeAlignmentRadarChart
+            data={(organisationSnapshot?.domainScores ?? []).map((s) => ({
+              domain: s.domain as string,
+              percent: s.percent,
+              strength: (s.percent >= 75 ? "strong" : s.percent >= 50 ? "developing" : s.percent >= 25 ? "weak" : "critical") as "strong" | "developing" | "weak" | "critical",
+            }))}
           />
         </div>
 
         {/* Temporal Trajectory (Trend) */}
         <div className="lg:col-span-7 h-[460px]">
-          <PurposeAlignmentTrendChart 
-            title="Institutional Alignment Trajectory"
+          <PurposeAlignmentTrendChart
             data={trendSeries}
           />
         </div>

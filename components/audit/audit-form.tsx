@@ -75,11 +75,11 @@ interface AuditSubmission {
 // ─── Domain Icons ────────────────────────────────────────────────────────────
 
 const DOMAIN_ICONS: Record<AlignmentDomain, React.ElementType> = {
-  "mandate": ShieldCheck,
+  "identity": ShieldCheck,
   "decision": Gavel,
   "environment": Globe,
   "behaviour": Users,
-  "emotional-order": Heart,
+  "emotional_order": Heart,
   "legacy": Compass,
 } as const;
 
@@ -108,7 +108,7 @@ function DomainCard({
   answers: Record<string, boolean>;
   onAnswerChange: (questionId: string, checked: boolean) => void;
 }) {
-  const Icon = DOMAIN_ICONS[domain];
+  const Icon: React.ElementType = DOMAIN_ICONS[domain] ?? ShieldCheck;
   const answeredCount = questions.filter(q => answers[q.id]).length;
   const totalCount = questions.length;
   const completionPercent = Math.round((answeredCount / totalCount) * 100);
@@ -377,13 +377,14 @@ export function AuditForm({ participantId, campaignId, campaignTitle }: AuditFor
       const responses: AuditResponse[] = [];
       
       for (const domain of ALIGNMENT_DOMAIN_ORDER) {
-        const domainQuestions = groupedQuestions[domain];
+        const domainQuestions = groupedQuestions[domain] ?? [];
+        const domainTelemetry = telemetry[domain] ?? { resonance: 50, certainty: 50 };
         for (const question of domainQuestions) {
           responses.push({
             questionId: question.id,
             domain,
-            resonance: telemetry[domain].resonance,
-            certainty: telemetry[domain].certainty,
+            resonance: domainTelemetry.resonance,
+            certainty: domainTelemetry.certainty,
           });
         }
       }
@@ -502,11 +503,11 @@ export function AuditForm({ participantId, campaignId, campaignTitle }: AuditFor
           <DomainCard
             key={domain}
             domain={domain}
-            telemetry={telemetry[domain]}
+            telemetry={telemetry[domain] ?? { resonance: 50, certainty: 50 }}
             onChange={handleTelemetryChange}
-            isExpanded={expandedDomains[domain]}
+            isExpanded={expandedDomains[domain] ?? false}
             onToggle={() => toggleDomain(domain)}
-            questions={groupedQuestions[domain]}
+            questions={groupedQuestions[domain] ?? []}
             answers={answers}
             onAnswerChange={handleAnswerChange}
           />

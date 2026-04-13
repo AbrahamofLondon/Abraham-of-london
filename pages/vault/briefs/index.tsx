@@ -204,8 +204,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const allDocs = await content.getAllCombinedDocs();
   const docs = getCombinedBriefs(allDocs);
 
-  const items: BriefCard[] = docs
-    .map((doc: any) => {
+  const rawItems = docs
+    .map((doc: any): BriefCard | null => {
       const rawSlug =
         doc?.urlSlug ||
         doc?.collectionSlug ||
@@ -242,7 +242,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         publishedAt: doc?.date ? String(doc.date) : null,
       };
     })
-    .filter((item): item is BriefCard => Boolean(item));
+    .filter((x): x is BriefCard => x !== null);
+  const items: BriefCard[] = rawItems;
 
   items.sort((a, b) => {
     const timeA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;

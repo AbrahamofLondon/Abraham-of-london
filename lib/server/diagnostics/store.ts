@@ -536,13 +536,14 @@ export async function markDiagnosticReportPending(args: {
 
   if (idx < 0) return null;
 
+  const currentItem = store.items[idx]!;
   const updated: StoredDiagnosticRecord = {
-    ...normalizeStoredRecord(store.items[idx]),
+    ...normalizeStoredRecord(currentItem),
     reportStatus: "pending",
     reportTier:
       args.reportTier !== undefined
         ? safeNullableString(args.reportTier)
-        : store.items[idx].reportTier,
+        : currentItem.reportTier,
     updatedAt: nowIso(),
   };
 
@@ -570,13 +571,14 @@ export async function markDiagnosticReportPaid(args: {
 
   if (idx < 0) return null;
 
+  const paidItem = store.items[idx]!;
   const updated: StoredDiagnosticRecord = {
-    ...normalizeStoredRecord(store.items[idx]),
+    ...normalizeStoredRecord(paidItem),
     reportStatus: "paid",
     reportTier:
       args.reportTier !== undefined
         ? safeNullableString(args.reportTier)
-        : store.items[idx].reportTier,
+        : paidItem.reportTier,
     updatedAt: nowIso(),
   };
 

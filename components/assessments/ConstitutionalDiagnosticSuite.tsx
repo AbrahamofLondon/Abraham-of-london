@@ -357,10 +357,16 @@ export default function ConstitutionalDiagnosticSuite() {
   const { decision, scores, routeHref } = React.useMemo(() => buildDecision(answers), [answers]);
 
   function setResonance(v: number) {
-    setAnswers(prev => ({ ...prev, [current.id]: { ...currentAnswer, resonance: v as Likert } }));
+    setAnswers(prev => {
+      const existing = prev[current.id] ?? { resonance: 5 as Likert, certainty: 5 as Likert };
+      return { ...prev, [current.id]: { ...existing, resonance: v as Likert } };
+    });
   }
   function setCertainty(v: number) {
-    setAnswers(prev => ({ ...prev, [current.id]: { ...currentAnswer, certainty: v as Likert } }));
+    setAnswers(prev => {
+      const existing = prev[current.id] ?? { resonance: 5 as Likert, certainty: 5 as Likert };
+      return { ...prev, [current.id]: { ...existing, certainty: v as Likert } };
+    });
   }
 
   const rc = routeColor(decision?.route ?? "DIAGNOSTIC");

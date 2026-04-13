@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext, GetStaticPropsResult, NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 
@@ -303,12 +303,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   const slug = norm(String(params?.slug || ""));
   const canonicalUrl = `/${slug}`;
 
   if (!allowRootSlug(slug)) {
-    return { notFound: true, revalidate: 60 };
+    return { notFound: true };
   }
 
   const {
@@ -322,7 +322,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const rawDoc = getDocBySlug(needle);
 
   if (!rawDoc || isDraftContent(rawDoc) || !isPublished(rawDoc)) {
-    return { notFound: true, revalidate: 60 };
+    return { notFound: true };
   }
 
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));

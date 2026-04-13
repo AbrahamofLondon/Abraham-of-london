@@ -103,8 +103,9 @@ function normalizeString(v: unknown): string | null {
 function normalizeSeverity(v: unknown): AuditSeverity {
   const s = String(v ?? "").trim().toLowerCase();
   if (s === "critical") return "critical";
-  if (s === "high" || s === "error") return "high";
-  if (s === "warning" || s === "warn" || s === "medium") return "warning";
+  if (s === "high" || s === "error") return "error";
+  if (s === "warning" || s === "warn" || s === "medium") return "warn";
+  if (s === "debug") return "debug";
   return "info";
 }
 
@@ -229,8 +230,8 @@ function toDbCreateInput(event: AuditEvent): Prisma.SystemAuditLogCreateInput {
     errorMessage,
     category,
     subCategory,
-    tags: toJson(tags),
-    metadata: toJson(mergedMetadata),
+    tags: JSON.stringify(tags),
+    metadata: JSON.stringify(mergedMetadata),
   };
 }
 
@@ -287,7 +288,7 @@ export class AuditLogger {
       console.log(`🧾 [AUDIT:${String(input.severity).toUpperCase()}] ${input.action}`);
     }
 
-    if (input.severity === "critical" || input.severity === "high" || highClearance) {
+    if (input.severity === "critical" || input.severity === "error" || highClearance) {
       return (this.prisma as any).systemAuditLog.create({ data: input });
     }
 
@@ -314,7 +315,7 @@ export class AuditLogger {
     const cutoff = new Date(Date.now() - clampInt(retentionDays, 90, 30, 3650) * 24 * 60 * 60 * 1000);
     await this.flushBatch();
     const result = await (this.prisma as any).systemAuditLog.deleteMany({
-      where: { createdAt: { lt: cutoff }, severity: { in: ["info", "warning"] } },
+      where: { createdAt: { lt: cutoff }, severity: { in: ["info", "warn"] } },
     });
     return result.count;
   }

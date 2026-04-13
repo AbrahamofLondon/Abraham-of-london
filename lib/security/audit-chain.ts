@@ -25,7 +25,9 @@ export async function writeChainedAudit(entry: {
 
   return prisma.systemAuditLog.create({
     data: {
-      ...entry,
+      action: entry.action,
+      actorEmail: entry.subjectEmail,
+      metadata: entry.metadata != null ? JSON.stringify(entry.metadata) : undefined,
       hash,
       prevHash,
     },

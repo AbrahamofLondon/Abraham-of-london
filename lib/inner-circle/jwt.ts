@@ -222,7 +222,7 @@ export function createDevToken(): string {
     id: "dev_001",
     email: "dev@abrahamoflondon.org",
     name: "Development User",
-    tier: "inner-circle",
+    tier: "inner_circle",
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
   };

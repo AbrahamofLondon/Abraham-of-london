@@ -338,7 +338,7 @@ export async function createDownloadToken(params: {
         expiresAt,
         maxDownloads,
         usedCount: 0,
-        metadata: toPrismaJson(mergedMetadata),
+        metadata: JSON.stringify(mergedMetadata),
       },
     });
 

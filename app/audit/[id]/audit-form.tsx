@@ -19,7 +19,7 @@ export function AuditForm({ participantId }: { participantId: string }) {
       const statuses = ['Scrubbing ID...', 'Anonymizing Metadata...', 'Encrypting Node...', 'Transmitting...'];
       let i = 0;
       const interval = setInterval(() => {
-        setEncryptionStatus(statuses[i % statuses.length]);
+        setEncryptionStatus(statuses[i % statuses.length] ?? 'Transmitting...');
         i++;
       }, 600);
       return () => clearInterval(interval);

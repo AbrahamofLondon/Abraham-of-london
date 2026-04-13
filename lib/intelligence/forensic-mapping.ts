@@ -1,5 +1,5 @@
 /* lib/intelligence/forensic-mapping.ts — V1.0 (INSTITUTIONAL TRACE) */
-import { crypto } from "crypto";
+import crypto from "crypto";
 import type { WatermarkPayload } from "./watermark-delegate";
 import type { PDFRegistryEntry } from "../pdf/registry.static";
 

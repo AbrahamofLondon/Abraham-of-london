@@ -221,7 +221,7 @@ export function ConstitutionalFollowupPanel({
         urgency: "immediate",
         clarityScore: 70,
         authorityType: normaliseAuthorityType(constitution.authorityType),
-        readinessTier: normaliseReadinessTier(constitution.readinessTier),
+        readinessTier: normaliseReadinessTier(constitution.readinessTier) as "FRAGILE" | "EMERGING" | "STABILIZING" | "EXECUTION_READY" | "SOVEREIGN",
         failureModeCount: 2,
       });
 

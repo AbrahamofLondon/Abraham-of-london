@@ -13,7 +13,7 @@ export function requiredTierFromVaultPath(filePath: string): AccessTier {
   const p = norm(filePath);
 
   if (p.includes("/frameworks/public-teasers/")) return "public";
-  if (p.includes("/frameworks/inner-circle/")) return "inner-circle";
+  if (p.includes("/frameworks/inner-circle/")) return "inner_circle";
   if (p.includes("/frameworks/client/")) return "client";
   if (p.includes("/frameworks/legacy/")) return "legacy";
   if (p.includes("/frameworks/architect/")) return "architect";

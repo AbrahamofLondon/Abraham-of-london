@@ -1,10 +1,39 @@
 // lib/admin/reporting/canonical-report-contract.ts
 
 import type {
+  CanonicalExecutiveReportExport,
+  ConstitutionalRoute,
+  ExecutiveReportAuthorityType,
   ExecutiveReportConstitution,
   ExecutiveReportGuidance,
+  ExecutiveReportMarketRiskBand,
+  ExecutiveReportPriority,
+  ExecutiveReportReadinessTier,
   ExecutiveReportRecommendation,
+  ExecutiveReportRevenueBand,
+  ExecutiveReportState,
+  ExecutiveReportTemperature,
 } from "./types";
+
+/**
+ * @deprecated Use `CanonicalExecutiveReportExport` from `./types` directly.
+ * This alias is retained for any latent importer; `buildCanonicalReportContract`
+ * now returns the stricter Export type.
+ */
+export type CanonicalReportContract = CanonicalExecutiveReportExport;
+
+function toExecutiveReportState(
+  value: unknown,
+  fallback: ExecutiveReportState,
+): ExecutiveReportState {
+  const s = typeof value === "string" ? value.trim() : "";
+  return s === "ORDERED" ||
+    s === "DRIFTING" ||
+    s === "MISALIGNED" ||
+    s === "DISORDERED"
+    ? s
+    : fallback;
+}
 
 type AnyRecord = Record<string, unknown>;
 
@@ -89,84 +118,6 @@ function normalizeDomain(domain: unknown): {
   };
 }
 
-export type CanonicalReportContract = {
-  schemaVersion: "canonical-report-v2";
-  generatedAt: string;
-  reportId: string;
-  campaign: {
-    id: string;
-    title: string;
-    organisationName: string;
-    generatedAt: string;
-  };
-  registry: {
-    model: string;
-    node: string;
-    protocol: string;
-  };
-  sections: {
-    executiveSummary: {
-      title: string;
-      subtitle: string;
-      state: string;
-      headline: string;
-      summary: string;
-      mandate: string;
-    };
-    constitutionalPosture: ExecutiveReportConstitution;
-    strategicDomainAnalysis: {
-      averageDissonance: number;
-      domains: Array<{
-        label: string;
-        intent: number;
-        reality: number;
-        dissonance: number;
-      }>;
-    };
-    financialExposure: {
-      replacementCost: number;
-      executionLoss: number;
-      totalExposure: number;
-      replacementCostFormatted: string;
-      executionLossFormatted: string;
-      totalExposureFormatted: string;
-    };
-    integritySnapshot: {
-      sovereignCertainty: number;
-      burnoutIndex: number;
-      averageDissonance: number;
-      authorized: boolean;
-    };
-    governedRecommendations: {
-      summary: string;
-      nextAction: string;
-      rationale: string[];
-      recommendations: ExecutiveReportRecommendation[];
-    };
-    priorityStack: {
-      items: string[];
-    };
-    failureModes: {
-      items: string[];
-    };
-    requiredInterventions: {
-      items: string[];
-    };
-    dominantDomains: {
-      items: string[];
-    };
-    worldviewAnchors: {
-      items: string[];
-    };
-    sponsorTypes: {
-      items: string[];
-    };
-    rationale: {
-      items: string[];
-    };
-  };
-};
-
 export type BuildCanonicalReportContractArgs = {
   report: any;
   constitution: ExecutiveReportConstitution;
@@ -186,7 +137,7 @@ export type BuildCanonicalReportContractArgs = {
 
 export function buildCanonicalReportContract(
   args: BuildCanonicalReportContractArgs,
-): CanonicalReportContract {
+): CanonicalExecutiveReportExport {
   const report = args.report || {};
   const constitution = args.constitution;
   const guidance = args.guidance;
@@ -207,7 +158,7 @@ export function buildCanonicalReportContract(
     report?.resonance?.telemetry?.averageDissonance,
     domains.length
       ? Math.round(
-          domains.reduce((sum, item) => sum + item.dissonance, 0) / domains.length,
+          domains.reduce((sum: number, item: { dissonance: number }) => sum + item.dissonance, 0) / domains.length,
         )
       : safeNumber(constitution?.severityScore, 0),
   );
@@ -225,14 +176,14 @@ export function buildCanonicalReportContract(
 
   const normalizedConstitution: ExecutiveReportConstitution = {
     ...constitution,
-    route: safeString(constitution?.route, "DIAGNOSTIC"),
-    priority: safeString(constitution?.priority, "MEDIUM"),
-    temperature: safeString(constitution?.temperature, "WARM"),
-    orgState: safeString(constitution?.orgState, "DRIFTING"),
-    readinessTier: safeString(constitution?.readinessTier, "EMERGING"),
-    authorityType: safeString(constitution?.authorityType, "UNCLEAR"),
-    revenueBand: safeString(constitution?.revenueBand, "SMB"),
-    marketRiskBand: safeString(constitution?.marketRiskBand, "MODERATE"),
+    route: safeString(constitution?.route, "DIAGNOSTIC") as ConstitutionalRoute,
+    priority: safeString(constitution?.priority, "MEDIUM") as ExecutiveReportPriority,
+    temperature: safeString(constitution?.temperature, "WARM") as ExecutiveReportTemperature,
+    orgState: safeString(constitution?.orgState, "DRIFTING") as ExecutiveReportState,
+    readinessTier: safeString(constitution?.readinessTier, "EMERGING") as ExecutiveReportReadinessTier,
+    authorityType: safeString(constitution?.authorityType, "UNCLEAR") as ExecutiveReportAuthorityType,
+    revenueBand: safeString(constitution?.revenueBand, "SMB") as ExecutiveReportRevenueBand,
+    marketRiskBand: safeString(constitution?.marketRiskBand, "MODERATE") as ExecutiveReportMarketRiskBand,
     clarityScore: safeNumber(constitution?.clarityScore, 50),
     authorityScore: safeNumber(constitution?.authorityScore, 50),
     governanceScore: safeNumber(constitution?.governanceScore, 50),
@@ -283,7 +234,10 @@ export function buildCanonicalReportContract(
       executiveSummary: {
         title: "Executive Intelligence Brief",
         subtitle: organisationName,
-        state: safeString(report?.state, normalizedConstitution.orgState),
+        state: toExecutiveReportState(
+          report?.state,
+          normalizedConstitution.orgState,
+        ),
         headline: safeString(
           report?.narrative?.headline,
           "Alignment condition assessed across core operating domains.",

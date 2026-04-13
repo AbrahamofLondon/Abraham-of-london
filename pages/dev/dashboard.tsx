@@ -256,7 +256,7 @@ function DevDashboardComponent({
   // Extract username from email
   const userName = React.useMemo(() => {
     if (userEmail && userEmail !== "developer@sovereign.internal") {
-      const name = userEmail.split("@")[0];
+      const name = userEmail.split("@")[0] ?? "";
       return name.charAt(0).toUpperCase() + name.slice(1);
     }
     return "Developer Preview";
@@ -544,13 +544,20 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
           id: true,
           title: true,
           slug: true,
-          excerpt: true,
+          summary: true,
           createdAt: true,
-          category: true,
+          contentType: true,
         },
       });
 
-      briefs = allBriefs;
+      briefs = allBriefs.map((b) => ({
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        excerpt: b.summary ?? undefined,
+        createdAt: b.createdAt.toISOString(),
+        category: String(b.contentType),
+      }));
       totalCount = await prisma.contentMetadata.count();
     } catch (error) {
       console.warn("Briefs unavailable, using mock data:", error);

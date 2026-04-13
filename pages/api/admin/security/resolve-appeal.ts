@@ -27,7 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Original request not found." });
     }
 
-    const requestedTier = (originalEvent.metadata as any)?.requiredTier;
+    const _parsedMeta = (() => { try { return JSON.parse(originalEvent.metadata as string ?? "{}"); } catch { return {}; } })();
+    const requestedTier = _parsedMeta?.requiredTier;
     const targetUserId = originalEvent.actorId;
 
     // 3. Atomic Transaction: Update User + Close Audit Log
@@ -46,12 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { id: eventId },
         data: {
           status: approved ? "resolved_approved" : "resolved_denied",
-          metadata: {
-            ...(originalEvent.metadata as object),
+          metadata: JSON.stringify({
+            ..._parsedMeta,
             resolvedBy: session?.user?.email,
             resolvedAt: new Date().toISOString(),
             finalDecision: approved ? "TIER_ESCALATED" : "REQUEST_REJECTED",
-          },
+          }),
         },
       });
 
@@ -65,11 +66,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           actorType: "admin",
           resourceId: targetUserId,
           status: "success",
-          metadata: {
-            previousTier: (originalEvent.metadata as any)?.userTier,
+          metadata: JSON.stringify({
+            previousTier: _parsedMeta?.userTier,
             newTier: approved ? requestedTier : "NO_CHANGE",
-            reason: "Manual review of appeal " + eventId
-          }
+            reason: "Manual review of appeal " + eventId,
+          })
         }
       });
     });

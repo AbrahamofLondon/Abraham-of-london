@@ -4,7 +4,7 @@ import Head from "next/head";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { contact, getPageTitle } from "@/lib/siteConfig";
+import { getPageTitle, siteConfig } from "@/lib/siteConfig";
 
 const TermsPage: NextPage = () => {
   const lastUpdated = React.useMemo(
@@ -67,7 +67,7 @@ const TermsPage: NextPage = () => {
             <h3 className="text-xs uppercase tracking-widest text-amber-500 mb-4">Protocol Conflict</h3>
             <p className="text-xs text-zinc-500 leading-relaxed">
               If you believe a provision is unclear, we invite a measured dialogue. 
-              Contact: <span className="text-zinc-300">{contact.email}</span>
+              Contact: <span className="text-zinc-300">{siteConfig.contact?.email ?? ""}</span>
             </p>
           </div>
         </div>

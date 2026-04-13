@@ -34,8 +34,8 @@ export function hasValidOgrSession(cookieValue: string | undefined): boolean {
   return timingSafeEqual(providedMac, expectedMac);
 }
 
-export function getOgrSession(): string | undefined {
-  const cookieStore = cookies();
+export async function getOgrSession(): Promise<string | undefined> {
+  const cookieStore = await cookies();
   return cookieStore.get(OGR_COOKIE_NAME)?.value;
 }
 

@@ -10,8 +10,8 @@ export default function AssessmentSuccessPage() {
   const router = useRouter();
   
   // Extract scores from URL (pushed from the POST response)
-  const score = searchParams.get('score') || '0';
-  const band = searchParams.get('band') || 'Emergent';
+  const score = searchParams?.get('score') || '0';
+  const band = searchParams?.get('band') || 'Emergent';
   const numericScore = parseInt(score, 10);
 
   // Determine accent color based on the Band

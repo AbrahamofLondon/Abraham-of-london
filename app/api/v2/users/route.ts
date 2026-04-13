@@ -29,23 +29,26 @@ async function auditApiCall(args: {
   note?: string;
 }) {
   // Best-effort logging: MUST NEVER break the request
-  await safePrismaQuery(() =>
-    prisma.systemAuditLog.create({
-      data: {
-        action: "API_CALL",
-        severity: "info",
-        resourceId: args.endpoint,
-        ipAddress: args.ipAddress,
-        userAgent: args.userAgent,
-        metadata: {
-          endpoint: args.endpoint,
-          method: args.method,
-          statusCode: args.statusCode,
-          note: args.note || null,
-          at: new Date().toISOString(),
+  await safePrismaQuery(
+    "api.v2.users.recordAuditEvent",
+    () =>
+      prisma.systemAuditLog.create({
+        data: {
+          action: "API_CALL",
+          severity: "info",
+          resourceId: args.endpoint,
+          ipAddress: args.ipAddress,
+          userAgent: args.userAgent,
+          metadata: JSON.stringify({
+            endpoint: args.endpoint,
+            method: args.method,
+            statusCode: args.statusCode,
+            note: args.note || null,
+            at: new Date().toISOString(),
+          }),
         },
-      },
-    })
+      }),
+    null,
   );
 }
 
@@ -116,20 +119,23 @@ async function forwardToV1(request: NextRequest, method: Method = "GET", body?: 
 }
 
 async function dbFallback(request: NextRequest) {
-  const usersResult = await safePrismaQuery(() =>
-    prisma.innerCircleMember.findMany({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        status: true,
-        tier: true,
-        createdAt: true,
-        lastSeenAt: true,
-      },
-      take: 50,
-      orderBy: { createdAt: "desc" },
-    })
+  const usersResult = await safePrismaQuery(
+    "api.v2.users.dbFallback",
+    () =>
+      prisma.innerCircleMember.findMany({
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          status: true,
+          tier: true,
+          createdAt: true,
+          lastSeenAt: true,
+        },
+        take: 50,
+        orderBy: { createdAt: "desc" },
+      }),
+    [],
   );
 
   const users = Array.isArray(usersResult) ? usersResult : [];

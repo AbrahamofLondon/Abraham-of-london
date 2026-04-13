@@ -120,9 +120,35 @@ function ReportDocument({ report }: { report: any }) {
   );
 }
 
+async function readableStreamToBuffer(
+  stream: ReadableStream<Uint8Array>,
+): Promise<Buffer> {
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalLength = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) {
+      chunks.push(value);
+      totalLength += value.length;
+    }
+  }
+
+  const bytes = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return Buffer.from(bytes);
+}
+
 export async function renderReportPdfToPublic(report: any): Promise<string> {
   const instance = pdf(<ReportDocument report={report} />);
-  const buffer = await instance.toBuffer();
+  const pdfStream = (await instance.toBuffer()) as unknown as ReadableStream<Uint8Array>;
+  const buffer = await readableStreamToBuffer(pdfStream);
 
   const dir = path.join(process.cwd(), "public", "generated-reports");
   fs.mkdirSync(dir, { recursive: true });

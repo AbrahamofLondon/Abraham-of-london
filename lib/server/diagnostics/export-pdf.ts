@@ -1,6 +1,26 @@
 // lib/server/diagnostics/export-pdf.ts
 import "server-only";
-import PDFDocument from "pdfkit";
+interface PDFDocumentInstance {
+  on(event: string, cb: (c: Buffer) => void): void;
+  end(): void;
+  save(): PDFDocumentInstance;
+  restore(): PDFDocumentInstance;
+  rotate(deg: number, opts: Record<string, unknown>): PDFDocumentInstance;
+  fillColor(c: string): PDFDocumentInstance;
+  opacity(n: number): PDFDocumentInstance;
+  fontSize(n: number): PDFDocumentInstance;
+  text(s: string, opts?: Record<string, unknown>): PDFDocumentInstance;
+  text(s: string, x: number, y: number, opts?: Record<string, unknown>): PDFDocumentInstance;
+  rect(x: number, y: number, w: number, h: number): PDFDocumentInstance;
+  strokeColor(c: string): PDFDocumentInstance;
+  stroke(): PDFDocumentInstance;
+  moveDown(n?: number): PDFDocumentInstance;
+  moveTo(x: number, y: number): PDFDocumentInstance;
+  lineTo(x: number, y: number): PDFDocumentInstance;
+  readonly y: number;
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const PDFDocument = require("pdfkit") as new (opts: { margin: number; size: string }) => PDFDocumentInstance;
 import { signPayload } from "./signing";
 import { buildWatermarkLines } from "./watermark";
 import type { ReportWatermarkPayload } from "./types";

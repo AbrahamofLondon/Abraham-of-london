@@ -117,7 +117,7 @@ const DiagnosticsDashboardPage: NextPage = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    {["paid", "generated"].includes(record.reportStatus) ? (
+                    {["paid", "generated"].includes(record.reportStatus ?? "") ? (
                       <button
                         onClick={() => downloadReport(record.id)}
                         className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-xs uppercase tracking-[0.18em] text-emerald-300"

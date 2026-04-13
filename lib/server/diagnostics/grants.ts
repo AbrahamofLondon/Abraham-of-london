@@ -10,6 +10,7 @@ function entitlementKey() {
 
 export async function issueArtifactGrant(input: {
   diagnosticRef: string;
+  diagnosticId: string;
   artifactId: string;
   granteeEmail: string;
   expiresAt?: Date | null;
@@ -18,6 +19,7 @@ export async function issueArtifactGrant(input: {
   const grant = await prisma.diagnosticArtifactAccessGrant.create({
     data: {
       diagnosticRef: input.diagnosticRef,
+      diagnosticId: input.diagnosticId,
       artifactId: input.artifactId,
       granteeEmail: input.granteeEmail.trim().toLowerCase(),
       entitlementKey: entitlementKey(),

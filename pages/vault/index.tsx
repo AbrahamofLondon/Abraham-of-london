@@ -505,8 +505,6 @@ const VaultPage: NextPage<
             <div className="mt-16 grid gap-6 md:grid-cols-3">
               <VaultTierCard
                 title="Vault Access"
-                price="£29"
-                period="month"
                 features={[
                   "Playbooks access",
                   "Canon essays",
@@ -514,14 +512,10 @@ const VaultPage: NextPage<
                   "Intelligence briefs",
                   "Public archive access",
                 ]}
-                ctaText="Start with Vault"
-                ctaLink="/inner-circle?tier=vault"
               />
 
               <VaultTierCard
                 title="Vault Plus"
-                price="£79"
-                period="month"
                 emphasis
                 features={[
                   "Everything in Vault",
@@ -530,14 +524,10 @@ const VaultPage: NextPage<
                   "Executive briefings",
                   "Priority support",
                 ]}
-                ctaText="Upgrade to Plus"
-                ctaLink="/inner-circle?tier=vault-plus"
               />
 
               <VaultTierCard
                 title="Private Access"
-                price="Custom"
-                period="annual"
                 features={[
                   "Strategy proximity",
                   "Direct escalation",
@@ -545,8 +535,6 @@ const VaultPage: NextPage<
                   "Private advisory",
                   "Inner Circle access",
                 ]}
-                ctaText="Request Access"
-                ctaLink="/strategy-room"
               />
             </div>
           </div>

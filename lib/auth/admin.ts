@@ -24,7 +24,7 @@ export async function getAdminSession(request: Request | any): Promise<AdminSess
   const session = await prisma.adminSession.findUnique({
     where: { token },
     include: {
-      user: {
+      member: {
         select: {
           id: true,
           role: true,
@@ -38,15 +38,15 @@ export async function getAdminSession(request: Request | any): Promise<AdminSess
 
   if (!session) return null;
   if (session.expiresAt < new Date()) return null;
-  if (!session.user) return null;
+  if (!session.member) return null;
 
   return {
-    userId: session.userId,
+    userId: session.memberId,
     token: session.token,
-    role: session.user.role,
-    isAdmin: session.user.status === "active" && session.user.role === "ADMIN",
-    email: session.user.email,
-    name: session.user.name,
+    role: session.member.role,
+    isAdmin: session.member.status === "active" && session.member.role === "ADMIN",
+    email: session.member.email,
+    name: session.member.name,
   };
 }
 

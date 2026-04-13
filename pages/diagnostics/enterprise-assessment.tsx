@@ -561,7 +561,35 @@ export default function EnterpriseAssessmentPage() {
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
       metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/consulting/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
     });
-    setSubmitResult(res); setIsSubmitting(false);
+    setSubmitResult(res);
+
+    // Handoff to /diagnostics/executive-reporting (and the Strategy Room chain).
+    // Canonical key per CLAUDE_SESSION_LOG.md section 4 ladder chain:
+    // purpose-alignment-result → team-assessment-result → enterprise-assessment-result
+    // → executive-report-result → strategy-room-result.
+    // Mirrors the Team → Enterprise write pattern. Preserves the server response
+    // plus the key computed enterprise metrics so downstream surfaces can enrich
+    // without an extra round-trip.
+    try {
+      sessionStorage.setItem(
+        "enterprise-assessment-result",
+        JSON.stringify({
+          ...(res || {}),
+          totalScore,
+          maxScore,
+          totalPct,
+          severity: severityFromPct(totalPct),
+          band: bandFromPct(totalPct),
+          sections: sections.map(s => ({ id: s.id, title: s.title, pct: s.pct })),
+          nextRoute: reading?.route ?? "EXECUTIVE_REPORTING",
+          teamAlignmentPct,
+        }),
+      );
+    } catch {
+      /* sessionStorage unavailable (private mode / SSR) — handoff degrades gracefully */
+    }
+
+    setIsSubmitting(false);
   }
 
   return (

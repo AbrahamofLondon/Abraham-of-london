@@ -9,7 +9,7 @@ export default function SovereignHeader() {
   // Initialize the real-time telemetry stream
   useOGRTelemetry();
 
-  const { isAuthenticated, marketFriction, emergencyLockout, logout } = useOGRStore();
+  const { isAuthenticated, marketFriction, logout } = useOGRStore();
 
   if (!isAuthenticated) return null;
 
@@ -47,7 +47,7 @@ export default function SovereignHeader() {
         <button 
           onClick={() => {
             if (confirm("INITIATE EMERGENCY LOCKOUT? This will purge all local session data.")) {
-              emergencyLockout();
+              logout();
             }
           }}
           className="group px-4 py-2 bg-red-950/20 border border-red-900/50 text-red-500 font-mono text-[9px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(220,38,38,0.1)]"

@@ -8,10 +8,12 @@ import { adminFetch } from "@/lib/api/admin-client";
 interface AuditLog {
   id: string;
   action: string;
-  severity: string;
-  status: string;
-  createdAt: string;
+  severity: "info" | "warning" | "high" | "critical";
+  status?: string | null;
+  createdAt?: string;
   metadata?: any;
+  ipAddress?: string | null;
+  category?: string | null;
 }
 
 interface AdminStats {
@@ -287,7 +289,7 @@ export default function AdminDashboard() {
                   className="p-2 border-b border-white/5 flex justify-between hover:bg-white/5"
                 >
                   <span className="text-blue-500">
-                    [{new Date(log.createdAt).toLocaleTimeString()}]
+                    [{new Date(log.createdAt ?? Date.now()).toLocaleTimeString()}]
                   </span>
                   <span className="text-slate-300 uppercase">{log.action}</span>
                   <span

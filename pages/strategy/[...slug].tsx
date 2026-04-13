@@ -171,7 +171,7 @@ const StrategySlugPage: NextPage<Props> = ({ item }) => {
                  <div className="flex items-start gap-3">
                     <Fingerprint className="h-5 w-5 text-zinc-800" />
                     <code className="break-all text-[8px] leading-relaxed text-zinc-600">
-                        {crypto.createHash('sha256').update(slug).digest('hex')}
+                        {slug.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0).toString(16).padStart(8, "0")}
                     </code>
                  </div>
               </div>

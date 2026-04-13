@@ -342,10 +342,11 @@ function tokenizeInline(text: string): Array<
   return parts.map((part) => {
     const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (linkMatch) {
+      const [, linkText = "", linkHref = ""] = linkMatch;
       return {
         type: "link" as const,
-        content: cleanInline(linkMatch[1], 240),
-        href: safeString(linkMatch[2]).trim(),
+        content: cleanInline(linkText, 240),
+        href: safeString(linkHref).trim(),
       };
     }
 

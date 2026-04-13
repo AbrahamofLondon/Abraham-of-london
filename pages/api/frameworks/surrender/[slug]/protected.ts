@@ -68,11 +68,13 @@ function resolveDoc(slug: string): { doc: any | null; tried: string[] } {
     cleaned,
   ].map(norm);
 
+  const [t0, t1, t2, t3] = tries;
+
   let doc =
-    getDocBySlug(tries[0]) ||
-    getDocBySlug(tries[1]) ||
-    getDocBySlug(tries[2]) ||
-    getDocBySlug(tries[3]) ||
+    (t0 ? getDocBySlug(t0) : null) ||
+    (t1 ? getDocBySlug(t1) : null) ||
+    (t2 ? getDocBySlug(t2) : null) ||
+    (t3 ? getDocBySlug(t3) : null) ||
     null;
 
   if (!doc) {

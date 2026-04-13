@@ -75,7 +75,7 @@ const RegistryPage: NextPage<RegistryPageProps> = ({ initialDocs, categories }) 
   return (
     <RegistryProvider initialDocs={initialDocs} categories={categories}>
       <RegistryLayout>
-        <RegistryView />
+        <RegistryView initialDocs={initialDocs} categories={categories} />
       </RegistryLayout>
     </RegistryProvider>
   );

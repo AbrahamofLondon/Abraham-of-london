@@ -14,7 +14,7 @@ interface AuthState {
 export default function RestrictedAccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get('returnTo') || '/dashboard';
+  const returnTo = searchParams?.get('returnTo') || '/dashboard';
   
   const [accessKey, setAccessKey] = React.useState('');
   const [state, setState] = React.useState<AuthState>({

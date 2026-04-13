@@ -52,7 +52,7 @@ function safePush(href: string): void {
 const PERMISSIONS_MAP: Record<AccessTier, readonly string[]> = {
   public: ["content:view"],
   member: ["content:view", "content:download"],
-  "inner-circle": [
+  inner_circle: [
     "content:view",
     "content:download",
     "content:create",
@@ -104,7 +104,7 @@ const PERMISSIONS_MAP: Record<AccessTier, readonly string[]> = {
     "tokens:manage",
     "system:view",
   ],
-  "top-secret": [
+  top_secret: [
     "content:view",
     "content:download",
     "content:create",

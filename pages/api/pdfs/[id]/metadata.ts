@@ -1,7 +1,6 @@
 // pages/api/pdfs/[id]/metadata.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import type { Prisma } from "@prisma/client";
 
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/prisma";
@@ -10,6 +9,16 @@ type JsonRecord = Record<string, unknown>;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function safeParseMetadata(raw: unknown): JsonRecord {
+  if (typeof raw !== "string") return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return isRecord(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
 }
 
 export default async function handler(
@@ -45,9 +54,7 @@ export default async function handler(
       return res.status(404).json({ error: "PDF not found in registry" });
     }
 
-    const currentMetadata: JsonRecord = isRecord(record.metadata)
-      ? { ...record.metadata }
-      : {};
+    const currentMetadata: JsonRecord = safeParseMetadata(record.metadata);
 
     const allowedFields = [
       "title",
@@ -87,7 +94,7 @@ export default async function handler(
       where: { slug: id },
       data: {
         ...topLevelUpdates,
-        metadata: newMetadata as Prisma.InputJsonValue,
+        metadata: JSON.stringify(newMetadata),
       },
     });
 

@@ -1,19 +1,20 @@
 import { GetServerSideProps } from "next";
 import { getAllCombinedDocs } from "@/lib/content/server";
+import type { ContentDoc } from "@/lib/contentlayer-helper";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   // Filter for specific content types (e.g., 'Canon')
-  const docs = allDocuments.filter((d) => d.type === "Canon" || d.slug.includes("canon"));
+  const docs = getAllCombinedDocs().filter((d: ContentDoc) => d.type === "Canon" || String(d.slug ?? "").includes("canon"));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       ${docs
-        .map((doc) => `
+        .map((doc: ContentDoc) => `
           <url>
             <loc>${SITE_URL}/${doc.slug}</loc>
-            <lastmod>${doc.date ? new Date(doc.date).toISOString() : new Date().toISOString()}</lastmod>
+            <lastmod>${doc.date ? new Date(String(doc.date)).toISOString() : new Date().toISOString()}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.8</priority>
           </url>

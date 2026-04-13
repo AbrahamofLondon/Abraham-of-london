@@ -2,7 +2,9 @@ export const dynamic = "force-dynamic";
 /* app/api/download/[token]/route.ts — STRICT-TYPED MASTER VAULT */
 import { NextRequest, NextResponse } from "next/server";
 import React from "react";
-import { renderToStream } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
+import { renderToBuffer } from "@react-pdf/renderer";
+import type { DocumentProps } from "@react-pdf/renderer";
 import { getServerSession } from "next-auth";
 
 import { getPDFById } from "@/lib/pdf/registry";
@@ -277,11 +279,11 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
       watermark: forensic,
     });
 
-    const stream = await renderToStream(documentElement);
+    const pdfBuffer = await renderToBuffer(documentElement as ReactElement<DocumentProps>);
     const signature = getForensicSignature(forensic);
     const filename = `${pdfConfig.slug || "brief"}-${traceId}.pdf`;
 
-    return new NextResponse(stream as BodyInit, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,

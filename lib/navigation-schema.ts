@@ -45,4 +45,4 @@ export const SHARED_NAV_ITEMS: SharedNavItem[] = [
     label: "Consulting",
     icon: Briefcase,
   },
-];s
+];

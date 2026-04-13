@@ -190,7 +190,7 @@ function StatCell({ value, label }: { value: string; label: string }) {
           fontSize: "2.2rem",
           lineHeight: 1,
           letterSpacing: "-0.03em",
-          color: "rgba(255,255,255,0.85)",
+          color: "rgba(255,255,255,0.92)",
         }}
       >
         {value}
@@ -201,7 +201,7 @@ function StatCell({ value, label }: { value: string; label: string }) {
           fontSize: "7px",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.25)",
+          color: "rgba(255,255,255,0.42)",
           marginTop: "0.35rem",
         }}
       >
@@ -241,7 +241,7 @@ function ClassificationStrip() {
           fontSize: "6.5px",
           letterSpacing: "0.30em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.18)",
+          color: "rgba(255,255,255,0.40)",
           marginBottom: "0.6rem",
         }}
       >
@@ -391,7 +391,7 @@ function LayerRow({
                   fontSize: "7px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.22)",
+                  color: "rgba(255,255,255,0.42)",
                 }}
               >
                 {layer.domain} · {layer.duration}
@@ -407,7 +407,7 @@ function LayerRow({
                   fontSize: "7.5px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.20)",
+                  color: "rgba(255,255,255,0.38)",
                 }}
               >
                 {isOpen ? "Collapse" : "Expand"}
@@ -444,7 +444,7 @@ function LayerRow({
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.32 }}
               style={{
-                borderTop: "1px solid rgba(255,255,255,0.05)",
+                borderTop: "1px solid rgba(255,255,255,0.09)",
                 overflow: "hidden",
               }}
             >
@@ -457,7 +457,7 @@ function LayerRow({
                         fontWeight: 300,
                         fontSize: "1.08rem",
                         lineHeight: 1.78,
-                        color: "rgba(255,255,255,0.65)",
+                        color: "rgba(255,255,255,0.78)",
                         marginBottom: "1rem",
                       }}
                     >
@@ -470,7 +470,7 @@ function LayerRow({
                         fontWeight: 300,
                         fontSize: "0.94rem",
                         lineHeight: 1.7,
-                        color: "rgba(255,255,255,0.36)",
+                        color: "rgba(255,255,255,0.52)",
                         marginBottom: "1.25rem",
                         fontStyle: "italic",
                       }}
@@ -481,8 +481,8 @@ function LayerRow({
                     <div
                       style={{
                         padding: "0.75rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.05)",
-                        backgroundColor: "rgba(255,255,255,0.01)",
+                        border: "1px solid rgba(255,255,255,0.09)",
+                        backgroundColor: "rgba(255,255,255,0.025)",
                         display: "inline-flex",
                         alignItems: "center",
                         gap: "0.75rem",
@@ -494,7 +494,7 @@ function LayerRow({
                           fontSize: "6.5px",
                           letterSpacing: "0.28em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.22)",
+                          color: "rgba(255,255,255,0.42)",
                         }}
                       >
                         Gate
@@ -504,7 +504,7 @@ function LayerRow({
                           fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
                           fontWeight: 300,
                           fontSize: "0.88rem",
-                          color: "rgba(255,255,255,0.45)",
+                          color: "rgba(255,255,255,0.62)",
                           fontStyle: "italic",
                         }}
                       >
@@ -516,8 +516,8 @@ function LayerRow({
                   <div className="space-y-4">
                     <div
                       style={{
-                        border: `1px solid ${GOLD}18`,
-                        backgroundColor: `${GOLD}06`,
+                        border: `1px solid ${GOLD}28`,
+                        backgroundColor: `${GOLD}08`,
                         padding: "1rem 1.25rem",
                       }}
                     >
@@ -527,7 +527,7 @@ function LayerRow({
                           fontSize: "6.5px",
                           letterSpacing: "0.32em",
                           textTransform: "uppercase",
-                          color: `${GOLD}80`,
+                          color: `${GOLD}AA`,
                           marginBottom: "0.5rem",
                         }}
                       >
@@ -539,7 +539,7 @@ function LayerRow({
                           fontWeight: 300,
                           fontSize: "0.88rem",
                           lineHeight: 1.65,
-                          color: "rgba(255,255,255,0.60)",
+                          color: "rgba(255,255,255,0.78)",
                           marginBottom: "0.85rem",
                         }}
                       >
@@ -551,7 +551,7 @@ function LayerRow({
                           fontSize: "6.5px",
                           letterSpacing: "0.22em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.22)",
+                          color: "rgba(255,255,255,0.42)",
                         }}
                       >
                         {layer.routeHint}
@@ -802,7 +802,7 @@ export default function DiagnosticsIndexPage() {
                   <div
                     style={{
                       padding: "0.85rem 1.5rem",
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      borderBottom: "1px solid rgba(255,255,255,0.09)",
                     }}
                   >
                     <span
@@ -811,7 +811,7 @@ export default function DiagnosticsIndexPage() {
                         fontSize: "7px",
                         letterSpacing: "0.38em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.20)",
+                        color: "rgba(255,255,255,0.42)",
                       }}
                     >
                       Platform specification
@@ -820,20 +820,20 @@ export default function DiagnosticsIndexPage() {
 
                   <div
                     className="grid grid-cols-2"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.09)" }}
                   >
                     <div
                       style={{
-                        borderRight: "1px solid rgba(255,255,255,0.05)",
-                        borderBottom: "1px solid rgba(255,255,255,0.05)",
+                        borderRight: "1px solid rgba(255,255,255,0.09)",
+                        borderBottom: "1px solid rgba(255,255,255,0.09)",
                       }}
                     >
                       <StatCell value="4" label="Diagnostic layers" />
                     </div>
-                    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.09)" }}>
                       <StatCell value="3" label="Escalation routes" />
                     </div>
-                    <div style={{ borderRight: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ borderRight: "1px solid rgba(255,255,255,0.09)" }}>
                       <StatCell value="10" label="Constitutional questions" />
                     </div>
                     <div>

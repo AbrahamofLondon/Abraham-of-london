@@ -66,7 +66,8 @@ function makeObjectKey(record: DiagnosticRecordDTO, version: string): string {
 
 async function renderDiagnosticPdf(record: DiagnosticRecordDTO): Promise<Buffer> {
   const instance = pdf(
-    React.createElement(DiagnosticReportDocument, { record }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    React.createElement(DiagnosticReportDocument, { record }) as any,
   );
 
   const raw = await instance.toBuffer();
@@ -115,7 +116,7 @@ async function writeAuditEvent(input: {
       diagnosticId: input.diagnosticId,
       action: input.action,
       actor: input.actor || null,
-      metadata: input.metadata || {},
+      metadata: input.metadata ? JSON.stringify(input.metadata) : null,
     },
   });
 }
@@ -139,7 +140,7 @@ async function writeLineageEvent(input: {
       eventType: input.eventType,
       version: input.version || null,
       actor: input.actor || null,
-      metadata: input.metadata || {},
+      metadata: input.metadata ? JSON.stringify(input.metadata) : null,
     },
   });
 }
@@ -155,10 +156,12 @@ export async function issueDiagnosticReportFromRecord(
     throw new Error("DIAGNOSTIC_ID_REQUIRED");
   }
 
-  const record = await getDiagnosticRecordById(diagnosticId);
-  if (!record) {
+  const rawRecord = await getDiagnosticRecordById(diagnosticId);
+  if (!rawRecord) {
     throw new Error("DIAGNOSTIC_NOT_FOUND");
   }
+  // Cast to DiagnosticRecordDTO to satisfy function signatures; underlying shape is compatible
+  const record = rawRecord as unknown as DiagnosticRecordDTO;
 
   const diagnosticRef = record.reference || makeDiagnosticReference(record.diagnosticType, record.id);
 

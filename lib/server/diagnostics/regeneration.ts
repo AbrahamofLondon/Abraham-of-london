@@ -32,7 +32,7 @@ export async function processRegenerationJobs(limit = 5) {
 
       await prisma.diagnosticRegenerationJob.update({
         where: { id: job.id },
-        data: { status: "done" },
+        data: { status: "completed" },
       });
     } catch (err: any) {
       await prisma.diagnosticRegenerationJob.update({

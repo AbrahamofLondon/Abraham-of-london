@@ -129,8 +129,8 @@ function StatusBadge({ status }: { status: string }) {
     }
   };
 
-  const config = configs[status] || configs.invited;
-  const Icon = config.icon;
+  const config = configs[status] ?? configs["invited"]!;
+  const Icon: React.ElementType = config.icon;
 
   return (
     <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 border text-[9px] font-black uppercase tracking-widest transition-all shadow-sm ${config.classes}`}>

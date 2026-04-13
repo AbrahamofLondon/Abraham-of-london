@@ -73,7 +73,7 @@ const memberStore = new Map<string, { email: string; name?: string; createdAt: D
 const keyUsageStore = new Map<string, { keySuffix: string; memberId: string; timestamp: Date; ipAddress?: string }>();
 
 // Canonical tier order used only for stats bucketing.
-const TIER_ORDER: KeyTier[] = ["public", "member", "inner-circle", "client", "legacy", "architect", "owner"];
+const TIER_ORDER: KeyTier[] = ["public", "member", "inner_circle", "client", "legacy", "architect", "owner"];
 
 // --- UTILITIES ---
 

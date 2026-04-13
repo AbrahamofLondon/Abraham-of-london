@@ -4,7 +4,7 @@ import Head from "next/head";
 import type { NextPage } from "next";
 import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
-import { contact, getPageTitle } from "@/lib/siteConfig";
+import { getPageTitle } from "@/lib/siteConfig";
 
 const CookiesPage: NextPage = () => {
   const lastUpdated = React.useMemo(

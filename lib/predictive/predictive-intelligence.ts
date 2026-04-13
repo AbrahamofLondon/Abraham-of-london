@@ -247,8 +247,9 @@ export class PredictiveIntelligenceService {
     let ssTot = 0;
     
     for (let i = 0; i < values.length; i++) {
-      ssRes += Math.pow(values[i] - mean, 2);
-      ssTot += Math.pow(values[i] - mean, 2);
+      const v = values[i] ?? 0;
+      ssRes += Math.pow(v - mean, 2);
+      ssTot += Math.pow(v - mean, 2);
     }
     
     return ssTot === 0 ? 0 : 1 - ssRes / ssTot;
@@ -260,7 +261,7 @@ export class PredictiveIntelligenceService {
     
     let mae = 0;
     for (let i = 0; i < values.length; i++) {
-      mae += Math.abs(values[i] - mean);
+      mae += Math.abs((values[i] ?? 0) - mean);
     }
     
     return mae / values.length;
@@ -272,7 +273,7 @@ export class PredictiveIntelligenceService {
     
     let mse = 0;
     for (let i = 0; i < values.length; i++) {
-      mse += Math.pow(values[i] - mean, 2);
+      mse += Math.pow((values[i] ?? 0) - mean, 2);
     }
     
     return Math.sqrt(mse / values.length);

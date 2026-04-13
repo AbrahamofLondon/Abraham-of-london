@@ -16,7 +16,7 @@ const CONTAINER_TRANSITION = {
 export default function StrategySuccessPage() {
   const isReady = useClientIsReady();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams?.get('id') ?? null;
   
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

@@ -41,7 +41,8 @@ export class EarlyWarningSystem {
     
     for (let i = 0; i < forecast.points.length; i++) {
       const point = forecast.points[i];
-      
+      if (!point) continue;
+
       if (metric === 'resonance' || metric === 'certainty') {
         if (point.value <= threshold && projectedValue > threshold) {
           daysToThreshold = i + 1;
@@ -55,7 +56,7 @@ export class EarlyWarningSystem {
           break;
         }
       }
-      
+
       projectedValue = point.value;
     }
     

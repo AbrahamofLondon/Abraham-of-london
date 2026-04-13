@@ -52,12 +52,15 @@ async function resolveAoLClaimsByEmail(email?: string | null): Promise<AoLClaims
   const normalizedEmail = email.trim().toLowerCase();
   const hashedEmail = sha256Hex(normalizedEmail);
 
-  const member = await safePrismaQuery(() =>
-    prisma.innerCircleMember.findFirst({
-      where: {
-        OR: [{ email: normalizedEmail }, { emailHash: hashedEmail }],
-      },
-    })
+  const member = await safePrismaQuery(
+    "resolveAoLClaimsByEmail",
+    () =>
+      prisma.innerCircleMember.findFirst({
+        where: {
+          OR: [{ email: normalizedEmail }, { emailHash: hashedEmail }],
+        },
+      }),
+    null,
   );
 
   if (!member) return { ...BASE_CLAIMS, emailHash: hashedEmail };

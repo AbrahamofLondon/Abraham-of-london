@@ -97,19 +97,18 @@ export default async function handler(
       createdBy: ctx.memberId || null,
     });
 
-    await appendDiagnosticReportVersion(diagnosticRef, {
-      reportId: composed.reportId,
-      version: composed.version,
-      generatedAt: composed.generatedAt,
-      headline: composed.headline,
-      executiveSummary: composed.executiveSummary,
-      narrativeSummary: composed.narrativeSummary,
-      keyFindings: composed.keyFindings,
-      recommendations: composed.recommendations,
-      htmlPath,
-      pdfPath,
-      archivedArtifactId: artifact.artifactId,
-      archivedAt: artifact.createdAt,
+    await appendDiagnosticReportVersion({
+      diagnosticRef,
+      report: {
+        reportId: composed.reportId,
+        version: composed.version,
+        generatedAt: composed.generatedAt,
+        htmlPath,
+        pdfPath,
+        archivedArtifactId: artifact.artifactId,
+        archivedAt: artifact.createdAt,
+      },
+      reportStatus: "generated",
     });
 
     return res.status(200).json({

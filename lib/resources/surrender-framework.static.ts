@@ -31,7 +31,7 @@ export type SurrenderFramework = {
 const ORDER: AccessTier[] = [
   "public",
   "member",
-  "inner-circle",
+  "inner_circle",
   "client",
   "legacy",
   "architect",

@@ -1,7 +1,8 @@
-// app/api/executive-reporting/export/pdf/route.ts
 import { NextResponse } from "next/server";
 import React from "react";
-import { pdf } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
+import { renderToBuffer } from "@react-pdf/renderer";
+import type { DocumentProps } from "@react-pdf/renderer";
 import ExecutiveBriefingPdfDocument from "@/components/reporting/pdf/ExecutiveBriefingPdfDocument";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 
@@ -30,25 +31,22 @@ export async function POST(request: Request) {
     }
 
     const entitlements = await getExecutiveReportingEntitlements(email);
-    if (!entitlements.boardroomPdf && !entitlements.fullReport) {
+    if (!entitlements.canExportBoardroomPdf && !entitlements.canViewFullReport) {
       return NextResponse.json(
         { ok: false, error: "Boardroom PDF entitlement not active." },
         { status: 403 },
       );
     }
 
-    const instance = pdf(
-      React.createElement(ExecutiveBriefingPdfDocument, { canonical }),
+    const buffer = await renderToBuffer(
+      React.createElement(ExecutiveBriefingPdfDocument, { canonical }) as ReactElement<DocumentProps>
     );
 
-    const buffer = await instance.toBuffer();
-
-    return new NextResponse(buffer as BodyInit, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition":
-          'attachment; filename="executive-reporting-boardroom-brief.pdf"',
+        "Content-Disposition": 'attachment; filename="executive-reporting-boardroom-brief.pdf"',
       },
     });
   } catch (error) {

@@ -169,7 +169,7 @@ function deriveUserTier(ctx: AccessContext): AccessTier {
     if (sub.planId) {
       const planTierMap: Record<string, AccessTier> = {
         "member-plan": "member",
-        "inner-circle-plan": "inner-circle",
+        "inner-circle-plan": "inner_circle",
         "client-plan": "client",
         "legacy-plan": "legacy",
       };

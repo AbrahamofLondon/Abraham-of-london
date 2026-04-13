@@ -21,26 +21,12 @@ export type StrategicHealthReport = {
   }>;
 };
 
-type PageViewBySlugRow = {
-  slug: string | null;
-  _count: { slug: number };
-};
-
-type PageViewBySlugMemberRow = {
-  slug: string | null;
-  memberId: string | null;
-  _count: { _all: number };
-};
-
-type AuditActionRow = {
-  action: string;
-  _count: { action: number };
-};
+const SHORTS_PATH_PREFIX = "/shorts/";
 
 /**
  * INSTITUTIONAL HEALTH REPORT
  * Aligned to actual schema:
- * - PageView uses viewedAt, not createdAt
+ * - PageView stores `path` + `createdAt` (short slug is embedded in path)
  * - SystemAuditLog uses createdAt
  * - StrategyIntake exists
  */
@@ -53,9 +39,9 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
       keyCount,
       intakeCount,
       breachCount,
-      viewsBySlugRaw,
-      uniqueBySlugMemberRaw,
-      auditStatsRaw,
+      viewsByPath,
+      uniqueByPathMember,
+      auditStats,
     ] = await Promise.all([
       prisma.innerCircleMember.count({
         where: { status: "active" },
@@ -80,24 +66,22 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
       }),
 
       prisma.pageView.groupBy({
-        by: ["slug"],
+        by: ["path"],
         where: {
-          viewedAt: { gte: thirtyDaysAgo },
-          slug: { not: null },
-          path: { startsWith: "/shorts/" },
+          createdAt: { gte: thirtyDaysAgo },
+          path: { startsWith: SHORTS_PATH_PREFIX },
         },
-        _count: { slug: true },
-        orderBy: { _count: { slug: "desc" } },
+        _count: { _all: true },
+        orderBy: { _count: { path: "desc" } },
         take: 10,
       }),
 
       prisma.pageView.groupBy({
-        by: ["slug", "memberId"],
+        by: ["path", "memberId"],
         where: {
-          viewedAt: { gte: thirtyDaysAgo },
-          slug: { not: null },
+          createdAt: { gte: thirtyDaysAgo },
           memberId: { not: null },
-          path: { startsWith: "/shorts/" },
+          path: { startsWith: SHORTS_PATH_PREFIX },
         },
         _count: { _all: true },
       }),
@@ -111,14 +95,9 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
       }),
     ]);
 
-    const viewsBySlug = viewsBySlugRaw as unknown as PageViewBySlugRow[];
-    const uniqueBySlugMember =
-      uniqueBySlugMemberRaw as unknown as PageViewBySlugMemberRow[];
-    const auditStats = auditStatsRaw as unknown as AuditActionRow[];
-
     const uniqueMap = new Map<string, number>();
-    for (const row of uniqueBySlugMember) {
-      const slug = row.slug ?? "";
+    for (const row of uniqueByPathMember) {
+      const slug = row.path.replace(SHORTS_PATH_PREFIX, "");
       if (!slug) continue;
       uniqueMap.set(slug, (uniqueMap.get(slug) ?? 0) + 1);
     }
@@ -130,11 +109,11 @@ export async function getStrategicHealthReport(): Promise<StrategicHealthReport>
         recentIntakes: intakeCount,
         perimeterBreaches: breachCount,
       },
-      engagement: viewsBySlug.map((stat) => {
-        const slug = stat.slug ?? "unknown";
+      engagement: viewsByPath.map((stat) => {
+        const slug = stat.path.replace(SHORTS_PATH_PREFIX, "") || "unknown";
         return {
           shortSlug: slug,
-          viewCount: stat._count.slug,
+          viewCount: stat._count._all,
           uniquePrincipals: uniqueMap.get(slug) ?? 0,
         };
       }),

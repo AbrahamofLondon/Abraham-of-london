@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useOGRStore } from "@/store/useOGRStore";
-import { Info, mousePointer2, Calculator, Variable } from "lucide-react";
+import { Info, MousePointer2, Calculator, Variable } from "lucide-react";
 
 interface InspectorProps {
   type: "tax" | "velocity" | "alpha" | "certainty";
