@@ -134,7 +134,7 @@ export async function revokeKey(key: string, reason?: string): Promise<boolean> 
 
   await auditLogger.log({
     action: "KEY_REVOCATION_SERVER",
-    severity: "warning",
+    severity: "warn",
     actorId: existing.memberId || null,
     actorType: "system",
     resourceId: key,

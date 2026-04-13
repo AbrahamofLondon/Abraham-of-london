@@ -73,9 +73,18 @@ function normalizeCalloutVariant(input: unknown): CalloutVariant {
  * Maps the brand-specific variants to functionally compatible base types.
  */
 function toCalloutType(v: CalloutVariant): CalloutTypeActual {
-  if (v === "strategy") return "note";
-  if (v === "default") return "info";
-  return v as CalloutTypeActual;
+  switch (v) {
+    case "strategy":
+      return "note";
+    case "default":
+      return "info";
+    case "info":
+    case "note":
+    case "success":
+    case "warning":
+    case "danger":
+      return v;
+  }
 }
 
 const CalloutAdapter: ComponentType<AnyProps> = (props) => {

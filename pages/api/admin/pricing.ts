@@ -319,7 +319,7 @@ export async function getAllEvents() {
     
     // Combine and deduplicate
     const eventSet = new Set([
-      ...dbEvents.map(e => e.eventId),
+      ...dbEvents.map((e: { eventId: string }) => e.eventId),
       ...matrixEvents,
     ]);
     

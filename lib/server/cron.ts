@@ -72,7 +72,7 @@ export async function executeInstitutionalHygiene() {
 
       await auditLogger.log({
         action: "SECURITY_THREAT_DETECTED",
-        severity: "warning",
+        severity: "warn",
         actorId: "SECURITY_MONITOR",
         actorType: "system",
         ipAddress: ip,

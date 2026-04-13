@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/rate-limit-unified.ts — EDGE-SAFE (FULL REPLACEMENT) */
 // Fixes: "@upstash/redis/nodejs.mjs uses process.version" Edge failure.
 // Memory rate limiter (Edge-safe). Backward compatible API surface.

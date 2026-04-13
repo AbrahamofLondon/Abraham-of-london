@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
-import { withApiRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/server/rate-limit-unified";
+import { withApiRateLimit } from "@/lib/server/rate-limit-unified";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma.server";
 
@@ -270,4 +270,4 @@ async function handler(
   }
 }
 
-export default withApiRateLimit(handler, RATE_LIMIT_CONFIGS.authenticated);
+export default withApiRateLimit(handler, { key: "AUTH" });

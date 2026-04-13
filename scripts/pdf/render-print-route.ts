@@ -1,4 +1,5 @@
 // scripts/pdf/render-print-route.ts
+import "../load-local-env";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -6,6 +7,7 @@ import http from "http";
 import { buildFingerprintProfile } from "../../lib/premium/fingerprint-profile";
 import { createWatermarkPayload } from "../../lib/premium/watermark";
 import { SecurePuppeteerPDFGenerator } from "./secure-puppeteer-generator";
+import { requirePdfGenerationEnv } from "./require-pdf-env";
 
 function argValue(key: string): string | undefined {
   const argv = process.argv.slice(2);
@@ -62,6 +64,7 @@ function killTree(child: any) {
 }
 
 async function main() {
+  requirePdfGenerationEnv("render-print-route");
   const slug = argValue("--slug") || argValue("-s");
   if (!slug) {
     throw new Error("Missing --slug. Example: --slug ultimate-purpose-of-man-editorial");

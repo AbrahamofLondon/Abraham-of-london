@@ -7,7 +7,14 @@ import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
 
-const resend = new Resend(process.env.RESEND_API_KEY?.trim());
+function getResendClient(): Resend {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY_MISSING");
+  }
+
+  return new Resend(apiKey);
+}
 
 function normalizeEmail(value: unknown): string {
   return String(value || "").trim().toLowerCase();
@@ -166,7 +173,7 @@ export async function POST(
         "[CAMPAIGN_INVITE] RESEND_API_KEY missing. Participant created but email not sent.",
       );
     } else {
-      await resend.emails.send({
+      await getResendClient().emails.send({
         from: "Abraham of London <info@abrahamoflondon.org>",
         to: [email],
         bcc: [

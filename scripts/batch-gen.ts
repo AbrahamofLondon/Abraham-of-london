@@ -1,13 +1,16 @@
 /* scripts/batch-gen.ts — ARCHIVAL BATCH CONTROLLER */
+import "./load-local-env";
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { PrismaClient, ContentType } from "@prisma/client";
 import { generatePDF } from '../lib/pdf-generator';
+import { requirePdfGenerationEnv } from "./pdf/require-pdf-env";
 
 const prisma = new PrismaClient();
 
 async function runInstitutionalBuild() {
+  requirePdfGenerationEnv("batch-gen");
   console.log('🚀 AOL VAULT: STARTING FORENSIC BATCH BUILD + DB SYNC');
   console.log('='.repeat(60));
   

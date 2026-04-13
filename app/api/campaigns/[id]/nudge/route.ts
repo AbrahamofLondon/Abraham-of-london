@@ -5,8 +5,6 @@ import { db } from "@/lib/db";
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 type RouteContext = {
   params: { id: string };
 };
@@ -22,6 +20,15 @@ type EligibleParticipant = {
     email: string | null;
   } | null;
 };
+
+function getResendClient(): Resend {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY_MISSING");
+  }
+
+  return new Resend(apiKey);
+}
 
 function safeRefId(value: string | null | undefined): string {
   const raw = typeof value === "string" ? value.trim() : "";
@@ -147,6 +154,7 @@ export async function POST(req: Request, { params }: RouteContext) {
     }
 
     const CHUNK_SIZE = 100;
+    const resend = getResendClient();
     for (let i = 0; i < emailPayloads.length; i += CHUNK_SIZE) {
       const chunk = emailPayloads.slice(i, i + CHUNK_SIZE);
       await resend.batch.send(chunk);

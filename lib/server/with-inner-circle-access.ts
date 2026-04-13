@@ -1,3 +1,5 @@
+import "server-only";
+
 // lib/server/with-inner-circle-access.ts
 /**
  * Inner Circle access middleware with optional tier enforcement and rate limiting.

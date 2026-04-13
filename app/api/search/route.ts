@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
-import { authOptions, AoLClaims } from "@/lib/auth";
+import { authOptions } from "@/lib/auth";
+import type { AoLClaims } from "@/types/auth";
 import { Session } from "next-auth";
 
 /**

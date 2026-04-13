@@ -1,3 +1,5 @@
+import "server-only";
+
 // lib/server/guards.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 

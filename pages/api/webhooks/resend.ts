@@ -18,7 +18,7 @@ type ResendWebhookBody = {
 const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET?.trim() || "";
 
 function extractPrimaryRecipient(
-  to: ResendWebhookBody["data"]["to"],
+  to: NonNullable<ResendWebhookBody["data"]>["to"],
 ): string {
   if (!Array.isArray(to) || to.length === 0) return "unknown";
 
@@ -64,7 +64,7 @@ function verifyWebhookSignature(req: NextApiRequest): boolean {
 }
 
 async function handleOpened(data: NonNullable<ResendWebhookBody["data"]>) {
-  const recipient = extractPrimaryRecipient(data.to);
+  const recipient = extractPrimaryRecipient(data.to ?? []);
 
   await notifyDiscord({
     title: "EMAIL OPENED",
@@ -86,7 +86,7 @@ async function handleOpened(data: NonNullable<ResendWebhookBody["data"]>) {
 }
 
 async function handleClicked(data: NonNullable<ResendWebhookBody["data"]>) {
-  const recipient = extractPrimaryRecipient(data.to);
+  const recipient = extractPrimaryRecipient(data.to ?? []);
   const clickUrl = String(data.click_url || "");
   const version = inferDocumentVariant(clickUrl);
 

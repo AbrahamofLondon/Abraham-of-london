@@ -1,7 +1,7 @@
 /* scripts/vault-master.ts — V6.3 (POLICY-ALIGNED ORCHESTRATOR) */
 /* eslint-disable no-console */
 
-import dotenv from "dotenv";
+import "./load-local-env";
 import path from "path";
 import Module from "module";
 import { fileURLToPath } from "url";
@@ -9,9 +9,6 @@ import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const ENV_PATH = path.join(__dirname, "..", ".env.local");
-dotenv.config({ path: ENV_PATH });
 
 // Bypass Redis for CLI operations
 // @ts-ignore
@@ -47,6 +44,17 @@ import { generatePDF } from "../lib/pdf-generator";
 import { registerPdfFonts } from "../lib/pdf/register-fonts";
 
 const prisma = new PrismaClient();
+
+function requireVaultDatabaseUrl(): string {
+  const value = process.env.DATABASE_URL?.trim();
+  if (!value) {
+    throw new Error(
+      '[VAULT_MASTER] DATABASE_URL missing. Set it in .env.local before running vault sync.'
+    );
+  }
+
+  return value;
+}
 
 // 🚫 HARD EXCLUSION: Never process these
 const FORBIDDEN_TYPES = ["Book", "Post", "Canon"];
@@ -98,6 +106,7 @@ async function registerFontsForCli(): Promise<void> {
 
 async function vaultMaster(): Promise<void> {
   const startTime = Date.now();
+  requireVaultDatabaseUrl();
   const stats: VaultStats = {
     success: 0,
     cached: 0,

@@ -1,46 +1,46 @@
 {
-  "generatedAt": "2026-04-11T11:28:54.061Z",
+  "generatedAt": "2026-04-13T14:06:39.568Z",
   "count": 4,
   "items": [
     {
       "slug": "4d-surrender-framework-worksheet",
       "title": "4D Surrender Framework Worksheet",
       "author": "Abraham of London",
-      "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\4d-surrender-framework-worksheet.print.md",
-      "outputPath": "C:\\Abraham-of-london\\public\\epubs\\4d-surrender-framework-worksheet.epub",
+      "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\4d-surrender-framework-worksheet.print.md",
+      "outputPath": "C:\\aol-check-visual\\public\\epubs\\4d-surrender-framework-worksheet.epub",
       "publicHref": "/epubs/4d-surrender-framework-worksheet.epub",
-      "sizeBytes": 5560,
-      "generatedAt": "2026-04-11T11:28:54.061Z"
+      "sizeBytes": 5564,
+      "generatedAt": "2026-04-13T14:06:39.568Z"
     },
     {
       "slug": "surrender-decision-matrix",
       "title": "Surrender Decision Matrix",
       "author": "Abraham of London",
-      "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\surrender-decision-matrix.print.md",
-      "outputPath": "C:\\Abraham-of-london\\public\\epubs\\surrender-decision-matrix.epub",
+      "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\surrender-decision-matrix.print.md",
+      "outputPath": "C:\\aol-check-visual\\public\\epubs\\surrender-decision-matrix.epub",
       "publicHref": "/epubs/surrender-decision-matrix.epub",
-      "sizeBytes": 5328,
-      "generatedAt": "2026-04-11T11:28:54.061Z"
+      "sizeBytes": 5325,
+      "generatedAt": "2026-04-13T14:06:39.568Z"
     },
     {
       "slug": "ultimate-purpose-of-man-editorial",
       "title": "The Ultimate Purpose of Man",
       "author": "Abraham of London",
-      "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\ultimate-purpose-of-man-editorial.print.md",
-      "outputPath": "C:\\Abraham-of-london\\public\\epubs\\ultimate-purpose-of-man-editorial.epub",
+      "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\ultimate-purpose-of-man-editorial.print.md",
+      "outputPath": "C:\\aol-check-visual\\public\\epubs\\ultimate-purpose-of-man-editorial.epub",
       "publicHref": "/epubs/ultimate-purpose-of-man-editorial.epub",
-      "sizeBytes": 15226,
-      "generatedAt": "2026-04-11T11:28:54.061Z"
+      "sizeBytes": 15228,
+      "generatedAt": "2026-04-13T14:06:39.568Z"
     },
     {
       "slug": "weekly-surrender-audit-template",
       "title": "Weekly Surrender Audit Template",
       "author": "Abraham of London",
-      "sourcePath": "C:\\Abraham-of-london\\scripts\\pdf\\print-sources\\weekly-surrender-audit-template.print.md",
-      "outputPath": "C:\\Abraham-of-london\\public\\epubs\\weekly-surrender-audit-template.epub",
+      "sourcePath": "C:\\aol-check-visual\\scripts\\pdf\\print-sources\\weekly-surrender-audit-template.print.md",
+      "outputPath": "C:\\aol-check-visual\\public\\epubs\\weekly-surrender-audit-template.epub",
       "publicHref": "/epubs/weekly-surrender-audit-template.epub",
-      "sizeBytes": 5070,
-      "generatedAt": "2026-04-11T11:28:54.061Z"
+      "sizeBytes": 5068,
+      "generatedAt": "2026-04-13T14:06:39.568Z"
     }
   ]
 }
