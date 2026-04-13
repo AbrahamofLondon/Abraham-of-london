@@ -1,7 +1,8 @@
 import "server-only";
 
 import { grantEntitlement } from "@/lib/server/billing/entitlements";
-import { updateExecutionMemory } from "@/lib/memory/memory-store";
+import type { ProductCode } from "@/lib/server/billing/entitlements";
+import { updateExecutionMemory } from "@/lib/constitution/memory-store";
 
 export type CommercialiseMandateInput = {
   caseKey: string;
@@ -18,7 +19,7 @@ export async function commercialiseMandate(
 ) {
   const entitlement = await grantEntitlement({
     email: input.clientEmail,
-    productCode: input.productCode,
+    productCode: input.productCode as ProductCode,
     tier: input.tier,
     source: input.source || "mandate_acceptance",
     externalRef: input.mandateId,

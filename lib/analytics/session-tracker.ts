@@ -1,11 +1,13 @@
 // lib/analytics/session-tracker.ts
 // ─── CONSTITUTIONAL SESSION TRACKING V2.0 ─────────────────────────────────────
+// C7 DEBT: db.constitutionalSession and db.constitutionalSessionEvent do not
+// exist in the Prisma schema. All DB persistence is stubbed. Business logic,
+// types, and in-memory cache are preserved. Restore when C7 is resolved.
 
-import { db } from "@/lib/db";
 import { CanonicalSectionsEnvelope } from "@/lib/decision/canonical-sections";
 import { ConstitutionalDecision } from "@/lib/constitution/rules";
 
-export type SessionEventType = 
+export type SessionEventType =
   | "SESSION_INIT"
   | "IMPRESSION"
   | "FOLLOW_UP"
@@ -70,9 +72,6 @@ class ConstitutionalSessionTracker {
     return ConstitutionalSessionTracker.instance;
   }
 
-  /**
-   * Initialize a new session with the canonical snapshot
-   */
   async initSession(
     campaignId: string,
     userId: string,
@@ -103,7 +102,6 @@ class ConstitutionalSessionTracker {
       },
     };
 
-    // Record session init event
     await this.recordEvent(
       sessionId,
       campaignId,
@@ -116,25 +114,11 @@ class ConstitutionalSessionTracker {
 
     this.sessionCache.set(sessionId, session);
 
-    // Store in database
-    await db.constitutionalSession.create({
-      data: {
-        id: sessionId,
-        campaignId,
-        userId,
-        startedAt: new Date(now),
-        lastActivityAt: new Date(now),
-        initialCanonicalSnapshot: canonicalSnapshot,
-        metadata: session.metadata,
-      },
-    });
+    // STUB: db.constitutionalSession.create not available (C7 debt)
 
     return session;
   }
 
-  /**
-   * Record a session event with the current canonical snapshot
-   */
   async recordEvent(
     sessionId: string,
     campaignId: string,
@@ -157,7 +141,6 @@ class ConstitutionalSessionTracker {
       metadata: metadata || {},
     };
 
-    // Update session cache
     const cachedSession = this.sessionCache.get(sessionId);
     if (cachedSession) {
       cachedSession.events.push(event);
@@ -170,40 +153,12 @@ class ConstitutionalSessionTracker {
       this.sessionCache.set(sessionId, cachedSession);
     }
 
-    // Store in database
-    await db.constitutionalSessionEvent.create({
-      data: {
-        id: event.id,
-        sessionId,
-        campaignId,
-        userId,
-        eventType,
-        timestamp: new Date(now),
-        canonicalSnapshot: canonicalSnapshot as any,
-        constitutionalDecision: constitutionalDecision as any,
-        metadata: metadata || {},
-      },
-    });
-
-    // Update session last activity
-    await db.constitutionalSession.update({
-      where: { id: sessionId },
-      data: {
-        lastActivityAt: new Date(now),
-        ...(eventType === "CONVERSION" && {
-          conversionAt: new Date(now),
-          conversionType: eventType,
-          finalCanonicalSnapshot: canonicalSnapshot as any,
-        }),
-      },
-    });
+    // STUB: db.constitutionalSessionEvent.create not available (C7 debt)
+    // STUB: db.constitutionalSession.update not available (C7 debt)
 
     return event;
   }
 
-  /**
-   * Record a view of the report with canonical snapshot
-   */
   async recordReportView(
     sessionId: string,
     campaignId: string,
@@ -231,9 +186,6 @@ class ConstitutionalSessionTracker {
     );
   }
 
-  /**
-   * Record a PDF export with the canonical snapshot that was exported
-   */
   async recordPDFExport(
     sessionId: string,
     campaignId: string,
@@ -251,9 +203,6 @@ class ConstitutionalSessionTracker {
     );
   }
 
-  /**
-   * Record a JSON export with the canonical snapshot that was exported
-   */
   async recordJSONExport(
     sessionId: string,
     campaignId: string,
@@ -271,9 +220,6 @@ class ConstitutionalSessionTracker {
     );
   }
 
-  /**
-   * Record a conversion event (e.g., intervention created, appeal filed)
-   */
   async recordConversion(
     sessionId: string,
     campaignId: string,
@@ -294,60 +240,19 @@ class ConstitutionalSessionTracker {
     );
   }
 
-  /**
-   * Get session with all events
-   */
   async getSession(sessionId: string): Promise<Session | null> {
-    // Check cache first
     if (this.sessionCache.has(sessionId)) {
       return this.sessionCache.get(sessionId) || null;
     }
 
-    // Fetch from database
-    const dbSession = await db.constitutionalSession.findUnique({
-      where: { id: sessionId },
-      include: {
-        events: {
-          orderBy: { timestamp: "asc" },
-        },
-      },
-    });
-
-    if (!dbSession) return null;
-
-    const session: Session = {
-      id: dbSession.id,
-      campaignId: dbSession.campaignId,
-      userId: dbSession.userId,
-      startedAt: dbSession.startedAt.toISOString(),
-      endedAt: dbSession.endedAt?.toISOString(),
-      lastActivityAt: dbSession.lastActivityAt.toISOString(),
-      events: dbSession.events.map((e: any) => ({
-        id: e.id,
-        sessionId: e.sessionId,
-        campaignId: e.campaignId,
-        userId: e.userId,
-        eventType: e.eventType,
-        timestamp: e.timestamp.toISOString(),
-        canonicalSnapshot: e.canonicalSnapshot,
-        constitutionalDecision: e.constitutionalDecision,
-        metadata: e.metadata,
-      })),
-      initialCanonicalSnapshot: dbSession.initialCanonicalSnapshot,
-      finalCanonicalSnapshot: dbSession.finalCanonicalSnapshot,
-      conversionAt: dbSession.conversionAt?.toISOString(),
-      conversionType: dbSession.conversionType as SessionEventType | undefined,
-      metadata: dbSession.metadata,
-    };
-
-    this.sessionCache.set(sessionId, session);
-    return session;
+    // STUB: db.constitutionalSession.findUnique not available (C7 debt)
+    return null;
   }
 
-  /**
-   * End a session
-   */
-  async endSession(sessionId: string, finalCanonicalSnapshot?: CanonicalSectionsEnvelope): Promise<void> {
+  async endSession(
+    sessionId: string,
+    finalCanonicalSnapshot?: CanonicalSectionsEnvelope
+  ): Promise<void> {
     const cachedSession = this.sessionCache.get(sessionId);
     if (cachedSession) {
       cachedSession.endedAt = new Date().toISOString();
@@ -357,18 +262,9 @@ class ConstitutionalSessionTracker {
       this.sessionCache.set(sessionId, cachedSession);
     }
 
-    await db.constitutionalSession.update({
-      where: { id: sessionId },
-      data: {
-        endedAt: new Date(),
-        ...(finalCanonicalSnapshot && { finalCanonicalSnapshot: finalCanonicalSnapshot as any }),
-      },
-    });
+    // STUB: db.constitutionalSession.update not available (C7 debt)
   }
 
-  /**
-   * Get analytics for a campaign
-   */
   async getCampaignAnalytics(campaignId: string): Promise<{
     totalSessions: number;
     conversions: number;
@@ -379,46 +275,45 @@ class ConstitutionalSessionTracker {
     reportViews: number;
     interventionCreated: number;
   }> {
-    const sessions = await db.constitutionalSession.findMany({
-      where: { campaignId },
-      include: { events: true },
-    });
+    // STUB: db.constitutionalSession.findMany not available (C7 debt)
+    // Returns zero-state analytics until C7 schema extension is applied.
+    const sessions: Session[] = [];
 
     let totalDuration = 0;
     let conversions = 0;
-    const eventBreakdown: Record<SessionEventType, number> = {} as any;
+    const eventBreakdown: Record<SessionEventType, number> = {} as Record<SessionEventType, number>;
     let exportCount = 0;
     let reportViews = 0;
     let interventionCreated = 0;
 
     for (const session of sessions) {
       if (session.conversionAt) conversions++;
-      
       if (session.startedAt && session.lastActivityAt) {
-        const duration = session.lastActivityAt.getTime() - session.startedAt.getTime();
+        const duration =
+          new Date(session.lastActivityAt).getTime() -
+          new Date(session.startedAt).getTime();
         totalDuration += duration;
       }
-
       for (const event of session.events) {
-        eventBreakdown[event.eventType] = (eventBreakdown[event.eventType] || 0) + 1;
-        
-        if (event.eventType === "PDF_EXPORTED" || event.eventType === "JSON_EXPORTED") {
+        eventBreakdown[event.eventType] =
+          (eventBreakdown[event.eventType] || 0) + 1;
+        if (
+          event.eventType === "PDF_EXPORTED" ||
+          event.eventType === "JSON_EXPORTED"
+        )
           exportCount++;
-        }
-        if (event.eventType === "REPORT_VIEWED") {
-          reportViews++;
-        }
-        if (event.eventType === "INTERVENTION_CREATED") {
-          interventionCreated++;
-        }
+        if (event.eventType === "REPORT_VIEWED") reportViews++;
+        if (event.eventType === "INTERVENTION_CREATED") interventionCreated++;
       }
     }
 
     return {
       totalSessions: sessions.length,
       conversions,
-      conversionRate: sessions.length > 0 ? (conversions / sessions.length) * 100 : 0,
-      averageSessionDuration: sessions.length > 0 ? totalDuration / sessions.length : 0,
+      conversionRate:
+        sessions.length > 0 ? (conversions / sessions.length) * 100 : 0,
+      averageSessionDuration:
+        sessions.length > 0 ? totalDuration / sessions.length : 0,
       eventBreakdown,
       exportCount,
       reportViews,

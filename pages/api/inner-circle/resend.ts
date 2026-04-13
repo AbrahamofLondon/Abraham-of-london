@@ -2,13 +2,9 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
-import {
-  AccessTier as PrismaAccessTier,
-  KeyStatus as PrismaKeyStatus,
-} from "@prisma/client";
+import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import type { AccessTier as PolicyAccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
@@ -41,38 +37,6 @@ function isEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email);
 }
 
-function fromDbTier(
-  tier: PrismaAccessTier | string | null | undefined
-): PolicyAccessTier {
-  const raw = String(tier || "member").replace(/_/g, "-");
-  return normalizeUserTier(raw);
-}
-
-function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
-  switch (tier) {
-    case "inner-circle":
-      return PrismaAccessTier.inner_circle;
-    case "top-secret":
-      return PrismaAccessTier.top_secret;
-    case "public":
-      return PrismaAccessTier.public;
-    case "member":
-      return PrismaAccessTier.member;
-    case "restricted":
-      return PrismaAccessTier.restricted;
-    case "client":
-      return PrismaAccessTier.client;
-    case "legacy":
-      return PrismaAccessTier.legacy;
-    case "architect":
-      return PrismaAccessTier.architect;
-    case "owner":
-      return PrismaAccessTier.owner;
-    default:
-      return PrismaAccessTier.member;
-  }
-}
-
 function getBaseUrl(): string {
   return String(
     process.env.NEXT_PUBLIC_APP_URL ||
@@ -87,7 +51,7 @@ function getBaseUrl(): string {
 function getRequestIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.trim()) {
-    return forwarded.split(",")[0].trim();
+    return (forwarded.split(",")[0] ?? "").trim();
   }
   if (Array.isArray(forwarded) && forwarded[0]) {
     return forwarded[0];
@@ -127,8 +91,7 @@ export default async function handler(
     if (!isEmail(email)) {
       return res.status(200).json({
         ok: true,
-        message:
-          "If this email is registered, a recovery link is on its way.",
+        message: "If this email is registered, a recovery link is on its way.",
       });
     }
 
@@ -139,13 +102,12 @@ export default async function handler(
     if (!member) {
       return res.status(200).json({
         ok: true,
-        message:
-          "If this email is registered, a recovery link is on its way.",
+        message: "If this email is registered, a recovery link is on its way.",
       });
     }
 
-    const memberTier = fromDbTier(member.tier);
-    const dbTier = toDbTier(memberTier);
+    // normalizeUserTier handles the Prisma→app tier boundary — no PrismaAccessTier needed
+    const tier = normalizeUserTier(member.tier ?? "member");
 
     const rawKey = makeAccessKey();
     const keyHash = hashAccessKey(rawKey);
@@ -173,7 +135,7 @@ export default async function handler(
       }),
       prisma.innerCircleMember.update({
         where: { id: member.id },
-        data: { tier: dbTier },
+        data: { tier },
       }),
     ]);
 

@@ -60,6 +60,8 @@ lerna-debug.log*
 *.pid.lock
 .fixlogs/
 instrumentation*.log
+build.err
+build.out
 
 # ------------------------------
 # Database & local state (sensitive)
