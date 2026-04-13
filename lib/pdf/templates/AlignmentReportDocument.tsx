@@ -310,7 +310,17 @@ export default function AlignmentReportDocument({
   watermark: WatermarkPayload;
   qrCode?: string;
 }) {
-  const narrative = buildAlignmentNarrativeFromResult(assessment);
+  const narrative = buildAlignmentNarrativeFromResult({
+    totalScore: assessment.totalScore,
+    possibleScore: assessment.possibleScore,
+    percent: assessment.percentScore,
+    band: assessment.band,
+    domainScores: assessment.domainScores,
+    weakestDomains: assessment.weakestDomains,
+    strengths: assessment.strengths,
+    corrections: assessment.corrections,
+    createdAt: assessment.createdAt,
+  });
 
   const reference = `ALIGN-${assessment.id.slice(0, 8).toUpperCase()}`;
   const classification = "PUBLIC";
@@ -421,7 +431,7 @@ export default function AlignmentReportDocument({
                   styles.domainRow,
                   index === assessment.domainScores.length - 1
                     ? { borderBottomWidth: 0 }
-                    : undefined,
+                    : {},
                 ]}
               >
                 <Text style={styles.domainLabel}>

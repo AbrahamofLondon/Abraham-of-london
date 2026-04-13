@@ -1,3 +1,5 @@
+import "server-only";
+
 import { upsertArtifactDB, getLatestArtifactDB } from "./artifact-db";
 import { upsertArtifactRecord, getLatestArtifact } from "./artifact-registry";
 

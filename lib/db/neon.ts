@@ -3,7 +3,7 @@ import "server-only";
 
 import { neon, neonConfig, Pool, type PoolConfig } from "@neondatabase/serverless";
 import WebSocket from "ws";
-import { secrets } from "@/lib/server/secrets";
+import { getSecrets } from "@/lib/server/secrets";
 import { shouldUseDatabase } from "@/lib/db/db-gate";
 
 /**
@@ -13,16 +13,16 @@ import { shouldUseDatabase } from "@/lib/db/db-gate";
  * - build-safe and skip-safe via db-gate
  */
 
-const canUseDb = shouldUseDatabase();
-const databaseUrl = secrets.DATABASE_URL;
-
 // Neon tuning
 neonConfig.fetchConnectionCache = true;
 neonConfig.webSocketConstructor = WebSocket;
 
 type SqlFn = ReturnType<typeof neon>;
 
+const noopSql = createNoopSql();
+
 let pool: Pool | null = null;
+let sqlClient: SqlFn | null = null;
 let cleanupRegistered = false;
 
 function createNoopSql(): SqlFn {
@@ -33,18 +33,46 @@ function createNoopSql(): SqlFn {
   });
 }
 
+function canUseDb(): boolean {
+  return shouldUseDatabase();
+}
+
+function getDatabaseUrl(): string {
+  return getSecrets().DATABASE_URL;
+}
+
+function getSqlClient(): SqlFn {
+  if (!canUseDb()) {
+    return noopSql;
+  }
+
+  if (!sqlClient) {
+    sqlClient = neon(getDatabaseUrl());
+  }
+
+  return sqlClient;
+}
+
 function assertDatabaseAvailable(context: string): void {
-  if (!canUseDb || !databaseUrl) {
+  if (!canUseDb()) {
     throw new Error(`[DATABASE] Database unavailable for ${context}`);
   }
+
+  getDatabaseUrl();
 }
 
 /**
  * 1) Standard SQL Client (HTTP)
  * Build-safe: falls back to a harmless no-op client when DB should not be used.
  */
-export const sql: SqlFn =
-  canUseDb && databaseUrl ? neon(databaseUrl) : createNoopSql();
+export const sql: SqlFn = new Proxy(noopSql, {
+  apply(_target, thisArg, argArray) {
+    return Reflect.apply(getSqlClient() as unknown as Function, thisArg, argArray);
+  },
+  get(_target, prop, receiver) {
+    return Reflect.get(getSqlClient() as unknown as object, prop, receiver);
+  },
+}) as SqlFn;
 
 /**
  * 2) Connection Pool (WebSockets)
@@ -71,7 +99,7 @@ export function getPool(): Pool {
 
   if (!pool) {
     const poolConfig: PoolConfig = {
-      connectionString: databaseUrl,
+      connectionString: getDatabaseUrl(),
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
@@ -100,7 +128,7 @@ export interface BriefResult {
 }
 
 export async function queryBriefs(limit = 10): Promise<BriefResult[]> {
-  if (!canUseDb || !databaseUrl) return [];
+  if (!canUseDb()) return [];
 
   try {
     const safeLimit = Math.min(Math.max(1, limit), 100);
@@ -126,7 +154,7 @@ export async function queryBriefs(limit = 10): Promise<BriefResult[]> {
 }
 
 export async function checkDatabaseHealth(): Promise<boolean> {
-  if (!canUseDb || !databaseUrl) return false;
+  if (!canUseDb()) return false;
 
   try {
     const start = Date.now();

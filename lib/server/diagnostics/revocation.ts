@@ -1,3 +1,5 @@
+import "server-only";
+
 /* ============================================================================
    FILE: lib/server/diagnostics/revocation.ts
    PURPOSE:

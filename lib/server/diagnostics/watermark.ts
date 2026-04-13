@@ -1,3 +1,5 @@
+import "server-only";
+
 // lib/server/diagnostics/watermark.ts
 import crypto from "crypto";
 import type { ReportWatermarkPayload } from "./types";

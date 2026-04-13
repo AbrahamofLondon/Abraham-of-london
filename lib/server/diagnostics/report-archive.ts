@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/diagnostics/report-archive.ts */
 
 import crypto from "crypto";

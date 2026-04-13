@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/diagnostics/report-engine.ts */
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";

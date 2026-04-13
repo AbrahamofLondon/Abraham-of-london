@@ -1,3 +1,5 @@
+import "server-only";
+
 /* ============================================================================
    FILE: lib/server/diagnostics/retention.ts
    PURPOSE:

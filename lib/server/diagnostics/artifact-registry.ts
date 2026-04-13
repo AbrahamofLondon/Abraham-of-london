@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/diagnostics/artifact-registry.ts */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

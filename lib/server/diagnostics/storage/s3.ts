@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/diagnostics/storage/s3.ts */
 
 import {

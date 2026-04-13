@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/diagnostics/storage.ts */
 /* Pages-router safe diagnostic storage facade */
 

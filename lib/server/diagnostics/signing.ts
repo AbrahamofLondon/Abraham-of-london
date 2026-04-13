@@ -1,3 +1,5 @@
+import "server-only";
+
 // lib/server/diagnostics/signing.ts
 import crypto from "crypto";
 

@@ -1,9 +1,6 @@
 // lib/mail/enterprise-mail-service.ts
 import { Resend } from "resend";
 
-const resendApiKey = String(process.env.RESEND_API_KEY || "").trim();
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
 const DEFAULT_FROM = "Abraham of London <info@abrahamoflondon.org>";
 const DEFAULT_REPLY_TO = "info@abrahamoflondon.org";
 const DEFAULT_ADMIN_EMAIL = "info@abrahamoflondon.org";
@@ -61,14 +58,9 @@ function formatDate(date = new Date()): string {
   });
 }
 
-function requireMailer(): MailFailure | null {
-  if (!resend) {
-    return {
-      success: false,
-      error: "RESEND_API_KEY is missing.",
-    };
-  }
-  return null;
+function getResendClient(): Resend | null {
+  const resendApiKey = String(process.env.RESEND_API_KEY || "").trim();
+  return resendApiKey ? new Resend(resendApiKey) : null;
 }
 
 async function sendHtmlEmail(args: {
@@ -78,11 +70,16 @@ async function sendHtmlEmail(args: {
   from?: string;
   replyTo?: string;
 }): Promise<MailResult> {
-  const missing = requireMailer();
-  if (missing) return missing;
+  const resend = getResendClient();
+  if (!resend) {
+    return {
+      success: false,
+      error: "RESEND_API_KEY is missing.",
+    };
+  }
 
   try {
-    const response = await resend!.emails.send({
+    const response = await resend.emails.send({
       from: args.from || DEFAULT_FROM,
       to: Array.isArray(args.to) ? args.to : [args.to],
       subject: args.subject,

@@ -12,8 +12,6 @@ import {
 import { notifyDiscord } from "@/lib/notifications/discord";
 import TeaserEmail from "@/components/emails/TeaserEmail";
 
-const resend = new Resend(process.env.RESEND_API_KEY?.trim() || "");
-
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   process.env.SITE_URL?.trim() ||
@@ -55,6 +53,10 @@ function getRateLimitExceeded(result: unknown): boolean {
   return false;
 }
 
+function getResendClient(): Resend {
+  return new Resend(process.env.RESEND_API_KEY?.trim() || "");
+}
+
 async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, message: "Method not allowed" });
@@ -74,6 +76,7 @@ async function contactHandler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
+    const resend = getResendClient();
     const parsed = ContactSchema.safeParse(req.body);
 
     if (!parsed.success) {

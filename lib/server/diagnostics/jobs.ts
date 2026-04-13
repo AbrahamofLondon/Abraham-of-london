@@ -1,3 +1,5 @@
+import "server-only";
+
 /* lib/server/diagnostics/jobs.ts */
 
 import { prisma } from "@/lib/prisma";

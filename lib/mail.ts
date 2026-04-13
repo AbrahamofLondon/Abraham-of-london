@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim() || "";
-
 type MailSendResult = {
   success: boolean;
   id?: string | null;
@@ -24,11 +22,13 @@ type CampaignNudgeParams = {
 };
 
 function getResendClient(): Resend {
-  if (!RESEND_API_KEY) {
+  const resendApiKey = process.env.RESEND_API_KEY?.trim() || "";
+
+  if (!resendApiKey) {
     throw new Error("RESEND_API_KEY_MISSING");
   }
 
-  return new Resend(RESEND_API_KEY);
+  return new Resend(resendApiKey);
 }
 
 function requiredEnv(name: string, fallback?: string): string {
@@ -150,7 +150,7 @@ async function sendHtmlEmail(args: {
   bcc?: string | string[];
 }): Promise<MailSendResult> {
   try {
-    if (!RESEND_API_KEY) {
+    if (!(process.env.RESEND_API_KEY?.trim() || "")) {
       throw new Error("RESEND_API_KEY_MISSING");
     }
 
