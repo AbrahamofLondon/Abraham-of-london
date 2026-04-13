@@ -3,6 +3,8 @@
  * USP: Attributed Alignment & Friction Decay
  */
 
+import type { DomainDiagnostic } from "@/lib/alignment/domain-diagnostic";
+
 export interface SuccessMetric {
   domain: string;
   frictionDecay: number; // % reduction in variance

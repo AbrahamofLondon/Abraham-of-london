@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             action: "SYNC_FIX",
             performedBy: "ADMIN_SYSTEM_COMMAND",
             target: "GLOBAL_USER_TABLE",
-            details: { accountsFixed: fixCount, timestamp: new Date().toISOString() }
+            details: JSON.stringify({ accountsFixed: fixCount, timestamp: new Date().toISOString() })
           }
         })
       ]);
