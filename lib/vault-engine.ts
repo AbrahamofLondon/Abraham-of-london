@@ -97,8 +97,8 @@ function toDbTier(raw: unknown): DbAccessTier {
  */
 function fromDbTier(raw: unknown): PolicyAccessTier {
   const s = String(raw ?? "").trim().toLowerCase();
-  if (s === "inner_circle") return "inner-circle";
-  if (s === "top_secret") return "top-secret";
+  if (s === "inner_circle") return "inner_circle";
+  if (s === "top_secret") return "top_secret";
   return normalizeRequiredTier(s);
 }
 
@@ -300,13 +300,13 @@ export async function getVaultStats(): Promise<{
     const base: Record<PolicyAccessTier, number> = {
       public: 0,
       member: 0,
-      "inner-circle": 0,
+      inner_circle: 0,
       restricted: 0, 
       client: 0,
       legacy: 0,
       architect: 0,
       owner: 0,
-      "top-secret": 0,
+      top_secret: 0,
     };
 
     const mapped = byTier.reduce<Record<PolicyAccessTier, number>>(
@@ -330,13 +330,13 @@ export async function getVaultStats(): Promise<{
       byTier: {
         public: 0,
         member: 0,
-        "inner-circle": 0,
+        inner_circle: 0,
         restricted: 0, 
         client: 0,
         legacy: 0,
         architect: 0,
         owner: 0,
-        "top-secret": 0,
+        top_secret: 0,
       },
     };
   }
