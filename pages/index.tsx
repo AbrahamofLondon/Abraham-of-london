@@ -464,7 +464,7 @@ function HeroSection({
         style={{ opacity: imgOpacity, scale: imgScale }}
       >
         <Image
-          src="/assets/images/writing-desk.webp"
+          src="/assets/images/writing-desk.jpeg"
           alt=""
           fill
           priority
