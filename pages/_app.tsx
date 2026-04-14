@@ -38,7 +38,7 @@ const aolMono = JetBrains_Mono({
 
 const aolSerif = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300"],
   style: ["normal", "italic"],
   variable: "--font-family-serif",
   display: "swap",
