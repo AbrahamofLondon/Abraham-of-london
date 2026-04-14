@@ -15,6 +15,7 @@ type KeyRow = {
   memberEmail: string | null;
   memberTier: string;
   keyHash: string;
+  keySuffix: string | null;
   status: string;
   createdAt: string;
   expiresAt: string;
@@ -65,6 +66,7 @@ export default async function handler(
       memberEmail: k.member?.email ?? null,
       memberTier: String(k.member?.tier ?? "public"),
       keyHash: k.keyHash,
+      keySuffix: k.keySuffix ?? null,
       status: String(k.status),
       createdAt: k.createdAt.toISOString(),
       expiresAt: k.expiresAt.toISOString(),

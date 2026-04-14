@@ -1,3 +1,5 @@
+// DEPRECATED: orphaned dashboard — no inbound references.
+// Pending deletion in cleanup pass. Do not add new logic here.
 /* pages/board/intelligence.tsx */
 import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/Layout";

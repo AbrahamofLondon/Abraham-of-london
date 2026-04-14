@@ -76,6 +76,7 @@ export default async function handler(
       await tx.innerCircleKey.create({
         data: {
           keyHash,
+          keySuffix: rawKey.split("-").pop() ?? null,
           memberId: member.id,
           keyType: "access",
           status: PrismaKeyStatus.active,

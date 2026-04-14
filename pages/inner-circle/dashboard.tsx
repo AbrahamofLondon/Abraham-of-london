@@ -134,13 +134,21 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
               </p>
             </div>
 
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="p-4 rounded-full bg-gray-50 border border-gray-100 hover:bg-gray-100 transition-all text-gray-400 hover:text-blue-600 group"
-            >
-              <RefreshCw size={18} className={`${loading ? "animate-spin text-blue-600" : "group-hover:rotate-180 transition-transform duration-500"}`} />
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/inner-circle/account"
+                className="px-5 py-3 border border-gray-100 bg-white text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-all"
+              >
+                My Account
+              </Link>
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="p-4 rounded-full bg-gray-50 border border-gray-100 hover:bg-gray-100 transition-all text-gray-400 hover:text-blue-600 group"
+              >
+                <RefreshCw size={18} className={`${loading ? "animate-spin text-blue-600" : "group-hover:rotate-180 transition-transform duration-500"}`} />
+              </button>
+            </div>
           </header>
 
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">

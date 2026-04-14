@@ -56,6 +56,7 @@ interface KeyRow {
   memberEmail: string | null;
   memberTier: string;
   keyHash: string;
+  keySuffix: string | null;
   status: string;
   createdAt: string;
   expiresAt: string;
@@ -449,6 +450,90 @@ export default function AdminDashboard() {
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                       No members found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Keys Tab */}
+      {activeTab === "keys" && (
+        <div className="mb-8 bg-slate-950 border border-slate-900 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-800">
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              Access Key Roster
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="border-b border-slate-800 bg-slate-900/50">
+                <tr>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Email</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Key Suffix</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Tier</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Issued</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Expires</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Status</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {keysLoading && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500 font-mono uppercase text-[10px] tracking-widest animate-pulse">
+                      Loading keys...
+                    </td>
+                  </tr>
+                )}
+                {!keysLoading && keys.map((row) => {
+                  const isActive = String(row.status).toLowerCase() === "active";
+                  return (
+                    <tr key={row.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 text-sm text-slate-200">
+                        {row.memberEmail ?? <span className="text-slate-500 italic">no email</span>}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-[10px] text-blue-400">
+                        {row.keySuffix ? `****${row.keySuffix}` : `****${row.keyHash.slice(-8)}`}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider bg-blue-500/20 text-blue-400">
+                          {row.memberTier}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-slate-500">
+                        {new Date(row.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-slate-500">
+                        {new Date(row.expiresAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider ${
+                          isActive
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : "bg-slate-500/20 text-slate-400"
+                        }`}>
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => void handleRevokeKeyRow(row)}
+                          disabled={!isActive}
+                          className="px-3 py-1 bg-red-600/20 border border-red-500/20 rounded text-[10px] font-black uppercase tracking-widest text-red-300 hover:bg-red-600/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Revoke
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!keysLoading && keys.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                      No keys found
                     </td>
                   </tr>
                 )}

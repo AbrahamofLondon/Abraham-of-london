@@ -80,6 +80,14 @@ function matchesPrefix(pathname: string, prefixes: string[]): boolean {
 
 function isPublicRoute(pathname: string): boolean {
   if (PUBLIC_EXACT.has(pathname)) return true;
+  // Inner Circle entry/redemption pages must be reachable with zero credentials:
+  //   - /inner-circle          → registration form
+  //   - /inner-circle/unlock   → email-link key redemption (SSR)
+  //   - /inner-circle/login    → manual key entry
+  // All other /inner-circle/** paths remain Tier 2 (AL cookie required).
+  if (pathname === "/inner-circle") return true;
+  if (pathname === "/inner-circle/unlock") return true;
+  if (pathname === "/inner-circle/login") return true;
   return matchesPrefix(pathname, PUBLIC_PREFIXES);
 }
 
@@ -129,20 +137,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Tier 2 — NextAuth + AL token required.
+  // Tier 2 — AL token required (NextAuth is NOT required; Inner Circle
+  // members authenticate via the aol_access cookie alone).
   if (isTier2Route(pathname)) {
-    if (!token) {
-      if (isApi) {
-        return NextResponse.json(
-          { ok: false, error: "Inner Circle access required", code: "TOKEN_REQUIRED" },
-          { status: 401 },
-        );
-      }
-      const url = req.nextUrl.clone();
-      url.pathname = "/inner-circle";
-      url.searchParams.set("returnTo", pathname);
-      return NextResponse.redirect(url);
-    }
     const alCookie = req.cookies.get("aol_access");
     if (!alCookie) {
       if (isApi) {

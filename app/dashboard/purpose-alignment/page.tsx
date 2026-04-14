@@ -1,3 +1,5 @@
+// DEPRECATED: orphaned dashboard — no inbound references.
+// Pending deletion in cleanup pass. Do not add new logic here.
 import {
   ALIGNMENT_DOMAIN_LABELS,
   ALIGNMENT_DOMAIN_ORDER,

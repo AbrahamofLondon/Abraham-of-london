@@ -6,7 +6,7 @@ import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
-import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
+import { hashAccessKey, getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
 
 type ApiResponse =
@@ -81,7 +81,22 @@ export default async function handler(
   const recaptchaToken = String(req.body?.recaptchaToken || "").trim();
 
   try {
-    const isHuman = await verifyRecaptcha(recaptchaToken);
+    // Authenticated members bypass reCAPTCHA — they have already proven
+    // identity via the aol_access cookie. Unauthenticated requests still
+    // go through the standard reCAPTCHA check below.
+    let isHuman = false;
+    const cookie = req.cookies["aol_access"];
+    if (cookie) {
+      const ctx = await getSessionContext(cookie).catch(() => null);
+      if (ctx?.ok) {
+        isHuman = true;
+      }
+    }
+
+    if (!isHuman) {
+      isHuman = await verifyRecaptcha(recaptchaToken);
+    }
+
     if (!isHuman) {
       return res
         .status(403)
@@ -128,6 +143,7 @@ export default async function handler(
       prisma.innerCircleKey.create({
         data: {
           keyHash,
+          keySuffix: rawKey.split("-").pop() ?? null,
           memberId: member.id,
           keyType: "access",
           status: PrismaKeyStatus.active,

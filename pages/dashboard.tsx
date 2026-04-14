@@ -28,6 +28,8 @@ import Layout from "@/components/Layout";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { OGR_CLIENT_CONFIG } from "@/lib/ogr/client-config";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 
 /* -------------------------------------------------------------------------- */
 /* DYNAMIC PANELS                                                             */
@@ -168,6 +170,11 @@ interface DashboardProps {
   entitlements: EntitlementItem[];
   lineageEvents: LineageItem[];
   reports: ReportItem[];
+  innerCircle: {
+    hasValidToken: boolean;
+    tier: string;
+    expiresAt: string | null;
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -387,6 +394,7 @@ export default function UnifiedDashboard({
   entitlements,
   lineageEvents,
   reports,
+  innerCircle,
 }: DashboardProps) {
   const [liveResonance, setLiveResonance] = React.useState<number>(82);
   const [isLoadingMetrics, setIsLoadingMetrics] = React.useState<boolean>(true);
@@ -591,6 +599,78 @@ export default function UnifiedDashboard({
             </div>
           </div>
 
+          {/* My Access Panel — reads from getUnifiedSession-equivalent data */}
+          <div className="mb-12 border border-white/10 bg-white/[0.02] p-6">
+            <div className="mb-5 flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#8A6A2F]" />
+              <span className="text-[8px] uppercase tracking-wider text-white/40">
+                My Access
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-white/30 mb-2">
+                  Identity Tier
+                </div>
+                <div className="text-sm font-bold text-white uppercase">
+                  {aol.tier}
+                </div>
+              </div>
+              <div>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-white/30 mb-2">
+                  Inner Circle Token
+                </div>
+                <div
+                  className={`text-sm font-bold uppercase ${
+                    innerCircle.hasValidToken ? "text-emerald-400" : "text-white/40"
+                  }`}
+                >
+                  {innerCircle.hasValidToken ? "Active" : "Inactive"}
+                </div>
+              </div>
+              <div>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-white/30 mb-2">
+                  Token Expires
+                </div>
+                <div className="text-sm font-mono text-white/80">
+                  {innerCircle.expiresAt
+                    ? new Date(innerCircle.expiresAt).toLocaleDateString()
+                    : "—"}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/inner-circle/account"
+                className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                Manage Access Key
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+
+              {innerCircle.hasValidToken && (
+                <Link
+                  href="/inner-circle/dashboard"
+                  className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  Inner Circle Vault
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
+
+              {aol.isInternal && (
+                <Link
+                  href="/inner-circle/admin/dashboard"
+                  className="inline-flex items-center gap-2 border border-[#8A6A2F]/40 bg-[#8A6A2F]/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[#E7C16B] hover:bg-[#8A6A2F]/20 transition-colors"
+                >
+                  Directorate Command
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
+            </div>
+          </div>
+
           <SectionHeader
             icon={CreditCard}
             title="Client Entitlements & Chain of Custody"
@@ -711,6 +791,31 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         permanent: false,
       },
     };
+  }
+
+  // Resolve Inner Circle entitlement state alongside NextAuth identity.
+  // This mirrors what lib/auth/session-helpers.ts#getUnifiedSession returns,
+  // integrated inline so the dashboard's existing complex auth flow can
+  // consume the signal without a second getServerSession pass.
+  let innerCircleState: DashboardProps["innerCircle"] = {
+    hasValidToken: false,
+    tier: "public",
+    expiresAt: null,
+  };
+  try {
+    const cookieValue = readAccessCookie(context.req as any);
+    if (cookieValue) {
+      const ctx = await getSessionContext(cookieValue);
+      if (ctx.ok && ctx.valid) {
+        innerCircleState = {
+          hasValidToken: true,
+          tier: ctx.tier ?? "public",
+          expiresAt: ctx.expiresAt ?? null,
+        };
+      }
+    }
+  } catch {
+    // Fall through to default — never block dashboard on Inner Circle state.
   }
 
   try {
@@ -904,6 +1009,7 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         entitlements,
         lineageEvents,
         reports,
+        innerCircle: innerCircleState,
       },
     };
   } catch (error) {
@@ -917,6 +1023,7 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         featuredBriefs: [],
         recentBriefs: [],
         aol: { tier: "Inner Circle", isInternal: false },
+        innerCircle: innerCircleState,
         dealFlowStats: null,
         entitlements: [],
         lineageEvents: [],
