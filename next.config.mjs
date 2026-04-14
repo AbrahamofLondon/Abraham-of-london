@@ -93,6 +93,16 @@ const nextConfig = {
       "./node_modules/typescript/**",
       "./node_modules/sass/**",
       "./node_modules/@esbuild/**",
+
+      // Contentlayer generated JSON indexes are build-time artifacts.
+      // The runtime reads from .contentlayer/generated/**/*.js not
+      // **/_index.json — the 24 MB Brief/_index.json and 9.7 MB
+      // Intelligence/_index.json are pure bulk in the handler.
+      "./.contentlayer/generated/**/_index.json",
+
+      // private_storage/premium-content contains gated PDF assets that
+      // belong on disk/CDN, not inside the serverless handler.
+      "./private_storage/**",
     ],
   },
 
@@ -144,6 +154,22 @@ const nextConfig = {
         splitChunks: {
           chunks: "all",
           maxSize: 244000,
+        },
+      };
+    }
+
+    // 4b. Server-side chunk splitting — cap each server chunk at ~10 MB.
+    // Without this, webpack can emit single 44 MB chunks that alone push
+    // the Netlify handler past the 250 MB cap. The 10 MB cap forces each
+    // monolithic chunk to be broken into 4–5 smaller ones, which the
+    // standalone tracer can then prune more effectively.
+    if (!dev && isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: "all",
+          maxSize: 10 * 1024 * 1024, // 10 MB
+          minSize: 1 * 1024 * 1024,  // 1 MB
         },
       };
     }
