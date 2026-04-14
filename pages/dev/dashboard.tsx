@@ -1,3 +1,6 @@
+// DEPRECATED: orphaned route — no inbound references.
+// Pending operator decision: surface, redirect, or delete.
+// Do not add new logic here.
 /* pages/dev/dashboard.tsx — DEVELOPMENT DASHBOARD (No Auth Gates) */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";

@@ -1,3 +1,6 @@
+// DEPRECATED: orphaned route — no inbound references.
+// Pending operator decision: surface, redirect, or delete.
+// Do not add new logic here.
 /* pages/client/dashboard.tsx */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

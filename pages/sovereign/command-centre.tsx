@@ -1,3 +1,6 @@
+// DEPRECATED: orphaned route — no inbound references.
+// Pending operator decision: surface, redirect, or delete.
+// Do not add new logic here.
 import * as React from "react";
 import useSWR from "swr";
 
