@@ -3,18 +3,7 @@
 import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Link from "next/link";
-import {
-  BookOpen,
-  ShieldCheck,
-  Lock,
-  RefreshCw,
-  Search,
-  ArrowRight,
-  TrendingUp,
-  Zap,
-  Fingerprint,
-  FileText,
-} from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
 
 import { allBriefs } from "contentlayer/generated";
 
@@ -35,13 +24,8 @@ interface DashboardProps {
     email?: string | null;
   };
   initialData: {
-    content: any[];
     diagnostics: any[];
-    stats: {
-      total: number;
-      diagnostics: number;
-      reportsReady: number;
-    };
+    briefs: any[];
     user: {
       name: string;
       tier: string;
@@ -53,39 +37,6 @@ interface DashboardProps {
 
 export default function InnerCircleDashboard({ access, initialData, error }: DashboardProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
-
-  const filteredContent = React.useMemo(() => {
-    if (!initialData?.content) return [];
-    if (!searchTerm) return initialData.content;
-    const term = searchTerm.toLowerCase();
-    return initialData.content.filter(
-      (item) =>
-        item.title?.toLowerCase().includes(term) ||
-        item.excerpt?.toLowerCase().includes(term) ||
-        item.kind?.toLowerCase().includes(term),
-    );
-  }, [searchTerm, initialData.content]);
-
-  const filteredDiagnostics = React.useMemo(() => {
-    if (!initialData?.diagnostics) return [];
-    if (!searchTerm) return initialData.diagnostics;
-    const term = searchTerm.toLowerCase();
-    return initialData.diagnostics.filter(
-      (item) =>
-        item.title?.toLowerCase().includes(term) ||
-        item.kind?.toLowerCase().includes(term) ||
-        item.diagnosticRef?.toLowerCase().includes(term) ||
-        item.respondentName?.toLowerCase().includes(term) ||
-        item.organisation?.toLowerCase().includes(term),
-    );
-  }, [searchTerm, initialData.diagnostics]);
-
-  const handleRefresh = () => {
-    setLoading(true);
-    router.reload();
-  };
 
   if (error) {
     return (
@@ -95,10 +46,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
             <ShieldCheck />
             <h1>Vault Sync Error</h1>
             <p>{error}</p>
-            <button
-              onClick={handleRefresh}
-             
-            >
+            <button onClick={() => router.reload()}>
               Retry Protocol Connection
             </button>
           </div>
@@ -113,214 +61,120 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
         title="Member Dashboard | Abraham of London"
        
       >
-        <div>
+        <div className="min-h-screen bg-[rgb(3,3,5)] text-white">
           <WorkspaceNav />
-          <header>
-            <div>
-              <div>
-                <span>
-                  {access.tier} Clearance
-                </span>
-                <span>
-                  Sync: {initialData.user.lastLogin ? new Date(initialData.user.lastLogin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Active"}
-                </span>
-              </div>
-
-              <h1>
-                The Kingdom <span>Vault.</span>
-              </h1>
-              <p>
-                Welcome back, <span>{initialData.user.name}</span>.
-                Your restricted manuscripts and diagnostic records now sit in the same operating surface.
+          <div className="mx-auto max-w-5xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20">
+            <header className="max-w-3xl">
+              <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
+                INNER CIRCLE · CHAMBER MODE
               </p>
-            </div>
+              <h1 className="mt-5 font-serif text-[clamp(2rem,4vw,3rem)] font-light italic leading-[0.95] text-white/92">
+                The workspace.
+              </h1>
+              <p className="mt-4 font-mono text-[7.5px] uppercase tracking-[0.12em] text-white/48">
+                Active session · {initialData.user.name} · {access.tier}
+              </p>
+            </header>
 
-            <div>
-              <Link
-                href="/inner-circle/account"
-               
-              >
-                My Account
-              </Link>
-              <button
-                onClick={handleRefresh}
-                disabled={loading}
-               
-              >
-                <RefreshCw size={18} className={`${loading ? "animate-spin text-blue-600" : "group-hover:rotate-180 transition-transform duration-500"}`} />
-              </button>
-            </div>
-          </header>
-
-          <section>
-            <StatTile label="Briefs Available" val={initialData.stats.total} icon={BookOpen} />
-            <StatTile label="Diagnostics" val={initialData.stats.diagnostics} icon={Fingerprint} />
-            <StatTile label="Reports Ready" val={initialData.stats.reportsReady} icon={FileText} />
-            <StatTile label="Vault Tier" val={access.tier.toUpperCase()} icon={ShieldCheck} />
-          </section>
-
-          <div>
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Filter manuscripts and diagnostic records..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-             
-            />
-          </div>
-
-          <div>
-            <div>
+            <div className="mt-12 space-y-12">
               <section>
-                <div>
-                  <h2>Diagnostic Records</h2>
-                  <Link
-                    href="/diagnostics"
-                   
-                  >
-                    New Diagnostic <ArrowRight size={14} />
-                  </Link>
-                </div>
-
-                {/* Diagnostics Grid */}
-                <div>
-                  {initialData.content.length > 0 ? (
-                    initialData.content.map((item, i) => (
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Diagnostic Records
+                </h2>
+                <div className="mt-4 border-t border-white/8">
+                  {initialData.diagnostics.length > 0 ? (
+                    initialData.diagnostics.map((item, i) => (
                       <Link
                         key={item.diagnosticRef || i}
                         href={item.href}
-                       
+                        className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
                       >
-                        <div>
-                          <ArrowRight />
-                        </div>
-
-                        <div>
-                          <span>
-                            {item.kind}
-                          </span>
-                          <span>
-                            {item.reportStatus}
-                          </span>
-                        </div>
-
-                        <h3>
-                          {item.title}
-                        </h3>
-
-                        <p>
-                          {item.excerpt}
-                        </p>
-
-                        <div>
-                          Ref: {item.diagnosticRef}
-                        </div>
-
-                        <div>
-                          <span>{item.date}</span>
-                          <span>{item.readTime}</span>
-                        </div>
+                        <span>
+                          {item.title || item.date} · {item.reportStatus}
+                        </span>
+                        <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                          → View
+                        </span>
                       </Link>
                     ))
                   ) : (
-                    <div>
-                      <Lock size={32} />
-                      <p>
-                        No reports found matching your query.
-                      </p>
+                    <div className="border-b border-white/6 py-3 text-sm text-white/32">
+                      No diagnostic records available.
                     </div>
                   )}
                 </div>
               </section>
 
               <section>
-                <div>
-                  <h2>Restricted Manuscripts</h2>
-                </div>
-
-                <div>
-                  {filteredContent.length > 0 ? (
-                    filteredContent.map((item, i) => (
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Restricted Manuscripts
+                </h2>
+                <div className="mt-4 border-t border-white/8">
+                  {initialData.briefs.length > 0 ? (
+                    initialData.briefs.map((item, i) => (
                       <Link
                         key={i}
                         href={item.href}
-                       
+                        className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
                       >
-                        <div>
-                          <ArrowRight />
-                        </div>
-                        <div>
-                          <span>
-                            {item.kind}
-                          </span>
-                        </div>
-                        <h3>
-                          {item.title}
-                        </h3>
-                        <p>{item.excerpt}</p>
-                        <div>
-                          <span>{item.date}</span>
-                          <span>{item.readTime}</span>
-                        </div>
+                        <span className="flex items-center gap-2">
+                          {item.restricted ? <Lock size={14} className="text-white/34" /> : null}
+                          {item.title} · {item.accessTier}
+                        </span>
+                        <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                          → Read
+                        </span>
                       </Link>
                     ))
                   ) : (
-                    <div>
-                      <Lock size={32} />
-                      <p>No manuscripts found matching your query.</p>
+                    <div className="border-b border-white/6 py-3 text-sm text-white/32">
+                      No manuscripts available at your access tier.
                     </div>
                   )}
                 </div>
               </section>
-            </div>
 
-            <aside>
-              <div>
-                <div></div>
-                <h3>Institutional Advisory</h3>
-                <p>
-                  Direct access for board-level diagnostics, report review, or strategic escalation.
-                </p>
-                <Link href="/consulting/strategy-room">
-                  Enter Strategy Room
-                </Link>
-              </div>
-
-              <div>
-                <h3>
-                  <TrendingUp size={14} /> System Rhythms
-                </h3>
-                <div>
-                  <RhythmItem label="Next Salon" val="Feb 2026" />
-                  <RhythmItem label="Intel Cycle" val="Active" />
-                  <RhythmItem label="Diagnostic Loop" val="Closed" />
+              <section>
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Quick Actions
+                </h2>
+                <div className="mt-4 border-t border-white/8">
+                  <Link
+                    href="/purpose-alignment"
+                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
+                  >
+                    <span>New diagnostic</span>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                      → Open
+                    </span>
+                  </Link>
+                  <Link
+                    href="/strategy-room"
+                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
+                  >
+                    <span>Strategy Room</span>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                      → Open
+                    </span>
+                  </Link>
+                  <Link
+                    href="/inner-circle/account"
+                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
+                  >
+                    <span>Account settings</span>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                      → Manage
+                    </span>
+                  </Link>
                 </div>
-              </div>
-            </aside>
+              </section>
+            </div>
           </div>
         </div>
       </Layout>
     </ErrorBoundary>
   );
 }
-
-const StatTile = ({ label, val, icon: Icon }: any) => (
-  <div>
-    <div>
-      <Icon size={18} strokeWidth={1.5} />
-    </div>
-    <span>{label}</span>
-    <div>{val}</div>
-  </div>
-);
-
-const RhythmItem = ({ label, val }: any) => (
-  <div>
-    <span>{label}</span>
-    <span>{val}</span>
-  </div>
-);
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
@@ -381,18 +235,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // ✅ CONTENT QUERY ALIGNED TO SCHEMA (uses summary, not excerpt)
-    const content = allBriefs
+    const briefs = allBriefs
       .filter((b) => (b as any).status === "published" || process.env.NODE_ENV === "development")
+      .filter((b) => {
+        const tier = String((b as any).accessTier ?? "public").toLowerCase();
+        if (tier === "public") return true;
+        return tierAtLeast(ctx.tier, "inner-circle");
+      })
       .sort((a, b) => new Date(String((b as any).date ?? "")).getTime() - new Date(String((a as any).date ?? "")).getTime())
       .map((b) => {
         const ab = b as any;
         return {
           title: String(ab.title ?? ""),
-          kind: String(ab.category ?? "Briefing"),
-          excerpt: String(ab.summary ?? ab.excerpt ?? "Institutional strategic summary."),
+          accessTier: String(ab.accessTier ?? "inner-circle"),
           href: `/inner-circle/briefs/${ab._raw?.flattenedPath ?? ""}`,
-          date: ab.date ? new Date(ab.date).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : "2026",
-          readTime: ab.readingTime?.text ?? "12m",
+          restricted: String(ab.accessTier ?? "inner-circle").toLowerCase() !== "public",
         };
       });
 
@@ -405,13 +262,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           email: userEmail,
         },
         initialData: {
-          content: diagnostics,
           diagnostics: diagnostics,
-          stats: {
-            total: content.length,
-            diagnostics: diagnostics.length,
-            reportsReady: diagnostics.filter((d) => d.reportStatus === "generated").length,
-          },
+          briefs,
           user: {
             name: ctx.name || "Member",
             tier: ctx.tier || "public",
