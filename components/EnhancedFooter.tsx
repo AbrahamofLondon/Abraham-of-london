@@ -284,7 +284,7 @@ export default function EnhancedFooter(): React.ReactElement {
     Archive: [
       { label: "Canon",       href: "/canon"      },
       { label: "Editorials",  href: "/editorials" },
-      { label: "Essays",      href: "/editorials", highlight: true },
+      { label: "Essays",      href: "/blog",       highlight: true },
       { label: "Library",     href: "/library"    },
       { label: "Shorts",      href: "/shorts"     },
       { label: "Playbooks",   href: "/playbooks"  },
