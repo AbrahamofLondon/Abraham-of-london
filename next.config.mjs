@@ -5,7 +5,6 @@
  */
 
 import path from "path";
-import fs from "node:fs";
 import { fileURLToPath } from "url";
 import { withContentlayer } from "next-contentlayer2";
 
@@ -228,52 +227,6 @@ const nextConfig = {
           },
         },
       };
-
-      /**
-       * Server stats emitter (diagnostic).
-       *
-       * Taps webpack's `done` hook after the production server
-       * compilation and writes a stats JSON to .next/server/server-stats.json.
-       * Read back by scripts/diagnostic/stats-analyzer.mjs in the Netlify
-       * build command to enumerate which modules land in each oversized
-       * commons chunk.
-       *
-       * Guarded on `!dev && isServer` so it never runs in dev or for the
-       * client build. Does not mutate config.optimization or bundle output.
-       */
-      config.plugins = config.plugins || [];
-      config.plugins.push({
-        apply(compiler) {
-          compiler.hooks.done.tap("ServerStatsEmitter", (stats) => {
-            try {
-              const statsJson = stats.toJson({
-                all: false,
-                chunks: true,
-                chunkModules: true,
-                modules: true,
-                reasons: false,
-                source: false,
-                chunkOrigins: true,
-                ids: true,
-                entrypoints: true,
-              });
-              const outPath = path.join(
-                process.cwd(),
-                ".next/server/server-stats.json",
-              );
-              fs.mkdirSync(path.dirname(outPath), { recursive: true });
-              fs.writeFileSync(outPath, JSON.stringify(statsJson, null, 0));
-              console.log(
-                "STATS: wrote server-stats.json (" +
-                  Math.round(fs.statSync(outPath).size / 1024) +
-                  " KB)",
-              );
-            } catch (e) {
-              console.error("STATS: failed to write:", e && e.message);
-            }
-          });
-        },
-      });
     }
 
     return config;

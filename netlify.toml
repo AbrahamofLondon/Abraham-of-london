@@ -2,20 +2,11 @@
 # Minimal, adapter-first Netlify config for modern Next.js
 
 [build]
-  command = """
-    pnpm build:netlify && \
-    echo '===BUILD DIAGNOSTIC===' && \
-    du -sh .next 2>/dev/null || true && \
-    du -sh .next/server 2>/dev/null || true && \
-    find .next -type f -name '*.js' -size +10M -exec ls -lh {} \\; 2>/dev/null || true && \
-    echo '===END DIAGNOSTIC===' && \
-    (node scripts/diagnostic/chunk-inspector.mjs || echo '===END CHUNK MANIFEST===') && \
-    (node scripts/diagnostic/stats-analyzer.mjs || echo '===END STATS===')
-  """
+  command = "pnpm build:netlify"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
-  NODE_OPTIONS = "--max-old-space-size=4096"
+  NODE_OPTIONS = "--max-old-space-size=7168"
   CI = "true"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_DISABLE_SOURCEMAPS = "true"
