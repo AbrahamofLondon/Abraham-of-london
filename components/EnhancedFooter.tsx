@@ -283,7 +283,7 @@ export default function EnhancedFooter(): React.ReactElement {
       { label: "Playbooks",  href: "/playbooks"  },
     ],
     Products: [
-      { label: "Artifacts",           href: "/artifacts"                            },
+      { label: "Intelligence Archives", href: "/artifacts"                            },
       { label: "Market Intelligence",  href: "/intelligence/global-market-intelligence-q1-2026" },
       { label: "Executive Reporting",  href: "/diagnostics/executive-reporting"     },
       { label: "Vault Briefs",         href: "/vault/briefs"                        },

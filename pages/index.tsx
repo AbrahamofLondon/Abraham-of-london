@@ -514,7 +514,7 @@ function HeroSection({
               className="mt-11 flex flex-wrap gap-3"
             >
               <Link
-                href="/diagnostics/executive-reporting"
+                href="/diagnostics"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
                   borderColor: `${GOLD}44`,
@@ -537,13 +537,12 @@ function HeroSection({
                 }}
               >
                 <ScrollText className="h-3.5 w-3.5" />
-                Executive Reporting
+                Begin Assessment
                 <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
               </Link>
 
-              <button
-                type="button"
-                onClick={onScroll}
+              <Link
+                href="/diagnostics/executive-reporting"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
                   borderColor: "rgba(255,255,255,0.08)",
@@ -555,22 +554,22 @@ function HeroSection({
                   textTransform: "uppercase",
                 }}
                 onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLButtonElement;
+                  const el = e.currentTarget as HTMLAnchorElement;
                   el.style.borderColor = "rgba(255,255,255,0.15)";
                   el.style.backgroundColor = "rgba(255,255,255,0.06)";
                   el.style.color = "rgba(255,255,255,0.92)";
                 }}
                 onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLButtonElement;
+                  const el = e.currentTarget as HTMLAnchorElement;
                   el.style.borderColor = "rgba(255,255,255,0.08)";
                   el.style.backgroundColor = "rgba(255,255,255,0.03)";
                   el.style.color = "rgba(255,255,255,0.55)";
                 }}
               >
-                <Compass className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />
-                The platform
+                <ScrollText className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />
+                Executive Reporting
                 <ArrowRight className="h-3.5 w-3.5 opacity-45 transition-transform group-hover:translate-x-0.5 group-hover:opacity-80" />
-              </button>
+              </Link>
 
               <Link
                 href="/consulting/strategy-room"
@@ -828,7 +827,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.048)" }}>
               {[
                 { href: "/canon", eyebrow: "Doctrine", title: "Canon", icon: Compass },
-                { href: "/artifacts", eyebrow: "Products", title: "Artifacts", icon: Archive },
+                { href: "/artifacts", eyebrow: "Products", title: "Intelligence Archives", icon: Archive },
                 { href: "/editorials", eyebrow: "Publications", title: "Editorials", icon: ScrollText },
                 { href: "/diagnostics", eyebrow: "Gateway", title: "Diagnostics", icon: ScanSearch },
                 { href: "/consulting", eyebrow: "Advisory", title: "Consulting", icon: Briefcase },
@@ -1709,6 +1708,36 @@ const HomePage: NextPage<HomePageProps> = ({
         onScroll={() => document.getElementById("platform")?.scrollIntoView({ behavior: "smooth" })}
       />
 
+      <Bridge text="hero · buyer fit" />
+
+      <Section id="buyer-fit" variant="void" cap="buyer fit · who this is for">
+        <ModuleBoundary label="ExecutiveBuyerFitSection">
+          <ExecutiveBuyerFitSection />
+        </ModuleBoundary>
+      </Section>
+
+      <Bridge text="buyer fit · diagnostics" />
+
+      <Section id="diagnostics" variant="void" cap="diagnostics · three-layer sequence">
+        <SectionHeader
+          eyebrow="The diagnostic ladder"
+          title={
+            <>
+              Signal before solution.
+              <br />
+              <span className="text-white/35">Route before intervention.</span>
+            </>
+          }
+          description="Three layers. Each with a distinct function. The system routes by evidence, not by proximity to a sale."
+          large
+        />
+        <div className="mt-12">
+          <DiagnosticLadder />
+        </div>
+      </Section>
+
+      <Bridge text="diagnostics · platform" />
+
       <PlatformArchitecture counts={counts} />
 
       <Bridge text="platform · flagships" />
@@ -1733,39 +1762,11 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      <Bridge text="flagships · diagnostic ladder" />
-
-      <Section id="diagnostics" variant="void" cap="diagnostics · three-layer sequence">
-        <SectionHeader
-          eyebrow="The diagnostic ladder"
-          title={
-            <>
-              Signal before solution.
-              <br />
-              <span className="text-white/35">Route before intervention.</span>
-            </>
-          }
-          description="Three layers. Each with a distinct function. The system routes by evidence, not by proximity to a sale."
-          large
-        />
-        <div className="mt-12">
-          <DiagnosticLadder />
-        </div>
-      </Section>
-
-      <Bridge text="diagnostics · strategy room" />
+      <Bridge text="flagships · strategy room" />
 
       <Section id="strategy-room" variant="surface" cap="escalation · when product becomes mandate">
         <ModuleBoundary label="StrategyRoomIntegration">
           <StrategyRoomIntegration />
-        </ModuleBoundary>
-      </Section>
-
-      <Bridge text="strategy room · buyer fit" />
-
-      <Section id="buyer-fit" variant="void" cap="buyer fit · who this is for">
-        <ModuleBoundary label="ExecutiveBuyerFitSection">
-          <ExecutiveBuyerFitSection />
         </ModuleBoundary>
       </Section>
 
@@ -2415,3 +2416,4 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 };
 
 export default HomePage;
+

@@ -62,7 +62,7 @@ const DESKTOP_NAV: readonly NavItem[] = [
   { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
   { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
   { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
-  { href: "/artifacts",    label: "Artifacts",   sub: "Premium Intelligence",     icon: Archive    },
+  { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
   { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
 ] as const;
 
@@ -74,7 +74,7 @@ const MOBILE_NAV: readonly NavItem[] = [
   { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
   { href: "/library",      label: "Library",     sub: "Knowledge Shelf",          icon: BookOpen   },
   { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
-  { href: "/artifacts",    label: "Artifacts",   sub: "Premium Intelligence",     icon: Archive    },
+  { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
   { href: "/vault/briefs", label: "Briefs",      sub: "Operational Intelligence", icon: FileText   },
   { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
 ] as const;

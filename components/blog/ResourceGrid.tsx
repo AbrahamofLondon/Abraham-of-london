@@ -22,7 +22,7 @@ export const ResourceGrid: React.FC<ResourceGridProps> = ({ resources = [], vari
   return (
     <div className="my-12 w-full">
       <div className="flex items-center gap-2 mb-6 px-4 py-1.5 w-fit rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-        <ShieldCheck className="w-3.5 h-3.5" /> Institutional Artifacts
+        <ShieldCheck className="w-3.5 h-3.5" /> Intelligence Archives
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -382,7 +382,7 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                   }}
                 >
                   <ArrowLeft style={{ width: "11px", height: "11px" }} />
-                  Artifacts
+                  Intelligence Archives
                 </Link>
               </motion.div>
 
