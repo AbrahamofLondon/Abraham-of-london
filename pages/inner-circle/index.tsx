@@ -128,7 +128,7 @@ const InnerCirclePage: NextPage = () => {
     <Layout 
       title="Identity Verification | Inner Circle" 
       description="Authentication required for sovereign intelligence access."
-      noSidebar={true} // Hide sidebar on the login gate
+      // Hide sidebar on the login gate
       className="p-0"
     >
       <main className="min-h-screen bg-[#050505] pt-32 pb-32 relative overflow-hidden">
@@ -314,3 +314,4 @@ const InnerCirclePage: NextPage = () => {
 };
 
 export default InnerCirclePage;
+
