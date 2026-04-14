@@ -1,23 +1,26 @@
-# netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED & OPTIMIZED)
+# netlify.toml — Abraham of London
+# Minimal, adapter-first Netlify config for modern Next.js
+
 [build]
-  command = "pnpm build:netlify && echo '===HANDLER SIZE DIAGNOSTIC===' && du -sh .next/server 2>/dev/null || true && du -sh .next/standalone 2>/dev/null || true && du -sh .next/standalone/node_modules 2>/dev/null || true && echo '===LARGE JS CHUNKS (>10MB)===' && find .next -name '*.js' -size +10M -exec ls -lh {} \\; 2>/dev/null || true && echo '===LARGE FILES IN STANDALONE (>5MB)===' && find .next/standalone -type f -size +5M -exec ls -lh {} \\; 2>/dev/null || true && echo '===DIAGNOSTIC END==='"
-  publish = ".next"
+  command = """
+    pnpm build:netlify && \
+    echo '===BUILD DIAGNOSTIC===' && \
+    du -sh .next 2>/dev/null || true && \
+    du -sh .next/server 2>/dev/null || true && \
+    find .next -type f -name '*.js' -size +10M -exec ls -lh {} \; 2>/dev/null || true && \
+    echo '===END DIAGNOSTIC==='
+  """
 
 [build.environment]
   NODE_VERSION = "20.20.0"
   NODE_OPTIONS = "--max-old-space-size=4096"
   CI = "true"
   NEXT_TELEMETRY_DISABLED = "1"
-  # ✅ PRO TIP: Disabling linting/type-checking during 'next build' can save minutes
-  # if you already run them as separate CI steps.
   NEXT_DISABLE_SOURCEMAPS = "true"
   CONTENTLAYER_DISABLE_WARNINGS = "1"
   NETLIFY_USE_PNPM = "true"
   PNPM_FLAGS = "--frozen-lockfile"
   PNPM_VERSION = "10.29.3"
-  
-  # ✅ SPEED FIX: Force Next.js to use the cache more aggressively on Netlify
-  NEXT_CACHE_DIR = ".next/cache"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -25,56 +28,27 @@
 [[plugins]]
   package = "@netlify/plugin-emails"
 
-# ✅ SPEED FIX: Adding a caching plugin for Contentlayer
-# This prevents Contentlayer from re-processing 313 docs from scratch every time.
-[[plugins]]
-  package = "netlify-plugin-cache"
-  [plugins.inputs]
-    paths = [".contentlayer", ".next/cache"]
-
-# ✅ Custom functions configuration
-# Switched from esbuild → nft (Node File Tracing).
-# NFT only includes files actually imported at runtime, which dramatically
-# reduces the ___netlify-server-handler zip size.
-# external_node_modules moves heavy native binaries out of the bundle
-# and into the function execution environment instead.
+# Keep this block ONLY if these are genuinely custom non-Next functions
+# that you still use. If not, delete the whole block.
 [functions]
   directory = "netlify/functions_src/functions"
-  node_bundler = "nft"
-  external_node_modules = [
-    "@prisma/client",
-    "@react-pdf/renderer",
-    "canvas",
-    "sharp"
-  ]
 
-# ✅ Scheduled function for token cleanup
-[[schedule]]
-  path = "/api/cleanup-download-tokens"
-  schedule = "0 2 * * *"
-
-# Emails function kept on esbuild — Netlify email templates require it.
 [functions.emails]
   included_files = ["emails/**", "./emails/**"]
   node_bundler = "esbuild"
+
+[[schedule]]
+  path = "/api/cleanup-download-tokens"
+  schedule = "0 2 * * *"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
   NEXT_PUBLIC_APP_ENV = "production"
 
 [context.deploy-preview.environment]
-  # NEXT_PUBLIC_SITE_URL intentionally omitted on deploy-preview.
-  # ${DEPLOY_PRIME_URL} is a netlify.toml-level template literal that bakes
-  # the string into the bundle at build time, which breaks runtime URL
-  # resolution on non-Netlify builds and local dev. Application code reads
-  # process.env.DEPLOY_PRIME_URL at runtime via lib runtime helpers
-  # (see netlify/functions_src/_utils.ts#getSiteUrl).
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "true"
 
-# -----------------------
-# REDIRECTS
-# -----------------------
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -96,15 +70,11 @@
   to = "/vault/:splat"
   status = 301
 
-# -----------------------
-# HEADERS
-# -----------------------
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 

@@ -1,7 +1,5 @@
 /**
- * next.config.mjs — V12.0 (Abraham of London Performance Hardening)
- * Optimized for Netlify Build Times and Webpack Cache Efficiency.
- * ─────────────────────────────────────────────────────────────────────────────
+ * next.config.mjs — Netlify-aligned build configuration
  */
 
 import path from "path";
@@ -14,21 +12,12 @@ const __dirname = path.dirname(__filename);
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
   productionBrowserSourceMaps: false,
 
   typescript: {
-    // Type errors are tracked via tsc --noEmit in CI.
-    // Build compilation succeeds — only the strict checker blocks.
-    //
-    // RETIREMENT PATH: This flag stays true through the recovery merge and
-    // the schema PR chain. It is flipped to false in the final PR of
-    // SCHEMA-PR-CHAIN-CHECKLIST-01 (PR 4), after tier/identity/status
-    // honesty lands end-to-end. Any residual errors at that point must map
-    // to the explicitly-deferred non-chain debt surfaces named in DEBT.md.
     ignoreBuildErrors: true,
   },
 
@@ -52,10 +41,6 @@ const nextConfig = {
     },
   },
 
-  /**
-   * ✅ SERVER EXTERNAL PACKAGES
-   * Prevents Webpack from attempting to bundle heavy Node-only binaries.
-   */
   serverExternalPackages: [
     "@prisma/client",
     "contentlayer2",
@@ -65,25 +50,6 @@ const nextConfig = {
     "jsdom",
   ],
 
-  /**
-   * ✅ OUTPUT FILE TRACING — standalone handler pruning
-   * Targets the largest non-runtime contributors identified in the Netlify
-   * build diagnostic. Excludes:
-   *   - .git history (162 MB, never needed at runtime)
-   *   - .contentlayer/.cache (42 MB build cache — .contentlayer/generated
-   *     is left intact because it IS needed at runtime for MDX content)
-   *   - node_modules/.cache (build cache)
-   *   - typescript / sass / @esbuild (build-only toolchain)
-   *
-   * Do NOT exclude:
-   *   - .prisma/client (Prisma engine, runtime)
-   *   - @img/sharp  (image processing, runtime)
-   *   - .contentlayer/generated (MDX content index, runtime)
-   *   - node_modules/next/dist/compiled/** (Next server runtime)
-   *   - public/assets/fonts, public/fonts, public/assets/downloads
-   *     (traced by next/font/local, react-pdf Font.register, and
-   *     lib/premium/private-asset-store.ts respectively)
-   */
   outputFileTracingRoot: process.cwd(),
   outputFileTracingExcludes: {
     "*": [
@@ -93,15 +59,7 @@ const nextConfig = {
       "./node_modules/typescript/**",
       "./node_modules/sass/**",
       "./node_modules/@esbuild/**",
-
-      // Contentlayer generated JSON indexes are build-time artifacts.
-      // The runtime reads from .contentlayer/generated/**/*.js not
-      // **/_index.json — the 24 MB Brief/_index.json and 9.7 MB
-      // Intelligence/_index.json are pure bulk in the handler.
       "./.contentlayer/generated/**/_index.json",
-
-      // private_storage/premium-content contains gated PDF assets that
-      // belong on disk/CDN, not inside the serverless handler.
       "./private_storage/**",
     ],
   },
@@ -117,28 +75,17 @@ const nextConfig = {
   },
 
   webpack: (config, { isServer, dev }) => {
-    // 1. Alias Resolution
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       "@": path.resolve(__dirname),
     };
 
-    /**
-     * 2. ✅ CRITICAL: DYNAMIC CONTEXT RESOLUTION
-     * unknownContextCritical: false silences the Contentlayer internal import errors.
-     * exprContextCritical: false allows the dynamic PDF template loading.
-     */
     config.module = {
       ...config.module,
       exprContextCritical: false,
       unknownContextCritical: false,
     };
 
-    /**
-     * 3. ✅ LOGGING & CACHE OPTIMIZATION
-     * Prevents the build process from hanging on stdout logging and stops
-     * large serialized string bloat in the Webpack filesystem cache.
-     */
     config.infrastructureLogging = {
       level: "error",
     };
@@ -147,103 +94,18 @@ const nextConfig = {
       config.cache.maxMemoryGenerations = 1;
     }
 
-    // 4. Client-side optimizations
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
         splitChunks: {
+          ...(config.optimization?.splitChunks || {}),
           chunks: "all",
           maxSize: 244000,
         },
       };
     }
 
-    // 4b. Server-side chunk splitting — cap each server chunk at ~10 MB.
-    // Without this, webpack can emit single 44 MB chunks that alone push
-    // the Netlify handler past the 250 MB cap. The 10 MB cap forces each
-    // monolithic chunk to be broken into 4–5 smaller ones, which the
-    // standalone tracer can then prune more effectively.
-    if (!dev && isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          maxSize: 10 * 1024 * 1024, // 10 MB
-          minSize: 1 * 1024 * 1024,  // 1 MB
-        },
-      };
-    }
-
-    // 5. Build Safety: Block server-only logic from client bundles
-    if (!isServer) {
-      config.module.rules.push({
-        test: /\.mdx?$/,
-        include: [path.resolve(__dirname, "content")],
-        use: "null-loader",
-      });
-
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        stream: false,
-        crypto: false,
-        canvas: false,
-        net: false,
-        tls: false,
-      };
-    }
-
-    if (dev) {
-      config.module.rules.push({
-        test: /\.map$/,
-        use: "null-loader",
-      });
-    }
-
     return config;
-  },
-
-  async redirects() {
-    return [
-      { source: "/terms-of-service", destination: "/terms",    permanent: true },
-      { source: "/security-policy",  destination: "/security", permanent: true },
-      { source: "/strategy-room",    destination: "/consulting/strategy-room", permanent: true },
-      { source: "/premium/library",  destination: "/library",  permanent: true },
-      { source: "/diagnostic",       destination: "/diagnostics", permanent: true },
-      // /blog is the canonical content route (pages/blog/[...slug].tsx renders
-      // content/blog/*.mdx). Previously redirected to /editorials but that
-      // conflicted with the live /blog routes — removed.
-      { source: "/essays/:slug*",    destination: "/blog/:slug*", permanent: true },
-    ];
-  },
-
-  async headers() {
-    return [
-      {
-        source: "/api/:path*",
-        headers: [
-          { key: "Cache-Control", value: "no-store" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
-        ],
-      },
-      {
-        source: "/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/(.*)",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
-        ],
-      },
-    ];
   },
 };
 
