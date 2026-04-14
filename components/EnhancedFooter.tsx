@@ -101,7 +101,7 @@ function GatewayCard({ href, eyebrow, title, body, icon: Icon, tag, gold = false
               fontSize: "7.5px",
               letterSpacing: "0.38em",
               textTransform: "uppercase",
-              color: gold ? `${GOLD}AA` : "rgba(255,255,255,0.30)",
+              color: gold ? `${GOLD}AA` : "rgba(255,255,255,0.38)",
             }}
           >
             {eyebrow}
@@ -113,7 +113,7 @@ function GatewayCard({ href, eyebrow, title, body, icon: Icon, tag, gold = false
             fontSize: "6.5px",
             letterSpacing: "0.30em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.22)",
+            color: "rgba(255,255,255,0.28)",
           }}
         >
           {tag}
@@ -159,14 +159,14 @@ function GatewayCard({ href, eyebrow, title, body, icon: Icon, tag, gold = false
             fontSize: "7.5px",
             letterSpacing: "0.34em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.20)",
+            color: "rgba(255,255,255,0.28)",
           }}
         >
           Enter
         </span>
         <ArrowRight
           className="h-3 w-3 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-white/35"
-          style={{ color: "rgba(255,255,255,0.18)" }}
+          style={{ color: "rgba(255,255,255,0.28)" }}
         />
       </div>
     </Link>
@@ -187,7 +187,7 @@ function DirectoryColumn({ title, links }: { title: string; links: FooterLink[] 
             fontSize: "7.5px",
             letterSpacing: "0.38em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.28)",
+            color: "rgba(255,255,255,0.38)",
           }}
         >
           {title}
@@ -205,10 +205,10 @@ function DirectoryColumn({ title, links }: { title: string; links: FooterLink[] 
                 fontSize: "9px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.38)",
               }}
               onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.68)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.32)"}
+              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.38)"}
             >
               <div
                 className="h-px w-0 transition-all duration-300 group-hover:w-3"
@@ -452,7 +452,7 @@ export default function EnhancedFooter(): React.ReactElement {
                   fontSize: "7.5px",
                   letterSpacing: "0.32em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.26)",
+                  color: "rgba(255,255,255,0.32)",
                 }}
               >
                 © {year} Abraham of London · All rights reserved
@@ -483,11 +483,11 @@ export default function EnhancedFooter(): React.ReactElement {
                     fontSize: "7.5px",
                     letterSpacing: "0.26em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.24)",
+                    color: "rgba(255,255,255,0.28)",
                     transition: "color 200ms ease",
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.52)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.24)"}
+                  onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.62)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.28)"}
                 >
                   {item.label}
                 </Link>
