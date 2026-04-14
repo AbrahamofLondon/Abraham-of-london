@@ -18,6 +18,7 @@ import {
 
 import Layout from "@/components/Layout";
 import ConstitutionalDiagnosticSuite from "@/components/assessments/ConstitutionalDiagnosticSuite";
+import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -53,6 +54,10 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
 }
 
 export default function ConstitutionalDiagnosticPage() {
+  React.useEffect(() => {
+    getOrCreateSubjectId();
+  }, []);
+
   return (
     <Layout
       title="Constitutional Diagnostic | Abraham of London"

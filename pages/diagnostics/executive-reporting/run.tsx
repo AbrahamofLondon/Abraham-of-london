@@ -323,6 +323,7 @@ type LadderUpstreamContext = {
     | "team-assessment-result"
     | "purpose-alignment-result";
   layerLabel: string;
+  subjectId?: string;
   totalPct?: number;
   severity?: string;
   band?: string;
@@ -358,6 +359,7 @@ function readLadderUpstreamContext(): LadderUpstreamContext | null {
       return {
         source: key,
         layerLabel: label,
+        subjectId: typeof p.subjectId === "string" ? p.subjectId : undefined,
         totalPct:
           typeof p.totalPct === "number"
             ? p.totalPct
@@ -2040,6 +2042,7 @@ function ExecutiveReportingIntake({
 
   function buildPayload() {
     return {
+      subjectId: upstreamContext?.subjectId || undefined,
       fullName: form.fullName,
       email: form.email,
       organisation: form.organisation,

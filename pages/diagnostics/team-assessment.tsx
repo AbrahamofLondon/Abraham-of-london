@@ -499,6 +499,7 @@ export default function TeamAssessmentPage() {
   const [isSubmitting, setIsSubmitting]   = React.useState(false);
   const [direction,    setDirection]      = React.useState(1);
   const [purposePct,   setPurposePct]     = React.useState<number | null>(null);
+  const [subjectId,    setSubjectId]      = React.useState("");
 
   React.useEffect(() => {
     try {
@@ -506,6 +507,7 @@ export default function TeamAssessmentPage() {
       if (raw) {
         const p = JSON.parse(raw);
         if (typeof p?.percent === "number") setPurposePct(p.percent);
+        if (typeof p?.subjectId === "string") setSubjectId(p.subjectId);
       }
     } catch { /* ignore */ }
   }, []);
@@ -568,6 +570,7 @@ export default function TeamAssessmentPage() {
           totalScore,
           maxScore,
           pct,
+          subjectId,
           nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM",
           purposeAlignmentPct: purposePct,
         }),

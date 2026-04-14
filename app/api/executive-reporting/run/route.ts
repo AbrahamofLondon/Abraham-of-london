@@ -428,6 +428,7 @@ export async function POST(
     }
 
     const email = s(intake.email).toLowerCase();
+    const subjectId = s(intake.subjectId) || null;
     const runKey = makeRunKey();
 
     const assembled = await assembleConstitutionalGuidance({
@@ -554,7 +555,12 @@ export async function POST(
       },
     });
 
-    const viewModel = buildExecutiveReportViewModel(canonical);
+    const enrichedCanonical = {
+      ...canonical,
+      subjectId,
+    };
+
+    const viewModel = buildExecutiveReportViewModel(enrichedCanonical as typeof canonical);
     const entitlements = await getExecutiveReportingEntitlements(email);
 
     const run = await prisma.executiveReportingRun.create({
@@ -570,7 +576,7 @@ export async function POST(
         route: route || null,
         readinessTier: s(constitution.readinessTier) || null,
         authorityType: s(constitution.authorityType) || null,
-        canonicalSnapshot: canonical as unknown as Prisma.InputJsonValue,
+        canonicalSnapshot: enrichedCanonical as unknown as Prisma.InputJsonValue,
         viewModelSnapshot: viewModel as unknown as Prisma.InputJsonValue,
       },
     });
@@ -579,7 +585,7 @@ export async function POST(
       ok: true,
       runKey: run.runKey,
       route,
-      canonical,
+      canonical: enrichedCanonical,
       viewModel,
       entitlements,
       diagnostics: assembled.diagnostics,

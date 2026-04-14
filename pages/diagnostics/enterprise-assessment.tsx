@@ -512,11 +512,16 @@ export default function EnterpriseAssessmentPage() {
   const [submitResult,setSubmitResult]= React.useState<DiagnosticSubmitResponse | null>(null);
   const [isSubmitting,setIsSubmitting]= React.useState(false);
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
+  const [subjectId, setSubjectId] = React.useState("");
 
   React.useEffect(() => {
     try {
       const raw = sessionStorage.getItem("team-assessment-result");
-      if (raw) { const p = JSON.parse(raw); if (typeof p?.overallReality === "number") setTeamAlignmentPct(p.overallReality); }
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (typeof p?.overallReality === "number") setTeamAlignmentPct(p.overallReality);
+        if (typeof p?.subjectId === "string") setSubjectId(p.subjectId);
+      }
     } catch {}
   }, []);
 
@@ -581,6 +586,7 @@ export default function EnterpriseAssessmentPage() {
           severity: severityFromPct(totalPct),
           band: bandFromPct(totalPct),
           sections: sections.map(s => ({ id: s.id, title: s.title, pct: s.pct })),
+          subjectId,
           nextRoute: reading?.route ?? "EXECUTIVE_REPORTING",
           teamAlignmentPct,
         }),
