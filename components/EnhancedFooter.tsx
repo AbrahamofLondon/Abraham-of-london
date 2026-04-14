@@ -274,19 +274,19 @@ export default function EnhancedFooter(): React.ReactElement {
   ];
 
   const directory: Record<string, FooterLink[]> = {
-    Registry: [
-      { label: "Canon",      href: "/canon"      },
-      { label: "Books",      href: "/books"      },
-      { label: "Library",    href: "/library"    },
-      { label: "Editorials", href: "/editorials" },
-      { label: "Shorts",     href: "/shorts"     },
-      { label: "Playbooks",  href: "/playbooks"  },
+    Archive: [
+      { label: "Canon",       href: "/canon"      },
+      { label: "Editorials",  href: "/editorials" },
+      { label: "Library",     href: "/library"    },
+      { label: "Dispatches",  href: "/shorts"     },
+      { label: "Playbooks",   href: "/playbooks"  },
     ],
     Products: [
       { label: "Intelligence Archives", href: "/artifacts"                            },
       { label: "Market Intelligence",  href: "/intelligence/global-market-intelligence-q1-2026" },
       { label: "Executive Reporting",  href: "/diagnostics/executive-reporting"     },
       { label: "Vault Briefs",         href: "/vault/briefs"                        },
+      { label: "Vault",                href: "/vault"                               },
     ],
     Engagements: [
       { label: "Consulting",    href: "/consulting"                },
