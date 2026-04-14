@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import DoctrineShowcase from "@/components/homepage/DoctrineShowcase";
 import EngagementLanes from "@/components/homepage/EngagementLanes";
 import WhoIWorkWith from "@/components/WhoIWorkWith";
 import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
@@ -90,12 +91,22 @@ type QuarterlyReport = {
   keyFindings?: string[];
 };
 
+type CanonEntry = {
+  title: string;
+  excerpt: string | null;
+  slug: string;
+  href: string;
+  category: string | null;
+  readTime: string | null;
+};
+
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
   flagshipPublication: PublicationItem | null;
   featuredPublications: PublicationItem[];
   featuredPlaybooks: PlaybookItem[];
+  featuredCanon: CanonEntry[];
   latestReport: QuarterlyReport | null;
   counts: {
     shorts: number;
@@ -1672,6 +1683,7 @@ const HomePage: NextPage<HomePageProps> = ({
   flagshipPublication = null,
   featuredPublications = [],
   featuredPlaybooks = [],
+  featuredCanon = [],
   counts = {
     shorts: 0,
     canon: 0,
@@ -1716,7 +1728,26 @@ const HomePage: NextPage<HomePageProps> = ({
         </ModuleBoundary>
       </Section>
 
-      <Bridge text="buyer fit · diagnostics" />
+      <Bridge text="buyer fit · doctrine" />
+
+      <Section id="doctrine" variant="void" cap="doctrine · spine · intellectual foundation">
+        <SectionHeader
+          eyebrow="Doctrine"
+          title={
+            <>
+              The intellectual spine.
+              <br />
+              <span className="text-white/35">Source of truth for everything that follows.</span>
+            </>
+          }
+          description="The Canon and the book that grounds it. All structured products derive their authority from this foundation."
+        />
+        <div className="mt-12">
+          <DoctrineShowcase canonEntries={featuredCanon} />
+        </div>
+      </Section>
+
+      <Bridge text="doctrine · diagnostics" />
 
       <Section id="diagnostics" variant="void" cap="diagnostics · three-layer sequence">
         <SectionHeader
@@ -2401,6 +2432,26 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     // keep current counts
   }
 
+  // Canon entries for doctrine showcase
+  let featuredCanon: HomePageProps["featuredCanon"] = [];
+  try {
+    const { getAllCanons } = await import("@/lib/content/server");
+    const allCanon = getAllCanons() || [];
+    featuredCanon = allCanon
+      .filter((c: any) => !c?.draft && c?.accessLevel !== "restricted")
+      .slice(0, 3)
+      .map((c: any) => ({
+        title: String(c?.title || ""),
+        excerpt: (c?.excerpt || c?.description || null) as string | null,
+        slug: String(c?.slug || ""),
+        href: `/canon/${String(c?.slug || "").replace(/^\/?(canon\/)?/, "")}`,
+        category: (c?.category || null) as string | null,
+        readTime: (c?.readTime || null) as string | null,
+      }));
+  } catch {
+    featuredCanon = [];
+  }
+
   return {
     props: sanitizeData({
       featuredShorts,
@@ -2408,6 +2459,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       flagshipPublication,
       featuredPublications,
       featuredPlaybooks,
+      featuredCanon,
       counts,
       latestReport,
     }),
