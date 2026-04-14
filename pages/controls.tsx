@@ -31,3 +31,9 @@ export function ReportActions() {
     </button>
   );
 }
+// Next.js requires a default export for pages
+// ReportActions is a utility component used by other pages
+// This stub satisfies the page requirement
+import type { NextPage } from "next"
+const ControlsPage: NextPage = () => null
+export default ControlsPage
