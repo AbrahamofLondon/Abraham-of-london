@@ -1,5 +1,13 @@
 /* lib/server/rate-limit-edge.ts */
-import { Redis } from "@upstash/redis";
+// Type-only import keeps the Redis class name available for annotations
+// without pulling the package into the module graph at build time.
+// The runtime client is loaded via dynamic import of the Cloudflare/Edge-
+// safe subpath. The default "@upstash/redis" entry touches process.version
+// at module-evaluation time and crashes the Edge runtime the moment
+// webpack traces it into an edge chunk — even behind a runtime guard.
+// "@upstash/redis/cloudflare" is a pure fetch-based build safe in both
+// Edge and Node, and is already used in lib/redis-edge.ts.
+import type { Redis } from "@upstash/redis";
 
 export type EdgeRateLimitResult = {
   allowed: boolean;
@@ -15,14 +23,15 @@ export type EdgeRateLimitArgs = {
 
 let redisInstance: Redis | null = null;
 
-function getRedisOrNull(): Redis | null {
+async function getRedisOrNull(): Promise<Redis | null> {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) return null;
 
   if (!redisInstance) {
-    redisInstance = new Redis({ url, token });
+    const mod = await import("@upstash/redis/cloudflare");
+    redisInstance = new mod.Redis({ url, token });
   }
 
   return redisInstance;
@@ -33,7 +42,7 @@ export async function edgeRateLimit({
   windowSeconds,
   limit,
 }: EdgeRateLimitArgs): Promise<EdgeRateLimitResult> {
-  const redis = getRedisOrNull();
+  const redis = await getRedisOrNull();
 
   // Safe degradation: if Redis is unavailable or not configured, allow.
   if (!redis) {
