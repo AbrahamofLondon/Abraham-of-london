@@ -111,7 +111,6 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
     <ErrorBoundary>
       <Layout
         title="Member Dashboard | Abraham of London"
-        currentPath="/inner-circle/dashboard"
        
       >
         <div>

@@ -108,7 +108,6 @@ export default function InnerCircleAccount({
     <ErrorBoundary>
       <Layout
         title="Account | Abraham of London"
-        currentPath="/inner-circle/account"
        
       >
         <div>
