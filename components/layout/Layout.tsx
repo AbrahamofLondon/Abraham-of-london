@@ -1,3 +1,7 @@
+// DEPRECATED: Legacy light-theme layout component.
+// Not in the active import path — Layout.tsx and Header.tsx
+// at components/ root are the canonical files.
+// Do not add new logic here. Pending deletion in cleanup pass.
 /* components/layout/Layout.tsx — UNIFIED SSOT OPERATIONAL LAYOUT */
 import React, { ReactNode } from 'react';
 import Head from 'next/head';
