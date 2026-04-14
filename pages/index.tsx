@@ -34,7 +34,6 @@ import Layout from "@/components/Layout";
 import EngagementLanes from "@/components/homepage/EngagementLanes";
 import WhoIWorkWith from "@/components/WhoIWorkWith";
 import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
-import EventsSection from "@/components/homepage/EventsSection";
 import ContentShowcase from "@/components/homepage/ContentShowcase";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
@@ -68,18 +67,6 @@ type FeaturedItem = {
   kind?: string | null;
 };
 
-export type EventItem = {
-  slug: string;
-  title: string;
-  date: string;
-  location: string;
-  mode: "online" | "in-person" | "hybrid";
-  excerpt?: string | null;
-  capacity?: number | null;
-  duration?: string | null;
-  status?: "open" | "limited" | "full" | "past" | null;
-};
-
 type PlaybookItem = {
   slug: string;
   title: string;
@@ -109,7 +96,6 @@ type HomePageProps = {
   flagshipPublication: PublicationItem | null;
   featuredPublications: PublicationItem[];
   featuredPlaybooks: PlaybookItem[];
-  events: EventItem[];
   latestReport: QuarterlyReport | null;
   counts: {
     shorts: number;
@@ -1687,7 +1673,6 @@ const HomePage: NextPage<HomePageProps> = ({
   flagshipPublication = null,
   featuredPublications = [],
   featuredPlaybooks = [],
-  events = [],
   counts = {
     shorts: 0,
     canon: 0,
@@ -1935,22 +1920,9 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="lanes · live rooms" />
 
-      <Section id="events" variant="void" cap="events · live rooms">
-        <SectionHeader
-          eyebrow="Events"
-          title="Salons, briefings, and live rooms."
-          description="Where doctrine meets operators and ideas are tested in live environments."
-        />
-        <div className="mt-12">
-          <Panel surface="lift">
-            <div className="p-6 md:p-8">
-              <ModuleBoundary label="EventsSection">
-                <EventsSection events={events as any} />
-              </ModuleBoundary>
-            </div>
-          </Panel>
-        </div>
-      </Section>
+      {/* Events surface preserved at /events — removed from homepage
+          product narrative. Community gatherings are surfaced at /events
+          and in the footer. Not a product pillar. */}
 
       <Section id="vault" variant="surface" cap="vault · deployables">
         <SectionHeader
@@ -2144,63 +2116,6 @@ function toItem(d: any): FeaturedItem | null {
   };
 }
 
-function deriveEventMode(d: any): EventItem["mode"] {
-  const raw = String(d?.mode || d?.format || d?.delivery || "in-person").toLowerCase();
-  if (raw.includes("hybrid")) return "hybrid";
-  if (raw.includes("online") || raw.includes("virtual")) return "online";
-  return "in-person";
-}
-
-function deriveEventStatus(date: string, explicit?: any): EventItem["status"] {
-  const e = String(explicit || "").toLowerCase();
-  if (["open", "limited", "full", "past"].includes(e)) return e as EventItem["status"];
-
-  const t = Date.parse(date);
-  if (!Number.isFinite(t)) return "open";
-
-  const end = new Date(
-    new Date(t).getFullYear(),
-    new Date(t).getMonth(),
-    new Date(t).getDate(),
-    23,
-    59,
-    59,
-    999,
-  );
-  return end.getTime() < Date.now() ? "past" : "open";
-}
-
-function toEvent(d: any): EventItem | null {
-  const k = kindLower(d);
-  const fp = flattenedPath(d);
-  if (!(k === "event" || fp.startsWith("events/"))) return null;
-
-  const bare = normalizeSlug(String(computedSlug(d))).replace(/^events\//, "");
-  const date =
-    d?.eventDate ||
-    d?.date ||
-    d?.startDate ||
-    d?.datetime ||
-    d?.start ||
-    d?.startsAt ||
-    null;
-  if (!date) return null;
-
-  const mode = deriveEventMode(d);
-
-  return {
-    slug: bare,
-    title: safeString(d?.title, "Untitled Event"),
-    date: String(date),
-    location: safeString(d?.location, mode === "online" ? "Online" : "London"),
-    mode,
-    excerpt: (d?.excerpt || d?.description || null) as string | null,
-    capacity: typeof d?.capacity === "number" ? d.capacity : null,
-    duration: typeof d?.duration === "string" ? d.duration : null,
-    status: deriveEventStatus(String(date), d?.status),
-  };
-}
-
 function isDraftLocal(d: any): boolean {
   return d?.draft === true || d?.published === false;
 }
@@ -2338,7 +2253,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
   let featuredPlaybooks: PlaybookItem[] = [];
-  let events: EventItem[] = [];
   let latestReport: QuarterlyReport | null = null;
 
   const catalogue = getPublicationCatalogue();
@@ -2423,12 +2337,8 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     featuredPlaybooks = allPlaybooks.slice(0, 3);
     counts.playbooks = allPlaybooks.length;
 
-    events = (stableDocs
-      .filter((d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/"))
-      .map(toEvent)
-      .filter(Boolean) as EventItem[])
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 6);
+    // Events removed from homepage product narrative.
+    // /events page remains fully functional via pages/events/index.tsx
 
     const candidates = stableDocs.map(toItem).filter(Boolean) as FeaturedItem[];
     const featured = candidates.filter((x) => {
@@ -2497,7 +2407,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       flagshipPublication,
       featuredPublications,
       featuredPlaybooks,
-      events,
       counts,
       latestReport,
     }),
