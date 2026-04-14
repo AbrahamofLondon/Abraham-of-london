@@ -893,122 +893,225 @@ function EmptyState({ query }: { query: string }) {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => {
-  const [viewMode,       setViewMode]       = React.useState<"grid" | "list">("grid");
-  const [searchQuery,    setSearchQuery]    = React.useState("");
+function formatShortDate(date: string | null): string {
+  const raw = safeString(date);
+  if (!raw) return "";
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  return parsed.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  });
+}
+
+function firstSentence(input: string): string {
+  const text = safeString(input).trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  const match = text.match(/^.*?[.!?](?:\s|$)/);
+  return (match?.[0] || text).trim();
+}
+
+function MemoFilterStrip({
+  categories,
+  activeCategory,
+  setActiveCategory,
+}: {
+  categories: string[];
+  activeCategory: string;
+  setActiveCategory: (value: string) => void;
+}) {
+  return (
+    <div className="px-6 py-6 lg:px-10">
+      <div className="mx-auto max-w-5xl overflow-x-auto">
+        <div className="inline-flex min-w-full gap-8">
+          {["All", ...categories].map((category) => {
+            const isActive =
+              category === "All" ? activeCategory === "" : activeCategory === category;
+
+            return (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category === "All" ? "" : category)}
+                style={{
+                  paddingBottom: "0.25rem",
+                  border: "none",
+                  borderBottom: `1px solid ${isActive ? GOLD : "transparent"}`,
+                  background: "transparent",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.30em",
+                  textTransform: "uppercase",
+                  color: isActive ? GOLD : "rgba(255,255,255,0.32)",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {category}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
   const [activeCategory, setActiveCategory] = React.useState("");
-  const [streak,         setStreak]         = React.useState(1);
-  const [visitCount,     setVisitCount]     = React.useState(1);
-  const [whisper,        setWhisper]        = React.useState("");
-  const [isRareWhisper,  setIsRareWhisper]  = React.useState(false);
-  const [imprint,        setImprint]        = React.useState<any>(null);
 
-  // ── Client-side personalisation ────────────────────────────────────────────
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    setStreak(updateStreak());
-    setVisitCount(updateVisitCount());
-  }, []);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    const seed = getOrCreateSeed();
-    const out  = computeWhisper({ seed, visitCount, now: new Date() });
-    setWhisper(out.text);
-    setIsRareWhisper(out.isRare);
-  }, [visitCount]);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    setImprint(readImprint());
-    const interval = setInterval(() => setImprint(readImprint()), 60_000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // ── Derived data ───────────────────────────────────────────────────────────
   const categories = React.useMemo(() => {
-    const list = Array.isArray(shorts) ? shorts : [];
-    const set = new Set(list.map(s => s.category).filter(Boolean));
+    const set = new Set(shorts.map((short) => short.category).filter(Boolean));
     return Array.from(set).sort();
   }, [shorts]);
 
   const filtered = React.useMemo(() => {
-    const list = Array.isArray(shorts) ? shorts : [];
-    const query = searchQuery.trim().toLowerCase();
-    const cat   = activeCategory.trim().toLowerCase();
-
-    return list.filter(s => {
-      const matchQuery = !query
-        || safeString(s.title).toLowerCase().includes(query)
-        || safeString(s.excerpt).toLowerCase().includes(query)
-        || safeString(s.category).toLowerCase().includes(query);
-
-      const matchCat = !cat || safeString(s.category).toLowerCase() === cat;
-
-      return matchQuery && matchCat;
-    });
-  }, [shorts, searchQuery, activeCategory]);
-
-  // Top 3 for the hero rail
-  const featuredShorts = React.useMemo(() => shorts.slice(0, 3), [shorts]);
+    if (!activeCategory) return shorts;
+    return shorts.filter((short) => short.category === activeCategory);
+  }, [activeCategory, shorts]);
 
   return (
     <Layout
       title="Shorts — Abraham of London"
-      description="Thought distilled to its sharpest edge. Brief signals with lasting weight."
+      description="Compressed thinking for people who read fast."
       className="min-h-screen text-white"
       fullWidth
-      headerTransparent
+      headerTransparent={false}
       canonicalUrl="/shorts"
       showFooter={false}
       enableVaultSearch={false}
     >
       <Head>
         <title>Shorts — Abraham of London</title>
-        <meta name="description" content="Thought distilled to its sharpest edge. Brief signals with lasting weight." />
+        <meta name="description" content="Compressed thinking for people who read fast." />
       </Head>
 
-      {/* ── HERO ────────────────────────────────────────────────────────── */}
-      <HeroSection
-        totalCount={totalCount}
-        streak={streak}
-        visits={visitCount}
-        whisper={whisper}
-        isRareWhisper={isRareWhisper}
-        featuredShorts={featuredShorts}
-      />
+      <main className="min-h-screen" style={{ backgroundColor: VOID }}>
+        <header className="border-b px-6 py-14 lg:px-10" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+          <div className="mx-auto max-w-5xl">
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px",
+                letterSpacing: "0.40em",
+                textTransform: "uppercase",
+                color: "rgba(201,169,110,0.80)",
+              }}
+            >
+              SHORTS · ABRAHAM OF LONDON
+            </div>
+            <h1
+              style={{
+                marginTop: "1rem",
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontStyle: "italic",
+                fontSize: "clamp(2rem, 4vw, 3.5rem)",
+                lineHeight: 1.02,
+                color: "rgba(255,255,255,0.90)",
+              }}
+            >
+              Compressed thinking for people who read fast.
+            </h1>
+          </div>
+        </header>
 
-      {/* ── IMPRINT ─────────────────────────────────────────────────────── */}
-      <ImprintStrip
-        title={imprint?.title}
-        hoursRemaining={imprint?._hoursRemaining}
-        fadePercent={imprint?._fadePercent}
-      />
+        <MemoFilterStrip
+          categories={categories}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+        />
 
-      {/* ── FILTER BAR ──────────────────────────────────────────────────── */}
-      <FilterBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        categories={categories}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        visibleCount={filtered.length}
-        totalCount={totalCount}
-      />
+        <section>
+          {filtered.map((short) => {
+            const excerpt = firstSentence(short.excerpt);
 
-      {/* ── CHAMBER ─────────────────────────────────────────────────────── */}
-      <main
-        style={{ backgroundColor: BASE }}
-        className="min-h-screen"
-      >
-        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12 lg:py-16">
+            return (
+              <Link
+                key={short.id}
+                href={short.href}
+                className="block border-b px-6 py-6 transition-colors hover:bg-white/[0.02] lg:px-10"
+                style={{ borderColor: "rgba(255,255,255,0.05)" }}
+              >
+                <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-[80px_minmax(0,1fr)_80px] md:items-start">
+                  <div
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "8px",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.28)",
+                    }}
+                  >
+                    {short.readTime}
+                  </div>
 
-          {/* Section eyebrow */}
-          <div className="mb-10 flex items-center gap-3">
-            <div className="h-px w-8" style={{ background: `linear-gradient(to right, ${GOLD}45, transparent)` }} />
-            <span
+                  <div className="min-w-0">
+                    <div
+                      style={{
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: "7.5px",
+                        letterSpacing: "0.32em",
+                        textTransform: "uppercase",
+                        color: GOLD,
+                      }}
+                    >
+                      {short.category}
+                    </div>
+                    <h2
+                      style={{
+                        marginTop: "0.45rem",
+                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                        fontWeight: 300,
+                        fontStyle: "italic",
+                        fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+                        lineHeight: 1.08,
+                        color: "rgba(255,255,255,0.88)",
+                      }}
+                      className="transition-colors hover:text-white"
+                    >
+                      {short.title}
+                    </h2>
+                    {excerpt ? (
+                      <p
+                        className="truncate"
+                        style={{
+                          marginTop: "0.5rem",
+                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                          fontWeight: 300,
+                          fontSize: "0.875rem",
+                          lineHeight: 1.45,
+                          color: "rgba(255,255,255,0.40)",
+                        }}
+                      >
+                        {excerpt}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div
+                    className="md:text-right"
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                    }}
+                  >
+                    {formatShortDate(short.date)}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </section>
+
+        <footer className="px-6 py-10 lg:px-10">
+          <div className="mx-auto max-w-5xl border-t pt-6" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+            <div
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "7.5px",
@@ -1017,120 +1120,11 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, totalCount }) => 
                 color: "rgba(255,255,255,0.22)",
               }}
             >
-              {activeCategory || "All notes"}
-            </span>
-          </div>
-
-          {filtered.length === 0
-            ? <EmptyState query={searchQuery || activeCategory} />
-            : (
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  layout
-                  className={
-                    viewMode === "grid"
-                      ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
-                      : "space-y-3"
-                  }
-                >
-                  {filtered.map((short, idx) => (
-                    <motion.div
-                      key={short.id}
-                      layout
-                      initial={{ opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.45, delay: Math.min(idx * 0.04, 0.28), ease: "easeOut" }}
-                    >
-                      <ShortCard
-                        short={{
-                          slug:      short.slug,
-                          title:     short.title,
-                          excerpt:   short.excerpt,
-                          category:  short.category,
-                          readTime:  short.readTime,
-                          views:     short.views,
-                          intensity: short.intensity,
-                          lineage:   short.lineage,
-                          coverImage: short.coverImage,
-                          metrics: { likes: short.likes, saves: short.saves, views: short.views },
-                          state:   { liked: false, saved: false },
-                        }}
-                        listMode={viewMode === "list"}
-                        onClick={() => {
-                          if (typeof window !== "undefined") {
-                            writeImprint(short.slug, short.title);
-                          }
-                        }}
-                      />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </AnimatePresence>
-            )
-          }
-        </div>
-      </main>
-
-      {/* ── CLOSE ───────────────────────────────────────────────────────── */}
-      <section
-        style={{ borderTop: "1px solid rgba(255,255,255,0.04)", backgroundColor: VOID }}
-      >
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12">
-          <div className="flex flex-col items-center gap-5 text-center">
-            <div className="h-px w-12" style={{ background: `linear-gradient(to right, transparent, ${GOLD}35, transparent)` }} />
-            <p
-              style={{
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontSize: "clamp(1.1rem, 1.4vw, 1.30rem)",
-                fontStyle: "italic",
-                lineHeight: 1.65,
-                color: "rgba(255,255,255,0.32)",
-                maxWidth: "36ch",
-              }}
-            >
-              If a note stayed with you, the next step is a longer read — or a conversation.
-            </p>
-            <div className="mt-2 flex flex-wrap justify-center gap-3">
-              <Link
-                href="/canon"
-                className="group inline-flex items-center gap-2 px-5 py-3 transition-all duration-300"
-                style={{
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.30em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.35)",
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.14)"; (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.65)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.35)"; }}
-              >
-                Enter the Canon
-              </Link>
-              <Link
-                href="/diagnostics"
-                className="group inline-flex items-center gap-2 px-5 py-3 transition-all duration-300"
-                style={{
-                  border: `1px solid ${GOLD}30`,
-                  backgroundColor: `${GOLD}08`,
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.30em",
-                  textTransform: "uppercase",
-                  color: `${GOLD}CC`,
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = `${GOLD}50`; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${GOLD}12`; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = `${GOLD}30`; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${GOLD}08`; }}
-              >
-                Begin Diagnostics
-              </Link>
+              Abraham of London
             </div>
           </div>
-        </div>
-      </section>
-
+        </footer>
+      </main>
     </Layout>
   );
 };
