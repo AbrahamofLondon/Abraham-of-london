@@ -182,7 +182,7 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
               )}
             </article>
 
-            {event.schedule && <EventSchedule items={event.schedule} />}
+            {event.schedule && <EventSchedule schedule={event.schedule} />}
             {event.speakers && <EventSpeakers speakers={event.speakers} />}
           </main>
 
@@ -205,7 +205,7 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
               </div>
             </div>
 
-            <RelatedEvents currentSlug={event.slug} />
+            <RelatedEvents events={[]} currentEventId={event.slug} />
           </aside>
         </div>
       </div>

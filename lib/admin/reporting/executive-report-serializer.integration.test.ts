@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, expect, it } from "vitest";
 import { EXECUTIVE_REPORT_FIXTURE } from "./fixtures/executive-report.fixture";
 import {

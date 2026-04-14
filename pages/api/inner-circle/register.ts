@@ -1,13 +1,9 @@
 // pages/api/inner-circle/register.ts — STRATEGIC ENROLLMENT (SSOT)
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  AccessTier as PrismaAccessTier,
-  KeyStatus as PrismaKeyStatus,
-} from "@prisma/client";
+import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
-import type { AccessTier as PolicyAccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
@@ -18,29 +14,6 @@ type Fail = { ok: false; error: string };
 
 function isEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
-  switch (tier) {
-    case "inner-circle":
-      return PrismaAccessTier.inner_circle;
-    case "top-secret":
-      return PrismaAccessTier.top_secret;
-    case "public":
-      return PrismaAccessTier.public;
-    case "member":
-      return PrismaAccessTier.member;
-    case "client":
-      return PrismaAccessTier.client;
-    case "legacy":
-      return PrismaAccessTier.legacy;
-    case "architect":
-      return PrismaAccessTier.architect;
-    case "owner":
-      return PrismaAccessTier.owner;
-    default:
-      return PrismaAccessTier.member;
-  }
 }
 
 function buildEmailHash(email: string): string {
@@ -68,10 +41,7 @@ export default async function handler(
     return res.status(400).json({ ok: false, error: "Invalid email" });
   }
 
-  const requestedTier: PolicyAccessTier = normalizeUserTier(
-    req.body?.tier ?? "member"
-  );
-  const dbTier: PrismaAccessTier = toDbTier(requestedTier);
+  const tier = normalizeUserTier(req.body?.tier ?? "member");
   const emailHash = buildEmailHash(email);
 
   try {
@@ -86,7 +56,7 @@ export default async function handler(
         where: { email },
         update: {
           name: name || null,
-          tier: dbTier,
+          tier,
           emailHash,
         },
         create: {
@@ -94,7 +64,7 @@ export default async function handler(
           email,
           emailHash,
           name: name || null,
-          tier: dbTier,
+          tier,
         },
       });
 
@@ -106,6 +76,7 @@ export default async function handler(
       await tx.innerCircleKey.create({
         data: {
           keyHash,
+          keySuffix: rawKey.split("-").pop() ?? null,
           memberId: member.id,
           keyType: "access",
           status: PrismaKeyStatus.active,

@@ -1,5 +1,6 @@
 import { deriveConstitutionalAssessment } from "@/lib/decision/system-constitution";
 import { applyRecommendationGovernance } from "@/lib/decision/recommendation-governance";
+import type { MatchedAsset as GovernanceMatchedAsset } from "@/lib/decision/asset-matcher";
 import type {
   ExecutiveReportConstitution,
   ExecutiveReportGuidance,
@@ -125,7 +126,7 @@ async function loadContentlayerGenerated(): Promise<any | null> {
     return await import("contentlayer/generated");
   } catch {
     try {
-      return await import("../../.contentlayer/generated/index.mjs");
+      return await import("contentlayer/generated");
     } catch {
       return null;
     }
@@ -454,7 +455,7 @@ export async function assembleConstitutionalGuidance(
     }));
 
   const governanceResult = applyRecommendationGovernance(
-    scoredAssets,
+    scoredAssets as GovernanceMatchedAsset[],
     constitution as any,
   );
 

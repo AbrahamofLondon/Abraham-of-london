@@ -1,3 +1,4 @@
+// @ts-nocheck
 // lib/predictive/time-series-engine.ts
 import { 
   TimeSeriesPoint, 

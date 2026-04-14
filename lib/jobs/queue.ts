@@ -32,7 +32,7 @@ export function dequeueReady(): Job | null {
   if (index === -1) return null;
 
   const job = queue.splice(index, 1)[0];
-  return job;
+  return job ?? null;
 }
 
 export function moveToDeadLetter(job: Job) {

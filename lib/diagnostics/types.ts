@@ -252,6 +252,54 @@ export type DiagnosticArtifactListItem = {
 };
 
 /* -----------------------------------------------------------------------------
+   REPORT TIER
+----------------------------------------------------------------------------- */
+
+export type DiagnosticReportTier = "standard" | "premium";
+
+/* -----------------------------------------------------------------------------
+   DTO / RESULT TYPES (used by report-issuer and PDF renderer)
+----------------------------------------------------------------------------- */
+
+export type DiagnosticRecordDTO = {
+  id: string;
+  diagnosticRef?: string | null;
+  reference?: string | null;
+  diagnosticType: string;
+  title: string;
+  score?: number | null;
+  severity?: string | null;
+  verdict?: string | null;
+  notes?: string | null;
+  userEmail?: string | null;
+  userId?: string | null;
+  status?: string | null;
+  reportStatus?: string | null;
+  reportTier?: string | null;
+  summary?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
+  responses?: Record<string, unknown> | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export type IssueDiagnosticReportResult = {
+  ok: boolean;
+  diagnosticId?: string;
+  diagnosticRef?: string;
+  artifactId?: string;
+  version?: string;
+  objectKey?: string;
+  fileName?: string;
+  sha256?: string;
+  byteLength?: number;
+  storageProvider?: string;
+  bucket?: string | null;
+  publicPath?: string | null;
+  error?: string;
+};
+
+/* -----------------------------------------------------------------------------
    REPORTING / ISSUANCE TYPES
 ----------------------------------------------------------------------------- */
 

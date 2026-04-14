@@ -53,7 +53,7 @@ export default function EnterpriseDashboardController({ initialView, campaignId 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) setHasReachedEnd(true);
+        if (entry?.isIntersecting) setHasReachedEnd(true);
       },
       { threshold: 0.1 }
     );
@@ -118,7 +118,8 @@ export default function EnterpriseDashboardController({ initialView, campaignId 
         </div>
       )}
 
-      <style jsx global>{`
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <style {...({ jsx: true, global: true } as any)}>{`
         @media print {
           .no-print { display: none !important; }
           body { background: white !important; margin: 0 !important; }

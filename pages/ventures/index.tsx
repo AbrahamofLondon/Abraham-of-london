@@ -189,7 +189,7 @@ function MetricCell({
 
 function VentureCard({ venture, index }: { venture: Venture; index: number }) {
   const status = statusConfig[venture.status];
-  const PrimaryIcon = domainIcons[venture.domain[0]] || Briefcase;
+  const PrimaryIcon = (venture.domain[0] ? domainIcons[venture.domain[0]] : undefined) || Briefcase;
 
   return (
     <article

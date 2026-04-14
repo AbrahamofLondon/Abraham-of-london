@@ -21,23 +21,9 @@ const envSchema = z.object({
   SKIP_AUTH_IN_DEV: z.enum(['true', 'false']).transform(val => val === 'true').default('false'),
 });
 
-// Parse and validate
-const env = envSchema.safeParse(process.env);
+type ParsedEnv = z.infer<typeof envSchema>;
 
-if (!env.success) {
-  console.error('❌ Invalid environment variables:', env.error.format());
-  
-  // In production, throw error - NO DEFAULT VALUES
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('Invalid environment variables - required secrets missing in production');
-  }
-  
-  // In development only, provide clear placeholder messages
-  console.warn('⚠️  Missing required environment variables. Using development placeholders.');
-}
-
-// NEVER provide default values for secrets in the fallback object
-export const ENV = env.success ? env.data : {
+const fallbackEnv: ParsedEnv = {
   NODE_ENV: 'development' as const,
   DATABASE_URL: 'file:./dev.db',
   JWT_SECRET: 'DEVELOPMENT-ONLY-PLACEHOLDER-DO-NOT-USE-IN-PRODUCTION',
@@ -47,6 +33,40 @@ export const ENV = env.success ? env.data : {
   ENABLE_AUDIT_LOGGING: false,
   SKIP_AUTH_IN_DEV: false,
 };
+
+type EnvShape = ParsedEnv;
+
+let cachedEnv: EnvShape | null = null;
+
+function loadEnv(): EnvShape {
+  if (cachedEnv) {
+    return cachedEnv;
+  }
+
+  const env = envSchema.safeParse(process.env);
+
+  if (!env.success) {
+    console.error('❌ Invalid environment variables:', env.error.format());
+    
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Invalid environment variables - required secrets missing in production');
+    }
+    
+    console.warn('⚠️  Missing required environment variables. Using development placeholders.');
+    cachedEnv = fallbackEnv;
+    return cachedEnv;
+  }
+
+  cachedEnv = env.data;
+  return cachedEnv;
+}
+
+// NEVER provide default values for secrets in the fallback object
+export const ENV: EnvShape = new Proxy({} as EnvShape, {
+  get(_target, prop) {
+    return loadEnv()[prop as keyof EnvShape];
+  },
+});
 
 // Helper to get environment variables with fallbacks
 export function getEnv(key: keyof typeof ENV, defaultValue?: string): string {
@@ -60,24 +80,43 @@ export function getEnv(key: keyof typeof ENV, defaultValue?: string): string {
 }
 
 // Type-safe environment variables
-export const Config = {
-  isDevelopment: ENV.NODE_ENV === 'development',
-  isProduction: ENV.NODE_ENV === 'production',
-  isTest: ENV.NODE_ENV === 'test',
-  
-  database: {
-    url: ENV.DATABASE_URL,
-  },
-  
+export const Config = new Proxy({} as {
+  isDevelopment: boolean;
+  isProduction: boolean;
+  isTest: boolean;
+  database: { url: string };
   auth: {
-    jwtSecret: ENV.JWT_SECRET,
-    nextAuthSecret: ENV.NEXTAUTH_SECRET,
-    siteUrl: ENV.NEXT_PUBLIC_SITE_URL,
-    nextAuthUrl: ENV.NEXTAUTH_URL,
-  },
-  
+    jwtSecret: string;
+    nextAuthSecret: string;
+    siteUrl: string;
+    nextAuthUrl: string;
+  };
   features: {
-    auditLogging: ENV.ENABLE_AUDIT_LOGGING,
-    skipAuthInDev: ENV.SKIP_AUTH_IN_DEV,
+    auditLogging: boolean;
+    skipAuthInDev: boolean;
+  };
+}, {
+  get(_target, prop) {
+    const env = loadEnv();
+    const config = {
+      isDevelopment: env.NODE_ENV === 'development',
+      isProduction: env.NODE_ENV === 'production',
+      isTest: env.NODE_ENV === 'test',
+      database: {
+        url: env.DATABASE_URL,
+      },
+      auth: {
+        jwtSecret: env.JWT_SECRET,
+        nextAuthSecret: env.NEXTAUTH_SECRET,
+        siteUrl: env.NEXT_PUBLIC_SITE_URL,
+        nextAuthUrl: env.NEXTAUTH_URL,
+      },
+      features: {
+        auditLogging: env.ENABLE_AUDIT_LOGGING,
+        skipAuthInDev: env.SKIP_AUTH_IN_DEV,
+      },
+    } as const;
+
+    return config[prop as keyof typeof config];
   },
-} as const;
+});

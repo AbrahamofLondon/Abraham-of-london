@@ -79,24 +79,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       await revokeKeyByHash(keyHash);
     }
 
-    // 3. GLOBAL PROJECT SYNC: Invalidate NextAuth User Session
-    // If forceGlobalLogout is passed, we reset the user's tier or flag them for a re-auth.
+    // 3. GLOBAL PROJECT SYNC: Invalidate persisted identity tier.
+    // Persisted identity is InnerCircleMember (there is no User model). Drop
+    // the member's tier to the lowest current Prisma enum value and bump
+    // lastSeenAt to force session/JWT mismatch on next validation.
+    //
+    // NOTE: current Prisma AccessTier enum does not include "public". The
+    // 9-tier canonical expansion in SCHEMA-PR-CHAIN-CHECKLIST-01 PR 1 will
+    // restore the ability to drop all the way to "public"; until then
+    // "member" is the lowest available value.
     if (body.forceGlobalLogout && activeSession.ok && activeSession.valid && activeSession.memberId) {
-      // Find the member to get the userId
-      const member = await prisma.innerCircleMember.findUnique({
+      await prisma.innerCircleMember.update({
         where: { id: activeSession.memberId },
-        select: { userId: true }
+        data: {
+          tier: "member",
+          lastSeenAt: new Date(),
+        },
       });
-
-      if (member?.userId) {
-        await prisma.user.update({
-          where: { id: member.userId },
-          data: { 
-            tier: "public", // Drop them back to public 
-            lastSeenAt: new Date() // Triggers session mismatch in some JWT configs
-          }
-        });
-      }
     }
 
     // 4. Telemetry / Logging

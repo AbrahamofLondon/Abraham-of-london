@@ -12,7 +12,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
 
 const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
+      apiVersion: "2023-10-16" as Stripe.LatestApiVersion,
     })
   : null;
 
@@ -30,16 +30,16 @@ function mapStripeTierToAccessTier(membershipTier: unknown): AccessTier {
 
   const explicit: Record<string, AccessTier> = {
     free: "member",
-    premium: "inner-circle",
+    premium: "inner_circle",
     enterprise: "client",
     elite: "legacy",
     basic: "member",
     standard: "member",
-    pro: "inner-circle",
+    pro: "inner_circle",
     business: "client",
   };
 
-  return explicit[raw] ?? normalizeUserTier(raw);
+  return normalizeUserTier(explicit[raw] ?? raw);
 }
 
 function mergeMetadata(
@@ -112,21 +112,22 @@ export default async function handler(
       await prisma.innerCircleMember.update({
         where: { id: userId },
         data: {
+          // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
           tier,
           status: "active",
-          metadata: mergeMetadata(existingUser?.metadata, {
+          metadata: JSON.stringify(mergeMetadata(existingUser?.metadata, {
             stripeCustomerId: typeof session.customer === "string" ? session.customer : null,
             stripeSessionId: session.id,
             membershipTier: membershipTierRaw,
             upgradedAt: new Date().toISOString(),
-          }),
+          })),
           updatedAt: new Date(),
         },
       });
 
       await auditLogger.log({
         action: "membership_elevation_success",
-        userId,
+        actorId: userId,
         details: {
           email: userEmail,
           sessionId: session.id,
@@ -139,33 +140,46 @@ export default async function handler(
 
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object as Stripe.Subscription;
+      const targetCustomerId =
+        typeof subscription.customer === "string" ? subscription.customer : null;
 
-      const user = await prisma.innerCircleMember.findFirst({
-        where: {
-          metadata: {
-            path: ["stripeCustomerId"],
-            equals: subscription.customer as string,
-          },
-        },
+      // Engineering workaround for C3: InnerCircleMember.metadata is `String?`
+      // (not `Json?`), so Prisma's JSON `path` filter is unsupported on this
+      // schema. Load candidates with non-null metadata and parse-and-filter in
+      // memory instead. The Inner Circle population is bounded; acceptable for
+      // a webhook handler.
+      const candidates = await prisma.innerCircleMember.findMany({
+        where: { metadata: { not: null } },
       });
+      const user = targetCustomerId
+        ? candidates.find((m) => {
+            try {
+              const meta = JSON.parse(m.metadata ?? "{}");
+              return meta?.stripeCustomerId === targetCustomerId;
+            } catch {
+              return false;
+            }
+          }) ?? null
+        : null;
 
       if (user) {
         await prisma.innerCircleMember.update({
           where: { id: user.id },
           data: {
+            // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
             tier: "member",
             status: "active",
-            metadata: mergeMetadata(user.metadata, {
+            metadata: JSON.stringify(mergeMetadata(user.metadata, {
               subscriptionCancelledAt: new Date().toISOString(),
-            }),
+            })),
           },
         });
 
         await auditLogger.log({
           action: "membership_revoked_expiry",
-          userId: user.id,
+          actorId: user.id,
           details: { customerId: subscription.customer },
-          severity: "warning",
+          severity: "warn",
         });
       }
     }
@@ -173,27 +187,38 @@ export default async function handler(
     if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object as Stripe.Subscription;
       const priceId = subscription.items.data[0]?.price.id;
+      const targetCustomerId =
+        typeof subscription.customer === "string" ? subscription.customer : null;
 
-      const user = await prisma.innerCircleMember.findFirst({
-        where: {
-          metadata: {
-            path: ["stripeCustomerId"],
-            equals: subscription.customer as string,
-          },
-        },
+      // Same C3 workaround as the deleted handler above: in-memory parse-and-filter.
+      const candidates = await prisma.innerCircleMember.findMany({
+        where: { metadata: { not: null } },
       });
+      const user = targetCustomerId
+        ? candidates.find((m) => {
+            try {
+              const meta = JSON.parse(m.metadata ?? "{}");
+              return meta?.stripeCustomerId === targetCustomerId;
+            } catch {
+              return false;
+            }
+          }) ?? null
+        : null;
 
       if (user && priceId) {
-        const tier: AccessTier = "inner-circle";
+        const tier: AccessTier = "inner_circle";
 
         await prisma.innerCircleMember.update({
           where: { id: user.id },
-          data: { tier },
+          data: {
+            // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
+            tier,
+          },
         });
 
         await auditLogger.log({
           action: "membership_updated",
-          userId: user.id,
+          actorId: user.id,
           details: { customerId: subscription.customer, priceId, tier },
           severity: "info",
         });

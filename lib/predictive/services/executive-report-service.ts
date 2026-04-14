@@ -1,12 +1,38 @@
 // lib/predictive/services/executive-report-service.ts
-import { ScenarioEngine } from '../engines/scenario-engine';
-import { TimeSeriesEngine } from '../engines/time-series-engine';
-import { db } from '@/lib/db';
-import { 
-  ExecutiveReport, 
-  ReportMetadata, 
-  TimeSeriesPoint 
-} from '../types';
+// C10 DEBT: ExecutiveReport and ReportMetadata not exported from ../types.
+// db.marketData model does not exist in schema.
+// Local type definitions preserve compile safety. Restore from ../types when C10 resolved.
+
+import { ScenarioEngine } from "../engines/scenario-engine";
+import { TimeSeriesEngine } from "../engines/time-series-engine";
+
+interface ReportMetadata {
+  generatedAt: Date;
+  campaignId: string;
+  horizon: number;
+  confidenceScore: number;
+}
+
+interface ExecutiveReport {
+  metadata: ReportMetadata;
+  baseline: ReturnType<TimeSeriesEngine["forecast"]>;
+  riskAnalysis: unknown;
+  projections: {
+    optimistic: unknown;
+    pessimistic: unknown;
+    median: unknown;
+  };
+  distribution: Array<{ bucket: string; probability: number }>;
+  marketContext: {
+    volatilityRegime: string;
+    isAnomalous: boolean;
+  };
+}
+
+interface TimeSeriesPoint {
+  timestamp: Date;
+  value: number;
+}
 
 export class ExecutiveReportService {
   private static instance: ExecutiveReportService | null = null;
@@ -25,44 +51,42 @@ export class ExecutiveReportService {
     return ExecutiveReportService.instance;
   }
 
-  /**
-   * Generates a comprehensive executive report using live market data.
-   */
   async generateMarketAnalysisReport(
     campaignId: string,
     horizon: number = 30
   ): Promise<ExecutiveReport> {
-    // 1. Fetch live market data for the campaign
-    const marketData = await db.marketData.findMany({
-      where: { campaignId },
-      orderBy: { timestamp: 'asc' },
-    });
+    // STUB: db.marketData does not exist in schema (C10 debt)
+    // Returns empty dataset — route.ts returns 503 before reaching this point.
+    const marketData: Array<{ timestamp: Date; value: number }> = [];
 
     if (!marketData || marketData.length < 14) {
-      throw new Error(`[EXECUTIVE_REPORT_SERVICE_FAILURE] Insufficient market data for campaign ${campaignId}`);
+      throw new Error(
+        `[EXECUTIVE_REPORT_SERVICE_FAILURE] Insufficient market data for campaign ${campaignId}`
+      );
     }
 
-    const historicalPoints: TimeSeriesPoint[] = marketData.map(d => ({
-      timestamp: d.timestamp,
-      value: d.value
-    }));
+    const historicalPoints: TimeSeriesPoint[] = marketData.map(
+      (d: { timestamp: Date; value: number }) => ({
+        timestamp: d.timestamp,
+        value: d.value,
+      })
+    );
 
-    // 2. Generate Baseline Forecast
-    const baselineForecast = this.timeSeriesEngine.forecast(historicalPoints, horizon);
+    const baselineForecast = this.timeSeriesEngine.forecast(
+      historicalPoints,
+      horizon
+    );
 
-    // 3. Execute Volatility-Aware Monte Carlo Simulation
-    // Now passing historicalPoints to allow ScenarioEngine to calculate market regime
     const monteCarloResults = this.scenarioEngine.monteCarloSimulation(
       baselineForecast,
       historicalPoints
     );
 
-    // 4. Construct Final Report Object
     const metadata: ReportMetadata = {
       generatedAt: new Date(),
       campaignId,
       horizon,
-      confidenceScore: baselineForecast.rSquared, // Using R-Squared as a proxy for model reliability
+      confidenceScore: baselineForecast.rSquared ?? 0,
     };
 
     return {
@@ -72,16 +96,16 @@ export class ExecutiveReportService {
       projections: {
         optimistic: monteCarloResults.optimistic,
         pessimistic: monteCarloResults.pessimistic,
-        median: monteCarloResults.median
+        median: monteCarloResults.median,
       },
-      distribution: Array.from(monteCarloResults.distribution.entries()).map(([bucket, probability]) => ({
-        bucket,
-        probability
-      })),
+      distribution: Array.from(
+        monteCarloResults.distribution.entries()
+      ).map(([bucket, probability]) => ({ bucket: String(bucket), probability })),
       marketContext: {
-        volatilityRegime: monteCarloResults.riskMetrics.standardDeviation > 15 ? 'High' : 'Stable',
-        isAnomalous: Math.abs(monteCarloResults.riskMetrics.skewness) > 1
-      }
+        volatilityRegime:
+          monteCarloResults.riskMetrics.standardDeviation > 15 ? "High" : "Stable",
+        isAnomalous: Math.abs(monteCarloResults.riskMetrics.skewness) > 1,
+      },
     };
   }
 }

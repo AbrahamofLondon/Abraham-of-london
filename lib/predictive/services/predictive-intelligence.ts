@@ -1,7 +1,7 @@
 import { TimeSeriesEngine } from '../engines/time-series-engine';
 import { ScenarioEngine } from '../engines/scenario-engine';
 import { EarlyWarningEngine } from '../engines/early-warning-engine';
-import { TimeSeriesPoint, PredictiveInsight, ForecastResult } from '../types';
+import { TimeSeriesPoint, PredictiveInsight, ForecastResult, ScenarioOutcome } from '../types';
 
 export interface GenerateInsightOptions {
   horizon?: number;
@@ -98,11 +98,30 @@ export class PredictiveIntelligenceService {
     let scenarios = null;
     if (options.includeScenarios) {
       const baselineForecast = resonanceForecast;
-      const monteCarlo = this.scenarioEngine.monteCarloSimulation(baselineForecast, 1000);
+      const monteCarlo = this.scenarioEngine.monteCarloSimulation(
+        baselineForecast,
+        historicalData.resonance,
+        1000
+      );
       scenarios = {
-        optimistic: monteCarlo.optimistic,
-        pessimistic: monteCarlo.pessimistic,
-        median: monteCarlo.median
+        baseline: this.toScenarioOutcome(
+          baselineForecast,
+          humanCapitalForecast,
+          currentMetrics,
+          0.5
+        ),
+        optimistic: this.toScenarioOutcome(
+          monteCarlo.optimistic,
+          humanCapitalForecast,
+          currentMetrics,
+          0.25
+        ),
+        pessimistic: this.toScenarioOutcome(
+          monteCarlo.pessimistic,
+          humanCapitalForecast,
+          currentMetrics,
+          0.25
+        )
       };
     }
 
@@ -124,12 +143,59 @@ export class PredictiveIntelligenceService {
         operationalEfficiency: operationalForecast
       },
       earlyWarnings,
-      scenarios: scenarios || {
-        baseline: { resonanceTrajectory: resonanceForecast } as any,
-        optimistic: { resonanceTrajectory: resonanceForecast } as any,
-        pessimistic: { resonanceTrajectory: resonanceForecast } as any
-      },
+      scenarios: scenarios || this.buildDefaultScenarios(
+        resonanceForecast,
+        humanCapitalForecast,
+        currentMetrics
+      ),
       recommendations
+    };
+  }
+
+  private buildDefaultScenarios(
+    resonanceForecast: ForecastResult,
+    humanCapitalForecast: ForecastResult,
+    currentMetrics: {
+      resonance: number;
+      dissonance: number;
+      burnoutIndex: number;
+      sovereignCertainty: number;
+    }
+  ): PredictiveInsight["scenarios"] {
+    return {
+      baseline: this.toScenarioOutcome(resonanceForecast, humanCapitalForecast, currentMetrics, 0.5),
+      optimistic: this.toScenarioOutcome(resonanceForecast, humanCapitalForecast, currentMetrics, 0.25),
+      pessimistic: this.toScenarioOutcome(resonanceForecast, humanCapitalForecast, currentMetrics, 0.25),
+    };
+  }
+
+  private toScenarioOutcome(
+    resonanceTrajectory: ForecastResult,
+    humanCapitalTrajectory: ForecastResult,
+    currentMetrics: {
+      resonance: number;
+      dissonance: number;
+      burnoutIndex: number;
+      sovereignCertainty: number;
+    },
+    probability: number
+  ): ScenarioOutcome {
+    const costAvoidance = Math.max(0, Math.round((100 - currentMetrics.burnoutIndex) * 500));
+    const revenueProtection = Math.max(0, Math.round(currentMetrics.sovereignCertainty * 1000));
+    const netPresentValue = revenueProtection - costAvoidance;
+    const internalRateOfReturn = revenueProtection === 0 ? 0 : netPresentValue / revenueProtection;
+
+    return {
+      resonanceTrajectory,
+      humanCapitalTrajectory,
+      financialImpact: {
+        costAvoidance,
+        revenueProtection,
+        netPresentValue,
+        internalRateOfReturn,
+      },
+      probability,
+      riskAdjustedValue: netPresentValue * probability,
     };
   }
 

@@ -327,7 +327,7 @@ export async function generatePDF(id: string, force = false, contentOverride?: s
     // QR & Security
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://abrahamoflondon.org";
     const qrCode = await QRCode.toDataURL(`${siteUrl}${outPublic}`, { margin: 1 });
-    const signature = generateDossierSignature("SYSTEM", id, { brand: "Abraham of London", slug: source.slug, title: source.title });
+    const signature = generateDossierSignature("SYSTEM", id, { brand: "Abraham of London" });
     const watermark = getWatermarkPayload({ signature, classification: finalTier.toUpperCase(), context: { docType: finalType, reference: id } });
 
     // ── CRITICAL: DYNAMIC RENDER CONTEXT ──
@@ -338,13 +338,13 @@ export async function generatePDF(id: string, force = false, contentOverride?: s
 
     const { BriefDocument } = await import("./pdf-templates/BriefDocument");
 
-    const pdfBuffer = await ReactPDF.renderToBuffer(
-      React.createElement(BriefDocument as any, {
-        config: { ...source, type: finalType, outputPath: outPublic, pdfFontFamily: CANONICAL_PDF_FONT_FAMILY, pdfFontFamilies: PDF_FONT_FAMILIES },
-        content: sanitizeMDXContent(source.body),
-        watermark, qrCode, frontmatter: source.frontmatter
-      })
-    );
+    const pdfElement = React.createElement(BriefDocument, {
+      config: { ...source, type: finalType, outputPath: outPublic, pdfFontFamily: CANONICAL_PDF_FONT_FAMILY, pdfFontFamilies: PDF_FONT_FAMILIES },
+      content: sanitizeMDXContent(source.body),
+      watermark, qrCode, frontmatter: source.frontmatter
+    }) as unknown as import("react").ReactElement<import("@react-pdf/renderer").DocumentProps>;
+
+    const pdfBuffer = await ReactPDF.renderToBuffer(pdfElement);
 
     ensureDir(path.dirname(outFs));
     fs.writeFileSync(outFs, pdfBuffer);

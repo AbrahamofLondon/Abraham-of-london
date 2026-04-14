@@ -1,7 +1,9 @@
 import React from "react";
+import type { ReactElement } from "react";
 import QRCode from "qrcode";
 import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
+import type { DocumentProps } from "@react-pdf/renderer";
 import AlignmentReportDocument from "@/lib/pdf/templates/AlignmentReportDocument";
 import {
   createPurposeAlignmentReportRecord,
@@ -43,7 +45,7 @@ export async function GET(
       assessment,
       watermark,
       qrCode,
-    })
+    }) as ReactElement<DocumentProps>
   );
 
   await createPurposeAlignmentReportRecord({
@@ -51,7 +53,7 @@ export async function GET(
     filename,
   });
 
-  return new NextResponse(pdf, {
+  return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${filename}"`,

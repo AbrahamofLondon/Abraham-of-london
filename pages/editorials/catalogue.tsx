@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import type { NextPage } from "next";
-import { discoverPublications } from "./discovery";
+import { discoverPublications } from "@/lib/editorial/discovery";
 
 const EditorialCataloguePage: NextPage = () => {
   const publications = discoverPublications();

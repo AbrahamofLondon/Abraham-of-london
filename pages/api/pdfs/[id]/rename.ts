@@ -53,10 +53,10 @@ export default async function handler(
       where: { slug: id },
       data: {
         title,
-        metadata: {
+        metadata: JSON.stringify({
           ...existingMetadata,
           title,
-        },
+        }),
       },
     });
 

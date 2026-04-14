@@ -126,9 +126,9 @@ type EnterpriseReading = {
 };
 
 function sectionPct(answers: Record<string, DiagnosticAnswerValue>, blockId: string): number {
-  const vals = [0, 1, 2].map(i => answers[`${blockId}-${i}`] ?? 0).filter(v => v > 0);
+  const vals: number[] = [0, 1, 2].map(i => answers[`${blockId}-${i}`] ?? 0).filter(v => v > 0);
   if (!vals.length) return 0;
-  return Math.round((vals.reduce((s, v) => s + v, 0) / (vals.length * 5)) * 100);
+  return Math.round((vals.reduce((s: number, v: number) => s + v, 0) / (vals.length * 5)) * 100);
 }
 
 function deriveReading(
@@ -139,7 +139,11 @@ function deriveReading(
   const scores: Record<string, number> = {};
   for (const b of BLOCKS) scores[b.id] = sectionPct(answers, b.id);
 
-  const { leadership, governance, execution, risk } = scores as Record<string, number>;
+  const scoreMap = scores as Record<string, number>;
+  const leadership = scoreMap["leadership"] ?? 0;
+  const governance = scoreMap["governance"] ?? 0;
+  const execution  = scoreMap["execution"]  ?? 0;
+  const risk       = scoreMap["risk"]       ?? 0;
   const weakest = Object.entries(scores).sort((a, b) => a[1] - b[1])[0]!;
 
   // Band
@@ -508,16 +512,21 @@ export default function EnterpriseAssessmentPage() {
   const [submitResult,setSubmitResult]= React.useState<DiagnosticSubmitResponse | null>(null);
   const [isSubmitting,setIsSubmitting]= React.useState(false);
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
+  const [subjectId, setSubjectId] = React.useState("");
 
   React.useEffect(() => {
     try {
       const raw = sessionStorage.getItem("team-assessment-result");
-      if (raw) { const p = JSON.parse(raw); if (typeof p?.overallReality === "number") setTeamAlignmentPct(p.overallReality); }
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (typeof p?.overallReality === "number") setTeamAlignmentPct(p.overallReality);
+        if (typeof p?.subjectId === "string") setSubjectId(p.subjectId);
+      }
     } catch {}
   }, []);
 
   const allPrompts = BLOCKS.flatMap(b => b.prompts.map((_, i) => `${b.id}-${i}`));
-  const answeredCount = allPrompts.filter(k => answers[k] > 0).length;
+  const answeredCount = allPrompts.filter(k => (answers[k] ?? 0) > 0).length;
   const complete = answeredCount === allPrompts.length;
 
   const answerList: DiagnosticAnswer[] = BLOCKS.flatMap(b =>
@@ -555,9 +564,38 @@ export default function EnterpriseAssessmentPage() {
       respondent: { name: identity.name || null, email: identity.email || null, organisation: identity.organisation || null, role: identity.role || null },
       answers: answerList, notes: identity.notes || null,
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
-      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/consulting/strategy-room" : "/diagnostics/executive-reporting", nextRoute: reading?.route ?? "EXECUTIVE_REPORTING", teamAlignmentPct },
+      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/consulting/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
     });
-    setSubmitResult(res); setIsSubmitting(false);
+    setSubmitResult(res);
+
+    // Handoff to /diagnostics/executive-reporting (and the Strategy Room chain).
+    // Canonical key per CLAUDE_SESSION_LOG.md section 4 ladder chain:
+    // purpose-alignment-result → team-assessment-result → enterprise-assessment-result
+    // → executive-report-result → strategy-room-result.
+    // Mirrors the Team → Enterprise write pattern. Preserves the server response
+    // plus the key computed enterprise metrics so downstream surfaces can enrich
+    // without an extra round-trip.
+    try {
+      sessionStorage.setItem(
+        "enterprise-assessment-result",
+        JSON.stringify({
+          ...(res || {}),
+          totalScore,
+          maxScore,
+          totalPct,
+          severity: severityFromPct(totalPct),
+          band: bandFromPct(totalPct),
+          sections: sections.map(s => ({ id: s.id, title: s.title, pct: s.pct })),
+          subjectId,
+          nextRoute: reading?.route ?? "EXECUTIVE_REPORTING",
+          teamAlignmentPct,
+        }),
+      );
+    } catch {
+      /* sessionStorage unavailable (private mode / SSR) — handoff degrades gracefully */
+    }
+
+    setIsSubmitting(false);
   }
 
   return (

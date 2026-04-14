@@ -1,3 +1,6 @@
+// DEPRECATED: superseded by inline HeroSection in pages/index.tsx
+// No callers. Do not add new logic here.
+// Pending deletion in cleanup pass.
 "use client";
 
 /* ============================================================================

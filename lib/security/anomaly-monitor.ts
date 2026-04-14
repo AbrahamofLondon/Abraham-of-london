@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 import { prisma } from "@/lib/prisma";
 import { notifyPrincipalOfSecurityAction } from "@/lib/intelligence/notification-delegate";

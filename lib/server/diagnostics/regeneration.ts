@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 import { prisma } from "@/lib/prisma.server";
 import { archiveDiagnosticPdf } from "./report-archive";
 import { getDiagnosticRecordByRef } from "./store";
@@ -32,7 +32,7 @@ export async function processRegenerationJobs(limit = 5) {
 
       await prisma.diagnosticRegenerationJob.update({
         where: { id: job.id },
-        data: { status: "done" },
+        data: { status: "completed" },
       });
     } catch (err: any) {
       await prisma.diagnosticRegenerationJob.update({

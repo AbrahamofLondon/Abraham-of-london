@@ -99,8 +99,8 @@ export default async function handler(
 
     const contentType =
       String(brief.contentType) === "Dossier"
-        ? DownloadContentType.DOSSIER
-        : DownloadContentType.BRIEF;
+        ? DownloadContentType.PDF
+        : DownloadContentType.PDF;
 
     await prisma.$transaction([
       prisma.downloadAuditEvent.create({
@@ -109,7 +109,7 @@ export default async function handler(
           title: String(brief.title),
           contentType,
           eventType: DownloadEventType.DOWNLOAD,
-          deliveryMode: DownloadDeliveryMode.API,
+          deliveryMode: DownloadDeliveryMode.DIRECT,
 
           contentId: String(brief.id),
           memberId: memberId || undefined,
@@ -125,7 +125,7 @@ export default async function handler(
           watermarkId: sigObj.traceId,
           fileHash: sigObj.sig,
 
-          metadata: {
+          metadata: JSON.stringify({
             traceId: sigObj.traceId,
             issuedAt: sigObj.issuedAt,
             scheme: sigObj.scheme,
@@ -133,7 +133,7 @@ export default async function handler(
             proof: sigObj.proof,
             watermark: watermark.visibleFooter,
             exportRoute: "pages/api/strategy-room/export/[slug]",
-          },
+          }),
         },
       }),
       prisma.contentMetadata.update({

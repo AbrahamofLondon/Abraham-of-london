@@ -12,7 +12,7 @@ export async function logSystemAudit(
   tx: Prisma.TransactionClient,
   input: {
     action: string;
-    severity?: "info" | "warning" | "high" | "critical";
+    severity?: "debug" | "info" | "warn" | "error" | "critical";
     resourceId?: string | null;
     actorId?: string | null;
     actorEmail?: string | null;
@@ -30,10 +30,10 @@ export async function logSystemAudit(
       resourceId: input.resourceId ?? null,
       ipAddress: input.ipAddress ?? null,
       userAgent: input.userAgent ?? null,
-      metadata: {
+      metadata: JSON.stringify({
         actorType: "system",
         ...((input.metadata ?? {}) as Record<string, unknown>),
-      },
+      }),
     },
   });
 }
@@ -66,11 +66,11 @@ export async function logAuditEvent(event: {
       userAgent: Array.isArray(event.userAgent) 
         ? event.userAgent[0]?.substring(0, 500) 
         : (event.userAgent?.substring(0, 500) ?? null),
-      metadata: {
+      metadata: JSON.stringify({
         ...(event.metadata ?? {}),
         sessionId: event.sessionId,
         note: event.note,
-      },
+      }),
     },
   });
 }

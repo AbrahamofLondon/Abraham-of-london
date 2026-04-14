@@ -161,7 +161,7 @@ async function writeAuditSafe(data: {
         actorEmail: data.actorEmail || null,
         resourceType: data.resourceType || null,
         resourceId: data.resourceId || null,
-        metadata: toPrismaJsonObject(data.metadata),
+        metadata: JSON.stringify(toPrismaJsonObject(data.metadata)),
       },
     });
   } catch (error) {
@@ -447,7 +447,7 @@ export async function processStrategyRoomEnrolment(
         email,
         intent,
         status: "PENDING",
-        metadata: toPrismaJsonObject(initialMetadata),
+        metadata: JSON.stringify(toPrismaJsonObject(initialMetadata)),
       },
     });
 
@@ -479,7 +479,7 @@ export async function processStrategyRoomEnrolment(
       await prisma.strategyInquiry.update({
         where: { id: entry.id },
         data: {
-          metadata: toPrismaJsonObject(mergedMetadata),
+          metadata: JSON.stringify(toPrismaJsonObject(mergedMetadata)),
         },
       });
     } catch (updateError) {

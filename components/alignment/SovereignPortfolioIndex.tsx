@@ -7,21 +7,22 @@ import { Lock, ShieldCheck, EyeOff, Search, ChevronRight, Key } from "lucide-rea
 
 export default function SovereignPortfolioIndex() {
   useOGRTelemetry();
-  const { isAuthorized, validateKey, computed } = useOGRStore();
+  const { isAuthenticated, authenticate, computed } = useOGRStore();
   const [passkey, setPasskey] = useState("");
   const [error, setError] = useState(false);
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    const success = validateKey(passkey);
-    if (!success) setError(true);
+    authenticate(passkey).then((success) => {
+      if (!success) setError(true);
+    });
   };
 
   return (
     <div className="min-h-screen bg-[#F9F7F2] text-[#2C2416] font-sans relative">
       
       {/* 1. THE APPROVAL OVERLAY */}
-      {!isAuthorized && (
+      {!isAuthenticated && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-[#2C2416]/40 p-6">
           <div className="w-full max-w-md bg-white border border-[#D4C5A8] p-12 shadow-2xl space-y-8 animate-in fade-in zoom-in duration-500">
             <div className="flex justify-center">
@@ -57,7 +58,7 @@ export default function SovereignPortfolioIndex() {
       )}
 
       {/* 2. THE RESTRICTED CONTENT */}
-      <div className={`transition-all duration-1000 ${!isAuthorized ? 'blur-lg grayscale pointer-events-none select-none' : 'blur-0'}`}>
+      <div className={`transition-all duration-1000 ${!isAuthenticated ? 'blur-lg grayscale pointer-events-none select-none' : 'blur-0'}`}>
         <div className="p-12 lg:p-24">
           <header className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="space-y-4">

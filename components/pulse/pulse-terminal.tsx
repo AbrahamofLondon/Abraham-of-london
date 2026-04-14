@@ -20,7 +20,7 @@ export function PulseTerminal() {
   const [resonance, setResonance] = useState(50);
   const [complete, setComplete] = useState(false);
 
-  const currentQuestion = QUESTIONS[step];
+  const currentQuestion = QUESTIONS[step] ?? QUESTIONS[0]!;
 
   const handleNext = () => {
     if (step < QUESTIONS.length - 1) {

@@ -109,7 +109,7 @@ export async function getAdminSession(request: any): Promise<AdminSessionContext
         id: true,
         token: true,
         expiresAt: true,
-        user: {
+        member: {
           select: {
             id: true,
             email: true,
@@ -126,17 +126,17 @@ export async function getAdminSession(request: any): Promise<AdminSessionContext
     const exp = session.expiresAt ? new Date(session.expiresAt).getTime() : 0;
     if (!exp || exp <= Date.now()) return { user: null, isAdmin: false };
 
-    // User checks
-    const role = String(session.user?.role || "").toUpperCase();
-    const status = String(session.user?.status || "").toLowerCase();
+    // Member checks
+    const role = String(session.member?.role || "").toUpperCase();
+    const status = String(session.member?.status || "").toLowerCase();
 
     const isAdmin = role === "ADMIN" && status === "active";
     if (!isAdmin) return { user: null, isAdmin: false };
 
     return {
       user: {
-        id: session.user.id,
-        email: session.user.email ?? null,
+        id: session.member.id,
+        email: session.member.email ?? null,
         isAdmin: true,
       },
       isAdmin: true,

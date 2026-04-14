@@ -23,12 +23,12 @@ import {
 export const INNER_CIRCLE_TIER_ORDER: AccessTier[] = [
   "public",
   "member",
-  "inner-circle",
+  "inner_circle",
   "client",
   "legacy",
   "architect",
   "owner",
-  "top-secret", // ✅ Added as highest tier
+  "top_secret",
 ];
 
 const VALID_TIERS = [
@@ -358,13 +358,13 @@ InnerCircleDataSchema.virtual("accessDescription").get(function (this: any) {
   const descriptions: Record<AccessTier, string> = {
     public: "Available to everyone",
     member: "Available to all members",
-    "inner-circle": "Inner Circle exclusive content",
-    restricted: "Restricted - Additional clearance required", // ✅ ADDED THIS LINE
+    inner_circle: "Inner Circle exclusive content",
+    restricted: "Restricted - Additional clearance required",
     client: "Client access only",
     legacy: "Legacy member exclusive",
     architect: "Architect level access",
     owner: "Owner only",
-    "top-secret": "TOP SECRET - Highest clearance required",
+    top_secret: "TOP SECRET - Highest clearance required",
   };
 
   return descriptions[tier] || `Requires ${tier} access`;

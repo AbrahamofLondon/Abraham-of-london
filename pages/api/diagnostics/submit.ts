@@ -247,8 +247,6 @@ export default async function handler(
         userId: actor.userId,
         tier: actor.tier,
         authenticated: actor.authenticated,
-        email: actor.email,
-        name: actor.name,
       },
     });
   } catch {

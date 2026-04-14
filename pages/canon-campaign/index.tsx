@@ -96,26 +96,26 @@ function canonBareSlug(input: unknown): string {
 function accessTierToLevel(required: AccessTier): AccessLevel {
   const r = tiers.normalizeRequired(required);
   if (r === "public") return "public";
-  if (r === "member" || r === "verified") return "inner-circle";
+  if (r === "member") return "inner-circle";
   return "private";
 }
 
 function extractVolumeNumber(title: string): number | null {
   const romanMatch = title.match(/Volume[-\s]([IVXLCDM]+)/i);
   if (romanMatch) {
-    const roman = romanMatch[1].toUpperCase();
+    const roman = (romanMatch[1] ?? "").toUpperCase();
     const values: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
     let total = 0;
     let prev = 0;
     for (let i = roman.length - 1; i >= 0; i--) {
-      const cur = values[roman[i]];
+      const cur = values[roman[i] ?? ""] ?? 0;
       total += cur < prev ? -cur : cur;
       prev = cur;
     }
     return total;
   }
   const numMatch = title.match(/Volume[-\s](\d+)/i);
-  return numMatch ? parseInt(numMatch[1], 10) : null;
+  return numMatch ? parseInt(numMatch[1] ?? "0", 10) : null;
 }
 
 function extractSeries(title: string): string {

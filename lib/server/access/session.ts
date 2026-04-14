@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 import crypto from "crypto";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -110,13 +110,12 @@ export function buildSession(args: { tier: AccessTier; subject: string }): Acces
 
 /**
  * Local tier comparison helper
- * IMPORTANT: Use kebab-case tiers (your type union uses "inner-circle")
  */
 function hasAccess(current: AccessTier, required: AccessTier): boolean {
   const order: AccessTier[] = [
     "public",
     "member",
-    "inner-circle",
+    "inner_circle",
     "client",
     "legacy",
     "architect",

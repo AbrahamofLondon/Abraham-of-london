@@ -54,7 +54,7 @@ export function BriefingTrigger({ campaignId }: { campaignId: string }) {
       try {
         const result = await generateExecutiveBrief(campaignId);
         if (result.success) {
-          setBriefData(result.data);
+          setBriefData((result.data as BriefingData | undefined) ?? null);
           setShowModal(true);
         } else {
           setError(result.error || "Briefing compilation failed.");

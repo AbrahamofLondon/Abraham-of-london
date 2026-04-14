@@ -1,24 +1,22 @@
-/* pages/api/system/lock-status.ts — High-Speed Security State Read */
+/* pages/api/system/lock-status.ts — Security State Read */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "@/lib/prisma.server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+type LockStatusResponse = {
+  isLocked: boolean | null;
+  available: boolean;
+  reason?: string;
+};
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<LockStatusResponse>) {
   if (req.method !== "GET") return res.status(405).end();
 
-  try {
-    const lockConfig = await prisma.systemConfig.findUnique({
-      where: { key: "GLOBAL_LOCKDOWN" },
-      select: { value: true }
-    });
-
-    const isLocked = lockConfig?.value === "true";
-
-    // Set short cache headers to prevent DB hammering while maintaining responsiveness
-    res.setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate=5");
-    return res.status(200).json({ isLocked });
-  } catch (error) {
-    // In case of DB failure, we default to "Not Locked" to prevent total blackout,
-    // or "Locked" if you prefer a "Fail-Closed" security posture.
-    return res.status(200).json({ isLocked: false });
-  }
+  // SystemConfig model does not exist in the current Prisma schema.
+  // Lockdown state cannot be read. The response explicitly signals this
+  // so consumers can distinguish "unlocked" from "status unavailable."
+  res.setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate=5");
+  return res.status(200).json({
+    isLocked: null,
+    available: false,
+    reason: "SystemConfig model not provisioned. Lockdown state cannot be determined.",
+  });
 }

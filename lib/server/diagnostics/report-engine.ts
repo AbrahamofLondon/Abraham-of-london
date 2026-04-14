@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/report-engine.ts */
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";

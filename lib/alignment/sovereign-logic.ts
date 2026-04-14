@@ -3,16 +3,16 @@
 import { PulseAnalysis } from "./hardened-pulse-engine";
 
 export interface SovereignSnapshot {
-  sovereignCertainty: number;        // C_sov (0-100)
-  institutionalResonance: number;    // R (0-100)
-  frictionIndex: number;             // F (0-100)
+  sovereignCertainty: number;
+  institutionalResonance: number;
+  frictionIndex: number;
   isActionable: boolean;
   clearanceLevel: "ALPHA" | "BETA" | "GAMMA";
 }
 
 export interface SovereignInputs {
-  resonance: number;                 // R (0-100)
-  friction: number;                  // F (0-99.99 or 0-100 depending on caller)
+  resonance: number;
+  friction: number;
   dataIntegrity?: "HIGH" | "MEDIUM" | "LOW";
 }
 
@@ -27,7 +27,6 @@ function toFiniteNumber(value: unknown, fallback = 0): number {
       : typeof value === "string"
       ? Number(value)
       : fallback;
-
   return Number.isFinite(n) ? n : fallback;
 }
 
@@ -48,29 +47,15 @@ function resolveActionability(
   certainty: number,
   dataIntegrity: "HIGH" | "MEDIUM" | "LOW"
 ): boolean {
-  // Manifest hard-lock:
-  // below 90 => no-go
-  // LOW integrity => no-go
   return dataIntegrity !== "LOW" && certainty >= 90;
 }
 
-/* -------------------------------------------------------------------------- */
-/* PURE MANIFEST FORMULA                                                       */
-/* -------------------------------------------------------------------------- */
-/**
- * Manifest Formula:
- *   C_sov = (R * 0.7) + ((100 - F) * 0.3)
- *
- * This is the authoritative implementation when you already have true
- * resonance (R) and friction (F) as explicit system inputs.
- */
 export function calculateSovereignCertaintyFromInputs(
   inputs: SovereignInputs
 ): SovereignSnapshot {
   const R = clamp(toFiniteNumber(inputs?.resonance, 0), 0, 100);
   const F = clamp(toFiniteNumber(inputs?.friction, 0), 0, 100);
   const dataIntegrity = inputs?.dataIntegrity ?? "HIGH";
-
   const C_sov = clamp((R * 0.7) + ((100 - F) * 0.3), 0, 100);
 
   return {
@@ -82,17 +67,6 @@ export function calculateSovereignCertaintyFromInputs(
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* TELEMETRY-DERIVED FRICTION                                                  */
-/* -------------------------------------------------------------------------- */
-/**
- * This converts telemetry analysis into a friction proxy.
- *
- * It is NOT the same thing as externally modelled market friction.
- * It is a governance-layer inference based on:
- * - confidence weakness
- * - internal disagreement / variance
- */
 export function deriveFrictionFromTelemetry(analysis: PulseAnalysis): number {
   const confidenceScore = clamp(
     toFiniteNumber(analysis?.confidenceScore, 0),
@@ -100,19 +74,18 @@ export function deriveFrictionFromTelemetry(analysis: PulseAnalysis): number {
     100
   );
 
-  const varianceIndex = clamp(
-    toFiniteNumber(analysis?.varianceIndex, 0),
+  // PulseAnalysis does not expose varianceIndex directly.
+  // standardError is the dispersion proxy — measures spread across
+  // weighted telemetry nodes. Scale 0-50 => 0-100 then clamp.
+  const varianceProxy = clamp(
+    toFiniteNumber(analysis?.standardError, 0),
     0,
     100
   );
 
   const confidenceWeakness = 100 - confidenceScore;
+  const dissonanceFriction = clamp((varianceProxy / 50) * 100, 0, 100);
 
-  // varianceIndex is treated as a standard-deviation-like value.
-  // Scale 0-50 => 0-100, then clamp.
-  const dissonanceFriction = clamp((varianceIndex / 50) * 100, 0, 100);
-
-  // 60% confidence weakness, 40% disagreement
   return clamp(
     (confidenceWeakness * 0.6) + (dissonanceFriction * 0.4),
     0,
@@ -120,13 +93,6 @@ export function deriveFrictionFromTelemetry(analysis: PulseAnalysis): number {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* TELEMETRY PATH                                                              */
-/* -------------------------------------------------------------------------- */
-/**
- * Uses telemetry-derived resonance and derived friction proxy, then routes them
- * through the exact same sovereign formula.
- */
 export function calculateSovereignCertaintyFromTelemetry(
   analysis: PulseAnalysis
 ): SovereignSnapshot {
@@ -141,14 +107,6 @@ export function calculateSovereignCertaintyFromTelemetry(
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/* LEGACY COMPATIBILITY                                                        */
-/* -------------------------------------------------------------------------- */
-/**
- * Backward-compatible export.
- * Existing callers using calculateSovereignCertainty(analysis) will continue
- * to work via the telemetry path.
- */
 export function calculateSovereignCertainty(
   analysis: PulseAnalysis
 ): SovereignSnapshot {

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma.server";
 import { assembleConstitutionalGuidance } from "@/lib/decision/constitutional-guidance-assembler";
 import { buildCanonicalReportContract } from "@/lib/admin/reporting/canonical-report-contract";
 import { buildExecutiveReportViewModel } from "@/lib/admin/reporting/executive-report-view-model";
+import { resolveLadderContext } from "@/lib/diagnostics/ladder-context-resolver";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 
 type AnyRecord = Record<string, unknown>;
@@ -138,7 +139,27 @@ function buildNarrativeSummary(input: {
   whatHappensIfNothingChanges: string;
   priorAttemptOutcome: string;
   evidenceQuality: EvidenceQuality;
+  ladderContext?: {
+    constitutional?: { route: string | null } | null;
+    team?: { band: string | null } | null;
+    enterprise?: { reading: string | null } | null;
+  };
 }): string {
+  const ladderNotes: string[] = [];
+  if (input.ladderContext?.constitutional?.route) {
+    ladderNotes.push(
+      `Constitutional route: ${input.ladderContext.constitutional.route}.`,
+    );
+  }
+  if (input.ladderContext?.team?.band) {
+    ladderNotes.push(`Team alignment: ${input.ladderContext.team.band}.`);
+  }
+  if (input.ladderContext?.enterprise?.reading) {
+    ladderNotes.push(
+      `Institutional reading: ${input.ladderContext.enterprise.reading}.`,
+    );
+  }
+
   const constitutionalNarrative = s(input.constitution.narrativeSummary);
   if (constitutionalNarrative) {
     const additions: string[] = [];
@@ -157,7 +178,7 @@ function buildNarrativeSummary(input: {
       additions.push(`The immediate decision need is: ${input.decisionQuestion}`);
     }
 
-    return [constitutionalNarrative, ...additions].join(" ").trim();
+    return [...ladderNotes, constitutionalNarrative, ...additions].join(" ").trim();
   }
 
   const parts = [
@@ -166,7 +187,7 @@ function buildNarrativeSummary(input: {
     s(input.whatHappensIfNothingChanges),
   ].filter(Boolean);
 
-  return parts.join(" ").slice(0, 900);
+  return [...ladderNotes, ...parts].join(" ").trim().slice(0, 900);
 }
 
 function buildNarrativeMandate(input: {
@@ -428,6 +449,9 @@ export async function POST(
     }
 
     const email = s(intake.email).toLowerCase();
+    const subjectId = s(intake.subjectId) || null;
+    const campaignId = s(intake.campaignId) || null;
+    const ladderContext = await resolveLadderContext(subjectId, email, campaignId);
     const runKey = makeRunKey();
 
     const assembled = await assembleConstitutionalGuidance({
@@ -494,6 +518,7 @@ export async function POST(
             whatHappensIfNothingChanges: s(decisionNeed.whatHappensIfNothingChanges),
             priorAttemptOutcome: s(history.priorAttemptOutcome),
             evidenceQuality,
+            ladderContext,
           }),
           mandate: buildNarrativeMandate({
             guidance,
@@ -532,8 +557,15 @@ export async function POST(
           isAuthorizedToExecute: route === "STRATEGY",
         },
       },
-      constitution,
-      guidance,
+      // Pass the typed assembler outputs directly into buildCanonicalReportContract.
+      // The local `constitution`/`guidance` consts are AnyRecord (intentionally
+      // widened via getObject() above) for consumption by AnyRecord-typed local
+      // helpers throughout this file. The canonical builder needs the strict
+      // ExecutiveReportConstitution / ExecutiveReportGuidance shape per the
+      // ConstitutionalAssemblerOutput contract — the typed versions are still
+      // available on `assembled` and are used directly here.
+      constitution: assembled.constitution,
+      guidance: assembled.guidance,
       campaign: {
         id: runKey,
         title: "Executive Reporting Run",
@@ -547,7 +579,14 @@ export async function POST(
       },
     });
 
-    const viewModel = buildExecutiveReportViewModel(canonical);
+    const enrichedCanonical = {
+      ...canonical,
+      subjectId,
+      campaignId,
+      ladderContext,
+    };
+
+    const viewModel = buildExecutiveReportViewModel(enrichedCanonical as typeof canonical);
     const entitlements = await getExecutiveReportingEntitlements(email);
 
     const run = await prisma.executiveReportingRun.create({
@@ -563,8 +602,17 @@ export async function POST(
         route: route || null,
         readinessTier: s(constitution.readinessTier) || null,
         authorityType: s(constitution.authorityType) || null,
-        canonicalSnapshot: canonical as Prisma.InputJsonValue,
-        viewModelSnapshot: viewModel as Prisma.InputJsonValue,
+        canonicalSnapshot: enrichedCanonical as unknown as Prisma.InputJsonValue,
+        viewModelSnapshot: viewModel as unknown as Prisma.InputJsonValue,
+        ...(campaignId
+          ? {
+              campaign: {
+                connect: {
+                  id: campaignId,
+                },
+              },
+            }
+          : {}),
       },
     });
 
@@ -572,7 +620,7 @@ export async function POST(
       ok: true,
       runKey: run.runKey,
       route,
-      canonical,
+      canonical: enrichedCanonical,
       viewModel,
       entitlements,
       diagnostics: assembled.diagnostics,

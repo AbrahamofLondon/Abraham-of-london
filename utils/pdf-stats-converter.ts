@@ -33,7 +33,7 @@ export function convertStats(rawStats: any): DashboardStats {
   const allPDFs = getAllDashboardPDFs();
 
   const sortedByDate = [...allPDFs].sort(
-    (a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
+    (a, b) => new Date(b.lastModified ?? 0).getTime() - new Date(a.lastModified ?? 0).getTime()
   );
 
   const available = Number(rawStats?.existsOnDisk ?? 0) || allPDFs.filter((p) => p.exists).length;
@@ -101,8 +101,9 @@ function calculateAverageFileSize(pdfs: PDFDashboardItem[]): string {
     const match = s.match(/([\d.]+)\s*(KB|MB|GB)/i);
     if (!match) return acc;
 
-    const num = parseFloat(match[1]);
-    const unit = match[2].toUpperCase();
+    const [, numStr = "", unitRaw = ""] = match;
+    const num = parseFloat(numStr);
+    const unit = unitRaw.toUpperCase();
 
     if (!Number.isFinite(num)) return acc;
     if (unit === "MB") return acc + num * 1024;

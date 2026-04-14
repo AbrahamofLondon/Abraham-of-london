@@ -68,11 +68,13 @@ function resolveDoc(slug: string): { doc: any | null; tried: string[] } {
     cleaned,
   ].map(norm);
 
+  const [t0, t1, t2, t3] = tries;
+
   let doc =
-    getDocBySlug(tries[0]) ||
-    getDocBySlug(tries[1]) ||
-    getDocBySlug(tries[2]) ||
-    getDocBySlug(tries[3]) ||
+    (t0 ? getDocBySlug(t0) : null) ||
+    (t1 ? getDocBySlug(t1) : null) ||
+    (t2 ? getDocBySlug(t2) : null) ||
+    (t3 ? getDocBySlug(t3) : null) ||
     null;
 
   if (!doc) {
@@ -131,8 +133,8 @@ async function handler(
     res,
     {
       ok: true,
-      tier: access?.tier ?? "inner-circle",
-      requiredTier: "inner-circle",
+      tier: access?.tier ?? "inner_circle",
+      requiredTier: "inner_circle",
       slugResolved,
       bodyCode,
     },
@@ -142,7 +144,7 @@ async function handler(
 
 export default withInnerCircleAccess(handler, {
   requireAuth: true,
-  requiredTier: "inner-circle",
+  requiredTier: "inner_circle",
 });
 
 export const config = {

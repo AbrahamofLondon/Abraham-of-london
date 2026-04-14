@@ -1,4 +1,5 @@
 import type { AlignmentDomain, AlignmentQuestion } from "./types";
+export type { AlignmentDomain, AlignmentQuestion };
 
 export const PURPOSE_ALIGNMENT_INSTRUMENT_ID = "IA-PAC-001";
 export const PURPOSE_ALIGNMENT_REPORT_VERSION = "1.0.0";

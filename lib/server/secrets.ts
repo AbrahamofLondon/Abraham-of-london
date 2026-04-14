@@ -25,11 +25,13 @@ const secretSchema = z.object({
 
 type Secrets = z.infer<typeof secretSchema>;
 
-/**
- * Validates and exports all secrets. 
- * Accessing process.env directly elsewhere is now "Institutional Debt."
- */
-export const secrets = (() => {
+let cachedSecrets: Secrets | null = null;
+
+function loadSecrets(): Secrets {
+  if (cachedSecrets) {
+    return cachedSecrets;
+  }
+
   const result = secretSchema.safeParse(process.env);
 
   if (!result.success) {
@@ -37,15 +39,30 @@ export const secrets = (() => {
     throw new Error(`[SECURITY] Missing or invalid institutional secrets: ${missing}`);
   }
 
-  return result.data;
-})();
+  cachedSecrets = result.data;
+  return cachedSecrets;
+}
+
+/**
+ * Validates and exports all secrets. 
+ * Accessing process.env directly elsewhere is now "Institutional Debt."
+ */
+export function getSecrets(): Secrets {
+  return loadSecrets();
+}
+
+export const secrets: Secrets = new Proxy({} as Secrets, {
+  get(_target, prop) {
+    return loadSecrets()[prop as keyof Secrets];
+  },
+});
 
 /**
  * Supports rotation by allowing comma-separated secrets in one env var.
  * Returns [primary, ...fallbacks]
  */
 export function getRotatingSecrets(key: keyof Secrets): string[] {
-  const value = secrets[key];
+  const value = loadSecrets()[key];
   return value
     .split(",")
     .map((s) => s.trim())

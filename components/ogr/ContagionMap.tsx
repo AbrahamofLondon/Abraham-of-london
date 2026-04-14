@@ -310,8 +310,8 @@ function deriveContagionFromCanonical(
       
       if (mode.propagationPath && mode.propagationPath.length >= 2) {
         vectors.push({
-          source: mode.propagationPath[0],
-          target: mode.propagationPath[1],
+          source: mode.propagationPath[0] ?? mode.mode,
+          target: mode.propagationPath[1] ?? "Systemic Stability",
           impact: mode.systemicImpact || mode.severity,
           severity,
           confidence: mode.probability / 100,
@@ -352,8 +352,8 @@ function deriveContagionFromCanonical(
   if (dominantDomains && dominantDomains.length >= 2 && vectors.length < 2) {
     for (let i = 0; i < Math.min(dominantDomains.length - 1, 3); i++) {
       vectors.push({
-        source: dominantDomains[i],
-        target: dominantDomains[i + 1],
+        source: dominantDomains[i] ?? "",
+        target: dominantDomains[i + 1] ?? "",
         impact: 40 + (i * 10),
         severity: i === 0 ? "high" : i === 1 ? "moderate" : "low",
         confidence: 0.72 - (i * 0.05),
@@ -638,8 +638,8 @@ export function ContagionMap({
                     ? `Constitutional evaluation detected ${selectedMitigation.impact}% systemic impact. 
                        Route: ${selectedMitigation.constitutionalDecision.route} with ${(selectedMitigation.confidence * 100).toFixed(0)}% confidence.`
                     : `Direct contagion detected at ${selectedMitigation.impact}%. Immediate isolation of origin node is advised.`}
-                  {selectedMitigation.constitutionalDecision?.disqualifiersTriggered.length > 0 && (
-                    <> Disqualifiers: {selectedMitigation.constitutionalDecision.disqualifiersTriggered.slice(0, 2).join(", ")}.</>
+                  {(selectedMitigation.constitutionalDecision?.disqualifiersTriggered?.length ?? 0) > 0 && (
+                    <> Disqualifiers: {selectedMitigation.constitutionalDecision!.disqualifiersTriggered.slice(0, 2).join(", ")}.</>
                   )}
                 </p>
               </div>

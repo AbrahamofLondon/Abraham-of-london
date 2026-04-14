@@ -2,7 +2,7 @@ import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { getContentlayerData } from "@/lib/content/server";
+import { getAllEvents } from "@/lib/content/server";
 import { normalizeSlug, sanitizeData } from "@/lib/content/shared";
 import { Shield, Clock, MapPin } from "lucide-react";
 
@@ -33,34 +33,44 @@ function safeParseDate(input: string | null): Date | null {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
-    const data = getContentlayerData();
+    const allEventDocs = getAllEvents();
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-    const events = (data.allEvents || []).map((e: any) => {
+    type RawEvent = {
+      _id: string; slug: string; href: string; title: string;
+      excerpt: string | null; eventDate: string | null; location: string | null;
+      mode: string; __date: Date | null; __past: boolean;
+    };
+
+    const events: RawEvent[] = allEventDocs.map((e: any) => {
       const slug = normalizeSlug(e.slugComputed || e.slug || "").replace(/^events\//, "");
-      const dateStr = e.eventDate ?? e.date ?? null;
+      const dateStr: string | null = e.eventDate ?? e.date ?? null;
       const parsed = safeParseDate(dateStr);
-      
+
       return {
         _id: String(e._id ?? slug),
         slug,
         href: `/events/${slug}`,
         title: String(e.title ?? "Untitled"),
-        excerpt: e.excerpt ?? e.description ?? null,
+        excerpt: (e.excerpt ?? e.description ?? null) as string | null,
         eventDate: dateStr,
-        location: e.location ?? null,
+        location: (e.location ?? null) as string | null,
         mode: e.mode ?? "in-person",
         __date: parsed,
         __past: parsed ? parsed.getTime() < today : false
       };
     });
 
+    function toEventItem(e: RawEvent): EventItem {
+      return { _id: e._id, slug: e.slug, title: e.title, excerpt: e.excerpt, eventDate: e.eventDate, location: e.location, href: e.href, mode: e.mode as EventItem["mode"] };
+    }
+
     return {
       props: sanitizeData({
-        upcoming: events.filter(e => e.__date && !e.__past).sort((a,b) => a.__date!.getTime() - b.__date!.getTime()),
-        past: events.filter(e => e.__date && e.__past).sort((a,b) => b.__date!.getTime() - a.__date!.getTime()),
-        tbc: events.filter(e => !e.__date).sort((a,b) => a.title.localeCompare(b.title))
+        upcoming: events.filter((e: RawEvent) => e.__date && !e.__past).sort((a: RawEvent, b: RawEvent) => a.__date!.getTime() - b.__date!.getTime()).map(toEventItem),
+        past: events.filter((e: RawEvent) => e.__date && e.__past).sort((a: RawEvent, b: RawEvent) => b.__date!.getTime() - a.__date!.getTime()).map(toEventItem),
+        tbc: events.filter((e: RawEvent) => !e.__date).sort((a: RawEvent, b: RawEvent) => a.title.localeCompare(b.title)).map(toEventItem)
       }),
       revalidate: 1800,
     };

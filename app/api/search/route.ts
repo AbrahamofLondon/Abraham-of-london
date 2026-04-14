@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import OpenAI from "openai";
 import { getServerSession } from "next-auth/next";
-import { authOptions, AoLClaims } from "@/lib/auth";
+import { authOptions } from "@/lib/auth";
+import type { AoLClaims } from "@/types/auth";
 import { Session } from "next-auth";
 
 /**
@@ -15,7 +16,17 @@ interface ExtendedSession extends Session {
   aol?: AoLClaims;
 }
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+
+  if (!apiKey) {
+    throw new Error(
+      "Missing credentials. Please pass an apiKey, or set the OPENAI_API_KEY environment variable.",
+    );
+  }
+
+  return new OpenAI({ apiKey });
+}
 
 export async function POST(req: Request) {
   try {
@@ -40,7 +51,7 @@ export async function POST(req: Request) {
     if (!query) return NextResponse.json({ error: "Query Required" }, { status: 400 });
 
     // 2. Generate Query Vector
-    const embeddingResponse = await openai.embeddings.create({
+    const embeddingResponse = await getOpenAIClient().embeddings.create({
       model: "text-embedding-3-small",
       input: query,
     });

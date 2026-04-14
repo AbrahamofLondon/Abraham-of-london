@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* ============================================================================
    FILE: lib/server/diagnostics/retention.ts
    PURPOSE:
@@ -10,7 +12,7 @@ import { prisma } from "@/lib/prisma";
 export async function runDiagnosticsRetentionSweep() {
   const now = new Date();
 
-  const expiredReports = await prisma.diagnosticReport.findMany({
+  const expiredReports = await prisma.diagnosticArtifact.findMany({
     where: {
       revokedAt: null,
       expiresAt: { lte: now },
@@ -21,11 +23,11 @@ export async function runDiagnosticsRetentionSweep() {
   let revoked = 0;
 
   for (const report of expiredReports) {
-    await prisma.diagnosticReport.update({
+    await prisma.diagnosticArtifact.update({
       where: { id: report.id },
       data: {
         revokedAt: now,
-        revocationReason: "Retention expiry",
+        revokedReason: "Retention expiry",
       },
     });
     revoked++;
@@ -45,3 +47,4 @@ export async function runDiagnosticsRetentionSweep() {
     runAt: now.toISOString(),
   };
 }
+

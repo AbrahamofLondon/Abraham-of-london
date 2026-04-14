@@ -33,13 +33,13 @@ export interface UpdateUserInput {
 const ACCESS_RANK: Record<UserTier, number> = {
   public: 0,
   member: 1,
-  "inner-circle": 2,
-  restricted: 3,     // ✅ Added
+  inner_circle: 2,
+  restricted: 3,
   client: 4,
   legacy: 5,
   architect: 6,
   owner: 7,
-  "top-secret": 8,   // ✅ Adjusted to Level 8
+  top_secret: 8,
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -293,13 +293,13 @@ export class UserService {
     const labels: Record<UserTier, string> = {
       public: "Public Access",
       member: "Member Access",
-      "inner-circle": "Inner Circle Access",
-      restricted: "Restricted Access",     // ✅ FIXED
+      inner_circle: "Inner Circle Access",
+      restricted: "Restricted Access",
       client: "Client Access",
       legacy: "Legacy Access",
       architect: "Architect Access",
       owner: "Owner Access",
-      "top-secret": "Top Secret Access",
+      top_secret: "Top Secret Access",
     };
 
     return labels[tier] || "Unknown Access";

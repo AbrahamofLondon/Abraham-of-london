@@ -1,4 +1,5 @@
 // lib/content/loaders.ts
+import { getAllCombinedDocs } from "@/lib/content/server";
 
 export function getDocsByPrefix(prefix: string) {
   const docs = getAllCombinedDocs();

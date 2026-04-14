@@ -32,8 +32,8 @@ export function hashIp(ip: string): string {
 function toDbSeverity(sev: DenySeverity): AuditSeverity {
   switch (sev) {
     case "critical": return "critical";
-    case "high": return "high";
-    case "medium": return "warning";
+    case "high": return "error";
+    case "medium": return "warn";
     default: return "info";
   }
 }
@@ -60,11 +60,7 @@ export async function denyIp(
       severity: toDbSeverity(severity),
       ipAddress: norm,
       // FIXED: Changed 'details' to 'metadata' to match your Prisma schema
-      metadata: { 
-        reason, 
-        severity, 
-        ipHash 
-      },
+      metadata: JSON.stringify({ reason, severity, ipHash }),
       status: "warning"
     },
   });
@@ -90,7 +86,8 @@ export async function isIpDenied(ip: string): Promise<boolean> {
 
   if (!row) return false;
 
-  const metadata: any = row.metadata ?? {};
+  let metadata: any = {};
+  try { metadata = row.metadata ? JSON.parse(row.metadata) : {}; } catch { metadata = {}; }
   // Verify hash integrity
   if (metadata.ipHash !== ipHash) return false;
 
@@ -116,9 +113,9 @@ export async function recordDenylistHit(ip: string): Promise<void> {
       resourceType: "security",
       resourceId: "denylist",
       status: "warning",
-      severity: "warning", 
+      severity: "warn",
       ipAddress: norm,
-      metadata: { ipHash }, // FIXED: details -> metadata
+      metadata: JSON.stringify({ ipHash }),
     },
   });
 }

@@ -14,7 +14,7 @@ export default async function AuditEntryPage({ params }: { params: { id: string 
         select: {
           id: true,
           title: true,
-          description: true,
+          objective: true,
           status: true,
         }
       }
@@ -64,7 +64,7 @@ export default async function AuditEntryPage({ params }: { params: { id: string 
             {participant.campaign.title}
           </h1>
           <p className="text-sm text-neutral-500 leading-relaxed font-serif italic">
-            {participant.campaign.description || "Calibration of institutional alignment for the current operational window."}
+            {participant.campaign.objective || "Calibration of institutional alignment for the current operational window."}
           </p>
         </section>
 

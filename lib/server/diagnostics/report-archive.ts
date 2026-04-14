@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/report-archive.ts */
 
 import crypto from "crypto";

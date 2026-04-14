@@ -1,8 +1,10 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 import { prisma } from "@/lib/prisma.server";
+import { DiagnosticStorageProvider } from "@prisma/client";
 
 export async function upsertArtifactDB(record: {
   diagnosticRef: string;
+  diagnosticId?: string | null;
   reportId: string;
   version: string;
   fileName: string;
@@ -15,6 +17,23 @@ export async function upsertArtifactDB(record: {
   etag?: string | null;
   createdBy?: string | null;
 }) {
+  const resolvedDiagnosticId = record.diagnosticId || record.reportId;
+  const provider = record.storageProvider as DiagnosticStorageProvider;
+
+  const sharedData = {
+    reportId: record.reportId,
+    version: record.version,
+    fileName: record.fileName,
+    mimeType: record.mimeType,
+    byteLength: record.byteLength,
+    sha256: record.sha256,
+    storageProvider: provider,
+    objectKey: record.objectKey,
+    bucket: record.bucket ?? null,
+    etag: record.etag ?? null,
+    createdBy: record.createdBy ?? null,
+  };
+
   return prisma.diagnosticArtifact.upsert({
     where: {
       diagnosticRef_version_kind: {
@@ -23,11 +42,11 @@ export async function upsertArtifactDB(record: {
         kind: "pdf",
       },
     },
-    update: {
-      ...record,
-    },
+    update: sharedData,
     create: {
-      ...record,
+      ...sharedData,
+      diagnosticRef: record.diagnosticRef,
+      diagnosticId: resolvedDiagnosticId,
       kind: "pdf",
     },
   });

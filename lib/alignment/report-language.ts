@@ -33,10 +33,10 @@ function domainLabel(domain: AlignmentDomain): string {
 
 function domainList(domains: AlignmentDomain[]): string {
   if (domains.length === 0) return "no major weakness";
-  if (domains.length === 1) return domainLabel(domains[0]);
-  if (domains.length === 2) return `${domainLabel(domains[0])} and ${domainLabel(domains[1])}`;
+  if (domains.length === 1) return domainLabel(domains[0]!);
+  if (domains.length === 2) return `${domainLabel(domains[0]!)} and ${domainLabel(domains[1]!)}`;
   const labels = domains.map(domainLabel);
-  return `${labels.slice(0, -1).join(", ")}, and ${labels.at(-1)}`;
+  return `${labels.slice(0, -1).join(", ")}, and ${labels.at(-1)!}`;
 }
 
 function bestDomain(assessment: AssessmentLike): AlignmentDomain | null {

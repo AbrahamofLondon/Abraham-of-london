@@ -64,14 +64,18 @@ export type CleanupResult = {
   };
 };
 
-const DOWNLOAD_TOKEN_SECRET = String(
-  process.env.DOWNLOAD_TOKEN_SECRET || process.env.NEXTAUTH_SECRET || "",
-).trim();
+function getDownloadTokenSecret(): string {
+  const secret = String(
+    process.env.DOWNLOAD_TOKEN_SECRET || process.env.NEXTAUTH_SECRET || "",
+  ).trim();
 
-if (!DOWNLOAD_TOKEN_SECRET) {
-  throw new Error(
-    "[DOWNLOAD_TOKEN] Missing DOWNLOAD_TOKEN_SECRET or NEXTAUTH_SECRET",
-  );
+  if (!secret) {
+    throw new Error(
+      "[DOWNLOAD_TOKEN] Missing DOWNLOAD_TOKEN_SECRET or NEXTAUTH_SECRET",
+    );
+  }
+
+  return secret;
 }
 
 // -----------------------------------------------------------------------------
@@ -103,7 +107,7 @@ function base64UrlDecode(input: string): string {
 
 function sign(input: string): string {
   return base64UrlEncode(
-    crypto.createHmac("sha256", DOWNLOAD_TOKEN_SECRET).update(input).digest(),
+    crypto.createHmac("sha256", getDownloadTokenSecret()).update(input).digest(),
   );
 }
 
@@ -338,7 +342,7 @@ export async function createDownloadToken(params: {
         expiresAt,
         maxDownloads,
         usedCount: 0,
-        metadata: toPrismaJson(mergedMetadata),
+        metadata: JSON.stringify(mergedMetadata),
       },
     });
 

@@ -34,19 +34,19 @@ export const TIER_NAME_MAP: Record<string, Tier> = {
   member: "member",
   members: "member",
 
-  "inner-circle": "inner-circle",
-  innercircle: "inner-circle",
-  inner_circle: "inner-circle",
-  ic: "inner-circle",
+  "inner-circle": "inner_circle",
+  innercircle: "inner_circle",
+  inner_circle: "inner_circle",
+  ic: "inner_circle",
 
   // Routes legacy restricted terms to the new dedicated 'restricted' tier
-  restricted: "restricted", 
+  restricted: "restricted",
   confidential: "restricted",
   protected: "restricted",
-  
+
   premium: "client",
   private: "client",
-  "inner-circle-plus": "inner-circle",
+  "inner-circle-plus": "inner_circle",
 
   elite: "legacy",
   "inner-circle-elite": "legacy",
@@ -56,13 +56,13 @@ export const TIER_NAME_MAP: Record<string, Tier> = {
   owner: "owner",
 
   // ✅ Add top-secret mappings
-  "top-secret": "top-secret",
-  topsecret: "top-secret",
-  top_secret: "top-secret",
-  tops: "top-secret",
-  tsc: "top-secret",
-  hardened: "top-secret",
-  sovereign: "top-secret",
+  "top-secret": "top_secret",
+  topsecret: "top_secret",
+  top_secret: "top_secret",
+  tops: "top_secret",
+  tsc: "top_secret",
+  hardened: "top_secret",
+  sovereign: "top_secret",
 };
 
 export const resolveTierName = (displayName: string): Tier => {
@@ -211,13 +211,13 @@ export const getTierDescription = (tier: Tier | string): string => {
   const descriptions: Record<Tier, string> = {
     public: "Public content accessible to all visitors",
     member: "Member-only content",
-    "inner-circle": "Inner Circle membership content",
-    restricted: "Restricted content requiring elevated clearance", // ✅ FIXED
+    inner_circle: "Inner Circle membership content",
+    restricted: "Restricted content requiring elevated clearance",
     client: "Client-tier content and resources",
     legacy: "Legacy-tier content and archives",
     architect: "Architect-tier administrative and privileged content",
     owner: "Owner-tier sovereign access",
-    "top-secret": "TOP SECRET - Highest clearance required for vault access",
+    top_secret: "TOP SECRET - Highest clearance required for vault access",
   };
   return descriptions[t] || "Access level not defined";
 };

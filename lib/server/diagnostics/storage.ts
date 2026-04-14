@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/storage.ts */
 /* Pages-router safe diagnostic storage facade */
 

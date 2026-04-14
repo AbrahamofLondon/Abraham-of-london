@@ -121,7 +121,7 @@ function qKey(phase: "leader" | "reality", domainId: string, idx: number) {
 }
 
 function domainPct(scores: ScoreMap, phase: "leader" | "reality", domainId: string): number {
-  const vals = [0, 1, 2].map(i => scores[qKey(phase, domainId, i)] ?? 0);
+  const vals: number[] = [0, 1, 2].map(i => (scores[qKey(phase, domainId, i)] ?? 0) as number);
   const answered = vals.filter(v => v > 0);
   if (!answered.length) return 0;
   return Math.round((answered.reduce((s, v) => s + v, 0) / (answered.length * 5)) * 100);
@@ -499,6 +499,7 @@ export default function TeamAssessmentPage() {
   const [isSubmitting, setIsSubmitting]   = React.useState(false);
   const [direction,    setDirection]      = React.useState(1);
   const [purposePct,   setPurposePct]     = React.useState<number | null>(null);
+  const [subjectId,    setSubjectId]      = React.useState("");
 
   React.useEffect(() => {
     try {
@@ -506,6 +507,7 @@ export default function TeamAssessmentPage() {
       if (raw) {
         const p = JSON.parse(raw);
         if (typeof p?.percent === "number") setPurposePct(p.percent);
+        if (typeof p?.subjectId === "string") setSubjectId(p.subjectId);
       }
     } catch { /* ignore */ }
   }, []);
@@ -518,7 +520,7 @@ export default function TeamAssessmentPage() {
 
   function ovPct(p: "leader" | "reality"): number {
     const scores = p === "leader" ? leaderScores : realityScores;
-    const all = DOMAINS.flatMap(d => [0, 1, 2].map(idx => scores[qKey(p, d.id, idx)] ?? 0));
+    const all: number[] = DOMAINS.flatMap(d => [0, 1, 2].map(idx => (scores[qKey(p, d.id, idx)] ?? 0) as number));
     const ans = all.filter(v => v > 0);
     if (!ans.length) return 0;
     return Math.round((ans.reduce((s, v) => s + v, 0) / (ans.length * 5)) * 100);
@@ -550,7 +552,34 @@ export default function TeamAssessmentPage() {
       summary: { totalScore, maxScore, pct, severity: severityFromPct(pct), band: bandFromPct(pct), sectionScores: DOMAINS.map(d => buildSectionScore({ sectionId: d.id, title: d.label, answers: answers.filter(a => a.sectionId === d.id) })) },
       metadata: { ui: "team-assessment", teamName: identity.teamName || null, nextStepHref: "/diagnostics/enterprise-assessment", nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM", overallLeader, overallReality, overallGap: overallLeader - overallReality, fragilityStatus: fragility.status, purposeAlignmentPct: purposePct },
     });
-    setSubmitResult(res); setIsSubmitting(false);
+    setSubmitResult(res);
+
+    // Handoff to /diagnostics/enterprise-assessment (reads `team-assessment-result`
+    // and extracts `overallReality` + related metrics). Canonical chain per
+    // CLAUDE_SESSION_LOG.md section 4: purpose-alignment-result → team-assessment-result
+    // → enterprise-assessment-result → executive-report-result → strategy-room-result.
+    try {
+      sessionStorage.setItem(
+        "team-assessment-result",
+        JSON.stringify({
+          ...(res || {}),
+          overallReality,
+          overallLeader,
+          overallGap: overallLeader - overallReality,
+          fragilityStatus: fragility.status,
+          totalScore,
+          maxScore,
+          pct,
+          subjectId,
+          nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM",
+          purposeAlignmentPct: purposePct,
+        }),
+      );
+    } catch {
+      /* sessionStorage unavailable (private mode / SSR) — handoff degrades gracefully */
+    }
+
+    setIsSubmitting(false);
   }
 
   return (

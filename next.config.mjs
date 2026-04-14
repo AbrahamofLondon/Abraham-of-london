@@ -22,6 +22,12 @@ const nextConfig = {
   typescript: {
     // Type errors are tracked via tsc --noEmit in CI.
     // Build compilation succeeds — only the strict checker blocks.
+    //
+    // RETIREMENT PATH: This flag stays true through the recovery merge and
+    // the schema PR chain. It is flipped to false in the final PR of
+    // SCHEMA-PR-CHAIN-CHECKLIST-01 (PR 4), after tier/identity/status
+    // honesty lands end-to-end. Any residual errors at that point must map
+    // to the explicitly-deferred non-chain debt surfaces named in DEBT.md.
     ignoreBuildErrors: true,
   },
 

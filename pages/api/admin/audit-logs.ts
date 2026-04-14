@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { auditLogger } from "@/lib/server/db/audit";
+import { auditLogger } from "@/lib/audit/audit-logger";
 
 type LegacyUser = {
   role?: string | null;
@@ -36,7 +36,7 @@ export default async function handler(
   }
 
   try {
-    const logs = await auditLogger.getLatestLogs(100);
+    const logs = await auditLogger.query({ limit: 100 });
     return res.status(200).json({ logs });
   } catch (error) {
     console.error("[AUDIT_LOG_ERROR] Retrieval Failure:", error);

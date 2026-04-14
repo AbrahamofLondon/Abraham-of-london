@@ -1,7 +1,7 @@
 /* pages/canon/[slug].tsx */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext, NextPage } from "next";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
@@ -169,7 +169,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   const slug = canonBareSlug(params?.slug);
   if (!slug) return { notFound: true };
 

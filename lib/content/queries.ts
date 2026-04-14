@@ -10,7 +10,7 @@ async function loadGenerated(): Promise<any> {
     return await import("contentlayer/generated");
   } catch {
     // Fallback for some Windows/contentlayer2 setups
-    return await import("../../.contentlayer/generated");
+    return await import("contentlayer/generated");
   }
 }
 

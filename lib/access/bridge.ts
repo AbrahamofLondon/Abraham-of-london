@@ -30,22 +30,22 @@ const AOL_TO_ACCESS: Record<string, AccessTier> = {
   member: "member",
   members: "member",
   basic: "member",
-  "inner-circle": "inner-circle",
-  innercircle: "inner-circle",
-  inner_circle: "inner-circle",
-  ic: "inner-circle",
+  "inner-circle": "inner_circle",
+  innercircle: "inner_circle",
+  inner_circle: "inner_circle",
+  ic: "inner_circle",
 
   // “Plus/Pro” historically meant “above member”
   // In your new ladder, that belongs in inner-circle.
-  "inner-circle-plus": "inner-circle",
-  "inner-circle-pro": "inner-circle",
+  "inner-circle-plus": "inner_circle",
+  "inner-circle-pro": "inner_circle",
 
   // ─────────────────────────
   // Old “Verified” era
   // ─────────────────────────
-  verified: "inner-circle",
-  verification: "inner-circle",
-  "verified-member": "inner-circle",
+  verified: "inner_circle",
+  verification: "inner_circle",
+  "verified-member": "inner_circle",
 
   // ─────────────────────────
   // Old “Restricted / Premium / Private” era

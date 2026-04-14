@@ -81,7 +81,7 @@ export default async function handler(
       where: { id: intakeId },
       data: {
         readinessScore: finalScore,
-        payload: toJsonValue(mergedPayload),
+        payload: JSON.stringify(mergedPayload),
       },
     });
 

@@ -178,13 +178,14 @@ export default async function handler(
         eventType: "artifact_downloaded",
         version: artifact.version,
         actor: email,
-        metadata: {
+        diagnosticId: artifact.diagnosticId,
+        metadata: JSON.stringify({
           artifactId: artifact.id,
           ip,
           objectKey: artifact.objectKey,
           storageProvider: artifact.storageProvider,
           byteLength: artifact.byteLength,
-        },
+        }),
       },
     });
 

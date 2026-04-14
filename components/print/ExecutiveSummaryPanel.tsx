@@ -189,11 +189,11 @@ function splitLeadSentence(value: string): { lead: string; rest: string } {
   }
 
   if (sentences.length === 1) {
-    return { lead: capitalizeFirst(sentences[0]), rest: "" };
+    return { lead: capitalizeFirst(sentences[0] ?? ""), rest: "" };
   }
 
-  const first = sentences[0];
-  const second = sentences[1] || "";
+  const first = sentences[0] ?? "";
+  const second = sentences[1] ?? "";
 
   if (first.length < 58 && second) {
     return {

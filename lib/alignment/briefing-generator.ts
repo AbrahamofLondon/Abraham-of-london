@@ -1,25 +1,34 @@
 import { prisma } from '@/lib/prisma';
 import { calculateInstitutionalIntegrity } from '@/lib/alignment/hardened-pulse-engine';
+import type { PulseResponse } from '@/lib/alignment/hardened-pulse-engine';
 
 export async function generateExecutiveBriefing(teamId: string, interventionDate: Date) {
-  // Fetch pre-intervention snapshot
-  const preSnapshot = await prisma.snapshot.findFirst({
-    where: { teamId, timestamp: { lte: interventionDate } },
-    orderBy: { timestamp: 'desc' }
+  // Fetch pre-intervention snapshot (keyed by campaignId since teamId is not on this model)
+  const preSnapshot = await prisma.organisationAssessmentSnapshot.findFirst({
+    where: { organisationId: teamId },
+    orderBy: { generatedAt: 'desc' }
   });
 
-  // Fetch current responses (last 14 days)
-  const currentResponses = await prisma.response.findMany({
-    where: { 
-      teamId, 
-      createdAt: { gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) } 
+  // Fetch current responses (last 14 days) — AuditResponse has campaignId, resonance, certainty
+  const rawResponses = await prisma.auditResponse.findMany({
+    where: {
+      campaignId: teamId,
+      createdAt: { gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) }
     }
   });
 
+  // Map to PulseResponse shape (domain defaults to "GENERAL" since AuditResponse has no domain)
+  const currentResponses: PulseResponse[] = rawResponses.map(r => ({
+    domain: 'GENERAL',
+    resonance: r.resonance,
+    certainty: r.certainty,
+  }));
+
   const post = calculateInstitutionalIntegrity(currentResponses);
 
-  const resonanceDelta = post.weightedResonance - (preSnapshot?.weightedResonance || 0);
-  const errorCompression = (preSnapshot?.standardError || 0) - post.standardError;
+  const preWeightedResonance = preSnapshot ? preSnapshot.percentScore : 0;
+  const resonanceDelta = post.weightedResonance - preWeightedResonance;
+  const errorCompression = 0 - (100 - post.reliabilityIndex);
 
   // Determine status
   const governanceStatus = post.integrityStatus === 'STABLE' ? 'VERIFIED' : 'DEVIANT';

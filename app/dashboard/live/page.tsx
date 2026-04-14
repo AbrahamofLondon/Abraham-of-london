@@ -1,3 +1,5 @@
+// DEPRECATED: orphaned dashboard — no inbound references.
+// Pending deletion in cleanup pass. Do not add new logic here.
 export const dynamic = "force-dynamic";
 // app/dashboard/live/page.tsx
 import type { Metadata } from "next";

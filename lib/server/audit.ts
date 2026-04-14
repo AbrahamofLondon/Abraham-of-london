@@ -105,7 +105,7 @@ export interface AuditEvent {
   status: LegacyAuditStatus;
 
   // legacy severities: low|medium|high|critical
-  severity?: "low" | "medium" | "high" | "critical";
+  severity?: "low" | "medium" | "high" | "critical" | "warn" | "error" | "debug";
 
   requestId?: string | null;
   sessionId?: string | null;
@@ -138,8 +138,9 @@ function safeTags(v: unknown): string[] {
 function normalizeSeverity(s?: AuditEvent["severity"]): AuditSeverity {
   const v = safeStr(s).toLowerCase();
   if (v === "critical") return "critical";
-  if (v === "high") return "high";
-  if (v === "medium" || v === "warning" || v === "warn") return "warning";
+  if (v === "high" || v === "error") return "error";
+  if (v === "medium" || v === "warning" || v === "warn") return "warn";
+  if (v === "debug") return "debug";
   return "info";
 }
 

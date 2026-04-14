@@ -68,10 +68,13 @@ export default async function handler(
     // 5. Calculate resonance from brief IDs (if provided)
     if (ids && Array.isArray(ids) && ids.length > 0) {
       try {
-        const resonance = await calculateResonance(ids, {
-          includeConfidence: true,
-          calculateBand: true,
-        });
+        const resonance = await calculateResonance(
+          ids.map((id) => ({ id })),
+          {
+            includeConfidence: true,
+            calculateBand: true,
+          },
+        );
         response.resonance = resonance;
       } catch (error) {
         console.error("[OGR_SIM] Resonance calculation failed:", error);
@@ -131,10 +134,13 @@ export async function batchOGRSimulation(
 
       if (ids && ids.length > 0) {
         try {
-          response.resonance = await calculateResonance(ids, {
-            includeConfidence: true,
-            calculateBand: true,
-          });
+          response.resonance = await calculateResonance(
+            ids.map((id) => ({ id })),
+            {
+              includeConfidence: true,
+              calculateBand: true,
+            },
+          );
         } catch (error) {
           console.error("[OGR_SIM_BATCH] Resonance failed:", error);
         }

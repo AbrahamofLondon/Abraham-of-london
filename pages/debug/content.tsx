@@ -178,8 +178,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     return { notFound: true };
   }
 
-  const data = await getContentlayerData();
-  assertContentlayerHasDocs(data);
+  await getContentlayerData();
+  assertContentlayerHasDocs();
   
   const all = getAllContentlayerDocs() ?? [];
   const published = getPublishedDocuments() ?? [];
@@ -196,7 +196,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   // 2) Collision detection (slug across kinds)
   const slugMap = new Map<string, string[]>();
   for (const d of all) {
-    const slug = String(normalizeSlug(d) ?? "");
+    const slug = String(normalizeSlug(String(d.slug ?? "")) ?? "");
     const kind = String(getDocKind(d) ?? "document");
     const arr = slugMap.get(slug) ?? [];
     arr.push(kind);
@@ -204,10 +204,13 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }
   const dupes = [...slugMap.entries()].filter(([, kinds]) => new Set(kinds).size > 1);
   if (dupes.length > 0) {
-    const [slug, kinds] = dupes[0];
-    warnings.push(
-      `COLLISION: Duplicate slugs found across collections. Example: "${slug}" exists in both [${[...new Set(kinds)].join(", ")}].`
-    );
+    const first = dupes[0];
+    if (first) {
+      const [slug, kinds] = first;
+      warnings.push(
+        `COLLISION: Duplicate slugs found across collections. Example: "${slug}" exists in both [${[...new Set(kinds)].join(", ")}].`
+      );
+    }
   }
 
   // 3) Rows per kind

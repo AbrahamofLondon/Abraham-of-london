@@ -1,142 +1,203 @@
-/* components/homepage/EngagementLanes.tsx — Route-normalized, production-safe */
+/* components/homepage/EngagementLanes.tsx
+   Design: Institutional Monumentalism — sharp panels, softGold, correct weights
+
+   Previous version had:
+   - font-bold on eyebrow and lane subtitle labels
+   - amber-500 on eyebrow, subtitle, and icon hover
+   - text-zinc-300/500 token system — wrong
+   - rounded-full lane indicator bars
+   - "P-01" through "P-04" footer tags — invented bureaucracy
+   - hover:bg-zinc-950 — wrong token
+   - group-hover:text-amber-50 — wrong token
+   - expanding h-px line animation — performing drama
+   - "Four active lanes" counter with indicator dots — decorative
+
+   Rebuilt: Four routes stated plainly. Sharp card system.
+   Each lane is a factual destination, not a performed category.
+*/
+
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Globe, Lock, BookOpen, Landmark } from "lucide-react";
+import { ArrowRight, Globe, Lock, BookOpen, Landmark } from "lucide-react";
+
+const GOLD = "#C9A96E";
 
 type Lane = {
-  key: "media" | "education" | "private" | "institutional";
+  key: string;
   title: string;
-  subtitle: string;
+  tag: string;
   href: string;
   description: string;
-  icon: React.ElementType;
+  Icon: React.ElementType;
 };
 
 const LANES: Lane[] = [
   {
-    key: "media",
-    title: "Media",
-    subtitle: "PUBLIC SIGNAL",
-    href: "/media",
-    icon: Globe,
-    description:
-      "Commentary, interviews, and public-facing narrative built for clarity under scrutiny.",
+    key:         "media",
+    title:       "Media",
+    tag:         "Public signal",
+    href:        "/media",
+    Icon:        Globe,
+    description: "Commentary, interviews, and public-facing narrative built for clarity under scrutiny.",
   },
   {
-    key: "education",
-    title: "Education",
-    subtitle: "FORMATION & RESEARCH",
-    href: "/education-research",
-    icon: BookOpen,
-    description:
-      "Structured learning, disciplined inquiry, and research-led intellectual formation.",
+    key:         "education",
+    title:       "Education",
+    tag:         "Formation & research",
+    href:        "/education-research",
+    Icon:        BookOpen,
+    description: "Structured learning, disciplined inquiry, and research-led intellectual formation.",
   },
   {
-    key: "private",
-    title: "Private",
-    subtitle: "SELECT MANDATES",
-    href: "/private-clients",
-    icon: Lock,
-    description:
-      "Confidential advisory for principals, founders, and private strategic work.",
+    key:         "private",
+    title:       "Private",
+    tag:         "Select mandates",
+    href:        "/private-clients",
+    Icon:        Lock,
+    description: "Confidential advisory for principals, founders, and private strategic work.",
   },
   {
-    key: "institutional",
-    title: "Institutional",
-    subtitle: "GOVERNANCE & POLICY",
-    href: "/institutional",
-    icon: Landmark,
-    description:
-      "Institution design, governance architecture, and organisational advisory.",
+    key:         "institutional",
+    title:       "Institutional",
+    tag:         "Governance & policy",
+    href:        "/institutional",
+    Icon:        Landmark,
+    description: "Institution design, governance architecture, and organisational advisory.",
   },
 ];
 
-export default function EngagementLanes({
-  compact = true,
-}: {
-  compact?: boolean;
-}) {
+export default function EngagementLanes({ compact = true }: { compact?: boolean }) {
   return (
-    <section className="w-full bg-black text-white">
-      <div className={compact ? "p-1" : "mx-auto max-w-7xl px-6 py-20"}>
-        <div className="mb-12 flex flex-col items-start justify-between gap-8 border-b border-white/10 pb-10 md:flex-row md:items-end">
-          <div className="max-w-2xl">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.36em] text-amber-500">
-              Engagement
-            </span>
-            <h2 className="mt-4 font-serif text-4xl tracking-tight text-white md:text-5xl">
-              Modes of access
-            </h2>
-            <p className="mt-6 max-w-lg text-sm leading-relaxed text-zinc-300">
-              Different mandates require different operating environments. Choose
-              the lane that matches the work.
-            </p>
-          </div>
-
-          <div className="text-right">
-            <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-zinc-600">
-              Four active lanes
-            </div>
-            <div className="flex justify-end gap-1">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={`lane-indicator-${i}`}
-                  className="h-1 w-6 overflow-hidden rounded-full bg-amber-500/20"
-                >
-                  <div className="h-full w-full bg-amber-500/40" />
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className={compact ? "" : "mx-auto max-w-7xl px-6 py-20"}>
+      {/* Header */}
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+          <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
+          <span style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+            color: `${GOLD}BF`,
+          }}>
+            Engagement
+          </span>
         </div>
+        <h2 style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "clamp(1.6rem, 2.8vw, 2.4rem)",
+          lineHeight: 1.0, letterSpacing: "-0.025em",
+          color: "rgba(255,255,255,0.88)",
+          marginBottom: "0.75rem",
+        }}>
+          Four lanes. Each with a distinct function.
+        </h2>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+          fontWeight: 300, fontSize: "1rem", lineHeight: 1.70,
+          color: "rgba(255,255,255,0.38)",
+          maxWidth: "44ch",
+        }}>
+          Different mandates require different operating environments.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 gap-px border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
-          {LANES.map((lane, index) => {
-            const Icon = lane.icon;
+      {/* Lane grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+        {LANES.map((lane, i) => {
+          const { Icon } = lane;
+          const isLast = i === LANES.length - 1;
 
-            return (
-              <Link
-                key={lane.key}
-                href={lane.href}
-                className="group relative flex min-h-[320px] flex-col bg-black p-8 transition-all duration-500 hover:bg-zinc-950"
-              >
-                <div className="mb-12 flex items-start justify-between">
-                  <div className="border border-white/5 bg-white/[0.02] p-3 transition-colors group-hover:border-amber-500/30">
-                    <Icon className="h-5 w-5 text-zinc-500 transition-colors group-hover:text-amber-500" />
+          return (
+            <Link
+              key={lane.key}
+              href={lane.href}
+              className="group block transition-colors duration-300"
+              style={{
+                backgroundColor: "rgb(5 5 7)",
+                borderRight: !isLast ? "1px solid rgba(255,255,255,0.07)" : "none",
+                position: "relative",
+              }}
+              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgb(7 7 11)"}
+              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgb(5 5 7)"}
+            >
+              {/* Gold thread on hover */}
+              <div
+                className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                style={{ background: `linear-gradient(to right, transparent, ${GOLD}28, transparent)` }}
+              />
+
+              <div style={{ padding: "2rem", display: "flex", flexDirection: "column", minHeight: "280px" }}>
+
+                {/* Icon */}
+                <div style={{
+                  width: "34px", height: "34px",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  backgroundColor: "rgba(255,255,255,0.018)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  marginBottom: "auto",
+                  transition: "border-color 300ms ease",
+                }}
+                className="group-hover:[border-color:rgba(201,169,110,0.22)]"
+                >
+                  <Icon
+                    style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.32)" }}
+                    className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]"
+                  />
+                </div>
+
+                {/* Content — bottom-anchored */}
+                <div style={{ marginTop: "3rem" }}>
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase",
+                    color: `${GOLD}80`, marginBottom: "0.45rem",
+                  }}>
+                    {lane.tag}
                   </div>
 
-                  <ArrowUpRight className="h-4 w-4 text-zinc-800 transition-all group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-amber-500" />
-                </div>
-
-                <div className="mt-auto">
-                  <span className="mb-2 block font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-amber-500/60">
-                    {lane.subtitle}
-                  </span>
-
-                  <h3 className="font-serif text-3xl text-white transition-colors group-hover:text-amber-50">
+                  <h3
+                    className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,1)]"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "1.55rem", lineHeight: 1.06,
+                      letterSpacing: "-0.022em", color: "rgba(255,255,255,0.82)",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
                     {lane.title}
                   </h3>
 
-                  <div className="my-6 h-px w-8 bg-zinc-800 transition-all duration-700 group-hover:w-full group-hover:bg-amber-500/30" />
+                  {/* Separator — static, no animation */}
+                  <div style={{ height: "1px", width: "2rem", backgroundColor: "rgba(255,255,255,0.08)", marginBottom: "0.85rem" }} />
 
-                  <p className="text-[13px] font-light leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-300">
+                  <p
+                    className="transition-colors duration-300 group-hover:[color:rgba(255,255,255,0.50)]"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300, fontSize: "0.90rem", lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.34)",
+                    }}
+                  >
                     {lane.description}
                   </p>
                 </div>
 
-                <div className="mt-8 flex items-center justify-between opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-amber-500">
-                    Open lane
-                  </span>
-                  <span className="font-mono text-[9px] text-zinc-700">
-                    P-0{index + 1}
-                  </span>
+                {/* Footer CTA */}
+                <div style={{
+                  marginTop: "1.5rem", paddingTop: "1.25rem",
+                  borderTop: "1px solid rgba(255,255,255,0.05)",
+                  display: "flex", alignItems: "center", gap: "0.35rem",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.18)",
+                }}>
+                  <span className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]">Enter</span>
+                  <ArrowRight style={{ width: "10px", height: "10px" }} className="transition-all duration-300 group-hover:translate-x-0.5 group-hover:[color:rgba(201,169,110,0.65)]" />
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
-    </section>
+    </div>
   );
 }

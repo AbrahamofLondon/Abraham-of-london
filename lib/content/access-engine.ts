@@ -57,7 +57,7 @@ export function getAccessibleTiers(doc: unknown): AccessTier[] {
   const order: AccessTier[] = [
     "public",
     "member",
-    "inner-circle",
+    "inner_circle",
     "client",
     "legacy",
     "architect",

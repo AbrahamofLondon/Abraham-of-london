@@ -7,20 +7,20 @@ import {
   Text,
 } from "@react-pdf/renderer";
 
-import type { PDFRegistryEntry as PDFConfig } from "../pdf/registry";
-import type { WatermarkPayload } from "../intelligence/watermark-delegate";
+import type { PDFRegistryEntry as PDFConfig } from "@/lib/pdf/registry";
+import type { WatermarkPayload } from "@/lib/intelligence/watermark-delegate";
 
-import BriefCoverPage from "../../../components/print/BriefCoverPage";
-import ForensicMarkLayer from "../../../components/print/ForensicMarkLayer";
-import BriefHeaderBar from "../../../components/print/BriefHeaderBar";
-import BriefFooterBar from "../../../components/print/BriefFooterBar";
-import ExecutiveSummaryPanel from "../../../components/print/ExecutiveSummaryPanel";
-import KeyJudgementsPanel from "../../../components/print/KeyJudgementsPanel";
+import BriefCoverPage from "./BriefCoverPage";
+import ForensicMarkLayer from "./ForensicMarkLayer";
+import BriefHeaderBar from "./BriefHeaderBar";
+import BriefFooterBar from "./BriefFooterBar";
+import ExecutiveSummaryPanel from "./ExecutiveSummaryPanel";
+import KeyJudgementsPanel from "./KeyJudgementsPanel";
 import {
   renderBriefBody,
   extractExecutiveSummary,
   extractKeyJudgements,
-} from "../renderers/renderBriefBody";
+} from "./renderBriefBody";
 
 /* -------------------------------------------------------------------------- */
 /* Type Definitions                                                           */
@@ -326,7 +326,7 @@ function deriveExecutiveSummaryBlock(
 ): string {
   const explicitSummary = pickFirstString(summaryText, config.summary, config.description);
   if (explicitSummary) return explicitSummary;
-  return extractExecutiveSummary(resolvedContent);
+  return extractExecutiveSummary(resolvedContent) ?? "";
 }
 
 function deriveKeywords(config: LooseRecord, title: string): string {
@@ -355,9 +355,10 @@ function buildAppendixRows(
   const classification = deriveClassification(config, watermark);
   const slug = safeString(config.slug);
   const route = pickFirstString(config.outputPath, aol.route);
-  const traceId = pickFirstString(aol.traceId, watermark?.fingerprint);
+  const watermarkAny = watermark as (WatermarkPayload & { fingerprint?: string; issuedAt?: string }) | undefined;
+  const traceId = pickFirstString(aol.traceId, watermarkAny?.fingerprint);
   const signature = pickFirstString(aol.sig, "");
-  const issuedAt = pickFirstString(watermark?.issuedAt, "");
+  const issuedAt = pickFirstString(watermarkAny?.issuedAt, "");
   const sourcePath = pickFirstString(sourceMeta?.sourcePath, "");
   const sourceFolder = pickFirstString(sourceMeta?.sourceFolder, "");
   const sourceType = pickFirstString(sourceMeta?.sourceType, config.type);
@@ -385,10 +386,11 @@ export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
   content,
   summaryText,
   watermark = {
-    fingerprint: "institutional",
-    issuedAt: new Date().toISOString(),
+    visibleFooter: "",
+    overlayToken: "",
+    overlayHints: { rotationDeg: 0, opacity: 0.1, fontSize: 10, letterSpacing: 2 },
     metadata: { aol: { classification: "PUBLIC" } },
-  },
+  } as WatermarkPayload,
   qrCode,
   frontmatter,
   sourceMeta,

@@ -84,7 +84,7 @@ export default async function handler(
     orderBy: { createdAt: "desc" },
   });
 
-  const recentArtifacts = await prisma.diagnosticArtifact.count({
+  const recentArtifacts = await prisma.diagnosticArtifactAccessGrant.count({
     where: {
       createdAt: { gt: new Date(Date.now() - 60 * 60 * 1000) },
       granteeEmail: email,
@@ -93,7 +93,7 @@ export default async function handler(
 
   const failedAttempts = await prisma.systemAuditLog.count({
     where: {
-      subjectEmail: email,
+      actorEmail: email,
       action: "REPORT_ISSUE_DENIED",
       createdAt: { gt: new Date(Date.now() - 60 * 60 * 1000) },
     },
@@ -139,30 +139,31 @@ export default async function handler(
     const created = await prisma.diagnosticArtifact.create({
       data: {
         diagnosticRef: String(diagnosticRef),
+        diagnosticId: String(reportId),
         reportId: String(reportId),
         version: String(version || "v1"),
+        kind: "pdf",
         fileName: `${String(title).trim().replace(/[^\w.-]+/g, "-").toLowerCase()}.pdf`,
-        title: String(title),
-        narrative: narrative || "",
-        sections: Array.isArray(sections) ? sections : [],
-        score,
-        granteeEmail: email,
-        artifactType: "diagnostic-report",
-        status: "issued",
+        mimeType: "application/pdf",
+        byteLength: 0,
+        sha256: "",
+        storageProvider: "local",
+        objectKey: `diagnostics/${String(diagnosticRef)}/${String(version || "v1")}.pdf`,
       },
     });
 
     await prisma.diagnosticLineageEvent.create({
       data: {
         diagnosticRef: String(diagnosticRef),
+        diagnosticId: String(reportId),
         eventType: "artifact_issued",
         version: String(version || "v1"),
         actor: sessionEmail || email,
-        metadata: {
+        metadata: JSON.stringify({
           artifactId: created.id,
           granteeEmail: email,
           score,
-        },
+        }),
       },
     });
 
@@ -170,10 +171,10 @@ export default async function handler(
   });
 
   // ✅ OBSERVABILITY METRICS & LOGGING
-  increment("reports.issued", 1, { type: artifact.artifactType });
+  increment("reports.issued", 1, { type: artifact.kind });
   logger.info("Report issued", "diagnostics.report.issue", {
     artifactId: artifact.id,
-    type: artifact.artifactType,
+    type: artifact.kind,
     diagnosticRef,
     granteeEmail: email,
   });

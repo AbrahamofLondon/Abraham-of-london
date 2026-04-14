@@ -103,14 +103,14 @@ const DEFAULT_ITEMS: Milestone[] = [
 
 const ACCENTS = {
   amber: {
-    ring: "ring-amber-400/20",
-    border: "border-amber-400/20 hover:border-amber-400/35",
-    badge: "border-amber-400/25 bg-amber-400/10 text-amber-200",
-    icon: "text-amber-300",
-    glow: "from-amber-500/18 via-amber-500/6 to-transparent",
-    chip: "bg-amber-400/10 text-amber-200 border-amber-400/20",
-    link: "text-amber-200 hover:text-amber-100",
-    dot: "bg-amber-400",
+    ring: "ring-white/10",
+    border: "border-white/10 hover:border-white/22",
+    badge: "border-white/10 bg-white/5 text-white/70",
+    icon: "",
+    glow: "from-white/5 via-white/[0.03] to-transparent",
+    chip: "bg-white/5 text-white/70 border-white/10",
+    link: "",
+    dot: "bg-white/22",
   },
   blue: {
     ring: "ring-sky-400/20",
@@ -193,9 +193,9 @@ export default function MilestonesTimeline({
       ? "bg-white/5 text-cream border border-white/10 backdrop-blur"
       : "bg-white text-deepCharcoal ring-1 ring-black/5";
 
-  const subText = variant === "dark" ? "text-white/60" : "text-gray-600";
+  const subText = variant === "dark" ? "text-white/60" : "text-white/28";
 
-  const headingText = variant === "dark" ? "text-white" : "text-gray-900";
+  const headingText = variant === "dark" ? "text-white" : "text-white/88";
 
   // Helper to build motion props without undefined values
   const buildMotionProps = (index?: number) => {
@@ -218,19 +218,19 @@ export default function MilestonesTimeline({
       aria-labelledby={headingId}
     >
       <div className="container mx-auto max-w-6xl">
-        <div className={`rounded-3xl p-8 md:p-12 ${surface} shadow-2xl`}>
+        <div className={`p-8 md:p-12 ${surface} shadow-2xl`}>
           {showHeader && (
             <div className="mb-12 text-center">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-4 py-2">
-                <Sparkles className="h-4 w-4 text-amber-300" />
-                <span className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                <Sparkles className="h-4 w-4" style={{ color: "#C9A96E" }} />
+                <span className="text-xs uppercase tracking-[0.22em]" style={{ color: "#C9A96E" }}>
                   Track Record
                 </span>
               </div>
 
               <motion.h2
                 id={headingId}
-                className={`text-center font-serif text-4xl font-bold md:text-5xl ${headingText}`}
+                className={`text-center font-serif text-4xl md:text-5xl ${headingText}`}
                 {...buildMotionProps()}
               >
                 {title}
@@ -251,7 +251,7 @@ export default function MilestonesTimeline({
             <p className={`mt-6 text-center ${subText}`}>No milestones to display (yet!).</p>
           ) : (
             <div className="relative">
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500/20 via-white/10 to-transparent md:left-1/2 md:-translate-x-1/2" />
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-white/5 via-white/10 to-transparent md:left-1/2 md:-translate-x-1/2" />
 
               <div className="space-y-8">
                 {data.map((milestone, index) => {
@@ -273,7 +273,7 @@ export default function MilestonesTimeline({
                           {!isEven && <div className="hidden h-0.5 flex-1 bg-white/10 md:block" />}
                           <div
                             className={cx(
-                              "inline-flex rounded-full border px-4 py-2 font-mono text-lg font-bold",
+                              "inline-flex rounded-full border px-4 py-2 font-mono text-lg",
                               A.badge,
                             )}
                           >
@@ -284,13 +284,13 @@ export default function MilestonesTimeline({
                       </div>
 
                       {/* Timeline dot */}
-                      <div className="absolute left-8 top-1/2 z-10 h-4 w-4 -translate-y-1/2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 ring-4 ring-black/40 md:left-1/2 md:-translate-x-1/2" />
+                      <div className="absolute left-8 top-1/2 z-10 h-4 w-4 -translate-y-1/2 rounded-full bg-white/22 ring-4 ring-black/40 md:left-1/2 md:-translate-x-1/2" />
 
                       {/* Content card */}
                       <div className="flex-1">
                         <div
                           className={cx(
-                            "group relative overflow-hidden rounded-2xl border bg-white/[0.04] p-6 backdrop-blur-md transition",
+                            "group relative overflow-hidden border bg-white/[0.04] p-6 backdrop-blur-md transition",
                             A.border,
                             isEven
                               ? "md:mr-auto md:max-w-[calc(50%-4rem)]"
@@ -300,17 +300,17 @@ export default function MilestonesTimeline({
                           <div className={cx("absolute inset-0 opacity-70 bg-gradient-to-br", A.glow)} />
                           <div className="relative">
                             <div className="mb-4 flex items-start justify-between gap-4">
-                              <div className={cx("rounded-xl bg-white/7 p-3 ring-1", A.ring)}>
+                              <div className={cx("bg-white/7 p-3 ring-1", A.ring)}>
                                 <Icon className={cx("h-6 w-6", A.icon)} />
                               </div>
                               {milestone.tag && (
-                                <span className={cx("rounded-full border px-3 py-1 text-xs font-semibold", A.chip)}>
+                                <span className={cx("rounded-full border px-3 py-1 text-xs", A.chip)}>
                                   {milestone.tag}
                                 </span>
                               )}
                             </div>
 
-                            <h3 className={cx("mb-3 font-serif text-xl font-semibold", headingText)}>
+                            <h3 className={cx("mb-3 font-serif text-xl", headingText)}>
                               {milestone.title}
                             </h3>
 
@@ -319,7 +319,7 @@ export default function MilestonesTimeline({
                             {milestone.href && (
                               <Link
                                 href={milestone.href}
-                                className={cx("inline-flex items-center gap-2 text-sm font-semibold", A.link)}
+                                className={cx("inline-flex items-center gap-2 text-sm", A.link)}
                               >
                                 View details
                                 <ChevronRight className="h-4 w-4" />
@@ -345,7 +345,7 @@ export default function MilestonesTimeline({
                 { label: "Global Reach", value: "45+" },
               ].map((stat, idx) => (
                 <div key={idx} className="text-center">
-                  <div className={cx("mb-1 text-2xl font-bold", headingText)}>{stat.value}</div>
+                  <div className={cx("mb-1 text-2xl", headingText)}>{stat.value}</div>
                   <div className="text-xs uppercase tracking-wider text-white/60">{stat.label}</div>
                 </div>
               ))}

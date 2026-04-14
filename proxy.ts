@@ -201,6 +201,99 @@ const CONVERSION_PATHS = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/* AUTH TIER CLASSIFICATION (merged from middleware.ts)                       */
+/*                                                                            */
+/* Option 3 Hybrid Identity + Entitlement:                                    */
+/*   - NextAuth owns IDENTITY    (JWT in session cookie)                      */
+/*   - AL token owns ENTITLEMENT (aol_access cookie)                          */
+/*                                                                            */
+/* Tier 0 — public (no auth)                                                  */
+/* Tier 1 — NextAuth session required                                         */
+/* Tier 2 — AL token required (NextAuth NOT required)                         */
+/* Tier 3 — Admin only (token.isInternal === true)                            */
+/*                                                                            */
+/* This block is supplementary to proxy.ts's existing auth logic. It runs     */
+/* at the end of the proxy() function, AFTER proxy.ts's existing checks have  */
+/* had a chance to redirect or pass the request.                              */
+/* -------------------------------------------------------------------------- */
+
+const AUTH_PUBLIC_EXACT = new Set<string>([
+  "/",
+  "/favicon.ico",
+  "/api/inner-circle/register",
+  "/api/inner-circle/resend",
+]);
+
+const AUTH_PUBLIC_PREFIXES = [
+  "/blog",
+  "/canon",
+  "/shorts",
+  "/events",
+  "/media",
+  "/education-research",
+  "/api/auth",
+  "/_next",
+  "/assets",
+];
+
+const TIER3_PREFIXES = [
+  "/inner-circle/admin",
+  "/api/admin",
+  "/directorate",
+];
+
+const TIER3_EXACT = new Set<string>([
+  "/board/dashboard",
+]);
+
+const TIER2_PREFIXES = [
+  "/inner-circle",
+  "/private",
+  "/vault",
+  "/board",
+];
+
+const TIER1_PREFIXES = [
+  "/dashboard",
+  "/diagnostics",
+  "/consulting",
+  "/strategy",
+];
+
+function authTierMatchesPrefix(pathname: string, prefixes: string[]): boolean {
+  for (const p of prefixes) {
+    if (pathname === p || pathname.startsWith(p + "/")) return true;
+  }
+  return false;
+}
+
+function authTierIsPublicRoute(pathname: string): boolean {
+  if (AUTH_PUBLIC_EXACT.has(pathname)) return true;
+  // Inner Circle entry/redemption pages must be reachable with zero credentials:
+  //   - /inner-circle          → registration form
+  //   - /inner-circle/unlock   → email-link key redemption (SSR)
+  //   - /inner-circle/login    → manual key entry
+  // All other /inner-circle/** paths remain Tier 2 (AL cookie required).
+  if (pathname === "/inner-circle") return true;
+  if (pathname === "/inner-circle/unlock") return true;
+  if (pathname === "/inner-circle/login") return true;
+  return authTierMatchesPrefix(pathname, AUTH_PUBLIC_PREFIXES);
+}
+
+function authTierIsTier3(pathname: string): boolean {
+  if (TIER3_EXACT.has(pathname)) return true;
+  return authTierMatchesPrefix(pathname, TIER3_PREFIXES);
+}
+
+function authTierIsTier2(pathname: string): boolean {
+  return authTierMatchesPrefix(pathname, TIER2_PREFIXES);
+}
+
+function authTierIsTier1(pathname: string): boolean {
+  return authTierMatchesPrefix(pathname, TIER1_PREFIXES);
+}
+
+/* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -1260,6 +1353,67 @@ export async function proxy(req: NextRequest) {
         config: constitutionalConfig,
       },
     });
+  }
+
+  /* AUTH TIER ENFORCEMENT (merged from middleware.ts)                        */
+  /*                                                                          */
+  /* Supplementary tier check. Runs AFTER all existing proxy.ts auth logic.   */
+  /* Any route that proxy.ts's earlier sections have already redirected or    */
+  /* passed as public will not reach this block. Tier 3 (admin) is checked    */
+  /* before Tier 2 (member) because admin paths nest under member paths.      */
+  {
+    const tierPathname = req.nextUrl.pathname;
+
+    if (!authTierIsPublicRoute(tierPathname)) {
+      const tierIsApi = tierPathname.startsWith("/api/");
+
+      if (authTierIsTier3(tierPathname)) {
+        const tierToken = await getToken({
+          req,
+          secret: process.env.NEXTAUTH_SECRET,
+        });
+        if (!tierToken || !(tierToken as any).isInternal) {
+          if (tierIsApi) {
+            return jsonResponse(
+              { ok: false, error: "Forbidden", code: "ADMIN_REQUIRED" },
+              403,
+            );
+          }
+          return NextResponse.redirect(new URL("/", req.url));
+        }
+      } else if (authTierIsTier2(tierPathname)) {
+        const alCookie = req.cookies.get("aol_access");
+        if (!alCookie) {
+          if (tierIsApi) {
+            return jsonResponse(
+              { ok: false, error: "Inner Circle access required", code: "TOKEN_REQUIRED" },
+              401,
+            );
+          }
+          const url = req.nextUrl.clone();
+          url.pathname = "/inner-circle";
+          url.searchParams.set("returnTo", tierPathname);
+          return NextResponse.redirect(url);
+        }
+      } else if (authTierIsTier1(tierPathname)) {
+        const tierToken = await getToken({
+          req,
+          secret: process.env.NEXTAUTH_SECRET,
+        });
+        if (!tierToken) {
+          if (tierIsApi) {
+            return jsonResponse(
+              { ok: false, error: "Authentication required", code: "AUTH_REQUIRED" },
+              401,
+            );
+          }
+          const url = req.nextUrl.clone();
+          url.pathname = "/api/auth/signin";
+          url.searchParams.set("callbackUrl", tierPathname);
+          return NextResponse.redirect(url);
+        }
+      }
+    }
   }
 
   /* FINAL RESPONSE */

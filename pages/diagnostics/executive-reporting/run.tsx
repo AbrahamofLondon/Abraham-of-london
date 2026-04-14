@@ -309,6 +309,87 @@ const INITIAL: ExecutiveReportingIntakeForm = {
   whatHappensIfNothingChanges: "",
 };
 
+/* ============================================================================
+   LADDER UPSTREAM CONTEXT
+   Reads prior-ladder-rung results from sessionStorage in priority order
+   (most recent rung wins). Canonical keys per the ladder chain in
+   CLAUDE_SESSION_LOG.md section 4 and mirrored by the ladder's writers in
+   pages/diagnostics/enterprise-assessment.tsx and team-assessment.tsx.
+============================================================================ */
+
+type LadderUpstreamContext = {
+  source:
+    | "enterprise-assessment-result"
+    | "team-assessment-result"
+    | "purpose-alignment-result";
+  layerLabel: string;
+  subjectId?: string;
+  totalPct?: number;
+  severity?: string;
+  band?: string;
+  nextRoute?: string;
+  sections?: Array<{ id: string; title: string; pct: number }>;
+  teamAlignmentPct?: number | null;
+  overallReality?: number;
+  overallLeader?: number;
+  overallGap?: number;
+  fragilityStatus?: string;
+  percent?: number;
+};
+
+function readLadderUpstreamContext(): LadderUpstreamContext | null {
+  if (typeof window === "undefined") return null;
+
+  const KEYS: Array<{
+    key: LadderUpstreamContext["source"];
+    label: string;
+  }> = [
+    { key: "enterprise-assessment-result", label: "Enterprise Assessment" },
+    { key: "team-assessment-result", label: "Team Assessment" },
+    { key: "purpose-alignment-result", label: "Purpose Alignment" },
+  ];
+
+  try {
+    for (const { key, label } of KEYS) {
+      const raw = window.sessionStorage.getItem(key);
+      if (!raw) continue;
+      const p = JSON.parse(raw);
+      if (!p || typeof p !== "object") continue;
+
+      return {
+        source: key,
+        layerLabel: label,
+        subjectId: typeof p.subjectId === "string" ? p.subjectId : undefined,
+        totalPct:
+          typeof p.totalPct === "number"
+            ? p.totalPct
+            : typeof p.pct === "number"
+              ? p.pct
+              : undefined,
+        severity: typeof p.severity === "string" ? p.severity : undefined,
+        band: typeof p.band === "string" ? p.band : undefined,
+        nextRoute: typeof p.nextRoute === "string" ? p.nextRoute : undefined,
+        sections: Array.isArray(p.sections) ? p.sections : undefined,
+        teamAlignmentPct:
+          typeof p.teamAlignmentPct === "number" ? p.teamAlignmentPct : null,
+        overallReality:
+          typeof p.overallReality === "number" ? p.overallReality : undefined,
+        overallLeader:
+          typeof p.overallLeader === "number" ? p.overallLeader : undefined,
+        overallGap:
+          typeof p.overallGap === "number" ? p.overallGap : undefined,
+        fragilityStatus:
+          typeof p.fragilityStatus === "string" ? p.fragilityStatus : undefined,
+        percent: typeof p.percent === "number" ? p.percent : undefined,
+      };
+    }
+  } catch {
+    /* sessionStorage unavailable (private mode / SSR) — degrade gracefully */
+  }
+
+  return null;
+}
+
 function safeString(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
@@ -1944,6 +2025,12 @@ function ExecutiveReportingIntake({
   const [form, setForm] = React.useState<ExecutiveReportingIntakeForm>(INITIAL);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [upstreamContext, setUpstreamContext] =
+    React.useState<LadderUpstreamContext | null>(null);
+
+  React.useEffect(() => {
+    setUpstreamContext(readLadderUpstreamContext());
+  }, []);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -1955,6 +2042,7 @@ function ExecutiveReportingIntake({
 
   function buildPayload() {
     return {
+      subjectId: upstreamContext?.subjectId || undefined,
       fullName: form.fullName,
       email: form.email,
       organisation: form.organisation,
@@ -1988,6 +2076,7 @@ function ExecutiveReportingIntake({
       },
       diagnosticsMeta: {
         signalReadinessScore: 0,
+        upstreamContext,
       },
     };
   }
@@ -2056,6 +2145,65 @@ function ExecutiveReportingIntake({
             Precision increases signal. Signal increases quality of judgment.
           </p>
         </div>
+
+        {upstreamContext && (
+          <div
+            style={{
+              marginBottom: "2rem",
+              padding: "1rem 1.25rem",
+              border: `1px solid ${GOLD}22`,
+              backgroundColor: `${GOLD}07`,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+                color: `${GOLD}AA`,
+                marginBottom: "0.55rem",
+              }}
+            >
+              Carrying forward · {upstreamContext.layerLabel}
+            </div>
+            <div
+              style={{
+                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                fontWeight: 300,
+                fontSize: "0.95rem",
+                lineHeight: 1.55,
+                color: "rgba(255,255,255,0.68)",
+              }}
+            >
+              {typeof upstreamContext.totalPct === "number" && (
+                <span>
+                  Score {upstreamContext.totalPct}%
+                  {upstreamContext.severity ? ` · ${upstreamContext.severity}` : ""}
+                  {upstreamContext.band ? ` · ${upstreamContext.band}` : ""}
+                </span>
+              )}
+              {typeof upstreamContext.overallReality === "number" && (
+                <span>
+                  {typeof upstreamContext.totalPct === "number" ? " · " : ""}
+                  Team reality {upstreamContext.overallReality}%
+                  {typeof upstreamContext.overallLeader === "number"
+                    ? ` (leader ${upstreamContext.overallLeader}%)`
+                    : ""}
+                </span>
+              )}
+              {typeof upstreamContext.percent === "number" &&
+                upstreamContext.source === "purpose-alignment-result" && (
+                  <span>Purpose alignment {upstreamContext.percent}%</span>
+                )}
+              {upstreamContext.nextRoute && (
+                <span style={{ color: "rgba(255,255,255,0.42)" }}>
+                  {" · "}Route hint: {upstreamContext.nextRoute}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="space-y-10">
@@ -2421,6 +2569,20 @@ export default function ExecutiveReportingRunPage() {
   function handleResult(r: Extract<ExecutiveReportingResult, { ok: true }>) {
     setResult(r);
     setPageState("result");
+
+    // Handoff to the Strategy Room rung. Canonical key per the ladder chain
+    // in CLAUDE_SESSION_LOG.md section 4:
+    //   purpose-alignment-result → team-assessment-result
+    //   → enterprise-assessment-result → executive-report-result
+    //   → strategy-room-result
+    // Mirrors the Team → Enterprise and Enterprise → ER write patterns.
+    // Persists the full successful result so any downstream reader gets both
+    // the report data and server-computed envelope fields.
+    try {
+      sessionStorage.setItem("executive-report-result", JSON.stringify(r));
+    } catch {
+      /* sessionStorage unavailable (private mode / SSR) — handoff degrades gracefully */
+    }
   }
 
   function handleRerun() {

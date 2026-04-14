@@ -38,7 +38,7 @@ function internalError(message: string) {
 
 export async function GET(req: NextRequest) {
   try {
-    const sessionKey = await getOrCreatePurposeAlignmentSessionKey(req);
+    const sessionKey = await getOrCreatePurposeAlignmentSessionKey();
 
     const [latest, history] = await Promise.all([
       getLatestPurposeAlignmentAssessment({ sessionKey }),
@@ -72,17 +72,15 @@ export async function POST(req: NextRequest) {
     const result = scorePurposeAlignment({
       answers: parsed.answers,
       notes: parsed.notes || undefined,
-      resonanceData: parsed.resonanceData,
     });
 
-    const sessionKey = await getOrCreatePurposeAlignmentSessionKey(req);
+    const sessionKey = await getOrCreatePurposeAlignmentSessionKey();
 
     const assessmentId = await createPurposeAlignmentAssessment({
       sessionKey,
       input: {
         answers: parsed.answers,
         notes: parsed.notes || undefined,
-        resonanceData: parsed.resonanceData,
       },
       result,
     });

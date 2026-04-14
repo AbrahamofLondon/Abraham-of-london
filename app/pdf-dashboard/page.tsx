@@ -155,7 +155,7 @@ export default function PdfDashboard() {
       <Header minimal />
       
       <div className="min-h-screen bg-[#060609] text-white font-mono selection:bg-white selection:text-black pt-24 print:pt-0 print:bg-white print:text-black">
-        <style jsx global>{`
+        <style>{`
           @media print {
             body {
               background: white !important;

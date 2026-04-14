@@ -17,13 +17,13 @@ import {
 export const INNER_CIRCLE_TIER_ORDER: AccessTier[] = [
   "public",
   "member",
-  "inner-circle",
+  "inner_circle",
   "restricted",
   "client",
   "legacy",
   "architect",
   "owner",
-  "top-secret",
+  "top_secret",
 ];
 
 const VALID_TIERS = [
@@ -326,13 +326,13 @@ InnerCircleDataSchema.virtual("accessDescription").get(function (this: any) {
   const descriptions: Record<AccessTier, string> = {
     public: "Available to everyone",
     member: "Available to all members",
-    "inner-circle": "Inner Circle exclusive content",
+    inner_circle: "Inner Circle exclusive content",
     restricted: "Restricted access - limited distribution",
     client: "Client access only",
     legacy: "Legacy member exclusive",
     architect: "Architect level access",
     owner: "Owner only",
-    "top-secret": "Top secret - highest clearance required",
+    top_secret: "Top secret - highest clearance required",
   };
 
   return descriptions[tier];

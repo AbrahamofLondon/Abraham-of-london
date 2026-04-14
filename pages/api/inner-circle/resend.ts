@@ -2,15 +2,11 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
-import {
-  AccessTier as PrismaAccessTier,
-  KeyStatus as PrismaKeyStatus,
-} from "@prisma/client";
+import { KeyStatus as PrismaKeyStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import type { AccessTier as PolicyAccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
-import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
+import { hashAccessKey, getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 import { sendInnerCircleEmail } from "@/lib/inner-circle/templates/InnerCircleEmail";
 
 type ApiResponse =
@@ -41,38 +37,6 @@ function isEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email);
 }
 
-function fromDbTier(
-  tier: PrismaAccessTier | string | null | undefined
-): PolicyAccessTier {
-  const raw = String(tier || "member").replace(/_/g, "-");
-  return normalizeUserTier(raw);
-}
-
-function toDbTier(tier: PolicyAccessTier): PrismaAccessTier {
-  switch (tier) {
-    case "inner-circle":
-      return PrismaAccessTier.inner_circle;
-    case "top-secret":
-      return PrismaAccessTier.top_secret;
-    case "public":
-      return PrismaAccessTier.public;
-    case "member":
-      return PrismaAccessTier.member;
-    case "restricted":
-      return PrismaAccessTier.restricted;
-    case "client":
-      return PrismaAccessTier.client;
-    case "legacy":
-      return PrismaAccessTier.legacy;
-    case "architect":
-      return PrismaAccessTier.architect;
-    case "owner":
-      return PrismaAccessTier.owner;
-    default:
-      return PrismaAccessTier.member;
-  }
-}
-
 function getBaseUrl(): string {
   return String(
     process.env.NEXT_PUBLIC_APP_URL ||
@@ -87,7 +51,7 @@ function getBaseUrl(): string {
 function getRequestIp(req: NextApiRequest): string {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.trim()) {
-    return forwarded.split(",")[0].trim();
+    return (forwarded.split(",")[0] ?? "").trim();
   }
   if (Array.isArray(forwarded) && forwarded[0]) {
     return forwarded[0];
@@ -117,7 +81,22 @@ export default async function handler(
   const recaptchaToken = String(req.body?.recaptchaToken || "").trim();
 
   try {
-    const isHuman = await verifyRecaptcha(recaptchaToken);
+    // Authenticated members bypass reCAPTCHA — they have already proven
+    // identity via the aol_access cookie. Unauthenticated requests still
+    // go through the standard reCAPTCHA check below.
+    let isHuman = false;
+    const cookie = req.cookies["aol_access"];
+    if (cookie) {
+      const ctx = await getSessionContext(cookie).catch(() => null);
+      if (ctx?.ok) {
+        isHuman = true;
+      }
+    }
+
+    if (!isHuman) {
+      isHuman = await verifyRecaptcha(recaptchaToken);
+    }
+
     if (!isHuman) {
       return res
         .status(403)
@@ -144,8 +123,7 @@ export default async function handler(
       });
     }
 
-    const memberTier = fromDbTier(member.tier);
-    const dbTier = toDbTier(memberTier);
+    const tier = normalizeUserTier(member.tier ?? "member");
 
     const rawKey = makeAccessKey();
     const keyHash = hashAccessKey(rawKey);
@@ -165,6 +143,7 @@ export default async function handler(
       prisma.innerCircleKey.create({
         data: {
           keyHash,
+          keySuffix: rawKey.split("-").pop() ?? null,
           memberId: member.id,
           keyType: "access",
           status: PrismaKeyStatus.active,
@@ -173,7 +152,7 @@ export default async function handler(
       }),
       prisma.innerCircleMember.update({
         where: { id: member.id },
-        data: { tier: dbTier },
+        data: { tier },
       }),
     ]);
 

@@ -247,15 +247,30 @@ function summarize(content: string, fallback?: string): string {
 /* -------------------------------------------------------------------------- */
 /* Main Document */
 /* -------------------------------------------------------------------------- */
+const NEUTRAL_WATERMARK: WatermarkPayload = {
+  visibleFooter: "",
+  overlayToken: "",
+  overlayHints: {
+    rotationDeg: 0,
+    opacity: 0,
+    fontSize: 0,
+    letterSpacing: 0,
+  },
+  metadata: {},
+};
+
 export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
   config: configProp,
   content = "",
   summaryText,
-  watermark = { fingerprint: "institutional", issuedAt: new Date().toISOString(), metadata: {} },
+  watermark = NEUTRAL_WATERMARK,
   qrCode,
   frontmatter,
 }) => {
-  const mergedConfig = { ...(configProp || {}), ...(frontmatter || {}) };
+  const mergedConfig: ExpandedPDFConfig = {
+    ...(configProp || {}),
+    ...(frontmatter || {}),
+  };
 
   const title = safeString(mergedConfig.title, "Institutional Brief");
   const subtitle = safeString(mergedConfig.subtitle) || 
@@ -268,6 +283,16 @@ export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
   const reference = safeString(mergedConfig.reference || mergedConfig.id, "UNFILED").toUpperCase();
   const signAs = safeString(mergedConfig.signAs, "The Architect");
 
+  // Defensive boundary cast: BriefCoverPage's config prop expects the strict
+  // PDFRegistryEntry shape (6 required fields with PDFType/PDFFormat unions).
+  // mergedConfig is ExpandedPDFConfig (all fields optional) because frontmatter
+  // is Record<string, unknown>. Caller guarantees the fields are present at
+  // runtime; narrow via unknown to satisfy the strict prop shape. Same B8 class
+  // as the @react-pdf/renderer toBuffer() cast in lib/reports/pdf.tsx.
+  const coverConfig = mergedConfig as unknown as React.ComponentProps<
+    typeof BriefCoverPage
+  >["config"];
+
   return (
     <Document
       title={title}
@@ -276,7 +301,7 @@ export const InstitutionalBriefDocument: React.FC<BriefDocumentProps> = ({
       language="en-GB"
     >
       <BriefCoverPage
-        config={mergedConfig}
+        config={coverConfig}
         watermark={watermark}
         qrCode={qrCode}
         classification={classification}

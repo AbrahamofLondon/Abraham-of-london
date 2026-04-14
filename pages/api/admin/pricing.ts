@@ -2,6 +2,15 @@
 import { prisma } from '@/lib/prisma';
 import { cache } from 'react';
 
+// eventPrice model is not in the generated Prisma types; use a typed shim
+const eventPriceModel = (prisma as any).eventPrice as {
+  findUnique: Function;
+  findMany: Function;
+  upsert: Function;
+  delete: Function;
+  deleteMany: Function;
+};
+
 // Fallback static pricing matrix (used if no dynamic prices exist)
 const FALLBACK_PRICE_MATRIX: Record<string, Record<string, number>> = {
   'briefing-omega': {
@@ -82,7 +91,7 @@ export const getEventPrice = cache(async (
     }
 
     // 1. Try to get from database (configured via EventPriceManager)
-    const dbPrice = await prisma.eventPrice.findUnique({
+    const dbPrice = await eventPriceModel.findUnique({
       where: {
         eventId_ticketId: {
           eventId: normalizedEventId,
@@ -121,7 +130,7 @@ export const getEventPrice = cache(async (
  */
 export async function getAllEventPrices() {
   try {
-    const dbPrices = await prisma.eventPrice.findMany({
+    const dbPrices = await eventPriceModel.findMany({
       orderBy: [
         { eventId: 'asc' },
         { ticketId: 'asc' },
@@ -131,7 +140,7 @@ export async function getAllEventPrices() {
     // Transform to the format expected by the admin UI
     const priceMap: Record<string, Record<string, { price: number; updatedBy?: string | null; updatedAt: Date }>> = {};
     
-    dbPrices.forEach(({ eventId, ticketId, price, updatedBy, updatedAt }) => {
+    (dbPrices as Array<{ eventId: string; ticketId: string; price: number; updatedBy?: string | null; updatedAt: Date }>).forEach(({ eventId, ticketId, price, updatedBy, updatedAt }) => {
       if (!priceMap[eventId]) {
         priceMap[eventId] = {};
       }
@@ -168,7 +177,7 @@ export async function updateEventPrice(
     // If this is a verified tier, ensure it's >= member price (institutional rule)
     if (ticketId === 'verified') {
       // Get member price for this event to validate
-      const memberPrice = await prisma.eventPrice.findUnique({
+      const memberPrice = await eventPriceModel.findUnique({
         where: {
           eventId_ticketId: {
             eventId: eventId.toLowerCase(),
@@ -182,7 +191,7 @@ export async function updateEventPrice(
       }
     }
 
-    await prisma.eventPrice.upsert({
+    await eventPriceModel.upsert({
       where: {
         eventId_ticketId: {
           eventId: eventId.toLowerCase(),
@@ -223,7 +232,7 @@ export async function updateEventPrices(
     // Use a transaction to ensure atomic updates
     await prisma.$transaction(
       prices.map(({ ticketId, price }) =>
-        prisma.eventPrice.upsert({
+        eventPriceModel.upsert({
           where: {
             eventId_ticketId: {
               eventId: eventId.toLowerCase(),
@@ -258,7 +267,7 @@ export async function updateEventPrices(
  */
 export async function deleteEventPrice(eventId: string, ticketId: string): Promise<boolean> {
   try {
-    await prisma.eventPrice.delete({
+    await eventPriceModel.delete({
       where: {
         eventId_ticketId: {
           eventId: eventId.toLowerCase(),
@@ -280,7 +289,7 @@ export async function deleteEventPrice(eventId: string, ticketId: string): Promi
  */
 export async function deleteEventAllPrices(eventId: string): Promise<boolean> {
   try {
-    await prisma.eventPrice.deleteMany({
+    await eventPriceModel.deleteMany({
       where: {
         eventId: eventId.toLowerCase(),
       },
@@ -300,7 +309,7 @@ export async function deleteEventAllPrices(eventId: string): Promise<boolean> {
 export async function getAllEvents() {
   try {
     // Get unique eventIds from database
-    const dbEvents = await prisma.eventPrice.findMany({
+    const dbEvents = await eventPriceModel.findMany({
       select: { eventId: true },
       distinct: ['eventId'],
     });
@@ -310,7 +319,7 @@ export async function getAllEvents() {
     
     // Combine and deduplicate
     const eventSet = new Set([
-      ...dbEvents.map(e => e.eventId),
+      ...dbEvents.map((e: { eventId: string }) => e.eventId),
       ...matrixEvents,
     ]);
     
@@ -329,7 +338,7 @@ export async function getEventPrices(eventId: string) {
     const normalizedEventId = eventId.toLowerCase();
     
     // Get from database
-    const dbPrices = await prisma.eventPrice.findMany({
+    const dbPrices = await eventPriceModel.findMany({
       where: { eventId: normalizedEventId },
     });
     
@@ -337,7 +346,7 @@ export async function getEventPrices(eventId: string) {
     const priceMap: Record<string, { price: number; isOverridden: boolean; updatedBy?: string | null; updatedAt?: Date }> = {};
     
     // Add database prices (overrides)
-    dbPrices.forEach(({ ticketId, price, updatedBy, updatedAt }) => {
+    (dbPrices as Array<{ ticketId: string; price: number; updatedBy?: string | null; updatedAt: Date }>).forEach(({ ticketId, price, updatedBy, updatedAt }) => {
       priceMap[ticketId] = {
         price,
         isOverridden: true,

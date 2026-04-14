@@ -1,21 +1,31 @@
 /* eslint-disable no-console */
 /**
- * lib/db.ts — COMPATIBILITY BRIDGE (Deterministic, Build-Safe)
+ * lib/db.ts — PRISMA-BACKED COMPATIBILITY BRIDGE
  *
  * Purpose:
  * - Preserve legacy imports: `import { prisma } from "@/lib/db"`
- * - Provide optional helpers for health checks / safe queries
- *
- * HARD RULES:
- * - Never fake "success" with empty results.
- * - Never silently fall back to a Memory DB in production pathways.
- * - Prisma runs ONLY on Node server runtime (not browser, not Edge).
+ * - Preserve legacy imports: `import { db } from "@/lib/db"` where `db` is used like PrismaClient
+ * - Preserve helper methods used by newer recovery-safe routes
  */
 
 import type { PrismaClient } from "@prisma/client";
+import prismaSingleton, {
+  prisma as prismaProxy,
+  getPrisma,
+} from "@/lib/prisma";
 
-// Live binding: available only after init on Node runtime.
 export let prisma: PrismaClient | null = null;
+
+type DbHelpers = {
+  initializeDb: () => Promise<void>;
+  getPrismaClient: () => Promise<PrismaClient | null>;
+  safePrismaQuery: <T>(query: (p: PrismaClient) => Promise<T>) => Promise<T | null>;
+  checkDatabaseConnection: () => Promise<{
+    connected: boolean;
+    type: "prisma" | "unavailable";
+    error?: string;
+  }>;
+};
 
 function isServerRuntime() {
   return typeof window === "undefined";
@@ -29,34 +39,22 @@ function canUsePrisma() {
   return isServerRuntime() && !isEdgeRuntime();
 }
 
-async function loadServerPrisma(): Promise<PrismaClient> {
-  // Prefer your canonical server Prisma singleton.
-  // This avoids multiple client instances and keeps logging consistent.
-  const mod: any = await import("@/lib/prisma");
-  if (!mod?.prisma) throw new Error("[DB] Failed to load @/lib/prisma singleton");
-  return mod.prisma as PrismaClient;
-}
-
 /**
  * Initialize Prisma binding.
- * - Node server runtime: loads @/lib/prisma and sets exported `prisma`.
+ * - Node server runtime: binds exported `prisma` to the canonical singleton.
  * - Edge/browser: leaves prisma null.
  */
 export async function initializeDb(): Promise<void> {
-  if (prisma) return;
-
   if (!canUsePrisma()) {
     prisma = null;
     return;
   }
 
-  prisma = await loadServerPrisma();
+  prisma = getPrisma();
 
-  // Lightweight connectivity check (optional but valuable)
   try {
     await prisma.$queryRaw`SELECT 1`;
   } catch (e) {
-    // Do not fall back to memory: fail loudly to protect integrity.
     prisma = null;
     throw new Error(
       `[DB] Prisma connectivity check failed: ${e instanceof Error ? e.message : "UNKNOWN_ERROR"}`
@@ -68,8 +66,17 @@ export async function initializeDb(): Promise<void> {
  * Get Prisma if available (Node only). Returns null on Edge/browser.
  */
 export async function getPrismaClient(): Promise<PrismaClient | null> {
-  await initializeDb().catch(() => {});
-  return prisma;
+  if (!canUsePrisma()) return null;
+
+  try {
+    if (!prisma) {
+      prisma = getPrisma();
+    }
+    return prisma;
+  } catch {
+    prisma = null;
+    return null;
+  }
 }
 
 /**
@@ -78,11 +85,11 @@ export async function getPrismaClient(): Promise<PrismaClient | null> {
  * - Does NOT fake success.
  */
 export async function safePrismaQuery<T>(query: (p: PrismaClient) => Promise<T>): Promise<T | null> {
-  const p = await getPrismaClient();
-  if (!p) return null;
+  const client = await getPrismaClient();
+  if (!client) return null;
 
   try {
-    return await query(p);
+    return await query(client);
   } catch (e) {
     console.error("[DB] Prisma query failed:", e);
     return null;
@@ -92,12 +99,16 @@ export async function safePrismaQuery<T>(query: (p: PrismaClient) => Promise<T>)
 /**
  * Health status helper
  */
-export async function checkDatabaseConnection(): Promise<{ connected: boolean; type: "prisma" | "unavailable"; error?: string }> {
+export async function checkDatabaseConnection(): Promise<{
+  connected: boolean;
+  type: "prisma" | "unavailable";
+  error?: string;
+}> {
   try {
-    const p = await getPrismaClient();
-    if (!p) return { connected: false, type: "unavailable" };
+    const client = await getPrismaClient();
+    if (!client) return { connected: false, type: "unavailable" };
 
-    await p.$queryRaw`SELECT 1`;
+    await client.$queryRaw`SELECT 1`;
     return { connected: true, type: "prisma" };
   } catch (e) {
     return {
@@ -108,16 +119,14 @@ export async function checkDatabaseConnection(): Promise<{ connected: boolean; t
   }
 }
 
-/**
- * Default export kept for backward compatibility (some modules may import default db).
- * We expose a tiny façade rather than a pretend multi-db abstraction.
- */
-const db = {
+const helpers: DbHelpers = {
   initializeDb,
   getPrismaClient,
   safePrismaQuery,
   checkDatabaseConnection,
 };
+
+const db = Object.assign(prismaSingleton ?? prismaProxy, helpers) as PrismaClient & DbHelpers;
 
 export default db;
 export { db };

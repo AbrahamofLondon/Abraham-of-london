@@ -5,6 +5,7 @@ import crypto from "crypto";
 import {
   calculateDerived,
   sanitizeMetrics,
+  type OGRMetrics,
 } from "@/lib/ogr/manifest-engine";
 import { hasValidOgrSession } from "@/lib/ogr/server-auth";
 import { OGR_CLIENT_CONFIG } from "@/lib/ogr/client-config";
@@ -79,7 +80,14 @@ export async function POST(request: Request) {
     /* ---------------------------------------------------------------------- */
     /* 2. CANONICAL RECOMPUTATION                                             */
     /* ---------------------------------------------------------------------- */
-    const metrics = sanitizeMetrics(body?.metrics || {});
+    // Trust boundary: incoming `body.metrics` fields are typed `unknown`
+    // because we cannot trust the wire format. `sanitizeMetrics` internally
+    // uses `toFiniteNumber()` to coerce each field, so the runtime is safe;
+    // the cast is purely a type assertion at the trust transition. Same
+    // defensive-boundary class as the billing webhook productCode guard (A6).
+    const metrics = sanitizeMetrics(
+      (body?.metrics ?? {}) as Partial<OGRMetrics>,
+    );
     const derived = calculateDerived(metrics);
 
     const timestamp = sanitizeTimestamp(body?.timestamp);

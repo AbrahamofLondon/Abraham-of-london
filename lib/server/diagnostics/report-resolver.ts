@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/report-resolver.ts */
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";
@@ -31,20 +33,21 @@ export function resolveDiagnosticReport(args: {
   const { item, unlocked } = args;
 
   if (item.report?.reportId && item.report?.version) {
+    const rpt = item.report as Record<string, unknown>;
     return {
       reportId: safeString(item.report.reportId, `RPT-${item.diagnosticRef}`),
       version: safeString(item.report.version, "2026.1"),
-      generatedAt: safeString(item.report.generatedAt, item.updatedAt || item.submittedAt),
-      headline: safeString(item.report.headline, `${item.title} report`),
+      generatedAt: safeString(item.report.generatedAt, item.updatedAt || item.createdAt),
+      headline: safeString(rpt["headline"] as string | undefined, `${item.title} report`),
       strapline: `${safeString(item.kind, "diagnostic").toUpperCase()} REPORT • ${safeString(
         item.summary?.band,
         "WATCH",
       ).toUpperCase()} CONDITION • REF ${item.diagnosticRef}`,
-      executiveSummary: safeString(item.report.executiveSummary),
-      narrativeSummary: safeString(item.report.narrativeSummary),
-      keyFindings: Array.isArray(item.report.keyFindings) ? item.report.keyFindings : [],
-      recommendations: Array.isArray(item.report.recommendations)
-        ? item.report.recommendations
+      executiveSummary: safeString(rpt["executiveSummary"] as string | undefined),
+      narrativeSummary: safeString(rpt["narrativeSummary"] as string | undefined),
+      keyFindings: Array.isArray(rpt["keyFindings"]) ? (rpt["keyFindings"] as string[]) : [],
+      recommendations: Array.isArray(rpt["recommendations"])
+        ? (rpt["recommendations"] as ResolvedDiagnosticReport["recommendations"])
         : [],
     };
   }

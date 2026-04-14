@@ -39,7 +39,7 @@ export function AnalyticsProvider({
     
     const enrichedEvent = {
       ...event,
-      userId: userIdRef.current,
+      userId: userIdRef.current ?? undefined,
       userTraits: userTraitsRef.current,
       timestamp: event.timestamp || new Date().toISOString(),
       url: typeof window !== 'undefined' ? window.location.href : '',

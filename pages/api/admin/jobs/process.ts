@@ -13,10 +13,14 @@ registerJobHandler("diagnostic.report.regenerate", async (payload) => {
 
   if (!artifact) throw new Error("ARTIFACT_NOT_FOUND");
 
+  // Schema alignment: DiagnosticArtifact has no `regeneratedAt` column.
+  // The version bump (`-regen` suffix) is the existing canonical signal that
+  // a regeneration occurred — readers can detect regeneration from the version
+  // string. C17-class — provisional until/unless the schema gains a dedicated
+  // regeneratedAt column.
   await prisma.diagnosticArtifact.update({
     where: { id: artifact.id },
     data: {
-      regeneratedAt: new Date(),
       version: `${artifact.version || "v1"}-regen`,
     },
   });

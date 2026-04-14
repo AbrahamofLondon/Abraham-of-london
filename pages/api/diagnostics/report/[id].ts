@@ -43,7 +43,8 @@ export default async function handler(
     }
 
     const instance = pdf(
-      React.createElement(DiagnosticReportDocument, { record }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      React.createElement(DiagnosticReportDocument, { record: record as any }) as any,
     );
     const buffer = await instance.toBuffer();
 

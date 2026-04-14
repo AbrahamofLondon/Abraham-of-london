@@ -24,7 +24,7 @@ function permissionsForTier(tier: AccessTier): Permission[] {
     return ["admin:all", "content:read", "content:write", "downloads:read", "downloads:premium", "inner-circle:access", "billing:read"];
   }
   if (hasAccess(tier, "client")) return [...base, "downloads:read", "downloads:premium", "inner-circle:access"];
-  if (hasAccess(tier, "inner-circle")) return [...base, "downloads:read", "inner-circle:access"];
+  if (hasAccess(tier, "inner_circle")) return [...base, "downloads:read", "inner-circle:access"];
   if (hasAccess(tier, "member")) return [...base, "downloads:read"];
   return base;
 }

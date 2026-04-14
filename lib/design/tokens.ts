@@ -13,6 +13,12 @@
  * - All values here are the canonical source — if globals.css or
  *   tailwind.config.js disagree with this file, this file wins and the
  *   other two should be updated to match.
+ * - Use one dark page system: bg.base for normal pages, bg.void for hero
+ *   sections only, bg.panel for panels.
+ * - Long-form body copy must stay at text.body or text.muted. Do not use
+ *   ad hoc 0.32–0.48 white alpha for meaningful reading copy.
+ * - Borders should default to border.default and rise to border.strong or
+ *   border.gold on hover or emphasis. Avoid weaker custom hairlines.
  *
  * GOLD NOTE:
  * The platform has two gold values with distinct roles:
@@ -37,10 +43,10 @@ export const colors = {
     lifted:  "#09090C",
     /** #0E0E12 — panel/card background */
     panel:   "#0E0E12",
-    /** rgba overlay for glass panels */
-    glass:   "rgba(0, 0, 0, 0.40)",
-    /** rgba overlay for deep glass cards */
-    deep:    "rgba(0, 0, 0, 0.55)",
+    /** rgba overlay for rare controlled depth, not default glass */
+    glass:   "rgba(0, 0, 0, 0.28)",
+    /** rgba overlay for deep tonal separation only */
+    deep:    "rgba(0, 0, 0, 0.42)",
     /** rgba overlay for subtle surface tints */
     surface: "rgba(255, 255, 255, 0.02)",
   },
@@ -61,32 +67,32 @@ export const colors = {
   text: {
     /** #FFFFFF — full white, primary text */
     primary: "#FFFFFF",
-    /** rgba white at 85% — slightly warm, body copy */
+    /** rgba white at 85% — default long-form body copy */
     body:    "rgba(255, 255, 255, 0.85)",
-    /** rgba white at 55% — secondary text, descriptions */
-    muted:   "rgba(255, 255, 255, 0.55)",
-    /** rgba white at 38% — tertiary text, captions */
-    dim:     "rgba(255, 255, 255, 0.38)",
-    /** rgba white at 22% — labels, eyebrow tags */
-    faint:   "rgba(255, 255, 255, 0.22)",
+    /** rgba white at 66% — secondary text, descriptions, side notes */
+    muted:   "rgba(255, 255, 255, 0.66)",
+    /** rgba white at 48% — tertiary text, short supporting metadata only */
+    dim:     "rgba(255, 255, 255, 0.48)",
+    /** rgba white at 34% — labels, eyebrows, quiet metadata */
+    faint:   "rgba(255, 255, 255, 0.34)",
   },
 
   // Borders
   border: {
-    /** rgba white at 7% — default panel border */
-    subtle:  "rgba(255, 255, 255, 0.07)",
-    /** rgba white at 10% — standard border */
-    default: "rgba(255, 255, 255, 0.10)",
-    /** rgba white at 14% — hover/active border */
-    strong:  "rgba(255, 255, 255, 0.14)",
-    /** softGold at 18% — gold panel border */
-    gold:    "rgba(201, 169, 110, 0.18)",
-    /** softGold at 30% — gold rule/hairline */
-    goldRule: "rgba(201, 169, 110, 0.30)",
-    /** amber at 20% — action element border */
-    amber:   "rgba(245, 158, 11, 0.20)",
-    /** amber at 25% — hover amber border */
-    amberStrong: "rgba(245, 158, 11, 0.25)",
+    /** rgba white at 8% — separators only */
+    subtle:  "rgba(255, 255, 255, 0.08)",
+    /** rgba white at 12% — default panel border */
+    default: "rgba(255, 255, 255, 0.12)",
+    /** rgba white at 18% — hover/active border */
+    strong:  "rgba(255, 255, 255, 0.18)",
+    /** softGold at 24% — gold panel border */
+    gold:    "rgba(201, 169, 110, 0.24)",
+    /** softGold at 34% — canonical gold rule/hairline */
+    goldRule: "rgba(201, 169, 110, 0.34)",
+    /** amber at 24% — action element border */
+    amber:   "rgba(245, 158, 11, 0.24)",
+    /** amber at 32% — hover amber border */
+    amberStrong: "rgba(245, 158, 11, 0.32)",
   },
 
   // Status

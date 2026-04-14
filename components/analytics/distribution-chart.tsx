@@ -59,7 +59,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
               <Tooltip
                 contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b' }}
                 itemStyle={{ color: '#f8fafc' }}
-                formatter={(value: number) => [`${(value * 100).toFixed(2)}%`, 'Probability']}
+                formatter={(value) => [`${(Number(value) * 100).toFixed(2)}%`, 'Probability']}
                 labelFormatter={(label) => `Resonance Score: ${label}%`}
               />
               

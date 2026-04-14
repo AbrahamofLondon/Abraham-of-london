@@ -37,8 +37,9 @@
 [functions]
   directory = "netlify/functions_src/functions"
   node_bundler = "esbuild"
-  # ✅ SPEED FIX: Externalize heavy PDF libs so they don't bloat the function bundle
-  external_node_modules = ["@react-pdf/renderer", "canvas"]
+  # Keep custom Netlify functions fully bundled.
+  # Global external_node_modules causes Netlify to copy entire heavy packages
+  # into every function zip, which can push many functions past the 250 MB limit.
 
 # ✅ Scheduled function for token cleanup
 [[schedule]]
@@ -53,9 +54,14 @@
   NEXT_PUBLIC_APP_ENV = "production"
 
 [context.deploy-preview.environment]
-  NEXT_PUBLIC_SITE_URL = "${DEPLOY_PRIME_URL}"
+  # NEXT_PUBLIC_SITE_URL intentionally omitted on deploy-preview.
+  # ${DEPLOY_PRIME_URL} is a netlify.toml-level template literal that bakes
+  # the string into the bundle at build time, which breaks runtime URL
+  # resolution on non-Netlify builds and local dev. Application code reads
+  # process.env.DEPLOY_PRIME_URL at runtime via lib runtime helpers
+  # (see netlify/functions_src/_utils.ts#getSiteUrl).
   NEXT_PUBLIC_APP_ENV = "staging"
-  NEXT_DISABLE_SOURCEMAPS = "false"
+  NEXT_DISABLE_SOURCEMAPS = "true"
 
 # -----------------------
 # REDIRECTS

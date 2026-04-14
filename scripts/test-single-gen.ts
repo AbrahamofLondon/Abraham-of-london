@@ -1,11 +1,14 @@
 /* scripts/test-single-gen.ts — V2.4 (WINDOWS PATH FIX) */
+import "./load-local-env";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { generatePDF } from "../lib/pdf-generator";
+import { requirePdfGenerationEnv } from "./pdf/require-pdf-env";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function testSingle() {
+  requirePdfGenerationEnv("test-single-gen");
   // 1. Resolve path and convert to valid file:// URL for Windows
   const contentlayerPath = path.resolve(__dirname, "../.contentlayer/generated/index.mjs");
   const contentlayerUrl = pathToFileURL(contentlayerPath).href;
@@ -15,8 +18,6 @@ async function testSingle() {
   try {
     // 2. Dynamic Import
     const { allBriefs } = await import(contentlayerUrl);
-
-    process.env.SYSTEM_INTEGRITY_SALT = process.env.SYSTEM_INTEGRITY_SALT || "AOL_TEST_SALT";
 
     const TEST_ID = "CB-AOE-078";
     console.log(`\n🧪 TESTING RESOLUTION FOR: ${TEST_ID}`);

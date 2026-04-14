@@ -120,6 +120,15 @@ function buildConstitutionSeedFromReport(args: {
         ? "PROXY"
         : "UNCLEAR";
 
+  const rawState = safeString(report?.state, "DRIFTING");
+  const orgState: "ORDERED" | "DRIFTING" | "MISALIGNED" | "DISORDERED" =
+    rawState === "ORDERED" ||
+    rawState === "DRIFTING" ||
+    rawState === "MISALIGNED" ||
+    rawState === "DISORDERED"
+      ? rawState
+      : "DRIFTING";
+
   return {
     route,
     priority:
@@ -129,9 +138,10 @@ function buildConstitutionSeedFromReport(args: {
           ? "HIGH"
           : "MEDIUM",
     temperature: certainty >= 85 ? "HOT" : certainty >= 65 ? "WARM" : "COLD",
-    orgState: safeString(report?.state, "DRIFTING"),
+    orgState,
     readinessTier,
-    authorityType,
+    authorityType:
+      authorityType === "INSTITUTIONAL" ? "DIRECT" : authorityType,
     revenueBand:
       totalExposure >= 1_000_000
         ? "ENTERPRISE"
@@ -140,10 +150,10 @@ function buildConstitutionSeedFromReport(args: {
           : "SMB",
     marketRiskBand:
       averageDissonance >= 35
-        ? "SEVERE"
+        ? "CRITICAL"
         : averageDissonance >= 20
-          ? "ELEVATED"
-          : "MODERATE",
+          ? "HIGH"
+          : "MEDIUM",
     clarityScore: clamp(100 - averageDissonance, 0, 100),
     authorityScore: clamp(certainty * 0.7 + args.participantCount, 0, 100),
     governanceScore: clamp(
@@ -319,7 +329,7 @@ export async function buildExecutiveReportFromCampaign(
     const context = {
       campaignId: campaign.id,
       organisationName: campaignPayload.organisationName,
-      participantCount: completedParticipants.length,
+      completedParticipantCount: completedParticipants.length,
       correctionNodeCount: Array.isArray(campaign.correctionNodes)
         ? campaign.correctionNodes.length
         : 0,

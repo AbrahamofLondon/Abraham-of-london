@@ -1,7 +1,7 @@
 /* pages/api/admin/users/upgrade.ts — Tier Elevation Engine */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { authOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/db/prisma";
 import { auditLogger } from "@/lib/server/db/audit";
 
@@ -19,8 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const result = await prisma.$transaction([
-      // 1. Update the User's Tier
-      prisma.user.update({
+      // 1. Update the Member's Tier
+      prisma.innerCircleMember.update({
         where: { id: userId },
         data: { tier: newTier }
       }),

@@ -209,10 +209,10 @@ export async function mintSession(params: {
         expiresAt,
         ipAddress: params.ipAddress,
         userAgent: params.userAgent,
-        metadata: {
+        metadata: JSON.stringify({
           ...(params.metadata || {}),
           emailHash: params.emailHash || undefined,
-        },
+        }),
       },
     });
 
@@ -256,7 +256,6 @@ export async function redeemAccessKey(
           tier: true,
           status: true,
           email: true,
-          userId: true,
         },
       },
     },
@@ -298,26 +297,16 @@ export async function redeemAccessKey(
   if (!minted.ok) return { ok: false, reason: minted.reason };
 
   try {
-    if (member.userId || member.email) {
-      await prisma.user.update({
-        where: member.userId ? { id: member.userId } : { email: member.email },
-        data: {
-          tier: tierNorm,
-          lastSeenAt: now(),
-        },
-      });
-    }
-
     const prevMeta =
-      record.metadata && typeof record.metadata === "object"
-        ? (record.metadata as Record<string, any>)
+      record.metadata && typeof record.metadata === "string"
+        ? (() => { try { return JSON.parse(record.metadata) as Record<string, unknown>; } catch { return {}; } })()
         : {};
 
     await prisma.innerCircleKey.update({
       where: { id: record.id },
       data: {
         lastUsedAt: now(),
-        metadata: {
+        metadata: JSON.stringify({
           ...prevMeta,
           lastRedeem: {
             at: now().toISOString(),
@@ -325,7 +314,7 @@ export async function redeemAccessKey(
             ua: ctx?.userAgent,
             sid: minted.sessionId,
           },
-        },
+        }),
       },
     });
 

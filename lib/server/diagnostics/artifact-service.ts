@@ -2,10 +2,9 @@
 import "server-only";
 import { sha256Hex } from "./signing";
 import { renderDiagnosticPdf } from "./export-pdf";
-import { writeArtifactObject } from "./storage";
+import { putDiagnosticObject } from "./storage";
 import { saveArtifactUnified } from "./artifact-unified";
 import { writeLineageEvent } from "./lineage";
-import { computeExpiry } from "./retention";
 
 export async function createDiagnosticPdfArtifact(input: {
   diagnosticRef: string;
@@ -38,7 +37,7 @@ export async function createDiagnosticPdfArtifact(input: {
   const objectKey = `${input.diagnosticRef}/${input.version}/${fileName}`;
   const sha256 = sha256Hex(pdf);
 
-  await writeArtifactObject({ objectKey, buffer: pdf });
+  await putDiagnosticObject({ objectKey, contentType: "application/pdf", body: pdf, fileName, sha256 });
 
   const artifact = await saveArtifactUnified({
     diagnosticRef: input.diagnosticRef,
@@ -54,12 +53,11 @@ export async function createDiagnosticPdfArtifact(input: {
     etag: sha256,
     createdBy: input.createdBy || null,
     retentionClass: input.retentionClass || "standard",
-    expiresAt: computeExpiry(input.retentionClass || "standard"),
   });
 
   await writeLineageEvent({
     diagnosticRef: input.diagnosticRef,
-    artifactId: artifact.id || null,
+    artifactId: artifact.artifactId || null,
     eventType: "created",
     version: input.version,
     actor: input.createdBy || "system",

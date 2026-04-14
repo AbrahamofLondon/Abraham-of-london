@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, ArrowLeft, ShieldAlert } from "lucide-react";
 import { fontConfig } from "@/lib/next-fonts";
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 
 function sanitizeLocalPath(input: string | null, fallback: string) {
   if (!input) return fallback;
@@ -26,7 +26,7 @@ const LockedPage: React.FC = () => {
   const searchParams = useSearchParams();
 
   const returnTo = React.useMemo(() => {
-    const target = searchParams.get("returnTo") || searchParams.get("callbackUrl");
+    const target = searchParams?.get("returnTo") || searchParams?.get("callbackUrl") || null;
     return sanitizeLocalPath(target, "/inner-circle/dashboard");
   }, [searchParams]);
 
@@ -37,7 +37,7 @@ const LockedPage: React.FC = () => {
   }, [returnTo]);
 
   return (
-    <Layout title="Access Restricted | Abraham of London" noSidebar>
+    <Layout title="Access Restricted | Abraham of London">
       <main className={`flex min-h-screen items-center justify-center px-6 py-20 bg-black overflow-hidden relative ${fontConfig?.fontSans?.variable} ${fontConfig?.fontSerif?.variable}`}>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl max-h-4xl bg-amber-500/[0.02] rounded-full blur-[120px] pointer-events-none" />
 
@@ -110,3 +110,4 @@ const LockedPage: React.FC = () => {
 };
 
 export default LockedPage;
+

@@ -1,13 +1,13 @@
 /* lib/auth/key-generator.ts — TOKENSTORE ALIGNED (DETERMINISTIC HASH) */
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { KeyStatus, Prisma } from "@prisma/client";
+import { KeyStatus } from "@prisma/client";
 import { hashAccessKey } from "@/lib/server/auth/tokenStore.postgres";
 
 export type GenerateKeyOptions = {
   keyType?: string; // stored as string in schema
   expiresInDays?: number; // default: 365 here (tokenStore default is 30)
-  metadata?: Prisma.JsonObject; // ✅ Prisma-safe JSON object
+  metadata?: Record<string, unknown>; // serialized to String column
 };
 
 function normalizeKeyType(input?: string): string {
@@ -52,8 +52,7 @@ export async function generatePrincipalKey(memberId: string, options: GenerateKe
       status: KeyStatus.active,
       expiresAt,
       lastUsedAt: null,
-      // ✅ must be Prisma InputJsonValue-compatible
-      metadata: (options.metadata ?? { keySuffix }) as Prisma.InputJsonValue,
+      metadata: JSON.stringify(options.metadata ?? { keySuffix }),
     },
   });
 

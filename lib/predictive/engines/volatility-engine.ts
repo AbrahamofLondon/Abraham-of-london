@@ -24,7 +24,7 @@ export class VolatilityEngine {
 
     for (let i = 1; i < values.length; i++) {
       // Use log returns to handle market percentage shifts
-      const logReturn = Math.log(values[i] / (values[i - 1] || 1));
+      const logReturn = Math.log(values[i]! / (values[i - 1] || 1));
       returns.push(logReturn);
     }
 

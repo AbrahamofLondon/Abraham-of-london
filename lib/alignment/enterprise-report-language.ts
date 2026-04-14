@@ -1,4 +1,4 @@
-lib/alignment/enterprise-report-language.ts
+// lib/alignment/enterprise-report-language.ts
 
 import {
   ENTERPRISE_ALIGNMENT_DOMAIN_LABELS,
@@ -19,7 +19,7 @@ export type EnterpriseNarrative = {
 
 function domainList(domains: string[]): string {
   if (!domains.length) return "no major weak domain";
-  if (domains.length === 1) return ENTERPRISE_ALIGNMENT_DOMAIN_LABELS[domains[0] as keyof typeof ENTERPRISE_ALIGNMENT_DOMAIN_LABELS] || domains[0];
+  if (domains.length === 1) return ENTERPRISE_ALIGNMENT_DOMAIN_LABELS[domains[0] as keyof typeof ENTERPRISE_ALIGNMENT_DOMAIN_LABELS] ?? domains[0]!;
   if (domains.length === 2) {
     return `${ENTERPRISE_ALIGNMENT_DOMAIN_LABELS[domains[0] as keyof typeof ENTERPRISE_ALIGNMENT_DOMAIN_LABELS] || domains[0]} and ${ENTERPRISE_ALIGNMENT_DOMAIN_LABELS[domains[1] as keyof typeof ENTERPRISE_ALIGNMENT_DOMAIN_LABELS] || domains[1]}`;
   }
@@ -48,20 +48,20 @@ export function buildEnterpriseNarrative(
   const weak = domainList(snapshot.weakestDomains);
 
   const executivePosture =
-    snapshot.band === "aligned"
+    snapshot.band === "ALIGNED"
       ? "The institution is presently coherent. Direction is not merely stated but broadly shared."
-      : snapshot.band === "drifting"
+      : snapshot.band === "DRIFTING"
         ? "The institution still retains direction, but structural drift is visible across the operating environment."
-        : snapshot.band === "misaligned"
+        : snapshot.band === "MISALIGNED"
           ? "The institution is expending effort without full coherence between mandate and lived operation."
           : "The institution is presently fragmented. Activity can no longer be trusted as a clean signal of strategic health.";
 
   const organisationalInterpretation =
-    snapshot.band === "aligned"
+    snapshot.band === "ALIGNED"
       ? `The current campaign indicates broad organisational coherence. The key risk is quiet softening, especially in ${weak}.`
-      : snapshot.band === "drifting"
+      : snapshot.band === "DRIFTING"
         ? `The current campaign indicates a structure that still functions, but with visible weakening. Immediate attention should focus on ${weak}.`
-        : snapshot.band === "misaligned"
+        : snapshot.band === "MISALIGNED"
           ? `The current campaign indicates that declared direction and actual operating pattern are no longer fully cooperating. The most urgent weaknesses are ${weak}.`
           : `The current campaign indicates that the organisation is operating in a fragmented state. Structural intervention should begin with ${weak}.`;
 
@@ -86,11 +86,11 @@ export function buildEnterpriseNarrative(
     varianceCommentary,
     interventionTitle: "Required Intervention",
     interventionBody:
-      snapshot.band === "aligned"
+      snapshot.band === "ALIGNED"
         ? "Protect coherence, tighten weak domains early, and prevent drift from becoming cultural normal."
-        : snapshot.band === "drifting"
+        : snapshot.band === "DRIFTING"
           ? "Recalibrate the institution before drift becomes operating culture. Tighten priorities, reduce noise, and address the weakest domains explicitly."
-          : snapshot.band === "misaligned"
+          : snapshot.band === "MISALIGNED"
             ? "Simplify, restate mandate, and repair the domains where direction and execution have separated."
             : "Do not optimise noise. Re-establish mandate, reduce complexity, and rebuild institutional order from the foundations.",
     advisoryCtaTitle: "Book Executive Diagnostic",

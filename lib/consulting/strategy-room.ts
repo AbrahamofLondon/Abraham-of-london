@@ -406,7 +406,7 @@ export async function archiveIntake(
       volatility: "medium",
       readinessScore: evaluation.score.total,
       emailHash,
-      payload: persisted as unknown as Prisma.InputJsonValue,
+      payload: JSON.stringify(persisted),
       createdAt: createdAtDate,
     };
 

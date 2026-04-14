@@ -48,8 +48,7 @@ export default async function handler(
     const isAdmin = tierAtLeast(tier, "private");
 
     const records = await listDiagnosticRecords({
-      actorUserId: isAdmin ? null : ctx.memberId || null,
-      authenticatedOnly: !isAdmin,
+      userId: isAdmin ? null : ctx.memberId || null,
       limit: 100,
     });
 
@@ -57,7 +56,7 @@ export default async function handler(
       ok: true,
       items: records.map((r) => ({
         diagnosticRef: r.diagnosticRef,
-        submittedAt: r.submittedAt,
+        submittedAt: r.createdAt,
         kind: r.kind,
         title: r.title,
         status: r.status,

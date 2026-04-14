@@ -51,12 +51,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         actorType: "system", // Schema uses lowercase 'system' default
         resourceType: "ACCESS_KEYS",
         status: "success",
-        metadata: { // FIXED: matching Prisma Schema field name
-          expiredCount: result[0].count, 
+        metadata: JSON.stringify({
+          expiredCount: result[0].count,
           staleCount: result[1].count,
           threshold: "180_DAYS",
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        })
       }
     });
 

@@ -15,7 +15,7 @@ import {
   Zap
 } from "lucide-react";
 
-import Layout from "@/components/layout/Layout"; // Updated to use our new layout
+import Layout from "@/components/Layout"; // Updated to use our new layout
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
 const INNER_CIRCLE_COOKIE_NAME = "aol_access";
@@ -128,7 +128,7 @@ const InnerCirclePage: NextPage = () => {
     <Layout 
       title="Identity Verification | Inner Circle" 
       description="Authentication required for sovereign intelligence access."
-      noSidebar={true} // Hide sidebar on the login gate
+      // Hide sidebar on the login gate
       className="p-0"
     >
       <main className="min-h-screen bg-[#050505] pt-32 pb-32 relative overflow-hidden">
@@ -314,3 +314,4 @@ const InnerCirclePage: NextPage = () => {
 };
 
 export default InnerCirclePage;
+

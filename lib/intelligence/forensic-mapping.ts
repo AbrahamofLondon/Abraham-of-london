@@ -1,5 +1,5 @@
 /* lib/intelligence/forensic-mapping.ts — V1.0 (INSTITUTIONAL TRACE) */
-import { crypto } from "crypto";
+import crypto from "crypto";
 import type { WatermarkPayload } from "./watermark-delegate";
 import type { PDFRegistryEntry } from "../pdf/registry.static";
 
@@ -33,15 +33,22 @@ export function generateForensicPayload(
     .toUpperCase();
 
   return {
-    documentId: config.id,
-    overlayToken: sig, // Displayed as "Verification"
-    timestamp: new Date().toISOString(),
+    visibleFooter: `TRACE ${traceId} // VERIFY ${sig}`,
+    overlayToken: sig,
+    overlayHints: {
+      rotationDeg: -28,
+      opacity: 0.06,
+      fontSize: 10,
+      letterSpacing: 1.6,
+    },
     metadata: {
       aol: {
         traceId: traceId,   // Displayed as "Transmission"
         sig: sig,
         tier: context.userTier,
         origin: context.ipAddress || "INTERNAL",
+        documentId: config.id,
+        timestamp: new Date().toISOString(),
       },
       identity: {
         subject: context.userId,

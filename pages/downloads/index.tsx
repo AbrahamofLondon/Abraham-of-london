@@ -107,7 +107,7 @@ export const getStaticProps: GetStaticProps<{
         };
       })
       .filter((x: DownloadListItem) => Boolean(x.slug))
-      .sort((a, b) => {
+      .sort((a: DownloadListItem, b: DownloadListItem) => {
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
         const da = a.dateISO ? new Date(a.dateISO).getTime() : 0;
@@ -197,7 +197,7 @@ const DownloadsIndexPage: NextPage<{
                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    {byCategory[cat].map((item) => (
+                    {(byCategory[cat] ?? []).map((item) => (
                       <article
                         key={item.slug}
                         className="group rounded-[2rem] border border-white/10 bg-white/[0.03] transition-all duration-300 hover:border-amber-500/30 hover:bg-white/[0.05]"

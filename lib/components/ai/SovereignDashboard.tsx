@@ -150,7 +150,7 @@ export const SovereignDashboard: React.FC<SovereignDashboardProps> = ({ result, 
                   <PolarGrid stroke="#E7DFD1" strokeDasharray="3 3" />
                   <PolarAngleAxis 
                     dataKey="subject" 
-                    tick={{ fill: '#666666', fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase' }} 
+                    tick={{ fill: '#666666', fontSize: 9, fontFamily: 'monospace' }} 
                   />
                   <Radar
                     name="Institutional Signal"

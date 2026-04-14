@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MoveRight, cursor, Target, MessageSquare, Layers } from "lucide-react";
+import { MoveRight, MousePointer2, Target, MessageSquare, Layers } from "lucide-react";
 
 export default function ExecutiveSynthesisDashboard() {
   const [activeNarrative, setActiveNarrative] = useState(0);
@@ -29,6 +29,8 @@ export default function ExecutiveSynthesisDashboard() {
       risk: "Short-termism at the expense of long-term resonance."
     }
   ];
+
+  const activeNarrativeItem = narratives[activeNarrative] ?? narratives[0]!;
 
   return (
     <div className="mx-auto max-w-6xl bg-[#0A0A0A] p-12 shadow-3xl border border-brand-gold/10 min-h-screen">
@@ -92,11 +94,11 @@ export default function ExecutiveSynthesisDashboard() {
           {/* Active Narrative Vector (Geometric Visual) */}
           <div className="relative z-10 text-center space-y-8">
             <div className="space-y-2">
-              <h2 className="font-serif text-4xl text-brand-cream italic">{narratives[activeNarrative].title}</h2>
+              <h2 className="font-serif text-4xl text-brand-cream italic">{activeNarrativeItem.title}</h2>
               <div className="flex justify-center gap-6">
                 <div className="text-center">
                   <span className="block font-mono text-[8px] uppercase tracking-widest text-brand-gold/60">Alignment</span>
-                  <span className="font-serif text-xl text-brand-cream">{narratives[activeNarrative].alignment}</span>
+                  <span className="font-serif text-xl text-brand-cream">{activeNarrativeItem.alignment}</span>
                 </div>
                 <div className="w-px h-8 bg-brand-gold/20" />
                 <div className="text-center">
@@ -107,7 +109,7 @@ export default function ExecutiveSynthesisDashboard() {
             </div>
             
             <p className="font-sans text-xs text-neutral-400 max-w-md mx-auto leading-relaxed border-t border-brand-gold/10 pt-8">
-              {narratives[activeNarrative].risk} This variance requires immediate synchronization in Stage 01 to prevent Phase 2 friction.
+              {activeNarrativeItem.risk} This variance requires immediate synchronization in Stage 01 to prevent Phase 2 friction.
             </p>
 
             <button className="px-8 py-3 bg-brand-gold text-brand-charcoal font-mono text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-brand-cream transition-all">

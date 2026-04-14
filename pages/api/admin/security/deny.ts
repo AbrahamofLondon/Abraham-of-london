@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await auditLogger.log({
       action: "SECURITY_DENYLIST_ADDITION",
-      severity: severity === "critical" ? "critical" : "high",
+      severity: severity === "critical" ? "critical" : "error",
       actorType: "admin",
       resourceType: "NETWORK_IDENTITY",
       resourceId: ip,

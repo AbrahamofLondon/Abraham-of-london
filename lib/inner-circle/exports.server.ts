@@ -1,7 +1,7 @@
 /* lib/inner-circle/exports.server.ts — PRODUCTION READY */
 import { prisma } from "@/lib/prisma.server";
 import * as Core from "./keys.server";
-import type { AccessTier } from "@prisma/client";
+import type { AccessTier } from "@/lib/access/tier-policy";
 import { auditLogger } from "@/lib/server/db/audit";
 
 /**
@@ -92,7 +92,7 @@ export async function revokeKey(keyId: string, reason?: string): Promise<boolean
     if (updated.count > 0) {
       await auditLogger.log({
         action: "KEY_REVOCATION",
-        severity: "warning",
+        severity: "warn",
         resourceId: keyId,
         resourceType: "INNER_CIRCLE_KEY",
         status: "success",
@@ -104,7 +104,7 @@ export async function revokeKey(keyId: string, reason?: string): Promise<boolean
   } catch (error) {
     await auditLogger.log({
       action: "KEY_REVOCATION_FAILED",
-      severity: "high",
+      severity: "error",
       resourceId: keyId,
       resourceType: "INNER_CIRCLE_KEY",
       status: "error",

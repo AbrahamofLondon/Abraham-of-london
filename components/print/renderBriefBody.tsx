@@ -1,9 +1,9 @@
 /* lib/pdf/renderers/renderBriefBody.tsx — INSTITUTIONAL BODY ORCHESTRATOR V5 */
 
 import React from "react";
-import type { ParsedBriefDocument, BriefBlock } from "./brief-types";
-import { parseBriefBody } from "./brief-parser";
-import { renderBriefBlock } from "./brief-blocks";
+import type { ParsedBriefDocument, BriefBlock } from "@/lib/pdf/renderers/brief-types";
+import { parseBriefBody } from "@/lib/pdf/renderers/brief-parser";
+import { renderBriefBlock } from "@/lib/pdf/renderers/brief-blocks";
 
 /* -------------------------------------------------------------------------- */
 /* Safe Utilities — Production Hardened                                       */
@@ -341,7 +341,7 @@ function renderBlocksWithEditorialPriority(blocks: BriefBlock[]): React.ReactNod
       firstParagraphSeen = true;
     }
 
-    return renderBriefBlock(block, index, { isFirstParagraph });
+    return renderBriefBlock(block, index);
   });
 }
 
@@ -430,5 +430,5 @@ export function renderBriefBody(content: string): React.ReactNode[] {
 /* -------------------------------------------------------------------------- */
 /* Re-exports for API compatibility                                            */
 /* -------------------------------------------------------------------------- */
-export { parseBriefBody } from "./brief-parser";
-export type { BriefBlock, ParsedBriefDocument } from "./brief-types";
+export { parseBriefBody } from "@/lib/pdf/renderers/brief-parser";
+export type { BriefBlock, ParsedBriefDocument } from "@/lib/pdf/renderers/brief-types";

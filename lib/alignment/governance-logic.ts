@@ -88,7 +88,7 @@ export async function checkProtocolExpiry(campaignId: string): Promise<ExpirySta
     return { isExpired: false, daysRemaining: Infinity, escalatedAt: null, severity: "WARNING" };
   }
 
-  const oldestNode = activeNodes[0];
+  const oldestNode = activeNodes[0]!;
   const daysSinceMandate = (Date.now() - oldestNode.createdAt.getTime()) / (1000 * 60 * 60 * 24);
   const daysRemaining = Math.max(0, PROTOCOL_EXPIRY_DAYS - daysSinceMandate);
   const isExpired = daysRemaining === 0;
@@ -265,32 +265,32 @@ export async function generateIntelligenceBrief(
   const mandated = nodes.filter(n => n.status === "MANDATED");
 
   const totalRecovery = liquidated.reduce((acc, n) => {
-    const match = n.recoveryProjection.match(/\d+/);
+    const match = (n as any).recoveryProjection?.match?.(/\d+/) ?? null;
     return acc + (match ? parseFloat(match[0]) : 0);
   }, 0);
 
   const rawDissonance = rawMetrics.reduce((acc, m) => acc + (m.intent - m.reality), 0) / rawMetrics.length;
   const integrityIndex = 100 - Math.max(0, rawDissonance - totalRecovery);
 
-  const highestFriction = [...rawMetrics].sort((a, b) => (b.intent - b.reality) - (a.intent - a.reality))[0];
+  const highestFriction = [...rawMetrics].sort((a, b) => (b.intent - b.reality) - (a.intent - a.reality))[0] ?? null;
 
   return {
     summary: `Following the Sovereign Alignment Protocol, the organisation has achieved ${integrityIndex}% institutional integrity, recovering ${totalRecovery}% of lost resonance capacity.`,
     keyFindings: [
-      `Primary friction identified in ${highestFriction.label}: ${Math.round(highestFriction.intent - highestFriction.reality)}% gap between strategic intent and operational reality.`,
+      `Primary friction identified in ${highestFriction?.label ?? "unknown"}: ${Math.round((highestFriction?.intent ?? 0) - (highestFriction?.reality ?? 0))}% gap between strategic intent and operational reality.`,
       `${liquidated.length} correction nodes successfully liquidated, restoring ${totalRecovery}% of projected recovery value.`,
       `${mandated.length} active interventions remain in progress, with projected completion within the current governance cycle.`,
     ],
     recoveryProgress: `${Math.round((liquidated.length / nodes.length) * 100)}% of correction nodes completed • ${Math.round(integrityIndex)}% resonance achieved • ${Math.round(100 - integrityIndex)}% remaining friction delta`,
     recommendations: mandated.length > 0
       ? [
-          `Prioritize liquidation of ${mandated[0].domain} correction node to unlock ${mandated[0].recoveryProjection} recovery projection.`,
+          `Prioritize liquidation of ${(mandated[0] as any)?.domain ?? "primary"} correction node to unlock ${(mandated[0] as any)?.recoveryProjection ?? "projected"} recovery projection.`,
           `Schedule executive review of remaining ${mandated.length} active protocols within 14 days.`,
           `Consider expanding intervention scope to address cross-domain contagion risks.`,
         ]
       : [
           `Sustained resonance confirmed. Maintain current cadence with quarterly recalibration.`,
-          `Monitor ${highestFriction.label} for early signs of friction re-emergence.`,
+          `Monitor ${highestFriction?.label ?? "primary domain"} for early signs of friction re-emergence.`,
         ],
   };
 }

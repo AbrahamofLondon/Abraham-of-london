@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "framer-motion";
 
 interface StatisticalConfidenceProps {
   score: number; // 0 to 100
@@ -18,7 +19,7 @@ interface ConfidenceStatus {
   threshold: "high" | "medium" | "low";
 }
 
-const CONFIDENCE_CONFIG: Record<string, ConfidenceStatus> = {
+const CONFIDENCE_CONFIG: { high: ConfidenceStatus; medium: ConfidenceStatus; low: ConfidenceStatus } = {
   high: {
     label: "High Precision",
     description: "Statistically significant. Suitable for high-confidence intervention and structural interpretation.",

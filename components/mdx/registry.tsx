@@ -84,7 +84,7 @@ export function getComponentSync(componentName: string): AnyComponent {
 
   // Return a component that renders MissingComponent
   const Missing: React.FC<{ componentName: string }> = (props) => {
-    return React.createElement(MissingComponent, { componentName: componentName, ...props });
+    return React.createElement(MissingComponent, { ...props, componentName: componentName });
   };
   return Missing;
 }

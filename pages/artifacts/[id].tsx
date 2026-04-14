@@ -133,7 +133,7 @@ export default function ArtifactDetailPage({
         <main className="min-h-screen bg-[#050609] px-6 py-24 text-white">
           <div className="mx-auto max-w-4xl rounded-[28px] border border-white/10 bg-white/[0.03] p-10">
             <div className="text-[10px] font-mono uppercase tracking-[0.26em] text-amber-300/70">
-              Artifacts
+              Intelligence Archives
             </div>
             <h1 className="mt-4 font-serif text-3xl text-white/95">
               Asset not found
@@ -147,7 +147,7 @@ export default function ArtifactDetailPage({
               className="mt-8 inline-flex items-center rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.04]"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to artifacts
+              Back to Intelligence Archives
             </Link>
           </div>
         </main>
@@ -177,7 +177,7 @@ export default function ArtifactDetailPage({
   return (
     <Layout>
       <Head>
-        <title>{item.title} | Artifacts | Abraham of London</title>
+        <title>{item.title} | Intelligence Archives | Abraham of London</title>
         <meta name="description" content={item.description} />
       </Head>
 
@@ -193,7 +193,7 @@ export default function ArtifactDetailPage({
                 className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/62 transition hover:bg-white/[0.05]"
               >
                 <ArrowLeft className="mr-2 h-3.5 w-3.5" />
-                Back to artifacts
+                Back to Intelligence Archives
               </Link>
             </div>
 

@@ -14,6 +14,7 @@ export const SAMPLE_DECISION_ASSETS: DecisionAsset[] = [
     requiredInterventions: ["Re-sequence strategic priorities", "Stabilize operating environment"],
     readinessTiers: ["DIAGNOSTIC", "ADVISORY", "EXECUTION"],
     priorityWeight: 6,
+    metadataConfidence: 100,
   },
   {
     id: "playbook-burnout-containment",
@@ -25,6 +26,7 @@ export const SAMPLE_DECISION_ASSETS: DecisionAsset[] = [
     requiredInterventions: ["Reduce execution strain before transformation load"],
     readinessTiers: ["DIAGNOSTIC", "ADVISORY"],
     priorityWeight: 8,
+    metadataConfidence: 100,
   },
   {
     id: "doctrine-decision-rights",
@@ -36,6 +38,7 @@ export const SAMPLE_DECISION_ASSETS: DecisionAsset[] = [
     requiredInterventions: ["Clarify decision owner and sponsor"],
     readinessTiers: ["DIAGNOSTIC", "ADVISORY", "EXECUTION"],
     priorityWeight: 5,
+    metadataConfidence: 100,
   },
   {
     id: "framework-volatility-short-horizon",
@@ -46,6 +49,7 @@ export const SAMPLE_DECISION_ASSETS: DecisionAsset[] = [
     marketRiskBands: ["HIGH", "CRITICAL"],
     requiredInterventions: ["Adjust decision horizon for external volatility"],
     priorityWeight: 4,
+    metadataConfidence: 100,
   },
   {
     id: "report-module-strategy-room-escalation",
@@ -56,5 +60,6 @@ export const SAMPLE_DECISION_ASSETS: DecisionAsset[] = [
     appliesTo: ["STRATEGY", "HIGH", "CRITICAL", "SOVEREIGN", "DIRECT", "PROXY"],
     readinessTiers: ["ADVISORY", "EXECUTION", "SOVEREIGN"],
     priorityWeight: 10,
+    metadataConfidence: 100,
   },
 ];

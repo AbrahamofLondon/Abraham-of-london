@@ -38,6 +38,7 @@ import {
   ALIGNMENT_DOMAIN_ORDER,
   ALIGNMENT_DOMAIN_LABELS,
 } from "@/lib/alignment/checklist";
+import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
 import { scorePurposeProfile } from "@/lib/alignment/scoring";
 import type {
   AlignmentDomain,
@@ -839,7 +840,12 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
     setResult(scored);
     setDirection(1);
     setStage(STAGE_DOMAINS.length);
-    try { sessionStorage.setItem("purpose-alignment-result", JSON.stringify(scored)); } catch {}
+    try {
+      sessionStorage.setItem(
+        "purpose-alignment-result",
+        JSON.stringify({ ...scored, subjectId: getOrCreateSubjectId() }),
+      );
+    } catch {}
     onScored?.(scored, answers);
     try {
       await fetch("/api/purpose-alignment/assessments", {

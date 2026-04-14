@@ -68,7 +68,7 @@ export default async function handler(
         organisation,
         dependencyLevel,
         volatility,
-        payload: toJsonValue(intakePayload),
+        payload: JSON.stringify(intakePayload),
         emailHash,
       },
     });

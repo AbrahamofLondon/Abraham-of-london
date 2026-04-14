@@ -15,6 +15,10 @@ function toJsonValue(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value ?? {})) as Prisma.InputJsonValue;
 }
 
+function toJsonString(value: unknown): string {
+  try { return JSON.stringify(value ?? {}); } catch { return "{}"; }
+}
+
 function cleanString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -127,7 +131,7 @@ export class AuditService {
           errorCode: cleanOptionalString(params.errorCode),
           errorDetail: cleanOptionalString(params.errorDetail),
 
-          metadata: toJsonValue(params.metadata),
+          metadata: toJsonString(params.metadata),
         },
       });
     } catch (error) {
@@ -155,7 +159,7 @@ export class AuditService {
           severity: params.severity,
           memberId: cleanOptionalString(params.memberId),
           action: cleanString(params.action),
-          details: toJsonValue(params.details),
+          details: toJsonString(params.details),
           ipAddress: cleanOptionalString(params.ip),
           userAgent: cleanOptionalString(params.userAgent),
         },
@@ -197,7 +201,7 @@ export class AuditService {
           resourceId: cleanOptionalString(params.resourceId),
           ipAddress: cleanOptionalString(params.ip),
           userAgent: cleanOptionalString(params.userAgent),
-          metadata: toJsonValue(params.metadata),
+          metadata: toJsonString(params.metadata),
           actorType: cleanOptionalString(params.actorType) ?? "system",
           status: cleanOptionalString(params.status) ?? "success",
           resourceType: cleanOptionalString(params.resourceType),
@@ -211,7 +215,7 @@ export class AuditService {
           errorMessage: cleanOptionalString(params.errorMessage),
           category: cleanOptionalString(params.category),
           subCategory: cleanOptionalString(params.subCategory),
-          tags: toJsonValue(params.tags ?? []),
+          tags: toJsonString(params.tags ?? []),
         },
       });
     } catch (error) {

@@ -1,58 +1,66 @@
+/* components/SectionDivider.tsx
+   Design: Institutional Monumentalism
+
+   Previous version had:
+   - animate-ping pulsing amber dot
+   - animate-pulse-horizontal scanning amber line
+   - rounded-full label container
+   - "SYS-CHECK-OK" default label
+   - font-black on label text
+   - The entire component was a decorative separator performing operational signalling
+
+   Rebuilt: A divider. Its job is to separate sections with precision.
+   A gold rule — present but not insistent.
+   Optional cap label in the platform's Bridge pattern.
+   No animation. No performed status. No dot.
+*/
+
 import * as React from "react";
+
+const GOLD = "#C9A96E";
 
 type Props = {
   tight?: boolean;
   className?: string;
   id?: string;
-  label?: string; // New: optional technical label for the divider
+  cap?: string; // optional centre label — factual only, no invented codes
 };
 
-export default function SectionDivider({ 
-  tight = false, 
-  className = "", 
+export default function SectionDivider({
+  tight = false,
+  className = "",
   id,
-  label = "SYS-CHECK-OK"
+  cap,
 }: Props): React.ReactElement {
   return (
-    <div id={id} className={`bg-black overflow-hidden ${className}`}>
-      <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${tight ? "py-10" : "py-20"}`}>
-        <div className="relative flex items-center">
-          
-          {/* 1. The Main Track (The "Canon" Line) */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          
-          {/* 2. The Animated Pulse (The "Active" Signal) */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-1/3 h-[1.5px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent animate-pulse-horizontal" />
+    <div
+      id={id}
+      className={className}
+      style={{ backgroundColor: "rgb(6 6 9)", overflow: "hidden" }}
+    >
+      <div className={`mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 ${tight ? "py-7" : "py-14"}`}>
+        {cap ? (
+          /* Cap variant — matches the Bridge pattern in pages/index.tsx */
+          <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
+            <div style={{ flex: 1, height: "1px", background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06))" }} />
+            <span style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px", letterSpacing: "0.46em", textTransform: "uppercase",
+              color: "rgba(255,255,255,0.18)",
+              whiteSpace: "nowrap",
+            }}>
+              {cap}
+            </span>
+            <div style={{ flex: 1, height: "1px", background: "linear-gradient(to left, transparent, rgba(255,255,255,0.06))" }} />
           </div>
-
-          {/* 3. The Technical Label (High-Signal Aesthetic) */}
-          <div className="absolute left-1/2 -translate-x-1/2 -top-3">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-black">
-              <span className="flex h-1.5 w-1.5 items-center justify-center">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex h-1 w-1 rounded-full bg-amber-500"></span>
-              </span>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 whitespace-nowrap">
-                {label}
-              </span>
-            </div>
-          </div>
-
-        </div>
+        ) : (
+          /* Plain rule — softGold at low opacity */
+          <div style={{
+            height: "1px",
+            background: `linear-gradient(to right, transparent, ${GOLD}22, transparent)`,
+          }} />
+        )}
       </div>
-
-      {/* ✅ Fixed: Removed 'jsx' prop – now using a standard style tag */}
-      <style>{`
-        @keyframes pulse-horizontal {
-          0% { transform: translateX(-150%); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateX(150%); opacity: 0; }
-        }
-        .animate-pulse-horizontal {
-          animation: pulse-horizontal 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-      `}</style>
     </div>
   );
 }

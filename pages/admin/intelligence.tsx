@@ -238,7 +238,8 @@ function DealFlowBlock({
       REJECT: { color: "bg-gray-500/20 text-gray-400", label: "Reject" },
     };
 
-    const match = config[intent] || config.REJECT;
+    const fallback = { color: "bg-gray-500/20 text-gray-400", label: "Reject" };
+    const match = config[intent] ?? config["REJECT"] ?? fallback;
     return (
       <span className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider ${match.color}`}>
         {match.label}
@@ -256,7 +257,8 @@ function DealFlowBlock({
       LOW: { color: "text-gray-400 border-gray-500/30", icon: TrendingDown },
     };
 
-    const match = config[quality] || config.MEDIUM;
+    const fallback = { color: "text-blue-400 border-blue-500/30", icon: Activity };
+    const match = config[quality] ?? config["MEDIUM"] ?? fallback;
     const Icon = match.icon;
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${match.color}`}>
@@ -673,9 +675,9 @@ export const getServerSideProps: GetServerSideProps<IntelligenceProps> = async (
   let canonicalEfficacy: EfficacyRow[] = [];
   try {
     const rows =
-      (await db?.decisionContextEfficacy.findMany({
+      (await db?.decisionAssetEfficacy.findMany({
         take: 12,
-        orderBy: [{ contextualConversionRate: "desc" }],
+        orderBy: [{ efficacyScore: "desc" }],
       })) || [];
 
     canonicalEfficacy = rows.map((row: any) => ({

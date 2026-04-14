@@ -1,5 +1,16 @@
 // ALL imports are lazy — the Prisma generated client crashes at evaluation time
 // during Next.js static page collection ("lib is not defined" in bundled output).
+//
+// The runtime `Prisma` proxy below provides lazy access to the Prisma namespace
+// VALUES; the `import type { Prisma as PrismaTypes }` below provides eager
+// access to the Prisma TYPE namespace. Type-only imports are erased at runtime
+// so this does NOT defeat the lazy-require pattern. All `Prisma.X` references
+// in TYPE positions throughout this file resolve via PrismaTypes.
+import type {
+  Prisma as PrismaTypes,
+  TeamAssessmentSnapshot,
+} from "@prisma/client";
+
 let _db: any = null;
 let _Prisma: any = null;
 
@@ -50,8 +61,8 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 // ✅ FIX #1: SAFE JSON SERIALIZATION - No unsafe casting
-function toPrismaJsonValue(value: unknown): Prisma.InputJsonValue {
-  if (value === null || value === undefined) return null as unknown as Prisma.InputJsonValue;
+function toPrismaJsonValue(value: unknown): PrismaTypes.InputJsonValue {
+  if (value === null || value === undefined) return null as unknown as PrismaTypes.InputJsonValue;
 
   if (
     typeof value === "string" ||
@@ -66,15 +77,15 @@ function toPrismaJsonValue(value: unknown): Prisma.InputJsonValue {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => toPrismaJsonValue(item)) as Prisma.InputJsonArray;
+    return value.map((item) => toPrismaJsonValue(item)) as PrismaTypes.InputJsonArray;
   }
 
   if (isPlainObject(value)) {
-    const out: Record<string, Prisma.InputJsonValue> = {};
+    const out: Record<string, PrismaTypes.InputJsonValue> = {};
     for (const [key, val] of Object.entries(value)) {
       out[key] = toPrismaJsonValue(val);
     }
-    return out as Prisma.InputJsonObject;
+    return out as PrismaTypes.InputJsonObject;
   }
 
   return String(value);
@@ -295,7 +306,10 @@ export async function saveEnterpriseAssessment(
     throw new Error("Invalid assessment payload: missing identifiers");
   }
 
-  return db.$transaction(async (tx) => {
+  // tx annotated as `any` because tightening to PrismaTypes.TransactionClient
+  // reveals pre-existing C3 contagion at lines 318-325 (InputJsonValue → String
+  // column writes via toPrismaJsonValue) which is outside this batch's scope.
+  return db.$transaction(async (tx: any) => {
     await tx.enterpriseAssessment.deleteMany({
       where: { participantId: data.participantId },
     });
@@ -337,7 +351,10 @@ export async function loadCampaignAssessments(campaignId: string) {
     orderBy: { submittedAt: "desc" },
   });
 
-  return assessments.map((assessment) => ({
+  type AssessmentWithParticipant = PrismaTypes.EnterpriseAssessmentGetPayload<{
+    include: { participant: { include: { membership: true } } };
+  }>;
+  return assessments.map((assessment: AssessmentWithParticipant) => ({
     percentScore: normalizeNumber(assessment.percentScore, 0),
     totalScore: normalizeNumber(assessment.totalScore, 0),
     possibleScore: normalizeNumber(assessment.possibleScore, 100),
@@ -401,7 +418,8 @@ export async function replaceTeamSnapshots(
   campaignId: string,
   snapshots: TeamSnapshotPersistenceInput[]
 ) {
-  return db.$transaction(async (tx) => {
+  // tx annotated as `any` for the same C3-contagion reason as replaceEnterpriseAssessment above.
+  return db.$transaction(async (tx: any) => {
     await tx.teamAssessmentSnapshot.deleteMany({
       where: { campaignId },
     });
@@ -443,11 +461,11 @@ export async function getEnterpriseDashboardView(orgId: string) {
   });
 }
 
-export async function createOrganisation(data: Prisma.OrganisationCreateInput) {
+export async function createOrganisation(data: PrismaTypes.OrganisationCreateInput) {
   return db.organisation.create({ data });
 }
 
-export async function createCampaign(data: Prisma.AlignmentCampaignCreateInput) {
+export async function createCampaign(data: PrismaTypes.AlignmentCampaignCreateInput) {
   return db.alignmentCampaign.create({ data });
 }
 
@@ -459,7 +477,7 @@ export async function updateCampaignStatus(id: string, status: string) {
 }
 
 export async function createCampaignParticipants(
-  data: Prisma.CampaignParticipantCreateManyInput[]
+  data: PrismaTypes.CampaignParticipantCreateManyInput[]
 ) {
   return db.campaignParticipant.createMany({
     data,
@@ -490,7 +508,7 @@ export async function getTeamSnapshots(campaignId: string) {
     orderBy: { teamName: "asc" },
   });
 
-  return rows.map((row) => ({
+  return rows.map((row: TeamAssessmentSnapshot) => ({
     teamName: row.teamName,
     respondentCount: row.respondentCount,
     totalScore: row.totalScore,

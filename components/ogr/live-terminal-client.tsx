@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { ContagionMap } from "@/components/admin/reporting/contagion-map";
 import { TerminalConstitutionSurface } from "@/components/ogr/TerminalConstitutionSurface";
+import type { CanonicalSections } from "@/lib/decision/canonical-sections";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -536,15 +537,7 @@ export function OGRLiveTerminalClient({
             {/* Constitutional surface — using canonical contract */}
             {canonical ? (
               <TerminalConstitutionSurface
-                constitution={constitutionForSurface}
-                recommendations={recommendations}
-                nextAction={nextAction}
-                priorityStack={canonical.sections.priorityStack}
-                failureModes={canonical.sections.failureModes}
-                requiredInterventions={canonical.sections.requiredInterventions}
-                worldviewAnchors={canonical.sections.worldviewAnchors}
-                sponsorTypes={canonical.sections.sponsorTypes}
-                rationale={canonical.sections.rationale}
+                sections={canonical.sections as unknown as CanonicalSections}
               />
             ) : null}
 

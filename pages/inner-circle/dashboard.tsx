@@ -3,18 +3,7 @@
 import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Link from "next/link";
-import {
-  BookOpen,
-  ShieldCheck,
-  Lock,
-  RefreshCw,
-  Search,
-  ArrowRight,
-  TrendingUp,
-  Zap,
-  Fingerprint,
-  FileText,
-} from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
 
 import { allBriefs } from "contentlayer/generated";
 
@@ -22,8 +11,9 @@ import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 import { prisma } from "@/lib/prisma";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { useRouter } from "next/router";
 
 interface DashboardProps {
@@ -34,13 +24,8 @@ interface DashboardProps {
     email?: string | null;
   };
   initialData: {
-    content: any[];
     diagnostics: any[];
-    stats: {
-      total: number;
-      diagnostics: number;
-      reportsReady: number;
-    };
+    briefs: any[];
     user: {
       name: string;
       tier: string;
@@ -52,52 +37,16 @@ interface DashboardProps {
 
 export default function InnerCircleDashboard({ access, initialData, error }: DashboardProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
-
-  const filteredContent = React.useMemo(() => {
-    if (!initialData?.content) return [];
-    if (!searchTerm) return initialData.content;
-    const term = searchTerm.toLowerCase();
-    return initialData.content.filter(
-      (item) =>
-        item.title?.toLowerCase().includes(term) ||
-        item.excerpt?.toLowerCase().includes(term) ||
-        item.kind?.toLowerCase().includes(term),
-    );
-  }, [searchTerm, initialData.content]);
-
-  const filteredDiagnostics = React.useMemo(() => {
-    if (!initialData?.diagnostics) return [];
-    if (!searchTerm) return initialData.diagnostics;
-    const term = searchTerm.toLowerCase();
-    return initialData.diagnostics.filter(
-      (item) =>
-        item.title?.toLowerCase().includes(term) ||
-        item.kind?.toLowerCase().includes(term) ||
-        item.diagnosticRef?.toLowerCase().includes(term) ||
-        item.respondentName?.toLowerCase().includes(term) ||
-        item.organisation?.toLowerCase().includes(term),
-    );
-  }, [searchTerm, initialData.diagnostics]);
-
-  const handleRefresh = () => {
-    setLoading(true);
-    router.reload();
-  };
 
   if (error) {
     return (
-      <Layout title="Vault Error | Abraham of London" noSidebar>
-        <div className="min-h-[80vh] flex items-center justify-center p-6 text-center">
-          <div className="max-w-md bg-white p-12 border border-red-100 shadow-2xl">
-            <ShieldCheck className="h-12 w-12 text-red-500 mx-auto mb-6" />
-            <h1 className="text-2xl font-serif font-bold text-gray-900 mb-4">Vault Sync Error</h1>
-            <p className="text-gray-500 mb-8 font-light italic">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="w-full bg-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all"
-            >
+      <Layout title="Vault Error | Abraham of London">
+        <div>
+          <div>
+            <ShieldCheck />
+            <h1>Vault Sync Error</h1>
+            <p>{error}</p>
+            <button onClick={() => router.reload()}>
               Retry Protocol Connection
             </button>
           </div>
@@ -110,185 +59,116 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
     <ErrorBoundary>
       <Layout
         title="Member Dashboard | Abraham of London"
-        currentPath="/inner-circle/dashboard"
-        className="bg-white"
+       
       >
-        <div className="max-w-7xl mx-auto">
-          <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-100 pb-12">
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="bg-blue-50 text-blue-700 border border-blue-100 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
-                  {access.tier} Clearance
-                </span>
-                <span className="text-gray-400 text-[10px] font-mono uppercase tracking-widest">
-                  Sync: {initialData.user.lastLogin ? new Date(initialData.user.lastLogin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Active"}
-                </span>
-              </div>
-
-              <h1 className="font-serif text-5xl md:text-6xl text-gray-900 tracking-tighter leading-none italic">
-                The Kingdom <span className="text-gray-300">Vault.</span>
-              </h1>
-              <p className="mt-6 text-gray-500 max-w-xl text-lg font-light leading-relaxed italic">
-                Welcome back, <span className="text-gray-900 font-medium">{initialData.user.name}</span>.
-                Your restricted manuscripts and diagnostic records now sit in the same operating surface.
+        <div className="min-h-screen bg-[rgb(3,3,5)] text-white">
+          <WorkspaceNav />
+          <div className="mx-auto max-w-5xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20">
+            <header className="max-w-3xl">
+              <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
+                INNER CIRCLE · CHAMBER MODE
               </p>
-            </div>
+              <h1 className="mt-5 font-serif text-[clamp(2rem,4vw,3rem)] font-light italic leading-[0.95] text-white/92">
+                The workspace.
+              </h1>
+              <p className="mt-4 font-mono text-[7.5px] uppercase tracking-[0.12em] text-white/48">
+                Active session · {initialData.user.name} · {access.tier}
+              </p>
+            </header>
 
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="p-4 rounded-full bg-gray-50 border border-gray-100 hover:bg-gray-100 transition-all text-gray-400 hover:text-blue-600 group"
-            >
-              <RefreshCw size={18} className={`${loading ? "animate-spin text-blue-600" : "group-hover:rotate-180 transition-transform duration-500"}`} />
-            </button>
-          </header>
-
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <StatTile label="Briefs Available" val={initialData.stats.total} icon={BookOpen} />
-            <StatTile label="Diagnostics" val={initialData.stats.diagnostics} icon={Fingerprint} />
-            <StatTile label="Reports Ready" val={initialData.stats.reportsReady} icon={FileText} />
-            <StatTile label="Vault Tier" val={access.tier.toUpperCase()} icon={ShieldCheck} />
-          </section>
-
-          <div className="mb-12 relative">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
-            <input
-              type="text"
-              placeholder="Filter manuscripts and diagnostic records..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-100 rounded-full py-5 pl-16 pr-6 text-gray-900 focus:bg-white focus:border-blue-200 outline-none transition-all placeholder:text-gray-300 font-light"
-            />
-          </div>
-
-          <div className="grid lg:grid-cols-4 gap-16">
-            <div className="lg:col-span-3 space-y-16">
+            <div className="mt-12 space-y-12">
               <section>
-                <div className="mb-8 flex items-center justify-between">
-                  <h2 className="font-serif text-3xl italic text-gray-900">Diagnostic Records</h2>
-                  <Link
-                    href="/diagnostics"
-                    className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 flex items-center gap-2"
-                  >
-                    New Diagnostic <ArrowRight size={14} />
-                  </Link>
-                </div>
-
-                {/* Diagnostics Grid */}
-                <div className="grid gap-8 sm:grid-cols-2">
-                  {initialData.content.length > 0 ? (
-                    initialData.content.map((item, i) => (
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Diagnostic Records
+                </h2>
+                <div className="mt-4 border-t border-white/8">
+                  {initialData.diagnostics.length > 0 ? (
+                    initialData.diagnostics.map((item, i) => (
                       <Link
                         key={item.diagnosticRef || i}
                         href={item.href}
-                        className="group p-8 border border-gray-100 bg-white hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/5 transition-all flex flex-col h-full relative"
+                        className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
                       >
-                        <div className="absolute top-0 right-0 p-8">
-                          <ArrowRight className="h-5 w-5 text-gray-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                        </div>
-
-                        <div className="mb-6 flex items-center justify-between gap-4">
-                          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-600/60 py-1 px-3 bg-blue-50 rounded-full">
-                            {item.kind}
-                          </span>
-                          <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-gray-400">
-                            {item.reportStatus}
-                          </span>
-                        </div>
-
-                        <h3 className="font-serif text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-700 transition-colors leading-tight italic">
-                          {item.title}
-                        </h3>
-
-                        <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-light">
-                          {item.excerpt}
-                        </p>
-
-                        <div className="mb-8 text-[10px] font-mono uppercase tracking-[0.22em] text-gray-400">
-                          Ref: {item.diagnosticRef}
-                        </div>
-
-                        <div className="pt-6 border-t border-gray-50 flex items-center justify-between text-[10px] font-mono text-gray-400 uppercase tracking-widest">
-                          <span>{item.date}</span>
-                          <span>{item.readTime}</span>
-                        </div>
+                        <span>
+                          {item.title || item.date} · {item.reportStatus}
+                        </span>
+                        <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                          → View
+                        </span>
                       </Link>
                     ))
                   ) : (
-                    <div className="sm:col-span-2 py-32 text-center border border-dashed border-gray-100 rounded-lg">
-                      <Lock size={32} className="mx-auto text-gray-200 mb-4" />
-                      <p className="text-gray-400 italic font-serif text-lg">
-                        No reports found matching your query.
-                      </p>
+                    <div className="border-b border-white/6 py-3 text-sm text-white/32">
+                      No diagnostic records available.
                     </div>
                   )}
                 </div>
               </section>
 
               <section>
-                <div className="mb-8 flex items-center justify-between">
-                  <h2 className="font-serif text-3xl italic text-gray-900">Restricted Manuscripts</h2>
-                </div>
-
-                <div className="grid gap-8 sm:grid-cols-2">
-                  {filteredContent.length > 0 ? (
-                    filteredContent.map((item, i) => (
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Restricted Manuscripts
+                </h2>
+                <div className="mt-4 border-t border-white/8">
+                  {initialData.briefs.length > 0 ? (
+                    initialData.briefs.map((item, i) => (
                       <Link
                         key={i}
                         href={item.href}
-                        className="group p-8 border border-gray-100 bg-white hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/5 transition-all flex flex-col h-full relative"
+                        className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
                       >
-                        <div className="absolute top-0 right-0 p-8">
-                          <ArrowRight className="h-5 w-5 text-gray-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                        </div>
-                        <div className="mb-6">
-                          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-600/60 py-1 px-3 bg-blue-50 rounded-full">
-                            {item.kind}
-                          </span>
-                        </div>
-                        <h3 className="font-serif text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-700 transition-colors leading-tight italic">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-500 line-clamp-2 mb-8 flex-grow leading-relaxed font-light">{item.excerpt}</p>
-                        <div className="pt-6 border-t border-gray-50 flex items-center justify-between text-[10px] font-mono text-gray-400 uppercase tracking-widest">
-                          <span>{item.date}</span>
-                          <span>{item.readTime}</span>
-                        </div>
+                        <span className="flex items-center gap-2">
+                          {item.restricted ? <Lock size={14} className="text-white/34" /> : null}
+                          {item.title} · {item.accessTier}
+                        </span>
+                        <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                          → Read
+                        </span>
                       </Link>
                     ))
                   ) : (
-                    <div className="sm:col-span-2 py-32 text-center border border-dashed border-gray-100 rounded-lg">
-                      <Lock size={32} className="mx-auto text-gray-200 mb-4" />
-                      <p className="text-gray-400 italic font-serif text-lg">No manuscripts found matching your query.</p>
+                    <div className="border-b border-white/6 py-3 text-sm text-white/32">
+                      No manuscripts available at your access tier.
                     </div>
                   )}
                 </div>
               </section>
-            </div>
 
-            <aside className="space-y-12">
-              <div className="p-10 bg-gray-900 text-white shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
-                <h3 className="font-serif text-2xl font-bold mb-4 italic">Institutional Advisory</h3>
-                <p className="text-sm text-gray-400 mb-10 leading-relaxed font-light">
-                  Direct access for board-level diagnostics, report review, or strategic escalation.
-                </p>
-                <Link href="/consulting/strategy-room" className="block w-full py-5 bg-white text-black text-center text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-50 transition-all">
-                  Enter Strategy Room
-                </Link>
-              </div>
-
-              <div className="p-8 border-l border-gray-100">
-                <h3 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                  <TrendingUp size={14} className="text-blue-600" /> System Rhythms
-                </h3>
-                <div className="space-y-6">
-                  <RhythmItem label="Next Salon" val="Feb 2026" />
-                  <RhythmItem label="Intel Cycle" val="Active" />
-                  <RhythmItem label="Diagnostic Loop" val="Closed" />
+              <section>
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Quick Actions
+                </h2>
+                <div className="mt-4 border-t border-white/8">
+                  <Link
+                    href="/purpose-alignment"
+                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
+                  >
+                    <span>New diagnostic</span>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                      → Open
+                    </span>
+                  </Link>
+                  <Link
+                    href="/strategy-room"
+                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
+                  >
+                    <span>Strategy Room</span>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                      → Open
+                    </span>
+                  </Link>
+                  <Link
+                    href="/inner-circle/account"
+                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
+                  >
+                    <span>Account settings</span>
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
+                      → Manage
+                    </span>
+                  </Link>
                 </div>
-              </div>
-            </aside>
+              </section>
+            </div>
           </div>
         </div>
       </Layout>
@@ -296,35 +176,11 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
   );
 }
 
-const StatTile = ({ label, val, icon: Icon }: any) => (
-  <div className="bg-gray-50 border border-gray-100 p-8 hover:bg-white hover:shadow-xl transition-all">
-    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-400 mb-6 shadow-sm border border-gray-100">
-      <Icon size={18} strokeWidth={1.5} />
-    </div>
-    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">{label}</span>
-    <div className="text-2xl font-serif italic font-bold text-gray-900">{val}</div>
-  </div>
-);
-
-const RhythmItem = ({ label, val }: any) => (
-  <div className="flex items-center justify-between border-b border-gray-50 pb-5 last:border-0 last:pb-0">
-    <span className="text-[10px] text-gray-400 uppercase tracking-widest">{label}</span>
-    <span className="text-[10px] font-mono text-gray-900 font-bold">{val}</span>
-  </div>
-);
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const sessionId = readAccessCookie(context.req as any);
-
-    if (!sessionId) {
-      return {
-        redirect: {
-          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
-          permanent: false,
-        },
-      };
-    }
+    // AL token cookie presence is enforced by middleware.ts (Tier 2).
+    // By the time this handler runs, the cookie is guaranteed to exist.
+    const sessionId = readAccessCookie(context.req as any) || "";
 
     const ctx = await getSessionContext(sessionId);
 
@@ -346,8 +202,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       // Step 1: Get grants for this user
       const grants = await prisma.diagnosticArtifactAccessGrant.findMany({
         where: { granteeEmail: userEmail },
-        select: { artifactId: true, grantedAt: true },
-        orderBy: { grantedAt: "desc" },
+        select: { artifactId: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
       });
 
       if (grants.length > 0) {
@@ -362,9 +218,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         diagnostics = artifacts.map((artifact) => ({
           diagnosticRef: artifact.diagnosticRef,
-          title: artifact.title || "Diagnostic Report",
+          title: artifact.fileName || "Diagnostic Report",
           kind: "diagnostic",
-          excerpt: artifact.narrative?.substring(0, 200) || "Structured diagnostic report.",
+          excerpt: "Structured diagnostic report.",
           href: `/inner-circle/reports/${encodeURIComponent(artifact.diagnosticRef)}`,
           date: artifact.createdAt
             ? new Date(artifact.createdAt).toLocaleDateString("en-GB", {
@@ -373,23 +229,29 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
               })
             : "2026",
           readTime: artifact.version ? `v${artifact.version}` : "draft",
-          reportStatus: artifact.status === "issued" ? "generated" : "pending",
+          reportStatus: artifact.isRevoked ? "pending" : "generated",
         }));
       }
     }
 
     // ✅ CONTENT QUERY ALIGNED TO SCHEMA (uses summary, not excerpt)
-    const content = allBriefs
-      .filter((b) => b.status === "published" || process.env.NODE_ENV === "development")
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .map((b) => ({
-        title: b.title,
-        kind: b.category || "Briefing",
-        excerpt: b.summary || b.excerpt || "Institutional strategic summary.",
-        href: `/inner-circle/briefs/${b._raw.flattenedPath}`,
-        date: b.date ? new Date(b.date).toLocaleDateString("en-GB", { month: "short", year: "numeric" }) : "2026",
-        readTime: b.readingTime?.text || "12m",
-      }));
+    const briefs = allBriefs
+      .filter((b) => (b as any).status === "published" || process.env.NODE_ENV === "development")
+      .filter((b) => {
+        const tier = String((b as any).accessTier ?? "public").toLowerCase();
+        if (tier === "public") return true;
+        return tierAtLeast(ctx.tier, "inner-circle");
+      })
+      .sort((a, b) => new Date(String((b as any).date ?? "")).getTime() - new Date(String((a as any).date ?? "")).getTime())
+      .map((b) => {
+        const ab = b as any;
+        return {
+          title: String(ab.title ?? ""),
+          accessTier: String(ab.accessTier ?? "inner-circle"),
+          href: `/inner-circle/briefs/${ab._raw?.flattenedPath ?? ""}`,
+          restricted: String(ab.accessTier ?? "inner-circle").toLowerCase() !== "public",
+        };
+      });
 
     return {
       props: {
@@ -400,13 +262,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           email: userEmail,
         },
         initialData: {
-          content: diagnostics,
           diagnostics: diagnostics,
-          stats: {
-            total: content.length,
-            diagnostics: diagnostics.length,
-            reportsReady: diagnostics.filter((d) => d.reportStatus === "generated").length,
-          },
+          briefs,
           user: {
             name: ctx.name || "Member",
             tier: ctx.tier || "public",
@@ -420,3 +277,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: { error: "Institutional Vault connectivity lost. Systems re-aligning." } };
   }
 };
+
+
+
+

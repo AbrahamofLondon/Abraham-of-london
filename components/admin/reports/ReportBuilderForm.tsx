@@ -35,12 +35,12 @@ export default function ReportBuilderForm({
           executiveSummary: state.executiveSummary,
           keyFindings: state.keyFindings
             .split("\n")
-            .map((x) => x.trim())
+            .map((x: string) => x.trim())
             .filter(Boolean),
           riskSummary: state.riskSummary,
           correctionPriorities: state.correctionPriorities
             .split("\n")
-            .map((x) => x.trim())
+            .map((x: string) => x.trim())
             .filter(Boolean),
           advisoryRecommendation: state.advisoryRecommendation,
           status: state.status,

@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 // lib/server/with-inner-circle-access.ts
 /**
  * Inner Circle access middleware with optional tier enforcement and rate limiting.
@@ -142,3 +144,4 @@ export function withInnerCircleAccess(
 }
 
 export default withInnerCircleAccess;
+

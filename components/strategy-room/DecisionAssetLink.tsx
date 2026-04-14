@@ -4,7 +4,6 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  trackAssetClick,
   trackConversion,
   trackFollowup,
 } from "@/lib/strategy-room/client-trackers";
@@ -99,22 +98,16 @@ export function DecisionAssetLink({
   );
 
   const handleClick = React.useCallback(() => {
-    try {
-      trackAssetClick(trackingPayload);
-    } catch (error) {
-      console.error("[DecisionAssetLink] trackAssetClick failed:", error);
-    }
-
     if (conversionTypeOnClick) {
       try {
         trackConversion({
           sessionKey,
           conversionType: conversionTypeOnClick,
-          assetId: String(asset.id),
-          assetTitle: String(asset.title),
-          assetHref: href,
-          assetKind: asset.kind,
           metadata: {
+            assetId: String(asset.id),
+            assetTitle: String(asset.title),
+            assetHref: href,
+            assetKind: asset.kind,
             rank,
             source: "decision_asset_link",
           },
@@ -128,7 +121,12 @@ export function DecisionAssetLink({
       try {
         trackFollowup({
           sessionKey,
-          ...followupOnClick,
+          routeAfter: (followupOnClick.routeAfter ?? "STRATEGY") as "REJECT" | "DIAGNOSTIC" | "STRATEGY",
+          readinessTierAfter: followupOnClick.readinessTierAfter ?? "",
+          authorityTypeAfter: followupOnClick.authorityTypeAfter ?? "",
+          clarityDelta: followupOnClick.clarityDelta ?? 0,
+          authorityDelta: followupOnClick.authorityDelta ?? 0,
+          convertedAfterGuidance: followupOnClick.convertedAfterGuidance ?? false,
           metadata: {
             ...(followupOnClick.metadata || {}),
             assetId: String(asset.id),
@@ -143,7 +141,6 @@ export function DecisionAssetLink({
       }
     }
   }, [
-    trackingPayload,
     conversionTypeOnClick,
     followupOnClick,
     sessionKey,

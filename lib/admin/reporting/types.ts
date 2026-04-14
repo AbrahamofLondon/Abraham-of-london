@@ -234,8 +234,54 @@ export interface ExecutiveReportCampaignPayload {
   correctionNodes?: unknown[];
 }
 
+/** Canonical report data shape produced by executive-report-service */
+export interface ExecutiveReportData {
+  state?: string;
+  narrative?: {
+    headline?: string;
+    summary?: string;
+    mandate?: string;
+  };
+  resonance?: {
+    telemetry?: {
+      averageDissonance?: number;
+      domains?: Array<{
+        label?: string;
+        domain?: string;
+        intent?: number;
+        reality?: number;
+        dissonance?: number;
+      }>;
+    };
+  };
+  hcdAggregate?: {
+    overallBurnoutIndex?: number;
+    criticalDomains?: string[];
+  };
+  hcd?: Array<{
+    label?: string;
+    potential?: number;
+    extraction?: number;
+    burnoutIndex?: number;
+    wellbeing?: number;
+    attritionRisk?: string;
+  }>;
+  financialExposure?: {
+    replacementCost?: number;
+    executionLoss?: number;
+    totalExposure?: number;
+  };
+  failureModes?: string[];
+  priorityStack?: string[];
+  ogr?: {
+    sovereignCertainty?: number;
+    isAuthorizedToExecute?: boolean;
+  };
+  [key: string]: unknown;
+}
+
 export interface ExecutiveReportApiPayload {
-  report: unknown;
+  report: ExecutiveReportData;
   campaign: ExecutiveReportCampaignPayload;
   context: ExecutiveReportCampaignContext;
   constitution: ExecutiveReportConstitution;

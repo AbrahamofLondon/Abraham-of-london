@@ -13,7 +13,7 @@ export async function writeDiagnosticAudit(input: {
       diagnosticRef: input.diagnosticRef || null,
       action: input.action,
       actor: input.actor || null,
-      metadata: input.metadata || undefined,
+      metadata: input.metadata ? JSON.stringify(input.metadata) : null,
     },
   });
 }

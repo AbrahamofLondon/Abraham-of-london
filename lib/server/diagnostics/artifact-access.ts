@@ -2,7 +2,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma.server";
 import { validateArtifactGrant } from "./grants";
-import { readArtifactObject } from "./storage";
+import { getDiagnosticObjectBuffer } from "./storage";
 import { writeLineageEvent } from "./lineage";
 import type { ArtifactAccessDecision } from "./types";
 
@@ -49,7 +49,7 @@ export async function readAuthorizedArtifact(input: {
     where: { id: input.artifactId },
   });
 
-  const buffer = await readArtifactObject(artifact.objectKey);
+  const buffer = await getDiagnosticObjectBuffer(artifact.objectKey);
 
   await writeLineageEvent({
     diagnosticRef: input.diagnosticRef,

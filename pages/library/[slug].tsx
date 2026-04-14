@@ -54,7 +54,7 @@ function normalizeSlug(input: string) {
 function toRouteSlug(registrySlug: string): string {
   const n = normalizeSlug(registrySlug);
   const parts = n.split("/").filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : "";
+  return parts.length ? (parts[parts.length - 1] ?? "") : "";
 }
 
 function jsonSafe<T>(v: T): T {

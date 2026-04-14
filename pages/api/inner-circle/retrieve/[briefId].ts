@@ -89,9 +89,9 @@ export default async function handler(
       await AuditService.recordDownload({
         slug: asset.id,
         title: content?.title ?? asset.title ?? asset.id,
-        contentType: DownloadContentType.BRIEF,
+        contentType: DownloadContentType.PDF,
         eventType: DownloadEventType.DOWNLOAD,
-        deliveryMode: DownloadDeliveryMode.STREAM,
+        deliveryMode: DownloadDeliveryMode.DIRECT,
 
         contentId: content?.id,
         memberId,
@@ -125,9 +125,9 @@ export default async function handler(
     await AuditService.recordDownload({
       slug: asset.id,
       title: content?.title ?? asset.title ?? asset.id,
-      contentType: DownloadContentType.BRIEF,
+      contentType: DownloadContentType.PDF,
       eventType: DownloadEventType.DOWNLOAD,
-      deliveryMode: DownloadDeliveryMode.WATERMARKED,
+      deliveryMode: DownloadDeliveryMode.DIRECT,
 
       contentId: content?.id,
       memberId,
@@ -174,9 +174,9 @@ export default async function handler(
       await AuditService.recordDownload({
         slug: asset.id,
         title: content?.title ?? asset.title ?? asset.id,
-        contentType: DownloadContentType.BRIEF,
+        contentType: DownloadContentType.PDF,
         eventType: DownloadEventType.DOWNLOAD,
-        deliveryMode: DownloadDeliveryMode.STREAM,
+        deliveryMode: DownloadDeliveryMode.DIRECT,
 
         contentId: content?.id,
         memberId,

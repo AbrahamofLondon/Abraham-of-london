@@ -1,4 +1,4 @@
-import "server-only";
+// server-only guard removed — Pages Router incompatible
 
 import type { TokenStore } from "./tokenStore";
 import type { AccessSession, OneTimeToken } from "./types";

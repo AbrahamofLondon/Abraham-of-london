@@ -50,10 +50,21 @@ export default async function handler(
     const score = calculateInstitutionalGravity(incomingPayload);
     const cappedScore = Math.min(score, 25);
 
+    // PROVISIONAL MAPPING (debt: A7):
+    // The handler's original intent is a routing-outcome decision —
+    // high-score intakes escalate to directorate review, low-score intakes
+    // are accepted. The current Prisma `StrategyIntakeStatus` enum is
+    // lifecycle-oriented (PENDING | IN_REVIEW | ANALYZED | ARCHIVED) and
+    // does not carry the outcome values. Under the no-schema-changes rule,
+    // we collapse the two outcome states into the closest lifecycle values:
+    //   PENDING_DIRECTORATE_REVIEW -> IN_REVIEW (high-score: still in review)
+    //   ACCEPTED                   -> ANALYZED  (low-score: scored and moved on)
+    // This is reversible if the schema is later extended with the outcome
+    // values. No consumer audit performed in this batch.
     const status =
       cappedScore >= 22
-        ? StrategyIntakeStatus.PENDING_DIRECTORATE_REVIEW
-        : StrategyIntakeStatus.ACCEPTED;
+        ? StrategyIntakeStatus.IN_REVIEW
+        : StrategyIntakeStatus.ANALYZED;
 
     const existing = await prisma.strategyIntake.findUnique({
       where: { id: String(intakeId) },
@@ -111,13 +122,13 @@ export default async function handler(
     await prisma.strategyIntake.update({
       where: { id: String(intakeId) },
       data: {
-        payload: toJsonValue(mergedPayload),
+        payload: JSON.stringify(mergedPayload),
         score: cappedScore,
         status,
         analyzedAt,
         analyzedBy: ANALYZED_BY,
         analysisVersion: ANALYSIS_VERSION,
-        analysisNotes: toJsonValue(analysisNotes),
+        analysisNotes: JSON.stringify(analysisNotes),
       },
     });
 

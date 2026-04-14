@@ -14,7 +14,7 @@ import { InterventionProposal } from "@/components/admin/reporting/intervention-
 import { ConstitutionalRecommendationPanel } from "@/components/admin/reporting/ConstitutionalRecommendationPanel";
 import { ReportRecommendationsPanel } from "@/components/admin/reporting/ReportRecommendationsPanel";
 import { ReportEngineClient } from "@/components/admin/reporting/report-engine-client";
-import { CorrectionRegistry } from "@/components/admin/governance/correction-registry";
+import { CorrectionRegistry, type LiquidationNode } from "@/components/admin/governance/correction-registry";
 import { BriefingTrigger } from "@/components/admin/governance/briefing-trigger";
 import ReportPrintButton from "./ReportPrintButton";
 import { generateExecutiveReportForCampaign } from "@/lib/admin/reporting/executive-report-service";
@@ -380,7 +380,7 @@ export default async function ExecutiveReportPage({ params }: PageProps) {
             <div className="mt-16">
               <CorrectionRegistry
                 campaignId={id}
-                nodes={campaignPayload.correctionNodes || []}
+                nodes={(campaignPayload.correctionNodes || []) as LiquidationNode[]}
               />
             </div>
           </div>

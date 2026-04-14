@@ -1,32 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// pages/library/index.tsx — LIBRARY INDEX (PDF REGISTRY, SSOT, Premium-Correct)
+// pages/library/index.tsx — LIBRARY INDEX (PDF REGISTRY, SSOT)
 
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Head from "next/head";
-import { motion } from "framer-motion";
-import {
-  Search,
-  ArrowRight,
-  Box,
-  Terminal,
-  X,
-  Calendar,
-  Clock,
-  Filter,
-  FileText,
-  Lock,
-  Tag,
-  LibraryBig,
-} from "lucide-react";
+import { FileText, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import tiers, { type AccessTier } from "@/lib/access/tiers";
-
-/* ---------------------------------------------
-   TYPES
----------------------------------------------- */
 
 type PdfAsset = {
   slug: string;
@@ -51,9 +33,7 @@ type Props = {
   };
 };
 
-/* ---------------------------------------------
-   SERVER-SAFE HELPERS
----------------------------------------------- */
+const RULE = "rgba(255,255,255,0.08)";
 
 function safeStr(v: any): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
@@ -71,7 +51,7 @@ function normalizeSlug(input: string) {
 function toRouteSlug(registrySlug: string): string {
   const n = normalizeSlug(registrySlug);
   const parts = n.split("/").filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : "";
+  return parts.length ? (parts[parts.length - 1] ?? "") : "";
 }
 
 function toIsoDate(input: any): string | null {
@@ -187,10 +167,6 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
   }
 }
 
-/* ---------------------------------------------
-   SSG
----------------------------------------------- */
-
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const items = await loadPdfAssets();
 
@@ -210,72 +186,78 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   };
 };
 
-/* ---------------------------------------------
-   PAGE
----------------------------------------------- */
+function formatDate(value?: string | null) {
+  const iso = toIsoDate(value || "");
+  if (!iso) return "Undated";
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function assetType(item: PdfAsset) {
+  const cat = String(item.category || "").toLowerCase();
+  if (cat.includes("framework")) return "Framework";
+  if (cat.includes("reference")) return "Reference";
+  return "PDF";
+}
+
+function formatBadge(item: PdfAsset) {
+  const path = item.displayPath || "";
+  if (path.toLowerCase().endsWith(".epub")) return "EPUB";
+  return "PDF";
+}
+
+function filterKey(item: PdfAsset) {
+  const type = assetType(item);
+  if (!item.isPublic) return "Restricted";
+  return type;
+}
+
+function LibraryRow({ item }: { item: PdfAsset }) {
+  return (
+    <Link
+      href={`/library/${encodeURIComponent(item.routeSlug)}`}
+      className="group grid gap-3 border-b py-3 transition-colors duration-200 md:grid-cols-[1.5rem_5rem_1fr_3rem_5rem_6rem]"
+      style={{ borderBottomColor: "rgba(255,255,255,0.04)" }}
+    >
+      <div className="pt-0.5">
+        <FileText className="h-3.5 w-3.5" style={{ color: "rgba(255,255,255,0.2)" }} />
+      </div>
+      <div className="font-mono text-[6.5px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.22)" }}>
+        {assetType(item)}
+      </div>
+      <div className="min-w-0">
+        <h2 className="truncate font-serif text-[1rem] italic transition-colors duration-200 group-hover:text-white" style={{ color: "rgba(255,255,255,0.72)" }}>
+          {item.title}
+        </h2>
+        <p className="mt-0.5 truncate text-[12px]" style={{ color: "rgba(255,255,255,0.32)" }}>
+          {item.description || item.slug.replace(/\//g, " · ")}
+        </p>
+      </div>
+      <div className="font-mono text-[6.5px] uppercase tracking-[0.26em] md:text-right" style={{ color: "rgba(255,255,255,0.18)" }}>
+        {formatBadge(item)}
+      </div>
+      <div className="font-mono text-[6.5px] uppercase tracking-[0.26em] md:text-right" style={{ color: "rgba(255,255,255,0.2)" }}>
+        {item.isPublic ? "Public" : "Restricted"}
+      </div>
+      <div className="font-mono text-[6.5px] uppercase tracking-[0.24em] md:text-right" style={{ color: "rgba(255,255,255,0.18)" }}>
+        {formatDate(item.updated || item.date)}
+      </div>
+    </Link>
+  );
+}
 
 const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedTier, setSelectedTier] = React.useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-  const [showFilters, setShowFilters] = React.useState(false);
-
-  const tiersAvailable = React.useMemo(() => {
-    const s = new Set<string>();
-    items.forEach((i) => s.add(String(i.requiredTier || "public")));
-    return Array.from(s).sort();
-  }, [items]);
-
-  const categoriesAvailable = React.useMemo(() => {
-    const s = new Set<string>();
-    items.forEach((i) => {
-      if (i.category) s.add(String(i.category));
-    });
-    return Array.from(s).sort();
-  }, [items]);
+  const [activeFilter, setActiveFilter] = React.useState("All");
 
   const filtered = React.useMemo(() => {
-    let list = items;
-    const q = searchTerm.trim().toLowerCase();
+    if (activeFilter === "All") return items;
+    return items.filter((item) => filterKey(item) === activeFilter);
+  }, [items, activeFilter]);
 
-    if (q) {
-      list = list.filter((it) => {
-        const inTitle = it.title.toLowerCase().includes(q);
-        const inDesc = (it.description || "").toLowerCase().includes(q);
-        const inSlug = it.slug.toLowerCase().includes(q);
-        const inTags = (it.tags || []).some((t) => t.toLowerCase().includes(q));
-        const inCat = (it.category || "").toLowerCase().includes(q);
-        return inTitle || inDesc || inSlug || inTags || inCat;
-      });
-    }
-
-    if (selectedTier) {
-      list = list.filter((it) => String(it.requiredTier) === selectedTier);
-    }
-
-    if (selectedCategory) {
-      list = list.filter((it) => String(it.category || "") === selectedCategory);
-    }
-
-    return list;
-  }, [items, searchTerm, selectedTier, selectedCategory]);
-
-  const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedTier(null);
-    setSelectedCategory(null);
-  };
-
-  const latestYear = React.useMemo(() => {
-    if (!items.length) return new Date().getFullYear();
-    const ms = Math.max(
-      ...items.map((i) => {
-        const iso = toIsoDate(i.updated || i.date || "");
-        return iso ? Date.parse(iso) : 0;
-      })
-    );
-    return ms > 0 ? new Date(ms).getFullYear() : new Date().getFullYear();
-  }, [items]);
+  const filters = ["All", "PDF", "Framework", "Reference", "Restricted"];
 
   return (
     <Layout
@@ -289,274 +271,71 @@ const LibraryIndexPage: NextPage<Props> = ({ items, counts }) => {
         <title>Library | Abraham of London</title>
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-black text-gray-300">
-        <section className="relative overflow-hidden border-b border-white/5 pb-16 pt-24 lg:pt-32">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.06),transparent_45%)]" />
-          <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px]" />
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
-              <Terminal size={14} className="text-amber-500" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-500">
-                Central Library
-              </span>
-              <span className="h-1 w-1 rounded-full bg-amber-500/40" />
-              <span className="text-xs font-mono uppercase tracking-widest text-amber-200/70">
-                {counts.total} assets
+      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
+        <section className="border-b" style={{ borderBottomColor: RULE }}>
+          <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
+            <div className="flex items-center gap-3">
+              <span style={{ width: 1, height: 18, backgroundColor: "rgba(201,169,110,0.42)", display: "inline-block" }} />
+              <span className="font-mono text-[7.5px] uppercase tracking-[0.4em]" style={{ color: "rgba(201,169,110,0.8)" }}>
+                LIBRARY · ASSET REGISTRY
               </span>
             </div>
 
-            <h1 className="mb-6 font-serif text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-              Everything.
-              <span className="ml-2 italic text-amber-400">Organised.</span>
+            <h1 className="mt-6 font-serif text-[1.8rem] italic" style={{ color: "rgba(255,255,255,0.88)", fontWeight: 300 }}>
+              The reference corpus.
             </h1>
 
-            <p className="mb-12 max-w-3xl text-lg text-gray-400">
-              Verified PDF assets, surfaced cleanly. Public material opens immediately.
-              Restricted material remains controlled.
+            <p className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]" style={{ color: "rgba(255,255,255,0.28)" }}>
+              Documents, frameworks, and reference materials organized by type and access.
             </p>
 
-            <div className="max-w-3xl space-y-4">
-              <div className="group relative">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-amber-500"
-                  size={20}
-                />
-                <input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search titles, tags, categories, slugs..."
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-10 text-base text-white placeholder:text-gray-500 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/10"
-                />
-                {searchTerm && (
+            <div className="mt-6 h-px w-full" style={{ backgroundColor: RULE }} />
+
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
+              {filters.map((entry) => {
+                const active = activeFilter === entry;
+                return (
                   <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-500 transition-colors hover:text-amber-500"
-                    aria-label="Clear search"
+                    key={entry}
+                    type="button"
+                    onClick={() => setActiveFilter(entry)}
+                    className="font-mono text-[7.5px] uppercase tracking-[0.3em]"
+                    style={{
+                      color: active ? "rgba(255,255,255,0.62)" : "rgba(255,255,255,0.28)",
+                      textDecoration: active ? "underline" : "none",
+                      textUnderlineOffset: "0.35rem",
+                    }}
                   >
-                    <X size={16} />
+                    {entry}
                   </button>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setShowFilters((v) => !v)}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 transition-colors hover:border-amber-500/30 hover:text-amber-400"
-                >
-                  <Filter className="h-4 w-4" />
-                  <span className="text-sm font-medium">Filters</span>
-                </button>
-
-                {(selectedTier || selectedCategory) && (
-                  <button
-                    onClick={clearFilters}
-                    className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 px-4 py-2 text-sm text-amber-400 transition-colors hover:bg-amber-500/20"
-                  >
-                    Clear filters
-                  </button>
-                )}
-
-                <div className="ml-auto flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-white/35">
-                  <span>Public: {counts.public}</span>
-                  <span className="text-white/15">•</span>
-                  <span>Restricted: {counts.restricted}</span>
-                </div>
-              </div>
-
-              {showFilters && (
-                <div className="space-y-4 rounded-2xl border border-white/10 bg-black/50 p-6 backdrop-blur-sm">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
-                        <Lock className="h-4 w-4 text-amber-400" />
-                        Clearance
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {tiersAvailable.map((t) => (
-                          <button
-                            key={t}
-                            onClick={() => setSelectedTier((v) => (v === t ? null : t))}
-                            className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                              selectedTier === t
-                                ? "bg-amber-500 text-black"
-                                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-300"
-                            }`}
-                          >
-                            {t}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
-                        <Tag className="h-4 w-4 text-amber-400" />
-                        Categories
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {categoriesAvailable.map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => setSelectedCategory((v) => (v === c ? null : c))}
-                            className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                              selectedCategory === c
-                                ? "bg-blue-500 text-white"
-                                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-300"
-                            }`}
-                          >
-                            {c}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-sm text-gray-400">
-                    Showing {filtered.length} of {items.length} assets
-                  </div>
-                </div>
-              )}
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-20 lg:px-8">
-          {filtered.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="rounded-3xl border border-dashed border-white/10 py-24 text-center"
-            >
-              <Box className="mx-auto mb-4 text-gray-700" size={48} />
-              <p className="mb-6 font-serif text-xl italic text-gray-500">
-                No assets matching current filters.
-              </p>
-              <button
-                onClick={clearFilters}
-                className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                Clear all filters
-              </button>
-            </motion.div>
-          ) : (
-            <div className="space-y-10">
-              <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-white/5 p-2">
-                  <LibraryBig className="h-4 w-4 text-amber-400" />
-                </div>
-                <h2 className="font-serif text-2xl font-bold text-white md:text-3xl">Library Assets</h2>
-                <div className="h-px flex-1 bg-gradient-to-r from-amber-500/20 to-transparent" />
-                <span className="font-mono text-xs uppercase tracking-widest text-gray-500">
-                  {filtered.length} listed
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((item) => {
-                  const iso = toIsoDate(item.updated || item.date || "");
-                  const dateLabel = iso
-                    ? new Date(iso).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : null;
-
-                  return (
-                    <motion.div
-                      key={item.slug}
-                      whileHover={{ y: -4 }}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-black/50 p-6 transition-all hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10"
-                    >
-                      <Link href={`/library/${encodeURIComponent(item.routeSlug)}`} className="flex h-full flex-col">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-                            <FileText className="h-4 w-4 text-amber-400" />
-                            <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/55">
-                              {item.category || "Library"}
-                            </span>
-                            {!item.isPublic ? (
-                              <>
-                                <span className="h-1 w-1 rounded-full bg-white/20" />
-                                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-400">
-                                  <Lock className="mr-1 inline h-3 w-3" />
-                                  {item.requiredTier}
-                                </span>
-                              </>
-                            ) : null}
-                          </div>
-
-                          <ArrowRight
-                            size={14}
-                            className="flex-shrink-0 -translate-x-2 text-amber-500 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
-                          />
-                        </div>
-
-                        <h3 className="mb-3 mt-4 line-clamp-2 font-serif text-xl font-semibold leading-tight text-white transition-colors group-hover:text-amber-400">
-                          {item.title}
-                        </h3>
-
-                        {item.description ? (
-                          <p className="mb-6 line-clamp-2 text-sm leading-relaxed text-gray-400">
-                            {item.description}
-                          </p>
-                        ) : null}
-
-                        <div className="mt-auto space-y-3 border-t border-white/5 pt-4">
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <div className="flex items-center gap-2">
-                              {dateLabel ? (
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  <span>{dateLabel}</span>
-                                </div>
-                              ) : null}
-
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>{item.isPublic ? "Public" : "Restricted"}</span>
-                              </div>
-                            </div>
-
-                            <span className="rounded bg-white/5 px-2 py-0.5 text-[10px]">
-                              {item.routeSlug}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <span className="max-w-[70%] truncate font-mono text-[10px] uppercase tracking-widest text-gray-600 transition-colors group-hover:text-amber-500/50">
-                              {item.slug.replace(/\//g, " · ")}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
+        <section className="py-8 lg:py-10">
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="mb-6 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[6.5px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.22)" }}>
+              <span>{counts.total} assets indexed</span>
+              <span>{counts.public} public</span>
+              <span>{counts.restricted} restricted</span>
+              <span>{filtered.length} visible</span>
             </div>
-          )}
 
-          <div className="mt-16 border-t border-white/10 pt-8">
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <div className="rounded-xl bg-white/5 p-4 text-center">
-                <div className="mb-1 text-2xl font-bold text-white">{items.length}</div>
-                <div className="text-sm text-gray-400">Total Assets</div>
+            {filtered.length === 0 ? (
+              <div className="border px-6 py-16 text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.24)" }}>
+                  No assets matching current classification
+                </p>
               </div>
-              <div className="rounded-xl bg-white/5 p-4 text-center">
-                <div className="mb-1 text-2xl font-bold text-white">{counts.public}</div>
-                <div className="text-sm text-gray-400">Public</div>
+            ) : (
+              <div>
+                {filtered.map((item) => (
+                  <LibraryRow key={item.slug} item={item} />
+                ))}
               </div>
-              <div className="rounded-xl bg-white/5 p-4 text-center">
-                <div className="mb-1 text-2xl font-bold text-white">{counts.restricted}</div>
-                <div className="text-sm text-gray-400">Restricted</div>
-              </div>
-              <div className="rounded-xl bg-white/5 p-4 text-center">
-                <div className="mb-1 text-2xl font-bold text-white">{latestYear}</div>
-                <div className="text-sm text-gray-400">Latest Update</div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
       </main>

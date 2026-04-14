@@ -41,69 +41,79 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* -----------------------------
-    Adapters (authoring-safe)
+   Adapters (authoring-safe)
 ----------------------------- */
 
-/** * Extended variants used in Markdown content 
- */
-type CalloutVariant = "info" | "note" | "warning" | "success" | "danger" | "strategy" | "default";
+type CalloutVariant =
+  | "info"
+  | "note"
+  | "warning"
+  | "success"
+  | "danger"
+  | "strategy"
+  | "default";
 
-/** * Strict types accepted by the underlying UI component 
- */
 type CalloutTypeActual = "info" | "note" | "success" | "warning" | "danger";
 
-/**
- * Normalizes various input prop names (intent, tone, kind) into a standard CalloutVariant.
- */
 function normalizeCalloutVariant(input: unknown): CalloutVariant {
   const raw = String(input ?? "").trim().toLowerCase();
   if (!raw) return "info";
+
   if (raw === "warn" || raw === "alert" || raw === "caution") return "warning";
   if (raw === "ok" || raw === "positive") return "success";
   if (raw === "error" || raw === "critical") return "danger";
   if (raw === "tip" || raw === "hint") return "note";
-  
-  const valid: CalloutVariant[] = ["info", "note", "warning", "success", "danger", "strategy", "default"];
-  if (valid.includes(raw as CalloutVariant)) return raw as CalloutVariant;
-  
-  return "info";
+
+  const valid: CalloutVariant[] = [
+    "info",
+    "note",
+    "warning",
+    "success",
+    "danger",
+    "strategy",
+    "default",
+  ];
+
+  return valid.includes(raw as CalloutVariant)
+    ? (raw as CalloutVariant)
+    : "info";
 }
 
-/**
- * Maps the brand-specific variants to functionally compatible base types.
- */
 function toCalloutType(v: CalloutVariant): CalloutTypeActual {
-  if (v === "strategy") return "note";
-  if (v === "default") return "info";
-  return v as CalloutTypeActual;
+  switch (v) {
+    case "strategy":
+      return "note";
+    case "default":
+      return "info";
+    case "info":
+    case "note":
+    case "success":
+    case "warning":
+    case "danger":
+      return v;
+  }
 }
 
 const CalloutAdapter: ComponentType<AnyProps> = (props) => {
-  // 1. Determine the visual variant (for CSS) and the functional type (for TS/Logic)
-  const v = normalizeCalloutVariant(props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind);
+  const v = normalizeCalloutVariant(
+    props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind
+  );
   const t = toCalloutType(v);
 
-  // 2. Extract props to prevent non-standard attributes from hitting the DOM
-  const { 
-    type: _type, 
-    variant: _variant, 
-    intent: _intent, 
-    tone: _tone, 
-    kind: _kind, 
-    className, 
-    children, 
-    ...rest 
+  const {
+    type: _type,
+    variant: _variant,
+    intent: _intent,
+    tone: _tone,
+    kind: _kind,
+    className,
+    children,
+    ...rest
   } = props ?? {};
-  
-  // 3. Apply custom strategy class for unique styling if needed
+
   const nextClassName = cx(className, v === "strategy" && "callout--strategy");
 
-  // 4. Return the base component with the VALIDATED type 't'
-  return (
-    <Callout {...rest} className={nextClassName} type={t}>
-      {children ?? null}
-    </Callout>
-  );
+  return <Callout {...rest} className={nextClassName} type={t}>{children ?? null}</Callout>;
 };
 
 const QuoteAdapter: ComponentType<AnyProps> = (props) => {
@@ -120,7 +130,7 @@ const DividerAdapter: ComponentType<AnyProps> = (props) => {
 };
 
 /* -----------------------------
-    Markdown primitives (prose-safe)
+   Markdown primitives (prose-safe)
 ----------------------------- */
 
 const A: ComponentType<AnyProps> = (props) => {
@@ -153,37 +163,79 @@ const A: ComponentType<AnyProps> = (props) => {
 };
 
 const H1: ComponentType<AnyProps> = (props) => (
-  <h1 {...props} className={cx("font-serif text-4xl md:text-5xl text-white mb-8 mt-14 tracking-tight", props?.className)} />
+  <h1
+    {...props}
+    className={cx(
+      "font-serif text-4xl md:text-5xl text-white mb-8 mt-14 tracking-tight",
+      props?.className
+    )}
+  />
 );
 
 const H2: ComponentType<AnyProps> = (props) => (
-  <h2 {...props} className={cx("font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 border-b border-white/5 pb-2", props?.className)} />
+  <h2
+    {...props}
+    className={cx(
+      "font-serif text-2xl md:text-3xl text-white/90 mb-6 mt-12 border-b border-white/5 pb-2",
+      props?.className
+    )}
+  />
 );
 
 const H3: ComponentType<AnyProps> = (props) => (
-  <h3 {...props} className={cx("font-serif text-xl md:text-2xl text-white/90 mb-4 mt-10", props?.className)} />
+  <h3
+    {...props}
+    className={cx(
+      "font-serif text-xl md:text-2xl text-white/90 mb-4 mt-10",
+      props?.className
+    )}
+  />
 );
 
 const P: ComponentType<AnyProps> = (props) => (
-  <p {...props} className={cx("font-sans text-lg leading-relaxed text-white/70 my-6 font-light", props?.className)} />
+  <p
+    {...props}
+    className={cx(
+      "font-sans text-lg leading-relaxed text-white/70 my-6 font-light",
+      props?.className
+    )}
+  />
 );
 
-const Ul: ComponentType<AnyProps> = (props) => <ul {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />;
-const Ol: ComponentType<AnyProps> = (props) => <ol {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />;
-const Li: ComponentType<AnyProps> = (props) => <li {...props} className={cx("leading-relaxed", props?.className)} />;
+const Ul: ComponentType<AnyProps> = (props) => (
+  <ul {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />
+);
+const Ol: ComponentType<AnyProps> = (props) => (
+  <ol {...props} className={cx("my-6 space-y-2 text-white/70", props?.className)} />
+);
+const Li: ComponentType<AnyProps> = (props) => (
+  <li {...props} className={cx("leading-relaxed", props?.className)} />
+);
 
 const Blockquote: ComponentType<AnyProps> = (props) => (
-  <blockquote {...props} className={cx("my-10 border-l border-amber-500/30 pl-6 text-white/70 italic", props?.className)} />
+  <blockquote
+    {...props}
+    className={cx(
+      "my-10 border-l border-amber-500/30 pl-6 text-white/70 italic",
+      props?.className
+    )}
+  />
 );
 
-const Hr: ComponentType<AnyProps> = (props) => <hr {...props} className={cx("my-16 border-t border-white/10", props?.className)} />;
-
-const CTAGroup = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
-  <div className={cx("flex flex-wrap gap-4 my-10", className)}>{children}</div>
+const Hr: ComponentType<AnyProps> = (props) => (
+  <hr {...props} className={cx("my-16 border-t border-white/10", props?.className)} />
 );
+
+const CTAGroup = ({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) => <div className={cx("flex flex-wrap gap-4 my-10", className)}>{children}</div>;
 
 /* -----------------------------
-    Export registry
+   Export registry
 ----------------------------- */
 
 const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
@@ -244,3 +296,4 @@ const MDX_COMPONENTS: Record<string, ComponentType<any>> = {
 };
 
 export default MDX_COMPONENTS;
+

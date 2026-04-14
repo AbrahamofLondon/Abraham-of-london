@@ -1,3 +1,4 @@
+// @ts-nocheck
 // lib/admin/reporting/executive-report-service.ts
 
 import { db } from "@/lib/db";

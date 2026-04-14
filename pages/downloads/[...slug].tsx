@@ -121,7 +121,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
   const doc = await getMdxDocumentBySlug("downloads", slug);
   if (!doc) return { notFound: true };
 
-  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
+  const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc as Parameters<typeof requiredTierFromDoc>[0]));
   const isPublic = requiredTier === "public";
 
   return {

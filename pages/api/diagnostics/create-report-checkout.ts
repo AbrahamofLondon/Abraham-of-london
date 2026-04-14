@@ -95,7 +95,7 @@ export default async function handler(
     });
 
     await markDiagnosticReportPending({
-      diagnosticRecordId: record.id,
+      diagnosticId: record.id,
       reportTier,
     });
 

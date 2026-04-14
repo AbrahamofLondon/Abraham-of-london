@@ -128,7 +128,7 @@ export default function ChathamRoomsPage(): JSX.Element {
   return (
     <Layout
       title="The Chatham Rooms"
-      transparentHeader
+      headerTransparent
       className="bg-black text-white"
     >
       <main className="min-h-screen bg-black text-white">

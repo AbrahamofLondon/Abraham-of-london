@@ -38,9 +38,9 @@
   /* Legacy / convenience */
   --aol-dark:   #0b0b0b;
   --aol-darker: #060606;
-  --aol-border: rgba(255, 255, 255, 0.10);
-  --aol-surface: rgba(255, 255, 255, 0.04);
-  --aol-surface-2: rgba(255, 255, 255, 0.06);
+  --aol-border: rgba(255, 255, 255, 0.12);
+  --aol-surface: rgba(255, 255, 255, 0.02);
+  --aol-surface-2: rgba(255, 255, 255, 0.03);
   --aol-watermark: "";
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
@@ -202,7 +202,7 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 128px 128px;
-    opacity: 0.030;
+    opacity: 0.016;
     mix-blend-mode: overlay;
     pointer-events: none;
   }
@@ -211,15 +211,14 @@
 
   .nav-pill-premium {
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgb(var(--aol-bg-2));
     padding: 0.5rem 1rem;
     font-size: 9px;
     font-family: var(--font-family-mono);
     text-transform: uppercase;
-    backdrop-filter: blur(12px);
     letter-spacing: 0.34em;
-    color: rgba(242, 241, 238, 0.82);
+    color: rgba(242, 241, 238, 0.85);
     transition:
       color 300ms ease,
       border-color 300ms ease,
@@ -229,8 +228,8 @@
 
   .nav-pill-premium:hover {
     color: rgb(var(--aol-gold));
-    border-color: rgba(201, 169, 110, 0.30);
-    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(201, 169, 110, 0.24);
+    background: rgb(var(--aol-bg-3));
     transform: translateY(-1px);
   }
 
@@ -238,38 +237,27 @@
 
   .architecture-card {
     border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    backdrop-filter: blur(8px);
-    background-image: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.01) 100%
-    );
-    box-shadow:
-      0 10px 30px -15px rgba(0, 0, 0, 0.70),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgb(var(--aol-bg-3));
+    box-shadow: 0 24px 72px -30px rgba(0, 0, 0, 0.84);
     transition:
       border-color 300ms ease,
       box-shadow 300ms ease;
   }
 
   .architecture-card:hover {
-    border-color: rgba(201, 169, 110, 0.22);
+    border-color: rgba(201, 169, 110, 0.24);
     box-shadow:
-      0 18px 40px -18px rgba(0, 0, 0, 0.78),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 0 40px rgba(201, 169, 110, 0.08);
+      0 28px 84px -30px rgba(0, 0, 0, 0.90),
+      0 0 32px rgba(201, 169, 110, 0.05);
   }
 
   /* Deep glass card used across diagnostic pages */
   .city-gate-card {
     border-radius: 1.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(0, 0, 0, 0.40);
-    backdrop-filter: blur(12px);
-    box-shadow:
-      0 20px 40px -15px rgba(0, 0, 0, 0.80),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgb(var(--aol-bg-3));
+    box-shadow: 0 32px 100px -50px rgba(0, 0, 0, 0.98);
     position: relative;
     overflow: hidden;
   }
@@ -279,11 +267,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(
-      circle at center,
-      rgba(201, 169, 110, 0.07) 0%,
-      transparent 70%
-    );
+    background: linear-gradient(180deg, rgba(201, 169, 110, 0.04) 0%, transparent 45%);
   }
 
   .city-gate-card::after {
@@ -292,7 +276,7 @@
     inset-inline: 0;
     top: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.11);
+    background: rgba(255, 255, 255, 0.12);
     pointer-events: none;
   }
 
@@ -304,7 +288,7 @@
     background-image: linear-gradient(
       to right,
       transparent,
-      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.12),
       transparent
     );
   }
@@ -315,9 +299,42 @@
     background-image: linear-gradient(
       to right,
       transparent,
-      rgba(201, 169, 110, 0.30),
+      rgba(201, 169, 110, 0.34),
       transparent
     );
+  }
+
+  .aol-panel-standard {
+    background: rgb(var(--aol-bg-3));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 32px 100px -50px rgba(0, 0, 0, 0.98);
+  }
+
+  .aol-panel-gold {
+    background: linear-gradient(180deg, rgba(201, 169, 110, 0.06) 0%, rgba(14, 14, 18, 0.96) 100%);
+    border: 1px solid rgba(201, 169, 110, 0.24);
+    box-shadow:
+      0 32px 100px -50px rgba(0, 0, 0, 0.98),
+      0 0 90px -35px rgba(201, 169, 110, 0.18);
+  }
+
+  .aol-cta-primary {
+    background: rgba(255, 255, 255, 0.96);
+    color: rgb(3 3 5);
+    border: 1px solid rgba(255, 255, 255, 0.96);
+    box-shadow: 0 20px 50px -28px rgba(255, 255, 255, 0.24);
+  }
+
+  .aol-cta-secondary {
+    background: rgb(var(--aol-bg-3));
+    color: rgba(242, 241, 238, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .aol-cta-tertiary {
+    background: transparent;
+    color: rgba(242, 241, 238, 0.66);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   /* ── MDX content ────────────────────────────────────────────────────────── */
@@ -406,13 +423,20 @@
 
 @layer utilities {
   /* Text */
-  .text-premium-dim   { color: rgba(242, 241, 238, 0.82); }
-  .text-premium-muted { color: rgba(242, 241, 238, 0.68); }
+  .text-premium-dim   { color: rgba(242, 241, 238, 0.85); }
+  .text-premium-muted { color: rgba(242, 241, 238, 0.66); }
+  .text-aol-heading   { color: rgba(255, 255, 255, 0.94); }
+  .text-aol-body      { color: rgba(255, 255, 255, 0.85); }
+  .text-aol-muted     { color: rgba(255, 255, 255, 0.66); }
+  .text-aol-dim       { color: rgba(255, 255, 255, 0.48); }
+  .text-aol-faint     { color: rgba(255, 255, 255, 0.34); }
 
   /* Surfaces */
-  .bg-premium-surface   { background: rgba(255, 255, 255, 0.04); }
-  .bg-premium-surface-2 { background: rgba(255, 255, 255, 0.06); }
-  .border-premium       { border-color: rgba(255, 255, 255, 0.10); }
+  .bg-premium-surface   { background: rgb(var(--aol-bg-3)); }
+  .bg-premium-surface-2 { background: rgb(var(--aol-bg-2)); }
+  .border-premium       { border-color: rgba(255, 255, 255, 0.12); }
+  .border-aol-panel     { border-color: rgba(255, 255, 255, 0.12); }
+  .border-aol-panel-strong { border-color: rgba(255, 255, 255, 0.18); }
 
   /* Scrollbar suppression */
   .hide-scrollbar::-webkit-scrollbar { display: none; }

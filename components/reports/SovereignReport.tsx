@@ -214,7 +214,8 @@ export default function SovereignReport() {
       </div>
 
       {/* Print Styles */}
-      <style jsx global>{`
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <style {...({ jsx: true, global: true } as any)}>{`
         @media print {
           .print-report {
             box-shadow: none;

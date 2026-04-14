@@ -5,7 +5,7 @@ const DOMAIN_LABELS: Record<string, string> = {
   STRATEGY: 'Strategy',
   CANON: 'Canon',
   LIBRARY: 'Library',
-  ARTIFACTS: 'Artifacts',
+  ARTIFACTS: 'Intelligence Archives',
   BRIEFS: 'Briefs',
   VENTURES: 'Ventures',
   SHORTS: 'Shorts',

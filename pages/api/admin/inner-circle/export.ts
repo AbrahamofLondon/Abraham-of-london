@@ -89,7 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Log the failure to the audit trail
     await auditLogger.log({
       action: "DATA_EXPORT_FAILURE",
-      severity: "high",
+      severity: "error",
       status: "error",
       errorMessage: error instanceof Error ? error.message : "Internal Export Failure",
       category: "DATA_OPERATIONS",

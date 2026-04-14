@@ -31,10 +31,10 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import DoctrineShowcase from "@/components/homepage/DoctrineShowcase";
 import EngagementLanes from "@/components/homepage/EngagementLanes";
 import WhoIWorkWith from "@/components/WhoIWorkWith";
 import VaultTeaserRail from "@/components/homepage/VaultTeaserRail";
-import EventsSection from "@/components/homepage/EventsSection";
 import ContentShowcase from "@/components/homepage/ContentShowcase";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import ExecutiveBuyerFitSection from "@/components/diagnostics/ExecutiveBuyerFitSection";
@@ -45,7 +45,14 @@ import { joinHref, normalizeSlug } from "@/lib/content/shared";
 import { sanitizeData } from "@/lib/content/server";
 import { getPublicationCatalogue, getPublicationBySlug } from "@/lib/editorial/catalogue";
 import type { PublicationRecord } from "@/lib/editorial/types";
-import type { PublicationItem } from "@/lib/editorial/server-readers";
+import type { PublicationItem as _PublicationItemBase } from "@/lib/editorial/server-readers";
+
+// Extend the base type with optional fields used by publicationToItem
+type PublicationItem = _PublicationItemBase & {
+  previewHref?: string | null;
+  epubHref?: string | null;
+  citationHref?: string;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -59,18 +66,6 @@ type FeaturedItem = {
   dateISO?: string | null;
   theme?: string | null;
   kind?: string | null;
-};
-
-export type EventItem = {
-  slug: string;
-  title: string;
-  date: string;
-  location: string;
-  mode: "online" | "in-person" | "hybrid";
-  excerpt?: string | null;
-  capacity?: number | null;
-  duration?: string | null;
-  status?: "open" | "limited" | "full" | "past" | null;
 };
 
 type PlaybookItem = {
@@ -96,13 +91,22 @@ type QuarterlyReport = {
   keyFindings?: string[];
 };
 
+type CanonEntry = {
+  title: string;
+  excerpt: string | null;
+  slug: string;
+  href: string;
+  category: string | null;
+  readTime: string | null;
+};
+
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
   flagshipPublication: PublicationItem | null;
   featuredPublications: PublicationItem[];
   featuredPlaybooks: PlaybookItem[];
-  events: EventItem[];
+  featuredCanon: CanonEntry[];
   latestReport: QuarterlyReport | null;
   counts: {
     shorts: number;
@@ -241,12 +245,16 @@ function Section({
   id,
   variant = "base",
   cap,
+  capDim = false,
+  compact = false,
   className = "",
 }: {
   children: React.ReactNode;
   id?: string;
   variant?: "base" | "surface" | "void";
   cap?: string;
+  capDim?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   return (
@@ -274,7 +282,12 @@ function Section({
         <GoldRule soft />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 lg:py-28">
+      <div
+        className={cn(
+          "relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12",
+          compact ? "py-16 lg:py-24" : "py-20 lg:py-28",
+        )}
+      >
         {cap && (
           <div className="mb-14 flex items-center gap-6">
             <div className="flex-1">
@@ -286,7 +299,7 @@ function Section({
                 fontSize: "7.5px",
                 letterSpacing: "0.46em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.20)",
+                color: capDim ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.20)",
               }}
             >
               {cap}
@@ -308,12 +321,16 @@ function SectionHeader({
   description,
   align = "left",
   large = false,
+  eyebrowDim = false,
+  smaller = false,
 }: {
   eyebrow: string;
   title: React.ReactNode;
   description?: string;
   align?: "left" | "center";
   large?: boolean;
+  eyebrowDim?: boolean;
+  smaller?: boolean;
 }) {
   const center = align === "center";
 
@@ -325,11 +342,19 @@ function SectionHeader({
       viewport={{ once: true, margin: "-60px" }}
       className={cn("max-w-4xl", center && "mx-auto text-center")}
     >
-      <Eyebrow align={align}>{eyebrow}</Eyebrow>
+      <Eyebrow align={align} dim={eyebrowDim}>
+        {eyebrow}
+      </Eyebrow>
       <h2
         className={cn(
           "mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.93] tracking-[-0.028em] text-white",
-          large ? "text-4xl md:text-5xl lg:text-[3.6rem]" : "text-3xl md:text-4xl lg:text-5xl",
+          large
+            ? smaller
+              ? "text-3xl md:text-4xl lg:text-[3.1rem]"
+              : "text-4xl md:text-5xl lg:text-[3.6rem]"
+            : smaller
+              ? "text-[1.75rem] md:text-3xl lg:text-4xl"
+              : "text-3xl md:text-4xl lg:text-5xl",
         )}
       >
         {title}
@@ -378,17 +403,17 @@ class ModuleBoundary extends React.Component<
   { label: string; children: React.ReactNode },
   { hasError: boolean }
 > {
-  state = { hasError: false };
+  override state = { hasError: false };
 
   static getDerivedStateFromError() {
     return { hasError: true };
   }
 
-  componentDidCatch(err: any) {
+  override componentDidCatch(err: any) {
     console.error(`[Homepage/${this.props.label}]`, err);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
@@ -419,24 +444,15 @@ class ModuleBoundary extends React.Component<
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HeroSection({
-  counts,
-  onScroll,
+  onScroll: _onScroll,
 }: {
-  counts: { canon: number; library: number; briefs: number; shorts: number };
   onScroll?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const imgOpacity = useTransform(scrollY, [0, 700], [1, 0.26]);
-  const imgScale = useTransform(scrollY, [0, 700], [1, 1.08]);
-  const contentY = useTransform(scrollY, [0, 450], [0, -40]);
-
-  const stats = [
-    { value: counts.canon, label: "Canon entries", href: "/canon" },
-    { value: counts.library, label: "Library works", href: "/library" },
-    { value: counts.briefs, label: "Strategic briefs", href: "/vault/briefs" },
-    { value: counts.shorts, label: "Dispatches", href: "/shorts" },
-  ];
+  const imgOpacity = useTransform(scrollY, [0, 700], [1, reduceMotion ? 1 : 0.26]);
+  const imgScale = useTransform(scrollY, [0, 700], [1, reduceMotion ? 1 : 1.08]);
+  const contentY = useTransform(scrollY, [0, 450], [0, reduceMotion ? 0 : -40]);
 
   return (
     <section
@@ -448,17 +464,17 @@ function HeroSection({
         style={{ opacity: imgOpacity, scale: imgScale }}
       >
         <Image
-          src="/assets/images/abraham-of-london-banner.webp"
+          src="/assets/images/writing-desk.jpeg"
           alt=""
           fill
           priority
           sizes="100vw"
           quality={90}
-          className="object-cover object-[30%_center]"
+          className="object-cover object-[35%_55%]"
         />
         <div
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to right, rgba(3,3,5,0.94) 0%, rgba(3,3,5,0.76) 42%, rgba(3,3,5,0.56) 100%)` }}
+          style={{ background: `linear-gradient(to right, rgba(3,3,5,0.82) 0%, rgba(3,3,5,0.62) 42%, rgba(3,3,5,0.44) 100%)` }}
         />
         <div
           className="absolute inset-0"
@@ -466,7 +482,7 @@ function HeroSection({
         />
         <div
           className="absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 55% 70% at 15% 30%, rgba(201,169,110,0.07) 0%, transparent 60%)` }}
+          style={{ background: `radial-gradient(ellipse 55% 70% at 10% 50%, rgba(201,169,110,0.09) 0%, transparent 60%)` }}
         />
         <div className="absolute inset-0 opacity-[0.040]" style={GRAIN_STYLE} />
       </motion.div>
@@ -477,51 +493,41 @@ function HeroSection({
       />
 
       <motion.div className="relative z-10 flex h-full items-center" style={{ y: contentY }}>
-        <div className="mx-auto w-full max-w-7xl px-8 pb-24 pt-36 lg:px-16 lg:pt-44">
-          <div className="max-w-[58rem]">
-            <motion.div
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.0, delay: 0.10, ease: [0.22, 1, 0.36, 1] }}
+        <div className="mx-auto w-full max-w-7xl px-8 pb-24 pt-28 lg:px-16 lg:pt-36">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-[58rem]"
+          >
+            <div
+              className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.86] tracking-[-0.045em]"
+              style={{ fontFeatureSettings: '"liga" 1, "kern" 1' }}
             >
-              <div
-                className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.86] tracking-[-0.045em]"
-                style={{ fontFeatureSettings: '"liga" 1, "kern" 1' }}
-              >
-                <div className="flex flex-wrap items-baseline" style={{ gap: "0 1.2rem" }}>
-                  <span className="text-white" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)" }}>
-                    Abraham
-                  </span>
-                  <span className="italic text-white/28" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
-                    of
-                  </span>
-                </div>
-                <div className="italic" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)", color: GOLD }}>
-                  London
-                </div>
+              <div className="flex flex-wrap items-baseline" style={{ gap: "0 1.2rem" }}>
+                <span className="text-white" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)" }}>
+                  Abraham
+                </span>
+                <span className="italic text-white/28" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
+                  of
+                </span>
               </div>
-              <div className="mt-7 h-px w-24" style={{ background: `${GOLD}50` }} />
-            </motion.div>
+              <div className="italic" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)", color: GOLD, marginTop: "0.3em" }}>
+                London
+              </div>
+            </div>
+            <div className="mt-7 h-px w-40" style={{ background: `${GOLD}38` }} />
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.86, delay: 0.38 }}
-              className="mt-9 font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/45"
+            <p
+              className="mt-12 max-w-[38ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/52"
               style={{ fontSize: "clamp(1.05rem, 2vw, 1.35rem)" }}
             >
-              Doctrine, diagnostics, executive intelligence, and selective advisory
-              <span className="block text-white/22">organised into one governed platform.</span>
-            </motion.p>
+              Doctrine, diagnostics, executive intelligence, and selective advisory organised into one governed platform.
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.52 }}
-              className="mt-11 flex flex-wrap gap-3"
-            >
+            <div className="mt-11 flex flex-wrap gap-3">
               <Link
-                href="/diagnostics/executive-reporting"
+                href="/diagnostics"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
                   borderColor: `${GOLD}44`,
@@ -544,47 +550,45 @@ function HeroSection({
                 }}
               >
                 <ScrollText className="h-3.5 w-3.5" />
-                Executive Reporting
+                Begin Assessment
                 <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
               </Link>
 
-              <button
-                type="button"
-                onClick={onScroll}
+              <Link
+                href="/diagnostics/executive-reporting"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.08)",
-                  backgroundColor: "rgba(255,255,255,0.03)",
-                  color: "rgba(255,255,255,0.55)",
+                  borderColor: "rgba(255,255,255,0.05)",
+                  color: "rgba(255,255,255,0.42)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
                   textTransform: "uppercase",
                 }}
                 onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLButtonElement;
+                  const el = e.currentTarget as HTMLAnchorElement;
                   el.style.borderColor = "rgba(255,255,255,0.15)";
                   el.style.backgroundColor = "rgba(255,255,255,0.06)";
                   el.style.color = "rgba(255,255,255,0.92)";
                 }}
                 onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLButtonElement;
-                  el.style.borderColor = "rgba(255,255,255,0.08)";
-                  el.style.backgroundColor = "rgba(255,255,255,0.03)";
-                  el.style.color = "rgba(255,255,255,0.55)";
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.borderColor = "rgba(255,255,255,0.05)";
+                  el.style.backgroundColor = "transparent";
+                  el.style.color = "rgba(255,255,255,0.42)";
                 }}
               >
-                <Compass className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />
-                The platform
+                <ScrollText className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />
+                Executive Reporting
                 <ArrowRight className="h-3.5 w-3.5 opacity-45 transition-transform group-hover:translate-x-0.5 group-hover:opacity-80" />
-              </button>
+              </Link>
 
               <Link
                 href="/consulting/strategy-room"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.055)",
-                  color: "rgba(255,255,255,0.30)",
+                  borderColor: "rgba(255,255,255,0.03)",
+                  color: "rgba(255,255,255,0.22)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -598,67 +602,16 @@ function HeroSection({
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.055)";
-                  el.style.color = "rgba(255,255,255,0.30)";
+                  el.style.borderColor = "rgba(255,255,255,0.03)";
+                  el.style.color = "rgba(255,255,255,0.22)";
                   el.style.backgroundColor = "transparent";
                 }}
               >
                 <Crown className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />
                 Strategy Room
               </Link>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.05, delay: 0.82 }}
-        className="absolute inset-x-0 bottom-0 z-10"
-      >
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.055)", backgroundColor: "rgba(3,3,5,0.72)", backdropFilter: "blur(10px)" }}>
-          <div className="mx-auto max-w-7xl px-8 lg:px-16">
-            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ borderLeft: "1px solid rgba(255,255,255,0.055)" }}>
-              {stats.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group px-6 py-5 transition"
-                  style={{ borderRight: "1px solid rgba(255,255,255,0.055)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.022)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, serif",
-                      fontSize: "2rem",
-                      fontWeight: 300,
-                      color: "rgba(255,255,255,0.72)",
-                    }}
-                  >
-                    {item.value}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "0.25rem",
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.30em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.24)",
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                </Link>
-              ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </section>
@@ -835,7 +788,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.048)" }}>
               {[
                 { href: "/canon", eyebrow: "Doctrine", title: "Canon", icon: Compass },
-                { href: "/artifacts", eyebrow: "Products", title: "Artifacts", icon: Archive },
+                { href: "/artifacts", eyebrow: "Products", title: "Intelligence Archives", icon: Archive },
                 { href: "/editorials", eyebrow: "Publications", title: "Editorials", icon: ScrollText },
                 { href: "/diagnostics", eyebrow: "Gateway", title: "Diagnostics", icon: ScanSearch },
                 { href: "/consulting", eyebrow: "Advisory", title: "Consulting", icon: Briefcase },
@@ -1626,33 +1579,17 @@ function EscalationClose() {
                   textTransform: "uppercase",
                 }}
               >
-                Begin diagnostics
+                Begin Assessment
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-
-              <Link
-                href="/intelligence/global-market-intelligence-q1-2026"
-                className="inline-flex items-center gap-3 border px-7 py-4 transition"
-                style={{
-                  borderColor: "rgba(255,255,255,0.07)",
-                  backgroundColor: "rgba(255,255,255,0.018)",
-                  color: "rgba(255,255,255,0.40)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-              >
-                <TrendingUp className="h-3.5 w-3.5" />
-                Market Intelligence
               </Link>
 
               <Link
                 href="/consulting/strategy-room"
                 className="inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.055)",
-                  color: "rgba(255,255,255,0.28)",
+                  borderColor: "rgba(255,255,255,0.07)",
+                  backgroundColor: "rgba(255,255,255,0.02)",
+                  color: "rgba(255,255,255,0.36)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -1680,7 +1617,7 @@ const HomePage: NextPage<HomePageProps> = ({
   flagshipPublication = null,
   featuredPublications = [],
   featuredPlaybooks = [],
-  events = [],
+  featuredCanon = [],
   counts = {
     shorts: 0,
     canon: 0,
@@ -1692,13 +1629,6 @@ const HomePage: NextPage<HomePageProps> = ({
   },
   latestReport,
 }) => {
-  const heroCounts = {
-    shorts: counts.shorts,
-    canon: counts.canon,
-    briefs: counts.briefs,
-    library: counts.library,
-  };
-
   return (
     <Layout
       title="Abraham of London"
@@ -1713,9 +1643,57 @@ const HomePage: NextPage<HomePageProps> = ({
       </Head>
 
       <HeroSection
-        counts={heroCounts}
         onScroll={() => document.getElementById("platform")?.scrollIntoView({ behavior: "smooth" })}
       />
+
+      <Bridge text="hero · buyer fit" />
+
+      <Section id="buyer-fit" variant="void" cap="buyer fit · who this is for">
+        <ModuleBoundary label="ExecutiveBuyerFitSection">
+          <ExecutiveBuyerFitSection />
+        </ModuleBoundary>
+      </Section>
+
+      <Bridge text="buyer fit · doctrine" />
+
+      <Section id="doctrine" variant="void" cap="doctrine · spine · intellectual foundation">
+        <SectionHeader
+          eyebrow="Doctrine"
+          title={
+            <>
+              The intellectual spine.
+              <br />
+              <span className="text-white/35">Source of truth for everything that follows.</span>
+            </>
+          }
+          description="The Canon and the book that grounds it. All structured products derive their authority from this foundation."
+        />
+        <div className="mt-12">
+          <DoctrineShowcase canonEntries={featuredCanon} />
+        </div>
+      </Section>
+
+      <Bridge text="doctrine · diagnostics" />
+
+      <Section id="diagnostics" variant="void" cap="diagnostics · three-layer sequence">
+        <SectionHeader
+          eyebrow="The diagnostic ladder"
+          title={
+            <>
+              Signal before solution.
+              <br />
+              <span className="text-white/35">Route before intervention.</span>
+            </>
+          }
+          description="Three layers. Each with a distinct function. The system routes by evidence, not by proximity to a sale."
+          large
+        />
+        <div className="mt-12">
+          <DiagnosticLadder />
+        </div>
+      </Section>
+
+      <Bridge text="diagnostics · platform" />
 
       <PlatformArchitecture counts={counts} />
 
@@ -1741,27 +1719,7 @@ const HomePage: NextPage<HomePageProps> = ({
         </div>
       </Section>
 
-      <Bridge text="flagships · diagnostic ladder" />
-
-      <Section id="diagnostics" variant="void" cap="diagnostics · three-layer sequence">
-        <SectionHeader
-          eyebrow="The diagnostic ladder"
-          title={
-            <>
-              Signal before solution.
-              <br />
-              <span className="text-white/35">Route before intervention.</span>
-            </>
-          }
-          description="Three layers. Each with a distinct function. The system routes by evidence, not by proximity to a sale."
-          large
-        />
-        <div className="mt-12">
-          <DiagnosticLadder />
-        </div>
-      </Section>
-
-      <Bridge text="diagnostics · strategy room" />
+      <Bridge text="flagships · strategy room" />
 
       <Section id="strategy-room" variant="surface" cap="escalation · when product becomes mandate">
         <ModuleBoundary label="StrategyRoomIntegration">
@@ -1769,21 +1727,20 @@ const HomePage: NextPage<HomePageProps> = ({
         </ModuleBoundary>
       </Section>
 
-      <Bridge text="strategy room · buyer fit" />
-
-      <Section id="buyer-fit" variant="void" cap="buyer fit · who this is for">
-        <ModuleBoundary label="ExecutiveBuyerFitSection">
-          <ExecutiveBuyerFitSection />
-        </ModuleBoundary>
-      </Section>
-
       {(featuredPublications.length > 0 || featuredPlaybooks.length > 0) && (
         <>
           <Bridge text="products · editorial and execution property" />
 
-          <Section id="publications" variant="surface" cap="publications · doctrine and execution">
+          <Section
+            id="publications"
+            variant="surface"
+            cap="publications · doctrine and execution"
+            capDim
+            compact
+          >
             <SectionHeader
               eyebrow="Publications & Playbooks"
+              eyebrowDim
               title={
                 <>
                   The written record
@@ -1876,9 +1833,10 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="execution property · operators" />
 
-      <Section id="who" variant="void" cap="operators · target audience">
+      <Section id="who" variant="void" cap="operators · target audience" capDim compact>
         <SectionHeader
           eyebrow="Operators"
+          eyebrowDim
           title={
             <>
               Built for people carrying
@@ -1903,9 +1861,10 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="operators · engagement lanes" />
 
-      <Section id="lanes" variant="surface" cap="engagement · commercial structure">
+      <Section id="lanes" variant="surface" cap="engagement · commercial structure" capDim compact>
         <SectionHeader
           eyebrow="Engagement"
+          eyebrowDim
           title={
             <>
               Public signal.
@@ -1928,26 +1887,14 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="lanes · live rooms" />
 
-      <Section id="events" variant="void" cap="events · live rooms">
-        <SectionHeader
-          eyebrow="Events"
-          title="Salons, briefings, and live rooms."
-          description="Where doctrine meets operators and ideas are tested in live environments."
-        />
-        <div className="mt-12">
-          <Panel surface="lift">
-            <div className="p-6 md:p-8">
-              <ModuleBoundary label="EventsSection">
-                <EventsSection events={events as any} />
-              </ModuleBoundary>
-            </div>
-          </Panel>
-        </div>
-      </Section>
+      {/* Events surface preserved at /events — removed from homepage
+          product narrative. Community gatherings are surfaced at /events
+          and in the footer. Not a product pillar. */}
 
-      <Section id="vault" variant="surface" cap="vault · deployables">
+      <Section id="vault" variant="surface" cap="vault · deployables" capDim compact>
         <SectionHeader
           eyebrow="Vault"
+          eyebrowDim
           title="Deployable assets."
           description="Templates, packs, frameworks, and operating assets engineered for reuse."
         />
@@ -1966,9 +1913,10 @@ const HomePage: NextPage<HomePageProps> = ({
         <>
           <Bridge text="deployables · intelligence feed" />
 
-          <Section id="briefing" variant="void" cap="briefing · operator intelligence">
+          <Section id="briefing" variant="void" cap="briefing · operator intelligence" capDim compact>
             <SectionHeader
               eyebrow="Briefing"
+              eyebrowDim
               title="Operator intelligence."
               description="Focused transmission for people who will act on what they read."
             />
@@ -1989,9 +1937,10 @@ const HomePage: NextPage<HomePageProps> = ({
         <>
           <Bridge text="intelligence · dispatches" />
 
-          <Section id="dispatches" variant="surface" cap="dispatches · rapid intel">
+          <Section id="dispatches" variant="surface" cap="dispatches · rapid intel" capDim compact>
             <SectionHeader
               eyebrow="Dispatches"
+              eyebrowDim
               title="Short, sharp intelligence notes."
               description="Written for retrieval and reuse."
             />
@@ -2014,9 +1963,11 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="content · ventures" />
 
-      <Section id="ventures" variant="void" cap="ventures · institutions in motion">
+      <Section id="ventures" variant="void" cap="ventures · institutions in motion" capDim compact>
         <SectionHeader
           eyebrow="Ventures"
+          eyebrowDim
+          smaller
           title="Institutions in motion."
           description="Real ventures, systems, and infrastructure designed to move in the world."
         />
@@ -2137,63 +2088,6 @@ function toItem(d: any): FeaturedItem | null {
   };
 }
 
-function deriveEventMode(d: any): EventItem["mode"] {
-  const raw = String(d?.mode || d?.format || d?.delivery || "in-person").toLowerCase();
-  if (raw.includes("hybrid")) return "hybrid";
-  if (raw.includes("online") || raw.includes("virtual")) return "online";
-  return "in-person";
-}
-
-function deriveEventStatus(date: string, explicit?: any): EventItem["status"] {
-  const e = String(explicit || "").toLowerCase();
-  if (["open", "limited", "full", "past"].includes(e)) return e as EventItem["status"];
-
-  const t = Date.parse(date);
-  if (!Number.isFinite(t)) return "open";
-
-  const end = new Date(
-    new Date(t).getFullYear(),
-    new Date(t).getMonth(),
-    new Date(t).getDate(),
-    23,
-    59,
-    59,
-    999,
-  );
-  return end.getTime() < Date.now() ? "past" : "open";
-}
-
-function toEvent(d: any): EventItem | null {
-  const k = kindLower(d);
-  const fp = flattenedPath(d);
-  if (!(k === "event" || fp.startsWith("events/"))) return null;
-
-  const bare = normalizeSlug(String(computedSlug(d))).replace(/^events\//, "");
-  const date =
-    d?.eventDate ||
-    d?.date ||
-    d?.startDate ||
-    d?.datetime ||
-    d?.start ||
-    d?.startsAt ||
-    null;
-  if (!date) return null;
-
-  const mode = deriveEventMode(d);
-
-  return {
-    slug: bare,
-    title: safeString(d?.title, "Untitled Event"),
-    date: String(date),
-    location: safeString(d?.location, mode === "online" ? "Online" : "London"),
-    mode,
-    excerpt: (d?.excerpt || d?.description || null) as string | null,
-    capacity: typeof d?.capacity === "number" ? d.capacity : null,
-    duration: typeof d?.duration === "string" ? d.duration : null,
-    status: deriveEventStatus(String(date), d?.status),
-  };
-}
-
 function isDraftLocal(d: any): boolean {
   return d?.draft === true || d?.published === false;
 }
@@ -2266,14 +2160,14 @@ function parseFrontmatter(content: string): Record<string, any> {
   const result: Record<string, any> = {};
   let currentArrayKey: string | null = null;
 
-  for (const rawLine of match[1].split("\n")) {
+  for (const rawLine of (match[1] ?? "").split("\n")) {
     const line = rawLine.replace(/\r/g, "");
     if (!line.trim()) continue;
 
     const arrayItemMatch = line.match(/^\s*-\s+(.*)$/);
     if (arrayItemMatch && currentArrayKey) {
       if (!Array.isArray(result[currentArrayKey])) result[currentArrayKey] = [];
-      result[currentArrayKey].push(arrayItemMatch[1].trim().replace(/^['"]|['"]$/g, ""));
+      result[currentArrayKey].push((arrayItemMatch[1] ?? "").trim().replace(/^['"]|['"]$/g, ""));
       continue;
     }
 
@@ -2283,7 +2177,8 @@ function parseFrontmatter(content: string): Record<string, any> {
       continue;
     }
 
-    const [, key, rawValue] = keyMatch;
+    const key: string = keyMatch[1]!;
+    const rawValue: string = keyMatch[2] ?? "";
     const value = rawValue.trim();
 
     if (!value) {
@@ -2330,7 +2225,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
   let featuredPlaybooks: PlaybookItem[] = [];
-  let events: EventItem[] = [];
   let latestReport: QuarterlyReport | null = null;
 
   const catalogue = getPublicationCatalogue();
@@ -2415,12 +2309,8 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     featuredPlaybooks = allPlaybooks.slice(0, 3);
     counts.playbooks = allPlaybooks.length;
 
-    events = (stableDocs
-      .filter((d) => kindLower(d) === "event" || flattenedPath(d).startsWith("events/"))
-      .map(toEvent)
-      .filter(Boolean) as EventItem[])
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 6);
+    // Events removed from homepage product narrative.
+    // /events page remains fully functional via pages/events/index.tsx
 
     const candidates = stableDocs.map(toItem).filter(Boolean) as FeaturedItem[];
     const featured = candidates.filter((x) => {
@@ -2482,6 +2372,26 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     // keep current counts
   }
 
+  // Canon entries for doctrine showcase
+  let featuredCanon: HomePageProps["featuredCanon"] = [];
+  try {
+    const { getAllCanons } = await import("@/lib/content/server");
+    const allCanon = getAllCanons() || [];
+    featuredCanon = allCanon
+      .filter((c: any) => !c?.draft && c?.accessLevel !== "restricted")
+      .slice(0, 3)
+      .map((c: any) => ({
+        title: String(c?.title || ""),
+        excerpt: (c?.excerpt || c?.description || null) as string | null,
+        slug: String(c?.slug || ""),
+        href: `/canon/${String(c?.slug || "").replace(/^\/?(canon\/)?/, "")}`,
+        category: (c?.category || null) as string | null,
+        readTime: (c?.readTime || null) as string | null,
+      }));
+  } catch {
+    featuredCanon = [];
+  }
+
   return {
     props: sanitizeData({
       featuredShorts,
@@ -2489,7 +2399,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       flagshipPublication,
       featuredPublications,
       featuredPlaybooks,
-      events,
+      featuredCanon,
       counts,
       latestReport,
     }),

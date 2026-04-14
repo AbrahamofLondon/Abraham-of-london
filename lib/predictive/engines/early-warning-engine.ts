@@ -45,7 +45,9 @@ export class EarlyWarningEngine {
         const threshold = isCritical ? thresholds.critical : thresholds.warning;
         
         for (let i = 0; i < forecast.points.length; i++) {
-          if (this.isThresholdCrossed(forecast.points[i].value, threshold, thresholds.direction)) {
+          const point = forecast.points[i];
+          if (!point) continue;
+          if (this.isThresholdCrossed(point.value, threshold, thresholds.direction)) {
             projectedDaysToThreshold = i + 1;
             break;
           }
@@ -87,8 +89,10 @@ export class EarlyWarningEngine {
     
     let numerator = 0, denominator = 0;
     for (let i = 0; i < n; i++) {
-      numerator += (x[i] - meanX) * (values[i] - meanY);
-      denominator += Math.pow(x[i] - meanX, 2);
+      const xi = x[i] ?? 0;
+      const yi = values[i] ?? 0;
+      numerator += (xi - meanX) * (yi - meanY);
+      denominator += Math.pow(xi - meanX, 2);
     }
     
     return denominator === 0 ? 0 : numerator / denominator;

@@ -10,15 +10,9 @@ import Head from "next/head";
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowLeft,
   ArrowRight,
   CheckSquare,
-  ChevronRight,
   Lock,
-  Scale,
-  ShieldCheck,
-  Target,
-  TriangleAlert,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -67,14 +61,9 @@ type RecommendationItem = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GOLD = "#C9A96E";
-const BASE = "rgb(6 6 9)";
 const VOID = "rgb(3 3 5)";
 const LIFT = "rgb(10 14 20)";
-
-const GRAIN: React.CSSProperties = {
-  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-  backgroundSize: "180px 180px",
-};
+const AMBER = "#F59E0B";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -222,22 +211,63 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
+function RouteStrip() {
+  const items = [
+    { label: "STRATEGY", color: GOLD },
+    { label: "DIAGNOSTIC", color: "rgba(255,255,255,0.48)" },
+    { label: "REJECT", color: "rgba(255,255,255,0.24)" },
+  ];
+
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-2">
+      {items.map((item, index) => (
+        <React.Fragment key={item.label}>
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: item.color,
+            }}
+          >
+            {item.label}
+          </span>
+          {index < items.length - 1 ? (
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7px",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.16)",
+              }}
+            >
+              ·
+            </span>
+          ) : null}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FORM ELEMENT STYLES
 // ─────────────────────────────────────────────────────────────────────────────
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  backgroundColor: "rgba(255,255,255,0.025)",
+  backgroundColor: "transparent",
   border: "1px solid rgba(255,255,255,0.09)",
   outline: "none",
-  padding: "12px 14px",
+  padding: "10px 12px",
   fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
   fontWeight: 300,
   fontSize: "1rem",
   lineHeight: 1.55,
   color: "rgba(255,255,255,0.80)",
-  transition: "border-color 250ms ease, background-color 250ms ease",
+  transition: "border-color 250ms ease",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -254,171 +284,7 @@ const labelStyle: React.CSSProperties = {
 // CHAMBER HERO — the proposition before the form
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ChamberHero() {
-  const pillars = [
-    {
-      icon: ShieldCheck,
-      title: "Qualified access",
-      body: "Strong signals escalate immediately. Weak signals receive governed correction before any escalation.",
-    },
-    {
-      icon: Target,
-      title: "Matched guidance",
-      body: "Recommendations surface by constitutional fit — not generic content or ambient noise.",
-    },
-    {
-      icon: Lock,
-      title: "Advisory discipline",
-      body: "Strategy access is earned, not casually claimed. Bandwidth is protected by design.",
-    },
-    {
-      icon: Scale,
-      title: "Constitutional routing",
-      body: "The system reads authority, clarity, and readiness before deciding the appropriate next move.",
-    },
-  ];
 
-  return (
-    <div style={{ backgroundColor: VOID, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-      {/* Atmosphere */}
-      <div className="pointer-events-none absolute inset-x-0 overflow-hidden" style={{ height: "100%", maxHeight: "600px" }}>
-        <div className="absolute" style={{
-          left: "-5%", top: "-10%",
-          width: "700px", height: "600px",
-          borderRadius: "50%",
-          background: `radial-gradient(ellipse at center, ${GOLD}09 0%, ${GOLD}03 30%, transparent 65%)`,
-          filter: "blur(140px)",
-        }} />
-        <div className="absolute" style={{
-          right: "0%", top: "5%",
-          width: "450px", height: "450px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle at center, rgba(255,255,255,0.022) 0%, transparent 65%)",
-          filter: "blur(120px)",
-        }} />
-        <div className="absolute inset-0 opacity-[0.018]" style={GRAIN} />
-      </div>
-
-      {/* Top gold rule */}
-      <div className="absolute inset-x-0 top-0 h-px" style={{
-        background: `linear-gradient(to right, transparent, ${GOLD}22, transparent)`,
-      }} />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="pt-36 md:pt-44 lg:pt-52 pb-20 md:pb-24">
-
-          {/* Label */}
-          <Eyebrow>Strategy Room · Constitutional Gate</Eyebrow>
-
-          {/* Title */}
-          <h1 style={{
-            marginTop: "1.5rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "clamp(2.8rem, 6.5vw, 6.5rem)",
-            lineHeight: 0.90,
-            letterSpacing: "-0.048em",
-            color: "rgba(255,255,255,0.94)",
-            maxWidth: "18ch",
-          }}>
-            Not a booking form.
-            <br />
-            <span style={{ color: "rgba(255,255,255,0.28)" }}>
-              A governed advisory chamber.
-            </span>
-          </h1>
-
-          {/* Description */}
-          <p style={{
-            marginTop: "1.75rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "clamp(1rem, 1.4vw, 1.22rem)",
-            lineHeight: 1.75,
-            color: "rgba(255,255,255,0.42)",
-            maxWidth: "50ch",
-          }}>
-            This is where serious operators stop browsing and start declaring
-            the real problem. The room exists to test mandate fit, consequence
-            weight, authority, readiness, and whether private work is justified now.
-          </p>
-
-          {/* Pillars */}
-          <div className="grid gap-4 mt-12 sm:grid-cols-2 xl:grid-cols-4">
-            {pillars.map((p) => {
-              const Icon = p.icon;
-              return (
-                <div
-                  key={p.title}
-                  className="transition-all duration-400"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.062)",
-                    backgroundColor: "rgba(255,255,255,0.015)",
-                    padding: "1.5rem 1.75rem",
-                  }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLDivElement;
-                    el.style.borderColor = `${GOLD}20`;
-                    el.style.backgroundColor = "rgba(255,255,255,0.025)";
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLDivElement;
-                    el.style.borderColor = "rgba(255,255,255,0.062)";
-                    el.style.backgroundColor = "rgba(255,255,255,0.015)";
-                  }}
-                >
-                  <Icon style={{ width: "18px", height: "18px", color: `${GOLD}AA`, marginBottom: "1.25rem" }} />
-                  <h3 style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "1.10rem",
-                    color: "rgba(255,255,255,0.82)",
-                    marginBottom: "0.6rem",
-                  }}>
-                    {p.title}
-                  </h3>
-                  <p style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "0.88rem",
-                    lineHeight: 1.65,
-                    color: "rgba(255,255,255,0.38)",
-                  }}>
-                    {p.body}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Threshold note */}
-          <div style={{
-            marginTop: "2rem",
-            padding: "1.25rem 1.5rem",
-            border: "1px solid rgba(255,255,255,0.06)",
-            backgroundColor: "rgba(255,255,255,0.01)",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "0.85rem",
-          }}>
-            <TriangleAlert style={{ width: "14px", height: "14px", color: `${GOLD}80`, flexShrink: 0, marginTop: "2px" }} />
-            <p style={{
-              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-              fontWeight: 300,
-              fontSize: "0.92rem",
-              lineHeight: 1.65,
-              color: "rgba(255,255,255,0.45)",
-            }}>
-              Submitting here does not guarantee acceptance. It guarantees a
-              more serious reading than a contact form will ever produce.
-              Weak signals are redirected — not escalated.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INTAKE FORM
@@ -463,14 +329,6 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
             rows={5}
             placeholder={field.placeholder}
             style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
-            onFocus={e => {
-              e.currentTarget.style.borderColor = `${GOLD}35`;
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)";
-            }}
-            onBlur={e => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)";
-            }}
           />
         ) : field.type === "select" ? (
           <select
@@ -479,14 +337,6 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
             value={value}
             onChange={onChange}
             style={{ ...inputStyle, appearance: "none", cursor: "pointer" }}
-            onFocus={e => {
-              e.currentTarget.style.borderColor = `${GOLD}35`;
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)";
-            }}
-            onBlur={e => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)";
-            }}
           >
             <option value="" style={{ backgroundColor: "rgb(6 6 9)" }}>Select…</option>
             {(field.options || []).map(opt => (
@@ -504,14 +354,6 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
             onChange={onChange}
             placeholder={field.placeholder}
             style={inputStyle}
-            onFocus={e => {
-              e.currentTarget.style.borderColor = `${GOLD}35`;
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)";
-            }}
-            onBlur={e => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)";
-            }}
           />
         )}
 
@@ -549,36 +391,8 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
   }
 
   return (
-    <div style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-      <div className="mx-auto max-w-4xl px-6 py-16 lg:px-12 lg:py-20">
-
-        {/* Form header */}
-        <div className="mb-10">
-          <Eyebrow>Mandate qualification</Eyebrow>
-          <h2 style={{
-            marginTop: "1.25rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "clamp(1.8rem, 3vw, 2.8rem)",
-            lineHeight: 1.0,
-            letterSpacing: "-0.025em",
-            color: "rgba(255,255,255,0.92)",
-          }}>
-            Present the matter clearly.
-          </h2>
-          <p style={{
-            marginTop: "0.85rem",
-            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-            fontWeight: 300,
-            fontSize: "1.02rem",
-            lineHeight: 1.72,
-            color: "rgba(255,255,255,0.38)",
-            maxWidth: "48ch",
-          }}>
-            Thin answers weaken the constitutional reading. Serious operators
-            speak plainly about consequence.
-          </p>
-        </div>
+    <div style={{ backgroundColor: VOID }}>
+      <div className="mx-auto max-w-4xl px-6 py-8 lg:px-12 lg:py-10">
 
         <form onSubmit={onSubmit} noValidate>
           <div className="space-y-10">
@@ -621,10 +435,10 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
               disabled={isSubmitting}
               className="group w-full inline-flex items-center justify-center gap-3 transition-all duration-300"
               style={{
-                padding: "16px 28px",
-                border: `1px solid ${isSubmitting ? "rgba(255,255,255,0.07)" : `${GOLD}42`}`,
-                backgroundColor: isSubmitting ? "rgba(255,255,255,0.02)" : `${GOLD}10`,
-                color: isSubmitting ? "rgba(255,255,255,0.25)" : `${GOLD}CC`,
+                padding: "14px 20px",
+                border: `1px solid ${isSubmitting ? "rgba(255,255,255,0.07)" : `${AMBER}42`}`,
+                backgroundColor: "transparent",
+                color: isSubmitting ? "rgba(255,255,255,0.25)" : AMBER,
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "9px",
                 letterSpacing: "0.32em",
@@ -634,15 +448,13 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
               onMouseEnter={e => {
                 if (!isSubmitting) {
                   const el = e.currentTarget;
-                  el.style.borderColor = `${GOLD}65`;
-                  el.style.backgroundColor = `${GOLD}18`;
+                  el.style.borderColor = `${AMBER}65`;
                 }
               }}
               onMouseLeave={e => {
                 if (!isSubmitting) {
                   const el = e.currentTarget;
-                  el.style.borderColor = `${GOLD}42`;
-                  el.style.backgroundColor = `${GOLD}10`;
+                  el.style.borderColor = `${AMBER}42`;
                 }
               }}
             >
@@ -705,12 +517,11 @@ function IntakeForm({ form, onChange, onSubmit, onClearDraft, isSubmitting, erro
 
 type VerdictProps = {
   canonical: CanonicalSectionsEnvelope;
-  onResubmit: () => void;
   onMarkDiagnosticStarted: () => void;
   onMarkStrategyAccepted: () => void;
 };
 
-function Verdict({ canonical, onResubmit, onMarkDiagnosticStarted, onMarkStrategyAccepted }: VerdictProps) {
+function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted }: VerdictProps) {
   const posture = localSummary(canonical);
   const recs    = recommendations(canonical);
   const route   = routeMeta(posture.route);
@@ -776,23 +587,6 @@ function Verdict({ canonical, onResubmit, onMarkDiagnosticStarted, onMarkStrateg
                 {posture.narrative}
               </p>
             )}
-          </div>
-
-          {/* Route badge */}
-          <div style={{
-            padding: "6px 16px",
-            border: `1px solid ${tc.border}`,
-            backgroundColor: tc.bg,
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px",
-            letterSpacing: "0.36em",
-            textTransform: "uppercase",
-            color: tc.text,
-            whiteSpace: "nowrap",
-            alignSelf: "flex-start",
-            marginTop: "1.6rem",
-          }}>
-            {route.label}
           </div>
         </div>
 
@@ -919,52 +713,24 @@ function Verdict({ canonical, onResubmit, onMarkDiagnosticStarted, onMarkStrateg
               </div>
             )}
 
-            {/* CTA row */}
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href={route.ctaHref}
-                onClick={() => {
-                  if (posture.route === "STRATEGY") void onMarkStrategyAccepted();
-                  else void onMarkDiagnosticStarted();
-                }}
-                className="group inline-flex items-center gap-2.5 transition-all duration-300"
-                style={{
-                  padding: "12px 24px",
-                  border: `1px solid ${tc.border}`,
-                  backgroundColor: tc.bg,
-                  color: tc.text,
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {route.ctaLabel}
-                <ArrowRight style={{ width: "12px", height: "12px" }} />
-              </Link>
-
-              <button
-                type="button"
-                onClick={onResubmit}
-                className="inline-flex items-center gap-2.5 transition-all duration-300"
-                style={{
-                  padding: "12px 24px",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  backgroundColor: "rgba(255,255,255,0.02)",
-                  color: "rgba(255,255,255,0.42)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.65)"; }}
-                onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "rgba(255,255,255,0.08)"; el.style.color = "rgba(255,255,255,0.42)"; }}
-              >
-                Refine and resubmit
-                <ChevronRight style={{ width: "12px", height: "12px" }} />
-              </button>
-            </div>
+            <Link
+              href={route.ctaHref}
+              onClick={() => {
+                if (posture.route === "STRATEGY") void onMarkStrategyAccepted();
+                else void onMarkDiagnosticStarted();
+              }}
+              className="inline-flex items-center gap-2 pt-2 transition-all hover:underline"
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.24em",
+                textTransform: "uppercase",
+                color: route.tone === "gold" ? AMBER : tc.text,
+              }}
+            >
+              {route.ctaLabel}
+              <ArrowRight style={{ width: "11px", height: "11px" }} />
+            </Link>
           </div>
 
           {/* Right — posture metrics + recommendations */}
@@ -1301,43 +1067,7 @@ export default function StrategyRoomPage() {
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
-
-        {/* Breadcrumb — always visible */}
-        <div style={{
-          position: "absolute",
-          top: "1.25rem",
-          left: "1.5rem",
-          zIndex: 60,
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-        }}>
-          <Link
-            href="/diagnostics"
-            className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
-              letterSpacing: "0.30em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.28)",
-            }}
-          >
-            <ArrowLeft style={{ width: "11px", height: "11px" }} />
-            Diagnostics
-          </Link>
-          <span style={{ color: "rgba(255,255,255,0.12)" }}>/</span>
-          <span style={{
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.18)",
-          }}>
-            Strategy Room
-          </span>
-        </div>
+      <div style={{ backgroundColor: VOID, minHeight: "100vh", color: "white" }}>
 
         {/* ── STATE: LOADING ─────────────────────────────────────────────── */}
         {isSubmitting && (
@@ -1349,9 +1079,6 @@ export default function StrategyRoomPage() {
             justifyContent: "center",
             backgroundColor: VOID,
           }}>
-            <div className="pointer-events-none absolute inset-0" style={{ opacity: 0.018 }}>
-              <div style={GRAIN} className="absolute inset-0" />
-            </div>
             <div className="relative z-10 text-center">
               <div className="h-5 w-5 animate-spin border border-current border-t-transparent mx-auto mb-6"
                 style={{ borderColor: `${GOLD}80`, borderTopColor: "transparent", borderRadius: "50%" }}
@@ -1384,59 +1111,63 @@ export default function StrategyRoomPage() {
           <>
             <Verdict
               canonical={canonical}
-              onResubmit={handleResubmit}
               onMarkDiagnosticStarted={handleMarkDiagnosticStarted}
               onMarkStrategyAccepted={handleMarkStrategyAccepted}
             />
-
-            {/* Verdict escalation close */}
-            <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <div className="mx-auto max-w-5xl px-6 py-12 lg:px-12">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="h-px w-10" style={{ background: `linear-gradient(to right, transparent, ${GOLD}35, transparent)` }} />
-                  <p style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "0.98rem",
-                    lineHeight: 1.70,
-                    color: "rgba(255,255,255,0.28)",
-                    fontStyle: "italic",
-                    maxWidth: "44ch",
-                  }}>
-                    If you believe the diagnosis is incomplete, refine and
-                    resubmit. The system reads what you declare, not what
-                    you imply.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleResubmit}
-                    style={{
-                      marginTop: "0.5rem",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.30em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                      transition: "color 250ms ease",
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.50)")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.22)")}
-                  >
-                    Refine and resubmit
-                  </button>
-                </div>
-              </div>
-            </section>
           </>
         )}
 
         {/* ── STATE: CHAMBER (pre-submission) ────────────────────────────── */}
         {!isSubmitting && !canonical && (
           <>
-            <ChamberHero />
+            <section>
+              <div className="mx-auto max-w-6xl px-6 lg:px-12">
+                <div className="py-20 lg:py-24">
+                  <Eyebrow>STRATEGY ROOM · INSTRUMENT MODE</Eyebrow>
+                  <h1
+                    style={{
+                      marginTop: "1rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "clamp(2.5rem, 6vw, 4rem)",
+                      lineHeight: 0.98,
+                      letterSpacing: "-0.03em",
+                      color: "rgba(255,255,255,0.92)",
+                      maxWidth: "48ch",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    The constitutional gate.
+                  </h1>
+                  <p
+                    style={{
+                      marginTop: "1rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1rem",
+                      lineHeight: 1.6,
+                      color: "rgba(255,255,255,0.48)",
+                      maxWidth: "56ch",
+                    }}
+                  >
+                    Qualified advisory intake. Constitutional routing. Decision-grade guidance.
+                  </p>
+                  <RouteStrip />
+                  <div
+                    className="mt-8"
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.28)",
+                    }}
+                  >
+                    Required: Strategic context · Authority signal · Problem articulation
+                  </div>
+                </div>
+              </div>
+            </section>
             <IntakeForm
               form={form}
               onChange={handleChange}
@@ -1446,44 +1177,28 @@ export default function StrategyRoomPage() {
               error={error}
               draftSaved={draftSaved}
             />
-
-            {/* Pre-submission close */}
-            <section style={{ backgroundColor: VOID, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <div className="mx-auto max-w-5xl px-6 py-10 lg:px-12">
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <GoldRule soft />
-                  <p style={{
-                    marginTop: "0.75rem",
-                    fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                    fontWeight: 300,
-                    fontSize: "0.92rem",
-                    lineHeight: 1.68,
-                    color: "rgba(255,255,255,0.22)",
-                    fontStyle: "italic",
-                    maxWidth: "44ch",
-                  }}>
-                    The diagnostic ladder exists for readers who are not yet
-                    ready to declare their matter formally.
-                  </p>
-                  <Link
-                    href="/diagnostics"
-                    className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.20)",
-                    }}
-                  >
-                    Enter the diagnostic ladder
-                    <ChevronRight style={{ width: "10px", height: "10px" }} />
-                  </Link>
-                </div>
-              </div>
-            </section>
           </>
         )}
+
+        <section>
+          <div className="mx-auto max-w-6xl px-6 lg:px-12">
+            <div className="py-10">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 transition-all hover:underline"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.3)",
+                }}
+              >
+                Back to home
+              </Link>
+            </div>
+          </div>
+        </section>
 
       </div>
     </Layout>

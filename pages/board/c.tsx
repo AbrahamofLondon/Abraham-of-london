@@ -1,3 +1,5 @@
+// DEPRECATED: orphaned dashboard — no inbound references.
+// Pending deletion in cleanup pass. Do not add new logic here.
 /* pages/board/c.tsx */
 import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/Layout";
@@ -157,18 +159,20 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
           createdAt: {
             gte: new Date(Date.now() - 60 * 60 * 1000),
           },
-          severity: { in: ["warning", "high", "critical"] },
+          severity: { in: ["warn", "error", "critical"] },
           status: "failed",
         },
       }),
 
-      prisma.job.count({
+      // No generic Job model. DiagnosticRegenerationJob is the only job-queue
+      // model in schema — semantic is diagnostic jobs only, not all system jobs.
+      prisma.diagnosticRegenerationJob.count({
         where: {
-          status: { in: ["queued", "running"] },
+          status: { in: ["queued", "processing"] },
         },
       }),
 
-      prisma.systemAuditLog.groupBy({
+      (prisma.systemAuditLog.groupBy as any)({
         by: ["action"],
         _count: { action: true },
         where: {
@@ -182,7 +186,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
         take: 10,
       }),
 
-      prisma.job.count({
+      prisma.diagnosticRegenerationJob.count({
         where: {
           status: "failed",
           createdAt: {
@@ -244,7 +248,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
                   lt: hourEnd,
                 },
                 status: "failed",
-                severity: { in: ["warning", "high", "critical"] },
+                severity: { in: ["warn", "error", "critical"] },
               },
             }),
           ]);
@@ -280,7 +284,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
           createdAt: {
             gte: new Date(Date.now() - 2 * 60 * 60 * 1000),
           },
-          severity: { in: ["warning", "high", "critical"] },
+          severity: { in: ["warn", "error", "critical"] },
         },
         orderBy: { createdAt: "desc" },
         take: 5,
@@ -358,9 +362,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
           severity:
             alert.severity === "critical"
               ? "high"
-              : alert.severity === "high"
+              : alert.severity === "error"
                 ? "high"
-                : alert.severity === "warning"
+                : alert.severity === "warn"
                   ? "medium"
                   : "low",
         })),
@@ -673,7 +677,7 @@ const SystemControlDashboard: NextPage<Props> = ({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ status, percentage }) => `${status}: ${percentage}%`}
+                      label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ""}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                       outerRadius={80}
                       dataKey="count"
                     >
@@ -685,7 +689,7 @@ const SystemControlDashboard: NextPage<Props> = ({
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => [`${value} users`, "Count"]}
+                      formatter={((value: number) => [`${value} users`, "Count"]) as any}
                       contentStyle={{
                         backgroundColor: "#111827",
                         border: "1px solid #374151",

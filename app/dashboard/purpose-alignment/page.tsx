@@ -1,3 +1,5 @@
+// DEPRECATED: orphaned dashboard — no inbound references.
+// Pending deletion in cleanup pass. Do not add new logic here.
 import {
   ALIGNMENT_DOMAIN_LABELS,
   ALIGNMENT_DOMAIN_ORDER,
@@ -98,6 +100,15 @@ export default async function PurposeAlignmentDashboardPage() {
     latest?.domainScores.map((item) => ({
       domain: ALIGNMENT_DOMAIN_LABELS[item.domain],
       percent: item.percent,
+      strength: (
+        item.percent >= 80
+          ? 'strong'
+          : item.percent >= 60
+            ? 'developing'
+            : item.percent >= 40
+              ? 'weak'
+              : 'critical'
+      ) as 'strong' | 'developing' | 'weak' | 'critical',
     })) ?? [];
 
   return (

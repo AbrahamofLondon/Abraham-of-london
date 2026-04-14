@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/jobs.ts */
 
 import { prisma } from "@/lib/prisma";
@@ -77,4 +79,5 @@ export async function processPendingDiagnosticReports(): Promise<{
     processed: pending.length,
     results: out,
   };
-}s
+}
+

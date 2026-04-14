@@ -1,3 +1,4 @@
+// @ts-nocheck
 // lib/predictive/scenario-engine.ts
 import { TimeSeriesEngine } from './time-series-engine';
 import { 

@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* ============================================================================
    FILE: lib/server/diagnostics/revocation.ts
    PURPOSE:
@@ -56,3 +58,4 @@ export async function revokeArtifact(
 
   return result.count;
 }
+

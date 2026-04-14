@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const [summary, recent] = await Promise.all([
-      getDiagnosticSummary({ days: 30 }),
+      getDiagnosticSummary(),
       getRecentDiagnosticRecords(10),
     ]);
 

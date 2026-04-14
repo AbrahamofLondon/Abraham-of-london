@@ -229,13 +229,12 @@ const BrandsIndexPage: NextPage = () => {
             </MotionDiv>
 
             <MotionDiv
-              as="h1"
               className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-cream mb-6"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.6 }}
             >
-              Brands &amp; Movements
+              <h1 className="m-0">Brands &amp; Movements</h1>
             </MotionDiv>
 
             <MotionDiv

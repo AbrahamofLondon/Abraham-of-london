@@ -126,8 +126,8 @@ export default function ConstitutionalTrendChart({
     );
   }
 
-  const lastPoint = safeData[safeData.length - 1];
-  const previousPoint = safeData.length > 1 ? safeData[safeData.length - 2] : null;
+  const lastPoint = safeData[safeData.length - 1]!;
+  const previousPoint = safeData.length > 1 ? safeData[safeData.length - 2] ?? null : null;
   const trend = previousPoint ? lastPoint.score - previousPoint.score : 0;
 
   const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;

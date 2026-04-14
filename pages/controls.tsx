@@ -1,7 +1,9 @@
 /* pages/controls.tsx — CLIENT SIDE INTERACTIVITY */
 import * as React from "react";
+import type { NextPage } from "next";
 import { toast } from "sonner";
 import { RefreshCcw } from "lucide-react";
+import Layout from "@/components/Layout";
 
 export function ReportActions() {
   const [isSyncing, setIsSyncing] = React.useState(false);
@@ -31,3 +33,14 @@ export function ReportActions() {
     </button>
   );
 }
+
+const ControlsPage: NextPage = () => (
+  <Layout title="Controls">
+    <main className="mx-auto max-w-4xl px-6 py-16">
+      <ReportActions />
+    </main>
+  </Layout>
+);
+
+export default ControlsPage;
+

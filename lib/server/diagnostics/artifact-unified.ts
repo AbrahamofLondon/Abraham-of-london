@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 import { upsertArtifactDB, getLatestArtifactDB } from "./artifact-db";
 import { upsertArtifactRecord, getLatestArtifact } from "./artifact-registry";
 
@@ -19,3 +21,4 @@ export async function getLatestArtifactUnified(diagnosticRef: string) {
 
   return getLatestArtifact({ diagnosticRef });
 }
+

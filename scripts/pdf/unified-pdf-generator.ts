@@ -18,6 +18,7 @@
 // - STRICT mode exits non-zero on any failure
 // - allow-fallback is explicit (no silent placeholder drift)
 
+import "../load-local-env";
 import { Command } from "commander";
 import fs from "fs";
 import path from "path";
@@ -27,6 +28,7 @@ import matter from "gray-matter";
 import { spawn, spawnSync } from "child_process";
 import { fileURLToPath } from "url";
 import { SecurePuppeteerPDFGenerator } from "./secure-puppeteer-generator";
+import { requirePdfGenerationEnv } from "./require-pdf-env";
 
 // =============================================================================
 // TYPES
@@ -1046,6 +1048,7 @@ const invokedAsScript = (() => {
 })();
 
 async function main() {
+  requirePdfGenerationEnv("unified-pdf-generator");
   program.parse(process.argv);
   const opts = buildOptions();
   const engine = new GeneratorEngine(opts);

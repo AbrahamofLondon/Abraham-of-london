@@ -35,10 +35,11 @@ type ApiResponse =
     };
 
 function toDbTier(input: unknown): DbAccessTier {
+  // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
   const normalized = normalizeUserTier(input);
 
   switch (normalized) {
-    case "inner-circle":
+    case "inner_circle":
       return "inner_circle";
     case "public":
     case "member":
@@ -129,6 +130,7 @@ export default async function handler(
           email: inquiry.email,
           name: inquiry.name,
           role: "MEMBER",
+          // C1_UNRESOLVED_APP_TO_DB_TIER: app-side 9-tier vocabulary is canonical; Prisma migration is pending.
           tier: dbTier,
           status: "active",
           emailHash: inquiry.email,
@@ -137,11 +139,16 @@ export default async function handler(
 
       const keyData = await generatePrincipalKey(member.id);
 
-      // ✅ This now works because ONBOARDED exists in the schema
+      // PROVISIONAL MAPPING: the schema InquiryStatus enum is
+      // (PENDING|REVIEWING|CONTACTED|CLOSED). The original code referenced
+      // InquiryStatus.ONBOARDED which does not exist. Mapping to CLOSED as the
+      // closest "workflow complete" semantic — the inquiry is closed because
+      // the principal is now onboarded as a member. Reversible if the schema
+      // is later extended with a dedicated ONBOARDED value (C15-class).
       await tx.strategyInquiry.update({
         where: { id: inquiryId },
         data: {
-          status: InquiryStatus.ONBOARDED,
+          status: InquiryStatus.CLOSED,
           memberId: member.id,
         },
       });
@@ -149,7 +156,7 @@ export default async function handler(
       await tx.systemAuditLog.create({
         data: {
           action: "PRINCIPAL_ONBOARDED",
-          severity: "high",
+          severity: "error",
           actorId: actor.id,
           actorEmail: actor.email,
           resourceId: member.id,
@@ -158,7 +165,7 @@ export default async function handler(
           status: "success",
           category: "admin",
           subCategory: "onboarding",
-          metadata: {
+          metadata: JSON.stringify({
             inquiryId,
             originalTier: String(assignedTier),
             normalizedTier,
@@ -166,7 +173,7 @@ export default async function handler(
             tierLabel: getTierLabel(normalizedTier),
             onboardedBy: actor.id,
             onboardedAt: new Date().toISOString(),
-          },
+          }),
         },
       });
 

@@ -59,7 +59,6 @@ export default function InnerCircleLoginPage() {
       title="Inner Circle Login | Abraham of London"
       description="Secure access for Inner Circle members."
       canonicalUrl="/inner-circle/login"
-      minimalHeader
       enableVaultSearch={false}
     >
       <Head>

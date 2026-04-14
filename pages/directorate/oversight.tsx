@@ -262,7 +262,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const [{ getServerSession }, authModule, prismaModule] = await Promise.all([
     import("next-auth/next"),
-    import("@/pages/api/auth/[...nextauth]"),
+    import("@/lib/auth/config"),
     import("@/lib/prisma"),
   ]);
 
@@ -287,7 +287,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const prisma = prismaModule.default ?? prismaModule.prisma;
 
-  const data = await prisma.strategyRoomIntake.findMany({
+  const data = await prisma.strategyIntake.findMany({
     orderBy: { createdAt: "desc" },
     select: {
       id: true,

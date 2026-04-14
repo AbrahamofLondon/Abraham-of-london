@@ -42,19 +42,24 @@ enum MemberRole {
   CLIENT
 }
 
+enum AccessTier {
+  public
+  member
+  inner_circle
+  restricted
+  client
+  legacy
+  architect
+  owner
+  top_secret
+}
+
 enum MemberStatus {
   active
   inactive
   pending
+  paused
   suspended
-}
-
-enum AccessTier {
-  member
-  client
-  partner
-  executive
-  sovereign
 }
 
 enum ContentType {
@@ -278,6 +283,8 @@ model AlignmentCampaign {
   auditResponses         AuditResponse[]
   teamSnapshots          TeamAssessmentSnapshot[]
   organisationSnapshots  OrganisationAssessmentSnapshot[]
+  constitutionalIntakes  ConstitutionalIntakeReport[]
+  executiveRuns          ExecutiveReportingRun[]
   leadershipGapSnapshots LeadershipGapSnapshot[]
   reports                EnterpriseReport[]
   interventions          StrategicIntervention[]
@@ -1653,6 +1660,7 @@ model ConstitutionalIntakeReport {
   source                  String
   sessionKey              String?
   respondentKey           String?
+  campaignId              String?
   email                   String?
   organisation            String?
   ipAddress               String?
@@ -1677,7 +1685,10 @@ model ConstitutionalIntakeReport {
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
+  campaign                AlignmentCampaign? @relation(fields: [campaignId], references: [id])
+
   @@index([createdAt])
+  @@index([campaignId])
   @@index([sessionKey])
   @@index([respondentKey])
   @@index([email])
@@ -1688,6 +1699,7 @@ model ConstitutionalIntakeReport {
 model ExecutiveReportingRun {
   id                 String   @id @default(cuid())
   runKey             String   @unique
+  campaignId         String?
   email              String
   fullName           String?
   organisation       String?
@@ -1703,7 +1715,10 @@ model ExecutiveReportingRun {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  campaign           AlignmentCampaign? @relation(fields: [campaignId], references: [id])
   artifacts          ExecutiveReportingArtifact[]
+
+  @@index([campaignId])
 }
 
 model ExecutiveReportingArtifact {

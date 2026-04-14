@@ -28,6 +28,8 @@ import Layout from "@/components/Layout";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { OGR_CLIENT_CONFIG } from "@/lib/ogr/client-config";
+import { readAccessCookie } from "@/lib/server/auth/cookies";
+import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 
 /* -------------------------------------------------------------------------- */
 /* DYNAMIC PANELS                                                             */
@@ -58,7 +60,7 @@ const SovereignDashboard = dynamic(
 const BillingEntitlementsPanel = dynamic(
   () =>
     import("@/components/dashboard/BillingEntitlementsPanel").then(
-      (mod) => mod.BillingEntitlementsPanel
+      (mod) => mod.default
     ),
   {
     ssr: false,
@@ -69,7 +71,7 @@ const BillingEntitlementsPanel = dynamic(
 const DiagnosticLineagePanel = dynamic(
   () =>
     import("@/components/dashboard/DiagnosticLineagePanel").then(
-      (mod) => mod.DiagnosticLineagePanel
+      (mod) => mod.default
     ),
   {
     ssr: false,
@@ -168,6 +170,11 @@ interface DashboardProps {
   entitlements: EntitlementItem[];
   lineageEvents: LineageItem[];
   reports: ReportItem[];
+  innerCircle: {
+    hasValidToken: boolean;
+    tier: string;
+    expiresAt: string | null;
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -223,7 +230,7 @@ function resolveAuthenticatedEmail(session: any): string {
   ];
 
   if (process.env.NODE_ENV === "development") {
-    return allowedFallbacks[1];
+    return allowedFallbacks[1]!;
   }
 
   throw new Error("AUTH_EMAIL_MISSING");
@@ -387,6 +394,7 @@ export default function UnifiedDashboard({
   entitlements,
   lineageEvents,
   reports,
+  innerCircle,
 }: DashboardProps) {
   const [liveResonance, setLiveResonance] = React.useState<number>(82);
   const [isLoadingMetrics, setIsLoadingMetrics] = React.useState<boolean>(true);
@@ -591,6 +599,78 @@ export default function UnifiedDashboard({
             </div>
           </div>
 
+          {/* My Access Panel — reads from getUnifiedSession-equivalent data */}
+          <div className="mb-12 border border-white/10 bg-white/[0.02] p-6">
+            <div className="mb-5 flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#8A6A2F]" />
+              <span className="text-[8px] uppercase tracking-wider text-white/40">
+                My Access
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-white/30 mb-2">
+                  Identity Tier
+                </div>
+                <div className="text-sm font-bold text-white uppercase">
+                  {aol.tier}
+                </div>
+              </div>
+              <div>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-white/30 mb-2">
+                  Inner Circle Token
+                </div>
+                <div
+                  className={`text-sm font-bold uppercase ${
+                    innerCircle.hasValidToken ? "text-emerald-400" : "text-white/40"
+                  }`}
+                >
+                  {innerCircle.hasValidToken ? "Active" : "Inactive"}
+                </div>
+              </div>
+              <div>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-white/30 mb-2">
+                  Token Expires
+                </div>
+                <div className="text-sm font-mono text-white/80">
+                  {innerCircle.expiresAt
+                    ? new Date(innerCircle.expiresAt).toLocaleDateString()
+                    : "—"}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/inner-circle/account"
+                className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                Manage Access Key
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+
+              {innerCircle.hasValidToken && (
+                <Link
+                  href="/inner-circle/dashboard"
+                  className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  Inner Circle Vault
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
+
+              {aol.isInternal && (
+                <Link
+                  href="/inner-circle/admin/dashboard"
+                  className="inline-flex items-center gap-2 border border-[#8A6A2F]/40 bg-[#8A6A2F]/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[#E7C16B] hover:bg-[#8A6A2F]/20 transition-colors"
+                >
+                  Directorate Command
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
+            </div>
+          </div>
+
           <SectionHeader
             icon={CreditCard}
             title="Client Entitlements & Chain of Custody"
@@ -603,7 +683,7 @@ export default function UnifiedDashboard({
               entitlements={entitlements}
             />
             <DiagnosticLineagePanel events={lineageEvents} />
-            <MyReportsPanel reports={reports} />
+            <MyReportsPanel />
           </div>
 
           {aol.isInternal ? (
@@ -697,18 +777,13 @@ export default function UnifiedDashboard({
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
   context
 ) => {
+  // NextAuth session enforcement is handled by middleware.ts (Tier 1).
+  // By the time this handler runs, the session is guaranteed to exist.
   const session = await getServerSession(context.req, context.res, authOptions);
   const isOgrValid = hasValidOgrSessionFromContext(context);
 
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/admin/login?returnTo=/dashboard",
-        permanent: false,
-      },
-    };
-  }
-
+  // OGR is a secondary gate that is NOT migrated to middleware — it
+  // remains as a page-level redirect until the operator decides its fate.
   if (!isOgrValid) {
     return {
       redirect: {
@@ -716,6 +791,31 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         permanent: false,
       },
     };
+  }
+
+  // Resolve Inner Circle entitlement state alongside NextAuth identity.
+  // This mirrors what lib/auth/session-helpers.ts#getUnifiedSession returns,
+  // integrated inline so the dashboard's existing complex auth flow can
+  // consume the signal without a second getServerSession pass.
+  let innerCircleState: DashboardProps["innerCircle"] = {
+    hasValidToken: false,
+    tier: "public",
+    expiresAt: null,
+  };
+  try {
+    const cookieValue = readAccessCookie(context.req as any);
+    if (cookieValue) {
+      const ctx = await getSessionContext(cookieValue);
+      if (ctx.ok && ctx.valid) {
+        innerCircleState = {
+          hasValidToken: true,
+          tier: ctx.tier ?? "public",
+          expiresAt: ctx.expiresAt ?? null,
+        };
+      }
+    }
+  } catch {
+    // Fall through to default — never block dashboard on Inner Circle state.
   }
 
   try {
@@ -764,7 +864,7 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
 
     const artifactsById = new Map(artifactsRaw.map((a) => [a.id, a]));
 
-    const reports: ReportItem[] = grantsRaw
+    const reports: ReportItem[] = (grantsRaw
       .map((grant) => {
         const artifact = artifactsById.get(grant.artifactId);
         if (!artifact) return null;
@@ -777,11 +877,11 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
           createdAt: artifact.createdAt.toISOString(),
           downloadUrl: `/api/diagnostics/reports/download/${artifact.id}`,
           status: grant.status,
-          kind: artifact.kind,
+          kind: String(artifact.kind),
           retentionClass: artifact.retentionClass,
         };
       })
-      .filter((item): item is ReportItem => Boolean(item));
+      .filter((item) => item !== null) as ReportItem[]);
 
     const lineageEventsRaw =
       diagnosticRefs.length > 0
@@ -909,6 +1009,7 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         entitlements,
         lineageEvents,
         reports,
+        innerCircle: innerCircleState,
       },
     };
   } catch (error) {
@@ -922,6 +1023,7 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         featuredBriefs: [],
         recentBriefs: [],
         aol: { tier: "Inner Circle", isInternal: false },
+        innerCircle: innerCircleState,
         dealFlowStats: null,
         entitlements: [],
         lineageEvents: [],

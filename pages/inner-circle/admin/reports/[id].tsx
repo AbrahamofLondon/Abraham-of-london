@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 import ReportBuilderForm from "@/components/admin/reports/ReportBuilderForm";
@@ -114,3 +114,4 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 };
 
 export default Page;
+

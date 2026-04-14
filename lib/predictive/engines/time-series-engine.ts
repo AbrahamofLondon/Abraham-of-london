@@ -30,11 +30,11 @@ export class TimeSeriesEngine {
     const trend = this.loessTrend(values, Math.max(0.2, this.LOESS_BANDWIDTH));
     
     // Detrend and extract seasonal component
-    const detrended = values.map((v, i) => v - trend[i]);
+    const detrended = values.map((v, i) => v - trend[i]!);
     const seasonal = this.extractSeasonal(detrended, period);
-    
+
     // Calculate residuals
-    const residual = detrended.map((v, i) => v - seasonal[i]);
+    const residual = detrended.map((v, i) => v - seasonal[i]!);
     const trendSlope = this.calculateTrendSlope(trend);
     
     // Extract multi-period seasonal patterns for market cycles
@@ -67,8 +67,8 @@ export class TimeSeriesEngine {
     
     const decomposition = this.decompose(points);
     const n = points.length;
-    const lastPoint = points[n - 1];
-    const lastTrend = decomposition.trend[n - 1];
+    const lastPoint = points[n - 1]!;
+    const lastTrend = decomposition.trend[n - 1]!;
     const weeklyPattern = decomposition.seasonalPatterns.get('weekly') || [];
     
     const projectedPoints: TimeSeriesPointWithConfidence[] = [];
@@ -118,14 +118,14 @@ export class TimeSeriesEngine {
   private calculateMAE(projected: TimeSeriesPointWithConfidence[], decomp: DecompositionResult): number {
     // Measures mean absolute error against the last known trend average
     return projected.reduce((sum, p, i) => {
-      const fitted = decomp.trend[Math.min(i, decomp.trend.length - 1)];
+      const fitted = decomp.trend[Math.min(i, decomp.trend.length - 1)]!;
       return sum + Math.abs(p.value - fitted);
     }, 0) / projected.length;
   }
 
   private calculateRMSE(projected: TimeSeriesPointWithConfidence[], decomp: DecompositionResult): number {
     const mse = projected.reduce((sum, p, i) => {
-      const fitted = decomp.trend[Math.min(i, decomp.trend.length - 1)];
+      const fitted = decomp.trend[Math.min(i, decomp.trend.length - 1)]!;
       return sum + Math.pow(p.value - fitted, 2);
     }, 0) / projected.length;
     return Math.sqrt(mse);
@@ -135,11 +135,11 @@ export class TimeSeriesEngine {
     const values = projected.map(p => p.value);
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
     let ssRes = 0, ssTot = 0;
-    
+
     for (let i = 0; i < projected.length; i++) {
-      const fitted = decomp.trend[Math.min(i, decomp.trend.length - 1)];
-      ssRes += Math.pow(projected[i].value - fitted, 2);
-      ssTot += Math.pow(projected[i].value - mean, 2);
+      const fitted = decomp.trend[Math.min(i, decomp.trend.length - 1)]!;
+      ssRes += Math.pow(projected[i]!.value - fitted, 2);
+      ssTot += Math.pow(projected[i]!.value - mean, 2);
     }
     return ssTot === 0 ? 0 : 1 - (ssRes / ssTot);
   }
@@ -147,8 +147,8 @@ export class TimeSeriesEngine {
   private calculateMAPE(points: TimeSeriesPoint[], decomp: DecompositionResult): number {
     let totalAPE = 0, count = 0;
     for (let i = 0; i < points.length; i++) {
-      const actual = points[i].value;
-      const fitted = decomp.trend[i] + decomp.seasonal[i];
+      const actual = points[i]!.value;
+      const fitted = decomp.trend[i]! + decomp.seasonal[i]!;
       if (actual !== 0) {
         totalAPE += Math.abs((actual - fitted) / actual);
         count++;
@@ -164,17 +164,17 @@ export class TimeSeriesEngine {
     for (let i = 0; i < n; i++) {
       const weights = this.calculateTricubeWeights(x, i, bandwidth);
       const reg = this.weightedLinearRegression(x, y, weights);
-      result[i] = reg.intercept + reg.slope * x[i];
+      result[i] = reg.intercept + reg.slope * x[i]!;
     }
     return result;
   }
 
   private calculateTricubeWeights(x: number[], center: number, bandwidth: number): number[] {
     const n = x.length;
-    const maxDist = Math.max(...x.map(xi => Math.abs(xi - x[center])));
+    const maxDist = Math.max(...x.map(xi => Math.abs(xi - x[center]!)));
     const window = bandwidth * maxDist;
     return x.map(xi => {
-      const dist = Math.abs(xi - x[center]);
+      const dist = Math.abs(xi - x[center]!);
       if (dist < window) {
         return Math.pow(1 - Math.pow(dist / window, 3), 3);
       }
@@ -185,8 +185,8 @@ export class TimeSeriesEngine {
   private weightedLinearRegression(x: number[], y: number[], w: number[]) {
     let sW = 0, sWX = 0, sWY = 0, sWXX = 0, sWXY = 0;
     for (let i = 0; i < x.length; i++) {
-      sW += w[i]; sWX += w[i] * x[i]; sWY += w[i] * y[i];
-      sWXX += w[i] * x[i] * x[i]; sWXY += w[i] * x[i] * y[i];
+      sW += w[i]!; sWX += w[i]! * x[i]!; sWY += w[i]! * y[i]!;
+      sWXX += w[i]! * x[i]! * x[i]!; sWXY += w[i]! * x[i]! * y[i]!;
     }
     const denom = sW * sWXX - sWX * sWX;
     if (Math.abs(denom) < 1e-10) return { slope: 0, intercept: sWY / sW };
@@ -204,7 +204,7 @@ export class TimeSeriesEngine {
     }
     const averaged = seasonalIndices.map((val, i) => val / (counts[i] || 1));
     const mean = averaged.reduce((a, b) => a + b, 0) / period;
-    return Array.from({ length: n }, (_, i) => averaged[i % period] - mean);
+    return Array.from({ length: n }, (_, i) => averaged[i % period]! - mean);
   }
 
   private getSeasonalPattern(seasonal: number[], period: number): number[] {
@@ -224,8 +224,8 @@ export class TimeSeriesEngine {
     const meanY = trend.reduce((a, b) => a + b, 0) / n;
     let num = 0, den = 0;
     for (let i = 0; i < n; i++) {
-      num += (x[i] - meanX) * (trend[i] - meanY);
-      den += Math.pow(x[i] - meanX, 2);
+      num += (x[i]! - meanX) * (trend[i]! - meanY);
+      den += Math.pow(x[i]! - meanX, 2);
     }
     return den === 0 ? 0 : num / den;
   }

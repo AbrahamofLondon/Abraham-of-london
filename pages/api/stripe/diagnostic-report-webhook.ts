@@ -11,7 +11,7 @@ const diagnosticWebhookSecret =
 
 const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
+      apiVersion: "2026-02-25.clover" as any,
     })
   : null;
 
@@ -71,7 +71,7 @@ export default async function handler(
         });
 
         await markDiagnosticReportPaid({
-          diagnosticRecordId,
+          diagnosticId: diagnosticRecordId,
           reportTier,
         });
       }

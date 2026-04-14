@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/report-pdf.tsx */
 
 import React from "react";
@@ -364,5 +366,6 @@ export async function buildDiagnosticReportPdfBuffer(args: {
   );
 
   const out = await instance.toBuffer();
-  return Buffer.isBuffer(out) ? out : Buffer.from(out);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return Buffer.isBuffer(out) ? out : Buffer.from(out as any);
 }

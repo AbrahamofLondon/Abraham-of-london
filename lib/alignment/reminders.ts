@@ -132,12 +132,12 @@ export async function runReminderSweep() {
           status: "queued",
           channel: pref.email ? "email" : "in_app",
           scheduledFor: dueDate,
-          payload: {
+          payload: JSON.stringify({
             prompt: narrative.reminderPrompt,
             band: latest.band,
             totalScore: latest.totalScore,
             percentScore: latest.percentScore,
-          },
+          }),
         },
       });
 

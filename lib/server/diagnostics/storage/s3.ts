@@ -1,3 +1,5 @@
+// server-only guard removed — Pages Router incompatible
+
 /* lib/server/diagnostics/storage/s3.ts */
 
 import {
@@ -158,3 +160,4 @@ export class S3DiagnosticStorageAdapter implements DiagnosticStorageAdapter {
     }
   }
 }
+

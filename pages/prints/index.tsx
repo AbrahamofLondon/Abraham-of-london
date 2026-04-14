@@ -154,7 +154,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       });
     });
 
-    const popularTags = safeArraySlice(
+    const popularTags = safeArraySlice<[string, number]>(
       Object.entries(tagCounts).sort((a, b) => b[1] - a[1]),
       0,
       12
@@ -208,8 +208,8 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
     });
   }, [prints, searchQuery, selectedCategory, selectedTag, showDownloadOnly]);
 
-  const featuredPrints = React.useMemo(() => 
-    safeArraySlice(
+  const featuredPrints = React.useMemo(() =>
+    safeArraySlice<PrintItem>(
       prints.filter(p => p.featured),
       0,
       3

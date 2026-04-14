@@ -1,7 +1,7 @@
 // pages/api/events/checkout.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
+import { authOptions } from "@/lib/auth/config";
 import Stripe from "stripe";
 import { getEventPrice } from "@/lib/pricing/event-pricing";
 

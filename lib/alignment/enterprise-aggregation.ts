@@ -178,15 +178,15 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
   }
 
   const { domainScores, varianceScores } = computeDomainAggregates(assessments);
-  const orgTotalPercent = round(mean(assessments.map((a) => a.percentScore)));
+  const orgTotalPercent = round(mean(assessments.map((a: any) => a.percentScore)));
 
   const confidenceScore = computeConfidenceScore(respondentCount, invitedCount);
   const dissonanceArea = computePolygonArea(
     varianceScores.map((value) => value.variance),
   );
 
-  const execs = assessments.filter((assessment) => assessment.isExecutive);
-  const staff = assessments.filter((assessment) => !assessment.isExecutive);
+  const execs = assessments.filter((assessment: any) => assessment.isExecutive);
+  const staff = assessments.filter((assessment: any) => !assessment.isExecutive);
 
   const gapValues = ENTERPRISE_ALIGNMENT_DOMAIN_ORDER.map((domain) => {
     const getDomainAvg = (
@@ -252,12 +252,13 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
       overallGapPercent >= 15 ? ["CRITICAL: Perceptual Drift Detected"] : [],
   });
 
-  const teamMap = assessments.reduce((acc, current) => {
-    const team = current.teamName || "General Operations";
+  type AssessmentEntry = { domainScoresJson: unknown; percentScore: number };
+  const teamMap = (assessments as AssessmentEntry[]).reduce((acc: Record<string, AssessmentEntry[]>, current: AssessmentEntry) => {
+    const team = (current as any).teamName || "General Operations";
     if (!acc[team]) acc[team] = [];
     acc[team].push(current);
     return acc;
-  }, {} as Record<string, typeof assessments>);
+  }, {} as Record<string, AssessmentEntry[]>);
 
   const teamSnapshots = Object.entries(teamMap).map(
     ([teamName, teamAssessments]) => {
@@ -266,7 +267,7 @@ export async function aggregateEnterpriseCampaign(campaignId: string) {
         varianceScores: teamVarianceScores,
       } = computeDomainAggregates(teamAssessments);
 
-      const teamPercent = round(mean(teamAssessments.map((a) => a.percentScore)));
+      const teamPercent = round(mean(teamAssessments.map((a: AssessmentEntry) => a.percentScore)));
 
       return {
         organisationId: campaign.organisationId,

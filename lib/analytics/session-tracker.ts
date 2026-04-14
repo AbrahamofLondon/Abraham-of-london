@@ -1,7 +1,6 @@
 // lib/analytics/session-tracker.ts
 // ─── CONSTITUTIONAL SESSION TRACKING V2.0 ─────────────────────────────────────
 
-import { db } from "@/lib/db";
 import { CanonicalSectionsEnvelope } from "@/lib/decision/canonical-sections";
 import { ConstitutionalDecision } from "@/lib/constitution/rules";
 
@@ -116,18 +115,18 @@ class ConstitutionalSessionTracker {
 
     this.sessionCache.set(sessionId, session);
 
-    // Store in database
-    await db.constitutionalSession.create({
-      data: {
-        id: sessionId,
-        campaignId,
-        userId,
-        startedAt: new Date(now),
-        lastActivityAt: new Date(now),
-        initialCanonicalSnapshot: canonicalSnapshot,
-        metadata: session.metadata,
-      },
-    });
+    // STUB: constitutionalSession model not in schema (C2 debt)
+    // await db.constitutionalSession.create({
+    //   data: {
+    //     id: sessionId,
+    //     campaignId,
+    //     userId,
+    //     startedAt: new Date(now),
+    //     lastActivityAt: new Date(now),
+    //     initialCanonicalSnapshot: canonicalSnapshot,
+    //     metadata: session.metadata,
+    //   },
+    // });
 
     return session;
   }
@@ -170,33 +169,33 @@ class ConstitutionalSessionTracker {
       this.sessionCache.set(sessionId, cachedSession);
     }
 
-    // Store in database
-    await db.constitutionalSessionEvent.create({
-      data: {
-        id: event.id,
-        sessionId,
-        campaignId,
-        userId,
-        eventType,
-        timestamp: new Date(now),
-        canonicalSnapshot: canonicalSnapshot as any,
-        constitutionalDecision: constitutionalDecision as any,
-        metadata: metadata || {},
-      },
-    });
+    // STUB: constitutionalSessionEvent model not in schema (C2 debt)
+    // await db.constitutionalSessionEvent.create({
+    //   data: {
+    //     id: event.id,
+    //     sessionId,
+    //     campaignId,
+    //     userId,
+    //     eventType,
+    //     timestamp: new Date(now),
+    //     canonicalSnapshot: canonicalSnapshot as any,
+    //     constitutionalDecision: constitutionalDecision as any,
+    //     metadata: metadata || {},
+    //   },
+    // });
 
-    // Update session last activity
-    await db.constitutionalSession.update({
-      where: { id: sessionId },
-      data: {
-        lastActivityAt: new Date(now),
-        ...(eventType === "CONVERSION" && {
-          conversionAt: new Date(now),
-          conversionType: eventType,
-          finalCanonicalSnapshot: canonicalSnapshot as any,
-        }),
-      },
-    });
+    // STUB: constitutionalSession model not in schema (C2 debt)
+    // await db.constitutionalSession.update({
+    //   where: { id: sessionId },
+    //   data: {
+    //     lastActivityAt: new Date(now),
+    //     ...(eventType === "CONVERSION" && {
+    //       conversionAt: new Date(now),
+    //       conversionType: eventType,
+    //       finalCanonicalSnapshot: canonicalSnapshot as any,
+    //     }),
+    //   },
+    // });
 
     return event;
   }
@@ -303,45 +302,47 @@ class ConstitutionalSessionTracker {
       return this.sessionCache.get(sessionId) || null;
     }
 
+    // STUB: constitutionalSession model not in schema (C2 debt)
     // Fetch from database
-    const dbSession = await db.constitutionalSession.findUnique({
-      where: { id: sessionId },
-      include: {
-        events: {
-          orderBy: { timestamp: "asc" },
-        },
-      },
-    });
-
-    if (!dbSession) return null;
-
-    const session: Session = {
-      id: dbSession.id,
-      campaignId: dbSession.campaignId,
-      userId: dbSession.userId,
-      startedAt: dbSession.startedAt.toISOString(),
-      endedAt: dbSession.endedAt?.toISOString(),
-      lastActivityAt: dbSession.lastActivityAt.toISOString(),
-      events: dbSession.events.map((e: any) => ({
-        id: e.id,
-        sessionId: e.sessionId,
-        campaignId: e.campaignId,
-        userId: e.userId,
-        eventType: e.eventType,
-        timestamp: e.timestamp.toISOString(),
-        canonicalSnapshot: e.canonicalSnapshot,
-        constitutionalDecision: e.constitutionalDecision,
-        metadata: e.metadata,
-      })),
-      initialCanonicalSnapshot: dbSession.initialCanonicalSnapshot,
-      finalCanonicalSnapshot: dbSession.finalCanonicalSnapshot,
-      conversionAt: dbSession.conversionAt?.toISOString(),
-      conversionType: dbSession.conversionType as SessionEventType | undefined,
-      metadata: dbSession.metadata,
-    };
-
-    this.sessionCache.set(sessionId, session);
-    return session;
+    // const dbSession = await db.constitutionalSession.findUnique({
+    //   where: { id: sessionId },
+    //   include: {
+    //     events: {
+    //       orderBy: { timestamp: "asc" },
+    //     },
+    //   },
+    // });
+    //
+    // if (!dbSession) return null;
+    //
+    // const session: Session = {
+    //   id: dbSession.id,
+    //   campaignId: dbSession.campaignId,
+    //   userId: dbSession.userId,
+    //   startedAt: dbSession.startedAt.toISOString(),
+    //   endedAt: dbSession.endedAt?.toISOString(),
+    //   lastActivityAt: dbSession.lastActivityAt.toISOString(),
+    //   events: dbSession.events.map((e: any) => ({
+    //     id: e.id,
+    //     sessionId: e.sessionId,
+    //     campaignId: e.campaignId,
+    //     userId: e.userId,
+    //     eventType: e.eventType,
+    //     timestamp: e.timestamp.toISOString(),
+    //     canonicalSnapshot: e.canonicalSnapshot,
+    //     constitutionalDecision: e.constitutionalDecision,
+    //     metadata: e.metadata,
+    //   })),
+    //   initialCanonicalSnapshot: dbSession.initialCanonicalSnapshot,
+    //   finalCanonicalSnapshot: dbSession.finalCanonicalSnapshot,
+    //   conversionAt: dbSession.conversionAt?.toISOString(),
+    //   conversionType: dbSession.conversionType as SessionEventType | undefined,
+    //   metadata: dbSession.metadata,
+    // };
+    //
+    // this.sessionCache.set(sessionId, session);
+    // return session;
+    return null;
   }
 
   /**
@@ -357,13 +358,14 @@ class ConstitutionalSessionTracker {
       this.sessionCache.set(sessionId, cachedSession);
     }
 
-    await db.constitutionalSession.update({
-      where: { id: sessionId },
-      data: {
-        endedAt: new Date(),
-        ...(finalCanonicalSnapshot && { finalCanonicalSnapshot: finalCanonicalSnapshot as any }),
-      },
-    });
+    // STUB: constitutionalSession model not in schema (C2 debt)
+    // await db.constitutionalSession.update({
+    //   where: { id: sessionId },
+    //   data: {
+    //     endedAt: new Date(),
+    //     ...(finalCanonicalSnapshot && { finalCanonicalSnapshot: finalCanonicalSnapshot as any }),
+    //   },
+    // });
   }
 
   /**
@@ -379,10 +381,8 @@ class ConstitutionalSessionTracker {
     reportViews: number;
     interventionCreated: number;
   }> {
-    const sessions = await db.constitutionalSession.findMany({
-      where: { campaignId },
-      include: { events: true },
-    });
+    // STUB: constitutionalSession model not in schema (C2 debt)
+    const sessions: Session[] = [];
 
     let totalDuration = 0;
     let conversions = 0;
@@ -393,9 +393,9 @@ class ConstitutionalSessionTracker {
 
     for (const session of sessions) {
       if (session.conversionAt) conversions++;
-      
+
       if (session.startedAt && session.lastActivityAt) {
-        const duration = session.lastActivityAt.getTime() - session.startedAt.getTime();
+        const duration = new Date(session.lastActivityAt).getTime() - new Date(session.startedAt).getTime();
         totalDuration += duration;
       }
 

@@ -221,7 +221,8 @@ export default function OGRHandoverDocument({
         <span className="font-serif text-[280px] font-bold italic tracking-tighter text-[#2C2416]">OGR</span>
       </div>
 
-      <style jsx global>{`
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <style {...({ jsx: true, global: true } as any)}>{`
         @media print {
           .print-handover {
             box-shadow: none !important;
