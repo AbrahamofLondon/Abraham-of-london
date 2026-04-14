@@ -299,7 +299,7 @@ function Section({
                 fontSize: "7.5px",
                 letterSpacing: "0.46em",
                 textTransform: "uppercase",
-                color: capDim ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.20)",
+                color: capDim ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.20)",
               }}
             >
               {cap}
@@ -464,7 +464,7 @@ function HeroSection({
         style={{ opacity: imgOpacity, scale: imgScale }}
       >
         <Image
-          src="/assets/images/writing-desk.jpeg"
+          src="/assets/images/writing-desk.webp"
           alt=""
           fill
           priority
@@ -1579,7 +1579,7 @@ function EscalationClose() {
                   textTransform: "uppercase",
                 }}
               >
-                Begin diagnostics
+                Begin Assessment
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
 
