@@ -5,15 +5,9 @@ import type { GetStaticProps, NextPage } from "next";
 import Layout from "@/components/Layout";
 import { assertContentlayerHasDocs } from "@/lib/contentlayer-assert";
 
-// FIXED: Import from ONE source only
-import { 
-  getContentlayerData, 
-  getAllContentlayerDocs, 
-  getPublishedDocuments,
-  getDocKind,
-  normalizeSlug,
-  getDocHref
-} from "@/lib/content/server";
+// Debug page, dev-only (hard-gated in getStaticProps). Content-server
+// imports are deferred to inside getStaticProps so they cannot drag the
+// contentlayer graph into the production server chunk at build trace time.
 import { isDraftContent as isDraft } from "@/lib/content/client-utils";
 import { safeSlice } from "@/lib/utils/safe";
 
@@ -178,9 +172,18 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     return { notFound: true };
   }
 
+  const {
+    getContentlayerData,
+    getAllContentlayerDocs,
+    getPublishedDocuments,
+    getDocKind,
+    normalizeSlug,
+    getDocHref,
+  } = await import("@/lib/content/server");
+
   await getContentlayerData();
   assertContentlayerHasDocs();
-  
+
   const all = getAllContentlayerDocs() ?? [];
   const published = getPublishedDocuments() ?? [];
   const publishedCount = published.length;

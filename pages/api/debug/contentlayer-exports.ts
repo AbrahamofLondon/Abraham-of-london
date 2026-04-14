@@ -1,26 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextApiRequest, NextApiResponse } from "next";
-import * as Contentlayer from "contentlayer/generated";
 
+// Dev-only diagnostic. Dynamic import keeps contentlayer/generated out
+// of the module graph at build time so this file cannot drag the full
+// content corpus into a production server chunk even if the NODE_ENV
+// guard fails to evaluate at trace time.
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // Only allow in development
   if (process.env.NODE_ENV !== "development") {
     return res.status(404).json({ error: "Not found" });
   }
 
+  const Contentlayer = await import("contentlayer/generated");
+
   const exports = Object.keys(Contentlayer);
-  const arrays = exports.filter(key => Array.isArray((Contentlayer as any)[key]));
+  const arrays = exports.filter((key) => Array.isArray((Contentlayer as any)[key]));
   const arrayLengths: Record<string, number> = {};
-  
+
   for (const key of arrays) {
     arrayLengths[key] = (Contentlayer as any)[key]?.length || 0;
   }
 
   // Find canon-related exports
-  const canonExports = exports.filter(key => 
-    key.toLowerCase().includes("canon")
+  const canonExports = exports.filter((key) =>
+    key.toLowerCase().includes("canon"),
   );
 
   // Get sample of canon documents if available

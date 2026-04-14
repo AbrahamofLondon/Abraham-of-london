@@ -6,7 +6,6 @@ import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.pos
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
 import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
-import { buildDiagnosticReportPdfBuffer } from "@/lib/server/diagnostics/report-pdf";
 import {
   getArchivedDiagnosticPdf,
   getArchivedDiagnosticPdfSignedUrl,
@@ -101,6 +100,9 @@ export default async function handler(
       unlocked,
     });
 
+    const { buildDiagnosticReportPdfBuffer } = await import(
+      "@/lib/server/diagnostics/report-pdf"
+    );
     const pdfBuffer = await buildDiagnosticReportPdfBuffer({
       item,
       report,

@@ -6,7 +6,6 @@ import crypto from "crypto";
 
 import type { StoredDiagnosticRecord } from "@/lib/server/diagnostics/store";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
-import { buildDiagnosticReportPdfBuffer } from "@/lib/server/diagnostics/report-pdf";
 import { getDiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage";
 import {
   buildArtifactRecord,
@@ -29,6 +28,9 @@ export async function archiveDiagnosticPdf(args: {
     unlocked: true,
   });
 
+  const { buildDiagnosticReportPdfBuffer } = await import(
+    "@/lib/server/diagnostics/report-pdf"
+  );
   const pdfBuffer = await buildDiagnosticReportPdfBuffer({
     item,
     report,
