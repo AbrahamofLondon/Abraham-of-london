@@ -91,16 +91,30 @@ const Page: NextPage<Props> = ({ resource, requiredTier, bodyCode }) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = getAllCombinedDocs() || [];
 
-  const paths = docs
-    .filter((d: any) => !isDraftContent(d))
-    .filter(isResourceDoc)
-    .map((d: any) => {
-      const raw = d?.slug || d?._raw?.flattenedPath || "";
-      const slug = cleanResourceSlug(raw);
-      if (!slug) return null;
-      return { params: { slug: slug.split("/") } };
-    })
-    .filter(Boolean) as Array<{ params: { slug: string[] } }>;
+  const paths = (
+    docs
+      .filter((d: any) => !isDraftContent(d))
+      .filter(isResourceDoc)
+      .map((d: any) => {
+        const raw = d?.slug || d?._raw?.flattenedPath || "";
+        const slug = cleanResourceSlug(raw);
+        if (!slug) return null;
+        return { params: { slug: slug.split("/") } };
+      })
+      .filter((entry): entry is { params: { slug: string[] } } => {
+        if (!entry) return false;
+
+        const segments = entry.params.slug;
+        if (!segments.length) return false;
+
+        if (segments[0] === "surrender-framework") return false;
+        if (segments.length === 1 && segments[0] === "strategic-frameworks") {
+          return false;
+        }
+
+        return true;
+      })
+  ) as Array<{ params: { slug: string[] } }>;
 
   return { paths, fallback: "blocking" };
 };
