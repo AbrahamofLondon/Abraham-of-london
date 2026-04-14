@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { allBriefs } from "contentlayer/generated";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
@@ -191,3 +191,4 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 };
 
 export default BriefingRoom;
+

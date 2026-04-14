@@ -12,7 +12,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import {
   getSessionContext,

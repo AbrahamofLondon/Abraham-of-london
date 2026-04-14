@@ -43,3 +43,9 @@ const ControlsPage: NextPage = () => (
 );
 
 export default ControlsPage;
+
+// Next.js page requirement — default export stub
+// ReportActions above is a utility component used by other pages
+import type { NextPage } from "next"
+const ControlsPage: NextPage = () => null
+export default ControlsPage

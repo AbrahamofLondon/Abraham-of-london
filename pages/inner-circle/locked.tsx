@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock, ArrowLeft, ShieldAlert } from "lucide-react";
 import { fontConfig } from "@/lib/next-fonts";
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 
 function sanitizeLocalPath(input: string | null, fallback: string) {
   if (!input) return fallback;

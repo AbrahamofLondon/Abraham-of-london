@@ -8,7 +8,7 @@ import Link from "next/link";
 import { ShieldCheck, Lock, ChevronLeft } from "lucide-react";
 import { allBriefs } from "contentlayer/generated";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";

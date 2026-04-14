@@ -15,7 +15,7 @@ import {
   Zap
 } from "lucide-react";
 
-import Layout from "@/components/layout/Layout"; // Updated to use our new layout
+import Layout from "@/components/Layout"; // Updated to use our new layout
 import { getRecaptchaTokenSafe } from "@/lib/recaptchaClient";
 
 const INNER_CIRCLE_COOKIE_NAME = "aol_access";

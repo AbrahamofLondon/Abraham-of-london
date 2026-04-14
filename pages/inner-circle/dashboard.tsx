@@ -22,7 +22,7 @@ import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 import { prisma } from "@/lib/prisma";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { useRouter } from "next/router";
@@ -426,3 +426,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: { error: "Institutional Vault connectivity lost. Systems re-aligning." } };
   }
 };
+

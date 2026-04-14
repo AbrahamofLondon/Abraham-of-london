@@ -6,7 +6,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 import { ArrowRight, Download, FileText, RefreshCw } from "lucide-react";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import ReportShell from "@/components/diagnostics/report/ReportShell";
 import ReportHeader from "@/components/diagnostics/report/ReportHeader";
 import ReportSummaryBlock from "@/components/diagnostics/report/ReportSummaryBlock";

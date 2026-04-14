@@ -1,9 +1,10 @@
-import type { GetServerSideProps } from "next";
+import type { NextPage } from "next"
+import Layout from "@/components/Layout"
 
-export const getServerSideProps: GetServerSideProps = async () => ({
-  redirect: { destination: "/editorials", permanent: true },
-});
+const EditorialsDiscoveryPage: NextPage = () => (
+  <Layout title="Editorial Discovery">
+    <main />
+  </Layout>
+)
 
-export default function EditorialsDiscoveryRedirect() {
-  return null;
-}
+export default EditorialsDiscoveryPage

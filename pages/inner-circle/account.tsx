@@ -5,7 +5,7 @@ import type { GetServerSideProps } from "next";
 import Link from "next/link";
 import { ShieldCheck, Key, RefreshCw, ArrowRight, Lock } from "lucide-react";
 
-import Layout from "@/components/layout/Layout";
+import Layout from "@/components/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { getUnifiedSession } from "@/lib/auth/session-helpers";
@@ -335,3 +335,4 @@ export const getServerSideProps: GetServerSideProps<AccountProps> = async (
     },
   };
 };
+
