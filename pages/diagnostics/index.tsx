@@ -20,24 +20,31 @@ const VOID = "rgb(3 3 5)";
 const RUNGS: Rung[] = [
   {
     n: "01",
-    label: "Diagnostics",
-    href: "/purpose-alignment",
+    label: "Constitutional Diagnostic",
+    href: "/diagnostics/constitutional-diagnostic",
     duration: "6 min",
     route: "STRATEGY",
   },
   {
     n: "02",
-    label: "Executive Reporting",
-    href: "/executive-reporting",
-    duration: "12 min",
+    label: "Team Assessment",
+    href: "/diagnostics/team-assessment",
+    duration: "10 min",
     route: "DIAGNOSTIC",
   },
   {
     n: "03",
-    label: "Strategy Room",
-    href: "/strategy-room",
-    duration: "8 min",
-    route: "REJECT",
+    label: "Enterprise Assessment",
+    href: "/diagnostics/enterprise-assessment",
+    duration: "15 min",
+    route: "DIAGNOSTIC",
+  },
+  {
+    n: "04",
+    label: "Executive Reporting",
+    href: "/diagnostics/executive-reporting",
+    duration: "12 min",
+    route: "STRATEGY",
   },
 ];
 
