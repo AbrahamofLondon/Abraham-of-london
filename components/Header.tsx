@@ -308,7 +308,7 @@ export default function Header({
                   className="group flex items-center justify-between py-5 transition-all duration-200"
                 >
                   <div className="flex items-center gap-5">
-                    <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.36em] text-white/16 transition-colors group-hover:text-white/28">
+                    <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-[7px] uppercase tracking-[0.36em] text-white/20 transition-colors group-hover:text-white/28">
                       {String(idx + 1).padStart(2, "0")}
                     </span>
                     <div>
@@ -336,7 +336,7 @@ export default function Header({
                     <Icon
                       className={cn(
                         "h-4 w-4 transition-colors",
-                        active ? "" : item.signal ? "text-white/22 group-hover:text-white/45" : "text-white/14 group-hover:text-white/35",
+                        active ? "" : item.signal ? "text-white/22 group-hover:text-white/45" : "text-white/20 group-hover:text-white/35",
                       )}
                       style={active ? { color: `${GOLD}CC` } : item.signal ? { color: `${GOLD}60` } : {}}
                     />
