@@ -26,17 +26,17 @@ export default function PolicyFooter({ isDark = true }: PolicyFooterProps): Reac
   if (!mounted) return null; // Hydration Shield
 
   const email = resolveEmail(siteConfig);
-  const border = isDark ? "border-white/10" : "border-gray-200/70";
+  const border = isDark ? "border-white/10" : "border-white/10";
   const bg = isDark ? "bg-white/[0.02]" : "bg-gradient-to-br from-white to-slate-50";
-  const heading = isDark ? "text-white/90" : "text-slate-900";
-  const body = isDark ? "text-white/45" : "text-slate-600";
+  const heading = isDark ? "text-white/90" : "text-white/90";
+  const body = isDark ? "text-white/45" : "text-white/52";
   const subtle = isDark ? "text-white/35" : "text-slate-500";
   const link = isDark
-    ? "text-amber-200/80 underline decoration-amber-200/25 underline-offset-4 hover:text-amber-100"
-    : "text-emerald-700 underline decoration-emerald-700/30 underline-offset-4 hover:text-emerald-800";
+    ? "text-white/60 underline decoration-white/15 underline-offset-4 hover:text-white/80"
+    : "text-white/70 underline decoration-white/15 underline-offset-4 hover:text-white/90";
 
   return (
-    <section className={`overflow-hidden rounded-3xl border ${border} ${bg} backdrop-blur-sm p-7 sm:p-8`}>
+    <section className={`overflow-hidden border ${border} ${bg} backdrop-blur-sm p-7 sm:p-8`}>
       <div className="mx-auto max-w-3xl text-center">
         <p className={`text-[10px] font-mono uppercase tracking-[0.35em] ${subtle}`}>
           Governance · Policies
