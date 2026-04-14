@@ -245,12 +245,16 @@ function Section({
   id,
   variant = "base",
   cap,
+  capDim = false,
+  compact = false,
   className = "",
 }: {
   children: React.ReactNode;
   id?: string;
   variant?: "base" | "surface" | "void";
   cap?: string;
+  capDim?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   return (
@@ -278,7 +282,12 @@ function Section({
         <GoldRule soft />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 sm:px-8 lg:px-12 lg:py-28">
+      <div
+        className={cn(
+          "relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12",
+          compact ? "py-16 lg:py-24" : "py-20 lg:py-28",
+        )}
+      >
         {cap && (
           <div className="mb-14 flex items-center gap-6">
             <div className="flex-1">
@@ -290,7 +299,7 @@ function Section({
                 fontSize: "7.5px",
                 letterSpacing: "0.46em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.20)",
+                color: capDim ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.20)",
               }}
             >
               {cap}
@@ -312,12 +321,16 @@ function SectionHeader({
   description,
   align = "left",
   large = false,
+  eyebrowDim = false,
+  smaller = false,
 }: {
   eyebrow: string;
   title: React.ReactNode;
   description?: string;
   align?: "left" | "center";
   large?: boolean;
+  eyebrowDim?: boolean;
+  smaller?: boolean;
 }) {
   const center = align === "center";
 
@@ -329,11 +342,19 @@ function SectionHeader({
       viewport={{ once: true, margin: "-60px" }}
       className={cn("max-w-4xl", center && "mx-auto text-center")}
     >
-      <Eyebrow align={align}>{eyebrow}</Eyebrow>
+      <Eyebrow align={align} dim={eyebrowDim}>
+        {eyebrow}
+      </Eyebrow>
       <h2
         className={cn(
           "mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.93] tracking-[-0.028em] text-white",
-          large ? "text-4xl md:text-5xl lg:text-[3.6rem]" : "text-3xl md:text-4xl lg:text-5xl",
+          large
+            ? smaller
+              ? "text-3xl md:text-4xl lg:text-[3.1rem]"
+              : "text-4xl md:text-5xl lg:text-[3.6rem]"
+            : smaller
+              ? "text-[1.75rem] md:text-3xl lg:text-4xl"
+              : "text-3xl md:text-4xl lg:text-5xl",
         )}
       >
         {title}
@@ -1563,28 +1584,12 @@ function EscalationClose() {
               </Link>
 
               <Link
-                href="/intelligence/global-market-intelligence-q1-2026"
-                className="inline-flex items-center gap-3 border px-7 py-4 transition"
-                style={{
-                  borderColor: "rgba(255,255,255,0.07)",
-                  backgroundColor: "rgba(255,255,255,0.018)",
-                  color: "rgba(255,255,255,0.40)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.32em",
-                  textTransform: "uppercase",
-                }}
-              >
-                <TrendingUp className="h-3.5 w-3.5" />
-                Market Intelligence
-              </Link>
-
-              <Link
                 href="/consulting/strategy-room"
                 className="inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.055)",
-                  color: "rgba(255,255,255,0.28)",
+                  borderColor: "rgba(255,255,255,0.07)",
+                  backgroundColor: "rgba(255,255,255,0.02)",
+                  color: "rgba(255,255,255,0.36)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -1726,9 +1731,16 @@ const HomePage: NextPage<HomePageProps> = ({
         <>
           <Bridge text="products · editorial and execution property" />
 
-          <Section id="publications" variant="surface" cap="publications · doctrine and execution">
+          <Section
+            id="publications"
+            variant="surface"
+            cap="publications · doctrine and execution"
+            capDim
+            compact
+          >
             <SectionHeader
               eyebrow="Publications & Playbooks"
+              eyebrowDim
               title={
                 <>
                   The written record
@@ -1821,9 +1833,10 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="execution property · operators" />
 
-      <Section id="who" variant="void" cap="operators · target audience">
+      <Section id="who" variant="void" cap="operators · target audience" capDim compact>
         <SectionHeader
           eyebrow="Operators"
+          eyebrowDim
           title={
             <>
               Built for people carrying
@@ -1848,9 +1861,10 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="operators · engagement lanes" />
 
-      <Section id="lanes" variant="surface" cap="engagement · commercial structure">
+      <Section id="lanes" variant="surface" cap="engagement · commercial structure" capDim compact>
         <SectionHeader
           eyebrow="Engagement"
+          eyebrowDim
           title={
             <>
               Public signal.
@@ -1877,9 +1891,10 @@ const HomePage: NextPage<HomePageProps> = ({
           product narrative. Community gatherings are surfaced at /events
           and in the footer. Not a product pillar. */}
 
-      <Section id="vault" variant="surface" cap="vault · deployables">
+      <Section id="vault" variant="surface" cap="vault · deployables" capDim compact>
         <SectionHeader
           eyebrow="Vault"
+          eyebrowDim
           title="Deployable assets."
           description="Templates, packs, frameworks, and operating assets engineered for reuse."
         />
@@ -1898,9 +1913,10 @@ const HomePage: NextPage<HomePageProps> = ({
         <>
           <Bridge text="deployables · intelligence feed" />
 
-          <Section id="briefing" variant="void" cap="briefing · operator intelligence">
+          <Section id="briefing" variant="void" cap="briefing · operator intelligence" capDim compact>
             <SectionHeader
               eyebrow="Briefing"
+              eyebrowDim
               title="Operator intelligence."
               description="Focused transmission for people who will act on what they read."
             />
@@ -1921,9 +1937,10 @@ const HomePage: NextPage<HomePageProps> = ({
         <>
           <Bridge text="intelligence · dispatches" />
 
-          <Section id="dispatches" variant="surface" cap="dispatches · rapid intel">
+          <Section id="dispatches" variant="surface" cap="dispatches · rapid intel" capDim compact>
             <SectionHeader
               eyebrow="Dispatches"
+              eyebrowDim
               title="Short, sharp intelligence notes."
               description="Written for retrieval and reuse."
             />
@@ -1946,9 +1963,11 @@ const HomePage: NextPage<HomePageProps> = ({
 
       <Bridge text="content · ventures" />
 
-      <Section id="ventures" variant="void" cap="ventures · institutions in motion">
+      <Section id="ventures" variant="void" cap="ventures · institutions in motion" capDim compact>
         <SectionHeader
           eyebrow="Ventures"
+          eyebrowDim
+          smaller
           title="Institutions in motion."
           description="Real ventures, systems, and infrastructure designed to move in the world."
         />
@@ -2389,4 +2408,3 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 };
 
 export default HomePage;
-
