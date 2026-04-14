@@ -989,18 +989,33 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       </Head>
 
       <main className="min-h-screen" style={{ backgroundColor: VOID }}>
-        <header className="border-b px-6 py-14 lg:px-10" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <header
+          className="border-b px-6 pb-12 pt-16 lg:px-10 lg:pb-12 lg:pt-28"
+          style={{ borderColor: "rgba(255,255,255,0.10)" }}
+        >
           <div className="mx-auto max-w-5xl">
-            <div
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.40em",
-                textTransform: "uppercase",
-                color: "rgba(201,169,110,0.80)",
-              }}
-            >
-              SHORTS · ABRAHAM OF LONDON
+            <div className="flex items-center">
+              <span
+                style={{
+                  width: 1,
+                  height: 20,
+                  backgroundColor: "rgba(201,169,110,0.45)",
+                  display: "inline-block",
+                  marginRight: "0.75rem",
+                  verticalAlign: "middle",
+                }}
+              />
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  letterSpacing: "0.40em",
+                  textTransform: "uppercase",
+                  color: "rgba(201,169,110,0.80)",
+                }}
+              >
+                SHORTS · ABRAHAM OF LONDON
+              </div>
             </div>
             <h1
               style={{
@@ -1008,13 +1023,32 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                 fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
                 fontWeight: 300,
                 fontStyle: "italic",
-                fontSize: "clamp(2rem, 4vw, 3.5rem)",
+                fontSize: "clamp(2.8rem, 5.5vw, 5rem)",
                 lineHeight: 1.02,
                 color: "rgba(255,255,255,0.90)",
               }}
             >
               Compressed thinking for people who read fast.
             </h1>
+            <div
+              style={{
+                width: 40,
+                height: 1,
+                backgroundColor: "rgba(201,169,110,0.55)",
+                margin: "1.5rem 0 2rem",
+              }}
+            />
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.42em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.28)",
+              }}
+            >
+              Signal. Pattern. Decision.
+            </div>
           </div>
         </header>
 
