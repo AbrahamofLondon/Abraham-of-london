@@ -2,9 +2,6 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as React from "react";
-import { renderToStream } from "@react-pdf/renderer";
-
-import GlobalMarketIntelligenceQ12026BoardroomPdf from "@/lib/pdf/artifacts/global-market-intelligence-q1-2026-boardroom";
 
 type AccessPayload = {
   tier?: string;
@@ -94,6 +91,11 @@ export default async function handler(
       message: "This boardroom PDF is restricted to premium access tiers.",
     });
   }
+
+  const { renderToStream } = await import("@react-pdf/renderer");
+  const { default: GlobalMarketIntelligenceQ12026BoardroomPdf } = await import(
+    "@/lib/pdf/artifacts/global-market-intelligence-q1-2026-boardroom"
+  );
 
   const stream = await renderToStream(
     React.createElement(GlobalMarketIntelligenceQ12026BoardroomPdf)

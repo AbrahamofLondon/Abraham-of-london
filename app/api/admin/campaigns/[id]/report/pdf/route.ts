@@ -1,13 +1,11 @@
 // app/api/admin/campaigns/[id]/report/pdf/route.ts
 import { NextResponse } from "next/server";
 import React from "react";
-import { pdf } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { generateExecutiveReportForCampaign } from "@/lib/admin/reporting/executive-report-service";
-import { ExecutiveReportPdfDocument } from "@/lib/admin/reporting/report-pdf";
 import { evaluateConstitutionalRoute } from "@/lib/constitution/rules";
 
 type RouteContext = {
@@ -164,6 +162,11 @@ export async function GET(_request: Request, context: RouteContext) {
         },
       },
     };
+
+    const { pdf } = await import("@react-pdf/renderer");
+    const { ExecutiveReportPdfDocument } = await import(
+      "@/lib/admin/reporting/report-pdf"
+    );
 
     const pdfElement = React.createElement(ExecutiveReportPdfDocument, {
       payload: pdfPayload,

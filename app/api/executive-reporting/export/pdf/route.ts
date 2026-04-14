@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import React from "react";
 import type { ReactElement } from "react";
-import { renderToBuffer } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
-import ExecutiveBriefingPdfDocument from "@/components/reporting/pdf/ExecutiveBriefingPdfDocument";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 
 function asString(value: unknown, fallback = ""): string {
@@ -37,6 +35,11 @@ export async function POST(request: Request) {
         { status: 403 },
       );
     }
+
+    const { renderToBuffer } = await import("@react-pdf/renderer");
+    const { default: ExecutiveBriefingPdfDocument } = await import(
+      "@/components/reporting/pdf/ExecutiveBriefingPdfDocument"
+    );
 
     const buffer = await renderToBuffer(
       React.createElement(ExecutiveBriefingPdfDocument, { canonical }) as ReactElement<DocumentProps>

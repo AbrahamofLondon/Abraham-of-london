@@ -1,13 +1,10 @@
 /* app/api/campaigns/[id]/report/pdf-file/route.tsx */
 import * as React from "react";
-import * as ReactPDF from "@react-pdf/renderer";
 import { NextResponse } from "next/server";
 import { buildExecutiveReportFromCampaign } from "@/lib/admin/reporting/executive-report-service";
-import { 
+import {
   serializeExecutiveReportToPdfPayload,
 } from "@/lib/admin/reporting/executive-report-serializer";
-import { ExecutiveReportPdfDocument } from "@/lib/admin/reporting/executive-report-pdf";
-import { registerPdfFonts } from "@/lib/pdf/register-fonts";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -40,6 +37,12 @@ export async function GET(_request: Request, context: RouteContext) {
       guidance: result.payload.guidance,
       campaign: result.payload.campaign,
     });
+
+    const ReactPDF = await import("@react-pdf/renderer");
+    const { registerPdfFonts } = await import("@/lib/pdf/register-fonts");
+    const { ExecutiveReportPdfDocument } = await import(
+      "@/lib/admin/reporting/executive-report-pdf"
+    );
 
     registerPdfFonts(ReactPDF, process.cwd());
 

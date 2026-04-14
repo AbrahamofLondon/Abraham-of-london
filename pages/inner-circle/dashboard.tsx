@@ -5,7 +5,6 @@ import type { GetServerSideProps } from "next";
 import Link from "next/link";
 import { Lock, ShieldCheck } from "lucide-react";
 
-import { allBriefs } from "contentlayer/generated";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
@@ -235,6 +234,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // ✅ CONTENT QUERY ALIGNED TO SCHEMA (uses summary, not excerpt)
+    const { allBriefs } = await import("contentlayer/generated");
     const briefs = allBriefs
       .filter((b) => (b as any).status === "published" || process.env.NODE_ENV === "development")
       .filter((b) => {

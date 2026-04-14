@@ -6,7 +6,6 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { ShieldCheck, Lock, ChevronLeft } from "lucide-react";
-import { allBriefs } from "contentlayer/generated";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
@@ -35,12 +34,9 @@ function getBriefRouteSlug(brief: any): string {
   return normalizePathish(brief?.slug || brief?._raw?.flattenedPath || "");
 }
 
-function getBriefBySlug(slug: string) {
+function findBriefInList(slug: string, briefs: any[]) {
   const needle = normalizePathish(slug);
-  return (
-    allBriefs.find((b: any) => getBriefRouteSlug(b) === needle) ||
-    null
-  );
+  return briefs.find((b: any) => getBriefRouteSlug(b) === needle) || null;
 }
 
 const BriefDetailPage: NextPage<Props> = ({ brief, accessTier }) => {
@@ -146,7 +142,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  const brief = getBriefBySlug(slug);
+  const { allBriefs } = await import("contentlayer/generated");
+  const brief = findBriefInList(slug, allBriefs as any[]);
   if (!brief) return { notFound: true };
 
   return {

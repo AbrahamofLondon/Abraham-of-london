@@ -1,10 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as React from "react";
-import { pdf } from "@react-pdf/renderer";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
-import DiagnosticReportDocument from "@/lib/diagnostics/pdf/DiagnosticReportDocument";
 import {
   getDiagnosticRecordById,
   markDiagnosticReportGenerated,
@@ -41,6 +39,11 @@ export default async function handler(
     if (!["paid", "generated"].includes(String(record.reportStatus || ""))) {
       return res.status(402).json({ ok: false, reason: "REPORT_NOT_PAID" });
     }
+
+    const { pdf } = await import("@react-pdf/renderer");
+    const { default: DiagnosticReportDocument } = await import(
+      "@/lib/diagnostics/pdf/DiagnosticReportDocument"
+    );
 
     const instance = pdf(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

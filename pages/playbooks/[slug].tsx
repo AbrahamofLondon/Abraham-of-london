@@ -15,7 +15,6 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { allPlaybooks } from "contentlayer/generated";
 import type { Playbook } from "contentlayer/generated";
 import {
   ArrowLeft,
@@ -146,6 +145,7 @@ function titleCase(input?: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { allPlaybooks } = await import("contentlayer/generated");
   const paths = allPlaybooks
     .map((p) => normalizeSlug(p.slug))
     .filter(Boolean)
@@ -161,6 +161,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params }) => {
   const slug = normalizeSlug(params?.slug);
 
+  const { allPlaybooks } = await import("contentlayer/generated");
   const stablePlaybooks = [...allPlaybooks].filter((p) => normalizeSlug(p.slug));
   const playbook = stablePlaybooks.find((p) => normalizeSlug(p.slug) === slug);
 

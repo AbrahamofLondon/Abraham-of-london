@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { allCanons, allDocuments } from "contentlayer/generated";
 
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
@@ -84,7 +83,9 @@ function canonBareSlug(input: unknown): string {
   return !s || s.includes("..") ? "" : s;
 }
 
-function getAllCanonDocuments(): any[] {
+async function getAllCanonDocuments(): Promise<any[]> {
+  const { allCanons, allDocuments } = await import("contentlayer/generated");
+
   if (Array.isArray(allCanons) && allCanons.length > 0) {
     return allCanons;
   }
@@ -106,7 +107,7 @@ function extractBodyCode(doc: any): string {
   return String(doc?.body?.code || doc?.bodyCode || "");
 }
 
-function resolveCanonDoc(bare: string): { doc: any | null; tried: string[] } {
+async function resolveCanonDoc(bare: string): Promise<{ doc: any | null; tried: string[] }> {
   const tryCanon = cleanPathish(`canon/${bare}`);
   const tryContentCanon = cleanPathish(`content/canon/${bare}`);
   const tryVaultCanon = cleanPathish(`vault/canon/${bare}`);
@@ -114,7 +115,7 @@ function resolveCanonDoc(bare: string): { doc: any | null; tried: string[] } {
 
   const tried = [tryCanon, tryContentCanon, tryVaultCanon, tryBare];
 
-  const allCanonDocs = getAllCanonDocuments();
+  const allCanonDocs = await getAllCanonDocuments();
 
   const direct =
     allCanonDocs.find((doc: any) => {
@@ -172,7 +173,7 @@ export default async function handler(
     });
   }
 
-  const { doc, tried } = resolveCanonDoc(bare);
+  const { doc, tried } = await resolveCanonDoc(bare);
 
   if (!doc || doc.draft) {
     return res.status(404).json({

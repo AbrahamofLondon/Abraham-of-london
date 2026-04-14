@@ -5,7 +5,6 @@ import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 import { Lock } from "lucide-react";
-import { allBriefs } from "contentlayer/generated";
 
 import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
@@ -112,6 +111,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
+  const { allBriefs } = await import("contentlayer/generated");
   const briefs: BriefListItem[] = allBriefs
     .filter((b: any) => !b?.draft)
     .filter((b: any) => {

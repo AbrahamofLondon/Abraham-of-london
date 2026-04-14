@@ -2,9 +2,7 @@ import React from "react";
 import type { ReactElement } from "react";
 import QRCode from "qrcode";
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
-import AlignmentReportDocument from "@/lib/pdf/templates/AlignmentReportDocument";
 import {
   createPurposeAlignmentReportRecord,
   getPurposeAlignmentAssessmentById,
@@ -39,6 +37,11 @@ export async function GET(
   );
 
   const filename = `purpose-alignment-report-${assessmentId}.pdf`;
+
+  const { renderToBuffer } = await import("@react-pdf/renderer");
+  const { default: AlignmentReportDocument } = await import(
+    "@/lib/pdf/templates/AlignmentReportDocument"
+  );
 
   const pdf = await renderToBuffer(
     React.createElement(AlignmentReportDocument, {

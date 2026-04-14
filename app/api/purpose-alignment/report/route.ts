@@ -1,9 +1,7 @@
 import React from "react";
 import type { ReactElement } from "react";
 import { NextRequest, NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
-import AlignmentReportDocument from "@/lib/pdf/templates/AlignmentReportDocument";
 import { scorePurposeAlignment } from "@/lib/alignment/scoring";
 import type { StoredPurposeAlignmentAssessment } from "@/lib/alignment/types";
 import { PURPOSE_ALIGNMENT_INSTRUMENT_ID, PURPOSE_ALIGNMENT_REPORT_VERSION } from "@/lib/alignment/checklist";
@@ -36,6 +34,11 @@ export async function GET(_req: NextRequest) {
   };
 
   const watermark = buildAlignmentReportWatermark(sampleAssessment);
+
+  const { renderToBuffer } = await import("@react-pdf/renderer");
+  const { default: AlignmentReportDocument } = await import(
+    "@/lib/pdf/templates/AlignmentReportDocument"
+  );
 
   const pdf = await renderToBuffer(
     React.createElement(AlignmentReportDocument, {

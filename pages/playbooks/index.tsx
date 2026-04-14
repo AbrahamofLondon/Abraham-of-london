@@ -14,7 +14,6 @@ import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronRight, ScanSearch } from "lucide-react";
-import { allPlaybooks } from "contentlayer/generated";
 import type { Playbook } from "contentlayer/generated";
 
 import Layout from "@/components/Layout";
@@ -154,6 +153,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 export const getStaticProps: GetStaticProps<PlaybooksPageProps> = async () => {
   try {
+    const { allPlaybooks } = await import("contentlayer/generated");
     const items = allPlaybooks
       .filter(isPublishedPlaybook)
       .map(mapPlaybook)

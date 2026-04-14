@@ -5,7 +5,6 @@ import "server-only";
 
 import * as React from "react";
 import crypto from "crypto";
-import { pdf } from "@react-pdf/renderer";
 
 import { prisma } from "@/lib/prisma.server";
 import type {
@@ -13,7 +12,6 @@ import type {
   IssueDiagnosticReportResult,
 } from "@/lib/diagnostics/types";
 import { getDiagnosticRecordById } from "@/lib/diagnostics/store";
-import DiagnosticReportDocument from "@/lib/diagnostics/pdf/DiagnosticReportDocument";
 import { getDiagnosticStorageAdapter } from "@/lib/server/diagnostics/storage";
 
 export type IssueDiagnosticReportInput = {
@@ -65,6 +63,11 @@ function makeObjectKey(record: DiagnosticRecordDTO, version: string): string {
 }
 
 async function renderDiagnosticPdf(record: DiagnosticRecordDTO): Promise<Buffer> {
+  const { pdf } = await import("@react-pdf/renderer");
+  const { default: DiagnosticReportDocument } = await import(
+    "@/lib/diagnostics/pdf/DiagnosticReportDocument"
+  );
+
   const instance = pdf(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     React.createElement(DiagnosticReportDocument, { record }) as any,

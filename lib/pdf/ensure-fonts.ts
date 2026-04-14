@@ -1,20 +1,26 @@
 // lib/pdf/ensure-fonts.ts
-import * as ReactPDF from "@react-pdf/renderer";
-import registerInstitutionalFonts from "./register-fonts";
+//
+// Lazy font registration. Dynamic imports keep @react-pdf/renderer out of
+// the module graph at import time — only callers that actually invoke
+// ensureFontsRegistered() pay the cost, and only on first call.
 
 let fontsRegistered = false;
 
-export function ensureFontsRegistered(): void {
+export async function ensureFontsRegistered(): Promise<void> {
   if (fontsRegistered) {
     return;
   }
 
   try {
-    registerInstitutionalFonts(ReactPDF);
+    const ReactPDF = await import("@react-pdf/renderer");
+    const { default: registerInstitutionalFonts } = await import("./register-fonts");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    registerInstitutionalFonts(ReactPDF as any);
     fontsRegistered = true;
     console.log("✅ [ensureFontsRegistered] Fonts registered successfully");
-  } catch (err: any) {
-    console.error("❌ [ensureFontsRegistered] CRITICAL font registration failure:", err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("❌ [ensureFontsRegistered] CRITICAL font registration failure:", message);
     throw err;
   }
 }

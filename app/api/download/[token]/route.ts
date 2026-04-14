@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import React from "react";
 import type { ReactElement } from "react";
-import { renderToBuffer } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
 import { getServerSession } from "next-auth";
 
@@ -16,15 +15,14 @@ import {
   doesTokenMatchBinding,
 } from "@/lib/premium/download-token";
 import { generateForensicPayload } from "@/lib/intelligence/forensic-mapping";
-import ReactPDF from "@react-pdf/renderer";
-import { registerFonts } from "@/lib/pdf/register-fonts";
-import InstitutionalBriefDocument from "@/lib/pdf/templates/InstitutionalBriefDocument";
 import type { AccessTier } from "@/lib/access/tier-policy";
 
 /**
- * Warm-start font registration
+ * Font registration is performed lazily on first request (see GET handler)
+ * so that @react-pdf/renderer does not land in the module graph at import
+ * time. This keeps the server chunk off the handler's hot path.
  */
-registerFonts(ReactPDF);
+let fontsRegistered = false;
 
 type RouteContext = {
   params: {
@@ -268,6 +266,19 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
   });
 
   try {
+    const ReactPDFModule = await import("@react-pdf/renderer");
+    const { renderToBuffer } = ReactPDFModule;
+    const { default: InstitutionalBriefDocument } = await import(
+      "@/lib/pdf/templates/InstitutionalBriefDocument"
+    );
+
+    if (!fontsRegistered) {
+      const { registerFonts } = await import("@/lib/pdf/register-fonts");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      registerFonts(ReactPDFModule as any);
+      fontsRegistered = true;
+    }
+
     const documentElement = React.createElement(InstitutionalBriefDocument, {
       config: {
         ...pdfConfig,

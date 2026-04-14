@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as React from "react";
-import { pdf } from "@react-pdf/renderer";
-import ReportDoc from "@/lib/diagnostics/pdf/ReportDoc";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,6 +11,9 @@ export default async function handler(
 
   try {
     const data = req.body;
+
+    const { pdf } = await import("@react-pdf/renderer");
+    const { default: ReportDoc } = await import("@/lib/diagnostics/pdf/ReportDoc");
 
     const instance = pdf(React.createElement(ReportDoc, { data }));
     const buffer = await instance.toBuffer();
