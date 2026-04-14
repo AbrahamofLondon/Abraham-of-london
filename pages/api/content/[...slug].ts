@@ -1,9 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  getDocBySlug,
-} from "@/lib/content/server";
-
 import { getRenderableBody } from "@/lib/content/render-body";
 
 import {
@@ -32,6 +28,7 @@ export default async function handler(
       return res.status(400).json({ ok: false });
     }
 
+    const { getDocBySlug } = await import("@/lib/content/server");
     const doc =
       getDocBySlug(slug) ||
       getDocBySlug(`content/${slug}`);

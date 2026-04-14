@@ -6,11 +6,7 @@ import { getSessionTier } from "@/lib/server/auth/tokenStore.redis";
 import { getAccessTokenFromReq } from "@/lib/server/auth/cookies";
 import { getTokenForensics } from "@/lib/premium/download-token";
 
-import {
-  normalizeSlug,
-  getDocumentBySlug,
-  isDraftContent,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
@@ -121,7 +117,8 @@ function extractWatermarkFromDoc(doc: any): {
   };
 }
 
-function resolveDownloadDoc(slug: string): any | null {
+async function resolveDownloadDoc(slug: string): Promise<any | null> {
+  const { getDocumentBySlug } = await import("@/lib/content/server");
   const tryDirect = cleanPathish(slug);
   const tryPrefixed = cleanPathish(`downloads/${slug}`);
 
@@ -160,7 +157,8 @@ export default async function handler(
   }
 
   try {
-    const doc = resolveDownloadDoc(slug);
+    const { isDraftContent } = await import("@/lib/content/server");
+    const doc = await resolveDownloadDoc(slug);
 
     if (!doc || isDraftContent(doc)) {
       return res.status(404).json({

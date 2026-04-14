@@ -21,11 +21,7 @@ import DataTable from "@/components/mdx/DataTable";
 import { BriefSummaryCard } from "@/components/mdx/BriefSummaryCard";
 
 import { resolveDocCoverImage } from "@/lib/content/client-utils";
-import {
-  getAllCombinedDocs,
-  sanitizeData,
-  normalizeSlug as normalizeContentSlug,
-} from "@/lib/content/server";
+import { normalizeSlug as normalizeContentSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
 
@@ -149,7 +145,8 @@ function isBriefDoc(doc: any): boolean {
   );
 }
 
-function getCombinedBriefs(): any[] {
+async function getCombinedBriefs(): Promise<any[]> {
+  const { getAllCombinedDocs } = await import("@/lib/content/server");
   const seen = new Set<string>();
 
   return (getAllCombinedDocs() || [])
@@ -539,7 +536,7 @@ const BriefPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const briefs = getCombinedBriefs();
+  const briefs = await getCombinedBriefs();
 
   const paths = briefs
     .map((doc: any) => {
@@ -556,7 +553,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const bare = briefsBareSlug(params?.slug);
   if (!bare) return { notFound: true };
 
-  const docs = getCombinedBriefs();
+  const { sanitizeData } = await import("@/lib/content/server");
+  const docs = await getCombinedBriefs();
 
   const rawDoc =
     docs.find((doc: any) => {

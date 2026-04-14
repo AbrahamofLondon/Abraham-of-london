@@ -6,12 +6,7 @@ import Layout from "@/components/Layout";
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
-import {
-  getPublishedDocuments,
-  getDocBySlug,
-  sanitizeData,
-  normalizeSlug,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -65,6 +60,7 @@ const Page: NextPage<Props> = ({ doc, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { getPublishedDocuments } = await import("@/lib/content/server");
   const docs = getPublishedDocuments() || [];
 
   return {
@@ -82,6 +78,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
+
+  const { getDocBySlug, sanitizeData } = await import("@/lib/content/server");
 
   const doc =
     getDocBySlug(`content/${slug}`) ||

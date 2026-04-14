@@ -2,7 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { gzipSync } from "zlib";
 
-import { getServerEventBySlug } from "@/lib/content/server";
 import { requiredTierFromDoc } from "@/lib/access/tiers";
 import { normalizeSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
@@ -29,6 +28,7 @@ export default async function handler(
       return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
     }
 
+    const { getServerEventBySlug } = await import("@/lib/content/server");
     const event = getServerEventBySlug(slug);
 
     if (!event || event.draftSafe) {

@@ -5,13 +5,7 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 
-import {
-  getAllContentlayerDocs,
-  getDocBySlug,
-  sanitizeData,
-  isDraftContent,
-  normalizeSlug,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 type Props = {
   print: {
@@ -54,6 +48,9 @@ const Page: NextPage<Props> = ({ print, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { getAllContentlayerDocs, isDraftContent } = await import(
+    "@/lib/content/server"
+  );
   const docs = getAllContentlayerDocs() || [];
 
   const paths = docs
@@ -72,6 +69,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = String(params?.slug || "");
+
+  const { getDocBySlug, isDraftContent, sanitizeData } = await import(
+    "@/lib/content/server"
+  );
 
   const doc =
     getDocBySlug(`prints/${slug}`) ||

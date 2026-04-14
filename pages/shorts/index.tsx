@@ -29,11 +29,6 @@ import { Search, LayoutGrid, List, Sparkles, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import ShortCard from "@/components/ShortCard";
 import {
-  getAllShorts,
-  getAllCombinedDocs,
-  sanitizeData,
-} from "@/lib/content/server";
-import {
   readImprint,
   writeImprint,
   computeWhisper,
@@ -1170,6 +1165,9 @@ export default ShortsIndexPage;
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
+  const { getAllShorts, getAllCombinedDocs, sanitizeData } = await import(
+    "@/lib/content/server"
+  );
   const fromShorts   = (getAllShorts()       || []) as RawShortDoc[];
   const fromAllDocs  = (getAllCombinedDocs() || []) as RawShortDoc[];
 

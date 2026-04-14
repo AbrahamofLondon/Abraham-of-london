@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getAllCanons, normalizeSlug, sanitizeData } from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
 type AccessLevel = "public" | "inner-circle" | "restricted";
@@ -279,6 +279,7 @@ function CanonRow({ item, primary }: { item: CanonItem; primary: boolean }) {
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   try {
+    const { getAllCanons, sanitizeData } = await import("@/lib/content/server");
     const rawDocs = getAllCanons() || [];
     const seenSlugs = new Set<string>();
 

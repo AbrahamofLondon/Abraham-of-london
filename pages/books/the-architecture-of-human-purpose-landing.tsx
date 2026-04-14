@@ -7,7 +7,6 @@ import Image from "next/image";
 import Layout from "@/components/Layout";
 import { ArrowRight, BookOpen, Layers, Lock, ShieldCheck } from "lucide-react";
 
-import { sanitizeData, isDraftContent } from "@/lib/content/server";
 import { normalizeSlug } from "@/lib/content/shared";
 
 type PreludeBook = {
@@ -346,6 +345,11 @@ export const getStaticProps: GetStaticProps<PurposeLandingProps> = async () => {
     if (getBooks) candidates.push(...(getBooks() || []));
     if (getAllDocs) candidates.push(...(getAllDocs() || []));
 
+    const isDraftContent =
+      typeof mod?.isDraftContent === "function"
+        ? mod.isDraftContent
+        : (_d: any) => false;
+
     const docs = candidates
       .filter(Boolean)
       .filter((d: any) => !isDraftContent(d));
@@ -371,6 +375,8 @@ export const getStaticProps: GetStaticProps<PurposeLandingProps> = async () => {
     // eslint-disable-next-line no-console
     console.error("[PurposeLanding/getStaticProps] non-fatal:", err);
   }
+
+  const { sanitizeData } = await import("@/lib/content/server");
 
   return {
     props: sanitizeData({ book }),

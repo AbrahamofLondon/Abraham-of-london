@@ -1,10 +1,10 @@
 import { GetServerSideProps } from "next";
-import { getAllCombinedDocs } from "@/lib/content/server";
 import type { ContentDoc } from "@/lib/contentlayer-helper";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  const { getAllCombinedDocs } = await import("@/lib/content/server");
   const docs = getAllCombinedDocs().filter((d: ContentDoc) => d._raw?.sourceFilePath?.startsWith("shorts/"));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

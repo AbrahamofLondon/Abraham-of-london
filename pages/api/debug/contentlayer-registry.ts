@@ -1,12 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllContentlayerDocs, getAllCanons } from "@/lib/content/server";
 
 // ✅ Force Node.js runtime (prevents Edge runtime from breaking fs)
 export const config = {
   runtime: "nodejs",
 };
 
-export default function handler(_req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
+  const { getAllContentlayerDocs, getAllCanons } = await import(
+    "@/lib/content/server"
+  );
+
   const docs = getAllContentlayerDocs() || [];
   const canons = getAllCanons() || [];
 

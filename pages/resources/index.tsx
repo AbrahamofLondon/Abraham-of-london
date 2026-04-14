@@ -7,7 +7,6 @@ import Image from "next/image";
 import { ArrowRight, LibraryBig, FileText } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getAllResources, getDocHref, sanitizeData } from "@/lib/content/server";
 import { normalizeSlug } from "@/lib/content/shared";
 import { resolveDocCoverImage } from "@/lib/content/client-utils";
 
@@ -36,6 +35,9 @@ function safeDateISO(d: any): string | null {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
+    const { getAllResources, getDocHref, sanitizeData } = await import(
+      "@/lib/content/server"
+    );
     const docs = (getAllResources() || []).filter((d: any) => !d?.draft);
 
     const resources: ResourceMeta[] = docs

@@ -8,11 +8,7 @@ import { readAccessCookie } from "@/lib/server/auth/cookies";
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
 
-import {
-  getPublishedBooks,
-  getDocBySlug,
-  normalizeSlug,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
 
 type OkResponse = {
@@ -91,7 +87,9 @@ function booksBareSlug(input: unknown): string {
   return !s || s.includes("..") ? "" : s;
 }
 
-function resolveBookDoc(bare: string): { doc: any | null; tried: string[] } {
+async function resolveBookDoc(bare: string): Promise<{ doc: any | null; tried: string[] }> {
+  const { getPublishedBooks, getDocBySlug } = await import("@/lib/content/server");
+
   const tryBook = cleanPathish(`books/${bare}`);
   const tryContentBook = cleanPathish(`content/books/${bare}`);
   const tryVaultBook = cleanPathish(`vault/books/${bare}`);
@@ -142,7 +140,7 @@ export default async function handler(
     return res.status(400).json({ ok: false, reason: "SLUG_MISSING" });
   }
 
-  const { doc, tried } = resolveBookDoc(bare);
+  const { doc, tried } = await resolveBookDoc(bare);
 
   if (!doc || doc.draft) {
     return res.status(404).json({ ok: false, reason: "NOT_FOUND", tried });

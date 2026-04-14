@@ -5,7 +5,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
-import { getAllCombinedDocs, normalizeSlug } from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
 import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
@@ -63,7 +63,8 @@ function isBriefDoc(doc: any): boolean {
   );
 }
 
-function resolveBriefDoc(slug: string): any | null {
+async function resolveBriefDoc(slug: string): Promise<any | null> {
+  const { getAllCombinedDocs } = await import("@/lib/content/server");
   const docs = getAllCombinedDocs() || [];
 
   return (
@@ -102,7 +103,7 @@ export default async function handler(
       return res.status(400).json({ ok: false, reason: "INVALID_SLUG" });
     }
 
-    const doc = resolveBriefDoc(slug);
+    const doc = await resolveBriefDoc(slug);
 
     if (!doc || doc.draft) {
       return res.status(404).json({ ok: false, reason: "NOT_FOUND" });

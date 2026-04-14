@@ -1,19 +1,6 @@
 // pages/api/debug/ssot-health.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  getAllContentlayerDocs,
-  getAllPosts,
-  getAllBooks,
-  getAllCanons,
-  getAllDownloads,
-  getAllEvents,
-  getAllPrints,
-  getAllResources,
-  getAllShorts,
-  getAllStrategies,
-  getAllLexicons,
-  getPublishedDocuments,
-} from "@/lib/content/server";
 
 function sample(list: any[], n = 3) {
   return (list || []).slice(0, n).map((d: any) => ({
@@ -23,8 +10,23 @@ function sample(list: any[], n = 3) {
   }));
 }
 
-export default function handler(_req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
   try {
+    const {
+      getAllContentlayerDocs,
+      getAllPosts,
+      getAllBooks,
+      getAllCanons,
+      getAllDownloads,
+      getAllEvents,
+      getAllPrints,
+      getAllResources,
+      getAllShorts,
+      getAllStrategies,
+      getAllLexicons,
+      getPublishedDocuments,
+    } = await import("@/lib/content/server");
+
     const all = getAllContentlayerDocs() || [];
     const posts = getAllPosts() || [];
     const books = getAllBooks() || [];

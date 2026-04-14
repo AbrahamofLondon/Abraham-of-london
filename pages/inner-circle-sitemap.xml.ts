@@ -1,9 +1,9 @@
 import { GetServerSideProps } from "next";
-import { allDocuments } from "@/lib/contentlayer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  const { allDocuments } = await import("@/lib/contentlayer");
   const docs = allDocuments.filter((d) => d._raw.sourceFilePath.startsWith("inner-circle/"));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

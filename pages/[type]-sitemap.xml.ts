@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GetServerSideProps } from "next";
-import { getAllCombinedDocs } from "@/lib/content/server";
 import { normalizeSlug } from "@/lib/content/shared";
 
 const DOMAIN = (
@@ -57,6 +56,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   const typeKey = String(rawTypeKey || "blog").toLowerCase();
 
   // Get SSOT data
+  const { getAllCombinedDocs } = await import("@/lib/content/server");
   const allDocuments = getAllCombinedDocs();
 
   const filteredDocs = allDocuments.filter((d: any) => {

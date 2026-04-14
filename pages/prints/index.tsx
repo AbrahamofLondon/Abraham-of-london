@@ -24,11 +24,6 @@ import {
   Heart
 } from "lucide-react";
 import Layout from "@/components/Layout";
-// ✅ FIXED: Import server-side functions from correct location
-import {
-  getContentlayerData,
-  getPublishedDocuments,
-} from "@/lib/content/server";
 import {
   isDraftContent,
   normalizeSlug,
@@ -94,6 +89,9 @@ function getDownloadUrl(doc: any): string | null {
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
+    const { getContentlayerData, getPublishedDocuments } = await import(
+      "@/lib/content/server"
+    );
     const contentlayerData = getContentlayerData(); // ✅ Removed await - it's synchronous now
     const allDocuments = getPublishedDocuments();
 

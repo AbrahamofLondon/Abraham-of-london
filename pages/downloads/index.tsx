@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getContentlayerData } from "@/lib/content/server";
 import { sanitizeData } from "@/lib/content/shared";
 
 type AccessLevel = "public" | "inner-circle" | "private";
@@ -81,6 +80,7 @@ export const getStaticProps: GetStaticProps<{
   featuredCount: number;
 }> = async () => {
   try {
+    const { getContentlayerData } = await import("@/lib/content/server");
     const data = getContentlayerData();
     const docs = Array.isArray((data as any).allDownloads) ? (data as any).allDownloads : [];
 

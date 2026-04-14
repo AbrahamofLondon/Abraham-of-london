@@ -13,7 +13,6 @@ import {
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 
-import { getPublishedPosts } from "@/lib/content/server";
 import { normalizeSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
 
@@ -57,6 +56,7 @@ export default async function handler(
   const wantBlog = `blog/${bare}`;
   const wantPosts = `posts/${bare}`;
 
+  const { getPublishedPosts } = await import("@/lib/content/server");
   const posts = getPublishedPosts() || [];
   const doc =
     posts.find((p: any) => normalizeSlug(p.slug || "") === wantBlog) ||

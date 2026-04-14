@@ -5,11 +5,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { getAccessCookie } from "@/lib/server/auth/cookies";
-import {
-  getDocBySlug,
-  getAllContentlayerDocs,
-  normalizeSlug,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -60,10 +56,11 @@ function normalizePathish(s: string): string {
     .replace(/\/{2,}/g, "/");
 }
 
-function findByRegistryScan(wanted: string): any | null {
+async function findByRegistryScan(wanted: string): Promise<any | null> {
   const w = normalizePathish(wanted);
   if (!w) return null;
 
+  const { getAllContentlayerDocs } = await import("@/lib/content/server");
   const all = getAllContentlayerDocs?.() || [];
   const lowerW = w.toLowerCase();
 
@@ -85,7 +82,8 @@ function findByRegistryScan(wanted: string): any | null {
   );
 }
 
-function firstDocBySlug(candidates: string[]): any | null {
+async function firstDocBySlug(candidates: string[]): Promise<any | null> {
+  const { getDocBySlug } = await import("@/lib/content/server");
   for (const candidate of candidates) {
     const doc = getDocBySlug(candidate);
     if (doc) return doc;
@@ -114,11 +112,11 @@ export default async function handler(
     `resources/${slug.replace(/^resources\//, "")}`,
   ].map(normalizePathish);
 
-  let doc: any = firstDocBySlug(tries);
+  let doc: any = await firstDocBySlug(tries);
 
   if (!doc) {
     for (const t of tries) {
-      doc = findByRegistryScan(t);
+      doc = await findByRegistryScan(t);
       if (doc) break;
     }
   }

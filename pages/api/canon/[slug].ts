@@ -5,7 +5,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { verifySession } from "@/lib/server/auth/tokenStore.postgres";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getDocBySlug } from "@/lib/content/server";
 import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -140,6 +139,7 @@ async function resolveCanonDoc(bare: string): Promise<{ doc: any | null; tried: 
     return { doc: direct, tried };
   }
 
+  const { getDocBySlug } = await import("@/lib/content/server");
   const fallback =
     getDocBySlug(tryCanon) ||
     getDocBySlug(tryContentCanon) ||

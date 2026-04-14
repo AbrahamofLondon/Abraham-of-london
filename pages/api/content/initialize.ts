@@ -1,17 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  getAllCanons,
-  getAllDownloads,
-  getAllBooks,
-  getAllShorts,
-  getAllEvents,
-  getAllResources,
-  getAllPrints,
-  getAllLexicons,
-  getAllBlogs,
-  normalizeSlug,
-  sanitizeData,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 
@@ -107,6 +95,19 @@ export default async function handler(
   }
 
   try {
+    const {
+      getAllCanons,
+      getAllDownloads,
+      getAllBooks,
+      getAllShorts,
+      getAllEvents,
+      getAllResources,
+      getAllPrints,
+      getAllLexicons,
+      getAllBlogs,
+      sanitizeData,
+    } = await import("@/lib/content/server");
+
     const [canons, downloads, books, shorts, events, resources, prints, lexicons, blogs] =
       await Promise.all([
         Promise.resolve(getAllCanons() || []),

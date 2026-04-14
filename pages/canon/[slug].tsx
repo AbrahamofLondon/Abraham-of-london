@@ -8,13 +8,7 @@ import Layout from "@/components/Layout";
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
-import {
-  getDocBySlug,
-  getAllCombinedDocs,
-  normalizeSlug,
-  isDraftContent,
-  sanitizeData,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 import { getRenderableBody } from "@/lib/content/render-body";
 
@@ -139,6 +133,9 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { getAllCombinedDocs, isDraftContent } = await import(
+    "@/lib/content/server"
+  );
   const docs = getAllCombinedDocs() || [];
   const seen = new Set<string>();
 
@@ -172,6 +169,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   const slug = canonBareSlug(params?.slug);
   if (!slug) return { notFound: true };
+
+  const { getDocBySlug, isDraftContent, sanitizeData } = await import(
+    "@/lib/content/server"
+  );
 
   const doc =
     getDocBySlug(`canon/${slug}`) ||

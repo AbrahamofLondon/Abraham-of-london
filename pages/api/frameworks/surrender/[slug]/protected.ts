@@ -3,7 +3,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { getDocBySlug, getAllCombinedDocs, normalizeSlug } from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 import { sendCompressedBodyCode } from "@/lib/content/api-payload";
 import { withInnerCircleAccess } from "@/lib/server/with-inner-circle-access";
 
@@ -59,7 +59,8 @@ function isSurrenderFrameworkDoc(doc: any): boolean {
   );
 }
 
-function resolveDoc(slug: string): { doc: any | null; tried: string[] } {
+async function resolveDoc(slug: string): Promise<{ doc: any | null; tried: string[] }> {
+  const { getDocBySlug, getAllCombinedDocs } = await import("@/lib/content/server");
   const cleaned = normalizeSlug(slug);
   const tries = [
     `resources/surrender-framework/${cleaned}`,
@@ -115,7 +116,7 @@ async function handler(
     });
   }
 
-  const { doc, tried } = resolveDoc(slug);
+  const { doc, tried } = await resolveDoc(slug);
 
   if (!doc || doc.draft || !isSurrenderFrameworkDoc(doc)) {
     return res.status(404).json({

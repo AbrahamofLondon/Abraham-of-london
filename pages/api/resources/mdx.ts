@@ -10,11 +10,7 @@ import {
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
-import {
-  normalizeSlug,
-  getDocumentBySlug,
-  getAllContentlayerDocs,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 type Ok = { ok: true; tier: AccessTier; mdx: string };
 type Fail = { ok: false; reason: string };
@@ -45,7 +41,11 @@ function isResourceDoc(doc: any): boolean {
   return fp.startsWith("resources/") || fp.startsWith("content/resources/");
 }
 
-function findResourceDoc(slug: string): any | null {
+async function findResourceDoc(slug: string): Promise<any | null> {
+  const { getDocumentBySlug, getAllContentlayerDocs } = await import(
+    "@/lib/content/server"
+  );
+
   const tries = [
     slug,
     `resources/${slug}`,
@@ -87,7 +87,7 @@ export default async function handler(
     return res.status(400).json({ ok: false, reason: "Missing slug" });
   }
 
-  const doc = findResourceDoc(slug);
+  const doc = await findResourceDoc(slug);
 
   if (!doc || (doc as any).draft) {
     return res.status(404).json({ ok: false, reason: "Resource not found" });

@@ -10,7 +10,6 @@ import Head from "next/head";
 import Layout from "@/components/Layout";
 import { Search, ArrowRight, Tag } from "lucide-react";
 
-import { getPublishedBooks, resolveDocCoverImage } from "@/lib/content/server";
 
 /* -----------------------------------------------------------------------------
   TYPES
@@ -520,6 +519,9 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 
 export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
   try {
+    const { getPublishedBooks, resolveDocCoverImage } = await import(
+      "@/lib/content/server"
+    );
     const all = getPublishedBooks() || [];
 
     const items: BookItem[] = all

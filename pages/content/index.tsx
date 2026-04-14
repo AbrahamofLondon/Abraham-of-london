@@ -20,9 +20,7 @@ import {
 
 import Layout from "@/components/Layout";
 
-import { getPublishedDocuments } from "@/lib/content/server";
 import { safeFirstChar, safeSlice } from "@/lib/utils/safe";
-import { getDocKind, getDocHref, resolveDocCoverImage, sanitizeData } from "@/lib/content/server";
 
 type Item = {
   key: string;
@@ -42,6 +40,13 @@ type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
+    const {
+      getPublishedDocuments,
+      getDocKind,
+      getDocHref,
+      resolveDocCoverImage,
+      sanitizeData,
+    } = await import("@/lib/content/server");
     const docs = getPublishedDocuments();
 
     if (!docs || docs.length === 0) {

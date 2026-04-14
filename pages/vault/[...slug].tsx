@@ -6,13 +6,7 @@ import Layout from "@/components/Layout";
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
-import {
-  getDocBySlug,
-  getAllCombinedDocs,
-  normalizeSlug,
-  isDraftContent,
-  sanitizeData,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -79,6 +73,9 @@ const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { getAllCombinedDocs, isDraftContent } = await import(
+    "@/lib/content/server"
+  );
   const docs = getAllCombinedDocs() || [];
 
   const paths = (
@@ -112,6 +109,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = cleanVaultSlug(params?.slug);
   if (!slug) return { notFound: true };
+
+  const { getDocBySlug, isDraftContent, sanitizeData } = await import(
+    "@/lib/content/server"
+  );
 
   const doc =
     getDocBySlug(`vault/${slug}`) ||
