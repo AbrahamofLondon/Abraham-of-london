@@ -19,6 +19,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   Menu,
   X,
@@ -35,6 +36,8 @@ import {
   ScrollText,
   Layers,
   Zap,
+  Calendar,
+  Lock,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,22 +57,24 @@ type NavItem = {
   signal?: true; // marks the live signal item for subtle treatment
 };
 
-// Desktop nav — 7 items max for legibility at 8.5px mono
-// Shorts replaces Library in this slot. Library stays in mobile menu.
+// Desktop nav — flat by product logic.
+// Shorts is the signal item (gold underline, live dispatches feed).
+// Events slot was added to surface Gatherings on desktop.
 const DESKTOP_NAV: readonly NavItem[] = [
   { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
-  { href: "/editorials",   label: "Editorials",  sub: "Publications & Essays",    icon: ScrollText },
+  { href: "/editorials",   label: "Editorials",  sub: "Essays & published arguments", icon: ScrollText },
   { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
   { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
   { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
   { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
   { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
+  { href: "/events",       label: "Events",      sub: "Salons & Briefings",       icon: Calendar   },
 ] as const;
 
-// Mobile menu — full directory including Library
+// Mobile menu — full directory including Library.
 const MOBILE_NAV: readonly NavItem[] = [
   { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
-  { href: "/editorials",   label: "Editorials",  sub: "Publications & Essays",    icon: ScrollText },
+  { href: "/editorials",   label: "Editorials",  sub: "Essays & published arguments", icon: ScrollText },
   { href: "/playbooks",    label: "Playbooks",   sub: "Execution Frameworks",     icon: Layers     },
   { href: "/shorts",       label: "Shorts",      sub: "Intelligence Dispatches",  icon: Zap,       signal: true },
   { href: "/library",      label: "Library",     sub: "Knowledge Shelf",          icon: BookOpen   },
@@ -77,6 +82,7 @@ const MOBILE_NAV: readonly NavItem[] = [
   { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
   { href: "/vault/briefs", label: "Briefs",      sub: "Operational Intelligence", icon: FileText   },
   { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
+  { href: "/events",       label: "Events",      sub: "Salons & Briefings",       icon: Calendar   },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -115,6 +121,9 @@ export default function Header({
   // both contexts, so we read window.location.pathname directly and update
   // on popstate events. This avoids hook-context coupling and works in
   // every consumer (AppShell, Layout, SiteLayout, PDFDashboard, etc.).
+  const { data: session } = useSession();
+  const isAuthenticated = Boolean(session);
+
   const [currentPath, setCurrentPath] = React.useState<string>("/");
 
   React.useEffect(() => {
@@ -235,6 +244,34 @@ export default function Header({
               <Crown className="h-3 w-3" style={{ color: `${GOLD}90` }} />
               Strategy Room
             </Link>
+
+            {/* Member slot — auth-aware.
+                Authenticated: Inner Circle → dashboard.
+                Unauthenticated: Inner Circle → /inner-circle (registration/unlock). */}
+            {!minimal && (
+              <Link
+                href={isAuthenticated ? "/inner-circle/dashboard" : "/inner-circle"}
+                className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 md:inline-flex"
+                style={{
+                  borderColor: `${GOLD}38`,
+                  color: `${GOLD}D0`,
+                  backgroundColor: "#0E0E12",
+                }}
+                aria-label={isAuthenticated ? "Inner Circle dashboard" : "Inner Circle — request access"}
+              >
+                {isAuthenticated ? (
+                  <>
+                    <Crown className="h-3 w-3" style={{ color: GOLD }} />
+                    Inner Circle
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-3 w-3" style={{ color: `${GOLD}90` }} />
+                    Inner Circle
+                  </>
+                )}
+              </Link>
+            )}
 
             {/* Hamburger */}
             <button
@@ -357,7 +394,7 @@ export default function Header({
               <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
             </div>
 
-            {/* Special entries */}
+            {/* Special entries — Strategy Room is public; Member entries are auth-gated. */}
             {[
               {
                 href: "/consulting/strategy-room",
@@ -366,13 +403,32 @@ export default function Header({
                 tag: "Selective",
                 icon: Crown,
               },
-              {
-                href: "/dashboard",
-                label: "Registry",
-                sub: "Sovereign Dashboard",
-                tag: "System",
-                icon: Fingerprint,
-              },
+              ...(isAuthenticated
+                ? [
+                    {
+                      href: "/inner-circle/dashboard",
+                      label: "Inner Circle",
+                      sub: "Member Workspace",
+                      tag: "Member",
+                      icon: Crown,
+                    },
+                    {
+                      href: "/inner-circle/account",
+                      label: "Account",
+                      sub: "Identity & Access Key",
+                      tag: "Member",
+                      icon: Fingerprint,
+                    },
+                  ]
+                : [
+                    {
+                      href: "/inner-circle",
+                      label: "Inner Circle",
+                      sub: "Request Access",
+                      tag: "Member",
+                      icon: Lock,
+                    },
+                  ]),
             ].map((item) => {
               const Icon = item.icon;
               const active = isActive(currentPath, item.href);
