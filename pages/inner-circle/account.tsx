@@ -109,49 +109,49 @@ export default function InnerCircleAccount({
       <Layout
         title="Account | Abraham of London"
         currentPath="/inner-circle/account"
-        className="bg-white"
+       
       >
-        <div className="max-w-4xl mx-auto">
+        <div>
           <WorkspaceNav />
-          <header className="mb-12 border-b border-gray-100 pb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="bg-blue-50 text-blue-700 border border-blue-100 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
+          <header>
+            <div>
+              <span>
                 {tier} Clearance
               </span>
-              <span className="text-gray-400 text-[10px] font-mono uppercase tracking-widest">
+              <span>
                 {hasValidToken ? "Active Session" : "No Active Token"}
               </span>
             </div>
 
-            <h1 className="font-serif text-5xl md:text-6xl text-gray-900 tracking-tighter leading-none italic">
-              Your <span className="text-gray-300">Account.</span>
+            <h1>
+              Your <span>Account.</span>
             </h1>
-            <p className="mt-6 text-gray-500 max-w-xl text-lg font-light leading-relaxed italic">
+            <p>
               Identity, tier, and active access key management for{" "}
-              <span className="text-gray-900 font-medium">{name ?? email ?? "Principal"}</span>.
+              <span>{name ?? email ?? "Principal"}</span>.
             </p>
 
-            <div className="mt-8">
+            <div>
               <Link
                 href="/inner-circle/dashboard"
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 hover:text-blue-700 transition-colors"
+               
               >
-                <ArrowRight size={14} className="rotate-180" />
+                <ArrowRight size={14} />
                 Back to Vault
               </Link>
             </div>
           </header>
 
           {flash && (
-            <div className="mb-8 border border-blue-100 bg-blue-50 p-6 text-sm text-blue-900 font-light">
+            <div>
               {flash}
             </div>
           )}
 
           {/* Identity Panel */}
-          <section className="mb-12 border border-gray-100 bg-white p-8">
-            <h2 className="font-serif text-2xl italic text-gray-900 mb-8">Identity</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <section>
+            <h2>Identity</h2>
+            <div>
               <Field label="Name" value={name ?? "—"} />
               <Field label="Email" value={email ?? "—"} />
               <Field label="Tier" value={tier.toUpperCase()} />
@@ -161,28 +161,28 @@ export default function InnerCircleAccount({
                 emphasis={hasValidToken ? "active" : "inactive"}
               />
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-4 text-[10px] font-mono uppercase tracking-[0.22em] text-gray-400">
-              <Link href="/inner-circle/dashboard" className="hover:text-blue-600 transition-colors">
+            <div>
+              <Link href="/inner-circle/dashboard">
                 Vault
               </Link>
-              <Link href="/inner-circle/briefs" className="hover:text-blue-600 transition-colors">
+              <Link href="/inner-circle/briefs">
                 Briefs
               </Link>
-              <Link href="/diagnostics" className="hover:text-blue-600 transition-colors">
+              <Link href="/diagnostics">
                 Diagnostics
               </Link>
             </div>
           </section>
 
           {/* Token Panel */}
-          <section className="mb-12 border border-gray-100 bg-white p-8">
-            <div className="flex items-center gap-3 mb-8">
-              <Key size={20} className="text-gray-400" />
-              <h2 className="font-serif text-2xl italic text-gray-900">Access Key</h2>
+          <section>
+            <div>
+              <Key size={20} />
+              <h2>Access Key</h2>
             </div>
 
             {hasValidToken && activeKey ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+              <div>
                 <Field label="Key Suffix" value={keyDisplay} mono />
                 <Field
                   label="Expires"
@@ -204,19 +204,19 @@ export default function InnerCircleAccount({
                 />
               </div>
             ) : (
-              <div className="mb-8 py-8 border border-dashed border-gray-100 rounded-lg text-center">
-                <Lock size={24} className="mx-auto text-gray-200 mb-4" />
-                <p className="text-gray-400 italic font-serif">
+              <div>
+                <Lock size={24} />
+                <p>
                   No active access key on file. Request a new one to enter the vault.
                 </p>
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div>
               <button
                 onClick={() => void requestNewKey()}
                 disabled={busy !== null}
-                className="flex items-center justify-center gap-2 bg-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+               
               >
                 <RefreshCw
                   size={14}
@@ -228,7 +228,7 @@ export default function InnerCircleAccount({
               <button
                 onClick={() => void revokeMyAccess()}
                 disabled={busy !== null || !hasValidToken}
-                className="flex items-center justify-center gap-2 border border-red-100 bg-white text-red-700 px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+               
               >
                 <ShieldCheck size={14} />
                 {busy === "revoke" ? "Revoking…" : "Revoke My Access"}
@@ -263,7 +263,7 @@ function Field({
 
   return (
     <div>
-      <div className="text-[10px] font-mono uppercase tracking-widest text-gray-400 mb-2">
+      <div>
         {label}
       </div>
       <div className={valueClass}>{value}</div>
@@ -335,4 +335,5 @@ export const getServerSideProps: GetServerSideProps<AccountProps> = async (
     },
   };
 };
+
 
