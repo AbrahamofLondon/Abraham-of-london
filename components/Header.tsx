@@ -19,7 +19,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import {
   Menu,
   X,
@@ -111,8 +110,21 @@ export default function Header({
   transparent = false,
   minimal = false,
 }: HeaderProps) {
-  const router = useRouter();
-  const currentPath = normalizePath(router.asPath);
+  // Router-agnostic path tracking. next/router works only in Pages Router;
+  // next/navigation works only in App Router. This Header is imported by
+  // both contexts, so we read window.location.pathname directly and update
+  // on popstate events. This avoids hook-context coupling and works in
+  // every consumer (AppShell, Layout, SiteLayout, PDFDashboard, etc.).
+  const [currentPath, setCurrentPath] = React.useState<string>("/");
+
+  React.useEffect(() => {
+    const update = () => {
+      setCurrentPath(normalizePath(window.location.pathname || "/"));
+    };
+    update();
+    window.addEventListener("popstate", update);
+    return () => window.removeEventListener("popstate", update);
+  }, []);
 
   const [isOpen,   setIsOpen]   = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
