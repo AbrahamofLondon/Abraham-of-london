@@ -262,7 +262,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const [{ getServerSession }, authModule, prismaModule] = await Promise.all([
     import("next-auth/next"),
-    import("@/pages/api/auth/[...nextauth]"),
+    import("@/lib/auth/config"),
     import("@/lib/prisma"),
   ]);
 

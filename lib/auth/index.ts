@@ -5,7 +5,6 @@ export { default } from "./options";
 // Export all auth utilities
 export * from "./client";
 export * from "./server";
-export * from "./unified-auth";
 
 // Export HOCs
 export { withAdminAuth, adminHelpers } from "./withAdminAuth";

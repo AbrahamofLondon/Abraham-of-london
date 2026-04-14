@@ -38,12 +38,45 @@ interface DiagnosticSummary {
   version: string | null;
 }
 
+interface MemberRow {
+  id: string;
+  email: string | null;
+  name: string | null;
+  tier: string;
+  createdAt: string;
+  activeKeys: Array<{
+    expiresAt: string | null;
+    createdAt: string;
+  }>;
+}
+
+interface KeyRow {
+  id: string;
+  memberId: string;
+  memberEmail: string | null;
+  memberTier: string;
+  keyHash: string;
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+  revokedAt: string | null;
+}
+
+type AdminTab = "telemetry" | "members" | "keys";
+
 export default function AdminDashboard() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [diagnostics, setDiagnostics] = useState<DiagnosticSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [jobsBusy, setJobsBusy] = useState<null | "process" | "retention">(null);
+  const [activeTab, setActiveTab] = useState<AdminTab>("telemetry");
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [membersLoaded, setMembersLoaded] = useState(false);
+  const [keys, setKeys] = useState<KeyRow[]>([]);
+  const [keysLoading, setKeysLoading] = useState(false);
+  const [keysLoaded, setKeysLoaded] = useState(false);
   const denylistRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,6 +144,127 @@ export default function AdminDashboard() {
       }
     } finally {
       setJobsBusy(null);
+    }
+  }
+
+  async function fetchMembers() {
+    setMembersLoading(true);
+    try {
+      const res = await adminFetch("/api/admin/members/list");
+      const data = await res.json();
+      if (data.ok) {
+        setMembers(Array.isArray(data.members) ? data.members : []);
+      }
+    } catch (err) {
+      console.error("Failed to load members", err);
+    } finally {
+      setMembersLoading(false);
+      setMembersLoaded(true);
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "members" && !membersLoaded) {
+      void fetchMembers();
+    }
+    if (activeTab === "keys" && !keysLoaded) {
+      void fetchKeys();
+    }
+  }, [activeTab, membersLoaded, keysLoaded]);
+
+  async function fetchKeys() {
+    setKeysLoading(true);
+    try {
+      const res = await adminFetch("/api/admin/members/keys");
+      const data = await res.json();
+      if (data.ok) {
+        setKeys(Array.isArray(data.keys) ? data.keys : []);
+      }
+    } catch (err) {
+      console.error("Failed to load keys", err);
+    } finally {
+      setKeysLoading(false);
+      setKeysLoaded(true);
+    }
+  }
+
+  async function handleRevokeKeyRow(row: KeyRow) {
+    const confirmed = window.confirm(
+      `Revoke all active keys for ${row.memberEmail ?? row.memberId}?\n\nNote: this revokes every active key for the member, not just the selected row.`,
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch("/api/admin/members/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: row.memberId }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        await fetchKeys();
+      } else {
+        window.alert(`Revocation failed: ${data.error || "unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Revoke failed", err);
+      window.alert("Revoke failed — see console");
+    }
+  }
+
+  async function handleUpgradeTier(row: MemberRow) {
+    const newTier = window.prompt(
+      `Upgrade tier for ${row.email ?? row.id}\n\nEnter new canonical tier (public, member, inner_circle, restricted, client, legacy, architect, owner, top_secret):`,
+      row.tier,
+    );
+    if (!newTier) return;
+
+    try {
+      const res = await fetch("/api/admin/members/upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          memberId: row.id,
+          newTier: newTier.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        await fetchMembers();
+      } else {
+        window.alert(`Upgrade failed: ${data.error || "unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Upgrade failed", err);
+      window.alert("Upgrade failed — see console");
+    }
+  }
+
+  async function handleRevokeKey(row: MemberRow) {
+    if (row.activeKeys.length === 0) {
+      window.alert("This member has no active keys");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Revoke all active keys for ${row.email ?? row.id}?\n\nThis will revoke ${row.activeKeys.length} active key(s).`,
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch("/api/admin/members/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: row.id }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        await fetchMembers();
+      } else {
+        window.alert(`Revocation failed: ${data.error || "unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Revoke failed", err);
+      window.alert("Revoke failed — see console");
     }
   }
 
@@ -195,7 +349,117 @@ export default function AdminDashboard() {
         </button>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-900">
+        <button
+          onClick={() => setActiveTab("telemetry")}
+          className={`px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors border-b-2 ${
+            activeTab === "telemetry"
+              ? "text-blue-300 border-blue-500"
+              : "text-slate-500 border-transparent hover:text-slate-300"
+          }`}
+        >
+          Telemetry
+        </button>
+        <button
+          onClick={() => setActiveTab("members")}
+          className={`px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors border-b-2 ${
+            activeTab === "members"
+              ? "text-blue-300 border-blue-500"
+              : "text-slate-500 border-transparent hover:text-slate-300"
+          }`}
+        >
+          Members
+        </button>
+        <button
+          onClick={() => setActiveTab("keys")}
+          className={`px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors border-b-2 ${
+            activeTab === "keys"
+              ? "text-blue-300 border-blue-500"
+              : "text-slate-500 border-transparent hover:text-slate-300"
+          }`}
+        >
+          Keys
+        </button>
+      </div>
+
+      {/* Members Tab */}
+      {activeTab === "members" && (
+        <div className="mb-8 bg-slate-950 border border-slate-900 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-800">
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              Member Directory
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="border-b border-slate-800 bg-slate-900/50">
+                <tr>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Email</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Tier</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Active Keys</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Member Since</th>
+                  <th className="px-6 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {membersLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-mono uppercase text-[10px] tracking-widest animate-pulse">
+                      Loading members...
+                    </td>
+                  </tr>
+                )}
+                {!membersLoading && members.map((row) => (
+                  <tr key={row.id} className="hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 text-sm text-slate-200">
+                      {row.email ?? <span className="text-slate-500 italic">no email</span>}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider bg-blue-500/20 text-blue-400">
+                        {row.tier}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 font-mono text-sm text-slate-300">
+                      {row.activeKeys.length}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-xs text-slate-500">
+                      {new Date(row.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => void handleUpgradeTier(row)}
+                          className="px-3 py-1 bg-blue-600/20 border border-blue-500/20 rounded text-[10px] font-black uppercase tracking-widest text-blue-300 hover:bg-blue-600/30 transition-colors"
+                        >
+                          Upgrade Tier
+                        </button>
+                        <button
+                          onClick={() => void handleRevokeKey(row)}
+                          disabled={row.activeKeys.length === 0}
+                          className="px-3 py-1 bg-red-600/20 border border-red-500/20 rounded text-[10px] font-black uppercase tracking-widest text-red-300 hover:bg-red-600/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Revoke Key
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {!membersLoading && members.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                      No members found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Diagnostic Telemetry Table */}
+      {activeTab === "telemetry" && (
       <div className="mb-8 bg-slate-950 border border-slate-900 rounded-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-800">
           <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
@@ -275,6 +539,7 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">

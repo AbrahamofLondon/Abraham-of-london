@@ -697,18 +697,13 @@ export default function UnifiedDashboard({
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
   context
 ) => {
+  // NextAuth session enforcement is handled by middleware.ts (Tier 1).
+  // By the time this handler runs, the session is guaranteed to exist.
   const session = await getServerSession(context.req, context.res, authOptions);
   const isOgrValid = hasValidOgrSessionFromContext(context);
 
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/admin/login?returnTo=/dashboard",
-        permanent: false,
-      },
-    };
-  }
-
+  // OGR is a secondary gate that is NOT migrated to middleware — it
+  // remains as a page-level redirect until the operator decides its fate.
   if (!isOgrValid) {
     return {
       redirect: {

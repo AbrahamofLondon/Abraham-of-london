@@ -315,16 +315,9 @@ const RhythmItem = ({ label, val }: any) => (
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const sessionId = readAccessCookie(context.req as any);
-
-    if (!sessionId) {
-      return {
-        redirect: {
-          destination: `/inner-circle?returnTo=${encodeURIComponent(context.resolvedUrl)}`,
-          permanent: false,
-        },
-      };
-    }
+    // AL token cookie presence is enforced by middleware.ts (Tier 2).
+    // By the time this handler runs, the cookie is guaranteed to exist.
+    const sessionId = readAccessCookie(context.req as any) || "";
 
     const ctx = await getSessionContext(sessionId);
 

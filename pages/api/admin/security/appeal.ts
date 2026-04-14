@@ -1,7 +1,7 @@
 /* pages/api/admin/security/appeal.ts — Clearance Request Handler */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { authOptions } from "@/lib/auth/config";
 import { auditLogger } from "@/lib/server/db/audit";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
