@@ -25,7 +25,7 @@
     "//_netlify": "Netlify should NOT rebuild everything twice. Make it explicit and single-pass.",
     "build:netlify": "pnpm mdx:gate && pnpm contentlayer:clean && contentlayer2 build && pnpm mdx:integrity && pnpm build:fast",
     "build:safe": "pnpm vault:fix && pnpm fix:encoding && pnpm content:validate && pnpm build",
-    "build:fast": "tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" NEXT_TELEMETRY_DISABLED=1 next build --webpack",
+    "build:fast": "tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS=\"--max-old-space-size=7168\" NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "build:verbose": "cross-env DEBUG=* pnpm build",
     "test:perimeter": "bash ./scripts/perimeter-check.sh",
     "audit:check": "tsc --noEmit ./lib/audit/audit-logger.ts ./lib/inner-circle/exports.server.ts ./lib/server/cron.ts",
