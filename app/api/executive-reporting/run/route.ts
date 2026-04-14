@@ -450,7 +450,8 @@ export async function POST(
 
     const email = s(intake.email).toLowerCase();
     const subjectId = s(intake.subjectId) || null;
-    const ladderContext = await resolveLadderContext(subjectId, email);
+    const campaignId = s(intake.campaignId) || null;
+    const ladderContext = await resolveLadderContext(subjectId, email, campaignId);
     const runKey = makeRunKey();
 
     const assembled = await assembleConstitutionalGuidance({
@@ -581,6 +582,7 @@ export async function POST(
     const enrichedCanonical = {
       ...canonical,
       subjectId,
+      campaignId,
       ladderContext,
     };
 
@@ -602,6 +604,15 @@ export async function POST(
         authorityType: s(constitution.authorityType) || null,
         canonicalSnapshot: enrichedCanonical as unknown as Prisma.InputJsonValue,
         viewModelSnapshot: viewModel as unknown as Prisma.InputJsonValue,
+        ...(campaignId
+          ? {
+              campaign: {
+                connect: {
+                  id: campaignId,
+                },
+              },
+            }
+          : {}),
       },
     });
 

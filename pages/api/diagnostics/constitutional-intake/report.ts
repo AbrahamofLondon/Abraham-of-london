@@ -87,6 +87,7 @@ export default async function handler(
   try {
     const body = asRecord(req.body);
     const answers = parseAnswers(body.answers);
+    const campaignId = asString(body.campaignId) || null;
 
     if (Object.keys(answers).length < 4) {
       return res.status(400).json({
@@ -133,6 +134,15 @@ export default async function handler(
         authorityType: bundle.report.authorityType,
         seriousnessScore: bundle.report.seriousnessScore,
         completionPercent: bundle.report.completionPercent,
+        ...(campaignId
+          ? {
+              campaign: {
+                connect: {
+                  id: campaignId,
+                },
+              },
+            }
+          : {}),
       },
       select: {
         id: true,

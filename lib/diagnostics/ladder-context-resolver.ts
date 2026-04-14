@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 
 export interface LadderContext {
   subjectId: string | null;
+  campaignId: string | null;
   constitutional: {
     route: string | null;
     severity: string | null;
@@ -50,9 +51,11 @@ function hashEmail(email: string): string {
 export async function resolveLadderContext(
   subjectId: string | null,
   email: string,
+  campaignId: string | null = null,
 ): Promise<LadderContext> {
   const context: LadderContext = {
     subjectId,
+    campaignId,
     constitutional: null,
     team: null,
     enterprise: null,
@@ -65,6 +68,55 @@ export async function resolveLadderContext(
   const { prisma } = await import("@/lib/prisma");
 
   let organisationName: string | null = null;
+
+  try {
+    const campaign = campaignId
+      ? await prisma.alignmentCampaign.findUnique({
+          where: { id: campaignId },
+          include: {
+            organisation: {
+              select: {
+                name: true,
+              },
+            },
+            teamSnapshots: {
+              orderBy: { generatedAt: "desc" },
+              take: 1,
+            },
+            organisationSnapshots: {
+              orderBy: { generatedAt: "desc" },
+              take: 1,
+            },
+          },
+        })
+      : null;
+
+    if (campaign) {
+      organisationName = campaign.organisation?.name ?? null;
+
+      const latestTeam = campaign.teamSnapshots[0];
+      if (latestTeam) {
+        context.team = {
+          score: latestTeam.percentScore ?? null,
+          band: latestTeam.band ?? null,
+          fragility: null,
+          gaps: toStringArray(parseJson(latestTeam.weakestDomainsJson)),
+        };
+      }
+
+      const latestEnterprise = campaign.organisationSnapshots[0];
+      if (latestEnterprise) {
+        context.enterprise = {
+          score: latestEnterprise.percentScore ?? null,
+          sections:
+            (parseJson(latestEnterprise.domainScoresJson) as unknown[] | null) ??
+            null,
+          reading: latestEnterprise.fragilitySignal ?? null,
+          route: latestEnterprise.band ?? null,
+        };
+      }
+    }
+  } catch {}
 
   try {
     const c = await prisma.constitutionalIntakeReport.findFirst({
@@ -109,7 +161,7 @@ export async function resolveLadderContext(
 
   if (!organisationName) return context;
 
-  try {
+  if (!context.team) try {
     const t = await prisma.teamAssessmentSnapshot.findFirst({
       where: {
         campaign: {
@@ -136,7 +188,7 @@ export async function resolveLadderContext(
     }
   } catch {}
 
-  try {
+  if (!context.enterprise) try {
     const e = await prisma.organisationAssessmentSnapshot.findFirst({
       where: {
         campaign: {
