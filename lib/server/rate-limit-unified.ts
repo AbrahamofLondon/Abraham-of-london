@@ -1,7 +1,7 @@
 // server-only guard removed — Pages Router incompatible
 
 /* lib/server/rate-limit-unified.ts — EDGE-SAFE (FULL REPLACEMENT) */
-// Fixes: "@upstash/redis/nodejs.mjs uses process.version" Edge failure.
+// Fixes: "@upstash/redis.mjs uses process.version" Edge failure.
 // Memory rate limiter (Edge-safe). Backward compatible API surface.
 
 export type Bucket = { count: number; resetAt: number };
