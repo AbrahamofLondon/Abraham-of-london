@@ -1,6 +1,6 @@
 // lib/pdf/pdf-registry.generated.ts
 // AUTO-GENERATED — DO NOT EDIT MANUALLY
-// Generated: 2026-04-13T07:58:25.484Z
+// Generated: 2026-04-14T09:21:51.202Z
 
 import type { PDFRegistryEntry } from "./registry.static";
 
@@ -77,12 +77,12 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "isInteractive": false,
     "requiresAuth": false,
     "exists": true,
-    "fileSizeBytes": 44964,
-    "fileSizeHuman": "43.9 KB",
-    "lastModified": "2026-04-12T12:10:52.445Z",
-    "md5": "2cb6269d3dbde165add2b9f954b2abc8",
+    "fileSizeBytes": 80832,
+    "fileSizeHuman": "78.9 KB",
+    "lastModified": "2026-04-13T14:06:00.928Z",
+    "md5": "a949346ad7c4716ff7ee82b0d82a6642",
     "version": "1.0.0",
-    "qualityFlag": "SMALL_PDF_44KB",
+    "qualityFlag": null,
     "priority": 10,
     "preload": false
   },
@@ -2858,10 +2858,10 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "isInteractive": false,
     "requiresAuth": false,
     "exists": true,
-    "fileSizeBytes": 82981,
-    "fileSizeHuman": "81.0 KB",
-    "lastModified": "2026-04-12T12:10:52.484Z",
-    "md5": "1fcfff3e605a104b67b88cdd817d3648",
+    "fileSizeBytes": 81930,
+    "fileSizeHuman": "80.0 KB",
+    "lastModified": "2026-04-13T14:06:00.932Z",
+    "md5": "1762e2463fe8f2ec85695078fc97df13",
     "version": "1.0.0",
     "qualityFlag": null,
     "priority": 10,
@@ -3911,12 +3911,12 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "isInteractive": false,
     "requiresAuth": false,
     "exists": true,
-    "fileSizeBytes": 15835,
-    "fileSizeHuman": "15.5 KB",
-    "lastModified": "2026-04-12T12:10:52.540Z",
-    "md5": "ca6a36c6dac2dc35ad11acb75ab4e30f",
+    "fileSizeBytes": 75731,
+    "fileSizeHuman": "74.0 KB",
+    "lastModified": "2026-04-13T14:06:03.351Z",
+    "md5": "03367b2ec625883e55e566b2ee5a60c1",
     "version": "1.0.0",
-    "qualityFlag": "SMALL_PDF_15KB",
+    "qualityFlag": null,
     "priority": 10,
     "preload": false
   },
@@ -3965,12 +3965,12 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "isInteractive": false,
     "requiresAuth": false,
     "exists": true,
-    "fileSizeBytes": 34395,
-    "fileSizeHuman": "33.6 KB",
-    "lastModified": "2026-04-12T12:10:52.540Z",
-    "md5": "cedfb3fbb22e92dae4e8efd235cd6786",
+    "fileSizeBytes": 81278,
+    "fileSizeHuman": "79.4 KB",
+    "lastModified": "2026-04-13T14:06:12.894Z",
+    "md5": "96380aea55dc7d0f78322635eb9873b4",
     "version": "1.0.0",
-    "qualityFlag": "SMALL_PDF_34KB",
+    "qualityFlag": null,
     "priority": 10,
     "preload": false
   },
@@ -4775,12 +4775,12 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "isInteractive": false,
     "requiresAuth": false,
     "exists": true,
-    "fileSizeBytes": 34900,
-    "fileSizeHuman": "34.1 KB",
-    "lastModified": "2026-04-12T12:10:52.580Z",
-    "md5": "bfb6a613afa3072526bec9cb49045871",
+    "fileSizeBytes": 82349,
+    "fileSizeHuman": "80.4 KB",
+    "lastModified": "2026-04-13T14:06:23.541Z",
+    "md5": "af5e4a9b6e28927b2b1dd132e972181f",
     "version": "1.0.0",
-    "qualityFlag": "SMALL_PDF_34KB",
+    "qualityFlag": null,
     "priority": 10,
     "preload": false
   },
@@ -6918,5 +6918,5 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "preload": false
   }
 ];
-export const GENERATED_AT = "2026-04-13T07:58:25.484Z";
+export const GENERATED_AT = "2026-04-14T09:21:51.202Z";
 export const GENERATED_COUNT = 256;
