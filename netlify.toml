@@ -38,7 +38,20 @@
   directory = "netlify/functions_src/functions"
   node_bundler = "esbuild"
   # ✅ SPEED FIX: Externalize heavy PDF libs so they don't bloat the function bundle
-  external_node_modules = ["@react-pdf/renderer", "canvas"]
+  external_node_modules = [
+    "@react-pdf/renderer",
+    "canvas",
+    "@prisma/client",
+    "prisma",
+    "resend",
+    "nodemailer",
+    "@aws-sdk/client-s3",
+    "@aws-sdk/s3-request-presigner",
+    "sharp",
+    "better-sqlite3",
+    "puppeteer",
+    "puppeteer-core"
+  ]
 
 # ✅ Scheduled function for token cleanup
 [[schedule]]

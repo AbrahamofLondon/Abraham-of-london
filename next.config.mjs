@@ -57,11 +57,20 @@ const nextConfig = {
    */
   serverExternalPackages: [
     "@prisma/client",
+    "prisma",
     "contentlayer2",
     "next-contentlayer2",
     "@react-pdf/renderer",
     "canvas",
     "jsdom",
+    "resend",
+    "nodemailer",
+    "@aws-sdk/client-s3",
+    "@aws-sdk/s3-request-presigner",
+    "sharp",
+    "better-sqlite3",
+    "puppeteer",
+    "puppeteer-core",
   ],
 
   images: {
