@@ -1,5 +1,4 @@
 # netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED & OPTIMIZED)
-
 [build]
   command = "pnpm build:netlify"            
   publish = ".next"
@@ -34,20 +33,30 @@
     paths = [".contentlayer", ".next/cache"]
 
 # ✅ Custom functions configuration
+# Switched from esbuild → nft (Node File Tracing).
+# NFT only includes files actually imported at runtime, which dramatically
+# reduces the ___netlify-server-handler zip size.
+# external_node_modules moves heavy native binaries out of the bundle
+# and into the function execution environment instead.
 [functions]
   directory = "netlify/functions_src/functions"
-  node_bundler = "esbuild"
-  # Keep custom Netlify functions fully bundled.
-  # Global external_node_modules causes Netlify to copy entire heavy packages
-  # into every function zip, which can push many functions past the 250 MB limit.
+  node_bundler = "nft"
+  external_node_modules = [
+    "@prisma/client",
+    "@react-pdf/renderer",
+    "canvas",
+    "sharp"
+  ]
 
 # ✅ Scheduled function for token cleanup
 [[schedule]]
   path = "/api/cleanup-download-tokens"
   schedule = "0 2 * * *"
 
+# Emails function kept on esbuild — Netlify email templates require it.
 [functions.emails]
-  included_files = ["emails/**"]
+  included_files = ["emails/**", "./emails/**"]
+  node_bundler = "esbuild"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"
@@ -66,7 +75,6 @@
 # -----------------------
 # REDIRECTS
 # -----------------------
-
 [[redirects]]
   from = "https://abrahamoflondon.org/*"
   to = "https://www.abrahamoflondon.org/:splat"
@@ -91,7 +99,6 @@
 # -----------------------
 # HEADERS
 # -----------------------
-
 [[headers]]
   for = "/*"
   [headers.values]

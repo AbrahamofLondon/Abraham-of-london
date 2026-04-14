@@ -1,3 +1,6 @@
+// DEPRECATED: orphaned route — no inbound references.
+// Pending operator decision: surface, redirect, or delete.
+// Do not add new logic here.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* pages/directorate/dossier/[id].tsx
    DIRECTORATE DOSSIER — hardened, pages-router safe, SSR admin-gated

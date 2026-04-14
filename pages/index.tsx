@@ -100,6 +100,14 @@ type CanonEntry = {
   readTime: string | null;
 };
 
+type BlogPostItem = {
+  title: string;
+  slug: string;
+  href: string;
+  excerpt: string | null;
+  dateISO: string | null;
+};
+
 type HomePageProps = {
   featuredShorts: FeaturedItem[];
   featuredBriefing: FeaturedItem | null;
@@ -107,6 +115,7 @@ type HomePageProps = {
   featuredPublications: PublicationItem[];
   featuredPlaybooks: PlaybookItem[];
   featuredCanon: CanonEntry[];
+  featuredBlogPosts: BlogPostItem[];
   latestReport: QuarterlyReport | null;
   counts: {
     shorts: number;
@@ -1137,6 +1146,130 @@ function FlagshipAdvisory() {
 // FLAGSHIP PUBLICATION
 // ─────────────────────────────────────────────────────────────────────────────
 
+function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
+  if (posts.length === 0) return null;
+
+  const formatDate = (iso: string | null) => {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return iso;
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    } catch {
+      return iso;
+    }
+  };
+
+  return (
+    <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
+      <Panel surface="lift">
+        <div className="p-8 md:p-11 lg:p-13">
+          <div className="flex items-center gap-3">
+            <span className="h-5 w-px" style={{ backgroundColor: "rgba(255,255,255,0.22)" }} />
+            <span
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.28)",
+              }}
+            >
+              From the blog
+            </span>
+          </div>
+          <p
+            className="mt-3"
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "8px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.28)",
+            }}
+          >
+            Recent writing — direct, unedited thinking.
+          </p>
+
+          <ul className="mt-8">
+            {posts.slice(0, 3).map((post) => (
+              <li
+                key={post.slug}
+                style={{ borderBottom: "1px solid rgba(255,255,255,0.048)" }}
+              >
+                <Link
+                  href={post.href}
+                  className="group flex flex-col gap-2 py-4 transition-colors md:flex-row md:items-baseline md:gap-6"
+                  onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.018)")}
+                  onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent")}
+                >
+                  <span
+                    className="shrink-0"
+                    style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7px",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.22)",
+                      minWidth: "6.5rem",
+                    }}
+                  >
+                    {formatDate(post.dateISO)}
+                  </span>
+                  <span
+                    className="flex-1"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, serif",
+                      fontStyle: "italic",
+                      fontWeight: 300,
+                      fontSize: "1.05rem",
+                      lineHeight: 1.35,
+                      color: "rgba(255,255,255,0.75)",
+                    }}
+                  >
+                    {post.title}
+                  </span>
+                  {post.excerpt && (
+                    <span
+                      className="hidden max-w-[32ch] truncate md:inline"
+                      style={{
+                        fontSize: "12px",
+                        lineHeight: 1.5,
+                        color: "rgba(255,255,255,0.32)",
+                      }}
+                    >
+                      {post.excerpt}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 border px-5 py-3 transition"
+              style={{
+                borderColor: "rgba(255,255,255,0.10)",
+                backgroundColor: "rgba(255,255,255,0.018)",
+                color: "rgba(255,255,255,0.38)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8.5px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+              }}
+            >
+              All posts
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </Panel>
+    </motion.div>
+  );
+}
+
 function FlagshipPublication({ item }: { item: PublicationItem }) {
   return (
     <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}>
@@ -1618,6 +1751,7 @@ const HomePage: NextPage<HomePageProps> = ({
   featuredPublications = [],
   featuredPlaybooks = [],
   featuredCanon = [],
+  featuredBlogPosts = [],
   counts = {
     shorts: 0,
     canon: 0,
@@ -1716,6 +1850,7 @@ const HomePage: NextPage<HomePageProps> = ({
           <FlagshipIntelligence report={latestReport} />
           <FlagshipAdvisory />
           {flagshipPublication && <FlagshipPublication item={flagshipPublication} />}
+          <FlagshipBlogStrip posts={featuredBlogPosts} />
         </div>
       </Section>
 
@@ -1935,11 +2070,11 @@ const HomePage: NextPage<HomePageProps> = ({
 
       {featuredShorts.length > 0 && (
         <>
-          <Bridge text="intelligence · dispatches" />
+          <Bridge text="intelligence · shorts" />
 
-          <Section id="dispatches" variant="surface" cap="dispatches · rapid intel" capDim compact>
+          <Section id="dispatches" variant="surface" cap="shorts · rapid intel" capDim compact>
             <SectionHeader
-              eyebrow="Dispatches"
+              eyebrow="Shorts"
               eyebrowDim
               title="Short, sharp intelligence notes."
               description="Written for retrieval and reuse."
@@ -1950,7 +2085,7 @@ const HomePage: NextPage<HomePageProps> = ({
                   <ModuleBoundary label="ContentShowcase">
                     <ContentShowcase
                       items={featuredShorts as any}
-                      title="Dispatches"
+                      title="Shorts"
                       description="Short, sharp intelligence notes."
                     />
                   </ModuleBoundary>
@@ -2392,6 +2527,45 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     featuredCanon = [];
   }
 
+  let featuredBlogPosts: BlogPostItem[] = [];
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const blogDir = path.join(process.cwd(), "content/blog");
+    if (fs.existsSync(blogDir)) {
+      const entries = fs
+        .readdirSync(blogDir)
+        .filter((f: string) => f.endsWith(".mdx"))
+        .map((f: string) => {
+          const raw = fs.readFileSync(path.join(blogDir, f), "utf-8");
+          const titleMatch = raw.match(/^title:\s*["']?(.+?)["']?\s*$/m);
+          const excerptMatch = raw.match(/^(?:excerpt|description):\s*["']?(.+?)["']?\s*$/m);
+          const dateMatch = raw.match(/^date:\s*["']?(.+?)["']?\s*$/m);
+          const draftMatch = raw.match(/^draft:\s*(true|false)\s*$/m);
+          const slug = f.replace(/\.mdx$/, "");
+          return {
+            slug,
+            title: titleMatch?.[1] ?? slug,
+            href: `/blog/${slug}`,
+            excerpt: excerptMatch?.[1] ?? null,
+            dateISO: dateMatch?.[1] ?? null,
+            draft: draftMatch?.[1] === "true",
+          };
+        })
+        .filter((p) => !p.draft && p.slug !== "ultimate-purpose-of-man")
+        .sort((a, b) => {
+          const da = a.dateISO ? new Date(a.dateISO).getTime() : 0;
+          const db = b.dateISO ? new Date(b.dateISO).getTime() : 0;
+          return db - da;
+        })
+        .slice(0, 3);
+
+      featuredBlogPosts = entries.map(({ draft: _draft, ...rest }) => rest);
+    }
+  } catch {
+    featuredBlogPosts = [];
+  }
+
   return {
     props: sanitizeData({
       featuredShorts,
@@ -2400,6 +2574,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
       featuredPublications,
       featuredPlaybooks,
       featuredCanon,
+      featuredBlogPosts,
       counts,
       latestReport,
     }),

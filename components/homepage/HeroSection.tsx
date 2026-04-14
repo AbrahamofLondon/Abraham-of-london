@@ -174,7 +174,7 @@ export default function HeroSection({ counts }: Props): React.ReactElement {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <StatTile label="Canon"   value={formatCount(counts.canon)}   hint="Entries"    />
               <StatTile label="Briefs"  value={formatCount(counts.briefs)}  hint="Memos"      />
-              <StatTile label="Shorts"  value={formatCount(counts.shorts)}  hint="Dispatches" />
+              <StatTile label="Shorts"  value={formatCount(counts.shorts)}  hint="Notes"      />
               <StatTile label="Library" value={formatCount(counts.library)} hint="Assets"     />
             </div>
           </div>

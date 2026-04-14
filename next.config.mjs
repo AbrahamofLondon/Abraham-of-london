@@ -146,6 +146,20 @@ const nextConfig = {
     return config;
   },
 
+  async redirects() {
+    return [
+      { source: "/terms-of-service", destination: "/terms",    permanent: true },
+      { source: "/security-policy",  destination: "/security", permanent: true },
+      { source: "/strategy-room",    destination: "/consulting/strategy-room", permanent: true },
+      { source: "/premium/library",  destination: "/library",  permanent: true },
+      { source: "/diagnostic",       destination: "/diagnostics", permanent: true },
+      // /blog is the canonical content route (pages/blog/[...slug].tsx renders
+      // content/blog/*.mdx). Previously redirected to /editorials but that
+      // conflicted with the live /blog routes — removed.
+      { source: "/essays/:slug*",    destination: "/blog/:slug*", permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {

@@ -55,7 +55,7 @@ function normalizeItem(item: ContentItem): ContentItem | null {
 
 export default function ContentShowcase({
   items,
-  title       = "Dispatches",
+  title       = "Shorts",
   description = "Short, sharp intelligence notes. Written for retrieval and reuse.",
   maxItems    = 6,
   className   = "",
