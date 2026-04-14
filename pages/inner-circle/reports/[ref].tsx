@@ -1,18 +1,12 @@
-/* pages/inner-circle/reports/[ref].tsx */
+/* pages/inner-circle/reports/[ref].tsx — Chamber mode: simplified detail view */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
-import { ArrowRight, Download, FileText, RefreshCw } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import ReportShell from "@/components/diagnostics/report/ReportShell";
-import ReportHeader from "@/components/diagnostics/report/ReportHeader";
-import ReportSummaryBlock from "@/components/diagnostics/report/ReportSummaryBlock";
-import ReportSectionScores from "@/components/diagnostics/report/ReportSectionScores";
-import ReportRecommendations from "@/components/diagnostics/report/ReportRecommendations";
-import ReportVersionHistory from "@/components/diagnostics/report/ReportVersionHistory";
+import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import {
@@ -22,24 +16,13 @@ import {
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
 import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
-import { listDiagnosticPdfArtifacts } from "@/lib/server/diagnostics/report-archive";
-
-type ReportVersionRow = {
-  reportId: string;
-  version: string;
-  generatedAt: string;
-  htmlPath?: string | null;
-  pdfPath?: string | null;
-  archivedArtifactId?: string | null;
-  archivedAt?: string | null;
-};
 
 type Props = {
   item: any | null;
   renderedReport: any | null;
-  canGenerate: boolean;
   unlocked: boolean;
-  reportVersions: ReportVersionRow[];
+  diagnosticRef: string;
+  version: string;
 };
 
 function safeString(value: unknown, fallback = ""): string {
@@ -52,227 +35,157 @@ function safeArray<T = any>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-function uniqBy<T>(items: T[], getKey: (item: T) => string): T[] {
-  const seen = new Set<string>();
-  const out: T[] = [];
-
-  for (const item of items) {
-    const key = getKey(item);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
-  }
-
-  return out;
-}
-
 const ReportDetailPage: NextPage<Props> = ({
   item,
   renderedReport,
-  canGenerate,
   unlocked,
-  reportVersions,
+  diagnosticRef,
+  version,
 }) => {
-  const [busy, setBusy] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [signedUrlBusy, setSignedUrlBusy] = React.useState(false);
-
   if (!item || !renderedReport) {
     return (
-      <Layout title="Report Not Found">
-        <main className="min-h-screen bg-black p-10 text-white">
-          <div className="mx-auto max-w-4xl">
-            <h1 className="font-serif text-4xl">Report not found</h1>
+      <Layout title="Report Not Found | Inner Circle">
+        <div className="min-h-screen bg-[rgb(3,3,5)] text-white">
+          <WorkspaceNav />
+          <div className="mx-auto max-w-5xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20">
+            <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
+              INNER CIRCLE · REPORT
+            </p>
+            <h1 className="mt-5 font-serif text-[clamp(1.75rem,3vw,2.5rem)] font-light italic leading-[0.95] text-white/92">
+              Report not found.
+            </h1>
+            <div className="mt-8">
+              <Link
+                href="/inner-circle/reports"
+                className="font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/38 transition-colors hover:text-white/62"
+              >
+                ← Reports
+              </Link>
+            </div>
           </div>
-        </main>
+        </div>
       </Layout>
     );
   }
 
-  const diagnosticRef = safeString(item?.diagnosticRef);
-  const latestVersion = safeString(renderedReport?.version, "2026.1");
-  const sectionScores = safeArray(item?.summary?.sectionScores);
+  const title = safeString(item?.title, "Diagnostic Report");
+  const type = safeString(renderedReport?.type, safeString(item?.type, "Diagnostic"));
+  const generatedAt = safeString(renderedReport?.generatedAt);
+  const dateLabel = generatedAt
+    ? new Date(generatedAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "";
+
+  const executiveSummary = safeString(renderedReport?.executiveSummary);
+  const narrativeSummary = safeString(renderedReport?.narrativeSummary);
   const keyFindings = safeArray<string>(renderedReport?.keyFindings);
-  const recommendations = safeArray(renderedReport?.recommendations);
+  const recommendations = safeArray<any>(renderedReport?.recommendations);
 
-  const handleGenerate = async () => {
-    if (!diagnosticRef) return;
-
-    setBusy(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/diagnostics/report/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ diagnosticRef }),
-      });
-
-      const json = await res.json().catch(() => ({}));
-
-      if (!res.ok || !json?.ok) {
-        setError(
-          safeString(json?.error) ||
-            safeString(json?.reason) ||
-            "REPORT_GENERATION_FAILED",
-        );
-      } else {
-        window.location.reload();
-      }
-    } catch {
-      setError("REPORT_GENERATION_FAILED");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleOpenSignedPdf = async () => {
-    if (!diagnosticRef || !latestVersion) return;
-
-    try {
-      setSignedUrlBusy(true);
-
-      const res = await fetch(
-        `/api/diagnostics/report/signed-url?ref=${encodeURIComponent(
-          diagnosticRef,
-        )}&version=${encodeURIComponent(latestVersion)}`,
-      );
-
-      const json = await res.json().catch(() => ({}));
-
-      if (res.ok && json?.ok && json?.url) {
-        window.open(String(json.url), "_blank", "noopener,noreferrer");
-      } else {
-        setError(
-          safeString(json?.error) ||
-            safeString(json?.reason) ||
-            "SIGNED_URL_FAILED",
-        );
-      }
-    } catch {
-      setError("SIGNED_URL_FAILED");
-    } finally {
-      setSignedUrlBusy(false);
-    }
-  };
+  const pdfHref = `/api/diagnostics/report/pdf?ref=${encodeURIComponent(
+    diagnosticRef,
+  )}&version=${encodeURIComponent(version)}`;
 
   return (
-    <Layout title={`${safeString(item?.title, "Report")} | Report`}>
-      <ReportShell>
-        <div className="space-y-8">
-          <ReportHeader
-            diagnosticRef={diagnosticRef}
-            title={safeString(item?.title, "Diagnostic Report")}
-            headline={safeString(renderedReport?.headline)}
-            strapline={safeString(renderedReport?.strapline)}
-            version={latestVersion}
-            generatedAt={safeString(renderedReport?.generatedAt)}
-          />
+    <Layout title={`${title} | Inner Circle`}>
+      <div className="min-h-screen bg-[rgb(3,3,5)] text-white">
+        <WorkspaceNav />
+        <div className="mx-auto max-w-5xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20">
+          <header>
+            <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
+              INNER CIRCLE · REPORT
+            </p>
 
-          <div className="flex flex-wrap gap-4">
-            {canGenerate ? (
-              <button
-                type="button"
-                onClick={handleGenerate}
-                disabled={busy}
-                className="inline-flex items-center gap-3 bg-white px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-black transition-colors hover:bg-amber-50 disabled:opacity-50"
+            <div className="mt-5">
+              <Link
+                href="/inner-circle/reports"
+                className="font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/38 transition-colors hover:text-white/62"
               >
-                {busy ? "Regenerating…" : "Generate New Version"}
-                <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} />
-              </button>
+                ← Reports
+              </Link>
+            </div>
+
+            <h1 className="mt-6 font-serif text-[clamp(1.75rem,3vw,2.5rem)] font-light italic leading-[1.05] text-white/92">
+              {title}
+            </h1>
+
+            <p className="mt-4 font-mono text-[7.5px] uppercase tracking-[0.12em] text-white/38">
+              {type}
+              {dateLabel ? ` · ${dateLabel}` : ""}
+            </p>
+          </header>
+
+          <article className="mt-12 max-w-[65ch] space-y-12">
+            {executiveSummary ? (
+              <section>
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Executive Summary
+                </h2>
+                <p className="mt-4 whitespace-pre-line text-[17px] leading-[1.8] text-white/72">
+                  {executiveSummary}
+                </p>
+              </section>
+            ) : null}
+
+            {narrativeSummary ? (
+              <section>
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Narrative Summary
+                </h2>
+                <p className="mt-4 whitespace-pre-line text-[17px] leading-[1.8] text-white/72">
+                  {narrativeSummary}
+                </p>
+              </section>
+            ) : null}
+
+            {keyFindings.length > 0 ? (
+              <section>
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Key Findings
+                </h2>
+                <div className="mt-4 space-y-4 text-[17px] leading-[1.8] text-white/72">
+                  {keyFindings.map((finding, idx) => (
+                    <p key={`${idx}-${finding.slice(0, 24)}`}>{finding}</p>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {recommendations.length > 0 ? (
+              <section>
+                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+                  Recommendations
+                </h2>
+                <div className="mt-4 space-y-4 text-[17px] leading-[1.8] text-white/72">
+                  {recommendations.map((rec, idx) => {
+                    const text =
+                      typeof rec === "string"
+                        ? rec
+                        : safeString(rec?.body) ||
+                          safeString(rec?.text) ||
+                          safeString(rec?.title);
+                    if (!text) return null;
+                    return <p key={`rec-${idx}`}>{text}</p>;
+                  })}
+                </div>
+              </section>
             ) : null}
 
             {unlocked ? (
-              <>
+              <section>
                 <a
-                  href={`/api/diagnostics/report/pdf?ref=${encodeURIComponent(
-                    diagnosticRef,
-                  )}&version=${encodeURIComponent(latestVersion)}`}
-                  className="inline-flex items-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/82 hover:bg-white/[0.04]"
+                  href={pdfHref}
+                  className="font-mono text-[7.5px] uppercase tracking-[0.16em] text-[#F59E0B] transition-opacity hover:opacity-80"
                 >
-                  Download Latest PDF
-                  <Download className="h-4 w-4" />
+                  Download PDF →
                 </a>
-
-                <button
-                  type="button"
-                  onClick={handleOpenSignedPdf}
-                  disabled={signedUrlBusy}
-                  className="inline-flex items-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/82 hover:bg-white/[0.04] disabled:opacity-50"
-                >
-                  {signedUrlBusy ? "Preparing URL…" : "Open Signed PDF"}
-                  <Download className="h-4 w-4" />
-                </button>
-              </>
-            ) : (
-              <div className="inline-flex items-center gap-3 border border-amber-500/20 bg-amber-500/[0.06] px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">
-                Report PDF locked behind member clearance
-                <FileText className="h-4 w-4" />
-              </div>
-            )}
-
-            <Link
-              href="/inner-circle/dashboard"
-              className="inline-flex items-center gap-3 border border-white/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/82 hover:bg-white/[0.04]"
-            >
-              Back to Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          {error ? (
-            <div className="border border-red-500/20 bg-red-500/[0.04] p-4 text-sm text-red-300">
-              {error}
-            </div>
-          ) : null}
-
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-8">
-              <ReportSummaryBlock
-                title="Executive Summary"
-                body={safeString(renderedReport?.executiveSummary)}
-              />
-              <ReportSummaryBlock
-                title="Narrative Summary"
-                body={safeString(renderedReport?.narrativeSummary)}
-              />
-              <ReportSectionScores sections={sectionScores} />
-            </div>
-
-            <div className="space-y-8">
-              <section className="border border-white/[0.08] bg-white/[0.02] p-8">
-                <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-amber-300/70">
-                  Key Findings
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  {keyFindings.length ? (
-                    keyFindings.map((finding, idx) => (
-                      <div
-                        key={`${finding}-${idx}`}
-                        className="border border-white/6 bg-black/20 p-4 text-sm leading-relaxed text-white/64"
-                      >
-                        {finding}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="border border-white/6 bg-black/20 p-4 text-sm leading-relaxed text-white/50">
-                      No key findings available.
-                    </div>
-                  )}
-                </div>
               </section>
-
-              <ReportRecommendations recommendations={recommendations} />
-            </div>
-          </div>
-
-          <ReportVersionHistory
-            diagnosticRef={diagnosticRef}
-            reports={reportVersions}
-          />
+            ) : null}
+          </article>
         </div>
-      </ReportShell>
+      </div>
     </Layout>
   );
 };
@@ -297,12 +210,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     const ctx = await getSessionContext(sessionId);
 
     if (!ctx?.ok || !ctx?.valid) {
-      return {
-        redirect: {
-          destination: "/inner-circle",
-          permanent: false,
-        },
-      };
+      return { redirect: { destination: "/inner-circle", permanent: false } };
     }
 
     if (!diagnosticRef) {
@@ -332,52 +240,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       unlocked,
     });
 
-    const current = item?.report ? [item.report] : [];
-    const history = safeArray(item?.reportHistory);
-    const merged = uniqBy(
-      [...current, ...history].filter(Boolean),
-      (r: any) =>
-        `${safeString(r?.reportId, "no-report-id")}::${safeString(
-          r?.version,
-          "no-version",
-        )}`,
-    ).sort((a: any, b: any) =>
-      safeString(b?.generatedAt).localeCompare(safeString(a?.generatedAt)),
-    );
-
-    const archivedArtifacts = listDiagnosticPdfArtifacts(diagnosticRef);
-
-    const reportVersions: ReportVersionRow[] = merged.map((report: any) => {
-      const version = safeString(report?.version, renderedReport?.version || "2026.1");
-      const artifact =
-        archivedArtifacts.find((a) => safeString(a?.version) === version) || null;
-
-      return {
-        reportId: safeString(report?.reportId, `RPT-${diagnosticRef}-${version}`),
-        version,
-        generatedAt: safeString(
-          report?.generatedAt,
-          safeString(renderedReport?.generatedAt),
-        ),
-        htmlPath: report?.htmlPath ?? null,
-        pdfPath:
-          report?.pdfPath ??
-          `/api/diagnostics/report/pdf?ref=${encodeURIComponent(
-            diagnosticRef,
-          )}&version=${encodeURIComponent(version)}`,
-        archivedArtifactId:
-          report?.archivedArtifactId ?? artifact?.artifactId ?? null,
-        archivedAt: report?.archivedAt ?? artifact?.createdAt ?? null,
-      };
-    });
+    const version = safeString(renderedReport?.version, "2026.1");
 
     return {
       props: {
         item: JSON.parse(JSON.stringify(item)),
         renderedReport: JSON.parse(JSON.stringify(renderedReport)),
-        canGenerate: isAdmin,
         unlocked,
-        reportVersions: JSON.parse(JSON.stringify(reportVersions)),
+        diagnosticRef,
+        version,
       },
     };
   } catch (error) {
