@@ -1,11 +1,13 @@
 import Head from "next/head";
 import Link from "next/link";
-import type { NextPage } from "next";
-import { discoverPublications } from "@/lib/editorial/discovery";
+import type { GetStaticProps, NextPage } from "next";
+import type { DiscoveredPublication } from "@/lib/editorial/types";
 
-const EditorialCataloguePage: NextPage = () => {
-  const publications = discoverPublications();
+type Props = {
+  publications: DiscoveredPublication[];
+};
 
+const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
   return (
     <>
       <Head>
@@ -78,6 +80,20 @@ const EditorialCataloguePage: NextPage = () => {
       </main>
     </>
   );
+};
+
+// Filesystem work must stay on the server. Dynamic import inside
+// getStaticProps keeps lib/editorial/discovery.ts (which imports 'fs')
+// out of the client bundle entirely.
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const { discoverPublications } = await import("@/lib/editorial/discovery");
+  const publications = discoverPublications();
+
+  return {
+    props: {
+      publications: JSON.parse(JSON.stringify(publications)) as DiscoveredPublication[],
+    },
+  };
 };
 
 export default EditorialCataloguePage;
