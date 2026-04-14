@@ -146,6 +146,18 @@ const nextConfig = {
     return config;
   },
 
+  async redirects() {
+    return [
+      { source: "/terms-of-service", destination: "/terms",    permanent: true },
+      { source: "/security-policy",  destination: "/security", permanent: true },
+      { source: "/strategy-room",    destination: "/consulting/strategy-room", permanent: true },
+      { source: "/premium/library",  destination: "/library",  permanent: true },
+      { source: "/diagnostic",       destination: "/diagnostics", permanent: true },
+      { source: "/blog/:slug*",      destination: "/editorials/:slug*", permanent: true },
+      { source: "/essays/:slug*",    destination: "/editorials/:slug*", permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {
