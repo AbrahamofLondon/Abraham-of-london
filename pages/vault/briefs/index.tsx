@@ -6,15 +6,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import {
-  Search,
-  Shield,
-  Lock,
-  ArrowRight,
-  Filter,
-  Terminal,
-  Activity,
-} from "lucide-react";
+import { Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
 
@@ -45,6 +37,9 @@ type Props = {
   items: BriefCard[];
   total: number;
 };
+
+const RULE = "rgba(255,255,255,0.08)";
+const GOLD = "#C9A96E";
 
 function safeString(v: unknown): string {
   if (typeof v === "string") return v;
@@ -199,6 +194,72 @@ function getCombinedBriefs(docs: any[]): any[] {
     });
 }
 
+function formatDate(value?: string | null) {
+  if (!value) return "Undated";
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed)) return value;
+  return new Date(parsed).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function briefCode(brief: BriefCard) {
+  if (typeof brief.volume === "number") return `BRF-${String(brief.volume).padStart(2, "0")}`;
+  return `BRF-${brief.slug.slice(0, 3).toUpperCase()}`;
+}
+
+function BriefRow({
+  brief,
+  canOpen,
+}: {
+  brief: BriefCard;
+  canOpen: boolean;
+}) {
+  const restricted = brief.requiredTier !== "public";
+
+  return (
+    <Link
+      href={brief.href}
+      className="group grid gap-3 border-b px-0 py-4 transition-colors duration-200 md:grid-cols-[5rem_7rem_1fr_6rem_5rem]"
+      style={{
+        borderBottomColor: "rgba(255,255,255,0.048)",
+        opacity: canOpen ? 1 : 0.64,
+      }}
+    >
+      <div className="font-mono text-[7px] uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,0.2)" }}>
+        {briefCode(brief)}
+      </div>
+
+      <div className="flex items-center gap-1.5 font-mono text-[7px] uppercase tracking-[0.24em]" style={{ color: restricted ? "rgba(255,255,255,0.42)" : "rgba(255,255,255,0.24)" }}>
+        {restricted ? <Lock className="h-3 w-3 text-[#C9A96E]" /> : null}
+        {brief.tierLabel}
+      </div>
+
+      <div className="min-w-0">
+        <div className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: GOLD }}>
+          {brief.series}
+        </div>
+        <h2 className="mt-1 truncate font-serif text-[1.05rem] italic" style={{ color: canOpen ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.45)" }}>
+          {brief.title}
+        </h2>
+        <p className="mt-1 truncate text-[12px]" style={{ color: "rgba(255,255,255,0.32)" }}>
+          {brief.abstract}
+        </p>
+      </div>
+
+      <div className="font-mono text-[7px] uppercase tracking-[0.24em] md:text-right" style={{ color: "rgba(255,255,255,0.18)" }}>
+        {formatDate(brief.publishedAt)}
+      </div>
+
+      <div className="font-mono text-[7px] uppercase tracking-[0.24em] md:text-right" style={{ color: "rgba(255,255,255,0.18)" }}>
+        {brief.readTime || "5 min"}
+      </div>
+    </Link>
+  );
+}
+
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const content = await import("@/lib/content/server");
   const allDocs = await content.getAllCombinedDocs();
@@ -261,8 +322,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
-  const { data: session } = useSession();
-  const [query, setQuery] = React.useState("");
+  const { data: session, status } = useSession();
   const [series, setSeries] = React.useState<string>("All");
 
   const userTier = normalizeUserTier(
@@ -278,200 +338,120 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
   }, [items]);
 
   const filtered = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
+    if (series === "All") return items;
+    return items.filter((item) => item.series === series);
+  }, [items, series]);
 
-    return items.filter((item) => {
-      const seriesOk = series === "All" || item.series === series;
-      const queryOk =
-        !q ||
-        item.title.toLowerCase().includes(q) ||
-        item.abstract.toLowerCase().includes(q) ||
-        item.series.toLowerCase().includes(q) ||
-        item.tags.some((tag) => tag.toLowerCase().includes(q));
-
-      return seriesOk && queryOk;
-    });
-  }, [items, query, series]);
+  const isAuthenticated = status === "authenticated";
 
   return (
-    <Layout
-      title="Vault Briefs // Abraham of London"
-      className="min-h-screen bg-black text-white"
-    >
+    <Layout title="Vault Briefs // Abraham of London" className="min-h-screen bg-black text-white">
       <Head>
-        <title>Intelligence Registry // Abraham of London</title>
+        <title>Vault Briefs // Abraham of London</title>
         <meta
           name="description"
-          content="Strategic briefings, dossiers, and institutional intelligence."
+          content="Restricted operating documents for active members."
         />
       </Head>
 
-      <section className="relative border-b border-white/5 pb-16 pt-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-end">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <Terminal size={14} className="text-amber-500" />
-                <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em] text-white/40">
-                  Secure_Registry // {total}_Briefs_Loaded
-                </span>
-              </div>
-
-              <h1 className="text-5xl font-serif italic tracking-tighter md:text-7xl">
-                The Briefing Portfolio
-              </h1>
-
-              <p className="max-w-xl border-l border-amber-500/40 pl-6 font-light italic text-white/40">
-                Technical intelligence converted from vision to operational specification.
-                Search the registry for authorized doctrine.
-              </p>
+      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
+        <section className="border-b" style={{ borderBottomColor: RULE }}>
+          <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
+            <div className="flex items-center gap-3">
+              <span style={{ width: 1, height: 18, backgroundColor: "rgba(201,169,110,0.42)", display: "inline-block" }} />
+              <span className="font-mono text-[7.5px] uppercase tracking-[0.4em]" style={{ color: "rgba(201,169,110,0.8)" }}>
+                VAULT BRIEFS · BRIEFING REGISTRY
+              </span>
             </div>
 
-            <div className="min-w-[280px] rounded-sm border border-white/10 bg-zinc-900/50 p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Activity size={12} className="text-emerald-500" />
-                  <span className="text-[8px] font-mono uppercase tracking-widest text-white/30">
-                    Network_Secure
-                  </span>
+            <h1
+              className="mt-6 max-w-3xl font-serif italic"
+              style={{
+                fontWeight: 300,
+                fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+                lineHeight: 0.98,
+                color: "rgba(255,255,255,0.9)",
+              }}
+            >
+              Deployable briefing artifacts.
+            </h1>
+
+            <p className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]" style={{ color: "rgba(255,255,255,0.28)" }}>
+              Restricted operating documents for active members.
+            </p>
+
+            <div className="mt-6 h-px w-full" style={{ backgroundColor: RULE }} />
+
+            {seriesOptions.length > 1 ? (
+              <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+                {seriesOptions.map((entry) => {
+                  const active = series === entry;
+                  return (
+                    <button
+                      key={entry}
+                      type="button"
+                      onClick={() => setSeries(entry)}
+                      className="font-mono text-[8px] uppercase tracking-[0.3em]"
+                      style={{
+                        color: active ? GOLD : "rgba(255,255,255,0.3)",
+                        textDecoration: active ? "underline" : "none",
+                        textUnderlineOffset: "0.35rem",
+                      }}
+                    >
+                      {entry}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <section className="py-10 lg:py-12">
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="mb-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.22)" }}>
+              <span>{total} briefs indexed</span>
+              <span>Tier: {userTier}</span>
+              <span>{filtered.length} visible in current series</span>
+            </div>
+
+            {!isAuthenticated ? (
+              <div className="mb-8 border px-5 py-4" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.05)" }}>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.42)" }}>
+                    Access requires Inner Circle membership.
+                  </p>
+                  <Link
+                    href="/inner-circle"
+                    className="font-mono text-[8px] uppercase tracking-[0.28em]"
+                    style={{ color: GOLD }}
+                  >
+                    /inner-circle
+                  </Link>
                 </div>
-
-                <span className="border border-amber-500/20 px-2 py-0.5 text-[8px] font-mono uppercase text-amber-500/50">
-                  Tier: {userTier}
-                </span>
               </div>
+            ) : null}
 
-              <p className="text-[10px] font-mono text-white/60">
-                ID: {safeString(session?.user?.email || "GUEST_L1")}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-12">
-            <div className="relative md:col-span-8">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
-                size={18}
-              />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Query registry (title, tags, index)..."
-                className="w-full border border-white/10 bg-zinc-900/40 py-4 pl-12 pr-4 text-sm font-mono outline-none transition-all focus:border-amber-500/50"
-              />
-            </div>
-
-            <div className="relative md:col-span-4">
-              <Filter
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
-                size={18}
-              />
-              <select
-                value={series}
-                onChange={(e) => setSeries(e.target.value)}
-                className="w-full appearance-none border border-white/10 bg-zinc-900/40 py-4 pl-12 pr-4 text-sm font-mono outline-none focus:border-amber-500/50"
-              >
-                {seriesOptions.map((entry) => (
-                  <option key={entry} value={entry} className="bg-black">
-                    {entry}
-                  </option>
+            {filtered.length === 0 ? (
+              <div className="border px-6 py-16 text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.24)" }}>
+                  No briefings resolved in registry
+                </p>
+              </div>
+            ) : (
+              <div>
+                {filtered.map((brief) => (
+                  <BriefRow
+                    key={brief.slug}
+                    brief={brief}
+                    canOpen={hasAccess(userTier, brief.requiredTier)}
+                  />
                 ))}
-              </select>
-            </div>
+              </div>
+            )}
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-12">
-        {filtered.length === 0 ? (
-          <div className="rounded-sm border border-white/5 bg-zinc-950/40 px-8 py-16 text-center">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/28">
-              Registry returned zero dossiers
-            </p>
-            <p className="mx-auto mt-4 max-w-xl text-sm text-white/40">
-              Adjust your query or filter. The briefing registry is loaded, but
-              nothing matches the current selection.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((brief) => {
-              const canOpen = hasAccess(userTier, brief.requiredTier);
-              const isPublic = brief.requiredTier === "public";
-
-              return (
-                <Link
-                  key={brief.slug}
-                  href={brief.href}
-                  className="group relative overflow-hidden bg-black p-8 transition-all hover:bg-zinc-900/40"
-                >
-                  <div className="mb-12 flex items-start justify-between">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-amber-500">
-                      INDEX_{brief.slug.split("-")[1] || brief.slug.toUpperCase()}
-                    </span>
-
-                    <div className="flex items-center gap-2">
-                      <span className="hidden text-[8px] font-mono uppercase tracking-widest text-white/25 md:inline">
-                        {brief.tierLabel}
-                      </span>
-
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors group-hover:border-amber-500">
-                        {isPublic ? (
-                          <Shield size={12} className="text-emerald-500" />
-                        ) : (
-                          <Lock
-                            size={12}
-                            className={
-                              canOpen
-                                ? "text-emerald-500"
-                                : "text-white/20 group-hover:text-amber-500"
-                            }
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">
-                      {brief.series}
-                    </h4>
-
-                    <h3 className="font-serif text-xl italic leading-snug text-white transition-colors group-hover:text-amber-100">
-                      {brief.title}
-                    </h3>
-
-                    <p className="line-clamp-3 text-[11px] font-light italic leading-relaxed text-white/28">
-                      {brief.abstract}
-                    </p>
-                  </div>
-
-                  <div className="mt-8 flex flex-wrap gap-2">
-                    {brief.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={`${brief.slug}-${tag}`}
-                        className="rounded-full border border-white/10 px-2 py-1 text-[8px] font-mono uppercase tracking-wider text-white/35"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-12 flex items-center justify-between border-t border-white/5 pt-6">
-                    <span className="text-[8px] font-mono uppercase tracking-tighter text-white/24">
-                      {brief.readTime}
-                    </span>
-
-                    <span className="flex items-center gap-2 text-[8px] font-mono font-bold uppercase text-amber-500/50 opacity-0 transition-opacity group-hover:opacity-100">
-                      Initialize <ArrowRight size={10} />
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </section>
+        </section>
+      </main>
     </Layout>
   );
 };
