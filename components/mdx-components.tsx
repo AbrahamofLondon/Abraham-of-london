@@ -113,11 +113,7 @@ const CalloutAdapter: ComponentType<AnyProps> = (props) => {
 
   const nextClassName = cx(className, v === "strategy" && "callout--strategy");
 
-  return (
-    <Callout {...rest} className={nextClassName} type={t} >
-      {children ?? null}
-    </Callout>
-  );
+  return <Callout {...rest} className={nextClassName} type={t}>{children ?? null}</Callout>;
 };
 
 const QuoteAdapter: ComponentType<AnyProps> = (props) => {
