@@ -118,8 +118,19 @@ export default function Header({
   // both contexts, so we read window.location.pathname directly and update
   // on popstate events. This avoids hook-context coupling and works in
   // every consumer (AppShell, Layout, SiteLayout, PDFDashboard, etc.).
-  const { data: session } = useSession();
-  const isAuthenticated = Boolean(session);
+  // useSession is defensive: it returns undefined when SessionProvider is
+  // not present in the tree (e.g. during App Router prerender of /_not-found).
+  // Destructure with optional chaining and default to null.
+  const sessionResult = useSession();
+  const session = sessionResult?.data ?? null;
+
+  // Mounted guard avoids hydration mismatch and ensures the SSR / prerender
+  // output always renders the unauthenticated state. After hydration we flip
+  // to the authenticated state if a session exists.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+
+  const isAuthenticated = mounted && Boolean(session);
 
   const [currentPath, setCurrentPath] = React.useState<string>("/");
 
