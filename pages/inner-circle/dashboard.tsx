@@ -89,15 +89,15 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 
   if (error) {
     return (
-      <Layout title="Vault Error | Abraham of London" noSidebar>
-        <div className="min-h-[80vh] flex items-center justify-center p-6 text-center">
-          <div className="max-w-md bg-white p-12 border border-red-100 shadow-2xl">
-            <ShieldCheck className="h-12 w-12 text-red-500 mx-auto mb-6" />
-            <h1 className="text-2xl font-serif font-bold text-gray-900 mb-4">Vault Sync Error</h1>
-            <p className="text-gray-500 mb-8 font-light italic">{error}</p>
+      <Layout title="Vault Error | Abraham of London">
+        <div>
+          <div>
+            <ShieldCheck />
+            <h1>Vault Sync Error</h1>
+            <p>{error}</p>
             <button
               onClick={handleRefresh}
-              className="w-full bg-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all"
+             
             >
               Retry Protocol Connection
             </button>
@@ -112,122 +112,122 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
       <Layout
         title="Member Dashboard | Abraham of London"
         currentPath="/inner-circle/dashboard"
-        className="bg-white"
+       
       >
-        <div className="max-w-7xl mx-auto">
+        <div>
           <WorkspaceNav />
-          <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-100 pb-12">
+          <header>
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="bg-blue-50 text-blue-700 border border-blue-100 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
+              <div>
+                <span>
                   {access.tier} Clearance
                 </span>
-                <span className="text-gray-400 text-[10px] font-mono uppercase tracking-widest">
+                <span>
                   Sync: {initialData.user.lastLogin ? new Date(initialData.user.lastLogin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Active"}
                 </span>
               </div>
 
-              <h1 className="font-serif text-5xl md:text-6xl text-gray-900 tracking-tighter leading-none italic">
-                The Kingdom <span className="text-gray-300">Vault.</span>
+              <h1>
+                The Kingdom <span>Vault.</span>
               </h1>
-              <p className="mt-6 text-gray-500 max-w-xl text-lg font-light leading-relaxed italic">
-                Welcome back, <span className="text-gray-900 font-medium">{initialData.user.name}</span>.
+              <p>
+                Welcome back, <span>{initialData.user.name}</span>.
                 Your restricted manuscripts and diagnostic records now sit in the same operating surface.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div>
               <Link
                 href="/inner-circle/account"
-                className="px-5 py-3 border border-gray-100 bg-white text-[10px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-all"
+               
               >
                 My Account
               </Link>
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="p-4 rounded-full bg-gray-50 border border-gray-100 hover:bg-gray-100 transition-all text-gray-400 hover:text-blue-600 group"
+               
               >
                 <RefreshCw size={18} className={`${loading ? "animate-spin text-blue-600" : "group-hover:rotate-180 transition-transform duration-500"}`} />
               </button>
             </div>
           </header>
 
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <section>
             <StatTile label="Briefs Available" val={initialData.stats.total} icon={BookOpen} />
             <StatTile label="Diagnostics" val={initialData.stats.diagnostics} icon={Fingerprint} />
             <StatTile label="Reports Ready" val={initialData.stats.reportsReady} icon={FileText} />
             <StatTile label="Vault Tier" val={access.tier.toUpperCase()} icon={ShieldCheck} />
           </section>
 
-          <div className="mb-12 relative">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+          <div>
+            <Search size={18} />
             <input
               type="text"
               placeholder="Filter manuscripts and diagnostic records..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-100 rounded-full py-5 pl-16 pr-6 text-gray-900 focus:bg-white focus:border-blue-200 outline-none transition-all placeholder:text-gray-300 font-light"
+             
             />
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-16">
-            <div className="lg:col-span-3 space-y-16">
+          <div>
+            <div>
               <section>
-                <div className="mb-8 flex items-center justify-between">
-                  <h2 className="font-serif text-3xl italic text-gray-900">Diagnostic Records</h2>
+                <div>
+                  <h2>Diagnostic Records</h2>
                   <Link
                     href="/diagnostics"
-                    className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 flex items-center gap-2"
+                   
                   >
                     New Diagnostic <ArrowRight size={14} />
                   </Link>
                 </div>
 
                 {/* Diagnostics Grid */}
-                <div className="grid gap-8 sm:grid-cols-2">
+                <div>
                   {initialData.content.length > 0 ? (
                     initialData.content.map((item, i) => (
                       <Link
                         key={item.diagnosticRef || i}
                         href={item.href}
-                        className="group p-8 border border-gray-100 bg-white hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/5 transition-all flex flex-col h-full relative"
+                       
                       >
-                        <div className="absolute top-0 right-0 p-8">
-                          <ArrowRight className="h-5 w-5 text-gray-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                        <div>
+                          <ArrowRight />
                         </div>
 
-                        <div className="mb-6 flex items-center justify-between gap-4">
-                          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-600/60 py-1 px-3 bg-blue-50 rounded-full">
+                        <div>
+                          <span>
                             {item.kind}
                           </span>
-                          <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-gray-400">
+                          <span>
                             {item.reportStatus}
                           </span>
                         </div>
 
-                        <h3 className="font-serif text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-700 transition-colors leading-tight italic">
+                        <h3>
                           {item.title}
                         </h3>
 
-                        <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed font-light">
+                        <p>
                           {item.excerpt}
                         </p>
 
-                        <div className="mb-8 text-[10px] font-mono uppercase tracking-[0.22em] text-gray-400">
+                        <div>
                           Ref: {item.diagnosticRef}
                         </div>
 
-                        <div className="pt-6 border-t border-gray-50 flex items-center justify-between text-[10px] font-mono text-gray-400 uppercase tracking-widest">
+                        <div>
                           <span>{item.date}</span>
                           <span>{item.readTime}</span>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <div className="sm:col-span-2 py-32 text-center border border-dashed border-gray-100 rounded-lg">
-                      <Lock size={32} className="mx-auto text-gray-200 mb-4" />
-                      <p className="text-gray-400 italic font-serif text-lg">
+                    <div>
+                      <Lock size={32} />
+                      <p>
                         No reports found matching your query.
                       </p>
                     </div>
@@ -236,63 +236,63 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
               </section>
 
               <section>
-                <div className="mb-8 flex items-center justify-between">
-                  <h2 className="font-serif text-3xl italic text-gray-900">Restricted Manuscripts</h2>
+                <div>
+                  <h2>Restricted Manuscripts</h2>
                 </div>
 
-                <div className="grid gap-8 sm:grid-cols-2">
+                <div>
                   {filteredContent.length > 0 ? (
                     filteredContent.map((item, i) => (
                       <Link
                         key={i}
                         href={item.href}
-                        className="group p-8 border border-gray-100 bg-white hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-500/5 transition-all flex flex-col h-full relative"
+                       
                       >
-                        <div className="absolute top-0 right-0 p-8">
-                          <ArrowRight className="h-5 w-5 text-gray-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                        <div>
+                          <ArrowRight />
                         </div>
-                        <div className="mb-6">
-                          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-600/60 py-1 px-3 bg-blue-50 rounded-full">
+                        <div>
+                          <span>
                             {item.kind}
                           </span>
                         </div>
-                        <h3 className="font-serif text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-700 transition-colors leading-tight italic">
+                        <h3>
                           {item.title}
                         </h3>
-                        <p className="text-sm text-gray-500 line-clamp-2 mb-8 flex-grow leading-relaxed font-light">{item.excerpt}</p>
-                        <div className="pt-6 border-t border-gray-50 flex items-center justify-between text-[10px] font-mono text-gray-400 uppercase tracking-widest">
+                        <p>{item.excerpt}</p>
+                        <div>
                           <span>{item.date}</span>
                           <span>{item.readTime}</span>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <div className="sm:col-span-2 py-32 text-center border border-dashed border-gray-100 rounded-lg">
-                      <Lock size={32} className="mx-auto text-gray-200 mb-4" />
-                      <p className="text-gray-400 italic font-serif text-lg">No manuscripts found matching your query.</p>
+                    <div>
+                      <Lock size={32} />
+                      <p>No manuscripts found matching your query.</p>
                     </div>
                   )}
                 </div>
               </section>
             </div>
 
-            <aside className="space-y-12">
-              <div className="p-10 bg-gray-900 text-white shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
-                <h3 className="font-serif text-2xl font-bold mb-4 italic">Institutional Advisory</h3>
-                <p className="text-sm text-gray-400 mb-10 leading-relaxed font-light">
+            <aside>
+              <div>
+                <div></div>
+                <h3>Institutional Advisory</h3>
+                <p>
                   Direct access for board-level diagnostics, report review, or strategic escalation.
                 </p>
-                <Link href="/consulting/strategy-room" className="block w-full py-5 bg-white text-black text-center text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-50 transition-all">
+                <Link href="/consulting/strategy-room">
                   Enter Strategy Room
                 </Link>
               </div>
 
-              <div className="p-8 border-l border-gray-100">
-                <h3 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                  <TrendingUp size={14} className="text-blue-600" /> System Rhythms
+              <div>
+                <h3>
+                  <TrendingUp size={14} /> System Rhythms
                 </h3>
-                <div className="space-y-6">
+                <div>
                   <RhythmItem label="Next Salon" val="Feb 2026" />
                   <RhythmItem label="Intel Cycle" val="Active" />
                   <RhythmItem label="Diagnostic Loop" val="Closed" />
@@ -307,19 +307,19 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 }
 
 const StatTile = ({ label, val, icon: Icon }: any) => (
-  <div className="bg-gray-50 border border-gray-100 p-8 hover:bg-white hover:shadow-xl transition-all">
-    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-400 mb-6 shadow-sm border border-gray-100">
+  <div>
+    <div>
       <Icon size={18} strokeWidth={1.5} />
     </div>
-    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 block">{label}</span>
-    <div className="text-2xl font-serif italic font-bold text-gray-900">{val}</div>
+    <span>{label}</span>
+    <div>{val}</div>
   </div>
 );
 
 const RhythmItem = ({ label, val }: any) => (
-  <div className="flex items-center justify-between border-b border-gray-50 pb-5 last:border-0 last:pb-0">
-    <span className="text-[10px] text-gray-400 uppercase tracking-widest">{label}</span>
-    <span className="text-[10px] font-mono text-gray-900 font-bold">{val}</span>
+  <div>
+    <span>{label}</span>
+    <span>{val}</span>
   </div>
 );
 
@@ -426,4 +426,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: { error: "Institutional Vault connectivity lost. Systems re-aligning." } };
   }
 };
+
 
