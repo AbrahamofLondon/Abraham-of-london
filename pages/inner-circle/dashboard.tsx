@@ -24,6 +24,7 @@ import { prisma } from "@/lib/prisma";
 
 import Layout from "@/components/layout/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { useRouter } from "next/router";
 
 interface DashboardProps {
@@ -114,6 +115,7 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
         className="bg-white"
       >
         <div className="max-w-7xl mx-auto">
+          <WorkspaceNav />
           <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-100 pb-12">
             <div>
               <div className="flex items-center gap-3 mb-6">

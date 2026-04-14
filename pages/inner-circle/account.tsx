@@ -7,6 +7,7 @@ import { ShieldCheck, Key, RefreshCw, ArrowRight, Lock } from "lucide-react";
 
 import Layout from "@/components/layout/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { getUnifiedSession } from "@/lib/auth/session-helpers";
 import { prisma } from "@/lib/prisma";
 
@@ -111,6 +112,7 @@ export default function InnerCircleAccount({
         className="bg-white"
       >
         <div className="max-w-4xl mx-auto">
+          <WorkspaceNav />
           <header className="mb-12 border-b border-gray-100 pb-12">
             <div className="flex items-center gap-3 mb-6">
               <span className="bg-blue-50 text-blue-700 border border-blue-100 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
@@ -158,6 +160,17 @@ export default function InnerCircleAccount({
                 value={hasValidToken ? "ACTIVE" : "INACTIVE"}
                 emphasis={hasValidToken ? "active" : "inactive"}
               />
+            </div>
+            <div className="mt-8 flex flex-wrap items-center gap-4 text-[10px] font-mono uppercase tracking-[0.22em] text-gray-400">
+              <Link href="/inner-circle/dashboard" className="hover:text-blue-600 transition-colors">
+                Vault
+              </Link>
+              <Link href="/inner-circle/briefs" className="hover:text-blue-600 transition-colors">
+                Briefs
+              </Link>
+              <Link href="/diagnostics" className="hover:text-blue-600 transition-colors">
+                Diagnostics
+              </Link>
             </div>
           </section>
 

@@ -16,6 +16,7 @@ import {
 import { allBriefs } from "contentlayer/generated";
 
 import Layout from "@/components/layout/Layout";
+import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 
@@ -45,6 +46,7 @@ const BriefingRoom: NextPage<Props> = ({ briefs }) => {
     <Layout title="Briefing Room | Abraham of London">
       <main className="min-h-screen bg-black px-6 py-24 text-zinc-300">
         <div className="mx-auto max-w-7xl">
+          <WorkspaceNav />
           <header className="mb-16 border-b border-zinc-900 pb-12">
             <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div>
