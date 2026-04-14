@@ -11,7 +11,7 @@ interface AuthState {
   success: boolean;
 }
 
-export default function RestrictedAccessPage() {
+function RestrictedAccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams?.get('returnTo') || '/dashboard';
@@ -150,5 +150,15 @@ export default function RestrictedAccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RestrictedAccessPage() {
+  return (
+    <React.Suspense
+      fallback={<div className="min-h-screen bg-[#060609]" aria-busy="true" />}
+    >
+      <RestrictedAccessContent />
+    </React.Suspense>
   );
 }
