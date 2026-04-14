@@ -7,7 +7,7 @@
     echo '===BUILD DIAGNOSTIC===' && \
     du -sh .next 2>/dev/null || true && \
     du -sh .next/server 2>/dev/null || true && \
-    find .next -type f -name '*.js' -size +10M -exec ls -lh {} \; 2>/dev/null || true && \
+    find .next -type f -name '*.js' -size +10M -exec ls -lh {} \\; 2>/dev/null || true && \
     echo '===END DIAGNOSTIC==='
   """
 
