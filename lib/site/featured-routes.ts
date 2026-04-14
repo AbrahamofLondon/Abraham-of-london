@@ -59,7 +59,7 @@ export const FEATURED_ROUTES: FeaturedRoute[] = [
   {
     title: "Shorts",
     href: "/shorts",
-    eyebrow: "Dispatches",
+    eyebrow: "Rapid Intel",
     description: "Sharp reflections, compact doctrine, and daily intellectual cadence.",
     group: "thought",
   },

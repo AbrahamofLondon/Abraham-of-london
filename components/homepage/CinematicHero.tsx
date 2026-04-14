@@ -136,7 +136,7 @@ function InstitutionalCounts({ counts }: { counts: HeroCounts }) {
     { value: counts.canon,   label: "Canon entries",    href: "/canon" },
     { value: counts.library, label: "Library works",    href: "/library" },
     { value: counts.briefs,  label: "Strategic briefs", href: "/vault/briefs" },
-    { value: counts.shorts,  label: "Dispatches",       href: "/shorts" },
+    { value: counts.shorts,  label: "Shorts",           href: "/shorts" },
   ];
 
   return (

@@ -1935,11 +1935,11 @@ const HomePage: NextPage<HomePageProps> = ({
 
       {featuredShorts.length > 0 && (
         <>
-          <Bridge text="intelligence · dispatches" />
+          <Bridge text="intelligence · shorts" />
 
-          <Section id="dispatches" variant="surface" cap="dispatches · rapid intel" capDim compact>
+          <Section id="dispatches" variant="surface" cap="shorts · rapid intel" capDim compact>
             <SectionHeader
-              eyebrow="Dispatches"
+              eyebrow="Shorts"
               eyebrowDim
               title="Short, sharp intelligence notes."
               description="Written for retrieval and reuse."
@@ -1950,7 +1950,7 @@ const HomePage: NextPage<HomePageProps> = ({
                   <ModuleBoundary label="ContentShowcase">
                     <ContentShowcase
                       items={featuredShorts as any}
-                      title="Dispatches"
+                      title="Shorts"
                       description="Short, sharp intelligence notes."
                     />
                   </ModuleBoundary>

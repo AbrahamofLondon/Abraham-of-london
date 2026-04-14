@@ -36,7 +36,7 @@ import {
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
-type FooterLink = { label: string; href: string };
+type FooterLink = { label: string; href: string; highlight?: boolean };
 
 type GatewayCard = {
   href: string;
@@ -195,29 +195,36 @@ function DirectoryColumn({ title, links }: { title: string; links: FooterLink[] 
       </div>
 
       <ul className="space-y-3">
-        {links.map((link) => (
-          <li key={`${title}-${link.href}`}>
-            <Link
-              href={link.href}
-              className="group flex items-center gap-2 transition-colors"
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "9px",
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.38)",
-              }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.68)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.38)"}
-            >
-              <div
-                className="h-px w-0 transition-all duration-300 group-hover:w-3"
-                style={{ backgroundColor: `${GOLD}70` }}
-              />
-              {link.label}
-            </Link>
-          </li>
-        ))}
+        {links.map((link) => {
+          const baseColor = link.highlight ? `${GOLD}CC` : "rgba(255,255,255,0.38)";
+          const hoverColor = link.highlight ? GOLD : "rgba(255,255,255,0.68)";
+          return (
+            <li key={`${title}-${link.href}`}>
+              <Link
+                href={link.href}
+                className="group flex items-center gap-2 transition-colors"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: baseColor,
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = hoverColor}
+                onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = baseColor}
+              >
+                <div
+                  className="h-px transition-all duration-300 group-hover:w-3"
+                  style={{
+                    width: link.highlight ? "0.75rem" : "0",
+                    backgroundColor: `${GOLD}70`,
+                  }}
+                />
+                {link.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -277,8 +284,9 @@ export default function EnhancedFooter(): React.ReactElement {
     Archive: [
       { label: "Canon",       href: "/canon"      },
       { label: "Editorials",  href: "/editorials" },
+      { label: "Essays",      href: "/editorials", highlight: true },
       { label: "Library",     href: "/library"    },
-      { label: "Dispatches",  href: "/shorts"     },
+      { label: "Shorts",      href: "/shorts"     },
       { label: "Playbooks",   href: "/playbooks"  },
     ],
     Products: [

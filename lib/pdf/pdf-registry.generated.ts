@@ -1,6 +1,6 @@
 // lib/pdf/pdf-registry.generated.ts
 // AUTO-GENERATED — DO NOT EDIT MANUALLY
-// Generated: 2026-04-14T14:17:43.097Z
+// Generated: 2026-04-14T18:56:41.915Z
 
 import type { PDFRegistryEntry } from "./registry.static";
 
@@ -79,7 +79,7 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "exists": true,
     "fileSizeBytes": 80832,
     "fileSizeHuman": "78.9 KB",
-    "lastModified": "2026-04-13T14:06:00.928Z",
+    "lastModified": "2026-04-14T17:59:39.822Z",
     "md5": "a949346ad7c4716ff7ee82b0d82a6642",
     "version": "1.0.0",
     "qualityFlag": null,
@@ -2860,7 +2860,7 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "exists": true,
     "fileSizeBytes": 81930,
     "fileSizeHuman": "80.0 KB",
-    "lastModified": "2026-04-13T14:06:00.932Z",
+    "lastModified": "2026-04-14T17:59:39.835Z",
     "md5": "1762e2463fe8f2ec85695078fc97df13",
     "version": "1.0.0",
     "qualityFlag": null,
@@ -3913,7 +3913,7 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "exists": true,
     "fileSizeBytes": 75731,
     "fileSizeHuman": "74.0 KB",
-    "lastModified": "2026-04-13T14:06:03.351Z",
+    "lastModified": "2026-04-14T17:59:39.849Z",
     "md5": "03367b2ec625883e55e566b2ee5a60c1",
     "version": "1.0.0",
     "qualityFlag": null,
@@ -3967,7 +3967,7 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "exists": true,
     "fileSizeBytes": 81278,
     "fileSizeHuman": "79.4 KB",
-    "lastModified": "2026-04-13T14:06:12.894Z",
+    "lastModified": "2026-04-14T17:59:39.863Z",
     "md5": "96380aea55dc7d0f78322635eb9873b4",
     "version": "1.0.0",
     "qualityFlag": null,
@@ -4777,7 +4777,7 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "exists": true,
     "fileSizeBytes": 82349,
     "fileSizeHuman": "80.4 KB",
-    "lastModified": "2026-04-13T14:06:23.541Z",
+    "lastModified": "2026-04-14T17:59:39.863Z",
     "md5": "af5e4a9b6e28927b2b1dd132e972181f",
     "version": "1.0.0",
     "qualityFlag": null,
@@ -6918,5 +6918,5 @@ export const GENERATED_PDF_CONFIGS: ReadonlyArray<PDFRegistryEntry> = [
     "preload": false
   }
 ];
-export const GENERATED_AT = "2026-04-14T14:17:43.097Z";
+export const GENERATED_AT = "2026-04-14T18:56:41.915Z";
 export const GENERATED_COUNT = 256;

@@ -36,7 +36,6 @@ import {
   ScrollText,
   Layers,
   Zap,
-  Calendar,
   Lock,
 } from "lucide-react";
 
@@ -57,9 +56,8 @@ type NavItem = {
   signal?: true; // marks the live signal item for subtle treatment
 };
 
-// Desktop nav — flat by product logic.
-// Shorts is the signal item (gold underline, live dispatches feed).
-// Events slot was added to surface Gatherings on desktop.
+// Desktop nav — flat by product logic. Events removed to reduce crowding;
+// Events/Gatherings remain surfaced in the footer.
 const DESKTOP_NAV: readonly NavItem[] = [
   { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
   { href: "/editorials",   label: "Editorials",  sub: "Essays & published arguments", icon: ScrollText },
@@ -68,10 +66,10 @@ const DESKTOP_NAV: readonly NavItem[] = [
   { href: "/diagnostics",  label: "Diagnostics", sub: "Signal & Route",           icon: ScanSearch },
   { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
   { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
-  { href: "/events",       label: "Events",      sub: "Salons & Briefings",       icon: Calendar   },
 ] as const;
 
-// Mobile menu — full directory including Library.
+// Mobile menu — full directory including Library. Events removed per operator;
+// surfaced in the footer as Gatherings.
 const MOBILE_NAV: readonly NavItem[] = [
   { href: "/canon",        label: "Canon",       sub: "Doctrine & Method",        icon: Compass    },
   { href: "/editorials",   label: "Editorials",  sub: "Essays & published arguments", icon: ScrollText },
@@ -82,7 +80,6 @@ const MOBILE_NAV: readonly NavItem[] = [
   { href: "/artifacts",    label: "Intelligence Archives",   sub: "Premium Intelligence",     icon: Archive    },
   { href: "/vault/briefs", label: "Briefs",      sub: "Operational Intelligence", icon: FileText   },
   { href: "/consulting",   label: "Consulting",  sub: "Private Advisory",         icon: Briefcase  },
-  { href: "/events",       label: "Events",      sub: "Salons & Briefings",       icon: Calendar   },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────

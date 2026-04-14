@@ -70,7 +70,7 @@ export default function ExecutiveIntelligenceStrip({
               fontSize: "8.5px", letterSpacing: "0.40em", textTransform: "uppercase",
               color: `${GOLD}BF`,
             }}>
-              Dispatches
+              Shorts
             </span>
           </div>
           <h2 style={{
