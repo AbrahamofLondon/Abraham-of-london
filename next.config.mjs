@@ -65,6 +65,37 @@ const nextConfig = {
     "jsdom",
   ],
 
+  /**
+   * ✅ OUTPUT FILE TRACING — standalone handler pruning
+   * Targets the largest non-runtime contributors identified in the Netlify
+   * build diagnostic. Excludes:
+   *   - .git history (162 MB, never needed at runtime)
+   *   - .contentlayer/.cache (42 MB build cache — .contentlayer/generated
+   *     is left intact because it IS needed at runtime for MDX content)
+   *   - node_modules/.cache (build cache)
+   *   - typescript / sass / @esbuild (build-only toolchain)
+   *
+   * Do NOT exclude:
+   *   - .prisma/client (Prisma engine, runtime)
+   *   - @img/sharp  (image processing, runtime)
+   *   - .contentlayer/generated (MDX content index, runtime)
+   *   - node_modules/next/dist/compiled/** (Next server runtime)
+   *   - public/assets/fonts, public/fonts, public/assets/downloads
+   *     (traced by next/font/local, react-pdf Font.register, and
+   *     lib/premium/private-asset-store.ts respectively)
+   */
+  outputFileTracingRoot: process.cwd(),
+  outputFileTracingExcludes: {
+    "*": [
+      "./.git/**",
+      "./.contentlayer/.cache/**",
+      "./node_modules/.cache/**",
+      "./node_modules/typescript/**",
+      "./node_modules/sass/**",
+      "./node_modules/@esbuild/**",
+    ],
+  },
+
   images: {
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
