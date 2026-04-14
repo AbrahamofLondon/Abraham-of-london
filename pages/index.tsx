@@ -423,24 +423,15 @@ class ModuleBoundary extends React.Component<
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HeroSection({
-  counts,
-  onScroll,
+  onScroll: _onScroll,
 }: {
-  counts: { canon: number; library: number; briefs: number; shorts: number };
   onScroll?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const imgOpacity = useTransform(scrollY, [0, 700], [1, 0.26]);
-  const imgScale = useTransform(scrollY, [0, 700], [1, 1.08]);
-  const contentY = useTransform(scrollY, [0, 450], [0, -40]);
-
-  const stats = [
-    { value: counts.canon, label: "Canon entries", href: "/canon" },
-    { value: counts.library, label: "Library works", href: "/library" },
-    { value: counts.briefs, label: "Strategic briefs", href: "/vault/briefs" },
-    { value: counts.shorts, label: "Dispatches", href: "/shorts" },
-  ];
+  const imgOpacity = useTransform(scrollY, [0, 700], [1, reduceMotion ? 1 : 0.26]);
+  const imgScale = useTransform(scrollY, [0, 700], [1, reduceMotion ? 1 : 1.08]);
+  const contentY = useTransform(scrollY, [0, 450], [0, reduceMotion ? 0 : -40]);
 
   return (
     <section
@@ -452,17 +443,17 @@ function HeroSection({
         style={{ opacity: imgOpacity, scale: imgScale }}
       >
         <Image
-          src="/assets/images/abraham-of-london-banner.webp"
+          src="/assets/images/writing-desk.webp"
           alt=""
           fill
           priority
           sizes="100vw"
           quality={90}
-          className="object-cover object-[30%_center]"
+          className="object-cover object-[center_40%]"
         />
         <div
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to right, rgba(3,3,5,0.94) 0%, rgba(3,3,5,0.76) 42%, rgba(3,3,5,0.56) 100%)` }}
+          style={{ background: `linear-gradient(to right, rgba(3,3,5,0.82) 0%, rgba(3,3,5,0.62) 42%, rgba(3,3,5,0.44) 100%)` }}
         />
         <div
           className="absolute inset-0"
@@ -470,7 +461,7 @@ function HeroSection({
         />
         <div
           className="absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 55% 70% at 15% 30%, rgba(201,169,110,0.07) 0%, transparent 60%)` }}
+          style={{ background: `radial-gradient(ellipse 55% 70% at 10% 50%, rgba(201,169,110,0.09) 0%, transparent 60%)` }}
         />
         <div className="absolute inset-0 opacity-[0.040]" style={GRAIN_STYLE} />
       </motion.div>
@@ -481,49 +472,39 @@ function HeroSection({
       />
 
       <motion.div className="relative z-10 flex h-full items-center" style={{ y: contentY }}>
-        <div className="mx-auto w-full max-w-7xl px-8 pb-24 pt-36 lg:px-16 lg:pt-44">
-          <div className="max-w-[58rem]">
-            <motion.div
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.0, delay: 0.10, ease: [0.22, 1, 0.36, 1] }}
+        <div className="mx-auto w-full max-w-7xl px-8 pb-24 pt-28 lg:px-16 lg:pt-36">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-[58rem]"
+          >
+            <div
+              className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.86] tracking-[-0.045em]"
+              style={{ fontFeatureSettings: '"liga" 1, "kern" 1' }}
             >
-              <div
-                className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.86] tracking-[-0.045em]"
-                style={{ fontFeatureSettings: '"liga" 1, "kern" 1' }}
-              >
-                <div className="flex flex-wrap items-baseline" style={{ gap: "0 1.2rem" }}>
-                  <span className="text-white" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)" }}>
-                    Abraham
-                  </span>
-                  <span className="italic text-white/28" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
-                    of
-                  </span>
-                </div>
-                <div className="italic" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)", color: GOLD }}>
-                  London
-                </div>
+              <div className="flex flex-wrap items-baseline" style={{ gap: "0 1.2rem" }}>
+                <span className="text-white" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)" }}>
+                  Abraham
+                </span>
+                <span className="italic text-white/28" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
+                  of
+                </span>
               </div>
-              <div className="mt-7 h-px w-24" style={{ background: `${GOLD}50` }} />
-            </motion.div>
+              <div className="italic" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)", color: GOLD, marginTop: "0.3em" }}>
+                London
+              </div>
+            </div>
+            <div className="mt-7 h-px w-40" style={{ background: `${GOLD}38` }} />
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.86, delay: 0.38 }}
-              className="mt-9 font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/45"
+            <p
+              className="mt-12 max-w-[38ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/52"
               style={{ fontSize: "clamp(1.05rem, 2vw, 1.35rem)" }}
             >
-              Doctrine, diagnostics, executive intelligence, and selective advisory
-              <span className="block text-white/22">organised into one governed platform.</span>
-            </motion.p>
+              Doctrine, diagnostics, executive intelligence, and selective advisory organised into one governed platform.
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.52 }}
-              className="mt-11 flex flex-wrap gap-3"
-            >
+            <div className="mt-11 flex flex-wrap gap-3">
               <Link
                 href="/diagnostics"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
@@ -556,9 +537,8 @@ function HeroSection({
                 href="/diagnostics/executive-reporting"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.08)",
-                  backgroundColor: "rgba(255,255,255,0.03)",
-                  color: "rgba(255,255,255,0.55)",
+                  borderColor: "rgba(255,255,255,0.05)",
+                  color: "rgba(255,255,255,0.42)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -572,9 +552,9 @@ function HeroSection({
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.08)";
-                  el.style.backgroundColor = "rgba(255,255,255,0.03)";
-                  el.style.color = "rgba(255,255,255,0.55)";
+                  el.style.borderColor = "rgba(255,255,255,0.05)";
+                  el.style.backgroundColor = "transparent";
+                  el.style.color = "rgba(255,255,255,0.42)";
                 }}
               >
                 <ScrollText className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />
@@ -586,8 +566,8 @@ function HeroSection({
                 href="/consulting/strategy-room"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.055)",
-                  color: "rgba(255,255,255,0.30)",
+                  borderColor: "rgba(255,255,255,0.03)",
+                  color: "rgba(255,255,255,0.22)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -601,67 +581,16 @@ function HeroSection({
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.055)";
-                  el.style.color = "rgba(255,255,255,0.30)";
+                  el.style.borderColor = "rgba(255,255,255,0.03)";
+                  el.style.color = "rgba(255,255,255,0.22)";
                   el.style.backgroundColor = "transparent";
                 }}
               >
                 <Crown className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />
                 Strategy Room
               </Link>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.05, delay: 0.82 }}
-        className="absolute inset-x-0 bottom-0 z-10"
-      >
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.055)", backgroundColor: "rgba(3,3,5,0.72)", backdropFilter: "blur(10px)" }}>
-          <div className="mx-auto max-w-7xl px-8 lg:px-16">
-            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ borderLeft: "1px solid rgba(255,255,255,0.055)" }}>
-              {stats.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group px-6 py-5 transition"
-                  style={{ borderRight: "1px solid rgba(255,255,255,0.055)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.022)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, serif",
-                      fontSize: "2rem",
-                      fontWeight: 300,
-                      color: "rgba(255,255,255,0.72)",
-                    }}
-                  >
-                    {item.value}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "0.25rem",
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
-                      letterSpacing: "0.30em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.24)",
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                </Link>
-              ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </section>
@@ -1695,13 +1624,6 @@ const HomePage: NextPage<HomePageProps> = ({
   },
   latestReport,
 }) => {
-  const heroCounts = {
-    shorts: counts.shorts,
-    canon: counts.canon,
-    briefs: counts.briefs,
-    library: counts.library,
-  };
-
   return (
     <Layout
       title="Abraham of London"
@@ -1716,7 +1638,6 @@ const HomePage: NextPage<HomePageProps> = ({
       </Head>
 
       <HeroSection
-        counts={heroCounts}
         onScroll={() => document.getElementById("platform")?.scrollIntoView({ behavior: "smooth" })}
       />
 

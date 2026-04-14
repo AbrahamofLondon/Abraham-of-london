@@ -1,7 +1,6 @@
 // components/homepage/index.ts
 export { default as AboutSection } from './AboutSection';
 export { default as CanonInstitutionalIntro } from './CanonInstitutionalIntro';
-export { default as CinematicHero } from './CinematicHero';
 export { default as ContentShowcase } from './ContentShowcase';
 export { default as CredibilityQuotes } from './CredibilityQuotes';
 export { default as EngagementLanes } from './EngagementLanes';
