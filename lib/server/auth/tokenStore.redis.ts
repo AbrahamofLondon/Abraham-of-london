@@ -1,8 +1,27 @@
 /* lib/server/auth/tokenStore.redis.ts - FINAL SSOT ALIGNED */
-import { Redis } from '@upstash/redis';
+// Type-only import keeps the Redis class name available for annotations
+// without pulling @upstash/redis/nodejs.mjs into the static module graph
+// at build time. The main entry of @upstash/redis evaluates
+// `process.version` at import time which crashes the Edge runtime the
+// moment webpack traces any static import of this file into an edge
+// chunk — even if the file is only used from Node routes in practice.
+//
+// The client is lazy-initialised via a singleton getter that uses a
+// dynamic import(). Webpack treats the dynamic import as a code-split
+// point and does not bundle @upstash/redis into chunks that never
+// actually call getRedis().
+import type { Redis } from '@upstash/redis';
 import { type AccessTier, normalizeUserTier } from "@/lib/access/tier-policy";
 
-const redis = Redis.fromEnv();
+let _redis: Redis | null = null;
+
+async function getRedis(): Promise<Redis> {
+  if (!_redis) {
+    const mod = await import('@upstash/redis');
+    _redis = mod.Redis.fromEnv();
+  }
+  return _redis;
+}
 
 /**
  * FIXED: Added verifySession to satisfy lib/inner-circle/access.server.ts
@@ -16,17 +35,18 @@ export async function verifySession(token: string): Promise<{
   expiresAt?: string;
 }> {
   try {
+    const redis = await getRedis();
     const [tier, userData] = await Promise.all([
       redis.get<string>(`session:${token}:tier`),
       redis.get<any>(`session:${token}:user`),
     ]);
 
     if (!tier) {
-      return { 
-        ok: true, 
-        valid: false, 
-        tier: "public", 
-        reason: "SESSION_NOT_FOUND" 
+      return {
+        ok: true,
+        valid: false,
+        tier: "public",
+        reason: "SESSION_NOT_FOUND"
       };
     }
 
@@ -38,11 +58,11 @@ export async function verifySession(token: string): Promise<{
     };
   } catch (error) {
     console.error("[tokenStore] verifySession critical failure:", error);
-    return { 
-      ok: false, 
-      valid: false, 
-      tier: "public", 
-      reason: "INTERNAL_REDIS_ERROR" 
+    return {
+      ok: false,
+      valid: false,
+      tier: "public",
+      reason: "INTERNAL_REDIS_ERROR"
     };
   }
 }
@@ -52,6 +72,7 @@ export async function verifySession(token: string): Promise<{
  */
 export async function getSessionTier(token: string): Promise<AccessTier | null> {
   try {
+    const redis = await getRedis();
     const tier = await redis.get<string>(`session:${token}:tier`);
     if (!tier) return null;
     return normalizeUserTier(tier);
@@ -65,14 +86,15 @@ export async function getSessionTier(token: string): Promise<AccessTier | null> 
  * Stores session tier in Redis
  */
 export async function setSessionTier(
-  token: string, 
+  token: string,
   tier: string | AccessTier,
   expirySeconds: number = 7 * 24 * 60 * 60 // 7 days default
 ): Promise<void> {
   try {
+    const redis = await getRedis();
     const normalized = normalizeUserTier(tier);
     await redis.setex(`session:${token}:tier`, expirySeconds, normalized);
-    
+
     await redis.setex(`session:${token}:metadata`, expirySeconds, {
       storedAt: new Date().toISOString(),
       originalTier: tier,
@@ -88,6 +110,7 @@ export async function setSessionTier(
  */
 export async function revokeSession(token: string): Promise<void> {
   try {
+    const redis = await getRedis();
     await redis.del(`session:${token}:tier`);
     await redis.del(`session:${token}:metadata`);
     await redis.del(`session:${token}:user`);
@@ -109,7 +132,8 @@ export async function createSession(
   expirySeconds: number = 7 * 24 * 60 * 60
 ): Promise<void> {
   const normalizedTier = normalizeUserTier(userData.tier);
-  
+  const redis = await getRedis();
+
   await Promise.all([
     setSessionTier(token, normalizedTier, expirySeconds),
     redis.setex(`session:${token}:user`, expirySeconds, {
@@ -130,6 +154,7 @@ export async function getSessionUser(token: string): Promise<{
   tier?: AccessTier;
 } | null> {
   try {
+    const redis = await getRedis();
     const [tier, userData] = await Promise.all([
       redis.get<string>(`session:${token}:tier`),
       redis.get<Record<string, any>>(`session:${token}:user`),
@@ -150,10 +175,12 @@ export async function getSessionUser(token: string): Promise<{
 
 // Maintenance Exports
 export async function revokeKey(keyHash: string, reason: string): Promise<void> {
+  const redis = await getRedis();
   await redis.set(`revoked_key:${keyHash}`, { revokedAt: new Date().toISOString(), reason });
 }
 
 export async function isKeyRevoked(keyHash: string): Promise<boolean> {
+  const redis = await getRedis();
   const revoked = await redis.get(`revoked_key:${keyHash}`);
   return !!revoked;
 }
