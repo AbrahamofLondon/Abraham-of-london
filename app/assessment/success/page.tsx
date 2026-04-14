@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { ShieldCheck, Trophy, ArrowRight, Share2, Download, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function AssessmentSuccessPage() {
+function AssessmentSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -109,5 +109,15 @@ export default function AssessmentSuccessPage() {
       {/* NOISE OVERLAY */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('/grain.png')]" />
     </main>
+  );
+}
+
+export default function AssessmentSuccessPage() {
+  return (
+    <React.Suspense
+      fallback={<main className="min-h-screen bg-[#050505]" aria-busy="true" />}
+    >
+      <AssessmentSuccessContent />
+    </React.Suspense>
   );
 }
