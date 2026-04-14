@@ -64,6 +64,51 @@ const nextConfig = {
     "jsdom",
   ],
 
+  /**
+   * ✅ OUTPUT FILE TRACING EXCLUDES
+   * Keeps the Netlify serverless handler below the 250 MB per-function cap
+   * by preventing Next's file tracer from pulling heavy build-only binaries,
+   * caches, and public assets that are never read at runtime.
+   *
+   * Do NOT exclude:
+   *   - public/assets/fonts/**   (traced by next/font/local in lib/next-fonts.ts)
+   *   - public/fonts/**          (read by react-pdf Font.register)
+   *   - public/assets/downloads/** (read by lib/premium/private-asset-store.ts)
+   *   - next/dist/compiled/**    (used by Next server runtime at runtime)
+   */
+  outputFileTracingExcludes: {
+    "*": [
+      // Heavy binaries (platform-specific builds)
+      "node_modules/@swc/core-linux-*",
+      "node_modules/@swc/core-win32-*",
+      "node_modules/@swc/core-darwin-*",
+      "node_modules/@next/swc-*",
+      "node_modules/@esbuild/**",
+      "node_modules/webpack/**",
+      "node_modules/terser/**",
+
+      // Heavy dependencies with native binaries
+      "node_modules/sharp/vendor/**",
+      "node_modules/@prisma/engines/**",
+      "node_modules/canvas/build/**",
+      "node_modules/puppeteer/.local-chromium/**",
+      "node_modules/puppeteer-core/.local-chromium/**",
+
+      // Cache & build artifacts (never needed at runtime)
+      ".next/cache/**",
+      ".contentlayer/**",
+
+      // Public assets NOT read at runtime
+      "public/vault/**",
+      "public/resources/**",
+      "public/assets/images/**",
+      "public/assets/prints/**",
+      "public/epubs/**",
+      "public/pdfs/**",
+      "public/downloads/**",
+    ],
+  },
+
   images: {
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
