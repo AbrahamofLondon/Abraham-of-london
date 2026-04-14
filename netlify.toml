@@ -1,6 +1,6 @@
 # netlify.toml — ABRAHAM OF LONDON (NEXT.JS ON NETLIFY — HARDENED & OPTIMIZED)
 [build]
-  command = "pnpm build:netlify"            
+  command = "pnpm build:netlify && echo '===HANDLER SIZE DIAGNOSTIC===' && du -sh .next/server 2>/dev/null || true && du -sh .next/standalone 2>/dev/null || true && du -sh .next/standalone/node_modules 2>/dev/null || true && echo '===LARGE JS CHUNKS (>10MB)===' && find .next -name '*.js' -size +10M -exec ls -lh {} \\; 2>/dev/null || true && echo '===LARGE FILES IN STANDALONE (>5MB)===' && find .next/standalone -type f -size +5M -exec ls -lh {} \\; 2>/dev/null || true && echo '===DIAGNOSTIC END==='"
   publish = ".next"
 
 [build.environment]
