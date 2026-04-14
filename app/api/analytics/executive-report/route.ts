@@ -128,8 +128,10 @@ export async function GET(req: NextRequest) {
   // until the market data ingestion pipeline is configured.
   return NextResponse.json(
     {
-      error: "Market data ingestion pipeline not configured",
-      code:  "MARKET_DATA_UNAVAILABLE",
+      error: "Market intelligence pipeline launching soon",
+      code:  "MARKET_INTELLIGENCE_COMING_SOON",
+      message:
+        "Executive reporting is available via the assessment ladder. Market data integration is in active development.",
     },
     { status: 503 }
   );
