@@ -8,7 +8,8 @@
     du -sh .next 2>/dev/null || true && \
     du -sh .next/server 2>/dev/null || true && \
     find .next -type f -name '*.js' -size +10M -exec ls -lh {} \\; 2>/dev/null || true && \
-    echo '===END DIAGNOSTIC==='
+    echo '===END DIAGNOSTIC===' && \
+    node scripts/diagnostic/chunk-inspector.mjs 2>/dev/null || echo '===END CHUNK MANIFEST==='
   """
 
 [build.environment]
