@@ -9,7 +9,8 @@
     du -sh .next/server 2>/dev/null || true && \
     find .next -type f -name '*.js' -size +10M -exec ls -lh {} \\; 2>/dev/null || true && \
     echo '===END DIAGNOSTIC===' && \
-    node scripts/diagnostic/chunk-inspector.mjs 2>/dev/null || echo '===END CHUNK MANIFEST==='
+    (node scripts/diagnostic/chunk-inspector.mjs || echo '===END CHUNK MANIFEST===') && \
+    (node scripts/diagnostic/stats-analyzer.mjs || echo '===END STATS===')
   """
 
 [build.environment]
