@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ShieldCheck, AlertTriangle, TrendingUp, ChevronRight, Download, RefreshCw, Loader2 } from 'lucide-react';
@@ -13,7 +14,7 @@ const CONTAINER_TRANSITION = {
   ease: [0.22, 1, 0.36, 1] as const // Use 'as const' instead of 'as any'
 };
 
-export default function StrategySuccessPage() {
+function StrategySuccessContent() {
   const isReady = useClientIsReady();
   const searchParams = useSearchParams();
   const id = searchParams?.get('id') ?? null;
@@ -168,5 +169,17 @@ export default function StrategySuccessPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function StrategySuccessPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-[#060609]" aria-busy="true" />
+      }
+    >
+      <StrategySuccessContent />
+    </React.Suspense>
   );
 }
