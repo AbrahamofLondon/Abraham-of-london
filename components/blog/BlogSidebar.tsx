@@ -63,11 +63,11 @@ const BlogSidebar: React.FC<BlogSidebarProps> = ({
         <p className="text-xs text-gray-400 leading-relaxed mb-6">
           This artifact is part of the {tier} repository. Members gain access to interactive worksheets and fillable PDF frameworks.
         </p>
-        <Link 
-          href="/pricing"
+        <Link
+          href="/diagnostics/executive-reporting"
           className="group flex items-center justify-between w-full bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-bold uppercase tracking-widest py-4 px-6 rounded-xl transition-all"
         >
-          Upgrade Access <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          Executive Reporting <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
 

@@ -107,6 +107,17 @@ const nextConfig = {
 
     return config;
   },
+
+  async redirects() {
+    return [
+      // /pricing previously served the admin EventPriceManager control page
+      // to public visitors (linked from the blog sidebar "Upgrade Access" CTA).
+      // Temporary 302 redirect to the flagship paid product. Blog sidebar CTA
+      // was also updated in the same commit to link directly to Executive
+      // Reporting with a proper label.
+      { source: "/pricing", destination: "/diagnostics/executive-reporting", permanent: false },
+    ];
+  },
 };
 
 export default withContentlayer(nextConfig);
