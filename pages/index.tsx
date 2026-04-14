@@ -449,7 +449,7 @@ function HeroSection({
           priority
           sizes="100vw"
           quality={90}
-          className="object-cover object-[center_40%]"
+          className="object-cover object-[35%_55%]"
         />
         <div
           className="absolute inset-0"
