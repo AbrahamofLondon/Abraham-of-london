@@ -1,12 +1,10 @@
-/* pages/inner-circle/account.tsx — Member Account & Token Management */
+/* pages/inner-circle/account.tsx — Chamber mode: operating environment */
 
 import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Link from "next/link";
-import { ShieldCheck, Key, RefreshCw, ArrowRight, Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import ErrorBoundary from "@/components/error/ErrorBoundary";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { getUnifiedSession } from "@/lib/auth/session-helpers";
 import { prisma } from "@/lib/prisma";
@@ -37,12 +35,6 @@ export default function InnerCircleAccount({
 }: AccountProps) {
   const [busy, setBusy] = React.useState<null | "resend" | "revoke">(null);
   const [flash, setFlash] = React.useState<string | null>(null);
-
-  const keyDisplay = activeKey
-    ? activeKey.keySuffix
-      ? `****${activeKey.keySuffix}`
-      : `****${activeKey.keyHash.slice(-8)}`
-    : "—";
 
   async function requestNewKey() {
     if (!email) {
@@ -89,8 +81,6 @@ export default function InnerCircleAccount({
       if (data.ok) {
         setFlash("Access session revoked. Redirecting…");
         window.setTimeout(() => {
-          // Redirect to the public root — /inner-circle is Tier 2 and
-          // would redirect-loop without the cookie we just cleared.
           window.location.href = "/";
         }, 1200);
       } else {
@@ -104,169 +94,99 @@ export default function InnerCircleAccount({
     }
   }
 
+  const sessionExpiresDisplay = expiresAt
+    ? new Date(expiresAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : activeKey?.expiresAt
+    ? new Date(activeKey.expiresAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "—";
+
   return (
-    <ErrorBoundary>
-      <Layout
-        title="Account | Abraham of London"
-       
-      >
-        <div>
-          <WorkspaceNav />
-          <header>
-            <div>
-              <span>
-                {tier} Clearance
-              </span>
-              <span>
-                {hasValidToken ? "Active Session" : "No Active Token"}
-              </span>
-            </div>
-
-            <h1>
-              Your <span>Account.</span>
-            </h1>
-            <p>
-              Identity, tier, and active access key management for{" "}
-              <span>{name ?? email ?? "Principal"}</span>.
+    <Layout title="Account | Inner Circle">
+      <div className="min-h-screen bg-[rgb(3,3,5)] text-white">
+        <WorkspaceNav />
+        <div className="mx-auto max-w-5xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20">
+          <header className="max-w-3xl">
+            <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
+              INNER CIRCLE · ACCOUNT
             </p>
-
-            <div>
-              <Link
-                href="/inner-circle/dashboard"
-               
-              >
-                <ArrowRight size={14} />
-                Back to Vault
-              </Link>
-            </div>
+            <h1 className="mt-5 font-serif text-[clamp(2rem,4vw,3rem)] font-light italic leading-[0.95] text-white/92">
+              The operating environment.
+            </h1>
+            <p className="mt-4 font-mono text-[7.5px] uppercase tracking-[0.12em] text-white/48">
+              Active session · {name ?? "Member"} · {tier}
+            </p>
           </header>
 
-          {flash && (
-            <div>
-              {flash}
-            </div>
-          )}
-
-          {/* Identity Panel */}
-          <section>
-            <h2>Identity</h2>
-            <div>
-              <Field label="Name" value={name ?? "—"} />
-              <Field label="Email" value={email ?? "—"} />
-              <Field label="Tier" value={tier.toUpperCase()} />
-              <Field
-                label="Token Status"
-                value={hasValidToken ? "ACTIVE" : "INACTIVE"}
-                emphasis={hasValidToken ? "active" : "inactive"}
-              />
-            </div>
-            <div>
-              <Link href="/inner-circle/dashboard">
-                Vault
-              </Link>
-              <Link href="/inner-circle/briefs">
-                Briefs
-              </Link>
-              <Link href="/diagnostics">
-                Diagnostics
-              </Link>
+          <section className="mt-12">
+            <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
+              Identity
+            </h2>
+            <div className="mt-4 border-t border-white/8">
+              <div className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72">
+                <span className="font-mono text-[7.5px] uppercase tracking-[0.18em] text-white/38">
+                  Email
+                </span>
+                <span>{email ?? "—"}</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72">
+                <span className="font-mono text-[7.5px] uppercase tracking-[0.18em] text-white/38">
+                  Tier
+                </span>
+                <span>{tier}</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72">
+                <span className="font-mono text-[7.5px] uppercase tracking-[0.18em] text-white/38">
+                  Session expires
+                </span>
+                <span>{sessionExpiresDisplay}</span>
+              </div>
             </div>
           </section>
 
-          {/* Token Panel */}
-          <section>
-            <div>
-              <Key size={20} />
-              <h2>Access Key</h2>
-            </div>
+          {flash ? (
+            <p className="mt-8 font-mono text-[7.5px] uppercase tracking-[0.12em] text-[#C9A96E]">
+              {flash}
+            </p>
+          ) : null}
 
-            {hasValidToken && activeKey ? (
-              <div>
-                <Field label="Key Suffix" value={keyDisplay} mono />
-                <Field
-                  label="Expires"
-                  value={
-                    expiresAt
-                      ? new Date(expiresAt).toLocaleDateString()
-                      : activeKey.expiresAt
-                      ? new Date(activeKey.expiresAt).toLocaleDateString()
-                      : "—"
-                  }
-                />
-                <Field
-                  label="Last Used"
-                  value={
-                    activeKey.lastUsedAt
-                      ? new Date(activeKey.lastUsedAt).toLocaleString()
-                      : "Never"
-                  }
-                />
-              </div>
-            ) : (
-              <div>
-                <Lock size={24} />
-                <p>
-                  No active access key on file. Request a new one to enter the vault.
-                </p>
-              </div>
-            )}
+          <section className="mt-12 space-y-3">
+            <button
+              type="button"
+              onClick={() => void requestNewKey()}
+              disabled={busy !== null}
+              className="block font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/38 transition-colors hover:text-[#C9A96E] disabled:opacity-40"
+            >
+              {busy === "resend" ? "Dispatching…" : "Request new access key →"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void revokeMyAccess()}
+              disabled={busy !== null || !hasValidToken}
+              className="block font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/38 transition-colors hover:text-[#C9A96E] disabled:opacity-40"
+            >
+              {busy === "revoke" ? "Revoking…" : "Revoke session →"}
+            </button>
+          </section>
 
-            <div>
-              <button
-                onClick={() => void requestNewKey()}
-                disabled={busy !== null}
-               
-              >
-                <RefreshCw
-                  size={14}
-                  className={busy === "resend" ? "animate-spin" : undefined}
-                />
-                {busy === "resend" ? "Dispatching…" : "Request New Access Key"}
-              </button>
-
-              <button
-                onClick={() => void revokeMyAccess()}
-                disabled={busy !== null || !hasValidToken}
-               
-              >
-                <ShieldCheck size={14} />
-                {busy === "revoke" ? "Revoking…" : "Revoke My Access"}
-              </button>
-            </div>
+          <section className="mt-12">
+            <Link
+              href="/inner-circle/dashboard"
+              className="font-mono text-[7.5px] uppercase tracking-[0.16em] text-white/38 transition-colors hover:text-white/62"
+            >
+              Back to workspace →
+            </Link>
           </section>
         </div>
-      </Layout>
-    </ErrorBoundary>
-  );
-}
-
-function Field({
-  label,
-  value,
-  mono,
-  emphasis,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  emphasis?: "active" | "inactive";
-}) {
-  const valueClass = [
-    mono ? "font-mono text-sm" : "text-lg font-light",
-    emphasis === "active" ? "text-emerald-600 font-bold" : "",
-    emphasis === "inactive" ? "text-gray-400 italic" : "",
-    !emphasis ? "text-gray-900" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return (
-    <div>
-      <div>
-        {label}
       </div>
-      <div className={valueClass}>{value}</div>
-    </div>
+    </Layout>
   );
 }
 
@@ -334,5 +254,3 @@ export const getServerSideProps: GetServerSideProps<AccountProps> = async (
     },
   };
 };
-
-
