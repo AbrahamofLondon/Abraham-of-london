@@ -1,62 +1,24 @@
-import { NextResponse } from "next/server";
-import React from "react";
-import type { ReactElement } from "react";
-import type { DocumentProps } from "@react-pdf/renderer";
-import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
+// MOVED: this route is now served by
+// /.netlify/functions/executive-report-pdf
+//
+// The rewrite was required to pull @react-pdf/renderer + fontkit +
+// pdfkit out of the main `___netlify-server-handler` bundle, which was
+// exceeding Netlify's per-file function upload limit.
+//
+// Keeping this stub to prevent 404 during transition.
 
-function asString(value: unknown, fallback = ""): string {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
-}
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const email = asString(body?.email);
-    const canonical = body?.canonical;
-
-    if (!email) {
-      return NextResponse.json(
-        { ok: false, error: "Email is required." },
-        { status: 400 },
-      );
-    }
-
-    if (!canonical) {
-      return NextResponse.json(
-        { ok: false, error: "Canonical report payload is required." },
-        { status: 400 },
-      );
-    }
-
-    const entitlements = await getExecutiveReportingEntitlements(email);
-    if (!entitlements.canExportBoardroomPdf && !entitlements.canViewFullReport) {
-      return NextResponse.json(
-        { ok: false, error: "Boardroom PDF entitlement not active." },
-        { status: 403 },
-      );
-    }
-
-    const { renderToBuffer } = await import("@react-pdf/renderer");
-    const { default: ExecutiveBriefingPdfDocument } = await import(
-      "@/components/reporting/pdf/ExecutiveBriefingPdfDocument"
-    );
-
-    const buffer = await renderToBuffer(
-      React.createElement(ExecutiveBriefingPdfDocument, { canonical }) as ReactElement<DocumentProps>
-    );
-
-    return new NextResponse(new Uint8Array(buffer), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": 'attachment; filename="executive-reporting-boardroom-brief.pdf"',
-      },
-    });
-  } catch (error) {
-    console.error("[EXECUTIVE_REPORTING_EXPORT_PDF_ERROR]", error);
-    return NextResponse.json(
-      { ok: false, error: "Failed to export boardroom PDF." },
-      { status: 500 },
-    );
-  }
+  const body = await request.text();
+  // 307 preserves method + body so the forwarded POST still has its JSON.
+  return new NextResponse(body, {
+    status: 307,
+    headers: {
+      Location: "/.netlify/functions/executive-report-pdf",
+      "Content-Type": request.headers.get("Content-Type") || "application/json",
+    },
+  });
 }

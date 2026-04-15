@@ -60,7 +60,12 @@ const DiagnosticsDashboardPage: NextPage = () => {
   }
 
   function downloadReport(recordId: string) {
-    window.open(`/api/diagnostics/report/${encodeURIComponent(recordId)}`, "_blank");
+    // Route moved to a dedicated Netlify function so the @react-pdf
+    // toolchain is packaged outside the main Next server handler.
+    window.open(
+      `/.netlify/functions/diagnostic-report-id?id=${encodeURIComponent(recordId)}`,
+      "_blank",
+    );
   }
 
   return (
