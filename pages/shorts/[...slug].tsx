@@ -695,7 +695,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   const seen = new Set<string>();
 
-  const paths = shorts
+  const paths = (shorts
     .map((doc) => {
       const slug = toShortRouteSlug(getRawDocSlug(doc));
       if (!slug || seen.has(slug)) return null;
@@ -707,7 +707,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
       return { params: { slug: parts } };
     })
-    .filter(Boolean) as Array<{ params: { slug: string[] } }>;
+    .filter(Boolean) as Array<{ params: { slug: string[] } }>)
+    // Cap prebuild to the 10 most recent shorts. Runtime slug resolution
+    // still works for older shorts via `fallback: "blocking"` below.
+    .slice(0, 10);
 
   return {
     paths,

@@ -205,33 +205,35 @@ export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[BUILD_TRACE] START pages/registry/[type]/[slug].tsx getStaticPaths");
   try {
   const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
-  const allPosts = getAllPosts() as any[];
-  const allShorts = getAllShorts() as any[];
-  const dispatches = allPosts
-    .filter((p: any) => !p.draft)
-    .map((p: any) => ({
+  const allPosts = (getAllPosts() as any[]).filter((p) => !p.draft);
+  const allShorts = (getAllShorts() as any[]).filter((s) => !s.draft);
+
+  // Cap prebuild to the 10 most recent items across BOTH types combined.
+  // Runtime slug resolution still works via `fallback: "blocking"`.
+  type Tagged = { type: "dispatches" | "shorts"; doc: any };
+  const combined: Tagged[] = [
+    ...allPosts.map((doc) => ({ type: "dispatches" as const, doc })),
+    ...allShorts.map((doc) => ({ type: "shorts" as const, doc })),
+  ];
+
+  const paths = combined
+    .sort(
+      (a, b) =>
+        new Date(b.doc?.date || 0).getTime() -
+        new Date(a.doc?.date || 0).getTime(),
+    )
+    .slice(0, 10)
+    .map(({ type, doc }) => ({
       params: {
-        type: "dispatches",
+        type,
         slug: normalizeParamSlug(
-          p.slugAsParams || p._raw?.flattenedPath?.split("/").pop()
+          doc.slugAsParams || doc._raw?.flattenedPath?.split("/").pop(),
         ),
       },
     }))
-    .filter((p: any) => p.params.slug);
+    .filter((p) => p.params.slug);
 
-  const shorts = allShorts
-    .filter((s: any) => !s.draft)
-    .map((s: any) => ({
-      params: {
-        type: "shorts",
-        slug: normalizeParamSlug(
-          s.slugAsParams || s._raw?.flattenedPath?.split("/").pop()
-        ),
-      },
-    }))
-    .filter((p: any) => p.params.slug);
-
-  return { paths: [...dispatches, ...shorts], fallback: "blocking" };
+  return { paths, fallback: "blocking" };
 
   } finally {
     console.log("[BUILD_TRACE] END pages/registry/[type]/[slug].tsx getStaticPaths");

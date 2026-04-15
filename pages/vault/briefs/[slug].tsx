@@ -544,13 +544,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
   try {
   const briefs = await getCombinedBriefs();
 
-  const paths = briefs
+  // Cap prebuild to the 10 most recent briefs (by date desc). Runtime slug
+  // resolution still works for older briefs via `fallback: "blocking"`.
+  const recent = [...briefs].sort(
+    (a: any, b: any) =>
+      new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
+  );
+
+  const paths = (recent
     .map((doc: any) => {
       const bare = briefsBareSlug(doc?.slug || doc?._raw?.flattenedPath || "");
       if (!bare) return null;
       return { params: { slug: bare } };
     })
-    .filter(Boolean) as Array<{ params: { slug: string } }>;
+    .filter(Boolean) as Array<{ params: { slug: string } }>).slice(0, 10);
 
   return { paths, fallback: "blocking" };
 
