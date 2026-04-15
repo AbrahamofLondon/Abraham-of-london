@@ -1,4 +1,5 @@
 // app/admin/decision/governance/page.tsx
+export const dynamic = "force-dynamic";
 
 import { GovernanceAlertsPanel } from "@/components/admin/decision/GovernanceAlertsPanel";
 

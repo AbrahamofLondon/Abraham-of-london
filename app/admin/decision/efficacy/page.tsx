@@ -1,4 +1,6 @@
 // app/admin/decision/efficacy/page.tsx
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { DecisionEfficacyPanel } from "@/components/admin/decision/DecisionEfficacyPanel";
 import { RebuildEfficacyButton } from "@/components/admin/decision/RebuildEfficacyButton";

@@ -568,6 +568,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   console.log("[BUILD_TRACE] START pages/vault/briefs/[slug].tsx getStaticProps");
+  const __traceStart = Date.now();
+  console.log("[RENDER_TRACE] START pages/vault/briefs/[slug].tsx getStaticProps", JSON.stringify(params ?? {}));
   try {
   const bare = briefsBareSlug(params?.slug);
   if (!bare) return { notFound: true };
@@ -621,6 +623,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
+    const __rssMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
+    console.log("[RENDER_TRACE] END pages/vault/briefs/[slug].tsx getStaticProps", `ms=${Date.now() - __traceStart}`, `rssMB=${__rssMB}`);
     console.log("[BUILD_TRACE] END pages/vault/briefs/[slug].tsx getStaticProps");
   }
 };

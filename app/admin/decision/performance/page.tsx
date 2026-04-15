@@ -1,4 +1,5 @@
 // app/admin/decision/performance/page.tsx
+export const dynamic = "force-dynamic";
 
 import { DecisionPerformanceTable } from "@/components/admin/decision/DecisionPerformanceTable";
 import { RebuildPerformanceButton } from "@/components/admin/decision/RebuildPerformanceButton";

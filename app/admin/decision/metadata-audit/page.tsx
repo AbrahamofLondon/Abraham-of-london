@@ -1,4 +1,6 @@
 // app/admin/decision/metadata-audit/page.tsx
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 
 async function getAuditData() {
