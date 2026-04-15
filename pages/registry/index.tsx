@@ -33,27 +33,59 @@ function safeSlug(doc: any): string {
 }
 
 export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
-  const { getAllContentlayerDocs } = await import("@/lib/contentlayer-helper");
-  const { sanitizeData } = await import("@/lib/content/server");
+  const {
+    getAllCanons,
+    getAllPosts,
+    getAllPrints,
+    getAllResources,
+    getAllShorts,
+    getAllVault,
+    getAllBriefs,
+    getAllLexicons,
+    getAllStrategies,
+    getAllBooks,
+    getAllDownloads,
+    getAllEvents,
+    sanitizeData,
+  } = await import("@/lib/content/server");
 
-  const raw = getAllContentlayerDocs() || [];
-
-  // Single pass: filter + map to minimal row shape. Avoid holding full doc
-  // objects in memory longer than necessary, and avoid sorting them.
+  // Stream each kind through a map-to-minimal-row step so the worker never
+  // holds the full 316-doc corpus at once. Each typed loader reads only
+  // its own .contentlayer index file thanks to the per-kind cache in
+  // contentlayer-helper.ts.
   const initialDocs: RegistryPageProps["initialDocs"] = [];
-  for (const d of raw as any[]) {
-    if (d?.draft || d?.published === false) continue;
-    initialDocs.push({
-      title: safeString(d?.title, "Untitled"),
-      slug: safeSlug(d),
-      category: safeString(d?.category, "General Lexicon"),
-      date: safeString(d?.date, null as any) || null,
-      dateISO: safeDateIso(d?.date),
-      excerpt: typeof d?.excerpt === "string" ? d.excerpt.substring(0, 200) : null,
-      type: safeString(d?.type || d?.kind, "unknown"),
-      accessLevel: safeString(d?.accessLevel, "public"),
-      coverImage: d?.coverImage ? String(d.coverImage) : null,
-    });
+
+  const streams: Array<() => any[]> = [
+    getAllCanons,
+    getAllPosts,
+    getAllPrints,
+    getAllResources,
+    getAllShorts,
+    getAllVault,
+    getAllBriefs,
+    getAllLexicons,
+    getAllStrategies,
+    getAllBooks,
+    getAllDownloads,
+    getAllEvents,
+  ];
+
+  for (const load of streams) {
+    const batch = (load() || []) as any[];
+    for (const d of batch) {
+      if (d?.draft || d?.published === false) continue;
+      initialDocs.push({
+        title: safeString(d?.title, "Untitled"),
+        slug: safeSlug(d),
+        category: safeString(d?.category, "General Lexicon"),
+        date: safeString(d?.date, null as any) || null,
+        dateISO: safeDateIso(d?.date),
+        excerpt: typeof d?.excerpt === "string" ? d.excerpt.substring(0, 200) : null,
+        type: safeString(d?.type || d?.kind, "unknown"),
+        accessLevel: safeString(d?.accessLevel, "public"),
+        coverImage: d?.coverImage ? String(d.coverImage) : null,
+      });
+    }
   }
 
   // Sort the minimal rows (cheap) instead of the full doc array.

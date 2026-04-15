@@ -122,6 +122,55 @@ export const documentKinds: DocKind[] = [
 ];
 
 let cache: ContentDoc[] | null = null;
+const kindCache = new Map<DocKind, ContentDoc[]>();
+
+// Maps each DocKind to the contentlayer generated index directory name(s).
+// Used by per-kind loaders so workers that only touch one collection do not
+// need to read every collection's _index.json from disk.
+const COLLECTION_DIRS: Record<DocKind, string[]> = {
+  book: ["Book"],
+  brief: ["Brief", "VaultBrief"],
+  canon: ["Canon"],
+  dispatch: ["Dispatch"],
+  download: ["Download"],
+  event: ["Event"],
+  intelligence: ["Intelligence"],
+  lexicon: ["Lexicon"],
+  post: ["Post"],
+  print: ["Print"],
+  resource: ["Resource"],
+  short: ["Short"],
+  strategy: ["Strategy", "Playbook"],
+  vault: ["Vault"],
+  unknown: [],
+};
+
+// Slug-prefix heuristic so getDocBySlug can load only the relevant kind's
+// index instead of the full corpus when the caller hands us a prefixed needle.
+const SLUG_PREFIX_KINDS: Array<[string, DocKind]> = [
+  ["canon/", "canon"],
+  ["canons/", "canon"],
+  ["blog/", "post"],
+  ["posts/", "post"],
+  ["books/", "book"],
+  ["downloads/", "download"],
+  ["events/", "event"],
+  ["prints/", "print"],
+  ["resources/", "resource"],
+  ["shorts/", "short"],
+  ["briefs/", "brief"],
+  ["strategy/", "strategy"],
+  ["strategies/", "strategy"],
+  ["lexicon/", "lexicon"],
+  ["vault/", "vault"],
+];
+
+function inferKindFromNeedle(needle: string): DocKind | null {
+  for (const [prefix, kind] of SLUG_PREFIX_KINDS) {
+    if (needle.startsWith(prefix)) return kind;
+  }
+  return null;
+}
 
 type NodeFs = typeof import("fs");
 type NodePath = typeof import("path");
@@ -285,6 +334,29 @@ function loadAllFromGeneratedIndexes(): ContentDoc[] {
   return docs;
 }
 
+function loadDirsFromGeneratedIndexes(dirNames: string[]): ContentDoc[] {
+  const { fs, path, generatedRoot } = getNodeModules();
+  if (!fs.existsSync(generatedRoot)) return [];
+
+  const docs: ContentDoc[] = [];
+  for (const name of dirNames) {
+    const indexPath = path.join(generatedRoot, name, "_index.json");
+    if (fs.existsSync(indexPath)) {
+      docs.push(...parseIndexJson(indexPath));
+    }
+  }
+
+  const seen = new Set<string>();
+  const out: ContentDoc[] = [];
+  for (const raw of docs) {
+    const key = dedupeKey(raw);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(enrichWithCanonicalSlugs(raw));
+  }
+  return out;
+}
+
 export function enrichWithCanonicalSlugs<T extends ContentDoc>(doc: T): T {
   if (!doc) return doc;
 
@@ -353,7 +425,11 @@ export function getDocBySlug(slug: string): ContentDoc | null {
   const needle = normalizeFlattenedPath(String(slug || ""));
   if (!needle) return null;
 
-  const docs = getAllContentlayerDocs();
+  // Narrow the search pool when the caller provides a prefixed slug.
+  // This keeps workers from loading the full 316-doc corpus just to
+  // resolve e.g. `canon/foo` — we load only the Canon index instead.
+  const inferred = cache ? null : inferKindFromNeedle(needle);
+  const docs = inferred ? byKind(inferred) : getAllContentlayerDocs();
 
   for (const doc of docs) {
     const keys = candidateKeys(doc);
@@ -385,7 +461,20 @@ export function getDocBySlug(slug: string): ContentDoc | null {
 }
 
 function byKind(kind: DocKind): ContentDoc[] {
-  return getAllContentlayerDocs().filter((doc) => getDocKind(doc) === kind);
+  // If the full corpus is already cached (e.g. registry page ran), filter it.
+  if (cache) {
+    return cache.filter((doc) => getDocKind(doc) === kind);
+  }
+
+  const cached = kindCache.get(kind);
+  if (cached) return cached;
+
+  const dirs = COLLECTION_DIRS[kind] || [];
+  const loaded = dirs.length
+    ? loadDirsFromGeneratedIndexes(dirs).filter((doc) => getDocKind(doc) === kind)
+    : [];
+  kindCache.set(kind, loaded);
+  return loaded;
 }
 
 export const getAllBooks = () => byKind("book");
