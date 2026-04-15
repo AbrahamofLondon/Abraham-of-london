@@ -8,6 +8,39 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { withContentlayer } from "next-contentlayer2";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BUILD DIAGNOSTIC — capture silent failures during `next build`.
+//
+// When Next's page data collection phase crashes with no visible stack, the
+// real cause is often an unhandled promise rejection or an uncaught exception
+// thrown asynchronously from a getStaticProps / getStaticPaths call. The
+// build log shows only "Collecting page data... ✗" with no details. These
+// two hooks log full error details so the failure is no longer silent.
+//
+// Scoped to production builds (NODE_ENV=production) so dev server output
+// is not affected.
+// ─────────────────────────────────────────────────────────────────────────────
+if (process.env.NODE_ENV === "production") {
+  process.on("unhandledRejection", (reason, promise) => {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[BUILD DIAGNOSTIC] unhandledRejection:",
+      reason instanceof Error
+        ? { message: reason.message, stack: reason.stack }
+        : reason,
+    );
+  });
+
+  process.on("uncaughtException", (err) => {
+    // eslint-disable-next-line no-console
+    console.error("[BUILD DIAGNOSTIC] uncaughtException:", {
+      message: err?.message,
+      stack: err?.stack,
+      name: err?.name,
+    });
+  });
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
