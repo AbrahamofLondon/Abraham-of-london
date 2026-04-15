@@ -125,6 +125,7 @@ function mapDbAsset(asset: any): VaultAsset {
 async function cacheGet<T>(key: string): Promise<T | null> {
   try {
     const redis = getRedis();
+    if (!redis) return null;
     const val = await redis.get(key);
     if (!val) return null;
     return JSON.parse(val) as T;
@@ -140,6 +141,7 @@ async function cacheGet<T>(key: string): Promise<T | null> {
 async function cacheSet(key: string, value: any, ttlSeconds: number) {
   try {
     const redis = getRedis();
+    if (!redis) return;
     await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);
   } catch (error) {
     await auditVaultFailure("VAULT_CACHE_SET_FAILED", {
@@ -153,6 +155,7 @@ async function cacheSet(key: string, value: any, ttlSeconds: number) {
 async function cacheDel(key: string) {
   try {
     const redis = getRedis();
+    if (!redis) return;
     await redis.del(key);
   } catch (error) {
     await auditVaultFailure("VAULT_CACHE_DELETE_FAILED", {

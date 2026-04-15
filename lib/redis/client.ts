@@ -1,36 +1,54 @@
 // lib/redis/client.ts
 import Redis from "ioredis";
-import fs from 'fs';
-
-console.log('🔍 Redis Debug:');
-console.log('- process.platform:', process.platform);
-console.log('- REDIS_HOST env:', process.env.REDIS_HOST);
-console.log('- isDocker (old logic):', process.env.DOCKER === 'true' || process.env.REDIS_HOST === 'host.docker.internal' || process.platform === 'win32');
-console.log('- isRunningInDocker (new):', fs.existsSync('/.dockerenv') || process.env.RUNNING_IN_DOCKER === 'true');
+import fs from "fs";
 
 let redis: Redis | null = null;
 let isAvailable = false;
 
-// Better detection: check if we're running inside a Docker container
-const isRunningInDocker = fs.existsSync('/.dockerenv') || 
-                         process.env.RUNNING_IN_DOCKER === 'true';
+/**
+ * Detect whether the process is running inside a runtime Docker container.
+ *
+ * IMPORTANT: Netlify build containers ARE Linux containers — /.dockerenv
+ * exists and a naive check returns true. But a Netlify BUILD is not a
+ * runtime Docker host, it is a CI environment with no co-located Redis.
+ * Treating it as Docker makes the initializer try to dial
+ * host.docker.internal and flood the build log with connect errors.
+ *
+ * Gate order:
+ *   1. NETLIFY=true     → treat as non-Docker (CI build)
+ *   2. CI=true with no REDIS_HOST set → non-Docker (any CI, no redis intent)
+ *   3. Otherwise fall back to /.dockerenv presence
+ */
+export function isRunningInDocker(): boolean {
+  if (process.env.NETLIFY === "true") return false;
+  if (process.env.CI === "true" && !process.env.REDIS_HOST) return false;
+
+  try {
+    return (
+      fs.existsSync("/.dockerenv") ||
+      process.env.RUNNING_IN_DOCKER === "true"
+    );
+  } catch {
+    return false;
+  }
+}
 
 // Windows detection - only matters if NOT in Docker
-const isWindows = process.platform === 'win32' && !isRunningInDocker;
+const isWindows = process.platform === "win32" && !isRunningInDocker();
 
 // Redis connection config
 const REDIS_CONFIG = {
-  // On Windows with Docker but app not in Docker, use 127.0.0.1
-  // On Windows without Docker, use localhost
-  // In Docker container, use host.docker.internal or redis service name
-  host: process.env.REDIS_HOST || 
-        (isRunningInDocker ? 'host.docker.internal' : 
-         isWindows ? '127.0.0.1' : 'localhost'),
+  host:
+    process.env.REDIS_HOST ||
+    (isRunningInDocker()
+      ? "host.docker.internal"
+      : isWindows
+      ? "127.0.0.1"
+      : "localhost"),
   port: parseInt(process.env.REDIS_PORT || "6379"),
   password: process.env.REDIS_PASSWORD,
   retryStrategy: (times: number) => {
     const delay = Math.min(100 * Math.pow(2, times), 5000);
-    console.log(`[Redis] Retry attempt ${times}, waiting ${delay}ms`);
     return delay;
   },
   maxRetriesPerRequest: 3,
@@ -41,51 +59,51 @@ const REDIS_CONFIG = {
   family: 4, // Force IPv4
 };
 
-// Initialize Redis
+/**
+ * Initialize Redis.
+ *
+ * Build-time safety: if there is no explicit REDIS_HOST env var set, and
+ * we are not actually running inside a Docker container, return null.
+ * Callers already handle null. This prevents the Netlify build container
+ * from spawning an ioredis client that tries to reach host.docker.internal
+ * and logs a continuous stream of connection errors during `next build`.
+ */
 export function initRedis() {
   if (redis) return redis;
 
+  const hasHost = Boolean(process.env.REDIS_HOST);
+  if (!hasHost && !isRunningInDocker()) {
+    // No Redis available in this environment (e.g. Netlify CI build).
+    // Return null so callers can fall back to their no-redis paths.
+    isAvailable = false;
+    return null;
+  }
+
   try {
-    console.log(`[Redis] Attempting to connect to ${REDIS_CONFIG.host}:${REDIS_CONFIG.port}`);
-    console.log(`[Redis] Runtime: ${isRunningInDocker ? 'Docker' : 'Host'} (${process.platform})`);
-    
     redis = new Redis(REDIS_CONFIG);
 
     redis.on("connect", () => {
-      console.log(`✅ [Redis] Connected successfully to ${REDIS_CONFIG.host}:${REDIS_CONFIG.port}`);
       isAvailable = true;
     });
 
     redis.on("ready", () => {
-      console.log(`✅ [Redis] Ready to accept commands`);
       isAvailable = true;
     });
 
     redis.on("error", (error) => {
-      console.error(`❌ [Redis] Connection error:`, error.message);
+      console.error(`[Redis] Connection error:`, error.message);
       isAvailable = false;
     });
 
     redis.on("close", () => {
-      console.log("🔌 [Redis] Connection closed");
       isAvailable = false;
     });
 
     redis.on("reconnecting", () => {
-      console.log("🔄 [Redis] Reconnecting...");
+      // intentionally silent
     });
-
-    // Test connection immediately
-    redis.ping().then((result) => {
-      console.log(`✅ [Redis] PING successful: ${result}`);
-      isAvailable = true;
-    }).catch((error) => {
-      console.error(`❌ [Redis] Initial PING failed:`, error.message);
-      isAvailable = false;
-    });
-
   } catch (error) {
-    console.error("❌ [Redis] Failed to initialize:", error);
+    console.error("[Redis] Failed to initialize:", error);
     redis = null;
     isAvailable = false;
   }
