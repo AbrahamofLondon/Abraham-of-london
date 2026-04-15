@@ -94,11 +94,36 @@ function toCalloutType(v: CalloutVariant): CalloutTypeActual {
   }
 }
 
+// Valid values for the Callout `type` prop. The canonical union in
+// components/mdx/Callout.tsx is:
+//   "info" | "note" | "success" | "warning" | "danger"
+// Extended authoring variants like "strategy" and "default" are mapped
+// down to one of these five before being passed to type=, while the raw
+// variant is forwarded separately via the `variant` attribute for any
+// downstream CSS hook that reads it.
+const VALID_CALLOUT_TYPES = new Set<CalloutTypeActual>([
+  "info",
+  "note",
+  "success",
+  "warning",
+  "danger",
+]);
+
+// Local cast: components/mdx/Callout.tsx's inline type does not declare
+// `variant`, so we widen to AnyProps inside this adapter only. The
+// underlying component already ignores unknown props.
+const LooseCallout = Callout as unknown as ComponentType<AnyProps>;
+
 const CalloutAdapter: ComponentType<AnyProps> = (props) => {
   const v = normalizeCalloutVariant(
     props?.variant ?? props?.type ?? props?.intent ?? props?.tone ?? props?.kind
   );
-  const t = toCalloutType(v);
+
+  const safeType: CalloutTypeActual = VALID_CALLOUT_TYPES.has(
+    v as CalloutTypeActual,
+  )
+    ? (v as CalloutTypeActual)
+    : "info";
 
   const {
     type: _type,
@@ -113,7 +138,16 @@ const CalloutAdapter: ComponentType<AnyProps> = (props) => {
 
   const nextClassName = cx(className, v === "strategy" && "callout--strategy");
 
-  return <Callout {...rest} className={nextClassName} type={t}>{children ?? null}</Callout>;
+  return (
+    <LooseCallout
+      {...rest}
+      className={nextClassName}
+      type={safeType}
+      variant={v}
+    >
+      {children ?? null}
+    </LooseCallout>
+  );
 };
 
 const QuoteAdapter: ComponentType<AnyProps> = (props) => {
