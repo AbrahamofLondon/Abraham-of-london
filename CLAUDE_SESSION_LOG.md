@@ -1,10 +1,10 @@
 # Abraham of London — Platform Handover Document
-**Compiled**: 2026-04-11 (covers Sessions 1–5)
-**Project root**: `C:\Abraham-of-london`
+**Compiled**: 2026-04-15 (covers Sessions 1–6)
+**Project root**: `C:\aol-check-visual`
 **Framework**: Next.js Pages Router (hybrid — App Router for specific API routes only)
 **Database**: Prisma + PostgreSQL (Neon)
 **Deployment**: Netlify (auto-deploy on push to main)
-**Last commit**: `5bd516145` — Auth hardening pass
+**Last commit**: `b84c146d3` — Prerender queue cut (top 10 on heaviest dynamic routes)
 
 ---
 
@@ -16,7 +16,8 @@
 | 2 | Homepage rebuild, assessment suite upgrades, design system standardisation, GMI intelligence surfaces, playbook system, editorial library, engagement lane pages |
 | 3 | Intelligence surfaces, playbooks, editorials, strategy room, intervention console, consulting index, executive reporting landing + run, assessment components |
 | 4 | Full diagnostic ladder rebuild (constitutional/team/enterprise), design system enforcement, 8-path pattern engines, fragility integration, TS audit 1346→1187, enterprise-repository prisma fix |
-| 5 | **Current** — Diagnostics audit (46+ TS fixes), 7-phase product upgrade (PurposeAlignment, Strategy Room, Team/Enterprise/Executive Reporting, diagnostics completeness, cross-system integration), component deduplication (13 re-exports), bg-black→bg-[#060609] (28 edits/22 files), design tokens file, type-safe icon registry, GitHub Actions fix (18 workflows audited, 10 fixed, 2 disabled), env var audit (115 missing vars added), Netlify deploy hardening (force-dynamic on 56 routes, lazy PrismaClient, directive ordering), auth hardening (canonical guard primitives, route contract fixes, input hardening) |
+| 5 | Diagnostics audit (46+ TS fixes), 7-phase product upgrade (PurposeAlignment, Strategy Room, Team/Enterprise/Executive Reporting, diagnostics completeness, cross-system integration), component deduplication (13 re-exports), bg-black→bg-[#060609] (28 edits/22 files), design tokens file, type-safe icon registry, GitHub Actions fix (18 workflows audited, 10 fixed, 2 disabled), env var audit (115 missing vars added), Netlify deploy hardening (force-dynamic on 56 routes, lazy PrismaClient, directive ordering), auth hardening (canonical guard primitives, route contract fixes, input hardening) |
+| 6 | **Current** — Netlify build recovery: chased exit 137 OOM through page-data collection. Cluster A per-kind getStaticPaths narrowing; build wrapper instrumented to emit `__NEXT_BUILD_EXIT_CODE__`; contentlayer-helper per-kind lazy loader + `COLLECTION_DIRS` map (fixed 5×-per-worker full-corpus load); 41-file `[BUILD_TRACE]` instrumentation codemod; barrel-import bypass fix (7 pages routed through `@/lib/content/server` instead of `contentlayer/generated` or `@/lib/contentlayer`); local prerender inventory script (`scripts/audit/prerender-counts.ts`); top-three prerender queue cut (registry/[type]/[slug], shorts/[...slug], vault/briefs/[slug] → 10 recent each, −241 paths) |
 
 ---
 
@@ -251,3 +252,91 @@ The 12-field executive report schema in Section 11 of the previous handover must
 | sessionStorage chain | Each layer reads prior results on mount |
 | `force-dynamic` | Required on all App Router files that import prisma |
 | Auth guards | Every protected route uses `requireUser()`/`requireAdmin()` from `lib/auth/server.ts` |
+
+---
+
+## 11. Session 6 — Netlify Build Recovery (2026-04-13 → 2026-04-15)
+
+### Starting state
+Compile succeeded, contentlayer generated 316 docs, then `next build` died silently inside `Collecting page data using 5 workers ...`. The wrapper only printed `===END NEXT BUILD LOG===` — true exit code was hidden.
+
+### Resolved in order
+
+**1. Build wrapper telemetry** (`a6ed26bf4`)
+`package.json` → `build:fast` now pipes through `tee /tmp/nextbuild.log` then appends `__NEXT_BUILD_EXIT_CODE__=$status` from `${PIPESTATUS[0]}` and exits with that status. First real signal: exit **137** (SIGKILL/OOM) during page-data collection.
+
+**2. Cluster A — per-kind getStaticPaths narrowing**
+Six route files switched from `getAllContentlayerDocs()` full-corpus scans to typed loaders (`getAllCanons`, `getAllPrints`, `getAllVault`, `getAllBriefs`, `getAllResources`). Helped but did not clear exit 137.
+
+**3. Cluster E+C/B — catch-all narrowing** (`63bffff5b`)
+- `pages/[slug].tsx` + `pages/content/[...slug].tsx` → `paths: []` + `fallback: "blocking"` (runtime resolve).
+- `pages/registry/index.tsx` → single-pass filter+map to minimal rows before sort.
+- `pages/shorts/index.tsx` → dropped `getAllCombinedDocs()` fallback.
+- `pages/content/index.tsx` → replaced `getPublishedDocuments()` with 6 typed `getPublishedX()` loaders.
+
+**4. Root cause: full-corpus module-cache** (`2349a65d7`)
+**Every typed loader went through `byKind()` → `getAllContentlayerDocs()` which cached the entire 316-doc corpus at module scope.** With 5 parallel next-build workers, that meant 5× full corpus in worker RAM regardless of which page each worker built. Fixed in `lib/contentlayer-helper.ts`:
+- Added per-kind cache + `COLLECTION_DIRS` map (kind → `.contentlayer/generated/<Type>/` dirs).
+- New `loadDirsFromGeneratedIndexes(dirNames)` reads only requested index files.
+- `byKind(kind)` now loads just that kind's index unless the full cache already exists.
+- `getDocBySlug(slug)` infers kind from needle prefix (`canon/`, `shorts/`, `vault/`, …) and narrows the search pool.
+- `pages/registry/index.tsx` now streams each kind sequentially through map-to-minimal-row so even the one page that needs every collection never holds the full corpus at once.
+
+**5. Build-trace instrumentation** (`12aa4d96e`)
+One-shot codemod (`scripts/inject-build-trace.mjs`, deleted after use) wrapped `getStaticProps`/`getStaticPaths` in 41 pages with try/finally-guarded `[BUILD_TRACE] START/END <file> <fn>` markers. Next build showed: all `getStaticPaths` complete, build dies immediately entering `Generating static pages using 5 workers (0/553) ...`.
+
+**6. Barrel-import bypass fix** (`a9df820cd`)
+Per-kind caching was being defeated by direct imports from `contentlayer/generated` / `@/lib/contentlayer`. Both entry points load the **full 16-collection JSON barrel at module init** via top-level `import` statements in `.contentlayer/generated/index.mjs`. Nine pages were bypassing the cache; five were build-time relevant:
+- `lib/contentlayer-helper.ts` — added `playbook` DocKind, dedicated `Playbook/_index.json` loader, and `getAllPlaybooks()`.
+- `lib/content/server.ts` — re-exports `getAllPlaybooks`.
+- `pages/playbooks/{[slug],index}.tsx` — `await import("contentlayer/generated").allPlaybooks` → `getAllPlaybooks()`.
+- `pages/shorts/[...slug].tsx` — `loadAllShorts()` stopped pulling `allShorts + allDocuments` from the barrel; uses `getAllShorts()`.
+- `pages/registry/[type]/[slug].tsx` — top-level `import { allPosts, allShorts } from "@/lib/contentlayer"` → lazy `getAllPosts()` + `getAllShorts()` inside `getStaticPaths`.
+- `pages/index.tsx` — removed `contentlayer/generated` fallback path in homepage stats loader.
+- `pages/vault/index.tsx` — top-level `import { allBriefs, allDownloads } from "@/lib/contentlayer"` → lazy `getAllBriefs()` + `getAllDownloads()` inside `getStaticProps`.
+
+Left untouched (not build-time): `pages/inner-circle/**` (uses `getServerSideProps`), `pages/api/**` (runtime), `import type { Playbook }` (type-only, erased at compile).
+
+**7. Local prerender inventory** (`b84c146d3`)
+`scripts/audit/prerender-counts.ts` — standalone `tsx` script that imports the same loaders used by every `getStaticPaths`, applies route-specific filters, and prints exact path counts + top 10 + reconciliation vs the Netlify `(0/N)` queue number. Runs via `npx tsx scripts/audit/prerender-counts.ts`. No `next build` required.
+
+Inventory result (pre-cut):
+- dynamic-route paths: **429**
+- static singleton `.tsx`: **85**
+- combined: **514**
+- Netlify last seen: **553** (delta +39 from app-router / locale / 404 / nested variants)
+- Top 4 accounted for 62 % of queue: `registry/[type]/[slug]` (107), `shorts/[...slug]` (82), `vault/briefs/[slug]` (82), `library/[slug]` (70).
+
+**8. Top-three prerender queue cut** (`b84c146d3`)
+Capped the three content-driven top contributors to **10 most recent entries each**, sorted by date desc. Params shape preserved exactly, `fallback: "blocking"` preserved, no render-logic changes, `revalidate: 1800` already present on all three.
+- `pages/registry/[type]/[slug].tsx`: 107 → 10 (combined posts+shorts)
+- `pages/shorts/[...slug].tsx`: 82 → 10 (post-dedupe slice)
+- `pages/vault/briefs/[slug].tsx`: 82 → 10 (sort before map)
+
+Post-cut projection: queue **553 → ~312**, saving **-241 paths**.
+
+`pages/library/[slug].tsx` (70) deliberately left untouched — non-contentlayer PDF registry, higher product risk, held as second-tier.
+
+### Key architectural additions
+- `lib/contentlayer-helper.ts` now has a DocKind-indexed lazy cache (`kindCache`) with a `COLLECTION_DIRS` map. Never call `getAllContentlayerDocs()` in new code unless full-corpus is genuinely required.
+- `.contentlayer/generated/` barrel (`index.mjs`) and the `@/lib/contentlayer` wrapper both eagerly load every collection at module init. **Never import from them in build-time pages.** Always use `@/lib/content/server` typed loaders.
+- `scripts/audit/prerender-counts.ts` is a permanent diagnostic — run it before making any further prerender-surface decisions.
+- `build:fast` now appends `__NEXT_BUILD_EXIT_CODE__=$status` to the log. Grep for that line in any future Netlify failure to confirm OOM vs code error.
+
+### Commits (Session 6)
+| hash | scope |
+|---|---|
+| `a6ed26bf4` | Build wrapper — append next build exit code |
+| `63bffff5b` | Narrow remaining full-corpus static generators |
+| `2349a65d7` | Per-kind lazy loading — eliminate full-corpus worker bloat |
+| `12aa4d96e` | Instrument static generators with build-trace markers |
+| `a9df820cd` | Replace full contentlayer barrel imports with narrowed build loaders |
+| `b84c146d3` | Cap top prerender-heavy dynamic routes to 10 recent paths |
+
+### Outstanding
+- Waiting on next Netlify build result post-`b84c146d3`. Decision rule:
+  - **Build completes past static generation** → move to deploy-stage / bundle-stage diagnostics.
+  - **Still exits 137 at `Generating static pages using 5 workers`** → queue size was not the sole pressure point. Next move is render-phase instrumentation (trace `getStaticProps` enter/exit per page) or architectural shift (convert heavy pages to ISR-only / `getServerSideProps`).
+  - **Different exit code** → follow that specific error.
+- `[BUILD_TRACE]` instrumentation in 41 pages is **still in place**. Remove only after page-data collection is proven to pass.
+- Second-tier cut candidate: `pages/library/[slug].tsx` (70 PDFs) if first cut measurement is insufficient.
