@@ -188,6 +188,8 @@ const StrategySlugPage: NextPage<Props> = ({ item }) => {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/strategy/[...slug].tsx getStaticPaths");
+  try {
   try {
     const { getPublishedStrategies } = await import("@/lib/server/strategies-data");
     const list = await getPublishedStrategies();
@@ -201,9 +203,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
   } catch {
     return { paths: [], fallback: "blocking" };
   }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/strategy/[...slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[BUILD_TRACE] START pages/strategy/[...slug].tsx getStaticProps");
+  try {
   const slug = cleanPathish(joinParamSlug(params?.slug as any));
   if (!slug) return { notFound: true, revalidate: 300 };
 
@@ -220,6 +228,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: jsonSafe({ item: { ...doc, slug, bodyCode } }),
     revalidate: 1800,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/strategy/[...slug].tsx getStaticProps");
+  }
 };
 
 export default StrategySlugPage;

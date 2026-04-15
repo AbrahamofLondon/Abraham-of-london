@@ -203,6 +203,8 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/registry/[type]/[slug].tsx getStaticPaths");
+  try {
   const dispatches = allPosts
     .filter((p: any) => !p.draft)
     .map((p: any) => ({
@@ -228,11 +230,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter((p: any) => p.params.slug);
 
   return { paths: [...dispatches, ...shorts], fallback: "blocking" };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/registry/[type]/[slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   params,
 }) => {
+  console.log("[BUILD_TRACE] START pages/registry/[type]/[slug].tsx getStaticProps");
+  try {
   const typeRaw = String(params?.type ?? "");
   const slugRaw = normalizeParamSlug(params?.slug);
 
@@ -268,6 +276,10 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
     },
     revalidate: 1800,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/registry/[type]/[slug].tsx getStaticProps");
+  }
 };
 
 export default UniversalDispatchPage;

@@ -35,6 +35,8 @@ interface Props {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/events/[slug].tsx getStaticPaths");
+  try {
   const all = (typeof getServerAllEvents === "function" ? getServerAllEvents() : []) as any[];
   const paths = all
     .filter((e) => !e.draftSafe)
@@ -43,9 +45,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
     }));
 
   return { paths, fallback: "blocking" };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/events/[slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[BUILD_TRACE] START pages/events/[slug].tsx getStaticProps");
+  try {
   try {
     const s = normalizeSlug(String(params?.slug || ""));
     const eventData = getServerEventBySlug(s);
@@ -74,6 +82,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     };
   } catch {
     return { notFound: true };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/events/[slug].tsx getStaticProps");
   }
 };
 

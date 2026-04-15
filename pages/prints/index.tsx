@@ -88,6 +88,8 @@ function getDownloadUrl(doc: any): string | null {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[BUILD_TRACE] START pages/prints/index.tsx getStaticProps");
+  try {
   try {
     const { getContentlayerData, getPublishedDocuments } = await import(
       "@/lib/content/server"
@@ -180,6 +182,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       },
       revalidate: 1800,
     };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/prints/index.tsx getStaticProps");
   }
 };
 

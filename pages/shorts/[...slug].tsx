@@ -700,6 +700,8 @@ const ShortsSlugPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/shorts/[...slug].tsx getStaticPaths");
+  try {
   const allShorts = await loadAllShorts();
   const shorts = sortShorts(allShorts);
 
@@ -723,9 +725,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths,
     fallback: "blocking",
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/shorts/[...slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[BUILD_TRACE] START pages/shorts/[...slug].tsx getStaticProps");
+  try {
   const rawParam = joinParamSlug(params?.slug as string | string[] | undefined);
   const targetSlug = toShortRouteSlug(rawParam);
 
@@ -786,6 +794,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     },
     revalidate: 1800,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/shorts/[...slug].tsx getStaticProps");
+  }
 };
 
 export default ShortsSlugPage;

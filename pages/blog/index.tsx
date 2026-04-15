@@ -800,6 +800,8 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
 };
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/blog/index.tsx getStaticProps");
+  try {
   try {
     // ✅ FS SSOT: content/blog
     const metas = await getMdxCollectionMeta("blog");
@@ -848,6 +850,10 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     };
   } catch {
     return { props: { items: [], totalPosts: 0 }, revalidate: 60 };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/blog/index.tsx getStaticProps");
   }
 };
 

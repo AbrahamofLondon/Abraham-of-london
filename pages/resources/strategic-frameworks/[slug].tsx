@@ -71,6 +71,8 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/resources/strategic-frameworks/[slug].tsx getStaticPaths");
+  try {
   const slugs = getAllFrameworkSlugs() || [];
 
   return {
@@ -80,9 +82,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .map((slug) => ({ params: { slug } })),
     fallback: "blocking",
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/resources/strategic-frameworks/[slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[BUILD_TRACE] START pages/resources/strategic-frameworks/[slug].tsx getStaticProps");
+  try {
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
 
@@ -99,6 +107,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     },
     revalidate: 3600,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/resources/strategic-frameworks/[slug].tsx getStaticProps");
+  }
 };
 
 export default Page;

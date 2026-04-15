@@ -278,6 +278,8 @@ function CanonRow({ item, primary }: { item: CanonItem; primary: boolean }) {
 }
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/canon/index.tsx getStaticProps");
+  try {
   try {
     const { getAllCanons, sanitizeData } = await import("@/lib/content/server");
     const rawDocs = getAllCanons() || [];
@@ -387,6 +389,10 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       },
       revalidate: 60,
     };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/canon/index.tsx getStaticProps");
   }
 };
 

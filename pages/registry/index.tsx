@@ -33,6 +33,8 @@ function safeSlug(doc: any): string {
 }
 
 export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/registry/index.tsx getStaticProps");
+  try {
   const {
     getAllCanons,
     getAllPosts,
@@ -106,6 +108,10 @@ export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
     }),
     revalidate: 3600,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/registry/index.tsx getStaticProps");
+  }
 };
 
 const RegistryPage: NextPage<RegistryPageProps> = ({ initialDocs, categories }) => {

@@ -518,6 +518,8 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 };
 
 export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/books/index.tsx getStaticProps");
+  try {
   try {
     const { getPublishedBooks, resolveDocCoverImage } = await import(
       "@/lib/content/server"
@@ -566,6 +568,10 @@ export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
     };
   } catch {
     return { props: { items: [], totalBooks: 0 }, revalidate: 60 };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/books/index.tsx getStaticProps");
   }
 };
 

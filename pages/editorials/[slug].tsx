@@ -759,14 +759,22 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/editorials/[slug].tsx getStaticPaths");
+  try {
   const items = getPublicationCatalogue();
   return {
     paths: items.map(item => ({ params: { slug: item.slug } })),
     fallback: false,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/editorials/[slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ctx => {
+  console.log("[BUILD_TRACE] START pages/editorials/[slug].tsx getStaticProps");
+  try {
   const slug = typeof ctx.params?.slug === "string" ? ctx.params.slug : "";
   const item = getPublicationBySlug(slug);
   if (!item) return { notFound: true };
@@ -790,6 +798,10 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
     },
     revalidate: 1800,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/editorials/[slug].tsx getStaticProps");
+  }
 };
 
 export default EditorialPage;

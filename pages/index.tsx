@@ -2358,6 +2358,8 @@ function parseFrontmatter(content: string): Record<string, any> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/index.tsx getStaticProps");
+  try {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
   let featuredPlaybooks: PlaybookItem[] = [];
@@ -2581,6 +2583,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     }),
     revalidate: 3600,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/index.tsx getStaticProps");
+  }
 };
 
 export default HomePage;

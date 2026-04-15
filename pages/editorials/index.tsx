@@ -271,9 +271,15 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[BUILD_TRACE] START pages/editorials/index.tsx getStaticProps");
+  try {
   const items = getPublicationCatalogue();
   const flagship = items.find((item) => item.slug === "ultimate-purpose-of-man") || items[0] || null;
   return { props: { items, flagship }, revalidate: 1800 };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/editorials/index.tsx getStaticProps");
+  }
 };
 
 export default EditorialLibrary;

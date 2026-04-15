@@ -540,6 +540,8 @@ const BriefPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[BUILD_TRACE] START pages/vault/briefs/[slug].tsx getStaticPaths");
+  try {
   const briefs = await getCombinedBriefs();
 
   const paths = briefs
@@ -551,9 +553,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter(Boolean) as Array<{ params: { slug: string } }>;
 
   return { paths, fallback: "blocking" };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/vault/briefs/[slug].tsx getStaticPaths");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[BUILD_TRACE] START pages/vault/briefs/[slug].tsx getStaticProps");
+  try {
   const bare = briefsBareSlug(params?.slug);
   if (!bare) return { notFound: true };
 
@@ -604,6 +612,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     }),
     revalidate: 1800,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/vault/briefs/[slug].tsx getStaticProps");
+  }
 };
 
 export default BriefPage;

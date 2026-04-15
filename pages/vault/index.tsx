@@ -91,6 +91,8 @@ export const getStaticProps: GetStaticProps<{
   categories: string[];
   totalAssets: number;
 }> = async () => {
+  console.log("[BUILD_TRACE] START pages/vault/index.tsx getStaticProps");
+  try {
   try {
     const briefs = (allBriefs || [])
       .filter((b: any) => !b?.draft)
@@ -184,6 +186,10 @@ export const getStaticProps: GetStaticProps<{
       props: { items: [], categories: [], totalAssets: 0 },
       revalidate: 3600,
     };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/vault/index.tsx getStaticProps");
   }
 };
 

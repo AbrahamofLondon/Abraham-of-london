@@ -39,6 +39,8 @@ type Item = {
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[BUILD_TRACE] START pages/content/index.tsx getStaticProps");
+  try {
   try {
     const {
       getPublishedCanons,
@@ -112,6 +114,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   } catch (error) {
     console.error("[Content Index] getStaticProps error:", error);
     return { props: { items: [] }, revalidate: 1800 };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/content/index.tsx getStaticProps");
   }
 };
 

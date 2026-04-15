@@ -131,6 +131,8 @@ function safeHref(path: string): string {
 }
 
 export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/canon-campaign/index.tsx getStaticProps");
+  try {
   try {
     const rawDocs = getAllCanons() || [];
 
@@ -252,6 +254,10 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
       },
       revalidate: 60,
     };
+  }
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/canon-campaign/index.tsx getStaticProps");
   }
 };
 

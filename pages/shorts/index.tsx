@@ -1165,6 +1165,8 @@ export default ShortsIndexPage;
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
+  console.log("[BUILD_TRACE] START pages/shorts/index.tsx getStaticProps");
+  try {
   const { getAllShorts, sanitizeData } = await import(
     "@/lib/content/server"
   );
@@ -1188,4 +1190,8 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     },
     revalidate: 3600,
   };
+
+  } finally {
+    console.log("[BUILD_TRACE] END pages/shorts/index.tsx getStaticProps");
+  }
 };
