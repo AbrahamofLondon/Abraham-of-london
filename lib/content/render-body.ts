@@ -1,4 +1,3 @@
-console.log("[MODULE_INIT] lib/content/render-body");
 
 /* lib/content/render-body.ts */
 

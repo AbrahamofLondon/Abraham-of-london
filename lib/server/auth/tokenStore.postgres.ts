@@ -5,7 +5,6 @@ import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 import { type TierDirective, getDirectiveByTier } from "@/lib/resources/tier-metadata";
 
-console.log("[MODULE_INIT] lib/server/auth/tokenStore.postgres");
 
 /** Internal Result Types */
 type Ok<T> = { ok: true } & T;
