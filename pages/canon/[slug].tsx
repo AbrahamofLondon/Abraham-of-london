@@ -133,15 +133,15 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { getAllCombinedDocs, isDraftContent } = await import(
+  // Narrow: load only canon docs (~15) instead of the full 316-doc corpus.
+  const { getAllCanons, isDraftContent } = await import(
     "@/lib/content/server"
   );
-  const docs = getAllCombinedDocs() || [];
+  const docs = getAllCanons() || [];
   const seen = new Set<string>();
 
   const paths = docs
     .filter((d: any) => !isDraftContent(d))
-    .filter(isCanonDoc)
     .map((d: any) => {
       const raw =
         d?.urlSlug ||

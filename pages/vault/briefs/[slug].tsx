@@ -146,10 +146,14 @@ function isBriefDoc(doc: any): boolean {
 }
 
 async function getCombinedBriefs(): Promise<any[]> {
-  const { getAllCombinedDocs } = await import("@/lib/content/server");
+  // Narrow: load only Brief docs (~83) instead of the full 316-doc corpus.
+  // The subsequent isBriefDoc filter is kept so only vault/briefs/* entries
+  // survive — the generic Brief collection contains both root briefs and
+  // vault briefs, and this page only wants the latter.
+  const { getAllBriefs } = await import("@/lib/content/server");
   const seen = new Set<string>();
 
-  return (getAllCombinedDocs() || [])
+  return (getAllBriefs() || [])
     .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
     .filter(isBriefDoc)
     .filter((doc: any) => {

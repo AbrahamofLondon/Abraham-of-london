@@ -83,10 +83,13 @@ const Page: NextPage<Props> = ({ resource, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { getAllCombinedDocs, isDraftContent } = await import(
+  // Narrow: load only resource docs (~20) instead of the full 316-doc corpus.
+  // isResourceDoc filter retained because the generic Resource helper may
+  // include lexicon-shaped entries the UI filter still wants to exclude.
+  const { getAllResources, isDraftContent } = await import(
     "@/lib/content/server"
   );
-  const docs = getAllCombinedDocs() || [];
+  const docs = getAllResources() || [];
 
   const paths = (
     docs

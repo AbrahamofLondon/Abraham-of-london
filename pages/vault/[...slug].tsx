@@ -73,15 +73,17 @@ const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { getAllCombinedDocs, isDraftContent } = await import(
+  // Narrow: load only vault docs (~1) instead of the full 316-doc corpus.
+  // VaultBriefs are a separate collection handled by pages/vault/briefs/*,
+  // so excluding `briefs` below in the segment filter is still required.
+  const { getAllVault, isDraftContent } = await import(
     "@/lib/content/server"
   );
-  const docs = getAllCombinedDocs() || [];
+  const docs = getAllVault() || [];
 
   const paths = (
     docs
       .filter((d: any) => !isDraftContent(d))
-      .filter(isVaultDoc)
       .map((d: any) => {
         const raw = d?.slug || d?._raw?.flattenedPath || "";
         const slug = cleanVaultSlug(raw);

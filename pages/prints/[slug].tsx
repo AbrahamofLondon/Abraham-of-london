@@ -48,14 +48,14 @@ const Page: NextPage<Props> = ({ print, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { getAllContentlayerDocs, isDraftContent } = await import(
+  // Narrow: load only print docs (~6) instead of the full 316-doc corpus.
+  const { getAllPrints, isDraftContent } = await import(
     "@/lib/content/server"
   );
-  const docs = getAllContentlayerDocs() || [];
+  const docs = getAllPrints() || [];
 
   const paths = docs
     .filter((d: any) => !isDraftContent(d))
-    .filter(isPrintDoc)
     .map((d: any) => {
       const slug = normalizeSlug(
         String(d?.slug || d?._raw?.flattenedPath || "").replace(/^prints\//i, ""),

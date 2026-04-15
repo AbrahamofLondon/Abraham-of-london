@@ -6,13 +6,7 @@ import Layout from "@/components/Layout";
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 
-import {
-  getAllCombinedDocs,
-  getDocBySlug,
-  normalizeSlug,
-  isDraftContent,
-  sanitizeData,
-} from "@/lib/content/server";
+import { normalizeSlug } from "@/lib/content/shared";
 
 import tiers, { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -72,7 +66,12 @@ const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const docs = getAllCombinedDocs() || [];
+  // Narrow: load only resource docs (~20) instead of the full 316-doc corpus,
+  // then filter to the surrender-framework subset.
+  const { getAllResources, isDraftContent } = await import(
+    "@/lib/content/server"
+  );
+  const docs = getAllResources() || [];
 
   const paths = docs
     .filter((d: any) => !isDraftContent(d))
@@ -94,6 +93,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
+
+  const { getDocBySlug, isDraftContent, sanitizeData } = await import(
+    "@/lib/content/server"
+  );
 
   const doc =
     getDocBySlug(`resources/surrender-framework/${slug}`) ||
