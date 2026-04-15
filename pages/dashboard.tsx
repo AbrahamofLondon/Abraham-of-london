@@ -25,11 +25,8 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { OGR_CLIENT_CONFIG } from "@/lib/ogr/client-config";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext } from "@/lib/server/auth/tokenStore.postgres";
 
 /* -------------------------------------------------------------------------- */
 /* DYNAMIC PANELS                                                             */
@@ -777,6 +774,19 @@ export default function UnifiedDashboard({
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
   context
 ) => {
+  // Server-only modules loaded dynamically so they never land in the
+  // page's top-level static import graph (Wave 4: server boundary
+  // enforcement).
+  const [
+    { prisma },
+    { readAccessCookie },
+    { getSessionContext },
+  ] = await Promise.all([
+    import("@/lib/prisma"),
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   // NextAuth session enforcement is handled by middleware.ts (Tier 1).
   // By the time this handler runs, the session is guaranteed to exist.
   const session = await getServerSession(context.req, context.res, authOptions);

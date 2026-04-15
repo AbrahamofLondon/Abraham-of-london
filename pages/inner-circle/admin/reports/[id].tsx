@@ -4,8 +4,6 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/Layout";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 import ReportBuilderForm from "@/components/admin/reports/ReportBuilderForm";
 
 type Props = {
@@ -76,6 +74,14 @@ const Page: NextPage<Props> = ({ item }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const [
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   const sessionId = readAccessCookie(context.req as any);
   if (!sessionId) {
     return {

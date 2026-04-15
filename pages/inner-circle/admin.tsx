@@ -11,8 +11,6 @@ import { ShieldCheck, Zap, Globe, Lock, ArrowRight, CheckCircle2 } from "lucide-
 import Layout from "@/components/Layout";
 import { useAccess } from "@/hooks/useAccess";
 import { useClientRouter, useClientQuery, useClientIsReady } from "@/lib/router/useClientRouter";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 
 const tiers = [
   {
@@ -229,6 +227,14 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
   SERVER SIDE GATEWAY
 ----------------------------------------------------------------------------- */
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const [
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   try {
     const sessionId = readAccessCookie(context.req as any);
 

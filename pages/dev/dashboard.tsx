@@ -28,8 +28,6 @@ import {
 import Layout from "@/components/Layout";
 import dynamic from "next/dynamic";
 
-// Import prisma for data fetching
-import { prisma } from "@/lib/prisma";
 
 // Dynamically import widgets
 const PdfAnalyticsWidget = dynamic(
@@ -535,10 +533,12 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
   }
 
   try {
+    const { prisma } = await import("@/lib/prisma");
+
     // Fetch briefs from database
     let briefs: Brief[] = [];
     let totalCount = 0;
-    
+
     try {
       const allBriefs = await prisma.contentMetadata.findMany({
         take: 50,

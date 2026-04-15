@@ -8,11 +8,6 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import {
-  getSessionContext,
-  tierAtLeast,
-} from "@/lib/server/auth/tokenStore.postgres";
 import { getDiagnosticRecordByRef } from "@/lib/server/diagnostics/store";
 import { canUnlockReport } from "@/lib/server/diagnostics/report-engine";
 import { resolveDiagnosticReport } from "@/lib/server/diagnostics/report-resolver";
@@ -192,6 +187,14 @@ const ReportDetailPage: NextPage<Props> = ({
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const diagnosticRef = safeString(context.params?.ref);
+
+  const [
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
 
   try {
     const sessionId = readAccessCookie(context.req as any);

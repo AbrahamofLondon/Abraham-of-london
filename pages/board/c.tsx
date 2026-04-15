@@ -5,7 +5,6 @@ import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/Layout";
 import { validateAdminAccess } from "@/lib/server/validation";
 import { logAuditEvent, AUDIT_ACTIONS, AUDIT_CATEGORIES } from "@/lib/server/audit";
-import prisma from "@/lib/prisma";
 import {
   Activity,
   Shield,
@@ -84,6 +83,8 @@ interface Props {
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const { req } = context;
   const startTime = Date.now();
+
+  const { default: prisma } = await import("@/lib/prisma");
 
   const getClientIp = () => {
     const forwarded = req.headers["x-forwarded-for"];

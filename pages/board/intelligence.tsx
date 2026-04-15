@@ -25,7 +25,6 @@ import {
   Download,
   Eye,
 } from "lucide-react";
-import prisma from "@/lib/prisma";
 
 type EngagementRow = {
   shortSlug: string;
@@ -67,6 +66,7 @@ interface Props {
 
 async function getAnalyticsData(): Promise<StrategicHealthReport | null> {
   try {
+    const { default: prisma } = await import("@/lib/prisma");
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 

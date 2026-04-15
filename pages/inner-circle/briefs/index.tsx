@@ -8,8 +8,6 @@ import { Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 
 type BriefListItem = {
   slug: string;
@@ -89,6 +87,14 @@ const BriefsIndexPage: NextPage<Props> = ({ briefs, memberName, tier }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const [
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   const sessionId = readAccessCookie(context.req as any);
 
   if (!sessionId) {

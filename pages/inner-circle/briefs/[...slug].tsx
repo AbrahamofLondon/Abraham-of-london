@@ -9,8 +9,6 @@ import { ShieldCheck, Lock, ChevronLeft } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
 
 type Props = {
   brief: any;
@@ -112,6 +110,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   const slug = normalizePathish(rawSlug);
   if (!slug) return { notFound: true };
+
+  const [
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
 
   const sessionId = readAccessCookie(context.req as any);
   if (!sessionId) {

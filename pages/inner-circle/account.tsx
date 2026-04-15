@@ -7,7 +7,6 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 import { getUnifiedSession } from "@/lib/auth/session-helpers";
-import { prisma } from "@/lib/prisma";
 
 interface ActiveKeyInfo {
   keySuffix: string | null;
@@ -212,6 +211,7 @@ export const getServerSideProps: GetServerSideProps<AccountProps> = async (
 
   if (email) {
     try {
+      const { prisma } = await import("@/lib/prisma");
       const member = await prisma.innerCircleMember.findUnique({
         where: { email },
         select: {

@@ -13,11 +13,6 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import {
-  getSessionContext,
-  tierAtLeast,
-} from "@/lib/server/auth/tokenStore.postgres";
 import { readArtifactRegistry } from "@/lib/server/diagnostics/artifact-registry";
 
 type ArtifactRow = {
@@ -253,6 +248,14 @@ const AdminArtifactsPage: NextPage<Props> = ({ items }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const [
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   try {
     const sessionId = readAccessCookie(context.req as any);
 

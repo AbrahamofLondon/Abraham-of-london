@@ -7,13 +7,6 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
 
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import {
-  getSessionContext,
-  tierAtLeast,
-} from "@/lib/server/auth/tokenStore.postgres";
-import { prisma } from "@/lib/prisma";
-
 type ReportRow = {
   diagnosticRef: string;
   title: string;
@@ -80,6 +73,16 @@ const ReportsIndexPage: NextPage<Props> = ({ memberName, tier, reports }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const [
+    { prisma },
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/prisma"),
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   try {
     const sessionId = readAccessCookie(context.req as any) || "";
     const ctx = await getSessionContext(sessionId);

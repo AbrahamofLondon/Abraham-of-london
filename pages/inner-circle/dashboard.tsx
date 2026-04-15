@@ -6,10 +6,6 @@ import Link from "next/link";
 import { Lock, ShieldCheck } from "lucide-react";
 
 
-import { readAccessCookie } from "@/lib/server/auth/cookies";
-import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
-import { prisma } from "@/lib/prisma";
-
 import Layout from "@/components/Layout";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
@@ -176,6 +172,17 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Server-only modules loaded dynamically (Wave 4 boundary enforcement).
+  const [
+    { prisma },
+    { readAccessCookie },
+    { getSessionContext, tierAtLeast },
+  ] = await Promise.all([
+    import("@/lib/prisma"),
+    import("@/lib/server/auth/cookies"),
+    import("@/lib/server/auth/tokenStore.postgres"),
+  ]);
+
   try {
     // AL token cookie presence is enforced by middleware.ts (Tier 2).
     // By the time this handler runs, the cookie is guaranteed to exist.

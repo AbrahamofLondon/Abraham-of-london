@@ -2,7 +2,6 @@
 import * as React from "react";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import prisma from "@/lib/prisma";
 import Layout from "@/components/Layout";
 import { Users, Zap, Clock, ExternalLink, Activity, Shield, Key } from "lucide-react";
 import { validateAdminAccess } from "@/lib/server/validation";
@@ -55,6 +54,8 @@ type DashboardProps = {
 
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async ({ req }) => {
   const startTime = Date.now();
+
+  const { default: prisma } = await import("@/lib/prisma");
 
   const auth = await validateAdminAccess(req as any);
 
