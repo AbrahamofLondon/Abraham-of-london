@@ -31,6 +31,15 @@
 # that you still use. If not, delete the whole block.
 [functions]
   directory = "netlify/functions_src/functions"
+  node_bundler = "nft"
+  # Keep the Prisma client and its generated client package OUT of the
+  # function zip. They resolve from the Netlify runtime layer instead.
+  # This drops ~60 MB of traced weight out of `___netlify-server-handler`.
+  external_node_modules = [
+    "@prisma/client",
+    ".prisma",
+    "prisma",
+  ]
 
 [functions.emails]
   included_files = ["emails/**", "./emails/**"]

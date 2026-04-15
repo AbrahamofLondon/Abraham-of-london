@@ -118,17 +118,28 @@ const nextConfig = {
 
       // Prisma dead weight — schema/migration/introspection/fmt engines are
       // only used by `prisma migrate` / `prisma introspect` at CLI time.
-      // They are NOT used at runtime by `@prisma/client`. The Linux runtime
-      // engine `libquery_engine-rhel-openssl-3.0.x.so.node` MUST NOT be
-      // excluded — it is the only one that stays.
+      // They are NOT used at runtime by `@prisma/client`.
+      //
+      // CRITICAL: the Linux runtime engine
+      //   ./node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node
+      // MUST NOT be excluded. It is the only query engine that runs on
+      // Netlify's production Linux environment and is required at
+      // request time by every route that touches Prisma. All other
+      // platform-specific variants (musl, debian, windows, darwin) are
+      // stripped below.
       "./.prisma/client/schema-engine*",
-      "./node_modules/@prisma/engines/schema-engine*",
-      "./node_modules/@prisma/engines/introspection-engine*",
-      "./node_modules/@prisma/engines/migration-engine*",
-      "./node_modules/@prisma/engines/prisma-fmt*",
+      "./node_modules/@prisma/engines/**",
       "./node_modules/prisma/build/**",
       "./node_modules/@prisma/client/generator-build/**",
 
+      // Cross-platform query engines — we only run on Netlify Linux
+      // (rhel-openssl-3.0.x). Windows/darwin/debian/musl binaries are
+      // build artifacts of `prisma generate` from other environments
+      // that must never reach the handler.
+      "./node_modules/.prisma/client/libquery_engine-linux-musl*",
+      "./node_modules/.prisma/client/libquery_engine-debian*",
+      "./node_modules/.prisma/client/libquery_engine-windows*",
+      "./node_modules/.prisma/client/libquery_engine-darwin*",
     ],
   },
 
