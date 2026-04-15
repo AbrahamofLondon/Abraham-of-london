@@ -14,6 +14,7 @@
 // Result connects to Purpose Alignment if available in sessionStorage.
 // Result routes to Enterprise Assessment with a specific structural finding.
 
+import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -820,3 +821,9 @@ export default function TeamAssessmentPage() {
     </Layout>
   );
 }
+
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
+

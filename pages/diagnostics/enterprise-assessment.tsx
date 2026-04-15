@@ -16,6 +16,7 @@
 // - Specific escalation route with structural justification
 // - Connection to team assessment result if available in sessionStorage
 
+import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -869,3 +870,9 @@ export default function EnterpriseAssessmentPage() {
     </Layout>
   );
 }
+
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
+

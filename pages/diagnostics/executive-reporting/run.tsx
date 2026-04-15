@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // pages/diagnostics/executive-reporting/run.tsx
 
+import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -2819,3 +2820,9 @@ export default function ExecutiveReportingRunPage() {
     </Layout>
   );
 }
+
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
+
