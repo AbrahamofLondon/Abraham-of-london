@@ -8,14 +8,7 @@
   # satisfies the plugin's base-vs-publish sanity check without fighting
   # its internal file placement.
   publish = ".next"
-  command = """
-    pnpm build:netlify || ( \
-      echo '===NEXT BUILD FAILED — LAST 400 LINES OF /tmp/nextbuild.log===' && \
-      tail -400 /tmp/nextbuild.log 2>/dev/null || true; \
-      echo '===END NEXT BUILD LOG==='; \
-      exit 1 \
-    )
-  """
+  command = "pnpm build:netlify"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
