@@ -5,7 +5,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma.server";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import { getSessionContext, tierAtLeast } from "@/lib/server/auth/tokenStore.postgres";
-import { renderReportPdfToPublic } from "@/lib/reports/pdf";
 
 const MODEL_CANDIDATES = [
   "reportRequest",
@@ -43,6 +42,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const current = await model.findUnique({ where: { id } });
     if (!current) return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
 
+    // Lazy import keeps `@react-pdf/renderer` and its transitive deps
+    // (`fontkit`, `pdfkit`) out of the Pages Router static import graph,
+    // so webpack does not trace them into the shared server-commons
+    // chunk that ships inside `___netlify-server-handler`.
+    const { renderReportPdfToPublic } = await import("@/lib/reports/pdf");
     const pdfUrl = await renderReportPdfToPublic(current);
 
     const updated = await model.update({
