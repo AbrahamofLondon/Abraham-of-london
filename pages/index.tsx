@@ -20,6 +20,7 @@ import {
   Crown,
   Download,
   Eye,
+
   FileText,
   LibraryBig,
   Lock,
@@ -473,7 +474,7 @@ function HeroSection({
         style={{ opacity: imgOpacity, scale: imgScale }}
       >
         <Image
-          src="/assets/images/writing-desk.jpeg"
+          src="/assets/images/writing-desk.webp"
           alt=""
           fill
           priority

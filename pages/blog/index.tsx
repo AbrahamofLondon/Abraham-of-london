@@ -10,7 +10,17 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { Search, ArrowRight, Tag, Sparkles, Clock, RotateCcw } from "lucide-react";
+import {
+  Search,
+  ArrowRight,
+  Tag,
+  Sparkles,
+  Clock,
+  RotateCcw,
+  BookOpen,
+  Compass,
+  GalleryVerticalEnd,
+} from "lucide-react";
 
 import { joinHref, normalizeSlug } from "@/lib/content/shared";
 import { sanitizeData } from "@/lib/content/shared";
@@ -93,6 +103,21 @@ function objectPositionFor(pos?: CoverPosition | null): string {
 function normalizeFit(aspect?: CoverAspect | null, fit?: CoverFit | null): CoverFit {
   if (fit === "cover" || fit === "contain" || fit === "smart") return fit;
   return "smart";
+}
+
+function normalizeAspect(aspect?: CoverAspect | null): CoverAspect {
+  switch ((aspect || "auto").toLowerCase()) {
+    case "wide":
+      return "wide";
+    case "book":
+      return "book";
+    case "square":
+      return "square";
+    case "standard":
+      return "standard";
+    default:
+      return "auto";
+  }
 }
 
 /**
@@ -194,6 +219,146 @@ function isDraftish(meta: any): boolean {
   return false;
 }
 
+function cardSpanClass(aspect?: CoverAspect | null, index = 0): string {
+  const normalized = normalizeAspect(aspect);
+
+  if (normalized === "wide") return "sm:col-span-2";
+  if (normalized === "book" && index % 5 === 0) return "lg:row-span-2";
+
+  return "";
+}
+
+function cardShellClass(aspect?: CoverAspect | null): string {
+  const normalized = normalizeAspect(aspect);
+
+  switch (normalized) {
+    case "wide":
+      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]";
+    case "book":
+      return "bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,0.02))]";
+    case "square":
+      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]";
+    default:
+      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))]";
+  }
+}
+
+function cardTitleClass(aspect?: CoverAspect | null): string {
+  switch (normalizeAspect(aspect)) {
+    case "wide":
+      return "text-[1.7rem] md:text-[1.95rem]";
+    case "book":
+      return "text-[1.55rem] md:text-[1.8rem]";
+    default:
+      return "text-[1.35rem] md:text-[1.55rem]";
+  }
+}
+
+function cardExcerptLines(aspect?: CoverAspect | null): string {
+  return normalizeAspect(aspect) === "wide" ? "line-clamp-3" : "line-clamp-2";
+}
+
+function StoryCard({
+  post,
+  index,
+}: {
+  post: BlogPost;
+  index: number;
+}) {
+  const src = post.coverImage || DEFAULT_COVER;
+  const aspect = aspectRatioFor(post.coverAspect);
+  const fit = normalizeFit(post.coverAspect, post.coverFit);
+  const pos = objectPositionFor(post.coverPosition);
+  const normalizedAspect = normalizeAspect(post.coverAspect);
+
+  return (
+    <Link
+      href={post.url}
+      className={cx(
+        "group block rounded-[30px] border border-white/10 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/25 hover:bg-white/[0.045]",
+        cardSpanClass(post.coverAspect, index),
+        cardShellClass(post.coverAspect)
+      )}
+    >
+      <article className="h-full rounded-[24px] border border-white/8 bg-black/45 p-4 md:p-5">
+        <SmartCover
+          src={src}
+          alt={post.title}
+          aspect={aspect}
+          fit={fit}
+          position={pos}
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+        />
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.32em]">
+          {post.date ? <span className="text-amber-200/75">{post.date}</span> : null}
+          {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
+          <span className="text-white/25">
+            {normalizedAspect === "book"
+              ? "Portrait"
+              : normalizedAspect === "wide"
+                ? "Panorama"
+                : normalizedAspect === "square"
+                  ? "Study"
+                  : "Essay"}
+          </span>
+        </div>
+
+        <h2
+          className={cx(
+            "mt-3 font-serif leading-[1.02] tracking-[-0.03em] text-white/94 transition-colors group-hover:text-amber-100",
+            cardTitleClass(post.coverAspect)
+          )}
+        >
+          {post.title}
+        </h2>
+
+        {post.excerpt ? (
+          <p className={cx("mt-3 text-sm leading-relaxed text-white/58", cardExcerptLines(post.coverAspect))}>
+            {post.excerpt}
+          </p>
+        ) : null}
+
+        <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+          <div className="flex min-w-0 flex-wrap gap-2">
+            {(post.tags || []).slice(0, normalizedAspect === "wide" ? 3 : 2).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[9px] font-mono uppercase tracking-[0.22em] text-white/48"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/78">
+            Open
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </span>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function ShelfLink({ post }: { post: BlogPost }) {
+  return (
+    <Link href={post.url} className="group block rounded-[24px] border border-white/10 bg-white/[0.02] p-4 transition-colors hover:bg-white/[0.04]">
+      <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/32">
+        {post.date || "Undated"} {post.readTime ? `• ${post.readTime}` : ""}
+      </div>
+      <div className="mt-2 font-serif text-[1.2rem] leading-tight text-white/85 transition-colors group-hover:text-amber-100">
+        {post.title}
+      </div>
+      {post.excerpt ? (
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/48">
+          {post.excerpt}
+        </p>
+      ) : null}
+    </Link>
+  );
+}
+
 const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
@@ -214,10 +379,19 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
   }, [items]);
 
   const latest = React.useMemo(() => items.slice(0, 6), [items]);
+  const leadStory = featured[0] || items[0] || null;
+  const companionStories = React.useMemo(
+    () => featured.filter((post) => post.url !== leadStory?.url).slice(0, 2),
+    [featured, leadStory]
+  );
+  const archiveStories = React.useMemo(
+    () => items.filter((post) => post.url !== leadStory?.url),
+    [items, leadStory]
+  );
 
   const filteredPosts = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return items.filter((post) => {
+    return archiveStories.filter((post) => {
       const matchesSearch =
         !q ||
         post.title.toLowerCase().includes(q) ||
@@ -227,7 +401,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
       const matchesTag = !selectedTag || post.tags.includes(selectedTag);
       return matchesSearch && matchesTag;
     });
-  }, [items, searchQuery, selectedTag]);
+  }, [archiveStories, searchQuery, selectedTag]);
 
   const heroImage = items.find((p) => p.coverImage)?.coverImage || DEFAULT_COVER;
 
@@ -248,139 +422,160 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
         <title>Essays // Abraham of London</title>
       </Head>
 
-      {/* HERO */}
       <section
         className="relative overflow-hidden border-b border-white/10"
         style={{ paddingTop: "calc(var(--aol-header-h,88px) + 12px)" }}
       >
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-12 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-5">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(245,158,11,0.10),transparent_30%),radial-gradient(circle_at_85%_20%,rgba(255,255,255,0.06),transparent_28%),linear-gradient(180deg,#050506_0%,#09090d_100%)]" />
+        <div aria-hidden className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:96px_96px]" />
+
+        <div className="relative mx-auto max-w-7xl px-6 py-12 lg:px-12">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
                 <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
-                  Essays & Insights
+                  Story Catalogue
                 </span>
                 <span className="h-1 w-1 rounded-full bg-white/20" />
                 <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
-                  {totalPosts} notes
+                  {totalPosts} stories
                 </span>
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl md:text-5xl tracking-tight text-white/95">
-                Essays &amp; Insights
+              <h1 className="mt-6 max-w-[10ch] font-serif text-4xl tracking-[-0.04em] text-white/95 md:text-6xl">
+                A more beautiful room for reading.
               </h1>
-              <p className="mt-3 max-w-xl text-sm md:text-base text-white/55 leading-relaxed">
-                Institutional thinking, strategic frameworks, and civilizational notes — written for builders who govern
-                what they touch.
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-white/58 md:text-base">
+                Not a feed. Not a vault. A curated salon of essays, dispatches, and long thoughts designed to be wandered,
+                admired, and returned to.
               </p>
 
-              <div className="mt-6 grid grid-cols-3 gap-3 max-w-xl">
+              <div className="mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
-                  ["Signal", "No noise. Only essentials."],
-                  ["Blueprints", "Principles → execution."],
-                  ["Legacy", "Order that outlasts."],
+                  ["Atmosphere", "A reading room before it becomes a search result."],
+                  ["Range", "Wide covers, portrait covers, dense essays, shorter studies."],
+                  ["Nourishment", "Beauty first, then signal, then something worth keeping."],
                 ].map(([k, v]) => (
-                  <div key={k} className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+                  <div key={k} className="rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-4">
                     <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/40">{k}</div>
-                    <div className="mt-2 text-xs text-white/70 leading-snug">{v}</div>
+                    <div className="mt-2 text-xs leading-snug text-white/70">{v}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
-                <div className="relative w-full" style={{ aspectRatio: "21 / 9" }}>
-                  <Image
-                    src={heroImage}
-                    alt="Essays banner"
-                    fill
-                    priority
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 900px"
-                  />
-                  <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/10 to-black/40" />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.18),transparent_55%)]"
-                  />
-                </div>
+            <div className="lg:col-span-8">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
+                {leadStory ? (
+                  <Link
+                    href={leadStory.url}
+                    className="group block overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.03] p-4 transition-all duration-300 hover:border-amber-300/25 hover:bg-white/[0.045]"
+                  >
+                    <article className="rounded-[28px] border border-white/8 bg-black/40 p-4 md:p-5">
+                      <SmartCover
+                        src={leadStory.coverImage || heroImage}
+                        alt={leadStory.title}
+                        aspect={aspectRatioFor(leadStory.coverAspect || "wide")}
+                        fit={normalizeFit(leadStory.coverAspect, leadStory.coverFit)}
+                        position={objectPositionFor(leadStory.coverPosition)}
+                        sizes="(max-width: 1024px) 100vw, 820px"
+                        priority
+                      />
 
-                <div className="flex items-center justify-between gap-4 px-6 py-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-                    Institutional notes • scan-ready
+                      <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.34em]">
+                        <span className="text-amber-200/80">Lead Story</span>
+                        {leadStory.date ? <span className="text-white/35">{leadStory.date}</span> : null}
+                        {leadStory.readTime ? <span className="text-white/35">{leadStory.readTime}</span> : null}
+                        {leadStory.author ? <span className="text-white/28">{leadStory.author}</span> : null}
+                      </div>
+
+                      <h2 className="mt-4 max-w-[16ch] font-serif text-[2rem] leading-[0.96] tracking-[-0.04em] text-white transition-colors group-hover:text-amber-100 md:text-[3.2rem]">
+                        {leadStory.title}
+                      </h2>
+
+                      {leadStory.excerpt ? (
+                        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
+                          {leadStory.excerpt}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-4">
+                        <div className="flex flex-wrap gap-2">
+                          {(leadStory.tags || []).slice(0, 4).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[9px] font-mono uppercase tracking-[0.22em] text-white/48"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/75">
+                          Enter story
+                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </span>
+                      </div>
+                    </article>
+                  </Link>
+                ) : null}
+
+                <div className="space-y-4">
+                  <div className="rounded-[30px] border border-white/10 bg-white/[0.025] p-5">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/70">
+                      <Compass className="h-4 w-4" />
+                      Ways In
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/30">Browse by mood</div>
+                        <div className="mt-2 text-sm leading-relaxed text-white/68">
+                          Move through the catalogue by instinct, not obligation. Search when you know. Wander when you do not.
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                          <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/30">Latest</div>
+                          <div className="mt-2 font-serif text-xl text-white">{latest.length}</div>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                          <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/30">Themes</div>
+                          <div className="mt-2 font-serif text-xl text-white">{allTags.length}</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/55">Index ↓</div>
+
+                  <div className="rounded-[30px] border border-white/10 bg-white/[0.025] p-5">
+                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/70">
+                      <GalleryVerticalEnd className="h-4 w-4" />
+                      Companion Stories
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {companionStories.map((post) => (
+                        <ShelfLink key={post.url} post={post} />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Featured */}
-          {featured.length > 0 && (
-            <div className="mt-10">
-              <div className="mb-4 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
-                <Sparkles className="h-4 w-4" />
-                Featured
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {featured.map((post) => {
-                  const src = post.coverImage || DEFAULT_COVER;
-                  const aspect = aspectRatioFor(post.coverAspect || "wide");
-                  const fit = normalizeFit(post.coverAspect, post.coverFit);
-                  const pos = objectPositionFor(post.coverPosition);
-
-                  return (
-                    <Link
-                      key={post.url}
-                      href={post.url}
-                      className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
-                    >
-                      <article className="p-5">
-                        <SmartCover
-                          src={src}
-                          alt={post.title}
-                          aspect={aspect}
-                          fit={fit}
-                          position={pos}
-                          sizes="(max-width: 768px) 100vw, 360px"
-                          priority
-                        />
-
-                        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em]">
-                          {post.date ? <span className="text-amber-200/70">{post.date}</span> : null}
-                          {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
-                          {post.tags?.[0] ? <span className="text-white/25">{post.tags[0]}</span> : null}
-                        </div>
-
-                        <h3 className="mt-3 font-serif text-xl text-white/92 leading-tight tracking-tight group-hover:text-amber-100 transition-colors line-clamp-2">
-                          {post.title}
-                        </h3>
-
-                        {post.excerpt ? (
-                          <p className="mt-3 text-sm text-white/55 leading-relaxed line-clamp-2">{post.excerpt}</p>
-                        ) : null}
-
-                        <div className="mt-4 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
-                          Read
-                          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                        </div>
-                      </article>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Sticky filters */}
-      <section className="sticky top-20 z-30 border-b border-white/10 bg-black/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-6 lg:px-12 py-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-            <div className="lg:col-span-5">
+      <section className="border-b border-white/10 bg-[linear-gradient(180deg,rgba(8,8,10,0.95),rgba(8,8,10,0.88))] backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 py-4 lg:px-12">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-4">
+              <div className="mb-3 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/70">
+                <BookOpen className="h-4 w-4" />
+                Reading Atlas
+              </div>
+
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
                 <input
@@ -388,21 +583,25 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                   placeholder="Search essays, tags, themes…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 placeholder:text-white/20 outline-none focus:border-amber-500/25 focus:bg-white/[0.05]"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 placeholder:text-white/20 outline-none transition-colors focus:border-amber-500/25 focus:bg-white/[0.05]"
                 />
               </div>
             </div>
 
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-8">
+              <div className="mb-3 text-[10px] font-mono uppercase tracking-[0.34em] text-white/32">
+                Filter by recurring themes
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => setSelectedTag(null)}
                   className={cx(
-                    "inline-flex items-center gap-2 rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
                     !selectedTag
                       ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                      : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+                      : "border-white/10 bg-white/[0.02] text-white/45 hover:bg-white/[0.04] hover:text-white/70"
                   )}
                 >
                   <Tag className="h-3.5 w-3.5" />
@@ -417,10 +616,10 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                       type="button"
                       onClick={() => setSelectedTag(active ? null : t)}
                       className={cx(
-                        "rounded-full px-4 py-2 border text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
+                        "rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
                         active
                           ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                          : "border-white/10 bg-white/[0.02] text-white/45 hover:text-white/70 hover:bg-white/[0.04]"
+                          : "border-white/10 bg-white/[0.02] text-white/45 hover:bg-white/[0.04] hover:text-white/70"
                       )}
                     >
                       {t}
@@ -431,9 +630,9 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
             <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
-              Showing {filteredPosts.length} of {items.length}
+              Showing {filteredPosts.length} of {archiveStories.length} archive stories
             </div>
 
             {(searchQuery || selectedTag) && (
@@ -450,10 +649,8 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
         </div>
       </section>
 
-      {/* MAIN */}
       <section className="mx-auto max-w-7xl px-6 lg:px-12 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Cards */}
           <div className="lg:col-span-8">
             {filteredPosts.length === 0 ? (
               <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
@@ -461,60 +658,31 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                 <div className="mt-3 text-white/70">Try a different keyword or clear the tag filter.</div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredPosts.map((post) => {
-                  const src = post.coverImage || DEFAULT_COVER;
-                  const aspect = aspectRatioFor(post.coverAspect);
-                  const fit = normalizeFit(post.coverAspect, post.coverFit);
-                  const pos = objectPositionFor(post.coverPosition);
+              <>
+                <div className="mb-6 flex items-end justify-between gap-4">
+                  <div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/70">
+                      Archive Floor
+                    </div>
+                    <h2 className="mt-2 font-serif text-3xl tracking-[-0.03em] text-white">
+                      Stories arranged like objects worth keeping.
+                    </h2>
+                  </div>
+                </div>
 
-                  return (
-                    <Link
-                      key={post.url}
-                      href={post.url}
-                      className="group block rounded-3xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.03] transition-colors"
-                    >
-                      <article className="p-5">
-                        <SmartCover
-                          src={src}
-                          alt={post.title}
-                          aspect={aspect}
-                          fit={fit}
-                          position={pos}
-                          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                        />
-
-                        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em]">
-                          {post.date ? <span className="text-amber-200/70">{post.date}</span> : null}
-                          {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
-                          {post.tags?.[0] ? <span className="text-white/25">{post.tags[0]}</span> : null}
-                        </div>
-
-                        <h2 className="mt-3 font-serif text-xl text-white/92 tracking-tight leading-tight group-hover:text-amber-100 transition-colors line-clamp-2">
-                          {post.title}
-                        </h2>
-
-                        {post.excerpt ? (
-                          <p className="mt-3 text-sm text-white/55 leading-relaxed line-clamp-2">{post.excerpt}</p>
-                        ) : null}
-
-                        <div className="mt-4 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
-                          Read essay
-                          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                        </div>
-                      </article>
-                    </Link>
-                  );
-                })}
-              </div>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {filteredPosts.map((post, index) => (
+                    <StoryCard key={post.url} post={post} index={index} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
 
-          {/* Executive Sidebar */}
           <aside className="hidden lg:block lg:col-span-4">
             <div className="sticky top-28 space-y-6">
               <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-                <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">Quick Index</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">Current Mood</div>
 
                 <div className="mt-4 grid gap-3">
                   <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
@@ -550,7 +718,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
               <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
                 <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
                   <Sparkles className="h-4 w-4" />
-                  Featured
+                  Spotlight Shelf
                 </div>
 
                 <div className="mt-4 space-y-4">
@@ -571,7 +739,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
               <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
                 <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
                   <Clock className="h-4 w-4" />
-                  Latest
+                  Freshly Added
                 </div>
 
                 <div className="mt-4 space-y-3">
