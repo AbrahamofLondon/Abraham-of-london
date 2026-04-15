@@ -96,8 +96,6 @@ const nextConfig = {
     "canvas",
     "jsdom",
     "sharp",
-    "puppeteer",
-    "puppeteer-core",
   ],
 
   /**
@@ -131,14 +129,6 @@ const nextConfig = {
       "./node_modules/prisma/build/**",
       "./node_modules/@prisma/client/generator-build/**",
 
-      // Puppeteer + its bundled Chromium download (146.0.7680.153) — the
-      // browser binary is ~150 MB on its own and is being traced into the
-      // handler even though no runtime code path needs it during serverless
-      // invocation.
-      "./node_modules/puppeteer/**",
-      "./node_modules/puppeteer-core/**",
-      "./node_modules/@puppeteer/**",
-      "./node_modules/chrome-headless-shell/**",
     ],
   },
 
