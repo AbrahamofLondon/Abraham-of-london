@@ -275,32 +275,18 @@ const GenericContentPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const {
-    getAllCombinedDocs,
-    normalizeSlug,
-    isDraftContent,
-    isPublished,
-  } = await import("@/lib/content/server");
-
-  const docs = (getAllCombinedDocs() || []).filter(
-    (d: any) => !isDraftContent(d) && isPublished(d)
-  );
-
-  const seen = new Set<string>();
-  const paths: Array<{ params: { slug: string } }> = [];
-
-  for (const d of docs) {
-    const raw = normalizeSlug(d?.slug || d?._raw?.flattenedPath || "");
-    const slug = norm(raw);
-    const key = slug.toLowerCase();
-
-    if (!slug || !allowRootSlug(slug) || seen.has(key)) continue;
-
-    seen.add(key);
-    paths.push({ params: { slug } });
-  }
-
-  return { paths, fallback: "blocking" };
+  // Catch-all root-slug fallback. The reserved-root allowlist
+  // (allowRootSlug) rejects almost every normalized content slug because
+  // site content uses path prefixes (canon/, blog/, shorts/, ...). The
+  // previous implementation scanned the full 316-doc corpus in every
+  // build worker to find at most a handful of bare root-slug legacies.
+  // That scan was the largest remaining memory amplifier in this page.
+  //
+  // With fallback: "blocking", any bare root slug that is reachable via
+  // getDocBySlug at request time will still render — getStaticProps below
+  // handles the resolution per slug. Pre-generating zero paths at build
+  // time eliminates the full-corpus load without breaking routing.
+  return { paths: [], fallback: "blocking" };
 };
 
 export const getStaticProps = async ({ params }: GetStaticPropsContext) => {

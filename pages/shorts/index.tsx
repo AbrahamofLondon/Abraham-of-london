@@ -1165,23 +1165,12 @@ export default ShortsIndexPage;
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
-  const { getAllShorts, getAllCombinedDocs, sanitizeData } = await import(
+  const { getAllShorts, sanitizeData } = await import(
     "@/lib/content/server"
   );
-  const fromShorts   = (getAllShorts()       || []) as RawShortDoc[];
-  const fromAllDocs  = (getAllCombinedDocs() || []) as RawShortDoc[];
+  const fromShorts = (getAllShorts() || []) as RawShortDoc[];
 
-  const fallbackShorts = fromAllDocs.filter(doc => {
-    const slug = safeString(doc.slug) || safeString(doc.slugSafe)
-      || safeString(doc?._raw?.flattenedPath) || safeString(doc?._raw?.sourceFilePath);
-    const kind = safeString((doc as any).docKind || (doc as any).kind || (doc as any).type).toLowerCase();
-    const norm = normalizePath(slug).toLowerCase();
-    return kind === "short" || norm.startsWith("shorts/");
-  });
-
-  const source = fromShorts.length > 0 ? fromShorts : fallbackShorts;
-
-  const shorts = source
+  const shorts = fromShorts
     .filter(isPublishedShort)
     .map(toShortIndexItem)
     .filter(Boolean) as ShortIndexItem[];

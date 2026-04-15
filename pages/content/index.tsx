@@ -41,13 +41,25 @@ type Props = { items: Item[] };
 export const getStaticProps: GetStaticProps<Props> = async () => {
   try {
     const {
-      getPublishedDocuments,
+      getPublishedCanons,
+      getPublishedPosts,
+      getPublishedPrints,
+      getPublishedResources,
+      getPublishedShorts,
+      getPublishedVault,
       getDocKind,
-      getDocHref,
       resolveDocCoverImage,
       sanitizeData,
     } = await import("@/lib/content/server");
-    const docs = getPublishedDocuments();
+    // Load each kind directly instead of the full-corpus combined helper.
+    const docs = [
+      ...getPublishedCanons(),
+      ...getPublishedPosts(),
+      ...getPublishedPrints(),
+      ...getPublishedResources(),
+      ...getPublishedShorts(),
+      ...getPublishedVault(),
+    ];
 
     if (!docs || docs.length === 0) {
       return { props: { items: [] }, revalidate: 1800 };

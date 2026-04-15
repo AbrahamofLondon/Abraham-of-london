@@ -60,19 +60,12 @@ const Page: NextPage<Props> = ({ doc, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { getPublishedDocuments } = await import("@/lib/content/server");
-  const docs = getPublishedDocuments() || [];
-
-  return {
-    paths: docs
-      .map((d: any) => {
-        const raw = String(d?.slug || d?._raw?.flattenedPath || "");
-        const slug = cleanSlug(raw);
-        return slug ? { params: { slug: slug.split("/") } } : null;
-      })
-      .filter(Boolean) as Array<{ params: { slug: string[] } }>,
-    fallback: "blocking",
-  };
+  // Catch-all /content/* route. Pre-generating paths here requires a
+  // full-corpus scan across every published document just to enumerate
+  // routes that getDocBySlug already resolves at request time. With
+  // fallback: "blocking", every valid slug still renders via getStaticProps
+  // below, so we skip the pre-generation pass entirely.
+  return { paths: [], fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {

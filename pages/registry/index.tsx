@@ -3,13 +3,11 @@
 import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 
-import { getAllContentlayerDocs } from "@/lib/contentlayer-helper";
 import RegistryView from "@/components/registry/RegistryView";
 import RegistryLayout from "@/components/layout/RegistryLayout";
 import { RegistryProvider } from "@/contexts/RegistryContext";
 
 import { normalizeSlug } from "@/lib/content/shared";
-import { sanitizeData } from "@/lib/content/server";
 
 interface RegistryPageProps {
   initialDocs: any[];
@@ -35,21 +33,19 @@ function safeSlug(doc: any): string {
 }
 
 export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
-  const allDocs = (getAllContentlayerDocs() || []).filter((d: any) => !d?.draft && d?.published !== false);
+  const { getAllContentlayerDocs } = await import("@/lib/contentlayer-helper");
+  const { sanitizeData } = await import("@/lib/content/server");
 
-  // Sort safely even if date is missing/invalid
-  allDocs.sort((a: any, b: any) => {
-    const ad = new Date(a?.date || 0).getTime() || 0;
-    const bd = new Date(b?.date || 0).getTime() || 0;
-    return bd - ad;
-  });
+  const raw = getAllContentlayerDocs() || [];
 
-  const initialDocs = allDocs.map((d: any) => {
-    const slug = safeSlug(d);
-
-    return {
+  // Single pass: filter + map to minimal row shape. Avoid holding full doc
+  // objects in memory longer than necessary, and avoid sorting them.
+  const initialDocs: RegistryPageProps["initialDocs"] = [];
+  for (const d of raw as any[]) {
+    if (d?.draft || d?.published === false) continue;
+    initialDocs.push({
       title: safeString(d?.title, "Untitled"),
-      slug, // ✅ never undefined
+      slug: safeSlug(d),
       category: safeString(d?.category, "General Lexicon"),
       date: safeString(d?.date, null as any) || null,
       dateISO: safeDateIso(d?.date),
@@ -57,10 +53,19 @@ export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
       type: safeString(d?.type || d?.kind, "unknown"),
       accessLevel: safeString(d?.accessLevel, "public"),
       coverImage: d?.coverImage ? String(d.coverImage) : null,
-    };
+    });
+  }
+
+  // Sort the minimal rows (cheap) instead of the full doc array.
+  initialDocs.sort((a, b) => {
+    const ad = a.dateISO ? Date.parse(a.dateISO) : 0;
+    const bd = b.dateISO ? Date.parse(b.dateISO) : 0;
+    return bd - ad;
   });
 
-  const categories = Array.from(new Set(initialDocs.map((d) => d.category).filter(Boolean))) as string[];
+  const categories = Array.from(
+    new Set(initialDocs.map((d) => d.category).filter(Boolean)),
+  ) as string[];
 
   return {
     props: sanitizeData({
