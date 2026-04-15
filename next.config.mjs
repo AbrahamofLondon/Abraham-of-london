@@ -96,6 +96,8 @@ const nextConfig = {
     "canvas",
     "jsdom",
     "sharp",
+    "puppeteer",
+    "puppeteer-core",
   ],
 
   /**
@@ -115,6 +117,28 @@ const nextConfig = {
       "./node_modules/@esbuild/**",
       "./.contentlayer/generated/**/_index.json",
       "./private_storage/**",
+
+      // Prisma dead weight — schema/migration/introspection/fmt engines are
+      // only used by `prisma migrate` / `prisma introspect` at CLI time.
+      // They are NOT used at runtime by `@prisma/client`. The Linux runtime
+      // engine `libquery_engine-rhel-openssl-3.0.x.so.node` MUST NOT be
+      // excluded — it is the only one that stays.
+      "./.prisma/client/schema-engine*",
+      "./node_modules/@prisma/engines/schema-engine*",
+      "./node_modules/@prisma/engines/introspection-engine*",
+      "./node_modules/@prisma/engines/migration-engine*",
+      "./node_modules/@prisma/engines/prisma-fmt*",
+      "./node_modules/prisma/build/**",
+      "./node_modules/@prisma/client/generator-build/**",
+
+      // Puppeteer + its bundled Chromium download (146.0.7680.153) — the
+      // browser binary is ~150 MB on its own and is being traced into the
+      // handler even though no runtime code path needs it during serverless
+      // invocation.
+      "./node_modules/puppeteer/**",
+      "./node_modules/puppeteer-core/**",
+      "./node_modules/@puppeteer/**",
+      "./node_modules/chrome-headless-shell/**",
     ],
   },
 
