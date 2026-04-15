@@ -147,7 +147,8 @@ function titleCase(input?: string): string {
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[BUILD_TRACE] START pages/playbooks/[slug].tsx getStaticPaths");
   try {
-  const { allPlaybooks } = await import("contentlayer/generated");
+  const { getAllPlaybooks } = await import("@/lib/content/server");
+  const allPlaybooks = getAllPlaybooks();
   const paths = allPlaybooks
     .map((p) => normalizeSlug(p.slug))
     .filter(Boolean)
@@ -169,7 +170,8 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
   try {
   const slug = normalizeSlug(params?.slug);
 
-  const { allPlaybooks } = await import("contentlayer/generated");
+  const { getAllPlaybooks } = await import("@/lib/content/server");
+  const allPlaybooks = getAllPlaybooks();
   const stablePlaybooks = [...allPlaybooks].filter((p) => normalizeSlug(p.slug));
   const playbook = stablePlaybooks.find((p) => normalizeSlug(p.slug) === slug);
 

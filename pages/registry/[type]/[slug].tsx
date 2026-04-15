@@ -8,7 +8,6 @@ import RegistryLayout from "@/components/layout/RegistryLayout";
 import AccessGate from "@/components/AccessGate";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 
-import { allPosts, allShorts } from "@/lib/contentlayer";
 import { getDocBySlug } from "@/lib/content/unified-router";
 import { getRenderableBody } from "@/lib/content/render-body";
 
@@ -205,6 +204,9 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[BUILD_TRACE] START pages/registry/[type]/[slug].tsx getStaticPaths");
   try {
+  const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
+  const allPosts = getAllPosts() as any[];
+  const allShorts = getAllShorts() as any[];
   const dispatches = allPosts
     .filter((p: any) => !p.draft)
     .map((p: any) => ({

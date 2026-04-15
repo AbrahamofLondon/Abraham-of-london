@@ -35,6 +35,7 @@ export type DocKind =
   | "print"
   | "resource"
   | "strategy"
+  | "playbook"
   | "lexicon"
   | "vault"
   | "unknown";
@@ -117,6 +118,7 @@ export const documentKinds: DocKind[] = [
   "print",
   "resource",
   "strategy",
+  "playbook",
   "lexicon",
   "vault",
 ];
@@ -140,7 +142,8 @@ const COLLECTION_DIRS: Record<DocKind, string[]> = {
   print: ["Print"],
   resource: ["Resource"],
   short: ["Short"],
-  strategy: ["Strategy", "Playbook"],
+  strategy: ["Strategy"],
+  playbook: ["Playbook"],
   vault: ["Vault"],
   unknown: [],
 };
@@ -161,6 +164,7 @@ const SLUG_PREFIX_KINDS: Array<[string, DocKind]> = [
   ["briefs/", "brief"],
   ["strategy/", "strategy"],
   ["strategies/", "strategy"],
+  ["playbooks/", "playbook"],
   ["lexicon/", "lexicon"],
   ["vault/", "vault"],
 ];
@@ -279,6 +283,7 @@ export function getDocKind(doc: ContentDoc | null | undefined): DocKind {
   if (p.startsWith("prints/")) return "print";
   if (p.startsWith("resources/")) return "resource";
   if (p.startsWith("strategy/") || p.startsWith("strategies/")) return "strategy";
+  if (p.startsWith("playbooks/")) return "playbook";
   if (p.startsWith("vault/")) return "vault";
   if (p.startsWith("blog/") || p.startsWith("posts/")) return "post";
 
@@ -489,6 +494,7 @@ export const getAllShorts = () => byKind("short");
 export const getAllBriefs = () => byKind("brief");
 export const getAllLexicon = () => byKind("lexicon");
 export const getAllVault = () => byKind("vault");
+export const getAllPlaybooks = () => byKind("playbook");
 
 function getByCollectionSlug(collections: string[], slug: string): ContentDoc | null {
   const normalizedSlug = normalizeSlug(String(slug || ""));

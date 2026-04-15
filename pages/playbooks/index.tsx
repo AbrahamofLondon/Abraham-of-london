@@ -155,7 +155,8 @@ export const getStaticProps: GetStaticProps<PlaybooksPageProps> = async () => {
   console.log("[BUILD_TRACE] START pages/playbooks/index.tsx getStaticProps");
   try {
   try {
-    const { allPlaybooks } = await import("contentlayer/generated");
+    const { getAllPlaybooks } = await import("@/lib/content/server");
+    const allPlaybooks = getAllPlaybooks() as unknown as Playbook[];
     const items = allPlaybooks
       .filter(isPublishedPlaybook)
       .map(mapPlaybook)

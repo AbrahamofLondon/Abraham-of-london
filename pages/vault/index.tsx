@@ -24,7 +24,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Layout from "@/components/Layout";
 import { useClientRouter } from "@/lib/router/useClientRouter";
 import { getAllPDFItems, type PDFItem } from "@/lib/pdf-registry";
-import { allBriefs, allDownloads } from "@/lib/contentlayer";
 import VaultTierCard from "@/components/vault/VaultTierCard";
 import VaultValueStack from "@/components/vault/VaultValueStack";
 
@@ -94,6 +93,9 @@ export const getStaticProps: GetStaticProps<{
   console.log("[BUILD_TRACE] START pages/vault/index.tsx getStaticProps");
   try {
   try {
+    const { getAllBriefs, getAllDownloads } = await import("@/lib/content/server");
+    const allBriefs = getAllBriefs() as any[];
+    const allDownloads = getAllDownloads() as any[];
     const briefs = (allBriefs || [])
       .filter((b: any) => !b?.draft)
       .map((b: any): VaultItem => {

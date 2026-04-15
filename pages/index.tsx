@@ -2489,12 +2489,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     computeFromDocs(docs, data, data);
     if (shouldForceFallback(counts, docs.length)) throw new Error("fallback");
   } catch {
-    try {
-      const gen: any = await import("contentlayer/generated");
-      computeFromDocs(collectAnyDocs(gen), gen, gen);
-    } catch {
-      // keep defaults
-    }
+    // Primary content/server path failed; keep defaults rather than
+    // falling back to the full contentlayer barrel (which would drag
+    // the entire 16-collection corpus into this worker's RSS).
   }
 
   try {

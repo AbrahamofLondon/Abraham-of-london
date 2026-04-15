@@ -35,6 +35,7 @@ import {
   getAllBriefs as helperGetAllBriefs,
   getAllLexicon as helperGetAllLexicon,
   getAllVault as helperGetAllVault,
+  getAllPlaybooks as helperGetAllPlaybooks,
   getDocBySlug as helperGetDocBySlug,
   getBookBySlug as helperGetBookBySlug,
   getCanonBySlug as helperGetCanonBySlug,
@@ -113,6 +114,7 @@ export const getAllLexicons = (): ContentDoc[] => helperGetAllLexicon();
 export const getAllLexicon = (): ContentDoc[] => helperGetAllLexicon();
 
 export const getAllVault = (): ContentDoc[] => helperGetAllVault();
+export const getAllPlaybooks = (): ContentDoc[] => helperGetAllPlaybooks();
 export const getAllBlogs = (): ContentDoc[] => getAllPosts();
 
 export const getAllCombinedDocs = (): ContentDoc[] => {

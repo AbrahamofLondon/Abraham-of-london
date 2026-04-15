@@ -348,20 +348,8 @@ function isPublishedShort(doc: RawShortLike): boolean {
 
 async function loadAllShorts(): Promise<RawShortLike[]> {
   try {
-    const generated: any = await import("contentlayer/generated");
-
-    const buckets = [
-      generated?.allShorts,
-      generated?.allDocuments,
-      generated?.documents,
-    ];
-
-    const flat: RawShortLike[] = [];
-    for (const bucket of buckets) {
-      if (Array.isArray(bucket)) {
-        flat.push(...(bucket as RawShortLike[]));
-      }
-    }
+    const { getAllShorts } = await import("@/lib/content/server");
+    const flat = (getAllShorts() || []) as RawShortLike[];
 
     const deduped: RawShortLike[] = [];
     const seen = new Set<string>();
