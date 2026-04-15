@@ -2,6 +2,12 @@
 # Minimal, adapter-first Netlify config for modern Next.js
 
 [build]
+  # `publish` is set explicitly so @netlify/plugin-nextjs does not error
+  # with "publish directory cannot be the same as the base directory".
+  # The plugin manages `.next` output internally; pointing publish at it
+  # satisfies the plugin's base-vs-publish sanity check without fighting
+  # its internal file placement.
+  publish = ".next"
   command = """
     pnpm build:netlify || ( \
       echo '===NEXT BUILD FAILED — LAST 400 LINES OF /tmp/nextbuild.log===' && \
