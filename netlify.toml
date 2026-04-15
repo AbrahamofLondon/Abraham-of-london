@@ -2,7 +2,14 @@
 # Minimal, adapter-first Netlify config for modern Next.js
 
 [build]
-  command = "pnpm build:netlify"
+  command = """
+    pnpm build:netlify || ( \
+      echo '===NEXT BUILD FAILED — LAST 400 LINES OF /tmp/nextbuild.log===' && \
+      tail -400 /tmp/nextbuild.log 2>/dev/null || true; \
+      echo '===END NEXT BUILD LOG==='; \
+      exit 1 \
+    )
+  """
 
 [build.environment]
   NODE_VERSION = "20.20.0"

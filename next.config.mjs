@@ -20,6 +20,11 @@ import { withContentlayer } from "next-contentlayer2";
 // Scoped to production builds (NODE_ENV=production) so dev server output
 // is not affected.
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Force full stack traces — default is 10 frames which often truncates the
+// useful part of async error chains.
+Error.stackTraceLimit = Infinity;
+
 if (process.env.NODE_ENV === "production") {
   process.on("unhandledRejection", (reason, promise) => {
     // eslint-disable-next-line no-console
@@ -53,6 +58,10 @@ const nextConfig = {
   poweredByHeader: false,
   generateEtags: true,
   productionBrowserSourceMaps: false,
+
+  // Explicit — default is 60 seconds, setting it here forces Next to log
+  // the specific page name when it times out during static generation.
+  staticPageGenerationTimeout: 60,
 
   typescript: {
     ignoreBuildErrors: true,
