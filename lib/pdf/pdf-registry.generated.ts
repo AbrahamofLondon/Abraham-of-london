@@ -1,3 +1,5 @@
+console.log("[MODULE_INIT] lib/pdf/pdf-registry.generated");
+
 // lib/pdf/pdf-registry.generated.ts
 // AUTO-GENERATED — DO NOT EDIT MANUALLY
 // Generated: 2026-04-15T07:41:28.067Z

@@ -1,3 +1,5 @@
+console.log("[MODULE_INIT] lib/content/render-body");
+
 /* lib/content/render-body.ts */
 
 export type RenderBodyMode = "compiled" | "raw" | "empty";

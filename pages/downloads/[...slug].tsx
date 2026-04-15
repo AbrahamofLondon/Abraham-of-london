@@ -115,6 +115,8 @@ const Page: NextPage<Props> = ({ slug, title, requiredTier, bodyCode }) => {
 export const getServerSideProps: GetServerSideProps<Props> = async ({
   params,
 }) => {
+  console.log("[PAGE_DATA] pages/downloads/[...slug].tsx getServerSideProps START");
+  try {
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
 
@@ -132,6 +134,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
       bodyCode: isPublic ? pickRenderableDocumentCode(doc) : null,
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/downloads/[...slug].tsx getServerSideProps END");
+  }
 };
 
 export default Page;

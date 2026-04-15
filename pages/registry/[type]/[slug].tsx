@@ -202,6 +202,8 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[PAGE_DATA] pages/registry/[type]/[slug].tsx getStaticPaths START");
+  try {
   try {
   const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
   const allPosts = (getAllPosts() as any[]).filter((p) => !p.draft);
@@ -236,11 +238,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   } finally {
   }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/registry/[type]/[slug].tsx getStaticPaths END");
+  }
 };
 
 export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   params,
 }) => {
+  console.log("[PAGE_DATA] pages/registry/[type]/[slug].tsx getStaticProps START");
+  try {
   try {
   const typeRaw = String(params?.type ?? "");
   const slugRaw = normalizeParamSlug(params?.slug);
@@ -279,6 +287,10 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   };
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/registry/[type]/[slug].tsx getStaticProps END");
   }
 };
 

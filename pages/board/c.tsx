@@ -81,6 +81,8 @@ interface Props {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/board/c.tsx getServerSideProps START");
+  try {
   const { req } = context;
   const startTime = Date.now();
 
@@ -414,6 +416,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
             : "Unable to load system metrics",
       },
     };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/board/c.tsx getServerSideProps END");
   }
 };
 

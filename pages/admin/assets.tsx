@@ -83,6 +83,8 @@ const AdminAssetsPage: NextPage<Props> = ({ admin }) => {
  * Strictly enforces admin validation before rendering the page.
  */
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log("[PAGE_DATA] pages/admin/assets.tsx getServerSideProps START");
+  try {
   const auth = await validateAdminAccess(context.req as any);
 
   if (!auth.valid) {
@@ -102,6 +104,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/admin/assets.tsx getServerSideProps END");
+  }
 };
 
 export default AdminAssetsPage;

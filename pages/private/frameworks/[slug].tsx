@@ -294,6 +294,8 @@ const PrivateFrameworkPreviewPage: NextPage<Props> = ({
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  console.log("[PAGE_DATA] pages/private/frameworks/[slug].tsx getServerSideProps START");
+  try {
   const slug = normalizePrivateSlug(ctx.params?.slug);
   if (!slug) return { notFound: true };
 
@@ -321,6 +323,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   } catch (error) {
     console.error("[PRIVATE_PREVIEW_SSR_ERROR]", error);
     return { redirect: { destination: "/inner-circle/locked?reason=internal_error", permanent: false } };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/private/frameworks/[slug].tsx getServerSideProps END");
   }
 };
 

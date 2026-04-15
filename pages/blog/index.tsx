@@ -800,6 +800,8 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
 };
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
+  console.log("[PAGE_DATA] pages/blog/index.tsx getStaticProps START");
+  try {
   try {
   try {
     // ✅ FS SSOT: content/blog
@@ -852,6 +854,10 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   }
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/blog/index.tsx getStaticProps END");
   }
 };
 

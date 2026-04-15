@@ -4,6 +4,8 @@ import type { ContentDoc } from "@/lib/contentlayer-helper";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  console.log("[PAGE_DATA] pages/downloads-sitemap.xml.ts getServerSideProps START");
+  try {
   const { getAllCombinedDocs } = await import("@/lib/content/server");
   // Filter for both prints and general downloads
   const downloads = getAllCombinedDocs().filter((doc: ContentDoc) =>
@@ -41,6 +43,10 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   res.write(xml);
   res.end();
   return { props: {} };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/downloads-sitemap.xml.ts getServerSideProps END");
+  }
 };
 
 export default function DownloadsSitemap() { return null; }

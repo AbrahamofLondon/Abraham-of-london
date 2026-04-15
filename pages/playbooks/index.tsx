@@ -152,6 +152,8 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<PlaybooksPageProps> = async () => {
+  console.log("[PAGE_DATA] pages/playbooks/index.tsx getStaticProps START");
+  try {
   try {
   try {
     const { getAllPlaybooks } = await import("@/lib/content/server");
@@ -174,6 +176,10 @@ export const getStaticProps: GetStaticProps<PlaybooksPageProps> = async () => {
   }
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/playbooks/index.tsx getStaticProps END");
   }
 };
 

@@ -182,6 +182,8 @@ async function getAnalyticsData(): Promise<StrategicHealthReport | null> {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/board/intelligence.tsx getServerSideProps START");
+  try {
   const { req } = context;
   const startTime = Date.now();
 
@@ -284,6 +286,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
             : "Unable to load report",
       },
     };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/board/intelligence.tsx getServerSideProps END");
   }
 };
 

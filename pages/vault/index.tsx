@@ -90,6 +90,8 @@ export const getStaticProps: GetStaticProps<{
   categories: string[];
   totalAssets: number;
 }> = async () => {
+  console.log("[PAGE_DATA] pages/vault/index.tsx getStaticProps START");
+  try {
   try {
   try {
     const { getAllBriefs, getAllDownloads } = await import("@/lib/content/server");
@@ -190,6 +192,10 @@ export const getStaticProps: GetStaticProps<{
   }
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/vault/index.tsx getStaticProps END");
   }
 };
 

@@ -49,6 +49,8 @@ function isMarketIntelligenceItem(item: PremiumContentItem): boolean {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  console.log("[PAGE_DATA] pages/artifacts/[id].tsx getServerSideProps START");
+  try {
   const rawId = typeof ctx.params?.id === "string" ? ctx.params.id : "";
   const id = safeStr(rawId);
   const item = id ? getPremiumContentById(id) : null;
@@ -60,6 +62,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       related,
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/artifacts/[id].tsx getServerSideProps END");
+  }
 };
 
 function getAssetType(

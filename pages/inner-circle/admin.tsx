@@ -227,6 +227,8 @@ const InnerCircleIndex: NextPage<AdminProps> = ({ initialAccess, error }) => {
   SERVER SIDE GATEWAY
 ----------------------------------------------------------------------------- */
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log("[PAGE_DATA] pages/inner-circle/admin.tsx getServerSideProps START");
+  try {
   const [
     { readAccessCookie },
     { getSessionContext, tierAtLeast },
@@ -263,6 +265,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   } catch (err) {
     console.error("[INNER_CIRCLE_ADMIN_ERROR]:", err);
     return { props: { error: "Vault connectivity lost. Systems re-aligning." } };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/admin.tsx getServerSideProps END");
   }
 };
 

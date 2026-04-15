@@ -133,6 +133,8 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[PAGE_DATA] pages/canon/[slug].tsx getStaticPaths START");
+  try {
   try {
   // Narrow: load only canon docs (~15) instead of the full 316-doc corpus.
   const { getAllCanons, isDraftContent } = await import(
@@ -174,9 +176,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   } finally {
   }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/canon/[slug].tsx getStaticPaths END");
+  }
 };
 
 export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
+  console.log("[PAGE_DATA] pages/canon/[slug].tsx getStaticProps START");
+  try {
   try {
   const slug = canonBareSlug(params?.slug);
   if (!slug) return { notFound: true };
@@ -219,6 +227,10 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   };
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/canon/[slug].tsx getStaticProps END");
   }
 };
 

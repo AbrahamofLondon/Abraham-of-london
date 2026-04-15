@@ -56,6 +56,8 @@ const Page: NextPage<Props> = ({ reports, telemetry }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/inner-circle/admin/reports/index.tsx getServerSideProps START");
+  try {
   const [
     { readAccessCookie },
     { getSessionContext, tierAtLeast },
@@ -109,6 +111,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
         },
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/admin/reports/index.tsx getServerSideProps END");
+  }
 };
 
 export default Page;

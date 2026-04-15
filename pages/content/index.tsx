@@ -39,6 +39,8 @@ type Item = {
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[PAGE_DATA] pages/content/index.tsx getStaticProps START");
+  try {
   try {
   try {
     const {
@@ -116,6 +118,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/content/index.tsx getStaticProps END");
   }
 };
 

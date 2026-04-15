@@ -522,6 +522,8 @@ export default DevDashboardComponent;
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
   context: GetServerSidePropsContext
 ) => {
+  console.log("[PAGE_DATA] pages/dev/dashboard.tsx getServerSideProps START");
+  try {
   // Development mode - bypass all authentication
   if (process.env.NODE_ENV !== "development") {
     return {
@@ -616,5 +618,9 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
         dealFlowStats: null,
       },
     };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/dev/dashboard.tsx getServerSideProps END");
   }
 };

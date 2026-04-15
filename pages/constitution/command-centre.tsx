@@ -25,6 +25,8 @@ type Props = {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
+  console.log("[PAGE_DATA] pages/constitution/command-centre.tsx getServerSideProps START");
+  try {
   const data = buildExecutiveCommandCentreData();
 
   return {
@@ -32,6 +34,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
       data,
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/constitution/command-centre.tsx getServerSideProps END");
+  }
 };
 
 function cx(...parts: Array<string | false | null | undefined>) {

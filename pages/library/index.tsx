@@ -168,6 +168,8 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[PAGE_DATA] pages/library/index.tsx getStaticProps START");
+  try {
   try {
   const items = await loadPdfAssets();
 
@@ -187,6 +189,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   };
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/library/index.tsx getStaticProps END");
   }
 };
 

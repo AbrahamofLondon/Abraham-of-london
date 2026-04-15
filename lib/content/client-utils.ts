@@ -1,3 +1,5 @@
+console.log("[MODULE_INIT] lib/content/client-utils");
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/content/client-utils.ts — CLIENT-SAFE ONLY (SSOT RE-EXPORT)
 // This file must NOT invent its own slug/href logic.

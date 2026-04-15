@@ -188,6 +188,8 @@ const StrategySlugPage: NextPage<Props> = ({ item }) => {
 /* -------------------------------------------------------------------------- */
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[PAGE_DATA] pages/strategy/[...slug].tsx getStaticPaths START");
+  try {
   try {
   try {
     const { getPublishedStrategies } = await import("@/lib/server/strategies-data");
@@ -205,9 +207,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   } finally {
   }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/strategy/[...slug].tsx getStaticPaths END");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[PAGE_DATA] pages/strategy/[...slug].tsx getStaticProps START");
+  try {
   try {
   const slug = cleanPathish(joinParamSlug(params?.slug as any));
   if (!slug) return { notFound: true, revalidate: 300 };
@@ -227,6 +235,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/strategy/[...slug].tsx getStaticProps END");
   }
 };
 

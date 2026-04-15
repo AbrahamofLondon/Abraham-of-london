@@ -2823,6 +2823,12 @@ export default function ExecutiveReportingRunPage() {
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
+  console.log("[PAGE_DATA] pages/diagnostics/executive-reporting/run.tsx getServerSideProps START");
+  try {
   return { props: {} };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/diagnostics/executive-reporting/run.tsx getServerSideProps END");
+  }
 };
 

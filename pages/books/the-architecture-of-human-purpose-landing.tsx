@@ -316,6 +316,8 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
 };
 
 export const getStaticProps: GetStaticProps<PurposeLandingProps> = async () => {
+  console.log("[PAGE_DATA] pages/books/the-architecture-of-human-purpose-landing.tsx getStaticProps START");
+  try {
   try {
   // Hard fallback: never breaks deploy
   let book: PreludeBook = {
@@ -385,6 +387,10 @@ export const getStaticProps: GetStaticProps<PurposeLandingProps> = async () => {
   };
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/books/the-architecture-of-human-purpose-landing.tsx getStaticProps END");
   }
 };
 

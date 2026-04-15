@@ -165,6 +165,8 @@ const DebugContentPage: NextPage<Props> = ({ nodeEnv, totals, rows, warnings }) 
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[PAGE_DATA] pages/debug/content.tsx getStaticProps START");
+  try {
   const nodeEnv = process.env.NODE_ENV ?? "development";
 
   // Hard gate server-side as well: ensures Next export never leaks it
@@ -250,6 +252,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     },
     revalidate: 10,
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/debug/content.tsx getStaticProps END");
+  }
 };
 
 export default DebugContentPage;

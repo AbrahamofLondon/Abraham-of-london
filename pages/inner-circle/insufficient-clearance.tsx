@@ -163,6 +163,8 @@ export default function InsufficientClearance({ userTier, isLoggedIn, attemptedP
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log("[PAGE_DATA] pages/inner-circle/insufficient-clearance.tsx getServerSideProps START");
+  try {
   const { req, query } = context;
   const token = await getToken({ req });
   
@@ -201,4 +203,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       isLockdown
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/insufficient-clearance.tsx getServerSideProps END");
+  }
 };

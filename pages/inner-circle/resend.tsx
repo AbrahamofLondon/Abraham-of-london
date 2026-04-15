@@ -264,6 +264,8 @@ const InnerCircleResendPage: NextPage<ResendProps> = ({
 export const getServerSideProps: GetServerSideProps<ResendProps> = async (
   context
 ) => {
+  console.log("[PAGE_DATA] pages/inner-circle/resend.tsx getServerSideProps START");
+  try {
   try {
     const sessionId = readAccessCookie(context.req as any);
     const hasActiveSession = Boolean(sessionId);
@@ -288,6 +290,10 @@ export const getServerSideProps: GetServerSideProps<ResendProps> = async (
         hasActiveSession: false,
       },
     };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/resend.tsx getServerSideProps END");
   }
 };
 

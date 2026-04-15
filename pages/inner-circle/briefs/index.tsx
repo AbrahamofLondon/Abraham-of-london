@@ -87,6 +87,8 @@ const BriefsIndexPage: NextPage<Props> = ({ briefs, memberName, tier }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/inner-circle/briefs/index.tsx getServerSideProps START");
+  try {
   const [
     { readAccessCookie },
     { getSessionContext, tierAtLeast },
@@ -151,6 +153,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       tier: ctx.tier || "public",
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/briefs/index.tsx getServerSideProps END");
+  }
 };
 
 export default BriefsIndexPage;

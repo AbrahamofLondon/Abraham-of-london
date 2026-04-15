@@ -8,6 +8,8 @@ import type { NextRequest } from "next/server";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeUserTier } from "@/lib/access/tier-policy";
 
+console.log("[MODULE_INIT] lib/server/auth/cookies");
+
 export const ACCESS_COOKIE = "aol_access";
 export const TIER_COOKIE = "aol_tier";
 

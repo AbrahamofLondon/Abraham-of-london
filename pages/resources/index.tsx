@@ -34,6 +34,8 @@ function safeDateISO(d: any): string | null {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  console.log("[PAGE_DATA] pages/resources/index.tsx getStaticProps START");
+  try {
   try {
   try {
     const { getAllResources, getDocHref, sanitizeData } = await import(
@@ -72,6 +74,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/resources/index.tsx getStaticProps END");
   }
 };
 

@@ -104,6 +104,8 @@ const BriefDetailPage: NextPage<Props> = ({ brief, accessTier }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/inner-circle/briefs/[...slug].tsx getServerSideProps START");
+  try {
   const rawSlug = Array.isArray(context.params?.slug)
     ? context.params?.slug.join("/")
     : safeString(context.params?.slug);
@@ -158,6 +160,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       accessTier: safeString(ctx.tier) || "inner-circle",
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/briefs/[...slug].tsx getServerSideProps END");
+  }
 };
 
 export default BriefDetailPage;

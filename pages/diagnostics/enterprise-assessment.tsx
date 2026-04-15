@@ -873,6 +873,12 @@ export default function EnterpriseAssessmentPage() {
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
+  console.log("[PAGE_DATA] pages/diagnostics/enterprise-assessment.tsx getServerSideProps START");
+  try {
   return { props: {} };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/diagnostics/enterprise-assessment.tsx getServerSideProps END");
+  }
 };
 

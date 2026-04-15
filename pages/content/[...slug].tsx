@@ -60,6 +60,8 @@ const Page: NextPage<Props> = ({ doc, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  console.log("[PAGE_DATA] pages/content/[...slug].tsx getStaticPaths START");
+  try {
   try {
   // Catch-all /content/* route. Pre-generating paths here requires a
   // full-corpus scan across every published document just to enumerate
@@ -70,9 +72,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   } finally {
   }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/content/[...slug].tsx getStaticPaths END");
+  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  console.log("[PAGE_DATA] pages/content/[...slug].tsx getStaticProps START");
+  try {
   try {
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
@@ -102,6 +110,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/content/[...slug].tsx getStaticProps END");
   }
 };
 

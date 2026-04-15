@@ -1,3 +1,5 @@
+console.log("[MODULE_INIT] lib/contentlayer");
+
 // lib/contentlayer.ts — BUILD-SAFE CONTENTLAYER ADAPTER (SSOT)
 // Prevents hard-crash when .contentlayer/generated is missing (Windows/CI).
 // NOTE: Do NOT import "server-only" here because this module is used in pages/* (sitemaps).

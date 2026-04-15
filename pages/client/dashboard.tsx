@@ -153,6 +153,8 @@ function Tile({
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/client/dashboard.tsx getServerSideProps START");
+  try {
   const [{ readAccessCookie }, { getSessionContext, tierAtLeast }, diagnosticsStore, reportsStore] =
     await Promise.all([
       import("@/lib/server/auth/cookies"),
@@ -210,6 +212,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       reports,
     },
   };
+
+  } finally {
+    console.log("[PAGE_DATA] pages/client/dashboard.tsx getServerSideProps END");
+  }
 };
 
 export default ClientDashboardPage;

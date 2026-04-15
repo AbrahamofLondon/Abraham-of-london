@@ -1,3 +1,5 @@
+console.log("[MODULE_INIT] lib/prisma");
+
 // lib/prisma.ts — PAGES-SAFE COMPAT BARREL
 //
 // Use this from pages/** and legacy API routes.

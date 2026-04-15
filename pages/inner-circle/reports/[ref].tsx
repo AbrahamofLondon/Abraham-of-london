@@ -186,6 +186,8 @@ const ReportDetailPage: NextPage<Props> = ({
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  console.log("[PAGE_DATA] pages/inner-circle/reports/[ref].tsx getServerSideProps START");
+  try {
   const diagnosticRef = safeString(context.params?.ref);
 
   const [
@@ -257,6 +259,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   } catch (error) {
     console.error("[inner-circle/reports/[ref]]", error);
     return { notFound: true };
+  }
+
+  } finally {
+    console.log("[PAGE_DATA] pages/inner-circle/reports/[ref].tsx getServerSideProps END");
   }
 };
 
