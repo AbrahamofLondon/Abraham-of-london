@@ -475,7 +475,6 @@ const StrategicFrameworksLibraryPage: NextPage<PageProps> = ({ frameworks, categ
 };
 
 export const getStaticProps: GetStaticProps<PageProps> = async () => {
-  console.log("[BUILD_TRACE] START pages/resources/strategic-frameworks/index.tsx getStaticProps");
   try {
   // Always available build-safe base
   const staticFrameworks = getAllFrameworks();
@@ -517,7 +516,6 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/resources/strategic-frameworks/index.tsx getStaticProps");
   }
 };
 

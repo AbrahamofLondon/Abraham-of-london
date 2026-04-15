@@ -196,7 +196,6 @@ const statusColors: Record<VentureStatus, { text: string; bg: string; border: st
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/ventures/[slug].tsx getStaticPaths");
   try {
   const paths = ventures.map((venture) => ({
     params: { slug: venture.slug },
@@ -208,12 +207,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/ventures/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/ventures/[slug].tsx getStaticProps");
   try {
   const venture = ventures.find((v) => v.slug === params?.slug);
 
@@ -231,7 +228,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/ventures/[slug].tsx getStaticProps");
   }
 };
 

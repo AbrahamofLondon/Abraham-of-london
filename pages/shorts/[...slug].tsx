@@ -688,7 +688,6 @@ const ShortsSlugPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/shorts/[...slug].tsx getStaticPaths");
   try {
   const allShorts = await loadAllShorts();
   const shorts = sortShorts(allShorts);
@@ -708,9 +707,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
       return { params: { slug: parts } };
     })
     .filter(Boolean) as Array<{ params: { slug: string[] } }>)
-    // Cap prebuild to the 10 most recent shorts. Runtime slug resolution
+    // Cap prebuild to the 5 most recent shorts. Runtime slug resolution
     // still works for older shorts via `fallback: "blocking"` below.
-    .slice(0, 10);
+    .slice(0, 5);
 
   return {
     paths,
@@ -718,14 +717,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/shorts/[...slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/shorts/[...slug].tsx getStaticProps");
-  const __traceStart = Date.now();
-  console.log("[RENDER_TRACE] START pages/shorts/[...slug].tsx getStaticProps", JSON.stringify(params ?? {}));
   try {
   const rawParam = joinParamSlug(params?.slug as string | string[] | undefined);
   const targetSlug = toShortRouteSlug(rawParam);
@@ -789,9 +784,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
-    const __rssMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
-    console.log("[RENDER_TRACE] END pages/shorts/[...slug].tsx getStaticProps", `ms=${Date.now() - __traceStart}`, `rssMB=${__rssMB}`);
-    console.log("[BUILD_TRACE] END pages/shorts/[...slug].tsx getStaticProps");
   }
 };
 

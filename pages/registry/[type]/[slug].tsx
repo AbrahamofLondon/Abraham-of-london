@@ -202,13 +202,12 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/registry/[type]/[slug].tsx getStaticPaths");
   try {
   const { getAllPosts, getAllShorts } = await import("@/lib/content/server");
   const allPosts = (getAllPosts() as any[]).filter((p) => !p.draft);
   const allShorts = (getAllShorts() as any[]).filter((s) => !s.draft);
 
-  // Cap prebuild to the 10 most recent items across BOTH types combined.
+  // Cap prebuild to the 5 most recent items across BOTH types combined.
   // Runtime slug resolution still works via `fallback: "blocking"`.
   type Tagged = { type: "dispatches" | "shorts"; doc: any };
   const combined: Tagged[] = [
@@ -222,7 +221,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
         new Date(b.doc?.date || 0).getTime() -
         new Date(a.doc?.date || 0).getTime(),
     )
-    .slice(0, 10)
+    .slice(0, 5)
     .map(({ type, doc }) => ({
       params: {
         type,
@@ -236,14 +235,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/registry/[type]/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   params,
 }) => {
-  console.log("[BUILD_TRACE] START pages/registry/[type]/[slug].tsx getStaticProps");
   try {
   const typeRaw = String(params?.type ?? "");
   const slugRaw = normalizeParamSlug(params?.slug);
@@ -282,7 +279,6 @@ export const getStaticProps: GetStaticProps<UniversalPageProps> = async ({
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/registry/[type]/[slug].tsx getStaticProps");
   }
 };
 

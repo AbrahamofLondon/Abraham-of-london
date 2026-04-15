@@ -215,7 +215,6 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/books/[slug].tsx getStaticPaths");
   try {
   const { getPublishedBooks } = await import("@/lib/content/server");
   const books = (await getPublishedBooks()) || [];
@@ -231,14 +230,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/books/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/books/[slug].tsx getStaticProps");
-  const __traceStart = Date.now();
-  console.log("[RENDER_TRACE] START pages/books/[slug].tsx getStaticProps", JSON.stringify(params ?? {}));
   try {
   try {
     const bare = booksBareSlug(params?.slug);
@@ -283,9 +278,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
   } finally {
-    const __rssMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
-    console.log("[RENDER_TRACE] END pages/books/[slug].tsx getStaticProps", `ms=${Date.now() - __traceStart}`, `rssMB=${__rssMB}`);
-    console.log("[BUILD_TRACE] END pages/books/[slug].tsx getStaticProps");
   }
 };
 

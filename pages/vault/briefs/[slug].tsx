@@ -540,11 +540,10 @@ const BriefPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/vault/briefs/[slug].tsx getStaticPaths");
   try {
   const briefs = await getCombinedBriefs();
 
-  // Cap prebuild to the 10 most recent briefs (by date desc). Runtime slug
+  // Cap prebuild to the 5 most recent briefs (by date desc). Runtime slug
   // resolution still works for older briefs via `fallback: "blocking"`.
   const recent = [...briefs].sort(
     (a: any, b: any) =>
@@ -557,19 +556,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
       if (!bare) return null;
       return { params: { slug: bare } };
     })
-    .filter(Boolean) as Array<{ params: { slug: string } }>).slice(0, 10);
+    .filter(Boolean) as Array<{ params: { slug: string } }>).slice(0, 5);
 
   return { paths, fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/vault/briefs/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/vault/briefs/[slug].tsx getStaticProps");
-  const __traceStart = Date.now();
-  console.log("[RENDER_TRACE] START pages/vault/briefs/[slug].tsx getStaticProps", JSON.stringify(params ?? {}));
   try {
   const bare = briefsBareSlug(params?.slug);
   if (!bare) return { notFound: true };
@@ -623,9 +618,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
-    const __rssMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
-    console.log("[RENDER_TRACE] END pages/vault/briefs/[slug].tsx getStaticProps", `ms=${Date.now() - __traceStart}`, `rssMB=${__rssMB}`);
-    console.log("[BUILD_TRACE] END pages/vault/briefs/[slug].tsx getStaticProps");
   }
 };
 

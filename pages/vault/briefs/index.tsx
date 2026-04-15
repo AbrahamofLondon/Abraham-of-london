@@ -261,7 +261,6 @@ function BriefRow({
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  console.log("[BUILD_TRACE] START pages/vault/briefs/index.tsx getStaticProps");
   try {
   const content = await import("@/lib/content/server");
   const allDocs = await content.getAllCombinedDocs();
@@ -323,7 +322,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/vault/briefs/index.tsx getStaticProps");
   }
 };
 

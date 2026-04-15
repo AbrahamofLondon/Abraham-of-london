@@ -48,7 +48,6 @@ const Page: NextPage<Props> = ({ print, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/prints/[slug].tsx getStaticPaths");
   try {
   // Narrow: load only print docs (~6) instead of the full 316-doc corpus.
   const { getAllPrints, isDraftContent } = await import(
@@ -56,8 +55,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
   );
   const docs = getAllPrints() || [];
 
-  const paths = docs
+  // Cap prebuild to the 5 most recent prints; rest render via blocking.
+  const paths = [...docs]
     .filter((d: any) => !isDraftContent(d))
+    .sort(
+      (a: any, b: any) =>
+        new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
+    )
+    .slice(0, 5)
     .map((d: any) => {
       const slug = normalizeSlug(
         String(d?.slug || d?._raw?.flattenedPath || "").replace(/^prints\//i, ""),
@@ -69,12 +74,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/prints/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/prints/[slug].tsx getStaticProps");
   try {
   const slug = String(params?.slug || "");
 
@@ -103,7 +106,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/prints/[slug].tsx getStaticProps");
   }
 };
 

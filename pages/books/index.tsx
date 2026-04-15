@@ -518,7 +518,6 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 };
 
 export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
-  console.log("[BUILD_TRACE] START pages/books/index.tsx getStaticProps");
   try {
   try {
     const { getPublishedBooks, resolveDocCoverImage } = await import(
@@ -571,7 +570,6 @@ export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
   }
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/books/index.tsx getStaticProps");
   }
 };
 

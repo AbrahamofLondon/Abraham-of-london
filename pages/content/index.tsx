@@ -39,7 +39,6 @@ type Item = {
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  console.log("[BUILD_TRACE] START pages/content/index.tsx getStaticProps");
   try {
   try {
     const {
@@ -117,7 +116,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/content/index.tsx getStaticProps");
   }
 };
 

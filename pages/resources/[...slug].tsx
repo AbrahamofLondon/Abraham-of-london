@@ -83,7 +83,6 @@ const Page: NextPage<Props> = ({ resource, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/resources/[...slug].tsx getStaticPaths");
   try {
   // Narrow: load only resource docs (~20) instead of the full 316-doc corpus.
   // isResourceDoc filter retained because the generic Resource helper may
@@ -118,15 +117,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
       })
   ) as Array<{ params: { slug: string[] } }>;
 
-  return { paths, fallback: "blocking" };
+  // Cap prebuild to 5 paths; rest render via `fallback: "blocking"`.
+  return { paths: paths.slice(0, 5), fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/resources/[...slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/resources/[...slug].tsx getStaticProps");
   try {
   const slug = cleanResourceSlug(params?.slug);
   if (!slug) return { notFound: true };
@@ -160,7 +158,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/resources/[...slug].tsx getStaticProps");
   }
 };
 

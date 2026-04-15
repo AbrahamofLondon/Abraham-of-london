@@ -32,7 +32,6 @@ function safeParseDate(input: string | null): Date | null {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  console.log("[BUILD_TRACE] START pages/events/index.tsx getStaticProps");
   try {
   try {
     const allEventDocs = getAllEvents();
@@ -81,7 +80,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/events/index.tsx getStaticProps");
   }
 };
 

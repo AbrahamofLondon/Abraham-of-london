@@ -194,14 +194,19 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/blog/[...slug].tsx getStaticPaths");
   try {
   const { getPublishedPosts } = await import("@/lib/content/server");
 
   const posts = (await getPublishedPosts()) || [];
 
-  const paths = posts
+  // Cap prebuild to the 5 most recent posts; rest render via blocking.
+  const paths = [...posts]
     .filter((p: any) => !p?.draft)
+    .sort(
+      (a: any, b: any) =>
+        new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
+    )
+    .slice(0, 5)
     .map((p: any) => {
       const raw = normalizeSlug(
         p?.urlSlug ||
@@ -219,14 +224,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/blog/[...slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/blog/[...slug].tsx getStaticProps");
-  const __traceStart = Date.now();
-  console.log("[RENDER_TRACE] START pages/blog/[...slug].tsx getStaticProps", JSON.stringify(params ?? {}));
   try {
   try {
     const rawParam = Array.isArray(params?.slug)
@@ -281,9 +282,6 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
   }
 
   } finally {
-    const __rssMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
-    console.log("[RENDER_TRACE] END pages/blog/[...slug].tsx getStaticProps", `ms=${Date.now() - __traceStart}`, `rssMB=${__rssMB}`);
-    console.log("[BUILD_TRACE] END pages/blog/[...slug].tsx getStaticProps");
   }
 };
 

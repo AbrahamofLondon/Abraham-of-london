@@ -133,7 +133,6 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/canon/[slug].tsx getStaticPaths");
   try {
   // Narrow: load only canon docs (~15) instead of the full 316-doc corpus.
   const { getAllCanons, isDraftContent } = await import(
@@ -142,8 +141,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const docs = getAllCanons() || [];
   const seen = new Set<string>();
 
-  const paths = docs
+  // Cap prebuild to the 5 most recent canon docs; rest render via blocking.
+  const paths = [...docs]
     .filter((d: any) => !isDraftContent(d))
+    .sort(
+      (a: any, b: any) =>
+        new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
+    )
+    .slice(0, 5)
     .map((d: any) => {
       const raw =
         d?.urlSlug ||
@@ -168,12 +173,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/canon/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
-  console.log("[BUILD_TRACE] START pages/canon/[slug].tsx getStaticProps");
   try {
   const slug = canonBareSlug(params?.slug);
   if (!slug) return { notFound: true };
@@ -216,7 +219,6 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/canon/[slug].tsx getStaticProps");
   }
 };
 

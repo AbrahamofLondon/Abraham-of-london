@@ -145,7 +145,6 @@ function titleCase(input?: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[BUILD_TRACE] START pages/playbooks/[slug].tsx getStaticPaths");
   try {
   const { getAllPlaybooks } = await import("@/lib/content/server");
   const allPlaybooks = getAllPlaybooks();
@@ -155,20 +154,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter((slug) => !slug.includes("/"))
     .map((slug) => ({ params: { slug } }));
 
+  // 4 playbooks total; all prebuilt. New additions render via blocking.
   return {
-    paths,
-    fallback: false,
+    paths: paths.slice(0, 5),
+    fallback: "blocking",
   };
 
   } finally {
-    console.log("[BUILD_TRACE] END pages/playbooks/[slug].tsx getStaticPaths");
   }
 };
 
 export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params }) => {
-  console.log("[BUILD_TRACE] START pages/playbooks/[slug].tsx getStaticProps");
-  const __traceStart = Date.now();
-  console.log("[RENDER_TRACE] START pages/playbooks/[slug].tsx getStaticProps", JSON.stringify(params ?? {}));
   try {
   const slug = normalizeSlug(params?.slug);
 
@@ -206,9 +202,6 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
   };
 
   } finally {
-    const __rssMB = Math.round(process.memoryUsage().rss / 1024 / 1024);
-    console.log("[RENDER_TRACE] END pages/playbooks/[slug].tsx getStaticProps", `ms=${Date.now() - __traceStart}`, `rssMB=${__rssMB}`);
-    console.log("[BUILD_TRACE] END pages/playbooks/[slug].tsx getStaticProps");
   }
 };
 
