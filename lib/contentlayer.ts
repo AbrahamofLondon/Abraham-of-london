@@ -68,9 +68,10 @@ export const allPlaybooks = safeCall(
   () => (helper as any).getAllPlaybooks?.() as any[],
 );
 export const allVaults = safeCall(() => helper.getAllVault() as any[]);
-export const allIntelligences = safeCall(
-  () => (helper as any).getAllIntelligences?.() as any[],
-);
+// The contentlayer-helper per-kind loader does not expose an
+// `Intelligence` getter yet; no caller needs populated data for this
+// collection today. Keeping an empty array preserves the public shape.
+export const allIntelligences: any[] = [];
 
 // -------------------------------
 // `allDocuments` — lazy Proxy. Only triggers the full-corpus walk when a
