@@ -44,7 +44,7 @@ const EDITIONS = [
     icon: Scale,
     tag:  "Boardroom PDF",
     body: "Premium portable format for executives, review packs, and cleaner internal circulation.",
-    href: "/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf",
+    href: "/.netlify/functions/gmi-boardroom-pdf",
     cta:  "Open boardroom PDF",
     gold: false,
   },

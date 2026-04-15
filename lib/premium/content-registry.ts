@@ -158,7 +158,7 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       productLine: "Market Outlook",
       editionType: "public-surface",
       surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
-      directDownloadHref: "/api/artifacts/global-market-intelligence-q1-2026-boardroom-pdf",
+      directDownloadHref: "/.netlify/functions/gmi-boardroom-pdf",
       coverImage:
         "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg",
       relatedIds: [...GMI_RELATED_IDS],

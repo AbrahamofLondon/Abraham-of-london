@@ -1,56 +1,22 @@
-import React from "react";
-import type { ReactElement } from "react";
-import { NextRequest, NextResponse } from "next/server";
-import type { DocumentProps } from "@react-pdf/renderer";
-import { scorePurposeAlignment } from "@/lib/alignment/scoring";
-import type { StoredPurposeAlignmentAssessment } from "@/lib/alignment/types";
-import { PURPOSE_ALIGNMENT_INSTRUMENT_ID, PURPOSE_ALIGNMENT_REPORT_VERSION } from "@/lib/alignment/checklist";
-import { buildAlignmentReportWatermark } from "@/lib/alignment/report-watermark";
+// MOVED: this route is now served by
+// /.netlify/functions/purpose-alignment-report
+//
+// The rewrite was required to pull @react-pdf/renderer +
+// AlignmentReportDocument out of the main `___netlify-server-handler`
+// bundle, which exceeds Netlify's per-file function upload limit.
+//
+// Keeping this stub to prevent 404 during transition.
 
-export async function GET(_req: NextRequest) {
-  const sampleResult = scorePurposeAlignment({
-    answers: {},
-  });
+import { NextResponse } from "next/server";
 
-  const sampleAssessment: StoredPurposeAlignmentAssessment = {
-    id: "sample-purpose-alignment-report",
-    userId: null,
-    sessionKey: "sample-purpose-alignment-session",
-    title: "Purpose Alignment Report",
-    notes: null,
-    totalScore: sampleResult.totalScore,
-    possibleScore: sampleResult.possibleScore,
-    percentScore: sampleResult.percent,
-    band: sampleResult.band,
-    weakestDomains: sampleResult.weakestDomains,
-    strengths: sampleResult.strengths,
-    corrections: sampleResult.corrections,
-    answers: {},
-    domainScores: sampleResult.domainScores,
-    reportVersion: PURPOSE_ALIGNMENT_REPORT_VERSION,
-    sourceInstrumentId: PURPOSE_ALIGNMENT_INSTRUMENT_ID,
-    createdAt: sampleResult.createdAt,
-    updatedAt: sampleResult.createdAt,
-  };
+export const dynamic = "force-dynamic";
 
-  const watermark = buildAlignmentReportWatermark(sampleAssessment);
-
-  const { renderToBuffer } = await import("@react-pdf/renderer");
-  const { default: AlignmentReportDocument } = await import(
-    "@/lib/pdf/templates/AlignmentReportDocument"
+export async function GET() {
+  return NextResponse.redirect(
+    new URL(
+      "/.netlify/functions/purpose-alignment-report",
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org",
+    ),
+    308,
   );
-
-  const pdf = await renderToBuffer(
-    React.createElement(AlignmentReportDocument, {
-      assessment: sampleAssessment,
-      watermark,
-    }) as ReactElement<DocumentProps>
-  );
-
-  return new NextResponse(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": 'attachment; filename="purpose-alignment-report.pdf"',
-    },
-  });
 }

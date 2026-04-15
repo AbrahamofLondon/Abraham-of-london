@@ -104,7 +104,7 @@ export default function PurposeAlignmentAssessment({ onScored }: Props) {
 
           <div className="mt-6 flex gap-3">
             <a
-              href={`/api/purpose-alignment/report?ts=${encodeURIComponent(result.createdAt)}`}
+              href={`/.netlify/functions/purpose-alignment-report?ts=${encodeURIComponent(result.createdAt)}`}
               className="rounded-xl border px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50"
             >
               Download PDF report

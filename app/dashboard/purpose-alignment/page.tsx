@@ -224,7 +224,7 @@ export default async function PurposeAlignmentDashboardPage() {
 
               {latest ? (
                 <a
-                  href={`/api/purpose-alignment/report/${latest.id}`}
+                  href={`/.netlify/functions/purpose-alignment-report-id?assessmentId=${encodeURIComponent(latest.id)}`}
                   className="inline-flex rounded-2xl border bg-white px-5 py-3 text-sm font-medium text-neutral-900 transition hover:bg-neutral-50"
                 >
                   Download current report
@@ -349,7 +349,7 @@ export default async function PurposeAlignmentDashboardPage() {
 
           <AlignmentCTA
             narrative={narrative}
-            reportUrl={latest ? `/api/purpose-alignment/report/${latest.id}` : undefined}
+            reportUrl={latest ? `/.netlify/functions/purpose-alignment-report-id?assessmentId=${encodeURIComponent(latest.id)}` : undefined}
           />
         </>
       ) : null}
@@ -445,7 +445,7 @@ export default async function PurposeAlignmentDashboardPage() {
 
                 <div className="flex items-center gap-3">
                   <a
-                    href={`/api/purpose-alignment/report/${item.id}`}
+                    href={`/.netlify/functions/purpose-alignment-report-id?assessmentId=${encodeURIComponent(item.id)}`}
                     className="inline-flex rounded-2xl border bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-50"
                   >
                     Download PDF
