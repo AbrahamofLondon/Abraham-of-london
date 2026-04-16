@@ -83,22 +83,17 @@ function canonBareSlug(input: unknown): string {
 }
 
 async function getAllCanonDocuments(): Promise<any[]> {
-  const { allCanons, allDocuments } = await import("contentlayer/generated");
+  // Route through the per-kind helper so webpack does not bundle
+  // `contentlayer/generated` into this route's chunk.
+  const { getAllCanons } = await import("@/lib/content/server");
+  const allCanons = getAllCanons() || [];
 
   if (Array.isArray(allCanons) && allCanons.length > 0) {
     return allCanons;
   }
 
-  if (Array.isArray(allDocuments)) {
-    return allDocuments.filter((doc: any) => {
-      const docType = String(
-        doc?.type || doc?.docType || doc?._raw?.sourceFilePath?.split("/")[0] || "",
-      ).toLowerCase();
-
-      return docType === "canon";
-    });
-  }
-
+  // No fallback to allDocuments — the per-kind loader already returns
+  // the full Canon corpus from its own _index.json.
   return [];
 }
 

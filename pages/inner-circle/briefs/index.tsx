@@ -119,7 +119,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  const { allBriefs } = await import("contentlayer/generated");
+  // Per-kind helper — avoids bundling `contentlayer/generated`, which
+  // statically pulls every collection's _index.json into server chunks.
+  const { getAllBriefs } = await import("@/lib/content/server");
+  const allBriefs = (getAllBriefs() || []) as any[];
   const briefs: BriefListItem[] = allBriefs
     .filter((b: any) => !b?.draft)
     .filter((b: any) => {

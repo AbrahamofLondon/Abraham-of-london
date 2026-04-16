@@ -3,8 +3,23 @@
 // CONTENT ASSET ADAPTER — HARDENED
 // Real repo content -> decision assets with metadata precedence + confidence
 // ============================================================================
+//
+// IMPORTANT: this file MUST NOT statically `import ... from "contentlayer/
+// generated"` or re-import the contentlayer barrel through any wrapper.
+//
+// The barrel statically imports every collection's `_index.json` with
+// `{ type: "json" }`, and webpack inlines those JSON payloads into every
+// server chunk that transitively reaches this adapter. That was the
+// primary contributor to the oversized `___netlify-server-handler`
+// bundle (~127 MB of duplicated Contentlayer JSON across ~12 route
+// chunks, measured directly from .next/server/chunks/).
+//
+// The adapter needs only a handful of collection buckets, so each
+// bucket is loaded at runtime from its dedicated index file. Webpack
+// never sees the JSON as a module dependency; Next's file tracer
+// follows the `fs.readFileSync` path (and the trace-exclude that used
+// to strip these files has been removed from next.config.mjs).
 
-import * as Generated from "contentlayer/generated";
 import type { MatchedAsset } from "@/lib/decision/asset-matcher";
 import type {
   AssetKind,
@@ -342,9 +357,77 @@ function buildAssetFromDoc(doc: UnknownDoc, kind: AssetKind): DecisionAsset {
   };
 }
 
+// Map each logical bucket name to the Contentlayer generated directory
+// that backs it. The directory names are the ones Contentlayer creates
+// under `.contentlayer/generated/<Type>/`, which are stable and do not
+// depend on the runtime JS export names from the virtual barrel.
+const BUCKET_TO_GENERATED_DIR: Record<SourceBucketName, string> = {
+  allBriefs: "Brief",
+  allVaultBriefs: "VaultBrief",
+  allPlaybooks: "Playbook",
+  allStrategy: "Strategy",
+  allCanon: "Canon",
+  allIntelligence: "Intelligence",
+  allResources: "Resource",
+  allDownloads: "Download",
+};
+
+// Per-process memo so repeated calls from the same worker do not
+// re-read the JSON file.
+const bucketCache = new Map<SourceBucketName, UnknownDoc[]>();
+
+function loadBucketDocsFromDisk(bucketName: SourceBucketName): UnknownDoc[] {
+  if (typeof window !== "undefined") return [];
+
+  const dir = BUCKET_TO_GENERATED_DIR[bucketName];
+  if (!dir) return [];
+
+  try {
+    // `eval("require")` is the same pattern used in lib/contentlayer-
+    // helper.ts. It prevents webpack from static-analyzing `fs`/`path`
+    // into the client chunk while still working at runtime on Node.
+    // eslint-disable-next-line no-eval
+    const req = eval("require") as NodeRequire;
+    const fs = req("fs") as typeof import("fs");
+    const path = req("path") as typeof import("path");
+
+    const filePath = path.join(
+      process.cwd(),
+      ".contentlayer",
+      "generated",
+      dir,
+      "_index.json",
+    );
+
+    if (!fs.existsSync(filePath)) return [];
+
+    const raw = fs.readFileSync(filePath, "utf8");
+    const parsed = JSON.parse(raw);
+
+    if (Array.isArray(parsed)) return parsed as UnknownDoc[];
+    if (parsed && typeof parsed === "object") {
+      const obj = parsed as Record<string, unknown>;
+      if (Array.isArray(obj.documents)) return obj.documents as UnknownDoc[];
+      if (Array.isArray(obj.allDocuments)) {
+        return obj.allDocuments as UnknownDoc[];
+      }
+    }
+    return [];
+  } catch (error) {
+    console.warn(
+      `[content-asset-adapter] failed to load bucket "${bucketName}" from ${dir}/_index.json`,
+      error,
+    );
+    return [];
+  }
+}
+
 function getBucketDocs(bucketName: SourceBucketName): UnknownDoc[] {
-  const bucket = (Generated as Record<string, unknown>)[bucketName];
-  return Array.isArray(bucket) ? (bucket as UnknownDoc[]) : [];
+  const cached = bucketCache.get(bucketName);
+  if (cached) return cached;
+  const docs = loadBucketDocsFromDisk(bucketName);
+  bucketCache.set(bucketName, docs);
+  return docs;
 }
 
 export function getAllDecisionAssetsFromContent(): DecisionAsset[] {

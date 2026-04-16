@@ -113,7 +113,6 @@ const nextConfig = {
       "./node_modules/typescript/**",
       "./node_modules/sass/**",
       "./node_modules/@esbuild/**",
-      "./.contentlayer/generated/**/_index.json",
       "./private_storage/**",
 
       // Prisma dead weight — schema/migration/introspection/fmt engines are

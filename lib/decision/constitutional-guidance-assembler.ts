@@ -121,15 +121,66 @@ function kindFromDocType(docType: string): AssetKind {
   return "unknown";
 }
 
-async function loadContentlayerGenerated(): Promise<any | null> {
+// Per-directory loader — avoids any webpack-visible reference to
+// `contentlayer/generated`. Every static or dynamic import of that
+// barrel pulls 16 collections' JSON into the server chunks via
+// webpack's `{ type: "json" }` static resolution, and this file was
+// transitively reachable from ~12 build-time routes (executive-report-
+// service -> ... -> constitutional-guidance-assembler), which was one
+// of the primary contributors to the ~127 MB of inlined Contentlayer
+// JSON measured in `.next/server/chunks/`.
+//
+// `eval("require")` hides the fs/path requires from webpack's static
+// analyzer; the JSON itself is read at runtime from disk, and Next's
+// file tracer copies `.contentlayer/generated/**/_index.json` into the
+// deployed function package because the trace-exclude that used to
+// strip those files has been removed from next.config.mjs.
+const _catalogBucketCache = new Map<string, any[]>();
+
+function loadCatalogBucket(dirName: string): any[] {
+  if (typeof window !== "undefined") return [];
+  const cached = _catalogBucketCache.get(dirName);
+  if (cached) return cached;
+
   try {
-    return await import("contentlayer/generated");
-  } catch {
-    try {
-      return await import("contentlayer/generated");
-    } catch {
-      return null;
+    // eslint-disable-next-line no-eval
+    const req = eval("require") as NodeRequire;
+    const fs = req("fs") as typeof import("fs");
+    const path = req("path") as typeof import("path");
+
+    const filePath = path.join(
+      process.cwd(),
+      ".contentlayer",
+      "generated",
+      dirName,
+      "_index.json",
+    );
+
+    if (!fs.existsSync(filePath)) {
+      _catalogBucketCache.set(dirName, []);
+      return [];
     }
+
+    const raw = fs.readFileSync(filePath, "utf8");
+    const parsed = JSON.parse(raw);
+
+    let docs: any[] = [];
+    if (Array.isArray(parsed)) docs = parsed;
+    else if (parsed && typeof parsed === "object") {
+      const obj = parsed as Record<string, unknown>;
+      if (Array.isArray(obj.documents)) docs = obj.documents as any[];
+      else if (Array.isArray(obj.allDocuments)) docs = obj.allDocuments as any[];
+    }
+
+    _catalogBucketCache.set(dirName, docs);
+    return docs;
+  } catch (error) {
+    console.warn(
+      `[constitutional-guidance-assembler] failed to load bucket "${dirName}"`,
+      error,
+    );
+    _catalogBucketCache.set(dirName, []);
+    return [];
   }
 }
 
@@ -177,20 +228,17 @@ function normalizeDoc(doc: any, sourceType: string): CatalogItem | null {
 }
 
 async function loadAssetCatalog(): Promise<CatalogItem[]> {
-  const generated = await loadContentlayerGenerated();
-  if (!generated) return [];
-
   const buckets: Array<{ key: string; docs: any[] }> = [
-    { key: "Download", docs: generated.allDownloads || [] },
-    { key: "Playbook", docs: generated.allPlaybooks || [] },
-    { key: "Brief", docs: generated.allBriefs || [] },
-    { key: "VaultBrief", docs: generated.allVaultBriefs || [] },
-    { key: "Intelligence", docs: generated.allIntelligence || [] },
-    { key: "Resource", docs: generated.allResources || [] },
-    { key: "Book", docs: generated.allBooks || [] },
-    { key: "Canon", docs: generated.allCanon || [] },
-    { key: "Strategy", docs: generated.allStrategy || [] },
-    { key: "Vault", docs: generated.allVaults || [] },
+    { key: "Download", docs: loadCatalogBucket("Download") },
+    { key: "Playbook", docs: loadCatalogBucket("Playbook") },
+    { key: "Brief", docs: loadCatalogBucket("Brief") },
+    { key: "VaultBrief", docs: loadCatalogBucket("VaultBrief") },
+    { key: "Intelligence", docs: loadCatalogBucket("Intelligence") },
+    { key: "Resource", docs: loadCatalogBucket("Resource") },
+    { key: "Book", docs: loadCatalogBucket("Book") },
+    { key: "Canon", docs: loadCatalogBucket("Canon") },
+    { key: "Strategy", docs: loadCatalogBucket("Strategy") },
+    { key: "Vault", docs: loadCatalogBucket("Vault") },
   ];
 
   const items: CatalogItem[] = [];

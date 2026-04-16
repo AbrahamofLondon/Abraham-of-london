@@ -59,13 +59,11 @@ function tierAccent(tierRaw?: string) {
 
 async function tryLoadFromContentlayer(slug: string): Promise<LoadedDoc | null> {
   try {
-    const mod: any = await import("contentlayer/generated");
-    const candidates: any[] =
-      mod?.allDownloads ||
-      mod?.allDownload ||
-      mod?.allDocuments ||
-      mod?.allDocs ||
-      [];
+    // Route through the per-kind helper so webpack does not bundle
+    // `contentlayer/generated` (the barrel statically imports every
+    // collection's _index.json and inflates the server chunks).
+    const { getAllDownloads } = await import("@/lib/content/server");
+    const candidates: any[] = getAllDownloads() || [];
 
     if (!Array.isArray(candidates) || candidates.length === 0) return null;
 

@@ -150,8 +150,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  const { allBriefs } = await import("contentlayer/generated");
-  const brief = findBriefInList(slug, allBriefs as any[]);
+  // Per-kind helper — avoids bundling `contentlayer/generated`.
+  const { getAllBriefs } = await import("@/lib/content/server");
+  const allBriefs = (getAllBriefs() || []) as any[];
+  const brief = findBriefInList(slug, allBriefs);
   if (!brief) return { notFound: true };
 
   return {

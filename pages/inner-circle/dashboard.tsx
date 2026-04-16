@@ -243,7 +243,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // ✅ CONTENT QUERY ALIGNED TO SCHEMA (uses summary, not excerpt)
-    const { allBriefs } = await import("contentlayer/generated");
+    // Per-kind helper — avoids bundling `contentlayer/generated`.
+    const { getAllBriefs } = await import("@/lib/content/server");
+    const allBriefs = (getAllBriefs() || []) as any[];
     const briefs = allBriefs
       .filter((b) => (b as any).status === "published" || process.env.NODE_ENV === "development")
       .filter((b) => {

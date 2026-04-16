@@ -14,7 +14,14 @@ export default async function handler(
     return res.status(404).json({ error: "Not found" });
   }
 
-  const Contentlayer = await import("contentlayer/generated");
+  // Dev-only: /* webpackIgnore: true */ tells webpack to leave this
+  // import as a true runtime call. Webpack never bundles the barrel
+  // into this handler's chunk; Node resolves it at request time in
+  // development. In production the NODE_ENV guard above short-circuits
+  // before this line is reached.
+  const Contentlayer = await import(
+    /* webpackIgnore: true */ "contentlayer/generated"
+  );
 
   const exports = Object.keys(Contentlayer);
   const arrays = exports.filter((key) => Array.isArray((Contentlayer as any)[key]));

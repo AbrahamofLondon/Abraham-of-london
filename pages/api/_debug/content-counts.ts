@@ -59,10 +59,14 @@ function top3(files: string[], contentRoot: string) {
 }
 
 async function canResolveContentlayerGenerated(): Promise<boolean> {
-  // In Next runtime, TS path mapping may allow this even if Node -e cannot.
+  // `/* webpackIgnore: true */` prevents webpack from bundling the full
+  // contentlayer barrel into this diagnostic endpoint's chunk. The import
+  // is left as a true runtime call that Node resolves at request time.
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const mod = await import("contentlayer/generated");
+    const mod = await import(
+      /* webpackIgnore: true */ "contentlayer/generated"
+    );
     return !!mod;
   } catch {
     return false;

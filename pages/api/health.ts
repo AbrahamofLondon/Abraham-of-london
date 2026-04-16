@@ -223,9 +223,11 @@ async function checkRedisConnection(): Promise<ServiceStatus> {
 async function checkContentlayerStatus(): Promise<ServiceStatus> {
   const start = Date.now();
   try {
-    // Dynamically import the generated manifest
-    const { allDocuments } = await import('.contentlayer/generated');
-    
+    // Route through the per-kind helper — avoids bundling the full
+    // contentlayer barrel into the health endpoint's chunk.
+    const { getAllContentlayerDocs } = await import("@/lib/contentlayer-helper");
+    const allDocuments = getAllContentlayerDocs() || [];
+
     if (!allDocuments || allDocuments.length === 0) {
       return {
         status: 'degraded',
