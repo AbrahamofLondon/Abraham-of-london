@@ -96,6 +96,9 @@ const nextConfig = {
     "canvas",
     "jsdom",
     "sharp",
+    "puppeteer",
+    "puppeteer-core",
+    "@puppeteer/browsers",
   ],
 
   /**
@@ -139,6 +142,21 @@ const nextConfig = {
       "./node_modules/.prisma/client/libquery_engine-debian*",
       "./node_modules/.prisma/client/libquery_engine-windows*",
       "./node_modules/.prisma/client/libquery_engine-darwin*",
+
+      // Puppeteer + bundled Chromium (~150 MB combined on Netlify Linux).
+      // The only routes that ever referenced Puppeteer
+      // (pages/api/pdfs/generate-all.ts and pages/api/pdfs/[id]/generate.ts)
+      // have been stubbed to a 503 because the underlying workflow
+      // relies on writing to `public/assets/downloads/`, which does
+      // not persist on Netlify functions. Regeneration is done via
+      // the build-time CLI instead, so Puppeteer has zero runtime
+      // reachability from the deployed handler and can be stripped
+      // from the trace entirely.
+      "./node_modules/puppeteer/**",
+      "./node_modules/puppeteer-core/**",
+      "./node_modules/@puppeteer/**",
+      "./node_modules/chrome-headless-shell/**",
+      "./node_modules/.cache/puppeteer/**",
     ],
   },
 
