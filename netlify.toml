@@ -41,6 +41,48 @@
     "prisma",
   ]
 
+# Strip the handler package from ~1.1 GB to <250 MB by removing
+# directories that should never be in a serverless function.
+# `outputFileTracingExcludes` in next.config.mjs is supposed to handle
+# this, but the plugin-nextjs trace copy does not honour all of those
+# patterns. The Netlify-native `excluded_files` directive IS enforced.
+[functions."___netlify-server-handler"]
+  excluded_files = [
+    # Recursive self-inclusion: the plugin copies .netlify/ into the handler
+    # because outputFileTracingRoot = process.cwd(), and .netlify/ is under cwd.
+    ".netlify/**",
+    # Static assets are served via Netlify CDN, not the function.
+    "public/**",
+    "public/assets/**",
+    # Contentlayer build cache — runtime only needs the _index.json files.
+    ".contentlayer/.cache/**",
+    # Build tools / dev-only dirs that have no place in a Lambda function.
+    "tests/**",
+    "scripts/**",
+    ".agents/**",
+    ".github/**",
+    ".husky/**",
+    "playwright-report/**",
+    "briefs-contamination-backup/**",
+    "deepseek-terminal-chat/**",
+    "triage_hold/**",
+    "CRM/**",
+    "OGR/**",
+    "src/**",
+    # Build-only node_modules already in next.config.mjs excludes but
+    # not consistently honoured by the trace copy.
+    "node_modules/sass/**",
+    "node_modules/@esbuild/**",
+    "node_modules/webpack/**",
+    "node_modules/@img/**",
+    "node_modules/typescript/**",
+    "node_modules/puppeteer/**",
+    "node_modules/puppeteer-core/**",
+    "node_modules/@puppeteer/**",
+    "node_modules/chrome-headless-shell/**",
+    "node_modules/.cache/**",
+  ]
+
 [functions.emails]
   included_files = ["emails/**", "./emails/**"]
   node_bundler = "esbuild"
