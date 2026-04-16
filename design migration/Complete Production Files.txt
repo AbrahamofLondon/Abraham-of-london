@@ -1,0 +1,2271 @@
+# ABRAHAMOFLONDON: Federated Surfaces - Complete Production Files
+
+**Based on Corrected Architecture | Ready for Implementation | April 2026**
+
+---
+
+## FILE 1: `lib/design-system/tokens.ts`
+
+```typescript
+// Foundation Tokens - Raw values, no semantics
+// DO NOT use these directly in components. Use semantic.ts instead.
+
+export const tokens = {
+  // Color foundations - raw palette
+  color: {
+    // Primary brand - used sparingly, never for body text
+    primary: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
+    },
+    // Neutral grays - workhorse palette
+    neutral: {
+      0: '#ffffff',
+      50: '#fafafa',
+      100: '#f5f5f5',
+      200: '#e5e5e5',
+      300: '#d4d4d4',
+      400: '#a3a3a3',
+      500: '#737373',
+      600: '#525252',
+      700: '#404040',
+      800: '#262626',
+      900: '#171717',
+      1000: '#000000',
+    },
+    // Semantic aliases (raw values - will be mapped to CSS variables)
+    success: {
+      light: '#f0fdf4',
+      base: '#22c55e',
+      dark: '#166534',
+    },
+    warning: {
+      light: '#fefce8',
+      base: '#eab308',
+      dark: '#854d0e',
+    },
+    error: {
+      light: '#fef2f2',
+      base: '#ef4444',
+      dark: '#991b1b',
+    },
+    info: {
+      light: '#eff6ff',
+      base: '#3b82f6',
+      dark: '#1e40af',
+    },
+  },
+
+  // Typography foundations
+  typography: {
+    family: {
+      sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      serif: ['Charter', 'Georgia', 'Times', 'serif'],
+      mono: ['"JetBrains Mono"', '"SF Mono"', 'monospace'],
+    },
+    scale: {
+      xs: '0.75rem',     // 12px
+      sm: '0.875rem',    // 14px
+      base: '1rem',      // 16px
+      lg: '1.125rem',    // 18px
+      xl: '1.25rem',     // 20px
+      '2xl': '1.5rem',   // 24px
+      '3xl': '1.875rem', // 30px
+      '4xl': '2.25rem',  // 36px
+      '5xl': '3rem',     // 48px
+      '6xl': '3.75rem',  // 60px
+      '7xl': '4.5rem',   // 72px
+    },
+    lineHeight: {
+      none: 1,
+      tight: 1.25,
+      snug: 1.375,
+      normal: 1.5,
+      relaxed: 1.625,
+      loose: 2,
+    },
+    letterSpacing: {
+      tighter: '-0.05em',
+      tight: '-0.025em',
+      normal: '0',
+      wide: '0.025em',
+      wider: '0.05em',
+      widest: '0.1em',
+    },
+  },
+
+  // Spacing - 8px grid system
+  spacing: {
+    0: '0',
+    1: '0.25rem',   // 4px
+    2: '0.5rem',    // 8px
+    3: '0.75rem',   // 12px
+    4: '1rem',      // 16px
+    5: '1.25rem',   // 20px
+    6: '1.5rem',    // 24px
+    8: '2rem',      // 32px
+    10: '2.5rem',   // 40px
+    12: '3rem',     // 48px
+    16: '4rem',     // 64px
+    20: '5rem',     // 80px
+    24: '6rem',     // 96px
+    32: '8rem',     // 128px
+    40: '10rem',    // 160px
+    48: '12rem',    // 192px
+    56: '14rem',    // 224px
+    64: '16rem',    // 256px
+  },
+
+  // Border radius
+  radius: {
+    none: '0',
+    sm: '0.125rem',   // 2px
+    base: '0.25rem',  // 4px
+    md: '0.375rem',   // 6px
+    lg: '0.5rem',     // 8px
+    xl: '0.75rem',    // 12px
+    '2xl': '1rem',    // 16px
+    '3xl': '1.5rem',  // 24px
+    full: '9999px',
+  },
+
+  // Shadows - elevation tiers
+  shadow: {
+    none: 'none',
+    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    base: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+    '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+    inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+  },
+
+  // Borders
+  borderWidth: {
+    none: '0',
+    hairline: '0.5px',
+    thin: '1px',
+    medium: '2px',
+    thick: '4px',
+  },
+
+  // Motion
+  motion: {
+    duration: {
+      instant: '0ms',
+      fast: '100ms',
+      base: '200ms',
+      slow: '300ms',
+      slower: '500ms',
+    },
+    easing: {
+      linear: 'linear',
+      in: 'cubic-bezier(0.4, 0, 1, 1)',
+      out: 'cubic-bezier(0, 0, 0.2, 1)',
+      inOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    },
+  },
+
+  // Z-index
+  zIndex: {
+    behind: -1,
+    auto: 'auto',
+    base: 0,
+    dropdown: 1000,
+    sticky: 1100,
+    banner: 1200,
+    overlay: 1300,
+    modal: 1400,
+    popover: 1500,
+    skipLink: 1600,
+    toast: 1700,
+    tooltip: 1800,
+  },
+
+  // Breakpoints
+  breakpoint: {
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+    xl: '1280px',
+    '2xl': '1536px',
+  },
+} as const;
+
+export type Token = typeof tokens;
+export type ColorToken = keyof typeof tokens.color;
+export type SpacingToken = keyof typeof tokens.spacing;
+export type RadiusToken = keyof typeof tokens.radius;
+export type ShadowToken = keyof typeof tokens.shadow;
+```
+
+---
+
+## FILE 2: `lib/design-system/semantic.ts`
+
+```typescript
+// Semantic Tokens - CSS variable definitions
+// These map foundation tokens to meaning-based variables
+
+import { tokens } from './tokens';
+
+export interface SemanticVariables {
+  // Backgrounds
+  '--surface-bg': string;
+  '--surface-bg-muted': string;
+  '--surface-panel': string;
+  '--surface-panel-alt': string;
+  '--surface-elevated': string;
+  
+  // Borders
+  '--surface-border': string;
+  '--surface-border-strong': string;
+  '--surface-border-focus': string;
+  
+  // Text
+  '--surface-text': string;
+  '--surface-text-muted': string;
+  '--surface-text-subtle': string;
+  '--surface-text-inverse': string;
+  '--surface-link': string;
+  '--surface-link-hover': string;
+  
+  // Accents
+  '--surface-accent': string;
+  '--surface-accent-soft': string;
+  '--surface-accent-strong': string;
+  
+  // Status
+  '--surface-success': string;
+  '--surface-warning': string;
+  '--surface-error': string;
+  '--surface-info': string;
+  
+  // Hero & Scrims
+  '--surface-hero-wash': string;
+  '--surface-hero-scrim': string;
+  '--surface-hero-scrim-strong': string;
+  
+  // Interactive
+  '--surface-hover': string;
+  '--surface-active': string;
+  '--surface-focus-ring': string;
+  '--surface-disabled': string;
+  
+  // Gradients
+  '--gradient-hero-start': string;
+  '--gradient-hero-end': string;
+  '--gradient-accent-start': string;
+  '--gradient-accent-end': string;
+}
+
+// Default semantic values (light mode, neutral surface)
+export const defaultSemanticVariables: SemanticVariables = {
+  '--surface-bg': tokens.color.neutral[50],
+  '--surface-bg-muted': tokens.color.neutral[100],
+  '--surface-panel': tokens.color.neutral[0],
+  '--surface-panel-alt': tokens.color.neutral[50],
+  '--surface-elevated': tokens.color.neutral[0],
+  
+  '--surface-border': tokens.color.neutral[200],
+  '--surface-border-strong': tokens.color.neutral[300],
+  '--surface-border-focus': tokens.color.primary[500],
+  
+  '--surface-text': tokens.color.neutral[900],
+  '--surface-text-muted': tokens.color.neutral[600],
+  '--surface-text-subtle': tokens.color.neutral[400],
+  '--surface-text-inverse': tokens.color.neutral[0],
+  '--surface-link': tokens.color.primary[600],
+  '--surface-link-hover': tokens.color.primary[700],
+  
+  '--surface-accent': tokens.color.primary[500],
+  '--surface-accent-soft': tokens.color.primary[100],
+  '--surface-accent-strong': tokens.color.primary[700],
+  
+  '--surface-success': tokens.color.success.base,
+  '--surface-warning': tokens.color.warning.base,
+  '--surface-error': tokens.color.error.base,
+  '--surface-info': tokens.color.info.base,
+  
+  '--surface-hero-wash': `radial-gradient(ellipse at 50% 0%, ${tokens.color.primary[50]} 0%, transparent 70%)`,
+  '--surface-hero-scrim': `linear-gradient(to bottom, ${tokens.color.neutral[900]} 0%, transparent 100%)`,
+  '--surface-hero-scrim-strong': `linear-gradient(to bottom, ${tokens.color.neutral[900]} 0%, ${tokens.color.neutral[900]} 20%, transparent 100%)`,
+  
+  '--surface-hover': tokens.color.neutral[50],
+  '--surface-active': tokens.color.neutral[100],
+  '--surface-focus-ring': `0 0 0 2px ${tokens.color.primary[500]}`,
+  '--surface-disabled': tokens.color.neutral[300],
+  
+  '--gradient-hero-start': tokens.color.primary[50],
+  '--gradient-hero-end': tokens.color.neutral[0],
+  '--gradient-accent-start': tokens.color.primary[100],
+  '--gradient-accent-end': tokens.color.primary[200],
+};
+
+// Helper to generate CSS variable string
+export function toCSSVariables(variables: Partial<SemanticVariables>): string {
+  return Object.entries(variables)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join('\n');
+}
+
+// Helper to get a specific variable value
+export function getSemanticVariable(name: keyof SemanticVariables): string {
+  return `var(${name})`;
+}
+```
+
+---
+
+## FILE 3: `lib/design-system/surfaces.ts`
+
+```typescript
+// Surface Contracts - Each surface's identity and rules
+
+import { tokens } from './tokens';
+import { SemanticVariables } from './semantic';
+
+export type SurfaceTone = 'warm' | 'neutral' | 'cool';
+export type SurfaceDensity = 'spacious' | 'comfortable' | 'dense';
+export type HeroStyle = 'minimal' | 'standard' | 'cinematic' | 'technical';
+export type MetadataEmphasis = 'low' | 'medium' | 'high';
+
+export interface SurfaceContract {
+  id: string;
+  name: string;
+  path: string;
+  icon: string;
+  tone: SurfaceTone;
+  density: SurfaceDensity;
+  heroStyle: HeroStyle;
+  metadataEmphasis: MetadataEmphasis;
+  allowedGradients: GradientRecipe[];
+  contrastTier: 'AAA' | 'AA';
+  cardRhythm: SpacingToken;
+  imageRatio: 'square' | 'portrait' | 'video' | 'wide';
+  readerMode: 'prose' | 'technical' | 'scan';
+}
+
+export interface GradientRecipe {
+  name: string;
+  css: string;
+  maxOpacityUnderText: number; // 0-1, 0 = no text allowed directly on gradient
+  requiresScrim: boolean;
+  allowedSurfaces: SurfaceTone[];
+}
+
+// Predefined gradient recipes
+export const gradientRecipes: Record<string, GradientRecipe> = {
+  softRadial: {
+    name: 'softRadial',
+    css: `radial-gradient(ellipse at 50% 0%, var(--gradient-hero-start) 0%, var(--gradient-hero-end) 70%, transparent 100%)`,
+    maxOpacityUnderText: 0.08,
+    requiresScrim: true,
+    allowedSurfaces: ['warm', 'neutral'],
+  },
+  coolGlow: {
+    name: 'coolGlow',
+    css: `radial-gradient(ellipse at 30% 50%, ${tokens.color.primary[100]} 0%, transparent 80%)`,
+    maxOpacityUnderText: 0.06,
+    requiresScrim: true,
+    allowedSurfaces: ['cool'],
+  },
+  warmWash: {
+    name: 'warmWash',
+    css: `linear-gradient(135deg, ${tokens.color.primary[50]} 0%, ${tokens.color.neutral[0]} 100%)`,
+    maxOpacityUnderText: 0.1,
+    requiresScrim: false,
+    allowedSurfaces: ['warm'],
+  },
+  none: {
+    name: 'none',
+    css: 'none',
+    maxOpacityUnderText: 0,
+    requiresScrim: false,
+    allowedSurfaces: ['warm', 'neutral', 'cool'],
+  },
+};
+
+// All 13 surface contracts
+export const surfaces: Record<string, SurfaceContract> = {
+  index: {
+    id: 'index',
+    name: 'Home',
+    path: '/',
+    icon: 'Home',
+    tone: 'neutral',
+    density: 'comfortable',
+    heroStyle: 'cinematic',
+    metadataEmphasis: 'low',
+    allowedGradients: [gradientRecipes.softRadial],
+    contrastTier: 'AA',
+    cardRhythm: '6',
+    imageRatio: 'video',
+    readerMode: 'scan',
+  },
+  
+  canon: {
+    id: 'canon',
+    name: 'Canon',
+    path: '/canon',
+    icon: 'BookOpen',
+    tone: 'warm',
+    density: 'spacious',
+    heroStyle: 'standard',
+    metadataEmphasis: 'high',
+    allowedGradients: [gradientRecipes.warmWash, gradientRecipes.none],
+    contrastTier: 'AAA',
+    cardRhythm: '10',
+    imageRatio: 'square',
+    readerMode: 'prose',
+  },
+  
+  vault: {
+    id: 'vault',
+    name: 'Vault',
+    path: '/vault',
+    icon: 'Shield',
+    tone: 'cool',
+    density: 'dense',
+    heroStyle: 'technical',
+    metadataEmphasis: 'medium',
+    allowedGradients: [gradientRecipes.coolGlow, gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '4',
+    imageRatio: 'square',
+    readerMode: 'technical',
+  },
+  
+  'vault-briefs': {
+    id: 'vault-briefs',
+    name: 'Vault Briefs',
+    path: '/vault/briefs',
+    icon: 'FileText',
+    tone: 'cool',
+    density: 'dense',
+    heroStyle: 'technical',
+    metadataEmphasis: 'high',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '3',
+    imageRatio: 'square',
+    readerMode: 'technical',
+  },
+  
+  essays: {
+    id: 'essays',
+    name: 'Essays',
+    path: '/blog',
+    icon: 'Feather',
+    tone: 'warm',
+    density: 'comfortable',
+    heroStyle: 'standard',
+    metadataEmphasis: 'medium',
+    allowedGradients: [gradientRecipes.warmWash],
+    contrastTier: 'AAA',
+    cardRhythm: '8',
+    imageRatio: 'video',
+    readerMode: 'prose',
+  },
+  
+  shorts: {
+    id: 'shorts',
+    name: 'Shorts',
+    path: '/shorts',
+    icon: 'Zap',
+    tone: 'neutral',
+    density: 'dense',
+    heroStyle: 'minimal',
+    metadataEmphasis: 'low',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '2',
+    imageRatio: 'square',
+    readerMode: 'scan',
+  },
+  
+  books: {
+    id: 'books',
+    name: 'Books',
+    path: '/books',
+    icon: 'Library',
+    tone: 'neutral',
+    density: 'dense',
+    heroStyle: 'standard',
+    metadataEmphasis: 'medium',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '6',
+    imageRatio: 'portrait',
+    readerMode: 'prose',
+  },
+  
+  library: {
+    id: 'library',
+    name: 'Library',
+    path: '/library',
+    icon: 'Archive',
+    tone: 'neutral',
+    density: 'dense',
+    heroStyle: 'minimal',
+    metadataEmphasis: 'low',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '4',
+    imageRatio: 'square',
+    readerMode: 'scan',
+  },
+  
+  downloads: {
+    id: 'downloads',
+    name: 'Downloads',
+    path: '/downloads',
+    icon: 'Download',
+    tone: 'neutral',
+    density: 'dense',
+    heroStyle: 'minimal',
+    metadataEmphasis: 'medium',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '3',
+    imageRatio: 'square',
+    readerMode: 'scan',
+  },
+  
+  resources: {
+    id: 'resources',
+    name: 'Resources',
+    path: '/resources',
+    icon: 'Folder',
+    tone: 'neutral',
+    density: 'comfortable',
+    heroStyle: 'minimal',
+    metadataEmphasis: 'medium',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '6',
+    imageRatio: 'square',
+    readerMode: 'scan',
+  },
+  
+  events: {
+    id: 'events',
+    name: 'Events',
+    path: '/events',
+    icon: 'Calendar',
+    tone: 'neutral',
+    density: 'comfortable',
+    heroStyle: 'standard',
+    metadataEmphasis: 'high',
+    allowedGradients: [gradientRecipes.softRadial],
+    contrastTier: 'AA',
+    cardRhythm: '6',
+    imageRatio: 'video',
+    readerMode: 'scan',
+  },
+  
+  editorial: {
+    id: 'editorial',
+    name: 'Editorial',
+    path: '/editorial',
+    icon: 'PenTool',
+    tone: 'warm',
+    density: 'comfortable',
+    heroStyle: 'standard',
+    metadataEmphasis: 'high',
+    allowedGradients: [gradientRecipes.warmWash],
+    contrastTier: 'AAA',
+    cardRhythm: '8',
+    imageRatio: 'video',
+    readerMode: 'prose',
+  },
+  
+  'inner-circle': {
+    id: 'inner-circle',
+    name: 'Inner Circle',
+    path: '/inner-circle',
+    icon: 'Lock',
+    tone: 'warm',
+    density: 'dense',
+    heroStyle: 'minimal',
+    metadataEmphasis: 'high',
+    allowedGradients: [gradientRecipes.none],
+    contrastTier: 'AA',
+    cardRhythm: '4',
+    imageRatio: 'square',
+    readerMode: 'scan',
+  },
+};
+
+export function getSurface(id: string): SurfaceContract | undefined {
+  return surfaces[id];
+}
+
+export function getAllSurfaces(): SurfaceContract[] {
+  return Object.values(surfaces);
+}
+```
+
+---
+
+## FILE 4: `lib/design-system/contrast.ts`
+
+```typescript
+// Contrast validation utilities
+// WCAG 2.1 compliant contrast checking
+
+export interface ContrastRatios {
+  body: number;
+  secondary: number;
+  largeText: number;
+  interactive: number;
+}
+
+export const CONTRAST_MINIMUMS = {
+  AAA: {
+    body: 7.0,
+    secondary: 4.5,
+    largeText: 4.5,
+    interactive: 4.5,
+  },
+  AA: {
+    body: 4.5,
+    secondary: 3.0,
+    largeText: 3.0,
+    interactive: 3.0,
+  },
+} as const;
+
+// Calculate relative luminance (WCAG formula)
+export function getLuminance(hex: string): number {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 0;
+  
+  const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+// Calculate contrast ratio between two colors
+export function getContrastRatio(foreground: string, background: string): number {
+  const lum1 = getLuminance(foreground);
+  const lum2 = getLuminance(background);
+  const lighter = Math.max(lum1, lum2);
+  const darker = Math.min(lum1, lum2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+// Validate contrast meets minimum
+export function validateContrast(
+  foreground: string,
+  background: string,
+  minimum: number
+): boolean {
+  return getContrastRatio(foreground, background) >= minimum;
+}
+
+// Helper: hex to RGB
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+// Validate entire surface's contrast compliance
+export interface SurfaceContrastReport {
+  surfaceId: string;
+  passes: boolean;
+  failures: Array<{
+    element: string;
+    foreground: string;
+    background: string;
+    ratio: number;
+    required: number;
+  }>;
+}
+
+export function validateSurfaceContrast(
+  surfaceId: string,
+  colors: Record<string, string>
+): SurfaceContrastReport {
+  const failures = [];
+  
+  // Body text validation
+  const bodyRatio = getContrastRatio(colors.bodyText, colors.bodyBg);
+  if (bodyRatio < 7.0) {
+    failures.push({
+      element: 'body text',
+      foreground: colors.bodyText,
+      background: colors.bodyBg,
+      ratio: bodyRatio,
+      required: 7.0,
+    });
+  }
+  
+  // Secondary text validation
+  const secondaryRatio = getContrastRatio(colors.secondaryText, colors.bodyBg);
+  if (secondaryRatio < 4.5) {
+    failures.push({
+      element: 'secondary text',
+      foreground: colors.secondaryText,
+      background: colors.bodyBg,
+      ratio: secondaryRatio,
+      required: 4.5,
+    });
+  }
+  
+  return {
+    surfaceId,
+    passes: failures.length === 0,
+    failures,
+  };
+}
+```
+
+---
+
+## FILE 5: `lib/design-system/gradients.ts`
+
+```typescript
+// Gradient system with safety rules
+
+import { tokens } from './tokens';
+
+export interface GradientDefinition {
+  name: string;
+  css: string;
+  maxOpacityUnderText: number; // 0-1, maximum visual influence beneath text
+  requiresScrim: boolean; // Must have a solid/semi-solid layer over it under text
+  allowedOnSurfaces: Array<'warm' | 'neutral' | 'cool'>;
+  textPlacement: 'allowed' | 'scrim-required' | 'forbidden';
+}
+
+// Safe gradient recipes
+export const safeGradients: Record<string, GradientDefinition> = {
+  // Hero background only - never under body text
+  heroRadial: {
+    name: 'heroRadial',
+    css: `radial-gradient(ellipse at 50% 0%, ${tokens.color.primary[100]} 0%, transparent 70%)`,
+    maxOpacityUnderText: 0.08,
+    requiresScrim: true,
+    allowedOnSurfaces: ['warm', 'neutral'],
+    textPlacement: 'scrim-required',
+  },
+  
+  // Subtle accent - decorative only
+  accentLine: {
+    name: 'accentLine',
+    css: `linear-gradient(90deg, ${tokens.color.primary[200]} 0%, transparent 100%)`,
+    maxOpacityUnderText: 0,
+    requiresScrim: false,
+    allowedOnSurfaces: ['warm', 'neutral', 'cool'],
+    textPlacement: 'forbidden',
+  },
+  
+  // Cool surface accent (Vault)
+  coolAmbient: {
+    name: 'coolAmbient',
+    css: `radial-gradient(ellipse at 30% 50%, ${tokens.color.primary[100]} 0%, transparent 80%)`,
+    maxOpacityUnderText: 0.06,
+    requiresScrim: true,
+    allowedOnSurfaces: ['cool'],
+    textPlacement: 'scrim-required',
+  },
+  
+  // Warm surface accent (Canon, Essays)
+  warmWash: {
+    name: 'warmWash',
+    css: `linear-gradient(135deg, ${tokens.color.primary[50]} 0%, ${tokens.color.neutral[0]} 100%)`,
+    maxOpacityUnderText: 0.1,
+    requiresScrim: false,
+    allowedOnSurfaces: ['warm'],
+    textPlacement: 'allowed',
+  },
+  
+  // Forbidden for text-bearing areas - decorative borders only
+  decorativeBorder: {
+    name: 'decorativeBorder',
+    css: `linear-gradient(90deg, ${tokens.color.primary[400]} 0%, ${tokens.color.primary[600]} 50%, ${tokens.color.primary[400]} 100%)`,
+    maxOpacityUnderText: 0,
+    requiresScrim: false,
+    allowedOnSurfaces: ['warm', 'neutral', 'cool'],
+    textPlacement: 'forbidden',
+  },
+};
+
+// Validate a gradient usage
+export interface GradientUsageValidation {
+  gradientName: string;
+  surfaceTone: 'warm' | 'neutral' | 'cool';
+  hasTextOverlay: boolean;
+  hasScrim: boolean;
+  isValid: boolean;
+  errors: string[];
+}
+
+export function validateGradientUsage(
+  gradientName: string,
+  surfaceTone: 'warm' | 'neutral' | 'cool',
+  hasTextOverlay: boolean,
+  hasScrim: boolean
+): GradientUsageValidation {
+  const gradient = safeGradients[gradientName];
+  const errors: string[] = [];
+  
+  if (!gradient) {
+    errors.push(`Unknown gradient: ${gradientName}`);
+    return { gradientName, surfaceTone, hasTextOverlay, hasScrim, isValid: false, errors };
+  }
+  
+  if (!gradient.allowedOnSurfaces.includes(surfaceTone)) {
+    errors.push(`Gradient ${gradientName} not allowed on ${surfaceTone} surfaces`);
+  }
+  
+  if (hasTextOverlay && gradient.textPlacement === 'forbidden') {
+    errors.push(`Gradient ${gradientName} does not allow text overlay`);
+  }
+  
+  if (hasTextOverlay && gradient.textPlacement === 'scrim-required' && !hasScrim) {
+    errors.push(`Gradient ${gradientName} requires a scrim when text is overlaid`);
+  }
+  
+  return {
+    gradientName,
+    surfaceTone,
+    hasTextOverlay,
+    hasScrim,
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+// Get CSS for a gradient (with safety)
+export function getGradientCSS(
+  gradientName: string,
+  options?: { opacity?: number }
+): string {
+  const gradient = safeGradients[gradientName];
+  if (!gradient) return 'none';
+  
+  let css = gradient.css;
+  if (options?.opacity && options.opacity < 1) {
+    // Wrap in an opacity filter (safest approach)
+    css = `${css} / ${options.opacity}`;
+  }
+  
+  return css;
+}
+```
+
+---
+
+## FILE 6: `styles/design-system.css`
+
+```css
+/* Design System CSS Variables
+   This file defines the semantic layer and surface overrides.
+   DO NOT add raw color values here. Use tokens → semantic → CSS variables.
+*/
+
+@import './globals.css'; /* Keep existing imports */
+
+:root {
+  /* Default semantic variables (neutral, light mode) */
+  --surface-bg: #fafafa;
+  --surface-bg-muted: #f5f5f5;
+  --surface-panel: #ffffff;
+  --surface-panel-alt: #fafafa;
+  --surface-elevated: #ffffff;
+  
+  --surface-border: #e5e5e5;
+  --surface-border-strong: #d4d4d4;
+  --surface-border-focus: #3b82f6;
+  
+  --surface-text: #171717;
+  --surface-text-muted: #525252;
+  --surface-text-subtle: #a3a3a3;
+  --surface-text-inverse: #ffffff;
+  --surface-link: #2563eb;
+  --surface-link-hover: #1d4ed8;
+  
+  --surface-accent: #3b82f6;
+  --surface-accent-soft: #dbeafe;
+  --surface-accent-strong: #1e40af;
+  
+  --surface-success: #22c55e;
+  --surface-warning: #eab308;
+  --surface-error: #ef4444;
+  --surface-info: #3b82f6;
+  
+  --surface-hero-wash: radial-gradient(ellipse at 50% 0%, #eff6ff 0%, transparent 70%);
+  --surface-hero-scrim: linear-gradient(to bottom, #171717 0%, transparent 100%);
+  --surface-hero-scrim-strong: linear-gradient(to bottom, #171717 0%, #171717 20%, transparent 100%);
+  
+  --surface-hover: #fafafa;
+  --surface-active: #f5f5f5;
+  --surface-focus-ring: 0 0 0 2px #3b82f6;
+  --surface-disabled: #d4d4d4;
+  
+  --gradient-hero-start: #eff6ff;
+  --gradient-hero-end: #ffffff;
+  --gradient-accent-start: #dbeafe;
+  --gradient-accent-end: #bfdbfe;
+  
+  /* Typography defaults */
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --font-serif: Charter, Georgia, Times, serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+  
+  /* Spacing scale */
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
+  --spacing-40: 10rem;
+  --spacing-48: 12rem;
+  
+  /* Motion */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Surface: Canon (warm, spacious, authoritative) */
+.surface-canon {
+  --surface-bg: #ffffff;
+  --surface-panel: #ffffff;
+  --surface-border: #e5e7eb;
+  --surface-text: #171717;
+  --surface-text-muted: #525252;
+  --surface-accent: #2563eb;
+  --surface-accent-soft: #dbeafe;
+  --gradient-hero-start: #fef3c7;
+  --gradient-hero-end: #ffffff;
+}
+
+/* Surface: Vault (cool, dense, technical) */
+.surface-vault {
+  --surface-bg: #f8fafc;
+  --surface-panel: #ffffff;
+  --surface-border: #cbd5e1;
+  --surface-text: #0f172a;
+  --surface-text-muted: #475569;
+  --surface-accent: #3b82f6;
+  --surface-accent-soft: #e0f2fe;
+  --gradient-hero-start: #e0f2fe;
+  --gradient-hero-end: #f8fafc;
+  --font-family-default: var(--font-mono);
+}
+
+/* Surface: Shorts (neutral, dense, energetic) */
+.surface-shorts {
+  --surface-bg: #fafafa;
+  --surface-panel: #ffffff;
+  --surface-border: #e5e5e5;
+  --surface-text: #171717;
+  --surface-text-muted: #737373;
+  --surface-accent: #3b82f6;
+  --surface-hover: #f5f5f5;
+}
+
+/* Surface: Essays (warm, comfortable, editorial) */
+.surface-essays {
+  --surface-bg: #ffffff;
+  --surface-panel: #ffffff;
+  --surface-border: #e5e7eb;
+  --surface-text: #1f2937;
+  --surface-text-muted: #6b7280;
+  --surface-accent: #2563eb;
+  --gradient-hero-start: #fef3c7;
+  --gradient-hero-end: #ffffff;
+}
+
+/* Surface: Inner Circle (warm, dense, exclusive) */
+.surface-inner-circle {
+  --surface-bg: #fefce8;
+  --surface-panel: #ffffff;
+  --surface-border: #fde047;
+  --surface-text: #171717;
+  --surface-text-muted: #525252;
+  --surface-accent: #eab308;
+  --surface-accent-soft: #fef9c3;
+}
+
+/* Utility classes for surface-aware styling */
+.surface-aware-bg {
+  background-color: var(--surface-bg);
+}
+
+.surface-aware-panel {
+  background-color: var(--surface-panel);
+  border-color: var(--surface-border);
+}
+
+.surface-aware-text {
+  color: var(--surface-text);
+}
+
+.surface-aware-text-muted {
+  color: var(--surface-text-muted);
+}
+
+.surface-aware-border {
+  border-color: var(--surface-border);
+}
+
+/* Hero scrim - required for text over gradients */
+.hero-scrim {
+  position: relative;
+}
+
+.hero-scrim::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--surface-hero-scrim);
+  pointer-events: none;
+}
+
+.hero-scrim-strong::before {
+  background: var(--surface-hero-scrim-strong);
+}
+
+/* Text contrast enforcement */
+.text-readable {
+  color: var(--surface-text);
+}
+
+.text-readable-muted {
+  color: var(--surface-text-muted);
+}
+
+/* Focus ring - consistent across all surfaces */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: var(--surface-focus-ring);
+}
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+---
+
+## FILE 7: `components/primitives/CardShell.tsx`
+
+```typescript
+// CardShell - Layout-only primitive, no surface logic
+// Composes with surface variants via className
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { SurfaceContract } from '@/lib/design-system/surfaces';
+
+export interface CardShellProps {
+  children: React.ReactNode;
+  surface: SurfaceContract;
+  variant?: 'default' | 'featured' | 'compact';
+  interactive?: boolean;
+  className?: string;
+  onClick?: () => void;
+}
+
+export const CardShell: React.FC<CardShellProps> = ({
+  children,
+  surface,
+  variant = 'default',
+  interactive = false,
+  className,
+  onClick,
+}) => {
+  const densityClasses = {
+    spacious: 'p-8',
+    comfortable: 'p-6',
+    dense: 'p-4',
+  };
+  
+  const variantClasses = {
+    default: '',
+    featured: 'ring-2 ring-surface-accent ring-offset-2',
+    compact: densityClasses.dense,
+  };
+  
+  return (
+    <article
+      className={cn(
+        'surface-aware-panel rounded-lg transition-all',
+        densityClasses[surface.density],
+        variantClasses[variant],
+        interactive && 'cursor-pointer hover:shadow-md hover:-translate-y-0.5',
+        interactive && 'transition-all duration-200',
+        className
+      )}
+      onClick={onClick}
+      role={onClick ? 'button' : 'article'}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+    >
+      {children}
+    </article>
+  );
+};
+```
+
+---
+
+## FILE 8: `components/primitives/SmartCover.tsx`
+
+```typescript
+// SmartCover - Enhanced with surface support, keeping existing logic
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { SurfaceContract } from '@/lib/design-system/surfaces';
+
+export interface SmartCoverProps {
+  src: string;
+  alt: string;
+  aspect?: 'square' | 'portrait' | 'video' | 'wide';
+  fit?: 'cover' | 'contain';
+  position?: 'center' | 'top' | 'bottom' | 'left' | 'right';
+  surface?: SurfaceContract;
+  className?: string;
+  priority?: boolean;
+  onLoad?: () => void;
+}
+
+export const SmartCover: React.FC<SmartCoverProps> = ({
+  src,
+  alt,
+  aspect = 'square',
+  fit = 'cover',
+  position = 'center',
+  surface,
+  className,
+  priority = false,
+  onLoad,
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  
+  const aspectClasses = {
+    square: 'aspect-square',
+    portrait: 'aspect-[3/4]',
+    video: 'aspect-video',
+    wide: 'aspect-[16/9]',
+  };
+  
+  const objectPosition = {
+    center: 'object-center',
+    top: 'object-top',
+    bottom: 'object-bottom',
+    left: 'object-left',
+    right: 'object-right',
+  };
+  
+  // Surface-specific overlay treatments (very subtle)
+  const surfaceOverlay = surface?.id === 'canon'
+    ? 'after:absolute after:inset-0 after:bg-black/5 after:opacity-0 hover:after:opacity-100 after:transition-opacity'
+    : surface?.id === 'vault'
+    ? 'after:absolute after:inset-0 after:bg-gradient-to-tr after:from-blue-500/10 after:to-transparent'
+    : '';
+  
+  // Fallback for errors
+  if (hasError) {
+    return (
+      <div className={cn(
+        'bg-gray-100 flex items-center justify-center',
+        aspectClasses[aspect],
+        className
+      )}>
+        <span className="text-gray-400 text-sm">{alt}</span>
+      </div>
+    );
+  }
+  
+  return (
+    <div className={cn(
+      'relative overflow-hidden bg-gray-100',
+      aspectClasses[aspect],
+      surfaceOverlay,
+      className
+    )}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className={cn(
+          'transition-all duration-500',
+          fit === 'cover' ? 'object-cover' : 'object-contain',
+          objectPosition[position],
+          isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105',
+          'group-hover:scale-105'
+        )}
+        onLoadingComplete={() => {
+          setIsLoaded(true);
+          onLoad?.();
+        }}
+        onError={() => setHasError(true)}
+        priority={priority}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+      
+      {/* Loading skeleton */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
+      )}
+      
+      {/* Surface-specific corner treatments (very subtle) */}
+      {surface?.id === 'vault' && isLoaded && (
+        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-500/30 rounded-full" />
+      )}
+      {surface?.id === 'canon' && isLoaded && (
+        <div className="absolute bottom-2 left-2 w-6 h-px bg-amber-500/20" />
+      )}
+      {surface?.id === 'books' && isLoaded && (
+        <div className="absolute inset-0 shadow-inner pointer-events-none" />
+      )}
+    </div>
+  );
+};
+```
+
+---
+
+## FILE 9: `components/primitives/ContentMeta.tsx`
+
+```typescript
+// ContentMeta - Metadata display with surface-aware formatting
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { SurfaceContract } from '@/lib/design-system/surfaces';
+
+export interface ContentMetaProps {
+  document: {
+    author?: string;
+    date?: string;
+    readTime?: number;
+    citationCount?: number;
+    securityLevel?: 'confidential' | 'restricted' | 'top-secret';
+    version?: string;
+    publisher?: string;
+  };
+  surface: SurfaceContract;
+  showAuthor?: boolean;
+  showDate?: boolean;
+  showReadTime?: boolean;
+  showCitationCount?: boolean;
+  showSecurity?: boolean;
+  showVersion?: boolean;
+  className?: string;
+}
+
+export const ContentMeta: React.FC<ContentMetaProps> = ({
+  document,
+  surface,
+  showAuthor = true,
+  showDate = true,
+  showReadTime = false,
+  showCitationCount = false,
+  showSecurity = false,
+  showVersion = false,
+  className,
+}) => {
+  const metaItems: React.ReactNode[] = [];
+  
+  // Author
+  if (showAuthor && document.author) {
+    metaItems.push(
+      <span key="author" className="flex items-center space-x-1">
+        <span>✍️</span>
+        <span>{document.author}</span>
+      </span>
+    );
+  }
+  
+  // Date
+  if (showDate && document.date) {
+    metaItems.push(
+      <span key="date">{document.date}</span>
+    );
+  }
+  
+  // Read time
+  if (showReadTime && document.readTime) {
+    metaItems.push(
+      <span key="readTime">{document.readTime} min read</span>
+    );
+  }
+  
+  // Citation count (Canon-specific)
+  if (showCitationCount && document.citationCount && document.citationCount > 0) {
+    metaItems.push(
+      <span key="citations" className="flex items-center space-x-1">
+        <span>📚</span>
+        <span>Cited {document.citationCount} times</span>
+      </span>
+    );
+  }
+  
+  // Security level (Vault-specific)
+  if (showSecurity && document.securityLevel) {
+    const securityColors = {
+      confidential: 'bg-yellow-100 text-yellow-700',
+      restricted: 'bg-gray-100 text-gray-700',
+      'top-secret': 'bg-red-100 text-red-700',
+    };
+    
+    metaItems.push(
+      <span
+        key="security"
+        className={cn(
+          'inline-block px-2 py-0.5 rounded text-xs font-mono',
+          securityColors[document.securityLevel]
+        )}
+      >
+        {document.securityLevel.toUpperCase()}
+      </span>
+    );
+  }
+  
+  // Version (Vault-specific)
+  if (showVersion && document.version) {
+    metaItems.push(
+      <span key="version" className="font-mono text-xs">
+        v{document.version}
+      </span>
+    );
+  }
+  
+  // Publisher (Books-specific)
+  if (surface.id === 'books' && document.publisher) {
+    metaItems.push(
+      <span key="publisher" className="text-gray-500">
+        {document.publisher}
+      </span>
+    );
+  }
+  
+  if (metaItems.length === 0) {
+    return null;
+  }
+  
+  // Determine meta density based on surface
+  const metaDensity = surface.metadataEmphasis === 'high' ? 'space-x-3' : 'space-x-2';
+  const metaSize = surface.metadataEmphasis === 'high' ? 'text-sm' : 'text-xs';
+  
+  return (
+    <div className={cn(
+      'flex flex-wrap items-center text-gray-500',
+      metaDensity,
+      metaSize,
+      className
+    )}>
+      {metaItems.map((item, index) => (
+        <React.Fragment key={index}>
+          {item}
+          {index < metaItems.length - 1 && (
+            <span className="text-gray-300">•</span>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+```
+
+---
+
+## FILE 10: `components/primitives/ReaderFrame.tsx`
+
+```typescript
+// ReaderFrame - Prose container with legibility rules
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { SurfaceContract } from '@/lib/design-system/surfaces';
+
+export interface ReaderFrameProps {
+  children: React.ReactNode;
+  surface: SurfaceContract;
+  className?: string;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  showProgress?: boolean;
+}
+
+export const ReaderFrame: React.FC<ReaderFrameProps> = ({
+  children,
+  surface,
+  className,
+  maxWidth = 'lg',
+  showProgress = false,
+}) => {
+  const maxWidthClasses = {
+    sm: 'max-w-2xl',
+    md: 'max-w-3xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-5xl',
+    full: 'max-w-full',
+  };
+  
+  const readerStyles = {
+    prose: 'prose prose-lg prose-gray',
+    technical: 'prose prose-gray font-mono',
+    scan: 'prose prose-base',
+  };
+  
+  return (
+    <article className={cn(
+      'mx-auto',
+      maxWidthClasses[maxWidth],
+      className
+    )}>
+      <div className={cn(
+        'surface-aware-text',
+        readerStyles[surface.readerMode],
+        surface.readerMode === 'technical' && 'prose-code:before:hidden prose-code:after:hidden',
+        'prose-headings:font-semibold prose-headings:tracking-tight',
+        'prose-a:text-surface-link prose-a:no-underline hover:prose-a:underline',
+        'prose-blockquote:border-l-surface-accent prose-blockquote:pl-6',
+        'prose-code:text-surface-accent prose-code:bg-surface-bg-muted prose-code:px-1 prose-code:rounded',
+        'prose-pre:bg-surface-panel-alt prose-pre:border prose-pre:border-surface-border',
+      )}>
+        {children}
+      </div>
+      
+      {/* Reading progress indicator */}
+      {showProgress && (
+        <ReadingProgressBar surface={surface} />
+      )}
+    </article>
+  );
+};
+
+// Optional reading progress component
+const ReadingProgressBar: React.FC<{ surface: SurfaceContract }> = ({ surface }) => {
+  const [progress, setProgress] = React.useState(0);
+  
+  React.useEffect(() => {
+    const updateProgress = () => {
+      const scrolled = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const value = (scrolled / maxScroll) * 100;
+      setProgress(value);
+    };
+    
+    window.addEventListener('scroll', updateProgress);
+    return () => window.removeEventListener('scroll', updateProgress);
+  }, []);
+  
+  if (progress === 0) return null;
+  
+  return (
+    <div className="fixed top-0 left-0 right-0 h-0.5 bg-surface-bg-muted z-50">
+      <div
+        className="h-full bg-surface-accent transition-all duration-100"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  );
+};
+```
+
+---
+
+## FILE 11: `lib/adapters/normalize-list-item.ts`
+
+```typescript
+// List item normalization - for grid/list views
+
+export interface NormalizedListItem {
+  id: string;
+  title: string;
+  excerpt: string | null;
+  slug: string;
+  coverImage: string | null;
+  coverAspect?: 'square' | 'portrait' | 'video';
+  date?: string;
+  author?: string;
+  // Surface-specific optional fields
+  citationCount?: number;
+  securityLevel?: 'confidential' | 'restricted' | 'top-secret';
+  likes?: number;
+  saves?: number;
+  shares?: number;
+  version?: string;
+  publisher?: string;
+}
+
+export type RawDocument = Record<string, unknown>;
+
+export interface ListNormalizer<T extends RawDocument = RawDocument> {
+  (raw: T): NormalizedListItem;
+}
+
+// Canon normalizer
+export const normalizeCanonItem: ListNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.title as string,
+  excerpt: (raw.excerpt as string) || null,
+  slug: raw.slug as string,
+  coverImage: (raw.featuredImage as string) || null,
+  coverAspect: 'square',
+  date: raw.publishedAt ? new Date(raw.publishedAt as string).toLocaleDateString() : undefined,
+  author: (raw.author as { name: string })?.name,
+  citationCount: (raw.citations as unknown[])?.length || 0,
+});
+
+// Vault normalizer
+export const normalizeVaultItem: ListNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.name as string,
+  excerpt: (raw.description as string) || null,
+  slug: raw.slug as string,
+  coverImage: (raw.coverArt as string) || null,
+  coverAspect: 'square',
+  date: raw.createdAt ? new Date(raw.createdAt as string).toLocaleDateString() : undefined,
+  securityLevel: (raw.classification as string)?.toLowerCase() as NormalizedListItem['securityLevel'],
+  version: raw.version as string,
+});
+
+// Shorts normalizer
+export const normalizeShortItem: ListNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.title as string,
+  excerpt: ((raw.content as string) || '').substring(0, 160),
+  slug: raw.slug as string,
+  coverImage: (raw.thumbnail as string) || null,
+  coverAspect: 'square',
+  date: raw.createdAt ? new Date(raw.createdAt as string).toLocaleDateString() : undefined,
+  likes: raw.likes as number,
+  saves: raw.saves as number,
+  shares: raw.shares as number,
+});
+
+// Books normalizer
+export const normalizeBookItem: ListNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.title as string,
+  excerpt: (raw.description as string) || null,
+  slug: raw.slug as string,
+  coverImage: (raw.coverImage as string) || null,
+  coverAspect: 'portrait',
+  date: raw.publishedDate ? new Date(raw.publishedDate as string).toLocaleDateString() : undefined,
+  author: (raw.author as string),
+  publisher: raw.publisher as string,
+});
+
+// Generic normalizer factory
+export function createListNormalizer<T extends RawDocument>(
+  normalizer: ListNormalizer<T>
+): ListNormalizer<T> {
+  return normalizer;
+}
+
+// Batch normalization
+export function normalizeList<T extends RawDocument>(
+  items: T[],
+  normalizer: ListNormalizer<T>
+): NormalizedListItem[] {
+  return items.map(normalizer);
+}
+```
+
+---
+
+## FILE 12: `lib/adapters/normalize-reader-document.ts`
+
+```typescript
+// Reader document normalization - for detail/reader views
+
+export interface NormalizedReaderDocument {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  slug: string;
+  coverImage: string | null;
+  coverCaption?: string;
+  author?: {
+    name: string;
+    bio?: string;
+    avatar?: string;
+  };
+  date?: string;
+  updatedDate?: string;
+  readTime?: number;
+  
+  // Surface-specific
+  citations?: Array<{ text: string; source: string }>;
+  securityLevel?: 'confidential' | 'restricted' | 'top-secret';
+  version?: string;
+  edition?: string;
+  publisher?: string;
+  
+  // Related content
+  relatedDocuments?: Array<{ id: string; title: string; slug: string; surface: string }>;
+  
+  // Metadata
+  tags?: string[];
+  wordCount?: number;
+}
+
+export type RawReaderDocument = Record<string, unknown>;
+
+export interface ReaderNormalizer<T extends RawReaderDocument = RawReaderDocument> {
+  (raw: T): NormalizedReaderDocument;
+}
+
+// Canon reader normalizer
+export const normalizeCanonReader: ReaderNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.title as string,
+  content: raw.content as string,
+  excerpt: (raw.excerpt as string) || null,
+  slug: raw.slug as string,
+  coverImage: (raw.featuredImage as string) || null,
+  coverCaption: raw.coverCaption as string,
+  author: raw.author ? {
+    name: (raw.author as { name: string }).name,
+    bio: (raw.author as { bio?: string }).bio,
+    avatar: (raw.author as { avatar?: string }).avatar,
+  } : undefined,
+  date: raw.publishedAt ? new Date(raw.publishedAt as string).toLocaleDateString() : undefined,
+  updatedDate: raw.updatedAt ? new Date(raw.updatedAt as string).toLocaleDateString() : undefined,
+  readTime: Math.ceil(((raw.content as string) || '').split(' ').length / 200),
+  citations: (raw.citations as Array<{ text: string; source: string }>) || [],
+  tags: raw.tags as string[],
+  wordCount: ((raw.content as string) || '').split(' ').length,
+});
+
+// Vault reader normalizer
+export const normalizeVaultReader: ReaderNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.name as string,
+  content: raw.content as string,
+  excerpt: (raw.description as string) || null,
+  slug: raw.slug as string,
+  coverImage: (raw.coverArt as string) || null,
+  date: raw.createdAt ? new Date(raw.createdAt as string).toLocaleDateString() : undefined,
+  updatedDate: raw.updatedAt ? new Date(raw.updatedAt as string).toLocaleDateString() : undefined,
+  readTime: Math.ceil(((raw.content as string) || '').split(' ').length / 250),
+  securityLevel: (raw.classification as string)?.toLowerCase() as NormalizedReaderDocument['securityLevel'],
+  version: raw.version as string,
+  tags: raw.tags as string[],
+  wordCount: ((raw.content as string) || '').split(' ').length,
+});
+
+// Shorts reader normalizer
+export const normalizeShortReader: ReaderNormalizer = (raw) => ({
+  id: raw.id as string,
+  title: raw.title as string,
+  content: raw.content as string,
+  excerpt: raw.excerpt as string || ((raw.content as string) || '').substring(0, 160),
+  slug: raw.slug as string,
+  coverImage: (raw.thumbnail as string) || null,
+  date: raw.createdAt ? new Date(raw.createdAt as string).toLocaleDateString() : undefined,
+  readTime: Math.ceil(((raw.content as string) || '').split(' ').length / 300),
+  tags: raw.tags as string[],
+  wordCount: ((raw.content as string) || '').split(' ').length,
+});
+
+// Factory function
+export function createReaderNormalizer<T extends RawReaderDocument>(
+  normalizer: ReaderNormalizer<T>
+): ReaderNormalizer<T> {
+  return normalizer;
+}
+```
+
+---
+
+## FILE 13: `components/layout/SurfaceLayout.tsx`
+
+```typescript
+// SurfaceLayout - Main layout wrapper with surface context
+
+import React from 'react';
+import { SurfaceAwareNav } from '@/components/navigation/SurfaceAwareNav';
+import { SurfaceContract, getSurface } from '@/lib/design-system/surfaces';
+import { cn } from '@/lib/utils';
+
+export interface SurfaceLayoutProps {
+  children: React.ReactNode;
+  surfaceId: string;
+  hero?: React.ReactNode;
+  showSearch?: boolean;
+  className?: string;
+}
+
+export const SurfaceLayout: React.FC<SurfaceLayoutProps> = ({
+  children,
+  surfaceId,
+  hero,
+  showSearch = false,
+  className,
+}) => {
+  const surface = getSurface(surfaceId);
+  
+  if (!surface) {
+    console.warn(`Unknown surface: ${surfaceId}`);
+    return <div className={className}>{children}</div>;
+  }
+  
+  const densityPadding = {
+    spacious: 'py-16',
+    comfortable: 'py-12',
+    dense: 'py-8',
+  };
+  
+  return (
+    <div className={cn(
+      `surface-${surface.id}`,
+      'min-h-screen surface-aware-bg',
+      className
+    )}>
+      <SurfaceAwareNav currentSurface={surface} showSearch={showSearch} />
+      
+      {/* Hero section */}
+      {hero ? (
+        hero
+      ) : (
+        <div className={cn(
+          'container mx-auto px-6',
+          densityPadding[surface.density]
+        )}>
+          <div className={surface.heroStyle === 'technical' ? 'bg-surface-panel-alt rounded-xl p-8' : ''}>
+            <h1 className={cn(
+              'font-bold tracking-tight surface-aware-text',
+              surface.tone === 'warm' && 'font-serif',
+              surface.tone === 'cool' && 'font-mono',
+              'text-4xl md:text-5xl lg:text-6xl'
+            )}>
+              {surface.name}
+            </h1>
+            <p className="mt-4 text-surface-text-muted max-w-2xl text-lg">
+              {/* Description would come from props or config */}
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* Main content */}
+      <main className={cn(
+        'container mx-auto px-6',
+        surface.id === 'shorts' ? 'max-w-4xl' : 'max-w-7xl',
+        densityPadding[surface.density]
+      )}>
+        {children}
+      </main>
+      
+      {/* Footer */}
+      <footer className="border-t border-surface-border mt-20 py-12">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-surface-text-muted">
+            <div>
+              © AbrahamofLondon • {surface.name} • {new Date().getFullYear()}
+            </div>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <a href="/about" className="hover:text-surface-text transition-colors">About</a>
+              <a href="/privacy" className="hover:text-surface-text transition-colors">Privacy</a>
+              <a href="/terms" className="hover:text-surface-text transition-colors">Terms</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+```
+
+---
+
+## FILE 14: `components/navigation/SurfaceAwareNav.tsx`
+
+```typescript
+// SurfaceAwareNav - Calm, hierarchical navigation
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { SurfaceContract, getAllSurfaces } from '@/lib/design-system/surfaces';
+import { cn } from '@/lib/utils';
+
+export interface SurfaceAwareNavProps {
+  currentSurface?: SurfaceContract;
+  showSearch?: boolean;
+}
+
+export const SurfaceAwareNav: React.FC<SurfaceAwareNavProps> = ({
+  currentSurface,
+  showSearch = false,
+}) => {
+  const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const surfaces = getAllSurfaces().filter(s => s.id !== 'index'); // Exclude home from nav
+  
+  // Icon mapping (simplified - use actual icons)
+  const getIcon = (surfaceId: string): string => {
+    const icons: Record<string, string> = {
+      canon: '📚',
+      vault: '🔒',
+      shorts: '⚡',
+      essays: '📝',
+      books: '📖',
+      library: '🏛️',
+      'inner-circle': '🔐',
+      downloads: '⬇️',
+      resources: '📁',
+      events: '📅',
+      editorial: '✍️',
+      'vault-briefs': '📋',
+    };
+    return icons[surfaceId] || '•';
+  };
+  
+  return (
+    <nav className="sticky top-0 z-50 bg-surface-bg/95 backdrop-blur-sm border-b border-surface-border">
+      <div className="container mx-auto px-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between h-14">
+          {/* Logo */}
+          <Link href="/" className="font-serif font-bold text-xl surface-aware-text">
+            Abraham<span className="text-surface-accent">of</span>London
+          </Link>
+          
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {surfaces.map((surface) => (
+              <Link
+                key={surface.id}
+                href={surface.path}
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+                  currentSurface?.id === surface.id
+                    ? 'bg-surface-panel-alt surface-aware-text'
+                    : 'text-surface-text-muted hover:text-surface-text hover:bg-surface-panel-alt'
+                )}
+              >
+                <span className="flex items-center space-x-2">
+                  <span>{getIcon(surface.id)}</span>
+                  <span>{surface.name}</span>
+                  {surface.id === 'inner-circle' && (
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                  )}
+                </span>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-md surface-aware-text hover:bg-surface-panel-alt"
+            aria-label="Menu"
+          >
+            <span className="text-xl">☰</span>
+          </button>
+        </div>
+        
+        {/* Surface context indicator (desktop only) */}
+        {currentSurface && (
+          <div className="hidden md:flex h-10 items-center space-x-4 text-sm border-t border-surface-border">
+            <span className="text-surface-text-muted font-mono text-xs uppercase tracking-wider">
+              {currentSurface.name}
+            </span>
+            <div className="h-4 w-px bg-surface-border" />
+            <Link
+              href={`${currentSurface.path}/latest`}
+              className="text-surface-text-muted hover:text-surface-text transition-colors"
+            >
+              Latest
+            </Link>
+            <Link
+              href={`${currentSurface.path}/featured`}
+              className="text-surface-text-muted hover:text-surface-text transition-colors"
+            >
+              Featured
+            </Link>
+            {currentSurface.id === 'vault' && (
+              <Link
+                href="/vault/archive"
+                className="text-surface-text-muted hover:text-surface-text transition-colors"
+              >
+                Archive
+              </Link>
+            )}
+            {currentSurface.id === 'shorts' && (
+              <Link
+                href="/shorts/trending"
+                className="text-surface-text-muted hover:text-surface-text transition-colors"
+              >
+                Trending
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-surface-border bg-surface-bg">
+          <div className="container mx-auto px-6 py-4 space-y-2">
+            {surfaces.map((surface) => (
+              <Link
+                key={surface.id}
+                href={surface.path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  'flex items-center space-x-3 px-3 py-2 rounded-md transition-all',
+                  currentSurface?.id === surface.id
+                    ? 'bg-surface-panel-alt surface-aware-text'
+                    : 'text-surface-text-muted'
+                )}
+              >
+                <span>{getIcon(surface.id)}</span>
+                <span>{surface.name}</span>
+                {surface.id === 'inner-circle' && (
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
+```
+
+---
+
+## FILE 15: `tailwind.config.js` (New - Replace 9,847 line .cjs)
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+const { tokens } = require('./lib/design-system/tokens');
+
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      // Colors from tokens (mapped to CSS variables for runtime flexibility)
+      colors: {
+        primary: tokens.color.primary,
+        neutral: tokens.color.neutral,
+        success: tokens.color.success,
+        warning: tokens.color.warning,
+        error: tokens.color.error,
+        info: tokens.color.info,
+        
+        // Semantic colors (use CSS variables for surface-awareness)
+        'surface-bg': 'var(--surface-bg)',
+        'surface-bg-muted': 'var(--surface-bg-muted)',
+        'surface-panel': 'var(--surface-panel)',
+        'surface-panel-alt': 'var(--surface-panel-alt)',
+        'surface-border': 'var(--surface-border)',
+        'surface-border-strong': 'var(--surface-border-strong)',
+        'surface-text': 'var(--surface-text)',
+        'surface-text-muted': 'var(--surface-text-muted)',
+        'surface-text-subtle': 'var(--surface-text-subtle)',
+        'surface-accent': 'var(--surface-accent)',
+        'surface-accent-soft': 'var(--surface-accent-soft)',
+      },
+      
+      // Spacing from tokens
+      spacing: tokens.spacing,
+      
+      // Typography
+      fontFamily: {
+        sans: tokens.typography.family.sans,
+        serif: tokens.typography.family.serif,
+        mono: tokens.typography.family.mono,
+      },
+      
+      fontSize: {
+        xs: [tokens.typography.scale.xs, { lineHeight: tokens.typography.lineHeight.normal }],
+        sm: [tokens.typography.scale.sm, { lineHeight: tokens.typography.lineHeight.normal }],
+        base: [tokens.typography.scale.base, { lineHeight: tokens.typography.lineHeight.relaxed }],
+        lg: [tokens.typography.scale.lg, { lineHeight: tokens.typography.lineHeight.relaxed }],
+        xl: [tokens.typography.scale.xl, { lineHeight: tokens.typography.lineHeight.snug }],
+        '2xl': [tokens.typography.scale['2xl'], { lineHeight: tokens.typography.lineHeight.snug }],
+        '3xl': [tokens.typography.scale['3xl'], { lineHeight: tokens.typography.lineHeight.tight }],
+        '4xl': [tokens.typography.scale['4xl'], { lineHeight: tokens.typography.lineHeight.tight }],
+        '5xl': [tokens.typography.scale['5xl'], { lineHeight: tokens.typography.lineHeight.tight }],
+        '6xl': [tokens.typography.scale['6xl'], { lineHeight: tokens.typography.lineHeight.tight }],
+        '7xl': [tokens.typography.scale['7xl'], { lineHeight: tokens.typography.lineHeight.none }],
+      },
+      
+      letterSpacing: tokens.typography.letterSpacing,
+      
+      // Border radius
+      borderRadius: {
+        none: tokens.radius.none,
+        sm: tokens.radius.sm,
+        DEFAULT: tokens.radius.base,
+        md: tokens.radius.md,
+        lg: tokens.radius.lg,
+        xl: tokens.radius.xl,
+        '2xl': tokens.radius['2xl'],
+        '3xl': tokens.radius['3xl'],
+        full: tokens.radius.full,
+      },
+      
+      // Shadows
+      boxShadow: {
+        none: tokens.shadow.none,
+        sm: tokens.shadow.sm,
+        DEFAULT: tokens.shadow.base,
+        md: tokens.shadow.md,
+        lg: tokens.shadow.lg,
+        xl: tokens.shadow.xl,
+        '2xl': tokens.shadow['2xl'],
+        inner: tokens.shadow.inner,
+      },
+      
+      // Border width
+      borderWidth: {
+        DEFAULT: tokens.borderWidth.thin,
+        0: tokens.borderWidth.none,
+        0.5: tokens.borderWidth.hairline,
+        1: tokens.borderWidth.thin,
+        2: tokens.borderWidth.medium,
+        4: tokens.borderWidth.thick,
+      },
+      
+      // Transitions
+      transitionDuration: {
+        instant: tokens.motion.duration.instant,
+        fast: tokens.motion.duration.fast,
+        DEFAULT: tokens.motion.duration.base,
+        slow: tokens.motion.duration.slow,
+        slower: tokens.motion.duration.slower,
+      },
+      
+      transitionTimingFunction: {
+        linear: tokens.motion.easing.linear,
+        in: tokens.motion.easing.in,
+        out: tokens.motion.easing.out,
+        inOut: tokens.motion.easing.inOut,
+        bounce: tokens.motion.easing.bounce,
+      },
+      
+      // Z-index
+      zIndex: tokens.zIndex,
+      
+      // Screens (breakpoints)
+      screens: {
+        sm: tokens.breakpoint.sm,
+        md: tokens.breakpoint.md,
+        lg: tokens.breakpoint.lg,
+        xl: tokens.breakpoint.xl,
+        '2xl': tokens.breakpoint['2xl'],
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/forms'),
+  ],
+  // Safelist for dynamic surface classes
+  safelist: [
+    'surface-canon',
+    'surface-vault',
+    'surface-shorts',
+    'surface-essays',
+    'surface-books',
+    'surface-library',
+    'surface-inner-circle',
+    'surface-downloads',
+    'surface-resources',
+    'surface-events',
+    'surface-editorial',
+    'surface-vault-briefs',
+    // Surface-aware utilities
+    'surface-aware-bg',
+    'surface-aware-panel',
+    'surface-aware-text',
+    'surface-aware-text-muted',
+    'surface-aware-border',
+    // Hero scrims
+    'hero-scrim',
+    'hero-scrim-strong',
+  ],
+};
+```
+
+---
+
+## FILE 16: `styles/globals.css` (Reduced)
+
+```css
+@import './design-system.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Base typography - minimal, just essentials */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    @apply surface-aware-bg surface-aware-text;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Focus ring - consistent across all surfaces */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--surface-focus-ring);
+  }
+  
+  /* Selection color */
+  ::selection {
+    background-color: var(--surface-accent-soft);
+    color: var(--surface-text);
+  }
+}
+
+/* Utility classes - only what Tailwind doesn't provide */
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  
+  .line-clamp-4 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+  }
+}
+
+/* Surface-specific overrides (minimal) */
+.surface-canon .prose {
+  --tw-prose-body: var(--surface-text);
+  --tw-prose-headings: var(--surface-text);
+  --tw-prose-lead: var(--surface-text-muted);
+  --tw-prose-links: var(--surface-link);
+  --tw-prose-bold: var(--surface-text);
+  --tw-prose-counters: var(--surface-text-muted);
+  --tw-prose-bullets: var(--surface-border-strong);
+  --tw-prose-hr: var(--surface-border);
+  --tw-prose-quotes: var(--surface-text-muted);
+  --tw-prose-quote-borders: var(--surface-accent);
+  --tw-prose-captions: var(--surface-text-muted);
+  --tw-prose-code: var(--surface-accent);
+  --tw-prose-pre-code: var(--surface-text);
+  --tw-prose-pre-bg: var(--surface-bg-muted);
+  --tw-prose-th-borders: var(--surface-border);
+  --tw-prose-td-borders: var(--surface-border);
+}
+
+.surface-vault .prose {
+  font-family: var(--font-mono);
+  --tw-prose-body: var(--surface-text);
+  --tw-prose-headings: var(--surface-text);
+  --tw-prose-links: var(--surface-link);
+  --tw-prose-code: var(--surface-accent);
+}
+```
+
+---
+
+## DELIVERY SUMMARY
+
+All 16 files produced:
+
+| File | Purpose |
+|------|---------|
+| `lib/design-system/tokens.ts` | Foundation tokens (raw values) |
+| `lib/design-system/semantic.ts` | Semantic CSS variable definitions |
+| `lib/design-system/surfaces.ts` | 13 surface contracts with rules |
+| `lib/design-system/contrast.ts` | WCAG contrast validation |
+| `lib/design-system/gradients.ts` | Gradient safety rules |
+| `styles/design-system.css` | CSS variable bridge |
+| `components/primitives/CardShell.tsx` | Layout-only card primitive |
+| `components/primitives/SmartCover.tsx` | Enhanced cover with surface support |
+| `components/primitives/ContentMeta.tsx` | Surface-aware metadata |
+| `components/primitives/ReaderFrame.tsx` | Prose container with legibility |
+| `lib/adapters/normalize-list-item.ts` | List item normalization |
+| `lib/adapters/normalize-reader-document.ts` | Reader document normalization |
+| `components/layout/SurfaceLayout.tsx` | Main layout wrapper |
+| `components/navigation/SurfaceAwareNav.tsx` | Calm, hierarchical navigation |
+| `tailwind.config.js` | New config (replaces 9,847 lines) |
+| `styles/globals.css` | Reduced to essentials |
+
+**Ready for pilot on Canon + Vault surfaces.**

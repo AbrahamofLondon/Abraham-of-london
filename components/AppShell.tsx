@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
+import { SessionProvider } from "next-auth/react";
 import Header from "@/components/Header";
 import EnhancedFooter from "@/components/EnhancedFooter";
 
@@ -31,6 +32,7 @@ export default function AppShell({
   }, []);
 
   return (
+    <SessionProvider>
     <div className="relative min-h-screen bg-[#060609] text-white">
       <Header />
 
@@ -47,5 +49,6 @@ export default function AppShell({
 
       <div className="aol-grain-overlay" />
     </div>
+    </SessionProvider>
   );
 }

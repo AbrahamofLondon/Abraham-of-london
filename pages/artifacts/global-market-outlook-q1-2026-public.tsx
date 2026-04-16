@@ -243,7 +243,6 @@ function markdownToHtml(markdown: string): string {
 export const getStaticProps: GetStaticProps<PublicBriefProps> = async () => {
   console.log("[PAGE_DATA] pages/artifacts/global-market-outlook-q1-2026-public.tsx getStaticProps START");
   try {
-  try {
   const filePath = path.join(
     process.cwd(),
     "content",
@@ -293,8 +292,6 @@ export const getStaticProps: GetStaticProps<PublicBriefProps> = async () => {
     return { props: fallback, revalidate: 3600 };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/artifacts/global-market-outlook-q1-2026-public.tsx getStaticProps END");

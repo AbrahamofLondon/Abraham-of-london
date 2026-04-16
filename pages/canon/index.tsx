@@ -281,7 +281,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   console.log("[PAGE_DATA] pages/canon/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const { getAllCanons, sanitizeData } = await import("@/lib/content/server");
     const rawDocs = getAllCanons() || [];
     const seenSlugs = new Set<string>();
@@ -392,8 +391,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/canon/index.tsx getStaticProps END");

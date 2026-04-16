@@ -91,7 +91,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   console.log("[PAGE_DATA] pages/prints/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const { getContentlayerData, getPublishedDocuments } = await import(
       "@/lib/content/server"
     );
@@ -185,8 +184,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/prints/index.tsx getStaticProps END");

@@ -147,7 +147,6 @@ function titleCase(input?: string): string {
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticPaths START");
   try {
-  try {
   const { getAllPlaybooks } = await import("@/lib/content/server");
   const allPlaybooks = getAllPlaybooks();
   const paths = allPlaybooks
@@ -162,8 +161,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: "blocking",
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticPaths END");
@@ -172,7 +169,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params }) => {
   console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticProps START");
-  try {
   try {
   const slug = normalizeSlug(params?.slug);
 
@@ -209,8 +205,6 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
     revalidate: 3600,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticProps END");

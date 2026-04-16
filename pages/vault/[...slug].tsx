@@ -75,7 +75,6 @@ const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[PAGE_DATA] pages/vault/[...slug].tsx getStaticPaths START");
   try {
-  try {
   // Narrow: load only vault docs (~1) instead of the full 316-doc corpus.
   // VaultBriefs are a separate collection handled by pages/vault/briefs/*,
   // so excluding `briefs` below in the segment filter is still required.
@@ -110,8 +109,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return { paths, fallback: "blocking" };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/vault/[...slug].tsx getStaticPaths END");
@@ -120,7 +117,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   console.log("[PAGE_DATA] pages/vault/[...slug].tsx getStaticProps START");
-  try {
   try {
   const slug = cleanVaultSlug(params?.slug);
   if (!slug) return { notFound: true };
@@ -151,8 +147,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 3600,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/vault/[...slug].tsx getStaticProps END");

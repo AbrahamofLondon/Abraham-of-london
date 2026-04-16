@@ -1,0 +1,270 @@
+# EXECUTIVE ACCEPTANCE & EXECUTION ORDER
+
+**Status:** ✅ **APPROVED WITH CORRECTIONS**
+
+Your critique is accepted in full. The draft was clever but fragile. You have identified the difference between architectural elegance and production resilience.
+
+---
+
+## WHAT YOU GOT RIGHT (That I Missed)
+
+| My Mistake | Your Correction | Why You're Right |
+|------------|----------------|------------------|
+| One component to rule them all | Primitives + thin compositions | Single component becomes switch statement hell |
+| Tokens as literal values | Tokens + semantic layer + CSS variables | Runtime flexibility without rebuilds |
+| Delete first, ask questions later | Pilot surfaces, bridge mode, audit first | Legacy code has hidden business logic |
+| Gradients as decoration | Gradients with scrims, ceilings, rules | Illegibility is the enemy of premium |
+| Contrast as afterthought | 7:1/4.5:1 minimums, automated checks | Accessibility is not optional |
+| Tailwind interpolation | CSS variables mapped to utilities | `bg-[${var}]` is not production-safe |
+
+---
+
+## THE CORRECTED ARCHITECTURE (As You Defined It)
+
+```
+Layer 1: Foundation Tokens
+├── colors (raw)
+├── spacing (8px grid)
+├── typography (scale + families)
+├── radius, shadow, border, motion, z-index
+└── breakpoints
+
+Layer 2: Semantic Tokens
+├── --surface-bg, --surface-panel, --surface-border
+├── --surface-text, --surface-text-muted, --surface-text-subtle
+├── --surface-accent, --surface-hero-wash, --surface-hero-scrim
+└── Per-surface overrides
+
+Layer 3: Surface Contracts
+├── canon: warm, spacious, serif, high authority
+├── vault: cool, dense, mono accents, archival
+├── shorts: neutral, tight, sans, scan-friendly
+└── [10 more surfaces with explicit tone/density/rhythm]
+
+Layer 4: Primitives (Reusable, Tightly Controlled)
+├── CardShell
+├── SurfaceHeader
+├── ContentMeta
+├── SmartCover (enhanced, not rewritten)
+├── ReaderFrame
+├── ActionLink
+├── SectionRail
+├── FilterBar
+└── EmptyState
+
+Layer 5: Thin Compositions (Surface-Specific)
+├── CanonCard = CardShell + Canon config
+├── VaultCard = CardShell + Vault config
+├── ShortCard = VerticalCardShell + Shorts config
+└── [No giant switch statements]
+```
+
+---
+
+## IMMEDIATE EXECUTION ORDER (As You Commanded)
+
+### Phase 0: Audit (Do Not Touch Code Yet)
+
+```bash
+# Inventory all existing card components
+find components -name "*Card*" -type f > audit/card-inventory.txt
+
+# Record props, variants, business logic
+# Capture screenshots of every surface
+# Identify contrast failures (manual + automated)
+# Map business-critical pages that cannot regress
+```
+
+**Deliverable:** `audit/findings.md` with:
+- List of 13+ card components and their line counts
+- Each surface's current contrast ratios
+- Hidden business logic in legacy components
+- Risk matrix for migration
+
+### Phase 1: Foundation Layer (No Production Changes)
+
+**Files to create:**
+
+```
+lib/design-system/
+├── tokens.ts           # Raw foundation values
+├── semantic.ts         # CSS variable definitions
+├── surfaces.ts         # Surface contracts
+├── contrast.ts         # Contrast validation helpers
+└── gradients.ts        # Allowed gradient recipes with scrim rules
+
+styles/
+├── design-system.css   # CSS variable bridge
+└── globals.css         # Reduced to imports + minimal overrides
+```
+
+**Success criteria:** New system compiles, existing pages unchanged.
+
+### Phase 2: Primitive Components
+
+**Build in this order:**
+
+1. `CardShell` - layout only, no surface logic
+2. `SurfaceHeader` - hero + breadcrumb + metadata
+3. `ContentMeta` - author, date, citations, security badges
+4. `SmartCover` - enhance only if needed (keep existing)
+5. `ReaderFrame` - prose container with surface-aware styling
+6. `ActionLink` - unified interactive element
+
+**Success criteria:** Primitives render in isolation (Storybook or test page).
+
+### Phase 3: Pilot Surfaces (Canon + Vault)
+
+**Migrate Canon first:**
+
+```typescript
+// pages/canon/index.tsx - AFTER migration
+import { CardShell } from '@/components/primitives/CardShell';
+import { SurfaceHeader } from '@/components/primitives/SurfaceHeader';
+import { ContentMeta } from '@/components/primitives/ContentMeta';
+
+const CanonCard = ({ document }) => (
+  <CardShell surface="canon">
+    <SmartCover src={document.coverImage} surface="canon" />
+    <h3 className="canon-card-title">{document.title}</h3>
+    <ContentMeta document={document} surface="canon" />
+  </CardShell>
+);
+```
+
+**Then Vault:**
+
+```typescript
+// pages/vault/index.tsx - AFTER migration
+const VaultCard = ({ item }) => (
+  <CardShell surface="vault">
+    <SmartCover src={item.coverArt} surface="vault" />
+    <h3 className="vault-card-title font-mono">{item.name}</h3>
+    <ContentMeta document={item} surface="vault" showSecurity={true} />
+  </CardShell>
+);
+```
+
+**Success criteria:**
+- Visual regression passes (screenshots match within 1% diff)
+- Contrast: body text ≥7:1, secondary ≥4.5:1
+- No console errors
+- Performance: LCP within 10% of original
+
+### Phase 4: Remaining Surfaces (Conditional on Pilot)
+
+Only proceed if Canon + Vault pass all acceptance criteria.
+
+Migration order (as you specified):
+1. Essays (reading surface, similar to Canon)
+2. Shorts (tests vertical feed variant)
+3. Books (tests cover-led layout)
+4. Resources, Downloads, Library, Events (utility surfaces)
+5. Inner Circle, Editorial, Vault Briefs (restricted/edge cases)
+6. Home page (last, most visible)
+
+### Phase 5: Deletion (Only After Verification)
+
+**Delete only when:**
+- All 13 surfaces migrated and verified
+- Visual regression suite passes
+- Accessibility audit passes
+- Performance metrics equal or better
+- Business stakeholders sign off
+
+**Then delete:**
+- Old card components (50,000+ lines)
+- Replace tailwind.config.cjs with new config
+- Reduce globals.css from 5,000 to ~200 lines
+
+---
+
+## NON-NEGOTIABLE RULES (To Be Enforced by Linting)
+
+### Contrast Rule (Automated)
+
+```typescript
+// lib/design-system/contrast.ts
+export const CONTRAST_MINIMUMS = {
+  body: 7.0,      // WCAG AAA
+  secondary: 4.5, // WCAG AA
+  largeText: 4.5, // WCAG AA
+  interactive: 4.5,
+} as const;
+```
+
+### Gradient Rule (Code Review Required)
+
+```markdown
+No gradient may:
+- Have opacity >12% beneath body text
+- Use more than 2 color stops in text-bearing areas
+- Allow text to sit directly on gradient without scrim
+- Be animated (respect reduced-motion)
+```
+
+### Surface Contract Rule
+
+```typescript
+// Every surface must declare these properties
+interface SurfaceContract {
+  id: string;
+  tone: 'warm' | 'neutral' | 'cool';
+  density: 'spacious' | 'comfortable' | 'dense';
+  heroScrim: 'none' | 'subtle' | 'pronounced';
+  allowedGradients: GradientRecipe[];
+  contrastTier: 'AAA' | 'AA';
+}
+```
+
+### Ban List (ESLint Custom Rule)
+
+```javascript
+// Disallowed patterns
+'bg-\\[\\${',           // No runtime Tailwind interpolation
+'style=\\{\\{',          // No inline styles for colors
+'#[0-9a-f]{3,6}',       // No raw hex codes outside tokens
+'opacity-\\d+',         // No opacity without contrast validation (except transitions)
+'gradient-to-[trbl]',   // No un-scrimmed gradients under text
+```
+
+---
+
+## WHAT I WILL IMPLEMENT IMMEDIATELY
+
+Based on your corrected brief, I will now produce:
+
+1. **`lib/design-system/tokens.ts`** - Foundation tokens (colors, spacing, typography, radius, shadow, motion, z-index)
+2. **`lib/design-system/semantic.ts`** - CSS variable definitions with surface overrides
+3. **`lib/design-system/surfaces.ts`** - All 13 surface contracts with tone/density/contrast rules
+4. **`lib/design-system/contrast.ts`** - Validation helpers and minimums
+5. **`lib/design-system/gradients.ts`** - Allowed gradient recipes with scrim rules
+6. **`styles/design-system.css`** - CSS variable bridge (no runtime interpolation)
+7. **`components/primitives/CardShell.tsx`** - Layout-only, no surface logic
+8. **`components/primitives/SurfaceHeader.tsx`** - Hero with scrim support
+9. **`components/primitives/ContentMeta.tsx`** - Metadata with surface variants
+10. **`components/primitives/ReaderFrame.tsx`** - Prose container with legibility rules
+
+Each file will include:
+- Strict TypeScript (no `any`)
+- JSDoc comments explaining intent
+- Contrast validation where applicable
+- No assumptions about legacy deletion
+
+---
+
+## FINAL ACKNOWLEDGMENT
+
+You were right to reject the naive "one component to rule them all" fantasy.
+
+You were right to demand contrast rules, gradient ceilings, and semantic layers.
+
+You were right to insist on pilot surfaces before mass deletion.
+
+You were right to call out runtime Tailwind interpolation as wishful syntax.
+
+**The corrected architecture is now ready for implementation.**
+
+I will produce the files as specified above. Each will be production-ready, not presentation-ready.
+
+Shall I begin with `lib/design-system/tokens.ts`?

@@ -542,7 +542,6 @@ const BriefPage: NextPage<Props> = ({
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[PAGE_DATA] pages/vault/briefs/[slug].tsx getStaticPaths START");
   try {
-  try {
   const briefs = await getCombinedBriefs();
 
   // Cap prebuild to the 5 most recent briefs (by date desc). Runtime slug
@@ -562,8 +561,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return { paths, fallback: "blocking" };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/vault/briefs/[slug].tsx getStaticPaths END");
@@ -572,7 +569,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   console.log("[PAGE_DATA] pages/vault/briefs/[slug].tsx getStaticProps START");
-  try {
   try {
   const bare = briefsBareSlug(params?.slug);
   if (!bare) return { notFound: true };
@@ -625,8 +621,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 1800,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/vault/briefs/[slug].tsx getStaticProps END");

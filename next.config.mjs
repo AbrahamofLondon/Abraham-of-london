@@ -176,7 +176,7 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowSVG: true,
-    qualities: [75, 82, 85],
+    qualities: [75, 82, 85, 90],
   },
 
   httpAgentOptions: {

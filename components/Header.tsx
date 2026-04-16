@@ -118,9 +118,8 @@ export default function Header({
   // both contexts, so we read window.location.pathname directly and update
   // on popstate events. This avoids hook-context coupling and works in
   // every consumer (AppShell, Layout, SiteLayout, PDFDashboard, etc.).
-  // useSession is defensive: it returns undefined when SessionProvider is
-  // not present in the tree (e.g. during App Router prerender of /_not-found).
-  // Destructure with optional chaining and default to null.
+  // useSession reads the nearest SessionProvider context. Pages Router
+  // always wraps via _app.tsx. App Router wraps via AppShell's Providers.
   const sessionResult = useSession();
   const session = sessionResult?.data ?? null;
 

@@ -37,7 +37,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   console.log("[PAGE_DATA] pages/resources/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const { getAllResources, getDocHref, sanitizeData } = await import(
       "@/lib/content/server"
     );
@@ -73,8 +72,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     return { props: { resources: [] }, revalidate: 1800 };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/resources/index.tsx getStaticProps END");

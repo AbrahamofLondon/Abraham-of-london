@@ -521,7 +521,6 @@ export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
   console.log("[PAGE_DATA] pages/books/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const { getPublishedBooks, resolveDocCoverImage } = await import(
       "@/lib/content/server"
     );
@@ -571,8 +570,6 @@ export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
     return { props: { items: [], totalBooks: 0 }, revalidate: 60 };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/books/index.tsx getStaticProps END");

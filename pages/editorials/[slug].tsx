@@ -761,7 +761,6 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticPaths START");
   try {
-  try {
   // Hardcoded catalogue is tiny; use blocking so new additions render
   // without a redeploy.
   const items = getPublicationCatalogue();
@@ -770,8 +769,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: "blocking",
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticPaths END");
@@ -780,7 +777,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ctx => {
   console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticProps START");
-  try {
   try {
   const slug = typeof ctx.params?.slug === "string" ? ctx.params.slug : "";
   const item = getPublicationBySlug(slug);
@@ -806,8 +802,6 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
     revalidate: 1800,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticProps END");

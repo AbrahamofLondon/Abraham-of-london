@@ -170,7 +170,6 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   console.log("[PAGE_DATA] pages/library/index.tsx getStaticProps START");
   try {
-  try {
   const items = await loadPdfAssets();
 
   const counts = items.reduce(
@@ -188,8 +187,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     revalidate: 900,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/library/index.tsx getStaticProps END");

@@ -68,7 +68,6 @@ const Page: NextPage<Props> = ({ title, slug, requiredTier, bodyCode }) => {
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log("[PAGE_DATA] pages/resources/surrender-framework/[slug].tsx getStaticPaths START");
   try {
-  try {
   // Narrow: load only resource docs (~20) instead of the full 316-doc corpus,
   // then filter to the surrender-framework subset.
   const { getAllResources, isDraftContent } = await import(
@@ -92,8 +91,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return { paths, fallback: "blocking" };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/resources/surrender-framework/[slug].tsx getStaticPaths END");
@@ -102,7 +99,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   console.log("[PAGE_DATA] pages/resources/surrender-framework/[slug].tsx getStaticProps START");
-  try {
   try {
   const slug = cleanSlug(params?.slug);
   if (!slug) return { notFound: true };
@@ -133,8 +129,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     revalidate: 3600,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/resources/surrender-framework/[slug].tsx getStaticProps END");

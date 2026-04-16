@@ -35,7 +35,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   console.log("[PAGE_DATA] pages/events/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const allEventDocs = getAllEvents();
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -81,8 +80,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     return { props: { upcoming: [], past: [], tbc: [] }, revalidate: 1800 };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/events/index.tsx getStaticProps END");

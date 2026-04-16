@@ -2360,7 +2360,6 @@ function parseFrontmatter(content: string): Record<string, any> {
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   console.log("[PAGE_DATA] pages/index.tsx getStaticProps START");
   try {
-  try {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
   let featuredPlaybooks: PlaybookItem[] = [];
@@ -2582,8 +2581,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     revalidate: 3600,
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/index.tsx getStaticProps END");

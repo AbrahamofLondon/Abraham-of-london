@@ -42,7 +42,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   console.log("[PAGE_DATA] pages/content/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const {
       getPublishedCanons,
       getPublishedPosts,
@@ -117,8 +116,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     return { props: { items: [] }, revalidate: 1800 };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/content/index.tsx getStaticProps END");

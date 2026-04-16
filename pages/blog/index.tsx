@@ -424,7 +424,6 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
 
       <section
         className="relative overflow-hidden border-b border-white/10"
-        style={{ paddingTop: "calc(var(--aol-header-h,88px) + 12px)" }}
       >
         <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(245,158,11,0.10),transparent_30%),radial-gradient(circle_at_85%_20%,rgba(255,255,255,0.06),transparent_28%),linear-gradient(180deg,#050506_0%,#09090d_100%)]" />
         <div aria-hidden className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:96px_96px]" />
@@ -803,7 +802,6 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   console.log("[PAGE_DATA] pages/blog/index.tsx getStaticProps START");
   try {
   try {
-  try {
     // ✅ FS SSOT: content/blog
     const metas = await getMdxCollectionMeta("blog");
 
@@ -853,8 +851,6 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
     return { props: { items: [], totalPosts: 0 }, revalidate: 60 };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/blog/index.tsx getStaticProps END");

@@ -93,7 +93,6 @@ export const getStaticProps: GetStaticProps<{
   console.log("[PAGE_DATA] pages/vault/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const { getAllBriefs, getAllDownloads } = await import("@/lib/content/server");
     const allBriefs = getAllBriefs() as any[];
     const allDownloads = getAllDownloads() as any[];
@@ -191,8 +190,6 @@ export const getStaticProps: GetStaticProps<{
     };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/vault/index.tsx getStaticProps END");

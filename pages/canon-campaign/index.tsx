@@ -134,7 +134,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
   console.log("[PAGE_DATA] pages/canon-campaign/index.tsx getStaticProps START");
   try {
   try {
-  try {
     const rawDocs = getAllCanons() || [];
 
     const seen = new Set<string>();
@@ -257,8 +256,6 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
     };
   }
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/canon-campaign/index.tsx getStaticProps END");

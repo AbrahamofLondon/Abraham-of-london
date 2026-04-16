@@ -88,7 +88,6 @@ const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   console.log("[PAGE_DATA] pages/editorials/catalogue.tsx getStaticProps START");
   try {
-  try {
   const { discoverPublications } = await import("@/lib/editorial/discovery");
   const publications = discoverPublications();
 
@@ -98,8 +97,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     },
   };
 
-  } finally {
-  }
 
   } finally {
     console.log("[PAGE_DATA] pages/editorials/catalogue.tsx getStaticProps END");
