@@ -9,6 +9,7 @@ import {
 } from "@/lib/content-helper";
 
 import { safeSlice } from "@/lib/utils/safe";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type Book = ContentDoc & {
   normalizedReadTime: string;
@@ -33,12 +34,7 @@ function getReadTime(book: any): string {
 }
 
 function getCoverImage(book: any): string {
-  return (
-    safeString(book?.coverImage) ||
-    safeString(book?.image) ||
-    safeString(book?.cover) ||
-    "/assets/images/writing-desk.webp"
-  );
+  return resolveDocCoverImage(book, { contentType: 'BOOK' }) || "/assets/images/writing-desk.webp";
 }
 
 function enhance(book: ContentDoc): Book {

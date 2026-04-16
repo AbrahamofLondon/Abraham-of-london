@@ -1,5 +1,6 @@
 import { GetServerSideProps } from "next";
 import type { ContentDoc } from "@/lib/contentlayer-helper";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
@@ -16,7 +17,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
             xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
       ${downloads
         .map((doc: ContentDoc) => {
-          const imageUrl = String(doc.coverImage || doc.image || "");
+          const imageUrl = resolveDocCoverImage(doc, { contentType: 'DOWNLOAD' });
           const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${SITE_URL}${imageUrl}`;
           
           return `

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Lock, Clock, Calendar, ArrowRight, Shield } from "lucide-react";
 import { safeSlice } from "@/lib/utils/safe";
-import { resolveDocCoverImage } from "@/lib/image-resolver";
+import { getImageProps } from "@/lib/image-resolver";
 import type {
   BaseCardProps,
   DocumentCardProps,
@@ -68,8 +68,16 @@ const BaseCard: React.FC<BaseCardProps> = ({
   const displayText = excerpt || description || subtitle || "";
   const displayTags = safeSlice(tags || [], 0, 3);
   const formattedDate = date ? formatDate(date) : "";
-  // Use unified image resolver with brief fallback
-  const cardImage = resolveDocCoverImage({ coverImage }, { contentType: 'BRIEF' });
+  // Use unified image resolver with getImageProps for consistent rendering
+  const imageProps = getImageProps(
+    { coverImage, title },
+    { 
+      contentType: 'BRIEF',
+      alt: title,
+      sizes: "(max-width: 768px) 100vw, 33vw",
+      priority: false
+    }
+  );
 
   return (
     <Link
@@ -86,15 +94,13 @@ const BaseCard: React.FC<BaseCardProps> = ({
       {/* 1. Cover Sector */}
       <div className={`relative w-full overflow-hidden border-b border-white/5 ${aspectClass(coverAspect)}`}>
         <Image
-          src={cardImage}
-          alt={title}
+          {...imageProps}
           fill
           className={`
             ${coverFit === "contain" ? "object-contain" : "object-cover"} 
             opacity-40 grayscale transition-all duration-700 
             group-hover:scale-105 group-hover:opacity-80 group-hover:grayscale-0
           `}
-          sizes="(max-width: 768px) 100vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
         

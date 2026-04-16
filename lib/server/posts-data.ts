@@ -12,6 +12,7 @@ import type { Post } from "@/types/index";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
 import { safeSlice } from "@/lib/utils/safe";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type PostWithContent = Post & { content: string };
 
@@ -67,7 +68,7 @@ function fromMdxMeta(meta: MdxMeta): Post {
     featured: b(m.featured),
     readTime: s(m.readTime) || (n(m.readTime) as any) || (n(m.readingTime) as any),
 
-    coverImage: s(m.coverImage) || s(m.image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'POST' }),
     ogImage: s(m.ogImage),
 
     series: s(m.series),

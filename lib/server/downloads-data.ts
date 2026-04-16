@@ -10,6 +10,7 @@ import {
 
 import type { Download } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type DownloadWithContent = Download & { content: string };
 
@@ -59,7 +60,7 @@ function fromMdxMeta(meta: MdxMeta): Download {
     category: s(m.category),
     tags: a(m.tags),
     featured: b(m.featured),
-    coverImage: s(m.coverImage) || s(m.image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'DOWNLOAD' }),
     draft: b(m.draft),
     published: m.published === undefined ? true : b(m.published),
     fileName: s(m.fileName),

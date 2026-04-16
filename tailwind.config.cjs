@@ -32,9 +32,6 @@ module.exports = {
 
     extend: {
       // ── TYPOGRAPHY ──────────────────────────────────────────────────────────
-      // Cormorant Garamond loaded via Google Fonts in _document.tsx
-      // JetBrains Mono loaded via Google Fonts in _document.tsx
-      // CSS vars --font-serif and --font-mono set in globals.css
       fontFamily: {
         sans: [
           "var(--font-sans)",
@@ -76,7 +73,6 @@ module.exports = {
       },
 
       // ── COLOURS ─────────────────────────────────────────────────────────────
-      // All CSS variable bindings. Variables defined in globals.css.
       colors: {
         // Semantic system tokens
         background:    "rgb(var(--aol-bg)     / <alpha-value>)",
@@ -86,31 +82,44 @@ module.exports = {
         ring:          "rgb(var(--aol-gold)   / <alpha-value>)",
 
         // Surface scale
-        surface:    "rgb(14 14 18 / <alpha-value>)",
-        "surface-2": "rgb(9 9 12 / <alpha-value>)",
-        "surface-3": "rgb(6 6 9 / <alpha-value>)",
+        surface:        "rgb(14 14 18 / <alpha-value>)",
+        "surface-2":    "rgb(9 9 12 / <alpha-value>)",
+        "surface-3":    "rgb(6 6 9 / <alpha-value>)",
+
+        // Surface-aware tokens (for federated surfaces)
+        "surface-bg":         "rgb(var(--surface-bg, var(--aol-bg)) / <alpha-value>)",
+        "surface-bg-muted":   "rgb(var(--surface-bg-muted, var(--aol-bg-2)) / <alpha-value>)",
+        "surface-panel":      "rgb(var(--surface-panel, var(--aol-panel)) / <alpha-value>)",
+        "surface-panel-alt":  "rgb(var(--surface-panel-alt, var(--aol-panel-2)) / <alpha-value>)",
+        "surface-border":     "rgb(var(--surface-border, 255 255 255) / <alpha-value> / 0.12)",
+        "surface-text":       "rgb(var(--surface-text, var(--aol-ink)) / <alpha-value>)",
+        "surface-text-muted": "rgb(var(--surface-text-muted, var(--aol-ink-muted)) / <alpha-value>)",
+        "surface-accent":     "rgb(var(--surface-accent, var(--aol-gold)) / <alpha-value>)",
+        "surface-accent-soft":"rgb(var(--surface-accent-soft, var(--aol-gold-soft)) / <alpha-value>)",
 
         aol: {
-          void: "rgb(3 3 5 / <alpha-value>)",
-          base: "rgb(6 6 9 / <alpha-value>)",
-          lifted: "rgb(9 9 12 / <alpha-value>)",
-          panel: "rgb(14 14 18 / <alpha-value>)",
-          heading: "rgb(255 255 255 / 0.94)",
-          body: "rgb(255 255 255 / 0.85)",
-          muted: "rgb(255 255 255 / 0.66)",
-          dim: "rgb(255 255 255 / 0.48)",
-          faint: "rgb(255 255 255 / 0.34)",
-          gold: "rgb(201 169 110 / <alpha-value>)",
-          amber: "rgb(245 158 11 / <alpha-value>)",
-          "border-subtle": "rgb(255 255 255 / 0.08)",
-          "border-panel": "rgb(255 255 255 / 0.12)",
-          "border-strong": "rgb(255 255 255 / 0.18)",
-          "border-gold": "rgb(201 169 110 / 0.24)",
+          void:      "rgb(3 3 5 / <alpha-value>)",
+          base:      "rgb(6 6 9 / <alpha-value>)",
+          lifted:    "rgb(9 9 12 / <alpha-value>)",
+          panel:     "rgb(14 14 18 / <alpha-value>)",
+          heading:   "rgb(255 255 255 / 0.94)",
+          body:      "rgb(255 255 255 / 0.85)",
+          muted:     "rgb(255 255 255 / 0.66)",
+          dim:       "rgb(255 255 255 / 0.48)",
+          faint:     "rgb(255 255 255 / 0.34)",
+          gold:      "rgb(201 169 110 / <alpha-value>)",
+          "gold-strong": "rgb(212 175 55 / <alpha-value>)",
+          "gold-soft":   "rgb(201 169 110 / 0.24)",
+          amber:     "rgb(245 158 11 / <alpha-value>)",
+          "border-subtle":  "rgb(255 255 255 / 0.08)",
+          "border-panel":   "rgb(255 255 255 / 0.12)",
+          "border-strong":  "rgb(255 255 255 / 0.18)",
+          "border-gold":    "rgb(201 169 110 / 0.24)",
         },
 
         // Card
-        card:            "rgb(15 15 17 / <alpha-value>)",
-        "card-foreground": "rgb(var(--aol-ink) / <alpha-value>)",
+        card:               "rgb(15 15 17 / <alpha-value>)",
+        "card-foreground":  "rgb(var(--aol-ink) / <alpha-value>)",
 
         // Full brand namespace
         brand: {
@@ -131,19 +140,41 @@ module.exports = {
           warning:       "rgb(var(--aol-warning)   / <alpha-value>)",
         },
 
-        // Convenience aliases (used throughout existing components)
-        softGold:       "rgb(var(--aol-gold)        / <alpha-value>)",
-        gold:           "rgb(var(--aol-gold)        / <alpha-value>)",
-        amber:          "rgb(var(--aol-gold-strong)  / <alpha-value>)",
-        cream:          "rgb(var(--aol-ink)          / <alpha-value>)",
-        warmWhite:      "rgb(var(--aol-ink)          / <alpha-value>)",
-        charcoal:       "rgb(var(--aol-bg-3)         / <alpha-value>)",
+        // Convenience aliases
+        softGold:        "rgb(var(--aol-gold)        / <alpha-value>)",
+        gold:            "rgb(var(--aol-gold)        / <alpha-value>)",
+        amber:           "rgb(var(--aol-gold-strong) / <alpha-value>)",
+        cream:           "rgb(var(--aol-ink)         / <alpha-value>)",
+        warmWhite:       "rgb(var(--aol-ink)         / <alpha-value>)",
+        charcoal:        "rgb(var(--aol-bg-3)        / <alpha-value>)",
         "charcoal-light": "rgb(22 22 24              / <alpha-value>)",
-        deepCharcoal:   "rgb(var(--aol-bg-2)         / <alpha-value>)",
-        softBlack:      "rgb(var(--aol-bg)           / <alpha-value>)",
-        obsidian:       "rgb(var(--aol-bg)           / <alpha-value>)",
-        lightGrey:      "rgb(255 255 255 / 0.18)",
-        forest:         "#0e3b33",
+        deepCharcoal:    "rgb(var(--aol-bg-2)        / <alpha-value>)",
+        softBlack:       "rgb(var(--aol-bg)          / <alpha-value>)",
+        obsidian:        "rgb(var(--aol-bg)          / <alpha-value>)",
+        lightGrey:       "rgb(255 255 255 / 0.18)",
+        forest:          "#0e3b33",
+      },
+
+      // ── SPACING (8px grid system for federated surfaces) ───────────────────
+      spacing: {
+        0: "0",
+        1: "0.25rem",   // 4px
+        2: "0.5rem",    // 8px
+        3: "0.75rem",   // 12px
+        4: "1rem",      // 16px
+        5: "1.25rem",   // 20px
+        6: "1.5rem",    // 24px
+        8: "2rem",      // 32px
+        10: "2.5rem",   // 40px
+        12: "3rem",     // 48px
+        16: "4rem",     // 64px
+        20: "5rem",     // 80px
+        24: "6rem",     // 96px
+        32: "8rem",     // 128px
+        40: "10rem",    // 160px
+        48: "12rem",    // 192px
+        56: "14rem",    // 224px
+        64: "16rem",    // 256px
       },
 
       // ── TIMING ──────────────────────────────────────────────────────────────
@@ -151,6 +182,10 @@ module.exports = {
         "400":   "400ms",
         "4000":  "4000ms",
         "10000": "10000ms",
+      },
+      transitionTimingFunction: {
+        "in-expo": "cubic-bezier(0.95, 0.05, 0.795, 0.035)",
+        "out-expo": "cubic-bezier(0.19, 1, 0.22, 1)",
       },
 
       // ── BORDER RADIUS ───────────────────────────────────────────────────────
@@ -205,6 +240,27 @@ module.exports = {
         terminal:  "0 28px 90px rgba(0,0,0,0.46), 0 1px 0 rgba(255,255,255,0.04) inset",
         "aol-panel": "0 32px 100px -50px rgba(0,0,0,0.98)",
         "aol-panel-gold": "0 32px 100px -50px rgba(0,0,0,0.98), 0 0 90px -35px rgba(201,169,106,0.18)",
+      },
+
+      // ── ANIMATION ───────────────────────────────────────────────────────────
+      keyframes: {
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "slide-up": {
+          "0%": { transform: "translateY(10px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "pulse-gold": {
+          "0%, 100%": { opacity: "0.3" },
+          "50%": { opacity: "0.6" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.5s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
+        "pulse-gold": "pulse-gold 2s ease-in-out infinite",
       },
     },
   },

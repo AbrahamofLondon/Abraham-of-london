@@ -14,6 +14,7 @@ import {
 } from "@/lib/server/mdx-collections";
 
 import type { Strategy } from "@/types/index";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 import { safeSlice } from "@/lib/utils/safe";
 
 export type StrategyWithContent = Strategy & { content: string };
@@ -51,7 +52,7 @@ function fromMdxMeta(meta: MdxMeta): Strategy {
     tags: a(m.tags),
     featured: b(m.featured),
 
-    coverImage: s(m.coverImage) || s(m.image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'STRATEGY' }),
 
     draft: b(m.draft),
     published: m.published === undefined ? true : b(m.published),
