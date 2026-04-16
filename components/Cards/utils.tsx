@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { safeFirstChar, safeSlice, safeCapitalize } from "@/lib/utils/safe";
+import { FALLBACK_IMAGES } from "@/lib/image-resolver";
 
 
 // =============================================================================
@@ -71,13 +72,13 @@ export interface CardConfig {
 
 export function getCardFallbackConfig() {
   return {
-    defaultImage: "/assets/images/writing-desk.webp",
+    defaultImage: FALLBACK_IMAGES.DEFAULT,
     defaultTitle: "Untitled",
     defaultDescription: "No description available yet.",
     defaultTags: [] as string[],
     defaultAuthor: "Abraham of London",
     defaultAvatar: "/assets/images/profile-portrait.webp",
-    defaultBookImage: "/assets/images/default-book.jpg",
+    defaultBookImage: FALLBACK_IMAGES.BOOK,
   };
 }
 

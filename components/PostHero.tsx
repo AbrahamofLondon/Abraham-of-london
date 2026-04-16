@@ -29,7 +29,6 @@ function useCover(slug: string, coverImage?: string | null) {
       normalizeLocal(coverImage),
       `/assets/images/blog/${slug}.webp`,
       `/assets/images/blog/${slug}.jpg`,
-      `/assets/images/blog/${slug}.jpeg`,
       `/assets/images/blog/${slug}.png`,
       `/assets/images/blog/default-blog-cover.jpg`,
     ].filter(Boolean) as string[];

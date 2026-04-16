@@ -20,7 +20,7 @@ type BookCardProps = {
   image?: string | null;
 };
 
-const BOOK_FALLBACK_COVER = "/assets/images/fathering-without-fear-teaser.jpg";
+const BOOK_FALLBACK_COVER = "/assets/images/books/the-architecture-of-human-purpose.jpg";
 
 function resolveBookCover(book: BookCardProps): string {
   // Check in order of priority

@@ -14,7 +14,7 @@ type Props = {
   priority?: boolean; // optional; true only if above-the-fold
 };
 
-const DEFAULT_COVER = "/assets/images/default-book.jpg";
+const DEFAULT_COVER = "/assets/images/books/the-architecture-of-human-purpose.jpg";
 const isExternal = (u?: string | null) => !!u && /^https?:\/\//i.test(u);
 const toLocalOrFallback = (src?: string) =>
   src && src.startsWith("/") ? src : DEFAULT_COVER;

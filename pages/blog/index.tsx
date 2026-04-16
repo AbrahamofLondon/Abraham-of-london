@@ -62,7 +62,8 @@ type BlogIndexProps = {
   totalPosts: number;
 };
 
-const DEFAULT_COVER = "/assets/images/writing-desk.webp"; // ✅ you said this exists
+// Canonical fallback — sourced from the unified image resolver
+const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");

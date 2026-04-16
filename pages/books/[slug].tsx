@@ -29,7 +29,7 @@ type Props = {
   bareSlug: string;
 };
 
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
+const DEFAULT_COVER = "/assets/images/books/the-architecture-of-human-purpose.jpg";
 
 function safeString(value: unknown): string {
   if (typeof value === "string") return value;

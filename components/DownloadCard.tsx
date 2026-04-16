@@ -24,7 +24,7 @@ type DownloadCardProps = {
   pdfFormats?: string[];
 };
 
-const DEFAULT_COVER = "/assets/images/downloads/default-download-cover.jpg";
+const DEFAULT_COVER = "/assets/images/writing-desk.webp";
 
 function isGatedHref(href: string): boolean {
   return href.startsWith("/api/downloads/");

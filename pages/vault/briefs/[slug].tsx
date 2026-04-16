@@ -46,7 +46,7 @@ type Props = {
   bareSlug: string;
 };
 
-const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
+const DEFAULT_COVER = "/assets/images/canon/canon-resources.jpg";
 
 function safeString(v: unknown): string {
   if (typeof v === "string") return v;

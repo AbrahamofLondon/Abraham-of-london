@@ -9,24 +9,26 @@
  * - Image type normalization (string vs object with src property)
  */
 
-// Default fallback images for different content types
+// Default fallback images for different content types.
+// IMPORTANT: Every path here must correspond to a file that exists under public/.
+// Verified against disk on 2026-04-16.
 export const FALLBACK_IMAGES = {
   // Primary fallback - used when no specific type matches
-  DEFAULT: '/assets/images/social/og-image.jpg',
-  
-  // Content type specific fallbacks
+  DEFAULT: '/assets/images/writing-desk.webp',
+
+  // Content type specific fallbacks (all verified to exist on disk)
   BLOG: '/assets/images/blog/default-blog-cover.jpg',
   BOOK: '/assets/images/books/the-architecture-of-human-purpose.jpg',
   CANON: '/assets/images/canon/canon-resources.jpg',
-  DOWNLOAD: '/assets/images/canon/canon-resources.jpg',
+  DOWNLOAD: '/assets/images/writing-desk.webp',
   RESOURCE: '/assets/images/canon/canon-resources.jpg',
-  STRATEGY: '/assets/images/strategy/strategy-default.webp',
-  EVENT: '/assets/images/events/default.jpg',
+  STRATEGY: '/assets/images/writing-desk.webp',
+  EVENT: '/assets/images/writing-desk.webp',
   PRINT: '/assets/images/writing-desk.webp',
-  SHORT: '/assets/images/shorts/default-cover.jpg',
-  BRIEF: '/assets/images/placeholder-brief.webp',
-  ARTIFACT: '/assets/images/artifacts/default-cover.jpg',
-  PLAYBOOK: '/assets/images/playbooks/default-cover.jpg',
+  SHORT: '/assets/images/writing-desk.webp',
+  BRIEF: '/assets/images/canon/canon-resources.jpg',
+  ARTIFACT: '/assets/images/writing-desk.webp',
+  PLAYBOOK: '/assets/images/writing-desk.webp',
 } as const;
 
 // Next.js supported image domains (from next.config.mjs)

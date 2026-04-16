@@ -415,7 +415,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
         />
       </Head>
 
-      <main className="ds-surface-canon min-h-screen bg-[rgb(3,3,5)] text-white">
+      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
         <section className="border-b" style={{ borderBottomColor: RULE }}>
           <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
             <div className="flex items-center gap-3">
