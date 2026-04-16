@@ -8,7 +8,8 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { Search, ArrowRight, Tag } from "lucide-react";
+import BookListCard from "@/components/books/BookListCard";
+import { Search, Tag } from "lucide-react";
 import { resolveDocCoverImage } from "@/lib/content/shared";
 
 
@@ -132,74 +133,6 @@ function safeDateLabel(value: unknown): string | null {
   return new Date(iso).toLocaleDateString("en-GB");
 }
 
-function aspectToStyle(a?: string | null): React.CSSProperties {
-  const v = (a || "").toLowerCase();
-  if (v === "wide") return { aspectRatio: "16 / 9" };
-  if (v === "square") return { aspectRatio: "1 / 1" };
-  return { aspectRatio: "3 / 4" };
-}
-
-function objectPos(pos?: string | null): string {
-  const p = (pos || "center").toLowerCase();
-  if (p.includes("%")) return p;
-  if (["top", "bottom", "left", "right", "center"].includes(p)) return p;
-  return "center";
-}
-
-/**
- * CoverCard (premium no-crop foreground + blurred backdrop)
- */
-const CoverCard: React.FC<{
-  src: string;
-  alt: string;
-  aspect?: string | null;
-  fit?: string | null;
-  position?: string | null;
-  priority?: boolean;
-}> = ({ src, alt, aspect, fit, position, priority }) => {
-  const fitMode = (fit || "cover").toLowerCase();
-  const fgContain = true;
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-      <div className="relative w-full" style={aspectToStyle(aspect)}>
-        <Image
-          src={src}
-          alt=""
-          fill
-          priority={!!priority}
-          className="object-cover scale-[1.08] blur-[10px] opacity-55"
-          style={{ objectPosition: objectPos(position) }}
-          sizes="(max-width: 768px) 100vw, 420px"
-        />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/25" />
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.18),transparent_55%)]"
-        />
-
-        <div className="absolute inset-0 p-4">
-          <div className="relative h-full w-full">
-            <Image
-              src={src}
-              alt={alt}
-              fill
-              priority={!!priority}
-              className={[
-                "transition-transform duration-700 will-change-transform",
-                fgContain ? "object-contain" : fitMode === "contain" ? "object-contain" : "object-cover",
-                "drop-shadow-[0_18px_45px_rgba(0,0,0,0.55)]",
-                "group-hover:scale-[1.02]",
-              ].join(" ")}
-              style={{ objectPosition: objectPos(position) }}
-              sizes="(max-width: 768px) 100vw, 420px"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 /* -----------------------------------------------------------------------------
   PAGE
@@ -404,53 +337,17 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="ds-surface-books grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featured.map((b, idx) => (
-              <Link
+              <BookListCard
                 key={b.url}
-                href={b.url}
-                className="group block rounded-3xl border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.03]"
-              >
-                <article className="p-6">
-                  <CoverCard
-                    src={resolveDocCoverImage(b, { contentType: 'BOOK' })}
-                    alt={b.title}
-                    aspect={b.coverAspect || "book"}
-                    fit={b.coverFit || "cover"}
-                    position={b.coverPosition || "center"}
-                    priority={idx === 0}
-                  />
-
-                  <div className="mt-5">
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
-                      {b.date ? <span>{b.date}</span> : null}
-                      {b.readTime ? <span className="text-white/35">{b.readTime}</span> : null}
-                      {b.tags?.[0] ? <span className="text-white/25">{b.tags[0]}</span> : null}
-                    </div>
-
-                    <h2 className="mt-4 font-serif text-2xl tracking-tight text-white/92 transition-colors group-hover:text-amber-100">
-                      {b.title}
-                    </h2>
-
-                    {b.subtitle ? (
-                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/50">
-                        {b.subtitle}
-                      </p>
-                    ) : null}
-
-                    {b.excerpt ? (
-                      <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-white/45">
-                        {b.excerpt}
-                      </p>
-                    ) : null}
-
-                    <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
-                      Open
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </div>
-                  </div>
-                </article>
-              </Link>
+                book={{
+                  ...b,
+                  coverImage: resolveDocCoverImage(b, { contentType: 'BOOK' }),
+                  featured: true,
+                }}
+                priority={idx === 0}
+              />
             ))}
           </div>
         </section>
@@ -464,46 +361,15 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="ds-surface-books grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {rest.map((b) => (
-            <Link
+            <BookListCard
               key={b.url}
-              href={b.url}
-              className="group block rounded-3xl border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.03]"
-            >
-              <article className="p-6">
-                <CoverCard
-                  src={resolveDocCoverImage(b, { contentType: 'BOOK' })}
-                  alt={b.title}
-                  aspect={b.coverAspect || "book"}
-                  fit={b.coverFit || "cover"}
-                  position={b.coverPosition || "center"}
-                />
-
-                <div className="mt-5">
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
-                    {b.date ? <span>{b.date}</span> : null}
-                    {b.readTime ? <span className="text-white/35">{b.readTime}</span> : null}
-                    {b.tags?.[0] ? <span className="text-white/25">{b.tags[0]}</span> : null}
-                  </div>
-
-                  <h2 className="mt-4 line-clamp-2 font-serif text-2xl tracking-tight text-white/92 transition-colors group-hover:text-amber-100">
-                    {b.title}
-                  </h2>
-
-                  {b.subtitle ? (
-                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/50">
-                      {b.subtitle}
-                    </p>
-                  ) : null}
-
-                  <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/70">
-                    Open
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </div>
-                </div>
-              </article>
-            </Link>
+              book={{
+                ...b,
+                coverImage: resolveDocCoverImage(b, { contentType: 'BOOK' }),
+              }}
+            />
           ))}
 
           {filtered.length === 0 && (

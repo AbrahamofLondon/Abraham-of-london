@@ -1,3 +1,6 @@
+// components/blog/BlogCard.migrated.tsx
+// Migrated version using UnifiedCard
+
 'use client';
 
 import { UnifiedCard } from '@/components/primitives/UnifiedCard';

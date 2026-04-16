@@ -7,6 +7,9 @@ import Layout from "@/components/Layout";
 
 import ServerMDXRenderer from "@/components/mdx/ServerMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
+import ReaderFrame from "@/components/reader/ReaderFrame";
+import ReaderHeader from "@/components/reader/ReaderHeader";
+import ReaderBody from "@/components/reader/ReaderBody";
 
 import { normalizeSlug } from "@/lib/content/shared";
 
@@ -88,46 +91,31 @@ const Page: NextPage<Props> = ({ canon, requiredTier, bodyCode }) => {
         <meta name="robots" content={isPublic ? "index,follow" : "noindex,nofollow"} />
       </Head>
 
-      <main className="min-h-screen bg-black text-white">
-        <section className="border-b border-white/8 px-6 pb-10 pt-32 md:pb-12 md:pt-36">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="h-px w-10 bg-gradient-to-r from-amber-500/50 to-transparent" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.34em] text-white/34">
-                Canonical Volume
-              </span>
-            </div>
+      <ReaderFrame surface="canon">
+        <ReaderHeader
+          surface="canon"
+          title={canon.title}
+          meta={[
+            ...(canon.category ? [{ label: "Category", value: canon.category }] : []),
+            ...(canon.readTime ? [{ label: "Read time", value: canon.readTime }] : []),
+            ...(canon.date ? [{ label: "Date", value: canon.date }] : []),
+          ]}
+        />
 
-            <h1 className="max-w-5xl font-serif text-5xl font-light leading-[0.94] tracking-[-0.055em] text-white md:text-7xl">
-              {canon.title}
-            </h1>
-
-            {(canon.excerpt || canon.category || canon.readTime || canon.date) && (
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-mono uppercase tracking-[0.18em] text-white/36">
-                {canon.category ? <span>{canon.category}</span> : null}
-                {canon.readTime ? <span>{canon.readTime}</span> : null}
-                {canon.date ? <span>{canon.date}</span> : null}
-              </div>
-            )}
+        {isPublic ? (
+          <ReaderBody surface="canon">
+            <ServerMDXRenderer code={bodyCode || ""} />
+          </ReaderBody>
+        ) : (
+          <div className="mx-auto max-w-3xl px-6 py-12">
+            <ClientUnlockRenderer
+              slug={`canon/${canon.slug}`}
+              requiredTier={requiredTier}
+              initialCode={null}
+            />
           </div>
-        </section>
-
-        <section className="px-6 py-12 md:py-16">
-          <div className="mx-auto max-w-5xl">
-            {isPublic ? (
-              <div className="aol-mdx-shell">
-                <ServerMDXRenderer code={bodyCode || ""} />
-              </div>
-            ) : (
-              <ClientUnlockRenderer
-                slug={`canon/${canon.slug}`}
-                requiredTier={requiredTier}
-                initialCode={null}
-              />
-            )}
-          </div>
-        </section>
-      </main>
+        )}
+      </ReaderFrame>
     </Layout>
   );
 };

@@ -166,7 +166,8 @@ export default function Header({
     return () => { document.body.style.overflow = original; };
   }, [isOpen]);
 
-  const elevated = scrolled || isOpen || !transparent;
+  // Gate scrolled behind mounted — server always renders un-scrolled state.
+  const elevated = (mounted && scrolled) || isOpen || !transparent;
 
   return (
     <>
@@ -207,7 +208,9 @@ export default function Header({
             {!minimal && (
               <nav className="hidden items-center gap-5 md:flex" aria-label="Primary navigation">
                 {DESKTOP_NAV.map((item) => {
-                  const active = isActive(currentPath, item.href);
+                  // Gate behind mounted to prevent hydration mismatch.
+                  // Server always renders "/" as currentPath; client may differ.
+                  const active = mounted && isActive(currentPath, item.href);
 
                   return (
                     <Link
@@ -340,7 +343,7 @@ export default function Header({
           {/* Nav items */}
           <nav className="space-y-0 divide-y divide-white/[0.04]" aria-label="Mobile navigation">
             {MOBILE_NAV.map((item, idx) => {
-              const active = isActive(currentPath, item.href);
+              const active = mounted && isActive(currentPath, item.href);
               const Icon = item.icon;
 
               return (
@@ -438,7 +441,7 @@ export default function Header({
                   ]),
             ].map((item) => {
               const Icon = item.icon;
-              const active = isActive(currentPath, item.href);
+              const active = mounted && isActive(currentPath, item.href);
               return (
                 <Link
                   key={item.href}

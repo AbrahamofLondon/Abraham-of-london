@@ -1,4 +1,6 @@
-// components/Cards/BaseCard.tsx — MIGRATED to UnifiedCard
+// components/Cards/BaseCard.migrated.tsx
+// Migrated version using UnifiedCard
+
 import * as React from "react";
 import { UnifiedCard } from '@/components/primitives/UnifiedCard';
 import type { BaseCardProps } from "./types";
@@ -27,7 +29,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
   const safeHref = href || `/briefs/${slug}`;
   const displayText = excerpt || description || subtitle || "";
 
-  // Map cover aspect to UnifiedCard aspect
+  // Map cover aspect
   const coverAspectMap = {
     book: "portrait" as const,
     square: "square" as const,

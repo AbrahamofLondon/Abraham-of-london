@@ -27,7 +27,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Search, LayoutGrid, List, Sparkles, ChevronRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import ShortCard from "@/components/ShortCard";
+// ShortsCard available at @/components/shorts/ShortsCard for grid layouts.
+// This page uses tabular rows — card component is not needed here.
 import {
   readImprint,
   writeImprint,
@@ -179,9 +180,9 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
 // DESIGN TOKENS (inline)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GOLD  = "#C9A96E";
-const VOID  = "rgb(3 3 5)";
-const BASE  = "rgb(6 6 9)";
+const GOLD  = "var(--ds-accent)";
+const VOID  = "var(--ds-background)";
+const BASE  = "var(--ds-background)";
 
 const GRAIN: React.CSSProperties = {
   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
@@ -856,28 +857,17 @@ function EmptyState({ query }: { query: string }) {
     <div className="flex flex-col items-center justify-center py-28">
       <div
         className="mb-6 h-px w-10"
-        style={{ background: `linear-gradient(to right, transparent, ${GOLD}40, transparent)` }}
+        style={{ background: "linear-gradient(to right, transparent, var(--ds-accent-soft), transparent)" }}
       />
       <p
-        style={{
-          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-          fontSize: "1.5rem",
-          fontWeight: 300,
-          color: "rgba(255,255,255,0.60)",
-          fontStyle: "italic",
-        }}
+        className="font-serif font-light italic"
+        style={{ fontSize: "1.5rem", color: "var(--ds-text-muted)" }}
       >
-        Nothing found for "{query}"
+        Nothing found for &ldquo;{query}&rdquo;
       </p>
       <p
-        style={{
-          marginTop: "0.75rem",
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8.5px",
-          letterSpacing: "0.32em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.22)",
-        }}
+        className="mt-3 font-mono text-[8.5px] uppercase tracking-[0.32em]"
+        style={{ color: "var(--ds-text-subtle)" }}
       >
         Try a broader term
       </p>
@@ -931,18 +921,10 @@ function MemoFilterStrip({
                 key={category}
                 type="button"
                 onClick={() => setActiveCategory(category === "All" ? "" : category)}
+                className="cursor-pointer whitespace-nowrap border-none bg-transparent pb-1 font-mono text-[8px] uppercase tracking-[0.30em]"
                 style={{
-                  paddingBottom: "0.25rem",
-                  border: "none",
-                  borderBottom: `1px solid ${isActive ? GOLD : "transparent"}`,
-                  background: "transparent",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
-                  letterSpacing: "0.30em",
-                  textTransform: "uppercase",
-                  color: isActive ? GOLD : "rgba(255,255,255,0.32)",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
+                  borderBottom: `1px solid ${isActive ? "var(--ds-accent)" : "transparent"}`,
+                  color: isActive ? "var(--ds-accent)" : "var(--ds-text-subtle)",
                 }}
               >
                 {category}
@@ -984,66 +966,59 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         <meta name="description" content="Compressed thinking for people who read fast." />
       </Head>
 
-      <main className="min-h-screen" style={{ backgroundColor: VOID }}>
+      <main className="ds-surface-shorts min-h-screen" style={{ backgroundColor: VOID }}>
         <header
-          className="border-b px-6 pb-12 pt-16 lg:px-10 lg:pb-12 lg:pt-28"
-          style={{ borderColor: "rgba(255,255,255,0.10)" }}
+          className="border-b px-6 pb-12 pt-16 lg:px-10 lg:pb-16 lg:pt-28"
+          style={{ borderColor: "var(--ds-border)" }}
         >
           <div className="mx-auto max-w-5xl">
-            <div className="flex items-center">
+            {/* Eyebrow */}
+            <div className="flex items-center gap-3">
               <span
-                style={{
-                  width: 1,
-                  height: 20,
-                  backgroundColor: "rgba(201,169,110,0.45)",
-                  display: "inline-block",
-                  marginRight: "0.75rem",
-                  verticalAlign: "middle",
-                }}
+                className="inline-block h-5 w-px"
+                style={{ backgroundColor: "var(--ds-accent-soft)" }}
               />
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
-                  letterSpacing: "0.40em",
-                  textTransform: "uppercase",
-                  color: "rgba(201,169,110,0.80)",
-                }}
+              <span
+                className="font-mono text-[7.5px] uppercase tracking-[0.40em]"
+                style={{ color: "var(--ds-accent)" }}
               >
                 SHORTS · ABRAHAM OF LONDON
-              </div>
+              </span>
             </div>
+
+            {/* Headline — stunning but controlled */}
             <h1
+              className="mt-5 max-w-[18ch] font-serif font-light italic"
               style={{
-                marginTop: "1rem",
-                fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                fontWeight: 300,
-                fontStyle: "italic",
                 fontSize: "clamp(2.8rem, 5.5vw, 5rem)",
-                lineHeight: 1.02,
-                color: "rgba(255,255,255,0.90)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.04em",
+                color: "var(--ds-text)",
               }}
             >
               Compressed thinking for people who read fast.
             </h1>
+
+            {/* Gold rule */}
             <div
-              style={{
-                width: 40,
-                height: 1,
-                backgroundColor: "rgba(201,169,110,0.55)",
-                margin: "1.5rem 0 2rem",
-              }}
+              className="my-6 h-px w-10"
+              style={{ background: "linear-gradient(to right, var(--ds-accent), transparent)" }}
             />
+
+            {/* Subline */}
             <div
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
-                letterSpacing: "0.42em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.28)",
-              }}
+              className="font-mono text-[8px] uppercase tracking-[0.42em]"
+              style={{ color: "var(--ds-text-subtle)" }}
             >
               Signal. Pattern. Decision.
+            </div>
+
+            {/* Count */}
+            <div
+              className="mt-6 font-mono text-[7px] uppercase tracking-[0.30em]"
+              style={{ color: "var(--ds-text-subtle)" }}
+            >
+              {shorts.length} dispatches indexed
             </div>
           </div>
         </header>
@@ -1062,58 +1037,41 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
               <Link
                 key={short.id}
                 href={short.href}
-                className="block border-b px-6 py-6 transition-colors hover:bg-white/[0.02] lg:px-10"
-                style={{ borderColor: "rgba(255,255,255,0.05)" }}
+                className="group block border-b px-6 py-6 transition-colors lg:px-10"
+                style={{ borderColor: "var(--ds-border)" }}
               >
                 <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-[80px_minmax(0,1fr)_80px] md:items-start">
                   <div
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.28)",
-                    }}
+                    className="font-mono text-[8px] uppercase tracking-[0.12em]"
+                    style={{ color: "var(--ds-text-subtle)" }}
                   >
                     {short.readTime}
                   </div>
 
                   <div className="min-w-0">
                     <div
-                      style={{
-                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
-                        letterSpacing: "0.32em",
-                        textTransform: "uppercase",
-                        color: GOLD,
-                      }}
+                      className="font-mono text-[7.5px] uppercase tracking-[0.32em]"
+                      style={{ color: "var(--ds-accent)" }}
                     >
                       {short.category}
                     </div>
                     <h2
+                      className="mt-2 font-serif font-light italic transition-colors group-hover:text-white"
                       style={{
-                        marginTop: "0.45rem",
-                        fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                        fontWeight: 300,
-                        fontStyle: "italic",
                         fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
                         lineHeight: 1.08,
-                        color: "rgba(255,255,255,0.88)",
+                        color: "var(--ds-text)",
                       }}
-                      className="transition-colors hover:text-white"
                     >
                       {short.title}
                     </h2>
                     {excerpt ? (
                       <p
-                        className="truncate"
+                        className="mt-2 truncate font-serif font-light"
                         style={{
-                          marginTop: "0.5rem",
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
                           fontSize: "0.875rem",
                           lineHeight: 1.45,
-                          color: "rgba(255,255,255,0.40)",
+                          color: "var(--ds-text-muted)",
                         }}
                       >
                         {excerpt}
@@ -1122,14 +1080,8 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
                   </div>
 
                   <div
-                    className="md:text-right"
-                    style={{
-                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
-                    }}
+                    className="font-mono text-[7.5px] uppercase tracking-[0.12em] md:text-right"
+                    style={{ color: "var(--ds-text-subtle)" }}
                   >
                     {formatShortDate(short.date)}
                   </div>
@@ -1140,15 +1092,10 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
         </section>
 
         <footer className="px-6 py-10 lg:px-10">
-          <div className="mx-auto max-w-5xl border-t pt-6" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+          <div className="mx-auto max-w-5xl border-t pt-6" style={{ borderColor: "var(--ds-border)" }}>
             <div
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.40em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.22)",
-              }}
+              className="font-mono text-[7.5px] uppercase tracking-[0.40em]"
+              style={{ color: "var(--ds-text-subtle)" }}
             >
               Abraham of London
             </div>

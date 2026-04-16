@@ -10,6 +10,7 @@ import Image from "next/image";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
+import EssayCard from "@/components/essays/EssayCard";
 import {
   Search,
   ArrowRight,
@@ -220,146 +221,6 @@ function isDraftish(meta: any): boolean {
   return false;
 }
 
-function cardSpanClass(aspect?: CoverAspect | null, index = 0): string {
-  const normalized = normalizeAspect(aspect);
-
-  if (normalized === "wide") return "sm:col-span-2";
-  if (normalized === "book" && index % 5 === 0) return "lg:row-span-2";
-
-  return "";
-}
-
-function cardShellClass(aspect?: CoverAspect | null): string {
-  const normalized = normalizeAspect(aspect);
-
-  switch (normalized) {
-    case "wide":
-      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]";
-    case "book":
-      return "bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,0.02))]";
-    case "square":
-      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]";
-    default:
-      return "bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))]";
-  }
-}
-
-function cardTitleClass(aspect?: CoverAspect | null): string {
-  switch (normalizeAspect(aspect)) {
-    case "wide":
-      return "text-[1.7rem] md:text-[1.95rem]";
-    case "book":
-      return "text-[1.55rem] md:text-[1.8rem]";
-    default:
-      return "text-[1.35rem] md:text-[1.55rem]";
-  }
-}
-
-function cardExcerptLines(aspect?: CoverAspect | null): string {
-  return normalizeAspect(aspect) === "wide" ? "line-clamp-3" : "line-clamp-2";
-}
-
-function StoryCard({
-  post,
-  index,
-}: {
-  post: BlogPost;
-  index: number;
-}) {
-  const src = resolveDocCoverImage(post, { contentType: 'BLOG' });
-  const aspect = aspectRatioFor(post.coverAspect);
-  const fit = normalizeFit(post.coverAspect, post.coverFit);
-  const pos = objectPositionFor(post.coverPosition);
-  const normalizedAspect = normalizeAspect(post.coverAspect);
-
-  return (
-    <Link
-      href={post.url}
-      className={cx(
-        "group block rounded-[30px] border border-white/10 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/25 hover:bg-white/[0.045]",
-        cardSpanClass(post.coverAspect, index),
-        cardShellClass(post.coverAspect)
-      )}
-    >
-      <article className="h-full rounded-[24px] border border-white/8 bg-black/45 p-4 md:p-5">
-        <SmartCover
-          src={src}
-          alt={post.title}
-          aspect={aspect}
-          fit={fit}
-          position={pos}
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-        />
-
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] font-mono uppercase tracking-[0.32em]">
-          {post.date ? <span className="text-amber-200/75">{post.date}</span> : null}
-          {post.readTime ? <span className="text-white/35">{post.readTime}</span> : null}
-          <span className="text-white/25">
-            {normalizedAspect === "book"
-              ? "Portrait"
-              : normalizedAspect === "wide"
-                ? "Panorama"
-                : normalizedAspect === "square"
-                  ? "Study"
-                  : "Essay"}
-          </span>
-        </div>
-
-        <h2
-          className={cx(
-            "mt-3 font-serif leading-[1.02] tracking-[-0.03em] text-white/98 transition-colors group-hover:text-amber-100",
-            cardTitleClass(post.coverAspect)
-          )}
-        >
-          {post.title}
-        </h2>
-
-        {post.excerpt ? (
-          <p className={cx("mt-3 text-sm leading-relaxed text-white/72", cardExcerptLines(post.coverAspect))}>
-            {post.excerpt}
-          </p>
-        ) : null}
-
-        <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-4">
-          <div className="flex min-w-0 flex-wrap gap-2">
-            {(post.tags || []).slice(0, normalizedAspect === "wide" ? 3 : 2).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[9px] font-mono uppercase tracking-[0.22em] text-white/65"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/88">
-            Open
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </span>
-        </div>
-      </article>
-    </Link>
-  );
-}
-
-function ShelfLink({ post }: { post: BlogPost }) {
-  return (
-    <Link href={post.url} className="group block rounded-[24px] border border-white/12 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.06]">
-      <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/52">
-        {post.date || "Undated"} {post.readTime ? `• ${post.readTime}` : ""}
-      </div>
-      <div className="mt-2 font-serif text-[1.2rem] leading-tight text-white/92 transition-colors group-hover:text-amber-100">
-        {post.title}
-      </div>
-      {post.excerpt ? (
-        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/65">
-          {post.excerpt}
-        </p>
-      ) : null}
-    </Link>
-  );
-}
-
 const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
@@ -556,7 +417,14 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
 
                     <div className="mt-4 space-y-3">
                       {companionStories.map((post) => (
-                        <ShelfLink key={post.url} post={post} />
+                        <EssayCard
+                          key={post.url}
+                          post={{
+                            ...post,
+                            coverImage: resolveDocCoverImage(post, { contentType: 'BLOG' }),
+                          }}
+                          variant="compact"
+                        />
                       ))}
                     </div>
                   </div>
@@ -670,9 +538,15 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {filteredPosts.map((post, index) => (
-                    <StoryCard key={post.url} post={post} index={index} />
+                <div className="ds-surface-essays grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {filteredPosts.map((post) => (
+                    <EssayCard
+                      key={post.url}
+                      post={{
+                        ...post,
+                        coverImage: resolveDocCoverImage(post, { contentType: 'BLOG' }),
+                      }}
+                    />
                   ))}
                 </div>
               </>

@@ -1,0 +1,482 @@
+/* styles/reader.css
+   Reader System — governs all long-form reading surfaces.
+   Canon = editorial authority, serif, warm bone panel on dark scaffold.
+   Vault = technical precision, sans, dark steel.
+
+   Class convention:
+     .reader-frame          — page scaffold
+     .reader-header         — title block
+     .reader-body           — prose content
+     .reader-body__panel-wrap — warm panel wrapper (Canon Option A)
+
+   Surface modifiers: --canon, --vault
+*/
+
+/* ==========================================================================
+   FRAME — page-level scaffold
+   ========================================================================== */
+
+.reader-frame {
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .reader-frame {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ==========================================================================
+   HEADER — title block, eyebrow, meta
+   ========================================================================== */
+
+.reader-header {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 8rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .reader-header {
+    padding-top: 9rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* Eyebrow — quiet orientation label */
+.reader-header__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.5625rem;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+/* Accent line before eyebrow text */
+.reader-header__accent-line {
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  background: linear-gradient(to right, var(--ds-accent), transparent);
+}
+
+/* Title — Canon: serif light, Vault: sans semibold */
+.reader-header__title {
+  margin: 0;
+  max-width: 56rem;
+}
+
+.reader-header__title--canon {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(2.4rem, 4.5vw, 3.5rem);
+  font-weight: 300;
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 1);
+}
+
+.reader-header__title--vault {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(2rem, 3.8vw, 3rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Subtitle */
+.reader-header__subtitle {
+  margin-top: 1.25rem;
+  max-width: 48rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Meta row — mono, small, uppercase */
+.reader-header__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 1.5rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+/* Divider below header */
+.reader-header__divider {
+  display: none;
+}
+
+/* ==========================================================================
+   BODY — prose content
+
+   Canon: warm bone panel (Option A)
+   Vault: dark steel, direct on scaffold
+   ========================================================================== */
+
+/* --- Canon: warm bone panel wrapper --- */
+
+.reader-body__panel-wrap {
+  padding: 3rem 0;
+}
+
+@media (min-width: 768px) {
+  .reader-body__panel-wrap {
+    padding: 4rem 0;
+  }
+}
+
+/* --- Canon prose --- */
+
+.reader-body--canon {
+  background-color: var(--ds-neutral-50);
+  color: var(--ds-neutral-800);
+  border-radius: var(--ds-radius-lg, 1rem);
+  padding: 2.5rem 2rem;
+  max-width: 68ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 768px) {
+  .reader-body--canon {
+    padding: 3.5rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .reader-body--canon {
+    padding: 4rem 3.5rem;
+  }
+}
+
+.reader-body--canon p {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.125rem;
+  line-height: 1.78;
+  color: var(--ds-neutral-800);
+  margin-bottom: 1.35em;
+}
+
+.reader-body--canon h1 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 2.5rem;
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--ds-neutral-900);
+  margin-top: 3em;
+  margin-bottom: 0.8em;
+}
+
+.reader-body--canon h2 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ds-neutral-900);
+  margin-top: 2.8em;
+  margin-bottom: 0.6em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--ds-neutral-200);
+}
+
+.reader-body--canon h3 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ds-neutral-800);
+  margin-top: 2.2em;
+  margin-bottom: 0.5em;
+}
+
+.reader-body--canon blockquote {
+  border-left: 3px solid var(--ds-amber-500);
+  padding-left: 1.5rem;
+  margin: 1.8em 0;
+  font-style: italic;
+  color: var(--ds-neutral-600);
+}
+
+.reader-body--canon blockquote p {
+  color: var(--ds-neutral-600);
+}
+
+.reader-body--canon ul,
+.reader-body--canon ol {
+  margin-bottom: 1.35em;
+  padding-left: 1.5rem;
+}
+
+.reader-body--canon li {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.125rem;
+  line-height: 1.78;
+  color: var(--ds-neutral-800);
+  margin-bottom: 0.6em;
+}
+
+.reader-body--canon ul li { list-style-type: disc; }
+.reader-body--canon ol li { list-style-type: decimal; }
+
+.reader-body--canon a {
+  color: var(--ds-amber-600);
+  text-decoration: underline;
+  text-decoration-color: rgba(155, 93, 19, 0.3);
+  text-underline-offset: 3px;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+.reader-body--canon a:hover {
+  color: var(--ds-amber-500);
+  text-decoration-color: rgba(155, 93, 19, 0.6);
+}
+
+.reader-body--canon code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--ds-neutral-100);
+  color: var(--ds-neutral-700);
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  border: 1px solid var(--ds-neutral-200);
+}
+
+.reader-body--canon pre {
+  background: var(--ds-neutral-800);
+  color: var(--ds-neutral-100);
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 1.8em 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.reader-body--canon pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.reader-body--canon hr {
+  border: none;
+  height: 1px;
+  background: var(--ds-neutral-200);
+  margin: 3em 0;
+}
+
+.reader-body--canon strong {
+  font-weight: 600;
+  color: var(--ds-neutral-900);
+}
+
+.reader-body--canon img {
+  border-radius: 0.75rem;
+  margin: 2em 0;
+}
+
+/* --- Vault prose --- */
+
+.reader-body--vault {
+  max-width: 75ch;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  .reader-body--vault {
+    padding-top: 4rem;
+  }
+}
+
+.reader-body--vault p {
+  font-family: var(--font-sans, Inter, system-ui, sans-serif);
+  font-size: 0.9375rem;
+  line-height: 1.68;
+  color: rgba(245, 247, 250, 0.90);
+  margin-bottom: 1.25em;
+}
+
+.reader-body--vault h1 {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.12;
+  color: rgba(245, 247, 250, 0.96);
+  margin-top: 2.5em;
+  margin-bottom: 0.6em;
+}
+
+.reader-body--vault h2 {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ds-amber-300);
+  margin-top: 2.5em;
+  margin-bottom: 0.8em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid rgba(188, 203, 218, 0.12);
+}
+
+.reader-body--vault h3 {
+  font-family: var(--font-sans, Inter, system-ui, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(245, 247, 250, 0.92);
+  margin-top: 2em;
+  margin-bottom: 0.4em;
+}
+
+.reader-body--vault ul,
+.reader-body--vault ol {
+  margin-bottom: 1.25em;
+  padding-left: 0;
+}
+
+.reader-body--vault ul {
+  list-style: none;
+  border-left: 1px solid rgba(188, 203, 218, 0.12);
+  padding-left: 1.25rem;
+}
+
+.reader-body--vault li {
+  font-family: var(--font-sans, Inter, system-ui, sans-serif);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: rgba(245, 247, 250, 0.85);
+  margin-bottom: 0.55em;
+}
+
+.reader-body--vault ol li {
+  list-style-type: decimal;
+  margin-left: 1.25rem;
+}
+
+.reader-body--vault blockquote {
+  border-left: 2px solid var(--ds-amber-300);
+  padding-left: 1.25rem;
+  margin: 1.5em 0;
+  color: rgba(219, 228, 238, 0.80);
+}
+
+.reader-body--vault blockquote p {
+  color: rgba(219, 228, 238, 0.80);
+  font-style: italic;
+}
+
+.reader-body--vault a {
+  color: var(--ds-amber-300);
+  text-decoration: underline;
+  text-decoration-color: rgba(240, 185, 79, 0.3);
+  text-underline-offset: 3px;
+  transition: color 120ms ease;
+}
+
+.reader-body--vault a:hover {
+  color: var(--ds-amber-200);
+  text-decoration-color: rgba(240, 185, 79, 0.6);
+}
+
+.reader-body--vault code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+  background: rgba(26, 35, 43, 0.86);
+  color: var(--ds-amber-200);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(188, 203, 218, 0.12);
+}
+
+.reader-body--vault pre {
+  background: rgba(26, 35, 43, 0.86);
+  color: rgba(219, 228, 238, 0.90);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(188, 203, 218, 0.10);
+  overflow-x: auto;
+  margin: 1.5em 0;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+.reader-body--vault pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.reader-body--vault table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.875rem;
+}
+
+.reader-body--vault th {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(219, 228, 238, 0.60);
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(188, 203, 218, 0.16);
+}
+
+.reader-body--vault td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(188, 203, 218, 0.08);
+  color: rgba(245, 247, 250, 0.85);
+}
+
+.reader-body--vault hr {
+  border: none;
+  height: 1px;
+  background: rgba(188, 203, 218, 0.12);
+  margin: 2.5em 0;
+}
+
+.reader-body--vault strong {
+  font-weight: 600;
+  color: rgba(245, 247, 250, 0.96);
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-frame *,
+  .reader-frame *::before,
+  .reader-frame *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

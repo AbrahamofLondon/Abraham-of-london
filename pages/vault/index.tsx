@@ -6,18 +6,11 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Link from "next/link";
 import {
   Search,
-  FileText,
-  Download,
-  Lock,
-  ArrowRight,
-  Database,
-  ShieldCheck,
   Crown,
   CheckCircle2,
   Sparkles,
   ScanSearch,
   FolderLock,
-  ScrollText,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,6 +19,7 @@ import { useClientRouter } from "@/lib/router/useClientRouter";
 import { getAllPDFItems, type PDFItem } from "@/lib/pdf-registry";
 import VaultTierCard from "@/components/vault/VaultTierCard";
 import VaultValueStack from "@/components/vault/VaultValueStack";
+import VaultItemCard from "@/components/vault/VaultItemCard";
 
 type VaultItemKind = "brief" | "download" | "pdf";
 
@@ -557,7 +551,7 @@ const VaultPage: NextPage<
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-px border bg-white/5 md:grid-cols-2 xl:grid-cols-3" style={{ borderColor: "var(--ds-border)" }}>
+          <div className="ds-surface-vault grid grid-cols-1 gap-px border bg-white/5 md:grid-cols-2 xl:grid-cols-3" style={{ borderColor: "var(--ds-border)" }}>
             <AnimatePresence mode="popLayout">
               {filteredItems.map((item) => {
                 const isLocked = item.requiresAuth && !hasCookie;
@@ -569,77 +563,12 @@ const VaultPage: NextPage<
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="group relative flex min-h-[440px] flex-col justify-between bg-[#050505] p-10 transition-colors duration-500 hover:bg-[#080808]"
                   >
-                    <div className="space-y-8">
-                      <div className="flex items-start justify-between">
-                        <div className="flex h-12 w-12 items-center justify-center border transition-colors" style={{ borderColor: "var(--ds-border)" }}>
-                          {item.kind === "brief" ? (
-                            <ShieldCheck size={20} style={{ color: "var(--ds-accent)" }} />
-                          ) : item.kind === "download" ? (
-                            <Download size={20} style={{ color: "var(--ds-text-subtle)" }} />
-                          ) : (
-                            <FileText size={20} style={{ color: "var(--ds-text-subtle)" }} />
-                          )}
-                        </div>
-
-                        <span
-                          className="border px-3 py-1 text-[8px] font-black uppercase tracking-[0.3em]"
-                          style={isLocked
-                            ? { borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
-                            : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-success)" }
-                          }
-                        >
-                          {isLocked ? "Classified" : item.tier}
-                        </span>
-                      </div>
-
-                      <div className="space-y-4">
-                        <h3 className="text-3xl font-serif leading-tight transition-colors" style={{ color: "var(--ds-text)" }}>
-                          {item.title}
-                        </h3>
-                        <p className="line-clamp-4 text-sm font-light italic leading-relaxed transition-colors" style={{ color: "var(--ds-text-subtle)" }}>
-                          {item.excerpt}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-12 space-y-6">
-                      <div className="flex justify-between border-b pb-4 font-mono text-[8px] uppercase tracking-[0.4em]" style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-subtle)" }}>
-                        <span>
-                          {item.format} // {item.size}
-                        </span>
-                        <span style={{ color: "var(--ds-accent)" }}>{item.category}</span>
-                      </div>
-
-                      <button
-                        onClick={() => handlePrimaryAction(item)}
-                        className="group/btn flex w-full items-center justify-between border px-6 py-4 transition-all duration-500"
-                        style={isLocked
-                          ? { borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
-                          : { borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }
-                        }
-                      >
-                        <span className="font-mono text-[10px] font-black uppercase tracking-[0.3em]">
-                          {isLocked
-                            ? "Elevate Clearance"
-                            : item.kind === "brief"
-                              ? "Open Briefing"
-                              : item.kind === "download"
-                                ? "Open Asset"
-                                : "Open File"}
-                        </span>
-
-                        {isLocked ? (
-                          <Lock size={14} />
-                        ) : (
-                          <ArrowRight
-                            size={14}
-                            className="transition-transform group-hover/btn:translate-x-1"
-                          />
-                        )}
-                      </button>
-                    </div>
+                    <VaultItemCard
+                      item={item}
+                      isLocked={isLocked}
+                      onAction={() => handlePrimaryAction(item)}
+                    />
                   </motion.div>
                 );
               })}

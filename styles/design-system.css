@@ -253,15 +253,28 @@
 }
 
 /* ==========================================================================
-   REDUCED MOTION
+   SHORTS CARD — CSS hover (replaces JS onMouseEnter/onMouseLeave)
    ========================================================================== */
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+.shorts-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ds-border);
+  transition:
+    border-color var(--ds-duration-base) var(--ds-ease-standard),
+    transform var(--ds-duration-base) var(--ds-ease-standard),
+    box-shadow var(--ds-duration-base) var(--ds-ease-standard);
 }
+
+.group:hover .shorts-card {
+  border-color: var(--ds-accent-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-lg);
+}
+
+/* Arrow box border on hover */
+.group:hover .shorts-card [data-arrow] {
+  border-color: var(--ds-accent-soft);
+}
+
+/* Reader system styles are in styles/reader.css */

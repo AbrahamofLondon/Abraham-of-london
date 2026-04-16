@@ -18,6 +18,8 @@ import { SessionProvider } from "next-auth/react";
 import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
 
 import "@/styles/globals.css";
+import "@/styles/design-system.css";
+import "@/styles/reader.css";
 import { ThemeScript, ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { InnerCircleProvider } from "@/lib/inner-circle/InnerCircleContext";

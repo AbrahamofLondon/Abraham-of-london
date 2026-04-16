@@ -11,6 +11,9 @@ import { ChevronLeft, ShieldCheck, Terminal, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
+import ReaderFrame from "@/components/reader/ReaderFrame";
+import ReaderHeader from "@/components/reader/ReaderHeader";
+import ReaderBody from "@/components/reader/ReaderBody";
 import Note from "@/components/mdx/Note";
 import BriefAlert from "@/components/mdx/BriefAlert";
 import DocumentFooter from "@/components/mdx/DocumentFooter";
@@ -206,31 +209,9 @@ function pickRenderableBriefCode(doc: any, renderBody?: any): string {
 }
 
 function getMdxComponents(directive?: TierDirective) {
+  // Vault reader: typography is controlled by .vault-reader CSS class.
+  // Only override structural/custom MDX components and link routing here.
   return {
-    h1: (p: any) => (
-      <h1 className="mb-6 mt-12 font-serif text-3xl italic text-white md:text-4xl" {...p} />
-    ),
-    h2: (p: any) => (
-      <h2 className="mb-4 mt-10 font-serif text-2xl text-white/90 md:text-3xl" {...p} />
-    ),
-    h3: (p: any) => (
-      <h3
-        className="mb-2 mt-8 font-mono text-xs uppercase tracking-[0.3em] text-amber-500/80"
-        {...p}
-      />
-    ),
-    p: (p: any) => (
-      <p className="mb-6 font-light leading-relaxed text-white/60" {...p} />
-    ),
-    ul: (p: any) => (
-      <ul className="mb-6 list-none space-y-3 border-l border-white/10 pl-4" {...p} />
-    ),
-    li: (p: any) => (
-      <li
-        className="text-sm text-white/50 before:mr-3 before:content-['//'] before:text-amber-500/40"
-        {...p}
-      />
-    ),
     a: ({ href, children, ...props }: any) => {
       const rawHref = safeString(href);
       const normalizedHref = rawHref.includes("brief")
@@ -240,7 +221,6 @@ function getMdxComponents(directive?: TierDirective) {
       return (
         <Link
           href={normalizedHref || "#"}
-          className="text-emerald-400 underline underline-offset-4 transition-colors hover:text-emerald-300"
           {...props}
         >
           {children}
@@ -350,7 +330,7 @@ const BriefPage: NextPage<Props> = ({
             <div className="mb-12 flex items-center justify-between border-b border-white/5 pb-8">
               <Link
                 href="/vault/briefs"
-                className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 transition-all hover:text-white"
+                className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/50 transition-all hover:text-white"
               >
                 <ChevronLeft size={12} /> Return to Index
               </Link>
@@ -366,7 +346,7 @@ const BriefPage: NextPage<Props> = ({
             <header className="mb-16">
               <div className="mb-6 flex items-center gap-3">
                 <Terminal size={14} className="text-amber-500" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/40">
+                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/56">
                   Intelligence Dossier
                 </span>
               </div>
@@ -376,7 +356,7 @@ const BriefPage: NextPage<Props> = ({
               </h1>
 
               {summary ? (
-                <p className="max-w-3xl border-l-2 border-amber-500/20 pl-8 text-xl font-light italic leading-relaxed text-white/40">
+                <p className="max-w-3xl border-l-2 border-amber-500/20 pl-8 text-xl font-light italic leading-relaxed text-white/65">
                   {summary}
                 </p>
               ) : null}
@@ -419,80 +399,68 @@ const BriefPage: NextPage<Props> = ({
         />
       </Head>
 
-      <main className="mx-auto min-h-screen max-w-5xl px-6 pb-24 pt-32">
-        <div className="mb-16 flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-8 md:flex-row md:items-center">
-          <Link
-            href="/vault/briefs"
-            className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 transition-all hover:text-white"
-          >
-            <ChevronLeft size={12} /> Return to Index
-          </Link>
+      <ReaderFrame surface="vault">
+        {/* Nav bar */}
+        <div className="mx-auto max-w-5xl px-6 pt-32">
+          <div className="mb-8 flex flex-col items-start justify-between gap-4 border-b border-white/5 pb-6 md:flex-row md:items-center">
+            <Link
+              href="/vault/briefs"
+              className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/50 transition-all hover:text-white"
+            >
+              <ChevronLeft size={12} /> Return to Index
+            </Link>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1">
-              <ShieldCheck size={10} className="text-emerald-500" />
-              <span className="font-mono text-[9px] uppercase tracking-widest text-emerald-500/80">
-                {required} Clearance
-              </span>
-            </div>
-            <div className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-white/20 md:block">
-              REF_ID: {bareSlug.toUpperCase()}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1">
+                <ShieldCheck size={10} className="text-emerald-500" />
+                <span className="font-mono text-[9px] uppercase tracking-widest text-emerald-500/80">
+                  {required} Clearance
+                </span>
+              </div>
+              <div className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-white/44 md:block">
+                REF_ID: {bareSlug.toUpperCase()}
+              </div>
             </div>
           </div>
         </div>
 
-        <header className="mb-20">
-          <div className="mb-6 flex items-center gap-3">
-            <Terminal size={14} className="text-amber-500" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-white/40">
-              Intelligence Dossier
-            </span>
-          </div>
-
-          <h1 className="mb-8 font-serif text-5xl italic leading-tight md:text-7xl">
-            {title}
-          </h1>
-
-          {summary ? (
-            <p className="max-w-3xl border-l-2 border-amber-500/20 pl-8 text-xl font-light italic leading-relaxed text-white/40">
-              {summary}
-            </p>
-          ) : null}
-        </header>
-
-        <BriefSummaryCard classification={required} />
+        <ReaderHeader
+          surface="vault"
+          title={title}
+          subtitle={summary || undefined}
+        />
 
         {coverImage ? (
-          <div className="mb-12 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40">
+          <div className="mx-auto mb-8 max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/40 px-6">
             <img
               src={coverImage}
               alt={title}
-              className="h-auto w-full object-cover"
+              className="h-auto w-full rounded-2xl object-cover"
             />
           </div>
         ) : null}
 
-        <div className="mt-16">
-          <div className="relative min-h-[400px]">
-            {loadingContent ? (
-              <div className="absolute inset-0 z-10 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-              </div>
-            ) : null}
+        <div className="relative min-h-[400px] pb-24">
+          {loadingContent ? (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+            </div>
+          ) : null}
 
-            <div className={loadingContent ? "pointer-events-none opacity-20" : "opacity-100"}>
+          <div className={loadingContent ? "pointer-events-none opacity-20" : "opacity-100"}>
+            <ReaderBody surface="vault">
               <SafeMDXRenderer
                 code={activeCode}
                 components={mdxComponents as any}
                 directive={directive}
               />
-            </div>
+            </ReaderBody>
           </div>
         </div>
 
         {safeArray(recommendations).length > 0 ? (
-          <div className="mt-24 border-t border-white/5 pt-12">
-            <h3 className="mb-6 text-[10px] font-mono uppercase tracking-[0.3em] text-white/35">
+          <div className="mx-auto mt-24 max-w-5xl border-t border-white/5 px-6 pt-12">
+            <h3 className="mb-6 text-[10px] font-mono uppercase tracking-[0.3em] text-white/56">
               Related Briefs
             </h3>
 
@@ -515,9 +483,9 @@ const BriefPage: NextPage<Props> = ({
           </div>
         ) : null}
 
-        <div className="mt-24 flex flex-col gap-12 border-t border-white/5 pt-12 text-white/20 md:flex-row">
+        <div className="mx-auto mt-24 flex max-w-5xl flex-col gap-12 border-t border-white/5 px-6 pb-24 pt-12 text-white/44 md:flex-row">
           <div className="flex-1">
-            <h4 className="mb-4 text-[10px] font-mono uppercase tracking-widest text-white/40">
+            <h4 className="mb-4 text-[10px] font-mono uppercase tracking-widest text-white/56">
               Metadata Verification
             </h4>
             <p className="font-mono text-[9px] leading-relaxed">
@@ -529,12 +497,12 @@ const BriefPage: NextPage<Props> = ({
             </p>
           </div>
           <div className="flex-1 text-right">
-            <span className="text-[8px] font-mono uppercase tracking-tighter opacity-30">
+            <span className="text-[8px] font-mono uppercase tracking-tighter opacity-50">
               All Rights Reserved // Abraham of London // 2026
             </span>
           </div>
         </div>
-      </main>
+      </ReaderFrame>
     </Layout>
   );
 };

@@ -8,9 +8,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design System token bridge — --ds-* semantic variables and surface classes */
-@import '../styles/design-system.css';
-
 /* ==========================================================================
    ROOT TOKENS
    ========================================================================== */

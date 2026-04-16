@@ -162,7 +162,9 @@ function DirectoryColumn({
 }
 
 export default function EnhancedFooter(): React.ReactElement {
-  const year = new Date().getFullYear();
+  // Hardcoded to avoid hydration mismatch between server build time and client render time.
+  // Update annually.
+  const year = 2026;
 
   const primaryGateways: GatewayCardProps[] = [
     { href: "/canon", eyebrow: "Doctrine", title: "The Canon", icon: BookOpen, tag: "DOC·V1" },
