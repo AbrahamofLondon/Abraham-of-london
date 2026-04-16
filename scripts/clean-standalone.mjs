@@ -1,0 +1,124 @@
+// scripts/clean-standalone.mjs
+//
+// Runs AFTER `next build --webpack` to strip heavyweight directories
+// from `.next/standalone/` before @netlify/plugin-nextjs packages them
+// into `___netlify-server-handler`.
+//
+// Why this exists:
+// `outputFileTracingExcludes` in next.config.mjs is supposed to prune
+// these from the standalone trace output, but the excludes are not
+// being honoured (observed: sass, @esbuild, .contentlayer/.cache, and
+// .netlify/ all survive in standalone despite being listed as excluded).
+// This script is a deterministic post-build cleanup that guarantees
+// those directories are removed before the Netlify plugin packages the
+// handler. Without it, the handler exceeds the 250 MB Lambda limit.
+//
+// What it removes:
+// - public/           — static assets served via Netlify CDN, not the function
+// - .netlify/         — recursive self-inclusion from outputFileTracingRoot
+// - .contentlayer/.cache/ — build cache, not needed at runtime
+// - .contentlayer/generated/ per-doc JSON (keeps _index.json)
+// - node_modules build-only packages still traced despite excludes
+// - dev/test/repo dirs that leaked through tracing
+
+import fs from "node:fs";
+import path from "node:path";
+
+const standalone = path.join(process.cwd(), ".next", "standalone");
+
+if (!fs.existsSync(standalone)) {
+  console.log("[clean-standalone] .next/standalone not found — skipping");
+  process.exit(0);
+}
+
+// Directories to remove entirely
+const REMOVE_DIRS = [
+  "public",
+  ".netlify",
+  ".contentlayer/.cache",
+  ".agents",
+  ".claude",
+  ".github",
+  ".husky",
+  ".githooks",
+  "tests",
+  "scripts",
+  "playwright-report",
+  "briefs-contamination-backup",
+  "deepseek-terminal-chat",
+  "triage_hold",
+  "CRM",
+  "OGR",
+  "src",
+  "bin",
+  "artifacts",
+  "config",
+  "private_storage",
+  "private",
+  // Build-only node_modules
+  "node_modules/sass",
+  "node_modules/@esbuild",
+  "node_modules/webpack",
+  "node_modules/@img",
+  "node_modules/typescript",
+  "node_modules/puppeteer",
+  "node_modules/puppeteer-core",
+  "node_modules/@puppeteer",
+  "node_modules/chrome-headless-shell",
+  "node_modules/.cache",
+];
+
+let saved = 0;
+
+for (const rel of REMOVE_DIRS) {
+  const abs = path.join(standalone, rel);
+  if (fs.existsSync(abs)) {
+    const before = dirSize(abs);
+    fs.rmSync(abs, { recursive: true, force: true });
+    saved += before;
+    console.log(
+      `[clean-standalone] removed ${rel} (${(before / 1024 / 1024).toFixed(1)} MB)`,
+    );
+  }
+}
+
+// Remove per-document JSON from .contentlayer/generated/ but KEEP _index.json
+const clGenerated = path.join(standalone, ".contentlayer", "generated");
+if (fs.existsSync(clGenerated)) {
+  let removed = 0;
+  for (const typeDir of fs.readdirSync(clGenerated, { withFileTypes: true })) {
+    if (!typeDir.isDirectory()) continue;
+    const typePath = path.join(clGenerated, typeDir.name);
+    for (const file of fs.readdirSync(typePath)) {
+      if (file === "_index.json") continue; // keep
+      const fp = path.join(typePath, file);
+      const st = fs.statSync(fp);
+      if (st.isFile()) {
+        removed += st.size;
+        fs.unlinkSync(fp);
+      }
+    }
+  }
+  if (removed > 0) {
+    saved += removed;
+    console.log(
+      `[clean-standalone] pruned per-doc JSON from .contentlayer/generated (${(removed / 1024 / 1024).toFixed(1)} MB)`,
+    );
+  }
+}
+
+console.log(
+  `[clean-standalone] total saved: ${(saved / 1024 / 1024).toFixed(1)} MB`,
+);
+
+function dirSize(dir) {
+  let total = 0;
+  try {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) total += dirSize(full);
+      else if (entry.isFile()) total += fs.statSync(full).size;
+    }
+  } catch {}
+  return total;
+}
