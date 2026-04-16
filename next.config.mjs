@@ -67,6 +67,11 @@ const nextConfig = {
   generateEtags: true,
   productionBrowserSourceMaps: false,
 
+  // Next.js 16+ defaults to Turbopack. This empty config acknowledges the
+  // webpack config below exists and silences the "no turbopack config"
+  // error when `--webpack` is not explicitly passed.
+  turbopack: {},
+
   // Explicit — default is 60 seconds, setting it here forces Next to log
   // the specific page name when it times out during static generation.
   staticPageGenerationTimeout: 60,
