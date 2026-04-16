@@ -2358,12 +2358,13 @@ function parseFrontmatter(content: string): Record<string, any> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  console.log("[PAGE_DATA] pages/index.tsx getStaticProps START");
-  try {
   let featuredShorts: FeaturedItem[] = [];
   let featuredBriefing: FeaturedItem | null = null;
   let featuredPlaybooks: PlaybookItem[] = [];
+  let featuredCanon: HomePageProps["featuredCanon"] = [];
+  let featuredBlogPosts: BlogPostItem[] = [];
   let latestReport: QuarterlyReport | null = null;
+  let artifactFileCount = 0;
 
   const catalogue = getPublicationCatalogue();
   const flagshipPublicationRecord =
@@ -2394,8 +2395,10 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
     if (fs.existsSync(dir)) {
       const reports: QuarterlyReport[] = [];
+      const mdxFiles = fs.readdirSync(dir).filter((f: string) => f.endsWith(".mdx") && !f.includes(".backup"));
+      artifactFileCount = mdxFiles.length;
 
-      for (const file of fs.readdirSync(dir).filter((f: string) => f.endsWith(".mdx") && !f.includes(".backup"))) {
+      for (const file of mdxFiles) {
         const fm = parseFrontmatter(fs.readFileSync(path.join(dir, file), "utf-8"));
         if (fm.type === "quarterly_report" || file.includes("global-market-intelligence")) {
           let q = fm.quarter || "Q1";
@@ -2438,32 +2441,37 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const computeFromDocs = (docsIn: any[], dataForBooks?: any, dataForPlaybooks?: any) => {
     const stableDocs = (docsIn || []).filter((d) => !isDraftLocal(d));
 
-    counts.shorts = stableDocs.filter((d) => kindLower(d) === "short" || flattenedPath(d).startsWith("shorts/")).length;
-    counts.canon = stableDocs.filter((d) => kindLower(d) === "canon" || flattenedPath(d).startsWith("canon/")).length;
-    counts.briefs = stableDocs.filter((d) => kindLower(d) === "brief" || flattenedPath(d).startsWith("briefs/") || flattenedPath(d).startsWith("vault/briefs/")).length;
-    counts.downloads = stableDocs.filter((d) => kindLower(d) === "download" || flattenedPath(d).startsWith("downloads/")).length;
+    // Single-pass counting instead of 4 separate filter() calls over 316 docs.
+    const shortsDocs: any[] = [];
+    for (const d of stableDocs) {
+      const k = kindLower(d);
+      const fp = flattenedPath(d);
+      if (k === "short" || fp.startsWith("shorts/")) { counts.shorts++; shortsDocs.push(d); }
+      else if (k === "canon" || fp.startsWith("canon/")) counts.canon++;
+      else if (k === "brief" || fp.startsWith("briefs/") || fp.startsWith("vault/briefs/")) counts.briefs++;
+      else if (k === "download" || fp.startsWith("downloads/")) counts.downloads++;
+    }
 
     const allPlaybooks = readPlaybooksFromGenerated(dataForPlaybooks);
     featuredPlaybooks = allPlaybooks.slice(0, 3);
     counts.playbooks = allPlaybooks.length;
 
-    // Events removed from homepage product narrative.
-    // /events page remains fully functional via pages/events/index.tsx
+    // Build featured-href index once, then look up — O(n) instead of O(n²).
+    const featuredHrefs = new Set<string>();
+    for (const d of stableDocs) {
+      if (pickBooleanFlag(d)) {
+        const item = toItem(d);
+        if (item?.href) featuredHrefs.add(item.href);
+      }
+    }
 
     const candidates = stableDocs.map(toItem).filter(Boolean) as FeaturedItem[];
-    const featured = candidates.filter((x) => {
-      const o = stableDocs.find((dd: any) => toItem(dd)?.href === x.href);
-      return o ? pickBooleanFlag(o) : false;
-    });
+    const featured = candidates.filter((x) => featuredHrefs.has(x.href));
 
     featuredBriefing =
       featured.find((x) => x.kind === "brief") ||
       featured.find((x) => x.kind === "short") ||
       null;
-
-    const shortsDocs = stableDocs.filter(
-      (d) => kindLower(d) === "short" || flattenedPath(d).startsWith("shorts/"),
-    );
 
     const fs2 = featured
       .filter((x) => x.kind === "short")
@@ -2478,6 +2486,45 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
             .slice(0, 8)
             .map(toItem)
             .filter(Boolean) as FeaturedItem[]));
+
+    // Extract featured canon from already-loaded docs (no separate getAllCanons() call).
+    featuredCanon = stableDocs
+      .filter((c: any) => {
+        const k = kindLower(c);
+        const fp = flattenedPath(c);
+        return (k === "canon" || fp.startsWith("canon/")) && c?.accessLevel !== "restricted";
+      })
+      .slice(0, 3)
+      .map((c: any) => ({
+        title: String(c?.title || ""),
+        excerpt: (c?.excerpt || c?.description || null) as string | null,
+        slug: String(c?.slug || ""),
+        href: `/canon/${String(c?.slug || "").replace(/^\/?(canon\/)?/, "")}`,
+        category: (c?.category || null) as string | null,
+        readTime: (c?.readTime || null) as string | null,
+      }));
+
+    // Extract featured blog posts from already-loaded docs (no raw fs scan).
+    featuredBlogPosts = stableDocs
+      .filter((p: any) => {
+        const k = kindLower(p);
+        const fp = flattenedPath(p);
+        return (k === "post" || fp.startsWith("blog/") || fp.startsWith("posts/")) &&
+          !String(p?.slug || "").includes("ultimate-purpose-of-man");
+      })
+      .sort((a: any, b: any) => (Date.parse(b?.date || "") || 0) - (Date.parse(a?.date || "") || 0))
+      .slice(0, 3)
+      .map((p: any) => {
+        const slug = String(p?.slug || p?._raw?.flattenedPath || "")
+          .replace(/^(blog|posts)\//, "");
+        return {
+          slug,
+          title: String(p?.title || "Untitled"),
+          href: `/blog/${slug}`,
+          excerpt: (p?.excerpt || p?.description || null) as string | null,
+          dateISO: p?.date ? String(p.date) : null,
+        };
+      });
   };
 
   try {
@@ -2494,77 +2541,12 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
     // the entire 16-collection corpus into this worker's RSS).
   }
 
-  try {
-    const fs = await import("fs");
-    const path = await import("path");
-    const dir = path.join(process.cwd(), "content/artifacts");
-    if (fs.existsSync(dir)) {
-      counts.library =
-        (counts.library || 0) +
-        fs.readdirSync(dir).filter((f: string) => f.endsWith(".mdx") && !f.includes(".backup")).length;
-    }
-  } catch {
-    // keep current counts
-  }
+  // Artifact count was captured during the first scan above — no duplicate fs read.
+  counts.library = (counts.library || 0) + artifactFileCount;
 
-  // Canon entries for doctrine showcase
-  let featuredCanon: HomePageProps["featuredCanon"] = [];
-  try {
-    const { getAllCanons } = await import("@/lib/content/server");
-    const allCanon = getAllCanons() || [];
-    featuredCanon = allCanon
-      .filter((c: any) => !c?.draft && c?.accessLevel !== "restricted")
-      .slice(0, 3)
-      .map((c: any) => ({
-        title: String(c?.title || ""),
-        excerpt: (c?.excerpt || c?.description || null) as string | null,
-        slug: String(c?.slug || ""),
-        href: `/canon/${String(c?.slug || "").replace(/^\/?(canon\/)?/, "")}`,
-        category: (c?.category || null) as string | null,
-        readTime: (c?.readTime || null) as string | null,
-      }));
-  } catch {
-    featuredCanon = [];
-  }
-
-  let featuredBlogPosts: BlogPostItem[] = [];
-  try {
-    const fs = await import("fs");
-    const path = await import("path");
-    const blogDir = path.join(process.cwd(), "content/blog");
-    if (fs.existsSync(blogDir)) {
-      const entries = fs
-        .readdirSync(blogDir)
-        .filter((f: string) => f.endsWith(".mdx"))
-        .map((f: string) => {
-          const raw = fs.readFileSync(path.join(blogDir, f), "utf-8");
-          const titleMatch = raw.match(/^title:\s*["']?(.+?)["']?\s*$/m);
-          const excerptMatch = raw.match(/^(?:excerpt|description):\s*["']?(.+?)["']?\s*$/m);
-          const dateMatch = raw.match(/^date:\s*["']?(.+?)["']?\s*$/m);
-          const draftMatch = raw.match(/^draft:\s*(true|false)\s*$/m);
-          const slug = f.replace(/\.mdx$/, "");
-          return {
-            slug,
-            title: titleMatch?.[1] ?? slug,
-            href: `/blog/${slug}`,
-            excerpt: excerptMatch?.[1] ?? null,
-            dateISO: dateMatch?.[1] ?? null,
-            draft: draftMatch?.[1] === "true",
-          };
-        })
-        .filter((p) => !p.draft && p.slug !== "ultimate-purpose-of-man")
-        .sort((a, b) => {
-          const da = a.dateISO ? new Date(a.dateISO).getTime() : 0;
-          const db = b.dateISO ? new Date(b.dateISO).getTime() : 0;
-          return db - da;
-        })
-        .slice(0, 3);
-
-      featuredBlogPosts = entries.map(({ draft: _draft, ...rest }) => rest);
-    }
-  } catch {
-    featuredBlogPosts = [];
-  }
+  // featuredCanon and featuredBlogPosts are now computed inside
+  // computeFromDocs() from the already-loaded contentlayer corpus,
+  // eliminating two separate filesystem scans + getAllCanons() call.
 
   return {
     props: sanitizeData({
@@ -2582,9 +2564,6 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/index.tsx getStaticProps END");
-  }
 };
 
 export default HomePage;

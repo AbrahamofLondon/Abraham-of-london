@@ -774,8 +774,6 @@ export default function UnifiedDashboard({
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
   context
 ) => {
-  console.log("[PAGE_DATA] pages/dashboard.tsx getServerSideProps START");
-  try {
   // Server-only modules loaded dynamically so they never land in the
   // page's top-level static import graph (Wave 4: server boundary
   // enforcement).
@@ -1044,7 +1042,4 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async (
     };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/dashboard.tsx getServerSideProps END");
-  }
 };

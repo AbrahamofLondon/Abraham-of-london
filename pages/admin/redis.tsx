@@ -1,6 +1,12 @@
 // pages/admin/redis.tsx
+import type { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
+
+// SSR to avoid prerender failure (module not found during static generation).
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 const RedisDiagnostic: NextPage = () => {
   const [status, setStatus] = useState<any>(null);

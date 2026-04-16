@@ -48,8 +48,6 @@ const Page: NextPage<Props> = ({ print, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/prints/[slug].tsx getStaticPaths START");
-  try {
   // Narrow: load only print docs (~6) instead of the full 316-doc corpus.
   const { getAllPrints, isDraftContent } = await import(
     "@/lib/content/server"
@@ -75,14 +73,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/prints/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/prints/[slug].tsx getStaticProps START");
-  try {
   const slug = String(params?.slug || "");
 
   const { getDocBySlug, isDraftContent, sanitizeData } = await import(
@@ -110,9 +103,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/prints/[slug].tsx getStaticProps END");
-  }
 };
 
 export default Page;

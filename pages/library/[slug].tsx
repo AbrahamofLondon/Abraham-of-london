@@ -131,8 +131,6 @@ async function loadPdfAssets(): Promise<PdfAsset[]> {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/library/[slug].tsx getStaticPaths START");
-  try {
   const assets = await loadPdfAssets();
 
   const paths = assets
@@ -152,14 +150,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths: deduped.slice(0, 5), fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/library/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/library/[slug].tsx getStaticProps START");
-  try {
   const rawParam = params?.slug;
   const paramSlug = normalizeSlug(Array.isArray(rawParam) ? rawParam.join("/") : safeStr(rawParam));
   if (!paramSlug) return { notFound: true, revalidate: 60 };
@@ -199,9 +192,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/library/[slug].tsx getStaticProps END");
-  }
 };
 
 const LibrarySlugPage: NextPage<Props> = ({ asset, requiredTier, resolvedUrl, routeSlug }) => {

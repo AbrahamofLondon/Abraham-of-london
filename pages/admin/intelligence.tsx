@@ -549,8 +549,6 @@ const IntelligenceView: NextPage<IntelligenceProps> = ({
 export const getServerSideProps: GetServerSideProps<IntelligenceProps> = async (
   context
 ) => {
-  console.log("[PAGE_DATA] pages/admin/intelligence.tsx getServerSideProps START");
-  try {
   const session = await getSession(context);
   const adminEmail =
     process.env.INITIAL_ADMIN_EMAIL || "admin@abrahamoflondon.com";
@@ -771,9 +769,6 @@ export const getServerSideProps: GetServerSideProps<IntelligenceProps> = async (
     },
   };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/admin/intelligence.tsx getServerSideProps END");
-  }
 };
 
 export default IntelligenceView;

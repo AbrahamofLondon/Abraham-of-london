@@ -73,8 +73,6 @@ const ReportsIndexPage: NextPage<Props> = ({ memberName, tier, reports }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  console.log("[PAGE_DATA] pages/inner-circle/reports/index.tsx getServerSideProps START");
-  try {
   const [
     { prisma },
     { readAccessCookie },
@@ -147,9 +145,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/inner-circle/reports/index.tsx getServerSideProps END");
-  }
 };
 
 export default ReportsIndexPage;

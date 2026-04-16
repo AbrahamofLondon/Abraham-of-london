@@ -3,8 +3,6 @@ import { GetServerSideProps } from "next";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  console.log("[PAGE_DATA] pages/inner-circle-sitemap.xml.ts getServerSideProps START");
-  try {
   const { allDocuments } = await import("@/lib/contentlayer");
   const docs = allDocuments.filter((d) => d._raw.sourceFilePath.startsWith("inner-circle/"));
 
@@ -23,9 +21,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   res.end();
   return { props: {} };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/inner-circle-sitemap.xml.ts getServerSideProps END");
-  }
 };
 
 export default function InnerCircleSitemap() {}

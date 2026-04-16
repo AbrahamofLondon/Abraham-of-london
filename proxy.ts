@@ -267,30 +267,96 @@ function authTierMatchesPrefix(pathname: string, prefixes: string[]): boolean {
   return false;
 }
 
+/* --- Canonical Tier type (inlined for edge safety — no Prisma imports) --- */
+
+type EdgeTier =
+  | "public"
+  | "member"
+  | "inner_circle"
+  | "client"
+  | "architect"
+  | "owner";
+
+const EDGE_TIER_ORDER: Record<EdgeTier, number> = {
+  public: 0,
+  member: 1,
+  inner_circle: 2,
+  client: 3,
+  architect: 4,
+  owner: 5,
+};
+
+function edgeHasAccess(subjectTier: EdgeTier, requiredTier: EdgeTier): boolean {
+  return (EDGE_TIER_ORDER[subjectTier] ?? 0) >= (EDGE_TIER_ORDER[requiredTier] ?? 999);
+}
+
+function edgeNormalizeTier(input: unknown): EdgeTier {
+  if (!input || typeof input !== "string") return "public";
+  const key = input.trim().toLowerCase().replace(/-/g, "_");
+  if (key in EDGE_TIER_ORDER) return key as EdgeTier;
+  const ALIASES: Record<string, EdgeTier> = {
+    free: "public", anonymous: "public", guest: "public", viewer: "public",
+    registered: "member", basic: "member", patron: "member",
+    innercircle: "inner_circle", premium: "inner_circle", ic: "inner_circle",
+    consulting: "client", enterprise: "client", restricted: "client",
+    founder: "architect", legacy: "architect", editor: "architect", admin: "architect", superadmin: "architect",
+    sovereign: "owner", top_secret: "owner", operator: "owner", system: "owner",
+  };
+  return ALIASES[key] ?? "public";
+}
+
+type EdgeResolvedIdentity = {
+  authenticated: boolean;
+  tier: EdgeTier;
+  isInternal: boolean;
+};
+
+function resolveIdentityEdge(
+  nextAuthToken: Record<string, unknown> | null,
+  hasAccessCookie: boolean,
+): EdgeResolvedIdentity {
+  if (nextAuthToken) {
+    const aol = (nextAuthToken as any).aol || {};
+    return {
+      authenticated: true,
+      tier: edgeNormalizeTier(aol.tier || nextAuthToken.tier || nextAuthToken.role),
+      isInternal: Boolean(aol.isInternal),
+    };
+  }
+  if (hasAccessCookie) {
+    return {
+      authenticated: true,
+      tier: "inner_circle",
+      isInternal: false,
+    };
+  }
+  return { authenticated: false, tier: "public", isInternal: false };
+}
+
+/* --- Route-to-tier classification functions --- */
+
 function authTierIsPublicRoute(pathname: string): boolean {
   if (AUTH_PUBLIC_EXACT.has(pathname)) return true;
-  // Inner Circle entry/redemption pages must be reachable with zero credentials:
-  //   - /inner-circle          → registration form
-  //   - /inner-circle/unlock   → email-link key redemption (SSR)
-  //   - /inner-circle/login    → manual key entry
-  // All other /inner-circle/** paths remain Tier 2 (AL cookie required).
   if (pathname === "/inner-circle") return true;
   if (pathname === "/inner-circle/unlock") return true;
   if (pathname === "/inner-circle/login") return true;
   return authTierMatchesPrefix(pathname, AUTH_PUBLIC_PREFIXES);
 }
 
-function authTierIsTier3(pathname: string): boolean {
-  if (TIER3_EXACT.has(pathname)) return true;
-  return authTierMatchesPrefix(pathname, TIER3_PREFIXES);
+function authTierIsTier3(pathname: string): EdgeTier | false {
+  if (TIER3_EXACT.has(pathname)) return "architect";
+  if (authTierMatchesPrefix(pathname, TIER3_PREFIXES)) return "architect";
+  return false;
 }
 
-function authTierIsTier2(pathname: string): boolean {
-  return authTierMatchesPrefix(pathname, TIER2_PREFIXES);
+function authTierIsTier2(pathname: string): EdgeTier | false {
+  if (authTierMatchesPrefix(pathname, TIER2_PREFIXES)) return "inner_circle";
+  return false;
 }
 
-function authTierIsTier1(pathname: string): boolean {
-  return authTierMatchesPrefix(pathname, TIER1_PREFIXES);
+function authTierIsTier1(pathname: string): EdgeTier | false {
+  if (authTierMatchesPrefix(pathname, TIER1_PREFIXES)) return "member";
+  return false;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1127,12 +1193,10 @@ export async function proxy(req: NextRequest) {
     return response;
   }
 
-  /* INSTITUTIONAL ACTION EXEMPTION */
-  if (req.headers.get("X-Institutional-Action") === "true") {
-    const response = NextResponse.next();
-    setSecurityHeaders(response, req);
-    return response;
-  }
+  /* INSTITUTIONAL ACTION EXEMPTION — REMOVED (Phase 0 security fix).
+   * This header was spoofable by any HTTP client, granting a full auth
+   * bypass to anyone who set X-Institutional-Action: true. Banned per
+   * auth-migration/05-ban-list.md §2. */
 
   /* CANONICAL REDIRECT */
   if (
@@ -1355,62 +1419,71 @@ export async function proxy(req: NextRequest) {
     });
   }
 
-  /* AUTH TIER ENFORCEMENT (merged from middleware.ts)                        */
+  /* AUTH TIER ENFORCEMENT (unified via resolveIdentityEdge)                  */
   /*                                                                          */
   /* Supplementary tier check. Runs AFTER all existing proxy.ts auth logic.   */
-  /* Any route that proxy.ts's earlier sections have already redirected or    */
-  /* passed as public will not reach this block. Tier 3 (admin) is checked    */
-  /* before Tier 2 (member) because admin paths nest under member paths.      */
+  /* Uses the edge-safe identity resolver (inlined above) to determine the    */
+  /* caller's tier, then checks against the route's required tier.            */
   {
     const tierPathname = req.nextUrl.pathname;
 
     if (!authTierIsPublicRoute(tierPathname)) {
       const tierIsApi = tierPathname.startsWith("/api/");
 
-      if (authTierIsTier3(tierPathname)) {
-        const tierToken = await getToken({
+      // Determine required tier for this route
+      const requiredTier: EdgeTier | false =
+        authTierIsTier3(tierPathname) ||
+        authTierIsTier2(tierPathname) ||
+        authTierIsTier1(tierPathname);
+
+      if (requiredTier) {
+        // Resolve identity at the edge (JWT claims + cookie presence only)
+        const edgeToken = await getToken({
           req,
           secret: process.env.NEXTAUTH_SECRET,
         });
-        if (!tierToken || !(tierToken as any).isInternal) {
+        const hasAccessCookie = Boolean(req.cookies.get("aol_access"));
+        const edgeIdentity = resolveIdentityEdge(
+          edgeToken as Record<string, unknown> | null,
+          hasAccessCookie,
+        );
+
+        if (!edgeHasAccess(edgeIdentity.tier, requiredTier)) {
+          // Not authenticated at all
+          if (!edgeIdentity.authenticated) {
+            if (tierIsApi) {
+              return jsonResponse(
+                { ok: false, error: "Authentication required", code: "AUTH_REQUIRED" },
+                401,
+              );
+            }
+            // Redirect based on what tier is required
+            if (requiredTier === "architect" || requiredTier === "owner") {
+              const url = new URL("/admin/login", req.url);
+              url.searchParams.set("returnTo", safeReturnTo(req));
+              return NextResponse.redirect(url, 307);
+            }
+            if (requiredTier === "inner_circle" || requiredTier === "client") {
+              const url = req.nextUrl.clone();
+              url.pathname = "/inner-circle";
+              url.searchParams.set("returnTo", tierPathname);
+              return NextResponse.redirect(url);
+            }
+            // member tier — redirect to sign-in
+            const url = req.nextUrl.clone();
+            url.pathname = "/api/auth/signin";
+            url.searchParams.set("callbackUrl", tierPathname);
+            return NextResponse.redirect(url);
+          }
+
+          // Authenticated but insufficient tier
           if (tierIsApi) {
             return jsonResponse(
-              { ok: false, error: "Forbidden", code: "ADMIN_REQUIRED" },
+              { ok: false, error: "Insufficient clearance", code: "CLEARANCE_REQUIRED" },
               403,
             );
           }
-          return NextResponse.redirect(new URL("/", req.url));
-        }
-      } else if (authTierIsTier2(tierPathname)) {
-        const alCookie = req.cookies.get("aol_access");
-        if (!alCookie) {
-          if (tierIsApi) {
-            return jsonResponse(
-              { ok: false, error: "Inner Circle access required", code: "TOKEN_REQUIRED" },
-              401,
-            );
-          }
-          const url = req.nextUrl.clone();
-          url.pathname = "/inner-circle";
-          url.searchParams.set("returnTo", tierPathname);
-          return NextResponse.redirect(url);
-        }
-      } else if (authTierIsTier1(tierPathname)) {
-        const tierToken = await getToken({
-          req,
-          secret: process.env.NEXTAUTH_SECRET,
-        });
-        if (!tierToken) {
-          if (tierIsApi) {
-            return jsonResponse(
-              { ok: false, error: "Authentication required", code: "AUTH_REQUIRED" },
-              401,
-            );
-          }
-          const url = req.nextUrl.clone();
-          url.pathname = "/api/auth/signin";
-          url.searchParams.set("callbackUrl", tierPathname);
-          return NextResponse.redirect(url);
+          return NextResponse.redirect(new URL("/auth/access-denied", req.url));
         }
       }
     }

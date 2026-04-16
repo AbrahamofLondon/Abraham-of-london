@@ -9,8 +9,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/options";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log("[PAGE_DATA] pages/membership/success.tsx getServerSideProps START");
-  try {
   const session = await getServerSession(context.req, context.res, authOptions);
   
   // Guard: If no session, redirect to prevent direct URL access
@@ -29,9 +27,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/membership/success.tsx getServerSideProps END");
-  }
 };
 
 interface MembershipSuccessProps {

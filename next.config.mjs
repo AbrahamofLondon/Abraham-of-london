@@ -264,6 +264,29 @@ const nextConfig = {
       level: "error",
     };
 
+    // Prevent the dev-mode file watcher from monitoring .contentlayer/
+    // and other generated/cache dirs. Without this, the Contentlayer
+    // watch process + Next's watcher create a feedback loop: page load
+    // reads _index.json → watcher detects "change" (Windows updates
+    // last-access time) → Contentlayer rebuilds → Next detects new
+    // files → Fast Refresh full reload → page reloads → infinite loop.
+    if (dev) {
+      config.watchOptions = {
+        ...(config.watchOptions || {}),
+        ignored: [
+          ...(config.watchOptions?.ignored || []),
+          "**/.contentlayer/**",
+          "**/.next/**",
+          "**/.netlify/**",
+          "**/node_modules/**",
+          "**/.git/**",
+          "**/var/**",
+          "**/.reports/**",
+          "**/tmp/**",
+        ],
+      };
+    }
+
     if (config.cache && config.cache.type === "filesystem") {
       config.cache.maxMemoryGenerations = 1;
     }

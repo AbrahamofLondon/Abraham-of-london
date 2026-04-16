@@ -16,13 +16,8 @@ import {
 } from "lucide-react";
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  console.log("[PAGE_DATA] pages/admin/login.tsx getServerSideProps START");
-  try {
   return { props: {} };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/admin/login.tsx getServerSideProps END");
-  }
 };
 
 const AdminLoginPage: NextPage = () => {

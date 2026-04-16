@@ -194,8 +194,6 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/blog/[...slug].tsx getStaticPaths START");
-  try {
   const { getPublishedPosts } = await import("@/lib/content/server");
 
   const posts = (await getPublishedPosts()) || [];
@@ -225,14 +223,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/blog/[...slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/blog/[...slug].tsx getStaticProps START");
-  try {
   try {
     const rawParam = Array.isArray(params?.slug)
       ? (params?.slug as string[]).join("/")
@@ -286,9 +279,6 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
   }
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/blog/[...slug].tsx getStaticProps END");
-  }
 };
 
 export default BlogSlugPage;

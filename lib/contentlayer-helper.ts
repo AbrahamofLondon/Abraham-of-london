@@ -22,7 +22,6 @@ import {
   stripContentPrefix,
 } from "./content/canonical";
 
-console.log("[MODULE_INIT] lib/contentlayer-helper");
 
 export type DocKind =
   | "post"

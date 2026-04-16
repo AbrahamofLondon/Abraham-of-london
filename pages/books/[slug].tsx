@@ -215,8 +215,6 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/books/[slug].tsx getStaticPaths START");
-  try {
   const { getPublishedBooks } = await import("@/lib/content/server");
   const books = (await getPublishedBooks()) || [];
 
@@ -231,14 +229,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/books/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/books/[slug].tsx getStaticProps START");
-  try {
   try {
     const bare = booksBareSlug(params?.slug);
     if (!bare) return { notFound: true };
@@ -282,9 +275,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/books/[slug].tsx getStaticProps END");
-  }
 };
 
 export default BookSlugPage;

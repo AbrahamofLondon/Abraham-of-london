@@ -824,12 +824,7 @@ export default function TeamAssessmentPage() {
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  console.log("[PAGE_DATA] pages/diagnostics/team-assessment.tsx getServerSideProps START");
-  try {
   return { props: {} };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/diagnostics/team-assessment.tsx getServerSideProps END");
-  }
 };
 

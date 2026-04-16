@@ -22,19 +22,20 @@ type RevokeBody = {
   forceGlobalLogout?: boolean; // New directive for project-wide reset
 };
 
-/** Simple admin guard for institutional security */
-function requireAdmin(req: NextApiRequest): { ok: true } | { ok: false; reason: string } {
-  const expected = process.env.ACCESS_REVOKE_ADMIN_TOKEN;
+// Phase 0: consolidated admin auth — standard Authorization: Bearer ADMIN_API_KEY.
+// Replaces the ad-hoc x-admin-token header + ACCESS_REVOKE_ADMIN_TOKEN env var.
+function requireAdminAuth(req: NextApiRequest): { ok: true } | { ok: false; reason: string } {
+  const adminKey = (process.env.ADMIN_API_KEY || "").trim();
 
-  if (!expected) {
+  if (!adminKey) {
     if (process.env.NODE_ENV !== "production") return { ok: true };
-    return { ok: false, reason: "Server not configured for revocation" };
+    return { ok: false, reason: "Server not configured for admin auth" };
   }
 
-  const header = req.headers["x-admin-token"];
-  const provided = Array.isArray(header) ? header[0] : header;
+  const auth = String(req.headers.authorization || "");
+  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
 
-  if (!provided || String(provided) !== expected) {
+  if (!token || token !== adminKey) {
     return { ok: false, reason: "Unauthorized" };
   }
 
@@ -47,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ ok: false, reason: "Method not allowed" });
   }
 
-  const admin = requireAdmin(req);
+  const admin = requireAdminAuth(req);
   if (!admin.ok) {
     return res.status(401).json({ ok: false, reason: admin.reason });
   }

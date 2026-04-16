@@ -56,7 +56,6 @@ import {
   type DocKind,
 } from "@/lib/contentlayer-helper";
 
-console.log("[MODULE_INIT] lib/content/server");
 
 const IS_BUILD =
   process.env.NEXT_PHASE === "phase-production-build" ||

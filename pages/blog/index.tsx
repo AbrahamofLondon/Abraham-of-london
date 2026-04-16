@@ -442,11 +442,11 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
               </div>
 
               <h1 className="mt-6 max-w-[10ch] font-serif text-4xl tracking-[-0.04em] text-white/95 md:text-6xl">
-                A more beautiful room for reading.
+                Essays and long-form writing.
               </h1>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-white/58 md:text-base">
-                Not a feed. Not a vault. A curated salon of essays, dispatches, and long thoughts designed to be wandered,
-                admired, and returned to.
+                Strategic essays, institutional dispatches, and extended analysis from Abraham of London.
+                Arranged by date, searchable by theme.
               </p>
 
               <div className="mt-8 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
@@ -664,7 +664,7 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
                       Archive Floor
                     </div>
                     <h2 className="mt-2 font-serif text-3xl tracking-[-0.03em] text-white">
-                      Stories arranged like objects worth keeping.
+                      Complete archive.
                     </h2>
                   </div>
                 </div>
@@ -799,8 +799,6 @@ const BlogIndex: NextPage<BlogIndexProps> = ({ items, totalPosts }) => {
 };
 
 export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
-  console.log("[PAGE_DATA] pages/blog/index.tsx getStaticProps START");
-  try {
   try {
     // ✅ FS SSOT: content/blog
     const metas = await getMdxCollectionMeta("blog");
@@ -852,9 +850,6 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
   }
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/blog/index.tsx getStaticProps END");
-  }
 };
 
 export default BlogIndex;

@@ -79,8 +79,6 @@ export const getStaticProps: GetStaticProps<{
   categories: string[];
   featuredCount: number;
 }> = async () => {
-  console.log("[PAGE_DATA] pages/downloads/index.tsx getStaticProps START");
-  try {
   try {
     const { getContentlayerData } = await import("@/lib/content/server");
     const data = getContentlayerData();
@@ -137,9 +135,6 @@ export const getStaticProps: GetStaticProps<{
   }
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/downloads/index.tsx getStaticProps END");
-  }
 };
 
 const DownloadsIndexPage: NextPage<{

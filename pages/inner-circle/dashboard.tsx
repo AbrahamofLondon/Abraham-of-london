@@ -172,8 +172,6 @@ export default function InnerCircleDashboard({ access, initialData, error }: Das
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log("[PAGE_DATA] pages/inner-circle/dashboard.tsx getServerSideProps START");
-  try {
   // Server-only modules loaded dynamically (Wave 4 boundary enforcement).
   const [
     { prisma },
@@ -288,9 +286,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: { error: "Institutional Vault connectivity lost. Systems re-aligning." } };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/inner-circle/dashboard.tsx getServerSideProps END");
-  }
 };
 
 

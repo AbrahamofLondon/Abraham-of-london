@@ -86,8 +86,6 @@ const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
 // getStaticProps keeps lib/editorial/discovery.ts (which imports 'fs')
 // out of the client bundle entirely.
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  console.log("[PAGE_DATA] pages/editorials/catalogue.tsx getStaticProps START");
-  try {
   const { discoverPublications } = await import("@/lib/editorial/discovery");
   const publications = discoverPublications();
 
@@ -98,9 +96,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/editorials/catalogue.tsx getStaticProps END");
-  }
 };
 
 export default EditorialCataloguePage;

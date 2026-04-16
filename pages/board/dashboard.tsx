@@ -53,8 +53,6 @@ type DashboardProps = {
 };
 
 export const getServerSideProps: GetServerSideProps<DashboardProps> = async ({ req }) => {
-  console.log("[PAGE_DATA] pages/board/dashboard.tsx getServerSideProps START");
-  try {
   const startTime = Date.now();
 
   const { default: prisma } = await import("@/lib/prisma");
@@ -244,9 +242,6 @@ export const getServerSideProps: GetServerSideProps<DashboardProps> = async ({ r
     };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/board/dashboard.tsx getServerSideProps END");
-  }
 };
 
 const BoardDashboard: NextPage<DashboardProps> = ({

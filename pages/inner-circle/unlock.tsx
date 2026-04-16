@@ -10,8 +10,6 @@ interface UnlockProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log("[PAGE_DATA] pages/inner-circle/unlock.tsx getServerSideProps START");
-  try {
   const { key } = context.query;
 
   if (!key || typeof key !== "string") {
@@ -45,9 +43,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { props: { error: "Institutional infrastructure failure." } };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/inner-circle/unlock.tsx getServerSideProps END");
-  }
 };
 
 export default function UnlockPage({ error }: UnlockProps) {

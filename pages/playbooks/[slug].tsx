@@ -145,8 +145,6 @@ function titleCase(input?: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticPaths START");
-  try {
   const { getAllPlaybooks } = await import("@/lib/content/server");
   const allPlaybooks = getAllPlaybooks();
   const paths = allPlaybooks
@@ -162,14 +160,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticProps START");
-  try {
   const slug = normalizeSlug(params?.slug);
 
   const { getAllPlaybooks } = await import("@/lib/content/server");
@@ -206,9 +199,6 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/playbooks/[slug].tsx getStaticProps END");
-  }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

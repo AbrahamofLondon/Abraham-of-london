@@ -261,8 +261,6 @@ const OversightDashboard: NextPage<Props> = ({ records, stats }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-  console.log("[PAGE_DATA] pages/directorate/oversight.tsx getServerSideProps START");
-  try {
   const { req, res } = ctx;
 
   const [{ getServerSession }, authModule, prismaModule] = await Promise.all([
@@ -320,9 +318,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     },
   };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/directorate/oversight.tsx getServerSideProps END");
-  }
 };
 
 export default OversightDashboard;

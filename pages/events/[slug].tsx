@@ -35,8 +35,6 @@ interface Props {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/events/[slug].tsx getStaticPaths START");
-  try {
   const all = (typeof getServerAllEvents === "function" ? getServerAllEvents() : []) as any[];
   const paths = all
     .filter((e) => !e.draftSafe)
@@ -47,14 +45,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/events/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/events/[slug].tsx getStaticProps START");
-  try {
   try {
     const s = normalizeSlug(String(params?.slug || ""));
     const eventData = getServerEventBySlug(s);
@@ -86,9 +79,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   }
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/events/[slug].tsx getStaticProps END");
-  }
 };
 
 const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) => {

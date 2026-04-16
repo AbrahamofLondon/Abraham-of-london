@@ -275,8 +275,6 @@ const GenericContentPage: NextPage<Props> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/[slug].tsx getStaticPaths START");
-  try {
   // Catch-all root-slug fallback. The reserved-root allowlist
   // (allowRootSlug) rejects almost every normalized content slug because
   // site content uses path prefixes (canon/, blog/, shorts/, ...). The
@@ -291,14 +289,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths: [], fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
-  console.log("[PAGE_DATA] pages/[slug].tsx getStaticProps START");
-  try {
   const slug = norm(String(params?.slug || ""));
   const canonicalUrl = `/${slug}`;
 
@@ -344,9 +337,6 @@ export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/[slug].tsx getStaticProps END");
-  }
 };
 
 export default GenericContentPage;

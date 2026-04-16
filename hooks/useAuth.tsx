@@ -1,39 +1,22 @@
 "use client";
 
-// hooks/useAuth.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useSession } from 'next-auth/react';
-import type { Session } from 'next-auth';
-import type { AccessTier } from '@/lib/access/tier-policy';
-
-/**
- * LOCAL TYPE OVERRIDE
- * Ensures the 'aol' property is recognized on the Session object
- * during strict build-time type checking.
- */
-type ExtendedSession = Session & {
-  aol?: {
-    tier: AccessTier;
-    innerCircleAccess: boolean;
-    isInternal: boolean;
-    allowPrivate: boolean;
-    memberId?: string | null;
-    emailHash?: string | null;
-    flags?: string[];
-  };
-};
+// hooks/useAuth.tsx — AUTH-UNIFIED (fetches from /api/auth/identity)
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import type { Tier } from '@/lib/auth/tiers';
+import type { ResolvedIdentity } from '@/lib/auth/resolve-identity';
 
 interface AuthContextType {
-  user: any | null;
+  identity: ResolvedIdentity | null;
+  user: { id: string; email: string; name: string } | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  aol?: ExtendedSession['aol'];
-  tier: AccessTier;
+  tier: Tier;
   innerCircleAccess: boolean;
+  adminAccess: boolean;
   isInternal: boolean;
   allowPrivate: boolean;
-  memberId?: string | null;
-  emailHash?: string | null;
+  memberId: string | null;
+  emailHash: string | null;
   login: () => void;
   logout: () => void;
 }
@@ -45,35 +28,98 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Explicitly cast the session to our ExtendedSession
-  const { data, status } = useSession();
-  const session = data as ExtendedSession | null;
-  
+  const [identity, setIdentity] = useState<ResolvedIdentity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    if (status !== 'loading') {
-      setIsLoading(false);
+  const fetchIdentity = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const res = await fetch('/api/auth/identity', {
+        credentials: 'include',
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        if (!controller.signal.aborted) setIdentity(null);
+        return;
+      }
+
+      const data = (await res.json()) as ResolvedIdentity;
+      if (!controller.signal.aborted) {
+        setIdentity(data);
+      }
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      console.error('[useAuth] identity fetch failed:', err);
+      if (!controller.signal.aborted) setIdentity(null);
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
     }
-  }, [status]);
+  }, []);
 
-  /**
-   * Institutional Claims Mapping
-   * Local interface override ensures session.aol is accessible.
-   */
-  const aolClaims = session?.aol;
+  // Fetch on mount
+  useEffect(() => {
+    fetchIdentity();
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [fetchIdentity]);
+
+  // Re-fetch on window focus
+  useEffect(() => {
+    const onFocus = () => {
+      fetchIdentity();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [fetchIdentity]);
+
+  // Re-fetch on route change (next/router)
+  useEffect(() => {
+    // Dynamic import to avoid issues if next/router not ready
+    let unsubscribe: (() => void) | undefined;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const Router = require('next/router').default;
+      const handler = () => {
+        fetchIdentity();
+      };
+      Router.events.on('routeChangeComplete', handler);
+      unsubscribe = () => Router.events.off('routeChangeComplete', handler);
+    } catch {
+      // next/router not available (e.g. app router only)
+    }
+    return () => {
+      unsubscribe?.();
+    };
+  }, [fetchIdentity]);
+
+  const user = identity?.authenticated
+    ? {
+        id: identity.subjectId || '',
+        email: identity.email || '',
+        name: identity.name || '',
+      }
+    : null;
 
   const contextValue: AuthContextType = {
-    user: session?.user || null,
+    identity,
+    user,
     isLoading,
-    isAuthenticated: !!session?.user,
-    aol: aolClaims,
-    tier: aolClaims?.tier || 'public',
-    innerCircleAccess: aolClaims?.innerCircleAccess || false,
-    isInternal: aolClaims?.isInternal || false,
-    allowPrivate: aolClaims?.allowPrivate || false,
-    memberId: aolClaims?.memberId || null,
-    emailHash: aolClaims?.emailHash || null,
+    isAuthenticated: identity?.authenticated ?? false,
+    tier: identity?.tier ?? 'public',
+    innerCircleAccess: identity?.innerCircleAccess ?? false,
+    adminAccess: identity?.adminAccess ?? false,
+    isInternal: identity?.isInternal ?? false,
+    allowPrivate: identity?.adminAccess ?? false,
+    memberId: identity?.subjectId ?? null,
+    emailHash: null,
     login: () => {
       window.location.href = '/api/auth/signin';
     },
@@ -99,7 +145,7 @@ export const useAuth = () => {
 
 // --- Strategic Helper Hooks ---
 
-export const useTier = (): AccessTier => {
+export const useTier = (): Tier => {
   const { tier } = useAuth();
   return tier;
 };

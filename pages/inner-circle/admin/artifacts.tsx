@@ -248,8 +248,6 @@ const AdminArtifactsPage: NextPage<Props> = ({ items }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  console.log("[PAGE_DATA] pages/inner-circle/admin/artifacts.tsx getServerSideProps START");
-  try {
   const [
     { readAccessCookie },
     { getSessionContext, tierAtLeast },
@@ -324,9 +322,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/inner-circle/admin/artifacts.tsx getServerSideProps END");
-  }
 };
 
 export default AdminArtifactsPage;

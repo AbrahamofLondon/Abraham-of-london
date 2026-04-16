@@ -178,8 +178,6 @@ const FilterButton = ({ active, onClick, children }: any) => (
 
 /* Server-side Assets Pulse */
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  console.log("[PAGE_DATA] pages/admin/pdf-status.tsx getServerSideProps START");
-  try {
   try {
     const pdfDir = path.join(process.cwd(), 'public', 'pdfs');
     let pdfs: PDFStatus[] = [];
@@ -219,7 +217,4 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
     return { props: { pdfs: [], stats: { total: 0, existing: 0, missing: 0 } } };
   }
 
-  } finally {
-    console.log("[PAGE_DATA] pages/admin/pdf-status.tsx getServerSideProps END");
-  }
 };

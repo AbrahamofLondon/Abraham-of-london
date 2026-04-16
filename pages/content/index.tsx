@@ -39,8 +39,6 @@ type Item = {
 type Props = { items: Item[] };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  console.log("[PAGE_DATA] pages/content/index.tsx getStaticProps START");
-  try {
   try {
     const {
       getPublishedCanons,
@@ -117,9 +115,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/content/index.tsx getStaticProps END");
-  }
 };
 
 const ContentIndexPage: NextPage<Props> = ({ items }) => {

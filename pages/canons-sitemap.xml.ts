@@ -4,8 +4,6 @@ import type { ContentDoc } from "@/lib/contentlayer-helper";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  console.log("[PAGE_DATA] pages/canons-sitemap.xml.ts getServerSideProps START");
-  try {
   const { getAllCombinedDocs } = await import("@/lib/content/server");
   // Filter for specific content types (e.g., 'Canon')
   const docs = getAllCombinedDocs().filter((d: ContentDoc) => d.type === "Canon" || String(d.slug ?? "").includes("canon"));
@@ -29,9 +27,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 
   return { props: {} };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/canons-sitemap.xml.ts getServerSideProps END");
-  }
 };
 
 export default function CanonsSitemap() {}

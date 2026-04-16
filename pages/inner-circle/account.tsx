@@ -192,8 +192,6 @@ export default function InnerCircleAccount({
 export const getServerSideProps: GetServerSideProps<AccountProps> = async (
   context,
 ) => {
-  console.log("[PAGE_DATA] pages/inner-circle/account.tsx getServerSideProps START");
-  try {
   const unified = await getUnifiedSession(context);
 
   if (!unified) {
@@ -256,7 +254,4 @@ export const getServerSideProps: GetServerSideProps<AccountProps> = async (
     },
   };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/inner-circle/account.tsx getServerSideProps END");
-  }
 };

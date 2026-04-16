@@ -78,8 +78,6 @@ export default function SignIn() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log("[PAGE_DATA] pages/auth/signin.tsx getServerSideProps START");
-  try {
   // Build/CI safety: never let auth SSR crash the build
   try {
     const [{ getServerSession }, { authOptions }] = await Promise.all([
@@ -98,7 +96,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return { props: {} };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/auth/signin.tsx getServerSideProps END");
-  }
 };

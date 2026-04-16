@@ -20,21 +20,17 @@ function methodNotAllowed(res: NextApiResponse<Err>) {
   return res.status(405).json({ ok: false, error: "Method Not Allowed" });
 }
 
+// Phase 0: consolidated admin auth. Uses standard Authorization: Bearer
+// pattern with ADMIN_API_KEY, matching lib/server/guards.ts. Replaces the
+// ad-hoc x-admin-secret header and INNER_CIRCLE_ADMIN_SECRET env var.
 function assertAdmin(req: NextApiRequest) {
-  const expected = process.env.INNER_CIRCLE_ADMIN_SECRET;
-  if (!expected) {
-    throw new Error("Server misconfigured: INNER_CIRCLE_ADMIN_SECRET not set");
+  const adminKey = (process.env.ADMIN_API_KEY || "").trim();
+  if (!adminKey) {
+    throw new Error("Server misconfigured: ADMIN_API_KEY not set");
   }
-  const headerSecret = req.headers["x-admin-secret"];
-  const providedFromHeader = Array.isArray(headerSecret)
-    ? headerSecret[0]
-    : headerSecret;
-  const providedFromQuery =
-    typeof req.query.adminSecret === "string"
-      ? req.query.adminSecret
-      : undefined;
-  const provided = providedFromHeader || providedFromQuery;
-  if (!provided || provided !== expected) {
+  const auth = String(req.headers.authorization || "");
+  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  if (!token || token !== adminKey) {
     throw new Error("Unauthorized");
   }
 }

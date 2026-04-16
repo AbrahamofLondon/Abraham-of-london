@@ -50,8 +50,6 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   resolvedUrl,
 }) => {
-  console.log("[PAGE_DATA] pages/[type]-sitemap.xml.ts getServerSideProps START");
-  try {
   // Matches URLs like /briefs-sitemap.xml
   const typeMatch = resolvedUrl.match(/\/([a-z-]+)-sitemap/i);
   const rawTypeKey = typeMatch?.[1];
@@ -83,9 +81,6 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   return { props: {} };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/[type]-sitemap.xml.ts getServerSideProps END");
-  }
 };
 
 export default function SiteMap() {

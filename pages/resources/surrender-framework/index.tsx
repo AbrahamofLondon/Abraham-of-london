@@ -202,8 +202,6 @@ async function loadRegistry(): Promise<{ registry: SurrenderAsset[]; isFallbackD
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  console.log("[PAGE_DATA] pages/resources/surrender-framework/index.tsx getStaticProps START");
-  try {
   const canonical = `${SITE}/resources/surrender-framework`;
 
   const { registry, isFallbackData } = await loadRegistry();
@@ -244,9 +242,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/resources/surrender-framework/index.tsx getStaticProps END");
-  }
 };
 
 const SurrenderFrameworkPage: NextPage<Props> = ({ canonical, assets, grouped, stats, isFallbackData }) => {

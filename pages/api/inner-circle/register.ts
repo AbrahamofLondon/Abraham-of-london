@@ -45,9 +45,10 @@ export default async function handler(
   const emailHash = buildEmailHash(email);
 
   try {
-    const rawKey = `AL-${crypto.randomBytes(4).toString("hex")}-${crypto
-      .randomBytes(4)
-      .toString("hex")}`.toUpperCase();
+    // Phase 0 fix: generate IC- prefix keys to match client-side validation
+    // in keys.client.ts (expects IC- prefix, 44 chars). The previous AL-
+    // prefix caused client-side key verification to reject valid keys.
+    const rawKey = `IC-${crypto.randomBytes(20).toString("hex")}`.toUpperCase();
 
     const keyHash = hashAccessKey(rawKey);
 

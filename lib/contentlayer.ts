@@ -16,7 +16,6 @@
 // pages/* (sitemaps). The exported shape is preserved — many shared libs
 // consume these as direct array re-exports (`allPosts.filter(...)`).
 
-console.log("[MODULE_INIT] lib/contentlayer");
 
 import * as helper from "@/lib/contentlayer-helper";
 

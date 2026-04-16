@@ -33,8 +33,21 @@ function getJwtSecret(): Uint8Array {
     );
   }
 
-  const fallback = "inner-circle-secret-change-in-production";
-  const secret = raw && raw.trim().length > 0 ? raw.trim() : fallback;
+  // Phase 0 security fix: no fallback secret outside local dev.
+  // The previous hardcoded fallback "inner-circle-secret-change-in-production"
+  // was in the source code and could be used to forge tokens in any environment
+  // that forgot to set the env var.
+  if (!raw || raw.trim().length === 0) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[inner-circle/jwt] INNER_CIRCLE_JWT_SECRET not set — using NEXTAUTH_SECRET as fallback in dev");
+      const ns = process.env.NEXTAUTH_SECRET;
+      if (ns && ns.trim().length >= 32) return new TextEncoder().encode(ns.trim());
+    }
+    throw new Error(
+      "[inner-circle/jwt] INNER_CIRCLE_JWT_SECRET not set. Required in all non-local environments.",
+    );
+  }
+  const secret = raw.trim();
 
   return new TextEncoder().encode(secret);
 }

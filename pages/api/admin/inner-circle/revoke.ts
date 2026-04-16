@@ -4,10 +4,13 @@ import { revokeKey } from "@/lib/server/inner-circle/keys";
 
 type ResData = { success: boolean } | { error: string };
 
+// Phase 0: consolidated admin auth — standard Authorization: Bearer pattern.
 function assertAdmin(req: NextApiRequest) {
-  const k = req.headers["x-admin-key"];
-  const provided = Array.isArray(k) ? k[0] : k;
-  if (!provided || provided !== process.env.ADMIN_API_KEY) throw new Error("forbidden");
+  const adminKey = (process.env.ADMIN_API_KEY || "").trim();
+  if (!adminKey) throw new Error("forbidden");
+  const auth = String(req.headers.authorization || "");
+  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  if (!token || token !== adminKey) throw new Error("forbidden");
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResData>) {

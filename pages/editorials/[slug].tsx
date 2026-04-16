@@ -759,8 +759,6 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticPaths START");
-  try {
   // Hardcoded catalogue is tiny; use blocking so new additions render
   // without a redeploy.
   const items = getPublicationCatalogue();
@@ -770,14 +768,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ctx => {
-  console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticProps START");
-  try {
   const slug = typeof ctx.params?.slug === "string" ? ctx.params.slug : "";
   const item = getPublicationBySlug(slug);
   if (!item) return { notFound: true };
@@ -803,9 +796,6 @@ export const getStaticProps: GetStaticProps<Props> = async ctx => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/editorials/[slug].tsx getStaticProps END");
-  }
 };
 
 export default EditorialPage;

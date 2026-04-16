@@ -354,8 +354,6 @@ const DossierDetail: NextPage<DossierProps> = ({ intake }) => {
 export const getServerSideProps: GetServerSideProps<DossierProps> = async (
   ctx
 ) => {
-  console.log("[PAGE_DATA] pages/directorate/dossier/[id].tsx getServerSideProps START");
-  try {
   const { params, req, res } = ctx;
   const id = String(params?.id || "").trim();
 
@@ -426,9 +424,6 @@ export const getServerSideProps: GetServerSideProps<DossierProps> = async (
     },
   };
 
-  } finally {
-    console.log("[PAGE_DATA] pages/directorate/dossier/[id].tsx getServerSideProps END");
-  }
 };
 
 export default DossierDetail;

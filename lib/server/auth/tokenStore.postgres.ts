@@ -51,8 +51,14 @@ export function sha256Hex(input: string): string {
 export function hashAccessKey(rawKey: string): string {
   const secret =
     process.env.INNER_CIRCLE_KEY_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    "dev-key-secret";
+    process.env.NEXTAUTH_SECRET;
+
+  if (!secret) {
+    throw new Error(
+      "[hashAccessKey] No key secret configured. " +
+        "Set INNER_CIRCLE_KEY_SECRET or NEXTAUTH_SECRET.",
+    );
+  }
 
   return sha256Hex(`${String(rawKey || "").trim()}::${secret}`);
 }

@@ -1,8 +1,14 @@
 // DEPRECATED: orphaned route — no inbound references.
 // Pending operator decision: surface, redirect, or delete.
 // Do not add new logic here.
+import type { GetServerSideProps } from "next";
 import * as React from "react";
 import useSWR from "swr";
+
+// SSR to avoid prerender failure (module not found during static generation).
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} };
+};
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 

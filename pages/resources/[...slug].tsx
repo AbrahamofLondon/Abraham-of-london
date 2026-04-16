@@ -83,8 +83,6 @@ const Page: NextPage<Props> = ({ resource, requiredTier, bodyCode }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log("[PAGE_DATA] pages/resources/[...slug].tsx getStaticPaths START");
-  try {
   // Narrow: load only resource docs (~20) instead of the full 316-doc corpus.
   // isResourceDoc filter retained because the generic Resource helper may
   // include lexicon-shaped entries the UI filter still wants to exclude.
@@ -122,14 +120,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths: paths.slice(0, 5), fallback: "blocking" };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/resources/[...slug].tsx getStaticPaths END");
-  }
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  console.log("[PAGE_DATA] pages/resources/[...slug].tsx getStaticProps START");
-  try {
   const slug = cleanResourceSlug(params?.slug);
   if (!slug) return { notFound: true };
 
@@ -162,9 +155,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 
 
-  } finally {
-    console.log("[PAGE_DATA] pages/resources/[...slug].tsx getStaticProps END");
-  }
 };
 
 export default Page;
