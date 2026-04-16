@@ -77,11 +77,11 @@ export default function BookCard(props: BookCardProps) {
       : null;
 
   return (
-    <article className="group flex h-full flex-col gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-softGold/30">
+    <article className="group flex h-full flex-col gap-6 rounded-3xl border border-white/12 bg-[#0E0E12] p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A96E]/30 hover:shadow-[0_28px_80px_-30px_rgba(0,0,0,0.82),inset_0_1px_0_rgba(255,255,255,0.05),0_0_36px_rgba(201,169,110,0.06)]">
       <div className="flex gap-6">
         <Link
           href={href}
-          className="relative h-40 w-28 flex-shrink-0 overflow-hidden rounded-xl border border-softGold/30 bg-black/40"
+          className="relative h-40 w-28 flex-shrink-0 overflow-hidden rounded-xl border border-[#C9A96E]/30 bg-black/40" /* gold.soft */
           prefetch={false}
         >
           {!imageLoaded && (
@@ -104,32 +104,32 @@ export default function BookCard(props: BookCardProps) {
             }}
           />
           {status && (
-            <span className="absolute left-2 top-2 rounded-full bg-amber-100/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-900">
+            <span className="absolute left-2 top-2 rounded-full bg-[#F59E0B]/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-black"> {/* amber */}
               {status}
             </span>
           )}
         </Link>
 
         <div className="flex flex-1 flex-col">
-          <h3 className="mb-1 font-serif text-xl font-bold text-white transition-colors group-hover:text-softGold">
+          <h3 className="mb-1 font-serif text-xl font-bold text-white transition-colors group-hover:text-[#C9A96E]"> {/* gold.soft */}
             {title}
           </h3>
           {subtitle && (
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-softGold/80">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#C9A96E]/80"> {/* gold.soft */}
               {subtitle}
             </p>
           )}
-          {blurb && <p className="mb-4 text-sm text-gray-300">{blurb}</p>}
+          {blurb && <p className="mb-4 text-sm text-white/85">{blurb}</p>} {/* text.body */}
 
           {safeProgress !== null && (
             <div className="mb-4">
-              <div className="mb-1 flex justify-between text-xs text-gray-400">
+              <div className="mb-1 flex justify-between text-xs text-white/66"> {/* text.muted */}
                 <span>Writing Progress</span>
                 <span>{safeProgress}%</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-white/10">
+              <div className="h-2 w-full rounded-full bg-white/2">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-softGold to-amber-200 transition-all duration-700"
+                  className="h-2 rounded-full bg-gradient-to-r from-[#C9A96E] to-[#F59E0B] transition-all duration-700" /* gold.soft to amber */
                   style={{ width: `${safeProgress}%` }}
                 />
               </div>
@@ -139,10 +139,10 @@ export default function BookCard(props: BookCardProps) {
           <div className="mt-auto">
             <Link
               href={href}
-              className="group/link inline-flex items-center gap-2 text-sm font-semibold text-softGold"
+              className="group/link inline-flex items-center gap-2 text-sm font-semibold text-[#C9A96E]" /* gold.soft */
             >
               View Book Details
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-softGold/40">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#C9A96E]/40"> {/* gold.soft */}
                 <svg
                   className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5"
                   viewBox="0 0 16 16"

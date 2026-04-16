@@ -122,11 +122,11 @@ const BaseCard: React.FC<BaseCardProps> = ({
       {/* 2. Intelligence Content Sector */}
       <div className="flex flex-1 flex-col p-6">
         {/* Registry Metadata Header */}
-        <div className="mb-4 flex items-center justify-between border-b border-white/5 pb-3">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+        <div className="mb-4 flex items-center justify-between border-b border-white/8 pb-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300">
             {category || "Unclassified"}
           </span>
-          <div className="flex items-center gap-3 text-zinc-600">
+          <div className="flex items-center gap-3 text-zinc-400">
              {readingTime && (
                <div className="flex items-center gap-1 font-mono text-[9px] uppercase">
                  <Clock size={10} /> {readingTime}
@@ -137,32 +137,32 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
         {/* Identification */}
         <div className="mb-4">
-          <h3 className="font-serif text-xl italic leading-tight text-zinc-100 transition-colors group-hover:text-amber-500">
+          <h3 className="font-serif text-xl italic leading-tight text-white transition-colors group-hover:text-amber-500">
             {title}
           </h3>
           {subtitle && (
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-zinc-500 italic">
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-zinc-300 italic">
               // {subtitle}
             </p>
           )}
         </div>
 
         {/* Abstract */}
-        <p className="mb-6 line-clamp-3 font-sans text-sm font-light leading-relaxed text-zinc-400 italic">
+        <p className="mb-6 line-clamp-3 font-sans text-sm font-light leading-relaxed text-zinc-300 italic">
           "{displayText}"
         </p>
 
         {/* 3. Archive Footer */}
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/8">
           <div className="flex items-center gap-2">
             {formattedDate && (
-              <span className="font-mono text-[10px] tracking-tighter text-zinc-500">
+              <span className="font-mono text-[10px] tracking-tighter text-zinc-400">
                 REF: {formattedDate}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-400 group-hover:text-amber-500 transition-colors">
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-300 group-hover:text-amber-500 transition-colors">
             Access <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
           </div>
         </div>

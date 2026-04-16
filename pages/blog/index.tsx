@@ -306,7 +306,7 @@ function StoryCard({
 
         <h2
           className={cx(
-            "mt-3 font-serif leading-[1.02] tracking-[-0.03em] text-white/94 transition-colors group-hover:text-amber-100",
+            "mt-3 font-serif leading-[1.02] tracking-[-0.03em] text-white/98 transition-colors group-hover:text-amber-100",
             cardTitleClass(post.coverAspect)
           )}
         >
@@ -314,24 +314,24 @@ function StoryCard({
         </h2>
 
         {post.excerpt ? (
-          <p className={cx("mt-3 text-sm leading-relaxed text-white/58", cardExcerptLines(post.coverAspect))}>
+          <p className={cx("mt-3 text-sm leading-relaxed text-white/72", cardExcerptLines(post.coverAspect))}>
             {post.excerpt}
           </p>
         ) : null}
 
-        <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+        <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/12 pt-4">
           <div className="flex min-w-0 flex-wrap gap-2">
             {(post.tags || []).slice(0, normalizedAspect === "wide" ? 3 : 2).map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[9px] font-mono uppercase tracking-[0.22em] text-white/48"
+                className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[9px] font-mono uppercase tracking-[0.22em] text-white/65"
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/78">
+          <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.32em] text-amber-200/88">
             Open
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </span>
@@ -343,15 +343,15 @@ function StoryCard({
 
 function ShelfLink({ post }: { post: BlogPost }) {
   return (
-    <Link href={post.url} className="group block rounded-[24px] border border-white/10 bg-white/[0.02] p-4 transition-colors hover:bg-white/[0.04]">
-      <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/32">
+    <Link href={post.url} className="group block rounded-[24px] border border-white/12 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.06]">
+      <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/52">
         {post.date || "Undated"} {post.readTime ? `• ${post.readTime}` : ""}
       </div>
-      <div className="mt-2 font-serif text-[1.2rem] leading-tight text-white/85 transition-colors group-hover:text-amber-100">
+      <div className="mt-2 font-serif text-[1.2rem] leading-tight text-white/92 transition-colors group-hover:text-amber-100">
         {post.title}
       </div>
       {post.excerpt ? (
-        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/48">
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/65">
           {post.excerpt}
         </p>
       ) : null}

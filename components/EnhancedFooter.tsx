@@ -278,7 +278,7 @@ export default function EnhancedFooter(): React.ReactElement {
               </div>
             </div>
 
-            <p className="max-w-[38ch] border-l border-white/12 pl-5 font-serif text-[15px] font-light italic leading-8 text-white/58">
+            <p className="max-w-[38ch] border-l border-white/15 pl-5 font-serif text-[15px] font-light italic leading-8 text-white/72">
               A platform for disciplined thinking: doctrine, systems, and strategic
               execution arranged for leaders, builders, and institutions that
               intend to endure.

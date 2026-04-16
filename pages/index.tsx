@@ -529,7 +529,7 @@ function HeroSection({
             <div className="mt-7 h-px w-40" style={{ background: `${GOLD}38` }} />
 
             <p
-              className="mt-12 max-w-[38ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/52"
+              className="mt-12 max-w-[38ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/78"
               style={{ fontSize: "clamp(1.05rem, 2vw, 1.35rem)" }}
             >
               Doctrine, diagnostics, executive intelligence, and selective advisory organised into one governed platform.
@@ -568,8 +568,8 @@ function HeroSection({
                 href="/diagnostics/executive-reporting"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.05)",
-                  color: "rgba(255,255,255,0.42)",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.65)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -577,15 +577,15 @@ function HeroSection({
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.15)";
-                  el.style.backgroundColor = "rgba(255,255,255,0.06)";
-                  el.style.color = "rgba(255,255,255,0.92)";
+                  el.style.borderColor = "rgba(255,255,255,0.18)";
+                  el.style.backgroundColor = "rgba(255,255,255,0.08)";
+                  el.style.color = "rgba(255,255,255,0.98)";
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.05)";
+                  el.style.borderColor = "rgba(255,255,255,0.08)";
                   el.style.backgroundColor = "transparent";
-                  el.style.color = "rgba(255,255,255,0.42)";
+                  el.style.color = "rgba(255,255,255,0.65)";
                 }}
               >
                 <ScrollText className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />

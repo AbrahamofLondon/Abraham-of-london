@@ -219,8 +219,8 @@ export default function Header({
                         active
                           ? "text-[#C9A96E]"
                           : item.signal
-                            ? "text-white/64 hover:text-white/82"
-                            : "text-white/58 hover:text-white/82",
+                            ? "text-white/78 hover:text-white/92"
+                            : "text-white/72 hover:text-white/92",
                       )}
                       style={active ? { color: GOLD } : {}}
                     >
@@ -246,7 +246,7 @@ export default function Header({
             {/* Strategy Room — desktop */}
             <Link
               href="/consulting/strategy-room"
-              className="hidden items-center gap-2 border border-white/[0.14] bg-[#0E0E12] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/62 transition-all duration-300 hover:border-white/[0.22] hover:bg-[#121216] hover:text-white md:inline-flex"
+              className="hidden items-center gap-2 border border-white/[0.18] bg-[#0E0E12] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/78 transition-all duration-300 hover:border-white/[0.26] hover:bg-[#121216] hover:text-white md:inline-flex"
             >
               <Crown className="h-3 w-3" style={{ color: `${GOLD}90` }} />
               Strategy Room

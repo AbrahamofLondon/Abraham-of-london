@@ -20,9 +20,9 @@ export const CardShell: React.FC<CardShellProps> = ({
   onClick,
 }) => {
   const densityClasses = {
-    spacious: 'p-8',
-    comfortable: 'p-6',
-    dense: 'p-4',
+    airy: 'p-8',
+    balanced: 'p-6',
+    compact: 'p-4',
   };
 
   return (

@@ -334,10 +334,10 @@ const displayTags = useMemo(() => {
 
       <article
         className={[
-          "group relative overflow-hidden bg-gradient-to-br from-white via-white to-ivory",
-          "shadow-2xl shadow-black/[0.02] transition-all duration-700",
-          "hover:shadow-3xl hover:shadow-black/[0.04] hover:-translate-y-1",
-          "border border-slate-100/80 backdrop-blur-sm",
+          "group relative overflow-hidden bg-[#0E0E12]", // bg.panel from design tokens
+          "shadow-[0_32px_100px_-50px_rgba(0,0,0,0.98)] transition-all duration-700", // shadows.panel from design tokens
+          "hover:shadow-[0_28px_80px_-30px_rgba(0,0,0,0.82),inset_0_1px_0_rgba(255,255,255,0.05),0_0_36px_rgba(201,169,110,0.06)] hover:-translate-y-1", // shadows.cardHover
+          "border border-white/12 backdrop-blur-sm", // border.default from design tokens
           size === "luxury" && "hover:scale-[1.01]",
           currentSize.container,
           className,
@@ -346,13 +346,13 @@ const displayTags = useMemo(() => {
         style={{ animation: "fadeInUp 0.6s ease-out" }}
       >
         {/* Premium background effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-softGold/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[#C9A96E]/5" />
         
         {/* Luxury accent border */}
-        <div className="absolute inset-0 rounded-inherit border border-slate-100/50 pointer-events-none" />
+        <div className="absolute inset-0 rounded-inherit border border-white/18 pointer-events-none" /> {/* border.strong */}
         
         {/* Hover shine effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-softGold/[0.02] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-[#C9A96E]/[0.02] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
         <Link
           href={href}
@@ -401,8 +401,8 @@ const displayTags = useMemo(() => {
               ) : null}
 
               {Boolean((post as any).featured) ? (
-                <div className="rounded-full border border-softGold/40 bg-gradient-to-r from-softGold/20 to-amber-500/20 backdrop-blur-xl px-4 py-2 transition-all duration-500 group-hover:from-softGold/30 group-hover:to-amber-500/30">
-                  <span className="text-xs font-medium tracking-wider text-softGold">
+                <div className="rounded-full border border-[#C9A96E]/40 bg-gradient-to-r from-[#C9A96E]/20 to-[#F59E0B]/20 backdrop-blur-xl px-4 py-2 transition-all duration-500 group-hover:from-[#C9A96E]/30 group-hover:to-[#F59E0B]/30"> {/* gold.soft to amber */}
+                  <span className="text-xs font-medium tracking-wider text-[#C9A96E]"> {/* gold.soft */}
                     FEATURED
                   </span>
                 </div>
@@ -431,8 +431,8 @@ const displayTags = useMemo(() => {
             <h3
               id={`post-title-${slug}`}
               className={[
-                "mb-4 font-serif font-light leading-tight text-deepCharcoal transition-colors duration-500",
-                "group-hover:text-softGold/90",
+                "mb-4 font-serif font-light leading-tight text-white transition-colors duration-500", // text.primary
+                "group-hover:text-[#C9A96E]/90", // gold.soft
                 currentSize.title,
               ].join(" ")}
             >
@@ -441,7 +441,7 @@ const displayTags = useMemo(() => {
 
             {/* Excerpt with refined typography */}
             {safeExcerpt ? (
-              <p className={`mb-6 font-light leading-relaxed text-slate-600 ${currentSize.excerpt}`}>
+              <p className={`mb-6 font-light leading-relaxed text-white/85 ${currentSize.excerpt}`}> {/* text.body */}
                 {safeExcerpt}
               </p>
             ) : null}
@@ -453,7 +453,7 @@ const displayTags = useMemo(() => {
                   <div className="relative" style={{ animation: "float 3s ease-in-out infinite" }}>
                     {/* Author image glow */}
                     <div
-                      className="absolute inset-0 rounded-full bg-gradient-to-r from-softGold/20 to-transparent blur-md transition-all duration-500 group-hover:blur-xl group-hover:from-softGold/40"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[#C9A96E]/20 to-transparent blur-md transition-all duration-500 group-hover:blur-xl group-hover:from-[#C9A96E]/40" /* gold.soft */
                       aria-hidden="true"
                     />
                     <Image
@@ -467,9 +467,9 @@ const displayTags = useMemo(() => {
                   </div>
 
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-deepCharcoal">{authorName}</span>
+                    <span className="text-sm font-medium text-white">{authorName}</span> {/* text.primary */}
                     {metaDisplay ? (
-                      <span className={`text-xs font-light text-slate-500 ${currentSize.meta}`}>
+                      <span className={`text-xs font-light text-white/66 ${currentSize.meta}`}> {/* text.muted */}
                         {metaDisplay}
                       </span>
                     ) : null}
@@ -477,7 +477,7 @@ const displayTags = useMemo(() => {
                 </div>
 
                 {/* Luxury arrow button */}
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-softGold/10 to-softGold/5 text-softGold transition-all duration-500 group-hover:from-softGold/20 group-hover:to-softGold/10 group-hover:scale-110">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#C9A96E]/10 to-[#C9A96E]/5 text-[#C9A96E] transition-all duration-500 group-hover:from-[#C9A96E]/20 group-hover:to-[#C9A96E]/10 group-hover:scale-110"> {/* gold.soft */}
                   <svg
                     className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1"
                     fill="none"
@@ -497,14 +497,14 @@ const displayTags = useMemo(() => {
                 {displayTags.map((tag, idx) => (
                   <span
                     key={`${tag}-${idx}`}
-                    className="rounded-full border border-slate-200/60 bg-white/50 px-3.5 py-1.5 text-xs font-light text-slate-600 backdrop-blur-sm transition-all duration-300 hover:border-softGold/30 hover:bg-softGold/10 hover:text-softGold"
+                    className="rounded-full border border-white/12 bg-white/2 px-3.5 py-1.5 text-xs font-light text-white/85 backdrop-blur-sm transition-all duration-300 hover:border-[#C9A96E]/30 hover:bg-[#C9A96E]/10 hover:text-[#C9A96E]" /* gold.soft */
                   >
                     {tag}
                   </span>
                 ))}
 
                 {post.tags && post.tags.length > 3 ? (
-                  <span className="rounded-full border border-slate-200/60 bg-white/50 px-3.5 py-1.5 text-xs font-light text-slate-500">
+                  <span className="rounded-full border border-white/12 bg-white/2 px-3.5 py-1.5 text-xs font-light text-white/66"> {/* text.muted */}
                     +{post.tags.length - 3}
                   </span>
                 ) : null}
@@ -514,7 +514,7 @@ const displayTags = useMemo(() => {
 
           {/* Luxury bottom accent line */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-softGold/30 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+            className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" /* gold.soft */
             aria-hidden="true"
           />
           

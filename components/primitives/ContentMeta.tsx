@@ -66,11 +66,11 @@ export const ContentMeta: React.FC<ContentMetaProps> = ({
   if (items.length === 0) return null;
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-surface-text-muted', className)}>
+    <div className={cn('flex flex-wrap items-center gap-x-3 gap-y-1 text-xs ds-text-muted', className)}>
       {items.map((item, i) => (
         <React.Fragment key={i}>
           {item}
-          {i < items.length - 1 && <span className="text-surface-border">•</span>}
+          {i < items.length - 1 && <span className="ds-text-subtle">•</span>}
         </React.Fragment>
       ))}
     </div>

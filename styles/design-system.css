@@ -1,101 +1,260 @@
-/* Design System CSS Variables */
+/* styles/design-system.css
+   Design System CSS Variable Bridge
+   Maps foundation + semantic tokens to CSS custom properties.
+   Source of truth: design migration/03-token-model.ts
+
+   Naming convention: --ds-* (design system)
+   Does NOT replace existing --aol-* variables in globals.css.
+   Both systems coexist until migration is complete.
+*/
+
+/* ==========================================================================
+   FOUNDATION TOKENS
+   ========================================================================== */
 
 :root {
-  --surface-bg: #fafafa;
-  --surface-bg-muted: #f5f5f5;
-  --surface-panel: #ffffff;
-  --surface-panel-alt: #fafafa;
-  --surface-elevated: #ffffff;
-  --surface-border: #e5e5e5;
-  --surface-border-strong: #d4d4d4;
-  --surface-border-focus: #3b82f6;
-  --surface-text: #171717;
-  --surface-text-muted: #525252;
-  --surface-text-subtle: #a3a3a3;
-  --surface-text-inverse: #ffffff;
-  --surface-link: #2563eb;
-  --surface-link-hover: #1d4ed8;
-  --surface-accent: #3b82f6;
-  --surface-accent-soft: #dbeafe;
-  --surface-accent-strong: #1e40af;
-  --surface-success: #22c55e;
-  --surface-warning: #eab308;
-  --surface-error: #ef4444;
-  --surface-info: #3b82f6;
-  --surface-hero-wash: radial-gradient(ellipse at 50% 0%, #eff6ff 0%, transparent 70%);
-  --surface-hero-scrim: linear-gradient(to bottom, #171717 0%, transparent 100%);
-  --surface-hero-scrim-strong: linear-gradient(to bottom, #171717 0%, #171717 20%, transparent 100%);
-  --surface-hover: #fafafa;
-  --surface-active: #f5f5f5;
-  --surface-focus-ring: 0 0 0 2px #3b82f6;
-  --surface-disabled: #d4d4d4;
-  --gradient-hero-start: #eff6ff;
-  --gradient-hero-end: #ffffff;
-  --gradient-accent-start: #dbeafe;
-  --gradient-accent-end: #bfdbfe;
-  --font-sans: Inter, system-ui, -apple-system, sans-serif;
-  --font-serif: Charter, Georgia, Times, serif;
-  --font-mono: "JetBrains Mono", "SF Mono", monospace;
-  --duration-instant: 0ms;
-  --duration-fast: 100ms;
-  --duration-base: 200ms;
-  --duration-slow: 300ms;
-  --duration-slower: 500ms;
-  --ease-linear: linear;
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  /* --- Neutral palette --- */
+  --ds-neutral-50: #f7f4ef;
+  --ds-neutral-100: #ece7df;
+  --ds-neutral-200: #d9d0c3;
+  --ds-neutral-300: #bcae9d;
+  --ds-neutral-400: #958674;
+  --ds-neutral-500: #726452;
+  --ds-neutral-600: #55493c;
+  --ds-neutral-700: #3b332c;
+  --ds-neutral-800: #221d19;
+  --ds-neutral-900: #0b0a09;
+
+  /* --- Amber palette --- */
+  --ds-amber-50: #fff7e6;
+  --ds-amber-100: #fdecc6;
+  --ds-amber-200: #f8d68b;
+  --ds-amber-300: #f0b94f;
+  --ds-amber-400: #df9830;
+  --ds-amber-500: #c97b1b;
+  --ds-amber-600: #9b5d13;
+  --ds-amber-700: #71430f;
+  --ds-amber-800: #492a0b;
+  --ds-amber-900: #241405;
+
+  /* --- Steel palette --- */
+  --ds-steel-50: #edf2f7;
+  --ds-steel-100: #dbe4ee;
+  --ds-steel-200: #bccbda;
+  --ds-steel-300: #92a9bd;
+  --ds-steel-400: #6a869d;
+  --ds-steel-500: #51697e;
+  --ds-steel-600: #3f5364;
+  --ds-steel-700: #2c3946;
+  --ds-steel-800: #1a232b;
+  --ds-steel-900: #0d1216;
+
+  /* --- Spacing --- */
+  --ds-space-0: 0rem;
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 0.75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.25rem;
+  --ds-space-6: 1.5rem;
+  --ds-space-8: 2rem;
+  --ds-space-10: 2.5rem;
+  --ds-space-12: 3rem;
+  --ds-space-16: 4rem;
+  --ds-space-20: 5rem;
+  --ds-space-24: 6rem;
+  --ds-space-32: 8rem;
+
+  /* --- Radius --- */
+  --ds-radius-none: 0px;
+  --ds-radius-sm: 0.375rem;
+  --ds-radius-md: 0.75rem;
+  --ds-radius-lg: 1rem;
+  --ds-radius-xl: 1.5rem;
+  --ds-radius-2xl: 2rem;
+  --ds-radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --ds-shadow-none: none;
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --ds-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --ds-shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.24);
+  --ds-shadow-xl: 0 28px 80px rgba(0, 0, 0, 0.30);
+
+  /* --- Typography families --- */
+  --ds-font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --ds-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ds-font-mono: "SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, monospace;
+
+  /* --- Motion --- */
+  --ds-duration-fast: 120ms;
+  --ds-duration-base: 180ms;
+  --ds-duration-slow: 280ms;
+  --ds-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ds-ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+
+  /* --- Z-index --- */
+  --ds-z-base: 0;
+  --ds-z-content: 10;
+  --ds-z-overlay: 20;
+  --ds-z-sticky: 30;
+  --ds-z-modal: 40;
+  --ds-z-toast: 50;
 }
 
-.surface-canon {
-  --surface-bg: #ffffff;
-  --surface-panel: #ffffff;
-  --surface-border: #e5e7eb;
-  --surface-text: #171717;
-  --surface-text-muted: #525252;
-  --surface-accent: #2563eb;
-  --surface-accent-soft: #dbeafe;
-  --gradient-hero-start: #fef3c7;
-  --gradient-hero-end: #ffffff;
+/* ==========================================================================
+   SEMANTIC TOKENS (dark-first default)
+   ========================================================================== */
+
+:root {
+  --ds-background: var(--ds-neutral-900);
+  --ds-background-muted: var(--ds-neutral-800);
+  --ds-panel: rgba(255, 255, 255, 0.05);
+  --ds-panel-alt: rgba(255, 255, 255, 0.08);
+  --ds-border: rgba(255, 255, 255, 0.10);
+  --ds-border-strong: rgba(255, 255, 255, 0.16);
+  --ds-text: rgba(255, 255, 255, 0.94);
+  --ds-text-muted: rgba(255, 255, 255, 0.72);
+  --ds-text-subtle: rgba(255, 255, 255, 0.56);
+  --ds-link: var(--ds-amber-300);
+  --ds-accent: var(--ds-amber-400);
+  --ds-accent-soft: rgba(240, 185, 79, 0.20);
+  --ds-success: #3fbf75;
+  --ds-warning: var(--ds-amber-300);
+  --ds-danger: #cf4d4d;
+  --ds-focus-ring: rgba(240, 185, 79, 0.55);
+  --ds-hero-wash: radial-gradient(circle at 15% 15%, rgba(240, 185, 79, 0.10), transparent 42%);
+  --ds-hero-scrim: linear-gradient(180deg, rgba(7, 7, 7, 0.14), rgba(7, 7, 7, 0.54));
+  --ds-card-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.38));
 }
 
-.surface-vault {
-  --surface-bg: #f8fafc;
-  --surface-panel: #ffffff;
-  --surface-border: #cbd5e1;
-  --surface-text: #0f172a;
-  --surface-text-muted: #475569;
-  --surface-accent: #3b82f6;
-  --surface-accent-soft: #e0f2fe;
-  --gradient-hero-start: #e0f2fe;
-  --gradient-hero-end: #f8fafc;
+/* ==========================================================================
+   SURFACE-SPECIFIC OVERRIDES
+   Applied via class on a wrapping element (e.g. <main class="ds-surface-canon">).
+   Each surface overrides only the semantic tokens that differ from base.
+   ========================================================================== */
+
+/* --- Canon: warm editorial --- */
+.ds-surface-canon {
+  --ds-panel: rgba(247, 244, 239, 0.92);
+  --ds-panel-alt: rgba(247, 244, 239, 0.82);
+  --ds-border: rgba(59, 51, 44, 0.12);
+  --ds-border-strong: rgba(59, 51, 44, 0.18);
+  --ds-text: var(--ds-neutral-800);
+  --ds-text-muted: rgba(59, 51, 44, 0.74);
+  --ds-text-subtle: rgba(59, 51, 44, 0.56);
+  --ds-accent: var(--ds-amber-500);
+  --ds-accent-soft: rgba(201, 123, 27, 0.14);
+  --ds-hero-wash: radial-gradient(circle at 18% 18%, rgba(201, 123, 27, 0.10), transparent 42%);
+  --ds-hero-scrim: linear-gradient(180deg, rgba(247, 244, 239, 0.10), rgba(247, 244, 239, 0.70));
 }
 
-.surface-aware-bg {
-  background-color: var(--surface-bg);
+/* --- Vault: technical cool --- */
+.ds-surface-vault,
+.ds-surface-vault-briefs {
+  --ds-panel: rgba(13, 18, 22, 0.86);
+  --ds-panel-alt: rgba(26, 35, 43, 0.86);
+  --ds-border: rgba(188, 203, 218, 0.16);
+  --ds-border-strong: rgba(188, 203, 218, 0.26);
+  --ds-text: rgba(245, 247, 250, 0.94);
+  --ds-text-muted: rgba(219, 228, 238, 0.76);
+  --ds-text-subtle: rgba(219, 228, 238, 0.56);
+  --ds-accent: var(--ds-amber-300);
+  --ds-accent-soft: rgba(240, 185, 79, 0.12);
+  --ds-hero-wash: linear-gradient(135deg, rgba(81, 105, 126, 0.18), rgba(240, 185, 79, 0.06));
+  --ds-hero-scrim: linear-gradient(180deg, rgba(13, 18, 22, 0.18), rgba(13, 18, 22, 0.68));
 }
 
-.surface-aware-panel {
-  background-color: var(--surface-panel);
-  border-color: var(--surface-border);
+/* --- Essays: editorial balanced --- */
+.ds-surface-essays {
+  --ds-accent: var(--ds-amber-400);
+  --ds-accent-soft: rgba(240, 185, 79, 0.16);
+  --ds-hero-wash: radial-gradient(circle at 16% 14%, rgba(240, 185, 79, 0.08), transparent 40%);
+  --ds-hero-scrim: linear-gradient(180deg, rgba(7, 7, 7, 0.12), rgba(7, 7, 7, 0.48));
 }
 
-.surface-aware-text {
-  color: var(--surface-text);
+/* --- Shorts: kinetic balanced --- */
+.ds-surface-shorts {
+  --ds-accent: var(--ds-amber-400);
+  --ds-hero-wash: radial-gradient(circle at 50% 20%, rgba(240, 185, 79, 0.08), transparent 44%);
+  --ds-hero-scrim: linear-gradient(180deg, rgba(7, 7, 7, 0.10), rgba(7, 7, 7, 0.42));
 }
 
-.surface-aware-text-muted {
-  color: var(--surface-text-muted);
+/* --- Books: editorial library --- */
+.ds-surface-books {
+  --ds-accent: var(--ds-amber-400);
+  --ds-hero-wash: radial-gradient(circle at 14% 16%, rgba(240, 185, 79, 0.06), transparent 38%);
+  --ds-hero-scrim: linear-gradient(180deg, rgba(7, 7, 7, 0.16), rgba(7, 7, 7, 0.56));
 }
 
-.surface-aware-border {
-  border-color: var(--surface-border);
+/* --- Inner Circle: restricted warm --- */
+.ds-surface-inner-circle {
+  --ds-accent: var(--ds-amber-500);
+  --ds-accent-soft: rgba(201, 123, 27, 0.18);
+  --ds-hero-wash: radial-gradient(circle at 20% 20%, rgba(201, 123, 27, 0.12), transparent 42%);
+  --ds-hero-scrim: linear-gradient(180deg, rgba(7, 7, 7, 0.20), rgba(7, 7, 7, 0.62));
 }
 
-.focus-ring:focus {
-  outline: none;
-  box-shadow: var(--surface-focus-ring);
+/* ==========================================================================
+   SEMANTIC UTILITY CLASSES
+   Consume --ds-* tokens so components stay surface-aware.
+   ========================================================================== */
+
+.ds-bg {
+  background-color: var(--ds-background);
 }
+
+.ds-bg-muted {
+  background-color: var(--ds-background-muted);
+}
+
+.ds-panel {
+  background-color: var(--ds-panel);
+  border: 1px solid var(--ds-border);
+}
+
+.ds-panel-alt {
+  background-color: var(--ds-panel-alt);
+  border: 1px solid var(--ds-border);
+}
+
+.ds-text {
+  color: var(--ds-text);
+}
+
+.ds-text-muted {
+  color: var(--ds-text-muted);
+}
+
+.ds-text-subtle {
+  color: var(--ds-text-subtle);
+}
+
+.ds-link {
+  color: var(--ds-link);
+}
+
+.ds-accent {
+  color: var(--ds-accent);
+}
+
+.ds-border {
+  border-color: var(--ds-border);
+}
+
+.ds-border-strong {
+  border-color: var(--ds-border-strong);
+}
+
+.ds-focus:focus-visible {
+  outline: 2px solid var(--ds-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
   *,

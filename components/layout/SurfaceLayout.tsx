@@ -24,24 +24,24 @@ export const SurfaceLayout: React.FC<SurfaceLayoutProps> = ({
   }
 
   const densityPadding = {
-    spacious: 'py-16',
-    comfortable: 'py-12',
-    dense: 'py-8',
+    airy: 'py-16',
+    balanced: 'py-12',
+    compact: 'py-8',
   };
 
   return (
-    <div className={cn(`surface-${surface.id}`, 'min-h-screen surface-aware-bg', className)}>
+    <div className={cn(`ds-surface-${surface.id}`, 'min-h-screen ds-bg', className)}>
       <main className={cn('container mx-auto px-6', densityPadding[surface.density])}>
         <div className="mb-12">
           <h1 className={cn(
-            'text-4xl md:text-5xl font-bold tracking-tight surface-aware-text',
-            surface.tone === 'warm' && 'font-serif',
-            surface.tone === 'cool' && 'font-mono'
+            'text-4xl md:text-5xl font-bold tracking-tight ds-text',
+            (surface.tone === 'editorial' || surface.tone === 'institutional') && 'font-serif',
+            surface.tone === 'technical' && 'font-mono'
           )}>
-            {title || surface.name}
+            {title || surface.label}
           </h1>
           {description && (
-            <p className="mt-4 text-surface-text-muted text-lg max-w-2xl">{description}</p>
+            <p className="mt-4 ds-text-muted text-lg max-w-2xl">{description}</p>
           )}
         </div>
         {children}

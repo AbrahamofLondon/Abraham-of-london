@@ -24,7 +24,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
   return (
     <Link href={href} className="group block">
       <article
-        className={`relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900 ${className}`}
+        className={`relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/12 dark:bg-[#0E0E12] ${className}`}
         style={{
           borderTopColor: `${color}40`,
           borderLeftColor: `${color}20`,
@@ -71,13 +71,13 @@ const ContentCard: React.FC<ContentCardProps> = ({
         </h3>
 
         {/* Description */}
-        <p className="mb-6 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mb-6 text-sm leading-relaxed text-gray-600 dark:text-white/85">
           {description}
         </p>
 
         {/* CTA */}
         <div
-          className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800"
+          className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-white/12"
         >
           <span
             className="text-sm font-medium transition-all group-hover:tracking-wide"

@@ -20,25 +20,25 @@
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
   --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
 
-  /* Core palette */
+  /* Core palette - improved contrast */
   --aol-bg: 4 4 5;
-  --aol-bg-2: 7 7 8;
-  --aol-bg-3: 11 11 12;
-  --aol-panel: 15 15 17;
-  --aol-panel-2: 19 19 22;
-  --aol-panel-3: 24 24 28;
+  --aol-bg-2: 8 8 10;
+  --aol-bg-3: 13 13 15;
+  --aol-panel: 18 18 20;
+  --aol-panel-2: 22 22 25;
+  --aol-panel-3: 28 28 32;
 
-  --aol-ink: 244 243 239;
-  --aol-ink-dim: 210 209 205;
-  --aol-ink-muted: 146 146 150;
+  --aol-ink: 250 249 245;
+  --aol-ink-dim: 225 224 220;
+  --aol-ink-muted: 160 160 165;
 
   --aol-gold: 201 169 106;
   --aol-gold-strong: 222 190 126;
   --aol-gold-soft: 170 144 94;
 
-  --aol-line: 255 255 255 / 0.08;
-  --aol-line-strong: 255 255 255 / 0.14;
-  --aol-line-gold: 201 169 106 / 0.22;
+  --aol-line: 255 255 255 / 0.12;
+  --aol-line-strong: 255 255 255 / 0.18;
+  --aol-line-gold: 201 169 106 / 0.28;
 
   --aol-danger: 185 65 65;
   --aol-success: 46 160 110;
@@ -105,9 +105,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background:
-      radial-gradient(circle at 16% 12%, rgba(201, 169, 106, 0.032) 0%, transparent 26%),
-      radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.028) 0%, transparent 18%),
-      linear-gradient(180deg, rgba(10, 10, 11, 0.98), rgba(4, 4, 5, 1));
+      radial-gradient(circle at 16% 12%, rgba(201, 169, 106, 0.024) 0%, transparent 26%),
+      radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.018) 0%, transparent 18%),
+      linear-gradient(180deg, rgba(12, 12, 13, 0.98), rgba(4, 4, 5, 1));
     color: rgb(var(--aol-ink));
   }
 
@@ -180,7 +180,7 @@
 
   p,
   li {
-    color: rgba(var(--aol-ink-dim), 0.88);
+    color: rgba(var(--aol-ink-dim), 0.95);
   }
 }
 
@@ -360,7 +360,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(var(--aol-ink-dim), 0.82);
+    color: rgba(var(--aol-ink-dim), 0.92);
   }
 
   .text-terminal-label,
@@ -370,7 +370,7 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(var(--aol-ink-muted), 0.9);
+    color: rgba(var(--aol-ink-muted), 0.95);
   }
 
   .text-terminal-data,
@@ -378,7 +378,7 @@
     font-family: var(--font-mono);
     font-size: 0.78rem;
     font-weight: 500;
-    color: rgba(var(--aol-ink), 0.94);
+    color: rgba(var(--aol-ink), 0.98);
   }
 
   .text-terminal-gold {
@@ -396,7 +396,7 @@
 
   .aol-mdx-content p,
   .aol-mdx-content li {
-    color: rgba(var(--aol-ink-dim), 0.88);
+    color: rgba(var(--aol-ink-dim), 0.95);
   }
 
   .aol-mdx-content h1,
@@ -557,11 +557,11 @@
   }
 
   .text-premium-dim {
-    color: rgba(var(--aol-ink-dim), 0.9);
+    color: rgba(var(--aol-ink-dim), 0.95);
   }
 
   .text-premium-muted {
-    color: rgba(var(--aol-ink-muted), 0.95);
+    color: rgba(var(--aol-ink-muted), 0.98);
   }
 
   .bg-premium-surface {
