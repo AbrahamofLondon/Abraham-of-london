@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { normalizeSlug } from "@/lib/content/shared";
+import { normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
 import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
 type AccessLevel = "public" | "inner-circle" | "restricted";
@@ -316,7 +316,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           href: safeHref(`/canon/${bare}`),
           requiredTier,
           accessLevel,
-          coverImage: doc?.coverImage ? String(doc.coverImage) : null,
+          coverImage: resolveDocCoverImage(doc, { contentType: 'CANON' }),
           dateISO,
           readTime: doc?.readTime ? String(doc.readTime) : "10 min",
           tags: Array.isArray(doc?.tags) ? doc.tags.filter(Boolean).map(String) : [],

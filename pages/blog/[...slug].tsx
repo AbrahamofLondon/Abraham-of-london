@@ -70,7 +70,7 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({ doc, code, requiredTier, bareSl
 
   const title = doc?.title || "Untitled Essay";
   const excerpt = doc?.excerpt || doc?.description || "";
-  const cover = resolveDocCoverImage(doc) || "/assets/images/blog/default-blog-cover.jpg";
+  const cover = resolveDocCoverImage(doc, { contentType: 'BLOG' });
   const canonicalUrl = joinHref("blog", bareSlug);
 
   const required = normalizeRequiredTier(requiredTier);

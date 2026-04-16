@@ -17,6 +17,7 @@ import RelatedShorts from "@/components/shorts/RelatedShorts";
 import ShortComments from "@/components/shorts/ShortComments";
 
 import { getRenderableBody } from "@/lib/content/render-body";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 type RawShortLike = {
   _id?: string | null;
@@ -333,7 +334,7 @@ function toPageItem(doc: RawShortLike): PageItem {
       safeString(doc.readTime) ||
       safeString(doc.readTimeSafe) ||
       null,
-    coverImage: safeString(doc.coverImage || doc.image) || null,
+    coverImage: resolveDocCoverImage(doc, { contentType: 'SHORT' }),
   };
 }
 

@@ -55,10 +55,8 @@ type Props = {
   popularTags: string[];
 };
 
-// Helper function to get cover image
-function resolveDocCoverImage(doc: any): string | null {
-  return doc.coverImage || doc.image || doc.thumbnail || null;
-}
+// Helper function to get cover image - using unified resolver
+import { resolveDocCoverImage } from '@/lib/image-resolver';
 
 // Helper function to format date
 function formatPrintDate(dateString: string | null): string | null {
@@ -119,7 +117,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         title: p.title || "Untitled Print",
         excerpt: p.excerpt || p.description || null,
         description: p.description || null,
-        coverImage: resolveDocCoverImage(p),
+        coverImage: resolveDocCoverImage(p, { contentType: 'PRINT' }),
         tags: Array.isArray(p.tags) ? p.tags : [],
         featured: Boolean(p.featured),
         date: p.date ? String(p.date) : null,

@@ -7,7 +7,7 @@ import RegistryView from "@/components/registry/RegistryView";
 import RegistryLayout from "@/components/layout/RegistryLayout";
 import { RegistryProvider } from "@/contexts/RegistryContext";
 
-import { normalizeSlug } from "@/lib/content/shared";
+import { normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
 
 interface RegistryPageProps {
   initialDocs: any[];
@@ -83,7 +83,7 @@ export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
         excerpt: typeof d?.excerpt === "string" ? d.excerpt.substring(0, 200) : null,
         type: safeString(d?.type || d?.kind, "unknown"),
         accessLevel: safeString(d?.accessLevel, "public"),
-        coverImage: d?.coverImage ? String(d.coverImage) : null,
+        coverImage: resolveDocCoverImage(d),
       });
     }
   }

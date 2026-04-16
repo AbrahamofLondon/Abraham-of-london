@@ -278,9 +278,8 @@ export function toUiDoc<T extends Record<string, any>>(doc: T): T {
   return doc;
 }
 
-export function resolveDocCoverImage(doc: any): string | null {
-  return doc?.coverImage ?? doc?.image ?? null;
-}
+// Re-export the unified image resolver for backward compatibility
+export { resolveDocCoverImage } from '@/lib/image-resolver';
 
 export function resolveDocDownloadUrl(doc: any): string | null {
   if (doc?.downloadUrl) return String(doc.downloadUrl);

@@ -22,7 +22,7 @@ import {
   GalleryVerticalEnd,
 } from "lucide-react";
 
-import { joinHref, normalizeSlug } from "@/lib/content/shared";
+import { joinHref, normalizeSlug, resolveDocCoverImage } from "@/lib/content/shared";
 import { sanitizeData } from "@/lib/content/shared";
 import { getMdxCollectionMeta, type MdxMeta } from "@/lib/server/mdx-collections";
 
@@ -265,7 +265,7 @@ function StoryCard({
   post: BlogPost;
   index: number;
 }) {
-  const src = post.coverImage || DEFAULT_COVER;
+  const src = resolveDocCoverImage(post, { contentType: 'BLOG' });
   const aspect = aspectRatioFor(post.coverAspect);
   const fit = normalizeFit(post.coverAspect, post.coverFit);
   const pos = objectPositionFor(post.coverPosition);
@@ -809,10 +809,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
         const rawSlug = normalizeSlug(m.slug || "");
         const { date, iso } = toDisplayDate(m.date || m.updated);
 
-        const coverImage =
-          (typeof m.coverImage === "string" && m.coverImage.trim() ? m.coverImage.trim() : null) ||
-          (typeof m.image === "string" && m.image.trim() ? m.image.trim() : null) ||
-          DEFAULT_COVER;
+        const coverImage = resolveDocCoverImage(m, { contentType: 'BLOG' }) || DEFAULT_COVER;
 
         const tags = Array.isArray(m.tags) ? (m.tags.filter((t: any) => typeof t === "string") as string[]) : [];
 

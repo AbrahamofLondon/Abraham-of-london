@@ -91,7 +91,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
             excerpt: (d?.excerpt || d?.description || null) as string | null,
             date: dateStr,
             dateIso,
-            image: (resolveDocCoverImage(d) || null) as string | null,
+            image: (resolveDocCoverImage(d, { contentType: kind.toUpperCase() as any }) || null) as string | null,
             readTime: d?.readTime || null,
             tags: Array.isArray(d?.tags) ? d.tags : [],
             category: d?.category || null,

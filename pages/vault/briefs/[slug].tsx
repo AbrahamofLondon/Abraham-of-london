@@ -270,7 +270,7 @@ const BriefPage: NextPage<Props> = ({
     safeString(brief?.summary) ||
     safeString(brief?.abstract) ||
     safeString(brief?.excerpt);
-  const coverImage = resolveDocCoverImage(brief) || DEFAULT_COVER;
+  const coverImage = resolveDocCoverImage(brief, { contentType: 'BRIEF' });
 
   const required = normalizeRequiredTier(requiredTier);
   const needsAuth = required !== "public";

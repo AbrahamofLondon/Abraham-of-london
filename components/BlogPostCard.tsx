@@ -16,6 +16,7 @@ import {
 
 // Import the safe utilities
 import { safeSlice } from "@/lib/utils/safe";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 // ✅ Use the shared PostLike type (single source of truth)
 import type { PostLike } from "@/components/Cards/types";
@@ -110,17 +111,8 @@ const ImageShimmer = () => (
 
 // Best image source from content
 function getPostImage(post: PostLike): string | null {
-  // Check each source explicitly and return first valid one
-  const coverImage = safeString(post.coverImage);
-  if (coverImage && coverImage.trim() !== "") return coverImage.trim();
-  
-  const heroImage = safeString((post as any).heroImage);
-  if (heroImage && heroImage.trim() !== "") return heroImage.trim();
-  
-  const image = safeString((post as any).image);
-  if (image && image.trim() !== "") return image.trim();
-  
-  return null;
+  // Use the unified image resolver which handles all image fields and fallbacks
+  return resolveDocCoverImage(post, { contentType: 'BLOG' });
 }
 
 function getPostFallbackConfig(post: PostLike): FallbackConfig {

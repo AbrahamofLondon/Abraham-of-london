@@ -9,6 +9,7 @@
 import type { Metadata } from "next";
 import * as ContentHelper from "@/lib/content-helper";
 import type { ContentDoc, DocKind } from "@/lib/content-helper";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
@@ -198,8 +199,7 @@ function deriveCard(doc: any): CardLike {
   const dateISO =
     safeISO(doc?.date || doc?.eventDate || doc?.startDate || doc?.datetime || doc?.startsAt) ?? null;
 
-  const coverImage =
-    safeString(doc?.coverImage || doc?.image || doc?.heroImage || doc?.ogImage || "", "") || null;
+  const coverImage = resolveDocCoverImage(doc);
 
   const coverAspect =
     safeString(doc?.coverAspect || doc?.imageAspect || doc?.aspect || "", "") || null;

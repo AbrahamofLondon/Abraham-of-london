@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 interface ResourceItem {
   slug: string;
@@ -46,7 +47,7 @@ export default function ResourceGrid({
 
 function ResourceCard({ resource }: { resource: ResourceItem }) {
   const safeSlug = String(resource.slug);
-  const safeCoverImage = resource.coverImage ? String(resource.coverImage) : null;
+  const safeCoverImage = resolveDocCoverImage(resource, { contentType: 'RESOURCE' });
   const safeTitle = resource.title ? String(resource.title) : "Untitled Resource";
   const safeExcerpt = resource.excerpt ? String(resource.excerpt) : null;
   const safeCategory = resource.category ? String(resource.category) : null;

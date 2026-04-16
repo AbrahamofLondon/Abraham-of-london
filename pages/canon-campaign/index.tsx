@@ -19,6 +19,7 @@ import {
 
 import Layout from "@/components/Layout";
 import { getAllCanons, sanitizeData } from "@/lib/content/server";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 import tiers, { requiredTierFromDoc, type AccessTier } from "@/lib/access/tiers";
 
 type AccessLevel = "public" | "inner-circle" | "private";
@@ -153,7 +154,7 @@ export const getStaticProps: GetStaticProps<CanonIndexProps> = async () => {
           slug: bare,
           href: safeHref(`/canon/${bare}`),
           accessLevel: accessTierToLevel(requiredTier),
-          coverImage: doc?.coverImage ? String(doc.coverImage) : null,
+          coverImage: resolveDocCoverImage(doc, { contentType: 'CANON' }),
           dateISO: doc?.date ? new Date(doc.date).toISOString() : null,
           readTime: doc?.readTime ? String(doc.readTime) : "10 min",
           tags: Array.isArray(doc?.tags) ? doc.tags.filter(Boolean).map(String) : [],

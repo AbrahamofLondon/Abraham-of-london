@@ -75,10 +75,9 @@ export const getDocHref = (doc: any): string => {
 
 /**
  * Resolves the primary visual asset for a document
+ * Re-exported from unified image resolver for consistency
  */
-export const resolveDocCoverImage = (doc: any): string | null => {
-  return doc?.coverImage || doc?.image || doc?.cover || null;
-};
+export { resolveDocCoverImage } from '@/lib/image-resolver';
 
 /**
  * A composite lookup function that scans all local collection modules for a specific slug

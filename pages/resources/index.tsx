@@ -53,7 +53,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           subtitle: r?.subtitle ?? null,
           date: safeDateISO(r?.date),
           readTime: r?.readTime ?? r?.normalizedReadTime ?? null,
-          image: resolveDocCoverImage(r),
+          image: resolveDocCoverImage(r, { contentType: 'RESOURCE' }),
           tags: Array.isArray(r?.tags)
             ? r.tags.filter((x: any) => typeof x === "string" && x.trim())
             : [],

@@ -9,6 +9,7 @@ import Head from "next/head";
 
 import Layout from "@/components/Layout";
 import { Search, ArrowRight, Tag } from "lucide-react";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 
 /* -----------------------------------------------------------------------------
@@ -412,7 +413,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
               >
                 <article className="p-6">
                   <CoverCard
-                    src={b.coverImage || DEFAULT_COVER}
+                    src={resolveDocCoverImage(b, { contentType: 'BOOK' })}
                     alt={b.title}
                     aspect={b.coverAspect || "book"}
                     fit={b.coverFit || "cover"}
@@ -472,7 +473,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
             >
               <article className="p-6">
                 <CoverCard
-                  src={b.coverImage || DEFAULT_COVER}
+                  src={resolveDocCoverImage(b, { contentType: 'BOOK' })}
                   alt={b.title}
                   aspect={b.coverAspect || "book"}
                   fit={b.coverFit || "cover"}

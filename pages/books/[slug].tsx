@@ -91,7 +91,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
   const title = doc?.title || "Untitled Book";
   const subtitle = doc?.subtitle ? String(doc.subtitle) : "";
   const excerpt = doc?.excerpt || doc?.description || "";
-  const cover = resolveDocCoverImage(doc) || DEFAULT_COVER;
+  const cover = resolveDocCoverImage(doc, { contentType: 'BOOK' });
   const canonicalUrl = joinHref("books", bareSlug);
 
   const required = normalizeRequiredTier(requiredTier);

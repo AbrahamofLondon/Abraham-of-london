@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Lock, Clock, Calendar, ArrowRight, Shield } from "lucide-react";
 import { safeSlice } from "@/lib/utils/safe";
+import { resolveDocCoverImage } from "@/lib/image-resolver";
 import type {
   BaseCardProps,
   DocumentCardProps,
@@ -67,7 +68,8 @@ const BaseCard: React.FC<BaseCardProps> = ({
   const displayText = excerpt || description || subtitle || "";
   const displayTags = safeSlice(tags || [], 0, 3);
   const formattedDate = date ? formatDate(date) : "";
-  const cardImage = coverImage || "/assets/images/placeholder-brief.webp";
+  // Use unified image resolver with brief fallback
+  const cardImage = resolveDocCoverImage({ coverImage }, { contentType: 'BRIEF' });
 
   return (
     <Link

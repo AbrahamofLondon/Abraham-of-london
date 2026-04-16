@@ -36,6 +36,7 @@ import {
   updateStreak,
   updateVisitCount,
 } from "@/lib/shorts/brand";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -164,7 +165,7 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
     readTime:  safeString(doc.readTime).trim() || safeString(doc.readTimeSafe).trim() || "2 min",
     slug,
     href:      `/shorts/${slug}`,
-    coverImage: safeString(doc.coverImage).trim() || safeString(doc.image).trim() || null,
+    coverImage: resolveDocCoverImage(doc, { contentType: 'SHORT' }),
     views:     safeNumber(doc.views, 0),
     likes:     safeNumber(doc.likes, 0),
     saves:     safeNumber(doc.saves, 0),
