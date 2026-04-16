@@ -53,6 +53,14 @@ const MB = 1024 * 1024;
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  // Standalone output produces a minimal `.next/standalone/` directory
+  // containing only the server code + traced node_modules needed at
+  // runtime. Without this, @netlify/plugin-nextjs copies the entire
+  // repo tree (~1.1 GB) into `___netlify-server-handler`. With it, the
+  // handler includes only what Next's file tracer identifies as
+  // required — typically 100–200 MB for a project this size.
+  output: "standalone",
+
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
