@@ -55,8 +55,9 @@ type CanonIndexProps = {
 };
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
-const EYEBROW = "rgba(201,169,110,0.8)";
-const RULE = "rgba(255,255,255,0.08)";
+// Migrated to --ds-* tokens. These fallback constants are kept for reference only.
+const EYEBROW = "var(--ds-accent)";
+const RULE = "var(--ds-border)";
 
 function collapseSlashes(s: string): string {
   return String(s || "")
@@ -227,27 +228,27 @@ function CanonRow({ item, primary }: { item: CanonItem; primary: boolean }) {
     <Link
       href={item.href}
       className="group grid gap-3 border-b px-0 py-5 transition-colors duration-200 md:grid-cols-[13rem_1fr_5rem]"
-      style={{ borderBottomColor: "rgba(255,255,255,0.048)" }}
+      style={{ borderBottomColor: "var(--ds-border)" }}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span
           className="font-mono text-[7px] uppercase tracking-[0.32em]"
-          style={{ color: primary ? "#C9A96E" : "rgba(255,255,255,0.22)" }}
+          style={{ color: primary ? "var(--ds-accent)" : "var(--ds-text-subtle)" }}
         >
           {formatSeriesLabel(item)}
         </span>
         <span
           className="font-mono text-[7px] uppercase tracking-[0.26em]"
-          style={{ color: "rgba(255,255,255,0.22)" }}
+          style={{ color: "var(--ds-text-subtle)" }}
         >
           {item.category || "General"}
         </span>
         {locked ? (
           <span
             className="inline-flex items-center gap-1.5 font-mono text-[7px] uppercase tracking-[0.24em]"
-            style={{ color: "rgba(255,255,255,0.42)" }}
+            style={{ color: "var(--ds-text-muted)" }}
           >
-            <Lock className="h-3 w-3 text-[#C9A96E]" />
+            <Lock className="h-3 w-3" style={{ color: "var(--ds-accent)" }} />
             Inner Circle
           </span>
         ) : null}
@@ -256,20 +257,20 @@ function CanonRow({ item, primary }: { item: CanonItem; primary: boolean }) {
       <div className="min-w-0">
         <h2
           className="truncate font-serif text-[1.1rem] italic transition-colors duration-200 group-hover:text-white"
-          style={{ color: locked ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.8)" }}
+          style={{ color: locked ? "var(--ds-text-muted)" : "var(--ds-text)" }}
         >
           {item.title}
         </h2>
-        <p className="mt-1 truncate text-[12px]" style={{ color: "rgba(255,255,255,0.32)" }}>
+        <p className="mt-1 truncate text-[12px]" style={{ color: "var(--ds-text-subtle)" }}>
           {item.excerpt || item.subtitle || getSeriesDescription(item.series)}
         </p>
       </div>
 
       <div className="text-left md:text-right">
-        <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.2)" }}>
+        <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
           {readingTimeLabel(item)}
         </span>
-        <div className="mt-2 font-mono text-[7px] uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,0.22)" }}>
+        <div className="mt-2 font-mono text-[7px] uppercase tracking-[0.24em]" style={{ color: "var(--ds-text-subtle)" }}>
           {accessLabel(item)}
         </div>
       </div>
@@ -414,12 +415,12 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
         />
       </Head>
 
-      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
+      <main className="ds-surface-canon min-h-screen bg-[rgb(3,3,5)] text-white">
         <section className="border-b" style={{ borderBottomColor: RULE }}>
           <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 lg:px-10 lg:pb-10 lg:pt-24">
             <div className="flex items-center gap-3">
-              <span style={{ width: 1, height: 20, backgroundColor: "rgba(201,169,110,0.45)", display: "inline-block" }} />
-              <span className="font-mono text-[7.5px] uppercase tracking-[0.4em]" style={{ color: EYEBROW }}>
+              <span style={{ width: 1, height: 20, backgroundColor: "var(--ds-accent-soft)", display: "inline-block" }} />
+              <span className="font-mono text-[7.5px] uppercase tracking-[0.4em]" style={{ color: "var(--ds-accent)" }}>
                 THE CANON · CONSTITUTIONAL ARCHIVE
               </span>
             </div>
@@ -430,7 +431,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
                 fontWeight: 300,
                 fontSize: "clamp(2rem, 3.5vw, 3rem)",
                 lineHeight: 0.98,
-                color: "rgba(255,255,255,0.9)",
+                color: "var(--ds-text)",
               }}
             >
               The foundational texts.
@@ -438,12 +439,12 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
 
             <p
               className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]"
-              style={{ color: "rgba(255,255,255,0.28)" }}
+              style={{ color: "var(--ds-text-subtle)" }}
             >
               The intellectual frame from which all structured products derive their authority.
             </p>
 
-            <div className="mt-6 h-px w-full" style={{ backgroundColor: RULE }} />
+            <div className="mt-6 h-px w-full" style={{ backgroundColor: "var(--ds-border)" }} />
 
             {series.length > 0 ? (
               <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
@@ -453,7 +454,7 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
                     href={`#${normalizeSlug(entry.volume)}`}
                     className="font-mono text-[8px] uppercase tracking-[0.3em] transition-colors"
                     style={{
-                      color: index === 0 ? "#C9A96E" : "rgba(255,255,255,0.3)",
+                      color: index === 0 ? "var(--ds-accent)" : "var(--ds-text-subtle)",
                       textDecoration: index === 0 ? "underline" : "none",
                       textUnderlineOffset: "0.35rem",
                     }}
@@ -469,13 +470,13 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
         <section className="py-10 lg:py-12">
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             {error ? (
-              <div className="border px-5 py-4" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.05)" }}>
-                <p className="text-sm" style={{ color: "rgba(255,255,255,0.62)" }}>{error}</p>
+              <div className="border px-5 py-4" style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}>
+                <p className="text-sm" style={{ color: "var(--ds-text-muted)" }}>{error}</p>
               </div>
             ) : null}
 
             {!error ? (
-              <div className="mb-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.22)" }}>
+              <div className="mb-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
                 <span>{counts.total} works indexed</span>
                 <span>{counts.public} public</span>
                 <span>{counts.innerCircle} inner circle</span>
@@ -484,8 +485,8 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
             ) : null}
 
             {items.length === 0 ? (
-              <div className="border px-6 py-16 text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.24)" }}>
+              <div className="border px-6 py-16 text-center" style={{ borderColor: "var(--ds-border)" }}>
+                <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
                   No volumes resolved in registry
                 </p>
               </div>
@@ -493,24 +494,24 @@ const CanonIndexPage: NextPage<CanonIndexProps> = ({
               <div className="space-y-10">
                 {series.map((entry, index) => (
                   <section key={entry.volume} id={normalizeSlug(entry.volume)}>
-                    <div className="mb-4 border-b pb-3" style={{ borderBottomColor: "rgba(255,255,255,0.06)" }}>
+                    <div className="mb-4 border-b pb-3" style={{ borderBottomColor: "var(--ds-border)" }}>
                       <div className="flex flex-wrap items-end justify-between gap-3">
                         <div>
                           <div
                             className="font-mono text-[7px] uppercase tracking-[0.34em]"
-                            style={{ color: index === 0 ? "#C9A96E" : "rgba(255,255,255,0.22)" }}
+                            style={{ color: index === 0 ? "var(--ds-accent)" : "var(--ds-text-subtle)" }}
                           >
                             {entry.volume}
                           </div>
-                          <h2 className="mt-2 font-serif text-[1.4rem] italic" style={{ color: "rgba(255,255,255,0.84)" }}>
+                          <h2 className="mt-2 font-serif text-[1.4rem] italic" style={{ color: "var(--ds-text)" }}>
                             {entry.title}
                           </h2>
                         </div>
-                        <div className="font-mono text-[7px] uppercase tracking-[0.26em]" style={{ color: "rgba(255,255,255,0.2)" }}>
+                        <div className="font-mono text-[7px] uppercase tracking-[0.26em]" style={{ color: "var(--ds-text-subtle)" }}>
                           {entry.items.length} texts
                         </div>
                       </div>
-                      <p className="mt-2 text-[12px]" style={{ color: "rgba(255,255,255,0.32)" }}>
+                      <p className="mt-2 text-[12px]" style={{ color: "var(--ds-text-subtle)" }}>
                         {entry.description}
                       </p>
                     </div>

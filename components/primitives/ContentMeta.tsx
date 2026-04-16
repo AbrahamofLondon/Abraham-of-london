@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { SurfaceContract } from '@/lib/design-system/surfaces';
+import type { SurfaceContract } from '@/lib/design-system/surfaces';
 
 export interface ContentMetaProps {
   document: {
@@ -44,19 +44,33 @@ export const ContentMeta: React.FC<ContentMetaProps> = ({
   }
 
   if (showCitationCount && document.citationCount && document.citationCount > 0) {
-    items.push(<span key="citations">📚 Cited {document.citationCount} times</span>);
+    items.push(<span key="citations">Cited {document.citationCount} times</span>);
   }
 
   if (showSecurity && document.securityLevel) {
-    const colors = {
-      confidential: 'bg-yellow-100 text-yellow-700',
-      restricted: 'bg-gray-100 text-gray-700',
-      'top-secret': 'bg-red-100 text-red-700',
+    const badgeStyles: Record<string, React.CSSProperties> = {
+      confidential: {
+        backgroundColor: 'var(--ds-accent-soft)',
+        color: 'var(--ds-accent)',
+        borderColor: 'var(--ds-accent)',
+      },
+      restricted: {
+        backgroundColor: 'var(--ds-panel-alt)',
+        color: 'var(--ds-text-muted)',
+        borderColor: 'var(--ds-border)',
+      },
+      'top-secret': {
+        backgroundColor: 'rgba(207, 77, 77, 0.12)',
+        color: 'var(--ds-danger)',
+        borderColor: 'var(--ds-danger)',
+      },
     };
+
     items.push(
       <span
         key="security"
-        className={cn('inline-block px-2 py-0.5 rounded text-xs font-mono', colors[document.securityLevel])}
+        className="inline-block px-2 py-0.5 rounded text-xs font-mono border"
+        style={badgeStyles[document.securityLevel]}
       >
         {document.securityLevel.toUpperCase()}
       </span>
@@ -70,7 +84,7 @@ export const ContentMeta: React.FC<ContentMetaProps> = ({
       {items.map((item, i) => (
         <React.Fragment key={i}>
           {item}
-          {i < items.length - 1 && <span className="ds-text-subtle">•</span>}
+          {i < items.length - 1 && <span className="ds-text-subtle">·</span>}
         </React.Fragment>
       ))}
     </div>

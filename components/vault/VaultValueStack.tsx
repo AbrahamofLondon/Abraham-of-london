@@ -15,7 +15,12 @@ export default function VaultValueStack() {
       {ITEMS.map((item) => (
         <div
           key={item}
-          className="border border-white/[0.08] bg-white/[0.02] p-6 text-white/60 text-sm"
+          className="border p-6 text-sm"
+          style={{
+            borderColor: "var(--ds-border)",
+            backgroundColor: "var(--ds-panel)",
+            color: "var(--ds-text-muted)",
+          }}
         >
           {item}
         </div>

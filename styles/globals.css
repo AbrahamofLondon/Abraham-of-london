@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design System token bridge — --ds-* semantic variables and surface classes */
+@import './design-system.css';
+
 /* ============================================================================
    CSS DESIGN TOKENS
    Single source of truth for all colour, typography, and surface variables.

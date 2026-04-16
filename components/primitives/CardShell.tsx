@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { SurfaceContract } from '@/lib/design-system/surfaces';
+import type { SurfaceContract } from '@/lib/design-system/surfaces';
 
 export interface CardShellProps {
   children: React.ReactNode;
@@ -25,14 +25,25 @@ export const CardShell: React.FC<CardShellProps> = ({
     compact: 'p-4',
   };
 
+  const variantClasses = {
+    default: 'rounded-lg',
+    featured: 'rounded-xl shadow-[var(--ds-shadow-md)]',
+    compact: 'rounded-md',
+  };
+
   return (
     <article
       className={cn(
-        'surface-aware-panel rounded-lg transition-all duration-200',
+        'ds-panel transition-all',
+        variantClasses[variant],
         densityClasses[surface.density],
-        interactive && 'cursor-pointer hover:shadow-md hover:-translate-y-0.5',
+        interactive && 'cursor-pointer hover:shadow-[var(--ds-shadow-lg)] hover:-translate-y-0.5',
         className
       )}
+      style={{
+        transitionDuration: 'var(--ds-duration-base)',
+        transitionTimingFunction: 'var(--ds-ease-standard)',
+      }}
       onClick={onClick}
       role={onClick ? 'button' : 'article'}
       tabIndex={onClick ? 0 : undefined}

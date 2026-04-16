@@ -86,7 +86,7 @@ module.exports = {
         "surface-2":    "rgb(9 9 12 / <alpha-value>)",
         "surface-3":    "rgb(6 6 9 / <alpha-value>)",
 
-        // Surface-aware tokens (for federated surfaces)
+        // Surface-aware tokens (for federated surfaces) — LEGACY, kept for unmigrated components
         "surface-bg":         "rgb(var(--surface-bg, var(--aol-bg)) / <alpha-value>)",
         "surface-bg-muted":   "rgb(var(--surface-bg-muted, var(--aol-bg-2)) / <alpha-value>)",
         "surface-panel":      "rgb(var(--surface-panel, var(--aol-panel)) / <alpha-value>)",
@@ -96,6 +96,25 @@ module.exports = {
         "surface-text-muted": "rgb(var(--surface-text-muted, var(--aol-ink-muted)) / <alpha-value>)",
         "surface-accent":     "rgb(var(--surface-accent, var(--aol-gold)) / <alpha-value>)",
         "surface-accent-soft":"rgb(var(--surface-accent-soft, var(--aol-gold-soft)) / <alpha-value>)",
+
+        // Design System tokens (--ds-*) — use for migrated components
+        // These read from CSS custom properties set in styles/design-system.css
+        // and are overridden per-surface via .ds-surface-* classes.
+        ds: {
+          bg:            "var(--ds-background)",
+          "bg-muted":    "var(--ds-background-muted)",
+          panel:         "var(--ds-panel)",
+          "panel-alt":   "var(--ds-panel-alt)",
+          text:          "var(--ds-text)",
+          "text-muted":  "var(--ds-text-muted)",
+          "text-subtle": "var(--ds-text-subtle)",
+          link:          "var(--ds-link)",
+          accent:        "var(--ds-accent)",
+          "accent-soft": "var(--ds-accent-soft)",
+          success:       "var(--ds-success)",
+          warning:       "var(--ds-warning)",
+          danger:        "var(--ds-danger)",
+        },
 
         aol: {
           void:      "rgb(3 3 5 / <alpha-value>)",
@@ -186,6 +205,12 @@ module.exports = {
       transitionTimingFunction: {
         "in-expo": "cubic-bezier(0.95, 0.05, 0.795, 0.035)",
         "out-expo": "cubic-bezier(0.19, 1, 0.22, 1)",
+      },
+
+      // ── BORDER COLORS (ds-*) ──────────────────────────────────────────────
+      borderColor: {
+        ds:          "var(--ds-border)",
+        "ds-strong": "var(--ds-border-strong)",
       },
 
       // ── BORDER RADIUS ───────────────────────────────────────────────────────

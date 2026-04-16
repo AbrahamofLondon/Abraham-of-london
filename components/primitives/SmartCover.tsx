@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { SurfaceContract } from '@/lib/design-system/surfaces';
+import type { SurfaceContract } from '@/lib/design-system/surfaces';
 
 export interface SmartCoverProps {
   src: string;
@@ -42,31 +42,53 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
 
   if (hasError) {
     return (
-      <div className={cn('bg-gray-100 flex items-center justify-center', aspectClasses[aspect], className)}>
-        <span className="text-gray-400 text-sm">{alt}</span>
+      <div
+        className={cn(
+          'flex items-center justify-center ds-bg-muted',
+          aspectClasses[aspect],
+          className,
+        )}
+      >
+        <span className="ds-text-subtle text-sm">{alt}</span>
       </div>
     );
   }
 
   return (
-    <div className={cn('relative overflow-hidden bg-gray-100', aspectClasses[aspect], className)}>
+    <div
+      className={cn(
+        'relative overflow-hidden ds-bg-muted',
+        aspectClasses[aspect],
+        className,
+      )}
+    >
       <Image
         src={src}
         alt={alt}
         fill
         className={cn(
-          'transition-all duration-500',
+          'transition-all',
           fit === 'cover' ? 'object-cover' : 'object-contain',
           positionClasses[position],
-          isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+          isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105',
         )}
+        style={{
+          transitionDuration: 'var(--ds-duration-slow)',
+          transitionTimingFunction: 'var(--ds-ease-entrance)',
+        }}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
         priority={priority}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
+        <div
+          className="absolute inset-0 animate-pulse"
+          style={{
+            background:
+              'linear-gradient(90deg, var(--ds-background-muted), var(--ds-panel-alt), var(--ds-background-muted))',
+          }}
+        />
       )}
     </div>
   );

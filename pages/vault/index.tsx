@@ -243,9 +243,9 @@ function RegistryMetric({
   value: React.ReactNode;
 }) {
   return (
-    <div className="border-l border-white/10 pl-4">
-      <div className="text-2xl font-light tracking-tight text-white">{value}</div>
-      <div className="mt-1 font-mono text-[8px] uppercase tracking-[0.26em] text-white/34">
+    <div className="border-l pl-4" style={{ borderColor: "var(--ds-border)" }}>
+      <div className="text-2xl font-light tracking-tight" style={{ color: "var(--ds-text)" }}>{value}</div>
+      <div className="mt-1 font-mono text-[8px] uppercase tracking-[0.26em]" style={{ color: "var(--ds-text-subtle)" }}>
         {label}
       </div>
     </div>
@@ -284,17 +284,17 @@ function VaultHero({
               className="max-w-4xl"
             >
               <div className="mb-5 flex items-center gap-3">
-                <span className="h-px w-12 bg-gradient-to-r from-[#D4AF37]/60 to-transparent" />
-                <span className="font-mono text-[9px] uppercase tracking-[0.34em] text-amber-300/78">
+                <span className="h-px w-12" style={{ background: "linear-gradient(to right, var(--ds-accent), transparent)" }} />
+                <span className="font-mono text-[9px] uppercase tracking-[0.34em]" style={{ color: "var(--ds-accent)" }}>
                   Sovereign Archive
                 </span>
               </div>
 
-              <h1 className="font-serif text-5xl font-light leading-[0.9] tracking-[-0.06em] text-white md:text-7xl lg:text-[6.2rem]">
-                The <span className="italic text-amber-100/92">Vault</span>
+              <h1 className="font-serif text-5xl font-light leading-[0.9] tracking-[-0.06em] md:text-7xl lg:text-[6.2rem]" style={{ color: "var(--ds-text)" }}>
+                The <span className="italic" style={{ color: "var(--ds-text)" }}>Vault</span>
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/64">
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed" style={{ color: "var(--ds-text-muted)" }}>
                 A chamber of briefings, frameworks, private assets, and operational
                 material arranged for builders who prefer ordered intelligence to
                 decorative noise.
@@ -322,10 +322,11 @@ function VaultHero({
                       }
                       className={cx(
                         "inline-flex items-center gap-2 rounded-full border px-4 py-2 transition-all",
-                        active
-                          ? "border-amber-500/34 bg-amber-500/10 text-amber-100"
-                          : "border-white/10 bg-white/[0.03] text-white/54 hover:border-white/16 hover:bg-white/[0.05] hover:text-white/74",
                       )}
+                      style={active
+                        ? { borderColor: "var(--ds-accent)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-text)" }
+                        : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-text-muted)" }
+                      }
                     >
                       <span className="font-mono text-[9px] uppercase tracking-[0.24em]">
                         {c}
@@ -475,7 +476,7 @@ const VaultPage: NextPage<
       fullWidth
       className="bg-black text-white"
     >
-      <main className="relative min-h-screen overflow-hidden bg-[#050505] pb-32">
+      <main className="ds-surface-vault relative min-h-screen overflow-hidden bg-[#050505] pb-32">
         <VaultHero
           totalAssets={totalAssets}
           categories={categories}
@@ -545,18 +546,18 @@ const VaultPage: NextPage<
 
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="h-px w-12 bg-gradient-to-r from-[#D4AF37]/55 to-transparent" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-white/34">
+              <span className="h-px w-12" style={{ background: "linear-gradient(to right, var(--ds-accent), transparent)" }} />
+              <span className="font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: "var(--ds-text-subtle)" }}>
                 Archive Surface
               </span>
             </div>
 
-            <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-white/24">
+            <span className="font-mono text-[9px] uppercase tracking-[0.18em]" style={{ color: "var(--ds-text-subtle)" }}>
               {filteredItems.length} visible
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-px border bg-white/5 md:grid-cols-2 xl:grid-cols-3" style={{ borderColor: "var(--ds-border)" }}>
             <AnimatePresence mode="popLayout">
               {filteredItems.map((item) => {
                 const isLocked = item.requiresAuth && !hasCookie;
@@ -572,54 +573,52 @@ const VaultPage: NextPage<
                   >
                     <div className="space-y-8">
                       <div className="flex items-start justify-between">
-                        <div className="flex h-12 w-12 items-center justify-center border border-white/10 transition-colors group-hover:border-amber-500/50">
+                        <div className="flex h-12 w-12 items-center justify-center border transition-colors" style={{ borderColor: "var(--ds-border)" }}>
                           {item.kind === "brief" ? (
-                            <ShieldCheck size={20} className="text-amber-200/50" />
+                            <ShieldCheck size={20} style={{ color: "var(--ds-accent)" }} />
                           ) : item.kind === "download" ? (
-                            <Download size={20} className="text-zinc-600" />
+                            <Download size={20} style={{ color: "var(--ds-text-subtle)" }} />
                           ) : (
-                            <FileText size={20} className="text-zinc-600" />
+                            <FileText size={20} style={{ color: "var(--ds-text-subtle)" }} />
                           )}
                         </div>
 
                         <span
-                          className={cx(
-                            "border px-3 py-1 text-[8px] font-black uppercase tracking-[0.3em]",
-                            isLocked
-                              ? "border-amber-900/50 bg-amber-950/20 text-amber-700"
-                              : "border-emerald-900/50 bg-emerald-950/20 text-emerald-700",
-                          )}
+                          className="border px-3 py-1 text-[8px] font-black uppercase tracking-[0.3em]"
+                          style={isLocked
+                            ? { borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
+                            : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-success)" }
+                          }
                         >
                           {isLocked ? "Classified" : item.tier}
                         </span>
                       </div>
 
                       <div className="space-y-4">
-                        <h3 className="text-3xl font-serif leading-tight text-white transition-colors group-hover:text-amber-100">
+                        <h3 className="text-3xl font-serif leading-tight transition-colors" style={{ color: "var(--ds-text)" }}>
                           {item.title}
                         </h3>
-                        <p className="line-clamp-4 text-sm font-light italic leading-relaxed text-zinc-500 transition-colors group-hover:text-zinc-400">
+                        <p className="line-clamp-4 text-sm font-light italic leading-relaxed transition-colors" style={{ color: "var(--ds-text-subtle)" }}>
                           {item.excerpt}
                         </p>
                       </div>
                     </div>
 
                     <div className="mt-12 space-y-6">
-                      <div className="flex justify-between border-b border-white/5 pb-4 font-mono text-[8px] uppercase tracking-[0.4em] text-zinc-700">
+                      <div className="flex justify-between border-b pb-4 font-mono text-[8px] uppercase tracking-[0.4em]" style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-subtle)" }}>
                         <span>
                           {item.format} // {item.size}
                         </span>
-                        <span className="text-amber-900/60">{item.category}</span>
+                        <span style={{ color: "var(--ds-accent)" }}>{item.category}</span>
                       </div>
 
                       <button
                         onClick={() => handlePrimaryAction(item)}
-                        className={cx(
-                          "group/btn flex w-full items-center justify-between border px-6 py-4 transition-all duration-500",
-                          isLocked
-                            ? "border-amber-900/30 text-amber-700 hover:border-amber-500 hover:bg-amber-600 hover:text-black"
-                            : "border-white/10 text-zinc-400 hover:border-white hover:bg-white hover:text-black",
-                        )}
+                        className="group/btn flex w-full items-center justify-between border px-6 py-4 transition-all duration-500"
+                        style={isLocked
+                          ? { borderColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
+                          : { borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }
+                        }
                       >
                         <span className="font-mono text-[10px] font-black uppercase tracking-[0.3em]">
                           {isLocked
@@ -649,21 +648,21 @@ const VaultPage: NextPage<
 
           {filteredItems.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-zinc-600">
+              <p className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: "var(--ds-text-subtle)" }}>
                 No Registry Matches Found
               </p>
             </div>
           ) : null}
 
-          <section className="mt-24 rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 md:p-10">
+          <section className="mt-24 rounded-[2rem] border p-8 md:p-10" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
             <div className="flex items-start gap-4">
-              <div className="mt-0.5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3 text-amber-300">
+              <div className="mt-0.5 rounded-2xl border p-3" style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }}>
                 <Sparkles className="h-5 w-5" />
               </div>
 
               <div>
-                <h2 className="font-serif text-3xl text-white">Why the Vault exists</h2>
-                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/65">
+                <h2 className="font-serif text-3xl" style={{ color: "var(--ds-text)" }}>Why the Vault exists</h2>
+                <p className="mt-4 max-w-3xl text-sm leading-relaxed" style={{ color: "var(--ds-text-muted)" }}>
                   Because serious builders do not need more content. They need ordered material:
                   frameworks, briefings, templates, and strategic assets that can be read, applied,
                   revisited, and governed.
@@ -675,8 +674,8 @@ const VaultPage: NextPage<
                     "Execution assets, not decorative downloads",
                     "Clear tiering, controlled escalation, institutional logic",
                   ].map((line) => (
-                    <div key={line} className="flex items-start gap-3 text-sm text-white/60">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-300/85" />
+                    <div key={line} className="flex items-start gap-3 text-sm" style={{ color: "var(--ds-text-muted)" }}>
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "var(--ds-accent)" }} />
                       <span>{line}</span>
                     </div>
                   ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Crown, Lock } from "lucide-react";
+import { Crown } from "lucide-react";
 
 export default function VaultTierCard({
   title,
@@ -14,24 +14,28 @@ export default function VaultTierCard({
 }) {
   return (
     <div
-      className={`p-8 border ${
+      className="p-8 border"
+      style={
         emphasis
-          ? "border-amber-500/30 bg-amber-500/[0.03]"
-          : "border-white/[0.08] bg-white/[0.02]"
-      }`}
+          ? { borderColor: "var(--ds-accent)", backgroundColor: "var(--ds-accent-soft)" }
+          : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }
+      }
     >
       <div className="flex justify-between items-center">
-        <h3 className="text-white font-serif text-2xl">{title}</h3>
-        {emphasis && <Crown className="text-amber-400" />}
+        <h3 className="font-serif text-2xl" style={{ color: "var(--ds-text)" }}>{title}</h3>
+        {emphasis && <Crown style={{ color: "var(--ds-accent)" }} />}
       </div>
 
-      <ul className="mt-6 space-y-3 text-sm text-white/50">
+      <ul className="mt-6 space-y-3 text-sm" style={{ color: "var(--ds-text-muted)" }}>
         {features.map((f) => (
-          <li key={f}>• {f}</li>
+          <li key={f}>· {f}</li>
         ))}
       </ul>
 
-      <button className="mt-8 w-full py-3 border border-white/[0.1] text-white text-xs uppercase tracking-wider hover:bg-white/[0.05]">
+      <button
+        className="mt-8 w-full py-3 border text-xs uppercase tracking-wider transition-colors"
+        style={{ borderColor: "var(--ds-border)", color: "var(--ds-text)" }}
+      >
         Request Access
       </button>
     </div>

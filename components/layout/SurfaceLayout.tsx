@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { getSurface, SurfaceContract } from '@/lib/design-system/surfaces';
+import { getSurface } from '@/lib/design-system/surfaces';
+import type { SurfaceContract } from '@/lib/design-system/surfaces';
 
 export interface SurfaceLayoutProps {
   children: React.ReactNode;
@@ -29,15 +30,24 @@ export const SurfaceLayout: React.FC<SurfaceLayoutProps> = ({
     compact: 'py-8',
   };
 
+  const toneFont = {
+    institutional: 'font-serif',
+    editorial: 'font-serif',
+    technical: 'font-mono',
+    restricted: 'font-serif',
+    kinetic: 'font-sans',
+  };
+
   return (
     <div className={cn(`ds-surface-${surface.id}`, 'min-h-screen ds-bg', className)}>
       <main className={cn('container mx-auto px-6', densityPadding[surface.density])}>
         <div className="mb-12">
-          <h1 className={cn(
-            'text-4xl md:text-5xl font-bold tracking-tight ds-text',
-            (surface.tone === 'editorial' || surface.tone === 'institutional') && 'font-serif',
-            surface.tone === 'technical' && 'font-mono'
-          )}>
+          <h1
+            className={cn(
+              'text-4xl md:text-5xl font-bold tracking-tight ds-text',
+              toneFont[surface.tone],
+            )}
+          >
             {title || surface.label}
           </h1>
           {description && (
