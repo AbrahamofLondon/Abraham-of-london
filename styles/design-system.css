@@ -1,0 +1,108 @@
+/* Design System CSS Variables */
+
+:root {
+  --surface-bg: #fafafa;
+  --surface-bg-muted: #f5f5f5;
+  --surface-panel: #ffffff;
+  --surface-panel-alt: #fafafa;
+  --surface-elevated: #ffffff;
+  --surface-border: #e5e5e5;
+  --surface-border-strong: #d4d4d4;
+  --surface-border-focus: #3b82f6;
+  --surface-text: #171717;
+  --surface-text-muted: #525252;
+  --surface-text-subtle: #a3a3a3;
+  --surface-text-inverse: #ffffff;
+  --surface-link: #2563eb;
+  --surface-link-hover: #1d4ed8;
+  --surface-accent: #3b82f6;
+  --surface-accent-soft: #dbeafe;
+  --surface-accent-strong: #1e40af;
+  --surface-success: #22c55e;
+  --surface-warning: #eab308;
+  --surface-error: #ef4444;
+  --surface-info: #3b82f6;
+  --surface-hero-wash: radial-gradient(ellipse at 50% 0%, #eff6ff 0%, transparent 70%);
+  --surface-hero-scrim: linear-gradient(to bottom, #171717 0%, transparent 100%);
+  --surface-hero-scrim-strong: linear-gradient(to bottom, #171717 0%, #171717 20%, transparent 100%);
+  --surface-hover: #fafafa;
+  --surface-active: #f5f5f5;
+  --surface-focus-ring: 0 0 0 2px #3b82f6;
+  --surface-disabled: #d4d4d4;
+  --gradient-hero-start: #eff6ff;
+  --gradient-hero-end: #ffffff;
+  --gradient-accent-start: #dbeafe;
+  --gradient-accent-end: #bfdbfe;
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --font-serif: Charter, Georgia, Times, serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.surface-canon {
+  --surface-bg: #ffffff;
+  --surface-panel: #ffffff;
+  --surface-border: #e5e7eb;
+  --surface-text: #171717;
+  --surface-text-muted: #525252;
+  --surface-accent: #2563eb;
+  --surface-accent-soft: #dbeafe;
+  --gradient-hero-start: #fef3c7;
+  --gradient-hero-end: #ffffff;
+}
+
+.surface-vault {
+  --surface-bg: #f8fafc;
+  --surface-panel: #ffffff;
+  --surface-border: #cbd5e1;
+  --surface-text: #0f172a;
+  --surface-text-muted: #475569;
+  --surface-accent: #3b82f6;
+  --surface-accent-soft: #e0f2fe;
+  --gradient-hero-start: #e0f2fe;
+  --gradient-hero-end: #f8fafc;
+}
+
+.surface-aware-bg {
+  background-color: var(--surface-bg);
+}
+
+.surface-aware-panel {
+  background-color: var(--surface-panel);
+  border-color: var(--surface-border);
+}
+
+.surface-aware-text {
+  color: var(--surface-text);
+}
+
+.surface-aware-text-muted {
+  color: var(--surface-text-muted);
+}
+
+.surface-aware-border {
+  border-color: var(--surface-border);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: var(--surface-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

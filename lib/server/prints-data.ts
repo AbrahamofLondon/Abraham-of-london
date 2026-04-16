@@ -11,6 +11,7 @@ import type { Print, ContentEntry, ContentMeta } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type PrintWithContent = Print & { content: string };
 
@@ -92,7 +93,7 @@ function fromMdxMeta(meta: MdxMeta): Print {
     featured: safeBoolean(m.featured),
     readTime: safeString((m as any).readTime) || safeNumber((m as any).readTime),
 
-    coverImage: safeString(m.coverImage) || safeString((m as any).image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'PRINT' }),
 
     printType: safePrintType((m as any).printType) || "digital",
     printStatus: safePrintStatus((m as any).printStatus) || "available",

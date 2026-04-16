@@ -13,6 +13,7 @@ import type { Page, ContentEntry, ContentMeta } from "@/types/index";
 import { safeSlice } from "@/lib/utils/safe";
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { normalizeRequiredTier, normalizeUserTier, hasAccess } from "@/lib/access/tier-policy";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type PageWithContent = Page & { content: string };
 
@@ -109,7 +110,7 @@ function fromMdxMeta(meta: MdxMeta): Page {
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
     readTime: safeString((m as any).readTime) || (safeNumber((m as any).readTime) as any),
-    coverImage: safeString((m as any).coverImage) || safeString((m as any).image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'PAGE' }),
     pageType: safeString((m as any).pageType) || "page",
     parentPage: safeString((m as any).parentPage),
     order: safeNumber((m as any).order),

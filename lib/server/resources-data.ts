@@ -8,6 +8,7 @@ import {
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
 import type { Resource } from "@/types/index";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type ResourceWithContent = Resource & { content: string };
 
@@ -45,7 +46,7 @@ function fromMdxMeta(meta: MdxMeta): Resource {
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
 
-    coverImage: safeString(m.coverImage) || safeString(m.image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'RESOURCE' }),
 
     draft: safeBoolean(m.draft),
     published: m.published === undefined ? true : safeBoolean(m.published),

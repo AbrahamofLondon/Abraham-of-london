@@ -8,6 +8,7 @@ import {
   type MdxDocument,
 } from "@/lib/server/mdx-collections";
 import type { Event } from "@/types/index";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 export type EventWithContent = Event & {
   content: string;
@@ -59,7 +60,7 @@ function fromMdxMeta(meta: MdxMeta): Event {
     tags: safeArray(m.tags),
     featured: safeBoolean(m.featured),
 
-    coverImage: safeString(m.coverImage) || safeString(m.image),
+    coverImage: resolveDocCoverImage(m, { contentType: 'EVENT' }),
 
     draft: safeBoolean(m.draft),
     // Treat as published unless explicitly false (tolerant)

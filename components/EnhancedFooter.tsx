@@ -208,36 +208,36 @@ export default function EnhancedFooter(): React.ReactElement {
   ];
 
   const directory: Record<string, FooterLink[]> = {
-    Archive: [
-      { label: "Canon", href: "/canon" },
-      { label: "Books", href: "/books", 
-      { label: "Editorials", href: "/editorials" },
-      { label: "Essays", href: "/blog" },   highlight: true },
-      { label: "Library", href: "/library" },
-      { label: "Shorts", href: "/shorts" },   highlight: true },
-      { label: "Playbooks", href: "/playbooks" },
-    ],
-    Products: [
-      { label: "Intelligence Archives", href: "/artifacts" },
-      { label: "Market Intelligence", href: "/intelligence/global-market-intelligence-q1-2026" },
-      { label: "Executive Reporting", href: "/diagnostics/executive-reporting" },
-      { label: "Vault Briefs", href: "/vault/briefs" },
-      { label: "Vault", href: "/vault" },
-    ],
-    Engagements: [
-      { label: "Consulting", href: "/consulting" },
-      { label: "Strategy Room", href: "/consulting/strategy-room" },
-      { label: "Diagnostics", href: "/diagnostics" },
-      { label: "Gatherings", href: "/events" },
-      { label: "Contact", href: "/contact" },
-    ],
-    Governance: [
-      { label: "About", href: "/about" },
-      { label: "Security", href: "/security" },
-      { label: "Privacy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
-    ],
-  };
+  Archive: [
+    { label: "Canon", href: "/canon" },
+    { label: "Books", href: "/books" },
+    { label: "Editorials", href: "/editorials" },
+    { label: "Essays", href: "/blog", highlight: true }, 
+    { label: "Library", href: "/library" },
+    { label: "Shorts", href: "/shorts", highlight: true }, 
+    { label: "Playbooks", href: "/playbooks" },
+  ],
+  Products: [
+    { label: "Intelligence Archives", href: "/artifacts" },
+    { label: "Market Intelligence", href: "/intelligence/global-market-intelligence-q1-2026" },
+    { label: "Executive Reporting", href: "/diagnostics/executive-reporting" },
+    { label: "Vault Briefs", href: "/vault/briefs" },
+    { label: "Vault", href: "/vault" },
+  ],
+  Engagements: [
+    { label: "Consulting", href: "/consulting" },
+    { label: "Strategy Room", href: "/consulting/strategy-room" },
+    { label: "Diagnostics", href: "/diagnostics" },
+    { label: "Gatherings", href: "/events" },
+    { label: "Contact", href: "/contact" },
+  ],
+  Governance: [
+    { label: "About", href: "/about" },
+    { label: "Security", href: "/security" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
+  ],
+};
 
   const policyLinks = [
     { label: "Privacy", href: "/privacy" },

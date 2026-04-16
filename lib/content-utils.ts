@@ -1,5 +1,6 @@
 // lib/content-utils.ts
 import type { AnyDoc } from "@/lib/content-fallback";
+import { resolveDocCoverImage } from "@/lib/content/shared";
 
 // Define PostMeta locally since the file doesn't exist
 interface PostMeta {
@@ -37,19 +38,8 @@ interface PostMeta {
 export type DocumentTypes = AnyDoc;
 
 export function convertDocumentToPostMeta(doc: DocumentTypes): PostMeta {
-  // --- coverImage normalisation: always string | null ---
-  let coverImage: string | null = null;
-
-  if (doc.coverImage) {
-    if (typeof doc.coverImage === "string") {
-      coverImage = doc.coverImage;
-    } else if (
-      typeof doc.coverImage === "object" &&
-      (doc.coverImage as any).src
-    ) {
-      coverImage = String((doc.coverImage as any).src);
-    }
-  }
+  // --- coverImage normalisation: use unified resolver ---
+  const coverImage = resolveDocCoverImage(doc);
 
   // --- readTime from multiple possible fields ---
   const rawReadTime = (doc as any).readTime ?? (doc as any).readingTime;
