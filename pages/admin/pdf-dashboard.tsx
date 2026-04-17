@@ -23,8 +23,8 @@ import DashboardStats from "@/components/DashboardStats";
 import PDFQuickActions from "@/components/PDFQuickActions";
 import PDFActionsBar from "@/components/PDFActionsBar";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import PDFDataDashboard from "@/components/dashboard/PDFDataDashboard";
-import LiveDataDashboard from "@/components/dashboard/LiveDataDashboard";
+import { PDFDataDashboard } from "@/components/dashboard/PDFDataDashboard";
+import { LiveDataDashboard } from "@/components/dashboard/LiveDataDashboard";
 
 type InstitutionalAnalyticsPayload = {
   rawPdfs: unknown[];

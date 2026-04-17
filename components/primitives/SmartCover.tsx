@@ -6,7 +6,7 @@
 // 2. Dark-first shimmer (no light-mode gray flash)
 // 3. Robust fallback chain — skips missing intermediaries, lands on writing-desk.webp
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -73,43 +73,13 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
   }, [src]);
 
   const [currentSrc, setCurrentSrc] = useState(resolvedSrc);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reset state when the source changes
+  // Reset when the source prop changes
   useEffect(() => {
     setCurrentSrc(resolvedSrc);
-    setImageLoaded(false);
   }, [resolvedSrc]);
 
-  // Fix: detect images that loaded before React hydrated.
-  // After mount, find the <img> inside the container and check if it's already complete.
-  useEffect(() => {
-    if (imageLoaded) return;
-
-    const checkComplete = () => {
-      const container = containerRef.current;
-      if (!container) return;
-      const img = container.querySelector('img');
-      if (img && img.complete && img.naturalWidth > 0) {
-        setImageLoaded(true);
-      }
-    };
-
-    // Check immediately and after a short delay (covers SSR hydration race)
-    checkComplete();
-    const timer = setTimeout(checkComplete, 150);
-    return () => clearTimeout(timer);
-  }, [currentSrc, imageLoaded]);
-
-  const handleLoad = useCallback(() => {
-    setImageLoaded(true);
-  }, []);
-
   const handleError = useCallback(() => {
-    setImageLoaded(false);
-    // After one error, fall back to the guaranteed default.
-    // Don't cycle through a chain of potentially missing fallbacks.
     if (currentSrc !== DEFAULT_FALLBACK) {
       setCurrentSrc(DEFAULT_FALLBACK);
     }
@@ -117,35 +87,25 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
 
   return (
     <div
-      ref={containerRef}
       className={cn(
         'relative w-full overflow-hidden',
         aspectClasses[aspect] || '',
         className,
       )}
+      style={{ backgroundColor: 'var(--ds-background-muted, #1a1a1e)' }}
     >
-      {/* Dark shimmer while loading */}
-      {!imageLoaded && (
-        <div className="absolute inset-0 animate-pulse" style={{
-          background: 'linear-gradient(90deg, var(--ds-background-muted, #1a1a1e), var(--ds-panel, #222226), var(--ds-background-muted, #1a1a1e))',
-        }} />
-      )}
-
-      {/* Image */}
+      {/* Image — always visible. Background color acts as placeholder. */}
       <Image
         src={currentSrc}
         alt={alt}
         fill
         className={cn(
           fitClasses[fit] || 'object-cover',
-          'transition-opacity duration-500',
-          imageLoaded ? 'opacity-100' : 'opacity-0',
           hoverEffect && 'group-hover:scale-[1.03]',
         )}
         sizes={sizes}
         priority={priority}
         loading={priority ? 'eager' : 'lazy'}
-        onLoad={handleLoad}
         onError={handleError}
         style={{ objectPosition: position }}
       />

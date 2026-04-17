@@ -180,7 +180,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
     <Layout
       title="Books // Abraham of London"
       canonicalUrl="/books"
-      className="bg-black text-white"
+      className="ds-surface-books bg-black text-white"
       fullWidth
       headerTransparent={false}
     >
@@ -188,36 +188,41 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
         <title>Books // Abraham of London</title>
       </Head>
 
-      <section className="relative overflow-hidden border-b border-white/10" style={{ paddingTop: 80 }}>
+      <section className="relative overflow-hidden border-b" style={{ paddingTop: 80, borderColor: "var(--ds-border)" }}>
         <div className="relative mx-auto max-w-7xl px-6 py-12 lg:px-12">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
-                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
+              <div className="inline-flex items-center gap-2 rounded-full border px-4 py-2" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
+                <span className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-accent)" }}>
                   Books & Manifestos
                 </span>
-                <span className="h-1 w-1 rounded-full bg-white/20" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/35">
+                <span className="h-1 w-1 rounded-full" style={{ backgroundColor: "var(--ds-text-subtle)" }} />
+                <span className="text-[10px] font-mono uppercase tracking-[0.25em]" style={{ color: "var(--ds-text-subtle)" }}>
                   {totalBooks} titles
                 </span>
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl tracking-tight text-white/95 md:text-5xl">
+              <h1 className="mt-6 font-serif text-4xl tracking-tight md:text-5xl" style={{ color: "var(--ds-text)" }}>
                 Books
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50 md:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed md:text-base" style={{ color: "var(--ds-text-muted)" }}>
                 Premium long-form work — built for builders who govern what they touch.
               </p>
 
               <div className="mt-8">
                 <div className="relative max-w-xl">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--ds-text-subtle)" }} />
                   <input
                     type="text"
                     placeholder="Search books, themes, tags…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white/85 outline-none placeholder:text-white/20 focus:border-amber-500/25 focus:bg-white/[0.05]"
+                    className="w-full rounded-2xl border py-3 pl-11 pr-4 text-sm outline-none transition-all focus:border-[var(--ds-accent-soft)] focus:bg-[rgba(255,255,255,0.05)] placeholder:text-[var(--ds-text-subtle)]"
+                    style={{
+                      borderColor: "var(--ds-border)",
+                      backgroundColor: "var(--ds-panel)",
+                      color: "var(--ds-text)",
+                    }}
                   />
                 </div>
 
@@ -228,10 +233,12 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                       onClick={() => setSelectedTag(null)}
                       className={[
                         "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
-                        !selectedTag
-                          ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                          : "border-white/10 bg-white/[0.02] text-white/45 hover:bg-white/[0.04] hover:text-white/70",
+                        selectedTag ? "hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--ds-text)]" : "",
                       ].join(" ")}
+                      style={!selectedTag
+                        ? { borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
+                        : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-text-muted)" }
+                      }
                     >
                       <Tag className="h-3.5 w-3.5" />
                       All
@@ -246,10 +253,12 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                           onClick={() => setSelectedTag(active ? null : t)}
                           className={[
                             "rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
-                            active
-                              ? "border-amber-500/25 bg-amber-500/10 text-amber-100"
-                              : "border-white/10 bg-white/[0.02] text-white/45 hover:bg-white/[0.04] hover:text-white/70",
+                            !active ? "hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--ds-text)]" : "",
                           ].join(" ")}
+                          style={active
+                            ? { borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
+                            : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-text-muted)" }
+                          }
                         >
                           {t}
                         </button>
@@ -261,7 +270,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
             </div>
 
             <div className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+              <div className="relative overflow-hidden rounded-3xl border" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
                 <div className="relative w-full" style={{ aspectRatio: "21 / 9" }}>
                   <Image
                     src={heroImage}
@@ -271,21 +280,21 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                     className="object-cover scale-[1.10] blur-[16px] opacity-55"
                     sizes="(max-width: 1024px) 100vw, 900px"
                   />
-                  <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/62 via-black/16 to-black/42" />
-                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_22%_22%,rgba(245,158,11,0.18),transparent_55%)]"
-                  />
-
+                  {/* Improved scrim for better text readability */}
+                  <div aria-hidden className="absolute inset-0" style={{ background: "var(--ds-hero-scrim)" }} />
+                  <div aria-hidden className="absolute inset-0" style={{ background: "var(--ds-hero-wash)" }} />
+                  
                   <div className="absolute inset-0 flex items-center justify-end pr-6 md:pr-10 lg:pr-12">
                     <div
-                      className={[
-                        "relative h-[86%] w-[64%] max-w-[560px] overflow-hidden rounded-2xl border border-white/12 bg-black/18 shadow-[0_34px_110px_-70px_rgba(245,158,11,0.40)] backdrop-blur-xl md:w-[56%] md:rounded-3xl lg:w-[52%]",
-                      ].join(" ")}
+                      className="relative h-[86%] w-[64%] max-w-[560px] overflow-hidden rounded-2xl border backdrop-blur-xl md:w-[56%] md:rounded-3xl lg:w-[52%]"
+                      style={{ 
+                        borderColor: "var(--ds-border-strong)", 
+                        backgroundColor: "var(--ds-panel-alt)",
+                        boxShadow: "var(--ds-shadow-xl)"
+                      }}
                     >
-                      <div className="pointer-events-none absolute inset-3 rounded-2xl border border-white/10" />
-                      <div className="pointer-events-none absolute inset-[18px] rounded-xl border border-white/[0.06]" />
+                      <div className="pointer-events-none absolute inset-3 rounded-2xl border" style={{ borderColor: "var(--ds-border)" }} />
+                      <div className="pointer-events-none absolute inset-[18px] rounded-xl border" style={{ borderColor: "var(--ds-border)" }} />
 
                       <div className="absolute inset-0 p-5 md:p-6 lg:p-7">
                         <div className="relative h-full w-full">
@@ -294,7 +303,8 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                             alt="Books banner"
                             fill
                             priority
-                            className="object-contain drop-shadow-[0_22px_70px_rgba(0,0,0,0.70)]"
+                            className="object-contain"
+                            style={{ filter: "drop-shadow(0 22px 70px rgba(0,0,0,0.70))" }}
                             sizes="(max-width: 1024px) 100vw, 900px"
                           />
                         </div>
@@ -304,22 +314,18 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
                         aria-hidden
                         className="absolute inset-0 opacity-60"
                         style={{
-                          background:
-                            "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.00) 38%, rgba(255,255,255,0.05) 70%, rgba(255,255,255,0.00) 100%)",
+                          background: "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.00) 38%, rgba(255,255,255,0.05) 70%, rgba(255,255,255,0.00) 100%)",
                         }}
                       />
-                      <div aria-hidden className="absolute inset-0 bg-gradient-to-tr from-black/30 via-transparent to-white/5" />
                     </div>
                   </div>
-
-                  <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgba(0,0,0,0.10),_rgba(0,0,0,0.60)_70%)]" />
                 </div>
 
                 <div className="flex items-center justify-between gap-4 px-6 py-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>
                     long-form • scan-ready
                   </div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/55">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-accent)" }}>
                     Browse ↓
                   </div>
                 </div>
@@ -332,7 +338,7 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
       {featured.length > 0 && (
         <section className="mx-auto max-w-7xl px-6 pt-12 lg:px-12">
           <div className="mb-6 flex items-center justify-between">
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-amber-200/60">
+            <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-accent)" }}>
               Featured
             </div>
           </div>
@@ -355,8 +361,8 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
 
       <section className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
         <div className="mb-6 flex items-center justify-between">
-          <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">Library</div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">
+          <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>Library</div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>
             showing {filtered.length} of {totalBooks}
           </div>
         </div>
@@ -373,9 +379,9 @@ const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
           ))}
 
           {filtered.length === 0 && (
-            <div className="lg:col-span-3 rounded-3xl border border-white/10 bg-white/[0.02] p-10 text-center">
-              <div className="text-[10px] font-mono uppercase tracking-[0.35em] text-white/35">No matches</div>
-              <div className="mt-3 text-white/70">Try a different keyword or clear the tag filter.</div>
+            <div className="lg:col-span-3 rounded-3xl border p-10 text-center" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
+              <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>No matches</div>
+              <div className="mt-3" style={{ color: "var(--ds-text-muted)" }}>Try a different keyword or clear the tag filter.</div>
             </div>
           )}
         </div>

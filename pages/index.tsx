@@ -133,11 +133,8 @@ type HomePageProps = {
 // TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GOLD = "#C9A96E";
-const VOID = "rgb(3 3 5)";
-const BASE = "rgb(6 6 9)";
-const LIFT = "rgb(10 14 20)";
-const CARD = "rgb(5 5 7)";
+// Design system tokens
+// All color references use --ds-* tokens from design-system.css
 
 const GRAIN_STYLE: React.CSSProperties = {
   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
@@ -173,12 +170,12 @@ function cn(...parts: Array<string | false | null | undefined>) {
 function GoldRule({ soft = false }: { soft?: boolean }) {
   return (
     <div
-      className={cn(
-        "h-px w-full",
-        soft
-          ? "bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
-          : "bg-gradient-to-r from-transparent via-[#C9A96E]/22 to-transparent",
-      )}
+      className="h-px w-full"
+      style={{
+        background: soft
+          ? "linear-gradient(to right, transparent, var(--ds-border), transparent)"
+          : "linear-gradient(to right, transparent, var(--ds-accent-soft), transparent)",
+      }}
     />
   );
 }
@@ -194,14 +191,14 @@ function Eyebrow({
 }) {
   return (
     <div className={cn("flex items-center gap-3", align === "center" && "justify-center")}>
-      <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
+      <span className="h-5 w-px" style={{ backgroundColor: "var(--ds-accent)", opacity: 0.55 }} />
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
           fontSize: "8px",
           letterSpacing: "0.40em",
           textTransform: "uppercase",
-          color: dim ? "rgba(255,255,255,0.22)" : `${GOLD}BF`,
+          color: dim ? "var(--ds-text-subtle)" : "var(--ds-accent)",
         }}
       >
         {children}
@@ -229,19 +226,19 @@ function Panel({
     <div
       className={cn("relative overflow-hidden border", className)}
       style={{
-        borderColor: gold ? `${GOLD}18` : "rgba(255,255,255,0.065)",
-        backgroundColor: gold ? `${GOLD}06` : surface === "lift" ? LIFT : CARD,
+        borderColor: gold ? "var(--ds-accent-soft)" : "var(--ds-border)",
+        backgroundColor: gold ? "var(--ds-accent-soft)" : "var(--ds-panel-alt)",
         boxShadow: gold
-          ? "0 0 90px -35px rgba(201,169,110,0.16)"
-          : "0 32px 100px -50px rgba(0,0,0,0.98)",
+          ? "0 0 90px -35px var(--ds-accent-soft)"
+          : "var(--ds-shadow-xl)",
       }}
     >
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background: gold
-            ? `linear-gradient(to right, transparent, ${GOLD}25, transparent)`
-            : "linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)",
+            ? "linear-gradient(to right, transparent, var(--ds-accent-soft), transparent)"
+            : "linear-gradient(to right, transparent, var(--ds-border), transparent)",
         }}
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.016),transparent_55%)]" />
@@ -270,7 +267,10 @@ function Section({
   return (
     <section
       className={cn("relative", className)}
-      style={{ backgroundColor: variant === "void" ? VOID : BASE }}
+      style={{ 
+        backgroundColor: variant === "void" ? "var(--ds-background)" : "var(--ds-background-muted)",
+        color: "var(--ds-text)"
+      }}
     >
       {id ? <Anchor id={id} /> : null}
 
@@ -278,8 +278,7 @@ function Section({
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background:
-              "radial-gradient(ellipse 70% 50% at 20% 0%, rgba(201,169,110,0.05) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 30%, rgba(255,255,255,0.02) 0%, transparent 55%)",
+            background: "var(--ds-hero-wash)",
           }}
         />
       )}
@@ -309,7 +308,7 @@ function Section({
                 fontSize: "7.5px",
                 letterSpacing: "0.46em",
                 textTransform: "uppercase",
-                color: capDim ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.20)",
+                color: capDim ? "var(--ds-text-subtle)" : "var(--ds-text-muted)",
               }}
             >
               {cap}
@@ -357,7 +356,7 @@ function SectionHeader({
       </Eyebrow>
       <h2
         className={cn(
-          "mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.93] tracking-[-0.028em] text-white",
+          "mt-5 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.93] tracking-[-0.028em] ds-text",
           large
             ? smaller
               ? "text-3xl md:text-4xl lg:text-[3.1rem]"
@@ -370,7 +369,7 @@ function SectionHeader({
         {title}
       </h2>
       {description && (
-        <p className={cn("mt-5 text-[15px] leading-[1.8] text-white/42", center && "mx-auto max-w-2xl")}>
+        <p className={cn("mt-5 text-[15px] leading-[1.8] ds-text-muted", center && "mx-auto max-w-2xl")}>
           {description}
         </p>
       )}
@@ -383,7 +382,7 @@ function SectionHeader({
 
 function Bridge({ text }: { text: string }) {
   return (
-    <div style={{ backgroundColor: BASE }}>
+    <div style={{ backgroundColor: "var(--ds-background)" }}>
       <div className="mx-auto max-w-7xl px-6 py-7 sm:px-8 lg:px-12">
         <div className="flex items-center gap-8">
           <div className="flex-1">
@@ -395,7 +394,7 @@ function Bridge({ text }: { text: string }) {
               fontSize: "7px",
               letterSpacing: "0.50em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.18)",
+              color: "var(--ds-text-subtle)",
             }}
           >
             {text}
@@ -426,7 +425,7 @@ class ModuleBoundary extends React.Component<
   override render() {
     if (this.state.hasError) {
       return (
-        <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
+        <div style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1.25rem" }}>
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-4 w-4 text-white/20" />
             <span
@@ -435,7 +434,7 @@ class ModuleBoundary extends React.Component<
                 fontSize: "8px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.25)",
+                color: "var(--ds-text-subtle)",
               }}
             >
               {this.props.label} unavailable
@@ -467,8 +466,9 @@ function HeroSection({
   return (
     <section
       className="relative isolate h-screen max-h-[1120px] min-h-[760px] w-full overflow-hidden"
-      style={{ backgroundColor: VOID }}
+      style={{ backgroundColor: "var(--ds-background)" }}
     >
+      {/* Background with unified directional light system */}
       <motion.div
         className="pointer-events-none absolute inset-0"
         style={{ opacity: imgOpacity, scale: imgScale }}
@@ -480,28 +480,55 @@ function HeroSection({
           priority
           sizes="100vw"
           quality={75}
-          className="object-cover object-[35%_55%]"
+          className="object-cover object-[35%_55%] opacity-[0.28]"
         />
+        {/* Top-left directional light bias */}
         <div
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to right, rgba(3,3,5,0.82) 0%, rgba(3,3,5,0.62) 42%, rgba(3,3,5,0.44) 100%)` }}
+          style={{ 
+            background: `
+              radial-gradient(
+                ellipse 80% 60% at 15% 20%,
+                var(--ds-accent-soft) 0%,
+                transparent 60%
+              ),
+              linear-gradient(
+                165deg,
+                rgba(0, 0, 0, 0.92) 0%,
+                rgba(0, 0, 0, 0.78) 30%,
+                rgba(0, 0, 0, 0.62) 60%,
+                rgba(0, 0, 0, 0.44) 100%
+              )
+            `
+          }}
         />
+        {/* Radial depth falloff for focal anchoring */}
         <div
           className="absolute inset-0"
-          style={{ background: `linear-gradient(to top, ${VOID} 0%, transparent 35%, rgba(3,3,5,0.22) 100%)` }}
+          style={{
+            maskImage: `radial-gradient(
+              ellipse 70% 50% at 50% 50%,
+              black 60%,
+              transparent 100%
+            )`,
+            WebkitMaskImage: `radial-gradient(
+              ellipse 70% 50% at 50% 50%,
+              black 60%,
+              transparent 100%
+            )`,
+            background: "var(--ds-hero-scrim)"
+          }}
         />
-        <div
-          className="absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 55% 70% at 10% 50%, rgba(201,169,110,0.09) 0%, transparent 60%)` }}
-        />
-        <div className="absolute inset-0 opacity-[0.040]" style={GRAIN_STYLE} />
+        <div className="absolute inset-0 opacity-[0.025]" style={GRAIN_STYLE} />
       </motion.div>
 
+      {/* Top accent line */}
       <div
         className="absolute inset-x-0 top-0 z-20"
-        style={{ height: 1, background: `linear-gradient(to right, transparent, ${GOLD}22, transparent)` }}
+        style={{ height: 1, background: "linear-gradient(to right, transparent, var(--ds-accent-soft), transparent)" }}
       />
 
+      {/* Content with stabilized reading zone */}
       <motion.div className="relative z-10 flex h-full items-center" style={{ y: contentY }}>
         <div className="mx-auto w-full max-w-7xl px-8 pb-24 pt-28 lg:px-16 lg:pt-36">
           <motion.div
@@ -510,117 +537,158 @@ function HeroSection({
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
             className="max-w-[58rem]"
           >
+            {/* Brand mark with commanding presence and subtle entrance */}
             <div
-              className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.86] tracking-[-0.045em]"
-              style={{ fontFeatureSettings: '"liga" 1, "kern" 1' }}
+              className="font-['Cormorant_Garamond',Georgia,serif] leading-[0.86] tracking-[-0.045em]"
+              style={{ fontFeatureSettings: '"liga" 1, "kern" 1', fontWeight: 380 }}
             >
-              <div className="flex flex-wrap items-baseline" style={{ gap: "0 1.2rem" }}>
-                <span className="text-white" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)" }}>
+              <div className="flex flex-wrap items-baseline" style={{ gap: "0 0.9rem" }}>
+                <motion.span 
+                  className="ds-text"
+                  style={{ fontSize: "clamp(4.2rem, 10.5vw, 10rem)" }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                >
                   Abraham
-                </span>
-                <span className="italic text-white/28" style={{ fontSize: "clamp(3.2rem, 8vw, 7.8rem)" }}>
+                </motion.span>
+                <motion.span 
+                  className="italic ds-text-muted"
+                  style={{ 
+                    fontSize: "clamp(3.4rem, 8.5vw, 8.2rem)", 
+                    opacity: 0.55,
+                    letterSpacing: "0.02em"
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.55 }}
+                  transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                >
                   of
-                </span>
+                </motion.span>
               </div>
-              <div className="italic" style={{ fontSize: "clamp(4rem, 10vw, 9.5rem)", color: GOLD, marginTop: "0.3em" }}>
+              <motion.div 
+                className="italic ds-accent"
+                style={{ 
+                  fontSize: "clamp(3.9rem, 9.7vw, 9.2rem)", 
+                  marginTop: "0.25em",
+                  fontWeight: 360
+                }}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              >
                 London
-              </div>
+              </motion.div>
             </div>
-            <div className="mt-7 h-px w-40" style={{ background: `${GOLD}38` }} />
+            <motion.div
+              className="mt-8 h-px"
+              initial={{ width: 0 }}
+              animate={{ width: "10rem" }}
+              transition={{
+                duration: 0.8,
+                delay: 0.3,
+                ease: [0.22, 1, 0.36, 1]
+              }}
+              style={{ backgroundColor: "var(--ds-accent)", opacity: 0.42 }}
+            />
 
-            <p
-              className="mt-12 max-w-[38ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-relaxed text-white/78"
-              style={{ fontSize: "clamp(1.05rem, 2vw, 1.35rem)" }}
+            {/* Hero message with commanding phrasing */}
+            <motion.p
+              className="mt-14 max-w-[32ch] font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.6] ds-text"
+              style={{ fontSize: "clamp(1.1rem, 2.1vw, 1.4rem)", opacity: 0.92 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 0.92, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              Doctrine, diagnostics, executive intelligence, and selective advisory organised into one governed platform.
-            </p>
+              Doctrine. Diagnostics. Intelligence. Advisory.<br />
+              One governed platform.
+            </motion.p>
 
-            <div className="mt-11 flex flex-wrap gap-3">
+            {/* CTA hierarchy with strengthened primary dominance */}
+            <motion.div 
+              className="mt-14 flex flex-wrap gap-4"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
               <Link
                 href="/diagnostics"
-                className="group inline-flex items-center gap-3 border px-7 py-4 transition"
+                className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300 hover:scale-[1.02]"
                 style={{
-                  borderColor: `${GOLD}44`,
-                  backgroundColor: `${GOLD}11`,
-                  color: GOLD,
+                  minWidth: "180px",
+                  borderColor: "var(--ds-accent-soft)",
+                  backgroundColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
                   textTransform: "uppercase",
                 }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = `${GOLD}66`;
-                  el.style.backgroundColor = `${GOLD}1A`;
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = "var(--ds-accent)";
+                  e.currentTarget.style.backgroundColor = "var(--ds-accent-soft)";
                 }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = `${GOLD}44`;
-                  el.style.backgroundColor = `${GOLD}11`;
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = "var(--ds-accent-soft)";
+                  e.currentTarget.style.backgroundColor = "var(--ds-accent-soft)";
                 }}
               >
                 <ScrollText className="h-3.5 w-3.5" />
                 Begin Assessment
-                <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5 opacity-70 transition-transform duration-300 group-hover:translate-x-0.5" />
               </Link>
 
               <Link
                 href="/diagnostics/executive-reporting"
-                className="group inline-flex items-center gap-3 border px-7 py-4 transition"
+                className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300"
                 style={{
-                  borderColor: "rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.65)",
+                  minWidth: "180px",
+                  borderColor: "var(--ds-border)",
+                  color: "var(--ds-text-muted)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
                   textTransform: "uppercase",
                 }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.18)";
-                  el.style.backgroundColor = "rgba(255,255,255,0.08)";
-                  el.style.color = "rgba(255,255,255,0.98)";
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = "var(--ds-border-strong)";
+                  e.currentTarget.style.backgroundColor = "var(--ds-panel)";
                 }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.08)";
-                  el.style.backgroundColor = "transparent";
-                  el.style.color = "rgba(255,255,255,0.65)";
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = "var(--ds-border)";
+                  e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                <ScrollText className="h-3.5 w-3.5" style={{ color: `${GOLD}CC` }} />
+                <ScrollText className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.8 }} />
                 Executive Reporting
-                <ArrowRight className="h-3.5 w-3.5 opacity-45 transition-transform group-hover:translate-x-0.5 group-hover:opacity-80" />
+                <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:opacity-75" />
               </Link>
 
               <Link
                 href="/consulting/strategy-room"
-                className="group inline-flex items-center gap-3 border px-7 py-4 transition"
+                className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300"
                 style={{
-                  borderColor: "rgba(255,255,255,0.03)",
-                  color: "rgba(255,255,255,0.22)",
+                  minWidth: "180px",
+                  borderColor: "var(--ds-border)",
+                  color: "var(--ds-text-subtle)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
                   textTransform: "uppercase",
                 }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.10)";
-                  el.style.color = "rgba(255,255,255,0.50)";
-                  el.style.backgroundColor = "rgba(255,255,255,0.03)";
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = "var(--ds-border-strong)";
+                  e.currentTarget.style.backgroundColor = "var(--ds-panel)";
                 }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.borderColor = "rgba(255,255,255,0.03)";
-                  el.style.color = "rgba(255,255,255,0.22)";
-                  el.style.backgroundColor = "transparent";
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = "var(--ds-border)";
+                  e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                <Crown className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />
+                <Crown className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.7 }} />
                 Strategy Room
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </motion.div>
@@ -646,22 +714,22 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
           <motion.div variants={fadeUp}>
             <Eyebrow>Platform</Eyebrow>
             <h2
-              className="mt-6 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.90] tracking-[-0.035em] text-white"
+              className="mt-6 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.90] tracking-[-0.035em] ds-text"
               style={{ fontSize: "clamp(2.4rem, 5vw, 4.2rem)" }}
             >
               Three layers.
               <br />
-              <span className="text-white/28">One governing logic.</span>
+              <span className="ds-text-muted">One governing logic.</span>
             </h2>
           </motion.div>
 
-          <motion.p variants={fadeUp} className="max-w-2xl text-[15px] leading-[1.85] text-white/40">
+          <motion.p variants={fadeUp} className="max-w-2xl text-[15px] leading-[1.85] ds-text-muted">
             Doctrine, structured products, and selective advisory operate as a single
             system. Each layer has a distinct function and a clear escalation path.
             None of them is decorative.
           </motion.p>
 
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.055)" }}>
+          <div style={{ borderTop: "1px solid var(--ds-border)" }}>
             {[
               {
                 n: "01",
@@ -689,17 +757,17 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                 <Link
                   href={item.href}
                   className="group flex gap-6 py-7 transition"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.055)" }}
+                  style={{ borderBottom: "1px solid var(--ds-border)" }}
                 >
                   <div className="shrink-0">
                     <div
                       className="flex h-8 w-8 items-center justify-center border"
                       style={{
-                        borderColor: "rgba(255,255,255,0.06)",
-                        backgroundColor: "rgba(255,255,255,0.02)",
+                        borderColor: "var(--ds-border)",
+                        backgroundColor: "var(--ds-panel)",
                       }}
                     >
-                      <item.icon className="h-3.5 w-3.5 text-white/22 transition-colors group-hover:text-white/50" />
+                      <item.icon className="h-3.5 w-3.5 text-[var(--ds-text-subtle)] transition-colors group-hover:text-[var(--ds-text-muted)]" />
                     </div>
                   </div>
                   <div>
@@ -710,7 +778,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                           fontSize: "7px",
                           letterSpacing: "0.34em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.20)",
+                          color: "var(--ds-text-subtle)",
                         }}
                       >
                         {item.n}
@@ -721,13 +789,13 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                           fontSize: "8.5px",
                           letterSpacing: "0.22em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.42)",
+                          color: "var(--ds-text-muted)",
                         }}
                       >
                         {item.title}
                       </span>
                     </div>
-                    <p className="mt-2 text-[13px] leading-relaxed text-white/30">{item.body}</p>
+                    <p className="mt-2 text-[13px] leading-relaxed ds-text-subtle">{item.body}</p>
                   </div>
                 </Link>
               </motion.div>
@@ -751,7 +819,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                   fontSize: "7px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
+                  color: "var(--ds-text-subtle)",
                   marginBottom: "1.25rem",
                 }}
               >
@@ -760,7 +828,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
 
               <div
                 className="grid grid-cols-2 gap-px"
-                style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+                style={{ backgroundColor: "var(--ds-border)" }}
               >
                 {[
                   { label: "Library", value: counts.library, icon: LibraryBig },
@@ -768,10 +836,10 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                   { label: "Playbooks", value: counts.playbooks, icon: Workflow },
                   { label: "Products", value: counts.downloads + counts.briefs, icon: Archive },
                 ].map((item) => (
-                  <div key={item.label} className="p-5" style={{ backgroundColor: CARD }}>
-                    <item.icon className="h-3.5 w-3.5 text-white/14" />
+                  <div key={item.label} className="p-5" style={{ backgroundColor: "var(--ds-panel-alt)" }}>
+                    <item.icon className="h-3.5 w-3.5 ds-text-subtle" />
                     <div
-                      className="mt-4 font-['Cormorant_Garamond',Georgia,serif] leading-none text-white/78"
+                      className="mt-4 font-['Cormorant_Garamond',Georgia,serif] leading-none ds-text"
                       style={{ fontSize: "2.4rem", fontWeight: 300 }}
                     >
                       {item.value}
@@ -783,7 +851,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                         fontSize: "6.5px",
                         letterSpacing: "0.30em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.22)",
+                        color: "var(--ds-text-subtle)",
                       }}
                     >
                       {item.label}
@@ -795,7 +863,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
           </Panel>
 
           <Panel surface="lift">
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.048)" }}>
+            <div style={{ borderTop: "1px solid var(--ds-border)" }}>
               {[
                 { href: "/canon", eyebrow: "Doctrine", title: "Canon", icon: Compass },
                 { href: "/artifacts", eyebrow: "Products", title: "Intelligence Archives", icon: Archive },
@@ -806,17 +874,11 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                 <Link
                   key={dest.href}
                   href={dest.href}
-                  className="group flex items-center justify-between px-5 py-3.5 transition"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.048)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.022)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
-                  }}
+                  className="group flex items-center justify-between px-5 py-3.5 transition hover:bg-[var(--ds-panel)]"
+                  style={{ borderBottom: "1px solid var(--ds-border)" }}
                 >
                   <div className="flex items-center gap-3">
-                    <dest.icon className="h-3.5 w-3.5 text-white/20 transition-colors group-hover:text-white/42" />
+                    <dest.icon className="h-3.5 w-3.5 text-[var(--ds-text-subtle)] transition-colors group-hover:text-[var(--ds-text-muted)]" />
                     <div>
                       <div
                         style={{
@@ -824,7 +886,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                           fontSize: "7px",
                           letterSpacing: "0.26em",
                           textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.24)",
+                          color: "var(--ds-text-subtle)",
                         }}
                       >
                         {dest.eyebrow}
@@ -833,14 +895,14 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                         style={{
                           fontFamily: "'Cormorant Garamond', Georgia, serif",
                           fontSize: "1rem",
-                          color: "rgba(255,255,255,0.60)",
+                          color: "var(--ds-text-muted)",
                         }}
                       >
                         {dest.title}
                       </div>
                     </div>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-white/12 transition-all group-hover:translate-x-0.5" />
+                  <ChevronRight className="h-3.5 w-3.5 ds-text-subtle transition-all group-hover:translate-x-0.5" />
                 </Link>
               ))}
             </div>
@@ -875,14 +937,14 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
             <Eyebrow>Global Market Intelligence</Eyebrow>
             <div
               style={{
-                border: `1px solid ${GOLD}30`,
-                backgroundColor: `${GOLD}0C`,
+                border: "1px solid var(--ds-accent-soft)",
+                backgroundColor: "var(--ds-accent-soft)",
                 padding: "0.4rem 0.75rem",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "7.5px",
                 letterSpacing: "0.26em",
                 textTransform: "uppercase",
-                color: `${GOLD}AA`,
+                color: "var(--ds-accent)",
               }}
             >
               {period}
@@ -892,26 +954,26 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
           <div className="mt-9 grid gap-9 lg:grid-cols-[1.35fr_0.65fr]">
             <div>
               <h3
-                className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.0] text-white md:text-[2.3rem]"
+                className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.0] ds-text md:text-[2.3rem]"
                 style={{ fontSize: "clamp(2rem, 3vw, 2.3rem)" }}
               >
                 {title}
               </h3>
-              <p className="mt-4 text-[13.5px] leading-relaxed text-white/42">{description}</p>
+              <p className="mt-4 text-[13.5px] leading-relaxed ds-text-muted">{description}</p>
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {["Public orientation", "Institutional edition", "Boardroom PDF"].map((tag) => (
                   <span
                     key={tag}
                     style={{
-                      border: "1px solid rgba(255,255,255,0.055)",
-                      backgroundColor: "rgba(255,255,255,0.018)",
+                      border: "1px solid var(--ds-border)",
+                      backgroundColor: "var(--ds-panel)",
                       padding: "0.25rem 0.75rem",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                       fontSize: "7px",
                       letterSpacing: "0.22em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.28)",
+                      color: "var(--ds-text-subtle)",
                     }}
                   >
                     {tag}
@@ -924,9 +986,9 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
                   href="/intelligence/global-market-intelligence-q1-2026"
                   className="group inline-flex items-center gap-2 border px-5 py-3 transition"
                   style={{
-                    borderColor: `${GOLD}44`,
-                    color: GOLD,
-                    backgroundColor: `${GOLD}10`,
+                    borderColor: "var(--ds-accent-soft)",
+                    color: "var(--ds-accent)",
+                    backgroundColor: "var(--ds-accent-soft)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                     fontSize: "8.5px",
                     letterSpacing: "0.28em",
@@ -941,9 +1003,9 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
                   href="/artifacts/global-market-intelligence-report-q1-2026"
                   className="inline-flex items-center gap-2 border px-5 py-3 transition"
                   style={{
-                    borderColor: "rgba(255,255,255,0.07)",
-                    backgroundColor: "rgba(255,255,255,0.018)",
-                    color: "rgba(255,255,255,0.42)",
+                    borderColor: "var(--ds-border)",
+                    backgroundColor: "var(--ds-panel)",
+                    color: "var(--ds-text-muted)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                     fontSize: "8.5px",
                     letterSpacing: "0.28em",
@@ -963,7 +1025,7 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
                   fontSize: "7px",
                   letterSpacing: "0.36em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
+                  color: "var(--ds-text-subtle)",
                   marginBottom: "1rem",
                 }}
               >
@@ -979,13 +1041,13 @@ function FlagshipIntelligence({ report }: { report: QuarterlyReport | null }) {
                   style={{
                     display: "flex",
                     gap: "0.75rem",
-                    border: "1px solid rgba(255,255,255,0.055)",
-                    backgroundColor: "rgba(255,255,255,0.018)",
+                    border: "1px solid var(--ds-border)",
+                    backgroundColor: "var(--ds-panel)",
                     padding: "1rem",
                   }}
                 >
-                  <TrendingUp className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: `${GOLD}90` }} />
-                  <span className="text-[12px] leading-relaxed text-white/48">{f}</span>
+                  <TrendingUp className="mt-0.5 h-3.5 w-3.5 shrink-0 ds-accent" />
+                  <span className="text-[12px] leading-relaxed ds-text-muted">{f}</span>
                 </motion.div>
               ))}
             </div>
@@ -1019,14 +1081,14 @@ function FlagshipAdvisory() {
             <Eyebrow>Executive Reporting</Eyebrow>
             <div
               style={{
-                border: "1px solid rgba(255,255,255,0.055)",
-                backgroundColor: "rgba(255,255,255,0.018)",
+                border: "1px solid var(--ds-border)",
+                backgroundColor: "var(--ds-panel)",
                 padding: "0.4rem 0.75rem",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "7.5px",
                 letterSpacing: "0.26em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.28)",
+                color: "var(--ds-text-subtle)",
               }}
             >
               Interpretation layer
@@ -1036,15 +1098,15 @@ function FlagshipAdvisory() {
           <div className="mt-9 grid gap-9 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
               <h3
-                className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.0] text-white md:text-[2.3rem]"
+                className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-[1.0] ds-text md:text-[2.3rem]"
                 style={{ fontSize: "clamp(2rem, 3vw, 2.3rem)" }}
               >
                 From diagnostic signal
                 <br />
-                <span className="text-white/35">to decision-grade output.</span>
+                <span className="ds-text-muted">to decision-grade output.</span>
               </h3>
 
-              <p className="mt-4 text-[13.5px] leading-relaxed text-white/40">
+              <p className="mt-4 text-[13.5px] leading-relaxed ds-text-muted">
                 The governed layer between raw diagnostic assessment and private mandate work.
                 A structured intake produces a board-grade report. The point is not to sound wise.
                 The point is to read the institutional condition precisely enough that the decision
@@ -1056,9 +1118,9 @@ function FlagshipAdvisory() {
                   href="/diagnostics/executive-reporting"
                   className="group inline-flex items-center gap-2 border px-5 py-3 transition"
                   style={{
-                    borderColor: `${GOLD}44`,
-                    color: GOLD,
-                    backgroundColor: `${GOLD}10`,
+                    borderColor: "var(--ds-accent-soft)",
+                    color: "var(--ds-accent)",
+                    backgroundColor: "var(--ds-accent-soft)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                     fontSize: "8.5px",
                     letterSpacing: "0.28em",
@@ -1073,9 +1135,9 @@ function FlagshipAdvisory() {
                   href="/diagnostics"
                   className="group inline-flex items-center gap-2 border px-5 py-3 transition"
                   style={{
-                    borderColor: "rgba(255,255,255,0.07)",
-                    backgroundColor: "rgba(255,255,255,0.018)",
-                    color: "rgba(255,255,255,0.38)",
+                    borderColor: "var(--ds-border)",
+                    backgroundColor: "var(--ds-panel)",
+                    color: "var(--ds-text-muted)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                     fontSize: "8.5px",
                     letterSpacing: "0.28em",
@@ -1095,19 +1157,19 @@ function FlagshipAdvisory() {
                   fontSize: "7px",
                   letterSpacing: "0.36em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
+                  color: "var(--ds-text-subtle)",
                   marginBottom: "1rem",
                 }}
               >
                 Report output fields
               </div>
 
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ borderTop: "1px solid var(--ds-border)" }}>
                 {reportFields.map((field, i) => (
                   <div
                     key={i}
                     className="flex items-start gap-3 py-2.5"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                    style={{ borderBottom: "1px solid var(--ds-border)" }}
                   >
                     <span
                       style={{
@@ -1117,7 +1179,7 @@ function FlagshipAdvisory() {
                         fontSize: "7px",
                         letterSpacing: "0.22em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.20)",
+                        color: "var(--ds-text-subtle)",
                       }}
                     >
                       {field.label}
@@ -1127,7 +1189,7 @@ function FlagshipAdvisory() {
                       style={{
                         fontSize: "11.5px",
                         lineHeight: 1.7,
-                        color: "rgba(255,255,255,0.40)",
+                        color: "var(--ds-text-muted)",
                       }}
                     >
                       {field.value}
@@ -1166,14 +1228,14 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
       <Panel surface="lift">
         <div className="p-8 md:p-11 lg:p-13">
           <div className="flex items-center gap-3">
-            <span className="h-5 w-px" style={{ backgroundColor: "rgba(255,255,255,0.22)" }} />
+            <span className="h-5 w-px" style={{ backgroundColor: "var(--ds-text-subtle)" }} />
             <span
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "8px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.28)",
+                color: "var(--ds-text-subtle)",
               }}
             >
               From the blog
@@ -1186,7 +1248,7 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
               fontSize: "8px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.28)",
+              color: "var(--ds-text-subtle)",
             }}
           >
             Recent writing — direct, unedited thinking.
@@ -1196,12 +1258,12 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
             {posts.slice(0, 3).map((post) => (
               <li
                 key={post.slug}
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.048)" }}
+                style={{ borderBottom: "1px solid var(--ds-border)" }}
               >
                 <Link
                   href={post.href}
                   className="group flex flex-col gap-2 py-4 transition-colors md:flex-row md:items-baseline md:gap-6"
-                  onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.018)")}
+                  onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "var(--ds-panel)")}
                   onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent")}
                 >
                   <span
@@ -1211,7 +1273,7 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
                       fontSize: "7px",
                       letterSpacing: "0.22em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.22)",
+                      color: "var(--ds-text-subtle)",
                       minWidth: "6.5rem",
                     }}
                   >
@@ -1225,7 +1287,7 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
                       fontWeight: 300,
                       fontSize: "1.05rem",
                       lineHeight: 1.35,
-                      color: "rgba(255,255,255,0.75)",
+                      color: "var(--ds-text-muted)",
                     }}
                   >
                     {post.title}
@@ -1236,7 +1298,7 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
                       style={{
                         fontSize: "12px",
                         lineHeight: 1.5,
-                        color: "rgba(255,255,255,0.32)",
+                        color: "var(--ds-text-subtle)",
                       }}
                     >
                       {post.excerpt}
@@ -1252,9 +1314,9 @@ function FlagshipBlogStrip({ posts }: { posts: BlogPostItem[] }) {
               href="/blog"
               className="inline-flex items-center gap-2 border px-5 py-3 transition"
               style={{
-                borderColor: "rgba(255,255,255,0.10)",
-                backgroundColor: "rgba(255,255,255,0.018)",
-                color: "rgba(255,255,255,0.38)",
+                borderColor: "var(--ds-border)",
+                backgroundColor: "var(--ds-panel)",
+                color: "var(--ds-text-muted)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "8.5px",
                 letterSpacing: "0.28em",
@@ -1281,14 +1343,14 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
             {item.documentId && (
               <span
                 style={{
-                  border: "1px solid rgba(255,255,255,0.055)",
-                  backgroundColor: "rgba(255,255,255,0.018)",
+                  border: "1px solid var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
                   padding: "0.4rem 0.75rem",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "7.5px",
                   letterSpacing: "0.26em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.28)",
+                  color: "var(--ds-text-subtle)",
                 }}
               >
                 {item.documentId}
@@ -1312,9 +1374,9 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                   href={item.href}
                   className="group inline-flex items-center gap-2 border px-5 py-3 transition"
                   style={{
-                    borderColor: `${GOLD}44`,
-                    color: GOLD,
-                    backgroundColor: `${GOLD}10`,
+                    borderColor: "var(--ds-accent-soft)",
+                    color: "var(--ds-accent)",
+                    backgroundColor: "var(--ds-accent-soft)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                     fontSize: "8.5px",
                     letterSpacing: "0.28em",
@@ -1332,9 +1394,9 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 border px-5 py-3 transition"
                     style={{
-                      borderColor: "rgba(255,255,255,0.07)",
-                      backgroundColor: "rgba(255,255,255,0.018)",
-                      color: "rgba(255,255,255,0.38)",
+                      borderColor: "var(--ds-border)",
+                      backgroundColor: "var(--ds-panel)",
+                      color: "var(--ds-text-muted)",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                       fontSize: "8.5px",
                       letterSpacing: "0.28em",
@@ -1354,7 +1416,7 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                   fontSize: "7px",
                   letterSpacing: "0.36em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.18)",
+                  color: "var(--ds-text-subtle)",
                   marginBottom: "1rem",
                 }}
               >
@@ -1368,12 +1430,12 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                   rel="noopener noreferrer"
                   className="flex items-center justify-between border p-4 transition"
                   style={{
-                    borderColor: "rgba(255,255,255,0.048)",
-                    backgroundColor: "rgba(255,255,255,0.014)",
+                    borderColor: "var(--ds-border)",
+                    backgroundColor: "var(--ds-panel)",
                   }}
                 >
                   <span className="flex items-center gap-3 text-[12px] text-white/45">
-                    <Download className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />
+                    <Download className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.56 }} />
                     Premium PDF
                   </span>
                   <ArrowRight className="h-3.5 w-3.5 text-white/20" />
@@ -1387,12 +1449,12 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                   rel="noopener noreferrer"
                   className="flex items-center justify-between border p-4 transition"
                   style={{
-                    borderColor: "rgba(255,255,255,0.048)",
-                    backgroundColor: "rgba(255,255,255,0.014)",
+                    borderColor: "var(--ds-border)",
+                    backgroundColor: "var(--ds-panel)",
                   }}
                 >
                   <span className="flex items-center gap-3 text-[12px] text-white/45">
-                    <BookOpen className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />
+                    <BookOpen className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.56 }} />
                     EPUB edition
                   </span>
                   <ArrowRight className="h-3.5 w-3.5 text-white/20" />
@@ -1405,12 +1467,12 @@ function FlagshipPublication({ item }: { item: PublicationItem }) {
                 rel="noopener noreferrer"
                 className="flex items-center justify-between border p-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.048)",
-                  backgroundColor: "rgba(255,255,255,0.014)",
+                  borderColor: "var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
                 }}
               >
                 <span className="flex items-center gap-3 text-[12px] text-white/45">
-                  <FileText className="h-3.5 w-3.5" style={{ color: `${GOLD}90` }} />
+                  <FileText className="h-3.5 w-3.5" style={{ color: "var(--ds-accent)", opacity: 0.56 }} />
                   Citation record
                 </span>
                 <ArrowRight className="h-3.5 w-3.5 text-white/20" />
@@ -1439,7 +1501,7 @@ function PubCard({ item }: { item: PublicationItem }) {
               fontSize: "7px",
               letterSpacing: "0.26em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.20)",
+              color: "var(--ds-text-subtle)",
             }}
           >
             {item.tier}
@@ -1457,9 +1519,9 @@ function PubCard({ item }: { item: PublicationItem }) {
             href={item.href}
             className="group inline-flex items-center gap-2 border px-4 py-2.5 transition"
             style={{
-              borderColor: "rgba(255,255,255,0.07)",
-              backgroundColor: "rgba(255,255,255,0.018)",
-              color: "rgba(255,255,255,0.45)",
+              borderColor: "var(--ds-border)",
+              backgroundColor: "var(--ds-panel)",
+              color: "var(--ds-text-muted)",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: "8px",
               letterSpacing: "0.26em",
@@ -1476,9 +1538,9 @@ function PubCard({ item }: { item: PublicationItem }) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 border px-4 py-2.5 transition"
               style={{
-                borderColor: `${GOLD}30`,
-                color: `${GOLD}BB`,
-                backgroundColor: `${GOLD}0A`,
+                borderColor: "var(--ds-accent-soft)",
+                color: "var(--ds-accent)",
+                backgroundColor: "var(--ds-accent-soft)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                 fontSize: "8px",
                 letterSpacing: "0.26em",
@@ -1506,7 +1568,7 @@ function PlaybookCard({ item }: { item: PlaybookItem }) {
               fontSize: "7px",
               letterSpacing: "0.26em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.20)",
+              color: "var(--ds-text-subtle)",
             }}
           >
             {item.difficulty || "Advanced"}
@@ -1524,9 +1586,9 @@ function PlaybookCard({ item }: { item: PlaybookItem }) {
             href={item.href}
             className="group inline-flex items-center gap-2 border px-4 py-2.5 transition"
             style={{
-              borderColor: "rgba(255,255,255,0.07)",
-              backgroundColor: "rgba(255,255,255,0.018)",
-              color: "rgba(255,255,255,0.45)",
+              borderColor: "var(--ds-border)",
+              backgroundColor: "var(--ds-panel)",
+              color: "var(--ds-text-muted)",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: "8px",
               letterSpacing: "0.26em",
@@ -1592,15 +1654,15 @@ function DiagnosticLadder() {
                 <div className="flex items-start justify-between gap-4">
                   <div
                     className="font-['Cormorant_Garamond',Georgia,serif] font-light leading-none transition-colors"
-                    style={{ fontSize: "3.5rem", color: "rgba(255,255,255,0.055)" }}
+                    style={{ fontSize: "3.5rem", color: "var(--ds-border)" }}
                   >
                     {p.n}
                   </div>
                   <div
                     className="flex h-9 w-9 items-center justify-center border transition"
                     style={{
-                      borderColor: "rgba(255,255,255,0.055)",
-                      backgroundColor: "rgba(255,255,255,0.018)",
+                      borderColor: "var(--ds-border)",
+                      backgroundColor: "var(--ds-panel)",
                     }}
                   >
                     <p.icon className="h-4 w-4 text-white/25 transition-colors group-hover:text-white/55" />
@@ -1615,7 +1677,7 @@ function DiagnosticLadder() {
                         fontSize: "7px",
                         letterSpacing: "0.32em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.20)",
+                        color: "var(--ds-text-subtle)",
                       }}
                     >
                       {p.tag}
@@ -1627,7 +1689,7 @@ function DiagnosticLadder() {
                         fontSize: "7px",
                         letterSpacing: "0.22em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.18)",
+                        color: "var(--ds-text-subtle)",
                       }}
                     >
                       {p.detail}
@@ -1650,7 +1712,7 @@ function DiagnosticLadder() {
                     fontSize: "8px",
                     letterSpacing: "0.26em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.20)",
+                    color: "var(--ds-text-subtle)",
                   }}
                 >
                   <span>Enter</span>
@@ -1677,9 +1739,9 @@ function EscalationClose() {
           <div className="mx-auto max-w-2xl text-center">
             <div
               className="mx-auto mb-9 flex h-14 w-14 items-center justify-center border"
-              style={{ borderColor: `${GOLD}28`, backgroundColor: `${GOLD}0A` }}
+              style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}
             >
-              <Crown className="h-6 w-6" style={{ color: `${GOLD}AA` }} />
+              <Crown className="h-6 w-6" style={{ color: "var(--ds-accent)" }} />
             </div>
 
             <Eyebrow align="center">Entry points</Eyebrow>
@@ -1689,7 +1751,7 @@ function EscalationClose() {
               style={{ fontSize: "clamp(2.4rem, 5vw, 3.8rem)" }}
             >
               Each route is designed for
-              <span className="block" style={{ color: GOLD }}>
+              <span className="block" style={{ color: "var(--ds-accent)" }}>
                 a different level of consequence.
               </span>
             </h2>
@@ -1704,9 +1766,9 @@ function EscalationClose() {
                 href="/diagnostics"
                 className="group inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: `${GOLD}44`,
-                  color: GOLD,
-                  backgroundColor: `${GOLD}0F`,
+                  borderColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                  backgroundColor: "var(--ds-accent-soft)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -1721,9 +1783,9 @@ function EscalationClose() {
                 href="/consulting/strategy-room"
                 className="inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.07)",
-                  backgroundColor: "rgba(255,255,255,0.02)",
-                  color: "rgba(255,255,255,0.36)",
+                  borderColor: "var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
+                  color: "var(--ds-text-muted)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "9px",
                   letterSpacing: "0.32em",
@@ -1895,7 +1957,7 @@ const HomePage: NextPage<HomePageProps> = ({
                     fontSize: "7px",
                     letterSpacing: "0.40em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.18)",
+                    color: "var(--ds-text-subtle)",
                   }}
                 >
                   Supporting publications
@@ -1917,7 +1979,7 @@ const HomePage: NextPage<HomePageProps> = ({
                     fontSize: "7px",
                     letterSpacing: "0.40em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.18)",
+                    color: "var(--ds-text-subtle)",
                   }}
                 >
                   Execution playbooks
@@ -1935,9 +1997,9 @@ const HomePage: NextPage<HomePageProps> = ({
                 href="/editorials"
                 className="group inline-flex items-center gap-2 border px-5 py-3 transition"
                 style={{
-                  borderColor: "rgba(255,255,255,0.07)",
-                  backgroundColor: "rgba(255,255,255,0.018)",
-                  color: "rgba(255,255,255,0.38)",
+                  borderColor: "var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
+                  color: "var(--ds-text-muted)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "8.5px",
                   letterSpacing: "0.26em",
@@ -1951,9 +2013,9 @@ const HomePage: NextPage<HomePageProps> = ({
                 href="/playbooks"
                 className="group inline-flex items-center gap-2 border px-5 py-3 transition"
                 style={{
-                  borderColor: `${GOLD}30`,
-                  color: `${GOLD}BB`,
-                  backgroundColor: `${GOLD}0A`,
+                  borderColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                  backgroundColor: "var(--ds-accent-soft)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
                   fontSize: "8.5px",
                   letterSpacing: "0.26em",
@@ -1977,7 +2039,7 @@ const HomePage: NextPage<HomePageProps> = ({
             <>
               Built for people carrying
               <br />
-              <em className="not-italic" style={{ color: GOLD }}>
+              <em className="not-italic" style={{ color: "var(--ds-accent)" }}>
                 responsibility.
               </em>
             </>

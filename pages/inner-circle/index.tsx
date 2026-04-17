@@ -129,73 +129,85 @@ const InnerCirclePage: NextPage = () => {
       title="Identity Verification | Inner Circle" 
       description="Authentication required for sovereign intelligence access."
       // Hide sidebar on the login gate
-      className="p-0"
+      className="p-0 ds-surface-inner-circle"
     >
-      <main className="min-h-screen bg-[#050505] pt-32 pb-32 relative overflow-hidden">
+      <main className="min-h-screen pt-32 pb-32 relative overflow-hidden" style={{ backgroundColor: "var(--ds-background)" }}>
         {/* INSTITUTIONAL TEXTURE */}
         <div className="absolute inset-0 bg-[url('/assets/textures/grain.png')] opacity-[0.02] pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-amber-900/5 blur-[160px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] blur-[160px] pointer-events-none" style={{ backgroundColor: "var(--ds-accent-soft)" }} />
 
         <div className="relative max-w-6xl mx-auto px-6">
           <header className="text-center mb-24">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-4 border border-amber-500/20 bg-amber-500/5 px-6 py-2 mb-12 rounded-full"
+              className="inline-flex items-center gap-4 border px-6 py-2 mb-12 rounded-full"
+              style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}
             >
-              <Zap size={12} className="text-amber-500" fill="currentColor" />
-              <span className="text-[9px] font-mono uppercase tracking-[0.5em] text-amber-200/80">
+              <Zap size={12} style={{ color: "var(--ds-accent)" }} fill="currentColor" />
+              <span className="text-[9px] font-mono uppercase tracking-[0.5em]" style={{ color: "var(--ds-accent)" }}>
                 Identity Verification Protocol
               </span>
             </motion.div>
 
-            <h1 className="text-6xl md:text-8xl font-serif text-white mb-8 italic tracking-tighter leading-none">
-              The Inner <span className="font-light text-zinc-600">Circle.</span>
+            <h1 className="text-6xl md:text-8xl font-serif mb-8 italic tracking-tighter leading-none" style={{ color: "var(--ds-text)" }}>
+              The Inner <span className="font-light" style={{ color: "var(--ds-text-subtle)" }}>Circle.</span>
             </h1>
 
-            <p className="mx-auto max-w-xl text-zinc-500 font-light text-lg italic leading-relaxed">
+            <p className="mx-auto max-w-xl font-light text-lg italic leading-relaxed" style={{ color: "var(--ds-text-muted)" }}>
               Entry to the Sovereign Intelligence Portfolio is restricted. Authorized stakeholders must authenticate via cryptographic key.
             </p>
           </header>
 
-          <div className="grid gap-px bg-white/5 border border-white/5 lg:grid-cols-2 shadow-2xl rounded-sm overflow-hidden">
+          <div className="grid gap-px border lg:grid-cols-2 shadow-2xl rounded-sm overflow-hidden" style={{ backgroundColor: "var(--ds-panel)", borderColor: "var(--ds-border)" }}>
             {/* REGISTER SECTION */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-[#050505] p-12 md:p-16"
+              className="p-12 md:p-16"
+              style={{ backgroundColor: "var(--ds-background)" }}
             >
               <div className="flex items-center gap-6 mb-16">
-                <div className="h-14 w-14 border border-white/10 flex items-center justify-center text-zinc-500">
+                <div className="h-14 w-14 border flex items-center justify-center" style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-subtle)" }}>
                   <Mail size={24} strokeWidth={1} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-serif text-white italic">Clearance</h2>
-                  <p className="text-[9px] uppercase tracking-[0.4em] text-zinc-700 font-mono mt-1">Formal Registration</p>
+                  <h2 className="text-2xl font-serif italic" style={{ color: "var(--ds-text)" }}>Clearance</h2>
+                  <p className="text-[9px] uppercase tracking-[0.4em] font-mono mt-1" style={{ color: "var(--ds-text-subtle)" }}>Formal Registration</p>
                 </div>
               </div>
 
               <form onSubmit={handleRegister} className="space-y-8">
                 <div className="space-y-3">
-                  <label className="text-[9px] font-mono uppercase tracking-[0.4em] text-zinc-600">Identity Name</label>
+                  <label className="text-[9px] font-mono uppercase tracking-[0.4em]" style={{ color: "var(--ds-text-subtle)" }}>Identity Name</label>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-white/[0.02] border border-white/10 px-6 py-4 text-white focus:border-amber-500/30 outline-none transition-all placeholder:text-zinc-800"
+                    className="w-full border px-6 py-4 outline-none transition-all focus:border-[var(--ds-accent-soft)] placeholder:text-[var(--ds-text-subtle)]"
+                    style={{
+                      borderColor: "var(--ds-border)",
+                      backgroundColor: "var(--ds-panel)",
+                      color: "var(--ds-text)",
+                    }}
                     placeholder="Institutional Name"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[9px] font-mono uppercase tracking-[0.4em] text-zinc-600">Professional Email</label>
+                  <label className="text-[9px] font-mono uppercase tracking-[0.4em]" style={{ color: "var(--ds-text-subtle)" }}>Professional Email</label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white/[0.02] border border-white/10 px-6 py-4 text-white focus:border-amber-500/30 outline-none transition-all placeholder:text-zinc-800"
+                    className="w-full border px-6 py-4 outline-none transition-all focus:border-[var(--ds-accent-soft)] placeholder:text-[var(--ds-text-subtle)]"
+                    style={{
+                      borderColor: "var(--ds-border)",
+                      backgroundColor: "var(--ds-panel)",
+                      color: "var(--ds-text)",
+                    }}
                     placeholder="name@institution.com"
                   />
                 </div>
@@ -203,14 +215,18 @@ const InnerCirclePage: NextPage = () => {
                 <button
                   type="submit"
                   disabled={registerStatus === "submitting"}
-                  className="w-full bg-white text-black py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-amber-100 transition-all flex items-center justify-center gap-4 disabled:opacity-30"
+                  className="w-full py-5 text-[10px] font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-4 disabled:opacity-30"
+                  style={{
+                    backgroundColor: "var(--ds-text)",
+                    color: "var(--ds-background)",
+                  }}
                 >
                   {registerStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
                   Issue Access Request
                 </button>
 
                 {feedback?.type === "register" && (
-                  <p className="text-[10px] font-mono text-center uppercase tracking-widest text-amber-500/60 mt-4">{feedback.msg}</p>
+                  <p className="text-[10px] font-mono text-center uppercase tracking-widest mt-4" style={{ color: "var(--ds-accent)" }}>{feedback.msg}</p>
                 )}
               </form>
             </motion.div>
@@ -219,15 +235,16 @@ const InnerCirclePage: NextPage = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-[#080808] p-12 md:p-16 border-l border-white/5"
+              className="p-12 md:p-16 border-l"
+              style={{ backgroundColor: "var(--ds-background-muted)", borderColor: "var(--ds-border)" }}
             >
               <div className="flex items-center gap-6 mb-16">
-                <div className="h-14 w-14 border border-amber-500/20 bg-amber-500/5 flex items-center justify-center text-amber-500/60">
+                <div className="h-14 w-14 border flex items-center justify-center" style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }}>
                   <Key size={24} strokeWidth={1} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-serif text-white italic">Secure Entry</h2>
-                  <p className="text-[9px] uppercase tracking-[0.4em] text-amber-500/40 font-mono mt-1">Authentication Required</p>
+                  <h2 className="text-2xl font-serif italic" style={{ color: "var(--ds-text)" }}>Secure Entry</h2>
+                  <p className="text-[9px] uppercase tracking-[0.4em] font-mono mt-1" style={{ color: "var(--ds-accent)" }}>Authentication Required</p>
                 </div>
               </div>
 
@@ -238,13 +255,17 @@ const InnerCirclePage: NextPage = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center py-10 space-y-12"
                   >
-                    <div className="inline-block p-8 bg-amber-500/5 border border-amber-500/20 rounded-full animate-pulse">
-                      <CheckCircle className="h-12 w-12 text-amber-500" />
+                    <div className="inline-block p-8 border rounded-full animate-pulse" style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)" }}>
+                      <CheckCircle className="h-12 w-12" style={{ color: "var(--ds-accent)" }} />
                     </div>
-                    <h3 className="text-2xl font-serif text-white italic">Clearance Verified</h3>
+                    <h3 className="text-2xl font-serif italic" style={{ color: "var(--ds-text)" }}>Clearance Verified</h3>
                     <button
                       onClick={() => router.replace(returnTo)}
-                      className="w-full bg-amber-500 text-black py-5 text-[10px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4"
+                      className="w-full py-5 text-[10px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4"
+                      style={{
+                        backgroundColor: "var(--ds-accent)",
+                        color: "var(--ds-background)",
+                      }}
                     >
                       Enter Registry <ArrowRight size={16} />
                     </button>
@@ -252,13 +273,18 @@ const InnerCirclePage: NextPage = () => {
                 ) : (
                   <form onSubmit={handleUnlock} className="space-y-8">
                     <div className="space-y-3">
-                      <label className="text-[9px] font-mono uppercase tracking-[0.4em] text-amber-500/30">Cryptographic Key</label>
+                      <label className="text-[9px] font-mono uppercase tracking-[0.4em]" style={{ color: "var(--ds-accent)" }}>Cryptographic Key</label>
                       <input
                         type="password"
                         required
                         value={accessKey}
                         onChange={(e) => setAccessKey(e.target.value)}
-                        className="w-full bg-black border border-amber-500/10 px-6 py-4 font-mono text-amber-500 focus:border-amber-500/40 outline-none transition-all placeholder:text-amber-900/20"
+                        className="w-full border px-6 py-4 font-mono outline-none transition-all focus:border-[var(--ds-accent)] placeholder:text-[var(--ds-text-subtle)]"
+                        style={{
+                          borderColor: "var(--ds-accent-soft)",
+                          backgroundColor: "var(--ds-background)",
+                          color: "var(--ds-accent)",
+                        }}
                         placeholder="ic_••••••••••••"
                       />
                     </div>
@@ -266,14 +292,18 @@ const InnerCirclePage: NextPage = () => {
                     <button
                       type="submit"
                       disabled={unlockStatus === "submitting"}
-                      className="w-full border border-amber-500/30 text-amber-500 py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-amber-500 hover:text-black transition-all flex items-center justify-center gap-4"
+                      className="w-full border py-5 text-[10px] font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-4"
+                      style={{
+                        borderColor: "var(--ds-accent-soft)",
+                        color: "var(--ds-accent)",
+                      }}
                     >
                       {unlockStatus === "submitting" ? <RefreshCw className="animate-spin" size={16} /> : <Unlock size={16} />}
                       Authenticate Key
                     </button>
 
                     {feedback?.type === "unlock" && (
-                      <p className="text-[10px] font-mono text-center uppercase tracking-widest text-red-500/60 mt-4">{feedback.msg}</p>
+                      <p className="text-[10px] font-mono text-center uppercase tracking-widest mt-4" style={{ color: "var(--ds-danger)" }}>{feedback.msg}</p>
                     )}
                   </form>
                 )}
@@ -282,10 +312,10 @@ const InnerCirclePage: NextPage = () => {
           </div>
         </div>
 
-        <section className="mt-48 py-24 border-t border-white/5">
+        <section className="mt-48 py-24 border-t" style={{ borderColor: "var(--ds-border)" }}>
           <div className="mx-auto max-w-xl px-6 text-center space-y-10">
-            <h2 className="text-3xl font-serif text-white italic tracking-tight">The Strategic Dispatch</h2>
-            <p className="text-zinc-500 text-lg font-light leading-relaxed italic">
+            <h2 className="text-3xl font-serif italic tracking-tight" style={{ color: "var(--ds-text)" }}>The Strategic Dispatch</h2>
+            <p className="text-lg font-light leading-relaxed italic" style={{ color: "var(--ds-text-muted)" }}>
               Public intelligence on institutional design and frontier market strategy.
             </p>
             <form className="relative max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
@@ -293,17 +323,23 @@ const InnerCirclePage: NextPage = () => {
                 type="email"
                 required
                 placeholder="Institutional Email"
-                className="w-full bg-white/[0.03] border border-white/10 px-8 py-4 text-sm text-white focus:border-amber-500/20 outline-none transition-all"
+                className="w-full border px-8 py-4 text-sm outline-none transition-all focus:border-[var(--ds-accent-soft)] placeholder:text-[var(--ds-text-subtle)]"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
+                  color: "var(--ds-text)",
+                }}
               />
               <button
                 type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-amber-500 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: "var(--ds-accent)" }}
                 aria-label="Subscribe"
               >
                 <Send size={18} />
               </button>
             </form>
-            <p className="text-[8px] font-mono uppercase tracking-[0.5em] text-zinc-800">
+            <p className="text-[8px] font-mono uppercase tracking-[0.5em]" style={{ color: "var(--ds-text-subtle)" }}>
               Direct Signal • Zero Proliferation
             </p>
           </div>

@@ -193,8 +193,10 @@ function transformRawMdxToMarkdownLike(input: string): string {
   });
   s = s.replace(/^\s*<\/Callout>\s*$/gm, "");
 
-  // Section breaks
+  // Section breaks and dividers
   s = s.replace(/^\s*<SectionBreak\s*\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^\s*<Divider\s*\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^\s*<Rule\s*\/>\s*$/gm, "\n---\n");
 
   // PullQuote
   s = s.replace(/^\s*<PullQuote\b([^>]*)>\s*$/gm, (_m, attrs: string) => {
@@ -249,6 +251,13 @@ function transformRawMdxToMarkdownLike(input: string): string {
 function RawMarkdownFallback({ content }: { content: string }) {
   const html = React.useMemo(() => {
     let processed = safeString(content).replace(/\r\n/g, "\n").trim();
+
+    // Convert remaining JSX component markers to horizontal rules BEFORE escaping.
+    // Handles <Divider />, <Rule />, <SectionBreak /> that may survive from raw MDX.
+    processed = processed.replace(/^\s*<(Divider|Rule|SectionBreak)\s*\/?\s*>\s*$/gm, "\n---\n");
+    // Also handle self-closing without space: <Divider/>
+    processed = processed.replace(/<(Divider|Rule|SectionBreak)\s*\/?\s*>/g, "\n---\n");
+
     processed = escapeHtml(processed);
 
     processed = processed.replace(
@@ -286,7 +295,7 @@ function RawMarkdownFallback({ content }: { content: string }) {
 
     const blocks = processed.split(/\n{2,}/);
 
-    return blocks
+    const joined = blocks
       .map((block) => {
         const trimmed = block.trim();
         if (!trimmed) return "";
@@ -336,12 +345,25 @@ function RawMarkdownFallback({ content }: { content: string }) {
         return `<p class="mb-6 leading-8 text-white/80">${trimmed.replace(/\n/g, "<br />")}</p>`;
       })
       .join("");
+
+    // Final cleanup: convert remaining component marker artifacts
+    // like <strong>[Divider]</strong> into proper <hr> elements.
+    return joined
+      .replace(/<strong>\[(Divider|Rule|SectionBreak)\]<\/strong>/g,
+        '<hr class="my-8 border-white/10" />')
+      .replace(/&lt;(Divider|Rule|SectionBreak)\s*\/?&gt;/g,
+        '<hr class="my-8 border-white/10" />');
   }, [content]);
+
+  // Belt-and-suspenders: strip any [ComponentName] markers that survived.
+  const cleanHtml = html
+    .replace(/<strong>\[(?:Divider|Rule|SectionBreak)\]<\/strong>/g, '<hr class="my-8 border-t border-white/10" />')
+    .replace(/\[(?:Divider|Rule|SectionBreak)\]/g, '<hr class="my-8 border-t border-white/10" />');
 
   return (
     <div
       className="aol-mdx-content max-w-none"
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: cleanHtml }}
     />
   );
 }
@@ -432,7 +454,10 @@ export default function SafeMDXRenderer({
   }
 
   if (isRaw) {
-    return <RawMarkdownFallback content={safeCode} />;
+    // Run the MDX-to-markdown transform even for raw content,
+    // to handle component tokens like <Divider /> and <Rule />
+    const cleaned = transformRawMdxToMarkdownLike(safeCode);
+    return <RawMarkdownFallback content={cleaned} />;
   }
 
   return (
@@ -456,7 +481,7 @@ export default function SafeMDXRenderer({
         ) : undefined
       }
     >
-      <div className="aol-mdx-content prose prose-invert max-w-none">
+      <div className="aol-mdx-content max-w-none">
         <CompiledMDXRenderer code={safeCode} components={finalComponents} />
       </div>
     </MDXErrorBoundary>
