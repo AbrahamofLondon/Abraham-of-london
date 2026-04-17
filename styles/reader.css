@@ -295,6 +295,84 @@
   margin: 2em 0;
 }
 
+/* --- Canon .aol-mdx-content overrides ---
+   baseComponents (MDXComponents.tsx) apply Tailwind dark-theme classes
+   like text-zinc-400 directly on elements. These must be overridden for
+   the warm bone panel. Higher specificity needed to beat utility classes. */
+
+.reader-body--canon .aol-mdx-content,
+.reader-body--canon .aol-mdx-content p,
+.reader-body--canon .aol-mdx-content li {
+  color: var(--ds-neutral-800) !important;
+}
+
+.reader-body--canon .aol-mdx-content h1,
+.reader-body--canon .aol-mdx-content h2,
+.reader-body--canon .aol-mdx-content h3,
+.reader-body--canon .aol-mdx-content h4,
+.reader-body--canon .aol-mdx-content h5,
+.reader-body--canon .aol-mdx-content h6 {
+  color: var(--ds-neutral-900) !important;
+}
+
+.reader-body--canon .aol-mdx-content strong {
+  color: var(--ds-neutral-900) !important;
+  font-weight: 600;
+}
+
+.reader-body--canon .aol-mdx-content a {
+  color: var(--ds-amber-600) !important;
+  text-decoration-color: rgba(155, 93, 19, 0.3) !important;
+}
+
+.reader-body--canon .aol-mdx-content a:hover {
+  color: var(--ds-amber-500) !important;
+  text-decoration-color: rgba(155, 93, 19, 0.6) !important;
+}
+
+.reader-body--canon .aol-mdx-content blockquote {
+  border-left-color: var(--ds-amber-500) !important;
+  color: var(--ds-neutral-600) !important;
+}
+
+.reader-body--canon .aol-mdx-content blockquote p {
+  color: var(--ds-neutral-600) !important;
+}
+
+.reader-body--canon .aol-mdx-content code {
+  color: var(--ds-neutral-700) !important;
+  background: var(--ds-neutral-100) !important;
+  border-color: var(--ds-neutral-200) !important;
+}
+
+.reader-body--canon .aol-mdx-content pre {
+  background: var(--ds-neutral-800) !important;
+  color: var(--ds-neutral-100) !important;
+  border-color: var(--ds-neutral-200) !important;
+}
+
+.reader-body--canon .aol-mdx-content pre code {
+  background: none !important;
+  border: none !important;
+  color: inherit !important;
+}
+
+.reader-body--canon .aol-mdx-content hr {
+  border-top-color: var(--ds-neutral-200) !important;
+  background: var(--ds-neutral-200) !important;
+}
+
+.reader-body--canon .aol-mdx-content table th {
+  color: var(--ds-neutral-900) !important;
+  background: var(--ds-neutral-100) !important;
+  border-color: var(--ds-neutral-200) !important;
+}
+
+.reader-body--canon .aol-mdx-content table td {
+  color: var(--ds-neutral-800) !important;
+  border-color: var(--ds-neutral-200) !important;
+}
+
 /* --- Vault prose --- */
 
 .reader-body--vault {
