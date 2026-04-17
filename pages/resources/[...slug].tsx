@@ -116,8 +116,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
       })
   ) as Array<{ params: { slug: string[] } }>;
 
-  // Cap prebuild to 5 paths; rest render via `fallback: "blocking"`.
-  return { paths: paths.slice(0, 5), fallback: "blocking" };
+  // Prerender all paths to avoid ISR failures on Netlify.
+  return { paths, fallback: "blocking" };
 
 
 };

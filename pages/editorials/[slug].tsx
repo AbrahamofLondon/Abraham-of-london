@@ -763,7 +763,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   // without a redeploy.
   const items = getPublicationCatalogue();
   return {
-    paths: items.slice(0, 5).map(item => ({ params: { slug: item.slug } })),
+    paths: items.map(item => ({ params: { slug: item.slug } })),
     fallback: "blocking",
   };
 

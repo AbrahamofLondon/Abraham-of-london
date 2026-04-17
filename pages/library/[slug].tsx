@@ -146,8 +146,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
     return true;
   });
 
-  // Cap prebuild to 5 paths; rest render via `fallback: "blocking"`.
-  return { paths: deduped.slice(0, 5), fallback: "blocking" };
+  // Prerender all paths to avoid ISR failures on Netlify.
+  return { paths: deduped, fallback: "blocking" };
 
 
 };

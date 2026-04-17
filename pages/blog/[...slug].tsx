@@ -198,14 +198,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   const posts = (await getPublishedPosts()) || [];
 
-  // Cap prebuild to the 5 most recent posts; rest render via blocking.
+  // Prerender ALL published posts to avoid ISR/edge-function failures on Netlify.
   const paths = [...posts]
     .filter((p: any) => !p?.draft)
-    .sort(
-      (a: any, b: any) =>
-        new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
-    )
-    .slice(0, 5)
     .map((p: any) => {
       const raw = normalizeSlug(
         p?.urlSlug ||

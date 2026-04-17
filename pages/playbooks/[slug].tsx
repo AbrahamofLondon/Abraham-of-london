@@ -155,7 +155,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   // 4 playbooks total; all prebuilt. New additions render via blocking.
   return {
-    paths: paths.slice(0, 5),
+    paths,
     fallback: "blocking",
   };
 
