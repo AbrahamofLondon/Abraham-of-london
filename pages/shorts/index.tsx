@@ -23,6 +23,7 @@ import * as React from "react";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, LayoutGrid, List, Sparkles, ChevronRight } from "lucide-react";
 
@@ -64,6 +65,7 @@ type RawShortDoc = {
   saves?: number | null;
   intensity?: 1 | 2 | 3 | 4 | 5 | null;
   lineage?: string | null;
+  theme?: string | null;
   _raw?: {
     flattenedPath?: string | null;
     sourceFilePath?: string | null;
@@ -84,6 +86,7 @@ type ShortIndexItem = {
   saves: number;
   intensity: 1 | 2 | 3 | 4 | 5;
   lineage: string | null;
+  theme: string;
   date: string | null;
 };
 
@@ -172,17 +175,43 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
     saves:     safeNumber(doc.saves, 0),
     intensity,
     lineage:   safeString(doc.lineage).trim() || null,
+    theme:     safeString(doc.theme).trim().toLowerCase() || "purpose",
     date:      safeString(doc.date).trim() || null,
   };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS (inline)
+// DESIGN TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GOLD  = "var(--ds-accent)";
 const VOID  = "var(--ds-background)";
-const BASE  = "var(--ds-background)";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THEME CONFIGURATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+const THEME_ORDER = [
+  "faith",
+  "purpose",
+  "hard-truths",
+  "inner-life",
+  "outer-life",
+  "relationships",
+  "gentle",
+] as const;
+
+type ThemeKey = (typeof THEME_ORDER)[number];
+
+const THEME_META: Record<ThemeKey, { label: string; subtitle: string; image: string }> = {
+  faith:         { label: "Faith",         subtitle: "The unseen architecture.",               image: "/assets/images/shorts/themes/faith.jpg" },
+  purpose:       { label: "Purpose",       subtitle: "Direction before ambition.",              image: "/assets/images/shorts/themes/purpose.jpg" },
+  "hard-truths": { label: "Hard Truths",   subtitle: "What nobody else will say.",             image: "/assets/images/shorts/themes/hard-truths.jpg" },
+  "inner-life":  { label: "Inner Life",    subtitle: "The conversation beneath the surface.",  image: "/assets/images/shorts/themes/inner-life.jpg" },
+  "outer-life":  { label: "Outer Life",    subtitle: "Work, systems, and visible consequence.", image: "/assets/images/shorts/themes/outer-life.jpg" },
+  relationships: { label: "Relationships", subtitle: "People, boundaries, and belonging.",     image: "/assets/images/shorts/themes/relationships.jpg" },
+  gentle:        { label: "Gentle",        subtitle: "Permission to be human.",                image: "/assets/images/shorts/themes/gentle.jpg" },
+};
 
 const GRAIN: React.CSSProperties = {
   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
@@ -899,56 +928,18 @@ function firstSentence(input: string): string {
   return (match?.[0] || text).trim();
 }
 
-function MemoFilterStrip({
-  categories,
-  activeCategory,
-  setActiveCategory,
-}: {
-  categories: string[];
-  activeCategory: string;
-  setActiveCategory: (value: string) => void;
-}) {
-  return (
-    <div className="px-6 py-6 lg:px-10">
-      <div className="mx-auto max-w-5xl overflow-x-auto">
-        <div className="inline-flex min-w-full gap-8">
-          {["All", ...categories].map((category) => {
-            const isActive =
-              category === "All" ? activeCategory === "" : activeCategory === category;
-
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category === "All" ? "" : category)}
-                className="cursor-pointer whitespace-nowrap border-none bg-transparent pb-1 font-mono text-[8px] uppercase tracking-[0.30em]"
-                style={{
-                  borderBottom: `1px solid ${isActive ? "var(--ds-accent)" : "transparent"}`,
-                  color: isActive ? "var(--ds-accent)" : "var(--ds-text-subtle)",
-                }}
-              >
-                {category}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
-  const [activeCategory, setActiveCategory] = React.useState("");
+  const [activeTheme, setActiveTheme] = React.useState<string>("");
 
-  const categories = React.useMemo(() => {
-    const set = new Set(shorts.map((short) => short.category).filter(Boolean));
-    return Array.from(set).sort();
+  const groupedByTheme = React.useMemo(() => {
+    const map = new Map<string, ShortIndexItem[]>();
+    for (const theme of THEME_ORDER) map.set(theme, []);
+    for (const short of shorts) {
+      const bucket = map.get(short.theme) || map.get("purpose")!;
+      bucket.push(short);
+    }
+    return map;
   }, [shorts]);
-
-  const filtered = React.useMemo(() => {
-    if (!activeCategory) return shorts;
-    return shorts.filter((short) => short.category === activeCategory);
-  }, [activeCategory, shorts]);
 
   return (
     <Layout
@@ -1023,72 +1014,158 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
           </div>
         </header>
 
-        <MemoFilterStrip
-          categories={categories}
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-        />
-
-        <section>
-          {filtered.map((short) => {
-            const excerpt = firstSentence(short.excerpt);
-
-            return (
-              <Link
-                key={short.id}
-                href={short.href}
-                className="group block border-b px-6 py-6 transition-colors lg:px-10"
-                style={{ borderColor: "var(--ds-border)" }}
+        {/* Theme navigation strip */}
+        <nav className="border-b px-6 py-5 lg:px-10" style={{ borderColor: "var(--ds-border)" }}>
+          <div className="mx-auto max-w-5xl overflow-x-auto">
+            <div className="inline-flex min-w-full gap-8">
+              <button
+                type="button"
+                onClick={() => setActiveTheme("")}
+                className="cursor-pointer whitespace-nowrap border-none bg-transparent pb-1 font-mono text-[8px] uppercase tracking-[0.30em]"
+                style={{
+                  borderBottom: `1px solid ${!activeTheme ? "var(--ds-accent)" : "transparent"}`,
+                  color: !activeTheme ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+                }}
               >
-                <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-[80px_minmax(0,1fr)_80px] md:items-start">
-                  <div
-                    className="font-mono text-[8px] uppercase tracking-[0.12em]"
-                    style={{ color: "var(--ds-text-subtle)" }}
+                All
+              </button>
+              {THEME_ORDER.map((theme) => {
+                const meta = THEME_META[theme];
+                const count = groupedByTheme.get(theme)?.length || 0;
+                const isActive = activeTheme === theme;
+                return (
+                  <button
+                    key={theme}
+                    type="button"
+                    onClick={() => setActiveTheme(theme)}
+                    className="cursor-pointer whitespace-nowrap border-none bg-transparent pb-1 font-mono text-[8px] uppercase tracking-[0.30em]"
+                    style={{
+                      borderBottom: `1px solid ${isActive ? "var(--ds-accent)" : "transparent"}`,
+                      color: isActive ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+                    }}
                   >
-                    {short.readTime}
-                  </div>
+                    {meta.label} <span style={{ opacity: 0.5 }}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
 
-                  <div className="min-w-0">
-                    <div
-                      className="font-mono text-[7.5px] uppercase tracking-[0.32em]"
-                      style={{ color: "var(--ds-accent)" }}
-                    >
-                      {short.category}
+        {/* Theme sections */}
+        <section>
+          {THEME_ORDER
+            .filter((theme) => !activeTheme || activeTheme === theme)
+            .map((theme) => {
+              const meta = THEME_META[theme];
+              const items = groupedByTheme.get(theme) || [];
+              if (items.length === 0) return null;
+
+              return (
+                <div key={theme} id={`theme-${theme}`}>
+                  {/* Theme header with cover image */}
+                  <div
+                    className="relative overflow-hidden border-b"
+                    style={{ borderColor: "var(--ds-border)" }}
+                  >
+                    <div className="absolute inset-0">
+                      <Image
+                        src={meta.image}
+                        alt=""
+                        fill
+                        className="object-cover opacity-[0.12]"
+                        sizes="100vw"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{ background: "linear-gradient(to right, var(--ds-background) 30%, transparent 70%)" }}
+                      />
                     </div>
-                    <h2
-                      className="mt-2 font-serif font-light italic transition-colors group-hover:text-white"
-                      style={{
-                        fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
-                        lineHeight: 1.08,
-                        color: "var(--ds-text)",
-                      }}
-                    >
-                      {short.title}
-                    </h2>
-                    {excerpt ? (
+                    <div className="relative mx-auto max-w-5xl px-6 py-10 lg:px-10 lg:py-14">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-block h-4 w-px" style={{ backgroundColor: "var(--ds-accent)", opacity: 0.5 }} />
+                        <span
+                          className="font-mono text-[7px] uppercase tracking-[0.40em]"
+                          style={{ color: "var(--ds-accent)" }}
+                        >
+                          {meta.label}
+                        </span>
+                        <span
+                          className="font-mono text-[7px] uppercase tracking-[0.26em]"
+                          style={{ color: "var(--ds-text-subtle)" }}
+                        >
+                          · {items.length} {items.length === 1 ? "dispatch" : "dispatches"}
+                        </span>
+                      </div>
                       <p
-                        className="mt-2 truncate font-serif font-light"
+                        className="mt-3 max-w-md font-serif font-light italic"
                         style={{
-                          fontSize: "0.875rem",
-                          lineHeight: 1.45,
-                          color: "var(--ds-text-muted)",
+                          fontSize: "clamp(1.3rem, 2.5vw, 1.8rem)",
+                          lineHeight: 1.15,
+                          color: "var(--ds-text)",
                         }}
                       >
-                        {excerpt}
+                        {meta.subtitle}
                       </p>
-                    ) : null}
+                    </div>
                   </div>
 
-                  <div
-                    className="font-mono text-[7.5px] uppercase tracking-[0.12em] md:text-right"
-                    style={{ color: "var(--ds-text-subtle)" }}
-                  >
-                    {formatShortDate(short.date)}
-                  </div>
+                  {/* Shorts list within theme */}
+                  {items.map((short) => {
+                    const excerpt = firstSentence(short.excerpt);
+                    return (
+                      <Link
+                        key={short.id}
+                        href={short.href}
+                        className="group block border-b px-6 py-6 transition-colors lg:px-10"
+                        style={{ borderColor: "var(--ds-border)" }}
+                      >
+                        <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-[80px_minmax(0,1fr)_80px] md:items-start">
+                          <div
+                            className="font-mono text-[8px] uppercase tracking-[0.12em]"
+                            style={{ color: "var(--ds-text-subtle)" }}
+                          >
+                            {short.readTime}
+                          </div>
+
+                          <div className="min-w-0">
+                            <h2
+                              className="font-serif font-light italic transition-colors group-hover:text-white"
+                              style={{
+                                fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+                                lineHeight: 1.08,
+                                color: "var(--ds-text)",
+                              }}
+                            >
+                              {short.title}
+                            </h2>
+                            {excerpt ? (
+                              <p
+                                className="mt-2 truncate font-serif font-light"
+                                style={{
+                                  fontSize: "0.875rem",
+                                  lineHeight: 1.45,
+                                  color: "var(--ds-text-muted)",
+                                }}
+                              >
+                                {excerpt}
+                              </p>
+                            ) : null}
+                          </div>
+
+                          <div
+                            className="font-mono text-[7.5px] uppercase tracking-[0.12em] md:text-right"
+                            style={{ color: "var(--ds-text-subtle)" }}
+                          >
+                            {formatShortDate(short.date)}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
-              </Link>
-            );
-          })}
+              );
+            })}
         </section>
 
         <footer className="px-6 py-10 lg:px-10">

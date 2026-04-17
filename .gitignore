@@ -265,3 +265,5 @@ hubspot.config.yml
 briefs-contamination.patch
 bucket-*.txt
 changed-*.txt
+
+.vercel

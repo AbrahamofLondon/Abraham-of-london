@@ -440,6 +440,7 @@ const Short = defineDocumentType(() => ({
     ...baseFields,
     hook: { type: "string", required: false },
     callToAction: { type: "string", required: false },
+    theme: { type: "string", required: false },
   },
   computedFields: createComputedFields("shorts/", "shorts"),
 }));
