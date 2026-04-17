@@ -1,15 +1,10 @@
 /* lib/api/admin-client.ts — Enhanced Fetch Wrapper */
 
 export async function adminFetch(endpoint: string, options: RequestInit = {}) {
-  const adminKey = typeof window !== "undefined" 
-    ? sessionStorage.getItem("inner_circle_admin_key") 
-    : null;
-
+  // Admin auth is handled server-side via NextAuth session.
+  // The x-inner-circle-admin-key header pattern has been removed
+  // as it stored admin credentials in sessionStorage (XSS risk).
   const headers = new Headers(options.headers);
-  
-  if (adminKey) {
-    headers.set("x-inner-circle-admin-key", adminKey);
-  }
 
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");

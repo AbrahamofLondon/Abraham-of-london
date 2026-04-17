@@ -15,103 +15,34 @@ export interface SafeInnerCircleAccess {
   };
 }
 
-// Client-side only safe check
+/**
+ * NEUTRALIZED — Client-side JWT validation removed.
+ *
+ * Previously parsed JWTs from localStorage and validated expiry client-side.
+ * This was a security risk: tokens were XSS-exfiltrable and expiry could be
+ * forged by modifying the base64 payload.
+ *
+ * Now: always returns { hasAccess: false, reason: 'missing' }.
+ * Server session (NextAuth) is the sole authority.
+ * Use useSession() client-side or getUserAccess() server-side.
+ */
 export function checkInnerCircleAccessSafe(): SafeInnerCircleAccess {
-  if (typeof window === 'undefined') {
-    return {
-      hasAccess: false,
-      reason: 'missing',
-    };
-  }
-
-  try {
-    const token = localStorage.getItem('innerCircleToken');
-    const userData = localStorage.getItem('innerCircleUser');
-
-    if (!token || !userData) {
-      return {
-        hasAccess: false,
-        reason: 'missing',
-      };
-    }
-
-    // Simple token validation (not cryptographically secure on client)
-    const tokenParts = token.split('.');
-    if (tokenParts.length !== 3) {
-      localStorage.removeItem('innerCircleToken');
-      localStorage.removeItem('innerCircleUser');
-      return {
-        hasAccess: false,
-        reason: 'invalid',
-      };
-    }
-
-    // Check if token is expired (basic check)
-    try {
-      // ✅ FIX: Ensure tokenParts[1] exists before using it
-      const payloadPart = tokenParts[1];
-      if (!payloadPart) {
-        throw new Error('Invalid token format');
-      }
-
-      const payload = JSON.parse(atob(payloadPart));
-      const now = Math.floor(Date.now() / 1000);
-      
-      if (payload.exp < now) {
-        localStorage.removeItem('innerCircleToken');
-        localStorage.removeItem('innerCircleUser');
-        return {
-          hasAccess: false,
-          reason: 'expired',
-        };
-      }
-
-      const user = JSON.parse(userData);
-      return {
-        hasAccess: true,
-        reason: 'valid',
-        user,
-      };
-    } catch (error) {
-      localStorage.removeItem('innerCircleToken');
-      localStorage.removeItem('innerCircleUser');
-      return {
-        hasAccess: false,
-        reason: 'invalid',
-      };
-    }
-  } catch (error) {
-    console.error('Safe access check failed:', error);
-    return {
-      hasAccess: false,
-      reason: 'invalid',
-    };
-  }
+  return { hasAccess: false, reason: 'missing' };
 }
 
-// Safe storage helpers
-export function storeInnerCircleDataSafe(token: string, userData: any): boolean {
-  if (typeof window === 'undefined') return false;
-  
-  try {
-    localStorage.setItem('innerCircleToken', token);
-    localStorage.setItem('innerCircleUser', JSON.stringify(userData));
-    return true;
-  } catch (error) {
-    console.error('Failed to store inner circle data:', error);
-    return false;
-  }
+/** @deprecated No-op. Tokens are not stored client-side. */
+export function storeInnerCircleDataSafe(_token: string, _userData: any): boolean {
+  return false;
 }
 
+/** Cleans up any legacy localStorage data. */
 export function clearInnerCircleDataSafe(): boolean {
   if (typeof window === 'undefined') return false;
-  
   try {
     localStorage.removeItem('innerCircleToken');
     localStorage.removeItem('innerCircleUser');
     return true;
-  } catch (error) {
-    console.error('Failed to clear inner circle data:', error);
+  } catch {
     return false;
   }
 }
