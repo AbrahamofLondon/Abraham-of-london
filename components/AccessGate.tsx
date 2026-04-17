@@ -152,8 +152,16 @@ export default function AccessGate({
 
           <button
             type="button"
+            onClick={() => window.location.assign("/access/redeem")}
+            className="w-full text-[9px] font-mono uppercase text-amber-600 hover:text-amber-400 transition-colors pt-4 tracking-widest"
+          >
+            Redeem Access Key
+          </button>
+
+          <button
+            type="button"
             onClick={onGoToJoin || (() => window.location.assign("/inner-circle"))}
-            className="w-full text-[9px] font-mono uppercase text-zinc-600 hover:text-white transition-colors pt-4 tracking-widest"
+            className="w-full text-[9px] font-mono uppercase text-zinc-600 hover:text-white transition-colors pt-2 tracking-widest"
           >
             Request Access // Inner Circle
           </button>

@@ -37,6 +37,7 @@ import {
   Layers,
   Zap,
   Lock,
+  Key,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -425,9 +426,16 @@ export default function Header({
                     {
                       href: "/inner-circle/account",
                       label: "Account",
-                      sub: "Identity & Access Key",
+                      sub: "Identity & Access",
                       tag: "Member",
                       icon: Fingerprint,
+                    },
+                    {
+                      href: "/access/redeem",
+                      label: "Redeem Key",
+                      sub: "Activate Entitlement",
+                      tag: "Member",
+                      icon: Key,
                     },
                   ]
                 : [

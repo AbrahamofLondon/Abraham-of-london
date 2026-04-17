@@ -14,6 +14,7 @@ import {
   LogOut,
   Activity,
   ChevronLeft,
+  Key,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -51,6 +52,12 @@ const navItems = [
     label: "Access Control",
     icon: Shield,
     description: "User permissions",
+  },
+  {
+    href: "/admin/access-keys",
+    label: "Access Keys",
+    icon: Key,
+    description: "Issue & manage keys",
   },
 ];
 

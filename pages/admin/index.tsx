@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Compass,
   Sparkles,
+  Key,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ContextualContextCard } from "@/components/admin/decision/ContextualContextCard";
@@ -207,6 +208,16 @@ const AdminIndexPage: NextPage = () => {
       color: "text-purple-400",
       bg: "bg-purple-500/10",
       stats: "Measured",
+    },
+    {
+      href: "/admin/access-keys",
+      title: "Access Key Management",
+      description:
+        "Issue, revoke, and audit access keys for tier, artifact, and product entitlements.",
+      icon: Key,
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+      stats: "Entitlements",
     },
   ];
 
