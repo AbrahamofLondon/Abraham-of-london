@@ -832,9 +832,9 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
               >
                 {[
                   { label: "Library", value: counts.library, icon: LibraryBig },
-                  { label: "Publications", value: counts.publications, icon: ScrollText },
+                  { label: "Essays", value: counts.publications, icon: ScrollText },
                   { label: "Playbooks", value: counts.playbooks, icon: Workflow },
-                  { label: "Products", value: counts.downloads + counts.briefs, icon: Archive },
+                  { label: "Deliverables", value: counts.downloads + counts.briefs, icon: Archive },
                 ].map((item) => (
                   <div key={item.label} className="p-5" style={{ backgroundColor: "var(--ds-panel-alt)" }}>
                     <item.icon className="h-3.5 w-3.5 ds-text-subtle" />
@@ -2503,20 +2503,16 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
   const computeFromDocs = (docsIn: any[], dataForBooks?: any, dataForPlaybooks?: any) => {
     const stableDocs = (docsIn || []).filter((d) => !isDraftLocal(d));
 
-    // Single-pass counting instead of 4 separate filter() calls over 316 docs.
+    // Collect shorts docs for featured selection (counts are set authoritatively above).
     const shortsDocs: any[] = [];
     for (const d of stableDocs) {
       const k = kindLower(d);
       const fp = flattenedPath(d);
-      if (k === "short" || fp.startsWith("shorts/")) { counts.shorts++; shortsDocs.push(d); }
-      else if (k === "canon" || fp.startsWith("canon/")) counts.canon++;
-      else if (k === "brief" || fp.startsWith("briefs/") || fp.startsWith("vault/briefs/")) counts.briefs++;
-      else if (k === "download" || fp.startsWith("downloads/")) counts.downloads++;
+      if (k === "short" || fp.startsWith("shorts/")) shortsDocs.push(d);
     }
 
     const allPlaybooks = readPlaybooksFromGenerated(dataForPlaybooks);
     featuredPlaybooks = allPlaybooks.slice(0, 3);
-    counts.playbooks = allPlaybooks.length;
 
     // Build featured-href index once, then look up — O(n) instead of O(n²).
     const featuredHrefs = new Set<string>();
@@ -2591,20 +2587,49 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   try {
     const mod: any = await import("@/lib/content/server");
-    const getContentlayerData = mod?.getContentlayerData;
-    if (typeof getContentlayerData !== "function") throw new Error("missing");
-    const data = getContentlayerData();
-    const docs = collectAnyDocs(data);
-    computeFromDocs(docs, data, data);
-    if (shouldForceFallback(counts, docs.length)) throw new Error("fallback");
-  } catch {
-    // Primary content/server path failed; keep defaults rather than
-    // falling back to the full contentlayer barrel (which would drag
-    // the entire 16-collection corpus into this worker's RSS).
-  }
 
-  // Artifact count was captured during the first scan above — no duplicate fs read.
-  counts.library = (counts.library || 0) + artifactFileCount;
+    // ── Authoritative counts from SSOT getters ──────────────────────────
+    const isLive = mod?.isPublished || ((d: any) => d?.draft !== true && d?.published !== false);
+    const countLive = (fn: (() => any[]) | undefined) => {
+      try { return (fn?.() || []).filter(isLive).length; } catch { return 0; }
+    };
+
+    counts.shorts   = countLive(mod?.getAllShorts);
+    counts.canon    = countLive(mod?.getAllCanons);
+    counts.briefs   = countLive(mod?.getAllBriefs);
+    counts.downloads = countLive(mod?.getAllDownloads);
+    counts.playbooks = countLive(mod?.getAllPlaybooks);
+
+    // Additional authoritative totals for display categories
+    const bookCount     = countLive(mod?.getAllBooks);
+    const lexiconCount  = countLive(mod?.getAllLexicons);
+    const resourceCount = countLive(mod?.getAllResources);
+    const postCount     = countLive(mod?.getAllPosts);
+    const printCount    = countLive(mod?.getAllPrints);
+
+    // Library = Canon + Books + Lexicon + Resources + artifacts
+    counts.library = counts.canon + bookCount + lexiconCount + resourceCount + artifactFileCount;
+
+    // Publications = Posts + editorial catalogue
+    counts.publications = postCount + catalogue.length;
+
+    // Products = Downloads + Briefs + Prints
+    // (counts.downloads and counts.briefs already set above)
+    counts.downloads = counts.downloads + printCount;
+
+    // ── Featured items (uses full doc corpus) ───────────────────────────
+    const getContentlayerData = mod?.getContentlayerData;
+    if (typeof getContentlayerData === "function") {
+      const data = getContentlayerData();
+      const docs = collectAnyDocs(data);
+      if (docs.length > 0) {
+        computeFromDocs(docs, data, data);
+      }
+    }
+  } catch {
+    // Content/server path failed; counts stay at initialized defaults.
+    counts.library = artifactFileCount;
+  }
 
   // featuredCanon and featuredBlogPosts are now computed inside
   // computeFromDocs() from the already-loaded contentlayer corpus,
