@@ -1,53 +1,31 @@
-import { DefaultSession, DefaultUser } from "next-auth";
-import type { AccessTier } from "@/lib/access/tier-policy";
-import type { AoLClaims } from "@/types/auth";
+import "next-auth";
+import "next-auth/jwt";
+import type { AccessTier } from "@/lib/access/types";
 
 declare module "next-auth" {
-  /**
-   * Extends the built-in User item
-   */
-  interface User extends DefaultUser {
-    id: string;
-    role?: string;
-    tier?: AccessTier;
-    aol?: AoLClaims;
-    isInternal?: boolean;
-  }
-
-  /**
-   * Extends the built-in Session
-   *
-   * The `innerCircle` field is populated only when the session is resolved
-   * through `getUnifiedSession()` (lib/auth/session-helpers.ts). Raw
-   * NextAuth sessions do not carry it.
-   */
   interface Session {
-    id?: string;
-    tier?: AccessTier;
-    aol?: AoLClaims;
     user: {
       id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
       role?: string;
-      tier?: AccessTier;
-      aol?: AoLClaims;
-      isInternal?: boolean;
-    } & DefaultSession["user"];
-    innerCircle?: {
-      hasValidToken: boolean;
-      tier: AccessTier;
-      expiresAt: string | null;
+      accessTier?: AccessTier;
+      entitlements?: {
+        tiers: AccessTier[];
+        products: string[];
+        artifacts: string[];
+      };
     };
+  }
+
+  interface User {
+    role?: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id?: string;
     role?: string;
-    tier?: AccessTier;
-    aol?: AoLClaims;
-    isInternal?: boolean;
   }
 }
-
-export {};

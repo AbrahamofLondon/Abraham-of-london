@@ -1,7 +1,12 @@
 /* pages/inner-circle/index.tsx — UNIFIED AUTHENTICATION GATE */
 import * as React from "react";
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
+import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
+import { authOptions } from "@/lib/auth/options";
+import { prisma } from "@/lib/prisma.server";
+import { getUserAccess } from "@/lib/access/get-user-access";
+import { canAccessTier } from "@/lib/access/checks";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck,
@@ -350,4 +355,21 @@ const InnerCirclePage: NextPage = () => {
 };
 
 export default InnerCirclePage;
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getServerSession(ctx.req, ctx.res, authOptions);
+  const access = await getUserAccess(prisma, session?.user?.id ?? null);
+
+  // Already has inner-circle access — redirect to dashboard
+  if (canAccessTier(access, "inner-circle")) {
+    return {
+      redirect: {
+        destination: "/inner-circle/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: {} };
+};
 

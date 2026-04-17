@@ -233,6 +233,37 @@ enum GovernanceStatus {
   ARCHIVED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  OWNER
+}
+
+enum EntitlementType {
+  TIER
+  PRODUCT
+  ARTIFACT
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum AccessKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+  DEPLETED
+}
+
+enum AuditActorType {
+  USER
+  SYSTEM
+  ADMIN
+}
+
 // ============================================================================
 // ORGANISATION & ENTERPRISE CAMPAIGN SYSTEM
 // ============================================================================
@@ -366,6 +397,120 @@ model GovernanceLog {
   target      String?
   details     String?
   createdAt   DateTime @default(now())
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole       @default(USER)
+
+  accounts      Account[]
+  sessions      Session[]
+
+  entitlements  Entitlement[]
+  accessKeyUses AccessKeyUse[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([role])
+}
+
+model Entitlement {
+  id          String             @id @default(cuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        EntitlementType
+  key         String
+  status      EntitlementStatus  @default(ACTIVE)
+
+  metadata    Json?
+
+  issuedAt    DateTime           @default(now())
+  startsAt    DateTime?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  issuedBy    String?
+  revokedBy   String?
+  reason      String?
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([userId, type, status])
+  @@index([key, type, status])
+  @@unique([userId, type, key, status], map: "entitlement_active_uniqueness")
+}
+
+model AccessKey {
+  id            String           @id @default(cuid())
+  codeHash       String           @unique
+  codePreview    String
+  label          String?
+  status         AccessKeyStatus  @default(ACTIVE)
+
+  grants         Json
+  metadata       Json?
+
+  maxUses        Int              @default(1)
+  uses           Int              @default(0)
+
+  startsAt       DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  issuedBy       String?
+  revokedBy      String?
+  reason         String?
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  usesLog        AccessKeyUse[]
+
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model AccessKeyUse {
+  id           String     @id @default(cuid())
+  accessKeyId  String
+  accessKey    AccessKey  @relation(fields: [accessKeyId], references: [id], onDelete: Cascade)
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  redeemedAt   DateTime   @default(now())
+  ipAddress    String?
+  userAgent    String?
+
+  @@index([accessKeyId])
+  @@index([userId])
+  @@unique([accessKeyId, userId])
+}
+
+model AccessAuditLog {
+  id            String         @id @default(cuid())
+  actorType     AuditActorType
+  actorUserId   String?
+  actorEmail    String?
+
+  action        String
+  targetType    String
+  targetKey     String?
+
+  success       Boolean        @default(true)
+  reason        String?
+  metadata      Json?
+
+  createdAt     DateTime       @default(now())
+
+  @@index([action, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([targetType, targetKey])
 }
 
 model CampaignParticipant {
