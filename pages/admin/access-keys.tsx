@@ -7,6 +7,7 @@ import Head from "next/head";
 import {
   Key, Plus, Copy, Check, X, AlertTriangle, Loader2,
   ChevronDown, ChevronRight, Shield, Clock, Users, Ban,
+  Mail, Send,
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
@@ -412,6 +413,58 @@ const AccessKeysPage: NextPage<PageProps> = ({ initialKeys }) => {
     setShowCreate(false);
   };
 
+  // --- Invite state ---
+  const [showInvite, setShowInvite] = React.useState(false);
+  const [inviteEmail, setInviteEmail] = React.useState("");
+  const [inviteGrants, setInviteGrants] = React.useState<GrantInput[]>([]);
+  const [inviteExpiry, setInviteExpiry] = React.useState("");
+  const [inviteState, setInviteState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [inviteResult, setInviteResult] = React.useState<{ recipientEmail: string; inviteUrl: string } | null>(null);
+  const [inviteError, setInviteError] = React.useState("");
+
+  const handleSendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim() || inviteGrants.length === 0 || inviteState === "sending") return;
+
+    setInviteState("sending");
+    setInviteError("");
+
+    try {
+      const res = await fetch("/api/admin/invites/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientEmail: inviteEmail.trim(),
+          grants: inviteGrants,
+          expiresAt: inviteExpiry || undefined,
+          sendEmail: true,
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.ok) {
+        setInviteState("sent");
+        setInviteResult({ recipientEmail: json.recipientEmail, inviteUrl: json.inviteUrl });
+      } else {
+        setInviteState("error");
+        setInviteError(json.error || "Failed to send invitation.");
+      }
+    } catch {
+      setInviteState("error");
+      setInviteError("Network error.");
+    }
+  };
+
+  const resetInvite = () => {
+    setShowInvite(false);
+    setInviteEmail("");
+    setInviteGrants([]);
+    setInviteExpiry("");
+    setInviteState("idle");
+    setInviteResult(null);
+    setInviteError("");
+  };
+
   return (
     <Layout title="Access Keys | Admin" fullWidth>
       <Head>
@@ -444,24 +497,130 @@ const AccessKeysPage: NextPage<PageProps> = ({ initialKeys }) => {
               </h1>
             </div>
 
-            <button
-              onClick={() => setShowCreate(!showCreate)}
-              className="inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
-              style={{
-                borderColor: "var(--ds-accent-soft)",
-                backgroundColor: "var(--ds-accent-soft)",
-                color: "var(--ds-accent)",
-              }}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Issue Key
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowCreate(!showCreate); setShowInvite(false); }}
+                className="inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                style={{
+                  borderColor: "var(--ds-accent-soft)",
+                  backgroundColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                }}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Issue Key
+              </button>
+              <button
+                onClick={() => { setShowInvite(!showInvite); setShowCreate(false); }}
+                className="inline-flex items-center gap-2 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  color: "var(--ds-text-muted)",
+                }}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Send Invitation
+              </button>
+            </div>
           </div>
 
           <div
             className="my-8 h-px"
             style={{ background: "var(--ds-border)" }}
           />
+
+          {/* Invite panel */}
+          {showInvite && (
+            <div
+              className="mb-10 rounded-xl border p-8"
+              style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}
+            >
+              {inviteState === "sent" && inviteResult ? (
+                <div>
+                  <div className="flex items-center gap-3">
+                    <Send className="h-5 w-5" style={{ color: "var(--ds-accent)" }} />
+                    <h3 className="font-mono text-[10px] uppercase tracking-[0.32em]" style={{ color: "var(--ds-accent)" }}>
+                      Invitation Sent
+                    </h3>
+                  </div>
+                  <p className="mt-4 text-sm" style={{ color: "var(--ds-text-muted)" }}>
+                    An invitation email has been sent to <strong style={{ color: "var(--ds-text)" }}>{inviteResult.recipientEmail}</strong>.
+                    They will receive a secure link to activate their entitlements.
+                  </p>
+                  <button
+                    onClick={resetInvite}
+                    className="mt-6 border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                    style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSendInvite} className="space-y-6">
+                  <h2 className="font-mono text-[10px] uppercase tracking-[0.32em]" style={{ color: "var(--ds-text)" }}>
+                    Send Access Invitation
+                  </h2>
+
+                  <div>
+                    <label className="block font-mono text-[9px] uppercase tracking-[0.36em]" style={{ color: "var(--ds-text-subtle)" }}>
+                      Recipient Email
+                    </label>
+                    <input
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="recipient@institution.com"
+                      required
+                      className="mt-2 w-full border px-4 py-3 text-sm outline-none transition focus:border-[var(--ds-accent-soft)]"
+                      style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-background)", color: "var(--ds-text)" }}
+                    />
+                  </div>
+
+                  <GrantBuilder grants={inviteGrants} onChange={setInviteGrants} />
+
+                  <div>
+                    <label className="block font-mono text-[9px] uppercase tracking-[0.36em]" style={{ color: "var(--ds-text-subtle)" }}>
+                      Expires At (optional)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={inviteExpiry}
+                      onChange={(e) => setInviteExpiry(e.target.value)}
+                      className="mt-2 w-full border px-4 py-3 text-sm outline-none transition focus:border-[var(--ds-accent-soft)]"
+                      style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-background)", color: "var(--ds-text)" }}
+                    />
+                  </div>
+
+                  {inviteState === "error" && (
+                    <div className="flex items-center gap-2 text-sm" style={{ color: "#cf4d4d" }}>
+                      <AlertTriangle className="h-4 w-4" />
+                      {inviteError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      disabled={!inviteEmail.trim() || inviteGrants.length === 0 || inviteState === "sending"}
+                      className="flex items-center gap-2 border px-6 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition disabled:opacity-40"
+                      style={{ borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }}
+                    >
+                      {inviteState === "sending" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                      {inviteState === "sending" ? "Sending…" : "Send Invitation"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetInvite}
+                      className="border px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] transition"
+                      style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-muted)" }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
 
           {/* Create panel */}
           {showCreate && (
