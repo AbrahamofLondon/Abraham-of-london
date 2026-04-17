@@ -43,7 +43,7 @@ function BookListCard({
   className,
 }: BookListCardProps) {
   return (
-    <Link href={book.url} className={["group block", className].filter(Boolean).join(" ")}>
+    <Link href={book.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
       <CardShell
         as="div"
         variant="default"

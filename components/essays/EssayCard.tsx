@@ -39,7 +39,7 @@ export type EssayCardProps = {
 
 function CompactEssayCard({ post, className }: { post: EssayCardItem; className?: string }) {
   return (
-    <Link href={post.url} className={["group block", className].filter(Boolean).join(" ")}>
+    <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
       <CardShell
         as="div"
         variant="default"
@@ -78,7 +78,7 @@ export default function EssayCard({
   }
 
   return (
-    <Link href={post.url} className={["group block", className].filter(Boolean).join(" ")}>
+    <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
       <CardShell
         as="div"
         variant="default"
