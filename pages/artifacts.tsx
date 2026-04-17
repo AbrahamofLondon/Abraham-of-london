@@ -43,8 +43,8 @@ import Layout from "@/components/Layout";
 const ROUTES = {
   publicBrief: "/artifacts/global-market-outlook-q1-2026-public",
   institutionalEdition: "/artifacts/global-market-intelligence-report-q1-2026",
-  boardDeck: "/artifacts/gmi-q1-2026-deck",
-  boardroomPdf: "/artifacts/intel-2026-q1-pdf",
+  boardDeck: "/artifacts/global-market-intelligence-board-deck-q1-2026",
+  boardroomPdf: "/artifacts/global-market-intelligence-report-q1-2026",
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -552,7 +552,7 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                     </Link>
 
                     <Link
-                      href="/artifacts/gmi-q1-2026-deck"
+                      href="/artifacts/global-market-intelligence-board-deck-q1-2026"
                       className="group inline-flex items-center gap-2.5 transition-all duration-300"
                       style={{
                         padding: "10px 20px",
@@ -819,13 +819,13 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                         {
                           label: "Board deck",
                           icon: Presentation,
-                          href: "/artifacts/gmi-q1-2026-deck",
+                          href: "/artifacts/global-market-intelligence-board-deck-q1-2026",
                           gold: false,
                         },
                         {
                           label: "Boardroom PDF",
                           icon: Scale,
-                          href: "/artifacts/intel-2026-q1-pdf",
+                          href: "/artifacts/global-market-intelligence-report-q1-2026",
                           gold: false,
                         },
                       ].map((item, idx, arr) => {
@@ -1043,7 +1043,7 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                   </Link>
 
                   <Link
-                    href="/artifacts/gmi-q1-2026-deck"
+                    href="/artifacts/global-market-intelligence-board-deck-q1-2026"
                     className="group inline-flex items-center gap-3 transition-all duration-300"
                     style={{
                       padding: "13px 24px",

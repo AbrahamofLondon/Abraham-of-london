@@ -785,7 +785,7 @@ export const getStaticProps: GetStaticProps<BlogIndexProps> = async () => {
         const bare = postBareSlug(fp);
         if (!bare) return null;
 
-        const url = safeString(doc?.url, `/blog/${bare}`);
+        const url = safeString(doc?.url) || `/blog/${bare}`;
 
         return {
           slug: bare,
