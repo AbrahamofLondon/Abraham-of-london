@@ -258,6 +258,12 @@ function RawMarkdownFallback({ content }: { content: string }) {
     // Also handle self-closing without space: <Divider/>
     processed = processed.replace(/<(Divider|Rule|SectionBreak)\s*\/?\s*>/g, "\n---\n");
 
+    // Strip remaining inline HTML tags (preserving text content) before escaping.
+    // Prevents <span class="...">text</span> from appearing as literal escaped tags.
+    // Self-closing tags (e.g. <br />, <img ... />) are removed entirely.
+    processed = processed.replace(/<[a-z][^>]*\/\s*>/gi, "");
+    processed = processed.replace(/<\/?[a-z][a-z0-9]*(?:\s[^>]*)?>/gi, "");
+
     processed = escapeHtml(processed);
 
     processed = processed.replace(

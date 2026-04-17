@@ -1,447 +1,526 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* pages/books/index.tsx — BOOKS ARCHIVE (Premium, scan-ready, SSOT-safe slugs) */
-
 import * as React from "react";
-import type { GetStaticProps, NextPage } from "next";
-import Link from "next/link";
-import Image from "next/image";
+import type { GetStaticProps, InferGetStaticPropsType } from "next";
 import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 
 import Layout from "@/components/Layout";
-import BookListCard from "@/components/books/BookListCard";
-import { Search, Tag } from "lucide-react";
+import { BookListCard } from "@/components/books/BookListCard";
+import { getAllBooks } from "@/lib/content/server";
 import { resolveDocCoverImage } from "@/lib/content/shared";
 
-
-/* -----------------------------------------------------------------------------
-  TYPES
------------------------------------------------------------------------------ */
+type BookDoc = {
+  slug?: string;
+  url?: string;
+  title?: string;
+  subtitle?: string | null;
+  description?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  tags?: string[] | null;
+  category?: string | null;
+  date?: string | null;
+  readingTime?: string | null;
+  featured?: boolean | null;
+};
 
 type BookItem = {
   slug: string;
   url: string;
   title: string;
-  subtitle?: string | null;
-  excerpt: string | null;
-  date: string | null;
-  dateIso: string | null;
-  readTime: string | null;
-  coverImage: string | null;
+  subtitle: string;
+  description: string;
+  coverImage: string;
   tags: string[];
-  author: string | null;
-  featured?: boolean;
-  coverAspect?: "wide" | "book" | "square" | string | null;
-  coverFit?: "cover" | "contain" | "smart" | string | null;
-  coverPosition?: "center" | string | null;
+  category: string;
+  date: string;
+  readingTime: string;
+  featured: boolean;
 };
 
-type BooksIndexProps = {
-  items: BookItem[];
-  totalBooks: number;
+type BooksPageProps = {
+  books: BookItem[];
+  featured: BookItem[];
+  library: BookItem[];
+  tags: string[];
+  heroBook: BookItem | null;
 };
 
-const DEFAULT_COVER = "/assets/images/books/the-architecture-of-human-purpose.jpg";
+const FALLBACK_BOOK_COVER =
+  "/assets/images/books/the-architecture-of-human-purpose.jpg";
 
-/* -----------------------------------------------------------------------------
-  HELPERS
------------------------------------------------------------------------------ */
-
-function sanitizeData<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+function safeString(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
-function safeString(value: unknown): string {
-  if (typeof value === "string") return value;
-  if (value == null) return "";
-  return String(value);
-}
-
-function collapseSlashes(s: string): string {
-  return String(s || "")
-    .replace(/\\/g, "/")
-    .replace(/\/{2,}/g, "/");
-}
-
-/** Books SSOT slug normalizer:
- * - keeps nested paths intact
- * - strips only known prefixes
- * - blocks traversal
- */
-function booksBareSlug(input: unknown): string {
-  let s = String(input ?? "")
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/")
-    .replace(/\.(md|mdx)$/i, "");
-
-  if (!s || s.includes("..")) return "";
-
-  const stripOnce = (prefix: string) => {
-    const p = prefix.replace(/^\/+/, "").replace(/\/+$/, "") + "/";
-    if (s.toLowerCase().startsWith(p.toLowerCase())) {
-      s = s.slice(p.length);
-      s = s.replace(/^\/+/, "");
-      return true;
-    }
-    return false;
-  };
-
-  let changed = true;
-  while (changed) {
-    changed = false;
-    changed = stripOnce("content") || changed;
-    changed = stripOnce("vault") || changed;
-    changed = stripOnce("books") || changed;
-  }
-
-  s = s.replace(/^\/+/, "").replace(/\/+$/, "").replace(/\/{2,}/g, "/");
-  if (!s || s.includes("..")) return "";
-
-  return s;
-}
-
-function pickBookBareSlug(doc: any): string {
-  return (
-    booksBareSlug(doc?.urlSlug) ||
-    booksBareSlug(doc?.collectionSlug) ||
-    booksBareSlug(doc?.slug) ||
-    booksBareSlug(doc?._raw?.flattenedPath) ||
-    booksBareSlug(doc?._raw?.sourceFilePath) ||
-    ""
-  );
-}
-
-function normalizeTagArray(value: unknown): string[] {
+function safeArray(value: unknown): string[] {
   return Array.isArray(value)
-    ? value.map((v) => safeString(v).trim()).filter(Boolean)
+    ? value.map((item) => String(item).trim()).filter(Boolean)
     : [];
 }
 
-function safeDateIso(value: unknown): string | null {
-  const raw = safeString(value).trim();
-  if (!raw) return null;
-  const time = Date.parse(raw);
-  if (!Number.isFinite(time)) return null;
-  return new Date(time).toISOString();
+function normalizeBook(doc: BookDoc): BookItem {
+  const slug = safeString(doc.slug, "untitled-book");
+  const url = safeString(doc.url, `/books/${slug}`);
+  const title = safeString(doc.title, "Untitled Volume");
+  const subtitle = safeString(doc.subtitle, "");
+  const description = safeString(
+    doc.description,
+    safeString(doc.excerpt, "A long-form work from Abraham of London."),
+  );
+
+  const resolvedCover = safeString(
+    resolveDocCoverImage(doc as never, { contentType: "BOOK" }),
+    FALLBACK_BOOK_COVER,
+  );
+
+  return {
+    slug,
+    url,
+    title,
+    subtitle,
+    description,
+    coverImage: resolvedCover || FALLBACK_BOOK_COVER,
+    tags: safeArray(doc.tags),
+    category: safeString(doc.category, "Book"),
+    date: safeString(doc.date, ""),
+    readingTime: safeString(doc.readingTime, ""),
+    featured: Boolean(doc.featured),
+  };
 }
 
-function safeDateLabel(value: unknown): string | null {
-  const iso = safeDateIso(value);
-  if (!iso) return null;
-  return new Date(iso).toLocaleDateString("en-GB");
+function formatEyebrowCount(count: number): string {
+  return `${count} ${count === 1 ? "title" : "titles"}`;
 }
 
+function HeroPanel({ heroBook }: { heroBook: BookItem | null }) {
+  if (!heroBook) {
+    return (
+      <div
+        className="relative overflow-hidden rounded-[2rem] border"
+        style={{
+          borderColor: "var(--ds-border)",
+          background:
+            "linear-gradient(180deg, var(--ds-panel-alt) 0%, var(--ds-panel) 100%)",
+        }}
+      >
+        <div className="grid min-h-[420px] place-items-center px-8 py-12 text-center">
+          <div className="max-w-xl">
+            <div
+              className="mb-4 font-mono text-[10px] uppercase tracking-[0.34em]"
+              style={{ color: "var(--ds-text-subtle)" }}
+            >
+              Catalogue Banner
+            </div>
+            <h2
+              className="font-serif text-4xl leading-[0.95] md:text-5xl"
+              style={{ color: "var(--ds-text)" }}
+            >
+              Built for builders who govern what they touch.
+            </h2>
+            <p
+              className="mt-5 text-base leading-8"
+              style={{ color: "var(--ds-text-muted)" }}
+            >
+              Premium long-form works, ordered for clarity, memory, and return
+              value.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-/* -----------------------------------------------------------------------------
-  PAGE
------------------------------------------------------------------------------ */
+  return (
+    <div
+      className="relative overflow-hidden rounded-[2rem] border"
+      style={{
+        borderColor: "var(--ds-border)",
+        background:
+          "linear-gradient(180deg, var(--ds-panel-alt) 0%, var(--ds-panel) 100%)",
+      }}
+    >
+      <div className="grid min-h-[420px] gap-0 md:grid-cols-[1.15fr_0.85fr]">
+        <div className="relative flex items-end overflow-hidden px-8 py-8 md:px-10 md:py-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 70% at 18% 18%, rgba(201,169,110,0.12) 0%, transparent 58%), linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%)",
+            }}
+          />
+          <div className="relative z-10 max-w-2xl">
+            <div
+              className="mb-4 font-mono text-[10px] uppercase tracking-[0.34em]"
+              style={{ color: "var(--ds-accent)" }}
+            >
+              Featured Volume
+            </div>
 
-const BooksIndex: NextPage<BooksIndexProps> = ({ items, totalBooks }) => {
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
+            <h2
+              className="font-serif text-4xl leading-[0.94] md:text-6xl"
+              style={{ color: "var(--ds-text)" }}
+            >
+              {heroBook.title}
+            </h2>
 
-  const allTags = React.useMemo(() => {
-    const map = new Map<string, number>();
-    for (const b of items) {
-      for (const t of b.tags || []) {
-        map.set(t, (map.get(t) || 0) + 1);
-      }
-    }
-    return Array.from(map.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 14)
-      .map(([t]) => t);
-  }, [items]);
+            {heroBook.subtitle ? (
+              <p
+                className="mt-4 max-w-[34ch] font-serif text-xl leading-8 md:text-2xl"
+                style={{ color: "var(--ds-text-muted)" }}
+              >
+                {heroBook.subtitle}
+              </p>
+            ) : null}
+
+            <p
+              className="mt-6 max-w-[40ch] text-base leading-8"
+              style={{ color: "var(--ds-text-muted)" }}
+            >
+              {heroBook.description}
+            </p>
+
+            <div
+              className="mt-8 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.28em]"
+              style={{ color: "var(--ds-text-subtle)" }}
+            >
+              {heroBook.date ? <span>{heroBook.date}</span> : null}
+              {heroBook.readingTime ? <span>{heroBook.readingTime}</span> : null}
+              {heroBook.category ? <span>{heroBook.category}</span> : null}
+            </div>
+
+            <div className="mt-8">
+              <Link
+                href={heroBook.url}
+                className="inline-flex items-center gap-3 border px-6 py-4 transition"
+                style={{
+                  borderColor: "var(--ds-accent-soft)",
+                  backgroundColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Read Volume
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative min-h-[320px] md:min-h-full">
+          <div
+            className="absolute inset-6 overflow-hidden rounded-[1.6rem] border"
+            style={{
+              borderColor: "var(--ds-border)",
+              backgroundColor: "var(--ds-background-muted)",
+            }}
+          >
+            <Image
+              src={heroBook.coverImage || FALLBACK_BOOK_COVER}
+              alt={heroBook.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 38vw"
+              className="object-cover"
+              priority
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(3,3,5,0.08) 0%, rgba(3,3,5,0.18) 100%)",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  count,
+}: {
+  eyebrow: string;
+  title: string;
+  count?: string;
+}) {
+  return (
+    <div className="mb-8 flex items-end justify-between gap-6">
+      <div>
+        <div
+          className="mb-3 font-mono text-[10px] uppercase tracking-[0.34em]"
+          style={{ color: "var(--ds-accent)" }}
+        >
+          {eyebrow}
+        </div>
+        <h2
+          className="font-serif text-3xl leading-none md:text-4xl"
+          style={{ color: "var(--ds-text)" }}
+        >
+          {title}
+        </h2>
+      </div>
+
+      {count ? (
+        <div
+          className="hidden font-mono text-[10px] uppercase tracking-[0.32em] md:block"
+          style={{ color: "var(--ds-text-subtle)" }}
+        >
+          {count}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export default function BooksPage({
+  books,
+  featured,
+  library,
+  tags,
+  heroBook,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  const [query, setQuery] = React.useState("");
+  const [activeTag, setActiveTag] = React.useState<string>("All");
 
   const filtered = React.useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = query.trim().toLowerCase();
 
-    return items.filter((b) => {
-      const matchesSearch =
-        !q ||
-        b.title.toLowerCase().includes(q) ||
-        (b.subtitle || "").toLowerCase().includes(q) ||
-        (b.excerpt || "").toLowerCase().includes(q) ||
-        (b.tags || []).some((t) => t.toLowerCase().includes(q));
+    return books.filter((book) => {
+      const matchesTag =
+        activeTag === "All" ||
+        book.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase()) ||
+        book.category.toLowerCase() === activeTag.toLowerCase();
 
-      const matchesTag = !selectedTag || (b.tags || []).includes(selectedTag);
-      return matchesSearch && matchesTag;
+      if (!matchesTag) return false;
+      if (!q) return true;
+
+      const haystack = [
+        book.title,
+        book.subtitle,
+        book.description,
+        book.category,
+        ...book.tags,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
     });
-  }, [items, searchQuery, selectedTag]);
+  }, [books, query, activeTag]);
 
-  const featured = React.useMemo(() => filtered.filter((x) => !!x.featured).slice(0, 3), [filtered]);
-  const rest = React.useMemo(() => filtered.filter((x) => !x.featured), [filtered]);
-
-  const heroImage = items.find((p) => p.coverImage)?.coverImage || DEFAULT_COVER;
+  const filteredFeatured = filtered.filter((book) => book.featured);
+  const filteredLibrary = filtered.filter((book) => !book.featured);
 
   return (
     <Layout
-      title="Books // Abraham of London"
+      title="Books | Abraham of London"
+      description="Premium long-form works built for builders, reformers, and serious operators."
       canonicalUrl="/books"
-      className="ds-surface-books bg-black text-white"
       fullWidth
-      headerTransparent={false}
     >
       <Head>
-        <title>Books // Abraham of London</title>
+        <meta property="og:title" content="Books | Abraham of London" />
       </Head>
 
-      <section className="relative overflow-hidden border-b" style={{ paddingTop: 80, borderColor: "var(--ds-border)" }}>
-        <div className="relative mx-auto max-w-7xl px-6 py-12 lg:px-12">
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <div className="inline-flex items-center gap-2 rounded-full border px-4 py-2" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
-                <span className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-accent)" }}>
-                  Books & Manifestos
-                </span>
-                <span className="h-1 w-1 rounded-full" style={{ backgroundColor: "var(--ds-text-subtle)" }} />
-                <span className="text-[10px] font-mono uppercase tracking-[0.25em]" style={{ color: "var(--ds-text-subtle)" }}>
-                  {totalBooks} titles
-                </span>
+      <main
+        className="ds-surface-books min-h-screen"
+        style={{ backgroundColor: "var(--ds-background)" }}
+      >
+        <section className="mx-auto max-w-7xl px-6 pb-8 pt-20 lg:px-12">
+          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
+            <div>
+              <div
+                className="inline-flex items-center rounded-full border px-4 py-3 font-mono text-[10px] uppercase tracking-[0.32em]"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  color: "var(--ds-accent)",
+                  backgroundColor: "var(--ds-panel)",
+                }}
+              >
+                Books & Manifestos · {formatEyebrowCount(books.length)}
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl tracking-tight md:text-5xl" style={{ color: "var(--ds-text)" }}>
+              <h1
+                className="mt-7 font-serif text-5xl leading-[0.95] md:text-6xl"
+                style={{ color: "var(--ds-text)" }}
+              >
                 Books
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed md:text-base" style={{ color: "var(--ds-text-muted)" }}>
-                Premium long-form work — built for builders who govern what they touch.
+
+              <p
+                className="mt-5 max-w-[24ch] text-xl leading-9"
+                style={{ color: "var(--ds-text-muted)" }}
+              >
+                Premium long-form work — built for builders who govern what they
+                touch.
               </p>
 
               <div className="mt-8">
-                <div className="relative max-w-xl">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--ds-text-subtle)" }} />
-                  <input
-                    type="text"
-                    placeholder="Search books, themes, tags…"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border py-3 pl-11 pr-4 text-sm outline-none transition-all focus:border-[var(--ds-accent-soft)] focus:bg-[rgba(255,255,255,0.05)] placeholder:text-[var(--ds-text-subtle)]"
-                    style={{
-                      borderColor: "var(--ds-border)",
-                      backgroundColor: "var(--ds-panel)",
-                      color: "var(--ds-text)",
-                    }}
-                  />
-                </div>
-
-                {allTags.length > 0 && (
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTag(null)}
-                      className={[
-                        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
-                        selectedTag ? "hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--ds-text)]" : "",
-                      ].join(" ")}
-                      style={!selectedTag
-                        ? { borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
-                        : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-text-muted)" }
-                      }
-                    >
-                      <Tag className="h-3.5 w-3.5" />
-                      All
-                    </button>
-
-                    {allTags.map((t) => {
-                      const active = selectedTag === t;
-                      return (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => setSelectedTag(active ? null : t)}
-                          className={[
-                            "rounded-full border px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] transition-all",
-                            !active ? "hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--ds-text)]" : "",
-                          ].join(" ")}
-                          style={active
-                            ? { borderColor: "var(--ds-accent-soft)", backgroundColor: "var(--ds-accent-soft)", color: "var(--ds-accent)" }
-                            : { borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)", color: "var(--ds-text-muted)" }
-                          }
-                        >
-                          {t}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search books, themes, tags..."
+                  className="w-full rounded-full border bg-transparent px-5 py-4 outline-none transition"
+                  style={{
+                    borderColor: "var(--ds-border)",
+                    color: "var(--ds-text)",
+                    backgroundColor: "var(--ds-panel)",
+                  }}
+                />
               </div>
-            </div>
 
-            <div className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-3xl border" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
-                <div className="relative w-full" style={{ aspectRatio: "21 / 9" }}>
-                  <Image
-                    src={heroImage}
-                    alt=""
-                    fill
-                    priority
-                    className="object-cover scale-[1.10] blur-[16px] opacity-55"
-                    sizes="(max-width: 1024px) 100vw, 900px"
-                  />
-                  {/* Improved scrim for better text readability */}
-                  <div aria-hidden className="absolute inset-0" style={{ background: "var(--ds-hero-scrim)" }} />
-                  <div aria-hidden className="absolute inset-0" style={{ background: "var(--ds-hero-wash)" }} />
-                  
-                  <div className="absolute inset-0 flex items-center justify-end pr-6 md:pr-10 lg:pr-12">
-                    <div
-                      className="relative h-[86%] w-[64%] max-w-[560px] overflow-hidden rounded-2xl border backdrop-blur-xl md:w-[56%] md:rounded-3xl lg:w-[52%]"
-                      style={{ 
-                        borderColor: "var(--ds-border-strong)", 
-                        backgroundColor: "var(--ds-panel-alt)",
-                        boxShadow: "var(--ds-shadow-xl)"
+              <div className="mt-5 flex flex-wrap gap-3">
+                {["All", ...tags].map((tag) => {
+                  const active = activeTag === tag;
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setActiveTag(tag)}
+                      className="rounded-full border px-4 py-3 font-mono text-[10px] uppercase tracking-[0.28em] transition"
+                      style={{
+                        borderColor: active
+                          ? "var(--ds-accent-soft)"
+                          : "var(--ds-border)",
+                        backgroundColor: active
+                          ? "var(--ds-accent-soft)"
+                          : "var(--ds-panel)",
+                        color: active
+                          ? "var(--ds-accent)"
+                          : "var(--ds-text-muted)",
                       }}
                     >
-                      <div className="pointer-events-none absolute inset-3 rounded-2xl border" style={{ borderColor: "var(--ds-border)" }} />
-                      <div className="pointer-events-none absolute inset-[18px] rounded-xl border" style={{ borderColor: "var(--ds-border)" }} />
-
-                      <div className="absolute inset-0 p-5 md:p-6 lg:p-7">
-                        <div className="relative h-full w-full">
-                          <Image
-                            src={heroImage}
-                            alt="Books banner"
-                            fill
-                            priority
-                            className="object-contain"
-                            style={{ filter: "drop-shadow(0 22px 70px rgba(0,0,0,0.70))" }}
-                            sizes="(max-width: 1024px) 100vw, 900px"
-                          />
-                        </div>
-                      </div>
-
-                      <div
-                        aria-hidden
-                        className="absolute inset-0 opacity-60"
-                        style={{
-                          background: "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.00) 38%, rgba(255,255,255,0.05) 70%, rgba(255,255,255,0.00) 100%)",
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-4 px-6 py-4">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>
-                    long-form • scan-ready
-                  </div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-accent)" }}>
-                    Browse ↓
-                  </div>
-                </div>
+                      {tag}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {featured.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 pt-12 lg:px-12">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-accent)" }}>
-              Featured
-            </div>
-          </div>
-
-          <div className="ds-surface-books grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {featured.map((b, idx) => (
-              <BookListCard
-                key={b.url}
-                book={{
-                  ...b,
-                  coverImage: resolveDocCoverImage(b, { contentType: 'BOOK' }),
-                  featured: true,
-                }}
-                priority={idx === 0}
-              />
-            ))}
+            <HeroPanel heroBook={heroBook} />
           </div>
         </section>
-      )}
 
-      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-12">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>Library</div>
-          <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>
-            showing {filtered.length} of {totalBooks}
-          </div>
-        </div>
+        <section
+          className="mx-auto max-w-7xl px-6 py-12 lg:px-12"
+          style={{ borderTop: "1px solid var(--ds-border)" }}
+        >
+          <SectionHeading
+            eyebrow="Featured"
+            title="Featured Volumes"
+            count={`${filteredFeatured.length} entries`}
+          />
 
-        <div className="ds-surface-books grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {rest.map((b) => (
-            <BookListCard
-              key={b.url}
-              book={{
-                ...b,
-                coverImage: resolveDocCoverImage(b, { contentType: 'BOOK' }),
+          {filteredFeatured.length ? (
+            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+              {filteredFeatured.map((book, idx) => (
+                <BookListCard
+                  key={book.slug}
+                  book={{
+                    url: book.url,
+                    title: book.title,
+                    subtitle: book.subtitle,
+                    coverImage: book.coverImage || FALLBACK_BOOK_COVER,
+                    date: book.date,
+                    readTime: book.readingTime,
+                    tags: book.tags,
+                    featured: true,
+                  }}
+                  priority={idx === 0}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              className="rounded-[1.5rem] border p-8"
+              style={{
+                borderColor: "var(--ds-border)",
+                backgroundColor: "var(--ds-panel)",
+                color: "var(--ds-text-muted)",
               }}
-            />
-          ))}
-
-          {filtered.length === 0 && (
-            <div className="lg:col-span-3 rounded-3xl border p-10 text-center" style={{ borderColor: "var(--ds-border)", backgroundColor: "var(--ds-panel)" }}>
-              <div className="text-[10px] font-mono uppercase tracking-[0.35em]" style={{ color: "var(--ds-text-subtle)" }}>No matches</div>
-              <div className="mt-3" style={{ color: "var(--ds-text-muted)" }}>Try a different keyword or clear the tag filter.</div>
+            >
+              No featured volumes match the current filter.
             </div>
           )}
-        </div>
-      </section>
+        </section>
+
+        <section
+          className="mx-auto max-w-7xl px-6 py-12 lg:px-12"
+          style={{ borderTop: "1px solid var(--ds-border)" }}
+        >
+          <SectionHeading
+            eyebrow="Library"
+            title="Full Catalogue"
+            count={`${filteredLibrary.length} volumes`}
+          />
+
+          {filteredLibrary.length ? (
+            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+              {filteredLibrary.map((book) => (
+                <BookListCard
+                  key={book.slug}
+                  book={{
+                    url: book.url,
+                    title: book.title,
+                    subtitle: book.subtitle,
+                    coverImage: book.coverImage || FALLBACK_BOOK_COVER,
+                    date: book.date,
+                    readTime: book.readingTime,
+                    tags: book.tags,
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              className="rounded-[1.5rem] border p-8"
+              style={{
+                borderColor: "var(--ds-border)",
+                backgroundColor: "var(--ds-panel)",
+                color: "var(--ds-text-muted)",
+              }}
+            >
+              No volumes match the current search and tag combination.
+            </div>
+          )}
+        </section>
+      </main>
     </Layout>
   );
+}
+
+export const getStaticProps: GetStaticProps<BooksPageProps> = async () => {
+  const rawBooks = (await getAllBooks()) as BookDoc[];
+
+  const books = rawBooks.map(normalizeBook);
+
+  const featured = books.filter((book) => book.featured);
+  const library = books.filter((book) => !book.featured);
+
+  const tags = Array.from(
+    new Set(
+      books.flatMap((book) => [book.category, ...book.tags].filter(Boolean)),
+    ),
+  )
+    .map((tag) => String(tag))
+    .sort((a, b) => a.localeCompare(b));
+
+  const heroBook = featured[0] ?? books[0] ?? null;
+
+  return {
+    props: {
+      books,
+      featured,
+      library,
+      tags,
+      heroBook,
+    },
+    revalidate: 300,
+  };
 };
-
-export const getStaticProps: GetStaticProps<BooksIndexProps> = async () => {
-  try {
-    const { getPublishedBooks, resolveDocCoverImage } = await import(
-      "@/lib/content/server"
-    );
-    const all = getPublishedBooks() || [];
-
-    const items: BookItem[] = all
-      .filter((doc: any) => !doc?.draft)
-      .map((doc: any) => {
-        // ✅ SSOT: flattenedPath is the truth
-        const fp = String(doc?._raw?.flattenedPath || doc?.slug || "");
-        const bare = booksBareSlug(fp);
-        if (!bare) return null;
-
-        const url = `/books/${bare}`;
-
-        return {
-          slug: bare,
-          url,
-          title: doc.title || "Untitled Book",
-          subtitle: doc.subtitle || null,
-          excerpt: doc.excerpt || doc.description || null,
-          date: doc.date ? new Date(doc.date).toLocaleDateString("en-GB") : null,
-          dateIso: doc.date ? new Date(doc.date).toISOString() : null,
-          readTime: doc.readTime || null,
-          coverImage: resolveDocCoverImage(doc),
-          tags: Array.isArray(doc.tags) ? doc.tags : [],
-          author: doc.author || "Abraham of London",
-          featured: !!doc.featured,
-          coverAspect: doc.coverAspect || null,
-          coverFit: doc.coverFit || null,
-          coverPosition: doc.coverPosition || null,
-        };
-      })
-      .filter(Boolean) as BookItem[];
-
-    // newest first
-    items.sort((a, b) => (b.dateIso || "").localeCompare(a.dateIso || ""));
-
-    return {
-      props: sanitizeData({
-        items,
-        totalBooks: items.length,
-      }),
-      revalidate: 3600,
-    };
-  } catch {
-    return { props: { items: [], totalBooks: 0 }, revalidate: 60 };
-  }
-
-
-};
-
-export default BooksIndex;

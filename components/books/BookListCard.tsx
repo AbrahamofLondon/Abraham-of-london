@@ -37,7 +37,7 @@ export type BookListCardProps = {
 // BookListCard
 // ---------------------------------------------------------------------------
 
-export default function BookListCard({
+function BookListCard({
   book,
   priority = false,
   className,
@@ -102,3 +102,6 @@ export default function BookListCard({
     </Link>
   );
 }
+
+export { BookListCard };
+export default BookListCard;
