@@ -228,7 +228,7 @@ function transformRawMdxToMarkdownLike(input: string): string {
   s = s.replace(/^\s*\[Link\]\s*$/gm, "**Link**");
   s = s.replace(/^\s*\[Rule\]\s*$/gm, "---");
 
-  // Generic capitalized component wrappers
+  // Generic capitalized component wrappers (single-line)
   s = s.replace(/^\s*<([A-Z][A-Za-z0-9._-]*)\b([^>]*)\/>\s*$/gm, (_m, tag: string) => {
     return `**[${tag}]**`;
   });
@@ -238,6 +238,15 @@ function transformRawMdxToMarkdownLike(input: string): string {
   });
 
   s = s.replace(/^\s*<\/([A-Z][A-Za-z0-9._-]*)>\s*$/gm, "");
+
+  // Multi-line JSX component tags (e.g. <ResourcesCTA\n  title="..."\n/>)
+  s = s.replace(/<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?\/>/g, (_m, tag: string) => {
+    return `**[${tag}]**`;
+  });
+  s = s.replace(/<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?>([\s\S]*?)<\/\1>/g, (_m, tag: string, inner: string) => {
+    const trimmed = inner.trim();
+    return trimmed ? trimmed : "";
+  });
 
   // Remove isolated JSX expressions / comments
   s = s.replace(/^\s*\{\s*\/\*[\s\S]*?\*\/\s*\}\s*$/gm, "");
@@ -258,10 +267,15 @@ function RawMarkdownFallback({ content }: { content: string }) {
     // Also handle self-closing without space: <Divider/>
     processed = processed.replace(/<(Divider|Rule|SectionBreak)\s*\/?\s*>/g, "\n---\n");
 
-    // Strip remaining inline HTML tags (preserving text content) before escaping.
-    // Prevents <span class="...">text</span> from appearing as literal escaped tags.
-    // Self-closing tags (e.g. <br />, <img ... />) are removed entirely.
+    // Strip remaining HTML/JSX tags (preserving text content) before escaping.
+    // Handles both single-line and multi-line tags.
+    // Multi-line self-closing: <ComponentName\n  attr="..."\n/>
+    processed = processed.replace(/<[A-Z][A-Za-z0-9._-]*\b[\s\S]*?\/>/g, "");
+    // Multi-line open+close: <ComponentName ...>content</ComponentName>
+    processed = processed.replace(/<([A-Z][A-Za-z0-9._-]*)\b[\s\S]*?>([\s\S]*?)<\/\1>/g, "$2");
+    // Single-line self-closing tags (e.g. <br />, <img ... />)
     processed = processed.replace(/<[a-z][^>]*\/\s*>/gi, "");
+    // Single-line open/close tags
     processed = processed.replace(/<\/?[a-z][a-z0-9]*(?:\s[^>]*)?>/gi, "");
 
     processed = escapeHtml(processed);
@@ -352,19 +366,23 @@ function RawMarkdownFallback({ content }: { content: string }) {
       })
       .join("");
 
-    // Final cleanup: convert remaining component marker artifacts
-    // like <strong>[Divider]</strong> into proper <hr> elements.
+    // Final cleanup: strip all component marker artifacts.
+    // [Divider], [Rule], [SectionBreak] become <hr>; all others are removed.
     return joined
       .replace(/<strong>\[(Divider|Rule|SectionBreak)\]<\/strong>/g,
         '<hr class="my-8 border-white/10" />')
       .replace(/&lt;(Divider|Rule|SectionBreak)\s*\/?&gt;/g,
-        '<hr class="my-8 border-white/10" />');
+        '<hr class="my-8 border-white/10" />')
+      .replace(/<strong>\[[A-Z][A-Za-z0-9._-]*\]<\/strong>/g, "")
+      .replace(/&lt;[A-Z][A-Za-z0-9._-]*[\s\S]*?&gt;/g, "");
   }, [content]);
 
   // Belt-and-suspenders: strip any [ComponentName] markers that survived.
   const cleanHtml = html
     .replace(/<strong>\[(?:Divider|Rule|SectionBreak)\]<\/strong>/g, '<hr class="my-8 border-t border-white/10" />')
-    .replace(/\[(?:Divider|Rule|SectionBreak)\]/g, '<hr class="my-8 border-t border-white/10" />');
+    .replace(/\[(?:Divider|Rule|SectionBreak)\]/g, '<hr class="my-8 border-t border-white/10" />')
+    .replace(/<strong>\[[A-Z][A-Za-z0-9._-]*\]<\/strong>/g, "")
+    .replace(/\[[A-Z][A-Za-z0-9._-]*\]/g, "");
 
   return (
     <div
