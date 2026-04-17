@@ -9,13 +9,10 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
-import {
-  getUserAccess,
-  hasArtifactAccess,
-  hasProductAccess,
-  hasTierAccess,
-} from "@/lib/access/entitlements";
+import { authOptions } from "@/lib/auth/options";
+import { prisma } from "@/lib/prisma.server";
+import { getUserAccess } from "@/lib/access/get-user-access";
+import { canAccessArtifact, canAccessProduct, canAccessTier } from "@/lib/access/checks";
 import crypto from "crypto";
 
 // Signed URL validity (seconds)
@@ -46,13 +43,13 @@ export default async function handler(
   }
 
   // Resolve user access from entitlements (SSOT)
-  const access = await getUserAccess(userId);
+  const access = await getUserAccess(prisma, userId);
 
   // Check entitlement — try artifact first, then product, then tier fallback
   const hasAccess =
-    hasArtifactAccess(access, artifactKey) ||
-    hasProductAccess(access, artifactKey) ||
-    hasTierAccess(access, "inner_circle"); // inner_circle gets all artifacts
+    canAccessArtifact(access, artifactKey) ||
+    canAccessProduct(access, artifactKey) ||
+    canAccessTier(access, "inner-circle");
 
   if (!hasAccess) {
     return res.status(403).json({

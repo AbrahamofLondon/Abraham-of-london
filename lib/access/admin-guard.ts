@@ -7,8 +7,9 @@
 
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
-import { getUserAccess } from "@/lib/access/entitlements";
+import { authOptions } from "@/lib/auth/options";
+import { prisma } from "@/lib/prisma.server";
+import { getUserAccess } from "@/lib/access/get-user-access";
 
 type AdminGuardResult<T> =
   | { authorized: true; userId: string; props: T }
@@ -57,7 +58,7 @@ export async function requireAdmin<T = Record<string, never>>(
     };
   }
 
-  const access = await getUserAccess(userId);
+  const access = await getUserAccess(prisma, userId);
 
   if (!access.permissions.isAdmin) {
     return {
