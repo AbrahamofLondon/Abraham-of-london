@@ -262,6 +262,25 @@ export const authOptions: NextAuthOptions = {
       // Back-compat: preserve session.aol for existing callers
       nextSession.aol = jwt.aol ? { ...jwt.aol, tier } : BASE_CLAIMS;
 
+      // Enrich session with entitlements from SSOT
+      try {
+        const memberId = typeof jwt.id === "string" ? jwt.id : jwt.aol?.memberId;
+        if (memberId) {
+          const { getUserAccess } = await import("@/lib/access/entitlements");
+          const access = await getUserAccess(memberId);
+          (nextSession as any).access = {
+            tier: access.tier,
+            entitlements: access.entitlements,
+            permissions: access.permissions,
+          };
+          // Update session tier to match entitlement-resolved tier
+          nextSession.tier = access.tier;
+          nextSession.user.tier = access.tier;
+        }
+      } catch {
+        // Entitlement lookup failed — keep base tier from JWT
+      }
+
       return nextSession;
     },
 

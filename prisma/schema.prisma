@@ -1424,6 +1424,59 @@ model InnerCircleMember {
   @@index([emailHash])
   @@index([lastSeenAt])
   @@map("inner_circle_members")
+
+  entitlements Entitlement[]
+}
+
+// ============================================================================
+// ENTITLEMENT SYSTEM
+// ============================================================================
+
+enum EntitlementType {
+  tier
+  artifact
+  product
+}
+
+enum EntitlementStatus {
+  active
+  revoked
+  expired
+}
+
+model Entitlement {
+  id        String            @id @default(cuid())
+  userId    String            @map("user_id")
+  type      EntitlementType
+  key       String            // e.g. "inner_circle", "gmi-q1-2026-deck", "canon-vol-iv"
+  status    EntitlementStatus @default(active)
+  issuedAt  DateTime          @default(now()) @map("issued_at")
+  expiresAt DateTime?         @map("expires_at")
+  issuedBy  String?           @map("issued_by") // admin email or "system"
+
+  user InnerCircleMember @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, key])
+  @@index([userId])
+  @@index([type, key])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("entitlements")
+}
+
+model AccessKey {
+  id        String   @id @default(cuid())
+  code      String   @unique          // the key users enter, e.g. "AK-2026-BOARD-xxxx"
+  grants    String                    // JSON array: [{"type":"tier","key":"inner_circle"},{"type":"artifact","key":"gmi-q1-2026-deck"}]
+  maxUses   Int      @default(1) @map("max_uses")
+  uses      Int      @default(0)
+  expiresAt DateTime? @map("expires_at")
+  issuedBy  String?   @map("issued_by")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([code])
+  @@index([expiresAt])
+  @@map("access_keys")
 }
 
 model AdminSession {
