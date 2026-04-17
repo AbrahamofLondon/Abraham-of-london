@@ -141,24 +141,38 @@ export function resolveDocCoverImage(
   for (const field of imageFields) {
     const imageValue = doc?.[field];
     const normalized = normalizeImageInput(imageValue);
-    
+
     if (normalized) {
       // Handle local paths
       if (isLocalPath(normalized)) {
-        return normalizeLocalPath(normalized);
+        const localPath = normalizeLocalPath(normalized);
+        // Validate file exists on disk during build (SSG/SSR only)
+        if (typeof process !== 'undefined' && process.cwd) {
+          try {
+            const fs = require('fs');
+            const path = require('path');
+            const diskPath = path.join(process.cwd(), 'public', localPath);
+            if (!fs.existsSync(diskPath)) {
+              continue; // Skip to next field or fallback
+            }
+          } catch {
+            // fs not available (client-side) — trust the path
+          }
+        }
+        return localPath;
       }
-      
+
       // Handle remote URLs
       if (isSupportedRemoteUrl(normalized)) {
         return normalized;
       }
-      
+
       // If strict mode, we don't accept unsupported remote URLs
       if (strict) {
         console.warn(`Unsupported remote image URL: ${normalized}`);
         continue;
       }
-      
+
       // In non-strict mode, return the URL anyway
       return normalized;
     }

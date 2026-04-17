@@ -11,6 +11,8 @@ import { resolveDocCoverImage } from "@/lib/content/shared";
 
 type BookDoc = {
   slug?: string;
+  slugSafe?: string;
+  hrefSafe?: string;
   url?: string;
   title?: string;
   subtitle?: string | null;
@@ -59,9 +61,17 @@ function safeArray(value: unknown): string[] {
     : [];
 }
 
+function stripBookPrefix(raw: string): string {
+  return raw.replace(/^\/?books\//, "").replace(/^\/+/, "");
+}
+
 function normalizeBook(doc: BookDoc): BookItem {
-  const slug = safeString(doc.slug, "untitled-book");
-  const url = safeString(doc.url, `/books/${slug}`);
+  const rawSlug = safeString(
+    doc.slugSafe || doc.hrefSafe || doc.slug,
+    "untitled-book",
+  );
+  const slug = stripBookPrefix(rawSlug);
+  const url = `/books/${slug}`;
   const title = safeString(doc.title, "Untitled Volume");
   const subtitle = safeString(doc.subtitle, "");
   const description = safeString(
@@ -70,7 +80,7 @@ function normalizeBook(doc: BookDoc): BookItem {
   );
 
   const resolvedCover = safeString(
-    resolveDocCoverImage(doc as never, { contentType: "BOOK" }),
+    resolveDocCoverImage(doc, { contentType: "BOOK" }),
     FALLBACK_BOOK_COVER,
   );
 
