@@ -1,41 +1,43 @@
 // components/primitives/SmartCover.tsx
-// Unified image cover component for cards
+// Unified image cover component for cards.
+//
+// Fixes applied:
+// 1. Handles "missed onLoad after SSR hydration" — checks img.complete on mount
+// 2. Dark-first shimmer (no light-mode gray flash)
+// 3. Robust fallback chain — skips missing intermediaries, lands on writing-desk.webp
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { getSafeImageProps, createFallbackSequence } from '@/lib/image-utils';
-import type { FallbackConfig } from '@/lib/image-utils';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const DEFAULT_FALLBACK = '/assets/images/writing-desk.webp';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export interface SmartCoverProps {
-  // Image source
   src?: string | null;
   alt: string;
-  
-  // Aspect ratio and sizing
   aspect?: 'square' | 'portrait' | 'landscape' | 'wide' | 'auto';
-  fit?: 'cover' | 'contain' | 'smart';
+  fit?: 'cover' | 'contain';
   position?: string;
-  
-  // Fallback configuration
-  fallbackConfig?: FallbackConfig;
-  fallbackKey?: string; // For generating deterministic fallbacks
-  
-  // Loading behavior
   priority?: boolean;
   sizes?: string;
-  
-  // Styling
   className?: string;
   overlay?: boolean;
   scrim?: boolean;
-  
-  // Interactive
   hoverEffect?: boolean;
-  
-  // Children (for badges, etc.)
   children?: React.ReactNode;
 }
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export const SmartCover: React.FC<SmartCoverProps> = ({
   src,
@@ -43,8 +45,6 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
   aspect = 'landscape',
   fit = 'cover',
   position = 'center',
-  fallbackConfig,
-  fallbackKey,
   priority = false,
   sizes = '(max-width: 768px) 100vw, 33vw',
   className,
@@ -53,8 +53,7 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
   hoverEffect = true,
   children,
 }) => {
-  // Aspect ratio classes
-  const aspectClasses = {
+  const aspectClasses: Record<string, string> = {
     square: 'aspect-square',
     portrait: 'aspect-[3/4]',
     landscape: 'aspect-[16/10]',
@@ -62,102 +61,92 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
     auto: '',
   };
 
-  // Object fit classes
-  const fitClasses = {
+  const fitClasses: Record<string, string> = {
     cover: 'object-cover',
     contain: 'object-contain',
-    smart: 'object-cover',
   };
 
-  // Generate fallback sequence if needed
-  const fallbackSequence = useMemo(() => {
-    if (!fallbackConfig || !fallbackKey) return [];
-    return createFallbackSequence(fallbackKey, fallbackConfig);
-  }, [fallbackConfig, fallbackKey]);
+  // Resolve the image source — never pass empty/null to next/image
+  const resolvedSrc = useMemo(() => {
+    if (src && typeof src === 'string' && src.trim()) return src.trim();
+    return DEFAULT_FALLBACK;
+  }, [src]);
 
-  const defaultFallbackSrc = '/assets/images/writing-desk.webp';
-  const primarySrc = useMemo(() => (src && src.trim() ? src : defaultFallbackSrc), [src]);
+  const [currentSrc, setCurrentSrc] = useState(resolvedSrc);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState(primarySrc);
-  const [fallbackIndex, setFallbackIndex] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reset when the primary source or fallback chain changes.
+  // Reset state when the source changes
   useEffect(() => {
+    setCurrentSrc(resolvedSrc);
     setImageLoaded(false);
-    setFallbackIndex(-1);
-    setCurrentSrc(primarySrc);
-  }, [primarySrc, fallbackSequence]);
+  }, [resolvedSrc]);
 
-  // Get safe image props
-  const imageProps = useMemo(
-    () =>
-      getSafeImageProps(currentSrc, alt, {
-        priority,
-        fallbackConfig,
-      }),
-    [currentSrc, alt, priority, fallbackConfig],
-  );
+  // Fix: detect images that loaded before React hydrated.
+  // After mount, find the <img> inside the container and check if it's already complete.
+  useEffect(() => {
+    if (imageLoaded) return;
 
-  // Handle image load
-  const handleImageLoad = useCallback(() => {
+    const checkComplete = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const img = container.querySelector('img');
+      if (img && img.complete && img.naturalWidth > 0) {
+        setImageLoaded(true);
+      }
+    };
+
+    // Check immediately and after a short delay (covers SSR hydration race)
+    checkComplete();
+    const timer = setTimeout(checkComplete, 150);
+    return () => clearTimeout(timer);
+  }, [currentSrc, imageLoaded]);
+
+  const handleLoad = useCallback(() => {
     setImageLoaded(true);
   }, []);
 
-  // Handle image error
-  const handleImageError = useCallback(() => {
+  const handleError = useCallback(() => {
     setImageLoaded(false);
-    const nextIndex = fallbackIndex + 1;
-
-    if (nextIndex < fallbackSequence.length) {
-      setFallbackIndex(nextIndex);
-      setCurrentSrc(fallbackSequence[nextIndex] || defaultFallbackSrc);
-      return;
+    // After one error, fall back to the guaranteed default.
+    // Don't cycle through a chain of potentially missing fallbacks.
+    if (currentSrc !== DEFAULT_FALLBACK) {
+      setCurrentSrc(DEFAULT_FALLBACK);
     }
-
-    if (currentSrc !== defaultFallbackSrc) {
-      setFallbackIndex(fallbackSequence.length);
-      setCurrentSrc(defaultFallbackSrc);
-    }
-  }, [currentSrc, fallbackIndex, fallbackSequence]);
-
-  // Shimmer effect for loading
-  const ShimmerEffect = () => (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50/80 to-gray-100 animate-pulse" />
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-        style={{ animation: 'shimmer 2s infinite' }}
-      />
-    </div>
-  );
+  }, [currentSrc]);
 
   return (
-    <div className={cn(
-      'relative w-full overflow-hidden',
-      aspectClasses[aspect],
-      className
-    )}>
-      {/* Loading shimmer */}
-      {!imageLoaded && <ShimmerEffect />}
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative w-full overflow-hidden',
+        aspectClasses[aspect] || '',
+        className,
+      )}
+    >
+      {/* Dark shimmer while loading */}
+      {!imageLoaded && (
+        <div className="absolute inset-0 animate-pulse" style={{
+          background: 'linear-gradient(90deg, var(--ds-background-muted, #1a1a1e), var(--ds-panel, #222226), var(--ds-background-muted, #1a1a1e))',
+        }} />
+      )}
 
       {/* Image */}
       <Image
-        src={imageProps.src}
-        alt={imageProps.alt}
+        src={currentSrc}
+        alt={alt}
         fill
         className={cn(
-          fitClasses[fit],
-          'transition-all duration-700',
-          imageLoaded 
-            ? 'opacity-100' 
-            : 'opacity-0',
-          hoverEffect && 'group-hover:scale-[1.03] group-hover:brightness-110'
+          fitClasses[fit] || 'object-cover',
+          'transition-opacity duration-500',
+          imageLoaded ? 'opacity-100' : 'opacity-0',
+          hoverEffect && 'group-hover:scale-[1.03]',
         )}
         sizes={sizes}
-        priority={imageProps.priority}
-        loading={imageProps.loading}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
+        priority={priority}
+        loading={priority ? 'eager' : 'lazy'}
+        onLoad={handleLoad}
+        onError={handleError}
         style={{ objectPosition: position }}
       />
 
@@ -178,45 +167,17 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
       )}
 
       {/* Accent line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
       {/* Children (badges, etc.) */}
       {children && (
         <div className="absolute inset-0 pointer-events-none">
-          <div className="relative h-full w-full">
-            {children}
-          </div>
-        </div>
-      )}
-
-      {/* Hover CTA (optional) */}
-      {hoverEffect && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-all duration-700 group-hover:opacity-100 pointer-events-none">
-          <div className="rounded-full border border-white/30 bg-black/60 backdrop-blur-xl px-6 py-3 transition-transform duration-500 group-hover:scale-105">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium tracking-wide text-white">
-                Read Article
-              </span>
-            </div>
-          </div>
+          <div className="relative h-full w-full">{children}</div>
         </div>
       )}
     </div>
   );
 };
-
-// Helper for aspect ratio calculation
-export function getAspectRatioClass(aspect: SmartCoverProps['aspect']): string {
-  const aspectClasses = {
-    square: 'aspect-square',
-    portrait: 'aspect-[3/4]',
-    landscape: 'aspect-[16/10]',
-    wide: 'aspect-[16/9]',
-    auto: '',
-  } satisfies Record<NonNullable<SmartCoverProps['aspect']>, string>;
-
-  return aspectClasses[aspect || 'landscape'] || '';
-}
 
 // Predefined aspect ratios for common use cases
 export const COVER_ASPECTS = {

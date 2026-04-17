@@ -2,16 +2,26 @@
 module.exports = {
   darkMode: "class",
 
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,md,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,md,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,md,mdx}",
-    "./layouts/**/*.{js,ts,jsx,tsx,md,mdx}",
-    "./lib/**/*.{js,ts,jsx,tsx,md,mdx}",
-    "./content/**/*.{md,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,md,mdx}",
-    "./.contentlayer/generated/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: {
+    files: [
+      "./pages/**/*.{js,ts,jsx,tsx,md,mdx}",
+      "./components/**/*.{js,ts,jsx,tsx,md,mdx}",
+      "./app/**/*.{js,ts,jsx,tsx,md,mdx}",
+      "./layouts/**/*.{js,ts,jsx,tsx,md,mdx}",
+      "./lib/**/*.{js,ts,jsx,tsx,md,mdx}",
+      "./content/**/*.{md,mdx}",
+      "./src/**/*.{js,ts,jsx,tsx,md,mdx}",
+      "./.contentlayer/generated/**/*.{js,ts,jsx,tsx}",
+    ],
+    // Regex patterns in these files break Tailwind JIT scanning (e.g. [-:.])
+    extract: {
+      ts: (content) => {
+        // Skip files that contain regex patterns Tailwind misinterprets
+        if (content.includes('.replace(/[-:.]')) return [];
+        return content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [];
+      },
+    },
+  },
 
   theme: {
     container: {

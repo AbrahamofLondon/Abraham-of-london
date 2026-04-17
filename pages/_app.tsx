@@ -85,9 +85,11 @@ export default function MyApp({
   const session = (pageProps as { session?: import("next-auth").Session | null }).session;
 
   const enablePdfDashboard = useMemo(() => {
+    // During static generation, router may not be mounted
+    if (!router || !router.pathname) return false;
     const guardedPaths = ["/vault", "/inner-circle", "/admin", "/pdf-dashboard"];
     return guardedPaths.some((path) => router.pathname.startsWith(path));
-  }, [router.pathname]);
+  }, [router?.pathname]);
 
   const getLayout =
     (Component as { getLayout?: (page: ReactElement) => ReactNode }).getLayout ??

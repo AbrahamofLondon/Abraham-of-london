@@ -76,12 +76,9 @@ const PROTECTED_RULES: ReadonlyArray<{ re: RegExp; required: Tier }> = [
 /* -------------------------------------------------------------------------- */
 
 export const InnerCircleProvider: React.FC<Props> = ({ children }) => {
-  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [identity, setIdentity] = useState<ResolvedIdentity | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-
-  useEffect(() => setMounted(true), []);
 
   const fetchIdentity = useCallback(async () => {
     // Abort any in-flight request
@@ -115,24 +112,22 @@ export const InnerCircleProvider: React.FC<Props> = ({ children }) => {
     }
   }, []);
 
-  // Fetch identity on mount
+  // Fetch identity on mount (client-side only)
   useEffect(() => {
-    if (!mounted) return;
     fetchIdentity();
     return () => {
       abortRef.current?.abort();
     };
-  }, [mounted, fetchIdentity]);
+  }, [fetchIdentity]);
 
   // Re-fetch on window focus
   useEffect(() => {
-    if (!mounted) return;
     const onFocus = () => {
       fetchIdentity();
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [mounted, fetchIdentity]);
+  }, [fetchIdentity]);
 
   const user = identity ? identityToUser(identity) : null;
   const tier: Tier = identity?.tier ?? "public";
@@ -154,8 +149,6 @@ export const InnerCircleProvider: React.FC<Props> = ({ children }) => {
   };
 
   const checkAccess = (path: string): boolean => {
-    if (!mounted) return true;
-
     const rule = PROTECTED_RULES.find((r) => r.re.test(path));
     if (!rule) return true;
 
@@ -168,9 +161,9 @@ export const InnerCircleProvider: React.FC<Props> = ({ children }) => {
     await fetchIdentity();
   };
 
-  // During SSR/prerender, return children without any logic
-  if (!mounted) return <>{children}</>;
-
+  // Always render the provider with the same structure
+  // On server: uses default values (null user, "public" tier, false access)
+  // On client: will update with fetched identity after mount
   return (
     <InnerCircleContext.Provider
       value={{

@@ -128,7 +128,7 @@ export default function CanonInstitutionalIntro({
                   width={220}
                   height={320}
                   loading="lazy"
-                  quality={90}
+                  quality={75}
                   sizes="(max-width: 640px) 100px, (max-width: 1024px) 130px, 150px"
                   className="h-auto w-[100px] sm:w-[130px] md:w-[150px]"
                   style={{ display: "block" }}
