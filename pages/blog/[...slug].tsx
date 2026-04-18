@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
 import DirectorateOversight from "@/components/content/DirectorateOversight";
+import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { normalizeSlug, joinHref } from "@/lib/content/shared";
 import { resolveDocCoverImage, sanitizeData } from "@/lib/content/client-utils";
@@ -216,6 +217,7 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({
         unlockError={unlockError}
         activeCode={activeCode}
         emptyLabel="No essay content available."
+        childrenBottom={<NextStepCTA surface="essay" title="Next step" />}
       />
     </Layout>
   );

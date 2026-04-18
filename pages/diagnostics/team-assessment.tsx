@@ -822,7 +822,7 @@ export default function TeamAssessmentPage() {
                         onMouseEnter={e => { if (leaderComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
                         onMouseLeave={e => { if (leaderComplete()) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                       >
-                        Continue: Team reality <ArrowRight style={{ width: "11px", height: "11px" }} />
+                        Continue the Assessment <ArrowRight style={{ width: "11px", height: "11px" }} />
                       </button>
                     </div>
                   </div>

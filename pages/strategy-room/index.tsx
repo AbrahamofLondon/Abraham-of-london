@@ -150,7 +150,7 @@ function routeMeta(route?: string | null) {
         label: "Diagnostic route",
         description: "The signal is real, but readiness and authority are not yet ordered enough for direct intervention.",
         ctaHref: "/diagnostics?source=strategy-room&entry=redirect&intent=diagnostic-escalation",
-        ctaLabel: "Continue into diagnostics",
+        ctaLabel: "Start the Diagnostic",
         tone: "gold" as const,
       };
   }

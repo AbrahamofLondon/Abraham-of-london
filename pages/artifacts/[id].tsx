@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import NextStepCTA from "@/components/content/NextStepCTA";
 import DownloadButton from "@/components/premium/DownloadButton";
 import PremiumAssetLaunchButton from "@/components/premium/PremiumAssetLaunchButton";
 import PremiumAssetCard from "@/components/premium/PremiumAssetCard";
@@ -441,6 +442,8 @@ export default function ArtifactDetailPage({
                     </div>
                   </div>
                 ) : null}
+
+                <NextStepCTA surface="intelligence" title="Next step" />
               </div>
             </div>
           </div>

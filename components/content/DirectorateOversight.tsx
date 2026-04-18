@@ -54,6 +54,7 @@ type DirectorateOversightProps = {
   activeCode?: string | null;
   emptyLabel?: string;
   childrenTopRight?: React.ReactNode;
+  childrenBottom?: React.ReactNode;
 };
 
 const DEFAULT_COVER = "/assets/images/blog/default-blog-cover.jpg";
@@ -305,6 +306,7 @@ export default function DirectorateOversight({
   activeCode = "",
   emptyLabel = "No content available.",
   childrenTopRight,
+  childrenBottom,
 }: DirectorateOversightProps) {
   const resolvedCover = cover || DEFAULT_COVER;
   const resolvedCategory = getResolvedCategory(kind, category);
@@ -471,6 +473,8 @@ export default function DirectorateOversight({
                 )}
               </div>
             </div>
+
+            {childrenBottom ? <div className="mt-8">{childrenBottom}</div> : null}
 
             <div className="mt-10 h-px bg-white/10" />
             <div className="mt-8 text-center text-[10px] font-mono tracking-widest text-white/30">

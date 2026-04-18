@@ -30,6 +30,7 @@ import {
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
+import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { getRenderableBody } from "@/lib/content/render-body";
 import { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -773,6 +774,10 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                   <SafeMDXRenderer code={renderCode} />
                 ) : null}
               </div>
+
+              <div className="mt-10">
+                <NextStepCTA surface="playbook" intent="playbooks" title="Next step" />
+              </div>
             </motion.div>
           </div>
         </section>
@@ -951,12 +956,12 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     el.style.backgroundColor = `${GOLD}0D`;
                   }}
                 >
-                  Enter diagnostics
+                  Start the Diagnostic
                   <ArrowRight style={{ width: "11px", height: "11px" }} />
                 </Link>
 
                 <Link
-                  href="/consulting/strategy-room"
+                  href="/strategy-room"
                   className="inline-flex items-center gap-2 transition-all duration-300"
                   style={{
                     padding: "11px 22px",
@@ -979,7 +984,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     el.style.color = "rgba(255,255,255,0.40)";
                   }}
                 >
-                  Strategy Room
+                  Enter Strategy Room
                 </Link>
 
                 <Link
@@ -1003,7 +1008,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                       "rgba(255,255,255,0.25)";
                   }}
                 >
-                  All playbooks
+                  Review the Playbooks
                 </Link>
               </div>
             </div>

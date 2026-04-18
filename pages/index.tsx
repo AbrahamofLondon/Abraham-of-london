@@ -2143,7 +2143,7 @@ function ContentWithContext({
               <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{body}</p>
               <div className="mt-5">
                 <Link href={href} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
-                  Explore <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  Browse Intelligence <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
             </div>

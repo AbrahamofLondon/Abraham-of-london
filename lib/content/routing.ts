@@ -22,14 +22,14 @@ export function getContentRouteRecommendation(
 
   if (surface === "playbook" || intent === "playbooks") {
     return {
-      label: "Run the Diagnostic",
+      label: "Start the Diagnostic",
       href: "/diagnostics/constitutional-diagnostic",
       description: "Use the constitutional layer to determine which playbook is actually warranted.",
     };
   }
 
   return {
-    label: "Run the Diagnostic",
+    label: "Start the Diagnostic",
     href: "/diagnostics/constitutional-diagnostic",
     description: "Move from signal and insight into a real constitutional reading.",
   };

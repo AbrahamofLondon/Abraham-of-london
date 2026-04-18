@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // components/alignment/PurposeAlignmentAssessment.tsx
 // Design: Institutional Monumentalism
+// Status: live parallel surface, not the canonical Stage 1 entry.
+// Canonical Stage 1 currently lives at /diagnostics/constitutional-diagnostic.
+// This page remains useful as a support/parallel assessment experience and
+// should not be mistaken for the primary diagnostic route during audit.
 // This assessment earns its place in the product ladder by delivering
 // a diagnostic reading that feels specific to this person's exact
 // score pattern — not a generic band label.

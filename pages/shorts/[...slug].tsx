@@ -8,6 +8,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import SafeMDXRenderer from "@/components/mdx/SafeMDXRenderer";
 import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
+import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { requiredTierFromDoc } from "@/lib/access/tiers";
 import type { AccessTier } from "@/lib/access/tiers";
@@ -632,6 +633,10 @@ const ShortsSlugPage: NextPage<Props> = ({
 
           <div className="mt-4">
             <ShortShare url={canonicalUrl} title={title} />
+          </div>
+
+          <div className="mt-8">
+            <NextStepCTA surface="shorts" title="Next step" />
           </div>
         </article>
 
