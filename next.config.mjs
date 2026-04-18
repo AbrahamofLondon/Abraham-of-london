@@ -201,13 +201,8 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/strategy-room",
-        destination: "/consulting/strategy-room",
-        permanent: true,
-      },
-      {
         source: "/diagnostic",
-        destination: "/consulting/strategy-room",
+        destination: "/strategy-room",
         permanent: true,
       },
       {
