@@ -665,7 +665,7 @@ function HeroSection({
               </Link>
 
               <Link
-                href="/consulting/strategy-room"
+                href="/strategy-room"
                 className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition-all duration-300"
                 style={{
                   minWidth: "180px",
@@ -750,7 +750,7 @@ function PlatformArchitecture({ counts }: { counts: HomePageProps["counts"] }) {
                 title: "Private mandate",
                 body: "Consulting and Strategy Room. Reserved for situations where a structured product is insufficient and consequence is material.",
                 icon: Crown,
-                href: "/consulting/strategy-room",
+                href: "/strategy-room",
               },
             ].map((item) => (
               <motion.div key={item.n} variants={fadeUp}>
@@ -1631,7 +1631,7 @@ function DiagnosticLadder() {
       n: "03",
       title: "Strategy Room",
       tag: "Private mandate",
-      href: "/consulting/strategy-room",
+      href: "/strategy-room",
       body: "The terminal layer. Accessed where a structured product is insufficient and the problem warrants direct advisory attention.",
       icon: Crown,
       detail: "By qualification",
@@ -1780,7 +1780,7 @@ function EscalationClose() {
               </Link>
 
               <Link
-                href="/consulting/strategy-room"
+                href="/strategy-room"
                 className="inline-flex items-center gap-3 border px-7 py-4 transition"
                 style={{
                   borderColor: "var(--ds-border)",
@@ -1807,6 +1807,504 @@ function EscalationClose() {
 // HOMEPAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
+function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
+  return (
+    <Section id="hero" variant="surface" cap="front door · orientation · progression">
+      <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+        <div>
+          <Eyebrow>Strategic Diagnostic Platform</Eyebrow>
+          <h1
+            className="mt-6 font-['Cormorant_Garamond',Georgia,serif] font-light leading-[0.9] tracking-[-0.04em] ds-text"
+            style={{ fontSize: "clamp(3.1rem, 8vw, 6.3rem)" }}
+          >
+            Resolve structural problems
+            <br />
+            <span className="ds-text-muted">before they become expensive drift.</span>
+          </h1>
+
+          <p className="mt-8 max-w-3xl text-[16px] leading-[1.9] ds-text-muted">
+            Abraham of London is a governed operating system for diagnosis, strategic
+            clarity, and intervention. It helps founders, executives, and organizations
+            under pressure identify what is actually wrong, clarify what must happen next,
+            and escalate only when the situation justifies it.
+          </p>
+
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link
+              href="/diagnostics/constitutional-diagnostic"
+              className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition"
+              style={{
+                borderColor: "var(--ds-accent-soft)",
+                backgroundColor: "var(--ds-accent-soft)",
+                color: "var(--ds-accent)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+              }}
+            >
+              Start the Diagnostic
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+
+            <Link
+              href="/strategy-room"
+              className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition"
+              style={{
+                borderColor: "var(--ds-border)",
+                backgroundColor: "var(--ds-panel)",
+                color: "var(--ds-text-muted)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+              }}
+            >
+              Enter Strategy Room
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+
+            <Link
+              href={intelligenceHref}
+              className="group inline-flex items-center justify-center gap-3 border px-7 py-4 transition"
+              style={{
+                borderColor: "var(--ds-border)",
+                color: "var(--ds-text-subtle)",
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "9px",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+              }}
+            >
+              Read Intelligence
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        </div>
+
+        <Panel surface="lift">
+          <div className="p-6 md:p-7">
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "7.5px",
+                letterSpacing: "0.40em",
+                textTransform: "uppercase",
+                color: "var(--ds-text-subtle)",
+              }}
+            >
+              Start Here
+            </div>
+            <div className="mt-4 space-y-4">
+              {[
+                "Use Diagnostics when you need signal, not speculation.",
+                "Use Executive Reporting when the issue is serious enough to justify paid interpretation.",
+                "Use Strategy Room when a real decision with real consequence is already on the table.",
+              ].map((item) => (
+                <div key={item} className="flex gap-4 border-b pb-4 last:border-b-0 last:pb-0" style={{ borderColor: "var(--ds-border)" }}>
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
+                  <p className="text-[14px] leading-[1.75] ds-text-muted">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+      </div>
+    </Section>
+  );
+}
+
+function WhatThisPlatformIs() {
+  return (
+    <Section id="what-this-is" variant="void" cap="system · what this platform is">
+      <SectionHeader
+        eyebrow="Operating Model"
+        title={
+          <>
+            Not a blog. Not a generic consultancy.
+            <br />
+            <span className="text-white/35">A progressive system for diagnosis, clarity, and intervention.</span>
+          </>
+        }
+        description="This platform is a structured operating system for diagnosis, strategic clarity, and intervention. It is designed to move a serious user through a governed sequence: diagnose the problem, clarify the reality, escalate deliberately, and intervene only when the situation warrants it."
+        large
+      />
+
+      <div className="mt-12 grid gap-4 lg:grid-cols-4">
+        {[
+          ["Diagnose", "Surface what is actually wrong before advice, action, or narrative distortion takes over."],
+          ["Clarify", "Translate pressure, drift, and conflicting signals into a decision-grade reading."],
+          ["Escalate", "Move only when the stakes, authority, and urgency justify a higher-order container."],
+          ["Intervene", "Use Strategy Room or advisory only when structured products are no longer sufficient."],
+        ].map(([title, body]) => (
+          <Panel key={title} surface="lift">
+            <div className="p-6">
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "var(--ds-accent)",
+                }}
+              >
+                {title}
+              </div>
+              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{body}</p>
+            </div>
+          </Panel>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function HowItWorksLadder() {
+  const stages = [
+    {
+      label: "Stage 1: Diagnostic",
+      href: "/diagnostics/constitutional-diagnostic",
+      effort: "6-10 minutes",
+      explanation: "The constitutional entry point for identifying seriousness, pressure, and route fit.",
+      outcome: "A first reading of whether the problem should stay diagnostic or move upward.",
+    },
+    {
+      label: "Stage 2: Team / Enterprise Assessment",
+      href: "/diagnostics",
+      effort: "10-25 minutes",
+      explanation: "Structured assessment layers for teams and organizations dealing with execution, alignment, or institutional friction.",
+      outcome: "Sharper visibility into drift, misalignment, and system-level breakdowns.",
+    },
+    {
+      label: "Stage 3: Executive Reporting",
+      href: "/diagnostics/executive-reporting",
+      effort: "Premium interpretation",
+      explanation: "A board-grade interpretation layer for buyers who need disciplined reading before intervention.",
+      outcome: "Decision-grade clarity, implications, and governed next-step logic.",
+    },
+    {
+      label: "Stage 4: Strategy Room",
+      href: "/strategy-room",
+      effort: "Qualified escalation",
+      explanation: "The private chamber for situations where a real decision with real consequence must be forced under constraint.",
+      outcome: "Decision architecture, trade-offs, owners, and execution cadence.",
+    },
+  ];
+
+  return (
+    <Section id="how-it-works" variant="surface" cap="journey · how the system works">
+      <SectionHeader
+        eyebrow="The Ladder"
+        title={
+          <>
+            A structured path,
+            <br />
+            <span className="text-white/35">not a pile of pages.</span>
+          </>
+        }
+        description="The system is designed as a deliberate escalation ladder. Strategy Room is not the first step for everyone. The route is earned by signal, seriousness, and authority."
+        large
+      />
+
+      <div className="mt-12 grid gap-4 lg:grid-cols-2">
+        {stages.map((stage, index) => (
+          <Panel key={stage.label} surface="lift" gold={index === 0 || index === 2}>
+            <div className="p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "8px",
+                    letterSpacing: "0.26em",
+                    textTransform: "uppercase",
+                    color: "var(--ds-accent)",
+                  }}
+                >
+                  {stage.label}
+                </div>
+                <div className="text-[11px] ds-text-subtle">{stage.effort}</div>
+              </div>
+              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{stage.explanation}</p>
+              <p className="mt-4 text-[13px] leading-[1.75] ds-text-subtle">
+                <span className="ds-text">Expected outcome:</span> {stage.outcome}
+              </p>
+              <div className="mt-5">
+                <Link href={stage.href} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
+                  Open stage <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            </div>
+          </Panel>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function WhoThisIsFor() {
+  return (
+    <Section id="who-this-is-for" variant="void" cap="fit · who this is for">
+      <div className="grid gap-6 lg:grid-cols-[1fr_0.72fr]">
+        <div>
+          <SectionHeader
+            eyebrow="Audience"
+            title={
+              <>
+                Built for serious operators,
+                <br />
+                <span className="text-white/35">not casual browsers.</span>
+              </>
+            }
+            description="This platform is for founders, executives, organizations under pressure, and leaders facing structural, strategic, or execution problems that cannot be solved by more noise."
+          />
+        </div>
+        <Panel surface="lift">
+          <div className="p-6">
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+                color: "var(--ds-accent)",
+              }}
+            >
+              Who This Is Not For
+            </div>
+            <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">
+              It is not for people looking for inspiration without accountability,
+              generic productivity advice, low-stakes thought leadership, or access
+              to premium aesthetics without a real decision context.
+            </p>
+          </div>
+        </Panel>
+      </div>
+    </Section>
+  );
+}
+
+function ContentWithContext({
+  featuredBlogPosts,
+  featuredShorts,
+  featuredPlaybooks,
+  latestReport,
+}: Pick<HomePageProps, "featuredBlogPosts" | "featuredShorts" | "featuredPlaybooks" | "latestReport">) {
+  const intelligenceHref = "/artifacts";
+
+  return (
+    <Section id="content" variant="surface" cap="content · context · authority">
+      <SectionHeader
+        eyebrow="Content With Context"
+        title={
+          <>
+            Depth, with orientation.
+            <br />
+            <span className="text-white/35">Every surface has a job.</span>
+          </>
+        }
+        description="The content layer exists to build judgment, not just atmosphere. If a first-time user lands here, they should know what each category is for and where it leads."
+        large
+      />
+
+      <div className="mt-12 grid gap-4 lg:grid-cols-2">
+        {[
+          ["Intelligence", "Deeper analysis for operators facing structural decisions, strategic pressure, or institutional consequence.", intelligenceHref],
+          ["Essays", "Long-form thinking on institutions, drift, leadership, execution, and the real structure beneath visible problems.", "/blog"],
+          ["Shorts", "Concise signal for fast orientation, daily strategic clarity, and quick entry into the deeper body of work.", "/shorts"],
+          ["Frameworks", "Practical operating models, playbooks, and structured tools that turn thinking into governed action.", "/playbooks"],
+          ["Canon", "Foundational doctrine and core frameworks. The deeper intellectual spine behind the system.", "/canon"],
+          ["Vault", "Restricted archive and deployable assets for members and serious operators who need reusable tools and briefings.", "/vault"],
+        ].map(([title, body, href]) => (
+          <Panel key={title} surface="lift">
+            <div className="p-6">
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "8px",
+                  letterSpacing: "0.28em",
+                  textTransform: "uppercase",
+                  color: "var(--ds-accent)",
+                }}
+              >
+                {title}
+              </div>
+              <p className="mt-4 text-[14px] leading-[1.8] ds-text-muted">{body}</p>
+              <div className="mt-5">
+                <Link href={href} className="group inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] ds-text-muted transition">
+                  Explore <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            </div>
+          </Panel>
+        ))}
+      </div>
+
+      <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        {latestReport && (
+          <Panel surface="lift">
+            <div className="p-6">
+              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Latest Intelligence</div>
+              <div className="mt-3 text-[1.4rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
+                {latestReport.title}
+              </div>
+              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">{latestReport.description}</p>
+            </div>
+          </Panel>
+        )}
+
+        {featuredBlogPosts[0] && (
+          <Panel surface="lift">
+            <div className="p-6">
+              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Featured Essay</div>
+              <div className="mt-3 text-[1.35rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
+                {featuredBlogPosts[0].title}
+              </div>
+              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">{featuredBlogPosts[0].excerpt || "Long-form thinking designed to reframe the problem correctly."}</p>
+            </div>
+          </Panel>
+        )}
+
+        {(featuredShorts[0] || featuredPlaybooks[0]) && (
+          <Panel surface="lift">
+            <div className="p-6">
+              <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">Active Surface</div>
+              <div className="mt-3 text-[1.35rem] font-['Cormorant_Garamond',Georgia,serif] leading-[1.15] ds-text">
+                {featuredPlaybooks[0]?.title || featuredShorts[0]?.title || "Operational Frameworks"}
+              </div>
+              <p className="mt-3 text-[14px] leading-[1.8] ds-text-muted">
+                {featuredPlaybooks[0]?.description || featuredShorts[0]?.excerpt || "Practical signal designed for operators who need usable structure, not just ideas."}
+              </p>
+            </div>
+          </Panel>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
+  return (
+    <Section id="authority-signal" variant="void" cap="proof · authority signal">
+      <SectionHeader
+        eyebrow="Authority Signal"
+        title={
+          <>
+            Seriousness without theatre.
+            <br />
+            <span className="text-white/35">What this platform helps surface.</span>
+          </>
+        }
+        description="The platform is designed to surface structural problems that usually remain hidden under noise, sentiment, or internal politics."
+      />
+
+      <div className="mt-12 grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+        <Panel surface="lift">
+          <div className="grid grid-cols-2 gap-4 p-6">
+            {[
+              { label: "Diagnostics", value: "4-stage path" },
+              { label: "Canon", value: String(counts.canon || 0) },
+              { label: "Shorts", value: String(counts.shorts || 0) },
+              { label: "Library", value: String(counts.library || 0) },
+            ].map((item) => (
+              <div key={item.label} className="border p-4" style={{ borderColor: "var(--ds-border)" }}>
+                <div className="text-[10px] uppercase tracking-[0.2em] ds-text-subtle">{item.label}</div>
+                <div className="mt-2 text-[1.6rem] font-['Cormorant_Garamond',Georgia,serif] ds-text">{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel surface="lift">
+          <div className="p-6">
+            <div className="text-[11px] uppercase tracking-[0.2em] ds-text-subtle">The Platform Helps Surface</div>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {[
+                "Institutional drift hidden behind busy execution.",
+                "Decision ambiguity disguised as complexity.",
+                "Authority gaps that make strategy impossible to execute.",
+                "Misalignment between what leaders think and what the system can carry.",
+              ].map((item) => (
+                <div key={item} className="flex gap-3">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--ds-accent)" }} />
+                  <p className="text-[14px] leading-[1.8] ds-text-muted">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+      </div>
+    </Section>
+  );
+}
+
+function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
+  return (
+    <Section id="final-cta" variant="surface" cap="exit · next move">
+      <Panel surface="lift" gold>
+        <div className="p-8 md:p-12">
+          <div className="mx-auto max-w-4xl text-center">
+            <Eyebrow align="center">Next Move</Eyebrow>
+            <h2 className="mt-5 font-['Cormorant_Garamond',Georgia,serif] text-4xl font-light leading-[0.95] tracking-[-0.03em] ds-text">
+              Do not leave without a route.
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.9] ds-text-muted">
+              Start with the Diagnostic if you need signal. Read Intelligence if you need context.
+              Enter Strategy Room if the decision is already real and consequence is material.
+            </p>
+
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/diagnostics/constitutional-diagnostic"
+                className="inline-flex items-center gap-3 border px-7 py-4 transition"
+                style={{
+                  borderColor: "var(--ds-accent-soft)",
+                  backgroundColor: "var(--ds-accent-soft)",
+                  color: "var(--ds-accent)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Start the Diagnostic
+              </Link>
+              <Link
+                href={intelligenceHref}
+                className="inline-flex items-center gap-3 border px-7 py-4 transition"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  backgroundColor: "var(--ds-panel)",
+                  color: "var(--ds-text-muted)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Explore Intelligence
+              </Link>
+              <Link
+                href="/strategy-room"
+                className="inline-flex items-center gap-3 border px-7 py-4 transition"
+                style={{
+                  borderColor: "var(--ds-border)",
+                  color: "var(--ds-text-muted)",
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Enter Strategy Room
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Panel>
+    </Section>
+  );
+}
+
 const HomePage: NextPage<HomePageProps> = ({
   featuredShorts = [],
   featuredBriefing = null,
@@ -1826,10 +2324,12 @@ const HomePage: NextPage<HomePageProps> = ({
   },
   latestReport,
 }) => {
+  const intelligenceHref = "/artifacts";
+
   return (
     <Layout
       title="Abraham of London"
-      description="Institutional doctrine, strategic products, diagnostics, executive intelligence, and selective mandate work."
+      description="A strategic diagnostic platform for founders, executives, and organizations that need structured clarity before intervention."
       canonicalUrl="/"
       fullWidth
       headerTransparent
@@ -1839,352 +2339,30 @@ const HomePage: NextPage<HomePageProps> = ({
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
-      <HeroSection
-        onScroll={() => document.getElementById("platform")?.scrollIntoView({ behavior: "smooth" })}
+      <HomeHero intelligenceHref={intelligenceHref} />
+
+      <Bridge text="orientation · system" />
+      <WhatThisPlatformIs />
+
+      <Bridge text="system · ladder" />
+      <HowItWorksLadder />
+
+      <Bridge text="ladder · audience" />
+      <WhoThisIsFor />
+
+      <Bridge text="audience · content" />
+      <ContentWithContext
+        featuredBlogPosts={featuredBlogPosts}
+        featuredShorts={featuredShorts}
+        featuredPlaybooks={featuredPlaybooks}
+        latestReport={latestReport}
       />
 
-      <Bridge text="hero · buyer fit" />
+      <Bridge text="content · proof" />
+      <AuthoritySignal counts={counts} />
 
-      <Section id="buyer-fit" variant="void" cap="buyer fit · who this is for">
-        <ModuleBoundary label="ExecutiveBuyerFitSection">
-          <ExecutiveBuyerFitSection />
-        </ModuleBoundary>
-      </Section>
-
-      <Bridge text="buyer fit · doctrine" />
-
-      <Section id="doctrine" variant="void" cap="doctrine · spine · intellectual foundation">
-        <SectionHeader
-          eyebrow="Doctrine"
-          title={
-            <>
-              The intellectual spine.
-              <br />
-              <span className="text-white/35">Source of truth for everything that follows.</span>
-            </>
-          }
-          description="The Canon and the book that grounds it. All structured products derive their authority from this foundation."
-        />
-        <div className="mt-12">
-          <DoctrineShowcase canonEntries={featuredCanon} />
-        </div>
-      </Section>
-
-      <Bridge text="doctrine · diagnostics" />
-
-      <Section id="diagnostics" variant="void" cap="diagnostics · three-layer sequence">
-        <SectionHeader
-          eyebrow="The diagnostic ladder"
-          title={
-            <>
-              Signal before solution.
-              <br />
-              <span className="text-white/35">Route before intervention.</span>
-            </>
-          }
-          description="Three layers. Each with a distinct function. The system routes by evidence, not by proximity to a sale."
-          large
-        />
-        <div className="mt-12">
-          <DiagnosticLadder />
-        </div>
-      </Section>
-
-      <Bridge text="diagnostics · platform" />
-
-      <PlatformArchitecture counts={counts} />
-
-      <Bridge text="platform · flagships" />
-
-      <Section id="flagships" variant="surface" cap="flagships · intelligence · reporting · editorial">
-        <SectionHeader
-          eyebrow="Flagships"
-          title={
-            <>
-              Three flagship surfaces.
-              <br />
-              <span className="text-white/35">One governing standard.</span>
-            </>
-          }
-          description="Global Market Intelligence. Executive Reporting. Editorial flagship. Each is the leading object in its category."
-          large
-        />
-        <div className="mt-14 space-y-5">
-          <FlagshipIntelligence report={latestReport} />
-          <FlagshipAdvisory />
-          {flagshipPublication && <FlagshipPublication item={flagshipPublication} />}
-          <FlagshipBlogStrip posts={featuredBlogPosts} />
-        </div>
-      </Section>
-
-      <Bridge text="flagships · strategy room" />
-
-      <Section id="strategy-room" variant="surface" cap="escalation · when product becomes mandate">
-        <ModuleBoundary label="StrategyRoomIntegration">
-          <StrategyRoomIntegration />
-        </ModuleBoundary>
-      </Section>
-
-      {(featuredPublications.length > 0 || featuredPlaybooks.length > 0) && (
-        <>
-          <Bridge text="products · editorial and execution property" />
-
-          <Section
-            id="publications"
-            variant="surface"
-            cap="publications · doctrine and execution"
-            capDim
-            compact
-          >
-            <SectionHeader
-              eyebrow="Publications & Playbooks"
-              eyebrowDim
-              title={
-                <>
-                  The written record
-                  <br />
-                  <span className="text-white/35">and the execution layer.</span>
-                </>
-              }
-            />
-
-            {featuredPublications.length > 0 && (
-              <div className="mt-12">
-                <div
-                  className="mb-5"
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.40em",
-                    textTransform: "uppercase",
-                    color: "var(--ds-text-subtle)",
-                  }}
-                >
-                  Supporting publications
-                </div>
-                <div className="grid gap-4 lg:grid-cols-3">
-                  {featuredPublications.slice(0, 3).map((item) => (
-                    <PubCard key={item.slug} item={item} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {featuredPlaybooks.length > 0 && (
-              <div className="mt-10">
-                <div
-                  className="mb-5"
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
-                    letterSpacing: "0.40em",
-                    textTransform: "uppercase",
-                    color: "var(--ds-text-subtle)",
-                  }}
-                >
-                  Execution playbooks
-                </div>
-                <div className="grid gap-4 lg:grid-cols-3">
-                  {featuredPlaybooks.slice(0, 3).map((item) => (
-                    <PlaybookCard key={item.slug} item={item} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link
-                href="/editorials"
-                className="group inline-flex items-center gap-2 border px-5 py-3 transition"
-                style={{
-                  borderColor: "var(--ds-border)",
-                  backgroundColor: "var(--ds-panel)",
-                  color: "var(--ds-text-muted)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.26em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Browse publications <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-
-              <Link
-                href="/playbooks"
-                className="group inline-flex items-center gap-2 border px-5 py-3 transition"
-                style={{
-                  borderColor: "var(--ds-accent-soft)",
-                  color: "var(--ds-accent)",
-                  backgroundColor: "var(--ds-accent-soft)",
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.26em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Browse playbooks <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </Section>
-        </>
-      )}
-
-      <Bridge text="execution property · operators" />
-
-      <Section id="who" variant="void" cap="operators · target audience" capDim compact>
-        <SectionHeader
-          eyebrow="Operators"
-          eyebrowDim
-          title={
-            <>
-              Built for people carrying
-              <br />
-              <em className="not-italic" style={{ color: "var(--ds-accent)" }}>
-                responsibility.
-              </em>
-            </>
-          }
-          description="Founders, boards, leadership teams, and builders who prefer standards over slogans."
-        />
-        <div className="mt-12">
-          <Panel surface="lift">
-            <div className="p-5 md:p-7">
-              <ModuleBoundary label="WhoIWorkWith">
-                <WhoIWorkWith />
-              </ModuleBoundary>
-            </div>
-          </Panel>
-        </div>
-      </Section>
-
-      <Bridge text="operators · engagement lanes" />
-
-      <Section id="lanes" variant="surface" cap="engagement · commercial structure" capDim compact>
-        <SectionHeader
-          eyebrow="Engagement"
-          eyebrowDim
-          title={
-            <>
-              Public signal.
-              <br />
-              <span className="text-white/35">Structured products. Private mandate.</span>
-            </>
-          }
-          description="Three lanes with clean boundaries. Each serves a different level of commitment and consequence."
-        />
-        <div className="mt-12">
-          <Panel surface="lift">
-            <div className="p-5 md:p-7">
-              <ModuleBoundary label="EngagementLanes">
-                <EngagementLanes />
-              </ModuleBoundary>
-            </div>
-          </Panel>
-        </div>
-      </Section>
-
-      <Bridge text="lanes · live rooms" />
-
-      {/* Events surface preserved at /events — removed from homepage
-          product narrative. Community gatherings are surfaced at /events
-          and in the footer. Not a product pillar. */}
-
-      <Section id="vault" variant="surface" cap="vault · deployables" capDim compact>
-        <SectionHeader
-          eyebrow="Vault"
-          eyebrowDim
-          title="Deployable assets."
-          description="Templates, packs, frameworks, and operating assets engineered for reuse."
-        />
-        <div className="mt-12">
-          <Panel surface="lift">
-            <div className="p-6 md:p-8">
-              <ModuleBoundary label="VaultTeaserRail">
-                <VaultTeaserRail />
-              </ModuleBoundary>
-            </div>
-          </Panel>
-        </div>
-      </Section>
-
-      {featuredBriefing && (
-        <>
-          <Bridge text="deployables · intelligence feed" />
-
-          <Section id="briefing" variant="void" cap="briefing · operator intelligence" capDim compact>
-            <SectionHeader
-              eyebrow="Briefing"
-              eyebrowDim
-              title="Operator intelligence."
-              description="Focused transmission for people who will act on what they read."
-            />
-            <div className="mt-12">
-              <Panel surface="lift">
-                <div className="p-6 md:p-8">
-                  <ModuleBoundary label="OperatorBriefing">
-                    <OperatorBriefing featured={featuredBriefing as any} />
-                  </ModuleBoundary>
-                </div>
-              </Panel>
-            </div>
-          </Section>
-        </>
-      )}
-
-      {featuredShorts.length > 0 && (
-        <>
-          <Bridge text="intelligence · shorts" />
-
-          <Section id="dispatches" variant="surface" cap="shorts · rapid intel" capDim compact>
-            <SectionHeader
-              eyebrow="Shorts"
-              eyebrowDim
-              title="Short, sharp intelligence notes."
-              description="Written for retrieval and reuse."
-            />
-            <div className="mt-12">
-              <Panel surface="lift">
-                <div className="p-6 md:p-8">
-                  <ModuleBoundary label="ContentShowcase">
-                    <ContentShowcase
-                      items={featuredShorts as any}
-                      title="Shorts"
-                      description="Short, sharp intelligence notes."
-                    />
-                  </ModuleBoundary>
-                </div>
-              </Panel>
-            </div>
-          </Section>
-        </>
-      )}
-
-      <Bridge text="content · ventures" />
-
-      <Section id="ventures" variant="void" cap="ventures · institutions in motion" capDim compact>
-        <SectionHeader
-          eyebrow="Ventures"
-          eyebrowDim
-          smaller
-          title="Institutions in motion."
-          description="Real ventures, systems, and infrastructure designed to move in the world."
-        />
-        <div className="mt-12">
-          <Panel surface="lift">
-            <div className="p-6 md:p-8">
-              <ModuleBoundary label="VenturesSection">
-                <VenturesSection />
-              </ModuleBoundary>
-            </div>
-          </Panel>
-        </div>
-      </Section>
-
-      <Section id="close" variant="void" cap="entry points · three routes">
-        <div className="mx-auto max-w-4xl">
-          <EscalationClose />
-        </div>
-      </Section>
+      <Bridge text="proof · exit" />
+      <HomeFinalCta intelligenceHref={intelligenceHref} />
     </Layout>
   );
 };

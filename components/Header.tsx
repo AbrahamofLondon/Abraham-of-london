@@ -249,7 +249,7 @@ export default function Header({
 
             {/* Strategy Room — desktop */}
             <Link
-              href="/consulting/strategy-room"
+              href="/strategy-room"
               className="hidden items-center gap-2 border border-white/[0.18] bg-[#0E0E12] px-4 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[8px] uppercase tracking-[0.28em] text-white/78 transition-all duration-300 hover:border-white/[0.26] hover:bg-[#121216] hover:text-white md:inline-flex"
             >
               <Crown className="h-3 w-3" style={{ color: `${GOLD}90` }} />
@@ -408,7 +408,7 @@ export default function Header({
             {/* Special entries — Strategy Room is public; Member entries are auth-gated. */}
             {[
               {
-                href: "/consulting/strategy-room",
+                href: "/strategy-room",
                 label: "Strategy Room",
                 sub: "Qualified Access Only",
                 tag: "Selective",

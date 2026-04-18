@@ -175,7 +175,7 @@ export default function EnhancedFooter(): React.ReactElement {
 
   const secondaryGateways: GatewayCardProps[] = [
     {
-      href: "/consulting/strategy-room",
+      href: "/strategy-room",
       eyebrow: "Qualified access",
       title: "Strategy Room",
       body: "Controlled entry for qualified operators. Score-based routing. Institutional gatekeeping.",
@@ -228,7 +228,7 @@ export default function EnhancedFooter(): React.ReactElement {
   ],
   Engagements: [
     { label: "Consulting", href: "/consulting" },
-    { label: "Strategy Room", href: "/consulting/strategy-room" },
+    { label: "Strategy Room", href: "/strategy-room" },
     { label: "Diagnostics", href: "/diagnostics" },
     { label: "Gatherings", href: "/events" },
     { label: "Contact", href: "/contact" },
@@ -296,7 +296,7 @@ export default function EnhancedFooter(): React.ReactElement {
               </Link>
 
               <Link
-                href="/consulting/strategy-room"
+                href="/strategy-room"
                 className="group inline-flex items-center justify-center gap-3 border border-[#C9A96E]/35 bg-[#C9A96E]/[0.08] px-6 py-[14px] font-mono text-[9px] uppercase tracking-[0.28em] text-[#D7B77E] transition-colors duration-300 hover:border-[#C9A96E]/55 hover:bg-[#C9A96E]/[0.13] hover:text-[#E8C991]"
               >
                 <Crown className="h-3.5 w-3.5" />
