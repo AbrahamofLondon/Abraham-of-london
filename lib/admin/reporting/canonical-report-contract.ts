@@ -177,9 +177,14 @@ export function buildCanonicalReportContract(
   const normalizedConstitution: ExecutiveReportConstitution = {
     ...constitution,
     route: safeString(constitution?.route, "DIAGNOSTIC") as ConstitutionalRoute,
+    confidence: safeNumber(constitution?.confidence, 0),
     priority: safeString(constitution?.priority, "MEDIUM") as ExecutiveReportPriority,
     temperature: safeString(constitution?.temperature, "WARM") as ExecutiveReportTemperature,
     orgState: safeString(constitution?.orgState, "DRIFTING") as ExecutiveReportState,
+    posture: safeString(
+      constitution?.posture,
+      safeString(constitution?.orgState, "DRIFTING"),
+    ) as ExecutiveReportState,
     readinessTier: safeString(constitution?.readinessTier, "EMERGING") as ExecutiveReportReadinessTier,
     authorityType: safeString(constitution?.authorityType, "UNCLEAR") as ExecutiveReportAuthorityType,
     revenueBand: safeString(constitution?.revenueBand, "SMB") as ExecutiveReportRevenueBand,
@@ -194,6 +199,11 @@ export function buildCanonicalReportContract(
     requiredInterventions: uniqueStrings(safeStringArray(constitution?.requiredInterventions)),
     sponsorTypes: uniqueStrings(safeStringArray(constitution?.sponsorTypes)),
     worldviewAnchors: uniqueStrings(safeStringArray(constitution?.worldviewAnchors)),
+    disqualifiersTriggered: uniqueStrings(safeStringArray(constitution?.disqualifiersTriggered)),
+    escalationAllowed: safeBoolean(
+      constitution?.escalationAllowed,
+      safeString(constitution?.route) === "STRATEGY",
+    ),
     narrativeSummary: safeString(
       constitution?.narrativeSummary,
       safeString(report?.narrative?.summary),

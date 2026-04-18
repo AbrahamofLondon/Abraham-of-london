@@ -225,6 +225,7 @@ const AUTH_PUBLIC_EXACT = new Set<string>([
 ]);
 
 const AUTH_PUBLIC_PREFIXES = [
+  "/diagnostics",
   "/blog",
   "/canon",
   "/shorts",

@@ -70,9 +70,11 @@ export interface ExecutiveReportIntegritySnapshot {
 
 export interface ExecutiveReportConstitution {
   route: ConstitutionalRoute;
+  confidence: number;
   priority: ExecutiveReportPriority;
   temperature: ExecutiveReportTemperature;
   orgState: ExecutiveReportState;
+  posture: ExecutiveReportState;
   readinessTier: ExecutiveReportReadinessTier;
   authorityType: ExecutiveReportAuthorityType;
   revenueBand: ExecutiveReportRevenueBand;
@@ -89,6 +91,8 @@ export interface ExecutiveReportConstitution {
   requiredInterventions: string[];
   sponsorTypes: string[];
   worldviewAnchors: string[];
+  disqualifiersTriggered: string[];
+  escalationAllowed: boolean;
 
   narrativeSummary: string;
   rationale: string[];

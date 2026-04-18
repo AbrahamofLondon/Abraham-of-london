@@ -1,4 +1,8 @@
-import { deriveConstitutionalAssessment } from "@/lib/decision/system-constitution";
+import {
+  deriveConstitutionalAssessment,
+  type ConstitutionalIntake,
+} from "@/lib/decision/system-constitution";
+import { evaluateConstitutionalRoute } from "@/lib/constitution/rules";
 import { applyRecommendationGovernance } from "@/lib/decision/recommendation-governance";
 import type { MatchedAsset as GovernanceMatchedAsset } from "@/lib/decision/asset-matcher";
 import type {
@@ -99,6 +103,16 @@ function safeNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function getRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 function normalizeText(value: unknown): string {
   return safeString(value).toLowerCase();
 }
@@ -184,6 +198,45 @@ function loadCatalogBucket(dirName: string): any[] {
   }
 }
 
+function normalizeConstitutionalIntake(
+  intake: Record<string, unknown>,
+): ConstitutionalIntake {
+  const governance = getRecord(intake.governance);
+  const economics = getRecord(intake.economics);
+
+  return {
+    fullName: safeString(intake.fullName),
+    email: safeString(intake.email),
+    organisation: safeString(intake.organisation),
+    sector: safeString(intake.sector, "institutional"),
+    revenueBand: safeString(intake.revenueBand || economics.revenueBand, "SMB"),
+    authorityRole: safeString(
+      intake.authorityRole || intake.role || governance.sponsorNameOrSeat,
+      "Executive sponsor",
+    ),
+    authorityScope: safeString(
+      intake.authorityScope || governance.authorityScope,
+      "UNCLEAR",
+    ),
+    urgencyWindow: safeString(
+      intake.urgencyWindow || economics.decisionWindow,
+      "NEAR_TERM",
+    ),
+    problemStatement: safeString(intake.problemStatement),
+    symptoms: safeString(intake.symptoms),
+    desiredOutcome: safeString(intake.desiredOutcome),
+    currentConstraint: safeString(intake.currentConstraint),
+    marketExposure: safeString(
+      intake.marketExposure || economics.marketExposure,
+      "MEDIUM",
+    ),
+    boardInvolved: safeString(
+      intake.boardInvolved || governance.boardInvolved,
+      "UNCERTAIN",
+    ),
+  };
+}
+
 function pickHref(doc: any): string | null {
   return (
     safeString(doc?.hrefSafe) ||
@@ -260,13 +313,65 @@ async function loadAssetCatalog(): Promise<CatalogItem[]> {
 function buildConstitutionFromIntake(
   intake: Record<string, unknown>,
 ): ExecutiveReportConstitution {
-  const derived = deriveConstitutionalAssessment(intake as any);
+  const canonicalIntake = normalizeConstitutionalIntake(intake);
+  const derived = deriveConstitutionalAssessment(canonicalIntake);
+  const routeDecision = evaluateConstitutionalRoute({
+    clarityScore: derived.clarityScore,
+    authorityType: derived.authorityType,
+    readinessTier: derived.readinessTier,
+    posture: derived.orgState,
+    failureModeCount: derived.failureModes.length,
+    failureModeSeverity: clamp(Math.round(derived.severityScore / 10), 0, 10),
+    narrativeCoherence: clamp(
+      Math.round(derived.clarityScore * 0.72 + derived.governanceScore * 0.28),
+      0,
+      100,
+    ),
+    interventionReadiness: clamp(
+      Math.round(
+        derived.governanceScore * 0.4 +
+          derived.clarityScore * 0.35 +
+          derived.authorityScore * 0.25,
+      ),
+      0,
+      100,
+    ),
+    mandateFit:
+      canonicalIntake.problemStatement.length >= 80 &&
+      canonicalIntake.desiredOutcome.length >= 30,
+    seriousnessScore: clamp(
+      Math.round(
+        derived.severityScore * 0.45 +
+          derived.revenueScore * 0.2 +
+          derived.governanceScore * 0.2 +
+          derived.clarityScore * 0.15,
+      ),
+      0,
+      100,
+    ),
+    trustCondition: derived.failureModes.some((mode) => /trust/i.test(mode))
+      ? 34
+      : 62,
+    governanceDiscipline: derived.governanceScore,
+  });
+
+  const requiredInterventions = uniqueStrings([
+    ...derived.requiredInterventions,
+    ...routeDecision.recommendedInterventions,
+  ]);
+
+  const rationale = uniqueStrings([
+    ...derived.rationale,
+    ...routeDecision.rationale,
+  ]);
 
   return {
-    route: safeString(derived.route, "DIAGNOSTIC") as import("@/lib/admin/reporting/types").ConstitutionalRoute,
+    route: safeString(routeDecision.route, derived.route || "DIAGNOSTIC") as import("@/lib/admin/reporting/types").ConstitutionalRoute,
+    confidence: safeNumber(routeDecision.confidence, 0.5),
     priority: safeString(derived.priority, "MEDIUM") as import("@/lib/admin/reporting/types").ExecutiveReportPriority,
     temperature: safeString(derived.temperature, "WARM") as import("@/lib/admin/reporting/types").ExecutiveReportTemperature,
     orgState: safeString(derived.orgState, "DRIFTING") as import("@/lib/admin/reporting/types").ExecutiveReportState,
+    posture: safeString(derived.orgState, "DRIFTING") as import("@/lib/admin/reporting/types").ExecutiveReportState,
     readinessTier: safeString(derived.readinessTier, "EMERGING") as import("@/lib/admin/reporting/types").ExecutiveReportReadinessTier,
     authorityType: safeString(derived.authorityType, "UNCLEAR") as import("@/lib/admin/reporting/types").ExecutiveReportAuthorityType,
     revenueBand: safeString(derived.revenueBand, "SMB") as import("@/lib/admin/reporting/types").ExecutiveReportRevenueBand,
@@ -278,11 +383,13 @@ function buildConstitutionFromIntake(
     revenueScore: safeNumber(derived.revenueScore, 50),
     dominantDomains: uniqueStrings(derived.dominantDomains || []),
     failureModes: uniqueStrings(derived.failureModes || []),
-    requiredInterventions: uniqueStrings(derived.requiredInterventions || []),
+    requiredInterventions,
     sponsorTypes: uniqueStrings(derived.sponsorTypes || []),
     worldviewAnchors: uniqueStrings(derived.worldviewAnchors || []),
+    disqualifiersTriggered: uniqueStrings(routeDecision.disqualifiersTriggered || []),
+    escalationAllowed: Boolean(routeDecision.escalationAllowed),
     narrativeSummary: safeString(derived.narrativeSummary, ""),
-    rationale: uniqueStrings(derived.rationale || []),
+    rationale,
   };
 }
 

@@ -89,6 +89,9 @@ type ExecutiveReportViewModel = {
     headline: string;
     summary: string;
     mandate: string;
+    primaryConstraint?: string;
+    structuralImplication?: string;
+    routeReason?: string;
     failureModes: string[];
     priorityStack: string[];
     requiredInterventions: string[];
@@ -117,9 +120,11 @@ type ExecutiveReportViewModel = {
   };
   constitution: {
     route: string;
+    confidence?: number;
     priority: string;
     temperature: string;
     orgState: string;
+    posture?: string;
     readinessTier: string;
     authorityType: string;
     revenueBand: string;
@@ -134,6 +139,8 @@ type ExecutiveReportViewModel = {
     requiredInterventions: string[];
     sponsorTypes: string[];
     worldviewAnchors: string[];
+    disqualifiersTriggered?: string[];
+    escalationAllowed?: boolean;
     narrativeSummary: string;
     rationale: string[];
   };
@@ -860,6 +867,76 @@ function ResultSurface({
                     }}
                   >
                     {summary.mandate}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {(summary?.primaryConstraint ||
+              summary?.structuralImplication ||
+              summary?.routeReason) && (
+              <div
+                style={{
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  backgroundColor: "rgba(255,255,255,0.015)",
+                  padding: "1.5rem 1.75rem",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: "7px",
+                    letterSpacing: "0.38em",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.22)",
+                    marginBottom: "0.9rem",
+                  }}
+                >
+                  Constitutional verdict
+                </div>
+
+                {summary?.primaryConstraint && (
+                  <p
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "1.02rem",
+                      lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.72)",
+                    }}
+                  >
+                    Primary institutional constraint: {summary.primaryConstraint}
+                  </p>
+                )}
+
+                {summary?.routeReason && (
+                  <p
+                    style={{
+                      marginTop: "0.65rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.92rem",
+                      lineHeight: 1.68,
+                      color: "rgba(255,255,255,0.48)",
+                    }}
+                  >
+                    Route decision: {summary.routeReason}
+                  </p>
+                )}
+
+                {summary?.structuralImplication && (
+                  <p
+                    style={{
+                      marginTop: "0.65rem",
+                      fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+                      fontWeight: 300,
+                      fontSize: "0.92rem",
+                      lineHeight: 1.68,
+                      color: "rgba(255,255,255,0.38)",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {summary.structuralImplication}
                   </p>
                 )}
               </div>
@@ -2846,4 +2923,3 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return { props: {} };
 
 };
-

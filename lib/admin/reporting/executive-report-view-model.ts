@@ -52,6 +52,9 @@ export interface ExecutiveReportViewModel {
     headline: string;
     summary: string;
     mandate: string;
+    primaryConstraint: string;
+    structuralImplication: string;
+    routeReason: string;
     failureModes: string[];
     priorityStack: string[];
     requiredInterventions: string[];
@@ -238,12 +241,18 @@ export function buildExecutiveReportViewModel(
       reasons: item.reasons,
     }));
 
-  const confidence = Math.round(
-    safeNumber(sections.integritySnapshot.sovereignCertainty, 0) * 0.35 +
-      (100 - safeNumber(sections.strategicDomainAnalysis.averageDissonance, 0)) * 0.25 +
-      safeNumber(constitution.governanceScore, 0) * 0.2 +
-      safeNumber(constitution.authorityScore, 0) * 0.2,
+  const constitutionalConfidence = Math.round(
+    safeNumber(constitution.confidence, 0) * 100,
   );
+  const confidence =
+    constitutionalConfidence > 0
+      ? constitutionalConfidence
+      : Math.round(
+          safeNumber(sections.integritySnapshot.sovereignCertainty, 0) * 0.35 +
+            (100 - safeNumber(sections.strategicDomainAnalysis.averageDissonance, 0)) * 0.25 +
+            safeNumber(constitution.governanceScore, 0) * 0.2 +
+            safeNumber(constitution.authorityScore, 0) * 0.2,
+        );
 
   const failureModes = sections.failureModes.items;
   const dominantDomains = sections.dominantDomains.items;
@@ -305,6 +314,23 @@ export function buildExecutiveReportViewModel(
     boardActions[0] ||
     "Proceed according to governed recommendation sequence.";
 
+  const primaryConstraint =
+    sections.requiredInterventions.items[0] ||
+    sections.failureModes.items[0] ||
+    "Decision structure is not yet sufficiently ordered.";
+
+  const structuralImplication =
+    route === "STRATEGY"
+      ? "The matter is ordered enough for direct intervention without bypassing governance."
+      : route === "REJECT"
+        ? "Escalation would overstate the signal and should be withheld until the case is more coherent."
+        : "The signal is real, but structural correction should precede executive escalation.";
+
+  const routeReason =
+    sections.rationale.items[0] ||
+    sections.governedRecommendations.rationale[0] ||
+    "Route assigned according to the constitutional reading.";
+
   return {
     header: {
       reportId: canonical.reportId,
@@ -323,6 +349,9 @@ export function buildExecutiveReportViewModel(
       headline: sections.executiveSummary.headline,
       summary: sections.executiveSummary.summary,
       mandate: sections.executiveSummary.mandate,
+      primaryConstraint,
+      structuralImplication,
+      routeReason,
       failureModes,
       priorityStack: sections.priorityStack.items,
       requiredInterventions: sections.requiredInterventions.items,
