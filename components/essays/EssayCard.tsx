@@ -92,6 +92,8 @@ export default function EssayCard({
           aspect="landscape"
           priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          overlay={false}
+          scrim={false}
         />
 
         {/* Meta row */}

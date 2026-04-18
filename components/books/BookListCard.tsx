@@ -57,6 +57,8 @@ function BookListCard({
           aspect="portrait"
           priority={priority}
           sizes="(max-width: 768px) 100vw, 420px"
+          overlay={false}
+          scrim={false}
         />
 
         <div className="mt-5">

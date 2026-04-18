@@ -48,8 +48,8 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
   priority = false,
   sizes = '(max-width: 768px) 100vw, 33vw',
   className,
-  overlay = true,
-  scrim = true,
+  overlay = false,
+  scrim = false,
   hoverEffect = true,
   children,
 }) => {
@@ -73,14 +73,19 @@ export const SmartCover: React.FC<SmartCoverProps> = ({
   }, [src]);
 
   const [currentSrc, setCurrentSrc] = useState(resolvedSrc);
+  const hasErrored = React.useRef(false);
 
-  // Reset when the source prop changes
+  // Reset when the source prop changes (new card, new data)
   useEffect(() => {
     setCurrentSrc(resolvedSrc);
+    hasErrored.current = false;
   }, [resolvedSrc]);
 
   const handleError = useCallback(() => {
-    if (currentSrc !== DEFAULT_FALLBACK) {
+    // Only fall back once per resolved src. Prevents re-render cascades
+    // from causing all cards to collapse to the same default image.
+    if (!hasErrored.current && currentSrc !== DEFAULT_FALLBACK) {
+      hasErrored.current = true;
       setCurrentSrc(DEFAULT_FALLBACK);
     }
   }, [currentSrc]);
