@@ -53,7 +53,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const rawId = typeof ctx.params?.id === "string" ? ctx.params.id : "";
   const id = safeStr(rawId);
   const item = id ? getPremiumContentById(id) : null;
-  const related = item ? getRelatedPremiumContent(item.id) : [];
+
+  if (!item) {
+    return { notFound: true };
+  }
+
+  const related = getRelatedPremiumContent(item.id);
 
   return {
     props: {
