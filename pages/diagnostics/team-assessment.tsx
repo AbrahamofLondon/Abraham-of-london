@@ -18,6 +18,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -501,6 +502,13 @@ export default function TeamAssessmentPage() {
   const [direction,    setDirection]      = React.useState(1);
   const [purposePct,   setPurposePct]     = React.useState<number | null>(null);
   const [subjectId,    setSubjectId]      = React.useState("");
+
+  React.useEffect(() => {
+    trackStageStart("team");
+    const handleUnload = () => trackDropoff("team");
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
 
   React.useEffect(() => {
     try {

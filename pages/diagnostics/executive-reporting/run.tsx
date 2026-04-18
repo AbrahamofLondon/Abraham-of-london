@@ -5,6 +5,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -2557,6 +2558,13 @@ export default function ExecutiveReportingRunPage() {
   const [result, setResult] = React.useState<Extract<ExecutiveReportingResult, { ok: true }> | null>(
     null,
   );
+
+  React.useEffect(() => {
+    trackStageStart("executive");
+    const handleUnload = () => trackDropoff("executive");
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
 
   function handleGenerating() {
     setPageState("generating");

@@ -19,6 +19,7 @@ import {
 import Layout from "@/components/Layout";
 import ConstitutionalDiagnosticSuite from "@/components/assessments/ConstitutionalDiagnosticSuite";
 import { getOrCreateSubjectId } from "@/lib/diagnostics/subject-id";
+import { trackFunnelEntry, trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -56,6 +57,12 @@ function GoldRule({ soft = false }: { soft?: boolean }) {
 export default function ConstitutionalDiagnosticPage() {
   React.useEffect(() => {
     getOrCreateSubjectId();
+    trackFunnelEntry("/diagnostics/constitutional-diagnostic");
+    trackStageStart("constitutional");
+
+    const handleUnload = () => trackDropoff("constitutional");
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
   return (

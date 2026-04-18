@@ -56,6 +56,14 @@ export default async function handler(
       });
     }
 
+    // Server-side conversion signal — highest-value event
+    console.log("[STRATEGY_ROOM_CONVERSION]", {
+      referenceId: result.referenceId,
+      priorityStatus: result.priorityStatus || null,
+      ip,
+      timestamp: new Date().toISOString(),
+    });
+
     return res.status(200).json({
       ok: true,
       status: "accepted",

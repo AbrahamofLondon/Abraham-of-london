@@ -20,6 +20,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
@@ -514,6 +515,13 @@ export default function EnterpriseAssessmentPage() {
   const [isSubmitting,setIsSubmitting]= React.useState(false);
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
   const [subjectId, setSubjectId] = React.useState("");
+
+  React.useEffect(() => {
+    trackStageStart("enterprise");
+    const handleUnload = () => trackDropoff("enterprise");
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
 
   React.useEffect(() => {
     try {

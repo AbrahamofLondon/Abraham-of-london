@@ -8,6 +8,7 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { trackStrategyRoomEntry, trackStrategyRoomConversion } from "@/lib/analytics/funnel";
 import {
   AlertTriangle,
   ArrowRight,
@@ -912,6 +913,11 @@ export default function StrategyRoomPage() {
   const [sessionKey,  setSessionKey]  = React.useState<string | null>(null);
   const [draftSaved,  setDraftSaved]  = React.useState(false);
 
+  // Track entry
+  React.useEffect(() => {
+    trackStrategyRoomEntry();
+  }, []);
+
   // Load draft
   React.useEffect(() => {
     try {
@@ -1016,6 +1022,7 @@ export default function StrategyRoomPage() {
       }
 
       setCanonical(nextCanonical);
+      trackStrategyRoomConversion();
       await logRecommendationImpressions(nextSessionKey, nextCanonical);
       try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       window.scrollTo({ top: 0, behavior: "smooth" });
