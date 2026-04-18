@@ -106,28 +106,28 @@ function buildNarrativeHeadline(input: {
   const state = input.orgState || "DRIFTING";
 
   if (input.route === "STRATEGY") {
-    return `${organisation} shows a ${state.toLowerCase()} condition with sufficient signal for strategic escalation.`;
+    return `${organisation} shows a ${state.toLowerCase()} condition with enough ordered signal for strategic escalation.`;
   }
 
   if (input.route === "REJECT") {
-    return `${organisation} does not yet present a decision-grade case for executive escalation.`;
+    return `${organisation} does not yet present a sufficiently ordered case for executive escalation.`;
   }
 
   if (
     input.stakeholderBreadth === "BOARD" ||
     input.stakeholderBreadth === "INSTITUTIONAL"
   ) {
-    return `${organisation} presents a ${state.toLowerCase()} condition with broad stakeholder consequence requiring disciplined executive interpretation.`;
+    return `${organisation} presents a ${state.toLowerCase()} condition with broad consequence and requires disciplined executive interpretation.`;
   }
 
   if (
     input.marketExposure === "CRITICAL" ||
     input.marketExposure === "HIGH"
   ) {
-    return `${organisation} is operating under visible structural strain with market-facing consequence.`;
+    return `${organisation} is operating under visible structural strain with real market-facing consequence.`;
   }
 
-  return `${organisation} presents a ${state.toLowerCase()} condition requiring disciplined interpretation before escalation.`;
+  return `${organisation} presents a ${state.toLowerCase()} condition requiring disciplined interpretation before escalation opens.`;
 }
 
 function buildNarrativeSummary(input: {
@@ -215,7 +215,7 @@ function buildNarrativeMandate(input: {
     );
   }
 
-  return mandateBits.join(" ").trim() || "Proceed according to governed recommendation sequence.";
+  return mandateBits.join(" ").trim() || "Proceed according to the governed recommendation sequence.";
 }
 
 function toTelemetryDomains(input: {

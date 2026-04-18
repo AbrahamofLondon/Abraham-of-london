@@ -40,7 +40,6 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
-import ModelReferencePanel from "@/components/diagnostics/results/ModelReferencePanel";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -279,33 +278,33 @@ function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScore
   const { posture, readinessTier, authorityType, coherence, trust } = scores;
 
   if (route === "STRATEGY") {
-    return `The constitutional signal meets all thresholds for direct strategic engagement. Coherence is above the clarity minimum, decision authority is established, and the posture condition (${posture.toLowerCase()}) is compatible with private advisory work. The route is clear.`;
+    return `The system reads as sufficiently ordered for direct strategic engagement. Coherence is above threshold, authority is sufficiently ordered, and the current posture (${posture.toLowerCase()}) can bear intervention without losing judgment. The threshold has been met for escalation. The next move is structured strategy, not further clarification.`;
   }
 
   if (route === "REJECT") {
     if (decision.disqualifiersTriggered.some(d => /clarity|coherence/i.test(d))) {
-      return `The diagnostic signal does not yet carry the structural clarity required for constitutional routing. This is not a judgement on the situation's importance — it means the declared problem has not been reduced to a form that the constitutional system can assess. Diagnostic clarification precedes everything else.`;
+      return `The signal is not yet coherent enough to carry constitutional judgment. Pressure may be present, but pressure without coherence displaces judgment rather than sharpening it. The threshold for escalation has not been met because the problem has not been reduced to a stable form. The next move is clarification, not escalation.`;
     }
     if (decision.disqualifiersTriggered.some(d => /authority/i.test(d))) {
-      return `The authority condition is not established. The constitutional system cannot route a matter to private advisory work without a confirmed decision-bearing sponsor. Clarify the authority position before re-entering.`;
+      return `Authority is not sufficiently ordered for private intervention. A matter can be serious and still remain constitutionally unready if no decision-bearing sponsor can carry it. The threshold fails at the level of authority, not importance. The next move is to establish mandate and re-enter with ordered sponsorship.`;
     }
     if (decision.disqualifiersTriggered.some(d => /seriousness|mandate/i.test(d))) {
-      return `The situation does not yet register as decision-grade — it is exploratory rather than consequential. The constitutional system routes exploratory concerns to the foundational diagnostic layer, not to private advisory.`;
+      return `The signal does not yet register as decision-grade. There may be concern, but the current state reads as exploratory rather than constitutionally consequential. The threshold for premium escalation is not reached while seriousness remains this thin. The next move is foundational diagnostic work, not private advisory.`;
     }
-    return `Multiple constitutional thresholds are triggered simultaneously. The diagnostic layer will establish which structural conditions need correction before escalation is appropriate.`;
+    return `Multiple constitutional thresholds are failing at once. This usually indicates disorder in purpose, authority, or coherence rather than a single isolated defect. The threshold for escalation is closed while those conditions remain unordered. The next move is diagnostic correction before any higher route is attempted.`;
   }
 
   // DIAGNOSTIC
   if (authorityType === "UNCLEAR") {
-    return `The situation carries genuine signal — coherence at ${coherence}%, trust at ${trust}% — but the authority condition is not established. The diagnostic route is the correct next step: it will surface whether the authority ambiguity is a clarity problem or a governance problem.`;
+    return `The signal is real, but authority is not sufficiently ordered. Coherence reads at ${coherence}% and trust at ${trust}%, which means the issue is not absence of strain but instability in who can carry judgment. The threshold for direct escalation fails at the authority layer. The next move is diagnostic work that distinguishes governance failure from simple ambiguity.`;
   }
   if (posture === "DISORDERED" || posture === "MISALIGNED") {
-    return `The posture reading (${posture.toLowerCase()}) indicates structural misalignment that should be formally mapped before private advisory escalation. The diagnostic layer exists precisely for this condition — real consequence with structural disorder that needs reading before it can be corrected.`;
+    return `The posture reads as ${posture.toLowerCase()}, which means the system is carrying constitutional strain. Consequence may already be material, but strain at this level distorts correction if it is rushed. The threshold for direct intervention is not met while coherence remains this unstable. The next move is formal diagnosis before any premium escalation.`;
   }
   if (readinessTier === "FRAGILE" || readinessTier === "EMERGING") {
-    return `The readiness tier (${readinessTier.toLowerCase()}) indicates the organisation is not yet structurally prepared for premium intervention. This is the most common diagnostic finding — genuine consequence paired with insufficient structural readiness. The route is not rejection; it is ordered preparation.`;
+    return `Readiness is currently ${readinessTier.toLowerCase()}, which means the system can register strain but cannot yet bear heavy intervention cleanly. Consequence is visible, but readiness this low turns escalation into additional friction. The threshold closes at the level of load-bearing capacity, not relevance. The next move is ordered preparation through the diagnostic layer.`;
   }
-  return `The constitutional signal is genuine but not yet strong enough for the highest escalation layer. The diagnostic route will sharpen the reading and establish whether private advisory engagement is the next correct move.`;
+  return `The system is carrying a genuine signal, but the constitutional reading remains below strategy threshold. There is enough coherence to proceed, yet not enough ordering to justify direct intervention without further reading. The threshold is close, but not met. The next move is diagnostic refinement to determine whether escalation should open.`;
 }
 
 function buildFailureModes(decision: ConstitutionalDecision, scores: DerivedScores): string[] {
@@ -929,8 +928,6 @@ export default function ConstitutionalDiagnosticSuite() {
                       </div>
                     </div>
                   )}
-
-                  <ModelReferencePanel />
 
                   <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 

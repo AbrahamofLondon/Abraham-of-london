@@ -50,7 +50,6 @@ import {
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
-import ModelReferencePanel from "@/components/diagnostics/results/ModelReferencePanel";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -172,46 +171,46 @@ function deriveGapReading(gaps: DomainGap[], overallLeader: number, overallReali
   const hasExecutionDisconnect = executionGap && executionGap.gap >= 20;
 
   if (criticalGaps.length >= 2) {
-    title = "Systemic perception breakdown";
-    pattern = `${criticalGaps.length} of 4 domains show critical perception gaps — the leader is operating from a map of the team that diverges significantly from the team's own self-assessment. Decisions made from this misread will reinforce the gap rather than close it. This is not a team problem. It is a structural information failure.`;
+    title = "Systemic coherence strain";
+    pattern = `${criticalGaps.length} of 4 domains show critical divergence between leadership perception and team reality. That means judgment is being made from a map the operating layer does not share, which turns ordinary decisions into structural risk. The threshold from local variance into constitutional strain has already been crossed. The next move is enterprise-level reading, not another round of team exhortation.`;
     firstAction = "Before any intervention, gather unfiltered direct reports from 3-5 team members on each domain — individually, not in a group. The goal is to verify whether the perception gap is accurate signal or whether team self-assessment is deflated by a psychological safety problem.";
-    escalationNote = "The perception gap is wide enough and distributed enough that this is an enterprise-level structural issue. The Enterprise Assessment will determine whether this pattern exists across the organisation or is confined to this unit.";
+    escalationNote = "The gap is too wide and too distributed to treat as a contained team issue. The Enterprise Assessment tests whether this strain is local or already embedded in the wider institutional structure.";
     route = "ENTERPRISE";
   } else if (hasSignalFailure) {
-    title = "Trust gap producing signal failure";
-    pattern = `The trust domain shows a ${Math.abs(trustGap!.gap)}-point gap between leader perception and team reality. When trust scores diverge by more than 20 points, the leader is not receiving accurate operating signal. Teams with low-trust self-assessments suppress the information leaders most need. This is how institutions drift without visible warning.`;
+    title = "Trust no longer load-bearing";
+    pattern = `The trust domain shows a ${Math.abs(trustGap!.gap)}-point divergence between leadership reading and team reality. When trust stops carrying load, signal quality collapses first and correction weakens soon after. The threshold has been crossed from ordinary tension into signal failure. The next move is to restore honest transmission before widening intervention.`;
     firstAction = "Initiate a structured individual conversation with each team member — not a team meeting — focused on: 'What would you change about how decisions get made here?' Anonymise the responses and look for patterns, not individuals.";
-    escalationNote = "A trust gap above 20 points indicates structural signal failure. The Enterprise Assessment will test whether this is a local condition or distributed across multiple layers.";
+    escalationNote = "A trust gap at this level usually means the leader is no longer receiving load-bearing signal. The Enterprise Assessment will test whether that condition is confined to this team or distributed across layers.";
     route = criticalGaps.length >= 1 ? "ENTERPRISE" : "WATCH";
   } else if (hasAuthorityBlindspot) {
-    title = "Authority blindspot — decision clarity exists for the leader but not the team";
-    pattern = `The authority domain gap is ${authorityGap!.gap} points. The leader perceives significantly more decision clarity than team members report. This is the pattern of a leader who has made authority clear to themselves but not structurally to the team. Decision rights that live in the leader's head but not in the team's operating reality are not decision rights — they are a source of recurring drag.`;
+    title = "Authority not sufficiently ordered";
+    pattern = `The authority domain gap is ${authorityGap!.gap} points. Leadership believes authority is ordered, but the team does not experience it that way in practice. That creates motion without alignment: decisions appear clear at the top and ambiguous at the operating edge. The threshold has not failed at intent but at structural transmission. The next move is to make authority visible in the system, not just assumed by the leader.`;
     firstAction = "Conduct a decision rights audit: for the last 10 significant decisions, map who actually decided, who needed to approve, and who was informed. Compare that map with what the team would draw. The gap is the structural problem.";
-    escalationNote = "Authority ambiguity at the team level, if uncorrected, becomes institutional drag. If the pattern exists across multiple teams it is an enterprise governance problem.";
+    escalationNote = "Authority ambiguity at this level becomes recurring friction if it is left unordered. If the same pattern appears across teams, it becomes a governance problem rather than a local one.";
     route = "WATCH";
   } else if (hasExecutionDisconnect) {
-    title = "Execution perception gap — leader sees movement, team experiences diffusion";
-    pattern = `The execution domain shows a ${executionGap!.gap}-point gap. The leader perceives more effective execution than team members report about themselves. This pattern — where leaders see movement and teams feel diffusion — is caused by measuring output at the wrong level. The leader is reading activity signals; the team is experiencing accountability gaps.`;
+    title = "Motion without alignment";
+    pattern = `The execution domain shows a ${executionGap!.gap}-point gap. Leadership is reading movement, while the team is living inside diffusion and weak ownership. That is a coherence problem, not an effort problem: motion is present, but it is not carrying the intended order. The threshold has shifted from execution strain into structural drag. The next move is to re-anchor ownership to outcome rather than activity.`;
     firstAction = "For the next two weeks, require each team member to submit a single-sentence statement of the one measurable outcome they are responsible for. Review against stated priorities. The mismatches show where ownership has not actually been established.";
-    escalationNote = "Execution gaps that persist across multiple performance cycles become embedded in team culture and require structural correction, not motivational intervention.";
+    escalationNote = "Execution strain of this kind hardens into culture if it persists. If it repeats across cycles, the correction must be structural rather than motivational.";
     route = "WATCH";
   } else if (overallGap <= -15) {
-    title = "Team underestimates itself — cultural deflation";
-    pattern = `The team rates itself lower than the leader's perception on ${gaps.filter(g => g.gap < -5).length} domains. This inverse gap — the team scoring lower than leadership perceives — is less common than overestimation but carries its own structural risk: deflated teams will not escalate opportunities, will not take autonomous action, and will develop learned dependency. Cultural deflation typically results from sustained criticism without evidence of recognised progress.`;
+    title = "Readiness suppressed by deflation";
+    pattern = `The team rates itself lower than leadership on ${gaps.filter(g => g.gap < -5).length} domains. This is not the usual inflation pattern; it suggests readiness is being held below its actual capacity by deflation, caution, or learned dependency. The threshold issue here is not discipline but under-loaded confidence. The next move is to restore evidence-backed trust in capability before asking for more initiative.`;
     firstAction = "Begin explicitly naming specific evidence of effective execution — not general praise, but specific factual instances: 'The decision on X was correct and here is why.' Specific positive evidence corrects deflation; generic encouragement does not.";
-    escalationNote = "Cultural deflation is correctable at the team level. If it exists across multiple teams it is a leadership environment problem requiring enterprise-level reading.";
+    escalationNote = "Deflation can be corrected locally when it is named early. If it appears across multiple teams, the issue is no longer cultural mood but leadership environment.";
     route = "WATCH";
   } else if (overallGap >= 5 && criticalGaps.length === 0 && highGaps.length <= 1) {
-    title = "Moderate perception variance — monitor and verify";
-    pattern = `The overall gap of ${overallGap} points is within the range of normal information asymmetry between leadership and execution layers. The pattern does not indicate systemic breakdown, but warrants structured monitoring — particularly in the ${urgentDomain ?? "most divergent"} domain where the gap is most pronounced.`;
+    title = "Manageable variance under watch";
+    pattern = `The overall gap of ${overallGap} points remains inside the range of manageable variance between leadership and execution. The system is not disordered, but there is enough divergence in ${urgentDomain ?? "the most exposed domain"} to justify watchfulness. The threshold for escalation has not been crossed. The next move is disciplined monitoring rather than forceful intervention.`;
     firstAction = "Run a quarterly structured check-in where each team member rates the four domains independently before the team meeting. Use the aggregate to track whether the gap is narrowing or widening.";
-    escalationNote = "Repeat this assessment in 60-90 days to determine trend direction. If gaps widen, escalation to Enterprise Assessment is warranted.";
+    escalationNote = "Repeat the reading in 60-90 days to see whether variance is narrowing or hardening. If the gap widens, the next correct move is Enterprise Assessment.";
     route = "WATCH";
   } else {
-    title = "Coherent team signal — alignment confirmed";
-    pattern = `Leader perception and team self-assessment are within close range across all four domains. Leadership and execution are reading the same reality. Problems that exist are visible — and visible problems are correctable.`;
+    title = "Coherent team signal";
+    pattern = `Leadership and team reality are reading close enough to the same condition that signal remains usable. That does not mean there is no strain, only that the system is still coherent enough to correct itself without distortion. The threshold is currently on the ordered side of risk. The next move is to test whether this coherence holds under greater pressure.`;
     firstAction = "The next useful diagnostic question is whether this alignment holds under pressure. Run the same assessment after a period of significant change, resource constraint, or strategic shift.";
-    escalationNote = "Aligned teams with strong individual purpose scores are ready for Enterprise Assessment — to verify whether this coherence extends across the broader organisation.";
+    escalationNote = "A coherent team can justify enterprise testing if leadership wants to know whether this ordering extends beyond one unit. The point is not escalation for its own sake, but verification under wider pressure.";
     route = "WATCH";
   }
 
@@ -432,8 +431,6 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             <Eyebrow>First structural action</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
           </div>
-
-          <ModelReferencePanel />
 
           <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
@@ -686,6 +683,11 @@ export default function TeamAssessmentPage() {
                         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.6, color: "rgba(255,255,255,0.54)" }}>
                           {constitutionalThread.summary.narrative}
                         </p>
+                        {constitutionalThread.bridge.teamAssessment.hypotheses.length > 0 && (
+                          <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.58, color: "rgba(255,255,255,0.40)", fontStyle: "italic" }}>
+                            This stage is testing whether {constitutionalThread.bridge.teamAssessment.hypotheses[0].charAt(0).toLowerCase() + constitutionalThread.bridge.teamAssessment.hypotheses[0].slice(1)}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -706,6 +708,16 @@ export default function TeamAssessmentPage() {
                       <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.35rem" }}>Output</div>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(255,255,255,0.45)" }}>Perception gap analysis, fragility index, escalation routing</p>
                     </div>
+                    {constitutionalThread?.bridge.teamAssessment.prompts?.length ? (
+                      <div style={{ marginTop: "1rem", padding: "0.75rem 0.85rem", border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.35rem" }}>Focus prompts</div>
+                        {constitutionalThread.bridge.teamAssessment.prompts.slice(0, 2).map((prompt) => (
+                          <p key={prompt} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.84rem", lineHeight: 1.55, color: "rgba(255,255,255,0.42)", marginTop: "0.35rem" }}>
+                            {prompt}
+                          </p>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>

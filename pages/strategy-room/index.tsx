@@ -34,7 +34,6 @@ import {
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
-import ModelBasisNote from "@/components/strategy-room/ModelBasisNote";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -133,7 +132,7 @@ function routeMeta(route?: string | null) {
     case "STRATEGY":
       return {
         label: "Strategy route",
-        description: "The signal is sufficiently coherent for direct strategic engagement.",
+        description: "The signal is sufficiently ordered for direct strategic engagement.",
         ctaHref: "/contact?intent=strategy-room-mandate",
         ctaLabel: "Request private mandate review",
         tone: "green" as const,
@@ -141,7 +140,7 @@ function routeMeta(route?: string | null) {
     case "REJECT":
       return {
         label: "Foundational route",
-        description: "The matter is not yet ready for premium escalation. Foundational work should precede it.",
+        description: "The matter is carrying strain, but not in a form ordered enough for premium escalation.",
         ctaHref: "/diagnostics/directional-integrity?source=strategy-room&entry=redirect&intent=foundational-correction",
         ctaLabel: "Start foundational diagnostic",
         tone: "red" as const,
@@ -149,7 +148,7 @@ function routeMeta(route?: string | null) {
     default:
       return {
         label: "Diagnostic route",
-        description: "The signal is real, but structural readiness is incomplete. Diagnostic correction is the appropriate next step.",
+        description: "The signal is real, but readiness and authority are not yet ordered enough for direct intervention.",
         ctaHref: "/diagnostics?source=strategy-room&entry=redirect&intent=diagnostic-escalation",
         ctaLabel: "Continue into diagnostics",
         tone: "gold" as const,
@@ -734,8 +733,6 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
                 </div>
               </div>
             )}
-
-            <ModelBasisNote />
 
             <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
