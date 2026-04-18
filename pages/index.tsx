@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import ShortsSignalRail from "@/components/shorts/ShortsSignalRail";
 import DoctrineShowcase from "@/components/homepage/DoctrineShowcase";
 import EngagementLanes from "@/components/homepage/EngagementLanes";
 import WhoIWorkWith from "@/components/WhoIWorkWith";
@@ -47,6 +48,7 @@ import { sanitizeData } from "@/lib/content/server";
 import { getPublicationCatalogue, getPublicationBySlug } from "@/lib/editorial/catalogue";
 import type { PublicationRecord } from "@/lib/editorial/types";
 import type { PublicationItem as _PublicationItemBase } from "@/lib/editorial/server-readers";
+import { HOMEPAGE_SHORT_SIGNALS } from "@/lib/shorts/homepage-signals";
 
 // Extend the base type with optional fields used by publicationToItem
 type PublicationItem = _PublicationItemBase & {
@@ -600,8 +602,8 @@ function HeroSection({
               animate={{ opacity: 0.92, y: 0 }}
               transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              Doctrine. Diagnostics. Intelligence. Advisory.<br />
-              One governed platform.
+              Diagnose structural problems. Clarify the real situation.<br />
+              Escalate only when it matters.
             </motion.p>
 
             {/* CTA hierarchy with strengthened primary dominance */}
@@ -1876,7 +1878,7 @@ function HomeHero({ intelligenceHref }: { intelligenceHref: string }) {
                 textTransform: "uppercase",
               }}
             >
-              Read Intelligence
+              Browse Intelligence
               <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
           </div>
@@ -1978,8 +1980,8 @@ function HowItWorksLadder() {
     {
       label: "Stage 3: Executive Reporting",
       href: "/diagnostics/executive-reporting",
-      effort: "Premium interpretation",
-      explanation: "A board-grade interpretation layer for buyers who need disciplined reading before intervention.",
+      effort: "Paid analysis",
+      explanation: "A board-grade interpretation layer for decision-makers who need disciplined reading before intervention. This is the first paid engagement in the ladder.",
       outcome: "Decision-grade clarity, implications, and governed next-step logic.",
     },
     {
@@ -2182,6 +2184,32 @@ function ContentWithContext({
   );
 }
 
+function ShortsRailSection() {
+  return (
+    <Section id="shorts-signal" variant="void" cap="shorts · signal layer">
+      <SectionHeader
+        eyebrow="Shorts Signal Rail"
+        title={
+          <>
+            Recognition before deeper reading.
+            <br />
+            <span className="text-white/35">Short-form signal for the right next move.</span>
+          </>
+        }
+        description="These are not a feed. They are a curated signal layer designed to move the right person from recognition into diagnosis, deeper intelligence, or strategic escalation."
+        large
+      />
+      <div className="mt-12">
+        <ShortsSignalRail
+          items={HOMEPAGE_SHORT_SIGNALS}
+          title="Signal Before Noise"
+          subtitle="A controlled rail of high-fit Shorts. Recognition first, then the correct route."
+        />
+      </div>
+    </Section>
+  );
+}
+
 function AuthoritySignal({ counts }: { counts: HomePageProps["counts"] }) {
   return (
     <Section id="authority-signal" variant="void" cap="proof · authority signal">
@@ -2248,8 +2276,8 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
               Do not leave without a route.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.9] ds-text-muted">
-              Start with the Diagnostic if you need signal. Read Intelligence if you need context.
-              Enter Strategy Room if the decision is already real and consequence is material.
+              Start with the Diagnostic if you need signal. Browse Intelligence if you need context.
+              Enter Strategy Room only when a real decision with real consequence is already on the table.
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">
@@ -2281,7 +2309,7 @@ function HomeFinalCta({ intelligenceHref }: { intelligenceHref: string }) {
                   textTransform: "uppercase",
                 }}
               >
-                Explore Intelligence
+                Browse Intelligence
               </Link>
               <Link
                 href="/strategy-room"
@@ -2347,10 +2375,10 @@ const HomePage: NextPage<HomePageProps> = ({
       <Bridge text="system · ladder" />
       <HowItWorksLadder />
 
-      <Bridge text="ladder · audience" />
-      <WhoThisIsFor />
+      <Bridge text="ladder · shorts" />
+      <ShortsRailSection />
 
-      <Bridge text="audience · content" />
+      <Bridge text="shorts · content" />
       <ContentWithContext
         featuredBlogPosts={featuredBlogPosts}
         featuredShorts={featuredShorts}
@@ -2358,7 +2386,10 @@ const HomePage: NextPage<HomePageProps> = ({
         latestReport={latestReport}
       />
 
-      <Bridge text="content · proof" />
+      <Bridge text="content · audience" />
+      <WhoThisIsFor />
+
+      <Bridge text="audience · proof" />
       <AuthoritySignal counts={counts} />
 
       <Bridge text="proof · exit" />
