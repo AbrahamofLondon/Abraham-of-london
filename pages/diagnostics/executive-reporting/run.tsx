@@ -2691,9 +2691,9 @@ export default function ExecutiveReportingRunPage() {
 
   return (
     <Layout
-      title="Run Executive Diagnostic | Abraham of London"
+      title="Executive Reporting | Abraham of London"
       description="Generate a board-grade executive intelligence brief from a structured constitutional intake."
-      canonicalUrl="/diagnostics/executive-reporting/run"
+      canonicalUrl="/diagnostics/executive-reporting"
       fullWidth
       headerTransparent
     >

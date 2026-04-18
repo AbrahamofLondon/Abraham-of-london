@@ -11,6 +11,8 @@ type Rung = {
   href: string;
   duration: string;
   route: string;
+  role: string;
+  produces: string;
 };
 
 const GOLD = "#C9A96E";
@@ -24,6 +26,8 @@ const RUNGS: Rung[] = [
     href: "/diagnostics/constitutional-diagnostic",
     duration: "6 min",
     route: "STRATEGY",
+    role: "Public instrument",
+    produces: "Route, confidence, posture, readiness, failure modes",
   },
   {
     n: "02",
@@ -31,6 +35,8 @@ const RUNGS: Rung[] = [
     href: "/diagnostics/team-assessment",
     duration: "10 min",
     route: "DIAGNOSTIC",
+    role: "Continuation instrument",
+    produces: "Perception gap, fragility class, team focus areas",
   },
   {
     n: "03",
@@ -38,6 +44,8 @@ const RUNGS: Rung[] = [
     href: "/diagnostics/enterprise-assessment",
     duration: "15 min",
     route: "DIAGNOSTIC",
+    role: "Continuation instrument",
+    produces: "Enterprise pressure points, escalation logic",
   },
   {
     n: "04",
@@ -45,6 +53,8 @@ const RUNGS: Rung[] = [
     href: "/diagnostics/executive-reporting",
     duration: "12 min",
     route: "STRATEGY",
+    role: "Executive intake instrument",
+    produces: "Board-grade constitutional interpretation",
   },
 ];
 
@@ -134,68 +144,73 @@ function Dot() {
 
 function RungRow({ rung }: { rung: Rung }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 py-2">
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.68)",
-        }}
-      >
-        {`STAGE ${rung.n} OF ${TOTAL_STAGES}`}
-      </span>
-      <Dot />
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.48)",
-        }}
-      >
-        {rung.label}
-      </span>
-      <Dot />
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.32)",
-        }}
-      >
-        {rung.duration}
-      </span>
-      <Dot />
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: routeColor(rung.route),
-        }}
-      >
-        {rung.route}
-      </span>
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "rgba(255,255,255,0.16)",
-        }}
-      >
-        →
-      </span>
+    <div className="grid gap-3 border-t border-white/[0.06] py-5 md:grid-cols-[0.8fr_1fr_auto] md:items-start">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.68)",
+            }}
+          >
+            {`STAGE ${rung.n} OF ${TOTAL_STAGES}`}
+          </span>
+          <Dot />
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7.5px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: routeColor(rung.route),
+            }}
+          >
+            {rung.route}
+          </span>
+        </div>
+        <div
+          style={{
+            marginTop: "0.65rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "1.12rem",
+            color: "rgba(255,255,255,0.78)",
+          }}
+        >
+          {rung.label}
+        </div>
+      </div>
+      <div>
+        <div
+          style={{
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            fontSize: "7px",
+            letterSpacing: "0.20em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.32)",
+          }}
+        >
+          {rung.role} · {rung.duration}
+        </div>
+        <p
+          style={{
+            marginTop: "0.55rem",
+            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+            fontWeight: 300,
+            fontSize: "0.92rem",
+            lineHeight: 1.55,
+            color: "rgba(255,255,255,0.44)",
+          }}
+        >
+          Produces: {rung.produces}.
+        </p>
+      </div>
       <Link
         href={rung.href}
-        className="transition-all hover:underline"
+        className="inline-flex items-center gap-2 transition-all hover:underline md:justify-self-end"
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
           fontSize: "7.5px",
@@ -204,7 +219,8 @@ function RungRow({ rung }: { rung: Rung }) {
           color: AMBER,
         }}
       >
-        Begin
+        Open stage
+        <ArrowRight style={{ width: "10px", height: "10px" }} />
       </Link>
     </div>
   );
@@ -238,7 +254,7 @@ export default function DiagnosticsIndexPage() {
                   fontStyle: "italic",
                 }}
               >
-                The diagnostic instrument.
+                The diagnostic ladder.
               </h1>
               <p
                 style={{
@@ -251,7 +267,7 @@ export default function DiagnosticsIndexPage() {
                   maxWidth: "56ch",
                 }}
               >
-                Assess structural alignment across six domains. Results inform constitutional routing.
+                A public navigation surface for the four assessment stages. Each stage below states whether it is an instrument, what it collects, and what it produces.
               </p>
               <RouteStrip />
               <div
@@ -264,7 +280,7 @@ export default function DiagnosticsIndexPage() {
                   color: "rgba(255,255,255,0.28)",
                 }}
               >
-                Required: 10 minutes · 18 questions · No account required
+                Public entry · staged assessment · no account required for diagnostic stages
               </div>
               <Link
                 href="/diagnostics/constitutional-diagnostic"
@@ -277,7 +293,7 @@ export default function DiagnosticsIndexPage() {
                   color: AMBER,
                 }}
               >
-                Begin diagnostic
+                Start the Diagnostic
                 <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
             </div>

@@ -329,7 +329,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 }) {
   const bc = bandColor(reading.band);
   const routeConfig = {
-    EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting/run", label: "Run Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
+    EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting", label: "Run Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
     STRATEGY_ROOM:       { href: "/strategy-room", label: "Enter Strategy Room", border: "rgba(52,211,153,0.30)", bg: "rgba(52,211,153,0.07)", text: "rgba(110,231,183,0.90)" },
     WATCH:               { href: "/diagnostics/executive-reporting", label: "View Executive Reporting", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)", text: "rgba(255,255,255,0.55)" },
   }[reading.route];
@@ -831,7 +831,7 @@ export default function EnterpriseAssessmentPage() {
                     onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
                     onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
                   >
-                    Begin instrument <ArrowRight style={{ width: "12px", height: "12px" }} />
+                    Continue the Assessment <ArrowRight style={{ width: "12px", height: "12px" }} />
                   </button>
                 </div>
               </motion.div>

@@ -168,7 +168,7 @@ export default function ConstitutionalDiagnosticPage() {
                       onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}16`; }}
                       onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
                     >
-                      Begin diagnostic
+                      Start the Diagnostic
                       <ArrowRight style={{ width: "12px", height: "12px" }} />
                     </Link>
                     <Link href="/diagnostics"
