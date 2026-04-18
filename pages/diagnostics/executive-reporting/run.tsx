@@ -5,7 +5,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
+import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -2578,6 +2578,7 @@ export default function ExecutiveReportingRunPage() {
   function handleResult(r: Extract<ExecutiveReportingResult, { ok: true }>) {
     setResult(r);
     setPageState("result");
+    trackStageComplete("executive", "strategy", "/strategy-room");
 
     // Handoff to the Strategy Room rung. Canonical key per the ladder chain
     // in CLAUDE_SESSION_LOG.md section 4:

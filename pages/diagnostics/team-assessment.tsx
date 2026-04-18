@@ -18,7 +18,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
+import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -562,6 +562,7 @@ export default function TeamAssessmentPage() {
       metadata: { ui: "team-assessment", teamName: identity.teamName || null, nextStepHref: "/diagnostics/enterprise-assessment", nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM", overallLeader, overallReality, overallGap: overallLeader - overallReality, fragilityStatus: fragility.status, purposeAlignmentPct: purposePct },
     });
     setSubmitResult(res);
+    trackStageComplete("team", "diagnostic", "/diagnostics/enterprise-assessment");
 
     // Handoff to /diagnostics/enterprise-assessment (reads `team-assessment-result`
     // and extracts `overallReality` + related metrics). Canonical chain per

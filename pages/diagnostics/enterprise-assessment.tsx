@@ -20,7 +20,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { trackStageStart, trackDropoff } from "@/lib/analytics/funnel";
+import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
@@ -576,6 +576,10 @@ export default function EnterpriseAssessmentPage() {
       metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
     });
     setSubmitResult(res);
+
+    const nextHref = reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting";
+    const outcome = reading?.route === "STRATEGY_ROOM" ? "strategy" as const : "diagnostic" as const;
+    trackStageComplete("enterprise", outcome, nextHref);
 
     // Handoff to /diagnostics/executive-reporting (and the Strategy Room chain).
     // Canonical key per CLAUDE_SESSION_LOG.md section 4 ladder chain:

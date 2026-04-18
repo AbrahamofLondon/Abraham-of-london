@@ -192,7 +192,7 @@ function buildDecision(answers: Record<string, Answer>): {
 
   const routeHref =
     decision.route === "STRATEGY"
-      ? "/consulting/strategy-room"
+      ? "/strategy-room"
       : decision.route === "DIAGNOSTIC"
         ? "/diagnostics/executive-reporting"
         : "/diagnostics";
@@ -311,7 +311,7 @@ function routeConfig(route: string, scores: DerivedScores) {
       return {
         label:         "Strategy Route",
         destination:   "Strategy Room",
-        href:          "/consulting/strategy-room",
+        href:          "/strategy-room",
         note:          "The signal warrants direct private advisory engagement.",
         secondaryHref: "/diagnostics/executive-reporting",
         secondaryLabel:"Executive Reporting",
@@ -333,7 +333,7 @@ function routeConfig(route: string, scores: DerivedScores) {
         note:          scores.authorityType === "UNCLEAR"
           ? "Establish authority clarity before escalating to private advisory."
           : "Diagnostic clarification will sharpen the constitutional case for private engagement.",
-        secondaryHref: "/consulting/strategy-room",
+        secondaryHref: "/strategy-room",
         secondaryLabel: "Strategy Room (pending diagnostic)",
       };
   }
@@ -355,6 +355,20 @@ export default function ConstitutionalDiagnosticSuite() {
   const progress       = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   const { decision, scores, routeHref } = React.useMemo(() => buildDecision(answers), [answers]);
+
+  // Fire stage-complete event once when verdict is shown
+  const completeFired = React.useRef(false);
+  React.useEffect(() => {
+    if (verdict && !completeFired.current) {
+      completeFired.current = true;
+      import("@/lib/analytics/funnel").then(({ trackStageComplete }) => {
+        const outcome = decision.route === "REJECT" ? "reject" as const
+          : decision.route === "STRATEGY" ? "strategy" as const
+          : "diagnostic" as const;
+        trackStageComplete("constitutional", outcome, routeHref);
+      }).catch(() => {});
+    }
+  }, [verdict, decision.route, routeHref]);
 
   function setResonance(v: number) {
     setAnswers(prev => {
