@@ -58,11 +58,11 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(Math.round(value), min), max);
 }
 
-function buildConstitutionSeedFromReport(args: {
+function buildCanonicalIntakeFromReport(args: {
   report: any;
   campaign: any;
   participantCount: number;
-}): ExecutiveReportConstitution {
+}): Record<string, string> {
   const report = args.report;
 
   const domains = Array.isArray(report?.resonance?.telemetry?.domains)
@@ -75,7 +75,6 @@ function buildConstitutionSeedFromReport(args: {
       : average(domains.map((d: any) => safeNumber(d?.dissonance, 0)));
 
   const totalExposure = safeNumber(report?.financialExposure?.totalExposure, 0);
-  const certainty = safeNumber(report?.ogr?.sovereignCertainty, 0);
 
   const dominantDomains = domains
     .slice()
@@ -91,57 +90,121 @@ function buildConstitutionSeedFromReport(args: {
     ? report.failureModes.map((x: any) => safeString(x)).filter(Boolean)
     : [];
 
-  const requiredInterventions = Array.isArray(report?.priorityStack)
-    ? report.priorityStack.map((x: any) => safeString(x)).filter(Boolean)
-    : [];
+  const revenueBand =
+    totalExposure >= 1_000_000
+      ? "ENTERPRISE"
+      : totalExposure >= 250_000
+        ? "MID"
+        : "SMB";
 
-  const route =
-    report?.state === "ORDERED"
-      ? "STRATEGY"
-      : report?.state === "DRIFTING"
-        ? "DIAGNOSTIC"
-        : report?.state === "MISALIGNED"
-          ? "DIAGNOSTIC"
-          : "REJECT";
-
-  const readinessTier =
-    route === "STRATEGY"
-      ? "EXECUTION_READY"
-      : report?.state === "MISALIGNED"
-        ? "EMERGING"
-        : report?.state === "DISORDERED"
-          ? "FRAGILE"
-          : "STABILIZING";
-
-  const authorityType =
-    args.participantCount >= 20
-      ? "INSTITUTIONAL"
-      : args.participantCount >= 8
+  const authorityScope =
+    args.participantCount >= 12
+      ? "DIRECT"
+      : args.participantCount >= 7
         ? "PROXY"
         : "UNCLEAR";
 
-  const rawState = safeString(report?.state, "DRIFTING");
-  const orgState: "ORDERED" | "DRIFTING" | "MISALIGNED" | "DISORDERED" =
-    rawState === "ORDERED" ||
-    rawState === "DRIFTING" ||
-    rawState === "MISALIGNED" ||
-    rawState === "DISORDERED"
-      ? rawState
-      : "DRIFTING";
+  const urgencyWindow =
+    averageDissonance >= 35 || totalExposure >= 1_000_000
+      ? "IMMEDIATE"
+      : averageDissonance >= 20
+        ? "NEAR_TERM"
+        : "MID_TERM";
+
+  const marketExposure =
+    averageDissonance >= 35
+      ? "CRITICAL"
+      : averageDissonance >= 20
+        ? "HIGH"
+        : "MEDIUM";
+
+  const boardInvolved = args.participantCount >= 10 ? "YES" : "UNCERTAIN";
 
   return {
-    route,
+    fullName: "Executive Reporting Campaign",
+    email: "",
+    organisation: safeString(
+      args.campaign?.organisation?.name,
+      safeString(args.campaign?.title, "Executive Alignment Campaign"),
+    ),
+    sector: safeString(args.campaign?.organisation?.sector, "institutional"),
+    revenueBand,
+    authorityRole:
+      args.participantCount >= 12
+        ? "Executive leadership cohort"
+        : "Leadership sponsor cohort",
+    authorityScope,
+    urgencyWindow,
+    problemStatement: safeString(
+      report?.narrative?.headline,
+      "Structural alignment condition requires disciplined executive interpretation.",
+    ),
+    symptoms: [
+      safeString(report?.narrative?.summary),
+      ...failureModes,
+      ...dominantDomains.map((domain) => `${domain} dissonance visible`),
+    ]
+      .filter(Boolean)
+      .join(" "),
+    desiredOutcome: Array.isArray(report?.priorityStack)
+      ? report.priorityStack.slice(0, 2).join(". ")
+      : "Restore structural order and decision discipline.",
+    currentConstraint: [
+      `Average dissonance ${Math.round(averageDissonance)}.`,
+      `Participant count ${args.participantCount}.`,
+      failureModes[0] ? `Primary failure mode: ${failureModes[0]}.` : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+    marketExposure,
+    boardInvolved,
+  };
+}
+
+function buildConstitutionSeedFromReport(args: {
+  report: any;
+  campaign: any;
+  participantCount: number;
+}): ExecutiveReportConstitution {
+  const report = args.report;
+  const domains = Array.isArray(report?.resonance?.telemetry?.domains)
+    ? report.resonance.telemetry.domains
+    : [];
+  const dominantDomains = domains
+    .slice()
+    .sort(
+      (a: any, b: any) =>
+        safeNumber(b?.dissonance, 0) - safeNumber(a?.dissonance, 0),
+    )
+    .slice(0, 3)
+    .map((d: any) => safeString(d?.label))
+    .filter(Boolean);
+  const failureModes = Array.isArray(report?.failureModes)
+    ? report.failureModes.map((x: any) => safeString(x)).filter(Boolean)
+    : [];
+  const requiredInterventions = Array.isArray(report?.priorityStack)
+    ? report.priorityStack.map((x: any) => safeString(x)).filter(Boolean)
+    : [];
+  const totalExposure = safeNumber(report?.financialExposure?.totalExposure, 0);
+  const averageDissonance = safeNumber(
+    report?.resonance?.telemetry?.averageDissonance,
+    0,
+  );
+  const certainty = safeNumber(report?.ogr?.sovereignCertainty, 0);
+
+  return {
+    route:
+      report?.state === "ORDERED"
+        ? "STRATEGY"
+        : report?.state === "DISORDERED"
+          ? "REJECT"
+          : "DIAGNOSTIC",
     priority:
-      totalExposure >= 1_000_000
-        ? "CRITICAL"
-        : totalExposure >= 250_000
-          ? "HIGH"
-          : "MEDIUM",
+      totalExposure >= 1_000_000 ? "CRITICAL" : totalExposure >= 250_000 ? "HIGH" : "MEDIUM",
     temperature: certainty >= 85 ? "HOT" : certainty >= 65 ? "WARM" : "COLD",
-    orgState,
-    readinessTier,
-    authorityType:
-      authorityType === "INSTITUTIONAL" ? "DIRECT" : authorityType,
+    orgState: safeString(report?.state, "DRIFTING") as any,
+    readinessTier: report?.state === "ORDERED" ? "EXECUTION_READY" : report?.state === "DISORDERED" ? "FRAGILE" : "STABILIZING",
+    authorityType: args.participantCount >= 12 ? "DIRECT" : args.participantCount >= 7 ? "PROXY" : "UNCLEAR",
     revenueBand:
       totalExposure >= 1_000_000
         ? "ENTERPRISE"
@@ -167,7 +230,7 @@ function buildConstitutionSeedFromReport(args: {
     failureModes,
     requiredInterventions,
     sponsorTypes:
-      authorityType === "INSTITUTIONAL" ? ["BOARD", "EXECUTIVE"] : ["EXECUTIVE"],
+      args.participantCount >= 12 ? ["BOARD", "EXECUTIVE"] : ["EXECUTIVE"],
     worldviewAnchors: ["ORDER", "STEWARDSHIP", "TRUTH", "RESPONSIBILITY"],
     narrativeSummary: safeString(report?.narrative?.summary),
     rationale: [
@@ -301,7 +364,7 @@ export async function buildExecutiveReportFromCampaign(
       },
     };
 
-    const constitutionSeed = buildConstitutionSeedFromReport({
+    const canonicalIntake = buildCanonicalIntakeFromReport({
       report,
       campaign,
       participantCount: completedParticipants.length,
@@ -309,7 +372,7 @@ export async function buildExecutiveReportFromCampaign(
 
     const unified: UnifiedGuidancePayload =
       await assembleConstitutionalGuidance({
-        constitution: constitutionSeed as any,
+        intake: canonicalIntake as any,
         assetLimit: 6,
         minAssetScore: 18,
         source: "admin-report",

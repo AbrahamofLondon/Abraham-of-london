@@ -49,6 +49,14 @@ import type {
   DiagnosticAnswerValue,
   DiagnosticSubmitResponse,
 } from "@/lib/diagnostics/types";
+import {
+  readConstitutionalThread,
+  type ConstitutionalThread,
+} from "@/lib/diagnostics/session-thread";
+import { matchPlaybooks } from "@/lib/playbooks/matcher";
+import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
+import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import ModelReferencePanel from "@/components/diagnostics/results/ModelReferencePanel";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -312,10 +320,12 @@ function ScoreSelector({ value, onChange }: { value: DiagnosticAnswerValue | 0; 
 // RESULT SURFACE
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, teamAlignmentPct, submitResult, onSubmit, isSubmitting, onRevise }: {
+function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, teamAlignmentPct, submitResult, onSubmit, isSubmitting, onRevise, constitutionalThread = null, matchedPlaybooks = [] }: {
   reading: EnterpriseReading; sections: SectionScore[]; totalScore: number; maxScore: number; totalPct: number;
   teamAlignmentPct: number | null; submitResult: DiagnosticSubmitResponse | null;
   onSubmit: () => void; isSubmitting: boolean; onRevise: () => void;
+  constitutionalThread?: ConstitutionalThread | null;
+  matchedPlaybooks?: ReturnType<typeof matchPlaybooks>;
 }) {
   const bc = bandColor(reading.band);
   const routeConfig = {
@@ -365,6 +375,13 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         {/* Left */}
         <div className="space-y-5">
+          {constitutionalThread && (
+            <InheritedThreadContext
+              thread={constitutionalThread}
+              title="Inherited constitutional thread"
+            />
+          )}
+
           {/* Structural reading */}
           <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, overflow: "hidden" }}>
             <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}><Eyebrow>Structural reading</Eyebrow></div>
@@ -416,6 +433,10 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <Eyebrow>First structural action</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
           </div>
+
+          <ModelReferencePanel />
+
+          <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
           {/* Escalation */}
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
@@ -515,6 +536,7 @@ export default function EnterpriseAssessmentPage() {
   const [isSubmitting,setIsSubmitting]= React.useState(false);
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
   const [subjectId, setSubjectId] = React.useState("");
+  const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
 
   React.useEffect(() => {
     trackStageStart("enterprise");
@@ -532,6 +554,10 @@ export default function EnterpriseAssessmentPage() {
         if (typeof p?.subjectId === "string") setSubjectId(p.subjectId);
       }
     } catch {}
+  }, []);
+
+  React.useEffect(() => {
+    setConstitutionalThread(readConstitutionalThread());
   }, []);
 
   const allPrompts = BLOCKS.flatMap(b => b.prompts.map((_, i) => `${b.id}-${i}`));
@@ -557,6 +583,29 @@ export default function EnterpriseAssessmentPage() {
   const reading = React.useMemo(() =>
     complete ? deriveReading(answers, totalPct, teamAlignmentPct) : null,
     [answers, totalPct, teamAlignmentPct, complete]
+  );
+  const matchedPlaybooks = React.useMemo(
+    () =>
+      reading
+        ? matchPlaybooks({
+            route: "ENTERPRISE",
+            readiness: constitutionalThread?.readinessTier ?? "STABILIZING",
+            failureModes: [
+              ...(constitutionalThread?.failureModes ?? []),
+              ...(reading.dominantFailure === "Governance reliability" ? ["GOVERNANCE_FAILURE"] : []),
+              ...(reading.dominantFailure === "Leadership coherence" ? ["SIGNAL_FAILURE"] : []),
+              ...(reading.dominantFailure === "Execution variance" ? ["EXECUTION_DRIFT"] : []),
+              ...(reading.dominantFailure === "Risk posture" ? ["RISK_POSTURE_DEGRADATION"] : []),
+              ...(reading.band === "ESCALATE" ? ["SYSTEMIC_BREAKDOWN"] : []),
+              ...(reading.band === "FRAGILE" ? ["STRUCTURAL_MISALIGNMENT"] : []),
+            ],
+            dominantDomains: sections
+              .filter((section) => section.pct < 55)
+              .map((section) => section.id),
+            authorityType: constitutionalThread?.authorityType ?? null,
+          })
+        : [],
+    [constitutionalThread, reading, sections],
   );
 
   function setAnswer(key: string, value: DiagnosticAnswerValue) {
@@ -652,6 +701,16 @@ export default function EnterpriseAssessmentPage() {
                     {teamAlignmentPct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
                         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Team reality loaded — {teamAlignmentPct}%</span>
+                      </div>
+                    )}
+                    {constitutionalThread && (
+                      <div style={{ marginTop: "1rem", padding: "0.95rem 1.25rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>
+                          Constitutional inheritance
+                        </div>
+                        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.6, color: "rgba(255,255,255,0.54)" }}>
+                          {constitutionalThread.bridge.enterpriseAssessment.rationale}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -852,7 +911,7 @@ export default function EnterpriseAssessmentPage() {
             {phase === "result" && reading && (
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
-                  <ResultSurface reading={reading} sections={sections} totalScore={totalScore} maxScore={maxScore} totalPct={totalPct} teamAlignmentPct={teamAlignmentPct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} onRevise={() => advance("instrument")} />
+                  <ResultSurface reading={reading} sections={sections} totalScore={totalScore} maxScore={maxScore} totalPct={totalPct} teamAlignmentPct={teamAlignmentPct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} onRevise={() => advance("instrument")} constitutionalThread={constitutionalThread} matchedPlaybooks={matchedPlaybooks} />
                 </div>
               </motion.div>
             )}
@@ -888,4 +947,3 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return { props: {} };
 
 };
-

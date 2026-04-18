@@ -34,6 +34,13 @@ import {
   type OrgPosture,
   type ReadinessTier,
 } from "@/lib/constitution/rules";
+import {
+  saveConstitutionalThread,
+  type ConstitutionalThread,
+} from "@/lib/diagnostics/session-thread";
+import { matchPlaybooks } from "@/lib/playbooks/matcher";
+import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import ModelReferencePanel from "@/components/diagnostics/results/ModelReferencePanel";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -301,6 +308,91 @@ function verdictNarrative(decision: ConstitutionalDecision, scores: DerivedScore
   return `The constitutional signal is genuine but not yet strong enough for the highest escalation layer. The diagnostic route will sharpen the reading and establish whether private advisory engagement is the next correct move.`;
 }
 
+function buildFailureModes(decision: ConstitutionalDecision, scores: DerivedScores): string[] {
+  const modes: string[] = [];
+  if (scores.coherence < 50) modes.push("STRUCTURAL_MISALIGNMENT");
+  if (scores.authorityType !== "DIRECT") modes.push("AUTHORITY_BLINDSPOT");
+  if (scores.trust < 50) modes.push("TRUST_EROSION");
+  if (scores.friction >= 60) modes.push("EXECUTION_DRIFT");
+  if (scores.pressure >= 70) modes.push("RISK_POSTURE_DEGRADATION");
+  if (scores.failureModeCount >= 3 || decision.route === "REJECT") {
+    modes.push("SYSTEMIC_BREAKDOWN");
+  }
+  if (decision.disqualifiersTriggered.some((item) => /trust|signal/i.test(item))) {
+    modes.push("SIGNAL_FAILURE");
+  }
+  return Array.from(new Set(modes));
+}
+
+function buildConstitutionalThread(
+  decision: ConstitutionalDecision,
+  scores: DerivedScores,
+  routeHref: string,
+): ConstitutionalThread {
+  const failureModes = buildFailureModes(decision, scores);
+  const narrative = verdictNarrative(decision, scores);
+
+  return {
+    source: "constitutional-diagnostic",
+    createdAt: new Date().toISOString(),
+    route: decision.route,
+    routeHref,
+    confidence: Math.round(decision.confidence * 100),
+    posture: scores.posture,
+    readinessTier: scores.readinessTier,
+    authorityType: scores.authorityType,
+    domainScores: {
+      coherence: scores.coherence,
+      authority: scores.authority,
+      trust: scores.trust,
+      pressure: scores.pressure,
+      friction: scores.friction,
+      seriousness: scores.seriousness,
+      governance: scores.governance,
+    },
+    failureModes,
+    recommendedInterventions: decision.recommendedInterventions,
+    rationale: decision.rationale,
+    summary: {
+      title: `${decision.route} constitutional reading`,
+      narrative,
+      whatThisStageTests:
+        "This stage tests whether the problem is structurally clear enough, sponsored enough, and orderly enough to justify escalation.",
+    },
+    bridge: {
+      teamAssessment: {
+        prompts: [
+          "Where does leadership believe authority sits, and where does the team experience it?",
+          "Which stated priorities are not reaching operating reality?",
+          "Where is trust weak enough to distort signal quality?",
+        ],
+        hypotheses: [
+          scores.authorityType !== "DIRECT"
+            ? "Authority is likely being experienced differently across layers."
+            : "Authority may be clearer than execution transmission.",
+          scores.coherence < 60
+            ? "Strategic language and operational reality are likely diverging."
+            : "The main issue may be translation rather than intent.",
+        ],
+      },
+      enterpriseAssessment: {
+        watchpoints: [
+          "Leadership coherence across layers",
+          "Governance reliability under pressure",
+          "Execution variance across units",
+        ],
+        rationale:
+          "The enterprise stage tests whether the constitutional signal is local to one team or distributed through the institution.",
+      },
+      strategyRoom: {
+        summary: narrative,
+        route: decision.route,
+        escalationAllowed: decision.route === "STRATEGY",
+      },
+    },
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ESCALATION ROUTING CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
@@ -355,12 +447,30 @@ export default function ConstitutionalDiagnosticSuite() {
   const progress       = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   const { decision, scores, routeHref } = React.useMemo(() => buildDecision(answers), [answers]);
+  const thread = React.useMemo(
+    () => (decision && scores ? buildConstitutionalThread(decision, scores, routeHref) : null),
+    [decision, routeHref, scores],
+  );
+  const matchedPlaybooks = React.useMemo(
+    () =>
+      thread
+        ? matchPlaybooks({
+            route: "CONSTITUTIONAL",
+            readiness: thread.readinessTier,
+            failureModes: thread.failureModes,
+            dominantDomains: ["coherence", "authority", "trust", "friction"],
+            authorityType: thread.authorityType,
+          })
+        : [],
+    [thread],
+  );
 
   // Fire stage-complete event once when verdict is shown
   const completeFired = React.useRef(false);
   React.useEffect(() => {
     if (verdict && !completeFired.current) {
       completeFired.current = true;
+      if (thread) saveConstitutionalThread(thread);
       import("@/lib/analytics/funnel").then(({ trackStageComplete }) => {
         const outcome = decision.route === "REJECT" ? "reject" as const
           : decision.route === "STRATEGY" ? "strategy" as const
@@ -368,7 +478,7 @@ export default function ConstitutionalDiagnosticSuite() {
         trackStageComplete("constitutional", outcome, routeHref);
       }).catch(() => {});
     }
-  }, [verdict, decision.route, routeHref]);
+  }, [verdict, decision.route, routeHref, thread]);
 
   function setResonance(v: number) {
     setAnswers(prev => {
@@ -819,6 +929,10 @@ export default function ConstitutionalDiagnosticSuite() {
                       </div>
                     </div>
                   )}
+
+                  <ModelReferencePanel />
+
+                  <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
                   {/* Escalation routing */}
                   {(() => {

@@ -43,6 +43,14 @@ import type {
   DiagnosticSubmitResponse,
 } from "@/lib/diagnostics/types";
 import { calculateFragility } from "@/lib/alignment/fragility-logic";
+import {
+  readConstitutionalThread,
+  type ConstitutionalThread,
+} from "@/lib/diagnostics/session-thread";
+import { matchPlaybooks } from "@/lib/playbooks/matcher";
+import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
+import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import ModelReferencePanel from "@/components/diagnostics/results/ModelReferencePanel";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -325,10 +333,12 @@ function QuestionBlock({ domain, phase, scores, onScore }: {
   );
 }
 
-function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility, purposePct, submitResult, onSubmit, isSubmitting }: {
+function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility, purposePct, submitResult, onSubmit, isSubmitting, constitutionalThread = null, matchedPlaybooks = [] }: {
   gaps: DomainGap[]; reading: GapReading; overallLeader: number; overallReality: number;
   fragility: ReturnType<typeof calculateFragility>; purposePct: number | null;
   submitResult: DiagnosticSubmitResponse | null; onSubmit: () => void; isSubmitting: boolean;
+  constitutionalThread?: ConstitutionalThread | null;
+  matchedPlaybooks?: ReturnType<typeof matchPlaybooks>;
 }) {
   const overallGap = overallLeader - overallReality;
   const gapAbs = Math.abs(overallGap);
@@ -369,6 +379,13 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         {/* Left */}
         <div className="space-y-5">
+          {constitutionalThread && (
+            <InheritedThreadContext
+              thread={constitutionalThread}
+              title="Inherited constitutional signal"
+            />
+          )}
+
           {/* Pattern reading */}
           <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, overflow: "hidden" }}>
             <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}><Eyebrow>Structural reading</Eyebrow></div>
@@ -415,6 +432,10 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             <Eyebrow>First structural action</Eyebrow>
             <p style={{ marginTop: "0.85rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.72, color: "rgba(255,255,255,0.72)" }}>{reading.firstAction}</p>
           </div>
+
+          <ModelReferencePanel />
+
+          <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
           {/* Escalation */}
           <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.5rem" }}>
@@ -502,6 +523,7 @@ export default function TeamAssessmentPage() {
   const [direction,    setDirection]      = React.useState(1);
   const [purposePct,   setPurposePct]     = React.useState<number | null>(null);
   const [subjectId,    setSubjectId]      = React.useState("");
+  const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
 
   React.useEffect(() => {
     trackStageStart("team");
@@ -519,6 +541,10 @@ export default function TeamAssessmentPage() {
         if (typeof p?.subjectId === "string") setSubjectId(p.subjectId);
       }
     } catch { /* ignore */ }
+  }, []);
+
+  React.useEffect(() => {
+    setConstitutionalThread(readConstitutionalThread());
   }, []);
 
   function setLS(key: string, v: DiagnosticAnswerValue) { setLeaderScores(prev => ({ ...prev, [key]: v })); }
@@ -540,6 +566,26 @@ export default function TeamAssessmentPage() {
   const overallReality = ovPct("reality");
   const fragility    = React.useMemo(() => calculateFragility(gaps.map(g => g.realityPct)), [gaps]);
   const reading      = React.useMemo(() => deriveGapReading(gaps, overallLeader, overallReality, purposePct), [gaps, overallLeader, overallReality, purposePct]);
+  const matchedPlaybooks = React.useMemo(
+    () =>
+      matchPlaybooks({
+        route: "TEAM",
+        readiness: constitutionalThread?.readinessTier ?? "EMERGING",
+        failureModes: [
+          ...(constitutionalThread?.failureModes ?? []),
+          ...(gaps.some((gap) => gap.domain === "trust" && Math.abs(gap.gap) >= 20) ? ["SIGNAL_FAILURE", "TRUST_EROSION"] : []),
+          ...(gaps.some((gap) => gap.domain === "authority" && gap.gap >= 20) ? ["AUTHORITY_BLINDSPOT"] : []),
+          ...(gaps.some((gap) => gap.domain === "execution" && gap.gap >= 20) ? ["EXECUTION_DRIFT"] : []),
+          ...(gaps.filter((gap) => gap.gapSeverity === "CRITICAL").length >= 2 ? ["SYSTEMIC_BREAKDOWN"] : []),
+          ...(overallLeader - overallReality <= -15 ? ["CULTURAL_DEFLATION"] : []),
+        ],
+        dominantDomains: gaps
+          .filter((gap) => gap.gapSeverity !== "LOW")
+          .map((gap) => gap.domain),
+        authorityType: constitutionalThread?.authorityType ?? null,
+      }),
+    [constitutionalThread, gaps, overallLeader, overallReality],
+  );
 
   function advance(to: Phase) { setDirection(1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
   function retreat(to: Phase) { setDirection(-1); window.scrollTo({ top: 0, behavior: "smooth" }); setPhase(to); }
@@ -630,6 +676,16 @@ export default function TeamAssessmentPage() {
                     {purposePct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
                         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Purpose alignment loaded — {purposePct}%</span>
+                      </div>
+                    )}
+                    {constitutionalThread && (
+                      <div style={{ marginTop: "1rem", padding: "0.95rem 1.25rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>
+                          Inherited constitutional route
+                        </div>
+                        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.6, color: "rgba(255,255,255,0.54)" }}>
+                          {constitutionalThread.summary.narrative}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -799,7 +855,7 @@ export default function TeamAssessmentPage() {
             {phase === "result" && (
               <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
                 <div className="py-14">
-                  <ResultSurface gaps={gaps} reading={reading} overallLeader={overallLeader} overallReality={overallReality} fragility={fragility} purposePct={purposePct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+                  <ResultSurface gaps={gaps} reading={reading} overallLeader={overallLeader} overallReality={overallReality} fragility={fragility} purposePct={purposePct} submitResult={submitResult} onSubmit={handleSubmit} isSubmitting={isSubmitting} constitutionalThread={constitutionalThread} matchedPlaybooks={matchedPlaybooks} />
                 </div>
               </motion.div>
             )}
@@ -836,4 +892,3 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return { props: {} };
 
 };
-

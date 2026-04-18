@@ -27,6 +27,14 @@ import {
 } from "@/lib/strategy-room/client-trackers";
 import type { CanonicalSectionsEnvelope } from "@/lib/decision/canonical-sections";
 import { hasCanonicalSections } from "@/lib/decision/canonical-sections";
+import {
+  readConstitutionalThread,
+  type ConstitutionalThread,
+} from "@/lib/diagnostics/session-thread";
+import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
+import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import { matchPlaybooks } from "@/lib/playbooks/matcher";
+import ModelBasisNote from "@/components/strategy-room/ModelBasisNote";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -520,13 +528,23 @@ type VerdictProps = {
   canonical: CanonicalSectionsEnvelope;
   onMarkDiagnosticStarted: () => void;
   onMarkStrategyAccepted: () => void;
+  thread: ConstitutionalThread | null;
 };
 
-function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted }: VerdictProps) {
+function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, thread }: VerdictProps) {
   const posture = localSummary(canonical);
   const recs    = recommendations(canonical);
   const route   = routeMeta(posture.route);
   const tc      = toneColors(route.tone);
+  const matchedPlaybooks = thread
+    ? matchPlaybooks({
+        route: "STRATEGY_ROOM",
+        readiness: posture.readinessTier,
+        failureModes: [...thread.failureModes, ...posture.failureModes],
+        dominantDomains: [],
+        authorityType: posture.authorityType,
+      })
+    : [];
 
   // Metric display
   function MetricRow({ label, value }: { label: string; value: string }) {
@@ -598,6 +616,9 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted }:
 
           {/* Left — route reading + narrative + interventions */}
           <div className="space-y-5">
+            {thread && (
+              <InheritedThreadContext thread={thread} title="Journey context" />
+            )}
 
             {/* Route reading panel */}
             <div style={{
@@ -713,6 +734,10 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted }:
                 </div>
               </div>
             )}
+
+            <ModelBasisNote />
+
+            <RecommendedPlaybooks playbooks={matchedPlaybooks} />
 
             <Link
               href={route.ctaHref}
@@ -912,10 +937,15 @@ export default function StrategyRoomPage() {
   const [canonical,   setCanonical]   = React.useState<CanonicalSectionsEnvelope | null>(null);
   const [sessionKey,  setSessionKey]  = React.useState<string | null>(null);
   const [draftSaved,  setDraftSaved]  = React.useState(false);
+  const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
 
   // Track entry
   React.useEffect(() => {
     trackStrategyRoomEntry();
+  }, []);
+
+  React.useEffect(() => {
+    setThread(readConstitutionalThread());
   }, []);
 
   // Load draft
@@ -1120,6 +1150,7 @@ export default function StrategyRoomPage() {
               canonical={canonical}
               onMarkDiagnosticStarted={handleMarkDiagnosticStarted}
               onMarkStrategyAccepted={handleMarkStrategyAccepted}
+              thread={thread}
             />
           </>
         )}
@@ -1159,6 +1190,11 @@ export default function StrategyRoomPage() {
                   >
                     Qualified advisory intake. Constitutional routing. Decision-grade guidance.
                   </p>
+                  {thread && (
+                    <div className="mt-6 max-w-3xl">
+                      <InheritedThreadContext thread={thread} title="Inherited journey context" />
+                    </div>
+                  )}
                   <RouteStrip />
                   <div
                     className="mt-8"
