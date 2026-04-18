@@ -11,5 +11,6 @@
 # Preserve old static file paths
 /downloads/*   /downloads/:splat   200
 
-# 404 fallback (serves your static 404.html)
-/*   /404.html   404
+# 404 fallback is handled by @netlify/plugin-nextjs and Next.js pages/404.tsx.
+# Do NOT add a manual /* catch-all — it can intercept valid Next.js static pages
+# before the plugin's handler processes them.
