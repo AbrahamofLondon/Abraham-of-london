@@ -1059,7 +1059,7 @@ export default function StrategyRoomPage() {
     <Layout
       title="Strategy Room | Abraham of London"
       description="Governed constitutional intelligence for founders, executives, and boards. Not a booking form — a qualified advisory gate."
-      canonicalUrl="/consulting/strategy-room"
+      canonicalUrl="/strategy-room"
       fullWidth
       headerTransparent
     >

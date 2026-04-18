@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { Prisma } from "@prisma/client";
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 
 type SubmitResponse =
   | {
@@ -35,6 +36,16 @@ export default async function handler(
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  // Rate limit parity with canonical /api/strategy-room/enrol
+  const ip = getClientIp(req);
+  const rl = rateLimitCheck({ key: "API_STRICT", id: `sr:${ip}` });
+  const rlHeaders = createRateLimitHeaders(rl);
+  for (const [k, v] of Object.entries(rlHeaders)) res.setHeader(k, v);
+
+  if (!rl.allowed) {
+    return res.status(429).json({ error: "Too many requests. Please try again later." });
   }
 
   const body = toSafeObject(req.body);

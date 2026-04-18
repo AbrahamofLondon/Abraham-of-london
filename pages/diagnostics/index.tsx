@@ -48,6 +48,8 @@ const RUNGS: Rung[] = [
   },
 ];
 
+const TOTAL_STAGES = RUNGS.length;
+
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
@@ -142,7 +144,7 @@ function RungRow({ rung }: { rung: Rung }) {
           color: "rgba(255,255,255,0.68)",
         }}
       >
-        {`RUNG ${rung.n}`}
+        {`STAGE ${rung.n} OF ${TOTAL_STAGES}`}
       </span>
       <Dot />
       <span
@@ -265,7 +267,7 @@ export default function DiagnosticsIndexPage() {
                 Required: 10 minutes · 18 questions · No account required
               </div>
               <Link
-                href="/purpose-alignment"
+                href="/diagnostics/constitutional-diagnostic"
                 className="mt-8 inline-flex items-center gap-2 transition-all hover:underline"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -289,6 +291,20 @@ export default function DiagnosticsIndexPage() {
                 {RUNGS.map((rung) => (
                   <RungRow key={rung.n} rung={rung} />
                 ))}
+              </div>
+
+              <div
+                className="mt-6 flex items-center gap-2"
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7px",
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.24)",
+                }}
+              >
+                <span style={{ display: "inline-block", width: "16px", height: "1px", backgroundColor: "rgba(255,255,255,0.12)" }} />
+                Escalates to Strategy Room only if earlier stages do not resolve the matter
               </div>
             </div>
           </div>

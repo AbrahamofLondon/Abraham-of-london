@@ -1927,7 +1927,7 @@ function ResultSurface({
             <div className="flex flex-wrap gap-3">
               {route === "STRATEGY" && (
                 <Link
-                  href="/consulting/strategy-room"
+                  href="/strategy-room"
                   className="inline-flex items-center gap-2 transition-all duration-300"
                   style={{
                     padding: "10px 20px",

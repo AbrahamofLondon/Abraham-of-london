@@ -319,7 +319,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
   const bc = bandColor(reading.band);
   const routeConfig = {
     EXECUTIVE_REPORTING: { href: "/diagnostics/executive-reporting/run", label: "Run Executive Reporting", border: `${GOLD}35`, bg: `${GOLD}0D`, text: `${GOLD}BB` },
-    STRATEGY_ROOM:       { href: "/consulting/strategy-room", label: "Enter Strategy Room", border: "rgba(52,211,153,0.30)", bg: "rgba(52,211,153,0.07)", text: "rgba(110,231,183,0.90)" },
+    STRATEGY_ROOM:       { href: "/strategy-room", label: "Enter Strategy Room", border: "rgba(52,211,153,0.30)", bg: "rgba(52,211,153,0.07)", text: "rgba(110,231,183,0.90)" },
     WATCH:               { href: "/diagnostics/executive-reporting", label: "View Executive Reporting", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)", text: "rgba(255,255,255,0.55)" },
   }[reading.route];
 
@@ -565,7 +565,7 @@ export default function EnterpriseAssessmentPage() {
       respondent: { name: identity.name || null, email: identity.email || null, organisation: identity.organisation || null, role: identity.role || null },
       answers: answerList, notes: identity.notes || null,
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
-      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/consulting/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
+      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
     });
     setSubmitResult(res);
 
