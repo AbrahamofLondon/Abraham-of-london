@@ -339,6 +339,30 @@ function scoreTextClarity(text: string): number {
   return Math.max(0, Math.min(100, score));
 }
 
+export function deriveDecisionSignalFromEnterpriseInput(recentDecision: string): {
+  clarityScore: number;
+  structuralRisk: number;
+  signalStrength: number;
+} {
+  const value = safeText(recentDecision);
+  const lower = value.toLowerCase();
+  const clarityScore = scoreTextClarity(value);
+
+  let structuralRisk = 30;
+  if (containsAny(lower, ["unclear", "delayed", "blocked", "conflict", "political"])) structuralRisk += 18;
+  if (containsAny(lower, ["board", "governance", "authority", "approval", "mandate"])) structuralRisk += 14;
+  if (containsAny(lower, ["risk", "exposure", "loss", "revenue", "market", "client"])) structuralRisk += 12;
+  if (containsAny(lower, ["because", "therefore", "constraint", "tradeoff", "outcome"])) structuralRisk -= 8;
+
+  const signalStrength = Math.round((clarityScore * 0.68) + (Math.min(100, Math.max(0, structuralRisk)) * 0.32));
+
+  return {
+    clarityScore,
+    structuralRisk: Math.min(100, Math.max(0, Math.round(structuralRisk))),
+    signalStrength: Math.min(100, Math.max(0, signalStrength)),
+  };
+}
+
 function normalizeRevenueBand(input: string): CanonRevenueBand {
   const raw = safeText(input).toUpperCase();
   if (["MICRO", "SMB", "MID", "ENTERPRISE", "WHALE"].includes(raw)) {

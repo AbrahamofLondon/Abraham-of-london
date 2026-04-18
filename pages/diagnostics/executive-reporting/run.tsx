@@ -6,7 +6,11 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
-import { mergeExecutiveFindingsIntoThread } from "@/lib/diagnostics/session-thread";
+import {
+  mergeExecutiveFindingsIntoThread,
+  readConstitutionalThread,
+  type ConstitutionalThread,
+} from "@/lib/diagnostics/session-thread";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -20,6 +24,10 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
+import ThresholdProximityLine, {
+  thresholdProximityText,
+} from "@/components/diagnostics/results/ThresholdProximityLine";
 
 type ExecutiveReportingIntakeForm = {
   fullName: string;
@@ -707,9 +715,11 @@ function MetricRow({ label, value }: { label: string; value: string }) {
 function ResultSurface({
   result,
   onRerun,
+  thread,
 }: {
   result: Extract<ExecutiveReportingResult, { ok: true }>;
   onRerun: () => void;
+  thread: ConstitutionalThread | null;
 }) {
   const vm = result.viewModel;
   const canonical = result.canonical;
@@ -725,6 +735,7 @@ function ResultSurface({
   const route = header?.route ?? result.route ?? constitution?.route ?? "DIAGNOSTIC";
   const rc = routeColor(route);
   const entitlements = result.entitlements;
+  const clarityScore = safeNumber(constitution?.clarityScore, header?.confidence ?? 0);
 
   const dominantDomains = summary?.dominantDomains ?? constitution?.dominantDomains ?? [];
   const failureModes = summary?.failureModes ?? constitution?.failureModes ?? [];
@@ -817,6 +828,10 @@ function ResultSurface({
 
         <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
           <div className="space-y-6">
+            {thread && (
+              <InheritedThreadContext thread={thread} title="Diagnostic progression" />
+            )}
+
             {(summary?.summary || summary?.mandate) && (
               <div
                 style={{
@@ -923,6 +938,15 @@ function ResultSurface({
                     Route decision: {summary.routeReason}
                   </p>
                 )}
+
+                <ThresholdProximityLine
+                  text={thresholdProximityText({
+                    label: "Clarity",
+                    value: clarityScore,
+                    thresholdLabel: "STRATEGY",
+                    threshold: 65,
+                  })}
+                />
 
                 {summary?.structuralImplication && (
                   <p
@@ -2636,9 +2660,11 @@ export default function ExecutiveReportingRunPage() {
   const [result, setResult] = React.useState<Extract<ExecutiveReportingResult, { ok: true }> | null>(
     null,
   );
+  const [thread, setThread] = React.useState<ConstitutionalThread | null>(null);
 
   React.useEffect(() => {
     trackStageStart("executive");
+    setThread(readConstitutionalThread());
     const handleUnload = () => trackDropoff("executive");
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
@@ -2675,6 +2701,7 @@ export default function ExecutiveReportingRunPage() {
       readinessTier: (r.canonical as any)?.constitution?.readinessTier || "EMERGING",
       narrativeHeadline: (r.canonical as any)?.report?.narrative?.headline || "",
     });
+    setThread(readConstitutionalThread());
 
     try {
       sessionStorage.setItem("executive-report-result", JSON.stringify(r));
@@ -2910,7 +2937,7 @@ export default function ExecutiveReportingRunPage() {
               </div>
             </section>
 
-            <ResultSurface result={result} onRerun={handleRerun} />
+            <ResultSurface result={result} onRerun={handleRerun} thread={thread} />
           </>
         )}
       </div>

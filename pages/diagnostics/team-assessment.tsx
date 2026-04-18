@@ -51,6 +51,9 @@ import {
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import ThresholdProximityLine, {
+  thresholdProximityText,
+} from "@/components/diagnostics/results/ThresholdProximityLine";
 
 const GOLD = "#C9A96E";
 const BASE = "rgb(6 6 9)";
@@ -366,6 +369,14 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
           <div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.5rem, 3vw, 2.5rem)", lineHeight: 1.0, letterSpacing: "-0.022em", color: "rgba(255,255,255,0.92)" }}>{reading.title}</h2>
             <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: rc.text, opacity: 0.90 }}>{rc.label}</div>
+            <ThresholdProximityLine
+              text={thresholdProximityText({
+                label: "Overall gap",
+                value: gapAbs,
+                thresholdLabel: gapAbs >= 30 ? "CRITICAL" : "ENTERPRISE",
+                threshold: gapAbs >= 30 ? 30 : 20,
+              })}
+            />
           </div>
           <div style={{ textAlign: "right", flexShrink: 0 }}>
             <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "3.5rem", lineHeight: 1, color: gapAbs >= 25 ? "rgba(252,165,165,0.85)" : gapAbs >= 12 ? `${GOLD}CC` : "rgba(110,231,183,0.80)" }}>

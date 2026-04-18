@@ -34,6 +34,9 @@ import {
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
+import ThresholdProximityLine, {
+  thresholdProximityText,
+} from "@/components/diagnostics/results/ThresholdProximityLine";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -648,6 +651,14 @@ function Verdict({ canonical, onMarkDiagnosticStarted, onMarkStrategyAccepted, t
               }}>
                 {route.description}
               </p>
+              <ThresholdProximityLine
+                text={thresholdProximityText({
+                  label: "Clarity",
+                  value: posture.confidence,
+                  thresholdLabel: "STRATEGY",
+                  threshold: 65,
+                })}
+              />
               {posture.nextAction && (
                 <p style={{
                   fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",

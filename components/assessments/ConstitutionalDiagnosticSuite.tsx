@@ -40,6 +40,9 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import ThresholdProximityLine, {
+  thresholdProximityText,
+} from "@/components/diagnostics/results/ThresholdProximityLine";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS
@@ -855,6 +858,16 @@ export default function ConstitutionalDiagnosticSuite() {
                     }}>
                       {Math.round(decision.confidence * 100)}% constitutional confidence
                     </div>
+                    <ThresholdProximityLine
+                      text={thresholdProximityText({
+                        label: "Coherence",
+                        value: scores.coherence,
+                        thresholdLabel: decision.route === "REJECT" ? "DIAGNOSTIC" : "STRATEGY",
+                        threshold: decision.route === "REJECT"
+                          ? decision.thresholds.diagnosticThreshold
+                          : decision.thresholds.strategyThreshold,
+                      })}
+                    />
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", flexShrink: 0 }}>
                     {[

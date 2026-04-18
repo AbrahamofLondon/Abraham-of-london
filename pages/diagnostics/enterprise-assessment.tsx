@@ -54,9 +54,13 @@ import {
   mergeEnterpriseFindingsIntoThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
+import { deriveDecisionSignalFromEnterpriseInput } from "@/lib/decision/system-constitution";
 import { matchPlaybooks } from "@/lib/playbooks/matcher";
 import InheritedThreadContext from "@/components/diagnostics/results/InheritedThreadContext";
 import RecommendedPlaybooks from "@/components/diagnostics/results/RecommendedPlaybooks";
+import ThresholdProximityLine, {
+  thresholdProximityText,
+} from "@/components/diagnostics/results/ThresholdProximityLine";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -133,6 +137,11 @@ type EnterpriseReading = {
   firstAction:   string;
   escalationNote:string;
   route:         "EXECUTIVE_REPORTING" | "STRATEGY_ROOM" | "WATCH";
+  decisionSignal: {
+    clarityScore: number;
+    structuralRisk: number;
+    signalStrength: number;
+  };
 };
 
 function sectionPct(answers: Record<string, DiagnosticAnswerValue>, blockId: string): number {
@@ -145,6 +154,7 @@ function deriveReading(
   answers: Record<string, DiagnosticAnswerValue>,
   totalPct: number,
   teamAlignmentPct: number | null,
+  recentDecision: string,
 ): EnterpriseReading {
   const scores: Record<string, number> = {};
   for (const b of BLOCKS) scores[b.id] = sectionPct(answers, b.id);
@@ -155,6 +165,7 @@ function deriveReading(
   const execution  = scoreMap["execution"]  ?? 0;
   const risk       = scoreMap["risk"]       ?? 0;
   const weakest = Object.entries(scores).sort((a, b) => a[1] - b[1])[0]!;
+  const decisionSignal = deriveDecisionSignalFromEnterpriseInput(recentDecision);
 
   // Band
   const band = totalPct >= 80 ? "STABLE"
@@ -256,7 +267,15 @@ function deriveReading(
     }
   }
 
-  return { band, patternTitle, primaryReading, dominantFailure, firstAction, escalationNote, route };
+  if (decisionSignal.clarityScore < 55) {
+    primaryReading += ` The recent decision signal reinforces this reading: decision clarity is ${decisionSignal.clarityScore}%, which means the enterprise is not only scoring under strain but also producing low-clarity judgment under real conditions.`;
+  } else if (decisionSignal.structuralRisk >= 60) {
+    primaryReading += ` The recent decision signal adds pressure: structural risk is ${decisionSignal.structuralRisk}%, so the assessment is reading consequence through an actual decision, not only through abstract condition scoring.`;
+  } else {
+    primaryReading += ` The recent decision signal is sufficiently legible (${decisionSignal.clarityScore}% clarity), which gives the enterprise reading a concrete decision reference rather than a generic condition score.`;
+  }
+
+  return { band, patternTitle, primaryReading, dominantFailure, firstAction, escalationNote, route, decisionSignal };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -356,6 +375,14 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: bc.text, opacity: 0.90 }}>
               {reading.band} — {totalPct}% overall
             </div>
+            <ThresholdProximityLine
+              text={thresholdProximityText({
+                label: "Decision clarity",
+                value: reading.decisionSignal.clarityScore,
+                thresholdLabel: "EXECUTIVE REPORTING",
+                threshold: 55,
+              })}
+            />
           </div>
           {/* Section mini-grid */}
           <div className="grid grid-cols-2 gap-2 shrink-0">
@@ -387,6 +414,15 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}><Eyebrow>Structural reading</Eyebrow></div>
             <div style={{ padding: "1.5rem" }}>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.78, color: "rgba(255,255,255,0.70)" }}>{reading.primaryReading}</p>
+            </div>
+          </div>
+
+          <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1.25rem 1.5rem" }}>
+            <Eyebrow>Recent decision signal</Eyebrow>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <MRow label="Clarity" value={`${reading.decisionSignal.clarityScore}%`} />
+              <MRow label="Structural risk" value={`${reading.decisionSignal.structuralRisk}%`} />
+              <MRow label="Signal strength" value={`${reading.decisionSignal.signalStrength}%`} />
             </div>
           </div>
 
@@ -529,12 +565,13 @@ type PagePhase = "identity" | "instrument" | "result";
 export default function EnterpriseAssessmentPage() {
   const [phase,       setPhase]       = React.useState<PagePhase>("identity");
   const [answers,     setAnswers]     = React.useState<Record<string, DiagnosticAnswerValue>>({});
-  const [identity,    setIdentity]    = React.useState({ name: "", email: "", organisation: "", role: "", notes: "" });
+  const [identity,    setIdentity]    = React.useState({ name: "", email: "", organisation: "", role: "", recentDecision: "", notes: "" });
   const [submitResult,setSubmitResult]= React.useState<DiagnosticSubmitResponse | null>(null);
   const [isSubmitting,setIsSubmitting]= React.useState(false);
   const [teamAlignmentPct, setTeamAlignmentPct] = React.useState<number | null>(null);
   const [subjectId, setSubjectId] = React.useState("");
   const [constitutionalThread, setConstitutionalThread] = React.useState<ConstitutionalThread | null>(null);
+  const recentDecisionReady = identity.recentDecision.trim().length >= 80;
 
   React.useEffect(() => {
     trackStageStart("enterprise");
@@ -579,8 +616,8 @@ export default function EnterpriseAssessmentPage() {
   }));
 
   const reading = React.useMemo(() =>
-    complete ? deriveReading(answers, totalPct, teamAlignmentPct) : null,
-    [answers, totalPct, teamAlignmentPct, complete]
+    complete ? deriveReading(answers, totalPct, teamAlignmentPct, identity.recentDecision) : null,
+    [answers, totalPct, teamAlignmentPct, identity.recentDecision, complete]
   );
   const matchedPlaybooks = React.useMemo(
     () =>
@@ -620,7 +657,7 @@ export default function EnterpriseAssessmentPage() {
       respondent: { name: identity.name || null, email: identity.email || null, organisation: identity.organisation || null, role: identity.role || null },
       answers: answerList, notes: identity.notes || null,
       summary: { totalScore, maxScore, pct: totalPct, severity: severityFromPct(totalPct), band: bandFromPct(totalPct), sectionScores: BLOCKS.map(b => buildSectionScore({ sectionId: b.id, title: b.title, answers: answerList.filter(a => a.sectionId === b.id) })) },
-      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct },
+      metadata: { ui: "enterprise-assessment", nextStepHref: reading?.route === "STRATEGY_ROOM" ? "/strategy-room" : "/diagnostics/executive-reporting", nextRoute: (reading?.route ?? "EXECUTIVE_REPORTING") as import("@/lib/diagnostics/types").DiagnosticRoute, teamAlignmentPct, recentDecision: identity.recentDecision, decisionSignal: reading?.decisionSignal ?? null },
     });
     setSubmitResult(res);
 
@@ -642,6 +679,7 @@ export default function EnterpriseAssessmentPage() {
       patternTitle: reading?.patternTitle ?? "",
       route: reading?.route ?? "EXECUTIVE_REPORTING",
       narrative: (reading?.primaryReading ?? "").slice(0, 300),
+      decisionClarity: reading?.decisionSignal.clarityScore,
     });
 
     // Handoff to /diagnostics/executive-reporting (and the Strategy Room chain).
@@ -662,6 +700,8 @@ export default function EnterpriseAssessmentPage() {
           severity: severityFromPct(totalPct),
           band: bandFromPct(totalPct),
           sections: sections.map(s => ({ id: s.id, title: s.title, pct: s.pct })),
+          decisionSignal: reading?.decisionSignal ?? null,
+          recentDecision: identity.recentDecision,
           subjectId,
           nextRoute: reading?.route ?? "EXECUTIVE_REPORTING",
           teamAlignmentPct,
@@ -819,6 +859,16 @@ export default function EnterpriseAssessmentPage() {
                       </div>
                     ))}
                     <div className="sm:col-span-2">
+                      <label style={labelStyle}>Most important decision in the last 90 days</label>
+                      <textarea value={identity.recentDecision} onChange={e => setIdentity(prev => ({ ...prev, recentDecision: e.target.value }))} rows={4} placeholder="Describe the most important decision made in the last 90 days. Include what was decided, who carried authority, what constraint shaped the decision, and what happened next." style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
+                        onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
+                        onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
+                      />
+                      <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: recentDecisionReady ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.22)" }}>
+                        {identity.recentDecision.trim().length}/80 minimum characters
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2">
                       <label style={labelStyle}>Initial observations (optional)</label>
                       <textarea value={identity.notes} onChange={e => setIdentity(prev => ({ ...prev, notes: e.target.value }))} rows={3} placeholder="Where is institutional signal, governance reliability, or trust becoming unstable?" style={{ ...inputStyle, resize: "none", lineHeight: 1.75 }}
                         onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; }}
@@ -827,9 +877,9 @@ export default function EnterpriseAssessmentPage() {
                     </div>
                   </div>
 
-                  <button type="button" onClick={() => advance("instrument")} style={{ marginTop: "1.75rem", padding: "13px 28px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
-                    onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; }}
-                    onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; }}
+                  <button type="button" onClick={() => recentDecisionReady && advance("instrument")} disabled={!recentDecisionReady} style={{ marginTop: "1.75rem", padding: "13px 28px", border: `1px solid ${recentDecisionReady ? `${GOLD}42` : "rgba(255,255,255,0.06)"}`, backgroundColor: recentDecisionReady ? `${GOLD}10` : "rgba(255,255,255,0.01)", color: recentDecisionReady ? `${GOLD}CC` : "rgba(255,255,255,0.18)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", cursor: recentDecisionReady ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", gap: "0.75rem" }}
+                    onMouseEnter={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}65`; el.style.backgroundColor = `${GOLD}18`; } }}
+                    onMouseLeave={e => { if (recentDecisionReady) { const el = e.currentTarget; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}10`; } }}
                   >
                     Continue the Assessment <ArrowRight style={{ width: "12px", height: "12px" }} />
                   </button>

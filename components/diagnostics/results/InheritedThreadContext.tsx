@@ -1,5 +1,5 @@
 import type { ConstitutionalThread } from "@/lib/diagnostics/session-thread";
-import { getJourneySummary } from "@/lib/diagnostics/session-thread";
+import { getJourneySummary, getStageDeltaSummary } from "@/lib/diagnostics/session-thread";
 
 const GOLD = "#C9A96E";
 
@@ -11,6 +11,7 @@ export default function InheritedThreadContext({
   title?: string;
 }) {
   const journeyLines = getJourneySummary(thread);
+  const deltaLines = getStageDeltaSummary(thread);
   const hasAccumulated = !!(thread.teamFindings || thread.enterpriseFindings || thread.executiveFindings);
 
   return (
@@ -51,6 +52,39 @@ export default function InheritedThreadContext({
         <Metric label="Authority" value={thread.authorityType} />
         <Metric label="Posture" value={thread.posture} />
       </div>
+
+      {deltaLines.length > 0 && (
+        <div style={{ marginTop: "0.9rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.9rem" }}>
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "6.5px",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: `${GOLD}70`,
+              marginBottom: "0.65rem",
+            }}
+          >
+            Diagnostic progression
+          </div>
+          <ul style={{ display: "flex", flexDirection: "column", gap: "0.38rem", margin: 0, paddingLeft: "1rem" }}>
+            {deltaLines.map((line) => (
+              <li
+                key={line}
+                style={{
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "7.5px",
+                  lineHeight: 1.55,
+                  color: "rgba(255,255,255,0.50)",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Accumulated downstream findings */}
       {hasAccumulated && (

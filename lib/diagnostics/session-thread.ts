@@ -33,6 +33,7 @@ export type EnterpriseFindings = {
   patternTitle: string;
   route: string;
   narrative: string;
+  decisionClarity?: number;
 };
 
 export type ExecutiveFindings = {
@@ -198,4 +199,40 @@ export function getJourneySummary(thread: ConstitutionalThread): string[] {
   }
 
   return lines;
+}
+
+export function getStageDeltaSummary(thread: ConstitutionalThread): string[] {
+  const lines: string[] = [];
+  const weakestDomain = Object.entries(thread.domainScores)
+    .sort((a, b) => a[1] - b[1])[0];
+  const firstFailure = thread.failureModes[0];
+
+  lines.push(
+    `Stage 1 identified ${firstFailure || `${weakestDomain?.[0] || "constitutional"} strain`} with ${thread.route.toLowerCase()} routing.`,
+  );
+
+  if (thread.teamFindings) {
+    const domains = thread.teamFindings.dominantGapDomains.slice(0, 2).join(", ");
+    lines.push(
+      `Stage 2 confirmed ${Math.abs(thread.teamFindings.overallGap)}-point leadership-team divergence${domains ? ` across ${domains}` : ""}.`,
+    );
+  }
+
+  if (thread.enterpriseFindings) {
+    const weak = thread.enterpriseFindings.weakBlocks.slice(0, 2).join(", ");
+    const decision = typeof thread.enterpriseFindings.decisionClarity === "number"
+      ? `; recent-decision clarity ${thread.enterpriseFindings.decisionClarity}%`
+      : "";
+    lines.push(
+      `Stage 3 found ${thread.enterpriseFindings.patternTitle || thread.enterpriseFindings.band}${weak ? ` in ${weak}` : ""}${decision}.`,
+    );
+  }
+
+  if (thread.executiveFindings) {
+    lines.push(
+      `Stage 4 translated the ladder signal into ${thread.executiveFindings.route.toLowerCase()} executive interpretation.`,
+    );
+  }
+
+  return lines.slice(0, 4);
 }

@@ -32,6 +32,14 @@ export interface ConstitutionInput {
 export interface ConstitutionalDecision {
   route: ConstitutionalRoute;
   confidence: number; // 0.0 - 1.0
+  thresholds: {
+    strategyThreshold: number;
+    diagnosticThreshold: number;
+  };
+  proximity: {
+    toStrategy: number;
+    toDiagnostic: number;
+  };
   disqualifiersTriggered: string[];
   recommendedInterventions: string[];
   rationale: string[];
@@ -308,9 +316,26 @@ export function evaluateConstitutionalRoute(
     interventions.push("Maintain constitutional discipline and monitor signal quality");
   }
 
+  const thresholdSignal = Math.round(
+    Math.min(
+      input.clarityScore,
+      input.narrativeCoherence,
+      input.interventionReadiness,
+      input.governanceDiscipline,
+    ),
+  );
+
   return {
     route,
     confidence,
+    thresholds: {
+      strategyThreshold: t.clarityStrategy,
+      diagnosticThreshold: t.clarityWeak,
+    },
+    proximity: {
+      toStrategy: thresholdSignal - t.clarityStrategy,
+      toDiagnostic: thresholdSignal - t.clarityWeak,
+    },
     disqualifiersTriggered: uniq(disqualifiers),
     recommendedInterventions: uniq(interventions),
     rationale: uniq(rationale.length ? rationale : ["Route assigned according to constitutional thresholds."]),
